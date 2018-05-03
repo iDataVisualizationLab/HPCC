@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="grants/main.css" rel="stylesheet" type="text/css" />
+
+<body bgcolor="white" text="black" id="mainBody">
+<svg width="2100" height="700"></svg>
+
+<div id="searchHolder"  class="searchHolder">
+  <input id="search">
+  <button type="button" onclick="searchNode()">Search</button>
+  <progress value="0" max="100" id="progBar">
+      <span id="downloadProgress">
+          <!-- Your fallback goes here -->
+      </span>
+  </progress>
+  <label id="progUpdate">
+      <!-- Success Message -->
+  </label>
+</div> 
+
+<div id="controlHolder"  class="controlHolder">
+ <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check" onclick="check1()">
+<label for="checkbox1"> Order by deadline</label>
+</div>
+
+<div id="networkHolder"  class="networkHolder">
+</div>
+
+<div id="graph"></div>
+<!-- load the d3.js library -->    
+<script src="grants/js/jquery.min.js"></script>
+<script type='text/javascript' src="grants/js/jquery-ui.min.js"> </script>
+<script src="grants/js/d3.v4.js"></script>
+<script src="grants/js/d3.tip.js"></script>
+<link href="grants/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+<script src="grants/myscripts/main.js"></script>
+<script src="grants/myscripts/tooltip.js"></script>
+
+</body>
