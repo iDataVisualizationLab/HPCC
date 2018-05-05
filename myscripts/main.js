@@ -30,9 +30,26 @@ var hosts = [];
 var links =[];
 var node,link;
 
+// START: loader spinner settings ****************************
+var opts = {
+    lines: 25, // The number of lines to draw
+    length: 15, // The length of each line
+    width: 5, // The line thickness
+    radius: 25, // The radius of the inner circle
+    color: '#f00', // #rgb or #rrggbb or array of colors
+    speed: 2, // Rounds per second
+    trail: 50, // Afterglow percentage
+    className: 'spinner', // The CSS class to assign to the spinner
+};
+var target = document.getElementById('loadingSpinner');
+var spinner = new Spinner(opts).spin(target);
+// END: loader spinner settings ****************************
+
 d3.json("data/host_usage1.json", function(data_) {
     hosts = data_;
     main();
+    // Spinner Stop ********************************************************************
+    spinner.stop();
 
 });
 
@@ -75,9 +92,6 @@ function main(){
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
         hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
-        //console.log(hosts[i].hostname+" rack="+hosts[i].hpcc_rack+" "+hosts[i].hpcc_node+" "+hosts[i].jobCount+"/"+hosts[i].numberOfProcessors);
-
-
 
         // Compute user list
         for (var j = 0; j < hosts[i].jobList.length; j++) {
@@ -183,7 +197,8 @@ function main(){
             .enter().append("rect")
             .attr("class", "hpcc_node" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node)
             .attr("x", function (d, j) {
-                return hosts[i].x + node_size * j;
+                d.x = hosts[i].x + node_size * j;
+                return d.x;
             })
             .attr("y", function (d) {
                 return hosts[i].y;
@@ -237,6 +252,11 @@ function main(){
             .on("end", dragended));
 
 
+    // Conpute users x position by averaging nodes x  -----------
+    for (var i=0; i<users.length;i++) {
+        
+    }
+
     var ticked = function() {
         link
             .attr("x1", function(d) { return d.source.x; })
@@ -274,12 +294,6 @@ function main(){
         d.fx = null;
         d.fy = null;
     }
-
-
-
-
-
-
 }
 
 function isContainUser(array, name) {
