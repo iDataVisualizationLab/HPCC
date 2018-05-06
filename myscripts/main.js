@@ -252,12 +252,41 @@ function main(){
             .on("end", dragended));
 
 
+
     // Conpute users x position by averaging nodes x  -----------
     for (var i=0; i<users.length;i++) {
-        
+        var sumX =0;
+        for (var j=0; j<users[i].nodes.length;j++) {
+            sumX+=users[i].nodes[j].x;
+        }
+        if (users[i].nodes.length>0)
+            users[i].averageX = sumX/users[i].nodes.length;
+        else
+            users[i].averageX =0;
     }
 
+
+    var nodeEnter = svg.append("g")
+        .attr("class", "nodesImage")
+        .selectAll("circle")
+        .data(users).enter().append("svg:g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "translate(" + 0+ "," + 0 + ")"; });
+
+    // Append images
+    var images = nodeEnter.append("svg:image")
+        .attr("xlink:href",  function(d) { return "images/user.png"})
+        .attr("x", function(d) { return -25;})
+        .attr("y", function(d) { return -25;})
+        .attr("height", 50)
+        .attr("width", 50);
+
+
+
     var ticked = function() {
+        for (var i=0; i<users.length;i++) {
+            users[i].x = users[i].averageX*0.1 +users[i].x*0.9;
+        }
         link
             .attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
@@ -267,6 +296,10 @@ function main(){
         node
             .attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
+
+        images
+            .attr("x", function(d) { return d.x; })
+            .attr("y", function(d) { return d.y; });
     }
 
     simulation
