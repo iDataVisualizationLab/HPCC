@@ -237,7 +237,7 @@ function main(){
         .selectAll("circle")
         .data(users)
         .enter().append("circle")
-        .attr("r", function(d){  return 20})
+        .attr("r", getRadius)
         .attr("fill", function(d,i) {
             return getColor(d.name);
 
@@ -276,10 +276,10 @@ function main(){
     // Append images
     var images = nodeEnter.append("svg:image")
         .attr("xlink:href",  function(d) { return "images/user.png"})
-        .attr("x", function(d) { return -25;})
-        .attr("y", function(d) { return -25;})
-        .attr("height", 50)
-        .attr("width", 50);
+        .attr("x", function(d) { return -getRadius(d)*2;})
+        .attr("y", function(d) { return -getRadius(d)*2;})
+        .attr("height", function(d){ return getRadius(d)*2;})
+        .attr("width", function(d){ return getRadius(d)*2;});
 
 
 
@@ -329,6 +329,10 @@ function main(){
     }
 }
 
+function getRadius(d) {
+    return Math.pow(d.nodes.length,0.5);
+}
+
 function isContainUser(array, name) {
     var foundIndex = -1;
     for(var i = 0; i < array.length; i++) {
@@ -353,9 +357,6 @@ function isContainRack(array, id) {
 
 function mouseoverNode2(d1){
     tool_tip2.show(d1);
-
-
-
 }
 
 function mouseoutNode2(d1){
@@ -365,7 +366,6 @@ function mouseoutNode2(d1){
         .transition().duration(dur)
         .attr("fill-opacity", 1)
         .attr("stroke-opacity", 1);
-
 }
 
 
