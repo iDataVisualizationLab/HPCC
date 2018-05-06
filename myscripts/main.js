@@ -45,6 +45,8 @@ var target = document.getElementById('loadingSpinner');
 var spinner = new Spinner(opts).spin(target);
 // END: loader spinner settings ****************************
 
+var simulation, link, node;
+
 d3.json("data/host_usage1.json", function(data_) {
     hosts = data_;
     main();
@@ -216,7 +218,7 @@ function main(){
     }
 
     // Network **********************************
-    var simulation = d3.forceSimulation()
+     simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.index }))
         .force("collide",d3.forceCollide( function(d){return 20 }).iterations(16) )
         .force("charge", d3.forceManyBody())
@@ -224,7 +226,7 @@ function main(){
         .force("y", d3.forceY(0))
         .force("x", d3.forceX(0))
 
-    var link = svg.append("g")
+     link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
         .data(links)
@@ -232,7 +234,7 @@ function main(){
         .append("line")
         .attr("stroke", "black")
 
-    var node = svg.append("g")
+     node = svg.append("g")
         .attr("class", "nodes")
         .selectAll("circle")
         .data(users)
@@ -242,9 +244,9 @@ function main(){
             return getColor(d.name);
 
         })
-        .attr("fill-opacity", 0.8)
+        .attr("fill-opacity", 0.9)
         .attr("stroke", "#000")
-        .attr("stroke-width", 0.5)
+        .attr("stroke-width", 0)
         .attr("stroke-opacity", 1)
         .call(d3.drag()
             .on("start", dragstarted)
@@ -276,10 +278,16 @@ function main(){
     // Append images
     var images = nodeEnter.append("svg:image")
         .attr("xlink:href",  function(d) { return "images/user.png"})
-        .attr("x", function(d) { return -getRadius(d)*2;})
-        .attr("y", function(d) { return -getRadius(d)*2;})
+        .attr("x", function(d) { return 0;})
+        .attr("y", function(d) { return 0;})
         .attr("height", function(d){ return getRadius(d)*2;})
-        .attr("width", function(d){ return getRadius(d)*2;});
+        .attr("width", function(d){ return getRadius(d)*2;})
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended))
+        .on("mouseover", mouseoverUser)
+        .on("mouseout", mouseoutUser);
 
 
 
@@ -298,8 +306,8 @@ function main(){
             .attr("cy", function(d) { return d.y; });
 
         images
-            .attr("x", function(d) { return d.x; })
-            .attr("y", function(d) { return d.y; });
+            .attr("x", function(d) { return d.x-getRadius(d); })
+            .attr("y", function(d) { return d.y-getRadius(d); });
     }
 
     simulation
@@ -309,63 +317,6 @@ function main(){
     simulation.force("link")
         .links(links);
 
-
-
-    function dragstarted(d) {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-
-    function dragged(d) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-}
-
-function getRadius(d) {
-    return Math.pow(d.nodes.length,0.5);
-}
-
-function isContainUser(array, name) {
-    var foundIndex = -1;
-    for(var i = 0; i < array.length; i++) {
-        if (array[i].name == name) {
-            foundIndex = i;
-            break;
-        }
-    }
-    return foundIndex;
-}
-
-function isContainRack(array, id) {
-    var foundIndex = -1;
-    for(var i = 0; i < array.length; i++) {
-        if (array[i].id == id) {
-            foundIndex = i;
-            break;
-        }
-    }
-    return foundIndex;
-}
-
-function mouseoverNode2(d1){
-    tool_tip2.show(d1);
-}
-
-function mouseoutNode2(d1){
-    tool_tip2.hide(d1);
-
-    svg.selectAll(".nodeCircle")
-        .transition().duration(dur)
-        .attr("fill-opacity", 1)
-        .attr("stroke-opacity", 1);
 }
 
 
