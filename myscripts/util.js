@@ -31,7 +31,7 @@ function getMaxNodesToShow(d){
     }
     else {
         var maxNodes =  users[0].nodes.length;
-        var scale = d3.scaleLinear().domain([0,maxNodes]).range([0, numberOfProcessors*0. ]);
+        var scale = d3.scaleLinear().domain([0,maxNodes]).range([0, numberOfProcessors*0.25]);
         return numberOfProcessors*0.25-scale(d.nodes.length);
     }
 }

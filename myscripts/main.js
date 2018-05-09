@@ -58,25 +58,12 @@ d3.json("data/host_usage1.json", function(data_) {
 
 var getColor = d3.scaleOrdinal(d3.schemeCategory20);
 
-
-
 var dur = 400;  // animation duration
 
 
 var startDate = new Date("4/1/2018");
 var endtDate = new Date("1/1/2019");
 var today = new Date();
-
-function getCategoty(str){
-    if (str=="PhD")
-        return 3;
-    else if (str=="MSSE")
-        return 2;
-    else if (str=="MSCS")
-        return 1;
-    else
-        return 0;
-}
 
 
 
