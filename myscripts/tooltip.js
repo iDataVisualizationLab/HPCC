@@ -10,8 +10,8 @@ var tool_tip2 = d3.tip()
         for (key in d) {
             if (key== "x" || key== "y" || key== "vx" || key== "vy" || key== "fx" || key== "fy")
                 ;// Do nothing
-            else if (key== "name")
-                str+=  "<tr><td> Sponsor</td> <td>  <span style='color:black'>" + d[key] + "</span> </td></tr>";
+            else if (key== "nodes")
+                str+=  "<tr><td> Number of nodes</td> <td>  <span style='color:black'>" + d[key].length + "</span> </td></tr>";
             else if (key== "Link")
                 str+=  "<tr><td>"+key+"</td> <td>  <span style='color:blue'>" + d[key] + "</span> </td></tr>";
             else{

@@ -1,10 +1,10 @@
 
 
 // Set the dimensions of the canvas / graph
-var margin = {top: 5, right: 30, bottom: 50, left: 70};
+var margin = {top: 5, right: 0, bottom: 50, left: 0};
 
 var svg = d3.select("svg"),
-    width = +document.getElementById("mainBody").offsetWidth-margin.left-margin.right,
+    width = +document.getElementById("mainBody").offsetWidth,
     height = +svg.attr("height")-margin.top-margin.bottom;
 
 svg = svg.append("g")
@@ -83,7 +83,7 @@ function getCategoty(str){
 var numberOfProcessors = 72;
 var h_rack = 500;
 var top_margin = 90;
-var w_rack = 200;
+var w_rack = width/10-1;
 var w_gap =0;
 var node_size = w_rack/numberOfProcessors;
 
@@ -140,14 +140,13 @@ function main(){
     }
     // Draw racks **********************
     for (var i=0; i<racks.length;i++) {
-        racks[i].x = racks[i].id* (w_rack + w_gap) -w_rack;
+        racks[i].x = racks[i].id* (w_rack + w_gap) -w_rack+10;
         racks[i].y = top_margin;
     }
-    svg.append("g")
-        .attr("class", "rackRects")
-        .selectAll("circle")
+    svg.selectAll(".rackRect")
         .data(racks)
         .enter().append("rect")
+        .attr("class", "rackRect")
         .attr("x", function (d) {return d.x-4;})
         .attr("y", function (d) {return d.y;})
         .attr("rx", 10)
@@ -156,12 +155,11 @@ function main(){
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
-        .attr("stroke-weight", 1);
-    svg.append("g")
-        .attr("class", "rackRectText1")
-        .selectAll("circle")
+        .attr("stroke-width", 1);
+    svg.selectAll(".rackRectText1")
         .data(racks)
         .enter().append("text")
+        .attr("class", "rackRectText1")
         .attr("x", function (d) {return d.x+w_rack/2-2;})
         .attr("y", function (d) {return d.y-30;})
         .attr("fill", "#000")
@@ -173,13 +171,12 @@ function main(){
             return "Rack "+d.id;
         });
 
-    svg.append("g")
-        .attr("class", "rackRectText2")
-        .selectAll("circle")
+    svg.selectAll(".rackRectText2")
         .data(racks)
         .enter().append("text")
         .attr("x", function (d) {return d.x+w_rack/2-2;})
         .attr("y", function (d) {return d.y-12;})
+        .attr("class", "rackRectText2")
         .attr("fill", "#000")
         .style("text-anchor","middle")
         .style("font-size",12)
@@ -194,10 +191,18 @@ function main(){
         hosts[i].x = racks[hosts[i].hpcc_rack-1].x;
         hosts[i].y = racks[hosts[i].hpcc_rack-1].y + hosts[i].hpcc_node * h_rack / 70;
 
-        svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node)
+        //var masterList = hosts[i].jobList.filter(function (d) {
+        //    return d;
+            //return d.masterQueue == "MASTER";
+        //})
+        //console.log("masterList="+masterList.length);
+
+        svg.selectAll(".hpcc_nodessss" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node)
             .data(hosts[i].jobList)
             .enter().append("rect")
-            .attr("class", "hpcc_node" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node)
+            .attr("class", function (d,j) {
+                return "hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node + "_"+j;
+            })
             .attr("x", function (d, j) {
                 d.x = hosts[i].x + node_size * j;
                 return d.x;
@@ -210,9 +215,20 @@ function main(){
             .attr("fill", function (d) {
                 return getColor(d.user);
             })
-            .attr("fill-opacity",0.7)
-            .attr("stroke", "#fff")
-            .attr("stroke-weight", 0)
+            .attr("fill-opacity",0.1)
+            .attr("stroke", function (d) {
+                if (d.masterQueue == "MASTER")
+                    return "#000";
+                else
+                    return "#fff";
+
+            })
+            .attr("stroke-width", function (d) {
+                if (d.masterQueue == "MASTER")
+                    return 0.2;
+                else
+                    return 0.1;
+            })
             .on("mouseover", mouseoverNode2)
             .on("mouseout", mouseoutNode2);
     }
@@ -222,7 +238,7 @@ function main(){
         .force("link", d3.forceLink().id(function(d) { return d.index }))
         .force("collide",d3.forceCollide( function(d){return 20 }).iterations(16) )
         .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(width / 2, (h_rack+top_margin) + (height -h_rack-top_margin) / 2))
+        .force("center", d3.forceCenter(width / 2, h_rack+180))
         .force("y", d3.forceY(0))
         .force("x", d3.forceX(0))
 
@@ -259,6 +275,7 @@ function main(){
     for (var i=0; i<users.length;i++) {
         var sumX =0;
         for (var j=0; j<users[i].nodes.length;j++) {
+            //if (users[i].nodes[j].masterQueue=="MASTER")
             sumX+=users[i].nodes[j].x;
         }
         if (users[i].nodes.length>0)
@@ -268,15 +285,14 @@ function main(){
     }
 
 
-    var nodeEnter = svg.append("g")
-        .attr("class", "nodesImage")
-        .selectAll("circle")
+    var nodeEnter = svg.selectAll(".nodeImages")
         .data(users).enter().append("svg:g")
         .attr("class", "node")
         .attr("transform", function(d) { return "translate(" + 0+ "," + 0 + ")"; });
 
     // Append images
     var images = nodeEnter.append("svg:image")
+        .attr("class", "nodeImages")
         .attr("xlink:href",  function(d) { return "images/user.png"})
         .attr("x", function(d) { return 0;})
         .attr("y", function(d) { return 0;})
