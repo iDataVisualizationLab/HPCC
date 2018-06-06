@@ -31,8 +31,8 @@ function getMaxNodesToShow(d){
     }
     else {
         var maxNodes =  users[0].nodes.length;
-        var scale = d3.scaleLinear().domain([0,maxNodes]).range([0, numberOfProcessors*0.25]);
-        return numberOfProcessors*0.25-scale(d.nodes.length);
+        var scale = d3.scaleLinear().domain([0,maxNodes]).range([1, numberOfProcessors*0.5]);
+        return numberOfProcessors-scale(d.nodes.length);
     }
 }
 
@@ -47,7 +47,8 @@ function mouseoverUser(d){
             //console.log(hosts[i].jobList[j].user);
             if (hosts[i].jobList[j].user == d.name){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
                 svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                    .attr("fill-opacity", 1);
+                    .attr("fill-opacity", 1)
+                    .attr("stroke", "#000");
                 count++;
                 if (count>max) // limit the number of host to highlight
                     break;
@@ -65,7 +66,8 @@ function mouseoutUser(d){
             //console.log(hosts[i].jobList[j].user);
             if (hosts[i].jobList[j].user == d.name){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
                 svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                    .attr("fill-opacity", 0.1);
+                    .attr("fill-opacity", 0.3)
+                    .attr("stroke", "#fff");
                 count++;
                 if (count>max) // limit the number of host to highlight
                     break;

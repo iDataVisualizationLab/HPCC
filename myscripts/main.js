@@ -54,6 +54,35 @@ d3.json("data/HostUsageHistory1Poll.json", function(data_) {
     // Spinner Stop ********************************************************************
     spinner.stop();
 
+
+    d3.csv('../data/trends.csv', function(err, d){
+        if(err) console.log(err);
+        //console.log(d)
+        debugger;
+        var nested_data = d3.nest()
+            .key(function(d) { return d.year; })
+            .entries(d);
+        debugger;
+
+        //console.log(nested_data);
+
+        var mqpdata = nested_data.map(function(d){
+            var obj = {
+                month: new Date(d.key, 0, 1)
+            }
+
+            d.values.forEach(function(v){
+                obj[v.elec_type] = v.paila;
+            //    console.log(d.paila)
+            })
+
+            return obj;
+        })
+
+        buildStreamGraph(mqpdata);
+
+    })
+
 });
 
 
@@ -81,7 +110,6 @@ function main(){
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
-        console.log(hosts[i].hostname);
         hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
 
         // Compute user list

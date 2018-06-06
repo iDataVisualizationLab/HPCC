@@ -1,0 +1,123 @@
+body {
+	font-size: 16px;
+	color: #4a4a4a;
+	background-color: #fcfcfc;
+	overflow-x: hidden;
+}
+
+/*CHART GENERAL*/
+.chart-wrapper{
+	margin-left:-.99%;
+	width: 102%;
+}
+
+/*AXES*/
+.axis path, .axis line {
+	fill: none;
+	stroke: #3a403d;
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
+}
+.axis text {
+	font-size: .625em;
+}
+
+/*LAYERS*/
+.chart .layer {
+	cursor: crosshair;
+}
+
+/*TIP*/
+.tip {
+	background-color: hsla(0,0%,100%,.9);
+	padding: 10px;
+	border-radius: 5px;
+	font-size: 1em;
+	width: 180px;
+}
+.tip .year {
+	font-weight: 900;
+	font-size: 1.25em;
+	margin-bottom: 2px;
+}
+.tip .swatch {
+	width: 11px;
+	height: 11px;
+	float: left;
+	margin-top: 6px;
+	margin-right: 4px;
+}
+
+/*LEGEND*/
+.legend {
+	position: absolute;
+	top: 15px;
+	left: 30px;
+	background-color: hsla(0,0%,100%,.9);
+	padding: 5px 10px 5px 10px;
+	border-radius: 5px;
+}
+.legend .title {
+	margin-bottom: 2px;
+	font-weight: 900;
+}
+.legend .item {
+	font-size: .75em;
+}
+.legend .swatch {
+	width: 10px;
+	height: 10px;
+	margin-top: 3px;
+	float: left;
+	margin-right: 5px;
+}
+
+/* Extra Small Devices, Phones */
+@media only screen and (max-width : 480px) {
+
+	/*chart*/
+	.chart-wrapper {
+		margin-left:-15px;
+		margin-right:-15px;
+		width: auto;
+	}
+	.chart-title {
+		font-size: 1.4em;
+	}
+
+	/*tip*/
+	.tip {
+		width: 100px;
+	}
+	.tip .year {
+		font-size: 1em;
+	}
+	.tip .key, .tip .value {
+		font-size: .75em;
+	}
+	.tip .swatch {
+		width: 10px;
+		height: 10px;
+		margin-top: 3.5px;
+	}
+	.remove {
+		display: none;
+	}
+
+	/*legend*/
+	.legend {
+		position: static;
+		background-color: #fcfcfc;
+	}
+	.legend .title {
+		display: none;
+	}
+	.legend .item {
+		float:left;
+		margin-right:10px;
+	}
+	.legend .swatch {
+		margin-top: 3.5px;
+	}
+
+}
