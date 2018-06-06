@@ -47,7 +47,8 @@ var spinner = new Spinner(opts).spin(target);
 
 var simulation, link, node;
 
-d3.json("data/host_usage1.json", function(data_) {
+//d3.json("data/host_usage1.json", function(data_) {
+d3.json("data/HostUsageHistory1Poll.json", function(data_) {
     hosts = data_;
     main();
     // Spinner Stop ********************************************************************
@@ -67,7 +68,7 @@ var today = new Date();
 
 
 
-var numberOfProcessors = 72;
+var numberOfProcessors = 42;
 var h_rack = 500;
 var top_margin = 90;
 var w_rack = width/10-1;
@@ -80,6 +81,7 @@ function main(){
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
+        console.log(hosts[i].hostname);
         hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
 
         // Compute user list
@@ -134,11 +136,11 @@ function main(){
         .data(racks)
         .enter().append("rect")
         .attr("class", "rackRect")
-        .attr("x", function (d) {return d.x-4;})
+        .attr("x", function (d) {return d.x-6;})
         .attr("y", function (d) {return d.y;})
         .attr("rx", 10)
         .attr("ry", 10)
-        .attr("width", w_rack-4)
+        .attr("width", w_rack-8)
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
@@ -176,7 +178,7 @@ function main(){
     // Draw host **********************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].x = racks[hosts[i].hpcc_rack-1].x;
-        hosts[i].y = racks[hosts[i].hpcc_rack-1].y + hosts[i].hpcc_node * h_rack / 70;
+        hosts[i].y = racks[hosts[i].hpcc_rack-1].y + hosts[i].hpcc_node * h_rack / 63;
 
         //var masterList = hosts[i].jobList.filter(function (d) {
         //    return d;
@@ -198,11 +200,11 @@ function main(){
                 return hosts[i].y;
             })
             .attr("width", node_size)
-            .attr("height", node_size + 2)
+            .attr("height", node_size )
             .attr("fill", function (d) {
                 return getColor(d.user);
             })
-            .attr("fill-opacity",0.1)
+            .attr("fill-opacity",0.3)
             .attr("stroke", function (d) {
                 if (d.masterQueue == "MASTER")
                     return "#000";
@@ -212,9 +214,9 @@ function main(){
             })
             .attr("stroke-width", function (d) {
                 if (d.masterQueue == "MASTER")
-                    return 0.2;
+                    return 0.4;
                 else
-                    return 0.1;
+                    return 0.3;
             })
             .on("mouseover", mouseoverNode2)
             .on("mouseout", mouseoutNode2);
