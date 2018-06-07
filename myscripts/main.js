@@ -57,15 +57,9 @@ d3.json("data/HostUsageHistory1Poll.json", function(data_) {
 
     d3.csv('../data/trends.csv', function(err, d){
         if(err) console.log(err);
-        //console.log(d)
-        debugger;
         var nested_data = d3.nest()
             .key(function(d) { return d.year; })
             .entries(d);
-        debugger;
-
-        //console.log(nested_data);
-
         var mqpdata = nested_data.map(function(d){
             var obj = {
                 month: new Date(d.key, 0, 1)
