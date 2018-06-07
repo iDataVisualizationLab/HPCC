@@ -1,3 +1,10 @@
+/* June-2018
+ * Tommy Dang (on the HPCC project, as Assistant professor, iDVL@TTU)
+ *
+ * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTY.  IN PARTICULAR, THE AUTHORS MAKE NO REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+ * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ */
 
 
 // Set the dimensions of the canvas / graph
@@ -55,29 +62,7 @@ d3.json("data/HostUsageHistory1Poll.json", function(data_) {
     // Spinner Stop ********************************************************************
     spinner.stop();
 
-
-    d3.csv('../data/trends.csv', function(err, d){
-        if(err) console.log(err);
-        var nested_data = d3.nest()
-            .key(function(d) { return d.year; })
-            .entries(d);
-        var mqpdata = nested_data.map(function(d){
-            var obj = {
-                month: new Date(d.key, 0, 1)
-            }
-
-            d.values.forEach(function(v){
-                obj[v.elec_type] = v.paila;
-            //    console.log(d.paila)
-            })
-
-            return obj;
-        })
-
-        buildStreamGraph(mqpdata);
-
-    })
-
+    buildStreamGraph();  // Draw stream graphs for user's jobs in Stream.js
 });
 
 

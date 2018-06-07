@@ -1,3 +1,10 @@
+/* June-2018
+ * Tommy Dang (on the HPCC project, as Assistant professor, iDVL@TTU)
+ *
+ * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTY.  IN PARTICULAR, THE AUTHORS MAKE NO REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+ * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ */
 
 var w = width/3,
     h = 200;
@@ -8,17 +15,10 @@ var svgStream = d3.select('.streamHolder').append('svg')
     .attr("height", h);
 
 
-function buildStreamGraph(mqpdata) {
-    var data = mqpdata;
-    var stack = d3.stack()
-        .keys(["AE", "AREN", "BBT", "BC", "BME", "CE", "CH", "CM", "CS", "ECE", "EV", "HU", "ID", "IE", "IMGD", "MA", "ME", "MG", "PH", "RBE", "SSPS"])
-        .order(d3.stackOrderNone)
-        .offset(d3.stackOffsetWiggle);
-
+function buildStreamGraph() {
+    // HPCC ****************************************
     var minTime = new Date();
     var maxTime= new Date("1/1/2000");
-
-    // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         for (var j = 0; j < hosts[i].jobList.length; j++) {
                 var e =  hosts[i].jobList[j];
@@ -54,8 +54,7 @@ function buildStreamGraph(mqpdata) {
         .keys(usernames)
         .order(d3.stackOrderNone)
         .offset(d3.stackOffsetSilhouette);
-
-
+    
     var series = stack(list);
 
 
