@@ -25,18 +25,19 @@ path {
 	z-index: 0;
 	top: 15px;
 	left: 427px;
-	border: 0px solid rgba(0,0,0, 1);
+	border: 0px solid rgba(100,0,0, 1);
 	background-color: none;
 }
 
-#networkHolder {
+#streamHolder {
 	position:absolute;
 	z-index: 0;
-	top: 0px;
-	left: 820px;
+	top: 720px;
+	left:10px;
 	border: 1px solid rgba(0,0,0, 1);
-	background-color: rgba(255,255,255, 1);
+	background-color: rgba(255,255,255, 0.75);
 	border-radius: 6px;
+	box-shadow: 10px 10px 10px #444;
 }
 
 /* tooltip */

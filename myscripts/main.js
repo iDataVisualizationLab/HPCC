@@ -12,6 +12,7 @@ svg = svg.append("g")
         "translate(" + margin.left + "," + margin.top + ")");
 
 
+
 // Parse the date / time
 var parseTime = d3.timeParse("%m/%d/%y");
 
@@ -166,7 +167,8 @@ function main(){
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1)
+        .style("box-shadow", "10px 10px 10px #666");
     svg.selectAll(".rackRectText1")
         .data(racks)
         .enter().append("text")

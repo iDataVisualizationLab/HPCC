@@ -1,4 +1,13 @@
 
+var w = width/3,
+    h = 200;
+
+var svgStream = d3.select('.streamHolder').append('svg')
+    .attr("class", "contextView")
+    .attr("width", w)
+    .attr("height", h);
+
+
 function buildStreamGraph(mqpdata) {
     var data = mqpdata;
     var stack = d3.stack()
@@ -22,9 +31,9 @@ function buildStreamGraph(mqpdata) {
     var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
     var numberOfhours = (maxTime-minTime)/3600000;
     var list = [];
-    for (var h=0; h<numberOfhours;h++) {
+    for (var hour=0; hour<numberOfhours;hour++) {
         var obj = {};
-        obj.month = new Date(startTime.getTime()+h*3600000);
+        obj.month = new Date(startTime.getTime()+hour*3600000);
         for (var u=0; u<users.length;u++) {
             obj[users[u].name] =0;
         }
@@ -48,31 +57,31 @@ function buildStreamGraph(mqpdata) {
 
 
     var series = stack(list);
-    var w = width/3,
-        h = 300;
+
 
     var x = d3.scaleTime()
         .domain(d3.extent(list, function(d){ return d.month; }))
-        .range([20, w]);
+        .range([30, w-40]);
 
     var xAxis = d3.axisBottom(x);
 
     var y = d3.scaleLinear()
         .domain([0, d3.max(series, function(layer) { return d3.max(layer, function(d){ return d[0] + d[1];}); })])
-        .range([h_rack+h, h_rack]);
+        .range([h/2, -h*0.9]);
 
     var area = d3.area()
         .x(function(d) {  return x(d.data.month); })
         .y0(function(d) { return y(d[0]); })
         .y1(function(d) { return y(d[1]); })
         .curve(d3.curveBasis);
-    debugger;
 
-    svg.selectAll("path")
+    svgStream.selectAll("path")
         .data(series)
         .enter().append("path")
         .attr("d", area)
         .style("fill", function(d) { return getColor(d.key); })
+        .style("stroke", "#fff")
+        .style("stroke-width", 0.1)
         .on('mouseover', function(d){
             d3.select(this).style('fill',d3.rgb( d3.select(this).style("fill") ).brighter());
             d3.select("#major").text(d.key);
@@ -84,14 +93,14 @@ function buildStreamGraph(mqpdata) {
 
         })
 
-    svg.append("g")
+    svgStream.append("g")
         .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + (h_rack+h) + ")")
+        .attr("transform", "translate(0," + h/2 + ")")
         .call(xAxis);
-    svg.append("text")
+    svgStream.append("text")
         .attr("class", "startTimeText")
-        .attr("x", 20)
-        .attr("y", h_rack+h-10)
+        .attr("x", 30)
+        .attr("y", h/2-15)
         .attr("fill", "#000")
         .style("text-anchor","left")
         .style("font-size",12)
