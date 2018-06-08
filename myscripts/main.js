@@ -56,7 +56,7 @@ var spinner = new Spinner(opts).spin(target);
 var simulation, link, node;
 
 //d3.json("data/host_usage1.json", function(data_) {
-d3.json("data/HostUsageHistory1Poll.json", function(data_) {
+d3.json("data/HostUsageHistoryPoll1.json", function(data_) {
     hosts = data_;
     main();
     // Spinner Stop ********************************************************************
@@ -260,7 +260,7 @@ function main(){
             return getColor(d.name);
 
         })
-        .attr("fill-opacity", 0.9)
+        .attr("fill-opacity", 1)
         .attr("stroke", "#000")
         .attr("stroke-width", 0)
         .attr("stroke-opacity", 1)
@@ -288,6 +288,7 @@ function main(){
     var images = svg.selectAll(".nodeImages")
         .data(users).enter().append("svg:image")
         .attr("class", "nodeImages")
+        .attr("opacity",1)
         .attr("xlink:href",  function(d) { return "images/user.png"})
         .attr("x", function(d) { return 0;})
         .attr("y", function(d) { return 0;})
@@ -301,6 +302,12 @@ function main(){
         .on("mouseout", mouseoutUser);
 
 
+    // make node more transparent to be ready for the simulation
+    svg.selectAll(".nodeImages")
+        .transition().duration(3000)
+        .attr("opacity", 0.01);
+    node.transition().duration(3000)
+        .attr("fill-opacity", 0.01);
 
     var ticked = function() {
         for (var i=0; i<users.length;i++) {
