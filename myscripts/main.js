@@ -79,14 +79,16 @@ var today = new Date();
 
 var numberOfProcessors = 42;
 var h_rack = 500;
-var top_margin = 90;
+var top_margin = 50;
 var w_rack = width/10-1;
 var w_gap =0;
 var node_size = w_rack/numberOfProcessors;
 
 var users = [];
 var racks = [];
+
 function main(){
+
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
@@ -213,7 +215,7 @@ function main(){
             .attr("fill", function (d) {
                 return getColor(d.user);
             })
-            .attr("fill-opacity",0.3)
+            .attr("fill-opacity",0.02)
             .attr("stroke", function (d) {
                 if (d.masterQueue == "MASTER")
                     return "#000";
@@ -236,7 +238,7 @@ function main(){
         .force("link", d3.forceLink().id(function(d) { return d.index }))
         .force("collide",d3.forceCollide( function(d){return 20 }).iterations(16) )
         .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(width / 2, h_rack+180))
+        .force("center", d3.forceCenter(width / 2, h_rack+150))
         .force("y", d3.forceY(0))
         .force("x", d3.forceX(0))
 
@@ -283,13 +285,8 @@ function main(){
     }
 
 
-    var nodeEnter = svg.selectAll(".nodeImages")
-        .data(users).enter().append("svg:g")
-        .attr("class", "node")
-        .attr("transform", function(d) { return "translate(" + 0+ "," + 0 + ")"; });
-
-    // Append images
-    var images = nodeEnter.append("svg:image")
+    var images = svg.selectAll(".nodeImages")
+        .data(users).enter().append("svg:image")
         .attr("class", "nodeImages")
         .attr("xlink:href",  function(d) { return "images/user.png"})
         .attr("x", function(d) { return 0;})

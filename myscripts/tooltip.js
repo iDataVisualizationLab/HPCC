@@ -1,7 +1,7 @@
 // Setup the tool tip.  Note that this is just one example, and that many styling options are available.
     // See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
 
-var tool_tip2 = d3.tip()
+var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-20, 0])
     .html(function(d) {
@@ -21,7 +21,7 @@ var tool_tip2 = d3.tip()
         str+="</table> <br>"
 
         return str; });
-svg.call(tool_tip2);
+svg.call(tool_tip);
     
 function formatDate(date) {
   var monthNames = [

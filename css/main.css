@@ -4,6 +4,14 @@ body { font: 15px Arial;}
 path {
 	fill: none;
 }
+text.textUsernames {
+	stroke-width: 0.5px;
+	text-shadow:
+			1px 0px 1px #444, 0px 1px 1px #999,
+			2px 1px 1px #444, 1px 2px 1px #999,
+			3px 2px 1px #444, 2px 3px 1px #999;
+}
+
 .axis path,
 .axis line {
 	fill: none;
