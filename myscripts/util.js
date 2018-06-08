@@ -63,12 +63,12 @@ function mouseoverUser(d){
 
 
     showHost(d);
-
+x
 
     svg.selectAll(".nodeImages")
         .attr("opacity", function(d2){
             return (d.name==d2.name) ? 1 :0.1;});
-    node.attr("opacity", function(d2){
+    node.attr("fill-opacity", function(d2){
         return (d.name==d2.name) ? 1 :0.1;});
 
     svgStream.selectAll(".areaUser")
@@ -119,14 +119,12 @@ function mouseoutUser(d){
     //tool_tip.hide(d);
 
     hideHost(d);
-
-
     svg.selectAll(".textUsernames").remove();
     svg.selectAll(".textUserNodes").remove();
 
     svg.selectAll(".nodeImages")
         .attr("opacity", 1);
-    node.attr("opacity", 1);
+    node.attr("fill-opacity",1);
 
     svgStream.selectAll(".areaUser")
         .style("fill-opacity", 1);

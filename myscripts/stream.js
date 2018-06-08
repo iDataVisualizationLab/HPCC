@@ -20,6 +20,9 @@ var startTime;
 var previousMiliseconds;
 var currentMiliseconds;
 
+var globalUserListString = "__";   // to keep the list of user active in the 10 minutes interval
+
+
 function buildStreamGraph() {
     // HPCC ****************************************
     var minTime = new Date();
@@ -110,7 +113,7 @@ function buildStreamGraph() {
             svg.selectAll(".nodeImages")
                 .attr("opacity", function(d2){
                     return (d.name==d2.name) ? 1 :0.1;});
-            node.attr("opacity", function(d2){
+            node.attr("fill-opacity", function(d2){
                 return (d.name==d2.name) ? 1 :0.1;});
 
         })
@@ -120,7 +123,7 @@ function buildStreamGraph() {
 
             svg.selectAll(".nodeImages")
                 .attr("opacity", 1);
-            node.attr("opacity", 1);
+            node.attr("fill-opacity", 1);
             hideHost(d);
         })
 
@@ -131,44 +134,97 @@ function buildStreamGraph() {
 
 
     // Simulation
+    var toggle =true;  // toggle variable for simulation
+
     interval1 = setInterval(function(){
-        previousMiliseconds = currentMiliseconds
-        currentMiliseconds += 10*60000;  //every 10 minutes
-        var currentDate = new Date(currentMiliseconds);
-        console.log("currentDate= "+currentDate);
+        if (simulation.alpha()<0.05)  {
+            previousMiliseconds = currentMiliseconds
+            currentMiliseconds += 10*60000;  //every 10 minutes
+            var currentDate = new Date(currentMiliseconds);
 
-        // Update hosts in the racks
-        for (var i=0; i<hosts.length;i++) {
-            for (var j = 0; j < hosts[i].jobList.length; j++) {
-                var t =  new Date(hosts[i].jobList[j].startTime);
-                if (previousMiliseconds<t && t < currentDate){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
-                    svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                        .attr("fill-opacity", 1);
+            // Update hosts in the racks
+            //svg.selectAll(".nodeLine").remove();
 
-                    svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                        .transition().duration(1500)
-                        .attr("fill-opacity", 0.3);
+            var userReverseList = {};
+            for (var i=0; i<users.length;i++) {
+                userReverseList[users[i].name] = users[i];
+            }
 
+            var foundSomeJob = false;
+            var userListString = "__";   // to keep the list of user active in the 10 minutes interval
+            for (var i=0; i<hosts.length;i++) {
+                for (var j = 0; j < hosts[i].jobList.length; j++) {
+                    var t =  new Date(hosts[i].jobList[j].startTime);
+                    if (previousMiliseconds<t && t < currentDate){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
+                        svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
+                            .attr("fill-opacity", 1);
+                        svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
+                            .transition().duration(1000)
+                            .attr("fill-opacity", 0.3);
+
+                        var user = userReverseList[hosts[i].jobList[j].user];
+                        svg.append("line")
+                            .attr("class","nodeLine"+toggle)
+                            .attr("x1",hosts[i].jobList[j].x)
+                            .attr("y1",hosts[i].y)
+                            .attr("x2",user.x)
+                            .attr("y2",user.y)
+                            .attr("stroke","#000")
+                            .attr("stroke-opacity",0.7);
+                        foundSomeJob = true;
+                        toggle = !toggle;
+                        if (userListString.indexOf(hosts[i].jobList[j].user)<0){
+                            userListString+=hosts[i].jobList[j].user+"__";
+                        }
+                    }
                 }
             }
-        }
-        // Update the stream blind
 
-        svgStream.selectAll(".streamBlind")
-            .attr("x", x(currentDate));
-        svgStream.selectAll(".currentTimeText")
-            .attr("x", x(currentDate));
-        svgStream.selectAll(".currentTimeText2")
-            .attr("x", x(currentDate))
-            .text(currentDate.toDateString());
-        svgStream.selectAll(".currentTimeText3")
-            .attr("x", x(currentDate))
-            .text(currentDate.getHours()+":"+currentDate.getMinutes());
+            svg.selectAll(".nodeLine"+(!toggle))
+                .transition().duration(300)
+                .attr("stroke-opacity", 0.1);
+            if (foundSomeJob==true){
+                // Update acitve users
+                node.attr("fill-opacity", function(d){ return userListString.indexOf(d.name)>=0 ? 1 :
+                    (globalUserListString.indexOf(d.name)>=0 ? 0.1 :0.01);});
+                svg.selectAll(".nodeImages")
+                    .attr("opacity",function(d){ return userListString.indexOf(d.name)>=0 ? 1 :
+                        (globalUserListString.indexOf(d.name)>=0 ? 0.1 :0.01);});
+
+                if (globalUserListString.indexOf(userListString)<0)
+                    globalUserListString +=userListString;
+
+                svg.selectAll(".nodeLine"+toggle).remove();
+            }
 
 
-        if (currentDate> maxTime){
-            clearInterval(interval1);
-            console.log("*************Done simulation");
+
+
+            // Update the stream blind
+            svgStream.selectAll(".streamBlind")
+                .attr("x", x(currentDate));
+            svgStream.selectAll(".currentTimeText")
+                .attr("x", x(currentDate));
+            svgStream.selectAll(".currentTimeText2")
+                .attr("x", x(currentDate))
+                .text(currentDate.toDateString());
+            svgStream.selectAll(".currentTimeText3")
+                .attr("x", x(currentDate))
+                .text(currentDate.getHours()+":"+currentDate.getMinutes());
+
+
+            if (currentDate> maxTime){
+                clearInterval(interval1);
+
+                svg.selectAll(".nodeLine"+(!toggle)).remove();
+
+                node.attr("fill-opacity",1);
+                svg.selectAll(".nodeImages")
+                    .attr("opacity",1);
+
+
+                console.log("*************Done simulation");
+            }
         }
     } , 100)
 
@@ -202,7 +258,7 @@ function buildStreamGraph() {
         //.style("font-weight","bold")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Current time");
+        .text("");
     svgStream.append("text")
         .attr("class", "currentTimeText3")
         .attr("x", 0)
@@ -213,9 +269,7 @@ function buildStreamGraph() {
         .style("font-weight","bold")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Current time");
-
-
+        .text("");
     svgStream.append("text")
         .attr("class", "startTimeText")
         .attr("x", 15)
