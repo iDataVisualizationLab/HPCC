@@ -30,7 +30,6 @@ var xNew = d3.scaleTime().range([0, width/2-margin.left]);
 var y = d3.scaleLinear().range([height, 0]);
 var yAxis= d3.scaleLinear().range([height, 0]);
 
-
 // HPCC
 var hosts = [];
 var links =[];
