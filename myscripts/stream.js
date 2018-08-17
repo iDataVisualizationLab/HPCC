@@ -163,18 +163,6 @@ function buildStreamGraph() {
                             .attr("fill-opacity", 0.3);
 
                         var user = userReverseList[hosts[i].jobList[j].user];
-<<<<<<< HEAD
-                        svg.append("line")
-                            .attr("class","nodeLine"+toggle)
-                            .attr("x1",hosts[i].jobList[j].x)
-                            .attr("y1",hosts[i].y)
-                            .attr("x2",user.x)
-                            .attr("y2",user.y)
-                            .attr("stroke","#000")
-                            .attr("stroke-opacity",0.7);
-                        foundSomeJob = true;
-                        toggle = !toggle;
-=======
                         //if (j%2==0) {
                             svg.append("line")
                                 .attr("class", "nodeLine" + toggle)
@@ -187,7 +175,6 @@ function buildStreamGraph() {
                                 .attr("stroke-width", 0.4);
                         //}
                         foundSomeJob = true;
->>>>>>> 7bbf8e96b5d2d4849e6d6c3ec7673066594b58dd
                         if (userListString.indexOf(hosts[i].jobList[j].user)<0){
                             userListString+=hosts[i].jobList[j].user+"__";
                         }
@@ -195,19 +182,11 @@ function buildStreamGraph() {
                 }
             }
 
-<<<<<<< HEAD
-            svg.selectAll(".nodeLine"+(!toggle))
-                .transition().duration(300)
-                .attr("stroke-opacity", 0.1);
-            if (foundSomeJob==true){
-=======
             svg.selectAll(".nodeLine"+(toggle))
                 .transition().duration(300)
                 .attr("stroke-opacity", 0.3);
             if (foundSomeJob==true){
                 toggle = !toggle;
-
->>>>>>> 7bbf8e96b5d2d4849e6d6c3ec7673066594b58dd
                 // Update acitve users
                 node.attr("fill-opacity", function(d){ return userListString.indexOf(d.name)>=0 ? 1 :
                     (globalUserListString.indexOf(d.name)>=0 ? 0.1 :0.01);});
@@ -240,10 +219,6 @@ function buildStreamGraph() {
             if (currentDate> maxTime){
                 clearInterval(interval1);
 
-<<<<<<< HEAD
-=======
-                svg.selectAll(".nodeLine"+(toggle)).remove();
->>>>>>> 7bbf8e96b5d2d4849e6d6c3ec7673066594b58dd
                 svg.selectAll(".nodeLine"+(!toggle)).remove();
 
                 node.attr("fill-opacity",1);
