@@ -163,7 +163,7 @@ function buildStreamGraph() {
                             .attr("fill-opacity", 0.3);
 
                         var user = userReverseList[hosts[i].jobList[j].user];
-                        //if (j%2==0) {
+                        if (j%4==0) {
                             svg.append("line")
                                 .attr("class", "nodeLine" + toggle)
                                 .attr("x1", hosts[i].jobList[j].x + node_size / 2)
@@ -173,7 +173,7 @@ function buildStreamGraph() {
                                 .attr("stroke", "#000")
                                 .attr("stroke-opacity", 0.8)
                                 .attr("stroke-width", 0.4);
-                        //}
+                        }
                         foundSomeJob = true;
                         if (userListString.indexOf(hosts[i].jobList[j].user)<0){
                             userListString+=hosts[i].jobList[j].user+"__";
