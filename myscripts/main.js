@@ -86,6 +86,17 @@ var racks = [];
 
 function main(){
 
+
+    fetch('http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist').then(function(response) {
+       return response.text();
+    }).then(function(data) {
+       console.log(data);
+    }).catch(function(error) {
+       console.log('Error: ' + error);
+    });
+
+
+
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
