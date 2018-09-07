@@ -86,6 +86,7 @@ var racks = [];
 
 function main(){
 
+<<<<<<< HEAD
     fetch('http://10.100.5.100/nagios/jsonquery.html').then(function(response) {
         debugger;
        return response.text();
@@ -98,6 +99,65 @@ function main(){
     });
        debugger;
     
+=======
+    
+   /* fetch('http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist').then(function(response) {
+       return response.text();
+    }).then(function(data) {
+       console.log(data);
+    }).catch(function(error) {
+       console.log('Error: ' + error);
+    });*/
+    
+    /*httpGet("http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist");
+
+
+    function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}*/
+
+
+/*
+httpGetAsync("http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist",callback1);
+
+function httpGetAsync(theUrl, callback){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+function callback1(){
+    console.log("AAAAA");
+    debugger;
+}*/
+
+function httpGetAsync(theUrl, callback) { //theURL or a path to file
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+        debugger;
+        if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+            var data = httpRequest.responseText;  //if you fetch a file you can JSON.parse(httpRequest.responseText)
+            if (callback) {
+                callback(data);
+            }                   
+        }   
+    };
+    httpRequest.open('GET', theUrl, true); 
+    httpRequest.send(null);
+}
+
+    httpGetAsync('http://nagiosadmin:nagios@10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist', function(data) {
+    //do something with your data
+    debugger;
+});
+>>>>>>> ab5c9bfe8908e96de85bc07fdcff8a8cab4e0fef
 
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
