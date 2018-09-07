@@ -84,23 +84,8 @@ var node_size = w_rack/numberOfProcessors;
 var users = [];
 var racks = [];
 
-function main(){
 
-<<<<<<< HEAD
-    fetch('http://10.100.5.100/nagios/jsonquery.html').then(function(response) {
-        debugger;
-       return response.text();
-    }).then(function(data) {
-         debugger;
-           console.log(data);
-    }).catch(function(error) {
-         debugger;
-           console.log('Error: ' + error);
-    });
-       debugger;
-    
-=======
-    
+
    /* fetch('http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist').then(function(response) {
        return response.text();
     }).then(function(data) {
@@ -157,7 +142,6 @@ function httpGetAsync(theUrl, callback) { //theURL or a path to file
     //do something with your data
     debugger;
 });
->>>>>>> ab5c9bfe8908e96de85bc07fdcff8a8cab4e0fef
 
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
