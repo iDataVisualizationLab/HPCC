@@ -84,6 +84,9 @@ var node_size = w_rack/numberOfProcessors;
 var users = [];
 var racks = [];
 
+function main(){
+
+
 
 
    /* fetch('http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist').then(function(response) {
@@ -131,10 +134,10 @@ function httpGetAsync(theUrl, callback) { //theURL or a path to file
             var data = httpRequest.responseText;  //if you fetch a file you can JSON.parse(httpRequest.responseText)
             if (callback) {
                 callback(data);
-            }                   
-        }   
+            }
+        }
     };
-    httpRequest.open('GET', theUrl, true); 
+    httpRequest.open('GET', theUrl, true);
     httpRequest.send(null);
 }
 
