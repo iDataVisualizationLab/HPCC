@@ -86,6 +86,19 @@ var racks = [];
 
 function main(){
 
+    fetch('http://10.100.5.100/nagios/jsonquery.html').then(function(response) {
+        debugger;
+       return response.text();
+    }).then(function(data) {
+         debugger;
+           console.log(data);
+    }).catch(function(error) {
+         debugger;
+           console.log('Error: ' + error);
+    });
+       debugger;
+    
+
     // HPCC ****************************************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
