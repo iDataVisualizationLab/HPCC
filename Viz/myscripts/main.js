@@ -32,6 +32,7 @@ var yAxis= d3.scaleLinear().range([height, 0]);
 
 // HPCC
 var hosts = [];
+var hostResults = {};
 var links =[];
 var node,link;
 
@@ -73,18 +74,22 @@ var today = new Date();
 
 
 
+
 var numberOfProcessors = 42;
-var h_rack = 800;
+var h_rack = 1000;
 var top_margin = 50;
 var w_rack = width/10-1;
 var w_gap =0;
-var node_size = w_rack/numberOfProcessors;
+var node_size = 5;
 
 var users = [];
 var racks = [];
 
+var currentMiliseconds;
+
 main();
 function main(){
+    currentMiliseconds = new Date().getTime();  // For simulation
 
     /*
     var xmlhttp = new XMLHttpRequest();
@@ -130,6 +135,12 @@ function main(){
         h.name = att;
         h.hpcc_rack = +att.split("-")[1];
         h.hpcc_node = +att.split("-")[2].split(".")[0];
+        h.index = hosts.length;
+
+        // to contain the historical query results
+        hostResults[ h.name] ={};
+        hostResults[ h.name].index = h.index;
+        hostResults[ h.name].arr = [];
         hosts.push(h);
        // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
@@ -216,7 +227,7 @@ function main(){
         });
 
     // Draw host **********************
-
+    /*
     for (var i=0; i<hosts.length;i++) {
         hosts[i].x = racks[hosts[i].hpcc_rack - 1].x;
         hosts[i].y = racks[hosts[i].hpcc_rack - 1].y + hosts[i].hpcc_node * h_rack / 63;
@@ -256,13 +267,16 @@ function main(){
                     return 0.3;
             })
             .on("mouseover", mouseoverNode2)
-            .on("mouseout", mouseoutNode2);
+            .on("mouseout", mouseoutNode2);*/
+
+
+    // ********* REQUEST ******************************************
 
     var count = 0;
     var interval2 = setInterval(function(){
          var xmlhttp = new XMLHttpRequest();
 
-         var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
+         /*var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
          xmlhttp.onreadystatechange = function() {
              if (this.readyState == 4 && this.status == 200) {
                 console.log(this.responseText);
@@ -273,18 +287,129 @@ function main(){
              }
 
          };
-
          xmlhttp.open("GET", url, true);
          xmlhttp.send();
+          */
+        var result = simulateResults(hosts[count].name);
+
+        // Process the result
+        var name =  result.data.service.host_name;
+        hostResults[name].arr.push(result);
+
+        plotResult(result);
+
+        //console.log(hosts[count]);
+        console.log(result);
 
         count++;
         if (count>=hosts.length)
             count=0;
-
-        console.log(hosts[count]);
-
-    } , 3000)
+    } , 10)
 
 }
 
+function simulateResults(hostname){
+    sampleService.result.queryTime =  new Date().getTime();
+    sampleService.data.service.host_name = hostname;
+
+
+    // temperature
+    //var str = sampleService.data.service.plugin_output;
+    var str = "CPU1 Temp 67 OK CPU2 Temp 49 OK Inlet Temp 40 OK";
+    var arrString =  str.split(" ");
+
+    var temp1 = +arrString[2];
+    temp1+= gaussianRandom(-50,50);
+    arrString[2]=temp1;
+
+    var temp2 = +arrString[6];
+    temp2+= gaussianRandom(-50,50);
+    arrString[6]=temp2;
+
+    var temp3 = +arrString[10];
+    temp3+= gaussianRandom(-50,50);
+    arrString[10]=temp3;
+
+    sampleService.data.service.plugin_output = arrString.join(' ')
+
+    //console.log(temp1);
+    console.log(sampleService.data.service.plugin_output );
+    //debugger;
+    return sampleService;
+}
+function gaussianRand() {
+    var rand = 0;
+
+    for (var i = 0; i < 6; i += 1) {
+        rand += Math.random();
+    }
+
+    return rand / 6;
+}
+
+function gaussianRandom(start, end) {
+    return Math.floor(start + gaussianRand() * (end - start + 1));
+}
+
+//function getRandomInt(min, max) {
+//    min = Math.ceil(min);
+//    max = Math.floor(max);
+//    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+//}
+
+
+function plotResult(result){
+    var name =  result.data.service.host_name;
+    var hpcc_rack = +name.split("-")[1];
+    var hpcc_node = +name.split("-")[2].split(".")[0];
+
+    var x = racks[hpcc_rack - 1].x;
+    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 61;
+    var numSecond= (sampleService.result.queryTime-currentMiliseconds)/1000;
+    x+=numSecond;
+
+    var str = result.data.service.plugin_output;
+    var arrString =  str.split(" ");
+
+    var temp1 = +arrString[2];
+    var temp2 = +arrString[6];
+    var temp3 = +arrString[10];
+
+
+    var color = d3.scaleLinear()
+        .domain([20, 60, 80, 100])
+        .range(['#44f', '#1a9850','#fee08b', '#d73027'])
+        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+
+
+    svg.append("rect")
+        .attr("class", name)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("width", node_size)
+        .attr("height", node_size )
+        .attr("fill", function (d) {
+            return color(temp1);
+        })
+        .attr("fill-opacity",0.8)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 0.1)
+        .on("mouseover", mouseoverNode2)
+        .on("mouseout", mouseoutNode2);
+
+    svg.append("rect")
+        .attr("class", name)
+        .attr("x", x)
+        .attr("y", y+6)
+        .attr("width", node_size)
+        .attr("height", node_size )
+        .attr("fill", function (d) {
+            return color(temp2);
+        })
+        .attr("fill-opacity",0.8)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 0.1)
+        .on("mouseover", mouseoverNode2)
+        .on("mouseout", mouseoutNode2);
+}
 
