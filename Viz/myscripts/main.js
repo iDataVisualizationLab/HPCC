@@ -276,10 +276,20 @@ function main(){
     var interval2 = setInterval(function(){
          var xmlhttp = new XMLHttpRequest();
 
-         /*var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
+         var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
          xmlhttp.onreadystatechange = function() {
              if (this.readyState == 4 && this.status == 200) {
-                console.log(this.responseText);
+                //console.log(this.responseText);
+
+                 var result = this.responseText;
+
+                 var name =  result.data.service.host_name;
+                 hostResults[name].arr.push(result);
+
+                 plotResult(result);
+
+                 //console.log(hosts[count]);
+                 console.log(result);
              }
              else{
 
@@ -289,7 +299,8 @@ function main(){
          };
          xmlhttp.open("GET", url, true);
          xmlhttp.send();
-          */
+
+        /*
         var result = simulateResults(hosts[count].name);
 
         // Process the result
@@ -300,11 +311,12 @@ function main(){
 
         //console.log(hosts[count]);
         console.log(result);
+        */
 
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 10)
+    } , 1000)
 
 }
 
