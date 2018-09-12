@@ -89,43 +89,6 @@ function main(){
 
 
 
-   /* fetch('http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist').then(function(response) {
-       return response.text();
-    }).then(function(data) {
-       console.log(data);
-    }).catch(function(error) {
-       console.log('Error: ' + error);
-    });*/
-    
-    /*httpGet("http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist");
-
-
-    function httpGet(theUrl)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-}*/
-
-
-/*
-httpGetAsync("http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=hostlist",callback1);
-
-function httpGetAsync(theUrl, callback){
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
-    }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-    xmlHttp.send(null);
-}
-function callback1(){
-    console.log("AAAAA");
-    debugger;
-}*/
-
 function httpGetAsync(theUrl, callback) { //theURL or a path to file
     var httpRequest = new XMLHttpRequest();
     httpRequest.onreadystatechange = function() {
