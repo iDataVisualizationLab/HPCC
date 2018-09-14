@@ -1,0 +1,20 @@
+svg {
+	margin-left:auto; margin-right:auto; display:block;
+}
+
+.axis {
+	font: 12px sans-serif;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+.tooltip {
+	position: absolute;
+	width: 150px;
+	height: 35px;
+	pointer-events: none;
+}
