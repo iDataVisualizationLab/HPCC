@@ -90,6 +90,8 @@ var w_rack = width/10-1;
 var w_gap =0;
 var node_size = 6;
 
+var numberOfMinutes = 20;
+
 var users = [];
 var racks = [];
 
@@ -321,7 +323,7 @@ function main(){
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 1)
+    } , 10)
 
 }
 
@@ -379,10 +381,15 @@ function plotResult(result){
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
-    var x = racks[hpcc_rack - 1].x;
+
+    var xStart = racks[hpcc_rack - 1].x;
+    var xTimeScale = d3.scaleLinear()
+        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
+        .range([xStart, xStart+w_rack-2*node_size]); // output
+
+    var x = xTimeScale(result.result.queryTime);
     var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 60.5 -10;
-    var numSecond= (result.result.queryTime-currentMiliseconds)/1000;
-    x+=numSecond;
+
 
     var str = result.data.service.plugin_output;
     var arrString =  str.split(" ");

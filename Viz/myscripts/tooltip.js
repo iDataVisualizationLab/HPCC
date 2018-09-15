@@ -15,12 +15,10 @@ var tool_tip = d3.tip()
         str="";
         str+="<table border='0.5px'  style='width:100%'>"
         for (key in d) {
-            if (key== "x" || key== "y" || key== "vx" || key== "vy" || key== "fx" || key== "fy")
+            if (key== "index")
                 ;// Do nothing
             else if (key== "nodes")
                 str+=  "<tr><td> Number of nodes</td> <td>  <span style='color:black'>" + d[key].length + "</span> </td></tr>";
-            else if (key== "Link")
-                str+=  "<tr><td>"+key+"</td> <td>  <span style='color:blue'>" + d[key] + "</span> </td></tr>";
             else{
                 str+=  "<tr><td>"+key+"</td> <td>  <span style='color:black'>" + d[key] + "</span> </td></tr>";
             }
@@ -87,7 +85,7 @@ function mouseoverNode(d1){
 
     // 6. Y scale will use the randomly generate number
         var yScale = d3.scaleLinear()
-            .domain([32, 100]) // input
+            .domain([20, 120]) // input
             .range([tipH, 0]); // output
 
 
@@ -105,10 +103,14 @@ function mouseoverNode(d1){
 
 
     // 3. Call the x axis in a group tag
+    // compute number of ticks
+    var numTicks = 1+Math.round((maxTime-minTime)/(60*1000)); // every minutes
+    if (numTicks>10) numTicks=10;
+
     svgTip.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + tipH + ")")
-            .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + tipH + ")")
+        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M")).ticks(numTicks)); //
 
     // 4. Call the y axis in a group tag
     svgTip.append("g")
@@ -156,9 +158,8 @@ function mouseoverNode(d1){
         .datum(arr) // 10. Binds data to the line
         .attr("class", "line2") // Assign a class for styling
         .attr("d", line2)
-        .attr("stroke","#000")
-        .attr("stroke-width",1)
-        .style("stroke-dasharray", ("1, 1"));
+        .attr("stroke","#888")
+        .attr("stroke-width",1);
     // Appends a circle for each datapoint ****** CPU2
     svgTip.selectAll(".dot2")
         .data(arr)
@@ -185,11 +186,11 @@ function mouseoverNode(d1){
         .attr("d", line3)
         .attr("stroke","#000")
         .attr("stroke-width",1)
-        .style("stroke-dasharray", ("3, 3"));
+        .style("stroke-dasharray", ("1, 4"));
 
 
     // Appends a circle for each datapoint ****** CPU2
-    svgTip.selectAll(".dot3")
+    /*svgTip.selectAll(".dot3")
         .data(arr)
         .enter().append("circle") // Uses the enter().append() method
         .attr("class", "dot3") // Assign a class for styling
@@ -201,7 +202,7 @@ function mouseoverNode(d1){
         })
         .attr("fill-opacity",function (d) {
             return opa(d.temp3);
-        });
+        });*/
 
 
 }
