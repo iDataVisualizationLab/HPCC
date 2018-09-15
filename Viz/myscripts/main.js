@@ -90,7 +90,7 @@ var w_rack = width/10-1;
 var w_gap =0;
 var node_size = 6;
 
-var numberOfMinutes = 20;
+var numberOfMinutes = 15;
 
 var users = [];
 var racks = [];
