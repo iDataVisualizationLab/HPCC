@@ -80,7 +80,7 @@ var h_rack = 1000;
 var top_margin = 50;
 var w_rack = width/10-1;
 var w_gap =0;
-var node_size = 5;
+var node_size = 6;
 
 var users = [];
 var racks = [];
@@ -276,19 +276,17 @@ function main(){
     var interval2 = setInterval(function(){
          var xmlhttp = new XMLHttpRequest();
 
+         /*
          var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
          xmlhttp.onreadystatechange = function() {
              if (this.readyState == 4 && this.status == 200) {
-                //console.log(this.responseText);
-
-                 var result = this.responseText;
+                 var result = JSON.parse(this.responseText);
 
                  var name =  result.data.service.host_name;
                  hostResults[name].arr.push(result);
 
                  plotResult(result);
 
-                 //console.log(hosts[count]);
                  console.log(result);
              }
              else{
@@ -299,8 +297,8 @@ function main(){
          };
          xmlhttp.open("GET", url, true);
          xmlhttp.send();
+        */
 
-        /*
         var result = simulateResults(hosts[count].name);
 
         // Process the result
@@ -310,13 +308,12 @@ function main(){
         plotResult(result);
 
         //console.log(hosts[count]);
-        console.log(result);
-        */
+
 
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 1000)
+    } , 10)
 
 }
 
@@ -345,7 +342,7 @@ function simulateResults(hostname){
     sampleService.data.service.plugin_output = arrString.join(' ')
 
     //console.log(temp1);
-    console.log(sampleService.data.service.plugin_output );
+    //console.log(sampleService.data.service.plugin_output );
     //debugger;
     return sampleService;
 }
@@ -376,8 +373,8 @@ function plotResult(result){
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
     var x = racks[hpcc_rack - 1].x;
-    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 61;
-    var numSecond= (sampleService.result.queryTime-currentMiliseconds)/1000;
+    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 60.5 -10;
+    var numSecond= (result.result.queryTime-currentMiliseconds)/1000;
     x+=numSecond;
 
     var str = result.data.service.plugin_output;
@@ -392,7 +389,9 @@ function plotResult(result){
         .domain([20, 60, 80, 100])
         .range(['#44f', '#1a9850','#fee08b', '#d73027'])
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-
+    var opa = d3.scaleLinear()
+        .domain([20, 100])
+        .range([0, 1])
 
     svg.append("rect")
         .attr("class", name)
@@ -403,11 +402,15 @@ function plotResult(result){
         .attr("fill", function (d) {
             return color(temp1);
         })
-        .attr("fill-opacity",0.8)
+        .attr("fill-opacity",function (d) {
+            return opa(temp1);
+        })
         .attr("stroke", "#000")
-        .attr("stroke-width", 0.1)
-        .on("mouseover", mouseoverNode2)
-        .on("mouseout", mouseoutNode2);
+        .attr("stroke-width", 0.05)
+        .on("mouseover", function (d) {
+            mouseoverNode (this);
+        })
+        .on("mouseout", mouseoutNode);
 
     svg.append("rect")
         .attr("class", name)
@@ -418,10 +421,14 @@ function plotResult(result){
         .attr("fill", function (d) {
             return color(temp2);
         })
-        .attr("fill-opacity",0.8)
+        .attr("fill-opacity",function (d) {
+            return opa(temp2);
+        })
         .attr("stroke", "#000")
-        .attr("stroke-width", 0.1)
-        .on("mouseover", mouseoverNode2)
-        .on("mouseout", mouseoutNode2);
+        .attr("stroke-width", 0.05)
+        .on("mouseover", function (d) {
+            mouseoverNode (this);
+        })
+        .on("mouseout", mouseoutNode);
 }
 

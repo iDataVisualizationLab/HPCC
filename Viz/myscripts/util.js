@@ -130,13 +130,6 @@ function mouseoutUser(d){
         .style("fill-opacity", 1);
 }
 
-function mouseoverNode2(d1){
-    tool_tip.show(d1);
-}
-
-function mouseoutNode2(d1){
-    tool_tip.hide(d1);
-}
 
 function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
