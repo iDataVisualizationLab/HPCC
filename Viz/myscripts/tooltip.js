@@ -5,7 +5,8 @@
 
 var tipW = 400;
 var tipH = 300;
-
+var margin = {top: 10, right: 0, bottom: 20, left: 40}
+;
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .offset([100, tipW/2])
@@ -26,8 +27,9 @@ var tool_tip = d3.tip()
         }
         str+="</table> <br>"
 
-        str +=  '<svg id="svgTip" width="400" height="400" > </svg>'
+       // str +=  '<svg id="svgTip" width="400" height="400" ><circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" /> </svg>'
 
+        str +=  '<svg width="100" height="100" id="svgTip"> </svg>'
 
 
         return str; });
@@ -40,84 +42,166 @@ function mouseoverNode(d1){
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
 
+    // 1. create the svgTip
+    var svgTip = d3.select("#svgTip")
+        .attr("width", tipW + margin.left + margin.right)
+        .attr("height", tipH + margin.top + margin.bottom)
+        .style("attr","#fff")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-// draw line graph
-    d3.select("#svgTip")
-        .append("rect")
-        .attr("class", "a")
-        .attr("x", 10)
-        .attr("y", 10)
-        .attr("width", 100)
-        .attr("height",100 )
-        .attr("fill", function (d) {
-            return "f00";
-        })
-        .attr("fill-opacity",0.9)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 0.5);
 
-    // 2. Use the margin convention practice
-    var margin = {top: 50, right: 50, bottom: 50, left: 50}
-        , width = 400 // Use the window's width
-        , height =200; // Use the window's height
+    // 2. Process the array of historical temperatures
+    var arr = [];
 
-    // The number of datapoints
-        var n = 21;
+    for (var i=0; i<r.arr.length;i++){
+        var str = r.arr[i].data.service.plugin_output;
+        var arrString =  str.split(" ");
+        var obj = {};
+        obj.temp1 = +arrString[2];
+        obj.temp2 = +arrString[6];
+        obj.temp3 = +arrString[10];
+        obj.queryTime =r.arr[i].result.queryTime;
 
-    // 5. X scale will use the index of our data
-        var xScale = d3.scaleLinear()
-            .domain([0, n-1]) // input
-            .range([0, width]); // output
+        arr.push(obj);
+
+    }
+
+    // 3. get Time
+    var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
+    var maxTime = 0;
+    for (var i=0; i<r.arr.length;i++){
+        var qtime =r.arr[i].result.queryTime;
+        minTime = Math.min(minTime,qtime);
+        maxTime = Math.max(maxTime,qtime);
+    }
+
+    var xScale = d3.scaleTime()
+        .domain([ new Date(minTime-1000), new Date(maxTime+1000) ])
+        .range([0, tipW]);
+
+    //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
+
+   // debugger;
+
 
     // 6. Y scale will use the randomly generate number
         var yScale = d3.scaleLinear()
-            .domain([0, 1]) // input
-            .range([height, 0]); // output
+            .domain([32, 100]) // input
+            .range([tipH, 0]); // output
 
-    // 7. d3's line generator
-        var line = d3.line()
-            .x(function(d, i) { return xScale(i); }) // set the x values for the line generator
-            .y(function(d) { return yScale(d.y); }) // set the y values for the line generator
-            .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-    // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
-        var dataset = d3.range(n).map(function(d) { return {"y": d3.randomUniform(1)() } })
+    // White Background
+    svgTip.append("rect")
+        .attr("class", name)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", tipW)
+        .attr("height", tipH )
+        .attr("fill", "#fff")
+        .attr("fill-opacity",1)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 0.05);               ;
 
-    // 1. Add the SVG to the page and employ #2
-        var svg = d3.select("#svgTip")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // 3. Call the x axis in a group tag
-        svg.append("g")
+    svgTip.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate(0," + tipH + ")")
             .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
 
     // 4. Call the y axis in a group tag
-        svg.append("g")
+    svgTip.append("g")
             .attr("class", "y axis")
             .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-    // 9. Append the path, bind the data, and call the line generator
-        svg.append("path")
-            .datum(dataset) // 10. Binds data to the line
-            .attr("class", "line") // Assign a class for styling
-            .attr("d", line)
-            .attr("stroke","#f00")
-            .attr("stroke-width",2); // 11. Calls the line generator
 
-    // 12. Appends a circle for each datapoint
-        svg.selectAll(".dot")
-            .data(dataset)
-            .enter().append("circle") // Uses the enter().append() method
-            .attr("class", "dot") // Assign a class for styling
-            .attr("cx", function(d, i) { return xScale(i) })
-            .attr("cy", function(d) { return yScale(d.y) })
-            .attr("r", 5);
 
+
+
+    // ****** Append the path ****** CPU1
+    var line1 = d3.line()
+        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.temp1); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+
+    svgTip.append("path")
+            .datum(arr) // 10. Binds data to the line
+            .attr("class", "line1") // Assign a class for styling
+            .attr("d", line1)
+            .attr("stroke","#000")
+            .attr("stroke-width",1); // 11. Calls the line generator
+    // Appends a circle for each datapoint ****** CPU1
+    svgTip.selectAll(".dot1")
+        .data(arr)
+        .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot1") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(d.queryTime) })
+        .attr("cy", function(d) { return yScale(d.temp1) })
+        .attr("r", 4)
+        .attr("fill", function (d) {
+            return color(d.temp1);
+        })
+        .attr("fill-opacity",function (d) {
+            return opa(d.temp1);
+        });
+
+    // ****** Append the path ****** CPU2
+    var line2 = d3.line()
+        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.temp2); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    svgTip.append("path")
+        .datum(arr) // 10. Binds data to the line
+        .attr("class", "line2") // Assign a class for styling
+        .attr("d", line2)
+        .attr("stroke","#000")
+        .attr("stroke-width",1)
+        .style("stroke-dasharray", ("1, 1"));
+    // Appends a circle for each datapoint ****** CPU2
+    svgTip.selectAll(".dot2")
+        .data(arr)
+        .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot2") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(d.queryTime) })
+        .attr("cy", function(d) { return yScale(d.temp2) })
+        .attr("r", 4)
+        .attr("fill", function (d) {
+            return color(d.temp2);
+        })
+        .attr("fill-opacity",function (d) {
+            return opa(d.temp2);
+        });
+
+    // ****** Append the path ****** CPU3
+    var line3 = d3.line()
+        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.temp3); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    svgTip.append("path")
+        .datum(arr) // 10. Binds data to the line
+        .attr("class", "line3") // Assign a class for styling
+        .attr("d", line3)
+        .attr("stroke","#000")
+        .attr("stroke-width",1)
+        .style("stroke-dasharray", ("3, 3"));
+
+
+    // Appends a circle for each datapoint ****** CPU2
+    svgTip.selectAll(".dot3")
+        .data(arr)
+        .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot3") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(d.queryTime) })
+        .attr("cy", function(d) { return yScale(d.temp3) })
+        .attr("r", 4)
+        .attr("fill", function (d) {
+            return color(d.temp3);
+        })
+        .attr("fill-opacity",function (d) {
+            return opa(d.temp3);
+        });
 
 
 }

@@ -63,7 +63,7 @@ var simulation, link, node;
 });
 */
 
-var getColor = d3.scaleOrdinal(d3.schemeCategory20);
+
 
 var dur = 400;  // animation duration
 
@@ -73,6 +73,14 @@ var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 
+
+var color = d3.scaleLinear()
+    .domain([20, 60, 80, 100])
+    .range(['#44f', '#1a9850','#fee08b', '#d73027'])
+    .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+var opa = d3.scaleLinear()
+    .domain([20, 100])
+    .range([0, 1]);
 
 
 var numberOfProcessors = 42;
@@ -313,13 +321,16 @@ function main(){
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 10)
+    } , 1)
 
 }
 
 function simulateResults(hostname){
-    sampleService.result.queryTime =  new Date().getTime();
-    sampleService.data.service.host_name = hostname;
+    let newService = JSON.parse(JSON.stringify(sampleService));
+
+
+    newService.result.queryTime =  new Date().getTime();
+    newService.data.service.host_name = hostname;
 
 
     // temperature
@@ -339,12 +350,8 @@ function simulateResults(hostname){
     temp3+= gaussianRandom(-50,50);
     arrString[10]=temp3;
 
-    sampleService.data.service.plugin_output = arrString.join(' ')
-
-    //console.log(temp1);
-    //console.log(sampleService.data.service.plugin_output );
-    //debugger;
-    return sampleService;
+    newService.data.service.plugin_output = arrString.join(' ')
+    return newService;
 }
 function gaussianRand() {
     var rand = 0;
@@ -385,13 +392,6 @@ function plotResult(result){
     var temp3 = +arrString[10];
 
 
-    var color = d3.scaleLinear()
-        .domain([20, 60, 80, 100])
-        .range(['#44f', '#1a9850','#fee08b', '#d73027'])
-        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-    var opa = d3.scaleLinear()
-        .domain([20, 100])
-        .range([0, 1])
 
     svg.append("rect")
         .attr("class", name)
