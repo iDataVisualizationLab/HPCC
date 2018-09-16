@@ -11,6 +11,17 @@ text.textUsernames {
 			2px 1px 1px #444, 1px 2px 1px #999,
 			3px 2px 1px #444, 2px 3px 1px #999;
 }
+div {
+	/* This is the default, you don't need to
+       explicitly declare it unless overriding
+       another declaration */
+	white-space: normal;
+}
+.logo__lockup
+h1{display:inline;margin:0em;width:100%;line-height:1em;padding: 10px; font-weight:400;letter-spacing:1px;font-size:1.6em}
+@media (max-width: 600px){.logo__lockup h1{font-size:1.2em}}
+a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0px}
+.ttu-logo img{width:200px;max-width:200px}@media only screen and (max-width: 999px){.nav-on-left .ttu-logo{left:auto;right:5%}}
 
 .axis path,
 .axis line {
@@ -22,10 +33,10 @@ text.textUsernames {
 #controlHolder {
 	position:absolute;
 	z-index: 0;
-	top: 50px;
-	left: 150px;
-	border: 0px solid rgba(0,0,0, 1);
-	background-color: none;
+	top: 20px;
+	left: 750px;
+	border: 1x solid rgba(0,0,0, 1);
+	background-color: #ddd;
 }
 
 #searchHolder {

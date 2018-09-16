@@ -211,30 +211,16 @@ function main(){
         .enter().append("text")
         .attr("class", "rackRectText1")
         .attr("x", function (d) {return d.x+w_rack/2-2;})
-        .attr("y", function (d) {return d.y-30;})
+        .attr("y", function (d) {return d.y-20;})
         .attr("fill", "#000")
         .style("text-anchor","middle")
         .style("font-size",16)
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text(function (d) {
-            return "Rack "+d.id;
+            return "Rack "+d.id +":   " +d.hosts.length + " hosts";
         });
 
-    svg.selectAll(".rackRectText2")
-        .data(racks)
-        .enter().append("text")
-        .attr("x", function (d) {return d.x+w_rack/2-2;})
-        .attr("y", function (d) {return d.y-12;})
-        .attr("class", "rackRectText2")
-        .attr("fill", "#000")
-        .style("text-anchor","middle")
-        .style("font-size",12)
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text(function (d) {
-            return "Host usage = "+d.hosts.length;
-        });
 
     // Draw host **********************
     /*
