@@ -32,10 +32,12 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 }
 #controlHolder {
 	position:absolute;
+	padding: 10px;
 	z-index: 0;
 	top: 20px;
-	left: 750px;
-	border: 1x solid rgba(0,0,0, 1);
+	left: 1000px;
+	border: 1px solid rgba(120,120,120, 1);
+	border-radius: 6px;
 	background-color: #ddd;
 }
 

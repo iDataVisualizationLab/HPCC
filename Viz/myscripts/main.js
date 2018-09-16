@@ -355,15 +355,17 @@ function gaussianRandom(start, end) {
     return Math.floor(start + gaussianRand() * (end - start + 1));
 }
 
-//function getRandomInt(min, max) {
-//    min = Math.ceil(min);
-//    max = Math.floor(max);
-//    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-//}
 
-
-function plotResult(result){
+function plotResult(result) {
     var name =  result.data.service.host_name;
+    if (document.getElementById("checkboxP1").checked)
+        plotArea(name);
+    else
+        plotHeat(result,name);
+
+}
+
+function plotHeat(result,name){
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
@@ -425,3 +427,82 @@ function plotResult(result){
         .on("mouseout", mouseoutNode);
 }
 
+function plotArea(name){
+    var r = hostResults[name];
+
+    var hpcc_rack = +name.split("-")[1];
+    var hpcc_node = +name.split("-")[2].split(".")[0];
+
+    var xStart = racks[hpcc_rack - 1].x;
+    var xTimeScale = d3.scaleLinear()
+        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
+        .range([xStart, xStart+w_rack-2*node_size]); // output
+    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 60.5;
+
+
+    // Process the array of historical temperatures
+    var arr = [];
+    for (var i=0; i<r.arr.length;i++){
+        var str = r.arr[i].data.service.plugin_output;
+        var arrString =  str.split(" ");
+        var obj = {};
+        obj.temp1 = +arrString[2];
+        obj.temp2 = +arrString[6];
+        obj.temp3 = +arrString[10];
+        obj.queryTime =r.arr[i].result.queryTime;
+        obj.x = xTimeScale(obj.queryTime);
+        arr.push(obj);
+    }
+
+    // get Time
+    var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
+    var maxTime = 0;
+    for (var i=0; i<r.arr.length;i++){
+        var qtime =r.arr[i].result.queryTime;
+        minTime = Math.min(minTime,qtime);
+        maxTime = Math.max(maxTime,qtime);
+    }
+
+  var yScale = d3.scaleLinear()
+        .domain([60, 120]) // input
+        .range([0, 25]); // output
+
+    var line = d3.line()
+        .x(function(d, i) { return d.x; }) // set the x values for the line generator
+        .y(function(d) { return y +yScale(d.temp1); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var area = d3.area()
+        .x(function(d) { return d.x; })
+        .y0(function(d) { return y; })
+        .y1(function(d) { return y-yScale(d.temp1); })
+        .curve(d3.curveCardinal);
+
+    svg.selectAll("."+name).remove();
+    svg.append("path")
+        .datum(arr) // 10. Binds data to the line
+        .attr("class", name)
+        .attr("stroke","#000")
+        .attr("stroke-width",0.2)
+        .attr("d", area)
+        .style("fill-opacity",function (d) {
+            return opa(d[d.length-1].temp1);
+        })
+        .on("mouseover", function (d) {
+            mouseoverNode (this);
+        })
+        .on("mouseout", mouseoutNode);
+    svg.selectAll("."+name).transition().duration(1000)
+        .style("fill",function (d) {
+            return color(d[d.length-1].temp1);
+        })
+
+
+
+
+}
+
+
+function areaChart(){
+
+}
