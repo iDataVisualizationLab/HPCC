@@ -4,12 +4,12 @@
 
 
 var tipW = 400;
-var tipH = 300;
-var margin = {top: 10, right: 0, bottom: 20, left: 40}
-;
+var tipH = 200;
+var margin = {top: 10, right: 0, bottom: 20, left: 40};
+
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
-    .offset([100, tipW/2])
+    .offset([0, tipW/2])
     .html(function(d1) {
         var d = hosts[d1.index];
         str="";
@@ -29,7 +29,7 @@ var tool_tip = d3.tip()
 
         str +=  '<svg width="100" height="100" id="svgTip"> </svg>'
 
-
+        str += '<div class="radarChart"></div>'; // Spider chart holder
         return str; });
 svg.call(tool_tip);
 
@@ -115,7 +115,7 @@ function mouseoverNode(d1){
     // 4. Call the y axis in a group tag
     svgTip.append("g")
             .attr("class", "y axis")
-            .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+            .call(d3.axisLeft(yScale).ticks(5)); // Create an axis component with d3.axisLeft
 
 
 
@@ -204,7 +204,7 @@ function mouseoverNode(d1){
             return opa(d.temp3);
         });*/
 
-
+    spiderChart();        
 }
 
 function mouseoutNode(d1){
@@ -213,17 +213,63 @@ function mouseoutNode(d1){
 
 
 
-function formatDate(date) {
-  var monthNames = [
-    "January", "February", "March",
-    "April", "May", "June", "July",
-    "August", "September", "October",
-    "November", "December"
-  ];
+function spiderChart() {
+   /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
+      
+      ////////////////////////////////////////////////////////////// 
+      //////////////////////// Set-Up ////////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
 
-  var day = date.getDate();
-  var monthIndex = date.getMonth();
-  var year = date.getFullYear();
+      var width = tipW - margin.left - margin.right-20,
+        height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
+          
+      ////////////////////////////////////////////////////////////// 
+      ////////////////////////// Data ////////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
 
-  return day + ' ' + monthNames[monthIndex] + ' ' + year;
+      var data = [
+            [//iPhone
+            {axis:"Battery Life",value:0.22},
+            {axis:"Brand",value:0.28},
+            {axis:"Contract Cost",value:0.29},
+            {axis:"Design And Quality",value:0.17},
+            {axis:"Have Internet Connectivity",value:0.22},
+            {axis:"Large Screen",value:0.02},
+            {axis:"Price Of Device",value:0.21},
+            ],[//Samsung
+            {axis:"Battery Life",value:0.27},
+            {axis:"Brand",value:0.16},
+            {axis:"Contract Cost",value:0.35},
+            {axis:"Design And Quality",value:0.13},
+            {axis:"Have Internet Connectivity",value:0.20},
+            {axis:"Large Screen",value:0.13},
+            {axis:"Price Of Device",value:0.35},
+            ],[//Nokia Smartphone
+            {axis:"Battery Life",value:0.26},
+            {axis:"Brand",value:0.10},
+            {axis:"Contract Cost",value:0.30},
+            {axis:"Design And Quality",value:0.14},
+            {axis:"Have Internet Connectivity",value:0.22},
+            {axis:"Large Screen",value:0.04},
+            {axis:"Price Of Device",value:0.41},
+            ]
+          ];
+      ////////////////////////////////////////////////////////////// 
+      //////////////////// Draw the Chart ////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
+
+      var color2 = d3.scaleOrdinal()
+        .range(["#EDC951","#CC333F","#00A0B0"]);
+        
+      var radarChartOptions = {
+        w: width,
+        h: height,
+        margin: margin,
+        maxValue: 0.5,
+        levels: 5,
+        roundStrokes: true,
+        color: color2
+      };
+      //Call function to draw the Radar chart
+      RadarChart(".radarChart", data, radarChartOptions);
 }
