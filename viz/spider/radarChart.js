@@ -9,7 +9,7 @@ function RadarChart(id, data, options) {
     var cfg = {
      w: 600,                //Width of the circle
      h: 600,                //Height of the circle
-     margin: {top: 20, right: 50, bottom: 20, left: 50}, //The margins of the SVG
+     margin: {top: 30, right: 55, bottom: 20, left: 55}, //The margins of the SVG
      levels: 3,             //How many levels or inner circles should there be drawn
      maxValue: 0,           //What is the value that the biggest circle will represent
      labelFactor: 1.15,     //How much farther than the radius of the outer circle should the labels be placed
@@ -183,14 +183,19 @@ function RadarChart(id, data, options) {
                 .style("fill-opacity", cfg.opacityArea);
         });
         
-    //Create the outlines   
+    //Create the outlines
     blobWrapper.append("path")
         .attr("class", "radarStroke")
         .attr("d", function(d,i) { return radarLine(d); })
         .style("stroke-width", cfg.strokeWidth + "px")
         .style("stroke", function(d,i) { return cfg.color(i); })
+        .style("stroke-dasharray", function (d,i) {
+            if (i==2)
+                return ("1, 4");
+
+        })
         .style("fill", "none")
-        .style("filter" , "url(#glow)");        
+        .style("filter" , "url(#glow)");
     
     //Append the circles
     blobWrapper.selectAll(".radarCircle")

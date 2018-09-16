@@ -5,7 +5,7 @@ var tipW = 450;
 var tipH = 200;
 var margin = {top: 10, right: 0, bottom: 40, left: 50};
 var color2 = d3.scaleOrdinal()
-    .range(["#a0a","#00a","#088"]);
+    .range(["#00a","#a0a","#000"]);
 
 
 //////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ function mouseoverNode(d1){
 
     var xScale = d3.scaleTime()
         .domain([ new Date(minTime-1000), new Date(maxTime+1000) ])
-        .range([0, tipW]);
+        .range([0, tipW-50]);
 
     //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
 
@@ -122,7 +122,7 @@ function mouseoverNode(d1){
         .attr("class", name)
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", tipW)
+        .attr("width", tipW+ margin.right)
         .attr("height", tipH )
         .attr("fill", "#fff")
         .attr("fill-opacity",1)
@@ -180,6 +180,16 @@ function mouseoverNode(d1){
             //return opa(d.temp1);
         });
 
+    svgTip.append("text")
+        .attr("x", tipW-4)
+        .attr("y",  yScale(arr[arr.length-1].temp1))
+        .attr("fill", function () { return color2(0); })
+        .style("text-anchor","end")
+        .style("font-size",11)
+        .attr("font-family", "sans-serif")
+        .text("CPU1="+Math.round(arr[arr.length-1].temp1));
+
+
     // ****** Append the path ****** CPU2
     var line2 = d3.line()
         .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
@@ -208,8 +218,16 @@ function mouseoverNode(d1){
             return opa(d.temp2);
         });
      */
+     svgTip.append("text")
+        .attr("x", tipW-4)
+        .attr("y",  yScale(arr[arr.length-1].temp2))
+        .attr("fill", function () { return color2(1); })
+        .style("text-anchor","end")
+        .style("font-size",11)
+        .attr("font-family", "sans-serif")
+        .text("CPU2="+Math.round(arr[arr.length-1].temp2));
 
-    // ****** Append the path ****** CPU3
+    // ****** Append the path ****** CPU3  Inlet
     var line3 = d3.line()
         .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
         .y(function(d) { return yScale(d.temp3); }) // set the y values for the line generator
@@ -221,22 +239,16 @@ function mouseoverNode(d1){
         .attr("stroke","#000")
         .attr("stroke-width",1)
         .style("stroke-dasharray", ("1, 4"));
+    svgTip.append("text")
+        .attr("x", tipW-4)
+        .attr("y",  yScale(arr[arr.length-1].temp3))
+        .attr("fill", function () { return "#444"; })
+        .style("text-anchor","end")
+        .style("font-size",11)
+        .attr("font-family", "sans-serif")
+        .text("Inlet="+Math.round(arr[arr.length-1].temp3));
 
 
-    // Appends a circle for each datapoint ****** CPU2
-    /*svgTip.selectAll(".dot3")
-        .data(arr)
-        .enter().append("circle") // Uses the enter().append() method
-        .attr("class", "dot3") // Assign a class for styling
-        .attr("cx", function(d, i) { return xScale(d.queryTime) })
-        .attr("cy", function(d) { return yScale(d.temp3) })
-        .attr("r", 4)
-        .attr("fill", function (d) {
-            return color(d.temp3);
-        })
-        .attr("fill-opacity",function (d) {
-            return opa(d.temp3);
-        });*/
 
 
 
@@ -264,16 +276,28 @@ function mouseoverNode(d1){
         .attr("font-family", "sans-serif")
         .text("Temperature (F)");
 
+    //************************************************************* Date and Time
     svgTip.append("text")
         .attr("x", -margin.left)
         .attr("y", tipH+34)
         .attr("fill", "#000")
-        .style("text-anchor","left")
         .style("font-style","italic")
+        .style("text-anchor","left")
         .style("font-size",12)
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text(""+new Date(minTime).toDateString());
+
+    svgTip.append("text")
+        .attr("x", tipW-3)
+        .attr("y", tipH+34)
+        .attr("fill", "#000")
+        .style("font-style","italic")
+        .style("text-anchor","end")
+        .style("font-size",12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
     for (var i=0; i<arr.length;i++){
@@ -302,7 +326,7 @@ function spiderChart() {
 
 
       var radarChartOptions = {
-        w: tipW-100,
+        w: tipW-50,
         h: tipW,
         maxValue: 0.5,
         levels: 5,
