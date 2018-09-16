@@ -16,8 +16,14 @@ var svg = d3.select("svg"),
 
 svg = svg.append("g")
     .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
+        "translate(" + margin.left + "," + margin.top + ")")
+    .call(d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", zoom));
 
+function zoom() {
+    svg.attr("transform", d3.event.transform);
+}
 
 
 // Parse the date / time
@@ -309,7 +315,7 @@ function main(){
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 10)
+    } , 1)
 
 }
 
@@ -476,7 +482,7 @@ function plotArea(name){
         .x(function(d) { return d.x; })
         .y0(function(d) { return y; })
         .y1(function(d) { return y-yScale(d.temp1); })
-        .curve(d3.curveCardinal);
+        .curve(d3.curveCatmullRom);
 
     svg.selectAll("."+name).remove();
     svg.append("path")
@@ -491,7 +497,7 @@ function plotArea(name){
         .on("mouseover", function (d) {
             mouseoverNode (this);
         })
-        .on("mouseout", mouseoutNode);
+        ;//.on("mouseout", mouseoutNode);
     svg.selectAll("."+name).transition().duration(1000)
         .style("fill",function (d) {
             return color(d[d.length-1].temp1);

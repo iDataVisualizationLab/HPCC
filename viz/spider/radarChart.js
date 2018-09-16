@@ -9,15 +9,15 @@ function RadarChart(id, data, options) {
     var cfg = {
      w: 600,                //Width of the circle
      h: 600,                //Height of the circle
-     margin: {top: 20, right: 20, bottom: 20, left: 20}, //The margins of the SVG
+     margin: {top: 20, right: 50, bottom: 20, left: 50}, //The margins of the SVG
      levels: 3,             //How many levels or inner circles should there be drawn
      maxValue: 0,           //What is the value that the biggest circle will represent
-     labelFactor: 1.25,     //How much farther than the radius of the outer circle should the labels be placed
+     labelFactor: 1.15,     //How much farther than the radius of the outer circle should the labels be placed
      wrapWidth: 60,         //The number of pixels after which a label needs to be given a new line
      opacityArea: 0.35,     //The opacity of the area of the blob
-     dotRadius: 4,          //The size of the colored circles of each blog
+     dotRadius: 3,          //The size of the colored circles of each blog
      opacityCircles: 0.1,   //The opacity of the circles of each blob
-     strokeWidth: 2,        //The width of the stroke around each blob
+     strokeWidth: 1,        //The width of the stroke around each blob
      roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
      color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
@@ -31,11 +31,14 @@ function RadarChart(id, data, options) {
     
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     var maxValue = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
-        
+    // *** TOMMY 2018
+    maxValue =100;
+
+
     var allAxis = (data[0].map(function(i, j){return i.axis})), //Names of each axis
         total = allAxis.length,                 //The number of different axes
         radius = Math.min(cfg.w/2, cfg.h/2),    //Radius of the outermost circle
-        Format = d3.format('%'),                //Percentage formatting
+        Format = d3.format(''),                //Percentage formatting
         angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
     
     //Scale for the radius
@@ -97,8 +100,9 @@ function RadarChart(id, data, options) {
        .attr("x", 4)
        .attr("y", function(d){return -d*radius/cfg.levels;})
        .attr("dy", "0.4em")
-       .style("font-size", "10px")
-       .attr("fill", "#737373")
+        .attr("font-family", "sans-serif")
+        .style("font-size", "11px")
+       .attr("fill", "#111")
        .text(function(d,i) { return Format(maxValue * d/cfg.levels); });
 
     /////////////////////////////////////////////////////////
@@ -115,16 +119,17 @@ function RadarChart(id, data, options) {
     axis.append("line")
         .attr("x1", 0)
         .attr("y1", 0)
-        .attr("x2", function(d, i){ return rScale(maxValue*1.1) * Math.cos(angleSlice*i - Math.PI/2); })
-        .attr("y2", function(d, i){ return rScale(maxValue*1.1) * Math.sin(angleSlice*i - Math.PI/2); })
+        .attr("x2", function(d, i){ return rScale(maxValue*1.05) * Math.cos(angleSlice*i - Math.PI/2); })
+        .attr("y2", function(d, i){ return rScale(maxValue*1.05) * Math.sin(angleSlice*i - Math.PI/2); })
         .attr("class", "line")
         .style("stroke", "white")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "1px");
 
     //Append the labels at each axis
     axis.append("text")
         .attr("class", "legend")
         .style("font-size", "11px")
+        .attr("font-family", "sans-serif")
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("x", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
@@ -191,8 +196,7 @@ function RadarChart(id, data, options) {
     blobWrapper.selectAll(".radarCircle")
         .data(function(d,i) { 
             d.forEach(function(d2){
-                d2.index=i; 
-                console.log (d); 
+                d2.index=i;
             })
             return d;
          })
@@ -201,7 +205,7 @@ function RadarChart(id, data, options) {
         .attr("r", cfg.dotRadius)
         .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2); })
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
-        .style("fill", function(d,i,j) { console.log (d); return cfg.color(d.index); })
+        .style("fill", function(d,i,j) {  return cfg.color(d.index); })
         .style("fill-opacity", 0.8);
 
     /////////////////////////////////////////////////////////

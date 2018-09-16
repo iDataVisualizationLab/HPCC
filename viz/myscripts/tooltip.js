@@ -1,11 +1,46 @@
 // Setup the tool tip.  Note that this is just one example, and that many styling options are available.
     // See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
 
-
-
-var tipW = 400;
+var tipW = 450;
 var tipH = 200;
-var margin = {top: 10, right: 0, bottom: 20, left: 40};
+var margin = {top: 10, right: 0, bottom: 40, left: 50};
+var color2 = d3.scaleOrdinal()
+    .range(["#a0a","#00a","#088"]);
+
+
+//////////////////////////////////////////////////////////////
+////////////////////////// Data //////////////////////////////
+//////////////////////////////////////////////////////////////
+
+var dataSpider = [
+    [//CPU1
+        {axis:"Temperature",value:0.22},
+        {axis:"CPU load",value:0.28},
+        {axis:"memory usage",value:0.29},
+        {axis:"disk usage",value:0.17},
+        {axis:"BMC health",value:0.22},
+        {axis:"process",value:0.02},
+        {axis:"user",value:0.21},
+    ],[//CPU2
+        {axis:"Temperature",value:0.27},
+        {axis:"CPU load",value:0.16},
+        {axis:"memory usage",value:0.35},
+        {axis:"disk usage",value:0.13},
+        {axis:"BMC health",value:0.20},
+        {axis:"process",value:0.13},
+        {axis:"user",value:0.35},
+    ],[//CPU3
+        {axis:"Temperature",value:0.26},
+        {axis:"CPU load",value:0.10},
+        {axis:"memory usaget",value:0.30},
+        {axis:"disk usage",value:0.14},
+        {axis:"BMC health",value:0.22},
+        {axis:"process",value:0.04},
+        {axis:"user",value:0.41},
+    ]
+];
+
+
 
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
@@ -13,7 +48,7 @@ var tool_tip = d3.tip()
     .html(function(d1) {
         var d = hosts[d1.index];
         str="";
-        str+="<table border='0.5px'  style='width:100%'>"
+       /* str+="<table border='0.5px'  style='width:100%'>"
         for (key in d) {
             if (key== "index")
                 ;// Do nothing
@@ -24,8 +59,7 @@ var tool_tip = d3.tip()
             }
         }
         str+="</table> <br>"
-
-       // str +=  '<svg id="svgTip" width="400" height="400" ><circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" /> </svg>'
+        */
 
         str +=  '<svg width="100" height="100" id="svgTip"> </svg>'
 
@@ -51,7 +85,6 @@ function mouseoverNode(d1){
 
     // 2. Process the array of historical temperatures
     var arr = [];
-
     for (var i=0; i<r.arr.length;i++){
         var str = r.arr[i].data.service.plugin_output;
         var arrString =  str.split(" ");
@@ -60,9 +93,7 @@ function mouseoverNode(d1){
         obj.temp2 = +arrString[6];
         obj.temp3 = +arrString[10];
         obj.queryTime =r.arr[i].result.queryTime;
-
         arr.push(obj);
-
     }
 
     // 3. get Time
@@ -79,9 +110,6 @@ function mouseoverNode(d1){
         .range([0, tipW]);
 
     //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
-
-   // debugger;
-
 
     // 6. Y scale will use the randomly generate number
         var yScale = d3.scaleLinear()
@@ -132,7 +160,9 @@ function mouseoverNode(d1){
             .datum(arr) // 10. Binds data to the line
             .attr("class", "line1") // Assign a class for styling
             .attr("d", line1)
-            .attr("stroke","#000")
+            .attr("stroke", function () {
+                return color2(0);
+            })
             .attr("stroke-width",1); // 11. Calls the line generator
     // Appends a circle for each datapoint ****** CPU1
     svgTip.selectAll(".dot1")
@@ -141,12 +171,13 @@ function mouseoverNode(d1){
         .attr("class", "dot1") // Assign a class for styling
         .attr("cx", function(d, i) { return xScale(d.queryTime) })
         .attr("cy", function(d) { return yScale(d.temp1) })
-        .attr("r", 4)
+        .attr("r", 2)
         .attr("fill", function (d) {
             return color(d.temp1);
         })
         .attr("fill-opacity",function (d) {
-            return opa(d.temp1);
+            return 1;
+            //return opa(d.temp1);
         });
 
     // ****** Append the path ****** CPU2
@@ -158,10 +189,12 @@ function mouseoverNode(d1){
         .datum(arr) // 10. Binds data to the line
         .attr("class", "line2") // Assign a class for styling
         .attr("d", line2)
-        .attr("stroke","#888")
+        .attr("stroke", function () {
+            return color2(1);
+        })
         .attr("stroke-width",1);
     // Appends a circle for each datapoint ****** CPU2
-    svgTip.selectAll(".dot2")
+    /*svgTip.selectAll(".dot2")
         .data(arr)
         .enter().append("circle") // Uses the enter().append() method
         .attr("class", "dot2") // Assign a class for styling
@@ -174,6 +207,7 @@ function mouseoverNode(d1){
         .attr("fill-opacity",function (d) {
             return opa(d.temp2);
         });
+     */
 
     // ****** Append the path ****** CPU3
     var line3 = d3.line()
@@ -204,6 +238,52 @@ function mouseoverNode(d1){
             return opa(d.temp3);
         });*/
 
+
+
+    //************************************************************* Host name
+    svgTip.append("text")
+        .attr("class", "hostnameInTip")
+        .attr("x", function (d) {return 15;})
+        .attr("y", function (d) {return 12;})
+        .attr("fill", "#000")
+        .style("text-anchor","left")
+        .style("font-weight","bold")
+        .style("font-size",12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Host: "+d1.className.baseVal);
+    svgTip.append("text")
+        .attr("x", -tipH/2)
+        .attr("y", -35)
+        .attr("transform", "rotate(-90)")
+        .attr("fill", "#000")
+        .style("text-anchor","middle")
+        .style("font-style","italic")
+        .style("font-size",12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Temperature (F)");
+
+    svgTip.append("text")
+        .attr("x", -margin.left)
+        .attr("y", tipH+34)
+        .attr("fill", "#000")
+        .style("text-anchor","left")
+        .style("font-style","italic")
+        .style("font-size",12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text(""+new Date(minTime).toDateString());
+
+    // Update spider data *************************************************************
+    for (var i=0; i<arr.length;i++){
+        var index = i%7;
+        dataSpider[0][index].value = arr[i].temp1;
+        dataSpider[1][index].value = arr[i].temp2;
+        dataSpider[2][index].value = arr[i].temp3;
+    }
+
+
     spiderChart();        
 }
 
@@ -215,61 +295,20 @@ function mouseoutNode(d1){
 
 function spiderChart() {
    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
-      
-      ////////////////////////////////////////////////////////////// 
-      //////////////////////// Set-Up ////////////////////////////// 
-      ////////////////////////////////////////////////////////////// 
 
-      var width = tipW - margin.left - margin.right-20,
-        height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
-          
-      ////////////////////////////////////////////////////////////// 
-      ////////////////////////// Data ////////////////////////////// 
-      ////////////////////////////////////////////////////////////// 
+      //////////////////////////////////////////////////////////////
+      //////////////////// Draw the Chart //////////////////////////
+      //////////////////////////////////////////////////////////////
 
-      var data = [
-            [//iPhone
-            {axis:"Battery Life",value:0.22},
-            {axis:"Brand",value:0.28},
-            {axis:"Contract Cost",value:0.29},
-            {axis:"Design And Quality",value:0.17},
-            {axis:"Have Internet Connectivity",value:0.22},
-            {axis:"Large Screen",value:0.02},
-            {axis:"Price Of Device",value:0.21},
-            ],[//Samsung
-            {axis:"Battery Life",value:0.27},
-            {axis:"Brand",value:0.16},
-            {axis:"Contract Cost",value:0.35},
-            {axis:"Design And Quality",value:0.13},
-            {axis:"Have Internet Connectivity",value:0.20},
-            {axis:"Large Screen",value:0.13},
-            {axis:"Price Of Device",value:0.35},
-            ],[//Nokia Smartphone
-            {axis:"Battery Life",value:0.26},
-            {axis:"Brand",value:0.10},
-            {axis:"Contract Cost",value:0.30},
-            {axis:"Design And Quality",value:0.14},
-            {axis:"Have Internet Connectivity",value:0.22},
-            {axis:"Large Screen",value:0.04},
-            {axis:"Price Of Device",value:0.41},
-            ]
-          ];
-      ////////////////////////////////////////////////////////////// 
-      //////////////////// Draw the Chart ////////////////////////// 
-      ////////////////////////////////////////////////////////////// 
 
-      var color2 = d3.scaleOrdinal()
-        .range(["#EDC951","#CC333F","#00A0B0"]);
-        
       var radarChartOptions = {
-        w: width,
-        h: height,
-        margin: margin,
+        w: tipW-100,
+        h: tipW,
         maxValue: 0.5,
         levels: 5,
         roundStrokes: true,
         color: color2
       };
       //Call function to draw the Radar chart
-      RadarChart(".radarChart", data, radarChartOptions);
+      RadarChart(".radarChart", dataSpider, radarChartOptions);
 }
