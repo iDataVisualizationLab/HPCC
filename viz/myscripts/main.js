@@ -90,7 +90,7 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =10;
-var numberOfMinutes = 3;
+var numberOfMinutes = 4;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 100;
@@ -378,7 +378,7 @@ function plotHeat(result,name){
         .on("mouseover", function (d) {
             mouseoverNode (this);
         })
-        .on("mouseout", mouseoutNode);
+        ;//.on("mouseout", mouseoutNode);
 
     svg.append("rect")
         .attr("class", name)
@@ -397,7 +397,7 @@ function plotHeat(result,name){
         .on("mouseover", function (d) {
             mouseoverNode (this);
         })
-        .on("mouseout", mouseoutNode);
+        ;//.on("mouseout", mouseoutNode);
 
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
@@ -455,7 +455,7 @@ function plotArea(name){
         .attr("stroke","#000")
         .attr("stroke-width",0.2)
         .attr("d", area)
-        .style("fill-opacity",function (d) {
+        .attr("fill-opacity",function (d) {
             return opa(d[d.length-1].temp1);
         })
         .on("mouseover", function (d) {

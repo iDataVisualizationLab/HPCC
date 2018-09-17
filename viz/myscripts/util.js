@@ -8,7 +8,7 @@ var svgLengend = d3.select('.legendHolder').append('svg')
 
 var x = d3.scaleLinear()
     .domain([0, 50])
-    .range([0, 160])
+    .range([0, 150])
     .clamp(true);
 
 var slider = svgLengend.append("g")
@@ -50,11 +50,51 @@ slider.transition() // Gratuitous intro!
     });
 
 
-function hue(h) {
-    var xx = x(h);
-    if (xx<0)
-        xx =0;
+
+/// When we move slider *****************************************************************
+function hue(hhh) {
+    var xx = x(hhh);
+    if (xx < 0)
+        xx = 0;
     handle.attr("cx", xx);
+
+    if (xx>1){
+        //    clearInterval(interval2);
+
+        for (var name in hostResults) {
+            var r = hostResults[name];
+            // Process the array of historical temperatures
+            var maxIncrease = 0;
+            var preTemp1 = 0;
+            var preTemp2 = 0;
+            for (var i = 0; i < r.arr.length; i++) {
+                var str = r.arr[i].data.service.plugin_output;
+                var arrString = str.split(" ");
+                var temp1 = +arrString[2];
+                var temp2 = +arrString[6];
+
+                if (i>=1){
+                    var dif1 = temp1-preTemp1;
+                    var dif2 = temp2-preTemp2;
+
+                    var max = Math.max(dif1,dif2);
+                    if (max>maxIncrease)
+                        maxIncrease=max;
+                }
+                preTemp1 = temp1;
+                preTemp2 = temp2;
+            }
+            var sliderValue = xx/3;  // based on the range above
+            if (maxIncrease>sliderValue){
+                //console.log(name+" "+maxIncrease +" "+xx/3);
+            }
+            else{
+                svg.selectAll("."+name).attr("fill-opacity",0);
+            }
+
+        }
+
+    }
 
 }
 

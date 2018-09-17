@@ -174,12 +174,14 @@ function mouseoverNode(d1){
         .attr("cy", function(d) { return yScale(d.temp1) })
         .attr("r", 3)
         .attr("fill", function (d) {
-            return color2(0);
+            return color(d.temp1);
         })
         .attr("fill-opacity",function (d) {
             return 1;
             //return opa(d.temp1);
-        });
+        })
+        .attr("stroke-width",0.5)
+        .attr("stroke","#000");
 
     svgTip.append("text")
         .attr("x", tipW-4)
@@ -205,20 +207,22 @@ function mouseoverNode(d1){
         })
         .attr("stroke-width",1);
     // Appends a circle for each datapoint ****** CPU2
-    /*svgTip.selectAll(".dot2")
+    svgTip.selectAll(".dot2")
         .data(arr)
         .enter().append("circle") // Uses the enter().append() method
         .attr("class", "dot2") // Assign a class for styling
         .attr("cx", function(d, i) { return xScale(d.query_time) })
         .attr("cy", function(d) { return yScale(d.temp2) })
-        .attr("r", 4)
+        .attr("r", 3)
         .attr("fill", function (d) {
             return color(d.temp2);
         })
         .attr("fill-opacity",function (d) {
             return opa(d.temp2);
-        });
-     */
+        })
+        .attr("stroke-width",0.5)
+        .attr("stroke","#000");
+
      svgTip.append("text")
         .attr("x", tipW-4)
         .attr("y",  yScale(arr[arr.length-1].temp2))
