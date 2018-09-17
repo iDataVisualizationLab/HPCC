@@ -88,9 +88,9 @@ var opa = d3.scaleLinear()
 
 
 var maxHostinRack= 60;
-var h_rack = 1100;
+var h_rack = 1200;
 var top_margin = 70;
-var w_rack = (width-30)/10-1;
+var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
 
@@ -102,6 +102,7 @@ var racks = [];
 var currentMiliseconds;
 var xTimeScale;
 var baseTemperature =60;
+var interval2;
 
 main();
 function main() {
@@ -183,7 +184,7 @@ function main() {
 
     // Draw racks **********************
     for (var i = 0; i < racks.length; i++) {
-        racks[i].x = 30 + racks[i].id * (w_rack + w_gap) - w_rack + 10;
+        racks[i].x = 35+ racks[i].id * (w_rack + w_gap) - w_rack + 10;
         racks[i].y = top_margin;
     }
     svg.selectAll(".rackRect")
@@ -212,7 +213,7 @@ function main() {
             return d.x + w_rack / 2 - 20;
         })
         .attr("y", function (d) {
-            return d.y - 42;
+            return d.y - 36;
         })
         .attr("fill", "#000")
         .style("text-anchor", "middle")
@@ -228,7 +229,7 @@ function main() {
     svg.append("text")
         .attr("class", "hostText")
         .attr("x", 0)
-        .attr("y", top_margin-19)
+        .attr("y", top_margin-15)
         .attr("fill", "#000")
         .style("font-weight","bold")
         .style("text-anchor", "start")
@@ -241,7 +242,7 @@ function main() {
         var yy = getHostY(1,i);
         svg.append("text")
             .attr("class", "hostText")
-            .attr("x", 27)
+            .attr("x", 32)
             .attr("y", yy+1)
             .attr("fill", "#000")
             .style("text-anchor", "end")
@@ -275,7 +276,7 @@ function main() {
     // ********* REQUEST ******************************************
 
     var count = 0;
-    var interval2 = setInterval(function(){
+    interval2 = setInterval(function(){
          var xmlhttp = new XMLHttpRequest();
 
          /*
@@ -382,7 +383,7 @@ function plotHeat(result,name){
         .range([xStart, xStart+w_rack-2*node_size]); // output
 
     var x = xTimeScale(result.result.queryTime);
-    var y =  getHostY(hpcc_rack,hpcc_node)-8;
+    var y =  getHostY(hpcc_rack,hpcc_node)-10;
 
 
     var str = result.data.service.plugin_output;
@@ -550,7 +551,7 @@ function drawSummaryAreaChart(rack, xStart) {
 
 
     // Drawing areas ****************************************************
-    var y = top_margin-20;
+    var y = top_margin-16;
 
     var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
@@ -597,4 +598,8 @@ function getHostY(r,n){
 
 function areaChart(){
     // Do nothing
+}
+
+function pauseRequest(){
+    clearInterval(interval2);
 }
