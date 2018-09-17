@@ -1,16 +1,64 @@
-function getRadius(d) {
-    return 5+Math.pow(d.nodes.length,0.35);
-}
+var w = 300,
+    h = 70;
 
-function isContainUser(array, name) {
-    var foundIndex = -1;
-    for(var i = 0; i < array.length; i++) {
-        if (array[i].name == name) {
-            foundIndex = i;
-            break;
-        }
-    }
-    return foundIndex;
+var svgLengend = d3.select('.legendHolder').append('svg')
+    .attr("class", "legendView")
+    .attr("width", w)
+    .attr("height", h);
+
+
+function drawLegend(arr, arrColor) {
+    var x =100;
+    var y = 16;
+    var r = 20;
+    svgLengend.selectAll(".legendRect").remove();
+    svgLengend.selectAll(".legendRect")
+        .data(arr)
+        .enter().append("rect")
+        .attr("class", "legendRect")
+        .attr("x", function (d,i) {
+            return x +i*r*2;
+        })
+        .attr("y", y)
+        .attr("width", r*2)
+        .attr("height", r)
+        .attr("fill",function (d,i) {
+            return arrColor[i];
+        })
+        .attr("fill-opacity",function (d,i) {
+            if (i==0)
+                return opa(40);
+            else
+                return opa(d);
+        })
+        .attr("stroke-width", 0);
+    svgLengend.selectAll(".legendText").remove();
+    svgLengend.selectAll(".legendText")
+        .data(arr)
+        .enter().append("text")
+        .attr("class", "legendText")
+        .attr("x", function (d,i) {
+            return x +i*r*2;
+        })
+        .attr("y", y-2)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-size", 12)
+        .attr("font-family", "sans-serif")
+        .text(function (d) {
+            return " "+d;
+        });
+    svgLengend.append("text")
+        .attr("class", "legendText1")
+        .attr("x", x-4)
+        .attr("y", y+15)
+        .style("text-anchor", "end")
+        .attr("fill", "#000")
+        .style("font-style","italic")
+        .style("font-size",12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Temperature (F)");
 }
 
 function isContainRack(array, id) {
@@ -22,112 +70,6 @@ function isContainRack(array, id) {
         }
     }
     return foundIndex;
-}
-
-
-function getMaxNodesToShow(d){
-    return 1000;
-    /*if (d.nodes.length<200){
-        return numberOfProcessors;
-    }
-    else {
-        var maxNodes =  users[0].nodes.length;
-        var scale = d3.scaleLinear().domain([0,maxNodes]).range([1, numberOfProcessors*0.5]);
-        return numberOfProcessors-scale(d.nodes.length);
-    }*/
-}
-
-function mouseoverUser(d){
-    // host **********************
-    //tool_tip.show(d);
-    svg.append("text")
-        .attr("class", "textUsernames")
-        .attr("x", d.x)
-        .attr("y", d.y+getRadius(d)+14)
-        .attr("fill", getColor(d.name))
-        .style("text-anchor","middle")
-        .style("font-size",16)
-        //.style("font-weight","bold")
-        .attr("font-family", "sans-serif")
-        .text(d.name);
-
-    svg.append("text")
-        .attr("class", "textUserNodes")
-        .attr("x", d.x)
-        .attr("y", d.y+getRadius(d)+28)
-        .attr("fill", "#000")
-        .style("text-anchor","middle")
-        .style("font-size",12)
-        .attr("font-family", "sans-serif")
-        .text("Total nodes = "+d.nodes.length);
-
-
-    showHost(d);
-x
-
-    svg.selectAll(".nodeImages")
-        .attr("opacity", function(d2){
-            return (d.name==d2.name) ? 1 :0.1;});
-    node.attr("fill-opacity", function(d2){
-        return (d.name==d2.name) ? 1 :0.1;});
-
-    svgStream.selectAll(".areaUser")
-        .style("fill-opacity", function(d2){  return (d.name==d2.key) ? 1 :0.1;});
-
-}
-
-function showHost(d){
-    var max = getMaxNodesToShow(d);
-    for (var i=0; i<hosts.length;i++) {
-        var count =0;
-        for (var j = 0; j < hosts[i].jobList.length; j++) {
-            //console.log(hosts[i].jobList[j].user);
-            if (hosts[i].jobList[j].user == d.name){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
-                svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                    .attr("fill-opacity", 1)
-                    .attr("stroke", "#000");
-                count++;
-                if (count>max) // limit the number of host to highlight
-                    break;
-            }
-        }
-    }
-}
-
-
-
-function hideHost(d){
-    var max = getMaxNodesToShow(d);
-    for (var i=0; i<hosts.length;i++) {
-        var count =0;
-        for (var j = 0; j < hosts[i].jobList.length; j++) {
-            //console.log(hosts[i].jobList[j].user);
-            if (hosts[i].jobList[j].user == d.name){//} && hosts[i].jobList[j].masterQueue=="MASTER") {
-                svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
-                    .attr("fill-opacity", 0.3)
-                    .attr("stroke", "#fff");
-                count++;
-                if (count>max) // limit the number of host to highlight
-                    break;
-            }
-        }
-    }
-}
-
-
-function mouseoutUser(d){
-    //tool_tip.hide(d);
-
-    hideHost(d);
-    svg.selectAll(".textUsernames").remove();
-    svg.selectAll(".textUserNodes").remove();
-
-    svg.selectAll(".nodeImages")
-        .attr("opacity", 1);
-    node.attr("fill-opacity",1);
-
-    svgStream.selectAll(".areaUser")
-        .style("fill-opacity", 1);
 }
 
 

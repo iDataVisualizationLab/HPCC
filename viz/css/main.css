@@ -39,26 +39,18 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	border: 1px solid rgba(120,120,120, 1);
 	border-radius: 6px;
 	background-color: #ddd;
+	box-shadow: 5px 5px 5px #444;
 }
 
-#searchHolder {
-	position:absolute;
-	z-index: 0;
-	top: 15px;
-	left: 427px;
-	border: 0px solid rgba(100,0,0, 1);
-	background-color: none;
-}
 
-#streamHolder {
+#legendHolder {
 	position:absolute;
 	z-index: 0;
-	top: 1120px;
-	left:10px;
+	top: 2px;
+	right:20px;
 	border: 1px solid rgba(0,0,0, 1);
 	background-color: rgba(255,255,255, 0.75);
 	border-radius: 6px;
-	box-shadow: 10px 10px 10px #444;
 }
 
 /* tooltip */

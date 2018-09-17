@@ -92,7 +92,7 @@ function mouseoverNode(d1){
         obj.temp1 = +arrString[2];
         obj.temp2 = +arrString[6];
         obj.temp3 = +arrString[10];
-        obj.queryTime =r.arr[i].result.queryTime;
+        obj.query_time =r.arr[i].result.query_time;
         arr.push(obj);
     }
 
@@ -100,7 +100,7 @@ function mouseoverNode(d1){
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
     var maxTime = 0;
     for (var i=0; i<r.arr.length;i++){
-        var qtime =r.arr[i].result.queryTime;
+        var qtime =r.arr[i].result.query_time;
         minTime = Math.min(minTime,qtime);
         maxTime = Math.max(maxTime,qtime);
     }
@@ -152,7 +152,7 @@ function mouseoverNode(d1){
 
     // ****** Append the path ****** CPU1
     var line1 = d3.line()
-        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
         .y(function(d) { return yScale(d.temp1); }) // set the y values for the line generator
         .curve(d3.curveMonotoneX) // apply smoothing to the line
 
@@ -170,7 +170,7 @@ function mouseoverNode(d1){
         .data(arr)
         .enter().append("circle") // Uses the enter().append() method
         .attr("class", "dot1") // Assign a class for styling
-        .attr("cx", function(d, i) { return xScale(d.queryTime) })
+        .attr("cx", function(d, i) { return xScale(d.query_time) })
         .attr("cy", function(d) { return yScale(d.temp1) })
         .attr("r", 3)
         .attr("fill", function (d) {
@@ -193,7 +193,7 @@ function mouseoverNode(d1){
 
     // ****** Append the path ****** CPU2
     var line2 = d3.line()
-        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
         .y(function(d) { return yScale(d.temp2); }) // set the y values for the line generator
         .curve(d3.curveMonotoneX) // apply smoothing to the line
     svgTip.append("path")
@@ -209,7 +209,7 @@ function mouseoverNode(d1){
         .data(arr)
         .enter().append("circle") // Uses the enter().append() method
         .attr("class", "dot2") // Assign a class for styling
-        .attr("cx", function(d, i) { return xScale(d.queryTime) })
+        .attr("cx", function(d, i) { return xScale(d.query_time) })
         .attr("cy", function(d) { return yScale(d.temp2) })
         .attr("r", 4)
         .attr("fill", function (d) {
@@ -230,7 +230,7 @@ function mouseoverNode(d1){
 
     // ****** Append the path ****** CPU3  Inlet
     var line3 = d3.line()
-        .x(function(d, i) { return xScale(d.queryTime); }) // set the x values for the line generator
+        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
         .y(function(d) { return yScale(d.temp3); }) // set the y values for the line generator
         .curve(d3.curveMonotoneX) // apply smoothing to the line
     svgTip.append("path")

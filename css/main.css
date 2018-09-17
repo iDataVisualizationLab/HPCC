@@ -40,7 +40,7 @@ text.textUsernames {
 #streamHolder {
 	position:absolute;
 	z-index: 0;
-	top: 1100px;
+	top: 10px;
 	left:10px;
 	border: 1px solid rgba(0,0,0, 1);
 	background-color: rgba(255,255,255, 0.75);

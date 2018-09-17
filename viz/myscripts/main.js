@@ -16,14 +16,13 @@ var svg = d3.select("svg"),
 
 svg = svg.append("g")
     .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")")
-    .call(d3.zoom()
-        .scaleExtent([1, 8])
-        .on("zoom", zoom));
-
-function zoom() {
-    svg.attr("transform", d3.event.transform);
-}
+        "translate(" + margin.left + "," + margin.top + ")");
+    //.call(d3.zoom()
+    //    .scaleExtent([1, 8])
+    //    .on("zoom", zoom));
+//function zoom() {
+//   svg.attr("transform", d3.event.transform);
+//}
 
 
 // Parse the date / time
@@ -58,34 +57,22 @@ var spinner = new Spinner(opts).spin(target);
 // END: loader spinner settings ****************************
 
 var simulation, link, node;
-
-//d3.json("data/host_usage1.json", function(data_) {
-/*d3.json("data/HostUsageHistoryPoll1.json", function(data_) {
-    hosts = data_;
-    main();
-
-
-    buildStreamGraph();  // Draw stream graphs for user's jobs in Stream.js
-});
-*/
-
-
-
 var dur = 400;  // animation duration
 var startDate = new Date("4/1/2018");
 var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 
+var arrTemp = [20, 60, 80, 100];
+var arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
 
 var color = d3.scaleLinear()
-    .domain([20, 60, 80, 100])
-    .range(['#44f', '#1a9850','#fee08b', '#d73027'])
+    .domain(arrTemp)
+    .range(arrColor)
     .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
 var opa = d3.scaleLinear()
     .domain([20, 100])
     .range([0, 1]);
-
 
 var maxHostinRack= 60;
 var h_rack = 1200;
@@ -94,47 +81,26 @@ var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
 
-var numberOfMinutes = 4;
-
 var users = [];
 var racks = [];
 
 var currentMiliseconds;
 var xTimeScale;
 var baseTemperature =60;
+
 var interval2;
+var simDuration =10;
+var numberOfMinutes = 2;
+var isRealtime = false;
+if (isRealtime){
+    simDuration = 100;
+    numberOfMinutes = 60;
+}
+
 
 main();
+drawLegend(arrTemp, arrColor);
 function main() {
-    currentMiliseconds = new Date().getTime();  // For simulation
-
-
-    // HPCC ****************************************
-    /*for (var i=0; i<hosts.length;i++) {
-     hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
-     hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
-
-     // Compute RACK list
-     var rackIndex = isContainRack(racks,hosts[i].hpcc_rack);
-     if (rackIndex>=0){  // found the user in the users list
-     racks[rackIndex].hosts.push(hosts[i]);
-     }
-     else{
-     var obj ={};
-     obj.id = hosts[i].hpcc_rack;
-     obj.hosts = [];
-     obj.hosts.push(hosts[i]);
-     racks.push(obj);
-     }
-     // Sort RACK list
-     racks = racks.sort(function(a,b){
-     if (a.id>b.id){
-     return 1;
-     }
-     else return -1;
-     })
-     }*/
-
     for (var att in hostList.data.hostlist) {
         var h = {};
         h.name = att;
@@ -276,51 +242,49 @@ function main() {
     // ********* REQUEST ******************************************
 
     var count = 0;
+    currentMiliseconds = new Date().getTime();  // For simulation
     interval2 = setInterval(function(){
-         var xmlhttp = new XMLHttpRequest();
+         if (isRealtime){
+                 var xmlhttp = new XMLHttpRequest();
+                 var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
+                 xmlhttp.onreadystatechange = function() {
+                     if (this.readyState == 4 && this.status == 200) {
+                         var result = JSON.parse(this.responseText);
 
-         /*
-         var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
-         xmlhttp.onreadystatechange = function() {
-             if (this.readyState == 4 && this.status == 200) {
-                 var result = JSON.parse(this.responseText);
+                         var name =  result.data.service.host_name;
+                         hostResults[name].arr.push(result);
 
-                 var name =  result.data.service.host_name;
-                 hostResults[name].arr.push(result);
+                         plotResult(result);
 
-                 plotResult(result);
+                         console.log(result);
+                     }
+                     else{
 
-                 console.log(result);
-             }
-             else{
+                         console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                     }
 
-                 console.log(count+" this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-             }
-
-         };
-         xmlhttp.open("GET", url, true);
-         xmlhttp.send();
-        */
-
-        var result = simulateResults(hosts[count].name);
-
-        // Process the result
-        var name =  result.data.service.host_name;
-        hostResults[name].arr.push(result);
-
-        plotResult(result);
-
+                 };
+                 xmlhttp.open("GET", url, true);
+                 xmlhttp.send();
+         }
+         else{
+                var result = simulateResults(hosts[count].name);
+                // Process the result
+                var name =  result.data.service.host_name;
+                hostResults[name].arr.push(result);
+                plotResult(result);
+         }
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 10)
+    } , simDuration)
 
 }
 
 function simulateResults(hostname){
     let newService = JSON.parse(JSON.stringify(sampleService));
 
-    newService.result.queryTime =  new Date().getTime();
+    newService.result.query_time =  new Date().getTime();
     newService.data.service.host_name = hostname;
 
 
@@ -330,15 +294,15 @@ function simulateResults(hostname){
     var arrString =  str.split(" ");
 
     var temp1 = +arrString[2];
-    temp1+= gaussianRandom(-50,50);
+    temp1+= gaussianRandom(-40,40);
     arrString[2]=temp1;
 
     var temp2 = +arrString[6];
-    temp2+= gaussianRandom(-50,50);
+    temp2+= gaussianRandom(-30,30);
     arrString[6]=temp2;
 
     var temp3 = +arrString[10];
-    temp3+= gaussianRandom(-50,50);
+    temp3+= gaussianRandom(-20,20);
     arrString[10]=temp3;
 
     newService.data.service.plugin_output = arrString.join(' ')
@@ -378,7 +342,7 @@ function plotHeat(result,name){
         .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
 
-    var x = xTimeScale(result.result.queryTime);
+    var x = xTimeScale(result.result.query_time);
     var y =  getHostY(hpcc_rack,hpcc_node)-10;
 
 
@@ -413,7 +377,7 @@ function plotHeat(result,name){
     svg.append("rect")
         .attr("class", name)
         .attr("x", x)
-        .attr("y", y+6)
+        .attr("y", y+node_size+1)
         .attr("width", node_size)
         .attr("height", node_size )
         .attr("fill", function (d) {
@@ -454,8 +418,8 @@ function plotArea(name){
         obj.temp1 = +arrString[2];
         obj.temp2 = +arrString[6];
         obj.temp3 = +arrString[10];
-        obj.queryTime =r.arr[i].result.queryTime;
-        obj.x = xTimeScale(obj.queryTime);
+        obj.query_time =r.arr[i].result.query_time;
+        obj.x = xTimeScale(obj.query_time);
         arr.push(obj);
     }
 
@@ -463,7 +427,7 @@ function plotArea(name){
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
     var maxTime = 0;
     for (var i=0; i<r.arr.length;i++){
-        var qtime =r.arr[i].result.queryTime;
+        var qtime =r.arr[i].result.query_time;
         minTime = Math.min(minTime,qtime);
         maxTime = Math.max(maxTime,qtime);
     }
@@ -502,6 +466,7 @@ function plotArea(name){
 
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
+    var binStep = 5; // pixels
     for (var att in hostResults) {
         var hpcc_rack = +att.split("-")[1];
         var hpcc_node = +att.split("-")[2].split(".")[0];
@@ -514,9 +479,9 @@ function drawSummaryAreaChart(rack, xStart) {
                 obj.temp1 = +arrString[2];
                 obj.temp2 = +arrString[6];
                 obj.temp3 = +arrString[10];
-                obj.queryTime = r.arr[i].result.queryTime;
-                obj.x = xTimeScale(obj.queryTime);
-                obj.bin = Math.round(obj.x-xStart);   // How to compute BINS ******************************************
+                obj.query_time = r.arr[i].result.query_time;
+                obj.x = xTimeScale(obj.query_time);
+                obj.bin = Math.round((obj.x-xStart)/binStep);   // How to compute BINS ******************************************
                 if (arr2[obj.bin] == undefined)
                     arr2[obj.bin] = [];
                 arr2[obj.bin].push(obj);
@@ -543,7 +508,6 @@ function drawSummaryAreaChart(rack, xStart) {
             arr3.push(obj)
         }
     }
-    //console.log(arr3.length);
 
 
     // Drawing areas ****************************************************
@@ -554,7 +518,7 @@ function drawSummaryAreaChart(rack, xStart) {
         .range([0, 25]); // output
 
     var areaMin = d3.area()
-        .x(function(d) { return xStart+d.bin; })
+        .x(function(d) { return xStart+d.bin*binStep; })
         .y0(function(d) { return y; })
         .y1(function(d) { return y-yScale(d.min)})
         .curve(d3.curveCatmullRom);
@@ -570,7 +534,7 @@ function drawSummaryAreaChart(rack, xStart) {
         .style("fill","#494");
 
     var areaMax = d3.area()
-        .x(function(d) { return xStart+d.bin; })
+        .x(function(d) { return xStart+d.bin*binStep; })
         .y0(function(d) { return y; })
         .y1(function(d) { return y-yScale(d.max)})
         .curve(d3.curveCatmullRom);
