@@ -90,7 +90,7 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =10;
-var numberOfMinutes = 2;
+var numberOfMinutes = 3;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 100;
@@ -531,7 +531,7 @@ function drawSummaryAreaChart(rack, xStart) {
         .attr("stroke-width",0.2)
         .attr("d", areaMin)
         .style("fill-opacity",1)
-        .style("fill","#494");
+        .style("fill","#9d9");
 
     var areaMax = d3.area()
         .x(function(d) { return xStart+d.bin*binStep; })
@@ -547,7 +547,7 @@ function drawSummaryAreaChart(rack, xStart) {
         .attr("stroke-width",0.2)
         .attr("d", areaMax)
         .style("fill-opacity",1)
-        .style("fill","#a44");
+        .style("fill","#e99");
 
 }
 
