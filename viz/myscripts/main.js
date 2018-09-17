@@ -376,13 +376,13 @@ function plotHeat(result,name){
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
 
-    var xStart = racks[hpcc_rack - 1].x+15;
+    var xStart = racks[hpcc_rack - 1].x+13;
     xTimeScale = d3.scaleLinear()
         .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
 
     var x = xTimeScale(result.result.queryTime);
-    var y =  getHostY(hpcc_rack,hpcc_node);
+    var y =  getHostY(hpcc_rack,hpcc_node)-8;
 
 
     var str = result.data.service.plugin_output;
@@ -431,6 +431,8 @@ function plotHeat(result,name){
             mouseoverNode (this);
         })
         .on("mouseout", mouseoutNode);
+
+    drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
 function plotArea(name){
@@ -472,8 +474,6 @@ function plotArea(name){
   var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
         .range([0, 25]); // output
-
-
 
     var area = d3.area()
         .x(function(d) { return d.x; })
