@@ -310,9 +310,6 @@ function main() {
 
         plotResult(result);
 
-        //console.log(hosts[count]);
-
-
         count++;
         if (count>=hosts.length)
             count=0;
@@ -322,7 +319,6 @@ function main() {
 
 function simulateResults(hostname){
     let newService = JSON.parse(JSON.stringify(sampleService));
-
 
     newService.result.queryTime =  new Date().getTime();
     newService.data.service.host_name = hostname;
