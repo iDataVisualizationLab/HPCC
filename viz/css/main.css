@@ -34,7 +34,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	position:absolute;
 	padding: 10px;
 	z-index: 0;
-	top: 20px;
+	top: 1px;
 	left: 1000px;
 	border: 1px solid rgba(120,120,120, 1);
 	border-radius: 6px;

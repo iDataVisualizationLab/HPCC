@@ -9,7 +9,7 @@ function RadarChart(id, data, options) {
     var cfg = {
      w: 600,                //Width of the circle
      h: 600,                //Height of the circle
-     margin: {top: 30, right: 55, bottom: 20, left: 55}, //The margins of the SVG
+     margin: {top: 0, right: 55, bottom: 0, left: 55}, //The margins of the SVG
      levels: 3,             //How many levels or inner circles should there be drawn
      maxValue: 0,           //What is the value that the biggest circle will represent
      labelFactor: 1.15,     //How much farther than the radius of the outer circle should the labels be placed
@@ -159,29 +159,7 @@ function RadarChart(id, data, options) {
         .enter().append("g")
         .attr("class", "radarWrapper");
             
-    //Append the backgrounds    
-    blobWrapper
-        .append("path")
-        .attr("class", "radarArea")
-        .attr("d", function(d,i) { return radarLine(d); })
-        .style("fill", function(d,i) { return cfg.color(i); })
-        .style("fill-opacity", cfg.opacityArea)
-        .on('mouseover', function (d,i){
-            //Dim all blobs
-            d3.selectAll(".radarArea")
-                .transition().duration(200)
-                .style("fill-opacity", 0.1); 
-            //Bring back the hovered over blob
-            d3.select(this)
-                .transition().duration(200)
-                .style("fill-opacity", 0.7);    
-        })
-        .on('mouseout', function(){
-            //Bring back all blobs
-            d3.selectAll(".radarArea")
-                .transition().duration(200)
-                .style("fill-opacity", cfg.opacityArea);
-        });
+
         
     //Create the outlines
     blobWrapper.append("path")
@@ -196,7 +174,8 @@ function RadarChart(id, data, options) {
         })
         .style("fill", "none")
         .style("filter" , "url(#glow)");
-    
+
+
     //Append the circles
     blobWrapper.selectAll(".radarCircle")
         .data(function(d,i) { 
@@ -212,6 +191,32 @@ function RadarChart(id, data, options) {
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
         .style("fill", function(d,i,j) {  return cfg.color(d.index); })
         .style("fill-opacity", 0.8);
+
+
+
+    //Append the backgrounds
+    blobWrapper
+        .append("path")
+        .attr("class", "radarArea")
+        .attr("d", function(d,i) { return radarLine(d); })
+        .style("fill", function(d,i) { return cfg.color(i); })
+        .style("fill-opacity", cfg.opacityArea)
+        .on('mouseover', function (d,i){
+            //Dim all blobs
+            d3.selectAll(".radarArea")
+                .transition().duration(200)
+                .style("fill-opacity", 0.1);
+            //Bring back the hovered over blob
+            d3.select(this)
+                .transition().duration(200)
+                .style("fill-opacity", 0.7);
+        })
+        .on('mouseout', function(){
+            //Bring back all blobs
+            d3.selectAll(".radarArea")
+                .transition().duration(200)
+                .style("fill-opacity", cfg.opacityArea);
+        });
 
     /////////////////////////////////////////////////////////
     //////// Append invisible circles for tooltip ///////////

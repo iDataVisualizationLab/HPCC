@@ -61,9 +61,9 @@ var tool_tip = d3.tip()
         str+="</table> <br>"
         */
 
-        str +=  '<svg width="100" height="100" id="svgTip"> </svg>'
-
+        str += '<svg width="100" height="100" id="svgTip"> </svg>'
         str += '<div class="radarChart"></div>'; // Spider chart holder
+        str += '<button onclick="tool_tip.hide()">Close</button>';
         return str; });
 svg.call(tool_tip);
 
@@ -143,7 +143,8 @@ function mouseoverNode(d1){
     // 4. Call the y axis in a group tag
     svgTip.append("g")
             .attr("class", "y axis")
-            .call(d3.axisLeft(yScale).ticks(5)); // Create an axis component with d3.axisLeft
+            .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW+50))
+            .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
 
 
 
@@ -171,9 +172,9 @@ function mouseoverNode(d1){
         .attr("class", "dot1") // Assign a class for styling
         .attr("cx", function(d, i) { return xScale(d.queryTime) })
         .attr("cy", function(d) { return yScale(d.temp1) })
-        .attr("r", 2)
+        .attr("r", 3)
         .attr("fill", function (d) {
-            return color(d.temp1);
+            return color2(0);
         })
         .attr("fill-opacity",function (d) {
             return 1;

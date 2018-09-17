@@ -72,8 +72,6 @@ var simulation, link, node;
 
 
 var dur = 400;  // animation duration
-
-
 var startDate = new Date("4/1/2018");
 var endtDate = new Date("1/1/2019");
 var today = new Date();
@@ -89,10 +87,10 @@ var opa = d3.scaleLinear()
     .range([0, 1]);
 
 
-var numberOfProcessors = 42;
-var h_rack = 1000;
-var top_margin = 50;
-var w_rack = width/10-1;
+var maxHostinRack= 60;
+var h_rack = 1100;
+var top_margin = 100;
+var w_rack = (width-30)/10-1;
 var w_gap =0;
 var node_size = 6;
 
@@ -104,47 +102,35 @@ var racks = [];
 var currentMiliseconds;
 
 main();
-function main(){
+function main() {
     currentMiliseconds = new Date().getTime();  // For simulation
-
-    /*
-    var xmlhttp = new XMLHttpRequest();
-    var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=host&hostname=compute-1-1";
-    xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            console.log(this.responseText);
-        }
-    };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
-    */
 
 
     // HPCC ****************************************
     /*for (var i=0; i<hosts.length;i++) {
-        hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
-        hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
+     hosts[i].hpcc_rack = +hosts[i].hostname.split("-")[1];
+     hosts[i].hpcc_node = +hosts[i].hostname.split("-")[2].split(".")[0];
 
-        // Compute RACK list
-        var rackIndex = isContainRack(racks,hosts[i].hpcc_rack);
-        if (rackIndex>=0){  // found the user in the users list
-            racks[rackIndex].hosts.push(hosts[i]);
-        }
-        else{
-            var obj ={};
-            obj.id = hosts[i].hpcc_rack;
-            obj.hosts = [];
-            obj.hosts.push(hosts[i]);
-            racks.push(obj);
-        }
-        // Sort RACK list
-        racks = racks.sort(function(a,b){
-            if (a.id>b.id){
-                return 1;
-            }
-            else return -1;
-        })
-    }*/
+     // Compute RACK list
+     var rackIndex = isContainRack(racks,hosts[i].hpcc_rack);
+     if (rackIndex>=0){  // found the user in the users list
+     racks[rackIndex].hosts.push(hosts[i]);
+     }
+     else{
+     var obj ={};
+     obj.id = hosts[i].hpcc_rack;
+     obj.hosts = [];
+     obj.hosts.push(hosts[i]);
+     racks.push(obj);
+     }
+     // Sort RACK list
+     racks = racks.sort(function(a,b){
+     if (a.id>b.id){
+     return 1;
+     }
+     else return -1;
+     })
+     }*/
 
     for (var att in hostList.data.hostlist) {
         var h = {};
@@ -154,35 +140,35 @@ function main(){
         h.index = hosts.length;
 
         // to contain the historical query results
-        hostResults[ h.name] ={};
-        hostResults[ h.name].index = h.index;
-        hostResults[ h.name].arr = [];
+        hostResults[h.name] = {};
+        hostResults[h.name].index = h.index;
+        hostResults[h.name].arr = [];
         hosts.push(h);
-       // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
+        // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
         // Compute RACK list
-        var rackIndex = isContainRack(racks,h.hpcc_rack);
-        if (rackIndex>=0){  // found the user in the users list
+        var rackIndex = isContainRack(racks, h.hpcc_rack);
+        if (rackIndex >= 0) {  // found the user in the users list
             racks[rackIndex].hosts.push(h);
         }
-        else{
-            var obj ={};
+        else {
+            var obj = {};
             obj.id = h.hpcc_rack;
             obj.hosts = [];
             obj.hosts.push(h);
             racks.push(obj);
         }
         // Sort RACK list
-        racks = racks.sort(function(a,b){
-            if (a.id>b.id){
+        racks = racks.sort(function (a, b) {
+            if (a.id > b.id) {
                 return 1;
             }
             else return -1;
         })
     }
-    for (var i=0; i<racks.length;i++) {
-        racks[i].hosts.sort(function(a,b){
-            if (a.hpcc_node>b.hpcc_node){
+    for (var i = 0; i < racks.length; i++) {
+        racks[i].hosts.sort(function (a, b) {
+            if (a.hpcc_node > b.hpcc_node) {
                 return 1;
             }
             else return -1;
@@ -193,20 +179,24 @@ function main(){
     // Spinner Stop ********************************************************************
     spinner.stop();
 
-        // Draw racks **********************
-    for (var i=0; i<racks.length;i++) {
-        racks[i].x = racks[i].id* (w_rack + w_gap) -w_rack+10;
+    // Draw racks **********************
+    for (var i = 0; i < racks.length; i++) {
+        racks[i].x = 30 + racks[i].id * (w_rack + w_gap) - w_rack + 10;
         racks[i].y = top_margin;
     }
     svg.selectAll(".rackRect")
         .data(racks)
         .enter().append("rect")
         .attr("class", "rackRect")
-        .attr("x", function (d) {return d.x-6;})
-        .attr("y", function (d) {return d.y;})
+        .attr("x", function (d) {
+            return d.x - 6;
+        })
+        .attr("y", function (d) {
+            return d.y;
+        })
         .attr("rx", 10)
         .attr("ry", 10)
-        .attr("width", w_rack-8)
+        .attr("width", w_rack - 8)
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
@@ -216,61 +206,57 @@ function main(){
         .data(racks)
         .enter().append("text")
         .attr("class", "rackRectText1")
-        .attr("x", function (d) {return d.x+w_rack/2-2;})
-        .attr("y", function (d) {return d.y-20;})
+        .attr("x", function (d) {
+            return d.x + w_rack / 2 - 2;
+        })
+        .attr("y", function (d) {
+            return d.y - 60;
+        })
         .attr("fill", "#000")
-        .style("text-anchor","middle")
-        .style("font-size",16)
+        .style("text-anchor", "middle")
+        .style("font-size", 16)
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text(function (d) {
-            return "Rack "+d.id +":   " +d.hosts.length + " hosts";
+            return "Rack " + d.id ;
+            //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
         });
 
+    // Draw host names **********************
+    for (var i = 1; i <= maxHostinRack; i++) {
+        var yy = getHostY(1,i);
+        svg.append("text")
+            .attr("class", "hostText")
+            .attr("x", 27)
+            .attr("y", yy+1)
+            .attr("fill", "#000")
+            .style("text-anchor", "end")
+            .style("font-size", 12)
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("Host");
+    }
+    for (var i = 0; i < hosts.length; i++) {
+        var name = hosts[i].name;
 
-    // Draw host **********************
-    /*
-    for (var i=0; i<hosts.length;i++) {
-        hosts[i].x = racks[hosts[i].hpcc_rack - 1].x;
-        hosts[i].y = racks[hosts[i].hpcc_rack - 1].y + hosts[i].hpcc_node * h_rack / 63;
+        var hpcc_rack = +name.split("-")[1];
+        var hpcc_node = +name.split("-")[2].split(".")[0];
+
+        var xStart = racks[hpcc_rack - 1].x-2;
+        var yy = getHostY(hpcc_rack,hpcc_node);
+
+        svg.append("text")
+            .attr("class", "hostId")
+            .attr("x", xStart)
+            .attr("y", yy+1)
+            .attr("fill", "#000")
+            .style("text-anchor", "start")
+            .style("font-size", 11)
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text(""+hpcc_node);
 
     }
-
-
-        svg.selectAll(".node_" )
-            .data(hosts)
-            .enter().append("rect")
-            .attr("class", function (d) {
-                return "node_" + d.hpcc_rack + "_" + d.hpcc_node;
-            })
-            .attr("x", function (d, j) {
-                return d.x;
-            })
-            .attr("y", function (d) {
-                return d.y;
-            })
-            .attr("width", node_size)
-            .attr("height", node_size )
-            .attr("fill", function (d) {
-                return getColor(d);
-            })
-            .attr("fill-opacity",0.2)
-            .attr("stroke", function (d) {
-                if (d.masterQueue == "MASTER")
-                    return "#000";
-                else
-                    return "#fff";
-
-            })
-            .attr("stroke-width", function (d) {
-                if (d.masterQueue == "MASTER")
-                    return 0.4;
-                else
-                    return 0.3;
-            })
-            .on("mouseover", mouseoverNode2)
-            .on("mouseout", mouseoutNode2);*/
-
 
     // ********* REQUEST ******************************************
 
@@ -376,13 +362,13 @@ function plotHeat(result,name){
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
 
-    var xStart = racks[hpcc_rack - 1].x;
+    var xStart = racks[hpcc_rack - 1].x+15;
     var xTimeScale = d3.scaleLinear()
-        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
+        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
 
     var x = xTimeScale(result.result.queryTime);
-    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 60.5 -10;
+    var y =  getHostY(hpcc_rack,hpcc_node);
 
 
     var str = result.data.service.plugin_output;
@@ -439,11 +425,11 @@ function plotArea(name){
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
-    var xStart = racks[hpcc_rack - 1].x;
+    var xStart = racks[hpcc_rack - 1].x+15;
     var xTimeScale = d3.scaleLinear()
-        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
+        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
-    var y = racks[hpcc_rack - 1].y + hpcc_node * h_rack / 60.5;
+    var y = getHostY(hpcc_rack,hpcc_node);
 
 
     // Process the array of historical temperatures
@@ -509,6 +495,11 @@ function plotArea(name){
 }
 
 
-function areaChart(){
+function getHostY(r,n){
+   return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
+}
 
+
+function areaChart(){
+    // Do nothing
 }
