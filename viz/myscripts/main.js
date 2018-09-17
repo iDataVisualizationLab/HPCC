@@ -89,7 +89,7 @@ var opa = d3.scaleLinear()
 
 var maxHostinRack= 60;
 var h_rack = 1100;
-var top_margin = 100;
+var top_margin = 70;
 var w_rack = (width-30)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -100,6 +100,8 @@ var users = [];
 var racks = [];
 
 var currentMiliseconds;
+var xTimeScale;
+var baseTemperature =60;
 
 main();
 function main() {
@@ -207,10 +209,10 @@ function main() {
         .enter().append("text")
         .attr("class", "rackRectText1")
         .attr("x", function (d) {
-            return d.x + w_rack / 2 - 2;
+            return d.x + w_rack / 2 - 20;
         })
         .attr("y", function (d) {
-            return d.y - 60;
+            return d.y - 42;
         })
         .attr("fill", "#000")
         .style("text-anchor", "middle")
@@ -223,6 +225,18 @@ function main() {
         });
 
     // Draw host names **********************
+    svg.append("text")
+        .attr("class", "hostText")
+        .attr("x", 0)
+        .attr("y", top_margin-19)
+        .attr("fill", "#000")
+        .style("font-weight","bold")
+        .style("text-anchor", "start")
+        .style("font-size", 12)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Summary");
+
     for (var i = 1; i <= maxHostinRack; i++) {
         var yy = getHostY(1,i);
         svg.append("text")
@@ -301,7 +315,7 @@ function main() {
         count++;
         if (count>=hosts.length)
             count=0;
-    } , 1)
+    } , 10)
 
 }
 
@@ -363,7 +377,7 @@ function plotHeat(result,name){
 
 
     var xStart = racks[hpcc_rack - 1].x+15;
-    var xTimeScale = d3.scaleLinear()
+    xTimeScale = d3.scaleLinear()
         .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
 
@@ -426,7 +440,7 @@ function plotArea(name){
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
     var xStart = racks[hpcc_rack - 1].x+15;
-    var xTimeScale = d3.scaleLinear()
+    xTimeScale = d3.scaleLinear()
         .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
         .range([xStart, xStart+w_rack-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node);
@@ -456,13 +470,10 @@ function plotArea(name){
     }
 
   var yScale = d3.scaleLinear()
-        .domain([60, 120]) // input
+        .domain([baseTemperature, 120]) //  baseTemperature=60
         .range([0, 25]); // output
 
-    var line = d3.line()
-        .x(function(d, i) { return d.x; }) // set the x values for the line generator
-        .y(function(d) { return y +yScale(d.temp1); }) // set the y values for the line generator
-        .curve(d3.curveMonotoneX) // apply smoothing to the line
+
 
     var area = d3.area()
         .x(function(d) { return d.x; })
@@ -489,11 +500,95 @@ function plotArea(name){
             return color(d[d.length-1].temp1);
         })
 
-
-
-
+    drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
+function drawSummaryAreaChart(rack, xStart) {
+    var arr2 = [];
+    for (var att in hostResults) {
+        var hpcc_rack = +att.split("-")[1];
+        var hpcc_node = +att.split("-")[2].split(".")[0];
+        if (hpcc_rack == rack) {
+            var r = hostResults[att];
+            for (var i = 0; i < r.arr.length; i++) {
+                var str = r.arr[i].data.service.plugin_output;
+                var arrString = str.split(" ");
+                var obj = {};
+                obj.temp1 = +arrString[2];
+                obj.temp2 = +arrString[6];
+                obj.temp3 = +arrString[10];
+                obj.queryTime = r.arr[i].result.queryTime;
+                obj.x = xTimeScale(obj.queryTime);
+                obj.bin = Math.round(obj.x-xStart);   // How to compute BINS ******************************************
+                if (arr2[obj.bin] == undefined)
+                    arr2[obj.bin] = [];
+                arr2[obj.bin].push(obj);
+            }
+        }
+    }
+    var arr3 = [];
+    for (var att in arr2) {
+        if (arr2[att].length>=2){
+            var max = 0;
+            var min = 1000;
+            for (var j=0; j< arr2[att].length; j++) {
+                var temp1 = arr2[att][j].temp1;
+                if (temp1 > max)
+                    max = temp1;
+                if (temp1 < min)
+                    min = temp1;
+
+            }
+            var obj ={};
+            obj.bin = arr2[att][0].bin;
+            obj.min = min;
+            obj.max = max;
+            arr3.push(obj)
+        }
+    }
+    //console.log(arr3.length);
+
+
+    // Drawing areas ****************************************************
+    var y = top_margin-20;
+
+    var yScale = d3.scaleLinear()
+        .domain([baseTemperature, 120]) //  baseTemperature=60
+        .range([0, 25]); // output
+
+    var areaMin = d3.area()
+        .x(function(d) { return xStart+d.bin; })
+        .y0(function(d) { return y; })
+        .y1(function(d) { return y-yScale(d.min)})
+        .curve(d3.curveCatmullRom);
+
+    svg.selectAll(".RackSummaryMin"+rack).remove();
+    svg.append("path")
+        .datum(arr3) // 10. Binds data to the line
+        .attr("class", "RackSummaryMin"+rack)
+        .attr("stroke","#000")
+        .attr("stroke-width",0.2)
+        .attr("d", areaMin)
+        .style("fill-opacity",1)
+        .style("fill","#494");
+
+    var areaMax = d3.area()
+        .x(function(d) { return xStart+d.bin; })
+        .y0(function(d) { return y; })
+        .y1(function(d) { return y-yScale(d.max)})
+        .curve(d3.curveCatmullRom);
+
+    svg.selectAll(".RackSummaryMax"+rack).remove();
+    svg.append("path")
+        .datum(arr3) // 10. Binds data to the line
+        .attr("class", "RackSummaryMax"+rack)
+        .attr("stroke","#000")
+        .attr("stroke-width",0.2)
+        .attr("d", areaMax)
+        .style("fill-opacity",1)
+        .style("fill","#a44");
+
+}
 
 function getHostY(r,n){
    return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
