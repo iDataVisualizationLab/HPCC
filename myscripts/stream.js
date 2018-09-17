@@ -160,11 +160,11 @@ function buildStreamGraph() {
                             .attr("fill-opacity", 1);
                         svg.selectAll(".hpcc_node_" + hosts[i].hpcc_rack + "_" + hosts[i].hpcc_node+ "_"+j)
                             .transition().duration(1000)
-                            .attr("fill-opacity", 0.9);
+                            .attr("fill-opacity", 0.5);
 
                         var user = userReverseList[hosts[i].jobList[j].user];
                         //if (j%2==0) {
-                            if (user.name == "jgorzo"){
+                           /* if (user.name == "hge"){
                                 svg.append("line")
                                     .attr("class", "nodeLine1" + toggle)
                                     .attr("x1", hosts[i].jobList[j].x + node_size / 2)
@@ -175,7 +175,7 @@ function buildStreamGraph() {
                                     .attr("stroke-opacity", 0.8)
                                     .attr("stroke-width", 0.5);
                             }
-                            else
+                            else*/
                                 svg.append("line")
                                     .attr("class", "nodeLine" + toggle)
                                     .attr("x1", hosts[i].jobList[j].x + node_size / 2)
@@ -203,10 +203,10 @@ function buildStreamGraph() {
                 toggle = !toggle;
                 // Update acitve users
                 node.attr("fill-opacity", function(d){ return userListString.indexOf(d.name)>=0 ? 1 :
-                    (globalUserListString.indexOf(d.name)>=0 ? 0.9 :0.1);});
+                    (globalUserListString.indexOf(d.name)>=0 ? 0.2 :0.1);});
                 svg.selectAll(".nodeImages")
                     .attr("opacity",function(d){ return userListString.indexOf(d.name)>=0 ? 1 :
-                        (globalUserListString.indexOf(d.name)>=0 ? 0.9 :0.1);});
+                        (globalUserListString.indexOf(d.name)>=0 ? 0.2 :0.1);});
 
                 if (globalUserListString.indexOf(userListString)<0)
                     globalUserListString +=userListString;

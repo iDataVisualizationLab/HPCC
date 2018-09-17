@@ -53,7 +53,7 @@ var spinner = new Spinner(opts).spin(target);
 var simulation, link, node;
 
 //d3.json("data/host_usage1.json", function(data_) {
-d3.json("data/HostUsageHistoryPoll1.json", function(data_) {
+d3.json("data/HostUsageHistoryPoll2.json", function(data_) {
     hosts = data_;
     main();
     // Spinner Stop ********************************************************************
