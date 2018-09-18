@@ -537,7 +537,7 @@ function drawSummaryAreaChart(rack, xStart) {
         .attr("stroke-width",0.2)
         .attr("d", areaMin)
         .style("fill-opacity",1)
-        .style("fill","#9d9");
+        .style("fill","#99d");
 
     var areaMax = d3.area()
         .x(function(d) { return xStart+d.bin*binStep; })
