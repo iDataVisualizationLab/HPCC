@@ -9,7 +9,7 @@
 
 <head>
 
-    <title>HPCC simulation</title>
+    <title>BMC monitoring</title>
     <script
             src="https://code.jquery.com/jquery-3.3.1.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -19,8 +19,15 @@
 
 </head>
 
-<body bgcolor="#aaa" text="black" id="mainBody">
-<svg width="2400" height="1300"></svg>
+<body bgcolor="#fff" text="black" id="mainBody">
+
+<header class="ttu-main-header" id="nav">
+    <div class="logo__lockup"><a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/viz/images/TTUlogo.png" alt="Texas Tech University"  height="5%"></a>
+        <h1> High Performance Computing Center </h1>
+    </div>
+</header>
+
+<svg width="2400" height="1300" ></svg>
 
 <!--
 <div id="searchHolder"  class="searchHolder">
@@ -43,14 +50,15 @@
 
 
 
-<!--
-<div id="controlHolder"  class="controlHolder">
- <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check" onclick="check1()">
-<label for="checkbox1"> Order by deadline</label>
-</div>
--->
 
-<div id="streamHolder"  class="streamHolder">
+<div id="controlHolder"  class="controlHolder">
+ <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check"  onclick="areaChart()">
+<label for="checkboxP1"> Area chart</label>
+    <br>
+    <button onclick="pauseRequest()">Pause request</button>
+</div>
+
+<div id="legendHolder"  class="legendHolder">
 
 
 </div>
@@ -70,7 +78,6 @@
 <script src="myscripts/service.js"></script>
 <script src="myscripts/main.js"></script>
 <script src="myscripts/tooltip.js"></script>
-
-<script src="myscripts/stream.js"></script>
+<script src="spider/radarChart.js"></script>
 
 </body>

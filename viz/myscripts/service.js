@@ -9,7 +9,7 @@
 //URL: URL: http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=compute-1-26&servicedescription=check+temperature
 
 var sampleService =
-    {
+    JSON.parse(JSON.stringify({
         "format_version": 0,
         "result": {
             "query_time": 1536725817000,
@@ -68,4 +68,4 @@ var sampleService =
                 "obsess": true
             }
         }
-    }
+    }))

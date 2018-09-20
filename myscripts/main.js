@@ -53,7 +53,7 @@ var spinner = new Spinner(opts).spin(target);
 var simulation, link, node;
 
 //d3.json("data/host_usage1.json", function(data_) {
-d3.json("data/HostUsageHistoryPoll1.json", function(data_) {
+d3.json("data/HostUsageHistoryPoll2.json", function(data_) {
     hosts = data_;
     main();
     // Spinner Stop ********************************************************************
@@ -75,7 +75,7 @@ var today = new Date();
 
 
 var numberOfProcessors = 42;
-var h_rack = 500;
+var h_rack = 800;
 var top_margin = 50;
 var w_rack = width/10-1;
 var w_gap =0;
@@ -209,7 +209,7 @@ function httpGetAsync(theUrl, callback) { //theURL or a path to file
     // Draw host **********************
     for (var i=0; i<hosts.length;i++) {
         hosts[i].x = racks[hosts[i].hpcc_rack-1].x;
-        hosts[i].y = racks[hosts[i].hpcc_rack-1].y + hosts[i].hpcc_node * h_rack / 63;
+        hosts[i].y = racks[hosts[i].hpcc_rack-1].y + hosts[i].hpcc_node * h_rack / 62;
 
         //var masterList = hosts[i].jobList.filter(function (d) {
         //    return d;

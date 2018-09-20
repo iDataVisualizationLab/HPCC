@@ -1,2 +1,2 @@
 # HPCC
-Online demo:  https://idatavisualizationlab.github.io/HPCC/Viz/
+Online demo:  https://idatavisualizationlab.github.io/HPCC/viz/
