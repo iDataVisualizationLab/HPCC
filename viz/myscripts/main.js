@@ -553,7 +553,7 @@ function areaChart(){
 }
 
 function saveResults(){
-    var filename = "HPCC_requests";
+    var filename = "HPCC_results.json";
     var type = "json";
     var str = JSON.stringify(hostResults);
 
