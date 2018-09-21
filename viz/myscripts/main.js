@@ -84,7 +84,6 @@ var node_size = 6;
 var users = [];
 var racks = [];
 
-var currentMiliseconds;
 var xTimeScale;
 var baseTemperature =60;
 
@@ -97,6 +96,8 @@ if (isRealtime){
     numberOfMinutes = 60;
 }
 
+var currentMiliseconds;
+var firstTime =true;
 
 main();
 drawLegend(arrTemp, arrColor);
@@ -199,7 +200,7 @@ function main() {
         .attr("fill", "#000")
         .style("font-weight","bold")
         .style("text-anchor", "start")
-        .style("font-size", 12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Summary");
@@ -212,17 +213,15 @@ function main() {
             .attr("y", yy+1)
             .attr("fill", "#000")
             .style("text-anchor", "end")
-            .style("font-size", 12)
+            .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
             .text("Host");
     }
     for (var i = 0; i < hosts.length; i++) {
         var name = hosts[i].name;
-
         var hpcc_rack = +name.split("-")[1];
         var hpcc_node = +name.split("-")[2].split(".")[0];
-
         var xStart = racks[hpcc_rack - 1].x-2;
         var yy = getHostY(hpcc_rack,hpcc_node);
 
@@ -232,63 +231,57 @@ function main() {
             .attr("y", yy+1)
             .attr("fill", "#000")
             .style("text-anchor", "start")
-            .style("font-size", 11)
+            .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
             .text(""+hpcc_node);
-
     }
 
-
-
-
-
-
-
     // ********* REQUEST ******************************************
+    request();
+}
 
+function request(){
     var count = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     interval2 = setInterval(function(){
-         if (isRealtime){
-                 var xmlhttp = new XMLHttpRequest();
-                 var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
-                 xmlhttp.onreadystatechange = function() {
-                     if (this.readyState == 4 && this.status == 200) {
-                         var result = JSON.parse(this.responseText);
+        if (isRealtime){
+            var xmlhttp = new XMLHttpRequest();
+            var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = JSON.parse(this.responseText);
 
-                         var name =  result.data.service.host_name;
-                         hostResults[name].arr.push(result);
+                    var name =  result.data.service.host_name;
+                    hostResults[name].arr.push(result);
+                    plotResult(result);
+                    console.log(result);
+                }
+                else{
+                    console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                }
 
-                         plotResult(result);
-
-                         console.log(result);
-                     }
-                     else{
-
-                         console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                     }
-
-                 };
-                 xmlhttp.open("GET", url, true);
-                 xmlhttp.send();
-         }
-         else{
-                var result = simulateResults(hosts[count].name);
-                // Process the result
-                var name =  result.data.service.host_name;
-                hostResults[name].arr.push(result);
-                plotResult(result);
-         }
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+        }
+        else{
+            var result = simulateResults(hosts[count].name);
+            // Process the result
+            var name =  result.data.service.host_name;
+            hostResults[name].arr.push(result);
+            plotResult(result);
+        }
         count++;
         if (count>=hosts.length)
             count=0;
     } , simDuration)
-
 }
 
+
+
 function simulateResults(hostname){
-    let newService = JSON.parse(JSON.stringify(sampleService));
+    var newService = JSON.parse(JSON.stringify(sampleService));
 
     newService.result.query_time =  new Date().getTime();
     newService.data.service.host_name = hostname;
@@ -300,15 +293,15 @@ function simulateResults(hostname){
     var arrString =  str.split(" ");
 
     var temp1 = +arrString[2];
-    temp1+= gaussianRandom(-40,40);
+    temp1+= gaussianRandom(-25,25);
     arrString[2]=temp1;
 
     var temp2 = +arrString[6];
-    temp2+= gaussianRandom(-30,30);
+    temp2+= gaussianRandom(-15,15);
     arrString[6]=temp2;
 
     var temp3 = +arrString[10];
-    temp3+= gaussianRandom(-20,20);
+    temp3+= gaussianRandom(-10,10);
     arrString[10]=temp3;
 
     newService.data.service.plugin_output = arrString.join(' ')
@@ -316,7 +309,6 @@ function simulateResults(hostname){
 }
 function gaussianRand() {
     var rand = 0;
-
     for (var i = 0; i < 6; i += 1) {
         rand += Math.random();
     }
@@ -331,6 +323,12 @@ function gaussianRandom(start, end) {
 
 function plotResult(result) {
     var name =  result.data.service.host_name;
+
+    // Check if we should reset the starting point
+    if (firstTime)
+        currentMiliseconds = result.result.query_time;
+    firstTime = false;
+
     if (document.getElementById("checkboxP1").checked)
         plotArea(name);
     else
@@ -342,7 +340,6 @@ function plotHeat(result,name){
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
-
     var xStart = racks[hpcc_rack - 1].x+13;
     xTimeScale = d3.scaleLinear()
         .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
@@ -351,15 +348,12 @@ function plotHeat(result,name){
     var x = xTimeScale(result.result.query_time);
     var y =  getHostY(hpcc_rack,hpcc_node)-10;
 
-
     var str = result.data.service.plugin_output;
     var arrString =  str.split(" ");
 
     var temp1 = +arrString[2];
     var temp2 = +arrString[6];
     var temp3 = +arrString[10];
-
-
 
     svg.append("rect")
         .attr("class", name)
@@ -568,4 +562,23 @@ function areaChart(){
 
 function pauseRequest(){
     clearInterval(interval2);
+}
+
+function resetRequest(){
+    firstTime = true;
+    clearInterval(interval2);
+
+    hostResults = {};
+    var count =0;
+    for (var att in hostList.data.hostlist) {
+        // to contain the historical query results
+        hostResults[att] = {};
+        hostResults[att].index = count;
+        hostResults[att].arr = [];
+        count++;
+
+        svg.selectAll("."+att).remove();
+    }
+
+    request();
 }

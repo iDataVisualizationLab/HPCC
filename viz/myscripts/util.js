@@ -135,7 +135,7 @@ function drawLegend(arr, arrColor) {
         .attr("y", y-2)
         .attr("fill", "#000")
         .style("text-anchor", "start")
-        .style("font-size", 12)
+        .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text(function (d) {
             return " "+d;
@@ -147,18 +147,18 @@ function drawLegend(arr, arrColor) {
         .style("text-anchor", "end")
         .attr("fill", "#000")
         .style("font-style","italic")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Temperature (°F)");
     svgLengend.append("text")
-        .attr("class", "legendText1")
+        .attr("class", "legendText22")
         .attr("x", x-5)
         .attr("y", y+39)
         .style("text-anchor", "end")
         .attr("fill", "#000")
         .style("font-style","italic")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Sudden Increase: ");
