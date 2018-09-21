@@ -3,8 +3,6 @@
 
 <link rel="icon" type="image/gif"
       href="images/fav.gif" />
-<!--css-->
-<link rel="stylesheet" href="css/stream.css" />
 <link href="css/main.css" rel="stylesheet" type="text/css" />
 
 <head>
@@ -55,7 +53,8 @@
  <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check"  onclick="areaChart()">
 <label for="checkboxP1"> Area chart</label>
     <br>
-    <button onclick="pauseRequest()">Pause request</button>
+    <button onclick="pauseRequest()" style="background-color: #ffd;">Pause</button>
+    <button onclick="resetRequest()" style="background-color: #ddf;">Reset</button>
 </div>
 
 <div id="legendHolder"  class="legendHolder">
@@ -69,7 +68,6 @@
 <script type='text/javascript' src="js/jquery-ui.min.js"> </script>
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>
-<link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 
 
