@@ -324,12 +324,6 @@ function mouseoutNode(d1){
 
 function spiderChart() {
    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
-
-      //////////////////////////////////////////////////////////////
-      //////////////////// Draw the Chart //////////////////////////
-      //////////////////////////////////////////////////////////////
-
-
       var radarChartOptions = {
         w: tipW-50,
         h: tipW,

@@ -1,5 +1,5 @@
 var w = 300,
-    h = 77;
+    h = 70;
 
 var svgLengend = d3.select('.legendHolder').append('svg')
     .attr("class", "legendView")

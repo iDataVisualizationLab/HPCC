@@ -89,10 +89,10 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =10;
-var numberOfMinutes = 4;
+var numberOfMinutes = 1.5;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 100;
+    simDuration = 200;
     numberOfMinutes = 60;
 }
 
@@ -293,11 +293,11 @@ function simulateResults(hostname){
     var arrString =  str.split(" ");
 
     var temp1 = +arrString[2];
-    temp1+= gaussianRandom(-25,25);
+    temp1+= gaussianRandom(-30,30);
     arrString[2]=temp1;
 
     var temp2 = +arrString[6];
-    temp2+= gaussianRandom(-15,15);
+    temp2+= gaussianRandom(-20,20);
     arrString[6]=temp2;
 
     var temp3 = +arrString[10];
@@ -322,82 +322,14 @@ function gaussianRandom(start, end) {
 
 
 function plotResult(result) {
-    var name =  result.data.service.host_name;
-
     // Check if we should reset the starting point
     if (firstTime)
         currentMiliseconds = result.result.query_time;
     firstTime = false;
 
-    if (document.getElementById("checkboxP1").checked)
-        plotArea(name);
-    else
-        plotHeat(result,name);
+     var name =  result.data.service.host_name;
 
-}
-
-function plotHeat(result,name){
-    var hpcc_rack = +name.split("-")[1];
-    var hpcc_node = +name.split("-")[2].split(".")[0];
-
-    var xStart = racks[hpcc_rack - 1].x+13;
-    xTimeScale = d3.scaleLinear()
-        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
-        .range([xStart, xStart+w_rack-2*node_size]); // output
-
-    var x = xTimeScale(result.result.query_time);
-    var y =  getHostY(hpcc_rack,hpcc_node)-10;
-
-    var str = result.data.service.plugin_output;
-    var arrString =  str.split(" ");
-
-    var temp1 = +arrString[2];
-    var temp2 = +arrString[6];
-    var temp3 = +arrString[10];
-
-    svg.append("rect")
-        .attr("class", name)
-        .attr("x", x)
-        .attr("y", y)
-        .attr("width", node_size)
-        .attr("height", node_size )
-        .attr("fill", function (d) {
-            return color(temp1);
-        })
-        .attr("fill-opacity",function (d) {
-            return opa(temp1);
-        })
-        .attr("stroke", "#000")
-        .attr("stroke-width", 0.05)
-        .on("mouseover", function (d) {
-            mouseoverNode (this);
-        })
-        ;//.on("mouseout", mouseoutNode);
-
-    svg.append("rect")
-        .attr("class", name)
-        .attr("x", x)
-        .attr("y", y+node_size+1)
-        .attr("width", node_size)
-        .attr("height", node_size )
-        .attr("fill", function (d) {
-            return color(temp2);
-        })
-        .attr("fill-opacity",function (d) {
-            return opa(temp2);
-        })
-        .attr("stroke", "#000")
-        .attr("stroke-width", 0.05)
-        .on("mouseover", function (d) {
-            mouseoverNode (this);
-        })
-        ;//.on("mouseout", mouseoutNode);
-
-    drawSummaryAreaChart(hpcc_rack, xStart);
-}
-
-function plotArea(name){
-    var r = hostResults[name];
+     var r = hostResults[name];
 
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
@@ -431,7 +363,67 @@ function plotArea(name){
         minTime = Math.min(minTime,qtime);
         maxTime = Math.max(maxTime,qtime);
     }
+    if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
+        pauseRequest();
 
+    if (document.getElementById("checkboxP1").checked)
+        plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
+    else
+        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
+
+}
+
+function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
+    svg.selectAll("."+name).remove();
+    for (var i=0; i<arr.length;i++){
+        var obj = arr[i];     
+        var xMin = xTimeScale(minTime);
+        var xMax = xTimeScale(maxTime);
+        var x = xTimeScale(arr[i].query_time);
+        if (arr.length>1)
+            x = xMin+ i*(xMax-xMin)/(arr.length);
+        svg.append("rect")
+            .attr("class", name)
+            .attr("x", x)
+            .attr("y", y-10)
+            .attr("width", node_size)
+            .attr("height", node_size )
+            .attr("fill", function (d) {
+                return color(obj.temp1);
+            })
+            .attr("fill-opacity",function (d) {
+                return opa(obj.temp1);
+            })
+            .attr("stroke", "#000")
+            .attr("stroke-width", 0.05)
+            .on("mouseover", function (d) {
+                mouseoverNode (this);
+            })
+            ;//.on("mouseout", mouseoutNode);
+
+        svg.append("rect")
+            .attr("class", name)
+            .attr("x", x)
+            .attr("y", y+node_size-9)
+            .attr("width", node_size)
+            .attr("height", node_size )
+            .attr("fill", function (d) {
+                return color(obj.temp2);
+            })
+            .attr("fill-opacity",function (d) {
+                return opa(obj.temp2);
+            })
+            .attr("stroke", "#000")
+            .attr("stroke-width", 0.05)
+            .on("mouseover", function (d) {
+                mouseoverNode (this);
+            })
+            ;//.on("mouseout", mouseoutNode);
+    }    
+    drawSummaryAreaChart(hpcc_rack, xStart);
+}
+
+function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
   var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
         .range([0, 25]); // output

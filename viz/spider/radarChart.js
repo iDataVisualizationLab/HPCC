@@ -18,8 +18,8 @@ function RadarChart(id, data, options) {
      dotRadius: 3,          //The size of the colored circles of each blog
      opacityCircles: 0.1,   //The opacity of the circles of each blob
      strokeWidth: 1,        //The width of the stroke around each blob
-     roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
-     color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
+     roundStrokes: false   //If true the area and stroke will follow a round path (cardinal-closed)
+    // color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
     
     //Put all of the options into a variable called cfg
