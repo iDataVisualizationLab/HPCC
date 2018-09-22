@@ -1,3 +1,7 @@
+ssh -C2qTnN -D 8090 tnhondan@redfish.hpcc.ttu.edu
+
 ssh tnhondan@redfish.hpcc.ttu.edu
 ssh root@10.10.1.4
 cd /usr/local/nagios/share/
+
+
