@@ -98,6 +98,7 @@ if (isRealtime){
 
 var currentMiliseconds;
 var firstTime =true;
+var charType = "Heatmap";
 
 main();
 drawLegend(arrTemp, arrColor);
@@ -366,11 +367,11 @@ function plotResult(result) {
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
-    if (document.getElementById("checkboxP1").checked)
-        plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
-    else
+    if (charType == "Heatmap")
         plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
-
+    else if (charType == "Area Chart") 
+        plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
+    
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
@@ -547,6 +548,10 @@ function getHostY(r,n){
    return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 }
 
+d3.select('#inds').on("change", function () {
+    var sect = document.getElementById("inds");
+    charType = sect.options[sect.selectedIndex].value;
+});
 
 function areaChart(){
     // Do nothing

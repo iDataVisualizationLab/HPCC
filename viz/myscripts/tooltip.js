@@ -44,7 +44,7 @@ var dataSpider = [
 
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
-    .offset([0, tipW/2])
+    .offset([0, 100])
     .html(function(d1) {
         var d = hosts[d1.index];
         str="";
