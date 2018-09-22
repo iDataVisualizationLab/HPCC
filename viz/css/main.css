@@ -35,7 +35,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	padding: 10px;
 	z-index: 0;
 	top: 1px;
-	right: 350px;
+	right: 400px;
 	border: 1px solid rgba(120,120,120, 1);
 	border-radius: 6px;
 	background-color: #ddd;
@@ -73,8 +73,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 }
 
 label {
-	font-family: "sans-serif";
-	font-size: 14px;
+	font-size: 12px;
 	color: #040507;
 }
 

@@ -50,12 +50,17 @@
 
 
 <div id="controlHolder"  class="controlHolder">
- <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check"  onclick="areaChart()">
-<label for="checkboxP1"> Area chart</label>
-    <br>
     <button onclick="pauseRequest()" style="background-color: #ffd;">Pause</button>
     <button onclick="resetRequest()" style="background-color: #ddf;">Reset</button>
     <button onclick="saveResults()" style="background-color: #fff;">Save</button>
+    <br><br>
+    <label for="inds"> Chart type: </label>
+    <select id="inds">
+        <option value="Heatmap" selected="selected">Heatmap</option>
+        <option value="Area Chart">Area Chart</option>
+    </select>
+
+
 </div>
 
 <div id="legendHolder"  class="legendHolder">

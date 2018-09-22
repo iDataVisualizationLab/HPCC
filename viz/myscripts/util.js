@@ -1,4 +1,4 @@
-var w = 300,
+var w = 350,
     h = 70;
 
 var svgLengend = d3.select('.legendHolder').append('svg')
@@ -99,29 +99,31 @@ function hue(hhh) {
 }
 
 
-function drawLegend(arr, arrColor) {
+function drawLegend() {
+    var arr = [20, 30, 40, 50, 60, 70, 80, 90, 100];
+    var arr2 = [];
+    for (var i=20; i<110;i=i+2){
+        arr2.push(i);
+    }
     var x =110;
     var y = 16;
     var r = 20;
     svgLengend.selectAll(".legendRect").remove();
     svgLengend.selectAll(".legendRect")
-        .data(arr)
+        .data(arr2)
         .enter().append("rect")
         .attr("class", "legendRect")
         .attr("x", function (d,i) {
-            return x +i*r*2;
+            return x +(d-20)*2.5;
         })
         .attr("y", y)
-        .attr("width", r*2)
+        .attr("width", 5)
         .attr("height", r)
         .attr("fill",function (d,i) {
-            return arrColor[i];
+            return color(d);
         })
         .attr("fill-opacity",function (d,i) {
-            if (i==0)
-                return opa(40);
-            else
-                return opa(d);
+            return opa(d);
         })
         .attr("stroke-width", 0);
     svgLengend.selectAll(".legendText").remove();
@@ -130,7 +132,7 @@ function drawLegend(arr, arrColor) {
         .enter().append("text")
         .attr("class", "legendText")
         .attr("x", function (d,i) {
-            return x +i*r*2;
+            return x +(d-20)*2.5+3;
         })
         .attr("y", y-2)
         .attr("fill", "#000")
