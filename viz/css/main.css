@@ -157,16 +157,18 @@ table, th, td {
 
 /********************************* Style for Box Plot  ****************************/
 .box {
-	font: 10px sans-serif;
+	font: 11px sans-serif;
 }
+
 
 .box line,
 .box rect,
 .box circle {
-	fill: steelblue;
 	stroke: #000;
 	stroke-width: 1px;
 }
+
+
 
 .box .center {
 	stroke-dasharray: 3,3;

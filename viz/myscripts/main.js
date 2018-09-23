@@ -94,7 +94,7 @@ var simDuration =1;
 var numberOfMinutes = 1.5;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 1000;
+    simDuration = 2000;
     numberOfMinutes = 6*60;
 }
 
@@ -127,6 +127,8 @@ function main() {
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
         hostResults[h.name].arrCPU_load = [];
+        hostResults[h.name].arrMemory_usage = [];
+        hostResults[h.name].arrFans_health= [];
         hosts.push(h);
         // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
@@ -312,11 +314,44 @@ function request(){
                    // plotResult(result);
                 }
                 else{
-                    console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                    console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
                 }
             };
             xmlhttp2.open("GET", url2, true);
             xmlhttp2.send();
+
+
+            var xmlhttp3 = new XMLHttpRequest();
+            var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
+            xmlhttp3.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = JSON.parse(this.responseText);
+                    var name =  result.data.service.host_name;
+                    hostResults[name].arrMemory_usage.push(result);
+                    // plotResult(result);
+                }
+                else{
+                    console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                }
+            };
+            xmlhttp3.open("GET", url3, true);
+            xmlhttp3.send();
+
+            var xmlhttp4 = new XMLHttpRequest();
+            var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
+            xmlhttp4.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = JSON.parse(this.responseText);
+                    var name =  result.data.service.host_name;
+                    hostResults[name].arrFans_health.push(result);
+                    // plotResult(result);
+                }
+                else{
+                    console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                }
+            };
+            xmlhttp4.open("GET", url4, true);
+            xmlhttp4.send();
         }
         else{
             var result = simulateResults(hosts[count].name);
@@ -326,15 +361,34 @@ function request(){
             plotResult(result);
         }
         count++;
-        if (count>=hosts.length){
-            // Draw the summary Box plot ***********************************************************
+        if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
+            var arr = [];
+            var xx; 
+            var lastIndex;
+            
 
+            var xTimeSummaryScale = d3.scaleLinear()
+                .domain([currentMiliseconds, currentMiliseconds+0.8*numberOfMinutes*60*1000]) // input
+                .range([50, width]); // output
 
-
-
+            if (selectedService == "Temperature"){
+                for (var h=0; h<hosts.length;h++){
+                    var name = hosts[h].name; 
+                    var r = hostResults[name];
+                    lastIndex = r.arr.length-1;
+                    if (lastIndex>=0){   // has some data
+                        var a = processData(r.arr[lastIndex].data.service.plugin_output);
+                        if (h==0){
+                             var query_time =r.arr[lastIndex].result.query_time;
+                             xx = xTimeSummaryScale(query_time);     
+                        }
+                        arr.push(a[0]);
+                    }
+                }
+            }
+            drawBoxplot(svg, arr, lastIndex, xx);
             count=0;
         }
-
     } , simDuration)
 }
 
@@ -700,6 +754,18 @@ function resetRequest(){
 
         svg.selectAll("."+att).remove();
     }
+
+    // Remove boxplot in Summary panel
+    svg.selectAll(".box").remove();
+    svg.selectAll(".box2").remove();
+    svg.selectAll("line.median").remove();
+    svg.selectAll("line.center").remove();
+    svg.selectAll("circle.outlier").remove();
+    svg.selectAll("text.box").remove();
+    svg.selectAll("line.whisker").remove();
+    svg.selectAll("text.whisker").remove();
+        
+    
     request();
 }
 
