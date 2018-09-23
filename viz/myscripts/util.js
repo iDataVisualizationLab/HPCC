@@ -59,8 +59,6 @@ function hue(hhh) {
     handle.attr("cx", xx);
 
     if (xx>1){
-        //    clearInterval(interval2);
-
         for (var name in hostResults) {
             var r = hostResults[name];
             // Process the array of historical temperatures
@@ -68,15 +66,12 @@ function hue(hhh) {
             var preTemp1 = 0;
             var preTemp2 = 0;
             for (var i = 0; i < r.arr.length; i++) {
-                var str = r.arr[i].data.service.plugin_output;
-                var arrString = str.split(" ");
-                var temp1 = +arrString[2];
-                var temp2 = +arrString[6];
-
+                var a = processData(r.arr[i].data.service.plugin_output);
+                var temp1 = a[0];
+                var temp2 = a[1];
                 if (i>=1){
-                    var dif1 = temp1-preTemp1;
-                    var dif2 = temp2-preTemp2;
-
+                    var dif1 = Math.abs(temp1-preTemp1);
+                    var dif2 = Math.abs(temp2-preTemp2);
                     var max = Math.max(dif1,dif2);
                     if (max>maxIncrease)
                         maxIncrease=max;
@@ -91,11 +86,8 @@ function hue(hhh) {
             else{
                 svg.selectAll("."+name).attr("fill-opacity",0);
             }
-
         }
-
     }
-
 }
 
 
@@ -163,7 +155,7 @@ function drawLegend() {
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Sudden Increase: ");
+        .text("Sudden change: ");
 }
 
 function isContainRack(array, id) {

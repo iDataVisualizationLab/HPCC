@@ -102,9 +102,9 @@ var charType = "Heatmap";
 
 
 //***********************
-var fileList = ["Temperature","CPU_load","Memory_load","Power_consumption"]
-var initialDataset = "Temperature";
-var fileName;
+var serviceList = ["Temperature","CPU_load","Memory_load","Power_consumption"]
+var initialService = "Temperature";
+var selectedService;
 
 
 main();
@@ -264,7 +264,6 @@ function request(){
             xmlhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var result = JSON.parse(this.responseText);
-
                     var name =  result.data.service.host_name;
                     hostResults[name].arr.push(result);
                     plotResult(result);
@@ -282,7 +281,6 @@ function request(){
             xmlhttp2.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var result = JSON.parse(this.responseText);
-
                     var name =  result.data.service.host_name;
                     hostResults[name].arrCPU_load.push(result);
                    // plotResult(result);
@@ -291,8 +289,8 @@ function request(){
                     console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
                 }
             };
-            xmlhttp.open("GET", url, true);
-            xmlhttp.send();
+            xmlhttp2.open("GET", url2, true);
+            xmlhttp2.send();
         }
         else{
             var result = simulateResults(hosts[count].name);
@@ -311,7 +309,6 @@ function request(){
 
 function simulateResults(hostname){
     var newService = JSON.parse(JSON.stringify(sampleService));
-
     newService.result.query_time =  new Date().getTime();
     newService.data.service.host_name = hostname;
 
@@ -330,7 +327,6 @@ function simulateResults(hostname){
     var temp3 = +arrString[10];
     temp3+= gaussianRandom(-10,10);
     arrString[10]=temp3;
-
 
     // CPU load
     /*var str = "OK - Average CPU load is normal! :: CPU Load: 0.500694"
@@ -379,12 +375,11 @@ function plotResult(result) {
     // Process the array of historical temperatures
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
-        var str = r.arr[i].data.service.plugin_output;
-        var arrString =  str.split(" ");
+        var a = processData(r.arr[i].data.service.plugin_output);
         var obj = {};
-        obj.temp1 = +arrString[2];
-        obj.temp2 = +arrString[6];
-        obj.temp3 = +arrString[10];
+        obj.temp1 = a[0];
+        obj.temp2 = a[1];
+        obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
         obj.x = xTimeScale(obj.query_time);
         arr.push(obj);
@@ -458,7 +453,15 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-function processData() {
+function processData(str) {
+    if (selectedService=="Temperature"){
+        var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
 
 }
 
@@ -504,12 +507,11 @@ function drawSummaryAreaChart(rack, xStart) {
         if (hpcc_rack == rack) {
             var r = hostResults[att];
             for (var i = 0; i < r.arr.length; i++) {
-                var str = r.arr[i].data.service.plugin_output;
-                var arrString = str.split(" ");
+                var a = processData(r.arr[i].data.service.plugin_output);
                 var obj = {};
-                obj.temp1 = +arrString[2];
-                obj.temp2 = +arrString[6];
-                obj.temp3 = +arrString[10];
+                obj.temp1 = a[0];
+                obj.temp2 = a[1];
+                obj.temp3 = a[2];
                 obj.query_time = r.arr[i].result.query_time;
                 obj.x = xTimeScale(obj.query_time);
                 obj.bin = Math.round((obj.x-xStart)/binStep);   // How to compute BINS ******************************************
@@ -641,26 +643,23 @@ function resetRequest(){
 
 function addDatasetsOptions() {
     var select = document.getElementById("datasetsSelect");
-    for(var i = 0; i < fileList.length; i++) {
-        var opt = fileList[i];
+    for(var i = 0; i < serviceList.length; i++) {
+        var opt = serviceList[i];
         var el = document.createElement("option");
         el.textContent = opt;
         el.value = opt;
-
-        el["data-image"]="images/"+fileList[i]+".png";
+        el["data-image"]="images/"+serviceList[i]+".png";
         select.appendChild(el);
     }
-    document.getElementById('datasetsSelect').value = initialDataset;  //************************************************
-    fileName = document.getElementById("datasetsSelect").value;
+    document.getElementById('datasetsSelect').value = initialService;  //************************************************
+    selectedService = document.getElementById("datasetsSelect").value;
 
     //loadData();
 }
 
-
 function loadNewData(event) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
     svg.selectAll("*").remove();
-    fileName = this.options[this.selectedIndex].text;
-    console.log(" fileName="+fileName);
-    //loadData();
+    selectedService = this.options[this.selectedIndex].text;
+
 }

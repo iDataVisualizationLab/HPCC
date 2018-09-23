@@ -86,12 +86,11 @@ function mouseoverNode(d1){
     // 2. Process the array of historical temperatures
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
-        var str = r.arr[i].data.service.plugin_output;
-        var arrString =  str.split(" ");
+        var a = processData(r.arr[i].data.service.plugin_output);
         var obj = {};
-        obj.temp1 = +arrString[2];
-        obj.temp2 = +arrString[6];
-        obj.temp3 = +arrString[10];
+        obj.temp1 = a[0];
+        obj.temp2 = a[1];
+        obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
         arr.push(obj);
     }
@@ -115,7 +114,6 @@ function mouseoverNode(d1){
         var yScale = d3.scaleLinear()
             .domain([20, 120]) // input
             .range([tipH, 0]); // output
-
 
     // White Background
     svgTip.append("rect")
@@ -146,16 +144,11 @@ function mouseoverNode(d1){
             .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW+50))
             .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
 
-
-
-
-
     // ****** Append the path ****** CPU1
     var line1 = d3.line()
         .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
         .y(function(d) { return yScale(d.temp1); }) // set the y values for the line generator
         .curve(d3.curveMonotoneX) // apply smoothing to the line
-
 
     svgTip.append("path")
             .datum(arr) // 10. Binds data to the line
@@ -311,16 +304,12 @@ function mouseoverNode(d1){
         dataSpider[1][index].value = arr[i].temp2;
         dataSpider[2][index].value = arr[i].temp3;
     }
-
-
     spiderChart();        
 }
 
 function mouseoutNode(d1){
     tool_tip.hide(d1);
 }
-
-
 
 function spiderChart() {
    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
