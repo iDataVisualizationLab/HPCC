@@ -9,7 +9,7 @@ function RadarChart(id, data, options) {
     var cfg = {
      w: 600,                //Width of the circle
      h: 600,                //Height of the circle
-     margin: {top: 0, right: 55, bottom: 0, left: 55}, //The margins of the SVG
+     margin: {top: 10, right: 55, bottom: 0, left: 55}, //The margins of the SVG
      levels: 3,             //How many levels or inner circles should there be drawn
      maxValue: 0,           //What is the value that the biggest circle will represent
      labelFactor: 1.15,     //How much farther than the radius of the outer circle should the labels be placed
@@ -128,7 +128,7 @@ function RadarChart(id, data, options) {
     //Append the labels at each axis
     axis.append("text")
         .attr("class", "legend")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")

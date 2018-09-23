@@ -5,7 +5,7 @@ var tipW = 450;
 var tipH = 200;
 var margin = {top: 10, right: 0, bottom: 40, left: 50};
 var color2 = d3.scaleOrdinal()
-    .range(["#00a","#a0a","#000"]);
+    .range(["#00a","#a0a","#444"]);
 
 
 //////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ function mouseoverNode(d1){
 
     // 6. Y scale will use the randomly generate number
         var yScale = d3.scaleLinear()
-            .domain([20, 120]) // input
+            .domain([0, 100]) // input
             .range([tipH, 0]); // output
 
     // White Background
@@ -181,7 +181,7 @@ function mouseoverNode(d1){
         .attr("y",  yScale(arr[arr.length-1].temp1))
         .attr("fill", function () { return color2(0); })
         .style("text-anchor","end")
-        .style("font-size",11)
+        .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text("CPU1="+Math.round(arr[arr.length-1].temp1));
 
@@ -221,7 +221,7 @@ function mouseoverNode(d1){
         .attr("y",  yScale(arr[arr.length-1].temp2))
         .attr("fill", function () { return color2(1); })
         .style("text-anchor","end")
-        .style("font-size",11)
+        .style("font-size", "12x")
         .attr("font-family", "sans-serif")
         .text("CPU2="+Math.round(arr[arr.length-1].temp2));
 
@@ -242,7 +242,7 @@ function mouseoverNode(d1){
         .attr("y",  yScale(arr[arr.length-1].temp3))
         .attr("fill", function () { return "#444"; })
         .style("text-anchor","end")
-        .style("font-size",11)
+        .style("font-size", "11px")
         .attr("font-family", "sans-serif")
         .text("Inlet="+Math.round(arr[arr.length-1].temp3));
 
@@ -258,7 +258,7 @@ function mouseoverNode(d1){
         .attr("fill", "#000")
         .style("text-anchor","left")
         .style("font-weight","bold")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Host: "+d1.className.baseVal);
@@ -269,7 +269,7 @@ function mouseoverNode(d1){
         .attr("fill", "#000")
         .style("text-anchor","middle")
         .style("font-style","italic")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Temperature (°F)");
@@ -281,7 +281,7 @@ function mouseoverNode(d1){
         .attr("fill", "#000")
         .style("font-style","italic")
         .style("text-anchor","left")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text(""+new Date(minTime).toDateString());
@@ -292,7 +292,7 @@ function mouseoverNode(d1){
         .attr("fill", "#000")
         .style("font-style","italic")
         .style("text-anchor","end")
-        .style("font-size",12)
+        .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());

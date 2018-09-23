@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<style>
+
+    body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .box {
+        font: 14px sans-serif;
+    }
+
+    .box line,
+    .box rect,
+    .box circle {
+        stroke: #000;
+        stroke-width: 1px;
+    }
+
+    .box .center {
+        stroke-dasharray: 3,3;
+    }
+
+    .box .outlier {
+        fill: none;
+        stroke: #000;
+    }
+
+    .box .median {
+        stroke-width: 2px;
+    }
+
+    .box .tick {
+        font: 18px sans-serif;
+
+    }
+
+    .axis {
+        font: 16px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Boxplot</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="js/d3.v4.js"></script>
+    <script src="script/box.js"></script>
+    <script src="script/boxplot.js"></script>
+
+</head>
+<body>
+
+</body>
+</html>

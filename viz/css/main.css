@@ -82,12 +82,10 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 .d3-tip {
 	line-height: 1;
 	padding: 10px;
-	font-size: 14px;
-	font-family: "sans-serif";
 	background: rgba(150, 150, 150, 1);
 	color: #000;
 	border: 1px solid rgba(0,0,0, 1);
-	border-radius: 12px;
+	border-radius: 10px;
 }
 
 /* Style northward tooltips differently */
@@ -149,4 +147,32 @@ table, th, td {
 	stroke: #000;
 	stroke-opacity: 1;
 	stroke-width: 1px;
+}
+
+.tick {
+	font-size: 12px;
+	font-family: sans-serif;
+}
+
+
+/********************************* Style for Box Plot  ****************************/
+.box {
+	font: 10px sans-serif;
+}
+
+.box line,
+.box rect,
+.box circle {
+	fill: steelblue;
+	stroke: #000;
+	stroke-width: 1px;
+}
+
+.box .center {
+	stroke-dasharray: 3,3;
+}
+
+.box .outlier {
+	fill: none;
+	stroke: #000;
 }

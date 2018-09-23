@@ -76,10 +76,12 @@ var opa = d3.scaleLinear()
 
 var maxHostinRack= 60;
 var h_rack = 1200;
-var top_margin = 70;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
+var sHeight=200;  // Summary panel height
+var top_margin = sHeight+80;  // Start rack spiatial layout
+
 
 var users = [];
 var racks = [];
@@ -88,7 +90,7 @@ var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
-var simDuration =10;
+var simDuration =1;
 var numberOfMinutes = 1.5;
 var isRealtime = false;
 if (isRealtime){
@@ -110,7 +112,6 @@ var selectedService;
 main();
 drawLegend(arrTemp, arrColor);
 addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
-
 
 
 function main() {
@@ -158,6 +159,31 @@ function main() {
         })
 
     }
+
+    // Summary Panel ********************************************************************
+    svg.append("rect")
+        .attr("class", "summaryRect")
+        .attr("x", 1)
+        .attr("y", 10)
+        .attr("rx", 10)
+        .attr("ry", 10)
+        .attr("width", width-2)
+        .attr("height", sHeight)
+        .attr("fill", "#fff")
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .style("box-shadow", "10px 10px 10px #666");
+    svg.append("text")
+        .attr("class", "summaryText1")
+        .attr("x", 20)
+        .attr("y", 30)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-size", 16)
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Quanah HPC system: " + hosts.length+" distributed in 10 racks" );
+
 
     // Spinner Stop ********************************************************************
     spinner.stop();
@@ -300,8 +326,15 @@ function request(){
             plotResult(result);
         }
         count++;
-        if (count>=hosts.length)
+        if (count>=hosts.length){
+            // Draw the summary Box plot ***********************************************************
+
+
+
+
             count=0;
+        }
+
     } , simDuration)
 }
 
@@ -501,6 +534,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
     var binStep = 5; // pixels
+    var maxX = 0;  // The latest x position, to draw the baseline 60 F
     for (var att in hostResults) {
         var hpcc_rack = +att.split("-")[1];
         var hpcc_node = +att.split("-")[2].split(".")[0];
@@ -514,6 +548,9 @@ function drawSummaryAreaChart(rack, xStart) {
                 obj.temp3 = a[2];
                 obj.query_time = r.arr[i].result.query_time;
                 obj.x = xTimeScale(obj.query_time);
+                if (obj.x >maxX)
+                    maxX = obj.x ;  // The latest x position, to draw the baseline 60 F
+
                 obj.bin = Math.round((obj.x-xStart)/binStep);   // How to compute BINS ******************************************
                 if (arr2[obj.bin] == undefined)
                     arr2[obj.bin] = [];
@@ -582,6 +619,31 @@ function drawSummaryAreaChart(rack, xStart) {
         .style("fill-opacity",1)
         .style("fill","#e99");
 
+    if (rack==1) {
+        svg.selectAll(".baseline").remove();
+        svg.append("line")
+            .attr("class", "baseline")
+            .attr("x1", xStart)
+            .attr("x2", maxX+10)
+            .attr("y1", y-yScale(baseTemperature))
+            .attr("y2", y-yScale(baseTemperature))
+            .attr("class", "baseline")
+            .attr("stroke","#000")
+            .attr("stroke-width",0.5);
+
+
+        svg.selectAll(".baselineText").remove();
+        svg.append("text")
+            .attr("class", "baselineText")
+            .attr("x", 12+maxX)
+            .attr("y", y+2)
+            .attr("fill", "#000")
+            .style("text-anchor", "start")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("60°F");
+    }
 }
 
 function getHostY(r,n){
