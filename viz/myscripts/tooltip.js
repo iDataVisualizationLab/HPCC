@@ -133,7 +133,7 @@ function mouseoverNode(d1){
     // 3. Call the x axis in a group tag
     // compute number of ticks
     var numTicks = 1+Math.round((maxTime-minTime)/(60*1000)); // every minutes
-    if (numTicks>10) numTicks=10;
+    if (numTicks>8) numTicks=8;
 
     svgTip.append("g")
         .attr("class", "x axis")

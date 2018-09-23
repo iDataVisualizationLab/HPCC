@@ -3,17 +3,16 @@
 
 <link rel="icon" type="image/gif"
       href="images/fav.gif" />
+<link href="css/main.css" rel="stylesheet" type="text/css" />
 
 <head>
-
     <title>BMC monitoring</title>
-    <link href="css/main.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="css/dd.css" />
-    <script src="js/jquery-1.9.0.min.js"></script>
-    <script src="js/jquery.dd.js"></script>
-    <script src="js/select.js"></script>
-
-
+    <script src="javascripts/jquery/jquery-1.9.0.min.js"></script>
+    <script src="javascripts/msdropdown/jquery.dd.js"></script>
+    <script src="javascripts/msdropdown/select.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles/default.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="styles/main.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="styles/msdropdown/dd.css" />
 </head>
 
 <body bgcolor="#ccc" text="black" id="mainBody">
@@ -34,7 +33,7 @@
 
 <!-- Select datasets -->
 <div id="holder1"  class="holder1">
-    Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select>
+    <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select>
 </div>
 
 
@@ -61,16 +60,16 @@
 
 <div id="graph"></div>
 <!-- load the d3.js library -->
-<script src="js/d3.v4.js"></script>
-<script src="js/d3.tip.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
+
+<script src="javascripts/select2.min.js"></script>
 
 
-<script src="myscripts/util.js"></script>
-<script src="myscripts/hostlist.js"></script>
-<script src="myscripts/service.js"></script>
-<script src="myscripts/main.js"></script>
-<script src="myscripts/tooltip.js"></script>
-<script src="spider/radarChart.js"></script>
+<script src="js/jquery.min.js"></script>
+<script type='text/javascript' src="js/jquery-ui.min.js"> </script>
+
+<link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+
+<script src="main.js"></script>
 
 </body>

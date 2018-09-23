@@ -92,16 +92,27 @@ var simDuration =10;
 var numberOfMinutes = 1.5;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 200;
-    numberOfMinutes = 60;
+    simDuration = 1000;
+    numberOfMinutes = 6*60;
 }
 
 var currentMiliseconds;
 var firstTime =true;
 var charType = "Heatmap";
 
+
+//***********************
+var fileList = ["Temperature","CPU_load","Memory_load","Power_consumption"]
+var initialDataset = "Temperature";
+var fileName;
+
+
 main();
 drawLegend(arrTemp, arrColor);
+addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+
+
+
 function main() {
     for (var att in hostList.data.hostlist) {
         var h = {};
@@ -114,6 +125,7 @@ function main() {
         hostResults[h.name] = {};
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
+        hostResults[h.name].arrCPU_load = [];
         hosts.push(h);
         // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
@@ -256,12 +268,28 @@ function request(){
                     var name =  result.data.service.host_name;
                     hostResults[name].arr.push(result);
                     plotResult(result);
-                    console.log(result);
                 }
                 else{
                     console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
                 }
 
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+
+            var xmlhttp2 = new XMLHttpRequest();
+            var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
+            xmlhttp2.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = JSON.parse(this.responseText);
+
+                    var name =  result.data.service.host_name;
+                    hostResults[name].arrCPU_load.push(result);
+                   // plotResult(result);
+                }
+                else{
+                    console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                }
             };
             xmlhttp.open("GET", url, true);
             xmlhttp.send();
@@ -289,11 +317,9 @@ function simulateResults(hostname){
 
 
     // temperature
-    //var str = sampleService.data.service.plugin_output;
     var str = "CPU1 Temp 67 OK CPU2 Temp 49 OK Inlet Temp 40 OK";
-    var arrString =  str.split(" ");
-
-    var temp1 = +arrString[2];
+     var arrString =  str.split(" ");
+     var temp1 = +arrString[2];
     temp1+= gaussianRandom(-30,30);
     arrString[2]=temp1;
 
@@ -304,6 +330,14 @@ function simulateResults(hostname){
     var temp3 = +arrString[10];
     temp3+= gaussianRandom(-10,10);
     arrString[10]=temp3;
+
+
+    // CPU load
+    /*var str = "OK - Average CPU load is normal! :: CPU Load: 0.500694"
+    var arrString =  str.split(" CPU Load: ");
+    var load = +arrString[1];
+    load+= gaussianRandom(-5,5);
+    arrString[1]=load;*/
 
     newService.data.service.plugin_output = arrString.join(' ')
     return newService;
@@ -422,6 +456,10 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
             ;//.on("mouseout", mouseoutNode);
     }    
     drawSummaryAreaChart(hpcc_rack, xStart);
+}
+
+function processData() {
+
 }
 
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
@@ -598,6 +636,31 @@ function resetRequest(){
 
         svg.selectAll("."+att).remove();
     }
-
     request();
+}
+
+function addDatasetsOptions() {
+    var select = document.getElementById("datasetsSelect");
+    for(var i = 0; i < fileList.length; i++) {
+        var opt = fileList[i];
+        var el = document.createElement("option");
+        el.textContent = opt;
+        el.value = opt;
+
+        el["data-image"]="images/"+fileList[i]+".png";
+        select.appendChild(el);
+    }
+    document.getElementById('datasetsSelect').value = initialDataset;  //************************************************
+    fileName = document.getElementById("datasetsSelect").value;
+
+    //loadData();
+}
+
+
+function loadNewData(event) {
+    //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
+    svg.selectAll("*").remove();
+    fileName = this.options[this.selectedIndex].text;
+    console.log(" fileName="+fileName);
+    //loadData();
 }
