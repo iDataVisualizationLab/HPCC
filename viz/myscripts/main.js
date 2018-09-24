@@ -90,7 +90,7 @@ var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
-var simDuration =1;
+var simDuration =20;
 var numberOfMinutes = 1.5;
 var isRealtime = false;
 if (isRealtime){
