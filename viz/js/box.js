@@ -104,6 +104,8 @@
                     .attr("class", "box")
                     .style("fill", function(d) {
                         return color(d[0]);})
+                    //.style("fill-opacity", function(d) {
+                    //    return color(d[0]);})
                     .attr("x", 0)
                     .attr("y", function(d) { return x0(d[2]); })
                     .attr("width", width)
@@ -115,7 +117,7 @@
                     .attr("stroke", "#000")
                     .attr("stroke-width", 1);
                 box.enter().append("rect")
-                    .attr("class", "box2")
+                    .attr("class", "boxx")
                     .style("fill", function(d) {
                         return color(d[2]);})
                     .attr("x", 0)

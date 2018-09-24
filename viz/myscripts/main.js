@@ -99,6 +99,11 @@ if (isRealtime){
 }
 
 var currentMiliseconds;
+var query_time;
+var currentHostname;
+var currentHostX = 0;
+var currentHosty = 0;
+
 var firstTime =true;
 var charType = "Heatmap";
 
@@ -161,6 +166,12 @@ function main() {
         })
 
     }
+    hosts.sort(function (a, b) {
+        if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
+            return 1;
+        }
+        else return -1;
+    })
 
     // Summary Panel ********************************************************************
     svg.append("rect")
@@ -181,12 +192,56 @@ function main() {
         .attr("y", 30)
         .attr("fill", "#000")
         .style("text-anchor", "start")
-        .style("font-size", 16)
+        .style("font-size", "16px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Quanah HPC system: " + hosts.length+" distributed in 10 racks" );
 
+    svg.append("line")
+        .attr("class", "currentTimeline")
+        .attr("x1", 10)
+        .attr("y1", 40)
+        .attr("x2", 10)
+        .attr("y2", 200)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .style("stroke-dasharray", ("2, 2"));;
 
+    svg.append("text")
+        .attr("class", "currentText")
+        .attr("x", 10)
+        .attr("y", 164)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-size", "12px")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Latest REQUEST");    
+    svg.append("text")
+        .attr("class", "currentHostText")
+        .attr("x", 10)
+        .attr("y", 182)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-weight","bold")
+        .style("font-size", "12px")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Host");
+    svg.append("text")
+        .attr("class", "currentTimeText")
+        .attr("x", 10)
+        .attr("y", 200)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-style","italic")
+        .style("font-size", "12px")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text("Time");
+    
+    
+            
     // Spinner Stop ********************************************************************
     spinner.stop();
 
@@ -278,13 +333,26 @@ function main() {
             .text(""+hpcc_node);
     }
 
+
+    // Draw line to connect current host and timeline in the Summary panel
+     svg.append("line")
+        .attr("class", "connectTimeline")
+        .attr("x1", 10)
+        .attr("y1", 200)
+        .attr("x2", 10)
+        .attr("y2", 200)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .style("stroke-dasharray", ("2, 2"));;   
     // ********* REQUEST ******************************************
     request();
 }
 
 function request(){
     var count = 0;
+    var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
+    query_time=currentMiliseconds;
     interval2 = setInterval(function(){
         if (isRealtime){
             var xmlhttp = new XMLHttpRequest();
@@ -354,23 +422,35 @@ function request(){
             xmlhttp4.send();
         }
         else{
-            var result = simulateResults(hosts[count].name);
+            // var result = simulateResults(hosts[count].name);
+            
+            numberOfMinutes = 4*60;
+            var result = simulateResults2(hosts[count].name,iteration);
             // Process the result
             var name =  result.data.service.host_name;
             hostResults[name].arr.push(result);
             plotResult(result);
         }
+
         count++;
+
+        var xTimeSummaryScale = d3.scaleLinear()
+                .domain([currentMiliseconds, currentMiliseconds+0.9*numberOfMinutes*60*1000]) // input
+                .range([0, width]); // output
+        Date.prototype.timeNow = function () {
+             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
+        } 
+         
+        Date.prototype.timeNow2 = function () {
+             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+        }
+
         if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
             var arr = [];
             var xx; 
             var lastIndex;
             
-
-            var xTimeSummaryScale = d3.scaleLinear()
-                .domain([currentMiliseconds, currentMiliseconds+0.8*numberOfMinutes*60*1000]) // input
-                .range([50, width]); // output
-
+            
             if (selectedService == "Temperature"){
                 for (var h=0; h<hosts.length;h++){
                     var name = hosts[h].name; 
@@ -378,17 +458,71 @@ function request(){
                     lastIndex = r.arr.length-1;
                     if (lastIndex>=0){   // has some data
                         var a = processData(r.arr[lastIndex].data.service.plugin_output);
-                        if (h==0){
-                             var query_time =r.arr[lastIndex].result.query_time;
+                        if (h==hosts.length-1){
+                            query_time =r.arr[lastIndex].result.query_time;
                              xx = xTimeSummaryScale(query_time);     
                         }
                         arr.push(a[0]);
                     }
                 }
             }
+            // Draw date
+            svg.selectAll(".currentDate").remove();
+            svg.append("text")
+                .attr("class", "currentDate")
+                .attr("x", 600)
+                .attr("y", 30)
+                .attr("fill", "#000")
+                .style("font-style","italic")
+                .style("text-anchor","left")
+                .style("font-size", "14px")
+                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                .attr("font-family", "sans-serif")
+                .text(""+new Date(currentMiliseconds).toDateString());
+
+
+           
+            // Boxplot Time
+            svg.append("text")
+                .attr("class", "boxTime")
+                .attr("x", xx+5)
+                .attr("y", hh+10)
+                .attr("fill", "#000")
+                .style("font-style","italic")
+                .style("text-anchor","middle")
+                .style("font-size", "12px")
+                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                .attr("font-family", "sans-serif")
+                .text(new Date(query_time).timeNow());    
+
             drawBoxplot(svg, arr, lastIndex, xx);
             count=0;
+            iteration++;
         }
+        // Update the current timeline in Summary panel
+
+        var x2 = xTimeSummaryScale(query_time);
+        svg.selectAll(".currentTimeline")
+            .attr("x1", x2)
+            .attr("x2", x2);
+        svg.selectAll(".connectTimeline")
+            .attr("x1", x2)
+            .attr("x2", currentHostX)
+            .attr("y2", currentHostY);
+                
+
+
+        svg.selectAll(".currentText")
+            .attr("x", x2+2)
+            .text("Latest update:");  
+        svg.selectAll(".currentTimeText")
+            .attr("x", x2+2)
+            .text(new Date(query_time).timeNow2());      
+        svg.selectAll(".currentHostText")
+            .attr("x", x2+2)
+            .text(currentHostname);       
+
+            
     } , simDuration)
 }
 
@@ -415,16 +549,23 @@ function simulateResults(hostname){
     temp3+= gaussianRandom(-10,10);
     arrString[10]=temp3;
 
-    // CPU load
-    /*var str = "OK - Average CPU load is normal! :: CPU Load: 0.500694"
-    var arrString =  str.split(" CPU Load: ");
-    var load = +arrString[1];
-    load+= gaussianRandom(-5,5);
-    arrString[1]=load;*/
-
     newService.data.service.plugin_output = arrString.join(' ')
     return newService;
 }
+
+function simulateResults2(hostname,iter){
+    /*if (iter>= sampleTemperature[hostname].arr.length){
+        pauseRequest();
+        var newService = sampleTemperature[hostname].arr[iter-1];
+        return newService;
+    }*/
+    var newService = sampleTemperature[hostname].arr[iter];
+    return newService;
+}
+
+
+
+
 function gaussianRand() {
     var rand = 0;
     for (var i = 0; i < 6; i += 1) {
@@ -443,9 +584,15 @@ function plotResult(result) {
     // Check if we should reset the starting point
     if (firstTime)
         currentMiliseconds = result.result.query_time;
+
+    
     firstTime = false;
 
-     var name =  result.data.service.host_name;
+    var name =  result.data.service.host_name;
+     
+    query_time = result.result.query_time;  // for drawing current timeline in Summary panel
+    currentHostname = name;
+    
 
      var r = hostResults[name];
 
@@ -483,6 +630,8 @@ function plotResult(result) {
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
+    currentHostX = xStart;
+    currentHostY = y;
     if (charType == "Heatmap")
         plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
     else if (charType == "Area Chart") 
@@ -737,6 +886,8 @@ function saveResults(){
 
 function pauseRequest(){
     clearInterval(interval2);
+
+    svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
 
 function resetRequest(){
@@ -757,14 +908,15 @@ function resetRequest(){
 
     // Remove boxplot in Summary panel
     svg.selectAll(".box").remove();
-    svg.selectAll(".box2").remove();
+    svg.selectAll(".boxx").remove();
     svg.selectAll("line.median").remove();
     svg.selectAll("line.center").remove();
     svg.selectAll("circle.outlier").remove();
     svg.selectAll("text.box").remove();
     svg.selectAll("line.whisker").remove();
     svg.selectAll("text.whisker").remove();
-        
+    
+    svg.selectAll(".connectTimeline").style("stroke-opacity", 1);     
     
     request();
 }

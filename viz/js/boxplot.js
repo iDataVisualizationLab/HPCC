@@ -1,7 +1,7 @@
 var labels = true; // show the text labels beside individual boxplots?
 
 var ww = 800;
-var hh = 200;
+var hh = 190;
 
 // parse in the data
 
@@ -17,21 +17,22 @@ function drawBoxplot(svg,arr, index,xx) {
     data[0][1] = [];
 
     arr.forEach(function(x) {
-        var v1 = x;
-            //v4 = Math.floor(x.Q4);
-        // add more variables if your csv file has more columns
-        var rowMax = v1;
-        var rowMin = v1;
+        if (!isNaN(x)){
+            var v1 = x;
+            // add more variables if your csv file has more columns
+            var rowMax = v1;
+            var rowMin = v1;
 
-        data[0][1].push(v1);
-        if (rowMax > max) max = rowMax;
-        if (rowMin < min) min = rowMin;
+            data[0][1].push(v1);
+            if (rowMax > max) max = rowMax;
+            if (rowMin < min) min = rowMin;
+        }
     });
 
     var chart = d3.box()
         .whiskers(iqr(1.5))
         .height(hh)
-        .domain([40, 100])
+        .domain([20, 100])
         .showLabels(labels);
     /*var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -44,11 +45,13 @@ function drawBoxplot(svg,arr, index,xx) {
         .domain([min, max])
         .range([hh]);
 
+
+         
     // draw the boxplots
     svg.selectAll(".box"+index)
         .data(data)
         .enter().append("g")
-        .attr("transform", function(d) { return "translate(" + xx  + "," + 20 + ")"; } )
+        .attr("transform", function(d) { return "translate(" + xx  + "," + 10 + ")"; } )
         .call(chart.width(20));
 }
 

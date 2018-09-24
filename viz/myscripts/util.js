@@ -58,7 +58,7 @@ function hue(hhh) {
         xx = 0;
     handle.attr("cx", xx);
 
-    if (xx>1){
+    if (xx>1 && hostResults!=undefined){
         for (var name in hostResults) {
             var r = hostResults[name];
             // Process the array of historical temperatures
