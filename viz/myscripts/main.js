@@ -90,8 +90,8 @@ var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
-var simDuration =20;
-var numberOfMinutes = 1.5;
+var simDuration =30;
+var numberOfMinutes = 4*60;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 2000;
@@ -424,7 +424,6 @@ function request(){
         else{
             // var result = simulateResults(hosts[count].name);
             
-            numberOfMinutes = 4*60;
             var result = simulateResults2(hosts[count].name,iteration);
             // Process the result
             var name =  result.data.service.host_name;
