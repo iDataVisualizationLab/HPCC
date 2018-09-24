@@ -202,7 +202,7 @@ function main() {
         .attr("x1", 10)
         .attr("y1", 40)
         .attr("x2", 10)
-        .attr("y2", 200)
+        .attr("y2", 210)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));;
@@ -338,9 +338,9 @@ function main() {
      svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
-        .attr("y1", 200)
+        .attr("y1", 210)
         .attr("x2", 10)
-        .attr("y2", 200)
+        .attr("y2", 210)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));;   
@@ -523,10 +523,49 @@ function request(){
             .text(currentHostname);       
 
             
-    } , simDuration)
+    } , simDuration);
+    
+    var count3=0;
+
+    var interval3 = setInterval(function(){
+
+        svg.selectAll(".currentText")
+            .attr("fill", decimalColorToHTMLcolor(count3*7));
+        count3++;
+        if (count3>10000)
+            count3 = 10000;
+    } , 20);    
+    
+        
 }
 
-
+function decimalColorToHTMLcolor(number) {
+    //converts to a integer
+    var intnumber = number - 0;
+ 
+    // isolate the colors - really not necessary
+    var red, green, blue;
+ 
+    // needed since toString does not zero fill on left
+    var template = "#000000";
+ 
+    // in the MS Windows world RGB colors
+    // are 0xBBGGRR because of the way Intel chips store bytes
+    red = (intnumber&0x0000ff) << 16;
+    green = intnumber&0x00ff00;
+    blue = (intnumber&0xff0000) >>> 16;
+ 
+    // mask out each color and reverse the order
+    intnumber = red|green|blue;
+ 
+    // toString converts a number to a hexstring
+    var HTMLcolor = intnumber.toString(16);
+ 
+    //template adds # for standard HTML #RRGGBB
+    HTMLcolor = template.substring(0,7 - HTMLcolor.length) + HTMLcolor;
+ 
+    return HTMLcolor;
+} 
 
 function simulateResults(hostname){
     var newService = JSON.parse(JSON.stringify(sampleService));
