@@ -75,7 +75,7 @@ var opa = d3.scaleLinear()
     .range([0, 1]);
 
 var maxHostinRack= 60;
-var h_rack = 1200;
+var h_rack = 1000;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -195,7 +195,7 @@ function main() {
         .style("font-size", "16px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Quanah HPC system: " + hosts.length+" distributed in 10 racks" );
+        .text("Quanah HPC system: " + hosts.length+" hosts distributed in 10 racks" );
 
     svg.append("line")
         .attr("class", "currentTimeline")
