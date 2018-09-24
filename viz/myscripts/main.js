@@ -90,8 +90,8 @@ var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
-var simDuration =30;
-var numberOfMinutes = 4*60;
+var simDuration =1;
+var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 2000;
@@ -484,7 +484,7 @@ function request(){
             // Boxplot Time
             svg.append("text")
                 .attr("class", "boxTime")
-                .attr("x", xx+5)
+                .attr("x", xx-2)
                 .attr("y", hh+10)
                 .attr("fill", "#000")
                 .style("font-style","italic")
@@ -494,7 +494,7 @@ function request(){
                 .attr("font-family", "sans-serif")
                 .text(new Date(query_time).timeNow());    
 
-            drawBoxplot(svg, arr, lastIndex, xx);
+            drawBoxplot(svg, arr, lastIndex, xx-10);
             count=0;
             iteration++;
         }

@@ -1,5 +1,6 @@
 var w = 350,
     h = 70;
+var first = true;
 
 var svgLengend = d3.select('.legendHolder').append('svg')
     .attr("class", "legendView")
@@ -8,7 +9,7 @@ var svgLengend = d3.select('.legendHolder').append('svg')
 
 var x = d3.scaleLinear()
     .domain([0, 50])
-    .range([0, 150])
+    .range([0, 180])
     .clamp(true);
 
 var slider = svgLengend.append("g")
@@ -56,9 +57,14 @@ function hue(hhh) {
     var xx = x(hhh);
     if (xx < 0)
         xx = 0;
-    handle.attr("cx", xx);
-
+    if (first)
+        handle.attr("cx", 0);
+    else
+        handle.attr("cx", xx);
+  
     if (xx>1 && hostResults!=undefined){
+        first = false;
+
         for (var name in hostResults) {
             var r = hostResults[name];
             // Process the array of historical temperatures
