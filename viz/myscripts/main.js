@@ -75,7 +75,7 @@ var opa = d3.scaleLinear()
     .range([0, 1]);
 
 var maxHostinRack= 60;
-var h_rack = 1000;
+var h_rack = 950;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -597,7 +597,7 @@ function simulateResults2(hostname,iter){
         var newService = sampleTemperature[hostname].arr[iter-1];
         return newService;
     }*/
-    var newService = sampleTemperature[hostname].arr[iter];
+    var newService = sampleS[hostname].arr[iter];
     return newService;
 }
 
@@ -727,17 +727,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-function processData(str) {
-    if (selectedService=="Temperature"){
-        var arrString =  str.split(" ");
-        var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
-        return a;
-    }
 
-}
 
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
   var yScale = d3.scaleLinear()
@@ -920,7 +910,101 @@ function saveResults(){
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+
+    // Save results for Outliagnostics
+    var filename = "HPCC_data.json";
+    var type = "json";
+
+    var data = {};
+    for (var att in sampleS){
+        data[att]={};
+        data[att].v0=[];
+        data[att].arrTemperatureCPU2=[];
+        data[att].arrCPU_load=[];
+        data[att].arrFans_speed1=[];
+        data[att].arrFans_speed2=[];
+        data[att].v1=[];
+
+        var item = sampleS[att];
+        for(var i=0;i<item.arr.length;i++){
+            var str = item.arr[i].data.service.plugin_output;
+            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000")
+                data[att].v0.push(null);
+            else{
+                var a = processData(str);
+                data[att].v0.push(a[0]);
+                data[att].arrTemperatureCPU2.push(a[0]);
+            }
+            
+            var str2 = item.arrCPU_load[i].data.service.plugin_output;
+            var b2 =  +str2.split("CPU Load: ")[1];
+            data[att].arrCPU_load.push(b2);
+            
+
+            
+            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
+            //console.log(att+" "+str3);
+            if (str3.indexOf("syntax error")>=0 ){
+                data[att].v1.push(null);
+            }
+            else{
+                var b3 =  str3.split("Usage Percentage = ")[1];
+                var c3 =  +b3.split(" :: Total Memory")[0];
+                data[att].v1.push(c3);
+            }
+
+            var str4 = item.arrFans_health[i].data.service.plugin_output;
+            //console.log("   d=" +JSON.stringify(item.arrFans_health[i].data.service));
+            //console.log("   str4=" +str4);
+            if (str4.indexOf("UNKNOWN")>=0 || str4.indexOf("No output on stdout) stderr")>=0 
+                || str4.indexOf("Service check timed out")>=0){
+                data[att].arrFans_speed1.push(null);
+                data[att].arrFans_speed2.push(null);  
+            }  
+            else{  
+                var arr4 =  str4.split(" RPM ");
+                //debugger;
+                //console.log("   arr4[0]=" +arr4[0]+"***arr4[1]=" +arr4[1]);
+                   
+                var fan1 = +arr4[0].split("FAN_1 ")[1];
+                var fan2 = +arr4[1].split("FAN_2 ")[1];
+                data[att].arrFans_speed1.push(fan1);
+                data[att].arrFans_speed2.push(fan2);  
+            }
+        }
+    }
+
+
+    var str = JSON.stringify(data);
+
+    var file = new Blob([str], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
 }
+
+function processData(str) {
+    if (selectedService=="Temperature"){
+        var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
+}
+
 
 function pauseRequest(){
     clearInterval(interval2);
