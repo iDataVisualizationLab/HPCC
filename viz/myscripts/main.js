@@ -719,8 +719,8 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname].arrMemory_usage[iter];
     else if (s == serviceList[3]) 
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) 
-        newService = sampleS[hostname].arrPower_usage[iter];
+ //   else if (s == serviceList[4]) 
+ //       newService = sampleS[hostname].arrPower_usage[iter];
     return newService;
 }
 
@@ -1010,6 +1010,7 @@ function saveResults(){
     var type = "json";
     var str = JSON.stringify(hostResults);
 
+      /* 
     var file = new Blob([str], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
@@ -1030,7 +1031,7 @@ function saveResults(){
     var filename = "HPCC_Project1.json";
     var type = "json";
     var data = {};
-    for (var att in sampleS){
+   for (var att in sampleS){
         data[att]={};
         data[att].arrTemperatureCPU1=[];
         data[att].arrTemperatureCPU2=[];
@@ -1098,7 +1099,7 @@ function saveResults(){
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);  
         }, 0); 
-    }
+    }*/
 
 
     // Save results for Outliagnostics ***************************
@@ -1108,8 +1109,8 @@ function saveResults(){
     var numnerOfYear = 100000;
     for (var att in sampleS){
         var item = sampleS[att];
-        if (item.arr.length<numnerOfYear){
-            numnerOfYear = item.arr.length;
+        if (item.arrTemperature.length<numnerOfYear){
+            numnerOfYear = item.arrTemperature.length;
         }
     }   
 
@@ -1126,24 +1127,29 @@ function saveResults(){
        
         var item = sampleS[att];
         for(var i=0;i<numnerOfYear;i++){
-            var str = item.arr[i].data.service.plugin_output;
+            var str = item.arrTemperature[i].data.service.plugin_output;
             var obj = {};
             if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
                 obj.v0=null;
             }
             else{
                 var a = processData(str,serviceList[0]);
-                obj.v0 = a[0];
+                obj.v0 = a[1];
             }
                          
-            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
-            if (str3.indexOf("syntax error")>=0 ){
+            var str3 = item.arrFans_health[i].data.service.plugin_output;
+            if (str3.indexOf("syntax error")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0){
                 obj.v1=null;
             }
             else{
-                var b3 =  str3.split("Usage Percentage = ")[1];
-                var c3 =  +b3.split(" :: Total Memory")[0];
-                obj.v1=c3;
+
+                var arr4 =  str3.split(" RPM ");
+                if (arr4[0]==undefined)
+                    obj.v1=null;
+                else{
+                    console.log(arr4[1]);
+                    obj.v1 = +arr4[0].split("FAN_2 ");
+                }
             }
             obj.Outlying = 0;
             obj.year = i;
