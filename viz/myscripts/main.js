@@ -94,7 +94,7 @@ var simDuration =1;
 var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 500;
+    simDuration = 1000;
     numberOfMinutes = 6*60;
 }
 
@@ -105,8 +105,6 @@ var currentHostX = 0;
 var currentHosty = 0;
 
 var charType = "Heatmap";
-
-
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_health","Power_consumption"]
 var initialService = "Temperature";
@@ -467,7 +465,9 @@ function request(){
 
             var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
             hostResults[name].arrFans_health.push(result);
-            
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
+            hostResults[name].arrPower_usage.push(result);       
         }
 
         count++;
@@ -637,12 +637,22 @@ function processData(str, serviceName) {
         }
         return a;
     }
-    else if (selectedService == serviceList[4]) {
-        var arrString =  str.split(" ");
-        var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
+    else if (serviceName == serviceList[4]) {
+        //console.log(str);
+         var a = [];
+        if (str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = -1;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        else{
+            var maxConsumtion = 3.2;  // over 100%
+            var arr4 =  str.split(" ");
+            a[0] = +arr4[arr4.length-2]/maxConsumtion;
+            a[1] = -1;
+            a[2] = -1;
+            console.log(a[0]);
+        }
         return a;
     }
 }
