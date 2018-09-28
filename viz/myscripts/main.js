@@ -92,7 +92,7 @@ var baseTemperature =60;
 var interval2;
 var simDuration =1;
 var numberOfMinutes = 6*60;
-var isRealtime = true;
+var isRealtime = false;
 if (isRealtime){
     simDuration = 2000;
     numberOfMinutes = 6*60;
@@ -104,7 +104,6 @@ var currentHostname;
 var currentHostX = 0;
 var currentHosty = 0;
 
-var firstTime =true;
 var charType = "Heatmap";
 
 
@@ -354,6 +353,7 @@ function request(){
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
+
     interval2 = setInterval(function(){
         if (isRealtime){
             var xmlhttp = new XMLHttpRequest();
@@ -363,7 +363,10 @@ function request(){
                     var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrTemperature.push(result);
-                    plotResult(result);
+                    if (selectedService == serviceList[0]){
+                        plotResult(result);
+                        hostResults[name].arr=hostResults[name].arrTemperature;
+                    }          
                 }
                 else{
                     console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -437,6 +440,10 @@ function request(){
             };
             xmlhttp5.open("GET", url5, true);
             xmlhttp5.send();
+
+            var result = {};
+
+            
         }
         else{
             // var result = simulateResults(hosts[count].name);
@@ -495,8 +502,6 @@ function request(){
                 .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
                 .attr("font-family", "sans-serif")
                 .text(""+new Date(currentMiliseconds).toDateString());
-
-
            
             // Boxplot Time
             svg.append("text")
@@ -526,8 +531,6 @@ function request(){
             .attr("x2", currentHostX)
             .attr("y2", currentHostY);
                 
-
-
         svg.selectAll(".currentText")
             .attr("x", x2+2)
             .text("Latest update:");  
@@ -593,12 +596,11 @@ function decimalColorToHTMLcolor(number) {
     return HTMLcolor;
 } 
 
+/*
 function simulateResults(hostname){
     var newService = JSON.parse(JSON.stringify(sampleService));
     newService.result.query_time =  new Date().getTime();
     newService.data.service.host_name = hostname;
-
-
     // temperature
     var str = "CPU1 Temp 67 OK CPU2 Temp 49 OK Inlet Temp 40 OK";
      var arrString =  str.split(" ");
@@ -616,15 +618,21 @@ function simulateResults(hostname){
 
     newService.data.service.plugin_output = arrString.join(' ')
     return newService;
-}
+}*/
 
 function simulateResults2(hostname,iter){
-    /*if (iter>= sampleTemperature[hostname].arr.length){
-        pauseRequest();
-        var newService = sampleTemperature[hostname].arr[iter-1];
-        return newService;
-    }*/
-    var newService = sampleS[hostname].arr[iter];
+    var newService
+    if (selectedService == serviceList[0])             
+        newService = sampleS[hostname].arrTemperature[iter];
+    else if (selectedService == serviceList[1])
+        newService = sampleS[hostname].arrCPU_load[iter];
+    else if (selectedService == serviceList[2]) 
+        newService = sampleS[hostname].arrMemory_usage[iter];
+    else if (selectedService == serviceList[3]) 
+        newService = sampleS[hostname].arrFans_health[iter];
+    else if (selectedService == serviceList[4]) 
+        newService = sampleS[hostname].arrPower_usage[iter];
+        
     return newService;
 }
 
@@ -636,7 +644,6 @@ function gaussianRand() {
     for (var i = 0; i < 6; i += 1) {
         rand += Math.random();
     }
-
     return rand / 6;
 }
 
@@ -1142,7 +1149,28 @@ function saveResults(){
 }
 
 function processData(str) {
-    if (selectedService=="Temperature"){
+    
+    if (selectedService == serviceList[0]){
+        var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
+    else if (selectedService == serviceList[1])
+        newService = sampleS[hostname].arrCPU_load[iter];
+    else if (selectedService == serviceList[2]) {
+       var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
+    else if (selectedService == serviceList[3]) 
+        newService = sampleS[hostname].arrFans_health[iter];
+    else if (selectedService == serviceList[4]) {
         var arrString =  str.split(" ");
         var a = [];
         a[0] = +arrString[2];
@@ -1210,4 +1238,5 @@ function loadNewData(event) {
     svg.selectAll("*").remove();
     selectedService = this.options[this.selectedIndex].text;
 
+    resetRequest();
 }
