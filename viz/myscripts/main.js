@@ -92,7 +92,7 @@ var baseTemperature =60;
 var interval2;
 var simDuration =1;
 var numberOfMinutes = 6*60;
-var isRealtime = false;
+var isRealtime = true;
 if (isRealtime){
     simDuration = 2000;
     numberOfMinutes = 6*60;
@@ -134,6 +134,7 @@ function main() {
         hostResults[h.name].arrCPU_load = [];
         hostResults[h.name].arrMemory_usage = [];
         hostResults[h.name].arrFans_health= [];
+        hostResults[h.name].arrPower_usage= [];
         hosts.push(h);
         // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
@@ -359,13 +360,13 @@ function request(){
             var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
             xmlhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var result = JSON.parse(this.responseText);
+                    var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
-                    hostResults[name].arr.push(result);
+                    hostResults[name].arrTemperature.push(result);
                     plotResult(result);
                 }
                 else{
-                    console.log(count+"ERROR____ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                    console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
                 }
 
             };
@@ -376,7 +377,7 @@ function request(){
             var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
             xmlhttp2.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var result = JSON.parse(this.responseText);
+                    var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrCPU_load.push(result);
                    // plotResult(result);
@@ -393,7 +394,7 @@ function request(){
             var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
             xmlhttp3.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var result = JSON.parse(this.responseText);
+                    var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrMemory_usage.push(result);
                     // plotResult(result);
@@ -409,7 +410,7 @@ function request(){
             var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
             xmlhttp4.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var result = JSON.parse(this.responseText);
+                    var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrFans_health.push(result);
                     // plotResult(result);
@@ -420,6 +421,22 @@ function request(){
             };
             xmlhttp4.open("GET", url4, true);
             xmlhttp4.send();
+
+            var xmlhttp5 = new XMLHttpRequest();
+            var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+power+usage";
+            xmlhttp5.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name =  result.data.service.host_name;
+                    hostResults[name].arrPower_usage.push(result);
+                    // plotResult(result);
+                }
+                else{
+                    console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+                }
+            };
+            xmlhttp5.open("GET", url5, true);
+            xmlhttp5.send();
         }
         else{
             // var result = simulateResults(hosts[count].name);
@@ -533,9 +550,19 @@ function request(){
         count3++;
         if (count3>10000)
             count3 = 10000;
-    } , 20);    
-    
-        
+    } , 20);     
+}
+
+// Delete unnesseccary files
+function processResult(r){
+    var obj = {};
+    obj.result = {};
+    obj.result.query_time = r.result.query_time;
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = r.data.service.host_name;
+    obj.data.service.plugin_output = r.data.service.plugin_output
+    return obj;
 }
 
 function decimalColorToHTMLcolor(number) {
