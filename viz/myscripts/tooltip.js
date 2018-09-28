@@ -99,15 +99,22 @@ function mouseoverNode(d1){
         var a = processData(r.arrTemperature[lastIndex].data.service.plugin_output, serviceList[0]);
         var obj = {};
         obj.a = a;
-        obj.query_time =r.arr[lastIndex].result.query_time;
         arrServices.push(obj);
 
         var a = processData(r.arrCPU_load[lastIndex].data.service.plugin_output, serviceList[1]);
         var obj = {};
         obj.a = a;
-        obj.query_time =r.arrCPU_load[lastIndex].result.query_time;
         arrServices.push(obj);
 
+        var a = processData(r.arrMemory_usage[lastIndex].data.service.plugin_output, serviceList[2]);
+        var obj = {};
+        obj.a = a;
+        arrServices.push(obj);
+
+        var a = processData(r.arrFans_health[lastIndex].data.service.plugin_output, serviceList[3]);
+        var obj = {};
+        obj.a = a;
+        arrServices.push(obj);
     }
     
 
