@@ -94,7 +94,7 @@ var simDuration =1;
 var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 2000;
+    simDuration = 500;
     numberOfMinutes = 6*60;
 }
 
@@ -108,7 +108,7 @@ var charType = "Heatmap";
 
 
 //***********************
-var serviceList = ["Temperature","CPU_load","Memory_load","Power_consumption"]
+var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_health","Power_consumption"]
 var initialService = "Temperature";
 var selectedService;
 
@@ -130,6 +130,7 @@ function main() {
         hostResults[h.name] = {};
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
+        hostResults[h.name].arrTemperature = [];  
         hostResults[h.name].arrCPU_load = [];
         hostResults[h.name].arrMemory_usage = [];
         hostResults[h.name].arrFans_health= [];
@@ -364,8 +365,8 @@ function request(){
                     var name =  result.data.service.host_name;
                     hostResults[name].arrTemperature.push(result);
                     if (selectedService == serviceList[0]){
-                        plotResult(result);
                         hostResults[name].arr=hostResults[name].arrTemperature;
+                        plotResult(result);
                     }          
                 }
                 else{
@@ -448,22 +449,35 @@ function request(){
         else{
             // var result = simulateResults(hosts[count].name);
             
-            var result = simulateResults2(hosts[count].name,iteration);
+            var result = simulateResults2(hosts[count].name,iteration, selectedService);
             // Process the result
             var name =  result.data.service.host_name;
             hostResults[name].arr.push(result);
             plotResult(result);
+
+            //console.log(hosts[count].name+" "+hostResults[name]);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+            hostResults[name].arrTemperature.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
+            hostResults[name].arrCPU_load.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
+            hostResults[name].arrMemory_usage.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
+            hostResults[name].arrFans_health.push(result);
+            
         }
 
         count++;
 
         var xTimeSummaryScale = d3.scaleLinear()
                 .domain([currentMiliseconds, currentMiliseconds+0.9*numberOfMinutes*60*1000]) // input
-                .range([0, width]); // output
+                .range([30, width]); // output
         Date.prototype.timeNow = function () {
              return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-        } 
-         
+        }  
         Date.prototype.timeNow2 = function () {
              return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         }
@@ -474,21 +488,21 @@ function request(){
             var lastIndex;
             
             
-            if (selectedService == "Temperature"){
-                for (var h=0; h<hosts.length;h++){
-                    var name = hosts[h].name; 
-                    var r = hostResults[name];
-                    lastIndex = r.arr.length-1;
-                    if (lastIndex>=0){   // has some data
-                        var a = processData(r.arr[lastIndex].data.service.plugin_output);
-                        if (h==hosts.length-1){
-                            query_time =r.arr[lastIndex].result.query_time;
-                             xx = xTimeSummaryScale(query_time);     
-                        }
-                        arr.push(a[0]);
+            for (var h=0; h<hosts.length;h++){
+                var name = hosts[h].name; 
+                var r = hostResults[name];
+                lastIndex = r.arr.length-1;
+                if (lastIndex>=0){   // has some data
+                    var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
+                    if (h==hosts.length-1){
+                        query_time =r.arr[lastIndex].result.query_time;
+                        console.log(query_time);
+                         xx = xTimeSummaryScale(query_time);     
                     }
+                    arr.push(a[0]);
                 }
             }
+            
             // Draw date
             svg.selectAll(".currentDate").remove();
             svg.append("text")
@@ -568,6 +582,71 @@ function processResult(r){
     return obj;
 }
 
+function processData(str, serviceName) {  
+    if (serviceName == serviceList[0]){
+        var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
+    else if (serviceName == serviceList[1]){
+        var a = [];
+        if (str.indexOf("(No output on stdout)")>=0){
+            a[0] = -1;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        else{
+            var arrString =  str.split("CPU Load: ")[1];
+            a[0] = +arrString*180;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        return a;
+    }
+    else if (serviceName == serviceList[2]) {
+        var a = [];
+        if (str.indexOf("(No output on stdout)")>=0){
+            a[0] = -1;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        else{
+            var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
+            a[0] = +arrString;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        return a;
+    }
+    else if (serviceName == serviceList[3]) {
+        var a = [];
+        if (str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = -1;
+            a[1] = -1;
+            a[2] = -1;
+        }
+        else{
+            var maxSpeed = 13000/100;  // over 100%
+            var arr4 =  str.split(" RPM ");
+            a[0] = +arr4[0].split("FAN_1 ")[1]/maxSpeed;
+            a[1] = +arr4[1].split("FAN_2 ")[1]/maxSpeed;
+            a[2] = -1;
+        }
+        return a;
+    }
+    else if (selectedService == serviceList[4]) {
+        var arrString =  str.split(" ");
+        var a = [];
+        a[0] = +arrString[2];
+        a[1] = +arrString[6];
+        a[2] = +arrString[10];
+        return a;
+    }
+}
+
 function decimalColorToHTMLcolor(number) {
     //converts to a integer
     var intnumber = number - 0;
@@ -620,23 +699,20 @@ function simulateResults(hostname){
     return newService;
 }*/
 
-function simulateResults2(hostname,iter){
+function simulateResults2(hostname,iter, s){
     var newService
-    if (selectedService == serviceList[0])             
+    if (s == serviceList[0])             
         newService = sampleS[hostname].arrTemperature[iter];
-    else if (selectedService == serviceList[1])
+    else if (s == serviceList[1])
         newService = sampleS[hostname].arrCPU_load[iter];
-    else if (selectedService == serviceList[2]) 
+    else if (s == serviceList[2]) 
         newService = sampleS[hostname].arrMemory_usage[iter];
-    else if (selectedService == serviceList[3]) 
+    else if (s == serviceList[3]) 
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (selectedService == serviceList[4]) 
+    else if (s == serviceList[4]) 
         newService = sampleS[hostname].arrPower_usage[iter];
-        
     return newService;
 }
-
-
 
 
 function gaussianRand() {
@@ -656,18 +732,14 @@ function plotResult(result) {
     // Check if we should reset the starting point
     if (firstTime)
         currentMiliseconds = result.result.query_time;
-
-    
     firstTime = false;
-
     var name =  result.data.service.host_name;
      
     query_time = result.result.query_time;  // for drawing current timeline in Summary panel
     currentHostname = name;
     
-
-     var r = hostResults[name];
-
+    // Process the array data ***************************************    
+    var r = hostResults[name];
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
 
@@ -678,10 +750,10 @@ function plotResult(result) {
     var y = getHostY(hpcc_rack,hpcc_node);
 
 
-    // Process the array of historical temperatures
+    // Process the array of historical temperatures *************************************** 
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output);
+        var a = processData(r.arr[i].data.service.plugin_output, selectedService);
         var obj = {};
         obj.temp1 = a[0];
         obj.temp2 = a[1];
@@ -766,7 +838,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
   var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
-        .range([0, 25]); // output
+        .range([0, 22]); // output
 
     var area = d3.area()
         .x(function(d) { return d.x; })
@@ -798,7 +870,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
 
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
-    var binStep = 5; // pixels
+    var binStep = 8; // pixels
     var maxX = 0;  // The latest x position, to draw the baseline 60 F
     for (var att in hostResults) {
         var hpcc_rack = +att.split("-")[1];
@@ -806,7 +878,7 @@ function drawSummaryAreaChart(rack, xStart) {
         if (hpcc_rack == rack) {
             var r = hostResults[att];
             for (var i = 0; i < r.arr.length; i++) {
-                var a = processData(r.arr[i].data.service.plugin_output);
+                var a = processData(r.arr[i].data.service.plugin_output, selectedService);
                 var obj = {};
                 obj.temp1 = a[0];
                 obj.temp2 = a[1];
@@ -965,7 +1037,7 @@ function saveResults(){
                 data[att].arrTemperatureCPU2.push(null);
             }
             else{
-                var a = processData(str);
+                var a = processData(str, serviceList[0]);
                 data[att].arrTemperatureCPU1.push(a[0]);
                 data[att].arrTemperatureCPU2.push(a[1]);
             }
@@ -1050,7 +1122,7 @@ function saveResults(){
                 obj.v0=null;
             }
             else{
-                var a = processData(str);
+                var a = processData(str,serviceList[0]);
                 obj.v0 = a[0];
             }
                          
@@ -1148,37 +1220,7 @@ function saveResults(){
     }
 }
 
-function processData(str) {
-    
-    if (selectedService == serviceList[0]){
-        var arrString =  str.split(" ");
-        var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
-        return a;
-    }
-    else if (selectedService == serviceList[1])
-        newService = sampleS[hostname].arrCPU_load[iter];
-    else if (selectedService == serviceList[2]) {
-       var arrString =  str.split(" ");
-        var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
-        return a;
-    }
-    else if (selectedService == serviceList[3]) 
-        newService = sampleS[hostname].arrFans_health[iter];
-    else if (selectedService == serviceList[4]) {
-        var arrString =  str.split(" ");
-        var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
-        return a;
-    }
-}
+
 
 
 function pauseRequest(){
@@ -1197,6 +1239,11 @@ function resetRequest(){
         hostResults[att] = {};
         hostResults[att].index = count;
         hostResults[att].arr = [];
+        hostResults[att].arrTemperature = [];  
+        hostResults[att].arrCPU_load = [];
+        hostResults[att].arrMemory_usage = [];
+        hostResults[att].arrFans_health= [];
+        hostResults[att].arrPower_usage= [];
         count++;
 
         svg.selectAll("."+att).remove();
@@ -1235,7 +1282,7 @@ function addDatasetsOptions() {
 
 function loadNewData(event) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
-    svg.selectAll("*").remove();
+    //svg.selectAll("*").remove();
     selectedService = this.options[this.selectedIndex].text;
 
     resetRequest();

@@ -30,8 +30,8 @@ function drawBoxplot(svg,arr, index,xx) {
     });
 
     var chart = d3.box()
-        .whiskers(iqr(1.5))
-        .height(hh)
+        .whiskers(iqr(2.5))
+        .height(hh-60)
         .domain([20, 100])
         .showLabels(labels);
     /*var svg = d3.select("body").append("svg")
@@ -40,18 +40,12 @@ function drawBoxplot(svg,arr, index,xx) {
         .attr("class", "box")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");*/
-    // the y-axis
-    var y = d3.scaleLinear()
-        .domain([min, max])
-        .range([hh]);
-
-
          
     // draw the boxplots
     svg.selectAll(".box"+index)
         .data(data)
         .enter().append("g")
-        .attr("transform", function(d) { return "translate(" + xx  + "," + 10 + ")"; } )
+        .attr("transform", function(d) { return "translate(" + xx  + "," + 40 + ")"; } )
         .call(chart.width(20));
 }
 

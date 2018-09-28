@@ -15,21 +15,17 @@ var color2 = d3.scaleOrdinal()
 var dataSpider = [
     [//CPU1
         {axis:"temperature",value:0.22},
-        {axis:"bmc health",value:0.28},
-        {axis:"cpu health",value:0.17},
         {axis:"cpu load",value:0.22},
-        {axis:"fans health",value:0.21},
-        {axis:"memory health",value:0.02},
-        {axis:"memory usage",value:0.29},
+        {axis:"memory usage",value:0.21},
+        {axis:"fans speed",value:0.02},
+        {axis:"power consumption",value:0.29},
     ],[//CPU2
         {axis:"temperature",value:0.22},
-        {axis:"bmc health",value:0.28},
-        {axis:"cpu health",value:0.17},
-        {axis:"cpu load",value:0.22},
-        {axis:"fans health",value:0.21},
-        {axis:"memory health",value:0.02},
-        {axis:"memory usage",value:0.29},
-    ],[//CPU3
+        {axis:"cpu load",value:0.28},
+        {axis:"memory usage",value:0.17},
+        {axis:"fans speed",value:0.22},
+        {axis:"power consumption",value:0.21},
+    ]/*,[//CPU3
         {axis:"temperature",value:0.22},
         {axis:"bmc health",value:0.28},
         {axis:"cpu health",value:0.17},
@@ -37,7 +33,7 @@ var dataSpider = [
         {axis:"fans health",value:0.21},
         {axis:"memory health",value:0.02},
         {axis:"memory usage",value:0.29},
-    ]
+    ]*/
 ];
 
 
@@ -86,7 +82,7 @@ function mouseoverNode(d1){
     // 2. Process the array of historical temperatures
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output);
+        var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
         var obj = {};
         obj.temp1 = a[0];
         obj.temp2 = a[1];
@@ -94,6 +90,26 @@ function mouseoverNode(d1){
         obj.query_time =r.arr[i].result.query_time;
         arr.push(obj);
     }
+
+    console.log(r);
+        
+    var arrServices = [];
+    if (r.arr.length>0){
+        var lastIndex = r.arr.length-1;
+        var a = processData(r.arrTemperature[lastIndex].data.service.plugin_output, serviceList[0]);
+        var obj = {};
+        obj.a = a;
+        obj.query_time =r.arr[lastIndex].result.query_time;
+        arrServices.push(obj);
+
+        var a = processData(r.arrCPU_load[lastIndex].data.service.plugin_output, serviceList[1]);
+        var obj = {};
+        obj.a = a;
+        obj.query_time =r.arrCPU_load[lastIndex].result.query_time;
+        arrServices.push(obj);
+
+    }
+    
 
     // 3. get Time
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
@@ -298,11 +314,10 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
-    for (var i=0; i<arr.length;i++){
-        var index = i%7;
-        dataSpider[0][index].value = arr[i].temp1;
-        dataSpider[1][index].value = arr[i].temp2;
-        dataSpider[2][index].value = arr[i].temp3;
+    for (var i=0; i<arrServices.length;i++){
+        dataSpider[0][i].value = arrServices[i].a[0];
+        dataSpider[1][i].value = arrServices[i].a[1];
+       // dataSpider[2][index].value = arr[i].temp3;
     }
     spiderChart();        
 }

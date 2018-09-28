@@ -202,7 +202,9 @@
                     .transition()
                     .duration(duration)
                     .attr("cy", function(i) { return x1(d[i]); })
-                    .style("fill-opacity", 1)
+                    .style("fill-opacity", function(d){
+                        return opa(data[1][d]);
+                    }) 
                     .style("fill", function(d){
                         return color(data[1][d]);
                     })  
