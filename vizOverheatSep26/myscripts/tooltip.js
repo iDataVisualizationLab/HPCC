@@ -116,9 +116,9 @@ function mouseoverNode(d1){
         obj.a = a;
         arrServices.push(obj);
 
-        var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
+      //  var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
         var obj = {};
-        obj.a = a;
+        obj.a = [0,0,0];
         arrServices.push(obj);
     }
     

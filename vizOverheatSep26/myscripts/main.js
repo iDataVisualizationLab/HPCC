@@ -719,8 +719,8 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname].arrMemory_usage[iter];
     else if (s == serviceList[3]) 
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) 
-        newService = sampleS[hostname].arrPower_usage[iter];
+//    else if (s == serviceList[4]) 
+//        newService = sampleS[hostname].arrPower_usage[iter];
     return newService;
 }
 
