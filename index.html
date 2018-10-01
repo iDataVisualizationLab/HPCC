@@ -1,41 +1,69 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html>
+<meta charset="utf-8">
 
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
-<meta name="description" content="DycomDetector: Topic Modeling Using Community Detection in Dynamic networks"/>
-<meta name="keywords" content="DycomDetector,Topic Modeling,Community Detection,Dynamic Networks,Louvain method"/> 
-<meta name="author" content="DycomDetector"/> 
-<link rel="stylesheet" type="text/css" href="styles/default.css" media="screen"/>
 <link rel="icon" type="image/gif"
       href="images/fav.gif" />
+<!--css-->
+<link rel="stylesheet" href="css/stream.css" />
+<link href="css/main.css" rel="stylesheet" type="text/css" />
 
-<title>DycomDetector</title>
+<head>
+
+    <title>HPCC simulation</title>
 </head>
 
-<body>
-	<div class="navigation">
-		<h1>ComModeler: Topic Modeling Using Community Detection </h1>
-		<h2>EuroVA 2018, Tommy Dang and Vinh T. Nguyen </h2>
-		<div id="menu">
-			<nav>
-			  <ul>
-			  <li><a href="index.html"><b><span style="color:#fff">Video<span></b></a></li>
-			  <li><a href="layout.html"><span style="color:#888">Layout<span></a></li>
-			  <li><a href="usecases.html"><span style="color:#888">Use cases<span></a></li>
-			  <li><a href="demos.html"><span style="color:#888">Demos<span></a></li>
-			    
-			  </li>  
-			  </ul>
-			</nav>
-		</div>
-	</div>
-	<center><iframe width="90%" height="700" src="https://www.youtube.com/embed/c28kc2I7BAU" frameborder="0" allowfullscreen></iframe></center>
+<body bgcolor="#aaa" text="black" id="mainBody">
+<svg width="2400" height="1300"></svg>
 
-<div class="footer">
-		<span class="right">&copy; Last revised: April 20, 2018</span>
-		<div class="clearer"><span></span></div>
-	</div>
+<!--
+<div id="searchHolder"  class="searchHolder">
+  <input id="search">
+  <button type="button" onclick="searchNode()">Search</button>
+  <progress value="0" max="100" id="progBar">
+      <span id="downloadProgress">
+
+      </span>
+  </progress>
+  <label id="progUpdate">
+
+  </label>
+</div> -->
+
+<!-- Spinner when loading -->
+<div id="loadingSpinner">
+    <!-- <span id="progressText"> -->
 </div>
+
+
+
+<!--
+<div id="controlHolder"  class="controlHolder">
+ <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check" onclick="check1()">
+<label for="checkbox1"> Order by deadline</label>
+</div>
+-->
+
+<div id="streamHolder"  class="streamHolder">
+
+
+</div>
+
+<div id="graph"></div>
+<!-- load the d3.js library -->    
+<script src="js/jquery.min.js"></script>
+<script type='text/javascript' src="js/jquery-ui.min.js"> </script>
+<script src="js/d3.v4.js"></script>
+<script src="js/d3.tip.js"></script>
+<link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
+
+
+
+
+<script src="myscripts/main.js"></script>
+<script src="myscripts/tooltip.js"></script>
+<script src="myscripts/util.js"></script>
+
+<script src="myscripts/stream.js"></script>
+
 </body>
-</html>
