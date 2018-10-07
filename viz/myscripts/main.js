@@ -92,7 +92,7 @@ var baseTemperature =60;
 var interval2;
 var simDuration =1;
 var numberOfMinutes = 6*60;
-var isRealtime = false;
+var isRealtime = true;
 if (isRealtime){
     simDuration = 1000;
     numberOfMinutes = 12*60;
@@ -1012,7 +1012,7 @@ function saveResults(){
     var type = "json";
     var str = JSON.stringify(hostResults);
 
-      /* 
+    
     var file = new Blob([str], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
@@ -1029,6 +1029,7 @@ function saveResults(){
         }, 0); 
     }
 
+    /*
     // Save results for Project 1
     var filename = "HPCC_Project1.json";
     var type = "json";
