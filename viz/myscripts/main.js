@@ -95,7 +95,7 @@ var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 1000;
-    numberOfMinutes = 6*60;
+    numberOfMinutes = 12*60;
 }
 
 var currentMiliseconds;
@@ -623,13 +623,15 @@ function processData(str, serviceName) {
     }
     else if (serviceName == serviceList[3]) {
         var a = [];
-        if (str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
+            || str.indexOf("UNKNOWN")>=0 ){
             a[0] = -1;
             a[1] = -1;
             a[2] = -1;
         }
         else{
-            var maxSpeed = 13000/100;  // over 100%
+            var maxSpeed = 16000/100;  // over 100%
+            console.log(str)
             var arr4 =  str.split(" RPM ");
             a[0] = +arr4[0].split("FAN_1 ")[1]/maxSpeed;
             a[1] = +arr4[1].split("FAN_2 ")[1]/maxSpeed;
@@ -1134,22 +1136,22 @@ function saveResults(){
             }
             else{
                 var a = processData(str,serviceList[0]);
+                if (a[1]<0)
+                    obj.v0 = null;
                 obj.v0 = a[1];
             }
                          
-            var str3 = item.arrFans_health[i].data.service.plugin_output;
-            if (str3.indexOf("syntax error")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0){
+            var str4 = item.arrFans_health[i].data.service.plugin_output;
+            if (str4.indexOf("(No output on stdout)")>=0 
+                || str4.indexOf("UNKNOWN")>=0  
+                || str4.indexOf("syntax error")>=0 ){
                 obj.v1=null;
             }
             else{
-
-                var arr4 =  str3.split(" RPM ");
-                if (arr4[0]==undefined)
-                    obj.v1=null;
-                else{
-                    console.log(arr4[1]);
-                    obj.v1 = +arr4[0].split("FAN_2 ");
-                }
+                var c3 =  processData(str4,serviceList[3]);
+                if (c3[1]<0)
+                     obj.v1 = null;
+                obj.v1=c3[1];
             }
             obj.Outlying = 0;
             obj.year = i;

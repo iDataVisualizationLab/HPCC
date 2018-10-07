@@ -629,7 +629,7 @@ function processData(str, serviceName) {
             a[2] = -1;
         }
         else{
-            var maxSpeed = 13000/100;  // over 100%
+            var maxSpeed = 16000/100;  // over 100%
             var arr4 =  str.split(" RPM ");
             a[0] = +arr4[0].split("FAN_1 ")[1]/maxSpeed;
             a[1] = +arr4[1].split("FAN_2 ")[1]/maxSpeed;
@@ -1027,7 +1027,7 @@ function saveResults(){
     }
 
     // Save results for Project 1
-    var filename = "HPCC_Project1.json";
+   /* var filename = "HPCC_Project1.json";
     var type = "json";
     var data = {};
     for (var att in sampleS){
@@ -1098,7 +1098,7 @@ function saveResults(){
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);  
         }, 0); 
-    }
+    }*/
 
 
     // Save results for Outliagnostics ***************************
@@ -1108,8 +1108,8 @@ function saveResults(){
     var numnerOfYear = 100000;
     for (var att in sampleS){
         var item = sampleS[att];
-        if (item.arr.length<numnerOfYear){
-            numnerOfYear = item.arr.length;
+        if (item.arrTemperature.length<numnerOfYear){
+            numnerOfYear = item.arrTemperature.length;
         }
     }   
 
@@ -1126,24 +1126,29 @@ function saveResults(){
        
         var item = sampleS[att];
         for(var i=0;i<numnerOfYear;i++){
-            var str = item.arr[i].data.service.plugin_output;
+            var str = item.arrTemperature[i].data.service.plugin_output;
             var obj = {};
             if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
                 obj.v0=null;
             }
             else{
                 var a = processData(str,serviceList[0]);
-                obj.v0 = a[0];
+                if (a[1]<0)
+                    obj.v0 = null;
+                obj.v0 = a[1];
             }
                          
-            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
-            if (str3.indexOf("syntax error")>=0 ){
+            var str4 = item.arrFans_health[i].data.service.plugin_output;
+            if (str4.indexOf("(No output on stdout)")>=0 
+                || str4.indexOf("UNKNOWN")>=0  
+                || str4.indexOf("syntax error")>=0 ){
                 obj.v1=null;
             }
             else{
-                var b3 =  str3.split("Usage Percentage = ")[1];
-                var c3 =  +b3.split(" :: Total Memory")[0];
-                obj.v1=c3;
+                var c3 =  processData(str4,serviceList[3]);
+                if (c3[1]<0)
+                     obj.v1 = null;
+                obj.v1=c3[1];
             }
             obj.Outlying = 0;
             obj.year = i;
