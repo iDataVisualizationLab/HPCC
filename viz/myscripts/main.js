@@ -94,7 +94,7 @@ var simDuration =1;
 var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 1000;
+    simDuration = 1200;
     numberOfMinutes = 12*60;
 }
 
@@ -106,7 +106,9 @@ var currentHosty = 0;
 
 var charType = "Heatmap";
 //***********************
-var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_health","Power_consumption"]
+var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"]
+var thresholds = [[3,98], [3,98], [3,98], [1050,17850],[3,98] ];
+
 var initialService = "Temperature";
 var selectedService;
 
@@ -382,7 +384,10 @@ function request(){
                     var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrCPU_load.push(result);
-                   // plotResult(result);
+                    if (selectedService == serviceList[1]){
+                        hostResults[name].arr=hostResults[name].arrCPU_load;
+                        plotResult(result);
+                    }     
                 }
                 else{
                     console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -399,7 +404,10 @@ function request(){
                     var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrMemory_usage.push(result);
-                    // plotResult(result);
+                    if (selectedService == serviceList[2]){
+                        hostResults[name].arr=hostResults[name].arrMemory_usage;
+                        plotResult(result);
+                    }  
                 }
                 else{
                     console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -415,7 +423,10 @@ function request(){
                     var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrFans_health.push(result);
-                    // plotResult(result);
+                    if (selectedService == serviceList[3]){
+                        hostResults[name].arr=hostResults[name].arrFans_health;
+                        plotResult(result);
+                    }  
                 }
                 else{
                     console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -431,7 +442,10 @@ function request(){
                     var result = processResult(JSON.parse(this.responseText));
                     var name =  result.data.service.host_name;
                     hostResults[name].arrPower_usage.push(result);
-                    // plotResult(result);
+                    if (selectedService == serviceList[4]){
+                        hostResults[name].arr=hostResults[name].arrPower_usage;
+                        plotResult(result);
+                    }  
                 }
                 else{
                     console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -439,10 +453,7 @@ function request(){
             };
             xmlhttp5.open("GET", url5, true);
             xmlhttp5.send();
-
             var result = {};
-
-            
         }
         else{
             // var result = simulateResults(hosts[count].name);
@@ -600,7 +611,7 @@ function processData(str, serviceName) {
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
-            a[0] = +arrString*180;
+            a[0] = +arrString*10;
             a[1] = -1;
             a[2] = -1;
         }
