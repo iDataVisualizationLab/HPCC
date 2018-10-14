@@ -106,7 +106,7 @@ var currentHosty = 0;
 
 var charType = "Heatmap";
 //***********************
-var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_health","Power_consumption"]
+var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_health"]
 var initialService = "Temperature";
 var selectedService;
 
