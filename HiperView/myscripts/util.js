@@ -95,22 +95,25 @@ function hue(hhh) {
 }
 
 
-function drawLegend() {
-    var arr = [20, 30, 40, 50, 60, 70, 80, 90, 100];
+/// drawLegend *****************************************************************
+function drawLegend(s,arrThresholds, arrColor){
     var arr2 = [];
-    for (var i=20; i<110;i=i+2){
+    for (var i=arrThresholds[0]; i<arrThresholds[arrThresholds.length-1];i=i+2){
         arr2.push(i);
     }
     var x =110;
     var y = 16;
     var r = 20;
+    var xScale = d3.scaleLinear()
+        .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
+        .range([x, x+200]); // output
     svgLengend.selectAll(".legendRect").remove();
     svgLengend.selectAll(".legendRect")
         .data(arr2)
         .enter().append("rect")
         .attr("class", "legendRect")
         .attr("x", function (d,i) {
-            return x +(d-20)*2.5;
+            return xScale(d);
         })
         .attr("y", y)
         .attr("width", 5)
@@ -124,20 +127,22 @@ function drawLegend() {
         .attr("stroke-width", 0);
     svgLengend.selectAll(".legendText").remove();
     svgLengend.selectAll(".legendText")
-        .data(arr)
+        .data(arrThresholds)
         .enter().append("text")
         .attr("class", "legendText")
         .attr("x", function (d,i) {
-            return x +(d-20)*2.5+3;
+            return xScale(d);
         })
         .attr("y", y-2)
         .attr("fill", "#000")
-        .style("text-anchor", "start")
+        .style("text-anchor", "middle")
         .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text(function (d) {
-            return " "+d;
+            return " "+Math.round(d);
         });
+    
+    svgLengend.selectAll(".legendText1").remove();
     svgLengend.append("text")
         .attr("class", "legendText1")
         .attr("x", x-7)
@@ -148,7 +153,8 @@ function drawLegend() {
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Temperature (°F)");
+        //.text("Temperature (°F)");
+        .text(s+"");
     svgLengend.append("text")
         .attr("class", "legendText22")
         .attr("x", x-5)

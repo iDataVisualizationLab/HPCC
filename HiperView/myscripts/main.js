@@ -62,18 +62,6 @@ var startDate = new Date("4/1/2018");
 var endtDate = new Date("1/1/2019");
 var today = new Date();
 
-
-var arrTemp = [20, 60, 80, 100];
-var arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-
-var color = d3.scaleLinear()
-    .domain(arrTemp)
-    .range(arrColor)
-    .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-var opa = d3.scaleLinear()
-    .domain([20, 100])
-    .range([0, 1]);
-
 var maxHostinRack= 60;
 var h_rack = 950;
 var w_rack = (width-23)/10-1;
@@ -108,13 +96,36 @@ var charType = "Heatmap";
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"]
 var thresholds = [[3,98], [3,98], [3,98], [1050,17850],[3,98] ];
-
 var initialService = "Temperature";
 var selectedService;
 
+var arrThresholds;
+var dif, mid;
+var color,opa;
+//var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
+var arrColor = ['#0000cc', '#1a9850','#fee08b', '#cc0000'];
+setColorsAndThresholds(initialService);
+
+function setColorsAndThresholds(s) {
+    for (var i=0; i<serviceList.length;i++){
+        if (s == serviceList[i]){
+            dif = (thresholds[i][1]-thresholds[i][0])/3;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            arrThresholds = [thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([thresholds[i][0],mid, thresholds[i][1]])
+                .range([1,0.2,1]);           
+        }    
+    }             
+}    
+//***********************
+drawLegend(initialService,arrThresholds, arrColor);
 
 main();
-drawLegend(arrTemp, arrColor);
 addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
 
 
@@ -507,8 +518,7 @@ function request(){
                     var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
                     if (h==hosts.length-1){
                         query_time =r.arr[lastIndex].result.query_time;
-                        console.log(query_time);
-                         xx = xTimeSummaryScale(query_time);     
+                        xx = xTimeSummaryScale(query_time);     
                     }
                     arr.push(a[0]);
                 }
@@ -604,31 +614,33 @@ function processData(str, serviceName) {
     }
     else if (serviceName == serviceList[1]){
         var a = [];
-        if (str.indexOf("(No output on stdout)")>=0){
-            a[0] = -1;
-            a[1] = -1;
-            a[2] = -1;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
+            || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = -100;
+            a[1] = -100;
+            a[2] = -100;
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
             a[0] = +arrString*10;
-            a[1] = -1;
-            a[2] = -1;
+            a[1] = -100;
+            a[2] = -100;
         }
         return a;
     }
     else if (serviceName == serviceList[2]) {
         var a = [];
-        if (str.indexOf("(No output on stdout)")>=0){
-            a[0] = -1;
-            a[1] = -1;
-            a[2] = -1;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
+            || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = -100;
+            a[1] = -100;
+            a[2] = -100;
         }
         else{
             var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
             a[0] = +arrString;
-            a[1] = -1;
-            a[2] = -1;
+            a[1] = -100;
+            a[2] = -100;
         }
         return a;
     }
@@ -636,34 +648,34 @@ function processData(str, serviceName) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
             || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -1;
-            a[1] = -1;
-            a[2] = -1;
+            a[0] = -100;
+            a[1] = -100;
+            a[2] = -100;
         }
         else{
-            var maxSpeed = 16000/100;  // over 100%
-            console.log(str)
+           // var maxSpeed = 16000/100;  // over 100%
             var arr4 =  str.split(" RPM ");
-            a[0] = +arr4[0].split("FAN_1 ")[1]/maxSpeed;
-            a[1] = +arr4[1].split("FAN_2 ")[1]/maxSpeed;
-            a[2] = -1;
+            a[0] = +arr4[0].split("FAN_1 ")[1];
+            a[1] = +arr4[1].split("FAN_2 ")[1];
+            a[2] = -100;
         }
         return a;
     }
     else if (serviceName == serviceList[4]) {
         //console.log(str);
          var a = [];
-        if (str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -1;
-            a[1] = -1;
-            a[2] = -1;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
+            || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = -100;
+            a[1] = -100;
+            a[2] = -100;
         }
         else{
             var maxConsumtion = 3.2;  // over 100%
             var arr4 =  str.split(" ");
             a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = -1;
-            a[2] = -1;
+            a[1] = -100;
+            a[2] = -100;
             console.log(a[0]);
         }
         return a;
@@ -1306,7 +1318,6 @@ function addDatasetsOptions() {
     }
     document.getElementById('datasetsSelect').value = initialService;  //************************************************
     selectedService = document.getElementById("datasetsSelect").value;
-
     //loadData();
 }
 
@@ -1315,5 +1326,7 @@ function loadNewData(event) {
     //svg.selectAll("*").remove();
     selectedService = this.options[this.selectedIndex].text;
 
+    setColorsAndThresholds(selectedService);
+    drawLegend(selectedService,arrThresholds, arrColor);
     resetRequest();
 }
