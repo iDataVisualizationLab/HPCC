@@ -3,7 +3,7 @@ Demo video:  https://idatavisualizationlab.github.io/HPCC/HPCViz/
 
 Wednesday Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOverheatSep26
 
-Thursday Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4
+Thursday Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/demo.html
 
 Current branch:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
 
