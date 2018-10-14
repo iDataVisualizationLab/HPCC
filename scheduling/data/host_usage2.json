@@ -1,0 +1,239 @@
+{
+	"_id" : "5af87960aa3644f4a27d3bcb",
+	"queueList" : [
+		{
+			"usedSlots" : 36
+		}
+	],
+	"cpu" : 100,
+	"cluster_name" : "Quanah",
+	"poll_time" : "2018-05-13T17:43:59.892+0000",
+	"poll_epoch" : 1526233439892,
+	"hostname" : "compute-1-10.localdomain",
+	"resourceNumericValues" : {
+		"mem_used" : 4620311069,
+		"swap_total" : 8200166310,
+		"virtual_total" : 210930138874,
+		"swap_used" : 69632,
+		"mem_total" : 202729972564,
+		"virtual_used" : 4620311069
+	},
+	"jobList" : [
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		},
+		{
+			"name" : "F0.006V0.35",
+			"startTime" : "Sun May 13 11:30:43 CDT 2018",
+			"id" : 168841,
+			"user" : "dsundara"
+		}
+	]
+}

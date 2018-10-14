@@ -1,0 +1,4442 @@
+year,place,indiaClass
+1966,Canada,foreign
+2009,France,foreign
+1972,France,foreign
+2016,France,foreign
+2017,France,foreign
+1983,France,foreign
+1981,France,foreign
+2007,France,foreign
+1974,Italy,foreign
+2008,Russia,foreign
+1961,Russia,foreign
+2002,Sri Lanka,foreign
+2012,United Kingdom,foreign
+1984,United Kingdom,foreign
+1987,United Kingdom,foreign
+1983,United Kingdom,foreign
+2008,United Kingdom,foreign
+1983,United Kingdom,foreign
+2016,United Kingdom,foreign
+2017,United Kingdom,foreign
+2012,USA,foreign
+2008,USA,foreign
+2009,USA,foreign
+2002,USA,foreign
+1999,USA,foreign
+2012,USA,foreign
+2015,USA,foreign
+1988,USA,foreign
+2001,USA,foreign
+1974,Afghanistan,foreign
+1967,Burma,foreign
+1975,Burma,foreign
+1984,Canada,foreign
+1968,France,foreign
+1972,United Kingdom,foreign
+1963,United Kingdom,foreign
+1982,USA,foreign
+1955,USA,foreign
+2014,Bangladesh,foreign
+1974,Belgium,foreign
+2015,China,foreign
+2008,China,foreign
+2006,Czechoslovakia,foreign
+2009,Foreigner,foreign
+2015,France,foreign
+2015,Germany,foreign
+2004,Germany,foreign
+2010,Germany,foreign
+2006,Germany,foreign
+1982,Germany,foreign
+2002,Greece,foreign
+2009,Japan,foreign
+2013,Japan,foreign
+2014,Japan,foreign
+2004,Kazakhstan,foreign
+2006,Russia,foreign
+2000,Russia,foreign
+1991,Russia,foreign
+2007,Russia,foreign
+2007,Russia,foreign
+2004,Russia,foreign
+2002,Russia,foreign
+2002,South Korea,foreign
+2012,Switzerland,foreign
+2009,UAE,foreign
+1999,United Kingdom,foreign
+2007,United Kingdom,foreign
+1990,United Kingdom,foreign
+2013,United Kingdom,foreign
+1971,United Kingdom,foreign
+2011,United Kingdom,foreign
+2009,United Kingdom,foreign
+1984,United Kingdom,foreign
+1976,United Kingdom,foreign
+2007,United Kingdom,foreign
+1969,United Kingdom,foreign
+2007,United Kingdom,foreign
+1992,United Kingdom,foreign
+2007,USA,foreign
+2014,USA,foreign
+2012,USA,foreign
+1976,USA,foreign
+2016,USA,foreign
+2017,USA,foreign
+2001,USA,foreign
+2009,USA,foreign
+2015,USA,foreign
+1976,USA,foreign
+2010,USA,foreign
+2013,USA,foreign
+2015,USA,foreign
+1976,USA,foreign
+1969,USA,foreign
+1977,USA,foreign
+2012,USA,foreign
+1984,USA,foreign
+2000,USA,foreign
+2007,USA,foreign
+2001,USA,foreign
+2012,USA,foreign
+2011,USA,foreign
+2008,USA,foreign
+2014,USA,foreign
+2015,USA,foreign
+2008,USA,foreign
+2008,USA,foreign
+2009,USA,foreign
+2007,USA,foreign
+1969,USA,foreign
+2016,USA,foreign
+2017,USA,foreign
+2010,USA,foreign
+2008,USA,foreign
+1982,USA,foreign
+2014,USA,foreign
+2010,USA,foreign
+2007,USA,foreign
+2012,USA,foreign
+1972,Switzerland,foreign
+1963,United Kingdom,foreign
+1992,United Kingdom,foreign
+2009,United Kingdom,foreign
+2007,United Kingdom,foreign
+2001,USA,foreign
+2015,USA,foreign
+2002,USA,foreign
+1999,USA,foreign
+2001,USA,foreign
+2014,USA,foreign
+2014,USA,foreign
+1990,Germany,foreign
+1992,Japan,foreign
+2015,Portugal,foreign
+2008,USA,foreign
+1954,Bhutan,foreign
+2004,Canada,foreign
+2003,France,foreign
+1986,France,foreign
+2003,Germany,foreign
+1977,Germany,foreign
+2001,Japan,foreign
+2015,Japan,foreign
+2002,Japan,foreign
+1989,Japan,foreign
+2004,Japan,foreign
+2014,Netherlands,foreign
+2006,Qatar,foreign
+2008,Russia,foreign
+2012,Singapore,foreign
+2007,South Africa,foreign
+1990,South Africa,foreign
+1998,South Africa,foreign
+2010,Spain,foreign
+2008,Switzerland,foreign
+1990,United Kingdom,foreign
+1989,United Kingdom,foreign
+2008,United Kingdom,foreign
+2000,United Kingdom,foreign
+2002,United Kingdom,foreign
+2011,United Kingdom,foreign
+2014,USA,foreign
+2001,USA,foreign
+2000,USA,foreign
+2002,USA,foreign
+2002,USA,foreign
+2002,USA,foreign
+2016,USA,foreign
+2017,USA,foreign
+2010,USA,foreign
+2001,USA,foreign
+1984,Argentina,foreign
+1958,Austria,foreign
+1992,Bhutan,foreign
+2008,Canada,foreign
+1985,Denmark,foreign
+2015,France,foreign
+1971,Italy,foreign
+2006,Mexico,foreign
+2001,Mexico,foreign
+1991,New Zealand,foreign
+2000,Phillipines,foreign
+2002,Russia,foreign
+2003,Russia,foreign
+1967,Spain,foreign
+1958,Thailand,foreign
+1977,United Kingdom,foreign
+2010,United Kingdom,foreign
+1961,United Kingdom,foreign
+2007,USA,foreign
+2010,USA,foreign
+2001,USA,foreign
+2009,USA,foreign
+2001,USA,foreign
+1975,USA,foreign
+2007,USA,foreign
+1981,USA,foreign
+1969,USA,foreign
+1969,USA,foreign
+2012,USA,foreign
+2013,USA,foreign
+1990,USA,foreign
+2011,USA,foreign
+2015,USA,foreign
+1973,USA,foreign
+2010,USA,foreign
+2001,USA,foreign
+1986,USA,foreign
+2008,USA,foreign
+2013,USA,foreign
+2011,USA,foreign
+1968,USA,foreign
+2009,USA,foreign
+2007,USA,foreign
+2005,Australia,foreign
+2013,Bangladesh,foreign
+2008,France,foreign
+2015,France,foreign
+2007,Ireland,foreign
+2000,Malaysia,foreign
+1987,Pakistan,foreign
+1970,Switzerland,foreign
+2011,UAE,foreign
+2009,UAE,foreign
+2010,UAE,foreign
+2016,UAE,foreign
+2017,UAE,foreign
+2008,UAE,foreign
+1977,United Kingdom,foreign
+1982,United Kingdom,foreign
+1983,United Kingdom,foreign
+2015,USA,foreign
+2011,USA,foreign
+2015,USA,foreign
+2010,USA,foreign
+1982,Denmark,foreign
+2008,New Zealand,foreign
+1971,USA,foreign
+2010,Bahrain,foreign
+1964,Beirut,foreign
+2016,Ireland,foreign
+2017,Ireland,foreign
+2007,Japan,foreign
+2012,Japan,foreign
+2012,Singapore,foreign
+2011,Singapore,foreign
+2009,UAE,foreign
+2008,United Kingdom,foreign
+2010,United Kingdom,foreign
+2016,USA,foreign
+2017,USA,foreign
+2007,USA,foreign
+2008,USA,foreign
+2016,Serbia,foreign
+2017,Serbia,foreign
+2016,USA,foreign
+2017,USA,foreign
+2005,Delhi,india
+2001,Delhi,india
+2008,Delhi,india
+2009,Delhi,india
+1975,Delhi,india
+1991,Delhi,india
+2001,Delhi,india
+2000,Delhi,india
+2011,Delhi,india
+1985,Delhi,india
+2008,Delhi,india
+2014,Delhi,india
+2004,Delhi,india
+2004,Delhi,india
+2014,Delhi,india
+1992,Delhi,india
+1986,Delhi,india
+1990,Delhi,india
+1972,Delhi,india
+2011,Delhi,india
+1992,Delhi,india
+1977,Delhi,india
+1991,Delhi,india
+2010,Delhi,india
+1985,Delhi,india
+1974,Delhi,india
+2010,Delhi,india
+2007,Delhi,india
+2009,Delhi,india
+2014,Delhi,india
+2005,Delhi,india
+1977,Delhi,india
+1983,Delhi,india
+1991,Delhi,india
+2009,Delhi,india
+1969,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2012,Delhi,india
+2008,Delhi,india
+1968,Delhi,india
+2012,Delhi,india
+2006,Delhi,india
+1990,Delhi,india
+2011,Delhi,india
+1976,Delhi,india
+2009,Delhi,india
+2002,Delhi,india
+2005,Delhi,india
+1990,Delhi,india
+2012,Delhi,india
+2009,Delhi,india
+1990,Delhi,india
+1990,Delhi,india
+2006,Delhi,india
+1991,Delhi,india
+2006,Delhi,india
+1991,Delhi,india
+1966,Delhi,india
+1973,Delhi,india
+2010,Delhi,india
+2012,Delhi,india
+2005,Delhi,india
+2015,Delhi,india
+2002,Delhi,india
+2003,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1974,Delhi,india
+2003,Delhi,india
+2013,Delhi,india
+2014,Delhi,india
+2015,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2007,Delhi,india
+1984,Delhi,india
+2000,Delhi,india
+1972,Delhi,india
+2008,Delhi,india
+1969,Delhi,india
+2015,Delhi,india
+1984,Delhi,india
+2000,Delhi,india
+2007,Delhi,india
+1986,Delhi,india
+1972,Delhi,india
+2010,Delhi,india
+2003,Delhi,india
+2003,Delhi,india
+1992,Delhi,india
+2006,Delhi,india
+2007,Delhi,india
+1971,Delhi,india
+2013,Delhi,india
+2002,Delhi,india
+1999,Delhi,india
+2013,Delhi,india
+2003,Delhi,india
+1973,Delhi,india
+2005,Delhi,india
+1966,Delhi,india
+1991,Delhi,india
+2006,Delhi,india
+2007,Delhi,india
+1968,Delhi,india
+2000,Delhi,india
+2013,Delhi,india
+1999,Delhi,india
+2000,Delhi,india
+1967,Delhi,india
+1981,Delhi,india
+1992,Delhi,india
+2003,Delhi,india
+1970,Delhi,india
+1999,Delhi,india
+2010,Delhi,india
+1966,Delhi,india
+1992,Delhi,india
+1972,Delhi,india
+2001,Delhi,india
+1992,Delhi,india
+2004,Delhi,india
+2008,Delhi,india
+2003,Delhi,india
+1976,Delhi,india
+1973,Delhi,india
+2001,Delhi,india
+2004,Delhi,india
+1984,Delhi,india
+1960,Delhi,india
+1982,Delhi,india
+2001,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1968,Delhi,india
+1998,Delhi,india
+2010,Delhi,india
+1988,Delhi,india
+1990,Delhi,india
+1983,Delhi,india
+1976,Delhi,india
+1977,Delhi,india
+1971,Delhi,india
+1965,Delhi,india
+1981,Delhi,india
+2010,Delhi,india
+1973,Delhi,india
+1967,Delhi,india
+1964,Delhi,india
+1977,Delhi,india
+2011,Delhi,india
+1972,Delhi,india
+1976,Delhi,india
+1988,Delhi,india
+1969,Delhi,india
+2008,Delhi,india
+1990,Delhi,india
+1998,Delhi,india
+1983,Delhi,india
+2010,Delhi,india
+1962,Delhi,india
+1999,Delhi,india
+2001,Delhi,india
+1973,Delhi,india
+2005,Delhi,india
+1974,Delhi,india
+1987,Delhi,india
+1985,Delhi,india
+1970,Delhi,india
+1965,Delhi,india
+1985,Delhi,india
+1972,Delhi,india
+1974,Delhi,india
+1983,Delhi,india
+1960,Delhi,india
+1992,Delhi,india
+1974,Delhi,india
+1972,Delhi,india
+1977,Delhi,india
+1984,Delhi,india
+1985,Delhi,india
+2006,Delhi,india
+1992,Delhi,india
+1962,Delhi,india
+2005,Delhi,india
+2008,Delhi,india
+1963,Delhi,india
+1984,Delhi,india
+1972,Delhi,india
+1971,Delhi,india
+1968,Delhi,india
+1973,Delhi,india
+1985,Delhi,india
+2000,Delhi,india
+1968,Delhi,india
+1999,Delhi,india
+1970,Delhi,india
+1987,Delhi,india
+1972,Delhi,india
+2013,Delhi,india
+2002,Delhi,india
+1987,Delhi,india
+1986,Delhi,india
+2000,Delhi,india
+1992,Delhi,india
+1987,Delhi,india
+1984,Delhi,india
+1966,Delhi,india
+2010,Delhi,india
+1972,Delhi,india
+2007,Delhi,india
+1961,Delhi,india
+1976,Delhi,india
+1992,Delhi,india
+1972,Delhi,india
+1973,Delhi,india
+1977,Delhi,india
+1982,Delhi,india
+1970,Delhi,india
+1954,Delhi,india
+1973,Delhi,india
+1974,Delhi,india
+1975,Delhi,india
+1986,Delhi,india
+1969,Delhi,india
+1976,Delhi,india
+1991,Delhi,india
+1976,Delhi,india
+1972,Delhi,india
+1986,Delhi,india
+2015,Delhi,india
+2012,Delhi,india
+1963,Delhi,india
+1985,Delhi,india
+1972,Delhi,india
+1976,Delhi,india
+2011,Delhi,india
+1986,Delhi,india
+1987,Delhi,india
+1985,Delhi,india
+1971,Delhi,india
+1971,Delhi,india
+1974,Delhi,india
+1969,Delhi,india
+1975,Delhi,india
+1983,Delhi,india
+2011,Delhi,india
+1966,Delhi,india
+1972,Delhi,india
+1972,Delhi,india
+1985,Delhi,india
+1974,Delhi,india
+1982,Delhi,india
+2012,Delhi,india
+2000,Delhi,india
+2007,Delhi,india
+1986,Delhi,india
+1989,Delhi,india
+1986,Delhi,india
+2014,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1992,Delhi,india
+2009,Delhi,india
+1986,Delhi,india
+2006,Delhi,india
+2013,Delhi,india
+1967,Delhi,india
+2009,Delhi,india
+2004,Delhi,india
+1969,Delhi,india
+2005,Delhi,india
+1986,Delhi,india
+1989,Delhi,india
+2013,Delhi,india
+2001,Delhi,india
+1990,Delhi,india
+2014,Delhi,india
+2015,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1992,Delhi,india
+1988,Delhi,india
+2003,Delhi,india
+1960,Delhi,india
+2011,Delhi,india
+2008,Delhi,india
+1989,Delhi,india
+1976,Delhi,india
+1967,Delhi,india
+1998,Delhi,india
+2015,Delhi,india
+2008,Delhi,india
+2010,Delhi,india
+1970,Delhi,india
+2015,Delhi,india
+1968,Delhi,india
+1977,Delhi,india
+1977,Delhi,india
+2014,Delhi,india
+2006,Delhi,india
+2012,Delhi,india
+1971,Delhi,india
+1999,Delhi,india
+2010,Delhi,india
+1989,Delhi,india
+2002,Delhi,india
+1965,Delhi,india
+2004,Delhi,india
+1990,Delhi,india
+1977,Delhi,india
+2004,Delhi,india
+2002,Delhi,india
+1962,Delhi,india
+1998,Delhi,india
+2000,Delhi,india
+1966,Delhi,india
+2009,Delhi,india
+2003,Delhi,india
+1971,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1954,Delhi,india
+1999,Delhi,india
+1988,Delhi,india
+2014,Delhi,india
+1991,Delhi,india
+2007,Delhi,india
+2011,Delhi,india
+1981,Delhi,india
+1969,Delhi,india
+1992,Delhi,india
+1972,Delhi,india
+1984,Delhi,india
+2009,Delhi,india
+2006,Delhi,india
+1975,Delhi,india
+2000,Delhi,india
+1955,Delhi,india
+2014,Delhi,india
+2007,Delhi,india
+2010,Delhi,india
+1965,Delhi,india
+2003,Delhi,india
+2006,Delhi,india
+2005,Delhi,india
+2014,Delhi,india
+1976,Delhi,india
+2007,Delhi,india
+1992,Delhi,india
+1983,Delhi,india
+2002,Delhi,india
+1971,Delhi,india
+2014,Delhi,india
+2001,Delhi,india
+1972,Delhi,india
+2000,Delhi,india
+1967,Delhi,india
+1968,Delhi,india
+2004,Delhi,india
+1985,Delhi,india
+2008,Delhi,india
+2011,Delhi,india
+1992,Delhi,india
+2013,Delhi,india
+1963,Delhi,india
+1970,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2007,Delhi,india
+2014,Delhi,india
+2011,Delhi,india
+2010,Delhi,india
+1992,Delhi,india
+1973,Delhi,india
+1983,Delhi,india
+1999,Delhi,india
+2010,Delhi,india
+1991,Delhi,india
+1954,Delhi,india
+2008,Delhi,india
+1999,Delhi,india
+1971,Delhi,india
+2009,Delhi,india
+1991,Delhi,india
+2005,Delhi,india
+1992,Delhi,india
+1969,Delhi,india
+1990,Delhi,india
+2004,Delhi,india
+2008,Delhi,india
+2015,Delhi,india
+2004,Delhi,india
+2013,Delhi,india
+2015,Delhi,india
+1977,Delhi,india
+2011,Delhi,india
+2009,Delhi,india
+1990,Delhi,india
+1992,Delhi,india
+1972,Delhi,india
+2008,Delhi,india
+2004,Delhi,india
+2005,Delhi,india
+1990,Delhi,india
+1977,Delhi,india
+1965,Delhi,india
+1992,Delhi,india
+2015,Delhi,india
+1967,Delhi,india
+2015,Delhi,india
+1992,Delhi,india
+2005,Delhi,india
+2010,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2007,Delhi,india
+2009,Delhi,india
+2009,Delhi,india
+2007,Delhi,india
+2009,Delhi,india
+2014,Delhi,india
+2003,Delhi,india
+2015,Delhi,india
+1973,Delhi,india
+1982,Delhi,india
+2007,Delhi,india
+1986,Delhi,india
+1986,Delhi,india
+1969,Delhi,india
+2007,Delhi,india
+1972,Delhi,india
+2014,Delhi,india
+2007,Delhi,india
+2003,Delhi,india
+2004,Delhi,india
+1954,Delhi,india
+1969,Delhi,india
+1992,Delhi,india
+2009,Delhi,india
+1971,Delhi,india
+1970,Delhi,india
+2003,Delhi,india
+2008,Delhi,india
+1999,Delhi,india
+2009,Delhi,india
+1983,Delhi,india
+1966,Delhi,india
+2008,Delhi,india
+1972,Delhi,india
+2013,Delhi,india
+1985,Delhi,india
+2001,Delhi,india
+2013,Delhi,india
+1992,Delhi,india
+1987,Delhi,india
+2006,Delhi,india
+1971,Delhi,india
+2005,Delhi,india
+2015,Delhi,india
+2002,Delhi,india
+1998,Delhi,india
+2003,Delhi,india
+1991,Delhi,india
+1981,Delhi,india
+1982,Delhi,india
+2015,Delhi,india
+2014,Delhi,india
+2005,Delhi,india
+1974,Delhi,india
+2012,Delhi,india
+2010,Delhi,india
+2009,Delhi,india
+2006,Delhi,india
+1992,Delhi,india
+2005,Delhi,india
+1969,Delhi,india
+1984,Delhi,india
+2001,Delhi,india
+2014,Delhi,india
+2010,Delhi,india
+1992,Delhi,india
+1977,Delhi,india
+1968,Delhi,india
+1963,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1985,Delhi,india
+1971,Delhi,india
+1992,Delhi,india
+2014,Delhi,india
+2007,Delhi,india
+2008,Delhi,india
+1991,Delhi,india
+1990,Delhi,india
+1984,Delhi,india
+1991,Delhi,india
+2007,Delhi,india
+2001,Delhi,india
+1976,Delhi,india
+1974,Delhi,india
+2003,Delhi,india
+1973,Delhi,india
+1991,Delhi,india
+2001,Delhi,india
+2007,Delhi,india
+2014,Delhi,india
+2015,Delhi,india
+2008,Delhi,india
+2014,Delhi,india
+2010,Delhi,india
+1998,Delhi,india
+2005,Delhi,india
+1987,Delhi,india
+2002,Delhi,india
+2002,Delhi,india
+1983,Delhi,india
+1973,Delhi,india
+1989,Delhi,india
+2006,Delhi,india
+2013,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1987,Delhi,india
+1970,Delhi,india
+2007,Delhi,india
+1966,Delhi,india
+1991,Delhi,india
+2014,Delhi,india
+2008,Delhi,india
+1962,Delhi,india
+1992,Delhi,india
+2003,Delhi,india
+1973,Delhi,india
+2015,Delhi,india
+2008,Delhi,india
+1998,Delhi,india
+1991,Delhi,india
+1985,Delhi,india
+1985,Delhi,india
+2006,Delhi,india
+1986,Delhi,india
+1964,Delhi,india
+2010,Delhi,india
+2015,Delhi,india
+1991,Delhi,india
+2007,Delhi,india
+1989,Delhi,india
+1990,Delhi,india
+2011,Delhi,india
+1955,Delhi,india
+2004,Delhi,india
+1967,Delhi,india
+1992,Delhi,india
+1991,Delhi,india
+1963,Delhi,india
+2004,Delhi,india
+2014,Delhi,india
+2013,Delhi,india
+2008,Delhi,india
+2004,Delhi,india
+2005,Delhi,india
+2006,Delhi,india
+1992,Delhi,india
+2005,Delhi,india
+1984,Delhi,india
+2002,Delhi,india
+2000,Delhi,india
+2013,Delhi,india
+2009,Delhi,india
+2015,Delhi,india
+1992,Delhi,india
+2000,Delhi,india
+2000,Delhi,india
+2011,Delhi,india
+1990,Delhi,india
+2008,Delhi,india
+2003,Delhi,india
+2001,Delhi,india
+2013,Delhi,india
+2009,Delhi,india
+1992,Delhi,india
+2005,Delhi,india
+2009,Delhi,india
+2009,Delhi,india
+2003,Delhi,india
+2010,Delhi,india
+2011,Delhi,india
+1997,Delhi,india
+1992,Delhi,india
+2001,Delhi,india
+1992,Delhi,india
+2015,Delhi,india
+1991,Delhi,india
+2007,Delhi,india
+1999,Delhi,india
+2015,Delhi,india
+1973,Delhi,india
+2005,Delhi,india
+1999,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2011,Delhi,india
+1968,Delhi,india
+2015,Delhi,india
+2005,Delhi,india
+2009,Delhi,india
+2002,Delhi,india
+1988,Delhi,india
+1967,Delhi,india
+2015,Delhi,india
+1998,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+1986,Delhi,india
+2005,Delhi,india
+1988,Delhi,india
+1971,Delhi,india
+2011,Delhi,india
+1964,Delhi,india
+2008,Delhi,india
+2003,Delhi,india
+2007,Delhi,india
+2008,Delhi,india
+2012,Delhi,india
+1991,Delhi,india
+1971,Delhi,india
+2006,Delhi,india
+2009,Delhi,india
+2000,Delhi,india
+2002,Delhi,india
+2015,Delhi,india
+2005,Delhi,india
+2007,Delhi,india
+1988,Delhi,india
+2002,Delhi,india
+2000,Delhi,india
+1997,Delhi,india
+1974,Delhi,india
+1982,Delhi,india
+1954,Delhi,india
+2002,Delhi,india
+2002,Delhi,india
+2013,Delhi,india
+1983,Delhi,india
+1989,Delhi,india
+2008,Delhi,india
+1976,Delhi,india
+2013,Delhi,india
+1990,Delhi,india
+2003,Delhi,india
+1958,Delhi,india
+1990,Delhi,india
+2014,Delhi,india
+2000,Delhi,india
+1968,Delhi,india
+1973,Delhi,india
+2007,Delhi,india
+2005,Delhi,india
+2008,Delhi,india
+2009,Delhi,india
+1982,Delhi,india
+1955,Delhi,india
+1974,Delhi,india
+1971,Delhi,india
+1981,Delhi,india
+1999,Delhi,india
+2010,Delhi,india
+1985,Delhi,india
+1992,Delhi,india
+1977,Delhi,india
+2008,Delhi,india
+2007,Delhi,india
+2012,Delhi,india
+1999,Delhi,india
+2013,Delhi,india
+1958,Delhi,india
+1961,Delhi,india
+1968,Delhi,india
+1972,Delhi,india
+2007,Delhi,india
+2003,Delhi,india
+1989,Delhi,india
+2015,Delhi,india
+1991,Delhi,india
+1989,Delhi,india
+1969,Delhi,india
+2000,Delhi,india
+1998,Delhi,india
+2008,Delhi,india
+1998,Delhi,india
+2004,Delhi,india
+1991,Delhi,india
+2003,Delhi,india
+1957,Delhi,india
+2014,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2004,Delhi,india
+2009,Delhi,india
+1970,Delhi,india
+2008,Delhi,india
+2011,Delhi,india
+2014,Delhi,india
+1971,Delhi,india
+1992,Delhi,india
+2005,Delhi,india
+2000,Delhi,india
+2013,Delhi,india
+1992,Delhi,india
+2014,Delhi,india
+2012,Delhi,india
+1985,Delhi,india
+1969,Delhi,india
+1971,Delhi,india
+1968,Delhi,india
+1971,Delhi,india
+1991,Delhi,india
+1991,Delhi,india
+1963,Delhi,india
+1977,Delhi,india
+2010,Delhi,india
+1991,Delhi,india
+1999,Delhi,india
+2002,Delhi,india
+1990,Delhi,india
+1975,Delhi,india
+2014,Delhi,india
+1970,Delhi,india
+1969,Delhi,india
+1958,Delhi,india
+2002,Delhi,india
+2003,Delhi,india
+1965,Delhi,india
+2008,Delhi,india
+1972,Delhi,india
+1971,Delhi,india
+2013,Delhi,india
+1999,Delhi,india
+2006,Delhi,india
+1984,Delhi,india
+2006,Delhi,india
+1967,Delhi,india
+2012,Delhi,india
+1986,Delhi,india
+1971,Delhi,india
+1982,Delhi,india
+1970,Delhi,india
+1972,Delhi,india
+2007,Delhi,india
+1975,Delhi,india
+2012,Delhi,india
+2007,Delhi,india
+2015,Delhi,india
+1992,Delhi,india
+2008,Delhi,india
+1977,Delhi,india
+1992,Delhi,india
+2001,Delhi,india
+1970,Delhi,india
+1971,Delhi,india
+2005,Delhi,india
+1983,Delhi,india
+1976,Delhi,india
+1965,Delhi,india
+1992,Delhi,india
+2002,Delhi,india
+1974,Delhi,india
+1991,Delhi,india
+1991,Delhi,india
+2006,Delhi,india
+1965,Delhi,india
+1967,Delhi,india
+2005,Delhi,india
+1983,Delhi,india
+2005,Delhi,india
+2012,Delhi,india
+2000,Delhi,india
+1983,Delhi,india
+2015,Delhi,india
+1992,Delhi,india
+2011,Delhi,india
+1986,Delhi,india
+2010,Delhi,india
+2011,Delhi,india
+2008,Delhi,india
+2011,Delhi,india
+1972,Delhi,india
+2005,Delhi,india
+1971,Delhi,india
+2010,Delhi,india
+1966,Delhi,india
+1970,Delhi,india
+1971,Delhi,india
+2003,Delhi,india
+1971,Delhi,india
+1991,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2010,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2001,Delhi,india
+2008,Delhi,india
+2012,Delhi,india
+1969,Delhi,india
+2016,Delhi,india
+2017,Delhi,india
+2006,Delhi,india
+2007,Delhi,india
+2008,Delhi,india
+2013,Delhi,india
+2010,Karnataka,india
+2013,Karnataka,india
+1981,Karnataka,india
+1991,Karnataka,india
+1975,Karnataka,india
+1969,Karnataka,india
+1992,Karnataka,india
+1988,Karnataka,india
+1958,Karnataka,india
+1971,Karnataka,india
+2002,Karnataka,india
+1992,Karnataka,india
+2011,Karnataka,india
+1974,Karnataka,india
+1972,Karnataka,india
+2004,Karnataka,india
+1992,Karnataka,india
+1959,Karnataka,india
+2005,Karnataka,india
+2001,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+1970,Karnataka,india
+1976,Karnataka,india
+1992,Karnataka,india
+2010,Karnataka,india
+2005,Karnataka,india
+2012,Karnataka,india
+2012,Karnataka,india
+1976,Karnataka,india
+2011,Karnataka,india
+1971,Karnataka,india
+1983,Karnataka,india
+1983,Karnataka,india
+1961,Karnataka,india
+1973,Karnataka,india
+1972,Karnataka,india
+1972,Karnataka,india
+1973,Karnataka,india
+1955,Karnataka,india
+1954,Karnataka,india
+1974,Karnataka,india
+1955,Karnataka,india
+1981,Karnataka,india
+1959,Karnataka,india
+1972,Karnataka,india
+2006,Karnataka,india
+1973,Karnataka,india
+1966,Karnataka,india
+1985,Karnataka,india
+1972,Karnataka,india
+1990,Karnataka,india
+2005,Karnataka,india
+1974,Karnataka,india
+1954,Karnataka,india
+1960,Karnataka,india
+1972,Karnataka,india
+1966,Karnataka,india
+2009,Karnataka,india
+1960,Karnataka,india
+1991,Karnataka,india
+2001,Karnataka,india
+1962,Karnataka,india
+1990,Karnataka,india
+1974,Karnataka,india
+1967,Karnataka,india
+1968,Karnataka,india
+1987,Karnataka,india
+2011,Karnataka,india
+2001,Karnataka,india
+1961,Karnataka,india
+1984,Karnataka,india
+1968,Karnataka,india
+2008,Karnataka,india
+1958,Karnataka,india
+1988,Karnataka,india
+2009,Karnataka,india
+1971,Karnataka,india
+1970,Karnataka,india
+1991,Karnataka,india
+1964,Karnataka,india
+2009,Karnataka,india
+2011,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2004,Karnataka,india
+2009,Karnataka,india
+1957,Karnataka,india
+2004,Karnataka,india
+2011,Karnataka,india
+1965,Karnataka,india
+1998,Karnataka,india
+1961,Karnataka,india
+2010,Karnataka,india
+1971,Karnataka,india
+2010,Karnataka,india
+2006,Karnataka,india
+2004,Karnataka,india
+2012,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2014,Karnataka,india
+2010,Karnataka,india
+1956,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+1990,Karnataka,india
+2007,Karnataka,india
+2005,Karnataka,india
+1968,Karnataka,india
+1972,Karnataka,india
+1975,Karnataka,india
+2000,Karnataka,india
+1986,Karnataka,india
+2012,Karnataka,india
+2015,Karnataka,india
+2011,Karnataka,india
+1992,Karnataka,india
+2004,Karnataka,india
+2013,Karnataka,india
+2003,Karnataka,india
+1974,Karnataka,india
+1991,Karnataka,india
+2005,Karnataka,india
+2013,Karnataka,india
+2014,Karnataka,india
+2001,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2014,Karnataka,india
+2009,Karnataka,india
+2001,Karnataka,india
+1973,Karnataka,india
+1991,Karnataka,india
+2004,Karnataka,india
+2005,Karnataka,india
+2015,Karnataka,india
+2007,Karnataka,india
+2005,Karnataka,india
+2014,Karnataka,india
+2002,Karnataka,india
+1982,Karnataka,india
+1992,Karnataka,india
+2000,Karnataka,india
+2006,Karnataka,india
+2011,Karnataka,india
+2010,Karnataka,india
+2014,Karnataka,india
+2005,Karnataka,india
+2004,Karnataka,india
+1998,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+1977,Karnataka,india
+2004,Karnataka,india
+2006,Karnataka,india
+2005,Karnataka,india
+2002,Karnataka,india
+2006,Karnataka,india
+1984,Karnataka,india
+2006,Karnataka,india
+2014,Karnataka,india
+2002,Karnataka,india
+2000,Karnataka,india
+1968,Karnataka,india
+2015,Karnataka,india
+2001,Karnataka,india
+1975,Karnataka,india
+2003,Karnataka,india
+1987,Karnataka,india
+2002,Karnataka,india
+1987,Karnataka,india
+2013,Karnataka,india
+2015,Karnataka,india
+2015,Karnataka,india
+1966,Karnataka,india
+1971,Karnataka,india
+1981,Karnataka,india
+1974,Karnataka,india
+1985,Karnataka,india
+1998,Karnataka,india
+2007,Karnataka,india
+2001,Karnataka,india
+2004,Karnataka,india
+1976,Karnataka,india
+2003,Karnataka,india
+1998,Karnataka,india
+1982,Karnataka,india
+2015,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2010,Karnataka,india
+1965,Karnataka,india
+2004,Karnataka,india
+2012,Karnataka,india
+2011,Karnataka,india
+2010,Karnataka,india
+2004,Karnataka,india
+2006,Karnataka,india
+2000,Karnataka,india
+2015,Karnataka,india
+1968,Karnataka,india
+1959,Karnataka,india
+1970,Karnataka,india
+2000,Karnataka,india
+1987,Karnataka,india
+1998,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+1958,Karnataka,india
+2006,Karnataka,india
+2011,Karnataka,india
+1972,Karnataka,india
+1969,Karnataka,india
+1959,Karnataka,india
+1973,Karnataka,india
+1991,Karnataka,india
+2006,Karnataka,india
+1968,Karnataka,india
+1961,Karnataka,india
+2008,Karnataka,india
+1972,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2005,Karnataka,india
+1972,Karnataka,india
+1970,Karnataka,india
+1971,Karnataka,india
+2014,Karnataka,india
+2013,Karnataka,india
+2001,Karnataka,india
+2001,Karnataka,india
+2009,Karnataka,india
+2004,Karnataka,india
+2013,Karnataka,india
+1967,Karnataka,india
+1982,Karnataka,india
+2005,Karnataka,india
+2011,Karnataka,india
+1989,Karnataka,india
+2008,Karnataka,india
+2000,Karnataka,india
+1991,Karnataka,india
+2011,Karnataka,india
+2015,Karnataka,india
+2016,Karnataka,india
+2017,Karnataka,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2004,Maharashtra,india
+2006,Maharashtra,india
+2003,Maharashtra,india
+2010,Maharashtra,india
+1970,Maharashtra,india
+2006,Maharashtra,india
+1964,Maharashtra,india
+2009,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2010,Maharashtra,india
+2009,Maharashtra,india
+2000,Maharashtra,india
+1971,Maharashtra,india
+1984,Maharashtra,india
+2001,Maharashtra,india
+2015,Maharashtra,india
+1992,Maharashtra,india
+2012,Maharashtra,india
+2004,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2013,Maharashtra,india
+1992,Maharashtra,india
+2008,Maharashtra,india
+1999,Maharashtra,india
+1962,Maharashtra,india
+2007,Maharashtra,india
+1970,Maharashtra,india
+1962,Maharashtra,india
+2001,Maharashtra,india
+1999,Maharashtra,india
+2009,Maharashtra,india
+1972,Maharashtra,india
+1985,Maharashtra,india
+2001,Maharashtra,india
+2013,Maharashtra,india
+2010,Maharashtra,india
+1992,Maharashtra,india
+1970,Maharashtra,india
+2004,Maharashtra,india
+2003,Maharashtra,india
+2002,Maharashtra,india
+1969,Maharashtra,india
+2001,Maharashtra,india
+2012,Maharashtra,india
+1968,Maharashtra,india
+1970,Maharashtra,india
+1958,Maharashtra,india
+1976,Maharashtra,india
+1982,Maharashtra,india
+1991,Maharashtra,india
+2006,Maharashtra,india
+1975,Maharashtra,india
+2002,Maharashtra,india
+2004,Maharashtra,india
+2000,Maharashtra,india
+1992,Maharashtra,india
+2009,Maharashtra,india
+2000,Maharashtra,india
+1970,Maharashtra,india
+2009,Maharashtra,india
+2001,Maharashtra,india
+1972,Maharashtra,india
+2002,Maharashtra,india
+1982,Maharashtra,india
+1999,Maharashtra,india
+2003,Maharashtra,india
+2015,Maharashtra,india
+1968,Maharashtra,india
+2000,Maharashtra,india
+1975,Maharashtra,india
+1990,Maharashtra,india
+1999,Maharashtra,india
+1992,Maharashtra,india
+2013,Maharashtra,india
+1977,Maharashtra,india
+1988,Maharashtra,india
+2011,Maharashtra,india
+2011,Maharashtra,india
+1992,Maharashtra,india
+1990,Maharashtra,india
+2013,Maharashtra,india
+1970,Maharashtra,india
+1961,Maharashtra,india
+1989,Maharashtra,india
+2008,Maharashtra,india
+1969,Maharashtra,india
+1982,Maharashtra,india
+2011,Maharashtra,india
+1969,Maharashtra,india
+1987,Maharashtra,india
+2002,Maharashtra,india
+1977,Maharashtra,india
+1967,Maharashtra,india
+1971,Maharashtra,india
+1998,Maharashtra,india
+2009,Maharashtra,india
+1969,Maharashtra,india
+1999,Maharashtra,india
+2001,Maharashtra,india
+1968,Maharashtra,india
+1975,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2008,Maharashtra,india
+2013,Maharashtra,india
+1972,Maharashtra,india
+1991,Maharashtra,india
+1974,Maharashtra,india
+1971,Maharashtra,india
+1992,Maharashtra,india
+1991,Maharashtra,india
+1963,Maharashtra,india
+1974,Maharashtra,india
+1991,Maharashtra,india
+2015,Maharashtra,india
+1990,Maharashtra,india
+2014,Maharashtra,india
+2013,Maharashtra,india
+1983,Maharashtra,india
+1991,Maharashtra,india
+1969,Maharashtra,india
+1964,Maharashtra,india
+1985,Maharashtra,india
+2003,Maharashtra,india
+1992,Maharashtra,india
+1990,Maharashtra,india
+1974,Maharashtra,india
+1990,Maharashtra,india
+2001,Maharashtra,india
+2006,Maharashtra,india
+1977,Maharashtra,india
+2014,Maharashtra,india
+2014,Maharashtra,india
+1976,Maharashtra,india
+2009,Maharashtra,india
+2002,Maharashtra,india
+1990,Maharashtra,india
+2009,Maharashtra,india
+2001,Maharashtra,india
+2015,Maharashtra,india
+1970,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2004,Maharashtra,india
+1990,Maharashtra,india
+1970,Maharashtra,india
+2013,Maharashtra,india
+2003,Maharashtra,india
+1976,Maharashtra,india
+2005,Maharashtra,india
+1991,Maharashtra,india
+2014,Maharashtra,india
+2000,Maharashtra,india
+2013,Maharashtra,india
+1971,Maharashtra,india
+2005,Maharashtra,india
+1971,Maharashtra,india
+2015,Maharashtra,india
+2010,Maharashtra,india
+1984,Maharashtra,india
+1986,Maharashtra,india
+2003,Maharashtra,india
+2011,Maharashtra,india
+2006,Maharashtra,india
+2010,Maharashtra,india
+2015,Maharashtra,india
+1999,Maharashtra,india
+1967,Maharashtra,india
+2003,Maharashtra,india
+2012,Maharashtra,india
+2011,Maharashtra,india
+2012,Maharashtra,india
+1988,Maharashtra,india
+2005,Maharashtra,india
+2012,Maharashtra,india
+2009,Maharashtra,india
+1968,Maharashtra,india
+1992,Maharashtra,india
+2011,Maharashtra,india
+2007,Maharashtra,india
+2000,Maharashtra,india
+2015,Maharashtra,india
+1991,Maharashtra,india
+2001,Maharashtra,india
+2002,Maharashtra,india
+2010,Maharashtra,india
+1976,Maharashtra,india
+1991,Maharashtra,india
+1973,Maharashtra,india
+1985,Maharashtra,india
+2014,Maharashtra,india
+2013,Maharashtra,india
+1974,Maharashtra,india
+2013,Maharashtra,india
+1969,Maharashtra,india
+1999,Maharashtra,india
+2010,Maharashtra,india
+2011,Maharashtra,india
+1968,Maharashtra,india
+2013,Maharashtra,india
+2011,Maharashtra,india
+1992,Maharashtra,india
+2008,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2007,Maharashtra,india
+1971,Maharashtra,india
+2009,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2012,Maharashtra,india
+1967,Maharashtra,india
+1972,Maharashtra,india
+2014,Maharashtra,india
+2014,Maharashtra,india
+1984,Maharashtra,india
+1987,Maharashtra,india
+1964,Maharashtra,india
+1972,Maharashtra,india
+1972,Maharashtra,india
+2011,Maharashtra,india
+2012,Maharashtra,india
+2005,Maharashtra,india
+2002,Maharashtra,india
+1982,Maharashtra,india
+1959,Maharashtra,india
+1972,Maharashtra,india
+1986,Maharashtra,india
+1989,Maharashtra,india
+1954,Maharashtra,india
+1987,Maharashtra,india
+1973,Maharashtra,india
+2009,Maharashtra,india
+1969,Maharashtra,india
+1955,Maharashtra,india
+1981,Maharashtra,india
+1986,Maharashtra,india
+1974,Maharashtra,india
+1972,Maharashtra,india
+1966,Maharashtra,india
+1975,Maharashtra,india
+1972,Maharashtra,india
+1957,Maharashtra,india
+1987,Maharashtra,india
+1991,Maharashtra,india
+1955,Maharashtra,india
+1972,Maharashtra,india
+1970,Maharashtra,india
+1985,Maharashtra,india
+1963,Maharashtra,india
+1965,Maharashtra,india
+2010,Maharashtra,india
+1973,Maharashtra,india
+1973,Maharashtra,india
+1990,Maharashtra,india
+1987,Maharashtra,india
+1964,Maharashtra,india
+1977,Maharashtra,india
+1968,Maharashtra,india
+1954,Maharashtra,india
+1973,Maharashtra,india
+1966,Maharashtra,india
+1971,Maharashtra,india
+1976,Maharashtra,india
+1973,Maharashtra,india
+1973,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+1971,Maharashtra,india
+1964,Maharashtra,india
+1967,Maharashtra,india
+1965,Maharashtra,india
+1974,Maharashtra,india
+1961,Maharashtra,india
+2010,Maharashtra,india
+2002,Maharashtra,india
+1971,Maharashtra,india
+1987,Maharashtra,india
+2004,Maharashtra,india
+1968,Maharashtra,india
+1990,Maharashtra,india
+2002,Maharashtra,india
+1986,Maharashtra,india
+1973,Maharashtra,india
+1990,Maharashtra,india
+1967,Maharashtra,india
+1968,Maharashtra,india
+1972,Maharashtra,india
+1955,Maharashtra,india
+2006,Maharashtra,india
+1969,Maharashtra,india
+1984,Maharashtra,india
+1957,Maharashtra,india
+1992,Maharashtra,india
+1992,Maharashtra,india
+1976,Maharashtra,india
+1972,Maharashtra,india
+1976,Maharashtra,india
+2007,Maharashtra,india
+1974,Maharashtra,india
+1983,Maharashtra,india
+2001,Maharashtra,india
+1972,Maharashtra,india
+2001,Maharashtra,india
+2001,Maharashtra,india
+1969,Maharashtra,india
+1970,Maharashtra,india
+2009,Maharashtra,india
+1976,Maharashtra,india
+1992,Maharashtra,india
+2004,Maharashtra,india
+1990,Maharashtra,india
+2002,Maharashtra,india
+1977,Maharashtra,india
+2013,Maharashtra,india
+1988,Maharashtra,india
+1967,Maharashtra,india
+2002,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+1991,Maharashtra,india
+1999,Maharashtra,india
+1965,Maharashtra,india
+1969,Maharashtra,india
+1998,Maharashtra,india
+1971,Maharashtra,india
+1962,Maharashtra,india
+2013,Maharashtra,india
+1992,Maharashtra,india
+1988,Maharashtra,india
+1969,Maharashtra,india
+1966,Maharashtra,india
+1975,Maharashtra,india
+1970,Maharashtra,india
+1966,Maharashtra,india
+1972,Maharashtra,india
+1981,Maharashtra,india
+1962,Maharashtra,india
+1973,Maharashtra,india
+1992,Maharashtra,india
+1972,Maharashtra,india
+1968,Maharashtra,india
+1984,Maharashtra,india
+2005,Maharashtra,india
+2012,Maharashtra,india
+1990,Maharashtra,india
+1968,Maharashtra,india
+1970,Maharashtra,india
+1970,Maharashtra,india
+2006,Maharashtra,india
+1971,Maharashtra,india
+1970,Maharashtra,india
+2003,Maharashtra,india
+1974,Maharashtra,india
+1992,Maharashtra,india
+1975,Maharashtra,india
+1991,Maharashtra,india
+1992,Maharashtra,india
+1965,Maharashtra,india
+1968,Maharashtra,india
+1991,Maharashtra,india
+1969,Maharashtra,india
+1969,Maharashtra,india
+2007,Maharashtra,india
+2001,Maharashtra,india
+2013,Maharashtra,india
+1990,Maharashtra,india
+2009,Maharashtra,india
+2004,Maharashtra,india
+1984,Maharashtra,india
+1990,Maharashtra,india
+2005,Maharashtra,india
+2009,Maharashtra,india
+1989,Maharashtra,india
+1965,Maharashtra,india
+1972,Maharashtra,india
+1992,Maharashtra,india
+1964,Maharashtra,india
+2005,Maharashtra,india
+1983,Maharashtra,india
+1975,Maharashtra,india
+1972,Maharashtra,india
+1976,Maharashtra,india
+1967,Maharashtra,india
+1966,Maharashtra,india
+1987,Maharashtra,india
+1998,Maharashtra,india
+2000,Maharashtra,india
+2011,Maharashtra,india
+1959,Maharashtra,india
+1982,Maharashtra,india
+1962,Maharashtra,india
+1973,Maharashtra,india
+1966,Maharashtra,india
+1982,Maharashtra,india
+1973,Maharashtra,india
+2003,Maharashtra,india
+2012,Maharashtra,india
+2008,Maharashtra,india
+2011,Maharashtra,india
+1969,Maharashtra,india
+1962,Maharashtra,india
+1972,Maharashtra,india
+1992,Maharashtra,india
+1990,Maharashtra,india
+2014,Maharashtra,india
+2012,Maharashtra,india
+1974,Maharashtra,india
+2013,Maharashtra,india
+1990,Maharashtra,india
+2012,Maharashtra,india
+1981,Maharashtra,india
+1969,Maharashtra,india
+2002,Maharashtra,india
+1983,Maharashtra,india
+2013,Maharashtra,india
+2014,Maharashtra,india
+2010,Maharashtra,india
+1992,Maharashtra,india
+1973,Maharashtra,india
+1973,Maharashtra,india
+1985,Maharashtra,india
+1958,Maharashtra,india
+1991,Maharashtra,india
+1961,Maharashtra,india
+1972,Maharashtra,india
+1971,Maharashtra,india
+2004,Maharashtra,india
+2014,Maharashtra,india
+1959,Maharashtra,india
+2007,Maharashtra,india
+2013,Maharashtra,india
+2000,Maharashtra,india
+2002,Maharashtra,india
+2012,Maharashtra,india
+1991,Maharashtra,india
+2008,Maharashtra,india
+2006,Maharashtra,india
+1969,Maharashtra,india
+1954,Maharashtra,india
+1955,Maharashtra,india
+1992,Maharashtra,india
+2010,Maharashtra,india
+2002,Maharashtra,india
+1960,Maharashtra,india
+2005,Maharashtra,india
+2009,Maharashtra,india
+2014,Maharashtra,india
+2012,Maharashtra,india
+2011,Maharashtra,india
+2003,Maharashtra,india
+2007,Maharashtra,india
+2007,Maharashtra,india
+1954,Maharashtra,india
+1970,Maharashtra,india
+1954,Maharashtra,india
+1954,Maharashtra,india
+1959,Maharashtra,india
+1990,Maharashtra,india
+1967,Maharashtra,india
+2004,Maharashtra,india
+1991,Maharashtra,india
+1963,Maharashtra,india
+1992,Maharashtra,india
+1972,Maharashtra,india
+1967,Maharashtra,india
+1989,Maharashtra,india
+1968,Maharashtra,india
+1962,Maharashtra,india
+2001,Maharashtra,india
+1957,Maharashtra,india
+1998,Maharashtra,india
+1972,Maharashtra,india
+1954,Maharashtra,india
+1959,Maharashtra,india
+1956,Maharashtra,india
+1965,Maharashtra,india
+1963,Maharashtra,india
+1960,Maharashtra,india
+2013,Maharashtra,india
+2007,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2011,Maharashtra,india
+2012,Maharashtra,india
+1967,Maharashtra,india
+2009,Maharashtra,india
+1998,Maharashtra,india
+1999,Maharashtra,india
+2003,Maharashtra,india
+1988,Maharashtra,india
+1972,Maharashtra,india
+1976,Maharashtra,india
+2006,Maharashtra,india
+1985,Maharashtra,india
+2008,Maharashtra,india
+2001,Maharashtra,india
+2006,Maharashtra,india
+1972,Maharashtra,india
+1958,Maharashtra,india
+1972,Maharashtra,india
+2013,Maharashtra,india
+1981,Maharashtra,india
+1990,Maharashtra,india
+2002,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2000,Maharashtra,india
+1968,Maharashtra,india
+2003,Maharashtra,india
+1967,Maharashtra,india
+2002,Maharashtra,india
+1954,Maharashtra,india
+1959,Maharashtra,india
+2003,Maharashtra,india
+1965,Maharashtra,india
+2004,Maharashtra,india
+2014,Maharashtra,india
+2001,Maharashtra,india
+1973,Maharashtra,india
+1957,Maharashtra,india
+2001,Maharashtra,india
+2012,Maharashtra,india
+2006,Maharashtra,india
+1975,Maharashtra,india
+1999,Maharashtra,india
+1984,Maharashtra,india
+1990,Maharashtra,india
+2001,Maharashtra,india
+1987,Maharashtra,india
+1969,Maharashtra,india
+1974,Maharashtra,india
+1990,Maharashtra,india
+2013,Maharashtra,india
+1984,Maharashtra,india
+1984,Maharashtra,india
+1975,Maharashtra,india
+1987,Maharashtra,india
+2001,Maharashtra,india
+1975,Maharashtra,india
+2007,Maharashtra,india
+1991,Maharashtra,india
+2000,Maharashtra,india
+2014,Maharashtra,india
+1999,Maharashtra,india
+1969,Maharashtra,india
+2014,Maharashtra,india
+1970,Maharashtra,india
+2014,Maharashtra,india
+2006,Maharashtra,india
+1958,Maharashtra,india
+2013,Maharashtra,india
+2014,Maharashtra,india
+2013,Maharashtra,india
+2012,Maharashtra,india
+2003,Maharashtra,india
+2005,Maharashtra,india
+1975,Maharashtra,india
+2001,Maharashtra,india
+2007,Maharashtra,india
+1984,Maharashtra,india
+2008,Maharashtra,india
+2015,Maharashtra,india
+2001,Maharashtra,india
+2000,Maharashtra,india
+2002,Maharashtra,india
+1968,Maharashtra,india
+1971,Maharashtra,india
+1992,Maharashtra,india
+2001,Maharashtra,india
+1983,Maharashtra,india
+1970,Maharashtra,india
+2010,Maharashtra,india
+1985,Maharashtra,india
+1971,Maharashtra,india
+1981,Maharashtra,india
+1968,Maharashtra,india
+1959,Maharashtra,india
+1991,Maharashtra,india
+1970,Maharashtra,india
+1971,Maharashtra,india
+1959,Maharashtra,india
+1958,Maharashtra,india
+1991,Maharashtra,india
+2014,Maharashtra,india
+1975,Maharashtra,india
+2010,Maharashtra,india
+1958,Maharashtra,india
+2009,Maharashtra,india
+1959,Maharashtra,india
+1977,Maharashtra,india
+1965,Maharashtra,india
+1973,Maharashtra,india
+1972,Maharashtra,india
+1974,Maharashtra,india
+1959,Maharashtra,india
+1969,Maharashtra,india
+1987,Maharashtra,india
+1976,Maharashtra,india
+2011,Maharashtra,india
+1961,Maharashtra,india
+1991,Maharashtra,india
+2000,Maharashtra,india
+2008,Maharashtra,india
+1992,Maharashtra,india
+1990,Maharashtra,india
+2010,Maharashtra,india
+1960,Maharashtra,india
+1963,Maharashtra,india
+1971,Maharashtra,india
+1986,Maharashtra,india
+1972,Maharashtra,india
+1992,Maharashtra,india
+1970,Maharashtra,india
+1968,Maharashtra,india
+1959,Maharashtra,india
+1968,Maharashtra,india
+2004,Maharashtra,india
+1989,Maharashtra,india
+2005,Maharashtra,india
+2009,Maharashtra,india
+2005,Maharashtra,india
+1960,Maharashtra,india
+1970,Maharashtra,india
+2014,Maharashtra,india
+1969,Maharashtra,india
+2013,Maharashtra,india
+2012,Maharashtra,india
+1971,Maharashtra,india
+1969,Maharashtra,india
+1963,Maharashtra,india
+1999,Maharashtra,india
+1963,Maharashtra,india
+1971,Maharashtra,india
+2002,Maharashtra,india
+2002,Maharashtra,india
+1970,Maharashtra,india
+1974,Maharashtra,india
+1990,Maharashtra,india
+2011,Maharashtra,india
+1982,Maharashtra,india
+1992,Maharashtra,india
+1985,Maharashtra,india
+2012,Maharashtra,india
+1991,Maharashtra,india
+1973,Maharashtra,india
+2011,Maharashtra,india
+1983,Maharashtra,india
+2011,Maharashtra,india
+1991,Maharashtra,india
+1988,Maharashtra,india
+1960,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+1971,Maharashtra,india
+1973,Maharashtra,india
+1991,Maharashtra,india
+2001,Maharashtra,india
+2006,Maharashtra,india
+1969,Maharashtra,india
+1962,Maharashtra,india
+1965,Maharashtra,india
+2001,Maharashtra,india
+1998,Maharashtra,india
+1966,Maharashtra,india
+1981,Maharashtra,india
+1984,Maharashtra,india
+1955,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+1972,Maharashtra,india
+1986,Maharashtra,india
+1992,Maharashtra,india
+1987,Maharashtra,india
+1969,Maharashtra,india
+2002,Maharashtra,india
+2001,Maharashtra,india
+2002,Maharashtra,india
+1987,Maharashtra,india
+1965,Maharashtra,india
+1991,Maharashtra,india
+1983,Maharashtra,india
+1973,Maharashtra,india
+2003,Maharashtra,india
+1990,Maharashtra,india
+2014,Maharashtra,india
+1984,Maharashtra,india
+1962,Maharashtra,india
+2013,Maharashtra,india
+1962,Maharashtra,india
+2012,Maharashtra,india
+2010,Maharashtra,india
+1999,Maharashtra,india
+2008,Maharashtra,india
+2014,Maharashtra,india
+2004,Maharashtra,india
+1991,Maharashtra,india
+2011,Maharashtra,india
+1980,Maharashtra,india
+1990,Maharashtra,india
+1991,Maharashtra,india
+2006,Maharashtra,india
+1965,Maharashtra,india
+2013,Maharashtra,india
+2009,Maharashtra,india
+2012,Maharashtra,india
+1988,Maharashtra,india
+2009,Maharashtra,india
+2012,Maharashtra,india
+2008,Maharashtra,india
+1966,Maharashtra,india
+2001,Maharashtra,india
+1990,Maharashtra,india
+1971,Maharashtra,india
+2010,Maharashtra,india
+2011,Maharashtra,india
+1970,Maharashtra,india
+2006,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+2006,Maharashtra,india
+1992,Maharashtra,india
+2002,Maharashtra,india
+1955,Maharashtra,india
+2007,Maharashtra,india
+2003,Maharashtra,india
+1958,Maharashtra,india
+1992,Maharashtra,india
+2008,Maharashtra,india
+2013,Maharashtra,india
+2001,Maharashtra,india
+2016,Maharashtra,india
+2017,Maharashtra,india
+1961,Maharashtra,india
+1992,Maharashtra,india
+1989,Maharashtra,india
+2013,Maharashtra,india
+2007,Maharashtra,india
+1976,Maharashtra,india
+1998,Maharashtra,india
+1991,Maharashtra,india
+1985,Maharashtra,india
+1975,Maharashtra,india
+2014,Maharashtra,india
+2002,Maharashtra,india
+2009,Maharashtra,india
+2001,Maharashtra,india
+2014,Maharashtra,india
+1971,Maharashtra,india
+2000,Maharashtra,india
+2008,Maharashtra,india
+1992,Maharashtra,india
+1965,Maharashtra,india
+2004,Maharashtra,india
+1988,Maharashtra,india
+1999,Maharashtra,india
+2006,Maharashtra,india
+1990,Maharashtra,india
+1989,Maharashtra,india
+2012,Maharashtra,india
+1967,Maharashtra,india
+1967,Maharashtra,india
+1961,Maharashtra,india
+1974,Maharashtra,india
+2016,Andaman & Nicobar,india
+2017,Andaman & Nicobar,india
+1992,Andhra Pradesh,india
+1974,Andhra Pradesh,india
+1957,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+2008,Andhra Pradesh,india
+1992,Andhra Pradesh,india
+1967,Andhra Pradesh,india
+1968,Andhra Pradesh,india
+1971,Andhra Pradesh,india
+2003,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1986,Andhra Pradesh,india
+1984,Andhra Pradesh,india
+1992,Andhra Pradesh,india
+1956,Andhra Pradesh,india
+1992,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1977,Assam,india
+1998,Assam,india
+2013,Assam,india
+2008,Assam,india
+1991,Assam,india
+2002,Assam,india
+2009,Assam,india
+1972,Bihar,india
+1992,Bihar,india
+2007,Bihar,india
+1984,Bihar,india
+2010,Bihar,india
+1975,Bihar,india
+2011,Bihar,india
+1991,Bihar,india
+1970,Bihar,india
+1991,Bihar,india
+1971,Bihar,india
+2013,Chandigarh,india
+2011,Chandigarh,india
+1984,Chandigarh,india
+2014,Chattisgarh,india
+2013,Chattisgarh,india
+2009,Chattisgarh,india
+2008,Chattisgarh,india
+2016,Chattisgarh,india
+2017,Chattisgarh,india
+2005,Chattisgarh,india
+2003,Chattisgarh,india
+1985,Goa,india
+2005,Goa,india
+2012,Goa,india
+2006,Goa,india
+2007,Goa,india
+2016,Gujarat,india
+2017,Gujarat,india
+1984,Gujarat,india
+2011,Gujarat,india
+1981,Gujarat,india
+1990,Gujarat,india
+2007,Gujarat,india
+1983,Gujarat,india
+2014,Gujarat,india
+1989,Gujarat,india
+2011,Gujarat,india
+1971,Gujarat,india
+1971,Gujarat,india
+2006,Gujarat,india
+2012,Gujarat,india
+2004,Gujarat,india
+1987,Gujarat,india
+2010,Gujarat,india
+2010,Gujarat,india
+2010,Gujarat,india
+1965,Gujarat,india
+1992,Gujarat,india
+1955,Gujarat,india
+2009,Gujarat,india
+1965,Gujarat,india
+1972,Gujarat,india
+1985,Gujarat,india
+1989,Gujarat,india
+2011,Haryana,india
+1983,Haryana,india
+2006,Haryana,india
+2014,Himachal Pradesh,india
+2012,Himachal Pradesh,india
+1977,Jammu & Kashmir,india
+2013,Jammu & Kashmir,india
+2013,Jammu & Kashmir,india
+2009,Jammu & Kashmir,india
+2004,Jammu & Kashmir,india
+2012,Jammu & Kashmir,india
+2002,Jammu & Kashmir,india
+2013,Jammu & Kashmir,india
+2007,Jammu & Kashmir,india
+1999,Jammu & Kashmir,india
+2012,Jharkhand,india
+2006,Jharkhand,india
+2005,Jharkhand,india
+2011,Jharkhand,india
+2008,Jharkhand,india
+2010,Jharkhand,india
+1984,Kerala,india
+2006,Kerala,india
+1982,Kerala,india
+2003,Kerala,india
+1991,Kerala,india
+1973,Kerala,india
+1971,Kerala,india
+1990,Kerala,india
+2010,Kerala,india
+1975,Kerala,india
+2009,Kerala,india
+2014,Kerala,india
+2009,Kerala,india
+1970,Kerala,india
+2012,Kerala,india
+2007,Kerala,india
+2006,Kerala,india
+2004,Kerala,india
+2008,Kerala,india
+2011,Kerala,india
+1965,Kerala,india
+2010,Kerala,india
+1974,Kerala,india
+2011,Kerala,india
+1974,Kerala,india
+2009,Kerala,india
+1984,Kerala,india
+2008,Kerala,india
+2004,Kerala,india
+2007,Kerala,india
+1971,Kerala,india
+2013,Kerala,india
+2011,Kerala,india
+1983,Kerala,india
+2007,Kerala,india
+2010,Kerala,india
+2007,Kerala,india
+2011,Kerala,india
+1973,Kerala,india
+2009,Kerala,india
+1971,Kerala,india
+2002,Madhya Pradesh,india
+1990,Madhya Pradesh,india
+2016,Madhya Pradesh,india
+2017,Madhya Pradesh,india
+1984,Madhya Pradesh,india
+2015,Madhya Pradesh,india
+2010,Madhya Pradesh,india
+2002,Madhya Pradesh,india
+1960,Madhya Pradesh,india
+1973,Madhya Pradesh,india
+1957,Madhya Pradesh,india
+2008,Madhya Pradesh,india
+2011,Madhya Pradesh,india
+1961,Madhya Pradesh,india
+2012,Madhya Pradesh,india
+1977,Madhya Pradesh,india
+1990,Madhya Pradesh,india
+1988,Madhya Pradesh,india
+2012,Madhya Pradesh,india
+2006,Madhya Pradesh,india
+2007,Madhya Pradesh,india
+2006,Manipur,india
+2014,Manipur,india
+1975,Manipur,india
+2009,Manipur,india
+2010,Manipur,india
+2004,Manipur,india
+2016,Manipur,india
+2017,Manipur,india
+2008,Manipur,india
+2011,Manipur,india
+1998,Manipur,india
+2003,Manipur,india
+1970,Manipur,india
+2012,Manipur,india
+2007,Manipur,india
+2010,Manipur,india
+1989,Manipur,india
+2005,Manipur,india
+1972,Manipur,india
+2007,Manipur,india
+2005,Manipur,india
+2008,Meghalaya,india
+2015,Meghalaya,india
+2009,Meghalaya,india
+2008,Nagaland,india
+1992,Odisha,india
+2005,Odisha,india
+2008,Odisha,india
+2006,Odisha,india
+2013,Odisha,india
+1974,Odisha,india
+1988,Odisha,india
+2000,Odisha,india
+2005,Odisha,india
+1998,Odisha,india
+2004,Odisha,india
+2004,Odisha,india
+2012,Odisha,india
+1976,Odisha,india
+1992,Odisha,india
+2015,Odisha,india
+2010,Odisha,india
+1976,Odisha,india
+2001,Odisha,india
+2013,Odisha,india
+1969,Odisha,india
+1975,Odisha,india
+2014,Odisha,india
+1988,Odisha,india
+1969,Punjab,india
+1991,Punjab,india
+2008,Punjab,india
+1983,Punjab,india
+1967,Punjab,india
+2009,Punjab,india
+1969,Punjab,india
+2005,Punjab,india
+1971,Punjab,india
+1973,Punjab,india
+1983,Punjab,india
+2010,Rajasthan,india
+1968,Rajasthan,india
+2016,Rajasthan,india
+2017,Rajasthan,india
+1982,Rajasthan,india
+1986,Rajasthan,india
+1974,Rajasthan,india
+2004,Rajasthan,india
+1988,Rajasthan,india
+2015,Rajasthan,india
+1963,Rajasthan,india
+2001,Rajasthan,india
+2012,Rajasthan,india
+2014,Rajasthan,india
+2010,Rajasthan,india
+2016,Rajasthan,india
+2017,Rajasthan,india
+1984,Rajasthan,india
+1984,Rajasthan,india
+2009,Rajasthan,india
+1970,Rajasthan,india
+2013,Rajasthan,india
+2012,Rajasthan,india
+2006,Rajasthan,india
+2002,Rajasthan,india
+2013,Sikkim,india
+2007,Sikkim,india
+2011,Telangana,india
+1968,Telangana,india
+1988,Telangana,india
+2007,Telangana,india
+2013,Telangana,india
+2001,Telangana,india
+2009,Telangana,india
+2013,Telangana,india
+2011,Telangana,india
+1990,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+1975,Telangana,india
+2009,Telangana,india
+2006,Telangana,india
+2015,Telangana,india
+2007,Telangana,india
+2014,Telangana,india
+1992,Telangana,india
+2001,Telangana,india
+2010,Telangana,india
+2007,Telangana,india
+2013,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+1990,Telangana,india
+2010,Telangana,india
+1969,Telangana,india
+2001,Telangana,india
+2001,Telangana,india
+2008,Telangana,india
+1974,Uttarakhand,india
+2006,Uttarakhand,india
+1970,Andhra Pradesh,india
+1962,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1967,Andhra Pradesh,india
+1974,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1964,Andhra Pradesh,india
+1962,Andhra Pradesh,india
+1971,Assam,india
+1963,Assam,india
+1969,Assam,india
+1973,Bihar,india
+1987,Bihar,india
+2011,Bihar,india
+1971,Bihar,india
+1971,Bihar,india
+1974,Bihar,india
+1985,Chandigarh,india
+1972,Chandigarh,india
+1989,Chandigarh,india
+1975,Chandigarh,india
+1971,Chandigarh,india
+1972,Chandigarh,india
+1972,Chandigarh,india
+1983,Goa,india
+1954,Gujarat,india
+1983,Gujarat,india
+1973,Gujarat,india
+1972,Gujarat,india
+1998,Gujarat,india
+2013,Haryana,india
+1963,Haryana,india
+1968,Haryana,india
+2007,Haryana,india
+2009,Haryana,india
+2009,Haryana,india
+1999,Himachal Pradesh,india
+1976,Himachal Pradesh,india
+1991,Jammu & Kashmir,india
+1983,Jammu & Kashmir,india
+1991,Jammu & Kashmir,india
+1974,Jammu & Kashmir,india
+1974,Jammu & Kashmir,india
+1974,Jammu & Kashmir,india
+1961,Jammu & Kashmir,india
+1972,Jammu & Kashmir,india
+1958,Kerala,india
+1957,Kerala,india
+1983,Kerala,india
+1958,Kerala,india
+1985,Kerala,india
+1959,Kerala,india
+2008,Kerala,india
+1972,Madhya Pradesh,india
+2011,Madhya Pradesh,india
+1975,Madhya Pradesh,india
+1976,Madhya Pradesh,india
+1972,Madhya Pradesh,india
+1975,Madhya Pradesh,india
+1985,Meghalaya,india
+1983,Mizoram,india
+1954,Odisha,india
+1971,Odisha,india
+1962,Odisha,india
+1972,Punjab,india
+1972,Punjab,india
+1988,Punjab,india
+1959,Punjab,india
+1967,Punjab,india
+1955,Punjab,india
+1972,Punjab,india
+1970,Punjab,india
+1960,Punjab,india
+1972,Punjab,india
+1971,Punjab,india
+1987,Punjab,india
+1965,Punjab,india
+1976,Punjab,india
+1987,Punjab,india
+1965,Punjab,india
+1955,Punjab,india
+1972,Punjab,india
+1971,Punjab,india
+1966,Punjab,india
+1966,Punjab,india
+1977,Punjab,india
+1972,Punjab,india
+1965,Punjab,india
+1972,Punjab,india
+1972,Punjab,india
+1954,Punjab,india
+1972,Punjab,india
+1958,Punjab,india
+1972,Punjab,india
+1989,Punjab,india
+1988,Punjab,india
+1962,Punjab,india
+1963,Punjab,india
+1972,Punjab,india
+1955,Punjab,india
+1972,Punjab,india
+1954,Punjab,india
+1962,Punjab,india
+1983,Punjab,india
+1985,Rajasthan,india
+1961,Rajasthan,india
+2002,Rajasthan,india
+1956,Rajasthan,india
+1969,Rajasthan,india
+1970,Rajasthan,india
+1972,Rajasthan,india
+1957,Telangana,india
+1974,Telangana,india
+2001,Telangana,india
+2011,Telangana,india
+1983,Telangana,india
+1960,Telangana,india
+1954,Telangana,india
+1967,Telangana,india
+2004,Telangana,india
+2000,Uttarakhand,india
+1975,Uttarakhand,india
+1969,Uttarakhand,india
+1985,Uttarakhand,india
+1974,Uttarakhand,india
+1984,Uttarakhand,india
+1973,Uttarakhand,india
+1967,Uttarakhand,india
+1973,Uttarakhand,india
+2016,Jharkhand,india
+2017,Jharkhand,india
+1981,Andhra Pradesh,india
+1976,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1969,Andhra Pradesh,india
+2011,Andhra Pradesh,india
+1984,Andhra Pradesh,india
+2001,Andhra Pradesh,india
+1968,Andhra Pradesh,india
+1968,Andhra Pradesh,india
+1972,Andhra Pradesh,india
+2013,Andhra Pradesh,india
+2001,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+2002,Andhra Pradesh,india
+1987,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+2003,Andhra Pradesh,india
+2016,Andhra Pradesh,india
+2017,Andhra Pradesh,india
+2011,Arunachal Pradesh,india
+1987,Assam,india
+1970,Assam,india
+2010,Assam,india
+1971,Assam,india
+1983,Assam,india
+2001,Assam,india
+2009,Assam,india
+2007,Assam,india
+2016,Assam,india
+2017,Assam,india
+1977,Assam,india
+2003,Assam,india
+2016,Assam,india
+2017,Assam,india
+1955,Assam,india
+1967,Assam,india
+2015,Assam,india
+1988,Assam,india
+2011,Assam,india
+1957,Assam,india
+1976,Assam,india
+1990,Assam,india
+2016,Assam,india
+2017,Assam,india
+1989,Assam,india
+1991,Assam,india
+2008,Assam,india
+1984,Assam,india
+1992,Assam,india
+2007,Assam,india
+1970,Assam,india
+1975,Bihar,india
+1985,Bihar,india
+2005,Bihar,india
+2013,Bihar,india
+1989,Bihar,india
+1982,Bihar,india
+2013,Bihar,india
+1970,Bihar,india
+1962,Bihar,india
+1991,Bihar,india
+2009,Bihar,india
+2003,Bihar,india
+1960,Bihar,india
+1972,Bihar,india
+1957,Bihar,india
+1991,Bihar,india
+1985,Bihar,india
+2015,Bihar,india
+1961,Bihar,india
+1983,Chandigarh,india
+1973,Chandigarh,india
+1998,Chandigarh,india
+2008,Chandigarh,india
+2005,Chandigarh,india
+2006,Chandigarh,india
+1972,Chandigarh,india
+1969,Chandigarh,india
+2009,Chandigarh,india
+1982,Chandigarh,india
+1957,Chandigarh,india
+1971,Chandigarh,india
+2007,Chattisgarh,india
+1976,Chattisgarh,india
+2010,Chattisgarh,india
+1967,Goa,india
+2015,Goa,india
+2010,Goa,india
+2002,Goa,india
+2008,Goa,india
+2010,Goa,india
+2009,Goa,india
+2004,Gujarat,india
+1975,Gujarat,india
+2007,Gujarat,india
+2008,Gujarat,india
+1967,Gujarat,india
+2016,Gujarat,india
+2017,Gujarat,india
+1992,Gujarat,india
+2013,Gujarat,india
+2014,Gujarat,india
+1962,Gujarat,india
+1992,Gujarat,india
+2014,Gujarat,india
+2015,Gujarat,india
+1983,Gujarat,india
+1967,Gujarat,india
+1976,Gujarat,india
+2004,Gujarat,india
+1958,Gujarat,india
+2011,Gujarat,india
+2006,Gujarat,india
+1974,Gujarat,india
+2015,Gujarat,india
+2006,Haryana,india
+2016,Haryana,india
+2017,Haryana,india
+2012,Haryana,india
+2005,Haryana,india
+2008,Haryana,india
+2002,Haryana,india
+1990,Himachal Pradesh,india
+2015,Himachal Pradesh,india
+2011,Himachal Pradesh,india
+2000,Jammu & Kashmir,india
+1968,Jammu & Kashmir,india
+2005,Jammu & Kashmir,india
+2008,Jammu & Kashmir,india
+1962,Jammu & Kashmir,india
+2005,Jammu & Kashmir,india
+2010,Jammu & Kashmir,india
+2010,Jammu & Kashmir,india
+2006,Jammu & Kashmir,india
+1989,Jammu & Kashmir,india
+1976,Jammu & Kashmir,india
+2011,Jammu & Kashmir,india
+1990,Jammu & Kashmir,india
+2011,Jammu & Kashmir,india
+2014,Jammu & Kashmir,india
+2008,Jammu & Kashmir,india
+2009,Kerala,india
+1999,Kerala,india
+2007,Kerala,india
+1968,Kerala,india
+1959,Kerala,india
+1998,Kerala,india
+2000,Kerala,india
+1965,Kerala,india
+1971,Kerala,india
+1988,Kerala,india
+2001,Kerala,india
+2004,Kerala,india
+1973,Kerala,india
+2008,Kerala,india
+2005,Kerala,india
+1974,Kerala,india
+2005,Kerala,india
+1975,Kerala,india
+1973,Kerala,india
+2006,Kerala,india
+2015,Kerala,india
+1987,Kerala,india
+2011,Kerala,india
+1998,Kerala,india
+2003,Kerala,india
+2004,Kerala,india
+2012,Kerala,india
+1973,Kerala,india
+1967,Kerala,india
+2006,Kerala,india
+1984,Kerala,india
+1985,Kerala,india
+1974,Kerala,india
+1982,Kerala,india
+1954,Kerala,india
+2008,Kerala,india
+2014,Kerala,india
+2009,Madhya Pradesh,india
+1999,Madhya Pradesh,india
+1972,Madhya Pradesh,india
+2010,Madhya Pradesh,india
+1961,Madhya Pradesh,india
+2015,Madhya Pradesh,india
+1985,Madhya Pradesh,india
+1972,Madhya Pradesh,india
+1992,Madhya Pradesh,india
+1970,Madhya Pradesh,india
+1963,Madhya Pradesh,india
+2003,Madhya Pradesh,india
+2005,Madhya Pradesh,india
+1966,Madhya Pradesh,india
+1991,Madhya Pradesh,india
+2004,Madhya Pradesh,india
+1974,Madhya Pradesh,india
+1999,Madhya Pradesh,india
+1958,Madhya Pradesh,india
+1972,Madhya Pradesh,india
+1971,Madhya Pradesh,india
+2012,Madhya Pradesh,india
+1966,Madhya Pradesh,india
+1990,Manipur,india
+1985,Manipur,india
+1971,Manipur,india
+2000,Manipur,india
+1987,Manipur,india
+1976,Manipur,india
+1992,Manipur,india
+1999,Manipur,india
+2014,Manipur,india
+2010,Meghalaya,india
+1977,Meghalaya,india
+2004,Meghalaya,india
+2005,Meghalaya,india
+2005,Meghalaya,india
+2011,Mizoram,india
+2014,Mizoram,india
+2005,Mizoram,india
+2013,Mizoram,india
+1985,Mizoram,india
+1987,Mizoram,india
+2007,Mizoram,india
+1998,Mizoram,india
+2009,Mizoram,india
+2006,Mizoram,india
+2010,Mizoram,india
+1986,Mizoram,india
+2000,Mizoram,india
+1991,Mizoram,india
+2012,Mizoram,india
+1984,Nagaland,india
+2003,Nagaland,india
+1960,Odisha,india
+1986,Odisha,india
+1981,Odisha,india
+2016,Odisha,india
+2017,Odisha,india
+2009,Odisha,india
+1971,Odisha,india
+1976,Odisha,india
+1955,Odisha,india
+1967,Odisha,india
+1961,Odisha,india
+1955,Odisha,india
+2007,Odisha,india
+1990,Odisha,india
+1968,Odisha,india
+2006,Odisha,india
+1974,Odisha,india
+2003,Odisha,india
+2011,Odisha,india
+1962,Odisha,india
+2008,Odisha,india
+1991,Odisha,india
+1990,Odisha,india
+2009,Puducherry,india
+2001,Puducherry,india
+1985,Puducherry,india
+1971,Punjab,india
+2016,Punjab,india
+2017,Punjab,india
+1966,Punjab,india
+2004,Punjab,india
+1970,Punjab,india
+1984,Punjab,india
+1985,Punjab,india
+1998,Punjab,india
+1976,Punjab,india
+1974,Punjab,india
+1975,Punjab,india
+1971,Punjab,india
+1969,Punjab,india
+1954,Punjab,india
+1984,Punjab,india
+1987,Punjab,india
+1991,Punjab,india
+2012,Punjab,india
+1990,Punjab,india
+1956,Punjab,india
+1970,Punjab,india
+1970,Punjab,india
+2010,Rajasthan,india
+2011,Rajasthan,india
+1982,Rajasthan,india
+1965,Rajasthan,india
+1983,Rajasthan,india
+1964,Rajasthan,india
+1984,Rajasthan,india
+1961,Rajasthan,india
+1958,Rajasthan,india
+1955,Rajasthan,india
+1977,Rajasthan,india
+1956,Rajasthan,india
+2007,Rajasthan,india
+2006,Rajasthan,india
+2005,Sikkim,india
+2012,Sikkim,india
+2009,Sikkim,india
+1973,Telangana,india
+2001,Telangana,india
+2002,Telangana,india
+2004,Telangana,india
+1977,Telangana,india
+1992,Telangana,india
+1973,Telangana,india
+2001,Telangana,india
+2014,Telangana,india
+2007,Telangana,india
+2011,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+1966,Telangana,india
+1991,Telangana,india
+2001,Telangana,india
+1985,Telangana,india
+2011,Uttarakhand,india
+2012,Uttarakhand,india
+1984,Uttarakhand,india
+1990,Uttarakhand,india
+2004,Uttarakhand,india
+1999,Uttarakhand,india
+2014,Uttarakhand,india
+2007,Uttarakhand,india
+1956,Uttarakhand,india
+1999,Andaman & Nicobar,india
+1984,Andhra Pradesh,india
+1976,Andhra Pradesh,india
+1970,Andhra Pradesh,india
+1961,Andhra Pradesh,india
+1962,Andhra Pradesh,india
+2016,Andhra Pradesh,india
+2017,Andhra Pradesh,india
+1988,Andhra Pradesh,india
+1969,Andhra Pradesh,india
+1954,Assam,india
+1992,Assam,india
+1984,Assam,india
+1963,Assam,india
+1983,Assam,india
+1971,Bihar,india
+1982,Bihar,india
+1962,Bihar,india
+2004,Bihar,india
+2008,Bihar,india
+2012,Bihar,india
+1974,Bihar,india
+2014,Bihar,india
+1964,Bihar,india
+2015,Bihar,india
+2010,Bihar,india
+1962,Bihar,india
+1966,Bihar,india
+1983,Bihar,india
+2008,Bihar,india
+2003,Bihar,india
+1992,Chandigarh,india
+2007,Chandigarh,india
+2008,Chandigarh,india
+2006,Chandigarh,india
+2000,Chandigarh,india
+1983,Chandigarh,india
+1982,Chandigarh,india
+1972,Chandigarh,india
+1987,Chandigarh,india
+2015,Chandigarh,india
+2004,Chattisgarh,india
+2011,Chattisgarh,india
+2012,Daman & Diu,india
+1971,Goa,india
+1981,Gujarat,india
+1956,Gujarat,india
+2015,Gujarat,india
+2014,Gujarat,india
+1975,Gujarat,india
+2016,Gujarat,india
+2017,Gujarat,india
+2015,Gujarat,india
+1988,Gujarat,india
+2014,Haryana,india
+2000,Haryana,india
+1991,Haryana,india
+1969,Haryana,india
+2014,Haryana,india
+2014,Haryana,india
+2009,Himachal Pradesh,india
+1975,Jammu & Kashmir,india
+1984,Jammu & Kashmir,india
+2006,Jammu & Kashmir,india
+2011,Kerala,india
+1992,Kerala,india
+2010,Kerala,india
+2009,Kerala,india
+2012,Kerala,india
+1964,Kerala,india
+2011,Kerala,india
+2011,Kerala,india
+2015,Kerala,india
+1976,Kerala,india
+2014,Kerala,india
+2001,Kerala,india
+1985,Kerala,india
+1990,Kerala,india
+1975,Kerala,india
+1984,Kerala,india
+1999,Kerala,india
+2010,Kerala,india
+1955,Kerala,india
+2010,Kerala,india
+2009,Kerala,india
+2003,Kerala,india
+2008,Kerala,india
+1992,Madhya Pradesh,india
+1973,Madhya Pradesh,india
+1976,Madhya Pradesh,india
+1971,Madhya Pradesh,india
+2008,Manipur,india
+2001,Manipur,india
+2015,Manipur,india
+1968,Odisha,india
+1984,Odisha,india
+2006,Odisha,india
+2013,Odisha,india
+1987,Punjab,india
+1981,Punjab,india
+2009,Punjab,india
+1957,Punjab,india
+1964,Punjab,india
+1963,Punjab,india
+1982,Punjab,india
+2014,Punjab,india
+1962,Punjab,india
+1956,Punjab,india
+1967,Punjab,india
+2014,Rajasthan,india
+1981,Rajasthan,india
+1985,Rajasthan,india
+1962,Rajasthan,india
+2015,Rajasthan,india
+2009,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+2002,Telangana,india
+2001,Telangana,india
+2013,Telangana,india
+2001,Telangana,india
+2001,Telangana,india
+2002,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+2002,Telangana,india
+2000,Telangana,india
+2015,Telangana,india
+2005,Telangana,india
+1970,Telangana,india
+1977,Telangana,india
+1986,Telangana,india
+2015,Telangana,india
+2014,Telangana,india
+1992,Tripura,india
+1999,Uttarakhand,india
+2008,Uttarakhand,india
+2011,Andaman & Nicobar,india
+2015,Arunachal Pradesh,india
+2015,Assam,india
+2014,Goa,india
+2012,Gujarat,india
+2006,Haryana,india
+1990,Himachal Pradesh,india
+2015,Jammu & Kashmir,india
+2010,Jammu & Kashmir,india
+2012,Puducherry,india
+2012,Rajasthan,india
+2005,Uttarakhand,india
+2007,Uttarakhand,india
+2010,Uttarakhand,india
+2009,Uttarakhand,india
+2015,Uttarakhand,india
+1965,Andhra Pradesh,india
+1960,Andhra Pradesh,india
+1975,Andhra Pradesh,india
+1954,Andhra Pradesh,india
+1954,Andhra Pradesh,india
+1991,Andhra Pradesh,india
+1957,Andhra Pradesh,india
+1992,Andhra Pradesh,india
+1954,Assam,india
+1992,Assam,india
+1999,Assam,india
+1999,Bihar,india
+1962,Bihar,india
+1956,Bihar,india
+1961,Bihar,india
+2006,Chandigarh,india
+1977,Chandigarh,india
+1992,Goa,india
+1991,Gujarat,india
+1997,Gujarat,india
+2014,Gujarat,india
+1991,Gujarat,india
+1991,Gujarat,india
+1954,Gujarat,india
+1991,Gujarat,india
+1970,Haryana,india
+2008,Jammu & Kashmir,india
+1972,Jammu & Kashmir,india
+2014,Jammu & Kashmir,india
+1966,Kerala,india
+2007,Kerala,india
+1957,Kerala,india
+1954,Kerala,india
+1999,Kerala,india
+1991,Madhya Pradesh,india
+1970,Madhya Pradesh,india
+1956,Madhya Pradesh,india
+1998,Madhya Pradesh,india
+1967,Madhya Pradesh,india
+1964,Madhya Pradesh,india
+1968,Madhya Pradesh,india
+1957,Manipur,india
+2009,Meghalaya,india
+2009,Nagaland,india
+2016,Nagaland,india
+2017,Nagaland,india
+1972,Odisha,india
+1960,Odisha,india
+1975,Odisha,india
+1954,Punjab,india
+1991,Punjab,india
+2015,Punjab,india
+1998,Punjab,india
+1992,Punjab,india
+1973,Rajasthan,india
+1958,Rajasthan,india
+1977,Telangana,india
+1965,Telangana,india
+1956,Telangana,india
+1962,Telangana,india
+2012,Telangana,india
+1992,Telangana,india
+2010,Telangana,india
+1954,Telangana,india
+1963,Telangana,india
+1960,Andhra Pradesh,india
+1972,Andhra Pradesh,india
+1964,Andhra Pradesh,india
+1991,Andhra Pradesh,india
+1959,Andhra Pradesh,india
+2009,Andhra Pradesh,india
+2002,Andhra Pradesh,india
+1957,Andhra Pradesh,india
+2014,Andhra Pradesh,india
+2013,Andhra Pradesh,india
+1974,Bihar,india
+1959,Chandigarh,india
+2007,Chandigarh,india
+1972,Chandigarh,india
+1988,Chandigarh,india
+1999,Chandigarh,india
+1983,Goa,india
+2014,Gujarat,india
+1976,Gujarat,india
+1971,Gujarat,india
+1985,Gujarat,india
+1999,Gujarat,india
+1991,Gujarat,india
+1965,Gujarat,india
+1984,Gujarat,india
+2004,Gujarat,india
+2011,Gujarat,india
+1967,Gujarat,india
+1970,Gujarat,india
+1973,Gujarat,india
+1984,Gujarat,india
+1985,Gujarat,india
+2010,Gujarat,india
+1982,Gujarat,india
+1999,Gujarat,india
+1966,Gujarat,india
+1972,Gujarat,india
+2003,Haryana,india
+1991,Haryana,india
+2003,Haryana,india
+2012,Haryana,india
+1972,Haryana,india
+1999,Haryana,india
+1968,Haryana,india
+2007,Haryana,india
+1970,Jammu & Kashmir,india
+2012,Jammu & Kashmir,india
+2000,Jharkhand,india
+2012,Kerala,india
+2002,Kerala,india
+1977,Kerala,india
+1998,Kerala,india
+2011,Kerala,india
+1976,Kerala,india
+1972,Kerala,india
+1990,Kerala,india
+2014,Kerala,india
+1990,Kerala,india
+2003,Kerala,india
+2010,Kerala,india
+2002,Kerala,india
+1982,Kerala,india
+2000,Kerala,india
+1968,Kerala,india
+2003,Kerala,india
+2005,Kerala,india
+1969,Kerala,india
+2005,Madhya Pradesh,india
+2000,Madhya Pradesh,india
+2014,Madhya Pradesh,india
+2009,Meghalaya,india
+2003,Odisha,india
+1964,Odisha,india
+1977,Odisha,india
+1998,Odisha,india
+1967,Punjab,india
+1969,Punjab,india
+1968,Punjab,india
+1987,Punjab,india
+1961,Punjab,india
+1968,Punjab,india
+1992,Punjab,india
+1972,Punjab,india
+1961,Punjab,india
+1992,Punjab,india
+1961,Punjab,india
+1972,Punjab,india
+1977,Punjab,india
+2004,Punjab,india
+1972,Punjab,india
+1976,Punjab,india
+1967,Rajasthan,india
+1992,Rajasthan,india
+1989,Rajasthan,india
+1991,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+1991,Telangana,india
+2002,Telangana,india
+2001,Telangana,india
+2002,Telangana,india
+2011,Telangana,india
+2014,Telangana,india
+2006,Telangana,india
+2002,Telangana,india
+2013,Telangana,india
+2005,Telangana,india
+2004,Telangana,india
+1999,Telangana,india
+1977,Telangana,india
+2004,Telangana,india
+1989,Telangana,india
+2001,Telangana,india
+2011,Telangana,india
+1990,Telangana,india
+2000,Telangana,india
+2006,Telangana,india
+1971,Telangana,india
+1967,Telangana,india
+1998,Telangana,india
+2010,Telangana,india
+1976,Tripura,india
+1998,Uttarakhand,india
+1982,Uttarakhand,india
+2002,Uttarakhand,india
+1967,Uttarakhand,india
+1975,Uttarakhand,india
+1977,Uttarakhand,india
+1989,Andaman & Nicobar,india
+1974,Andaman & Nicobar,india
+1965,Andaman & Nicobar,india
+1983,Andhra Pradesh,india
+1957,Andhra Pradesh,india
+2014,Andhra Pradesh,india
+1975,Andhra Pradesh,india
+2012,Andhra Pradesh,india
+1982,Andhra Pradesh,india
+1972,Andhra Pradesh,india
+1967,Andhra Pradesh,india
+2008,Andhra Pradesh,india
+1955,Andhra Pradesh,india
+1969,Andhra Pradesh,india
+2016,Andhra Pradesh,india
+2017,Andhra Pradesh,india
+1973,Andhra Pradesh,india
+2012,Arunachal Pradesh,india
+2007,Arunachal Pradesh,india
+2016,Assam,india
+2017,Assam,india
+1972,Assam,india
+1982,Assam,india
+2005,Assam,india
+1975,Assam,india
+2014,Assam,india
+1963,Assam,india
+1999,Assam,india
+2000,Assam,india
+1971,Assam,india
+1969,Assam,india
+2008,Assam,india
+1962,Assam,india
+1999,Bihar,india
+1961,Bihar,india
+1985,Bihar,india
+1970,Bihar,india
+1963,Bihar,india
+1976,Bihar,india
+1986,Bihar,india
+1981,Bihar,india
+2006,Bihar,india
+1988,Chandigarh,india
+1972,Chandigarh,india
+2006,Chandigarh,india
+2012,Chattisgarh,india
+2012,Chattisgarh,india
+2002,Goa,india
+1985,Gujarat,india
+1960,Gujarat,india
+1985,Gujarat,india
+1986,Gujarat,india
+1992,Gujarat,india
+1970,Gujarat,india
+1990,Gujarat,india
+1977,Gujarat,india
+1991,Gujarat,india
+2011,Gujarat,india
+1961,Gujarat,india
+2014,Gujarat,india
+1961,Gujarat,india
+1959,Gujarat,india
+2004,Gujarat,india
+2013,Gujarat,india
+1990,Gujarat,india
+1968,Gujarat,india
+1964,Gujarat,india
+1973,Gujarat,india
+1969,Gujarat,india
+2014,Haryana,india
+2000,Haryana,india
+1976,Haryana,india
+1968,Haryana,india
+1976,Haryana,india
+1968,Haryana,india
+2008,Himachal Pradesh,india
+1972,Jammu & Kashmir,india
+1966,Jammu & Kashmir,india
+2012,Jammu & Kashmir,india
+1998,Jammu & Kashmir,india
+1987,Jammu & Kashmir,india
+2015,Jharkhand,india
+1998,Kerala,india
+2009,Kerala,india
+2010,Kerala,india
+1966,Kerala,india
+2016,Kerala,india
+2017,Kerala,india
+2009,Madhya Pradesh,india
+1992,Madhya Pradesh,india
+2015,Madhya Pradesh,india
+1956,Madhya Pradesh,india
+1998,Madhya Pradesh,india
+1969,Madhya Pradesh,india
+1968,Madhya Pradesh,india
+1989,Madhya Pradesh,india
+1968,Madhya Pradesh,india
+1991,Madhya Pradesh,india
+2010,Manipur,india
+1984,Manipur,india
+1985,Manipur,india
+1975,Manipur,india
+2000,Meghalaya,india
+2004,Meghalaya,india
+1990,Meghalaya,india
+1974,Meghalaya,india
+2005,Meghalaya,india
+2003,Meghalaya,india
+2003,Mizoram,india
+1992,Mizoram,india
+1987,Mizoram,india
+2002,Mizoram,india
+1988,Mizoram,india
+2005,Mizoram,india
+1998,Mizoram,india
+1999,Mizoram,india
+1981,Nagaland,india
+1976,Nagaland,india
+2006,Nagaland,india
+1999,Nagaland,india
+2000,Nagaland,india
+1982,Nagaland,india
+1966,Odisha,india
+1959,Odisha,india
+1970,Odisha,india
+1959,Odisha,india
+2001,Odisha,india
+1969,Puducherry,india
+2016,Puducherry,india
+2017,Puducherry,india
+1958,Punjab,india
+1961,Punjab,india
+2008,Punjab,india
+1981,Punjab,india
+2010,Punjab,india
+1991,Punjab,india
+1976,Rajasthan,india
+2008,Rajasthan,india
+1971,Rajasthan,india
+2008,Rajasthan,india
+1989,Rajasthan,india
+1965,Rajasthan,india
+2015,Rajasthan,india
+2001,Rajasthan,india
+1973,Rajasthan,india
+1986,Rajasthan,india
+1991,Rajasthan,india
+1975,Rajasthan,india
+2009,Rajasthan,india
+1968,Rajasthan,india
+1971,Rajasthan,india
+1971,Rajasthan,india
+2009,Sikkim,india
+2009,Telangana,india
+1974,Telangana,india
+1998,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+1976,Telangana,india
+2006,Uttarakhand,india
+1986,Uttarakhand,india
+1986,Uttarakhand,india
+2007,Uttarakhand,india
+1974,Uttarakhand,india
+2007,Uttarakhand,india
+1981,Uttarakhand,india
+2016,Uttarakhand,india
+2017,Uttarakhand,india
+1971,Andhra Pradesh,india
+1999,Andhra Pradesh,india
+2007,Andhra Pradesh,india
+2006,Arunachal Pradesh,india
+1965,Assam,india
+1984,Bihar,india
+1990,Bihar,india
+1970,Bihar,india
+1957,Chandigarh,india
+1967,Chandigarh,india
+1959,Chandigarh,india
+1982,Chandigarh,india
+2015,Chattisgarh,india
+1986,Gujarat,india
+1960,Gujarat,india
+1960,Gujarat,india
+1973,Gujarat,india
+2012,Haryana,india
+2014,Haryana,india
+1983,Haryana,india
+1964,Haryana,india
+1983,Haryana,india
+1998,Haryana,india
+2014,Haryana,india
+2015,Haryana,india
+2014,Haryana,india
+2010,Haryana,india
+2013,Haryana,india
+2014,Haryana,india
+1983,Jharkhand,india
+2016,Jharkhand,india
+2017,Jharkhand,india
+2009,Jharkhand,india
+2013,Jharkhand,india
+2004,Kerala,india
+2004,Kerala,india
+1983,Kerala,india
+1985,Kerala,india
+2013,Madhya Pradesh,india
+1963,Madhya Pradesh,india
+2016,Madhya Pradesh,india
+2017,Madhya Pradesh,india
+2004,Manipur,india
+1983,Manipur,india
+2013,Manipur,india
+2006,Manipur,india
+2011,Manipur,india
+2004,Odisha,india
+2010,Odisha,india
+2009,Punjab,india
+1965,Punjab,india
+2006,Punjab,india
+2009,Punjab,india
+2007,Punjab,india
+1984,Punjab,india
+1956,Punjab,india
+2011,Punjab,india
+2009,Punjab,india
+1965,Punjab,india
+1983,Punjab,india
+1965,Punjab,india
+1998,Punjab,india
+1967,Punjab,india
+1976,Punjab,india
+2001,Punjab,india
+2013,Rajasthan,india
+2012,Rajasthan,india
+2011,Rajasthan,india
+2012,Rajasthan,india
+1983,Rajasthan,india
+2008,Sikkim,india
+1984,Sikkim,india
+1962,Sikkim,india
+1965,Sikkim,india
+1965,Sikkim,india
+2011,Telangana,india
+2015,Telangana,india
+1988,Telangana,india
+2003,Telangana,india
+2015,Telangana,india
+2014,Telangana,india
+2005,Telangana,india
+2012,Telangana,india
+2010,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+2006,Telangana,india
+2016,Telangana,india
+2017,Telangana,india
+2011,Telangana,india
+2003,Uttarakhand,india
+2014,Uttarakhand,india
+1991,Uttarakhand,india
+1958,Andhra Pradesh,india
+1971,Andhra Pradesh,india
+1972,Andhra Pradesh,india
+1969,Bihar,india
+1991,Goa,india
+2001,Gujarat,india
+2010,Gujarat,india
+1969,Gujarat,india
+1971,Gujarat,india
+1965,Gujarat,india
+1966,Gujarat,india
+2011,Haryana,india
+2006,Haryana,india
+2010,Himachal Pradesh,india
+1974,Jammu & Kashmir,india
+1989,Jharkhand,india
+1971,Madhya Pradesh,india
+1965,Odisha,india
+1971,Punjab,india
+2007,Punjab,india
+2010,Punjab,india
+1957,Rajasthan,india
+1965,Rajasthan,india
+1971,Rajasthan,india
+2010,Telangana,india
+2001,Telangana,india
+2011,Telangana,india
+2001,Telangana,india
+2011,Telangana,india
+2000,Telangana,india
+2014,Telangana,india
+2016,Bihar,india
+2017,Bihar,india
+2009,Tamil Nadu,india
+2010,Tamil Nadu,india
+1989,Tamil Nadu,india
+1991,Tamil Nadu,india
+2004,Tamil Nadu,india
+2000,Tamil Nadu,india
+1990,Tamil Nadu,india
+1958,Tamil Nadu,india
+2009,Tamil Nadu,india
+2001,Tamil Nadu,india
+1973,Tamil Nadu,india
+2003,Tamil Nadu,india
+1966,Tamil Nadu,india
+2004,Tamil Nadu,india
+2011,Tamil Nadu,india
+1973,Tamil Nadu,india
+1977,Tamil Nadu,india
+1992,Tamil Nadu,india
+1971,Tamil Nadu,india
+1999,Tamil Nadu,india
+1966,Tamil Nadu,india
+2006,Tamil Nadu,india
+2004,Tamil Nadu,india
+2010,Tamil Nadu,india
+2009,Tamil Nadu,india
+2011,Tamil Nadu,india
+1971,Tamil Nadu,india
+1987,Tamil Nadu,india
+1985,Tamil Nadu,india
+1990,Tamil Nadu,india
+2014,Tamil Nadu,india
+1970,Tamil Nadu,india
+2015,Tamil Nadu,india
+1992,Tamil Nadu,india
+2002,Tamil Nadu,india
+1970,Tamil Nadu,india
+1992,Tamil Nadu,india
+2005,Tamil Nadu,india
+2005,Tamil Nadu,india
+1989,Tamil Nadu,india
+1972,Tamil Nadu,india
+2001,Tamil Nadu,india
+1970,Tamil Nadu,india
+1954,Tamil Nadu,india
+2012,Tamil Nadu,india
+1975,Tamil Nadu,india
+1998,Tamil Nadu,india
+2011,Tamil Nadu,india
+1972,Tamil Nadu,india
+1975,Tamil Nadu,india
+1992,Tamil Nadu,india
+2003,Tamil Nadu,india
+1990,Tamil Nadu,india
+1976,Tamil Nadu,india
+2004,Tamil Nadu,india
+1990,Tamil Nadu,india
+2003,Tamil Nadu,india
+1991,Tamil Nadu,india
+1971,Tamil Nadu,india
+2002,Tamil Nadu,india
+2002,Tamil Nadu,india
+1983,Tamil Nadu,india
+2002,Tamil Nadu,india
+2008,Tamil Nadu,india
+1971,Tamil Nadu,india
+1992,Tamil Nadu,india
+2012,Tamil Nadu,india
+1981,Tamil Nadu,india
+1987,Tamil Nadu,india
+1971,Tamil Nadu,india
+2008,Tamil Nadu,india
+1998,Tamil Nadu,india
+2007,Tamil Nadu,india
+1981,Tamil Nadu,india
+2003,Tamil Nadu,india
+1976,Tamil Nadu,india
+1985,Tamil Nadu,india
+2001,Tamil Nadu,india
+1959,Tamil Nadu,india
+1972,Tamil Nadu,india
+1971,Tamil Nadu,india
+2006,Tamil Nadu,india
+1983,Tamil Nadu,india
+2003,Tamil Nadu,india
+2000,Tamil Nadu,india
+2016,Tamil Nadu,india
+2017,Tamil Nadu,india
+1970,Tamil Nadu,india
+1956,Tamil Nadu,india
+2009,Tamil Nadu,india
+1982,Tamil Nadu,india
+2007,Tamil Nadu,india
+2013,Tamil Nadu,india
+2011,Tamil Nadu,india
+2011,Tamil Nadu,india
+2014,Tamil Nadu,india
+1990,Tamil Nadu,india
+1969,Tamil Nadu,india
+2009,Tamil Nadu,india
+2006,Tamil Nadu,india
+2004,Tamil Nadu,india
+2004,Tamil Nadu,india
+2008,Tamil Nadu,india
+2012,Tamil Nadu,india
+2001,Tamil Nadu,india
+1969,Tamil Nadu,india
+2004,Tamil Nadu,india
+2015,Tamil Nadu,india
+1988,Tamil Nadu,india
+2003,Tamil Nadu,india
+1957,Tamil Nadu,india
+1977,Tamil Nadu,india
+2012,Tamil Nadu,india
+2014,Tamil Nadu,india
+1970,Tamil Nadu,india
+2002,Tamil Nadu,india
+1974,Tamil Nadu,india
+2003,Tamil Nadu,india
+2001,Tamil Nadu,india
+2003,Tamil Nadu,india
+2003,Tamil Nadu,india
+1992,Tamil Nadu,india
+1973,Tamil Nadu,india
+1971,Tamil Nadu,india
+1988,Tamil Nadu,india
+2010,Tamil Nadu,india
+2003,Tamil Nadu,india
+1998,Tamil Nadu,india
+2009,Tamil Nadu,india
+2009,Tamil Nadu,india
+1968,Tamil Nadu,india
+2007,Tamil Nadu,india
+1972,Tamil Nadu,india
+1998,Tamil Nadu,india
+1966,Tamil Nadu,india
+1984,Tamil Nadu,india
+1967,Tamil Nadu,india
+2001,Tamil Nadu,india
+1965,Tamil Nadu,india
+1972,Tamil Nadu,india
+1955,Tamil Nadu,india
+1971,Tamil Nadu,india
+2001,Tamil Nadu,india
+2006,Tamil Nadu,india
+1982,Tamil Nadu,india
+2005,Tamil Nadu,india
+1976,Tamil Nadu,india
+1957,Tamil Nadu,india
+1962,Tamil Nadu,india
+1983,Tamil Nadu,india
+1961,Tamil Nadu,india
+1976,Tamil Nadu,india
+1956,Tamil Nadu,india
+1963,Tamil Nadu,india
+2012,Tamil Nadu,india
+1957,Tamil Nadu,india
+2015,Tamil Nadu,india
+1959,Tamil Nadu,india
+1972,Tamil Nadu,india
+1970,Tamil Nadu,india
+2015,Tamil Nadu,india
+1971,Tamil Nadu,india
+1975,Tamil Nadu,india
+1973,Tamil Nadu,india
+1965,Tamil Nadu,india
+1972,Tamil Nadu,india
+1973,Tamil Nadu,india
+2004,Tamil Nadu,india
+1962,Tamil Nadu,india
+1973,Tamil Nadu,india
+1983,Tamil Nadu,india
+1954,Tamil Nadu,india
+2011,Tamil Nadu,india
+2008,Tamil Nadu,india
+1970,Tamil Nadu,india
+2009,Tamil Nadu,india
+1968,Tamil Nadu,india
+1957,Tamil Nadu,india
+1956,Tamil Nadu,india
+1959,Tamil Nadu,india
+1971,Tamil Nadu,india
+2004,Tamil Nadu,india
+1991,Tamil Nadu,india
+1968,Tamil Nadu,india
+1976,Tamil Nadu,india
+1968,Tamil Nadu,india
+2002,Tamil Nadu,india
+1990,Tamil Nadu,india
+1972,Tamil Nadu,india
+1971,Tamil Nadu,india
+1990,Tamil Nadu,india
+1961,Tamil Nadu,india
+1992,Tamil Nadu,india
+2003,Tamil Nadu,india
+2010,Tamil Nadu,india
+2000,Tamil Nadu,india
+1971,Tamil Nadu,india
+1999,Tamil Nadu,india
+1990,Tamil Nadu,india
+1969,Tamil Nadu,india
+1967,Tamil Nadu,india
+1970,Tamil Nadu,india
+2007,Tamil Nadu,india
+1977,Tamil Nadu,india
+1969,Tamil Nadu,india
+1959,Tamil Nadu,india
+1963,Tamil Nadu,india
+2014,Tamil Nadu,india
+1969,Tamil Nadu,india
+1962,Tamil Nadu,india
+2010,Tamil Nadu,india
+1963,Tamil Nadu,india
+2008,Tamil Nadu,india
+1982,Tamil Nadu,india
+2006,Tamil Nadu,india
+1972,Tamil Nadu,india
+1977,Tamil Nadu,india
+1967,Tamil Nadu,india
+2008,Tamil Nadu,india
+2016,Tamil Nadu,india
+2017,Tamil Nadu,india
+1992,Tamil Nadu,india
+1973,Tamil Nadu,india
+2005,Tamil Nadu,india
+2014,Tamil Nadu,india
+1984,Tamil Nadu,india
+2000,Tamil Nadu,india
+2010,Tamil Nadu,india
+2006,Tamil Nadu,india
+1981,Tamil Nadu,india
+1974,Tamil Nadu,india
+2007,Tamil Nadu,india
+1960,Tamil Nadu,india
+2002,Tamil Nadu,india
+1991,Tamil Nadu,india
+1971,Tamil Nadu,india
+1976,Tamil Nadu,india
+1999,Tamil Nadu,india
+2011,Tamil Nadu,india
+1973,Tamil Nadu,india
+1998,Tamil Nadu,india
+1972,Tamil Nadu,india
+2000,Tamil Nadu,india
+2007,Tamil Nadu,india
+2006,Tamil Nadu,india
+1991,Tamil Nadu,india
+1956,Tamil Nadu,india
+2002,Tamil Nadu,india
+1967,Tamil Nadu,india
+2007,Tamil Nadu,india
+2009,Tamil Nadu,india
+1992,Tamil Nadu,india
+1991,Tamil Nadu,india
+1990,Tamil Nadu,india
+1974,Tamil Nadu,india
+1983,Tamil Nadu,india
+1999,Tamil Nadu,india
+2009,Tamil Nadu,india
+1990,Tamil Nadu,india
+2011,Tamil Nadu,india
+1971,Tamil Nadu,india
+2009,Tamil Nadu,india
+1972,Tamil Nadu,india
+1992,Tamil Nadu,india
+2014,Tamil Nadu,india
+2013,Tamil Nadu,india
+2012,Tamil Nadu,india
+2016,Tamil Nadu,india
+2017,Tamil Nadu,india
+2006,Tamil Nadu,india
+2012,Tamil Nadu,india
+1974,Tamil Nadu,india
+1986,Tamil Nadu,india
+1971,Tamil Nadu,india
+1954,Tamil Nadu,india
+1998,Tamil Nadu,india
+1974,Tamil Nadu,india
+1965,Tamil Nadu,india
+1976,Tamil Nadu,india
+1988,Tamil Nadu,india
+1958,Tamil Nadu,india
+1962,Tamil Nadu,india
+1960,Tamil Nadu,india
+2007,Tamil Nadu,india
+1971,Tamil Nadu,india
+1954,Tamil Nadu,india
+1966,Tamil Nadu,india
+2014,Tamil Nadu,india
+2014,Tamil Nadu,india
+2002,Tamil Nadu,india
+2007,Tamil Nadu,india
+2011,Tamil Nadu,india
+1985,Tamil Nadu,india
+1986,Tamil Nadu,india
+1954,Tamil Nadu,india
+2009,Tamil Nadu,india
+1967,Tamil Nadu,india
+1954,Tamil Nadu,india
+1965,Tamil Nadu,india
+1970,Tamil Nadu,india
+1972,Tamil Nadu,india
+1970,Tamil Nadu,india
+2015,Tamil Nadu,india
+1981,Tamil Nadu,india
+1967,Tamil Nadu,india
+1965,Tamil Nadu,india
+1973,Tamil Nadu,india
+2003,Tamil Nadu,india
+1968,Tamil Nadu,india
+1973,Tamil Nadu,india
+1975,Tamil Nadu,india
+2006,Tamil Nadu,india
+1988,Tamil Nadu,india
+1992,Tamil Nadu,india
+2011,Tamil Nadu,india
+1975,Tamil Nadu,india
+1964,Tamil Nadu,india
+1969,Tamil Nadu,india
+2001,Tamil Nadu,india
+1956,Tamil Nadu,india
+1974,Tamil Nadu,india
+2002,Tamil Nadu,india
+2016,Tamil Nadu,india
+2017,Tamil Nadu,india
+1981,Tamil Nadu,india
+2016,Tamil Nadu,india
+2017,Tamil Nadu,india
+1968,Tamil Nadu,india
+1985,Tamil Nadu,india
+1999,Tamil Nadu,india
+1987,Tamil Nadu,india
+1971,Tamil Nadu,india
+1989,Tamil Nadu,india
+1983,Tamil Nadu,india
+1982,Tamil Nadu,india
+1992,Tamil Nadu,india
+1975,Tamil Nadu,india
+1955,Tamil Nadu,india
+1962,Tamil Nadu,india
+1971,Tamil Nadu,india
+2012,Tamil Nadu,india
+1984,Tamil Nadu,india
+1958,Tamil Nadu,india
+1958,Tamil Nadu,india
+1969,Tamil Nadu,india
+1957,Tamil Nadu,india
+1964,Tamil Nadu,india
+2009,Tamil Nadu,india
+1973,Tamil Nadu,india
+1962,Tamil Nadu,india
+1992,Tamil Nadu,india
+2002,Tamil Nadu,india
+2013,Tamil Nadu,india
+1967,Tamil Nadu,india
+1957,Tamil Nadu,india
+1971,Tamil Nadu,india
+1989,Tamil Nadu,india
+1991,Tamil Nadu,india
+1956,Tamil Nadu,india
+2014,Tamil Nadu,india
+2010,Tamil Nadu,india
+1964,Tamil Nadu,india
+1962,Tamil Nadu,india
+1967,Tamil Nadu,india
+1998,Tamil Nadu,india
+1998,Tamil Nadu,india
+2003,Tamil Nadu,india
+1981,Tamil Nadu,india
+1983,Tamil Nadu,india
+1988,Tamil Nadu,india
+2001,Tamil Nadu,india
+2008,Tamil Nadu,india
+2009,Tamil Nadu,india
+2007,Tamil Nadu,india
+2011,Tamil Nadu,india
+1969,Tamil Nadu,india
+1992,Tamil Nadu,india
+1969,Tamil Nadu,india
+2014,Tamil Nadu,india
+2011,Tamil Nadu,india
+1972,Tamil Nadu,india
+2012,Tamil Nadu,india
+2007,Tamil Nadu,india
+1967,Tamil Nadu,india
+2003,Tamil Nadu,india
+2010,Tamil Nadu,india
+1991,Tamil Nadu,india
+2010,Tamil Nadu,india
+1973,Tamil Nadu,india
+2013,Tamil Nadu,india
+2013,Tamil Nadu,india
+2008,Tamil Nadu,india
+2006,Tamil Nadu,india
+2010,Tamil Nadu,india
+2010,Tamil Nadu,india
+1971,Tamil Nadu,india
+1970,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1958,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1975,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1980,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+2010,Uttar Pradesh,india
+2002,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1989,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+2006,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+2002,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1999,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+1981,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1958,Uttar Pradesh,india
+1983,Uttar Pradesh,india
+1989,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+2005,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1975,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+1975,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1983,Uttar Pradesh,india
+1975,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+2012,Uttar Pradesh,india
+2014,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1983,Uttar Pradesh,india
+1980,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1985,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+1963,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+1962,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+2007,Uttar Pradesh,india
+1988,Uttar Pradesh,india
+1954,Uttar Pradesh,india
+1981,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1964,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+1963,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+1955,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+1965,Uttar Pradesh,india
+2011,Uttar Pradesh,india
+1982,Uttar Pradesh,india
+2007,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+2007,Uttar Pradesh,india
+1964,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+2005,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+1962,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+2010,Uttar Pradesh,india
+1988,Uttar Pradesh,india
+1956,Uttar Pradesh,india
+1954,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+1962,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+2014,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+1987,Uttar Pradesh,india
+1982,Uttar Pradesh,india
+1965,Uttar Pradesh,india
+1985,Uttar Pradesh,india
+2003,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+2005,Uttar Pradesh,india
+1986,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1983,Uttar Pradesh,india
+1963,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1960,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1958,Uttar Pradesh,india
+1963,Uttar Pradesh,india
+2009,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1959,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+2009,Uttar Pradesh,india
+1964,Uttar Pradesh,india
+2008,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+1989,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+1988,Uttar Pradesh,india
+1999,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+2006,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+2010,Uttar Pradesh,india
+2007,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2014,Uttar Pradesh,india
+1975,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1973,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+2012,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+1955,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+2011,Uttar Pradesh,india
+1956,Uttar Pradesh,india
+2008,Uttar Pradesh,india
+2012,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+2003,Uttar Pradesh,india
+2009,Uttar Pradesh,india
+1983,Uttar Pradesh,india
+2004,Uttar Pradesh,india
+1970,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+1954,Uttar Pradesh,india
+1965,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2014,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1985,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+2006,Uttar Pradesh,india
+2011,Uttar Pradesh,india
+1999,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+2008,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1957,Uttar Pradesh,india
+2009,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1955,Uttar Pradesh,india
+1998,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+2006,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1986,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2002,Uttar Pradesh,india
+1989,Uttar Pradesh,india
+2006,Uttar Pradesh,india
+1998,Uttar Pradesh,india
+1954,Uttar Pradesh,india
+1991,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+1999,Uttar Pradesh,india
+1963,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+2008,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+1992,Uttar Pradesh,india
+2005,Uttar Pradesh,india
+2003,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1962,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+1962,Uttar Pradesh,india
+2001,Uttar Pradesh,india
+2003,Uttar Pradesh,india
+2009,Uttar Pradesh,india
+1969,Uttar Pradesh,india
+1954,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+2005,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+2016,Uttar Pradesh,india
+2017,Uttar Pradesh,india
+2012,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+1974,Uttar Pradesh,india
+1982,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+2000,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+1965,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+1976,Uttar Pradesh,india
+2013,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+1955,Uttar Pradesh,india
+2007,Uttar Pradesh,india
+1981,Uttar Pradesh,india
+2015,Uttar Pradesh,india
+1984,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1958,Uttar Pradesh,india
+1961,Uttar Pradesh,india
+1972,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+1977,Uttar Pradesh,india
+1986,Uttar Pradesh,india
+1958,Uttar Pradesh,india
+2012,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+1968,Uttar Pradesh,india
+2010,Uttar Pradesh,india
+1985,Uttar Pradesh,india
+1990,Uttar Pradesh,india
+1966,Uttar Pradesh,india
+1988,Uttar Pradesh,india
+1967,Uttar Pradesh,india
+1971,Uttar Pradesh,india
+2013,West Bengal,india
+2011,West Bengal,india
+1967,West Bengal,india
+1989,West Bengal,india
+1971,West Bengal,india
+1987,West Bengal,india
+1988,West Bengal,india
+2012,West Bengal,india
+1974,West Bengal,india
+1958,West Bengal,india
+1958,West Bengal,india
+1974,West Bengal,india
+2011,West Bengal,india
+1981,West Bengal,india
+2016,West Bengal,india
+2017,West Bengal,india
+1954,West Bengal,india
+1984,West Bengal,india
+1972,West Bengal,india
+1975,West Bengal,india
+1986,West Bengal,india
+2012,West Bengal,india
+1992,West Bengal,india
+1981,West Bengal,india
+1954,West Bengal,india
+1986,West Bengal,india
+2010,West Bengal,india
+1983,West Bengal,india
+1968,West Bengal,india
+1987,West Bengal,india
+2009,West Bengal,india
+1970,West Bengal,india
+1964,West Bengal,india
+2013,West Bengal,india
+1970,West Bengal,india
+2014,West Bengal,india
+2006,West Bengal,india
+1970,West Bengal,india
+2014,West Bengal,india
+1969,West Bengal,india
+1985,West Bengal,india
+2009,West Bengal,india
+1958,West Bengal,india
+1965,West Bengal,india
+1976,West Bengal,india
+1992,West Bengal,india
+1959,West Bengal,india
+1970,West Bengal,india
+2007,West Bengal,india
+2004,West Bengal,india
+1986,West Bengal,india
+1972,West Bengal,india
+2014,West Bengal,india
+2014,West Bengal,india
+1972,West Bengal,india
+2009,West Bengal,india
+1992,West Bengal,india
+1990,West Bengal,india
+1971,West Bengal,india
+2010,West Bengal,india
+2011,West Bengal,india
+1970,West Bengal,india
+1983,West Bengal,india
+1975,West Bengal,india
+1962,West Bengal,india
+1964,West Bengal,india
+1973,West Bengal,india
+1972,West Bengal,india
+1966,West Bengal,india
+1970,West Bengal,india
+1962,West Bengal,india
+1972,West Bengal,india
+1973,West Bengal,india
+1972,West Bengal,india
+1973,West Bengal,india
+1976,West Bengal,india
+1986,West Bengal,india
+1974,West Bengal,india
+1973,West Bengal,india
+1965,West Bengal,india
+1972,West Bengal,india
+1972,West Bengal,india
+1967,West Bengal,india
+1971,West Bengal,india
+1989,West Bengal,india
+1981,West Bengal,india
+1972,West Bengal,india
+1963,West Bengal,india
+1957,West Bengal,india
+1962,West Bengal,india
+1965,West Bengal,india
+1973,West Bengal,india
+1954,West Bengal,india
+1970,West Bengal,india
+1970,West Bengal,india
+1954,West Bengal,india
+1963,West Bengal,india
+1983,West Bengal,india
+1970,West Bengal,india
+2005,West Bengal,india
+1987,West Bengal,india
+1976,West Bengal,india
+1990,West Bengal,india
+1967,West Bengal,india
+2011,West Bengal,india
+1975,West Bengal,india
+1990,West Bengal,india
+1974,West Bengal,india
+2015,West Bengal,india
+1969,West Bengal,india
+1970,West Bengal,india
+1998,West Bengal,india
+2009,West Bengal,india
+1960,West Bengal,india
+1990,West Bengal,india
+1975,West Bengal,india
+2004,West Bengal,india
+1968,West Bengal,india
+1970,West Bengal,india
+2006,West Bengal,india
+1977,West Bengal,india
+2000,West Bengal,india
+1960,West Bengal,india
+1969,West Bengal,india
+1966,West Bengal,india
+1959,West Bengal,india
+1992,West Bengal,india
+1970,West Bengal,india
+1971,West Bengal,india
+1975,West Bengal,india
+1961,West Bengal,india
+1977,West Bengal,india
+1956,West Bengal,india
+2010,West Bengal,india
+2013,West Bengal,india
+2011,West Bengal,india
+1954,West Bengal,india
+1985,West Bengal,india
+1962,West Bengal,india
+2003,West Bengal,india
+1983,West Bengal,india
+1972,West Bengal,india
+1968,West Bengal,india
+1990,West Bengal,india
+1963,West Bengal,india
+1955,West Bengal,india
+1969,West Bengal,india
+1962,West Bengal,india
+1965,West Bengal,india
+1964,West Bengal,india
+1970,West Bengal,india
+1970,West Bengal,india
+1972,West Bengal,india
+1990,West Bengal,india
+1984,West Bengal,india
+1985,West Bengal,india
+1965,West Bengal,india
+1982,West Bengal,india
+2014,West Bengal,india
+1956,West Bengal,india
+1965,West Bengal,india
+1968,West Bengal,india
+1955,West Bengal,india
+1974,West Bengal,india
+1960,West Bengal,india
+1964,West Bengal,india
+1962,West Bengal,india
+1962,West Bengal,india
+1987,West Bengal,india
+1962,West Bengal,india
+1972,West Bengal,india
+1971,West Bengal,india
+2007,West Bengal,india
+1961,West Bengal,india
+1992,West Bengal,india
+1992,West Bengal,india
+1977,West Bengal,india
+1961,West Bengal,india
+1985,West Bengal,india
+1991,West Bengal,india
+2003,West Bengal,india
+2003,West Bengal,india
+1974,West Bengal,india
+1959,West Bengal,india
+1957,West Bengal,india
+1988,West Bengal,india
+2010,West Bengal,india
+1962,West Bengal,india
+1985,West Bengal,india
+1969,West Bengal,india
+1991,West Bengal,india
+1960,West Bengal,india
+1975,West Bengal,india
+1975,West Bengal,india
+2003,West Bengal,india
+2001,West Bengal,india
+2010,West Bengal,india
+1957,West Bengal,india
+1976,West Bengal,india
+1990,West Bengal,india
+2014,West Bengal,india
+1954,West Bengal,india
+1964,West Bengal,india
+1954,West Bengal,india
+1959,West Bengal,india
+1975,West Bengal,india
+1972,West Bengal,india
+2013,West Bengal,india
+1989,West Bengal,india
+2007,West Bengal,india
+1983,West Bengal,india
+1956,West Bengal,india
+1974,West Bengal,india
+1959,West Bengal,india
+1960,West Bengal,india
+1962,West Bengal,india
+1991,West Bengal,india
+2006,West Bengal,india
+1969,West Bengal,india
+1955,West Bengal,india
+1986,West Bengal,india
+2011,West Bengal,india
+1980,West Bengal,india
+2009,West Bengal,india
+1973,West Bengal,india
+1963,West Bengal,india
+1977,West Bengal,india
+1972,West Bengal,india
+1967,West Bengal,india
+1968,West Bengal,india
+2010,West Bengal,india
+2009,West Bengal,india
+1986,West Bengal,india
+1960,West Bengal,india
+2008,West Bengal,india
+1965,West Bengal,india
+1984,West Bengal,india
+1962,West Bengal,india
+2012,West Bengal,india
+2003,West Bengal,india
+2001,West Bengal,india
+1971,West Bengal,india
+1959,West Bengal,india
+1967,West Bengal,india
+1964,West Bengal,india
+1965,West Bengal,india
+1985,West Bengal,india
+1975,West Bengal,india
+1965,West Bengal,india
+1990,West Bengal,india
+1971,West Bengal,india
+2004,West Bengal,india
+1959,West Bengal,india
+1960,West Bengal,india
+1959,West Bengal,india
+1999,West Bengal,india
+2013,West Bengal,india
+1971,West Bengal,india
+1971,West Bengal,india
+1969,West Bengal,india
+1992,West Bengal,india
+1970,West Bengal,india
+1971,West Bengal,india
+2011,West Bengal,india
