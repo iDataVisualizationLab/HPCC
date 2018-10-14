@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/ >
+    <title>Smoothed D3.js Radar Chart</title>
+
+    
+    <!-- D3.js -->
+   <script src="d3.v4.js"></script>
+
+    <style>
+      body {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 300;
+        fill: #242424;
+        text-align: center;
+        text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+        cursor: default;
+      }
+
+      .legend {
+        font-family: 'Raleway', sans-serif;
+        fill: #333333;
+      }
+
+      .tooltip {
+        fill: #333333;
+      }
+    </style>
+  
+  </head>
+  <body>
+
+    <div class="radarChart"></div>
+
+    <script src="radarChart.js"></script> 
+    <script>
+      
+      /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
+      
+      ////////////////////////////////////////////////////////////// 
+      //////////////////////// Set-Up ////////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
+
+      var margin = {top: 100, right: 100, bottom: 100, left: 100},
+        width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
+        height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
+          
+      ////////////////////////////////////////////////////////////// 
+      ////////////////////////// Data ////////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
+
+      var data = [
+            [//iPhone
+            {axis:"Battery Life",value:22},
+            {axis:"Brand",value:28},
+            {axis:"Contract Cost",value:29},
+            {axis:"Design And Quality",value:17},
+            {axis:"Have Internet Connectivity",value:22},
+            {axis:"Large Screen",value:2},
+            {axis:"Price Of Device",value: 21},
+            {axis:"To Be A Smartphone",value:50}
+            ],[//Samsung
+            {axis:"Battery Life",value:27},
+            {axis:"Brand",value:16},
+            {axis:"Contract Cost",value:35},
+            {axis:"Design And Quality",value:13},
+            {axis:"Have Internet Connectivity",value:20},
+            {axis:"Large Screen",value:13},
+            {axis:"Price Of Device",value:35},
+            {axis:"To Be A Smartphone",value:38}
+            ],[//Nokia Smartphone
+            {axis:"Battery Life",value:26},
+            {axis:"Brand",value:10},
+            {axis:"Contract Cost",value:30},
+            {axis:"Design And Quality",value:14},
+            {axis:"Have Internet Connectivity",value:22},
+            {axis:"Large Screen",value:4},
+            {axis:"Price Of Device",value:41},
+            {axis:"To Be A Smartphone",value:30}
+            ]
+          ];
+      ////////////////////////////////////////////////////////////// 
+      //////////////////// Draw the Chart ////////////////////////// 
+      ////////////////////////////////////////////////////////////// 
+
+      var color = d3.scaleOrdinal()
+        .range(["#EDC951","#CC333F","#00A0B0"]);
+        
+      var radarChartOptions = {
+        w: width,
+        h: height,
+        margin: margin,
+        maxValue: 0.5,
+        levels: 5,
+        roundStrokes: true,
+        color: color
+      };
+      //Call function to draw the Radar chart
+      RadarChart(".radarChart", data, radarChartOptions);
+    </script>
+  </body>
+</html>
