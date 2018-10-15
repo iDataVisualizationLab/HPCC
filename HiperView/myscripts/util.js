@@ -1,5 +1,5 @@
-var w = 350,
-    h = 70;
+var w = 380,
+    h = 82;
 var firstTime =true;
 
 var svgLengend = d3.select('.legendHolder').append('svg')
@@ -14,7 +14,7 @@ var x = d3.scaleLinear()
 
 var slider = svgLengend.append("g")
     .attr("class", "slider")
-    .attr("transform", "translate(" + 116 + "," + 50+ ")");
+    .attr("transform", "translate(" + 116 + "," + 63+ ")");
 
 slider.append("line")
     .attr("class", "track")
@@ -96,17 +96,18 @@ function hue(hhh) {
 
 
 /// drawLegend *****************************************************************
-function drawLegend(s,arrThresholds, arrColor){
-    var arr2 = [];
-    for (var i=arrThresholds[0]; i<arrThresholds[arrThresholds.length-1];i=i+2){
-        arr2.push(i);
-    }
-    var x =110;
-    var y = 16;
+function drawLegend(s,arrThresholds, arrColor, dif){
+    var x =100;
+    var y = 30;
     var r = 20;
     var xScale = d3.scaleLinear()
         .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
-        .range([x, x+200]); // output
+        .range([x, x+250]); // output
+    var arr2 = [];
+    var xStep = dif/10.;
+    for (var i=arrThresholds[0]; i<arrThresholds[arrThresholds.length-1];i=i+xStep){
+        arr2.push(i);
+    }
     svgLengend.selectAll(".legendRect").remove();
     svgLengend.selectAll(".legendRect")
         .data(arr2)
@@ -138,8 +139,36 @@ function drawLegend(s,arrThresholds, arrColor){
         .style("text-anchor", "middle")
         .style("font-size", "12px")
         .attr("font-family", "sans-serif")
-        .text(function (d) {
-            return " "+Math.round(d);
+        .text(function (d,i) {
+            if (selectedService!=serviceList[3] || i!=0)
+                return ""+Math.round(d);
+            else
+                return "";
+        });
+    
+    svgLengend.selectAll(".legendText2").remove();
+    svgLengend.selectAll(".legendText2")
+        .data(arrThresholds)
+        .enter().append("text")
+        .attr("class", "legendText")
+        .attr("x", function (d,i) {
+            return xScale(d);
+        })
+        .attr("y", y-15)
+        .attr("fill",function (d,i) {
+            return color(d);
+        })
+        .style("text-anchor", "middle")
+        //.style("font-weight","bold")
+        .style("font-size", "12px")
+        .attr("font-family", "sans-serif")
+        .text(function (d,i) {
+            if (i==1 || i==5)
+                return "Critical";
+            else if (i==3)
+                return "OK";
+            else
+                return "";
         });
     
     svgLengend.selectAll(".legendText1").remove();
@@ -181,7 +210,7 @@ function isContainRack(array, id) {
 
 
 function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) sulation.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
 }

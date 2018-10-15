@@ -31,8 +31,23 @@ function RadarChart(id, data, options) {
     
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     var maxValue = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
-    // *** TOMMY 2018
-    maxValue =100;
+    // *** TOMMY 2018 ************
+    //Compute min max for the temperature
+    var dif = (thresholds[0][1]-thresholds[0][0])/4;
+    var right = thresholds[0][1]+dif; 
+
+    maxValue =right;
+
+    var minValue = thresholds[0][0]-dif;         
+    var arrThresholds = [minValue, thresholds[0][0], thresholds[0][0]+dif, thresholds[0][0]+2*dif,
+                        thresholds[0][0]+3*dif, thresholds[0][1], maxValue]
+    var colorTemperature = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+    var opaTemperature  = d3.scaleLinear()
+                .domain([left,thresholds[0][0],thresholds[0][0]+2*dif, thresholds[0][1], thresholds[0][1]+dif])
+                .range([0.3,0.2,0.1,0.2,0.3]);              
 
 
     var allAxis = (data[0].map(function(i, j){return i.axis})), //Names of each axis
@@ -44,7 +59,7 @@ function RadarChart(id, data, options) {
     //Scale for the radius
     var rScale = d3.scaleLinear()
         .range([0, radius])
-        .domain([0, maxValue]);
+        .domain([minValue, maxValue]);
         
     /////////////////////////////////////////////////////////
     //////////// Create the container SVG and g /////////////
@@ -87,8 +102,17 @@ function RadarChart(id, data, options) {
         .append("circle")
         .attr("class", "gridCircle")
         .attr("r", function(d, i){return radius/cfg.levels*d;})
+        //.style("fill", function(d){
+        //    var v = (maxValue-minValue) * d/cfg.levels +minValue;
+        //    return colorTemperature(v);
+        //})
         .style("fill", "#CDCDCD")
-        .style("stroke", "#CDCDCD")
+        .style("stroke", function(d){
+            var v = (maxValue-minValue) * d/cfg.levels +minValue;
+            return colorTemperature(v);
+        })
+        .style("stroke-width",0.3)
+        .style("stroke-opacity",1)
         .style("fill-opacity", cfg.opacityCircles)
         .style("filter" , "url(#glow)");
 
@@ -101,9 +125,12 @@ function RadarChart(id, data, options) {
        .attr("y", function(d){return -d*radius/cfg.levels;})
        .attr("dy", "0.4em")
         .attr("font-family", "sans-serif")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
        .attr("fill", "#111")
-       .text(function(d,i) { return Format(maxValue * d/cfg.levels); });
+       .text(function(d,i) { 
+            var v = (maxValue-minValue) * d/cfg.levels +minValue;     
+            return Math.round(v); 
+        });
 
     /////////////////////////////////////////////////////////
     //////////////////// Draw the axes //////////////////////
@@ -149,7 +176,7 @@ function RadarChart(id, data, options) {
         .angle(function(d,i) {  return i*angleSlice; });
         
     if(cfg.roundStrokes) {
-        radarLine.curve(d3.curveCardinalClosed);
+        radarLine.curve(d3.curveCardinalClosed.tension(0));
         //radarLine.interpolate("cardinal-closed");
     }
                 

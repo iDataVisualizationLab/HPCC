@@ -5,7 +5,7 @@ var tipW = 450;
 var tipH = 200;
 var margin = {top: 10, right: 0, bottom: 40, left: 50};
 var color2 = d3.scaleOrdinal()
-    .range(["#00a","#a0a","#444"]);
+    .range(["#000","#000","#444"]);
 
 
 //////////////////////////////////////////////////////////////
@@ -14,18 +14,25 @@ var color2 = d3.scaleOrdinal()
 
 var dataSpider = [
     [//CPU1
-        {axis:"temperature",value:0.22},
+        {axis:"CPU1 temperature",value:0.22},
+        {axis:"CPU2 temperature",value:0.22},
+        {axis:"Inlet temperature",value:0.22},
         {axis:"cpu load",value:0.22},
         {axis:"memory usage",value:0.21},
-        {axis:"fans speed",value:0.02},
+        {axis:"Fan1 speed",value:0.02},
+        {axis:"Fan2 speed",value:0.02},
+        {axis:"Fan3 speed",value:0.02},
+        {axis:"Fan4 speed",value:0.02},
         {axis:"power consumption",value:0.29},
-    ],[//CPU2
-        {axis:"temperature",value:0.22},
+    ]/*,[//CPU2
+        {axis:"CPU1 temperature",value:0.22},
+        {axis:"CPU2 temperature",value:0.22},
+        {axis:"Inlet temperature",value:0.22},
         {axis:"cpu load",value:0.28},
         {axis:"memory usage",value:0.17},
         {axis:"fans speed",value:0.22},
         {axis:"power consumption",value:0.21},
-    ]/*,[//CPU3
+    ],[//CPU3
         {axis:"temperature",value:0.22},
         {axis:"bmc health",value:0.28},
         {axis:"cpu health",value:0.17},
@@ -91,8 +98,7 @@ function mouseoverNode(d1){
         arr.push(obj);
     }
 
-    console.log(r);
-        
+         
     var arrServices = [];
     if (r.arr.length>0){
         var lastIndex = r.arr.length-1;
@@ -116,10 +122,10 @@ function mouseoverNode(d1){
         obj.a = a;
         arrServices.push(obj);
 
-        var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
+ //       var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
+ //       var obj = {};
+ //       obj.a = a;
+ //       arrServices.push(obj);
     }
     
 
@@ -134,7 +140,7 @@ function mouseoverNode(d1){
 
     var xScale = d3.scaleTime()
         .domain([ new Date(minTime-1000), new Date(maxTime+1000) ])
-        .range([0, tipW-50]);
+        .range([0, tipW-60]);
 
     //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
 
@@ -239,7 +245,7 @@ function mouseoverNode(d1){
             return color(d.temp2);
         })
         .attr("fill-opacity",function (d) {
-            return opa(d.temp2);
+            return 1;//opa(d.temp2);
         })
         .attr("stroke-width",0.5)
         .attr("stroke","#000");
@@ -264,7 +270,7 @@ function mouseoverNode(d1){
         .attr("d", line3)
         .attr("stroke","#000")
         .attr("stroke-width",1)
-        .style("stroke-dasharray", ("1, 4"));
+        .style("stroke-dasharray", ("3, 3"));
     svgTip.append("text")
         .attr("x", tipW-4)
         .attr("y",  yScale(arr[arr.length-1].temp3))
@@ -273,9 +279,6 @@ function mouseoverNode(d1){
         .style("font-size", "11px")
         .attr("font-family", "sans-serif")
         .text("Inlet="+Math.round(arr[arr.length-1].temp3));
-
-
-
 
 
     //************************************************************* Host name
@@ -326,10 +329,29 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
-    for (var i=0; i<arrServices.length;i++){
-        dataSpider[0][i].value = arrServices[i].a[0];
-        dataSpider[1][i].value = arrServices[i].a[1];
-       // dataSpider[2][index].value = arr[i].temp3;
+    dataSpider[0][0].value = arrServices[0].a[0];
+    dataSpider[0][1].value = arrServices[0].a[1];
+    dataSpider[0][2].value = arrServices[0].a[2];
+    dataSpider[0][3].value = arrServices[1].a[0];
+    dataSpider[0][4].value = arrServices[2].a[0];
+    dataSpider[0][5].value = arrServices[3].a[0];
+    dataSpider[0][6].value = arrServices[3].a[1];
+    dataSpider[0][7].value = arrServices[3].a[2];
+    dataSpider[0][8].value = arrServices[3].a[3];
+    //dataSpider[0][9].value = arrServices[4].a[0];
+
+    // Standardize data for Radar chart
+    for (var i=0; i<dataSpider[0].length;i++){
+        if (dataSpider[0][i].value==-100 || isNaN(dataSpider[0][i].value))
+            dataSpider[0][i].value = -15;
+        else if (i==5 || i==6 || i==7 || i==8){   ////  Fans SPEED ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[3][0],thresholds[3][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            
+            dataSpider[0][i].value =  scale(dataSpider[0][i].value);   
+        }
+       // console.log(i+" "+dataSpider[0][i].value);
     }
     spiderChart();        
 }
@@ -344,7 +366,7 @@ function spiderChart() {
         w: tipW-50,
         h: tipW,
         maxValue: 0.5,
-        levels: 5,
+        levels: 6,
         roundStrokes: true,
         color: color2
       };

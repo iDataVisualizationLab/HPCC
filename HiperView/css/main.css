@@ -64,7 +64,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	top: 0px;
 	right:10px;
 	border: 1px solid rgba(0,0,0, 0.2);
-	background-color: rgba(225,225,225, 0.75);
+	background-color: rgba(255,255,255, 0.75);
 	border-radius: 6px;
 }
 
@@ -82,7 +82,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 .d3-tip {
 	line-height: 1;
 	padding: 10px;
-	background: rgba(150, 150, 150, 1);
+	background: rgba(255, 255, 255, 1);
 	color: #000;
 	border: 1px solid rgba(0,0,0, 1);
 	border-radius: 10px;

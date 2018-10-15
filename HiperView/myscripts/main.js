@@ -68,7 +68,7 @@ var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
 var sHeight=200;  // Summary panel height
-var top_margin = sHeight+80;  // Start rack spiatial layout
+var top_margin = sHeight+46;  // Start rack spiatial layout
 
 
 var users = [];
@@ -95,35 +95,38 @@ var currentHosty = 0;
 var charType = "Heatmap";
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"]
-var thresholds = [[3,98], [3,98], [3,98], [1050,17850],[3,98] ];
+var thresholds = [[3,98], [0,6], [3,98], [1050,17850],[3,98] ];
 var initialService = "Temperature";
 var selectedService;
 
 var arrThresholds;
-var dif, mid;
+var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
-var arrColor = ['#0000cc', '#1a9850','#fee08b', '#cc0000'];
+var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
 setColorsAndThresholds(initialService);
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i]){
-            dif = (thresholds[i][1]-thresholds[i][0])/3;
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
             mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-            arrThresholds = [thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][1]];
+            left = thresholds[i][0]-dif;
+            if (left<0 && i!=0) // Temperature can be less than 0
+                left=0;
+            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
             color = d3.scaleLinear()
                 .domain(arrThresholds)
                 .range(arrColor)
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
-                .domain([thresholds[i][0],mid, thresholds[i][1]])
-                .range([1,0.2,1]);           
+                .domain([left,thresholds[i][0],mid, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.1,1,1]);           
         }    
     }             
 }    
 //***********************
-drawLegend(initialService,arrThresholds, arrColor);
+drawLegend(initialService,arrThresholds, arrColor,dif);
 
 main();
 addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
@@ -189,7 +192,7 @@ function main() {
     svg.append("rect")
         .attr("class", "summaryRect")
         .attr("x", 1)
-        .attr("y", 10)
+        .attr("y", 15)
         .attr("rx", 10)
         .attr("ry", 10)
         .attr("width", width-2)
@@ -201,7 +204,7 @@ function main() {
     svg.append("text")
         .attr("class", "summaryText1")
         .attr("x", 20)
-        .attr("y", 30)
+        .attr("y", 35)
         .attr("fill", "#000")
         .style("text-anchor", "start")
         .style("font-size", "16px")
@@ -214,7 +217,7 @@ function main() {
         .attr("x1", 10)
         .attr("y1", 40)
         .attr("x2", 10)
-        .attr("y2", 210)
+        .attr("y2", 214)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));;
@@ -288,7 +291,7 @@ function main() {
             return d.x + w_rack / 2 - 20;
         })
         .attr("y", function (d) {
-            return d.y - 36;
+            return d.y - 6;
         })
         .attr("fill", "#000")
         .style("text-anchor", "middle")
@@ -301,7 +304,7 @@ function main() {
         });
 
     // Draw host names **********************
-    svg.append("text")
+    /*svg.append("text")
         .attr("class", "hostText")
         .attr("x", 0)
         .attr("y", top_margin-15)
@@ -311,7 +314,7 @@ function main() {
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Summary");
+        .text("Summary");*/
 
     for (var i = 1; i <= maxHostinRack; i++) {
         var yy = getHostY(1,i);
@@ -350,7 +353,7 @@ function main() {
      svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
-        .attr("y1", 210)
+        .attr("y1", 215)
         .attr("x2", 10)
         .attr("y2", 210)
         .attr("stroke", "#000")
@@ -529,7 +532,7 @@ function request(){
             svg.append("text")
                 .attr("class", "currentDate")
                 .attr("x", 600)
-                .attr("y", 30)
+                .attr("y", 35)
                 .attr("fill", "#000")
                 .style("font-style","italic")
                 .style("text-anchor","left")
@@ -551,7 +554,7 @@ function request(){
                 .attr("font-family", "sans-serif")
                 .text(new Date(query_time).timeNow());    
 
-            drawBoxplot(svg, arr, lastIndex, xx-10);
+           // drawBoxplot(svg, arr, lastIndex, xx-10);
             count=0;
             iteration++;
         }
@@ -622,7 +625,7 @@ function processData(str, serviceName) {
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
-            a[0] = +arrString*10;
+            a[0] = +arrString;
             a[1] = -100;
             a[2] = -100;
         }
@@ -651,13 +654,14 @@ function processData(str, serviceName) {
             a[0] = -100;
             a[1] = -100;
             a[2] = -100;
+            a[3] = -100;
         }
         else{
-           // var maxSpeed = 16000/100;  // over 100%
             var arr4 =  str.split(" RPM ");
             a[0] = +arr4[0].split("FAN_1 ")[1];
             a[1] = +arr4[1].split("FAN_2 ")[1];
-            a[2] = -100;
+            a[2] = +arr4[2].split("FAN_3 ")[1];
+            a[3] = +arr4[3].split("FAN_4 ")[1];
         }
         return a;
     }
@@ -676,7 +680,6 @@ function processData(str, serviceName) {
             a[0] = +arr4[arr4.length-2]/maxConsumtion;
             a[1] = -100;
             a[2] = -100;
-            console.log(a[0]);
         }
         return a;
     }
@@ -744,8 +747,8 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname].arrMemory_usage[iter];
     else if (s == serviceList[3]) 
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) 
-        newService = sampleS[hostname].arrPower_usage[iter];
+   // else if (s == serviceList[4]) 
+   //     newService = sampleS[hostname].arrPower_usage[iter];
     return newService;
 }
 
@@ -864,8 +867,9 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
                 mouseoverNode (this);
             })
             ;//.on("mouseout", mouseoutNode);
-    }    
-    drawSummaryAreaChart(hpcc_rack, xStart);
+    }  
+    // *****************************************  
+    /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
 
@@ -1262,9 +1266,6 @@ function saveResults(){
     }
 }
 
-
-
-
 function pauseRequest(){
     clearInterval(interval2);
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
@@ -1300,7 +1301,6 @@ function resetRequest(){
     svg.selectAll("text.box").remove();
     svg.selectAll("line.whisker").remove();
     svg.selectAll("text.whisker").remove();
-    
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);     
     
     request();
@@ -1327,6 +1327,7 @@ function loadNewData(event) {
     selectedService = this.options[this.selectedIndex].text;
 
     setColorsAndThresholds(selectedService);
-    drawLegend(selectedService,arrThresholds, arrColor);
+    drawLegend(selectedService,arrThresholds, arrColor,dif);
     resetRequest();
+    tool_tip.hide();
 }
