@@ -63,7 +63,7 @@ var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 var maxHostinRack= 60;
-var h_rack = 950;
+var h_rack = 980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -79,23 +79,23 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =1;
-var numberOfMinutes = 6*60;
+var numberOfMinutes = 12*60;
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 1200;
-    numberOfMinutes = 12*60;
+    simDuration = 3000;
+    numberOfMinutes = 24*60;
 }
 
 var currentMiliseconds;
 var query_time;
-var currentHostname;
+var currentHostname,currentMeasure;
 var currentHostX = 0;
 var currentHosty = 0;
 
 var charType = "Heatmap";
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"]
-var thresholds = [[3,98], [0,6], [3,98], [1050,17850],[3,98] ];
+var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService;
 
@@ -103,12 +103,44 @@ var arrThresholds;
 var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
-var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
+var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 setColorsAndThresholds(initialService);
+
+//***********************
+var undefinedValue = undefined;
+var undefinedColor = "#666";
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
-        if (s == serviceList[i]){
+        if (s == serviceList[i] && i==1){  // CPU_load
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);   
+
+        }
+        else if (s == serviceList[i] && i==2){  // Memory_usage
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);   
+
+        }
+        else if (s == serviceList[i]){
             dif = (thresholds[i][1]-thresholds[i][0])/4;
             mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
             left = thresholds[i][0]-dif;
@@ -120,8 +152,8 @@ function setColorsAndThresholds(s) {
                 .range(arrColor)
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],mid, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.1,1,1]);           
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);           
         }    
     }             
 }    
@@ -335,6 +367,9 @@ function main() {
         var hpcc_node = +name.split("-")[2].split(".")[0];
         var xStart = racks[hpcc_rack - 1].x-2;
         var yy = getHostY(hpcc_rack,hpcc_node);
+        // set opacity for current measurement text 
+        hosts[i].mOpacity = 0.1;
+
 
         svg.append("text")
             .attr("class", "hostId")
@@ -346,6 +381,18 @@ function main() {
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
             .text(""+hpcc_node);
+
+        svg.append("text")
+            .attr("class", "measure_"+hosts[i].name)
+            .attr("x", xStart+w_rack-20)
+            .attr("y", yy-4)
+            .attr("fill", "#000")
+            .attr("fill-opacity", hosts[i].mOpacity)
+            .style("text-anchor", "end")
+            .style("font-size", "11px")
+            .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
+            .attr("font-family", "sans-serif")
+            .text("");    
     }
 
 
@@ -355,7 +402,7 @@ function main() {
         .attr("x1", 10)
         .attr("y1", 215)
         .attr("x2", 10)
-        .attr("y2", 210)
+        .attr("y2", 310)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));;   
@@ -559,7 +606,6 @@ function request(){
             iteration++;
         }
         // Update the current timeline in Summary panel
-
         var x2 = xTimeSummaryScale(query_time);
         svg.selectAll(".currentTimeline")
             .attr("x1", x2)
@@ -567,8 +613,7 @@ function request(){
         svg.selectAll(".connectTimeline")
             .attr("x1", x2)
             .attr("x2", currentHostX)
-            .attr("y2", currentHostY);
-                
+            .attr("y2", currentHostY);       
         svg.selectAll(".currentText")
             .attr("x", x2+2)
             .text("Latest update:");  
@@ -577,15 +622,47 @@ function request(){
             .text(new Date(query_time).timeNow2());      
         svg.selectAll(".currentHostText")
             .attr("x", x2+2)
-            .text(currentHostname);       
+            .text(currentHostname);      
 
-            
+        // Update measurement text and opacity
+        for (var i = 0; i < hosts.length; i++) {
+            if (hosts[i].name==currentHostname){
+                hosts[i].mOpacity = 1;
+                hosts[i].xOpacity = currentHostX+38;
+
+                if (hosts[i].xOpacity>racks[hosts[i].hpcc_rack - 1].x+w_rack)
+                    hosts[i].mOpacity =0;
+
+                var mea = currentMeasure;
+                if (selectedService=="CPU_load" || selectedService=="Memory_usage"){
+                    mea = currentMeasure.toFixed(2);
+                }
+                else if (selectedService=="Power_consumption"){
+                    mea = Math.round(currentMeasure);
+                }
+                svg.selectAll(".measure_"+hosts[i].name)
+                    .attr("fill", color(currentMeasure))    
+                    .text(mea);
+            }
+            else{
+                if (hosts[i].mOpacity >0)
+                    hosts[i].mOpacity -= 0.01;
+                if (hosts[i].xOpacity==undefined)
+                    hosts[i].xOpacity = currentHostX+38;
+            }
+
+
+            svg.selectAll(".measure_"+hosts[i].name)
+                .attr("fill-opacity", hosts[i].mOpacity)
+                .attr("x", hosts[i].xOpacity);   
+
+        }    
+
     } , simDuration);
     
     var count3=0;
 
     var interval3 = setInterval(function(){
-
         svg.selectAll(".currentText")
             .attr("fill", decimalColorToHTMLcolor(count3*7));
         count3++;
@@ -608,53 +685,57 @@ function processResult(r){
 
 function processData(str, serviceName) {  
     if (serviceName == serviceList[0]){
-        var arrString =  str.split(" ");
         var a = [];
-        a[0] = +arrString[2];
-        a[1] = +arrString[6];
-        a[2] = +arrString[10];
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = undefinedValue;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
+        }
+        else{
+            var arrString =  str.split(" ");
+            a[0] = +arrString[2];
+            a[1] = +arrString[6];
+            a[2] = +arrString[10];
+        }
         return a;
     }
     else if (serviceName == serviceList[1]){
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
-            || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -100;
-            a[1] = -100;
-            a[2] = -100;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = undefinedValue;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
             a[0] = +arrString;
-            a[1] = -100;
-            a[2] = -100;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         return a;
     }
     else if (serviceName == serviceList[2]) {
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
-            || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -100;
-            a[1] = -100;
-            a[2] = -100;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = undefinedValue;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         else{
             var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
             a[0] = +arrString;
-            a[1] = -100;
-            a[2] = -100;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         return a;
     }
     else if (serviceName == serviceList[3]) {
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
-            || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -100;
-            a[1] = -100;
-            a[2] = -100;
-            a[3] = -100;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = undefinedValue;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
+            a[3] = undefinedValue;
         }
         else{
             var arr4 =  str.split(" RPM ");
@@ -668,18 +749,17 @@ function processData(str, serviceName) {
     else if (serviceName == serviceList[4]) {
         //console.log(str);
          var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("(No output on stdout)")>=0 
-            || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = -100;
-            a[1] = -100;
-            a[2] = -100;
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+            a[0] = undefinedValue;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         else{
             var maxConsumtion = 3.2;  // over 100%
             var arr4 =  str.split(" ");
             a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = -100;
-            a[2] = -100;
+            a[1] = undefinedValue;
+            a[2] = undefinedValue;
         }
         return a;
     }
@@ -713,30 +793,6 @@ function decimalColorToHTMLcolor(number) {
     return HTMLcolor;
 } 
 
-/*
-function simulateResults(hostname){
-    var newService = JSON.parse(JSON.stringify(sampleService));
-    newService.result.query_time =  new Date().getTime();
-    newService.data.service.host_name = hostname;
-    // temperature
-    var str = "CPU1 Temp 67 OK CPU2 Temp 49 OK Inlet Temp 40 OK";
-     var arrString =  str.split(" ");
-     var temp1 = +arrString[2];
-    temp1+= gaussianRandom(-30,30);
-    arrString[2]=temp1;
-
-    var temp2 = +arrString[6];
-    temp2+= gaussianRandom(-20,20);
-    arrString[6]=temp2;
-
-    var temp3 = +arrString[10];
-    temp3+= gaussianRandom(-10,10);
-    arrString[10]=temp3;
-
-    newService.data.service.plugin_output = arrString.join(' ')
-    return newService;
-}*/
-
 function simulateResults2(hostname,iter, s){
     var newService
     if (s == serviceList[0])             
@@ -747,8 +803,8 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname].arrMemory_usage[iter];
     else if (s == serviceList[3]) 
         newService = sampleS[hostname].arrFans_health[iter];
-   // else if (s == serviceList[4]) 
-   //     newService = sampleS[hostname].arrPower_usage[iter];
+    else if (s == serviceList[4]) 
+        newService = sampleS[hostname].arrPower_usage[iter];
     return newService;
 }
 
@@ -799,7 +855,12 @@ function plotResult(result) {
         obj.query_time =r.arr[i].result.query_time;
         obj.x = xTimeScale(obj.query_time);
         arr.push(obj);
+        currentHostX = obj.x ;
+        currentMeasure = obj.temp1;
     }
+
+    currentHostY = y;
+    
 
     // get Time
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
@@ -812,8 +873,6 @@ function plotResult(result) {
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
-    currentHostX = xStart;
-    currentHostY = y;
     if (charType == "Heatmap")
         plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
     else if (charType == "Area Chart") 
@@ -837,7 +896,10 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
             .attr("width", node_size)
             .attr("height", node_size )
             .attr("fill", function (d) {
-                return color(obj.temp1);
+                if (obj.temp1==undefinedValue)
+                    return undefinedColor;
+                else
+                    return color(obj.temp1);
             })
             .attr("fill-opacity",function (d) {
                 return opa(obj.temp1);
@@ -849,24 +911,29 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
             })
             ;//.on("mouseout", mouseoutNode);
 
-        svg.append("rect")
-            .attr("class", name)
-            .attr("x", x)
-            .attr("y", y+node_size-9)
-            .attr("width", node_size)
-            .attr("height", node_size )
-            .attr("fill", function (d) {
-                return color(obj.temp2);
-            })
-            .attr("fill-opacity",function (d) {
-                return opa(obj.temp2);
-            })
-            .attr("stroke", "#000")
-            .attr("stroke-width", 0.05)
-            .on("mouseover", function (d) {
-                mouseoverNode (this);
-            })
-            ;//.on("mouseout", mouseoutNode);
+        if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
+            svg.append("rect")
+                .attr("class", name)
+                .attr("x", x)
+                .attr("y", y+node_size-9)
+                .attr("width", node_size)
+                .attr("height", node_size )
+                .attr("fill", function (d) {
+                    if (obj.temp2==undefinedValue)
+                        return undefinedColor;
+                    else
+                    return color(obj.temp2);
+                })
+                .attr("fill-opacity",function (d) {
+                    return opa(obj.temp2);
+                })
+                .attr("stroke", "#000")
+                .attr("stroke-width", 0.05)
+                .on("mouseover", function (d) {
+                    mouseoverNode (this);
+                })
+                ;//.on("mouseout", mouseoutNode);
+         }   
     }  
     // *****************************************  
     /// drawSummaryAreaChart(hpcc_rack, xStart);
@@ -1030,241 +1097,7 @@ d3.select('#inds').on("change", function () {
     charType = sect.options[sect.selectedIndex].value;
 });
 
-function areaChart(){
-    // Do nothing
-}
 
-function saveResults(){
-    var filename = "HPCC_results.json";
-    var type = "json";
-    var str = JSON.stringify(hostResults);
-
-    
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }
-
-    /*
-    // Save results for Project 1
-    var filename = "HPCC_Project1.json";
-    var type = "json";
-    var data = {};
-   for (var att in sampleS){
-        data[att]={};
-        data[att].arrTemperatureCPU1=[];
-        data[att].arrTemperatureCPU2=[];
-        data[att].arrCPU_load=[];
-        data[att].arrFans_speed1=[];
-        data[att].arrFans_speed2=[];
-        data[att].arrMemory_usage=[];
-
-        var item = sampleS[att];
-        for(var i=0;i<item.arr.length;i++){
-            var str = item.arr[i].data.service.plugin_output;
-            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
-                data[att].arrTemperatureCPU1.push(null);
-                data[att].arrTemperatureCPU2.push(null);
-            }
-            else{
-                var a = processData(str, serviceList[0]);
-                data[att].arrTemperatureCPU1.push(a[0]);
-                data[att].arrTemperatureCPU2.push(a[1]);
-            }
-            
-            var str2 = item.arrCPU_load[i].data.service.plugin_output;
-            var b2 =  +str2.split("CPU Load: ")[1];
-            data[att].arrCPU_load.push(b2);
-                       
-            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
-            //console.log(att+" "+str3);
-            if (str3.indexOf("syntax error")>=0 ){
-                data[att].arrMemory_usage.push(null);
-            }
-            else{
-                var b3 =  str3.split("Usage Percentage = ")[1];
-                var c3 =  +b3.split(" :: Total Memory")[0];
-                data[att].arrMemory_usage.push(c3);
-            }
-
-            var str4 = item.arrFans_health[i].data.service.plugin_output;
-            if (str4.indexOf("UNKNOWN")>=0 || str4.indexOf("No output on stdout) stderr")>=0 
-                || str4.indexOf("Service check timed out")>=0){
-                data[att].arrFans_speed1.push(null);
-                data[att].arrFans_speed2.push(null);  
-            }  
-            else{  
-                var arr4 =  str4.split(" RPM ");
-                var fan1 = +arr4[0].split("FAN_1 ")[1];
-                var fan2 = +arr4[1].split("FAN_2 ")[1];
-                data[att].arrFans_speed1.push(fan1);
-                data[att].arrFans_speed2.push(fan2);  
-            }
-        }
-    }
-
-    var str = JSON.stringify(data);
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }*/
-
-
-    // Save results for Outliagnostics ***************************
-    var filename = "HPCC_scagnostics.json";
-    var type = "json";
-
-    var numnerOfYear = 100000;
-    for (var att in sampleS){
-        var item = sampleS[att];
-        if (item.arrTemperature.length<numnerOfYear){
-            numnerOfYear = item.arrTemperature.length;
-        }
-    }   
-
-    var dataS = {};
-    dataS.Scagnostics= ["Outlying", "Skewed", "Clumpy", "Sparse", "Striated", "Convex", "Skinny", "Stringy", "Monotonic"];
-    dataS.Variables = ["var1", "var2"];
-    dataS.Countries = [];
-    for (var att in sampleS){
-        dataS.Countries.push(att);
-    }    
-    dataS.CountriesData ={};
-    for (var att in sampleS){
-        dataS.CountriesData[att]=[];
-       
-        var item = sampleS[att];
-        for(var i=0;i<numnerOfYear;i++){
-            var str = item.arrTemperature[i].data.service.plugin_output;
-            var obj = {};
-            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
-                obj.v0=null;
-            }
-            else{
-                var a = processData(str,serviceList[0]);
-                if (a[1]<0)
-                    obj.v0 = null;
-                obj.v0 = a[1];
-            }
-                         
-            var str4 = item.arrFans_health[i].data.service.plugin_output;
-            if (str4.indexOf("(No output on stdout)")>=0 
-                || str4.indexOf("UNKNOWN")>=0  
-                || str4.indexOf("syntax error")>=0 ){
-                obj.v1=null;
-            }
-            else{
-                var c3 =  processData(str4,serviceList[3]);
-                if (c3[1]<0)
-                     obj.v1 = null;
-                obj.v1=c3[1];
-            }
-            obj.Outlying = 0;
-            obj.year = i;
-            dataS.CountriesData[att].push(obj);
-        }
-    }
-    // Standardize data ***************************************************************
-    var minV0 = 100000;
-    var minV1 = 100000;
-    var maxV0 = 0;
-    var maxV1 = 0;
-    for (var att in  dataS.CountriesData){
-        var hostArray = dataS.CountriesData[att];
-        for(var i=0;i<hostArray.length;i++){
-            var v0 = hostArray[i].v0;
-            var v1 = hostArray[i].v1;
-            if (v0 != null){
-                if (v0<minV0)
-                    minV0 = v0;
-                if (v0>maxV0)
-                    maxV0 = v0;
-            }
-            if (v1 != null){
-                if (v1<minV1)
-                    minV1 = v1;
-                if (v1>maxV1)
-                    maxV1 = v1;
-            }
-        }    
-    }
-    for (var att in  dataS.CountriesData){
-        var hostArray = dataS.CountriesData[att];
-        for(var i=0;i<hostArray.length;i++){
-            var v0 = hostArray[i].v0;
-            var v1 = hostArray[i].v1;
-            if (v0 != null){
-                hostArray[i].s0 = (hostArray[i].v0-minV0)/(maxV0-minV0)
-            }
-            else{
-                hostArray[i].s0=null;
-            }
-            if (v1 != null){
-                hostArray[i].s1= (hostArray[i].v1-minV1)/(maxV1-minV1);
-            }
-            else{
-                hostArray[i].s1=null;
-            }
-        }    
-    }
-
-    dataS.YearsData = [];
-    for (var y=0; y<numnerOfYear; y++){
-        var obj = {};
-        obj.s0 = [];
-        obj.s1 = [];
-        obj.Scagnostics0 = [0, 0, 0, 0, 0, 0, 0, 0, 0]; 
-        for (var att in  dataS.CountriesData){
-            var hostArray = dataS.CountriesData[att];   
-            console.log(y+ " "+att);
-            var v0 = hostArray[y].s0;
-            var v1 = hostArray[y].s1;
-            obj.s0.push(v0);
-            obj.s1.push(v1);
-        }
-        dataS.YearsData.push(obj);
-    }
-    
-
-    var str = JSON.stringify(dataS);
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }
-}
 
 function pauseRequest(){
     clearInterval(interval2);

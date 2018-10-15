@@ -95,7 +95,10 @@ function mouseoverNode(d1){
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
-        arr.push(obj);
+        if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue)
+            ;
+        else
+            arr.push(obj);
     }
 
          
@@ -122,10 +125,10 @@ function mouseoverNode(d1){
         obj.a = a;
         arrServices.push(obj);
 
- //       var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
- //       var obj = {};
- //       obj.a = a;
- //       arrServices.push(obj);
+        var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
+        var obj = {};
+        obj.a = a;
+        arrServices.push(obj);
     }
     
 
@@ -338,11 +341,11 @@ function mouseoverNode(d1){
     dataSpider[0][6].value = arrServices[3].a[1];
     dataSpider[0][7].value = arrServices[3].a[2];
     dataSpider[0][8].value = arrServices[3].a[3];
-    //dataSpider[0][9].value = arrServices[4].a[0];
+    dataSpider[0][9].value = arrServices[4].a[0];
 
     // Standardize data for Radar chart
     for (var i=0; i<dataSpider[0].length;i++){
-        if (dataSpider[0][i].value==-100 || isNaN(dataSpider[0][i].value))
+        if (dataSpider[0][i].value==undefinedValue || isNaN(dataSpider[0][i].value))
             dataSpider[0][i].value = -15;
         else if (i==5 || i==6 || i==7 || i==8){   ////  Fans SPEED ***********************
             var scale = d3.scaleLinear()
@@ -351,7 +354,13 @@ function mouseoverNode(d1){
             
             dataSpider[0][i].value =  scale(dataSpider[0][i].value);   
         }
-       // console.log(i+" "+dataSpider[0][i].value);
+        else if (i==9){   ////  Fans SPEED ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[4][0],thresholds[4][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            
+            dataSpider[0][i].value =  scale(dataSpider[0][i].value);   
+        }
     }
     spiderChart();        
 }

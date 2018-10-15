@@ -100,6 +100,9 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     var x =100;
     var y = 30;
     var r = 20;
+    var barW= 5;
+    if (selectedService=="Memory_usage" || selectedService=="CPU_load")
+        barW =8;
     var xScale = d3.scaleLinear()
         .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
         .range([x, x+250]); // output
@@ -117,7 +120,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             return xScale(d);
         })
         .attr("y", y)
-        .attr("width", 5)
+        .attr("width", barW)
         .attr("height", r)
         .attr("fill",function (d,i) {
             return color(d);
@@ -140,10 +143,12 @@ function drawLegend(s,arrThresholds, arrColor, dif){
         .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text(function (d,i) {
-            if (selectedService!=serviceList[3] || i!=0)
-                return ""+Math.round(d);
-            else
+            if (selectedService==serviceList[2] && (i==0 || i==2 || i==4 || i==6))  // memory
                 return "";
+            else if (selectedService==serviceList[3] && i==0)  // Fan speed
+                return "";
+            else
+                return Math.round(d);
         });
     
     svgLengend.selectAll(".legendText2").remove();
@@ -163,8 +168,14 @@ function drawLegend(s,arrThresholds, arrColor, dif){
         .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text(function (d,i) {
-            if (i==1 || i==5)
-                return "Critical";
+            if (i==1 || i==5){
+                if (selectedService==serviceList[1] && (i==1 || i==5))   // No lower & upper bound for CPU load
+                    return "";
+                else if (selectedService==serviceList[2] && i==1)   // No lower bound for Memory usage
+                    return "";
+                else 
+                    return "Critical";
+            }
             else if (i==3)
                 return "OK";
             else
@@ -224,4 +235,240 @@ function dragended(d) {
     if (!d3.event.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
+}
+
+function areaChart(){
+    // Do nothing
+}
+
+function saveResults(){
+    var filename = "HPCC_results.json";
+    var type = "json";
+    var str = JSON.stringify(hostResults);
+
+    
+    var file = new Blob([str], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+
+    /*
+    // Save results for Project 1
+    var filename = "HPCC_Project1.json";
+    var type = "json";
+    var data = {};
+   for (var att in sampleS){
+        data[att]={};
+        data[att].arrTemperatureCPU1=[];
+        data[att].arrTemperatureCPU2=[];
+        data[att].arrCPU_load=[];
+        data[att].arrFans_speed1=[];
+        data[att].arrFans_speed2=[];
+        data[att].arrMemory_usage=[];
+
+        var item = sampleS[att];
+        for(var i=0;i<item.arr.length;i++){
+            var str = item.arr[i].data.service.plugin_output;
+            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
+                data[att].arrTemperatureCPU1.push(null);
+                data[att].arrTemperatureCPU2.push(null);
+            }
+            else{
+                var a = processData(str, serviceList[0]);
+                data[att].arrTemperatureCPU1.push(a[0]);
+                data[att].arrTemperatureCPU2.push(a[1]);
+            }
+            
+            var str2 = item.arrCPU_load[i].data.service.plugin_output;
+            var b2 =  +str2.split("CPU Load: ")[1];
+            data[att].arrCPU_load.push(b2);
+                       
+            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
+            //console.log(att+" "+str3);
+            if (str3.indexOf("syntax error")>=0 ){
+                data[att].arrMemory_usage.push(null);
+            }
+            else{
+                var b3 =  str3.split("Usage Percentage = ")[1];
+                var c3 =  +b3.split(" :: Total Memory")[0];
+                data[att].arrMemory_usage.push(c3);
+            }
+
+            var str4 = item.arrFans_health[i].data.service.plugin_output;
+            if (str4.indexOf("UNKNOWN")>=0 || str4.indexOf("No output on stdout) stderr")>=0 
+                || str4.indexOf("Service check timed out")>=0){
+                data[att].arrFans_speed1.push(null);
+                data[att].arrFans_speed2.push(null);  
+            }  
+            else{  
+                var arr4 =  str4.split(" RPM ");
+                var fan1 = +arr4[0].split("FAN_1 ")[1];
+                var fan2 = +arr4[1].split("FAN_2 ")[1];
+                data[att].arrFans_speed1.push(fan1);
+                data[att].arrFans_speed2.push(fan2);  
+            }
+        }
+    }
+
+    var str = JSON.stringify(data);
+    var file = new Blob([str], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }*/
+
+
+    // Save results for Outliagnostics ***************************
+    var filename = "HPCC_scagnostics.json";
+    var type = "json";
+
+    var numnerOfYear = 100000;
+    for (var att in sampleS){
+        var item = sampleS[att];
+        if (item.arrTemperature.length<numnerOfYear){
+            numnerOfYear = item.arrTemperature.length;
+        }
+    }   
+
+    var dataS = {};
+    dataS.Scagnostics= ["Outlying", "Skewed", "Clumpy", "Sparse", "Striated", "Convex", "Skinny", "Stringy", "Monotonic"];
+    dataS.Variables = ["var1", "var2"];
+    dataS.Countries = [];
+    for (var att in sampleS){
+        dataS.Countries.push(att);
+    }    
+    dataS.CountriesData ={};
+    for (var att in sampleS){
+        dataS.CountriesData[att]=[];
+       
+        var item = sampleS[att];
+        for(var i=0;i<numnerOfYear;i++){
+            var str = item.arrTemperature[i].data.service.plugin_output;
+            var obj = {};
+            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
+                obj.v0=null;
+            }
+            else{
+                var a = processData(str,serviceList[0]);
+                if (a[1]<0)
+                    obj.v0 = null;
+                obj.v0 = a[1];
+            }
+                         
+            var str4 = item.arrFans_health[i].data.service.plugin_output;
+            if (str4.indexOf("(No output on stdout)")>=0 
+                || str4.indexOf("UNKNOWN")>=0  
+                || str4.indexOf("syntax error")>=0 ){
+                obj.v1=null;
+            }
+            else{
+                var c3 =  processData(str4,serviceList[3]);
+                if (c3[1]<0)
+                     obj.v1 = null;
+                obj.v1=c3[1];
+            }
+            obj.Outlying = 0;
+            obj.year = i;
+            dataS.CountriesData[att].push(obj);
+        }
+    }
+    // Standardize data ***************************************************************
+    var minV0 = 100000;
+    var minV1 = 100000;
+    var maxV0 = 0;
+    var maxV1 = 0;
+    for (var att in  dataS.CountriesData){
+        var hostArray = dataS.CountriesData[att];
+        for(var i=0;i<hostArray.length;i++){
+            var v0 = hostArray[i].v0;
+            var v1 = hostArray[i].v1;
+            if (v0 != null){
+                if (v0<minV0)
+                    minV0 = v0;
+                if (v0>maxV0)
+                    maxV0 = v0;
+            }
+            if (v1 != null){
+                if (v1<minV1)
+                    minV1 = v1;
+                if (v1>maxV1)
+                    maxV1 = v1;
+            }
+        }    
+    }
+    for (var att in  dataS.CountriesData){
+        var hostArray = dataS.CountriesData[att];
+        for(var i=0;i<hostArray.length;i++){
+            var v0 = hostArray[i].v0;
+            var v1 = hostArray[i].v1;
+            if (v0 != null){
+                hostArray[i].s0 = (hostArray[i].v0-minV0)/(maxV0-minV0)
+            }
+            else{
+                hostArray[i].s0=null;
+            }
+            if (v1 != null){
+                hostArray[i].s1= (hostArray[i].v1-minV1)/(maxV1-minV1);
+            }
+            else{
+                hostArray[i].s1=null;
+            }
+        }    
+    }
+
+    dataS.YearsData = [];
+    for (var y=0; y<numnerOfYear; y++){
+        var obj = {};
+        obj.s0 = [];
+        obj.s1 = [];
+        obj.Scagnostics0 = [0, 0, 0, 0, 0, 0, 0, 0, 0]; 
+        for (var att in  dataS.CountriesData){
+            var hostArray = dataS.CountriesData[att];   
+            console.log(y+ " "+att);
+            var v0 = hostArray[y].s0;
+            var v1 = hostArray[y].s1;
+            obj.s0.push(v0);
+            obj.s1.push(v1);
+        }
+        dataS.YearsData.push(obj);
+    }
+    
+
+    var str = JSON.stringify(dataS);
+    var file = new Blob([str], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
 }
