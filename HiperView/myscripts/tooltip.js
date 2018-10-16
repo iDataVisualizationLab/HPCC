@@ -365,7 +365,7 @@ function spiderChart(dataSpider) {
    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
       var radarChartOptions = {
         w: tipW-50,
-        h: tipW,
+        h: tipW+10,
         maxValue: 0.5,
         levels: 6,
         roundStrokes: true,

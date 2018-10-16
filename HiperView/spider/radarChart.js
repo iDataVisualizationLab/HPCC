@@ -55,8 +55,19 @@ function RadarChart(id, data, options) {
         radius = Math.min(cfg.w/2, cfg.h/2),    //Radius of the outermost circle
         Format = d3.format(''),                //Percentage formatting
     //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
-        angleSlice = [Math.PI/total,2*Math.PI/total,3*Math.PI/total,4*Math.PI/total,5*Math.PI/total,6*Math.PI/total,7*Math.PI/total,8*Math.PI/total,
-        9*Math.PI/total,10*Math.PI/total,11*Math.PI/total,12*Math.PI/total,13*Math.PI/total,14*Math.PI/total] ;       //TOMMY DANG
+        angle1= Math.PI * 2 / total;
+        angle2= Math.PI * 2 / (total+4);
+        angleSlice = [];
+        for (var i=0;i<total;i++){
+            if (i==0 || i==1 || i==2)       // Temperatures
+                angleSlice.push(angle2*(i-1));
+            else if (i==5 || i==6 || i==7 || i==8)  // Fan speeds
+                angleSlice.push(Math.PI/4.62+angle2*(i-1));
+            else if (i==9)  // Power consumption
+                angleSlice.push(Math.PI * 1.5);
+            else    
+                angleSlice.push(angle1*(i-1));
+        }      //TOMMY DANG
     
     //Scale for the radius
     var rScale = d3.scaleLinear()
@@ -202,6 +213,7 @@ function RadarChart(id, data, options) {
         .attr("class", "radarStroke")
         .attr("d", function(d,i) { return radarLine(d); })
         .style("stroke-width", cfg.strokeWidth + "px")
+        .style("stroke-opacity", 0.5)
         .style("stroke", function(d,i) { return cfg.color(i); })
         .style("fill", "none")
         .style("filter" , "url(#glow2)");
@@ -220,8 +232,13 @@ function RadarChart(id, data, options) {
         .attr("r", cfg.dotRadius)
         .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI/2); })
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
-        .style("fill", function(d,i,j) {  return cfg.color(d.index); })
-        .style("fill-opacity", 0.8);
+       // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
+        .style("fill", function(d){
+            return colorTemperature(d.value);
+        })
+        .style("fill-opacity", 0.5)
+        .style("stroke", "#000")
+        .style("stroke-width", 0.2);
 
 
 

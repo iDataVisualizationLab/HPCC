@@ -79,7 +79,7 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =0;
-var numberOfMinutes = 12*60;
+var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
     simDuration = 3000;
