@@ -78,7 +78,7 @@ var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
-var simDuration =1;
+var simDuration =0;
 var numberOfMinutes = 12*60;
 var isRealtime = false;
 if (isRealtime){
@@ -413,6 +413,8 @@ function main() {
 function request(){
     var count = 0;
     var iteration = 0;
+    var iterationstep = 21;
+    
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
 
@@ -518,28 +520,31 @@ function request(){
         }
         else{
             // var result = simulateResults(hosts[count].name);
-            
-            var result = simulateResults2(hosts[count].name,iteration, selectedService);
-            // Process the result
-            var name =  result.data.service.host_name;
-            hostResults[name].arr.push(result);
-            plotResult(result);
+            var tmp =iteration;
+            for (i=0;i<iterationstep;i++){
+                var result = simulateResults2(hosts[count].name,iteration, selectedService);
+                // Process the result
+                var name =  result.data.service.host_name;
+                hostResults[name].arr.push(result);
+                plotResult(result);
+                //console.log(hosts[count].name+" "+hostResults[name]);
+                var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+                hostResults[name].arrTemperature.push(result);
 
-            //console.log(hosts[count].name+" "+hostResults[name]);
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-            hostResults[name].arrTemperature.push(result);
+                var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
+                hostResults[name].arrCPU_load.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-            hostResults[name].arrCPU_load.push(result);
+                var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
+                hostResults[name].arrMemory_usage.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-            hostResults[name].arrMemory_usage.push(result);
+                var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
+                hostResults[name].arrFans_health.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-            hostResults[name].arrFans_health.push(result);
-
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-            hostResults[name].arrPower_usage.push(result);       
+                var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
+                hostResults[name].arrPower_usage.push(result);   
+                iteration++; 
+            }    
+            iteration = tmp;
         }
 
         count++;
@@ -603,7 +608,7 @@ function request(){
 
            // drawBoxplot(svg, arr, lastIndex, xx-10);
             count=0;
-            iteration++;
+            iteration+=iterationstep;
         }
         // Update the current timeline in Summary panel
         var x2 = xTimeSummaryScale(query_time);
@@ -630,7 +635,7 @@ function request(){
                 hosts[i].mOpacity = 1;
                 hosts[i].xOpacity = currentHostX+38;
 
-                if (hosts[i].xOpacity>racks[hosts[i].hpcc_rack - 1].x+w_rack)
+                if (hosts[i].xOpacity>racks[hosts[i].hpcc_rack - 1].x+w_rack-20)
                     hosts[i].mOpacity =0;
 
                 var mea = currentMeasure;

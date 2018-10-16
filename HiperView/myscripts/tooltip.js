@@ -12,38 +12,8 @@ var color2 = d3.scaleOrdinal()
 ////////////////////////// Data //////////////////////////////
 //////////////////////////////////////////////////////////////
 
-var dataSpider = [
-    [//CPU1
-        {axis:"CPU1 temperature",value:0.22},
-        {axis:"CPU2 temperature",value:0.22},
-        {axis:"Inlet temperature",value:0.22},
-        {axis:"cpu load",value:0.22},
-        {axis:"memory usage",value:0.21},
-        {axis:"Fan1 speed",value:0.02},
-        {axis:"Fan2 speed",value:0.02},
-        {axis:"Fan3 speed",value:0.02},
-        {axis:"Fan4 speed",value:0.02},
-        {axis:"power consumption",value:0.29},
-    ]/*,[//CPU2
-        {axis:"CPU1 temperature",value:0.22},
-        {axis:"CPU2 temperature",value:0.22},
-        {axis:"Inlet temperature",value:0.22},
-        {axis:"cpu load",value:0.28},
-        {axis:"memory usage",value:0.17},
-        {axis:"fans speed",value:0.22},
-        {axis:"power consumption",value:0.21},
-    ],[//CPU3
-        {axis:"temperature",value:0.22},
-        {axis:"bmc health",value:0.28},
-        {axis:"cpu health",value:0.17},
-        {axis:"cpu load",value:0.22},
-        {axis:"fans health",value:0.21},
-        {axis:"memory health",value:0.02},
-        {axis:"memory usage",value:0.29},
-    ]*/
-];
-
-
+var axes = ["CPU1 Temperature", "CPU2 Temperature ", "Inlet Temperature","CPU load",
+    "Memory usage", "Fan1 speed", "Fan2 speed", "Fan3 speed", "Fan4 speed", "Power consumption"];
 
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
@@ -101,35 +71,7 @@ function mouseoverNode(d1){
             arr.push(obj);
     }
 
-         
-    var arrServices = [];
-    if (r.arr.length>0){
-        var lastIndex = r.arr.length-1;
-        var a = processData(r.arrTemperature[lastIndex].data.service.plugin_output, serviceList[0]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
-
-        var a = processData(r.arrCPU_load[lastIndex].data.service.plugin_output, serviceList[1]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
-
-        var a = processData(r.arrMemory_usage[lastIndex].data.service.plugin_output, serviceList[2]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
-
-        var a = processData(r.arrFans_health[lastIndex].data.service.plugin_output, serviceList[3]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
-
-        var a = processData(r.arrPower_usage[lastIndex].data.service.plugin_output, serviceList[4]);
-        var obj = {};
-        obj.a = a;
-        arrServices.push(obj);
-    }
+   
     
 
     // 3. get Time
@@ -332,44 +274,94 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
-    dataSpider[0][0].value = arrServices[0].a[0];
-    dataSpider[0][1].value = arrServices[0].a[1];
-    dataSpider[0][2].value = arrServices[0].a[2];
-    dataSpider[0][3].value = arrServices[1].a[0];
-    dataSpider[0][4].value = arrServices[2].a[0];
-    dataSpider[0][5].value = arrServices[3].a[0];
-    dataSpider[0][6].value = arrServices[3].a[1];
-    dataSpider[0][7].value = arrServices[3].a[2];
-    dataSpider[0][8].value = arrServices[3].a[3];
-    dataSpider[0][9].value = arrServices[4].a[0];
 
-    // Standardize data for Radar chart
-    for (var i=0; i<dataSpider[0].length;i++){
-        if (dataSpider[0][i].value==undefinedValue || isNaN(dataSpider[0][i].value))
-            dataSpider[0][i].value = -15;
-        else if (i==5 || i==6 || i==7 || i==8){   ////  Fans SPEED ***********************
-            var scale = d3.scaleLinear()
-                .domain([thresholds[3][0],thresholds[3][1]])
-                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-            
-            dataSpider[0][i].value =  scale(dataSpider[0][i].value);   
-        }
-        else if (i==9){   ////  Fans SPEED ***********************
-            var scale = d3.scaleLinear()
-                .domain([thresholds[4][0],thresholds[4][1]])
-                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-            
-            dataSpider[0][i].value =  scale(dataSpider[0][i].value);   
+    var dataSpider = [];
+    if (r.arr.length>0){
+        for (var i=0;i<r.arr.length;i++){
+            var arrServices = [];
+            var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = processData(r.arrCPU_load[i].data.service.plugin_output, serviceList[1]);
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = processData(r.arrMemory_usage[i].data.service.plugin_output, serviceList[2]);
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = processData(r.arrFans_health[i].data.service.plugin_output, serviceList[3]);
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = processData(r.arrPower_usage[i].data.service.plugin_output, serviceList[4]);
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+                   
+            var arr1 = [];
+            for (var a=0;a<axes.length;a++){
+                var obj ={};
+                obj.axis = axes[a];
+                if (a==0)
+                    obj.value = arrServices[0].a[0];
+                else if (a==1)
+                    obj.value = arrServices[0].a[1];
+                else if (a==2)
+                    obj.value = arrServices[0].a[2];
+                else if (a==3)
+                    obj.value = arrServices[1].a[0];
+                else if (a==4)
+                    obj.value = arrServices[2].a[0];
+                else if (a==5)
+                    obj.value = arrServices[3].a[0];
+                else if (a==6)
+                    obj.value = arrServices[3].a[1];
+                else if (a==7)
+                    obj.value = arrServices[3].a[2];
+                else if (a==8)
+                    obj.value = arrServices[3].a[3];
+                else if (a==9)
+                    obj.value = arrServices[4].a[0];
+                arr1.push(obj);
+            }
+            dataSpider.push(arr1);
+           
+            // Standardize data for Radar chart
+            for (var j=0; j<dataSpider[i].length;j++){
+                if (dataSpider[i][j].value==undefinedValue || isNaN(dataSpider[i][j].value))
+                    dataSpider[i][j].value = -15;
+                else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
+                    var scale = d3.scaleLinear()
+                        .domain([thresholds[3][0],thresholds[3][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+                    
+                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                }
+                else if (j==9){   ////  Fans SPEED ***********************
+                    var scale = d3.scaleLinear()
+                        .domain([thresholds[4][0],thresholds[4][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+                    
+                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                }
+            }
         }
     }
-    spiderChart();        
+    
+    spiderChart(dataSpider);        
 }
 
 function mouseoutNode(d1){
     tool_tip.hide(d1);
 }
 
-function spiderChart() {
+function spiderChart(dataSpider) {
    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
       var radarChartOptions = {
         w: tipW-50,
