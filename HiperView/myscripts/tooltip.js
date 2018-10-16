@@ -7,7 +7,15 @@ var margin = {top: 10, right: 0, bottom: 40, left: 50};
 var color2 = d3.scaleOrdinal()
     .range(["#000","#000","#444"]);
 
-
+var dataSpider = [];
+var radarChartOptions = {
+    w: tipW-50,
+    h: tipW+10,
+    maxValue: 0.5,
+    levels: 6,
+    roundStrokes: true,
+    color: color2
+  };
 //////////////////////////////////////////////////////////////
 ////////////////////////// Data //////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -17,6 +25,7 @@ var axes = ["CPU1 Temperature", "CPU2 Temperature ", "Inlet Temperature","CPU lo
 
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
+    .attr("id", "d3-tip")
     .offset([-200, 100])
     .html(function(d1) {
         var d = hosts[d1.index];
@@ -37,18 +46,26 @@ var tool_tip = d3.tip()
         str += '<svg width="100" height="100" id="svgTip"> </svg>'
         str += '<div class="radarChart"></div>'; // Spider chart holder
         str += '<button onclick="tool_tip.hide()">Close</button>';
+        str += '<button onclick="addSVG()">Add</button>';
         return str; });
 svg.call(tool_tip);
 
+// Add radar chart to the end of html page
+var countRadarChart = 1;
+function addSVG(){
+   RadarChart("#radarChart"+countRadarChart, dataSpider, radarChartOptions,dataSpider.name);
+   countRadarChart++;
+   if (countRadarChart==4)
+    countRadarChart=1;
+}    
 
-
-
+var svgTip;
 function mouseoverNode(d1){
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
 
     // 1. create the svgTip
-    var svgTip = d3.select("#svgTip")
+     svgTip = d3.select("#svgTip")
         .attr("width", tipW + margin.left + margin.right)
         .attr("height", tipH + margin.top + margin.bottom)
         .style("attr","#fff")
@@ -275,7 +292,8 @@ function mouseoverNode(d1){
 
     // Update spider data *************************************************************
 
-    var dataSpider = [];
+    dataSpider = [];
+    dataSpider.name = d1.className.baseVal;
     if (r.arr.length>0){
         for (var i=0;i<r.arr.length;i++){
             var arrServices = [];
@@ -352,25 +370,10 @@ function mouseoverNode(d1){
                 }
             }
         }
-    }
-    
-    spiderChart(dataSpider);        
-}
+    }   
+   RadarChart(".radarChart", dataSpider, radarChartOptions,"");
+}   
 
 function mouseoutNode(d1){
     tool_tip.hide(d1);
-}
-
-function spiderChart(dataSpider) {
-   /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
-      var radarChartOptions = {
-        w: tipW-50,
-        h: tipW+10,
-        maxValue: 0.5,
-        levels: 6,
-        roundStrokes: true,
-        color: color2
-      };
-      //Call function to draw the Radar chart
-      RadarChart(".radarChart", dataSpider, radarChartOptions);
 }

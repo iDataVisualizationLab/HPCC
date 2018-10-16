@@ -5,7 +5,7 @@
 /////////// Inspired by the code of alangrafu ///////////
 /////////////////////////////////////////////////////////
     
-function RadarChart(id, data, options) {
+function RadarChart(id, data, options, name) {
     var cfg = {
      w: 600,                //Width of the circle
      h: 600,                //Height of the circle
@@ -90,6 +90,18 @@ function RadarChart(id, data, options) {
     var g = svg.append("g")
             .attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
     
+     svg.append("text")
+        .attr("class", "currentTimeText")
+        .attr("x", 10)
+        .attr("y", 12)
+        .attr("fill", "#000")
+        .style("text-anchor", "start")
+        .style("font-weight","bold")
+        .style("font-size", "12px")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text(name);
+
     /////////////////////////////////////////////////////////
     ////////// Glow filter for some extra pizzazz ///////////
     /////////////////////////////////////////////////////////
@@ -229,7 +241,9 @@ function RadarChart(id, data, options) {
          })
         .enter().append("circle")
         .attr("class", "radarCircle")
-        .attr("r", cfg.dotRadius)
+        .attr("r", function(d){
+            return 1+Math.pow((d.index+2),0.3);
+        })
         .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI/2); })
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
        // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
@@ -243,28 +257,28 @@ function RadarChart(id, data, options) {
 
 
     //Append the backgrounds
-    /*blobWrapper
+    blobWrapper
         .append("path")
         .attr("class", "radarArea")
         .attr("d", function(d,i) { return radarLine(d); })
         .style("fill", function(d,i) { return cfg.color(i); })
-        .style("fill-opacity", cfg.opacityArea)
+        .style("fill-opacity", 0.05)
         .on('mouseover', function (d,i){
             //Dim all blobs
             d3.selectAll(".radarArea")
                 .transition().duration(200)
-                .style("fill-opacity", 0.1);
+                .style("fill-opacity", 0.0);
             //Bring back the hovered over blob
             d3.select(this)
                 .transition().duration(200)
-                .style("fill-opacity", 0.7);
+                .style("fill-opacity", 0.3);
         })
         .on('mouseout', function(){
             //Bring back all blobs
             d3.selectAll(".radarArea")
                 .transition().duration(200)
-                .style("fill-opacity", cfg.opacityArea);
-        });*/
+                .style("fill-opacity",  0.05);
+        });
 
     /////////////////////////////////////////////////////////
     //////// Append invisible circles for tooltip ///////////

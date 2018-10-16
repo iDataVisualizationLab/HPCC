@@ -112,6 +112,41 @@ table, th, td {
 	height: 500px;
 }
 
+.radarChartss {
+	border: 1px solid rgba(120,120,120, 1);
+	border-radius: 6px;
+	background-color: #fff;
+	box-shadow: 5px 5px 5px #444;
+}
+#radarChart1 {
+	position:absolute;
+	width: 500px;
+	height: 500px;
+	border-radius: 0px;
+	z-index: 0;
+	top: 1320px;
+	left: 50px;
+}	
+
+#radarChart2 {
+	position:absolute;
+	width: 500px;
+	height: 500px;
+	border-radius: 0px;
+	z-index: 0;
+	top: 1320px;
+	left: 600px;
+}
+
+#radarChart3 {
+	position:absolute;
+	width: 500px;
+	height: 500px;
+	border-radius: 0px;
+	z-index: 0;
+	top: 1320px;
+	left: 1150px;
+}	
 
 .ticks {
 	font: 12px sans-serif;

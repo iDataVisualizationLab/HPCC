@@ -413,7 +413,7 @@ function main() {
 function request(){
     var count = 0;
     var iteration = 0;
-    var iterationstep = 21;
+    var iterationstep = 3;
     
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
