@@ -79,11 +79,13 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =0;
-var numberOfMinutes = 6*60;
+var numberOfMinutes = 26*60;
+var iterationstep = 21;
+
 var isRealtime = false;
 if (isRealtime){
-    simDuration = 3000;
-    numberOfMinutes = 24*60;
+    simDuration = 4000;
+    numberOfMinutes = 30*60;
 }
 
 var currentMiliseconds;
@@ -94,7 +96,7 @@ var currentHosty = 0;
 
 var charType = "Heatmap";
 //***********************
-var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"]
+var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"]
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService;
@@ -413,8 +415,6 @@ function main() {
 function request(){
     var count = 0;
     var iteration = 0;
-    var iterationstep = 3;
-    
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
 
@@ -639,7 +639,7 @@ function request(){
                     hosts[i].mOpacity =0;
 
                 var mea = currentMeasure;
-                if (selectedService=="CPU_load" || selectedService=="Memory_usage"){
+                if (selectedService=="Job_load" || selectedService=="Memory_usage"){
                     mea = currentMeasure.toFixed(2);
                 }
                 else if (selectedService=="Power_consumption"){
@@ -706,7 +706,8 @@ function processData(str, serviceName) {
     }
     else if (serviceName == serviceList[1]){
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 
+            || str.indexOf("CPU Load: null")>=0){
             a[0] = undefinedValue;
             a[1] = undefinedValue;
             a[2] = undefinedValue;

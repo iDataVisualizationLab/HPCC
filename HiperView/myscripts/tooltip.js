@@ -20,7 +20,7 @@ var radarChartOptions = {
 ////////////////////////// Data //////////////////////////////
 //////////////////////////////////////////////////////////////
 
-var axes = ["CPU1 Temperature", "CPU2 Temperature ", "Inlet Temperature","CPU load",
+var axes = ["CPU1 Temp", "CPU2 Temp ", "Inlet Temp","Job load",
     "Memory usage", "Fan1 speed", "Fan2 speed", "Fan3 speed", "Fan4 speed", "Power consumption"];
 
 var tool_tip = d3.tip()

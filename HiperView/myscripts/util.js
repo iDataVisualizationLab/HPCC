@@ -101,7 +101,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     var y = 30;
     var r = 20;
     var barW= 5;
-    if (selectedService=="Memory_usage" || selectedService=="CPU_load")
+    if (selectedService=="Memory_usage" || selectedService=="Job_load")
         barW =8;
     var xScale = d3.scaleLinear()
         .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
