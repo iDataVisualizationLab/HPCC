@@ -1,5 +1,11 @@
+# Outlier detection:
+https://outliagnostics.github.io/demos.html 
+
+
 # HiperView: Visualizing Multidimensional Health Status of High Performance Systems
 Demo :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+
+Overheat: https://idatavisualizationlab.github.io/HPCC/HiperOverheatSep26/demo.html
 
 
 # HPCViz: Monitoring Health Status of High Performance Computing Centers
