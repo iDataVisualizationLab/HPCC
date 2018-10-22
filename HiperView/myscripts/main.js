@@ -80,7 +80,7 @@ var baseTemperature =60;
 var interval2;
 var simDuration =0;
 var numberOfMinutes = 26*60;
-var iterationstep = 18;
+var iterationstep = 1;
 
 var isRealtime = false;
 if (isRealtime){
@@ -606,7 +606,7 @@ function request(){
                 .attr("font-family", "sans-serif")
                 .text(new Date(query_time).timeNow());    
 
-           // drawBoxplot(svg, arr, lastIndex, xx-10);
+            drawBoxplot(svg, arr, lastIndex, xx-10);
             count=0;
             iteration+=iterationstep;
         }
