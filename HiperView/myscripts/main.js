@@ -63,7 +63,7 @@ var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 var maxHostinRack= 60;
-var h_rack = 980;
+var h_rack = 1280;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -80,7 +80,7 @@ var baseTemperature =60;
 var interval2;
 var simDuration =0;
 var numberOfMinutes = 26*60;
-var iterationstep = 1;
+var iterationstep = 20;
 
 var isRealtime = false;
 if (isRealtime){
