@@ -368,6 +368,13 @@ function mouseoverNode(d1){
             for (var j=0; j<dataSpider[i].length;j++){
                 if (dataSpider[i][j].value==undefinedValue || isNaN(dataSpider[i][j].value))
                     dataSpider[i][j].value = -15;
+                else if (j==3){   ////  Job load ***********************
+                     var scale = d3.scaleLinear()
+                        .domain([thresholds[1][0],thresholds[1][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]); 
+                    
+                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                }
                 else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
                     var scale = d3.scaleLinear()
                         .domain([thresholds[3][0],thresholds[3][1]])
