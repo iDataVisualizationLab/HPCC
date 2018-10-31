@@ -426,7 +426,7 @@ function mouseoutLine(d,i) {
         // .style("visibility", "visible");
 }
 var playing =false;
-var timestep =1000;
+var timestep = 500;
 function playanimation() {
     var cfg = radarChartOptions;
     playing = true;
@@ -499,12 +499,12 @@ function playanimation() {
             playbar.remove();
             timer.stop();
         } else{
-            if (index != Math.floor(elapsed/timestep)+1) {
+            // if (index != Math.floor(elapsed/timestep)+1) {
                 index = Math.floor(elapsed/timestep)+1;
                 // console.log(index);
                 current_data = [radar._groups[0][index].__data__];
                 updateanimation(current_data);
-            }
+            // }
 
         }
 
@@ -519,13 +519,13 @@ function playanimation() {
             var path = blobWrapper.selectAll( ".radarStroke")
                 .datum((d,i) => current_data[i])
                 .transition().duration(timestep)
-                .attrTween("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); });
+                .attr("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); });
 
 
             //Append the circles
             blobWrapper.selectAll(".radarCircle")
                 .data((d,i) => current_data[i])
-        .transition().duration(timestep)
+                .transition().duration(timestep)
                 .attr("r", function(d){
                     return 1+Math.pow((d.index+2),0.3);
                 })
