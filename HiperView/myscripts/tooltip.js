@@ -499,17 +499,17 @@ function playanimation() {
             playbar.remove();
             timer.stop();
         } else{
-            // if (index != Math.floor(elapsed/timestep)+1) {
+            if (index != Math.floor(elapsed/timestep)+1) {
                 index = Math.floor(elapsed/timestep)+1;
                 // console.log(index);
                 current_data = [radar._groups[0][index].__data__];
                 updateanimation(current_data);
-            // }
+            }
 
         }
 
         function updateanimation (current_data) {
-            playbar.transition().duration(timestep).attr("transform", "translate("+ xScale(current_data[0].time) +"," + 0 + ")");
+            playbar.transition().duration(timestep).ease(d3.easeLinear).attr("transform", "translate("+ xScale(current_data[0].time) +"," + 0 + ")");
             // console.log("new: ");
             // console.log(current_data[0].time);
             wapperout.data(current_data);
@@ -518,14 +518,15 @@ function playanimation() {
             //Create the outlines
             var path = blobWrapper.selectAll( ".radarStroke")
                 .datum((d,i) => current_data[i])
-                .transition().duration(timestep)
-                .attr("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); });
+                .transition()
+                .duration(timestep).ease(d3.easePolyInOut)
+                .attr("d", function(d,i) { return radarLine(d); });
 
 
             //Append the circles
             blobWrapper.selectAll(".radarCircle")
                 .data((d,i) => current_data[i])
-                .transition().duration(timestep)
+                .transition().duration(timestep).ease(d3.easePolyInOut)
                 .attr("r", function(d){
                     return 1+Math.pow((d.index+2),0.3);
                 })

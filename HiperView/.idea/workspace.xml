@@ -17,8 +17,8 @@
       <file leaf-file-name="tooltip.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="521" column="21" lean-forward="false" selection-start-line="521" selection-start-column="21" selection-end-line="521" selection-end-column="21" />
+            <state relative-caret-position="271">
+              <caret line="521" column="16" lean-forward="false" selection-start-line="521" selection-start-column="16" selection-end-line="521" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -224,12 +224,12 @@
       <option name="presentableId" value="Default" />
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
-      <workItem from="1540947326819" duration="717000" />
+      <workItem from="1540947326819" duration="1632000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="23022000" />
+    <option name="totallyTimeSpent" value="23937000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="542" y="109" width="1552" height="873" extended-state="0" />
@@ -403,8 +403,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="521" column="21" lean-forward="false" selection-start-line="521" selection-start-column="21" selection-end-line="521" selection-end-column="21" />
+        <state relative-caret-position="271">
+          <caret line="521" column="16" lean-forward="false" selection-start-line="521" selection-start-column="16" selection-end-line="521" selection-end-column="16" />
           <folding />
         </state>
       </provider>
