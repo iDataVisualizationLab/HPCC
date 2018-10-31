@@ -18,7 +18,8 @@ function RadarChart(id, data, options, name) {
      dotRadius: 3,          //The size of the colored circles of each blog
      opacityCircles: 0.1,   //The opacity of the circles of each blob
      strokeWidth: 0.5,        //The width of the stroke around each blob
-     roundStrokes: false   //If true the area and stroke will follow a round path (cardinal-closed)
+     roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
+     legend: []
     // color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
     
@@ -149,21 +150,6 @@ function RadarChart(id, data, options, name) {
         .style("fill-opacity", cfg.opacityCircles)
         .style("filter" , "url(#glow)");
 
-    //Text indicating at what % each level is
-    axisGrid.selectAll(".axisLabel")
-       .data(d3.range(1,(cfg.levels)).reverse())
-       .enter().append("text")
-       .attr("class", "axisLabel")
-       .attr("x", 4)
-       .attr("y", function(d){return -d*radius/cfg.levels;})
-       .attr("dy", "0.4em")
-        .attr("font-family", "sans-serif")
-        .style("font-size", "12px")
-       .attr("fill", "#111")
-       .text(function(d,i) { 
-            var v = (maxValue-minValue) * d/cfg.levels +minValue;     
-            return Math.round(v); 
-        });
 
     /////////////////////////////////////////////////////////
     //////////////////// Draw the axes //////////////////////
@@ -353,6 +339,40 @@ function RadarChart(id, data, options, name) {
         }
       });
     }//wrap
+    //Text indicating at what % each level is
+    axisGrid.selectAll(".axisLabel")
+        .data(d3.range(1,(cfg.levels)).reverse())
+        .enter().append("text")
+        .attr("class", "axisLabel")
+        .attr("x", 4)
+        .attr("y", function(d){return -d*radius/cfg.levels;})
+        .attr("dy", "0.4em")
+        .attr("font-family", "sans-serif")
+        .style("font-size", "12px")
+        .attr("fill", "#111")
+        .text(function(d,i) {
+            var v = (maxValue-minValue) * d/cfg.levels +minValue;
+            return Math.round(v);
+        });
+    var legendg = cfg.legend.map(function(d,i) { return Object.keys(d).map(function(k) {return {key: k, value: d[k],index:i}})}).filter(d => d.length!=0);
+    var subaxis = axisGrid.selectAll(".axisLabelsub")
+        .data(legendg)
+        .enter().append('g').attr('class','axisLabelsub');
+    subaxis.selectAll('.axisLabelsubt')
+        .data(d=>d)
+        .enter().append("text")
+        .attr("class", "axisLabelsubt")
+        .attr("x", function(d,i){ return d.key*radius/cfg.levels * Math.cos(angleSlice[d.index] - Math.PI/2); })
+        .attr("y", function(d,i){ return d.key*radius/cfg.levels * Math.sin(angleSlice[d.index] - Math.PI/2); })
+        // .attr("x", d => {4+d.key*radius/cfg.levels})
+        // .attr("y", function(d){return -d.key*radius/cfg.levels;})
+        .attr("dy", "0.4em")
+        .attr("font-family", "sans-serif")
+        .style("font-size", "12px")
+        .attr("fill", "#111")
+        .text(function(d) {
+            return d.value;
+        });
     return {radarLine: radarLine,
         rScale: rScale,
         colorTemperature: colorTemperature};

@@ -6,15 +6,26 @@ var tipH = 200;
 var margin = {top: 10, right: 0, bottom: 40, left: 50};
 var color2 = d3.scaleOrdinal()
     .range(["#000","#000","#444"]);
-
+var playing =false;
 var dataSpider = [];
+var levelsR = 6;
 var radarChartOptions = {
     w: tipW-50,
     h: tipW+10,
     maxValue: 0.5,
-    levels: 6,
+    levels: levelsR,
     roundStrokes: true,
-    color: color2
+    color: color2,
+    legend: [{},
+        {},
+        {},
+        {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
+        {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
+        {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+        {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+        {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+        {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+        {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
   };
 var scaleopt;
 //////////////////////////////////////////////////////////////
@@ -63,6 +74,7 @@ function addSVG(){
 var svgTip;
 var xScale;
 function mouseoverNode(d1){
+    playing = false;
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
 
@@ -367,7 +379,7 @@ function mouseoverNode(d1){
            
             // Standardize data for Radar chart
             for (var j=0; j<dataSpider[i].length;j++){
-                if (dataSpider[i][j].value==undefinedValue || isNaN(dataSpider[i][j].value))
+                if (dataSpider[i][j].value == undefinedValue || isNaN(dataSpider[i][j].value))
                     dataSpider[i][j].value = -15;
                 else if (j==3){   ////  Job load ***********************
                      var scale = d3.scaleLinear()
@@ -383,16 +395,15 @@ function mouseoverNode(d1){
                     
                     dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
                 }
-                else if (j==9){   ////  Fans SPEED ***********************
+                else if (j==9){   ////  Power Consumption ***********************
                     var scale = d3.scaleLinear()
                         .domain([thresholds[4][0],thresholds[4][1]])
                         .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-                    
                     dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
                 }
             }
         }
-    }   
+    }
    scaleopt = RadarChart(".radarChart", dataSpider, radarChartOptions,"");
 }   
 
@@ -425,13 +436,12 @@ function mouseoutLine(d,i) {
         .style("opacity", 1);
         // .style("visibility", "visible");
 }
-var playing =false;
 var timestep = 500;
 function playanimation() {
     if (playing){
         playing = false;
     }else {
-        $(".playbtn").toggleClass("playing");
+        $(".playbtn").addClass('playing');
         $(".playbtn > i").removeClass('fa-play').addClass('fa-stop');
         var cfg = radarChartOptions;
         playing = true;
@@ -483,7 +493,13 @@ function playanimation() {
             .style("fill", "none")
             .style("filter", "url(#glow2)");
 
-
+        //Append the backgrounds
+        blobWrapper
+            .append("path")
+            .attr("class", "radarArea")
+            .attr("d", function(d,i) { return radarLine(d); })
+            .style("fill", function(d,i) { return cfg.color(i); })
+            .style("fill-opacity", 0.05);
         //Append the circles
         blobWrapper.selectAll(".radarCircle")
             .data(function (d, i) {
@@ -518,7 +534,7 @@ function playanimation() {
                 d3.selectAll(".radarWrapper")
                     .style("opacity", 1);
                 playbar.remove();
-                $(".playbtn").toggleClass("playing");
+                $(".playbtn").removeClass('playing');
                 $(".playbtn > i").removeClass('fa-stop').addClass('fa-play');
                 timer.stop();
             } else {
@@ -539,26 +555,27 @@ function playanimation() {
                 wapperout.data(current_data);
                 var blobWrapper = wapperout.enter().selectAll(".radarWrappermove")
                     .data((d, i) => current_data[i]
-            )
-                ;
+                );
                 //Create the outlines
                 var path = blobWrapper.selectAll(".radarStroke")
-                    .datum((d, i) => current_data[i]
-            )
-            .
-                transition()
+                    .datum((d, i) => current_data[i])
+                    .transition()
                     .duration(timestep).ease(d3.easePolyInOut)
                     .attr("d", function (d, i) {
                         return radarLine(d);
                     });
 
+                //Append the backgrounds
+                blobWrapper.selectAll(".radarArea")
+                    .datum((d, i) => current_data[i])
+                    .transition()
+                    .duration(timestep).ease(d3.easePolyInOut)
+                    .attr("d", function(d,i) { return radarLine(d); });
 
                 //Append the circles
                 blobWrapper.selectAll(".radarCircle")
                     .data((d, i) => current_data[i]
-            )
-            .
-                transition().duration(timestep).ease(d3.easePolyInOut)
+                ).transition().duration(timestep).ease(d3.easePolyInOut)
                     .attr("r", function (d) {
                         return 1 + Math.pow((d.index + 2), 0.3);
                     })
