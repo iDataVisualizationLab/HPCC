@@ -258,28 +258,28 @@ function RadarChart(id, data, options, name) {
 
 
     //Append the backgrounds
-    blobWrapper
-        .append("path")
-        .attr("class", "radarArea")
-        .attr("d", function(d,i) { return radarLine(d); })
-        .style("fill", function(d,i) { return cfg.color(i); })
-        .style("fill-opacity", 0.05)
-        .on('mouseover', function (d,i){
-            //Dim all blobs
-            d3.selectAll(".radarArea")
-                .transition().duration(200)
-                .style("fill-opacity", 0.0);
-            //Bring back the hovered over blob
-            d3.select(this)
-                .transition().duration(200)
-                .style("fill-opacity", 0.3);
-        })
-        .on('mouseout', function(){
-            //Bring back all blobs
-            d3.selectAll(".radarArea")
-                .transition().duration(200)
-                .style("fill-opacity",  0.05);
-        });
+    // blobWrapper
+    //     .append("path")
+    //     .attr("class", "radarArea")
+    //     .attr("d", function(d,i) { return radarLine(d); })
+    //     .style("fill", function(d,i) { return cfg.color(i); })
+    //     .style("fill-opacity", 0.05)
+    //     .on('mouseover', function (d,i){
+    //         //Dim all blobs
+    //         d3.selectAll(".radarArea")
+    //             .transition().duration(200)
+    //             .style("fill-opacity", 0.0);
+    //         //Bring back the hovered over blob
+    //         d3.select(this)
+    //             .transition().duration(200)
+    //             .style("fill-opacity", 0.3);
+    //     })
+    //     .on('mouseout', function(){
+    //         //Bring back all blobs
+    //         d3.selectAll(".radarArea")
+    //             .transition().duration(200)
+    //             .style("fill-opacity",  0.05);
+    //     });
 
     /////////////////////////////////////////////////////////
     //////// Append invisible circles for tooltip ///////////

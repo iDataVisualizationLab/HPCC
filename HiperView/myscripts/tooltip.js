@@ -444,7 +444,7 @@ function playanimation() {
         .attr('x1',function(d){return 0})
         .attr('y2',function(d){return 0})
         .attr('x2',function(d){return 0})
-        .style('opacity',1);;
+        .style('opacity',1);
     var g = d3.select("#radarGroup");
     var radar = d3.selectAll(".radarWrapper");
 
@@ -509,7 +509,8 @@ function playanimation() {
         }
 
         function updateanimation (current_data) {
-            playbar.transition().duration(timestep).ease(d3.easeLinear).attr("transform", "translate("+ xScale(current_data[0].time) +"," + 0 + ")");
+            playbar.transition().duration(timestep)//.ease(d3.easeLinear)
+                .attr("transform", "translate("+ xScale(current_data[0].time) +"," + 0 + ")");
             // console.log("new: ");
             // console.log(current_data[0].time);
             wapperout.data(current_data);
