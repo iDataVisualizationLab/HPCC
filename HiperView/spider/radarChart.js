@@ -88,6 +88,7 @@ function RadarChart(id, data, options, name) {
             .attr("class", "radar"+id);
     //Append a g element        
     var g = svg.append("g")
+            .attr("id","radarGroup")
             .attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
     
      svg.append("text")
@@ -351,6 +352,9 @@ function RadarChart(id, data, options, name) {
           }
         }
       });
-    }//wrap 
+    }//wrap
+    return {radarLine: radarLine,
+        rScale: rScale,
+        colorTemperature: colorTemperature};
     
 }//RadarChart

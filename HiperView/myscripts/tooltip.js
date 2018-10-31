@@ -16,6 +16,7 @@ var radarChartOptions = {
     roundStrokes: true,
     color: color2
   };
+var scaleopt;
 //////////////////////////////////////////////////////////////
 ////////////////////////// Data //////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -42,7 +43,7 @@ var tool_tip = d3.tip()
         }
         str+="</table> <br>"
         */
-
+        str += '<button class="playbtn" onclick="playanimation()"><i class="fas fa-play"></i></button>';
         str += '<svg width="100" height="100" id="svgTip"> </svg>'
         str += '<div class="radarChart"></div>'; // Spider chart holder
         str += '<button onclick="tool_tip.hide()">Close</button>';
@@ -70,7 +71,7 @@ function mouseoverNode(d1){
         .attr("height", tipH + margin.top + margin.bottom)
         .style("attr","#fff")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
     // 2. Process the array of historical temperatures
@@ -170,7 +171,13 @@ function mouseoverNode(d1){
             //return opa(d.temp1);
         })
         .attr("stroke-width",0.5)
-        .attr("stroke","#000");
+        .attr("stroke","#000")
+        .on("mouseover", function (d,i) {
+            mouseoverLine (d,i);
+        })
+        .on('mouseout', function(d,i){
+            mouseoutLine (d,i);
+        });
 
     svgTip.append("text")
         .attr("x", tipW-4)
@@ -210,7 +217,13 @@ function mouseoverNode(d1){
             return 1;//opa(d.temp2);
         })
         .attr("stroke-width",0.5)
-        .attr("stroke","#000");
+        .attr("stroke","#000")
+        .on("mouseover", function (d,i) {
+            mouseoverLine (d,i);
+        })
+        .on('mouseout', function(d,i){
+            mouseoutLine (d,i);
+        });
 
      svgTip.append("text")
         .attr("x", tipW-4)
@@ -348,6 +361,7 @@ function mouseoverNode(d1){
                     obj.value = arrServices[4].a[0];
                 arr1.push(obj);
             }
+            arr1.time = r.arr[i].result.query_time;
             dataSpider.push(arr1);
            
             // Standardize data for Radar chart
@@ -371,9 +385,144 @@ function mouseoverNode(d1){
             }
         }
     }   
-   RadarChart(".radarChart", dataSpider, radarChartOptions,"");
+   scaleopt = RadarChart(".radarChart", dataSpider, radarChartOptions,"");
 }   
 
 function mouseoutNode(d1){
     tool_tip.hide(d1);
+}
+
+function mouseoverLine(d,i){
+    //Dim all blobs
+    // console.log('time: '+d.query_time);
+    var radar = d3.selectAll(".radarWrapper");
+    radar.filter( e => e.time !== d.query_time )
+        .transition().duration(500)
+        .style("opacity", 0);
+        // .style("visibility", "hidden");
+    radar.filter( e => e.time == d.query_time )
+        .transition().duration(500)
+        .style("opacity", 1);
+        // .style("visibility", "visible");
+    //Bring back the hovered over blob
+    // console.log("added");
+    // radar
+    //     .transition().duration(200)
+    //     .style("fill-opacity", 0.3);
+}
+function mouseoutLine(d,i) {
+//Bring back all blobs
+    d3.selectAll(".radarWrapper")
+        .transition().duration(200)
+        .style("opacity", 1);
+        // .style("visibility", "visible");
+}
+var playing =false;
+var timestep =1000;
+function playanimation() {
+    var cfg = radarChartOptions;
+    playing = true;
+    var radarLine = scaleopt.radarLine,
+        rScale = scaleopt.rScale,
+        colorTemperature = scaleopt.colorTemperature ;
+    d3.selectAll(".radarWrapper")
+        .style("opacity", 0);
+    var g = d3.select("#radarGroup");
+    var radar = d3.selectAll(".radarWrapper");
+
+    var current_data = [radar._groups[0][0].__data__];
+
+    //Create a wrapper for the blobs
+    var wapperout =  g.selectAll(".radarWrappermove")
+        .data(current_data);
+    var blobWrapper = wapperout
+        .enter().append("g")
+        .attr("class", "radarWrappermove");
+    //Create the outlines
+    var path = blobWrapper.append("path")
+        .attr("class", "radarStroke")
+        .attr("d", function(d,i) { return radarLine(d); })
+        .style("stroke-width", cfg.strokeWidth + "px")
+        .style("stroke-opacity", 0.5)
+        .style("stroke", function(d,i) { return cfg.color(i); })
+        .style("fill", "none")
+        .style("filter" , "url(#glow2)");
+
+
+    //Append the circles
+    blobWrapper.selectAll(".radarCircle")
+        .data(function(d,i) {
+            d.forEach(function(d2){
+                d2.index=i;
+            });
+            return d;
+        })
+        .enter().append("circle")
+        .attr("class", "radarCircle")
+        .attr("r", function(d){
+            return 1+Math.pow((d.index+2),0.3);
+        })
+        .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI/2); })
+        .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
+        // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
+        .style("fill", function(d){
+            return colorTemperature(d.value);
+        })
+        .style("fill-opacity", 0.5)
+        .style("stroke", "#000")
+        .style("stroke-width", 0.2);
+    var index;
+    var timer = d3.timer(function(elapsed) {
+        if (elapsed/timestep > radar._groups[0].length-1 || (!playing)){
+            playing = false;
+            d3.selectAll(".radarWrappermove").remove();
+            d3.selectAll(".radarWrapper")
+                .style("opacity", 1);
+            timer.stop();
+        } else{
+            if (index != Math.floor(elapsed/timestep)+1) {
+                index = Math.floor(elapsed/timestep)+1;
+                // console.log(index);
+                current_data = [radar._groups[0][index].__data__];
+                updateanimation(current_data);
+            }
+
+        }
+
+        function updateanimation (current_data) {
+            // console.log("new: ");
+            // console.log(current_data[0].time);
+            wapperout.data(current_data);
+            var blobWrapper = wapperout.enter().selectAll(".radarWrappermove")
+                .data((d,i) => current_data[i]);
+            //Create the outlines
+            var path = blobWrapper.selectAll( ".radarStroke")
+                .datum((d,i) => current_data[i])
+                .transition().duration(timestep)
+                .attr("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); })
+                .style("stroke-width", cfg.strokeWidth + "px")
+                .style("stroke-opacity", 0.5)
+                .style("stroke", function(d,i) { return cfg.color(i); })
+                .style("fill", "none")
+                .style("filter" , "url(#glow2)");
+
+
+            //Append the circles
+            blobWrapper.selectAll(".radarCircle")
+                .data((d,i) => current_data[i])
+        .transition().duration(timestep)
+                .attr("r", function(d){
+                    return 1+Math.pow((d.index+2),0.3);
+                })
+                .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI/2); })
+                .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
+                // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
+                .style("fill", function(d){
+                    return colorTemperature(d.value);
+                })
+                .style("fill-opacity", 0.5)
+                .style("stroke", "#000")
+                .style("stroke-width", 0.2);
+        }
+    }, timestep);
 }
