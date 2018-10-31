@@ -112,7 +112,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 }
 .d3-tip .playbar{
 	stroke: black;
-	stroke-dasharray: 5,5;
+	stroke-dasharray: 2,2;
 }
 label {
 	font-size: 12px;

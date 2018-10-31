@@ -151,7 +151,7 @@ function RadarChart(id, data, options, name) {
 
     //Text indicating at what % each level is
     axisGrid.selectAll(".axisLabel")
-       .data(d3.range(1,(cfg.levels+1)).reverse())
+       .data(d3.range(1,(cfg.levels)).reverse())
        .enter().append("text")
        .attr("class", "axisLabel")
        .attr("x", 4)
