@@ -496,6 +496,7 @@ function playanimation() {
             d3.selectAll(".radarWrappermove").remove();
             d3.selectAll(".radarWrapper")
                 .style("opacity", 1);
+            playbar.remove();
             timer.stop();
         } else{
             if (index != Math.floor(elapsed/timestep)+1) {
