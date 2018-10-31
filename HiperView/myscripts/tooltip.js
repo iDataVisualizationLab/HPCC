@@ -61,6 +61,7 @@ function addSVG(){
 }    
 
 var svgTip;
+var xScale;
 function mouseoverNode(d1){
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
@@ -101,7 +102,7 @@ function mouseoverNode(d1){
         maxTime = Math.max(maxTime,qtime);
     }
 
-    var xScale = d3.scaleTime()
+    xScale = d3.scaleTime()
         .domain([ new Date(minTime-1000), new Date(maxTime+1000) ])
         .range([0, tipW-60]);
 
@@ -122,7 +123,7 @@ function mouseoverNode(d1){
         .attr("fill", "#fff")
         .attr("fill-opacity",1)
         .attr("stroke", "#000")
-        .attr("stroke-width", 0.05);               ;
+        .attr("stroke-width", 0.05);
 
 
     // 3. Call the x axis in a group tag
@@ -427,6 +428,16 @@ function playanimation() {
         colorTemperature = scaleopt.colorTemperature ;
     d3.selectAll(".radarWrapper")
         .style("opacity", 0);
+    var playbar = svgTip.append('g')
+        .attr('id','playbarg')
+        .attr("transform", "translate("+ 0 +"," + 0 + ")");
+    playbar.append('line')
+        .attr('class','playbar')
+        .attr('y1',function(d){return tipH})
+        .attr('x1',function(d){return 0})
+        .attr('y2',function(d){return 0})
+        .attr('x2',function(d){return 0})
+        .style('opacity',1);;
     var g = d3.select("#radarGroup");
     var radar = d3.selectAll(".radarWrapper");
 
@@ -490,6 +501,7 @@ function playanimation() {
         }
 
         function updateanimation (current_data) {
+            playbar.transition().duration(timestep).attr("transform", "translate("+ xScale(current_data[0].time) +"," + 0 + ")");
             // console.log("new: ");
             // console.log(current_data[0].time);
             wapperout.data(current_data);
@@ -499,12 +511,7 @@ function playanimation() {
             var path = blobWrapper.selectAll( ".radarStroke")
                 .datum((d,i) => current_data[i])
                 .transition().duration(timestep)
-                .attr("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); })
-                .style("stroke-width", cfg.strokeWidth + "px")
-                .style("stroke-opacity", 0.5)
-                .style("stroke", function(d,i) { return cfg.color(i); })
-                .style("fill", "none")
-                .style("filter" , "url(#glow2)");
+                .attrTween("d", function(d,i) {console.log("new1: "+d.time); return radarLine(d); });
 
 
             //Append the circles
