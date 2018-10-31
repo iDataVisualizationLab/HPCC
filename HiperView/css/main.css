@@ -110,10 +110,14 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	border-radius: 50%;
 	text-align: center;
 }
+.d3-tip .playbtn.playing{
+	background-color: #b20f02;
+}
 .d3-tip .playbar{
 	stroke: black;
 	stroke-dasharray: 2,2;
 }
+
 label {
 	font-size: 12px;
 	color: #040507;
