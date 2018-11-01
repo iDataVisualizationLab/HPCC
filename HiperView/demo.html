@@ -51,6 +51,12 @@
         <option value="Heatmap" selected="selected">Heatmap</option>
         <option value="Area Chart">Area Chart</option>
     </select>
+    <br><br>
+    <button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>
+    <select id="irecord">
+        <option value=0 selected="selected">0</option>
+        <option value=1>1</option>
+    </select>
 
 
 </div>
@@ -61,6 +67,13 @@
 <div id="radarChart1" class="radarChartss"></div>
 <div id="radarChart2" class="radarChartss"></div>
 <div id="radarChart3" class="radarChartss"></div>
+<!--tooltip total-->
+<div id="Summarynode">
+    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+    <div id="Summarynodeheader">Click here to move</div>
+    <div id = "Summarynodeg"></div>
+</div>
+
 <!-- load the d3.js library -->
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>

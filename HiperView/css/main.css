@@ -79,7 +79,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 
 /* tooltip */
-.d3-tip {
+#Summarynode, .d3-tip {
 	line-height: 1;
 	padding: 10px;
 	background: rgba(255, 255, 255, 1);
@@ -235,4 +235,21 @@ table, th, td {
 .box .outlier {
 	fill: none;
 	stroke: #000;
+}
+
+#Summarynode {
+	visibility: hidden;
+	position: absolute;
+	z-index: 9;
+	top: 10%;
+	left:20%;
+	text-align: center;
+}
+
+#Summarynodeheader {
+	padding: 10px;
+	cursor: move;
+	z-index: 10;
+	background-color: #2196F3;
+	color: #fff;
 }
