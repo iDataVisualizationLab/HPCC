@@ -17,9 +17,9 @@ var svg = d3.select("svg"),
 svg = svg.append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
-    //.call(d3.zoom()
-    //    .scaleExtent([1, 8])
-    //    .on("zoom", zoom));
+//.call(d3.zoom()
+//    .scaleExtent([1, 8])
+//    .on("zoom", zoom));
 //function zoom() {
 //   svg.attr("transform", d3.event.transform);
 //}
@@ -125,7 +125,7 @@ function setColorsAndThresholds(s) {
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
                 .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);   
+                .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
         else if (s == serviceList[i] && i==2){  // Memory_usage
@@ -139,7 +139,7 @@ function setColorsAndThresholds(s) {
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
                 .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);   
+                .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
         else if (s == serviceList[i]){
@@ -155,10 +155,10 @@ function setColorsAndThresholds(s) {
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
                 .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);           
-        }    
-    }             
-}    
+                .range([1,1,0.3,0.06,0.3,1,1]);
+        }
+    }
+}
 //***********************
 drawLegend(initialService,arrThresholds, arrColor,dif);
 
@@ -168,7 +168,7 @@ addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of
 
 function main() {
 
-    for (var att in listhost) {
+    for (var att in hostList.data.hostlist) {
         var h = {};
         h.name = att;
         h.hpcc_rack = +att.split("-")[1];
@@ -179,7 +179,7 @@ function main() {
         hostResults[h.name] = {};
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
-        hostResults[h.name].arrTemperature = [];  
+        hostResults[h.name].arrTemperature = [];
         hostResults[h.name].arrCPU_load = [];
         hostResults[h.name].arrMemory_usage = [];
         hostResults[h.name].arrFans_health= [];
@@ -284,7 +284,7 @@ function main() {
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Latest REQUEST");    
+        .text("Latest REQUEST");
     svg.append("text")
         .attr("class", "currentHostText")
         .attr("x", 10)
@@ -307,9 +307,9 @@ function main() {
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Time");
-    
-    
-            
+
+
+
     // Spinner Stop ********************************************************************
     spinner.stop();
 
@@ -318,8 +318,47 @@ function main() {
         racks[i].x = 35+ racks[i].id * (w_rack + w_gap) - w_rack + 10;
         racks[i].y = top_margin;
     }
-    svg.selectAll(".rackRect")
+    // add main rack and sub rack
+    svg.selectAll(".rackRectmain")
         .data(racks)
+        .enter().append("rect")
+        .attr("class", "rackRectmain")
+        .attr("x", function (d) {
+            return d.x - 6;
+        })
+        .attr("y", function (d) {
+            return d.y;
+        })
+        .attr("rx", 10)
+        .attr("ry", 10)
+        .attr("width", w_rack - 8)
+        .attr("height", h_rack)
+        .attr("fill", "#fff")
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .style("box-shadow", "10px 10px 10px #666");
+    //subrack below
+    var racksnewor = [];
+    racks.forEach(d=>{
+        var newl = {};
+        newl.id = d.id;
+        newl.pos = 0;
+        newl.x = d.x;
+        newl.y = d.y;
+        newl.hosts = d.hosts.filter(e=> e.hpcc_node%2);
+        racksnewor.push(newl);
+        var newr = {};
+        newr.id = d.id;
+        newr.pos = 1;
+        newr.x = d.x +w_rack/2;
+        newr.y = d.y;
+        newr.hosts = d.hosts.filter(e=> !(e.hpcc_node%2));
+        racksnewor.push(newr);
+
+    });
+
+    svg.selectAll(".rackRect")
+        .data(racksnewor)
         .enter().append("rect")
         .attr("class", "rackRect")
         .attr("x", function (d) {
@@ -330,7 +369,7 @@ function main() {
         })
         .attr("rx", 10)
         .attr("ry", 10)
-        .attr("width", w_rack - 8)
+        .attr("width", w_rack/2 - 8)
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
@@ -369,7 +408,7 @@ function main() {
         .attr("font-family", "sans-serif")
         .text("Summary");*/
 
-    for (var i = 1; i <= maxHostinRack; i++) {
+    for (var i = 1; i <= maxHostinRack/2; i++) {
         var yy = getHostY(1,i);
         svg.append("text")
             .attr("class", "hostText")
@@ -388,7 +427,7 @@ function main() {
         var hpcc_node = +name.split("-")[2].split(".")[0];
         var xStart = racks[hpcc_rack - 1].x-2;
         var yy = getHostY(hpcc_rack,hpcc_node);
-        // set opacity for current measurement text 
+        // set opacity for current measurement text
         hosts[i].mOpacity = 0.1;
 
 
@@ -413,12 +452,12 @@ function main() {
             .style("font-size", "11px")
             .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
             .attr("font-family", "sans-serif")
-            .text("");    
+            .text("");
     }
 
 
     // Draw line to connect current host and timeline in the Summary panel
-     svg.append("line")
+    svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
         .attr("y1", 215)
@@ -426,7 +465,7 @@ function main() {
         .attr("y2", 310)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));;   
+        .style("stroke-dasharray", ("2, 2"));;
     // ********* REQUEST ******************************************
     request();
 }
@@ -449,7 +488,7 @@ function request(){
                     if (selectedService == serviceList[0]){
                         hostResults[name].arr=hostResults[name].arrTemperature;
                         plotResult(result);
-                    }          
+                    }
                 }
                 else{
                     console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -469,7 +508,7 @@ function request(){
                     if (selectedService == serviceList[1]){
                         hostResults[name].arr=hostResults[name].arrCPU_load;
                         plotResult(result);
-                    }     
+                    }
                 }
                 else{
                     console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -489,7 +528,7 @@ function request(){
                     if (selectedService == serviceList[2]){
                         hostResults[name].arr=hostResults[name].arrMemory_usage;
                         plotResult(result);
-                    }  
+                    }
                 }
                 else{
                     console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -508,7 +547,7 @@ function request(){
                     if (selectedService == serviceList[3]){
                         hostResults[name].arr=hostResults[name].arrFans_health;
                         plotResult(result);
-                    }  
+                    }
                 }
                 else{
                     console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -527,7 +566,7 @@ function request(){
                     if (selectedService == serviceList[4]){
                         hostResults[name].arr=hostResults[name].arrPower_usage;
                         plotResult(result);
-                    }  
+                    }
                 }
                 else{
                     console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
@@ -560,44 +599,44 @@ function request(){
                 hostResults[name].arrFans_health.push(result);
 
                 var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-                hostResults[name].arrPower_usage.push(result);   
-                iteration++; 
-            }    
+                hostResults[name].arrPower_usage.push(result);
+                iteration++;
+            }
             iteration = tmp;
         }
 
         count++;
 
         var xTimeSummaryScale = d3.scaleLinear()
-                .domain([currentMiliseconds, currentMiliseconds+0.9*numberOfMinutes*60*1000]) // input
-                .range([30, width]); // output
+            .domain([currentMiliseconds, currentMiliseconds+0.9*numberOfMinutes*60*1000]) // input
+            .range([30, width]); // output
         Date.prototype.timeNow = function () {
-             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-        }  
+            return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
+        }
         Date.prototype.timeNow2 = function () {
-             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+            return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         }
 
         if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
             var arr = [];
-            var xx; 
+            var xx;
             var lastIndex;
-            
-            
+
+
             for (var h=0; h<hosts.length;h++){
-                var name = hosts[h].name; 
+                var name = hosts[h].name;
                 var r = hostResults[name];
                 lastIndex = r.arr.length-1;
                 if (lastIndex>=0){   // has some data
                     var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
                     if (h==hosts.length-1){
                         query_time =r.arr[lastIndex].result.query_time;
-                        xx = xTimeSummaryScale(query_time);     
+                        xx = xTimeSummaryScale(query_time);
                     }
                     arr.push(a[0]);
                 }
             }
-            
+
             // Draw date
             svg.selectAll(".currentDate").remove();
             svg.append("text")
@@ -611,7 +650,7 @@ function request(){
                 .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
                 .attr("font-family", "sans-serif")
                 .text(""+new Date(currentMiliseconds).toDateString());
-           
+
             // Boxplot Time
             svg.append("text")
                 .attr("class", "boxTime")
@@ -623,7 +662,7 @@ function request(){
                 .style("font-size", "12px")
                 .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
                 .attr("font-family", "sans-serif")
-                .text(new Date(query_time).timeNow());    
+                .text(new Date(query_time).timeNow());
 
             drawBoxplot(svg, arr, lastIndex, xx-10);
             count=0;
@@ -637,16 +676,16 @@ function request(){
         svg.selectAll(".connectTimeline")
             .attr("x1", x2)
             .attr("x2", currentHostX)
-            .attr("y2", currentHostY);       
+            .attr("y2", currentHostY);
         svg.selectAll(".currentText")
             .attr("x", x2+2)
-            .text("Latest update:");  
+            .text("Latest update:");
         svg.selectAll(".currentTimeText")
             .attr("x", x2+2)
-            .text(new Date(query_time).timeNow2());      
+            .text(new Date(query_time).timeNow2());
         svg.selectAll(".currentHostText")
             .attr("x", x2+2)
-            .text(currentHostname);      
+            .text(currentHostname);
 
         // Update measurement text and opacity
         for (var i = 0; i < hosts.length; i++) {
@@ -665,7 +704,7 @@ function request(){
                     mea = Math.round(currentMeasure);
                 }
                 svg.selectAll(".measure_"+hosts[i].name)
-                    .attr("fill", color(currentMeasure))    
+                    .attr("fill", color(currentMeasure))
                     .text(mea);
             }
             else{
@@ -678,12 +717,12 @@ function request(){
 
             svg.selectAll(".measure_"+hosts[i].name)
                 .attr("fill-opacity", hosts[i].mOpacity)
-                .attr("x", hosts[i].xOpacity);   
+                .attr("x", hosts[i].xOpacity);
 
-        }    
+        }
 
     } , simDuration);
-    
+
     var count3=0;
 
     var interval3 = setInterval(function(){
@@ -692,7 +731,7 @@ function request(){
         count3++;
         if (count3>10000)
             count3 = 10000;
-    } , 20);     
+    } , 20);
 }
 
 // Delete unnesseccary files
@@ -707,7 +746,7 @@ function processResult(r){
     return obj;
 }
 
-function processData(str, serviceName) {  
+function processData(str, serviceName) {
     if (serviceName == serviceList[0]){
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
@@ -725,7 +764,7 @@ function processData(str, serviceName) {
     }
     else if (serviceName == serviceList[1]){
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 
+        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
             || str.indexOf("CPU Load: null")>=0){
             a[0] = undefinedValue;
             a[1] = undefinedValue;
@@ -773,7 +812,7 @@ function processData(str, serviceName) {
     }
     else if (serviceName == serviceList[4]) {
         //console.log(str);
-         var a = [];
+        var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
             a[0] = undefinedValue;
             a[1] = undefinedValue;
@@ -793,42 +832,42 @@ function processData(str, serviceName) {
 function decimalColorToHTMLcolor(number) {
     //converts to a integer
     var intnumber = number - 0;
- 
+
     // isolate the colors - really not necessary
     var red, green, blue;
- 
+
     // needed since toString does not zero fill on left
     var template = "#000000";
- 
+
     // in the MS Windows world RGB colors
     // are 0xBBGGRR because of the way Intel chips store bytes
     red = (intnumber&0x0000ff) << 16;
     green = intnumber&0x00ff00;
     blue = (intnumber&0xff0000) >>> 16;
- 
+
     // mask out each color and reverse the order
     intnumber = red|green|blue;
- 
+
     // toString converts a number to a hexstring
     var HTMLcolor = intnumber.toString(16);
- 
+
     //template adds # for standard HTML #RRGGBB
     HTMLcolor = template.substring(0,7 - HTMLcolor.length) + HTMLcolor;
- 
+
     return HTMLcolor;
-} 
+}
 
 function simulateResults2(hostname,iter, s){
     var newService
-    if (s == serviceList[0])             
+    if (s == serviceList[0])
         newService = sampleS[hostname].arrTemperature[iter];
     else if (s == serviceList[1])
         newService = sampleS[hostname].arrCPU_load[iter];
-    else if (s == serviceList[2]) 
+    else if (s == serviceList[2])
         newService = sampleS[hostname].arrMemory_usage[iter];
-    else if (s == serviceList[3]) 
+    else if (s == serviceList[3])
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) 
+    else if (s == serviceList[4])
         newService = sampleS[hostname].arrPower_usage[iter];
     return newService;
 }
@@ -853,11 +892,11 @@ function plotResult(result) {
         currentMiliseconds = result.result.query_time;
     firstTime = false;
     var name =  result.data.service.host_name;
-     
+
     query_time = result.result.query_time;  // for drawing current timeline in Summary panel
     currentHostname = name;
-    
-    // Process the array data ***************************************    
+
+    // Process the array data ***************************************
     var r = hostResults[name];
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
@@ -869,7 +908,7 @@ function plotResult(result) {
     var y = getHostY(hpcc_rack,hpcc_node);
 
 
-    // Process the array of historical temperatures *************************************** 
+    // Process the array of historical temperatures ***************************************
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
         var a = processData(r.arr[i].data.service.plugin_output, selectedService);
@@ -885,7 +924,7 @@ function plotResult(result) {
     }
 
     currentHostY = y;
-    
+
 
     // get Time
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
@@ -900,15 +939,15 @@ function plotResult(result) {
 
     if (charType == "Heatmap")
         plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
-    else if (charType == "Area Chart") 
+    else if (charType == "Area Chart")
         plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
-    
+
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     svg.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
-        var obj = arr[i];     
+        var obj = arr[i];
         var xMin = xTimeScale(minTime);
         var xMax = xTimeScale(maxTime);
         var x = xTimeScale(arr[i].query_time);
@@ -934,7 +973,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
             .on("mouseover", function (d) {
                 mouseoverNode (this);
             })
-            ;//.on("mouseout", mouseoutNode);
+        ;//.on("mouseout", mouseoutNode);
 
         if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
             svg.append("rect")
@@ -947,7 +986,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
                     if (obj.temp2==undefinedValue)
                         return undefinedColor;
                     else
-                    return color(obj.temp2);
+                        return color(obj.temp2);
                 })
                 .attr("fill-opacity",function (d) {
                     return opa(obj.temp2);
@@ -957,17 +996,17 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
                 .on("mouseover", function (d) {
                     mouseoverNode (this);
                 })
-                ;//.on("mouseout", mouseoutNode);
-         }   
-    }  
-    // *****************************************  
+            ;//.on("mouseout", mouseoutNode);
+        }
+    }
+    // *****************************************
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
 
 
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
-  var yScale = d3.scaleLinear()
+    var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
         .range([0, 22]); // output
 
@@ -990,7 +1029,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
         .on("mouseover", function (d) {
             mouseoverNode (this);
         })
-        ;//.on("mouseout", mouseoutNode);
+    ;//.on("mouseout", mouseoutNode);
     svg.selectAll("."+name).transition().duration(1000)
         .style("fill",function (d) {
             return color(d[d.length-1].temp1);
@@ -1114,7 +1153,7 @@ function drawSummaryAreaChart(rack, xStart) {
 }
 
 function getHostY(r,n){
-   return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
+    return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 }
 
 d3.select('#inds').on("change", function () {
@@ -1140,7 +1179,7 @@ function resetRequest(){
         hostResults[att] = {};
         hostResults[att].index = count;
         hostResults[att].arr = [];
-        hostResults[att].arrTemperature = [];  
+        hostResults[att].arrTemperature = [];
         hostResults[att].arrCPU_load = [];
         hostResults[att].arrMemory_usage = [];
         hostResults[att].arrFans_health= [];
@@ -1159,8 +1198,8 @@ function resetRequest(){
     svg.selectAll("text.box").remove();
     svg.selectAll("line.whisker").remove();
     svg.selectAll("text.whisker").remove();
-    svg.selectAll(".connectTimeline").style("stroke-opacity", 1);     
-    
+    svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
+
     request();
 }
 
