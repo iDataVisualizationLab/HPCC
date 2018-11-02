@@ -8,6 +8,7 @@ var color2 = d3.scaleOrdinal()
     .range(["#000","#000","#444"]);
 var playing =false;
 var dataSpider = [];
+var dataSpider2 = [];
 var levelsR = 6;
 var radarChartOptions = {
     w: tipW-50,
@@ -39,33 +40,44 @@ var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .attr("id", "d3-tip")
     .offset([-200, 100])
-    .html(function(d1) {
-        var d = hosts[d1.index];
-        str="";
-       /* str+="<table border='0.5px'  style='width:100%'>"
-        for (key in d) {
-            if (key== "index")
-                ;// Do nothing
-            else if (key== "nodes")
-                str+=  "<tr><td> Number of nodes</td> <td>  <span style='color:black'>" + d[key].length + "</span> </td></tr>";
-            else{
-                str+=  "<tr><td>"+key+"</td> <td>  <span style='color:black'>" + d[key] + "</span> </td></tr>";
-            }
-        }
-        str+="</table> <br>"
-        */
-        str += '<button class="playbtn" onclick="playanimation()"><i class="fas fa-play"></i></button>';
-        str += '<svg width="100" height="100" id="svgTip"> </svg>'
-        str += '<div class="radarChart"></div>'; // Spider chart holder
-        str += '<button onclick="tool_tip.hide()">Close</button>';
-        str += '<button onclick="addSVG()">Add</button>';
-        return str; });
+    .html(function(d1,hideLine) {
+        return cotenttip(hideLine); });
 svg.call(tool_tip);
-
+function cotenttip (hideLine){
+    str="";
+    /* str+="<table border='0.5px'  style='width:100%'>"
+     for (key in d) {
+         if (key== "index")
+             ;// Do nothing
+         else if (key== "nodes")
+             str+=  "<tr><td> Number of nodes</td> <td>  <span style='color:black'>" + d[key].length + "</span> </td></tr>";
+         else{
+             str+=  "<tr><td>"+key+"</td> <td>  <span style='color:black'>" + d[key] + "</span> </td></tr>";
+         }
+     }
+     str+="</table> <br>"
+     */
+    hideLine = hideLine||false;
+    var classtype =  "radarChartsum";
+    if (!hideLine) {
+        str += '<button class="playbtn" onclick="playanimation()"><i class="fas fa-play"></i></button>';
+        str += '<svg width="100" height="100" id="svgTip"> </svg>';
+        classtype =  "radarChart";
+    }
+    str += '<div class="'+classtype+'"></div>'; // Spider chart holder
+    str += '<button onclick="'+(hideLine?'pannelsummary(false)':'tool_tip.hide()')+'">Close</button>';
+    str += '<button onclick="addSVG('+hideLine+')">Add</button>';
+    return str;
+}
 // Add radar chart to the end of html page
 var countRadarChart = 1;
-function addSVG(){
-   RadarChart("#radarChart"+countRadarChart, dataSpider, radarChartOptions,dataSpider.name);
+function addSVG(hideLine){
+    if (hideLine){
+        RadarChart("#radarChart" + countRadarChart, dataSpider2, radarChartOptions, dataSpider2.name);
+    }
+    else {
+        RadarChart("#radarChart" + countRadarChart, dataSpider, radarChartOptions, dataSpider.name);
+    }
    countRadarChart++;
    if (countRadarChart==4)
     countRadarChart=1;
@@ -90,12 +102,14 @@ function mouseoverNode(d1){
     // 2. Process the array of historical temperatures
     var arr = [];
     for (var i=0; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
+        // var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
+        var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
         var obj = {};
         obj.temp1 = a[0];
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
+        obj.indexSamp = i;
         if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue)
             ;
         else
@@ -374,6 +388,7 @@ function mouseoverNode(d1){
                     obj.value = arrServices[4].a[0];
                 arr1.push(obj);
             }
+            arr1.indexSamp = i;
             arr1.time = r.arr[i].result.query_time;
             dataSpider.push(arr1);
            
@@ -415,11 +430,11 @@ function mouseoverLine(d,i){
     //Dim all blobs
     // console.log('time: '+d.query_time);
     var radar = d3.selectAll(".radarWrapper");
-    radar.filter( e => e.time !== d.query_time )
+    radar.filter( e => e.indexSamp !== d.indexSamp )
         .transition().duration(500)
         .style("opacity", 0);
         // .style("visibility", "hidden");
-    radar.filter( e => e.time == d.query_time )
+    radar.filter( e => e.indexSamp === d.indexSamp )
         .transition().duration(500)
         .style("opacity", 1);
         // .style("visibility", "visible");
@@ -445,10 +460,11 @@ function playanimation() {
         $(".playbtn > i").removeClass('fa-play').addClass('fa-stop');
         var cfg = radarChartOptions;
         playing = true;
+        var d3tipg = d3.select('#d3-tip');
         var radarLine = scaleopt.radarLine,
             rScale = scaleopt.rScale,
             colorTemperature = scaleopt.colorTemperature;
-        d3.selectAll(".radarWrapper")
+        d3tipg.selectAll(".radarWrapper")
             .style("opacity", 0);
         var playbar = svgTip.append('g')
             .attr('id', 'playbarg')
@@ -468,8 +484,8 @@ function playanimation() {
                 return 0
             })
             .style('opacity', 1);
-        var g = d3.select("#radarGroup");
-        var radar = d3.selectAll(".radarWrapper");
+        var g = d3tipg.select("#radarGroup");
+        var radar = d3tipg.selectAll(".radarWrapper");
 
         var current_data = [radar._groups[0][0].__data__];
 
@@ -594,5 +610,182 @@ function playanimation() {
                     .style("stroke-width", 0.2);
             }
         }, timestep);
+    }
+}
+function pannelsummary(show){
+    var pansum = d3.select("#Summarynode");
+    if (show)
+        pansum.style('visibility','visible');
+    else
+        pansum.style('visibility','hidden');
+}
+
+function summaryRadar () {
+    var undefinededa = [undefinedValue,undefinedValue,undefinedValue];
+    var irecord = $('#irecord').children("option:selected").val();
+    var r ={host:[],index:[],arr:[],arrCPU_load:[],arrFans_health:[],arrMemory_usage:[],arrPower_usage:[],arrTemperature:[]};
+    for (nam in hostResults) {
+        r['host'].push(nam);
+        var element= hostResults[nam];
+        for (k in element){
+            r[k].push (element[k][irecord]);
+        }
+    }
+    // Summarynode
+    var pansum = d3.select('#Summarynodeg').html(function() {
+        return cotenttip(true); });
+    pannelsummary(true);
+    dataSpider2 = [];
+
+    dataSpider2.name = 'Summary '+d3.timeFormat('%H:%M %d %b %Y')(r.arr[0].result.query_time);
+    if (r.arr.length>0){
+        for (var i=0;i<r.arr.length;i++){
+            var arrServices = [];
+            var a = r.arrTemperature[i]!==undefinedValue?processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]):undefinededa;
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = r.arrCPU_load[i]!==undefinedValue?processData(r.arrCPU_load[i].data.service.plugin_output, serviceList[1]):undefinededa;
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = r.arrMemory_usage[i]!==undefinedValue?processData(r.arrMemory_usage[i].data.service.plugin_output, serviceList[2]):undefinededa;
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = r.arrFans_health[i]!==undefinedValue?processData(r.arrFans_health[i].data.service.plugin_output, serviceList[3]):undefinededa;
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var a = r.arrPower_usage[i]!==undefinedValue?processData(r.arrPower_usage[i].data.service.plugin_output, serviceList[4]):undefinededa;
+            var obj = {};
+            obj.a = a;
+            arrServices.push(obj);
+
+            var arr1 = [];
+            for (var a=0;a<axes.length;a++){
+                var obj ={};
+                obj.axis = axes[a];
+                if (a==0)
+                    obj.value = arrServices[0].a[0];
+                else if (a==1)
+                    obj.value = arrServices[0].a[1];
+                else if (a==2)
+                    obj.value = arrServices[0].a[2];
+                else if (a==3)
+                    obj.value = arrServices[1].a[0];
+                else if (a==4)
+                    obj.value = arrServices[2].a[0];
+                else if (a==5)
+                    obj.value = arrServices[3].a[0];
+                else if (a==6)
+                    obj.value = arrServices[3].a[1];
+                else if (a==7)
+                    obj.value = arrServices[3].a[2];
+                else if (a==8)
+                    obj.value = arrServices[3].a[3];
+                else if (a==9)
+                    obj.value = arrServices[4].a[0];
+                arr1.push(obj);
+            }
+            arr1.indexSamp = irecord;
+            dataSpider2.push(arr1);
+
+            // Standardize data for Radar chart
+            for (var j=0; j<dataSpider2[i].length;j++){
+                if (dataSpider2[i][j].value == undefinedValue || isNaN(dataSpider2[i][j].value))
+                    dataSpider2[i][j].value = -15;
+                else if (j==3){   ////  Job load ***********************
+                    var scale = d3.scaleLinear()
+                        .domain([thresholds[1][0],thresholds[1][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]);
+
+                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
+                }
+                else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
+                    var scale = d3.scaleLinear()
+                        .domain([thresholds[3][0],thresholds[3][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+
+                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
+                }
+                else if (j==9){   ////  Power Consumption ***********************
+                    var scale = d3.scaleLinear()
+                        .domain([thresholds[4][0],thresholds[4][1]])
+                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
+                }
+            }
+        }
+    }
+    var radarChartsumopt  = {
+        w: tipW*1.5 -50,
+        h: tipW*1.5 +50,
+        maxValue: 0.5,
+        levels: levelsR,
+        radiuschange: false,
+        roundStrokes: true,
+        color: color2,
+        legend: [{},
+            {},
+            {},
+            {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
+            {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
+            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
+    };
+    RadarChart(".radarChartsum", dataSpider2, radarChartsumopt,"");
+
+}
+
+
+// Make the DIV element draggable: from W3 code
+dragElement(document.getElementById("Summarynode"));
+
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+    } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
     }
 }

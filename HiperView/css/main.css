@@ -79,7 +79,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 
 /* tooltip */
-.d3-tip {
+#Summarynode, .d3-tip {
 	line-height: 1;
 	padding: 10px;
 	background: rgba(255, 255, 255, 1);
@@ -147,7 +147,11 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
+<<<<<<< HEAD
 	top: 1660px;
+=======
+	/*top: 1320px;*/
+>>>>>>> 9182e8c3d7d03b75aa8cdf58f56e94b4d3433f11
 	left: 50px;
 }	
 
@@ -157,7 +161,11 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
+<<<<<<< HEAD
 	top: 1660px;
+=======
+	/*top: 1320px;*/
+>>>>>>> 9182e8c3d7d03b75aa8cdf58f56e94b4d3433f11
 	left: 600px;
 }
 
@@ -167,7 +175,11 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
+<<<<<<< HEAD
 	top: 1660px;
+=======
+	/*top: 1320px;*/
+>>>>>>> 9182e8c3d7d03b75aa8cdf58f56e94b4d3433f11
 	left: 1150px;
 }	
 
@@ -235,4 +247,21 @@ table, th, td {
 .box .outlier {
 	fill: none;
 	stroke: #000;
+}
+
+#Summarynode {
+	visibility: hidden;
+	position: absolute;
+	z-index: 9;
+	top: 10%;
+	left:20%;
+	text-align: center;
+}
+
+#Summarynodeheader {
+	padding: 10px;
+	cursor: move;
+	z-index: 10;
+	background-color: #2196F3;
+	color: #fff;
 }

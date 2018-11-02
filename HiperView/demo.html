@@ -25,7 +25,8 @@
     </div>
 </header>
 
-<svg width="2600" height="1800" ></svg>
+<!--<svg width="2600" height="1800" ></svg>-->
+<svg width="2600" height="800" ></svg>
 
 
 <!-- Spinner when loading -->
@@ -52,6 +53,18 @@
         <option value="Area Chart">Area Chart</option>
     </select>
 
+    <label for="indsg"> Summary type: </label>
+    <select id="indsg">
+        <option value="Boxplot">Boxplot</option>
+        <option value="Radar" selected="selected">Radar</option>
+    </select>
+    <!--<br><br>-->
+    <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
+    <!--<select id="irecord">-->
+        <!--<option value=0 selected="selected">0</option>-->
+        <!--<option value=1>1</option>-->
+    <!--</select>-->
+
 
 </div>
 
@@ -61,6 +74,13 @@
 <div id="radarChart1" class="radarChartss"></div>
 <div id="radarChart2" class="radarChartss"></div>
 <div id="radarChart3" class="radarChartss"></div>
+<!--tooltip total-->
+<div id="Summarynode">
+    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+    <div id="Summarynodeheader">Click here to move</div>
+    <div id = "Summarynodeg"></div>
+</div>
+
 <!-- load the d3.js library -->
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>
@@ -71,12 +91,15 @@
 <script src="myscripts/hostlist.js"></script>
 <script src="myscripts/service.js"></script>
 <script src="myscripts/service17Oct.js"></script>
-<script src="myscripts/main.js"></script>
+<!--<script src="myscripts/main.js"></script>-->
+<script src="myscripts/main2.js"></script>
 <script src="myscripts/tooltip.js"></script>
 <script src="spider/radarChart.js"></script>
 
 <script src="js/box.js"></script>
 <script src="js/boxplot.js"></script>
+<script src="js/binnerN.min.js"></script>
+<script src="myscripts/radarSum.js"></script>
 
 
 </body>
