@@ -695,6 +695,7 @@ function request(){
 
                                 arrServices.push(obj);})
                         }
+                        arrServices.name = name;
                         arr.push(arrServices);
                     }
                     // Radar Time

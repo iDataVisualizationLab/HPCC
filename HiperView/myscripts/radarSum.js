@@ -48,6 +48,7 @@ function drawRadarsum (svg,arr, index,xx){
                     obj.value = arrServices[4].a[0];
                 arr1.push(obj);
             }
+            arr1.name = arr[i].name;
             arr1.indexSamp = index;
             dataSpider3.push(arr1);
 
@@ -78,7 +79,10 @@ function drawRadarsum (svg,arr, index,xx){
             }
         }
     }
-    var bin = binnerN(dataSpider3.map(d=>d.map(k=>k.value)),'leader',100,false,5,30);
+    var bin = binnerN(dataSpider3.map(d=>{
+        var dd = d.map(k=>k.value);
+        dd.data = d.name;
+        return dd;}),'leader',100,false,5,30);
     var keys = dataSpider3[0].map(d=>d.axis);
     dataSpider3.length = 0;
     console.log(bin.bins.length);

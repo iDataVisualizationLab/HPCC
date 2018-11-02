@@ -44,11 +44,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main2.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main2.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="26">
-              <caret line="371" column="26" lean-forward="false" selection-start-line="371" selection-start-column="26" selection-end-line="371" selection-end-column="26" />
+            <state relative-caret-position="94">
+              <caret line="712" column="20" lean-forward="false" selection-start-line="712" selection-start-column="20" selection-end-line="712" selection-end-column="20" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
                 <element signature="e#15962#21194#0" expanded="false" />
@@ -57,11 +57,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="radarSum.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="radarSum.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="587">
-              <caret line="88" column="152" lean-forward="false" selection-start-line="88" selection-start-column="152" selection-end-line="88" selection-end-column="152" />
+            <state relative-caret-position="145">
+              <caret line="84" column="18" lean-forward="false" selection-start-line="84" selection-start-column="18" selection-end-line="84" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -78,12 +78,10 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>plothea</find>
       <find>xTimeScale</find>
       <find>result</find>
       <find>currentMiliseconds</find>
       <find>plotHeat(</find>
-      <find>radar</find>
       <find>rackRect</find>
       <find>controlHolder</find>
       <find>xTimeS</find>
@@ -104,10 +102,12 @@
       <find>xtimescale</find>
       <find>timesteppixel</find>
       <find>text&quot;</find>
-      <find>value</find>
       <find>maxstack</find>
-      <find>radarsize</find>
+      <find>value</find>
       <find>rect</find>
+      <find>plothea</find>
+      <find>radarsize</find>
+      <find>radar</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -124,8 +124,8 @@
         <option value="$PROJECT_DIR$/myscripts/main.js" />
         <option value="$PROJECT_DIR$/demo.html" />
         <option value="$PROJECT_DIR$/spider/radarChart.js" />
-        <option value="$PROJECT_DIR$/myscripts/radarSum.js" />
         <option value="$PROJECT_DIR$/myscripts/main2.js" />
+        <option value="$PROJECT_DIR$/myscripts/radarSum.js" />
       </list>
     </option>
   </component>
@@ -252,12 +252,12 @@
       <option name="presentableId" value="Default" />
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
-      <workItem from="1540947326819" duration="71643000" />
+      <workItem from="1540947326819" duration="72314000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="93948000" />
+    <option name="totallyTimeSpent" value="94619000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="544" y="106" width="1552" height="819" extended-state="0" />
@@ -396,13 +396,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>711</line>
+          <line>712</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="72" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/radarSum.js</url>
-          <line>112</line>
+          <line>116</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="74" />
         </line-breakpoint>
@@ -438,24 +438,30 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/radarSum.js</url>
-          <line>80</line>
+          <line>81</line>
           <properties />
           <option name="timeStamp" value="83" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/radarSum.js</url>
-          <line>89</line>
+          <line>93</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="85" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/radarSum.js</url>
-          <line>88</line>
+          <line>92</line>
           <properties />
           <option name="timeStamp" value="92" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/myscripts/radarSum.js</url>
+          <line>21</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="93" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="93" />
+      <option name="time" value="94" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -625,22 +631,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="587">
-          <caret line="88" column="152" lean-forward="false" selection-start-line="88" selection-start-column="152" selection-end-line="88" selection-end-column="152" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26">
-          <caret line="371" column="26" lean-forward="false" selection-start-line="371" selection-start-column="26" selection-end-line="371" selection-end-column="26" />
+        <state relative-caret-position="94">
+          <caret line="712" column="20" lean-forward="false" selection-start-line="712" selection-start-column="20" selection-end-line="712" selection-end-column="20" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
             <element signature="e#15962#21194#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="84" column="18" lean-forward="false" selection-start-line="84" selection-start-column="18" selection-end-line="84" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
