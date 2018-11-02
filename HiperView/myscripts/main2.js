@@ -1256,6 +1256,14 @@ d3.select('#inds').on("change", function () {
 d3.select('#indsg').on("change", function () {
     var sect = document.getElementById("indsg");
     sumType = sect.options[sect.selectedIndex].value;
+    switch(sumType){
+        case "Scatterplot":
+            d3.select("#scatterzone").style("visibility","visible");
+            break;
+        default:
+            d3.select("#scatterzone").style("visibility","hidden");
+            break;
+    }
 });
 
 function pauseRequest(){

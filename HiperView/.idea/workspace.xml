@@ -60,8 +60,8 @@
       <file leaf-file-name="demo.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="276">
-              <caret line="150" column="37" lean-forward="false" selection-start-line="150" selection-start-column="37" selection-end-line="150" selection-end-column="37" />
+            <state relative-caret-position="292">
+              <caret line="119" column="34" lean-forward="false" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -70,8 +70,18 @@
       <file leaf-file-name="scatterplot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/scatterplot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="70" column="49" lean-forward="true" selection-start-line="70" selection-start-column="9" selection-end-line="70" selection-end-column="49" />
+            <state relative-caret-position="94">
+              <caret line="215" column="13" lean-forward="false" selection-start-line="215" selection-start-column="9" selection-end-line="215" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="util.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myscripts/util.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="121">
+              <caret line="28" column="19" lean-forward="false" selection-start-line="28" selection-start-column="19" selection-end-line="28" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -80,8 +90,8 @@
       <file leaf-file-name="main2.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="694" column="52" lean-forward="false" selection-start-line="694" selection-start-column="52" selection-end-line="694" selection-end-column="52" />
+            <state relative-caret-position="196">
+              <caret line="1265" column="5" lean-forward="true" selection-start-line="1265" selection-start-column="5" selection-end-line="1265" selection-end-column="5" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
                 <element signature="e#15962#21194#0" expanded="false" />
@@ -111,14 +121,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>xTimeS</find>
-      <find>currentHostX</find>
-      <find>&quot;measure</find>
-      <find>measure</find>
-      <find>xHost</find>
-      <find>*10</find>
-      <find>&quot;Box</find>
-      <find>8*</find>
       <find>sHeight</find>
       <find>xTime</find>
       <find>6*</find>
@@ -132,15 +134,23 @@
       <find>rect</find>
       <find>plothea</find>
       <find>mouse</find>
-      <find>mouseoverL</find>
       <find>&quot;.&quot;+na</find>
       <find>hostlist</find>
       <find>radarsize</find>
       <find>count</find>
       <find>boxplot</find>
-      <find>radar</find>
-      <find>Radar</find>
       <find>value</find>
+      <find>drag&quot;+</find>
+      <find>drag</find>
+      <find>selection</find>
+      <find>selection_on</find>
+      <find>mouseoverL</find>
+      <find>scatter_y</find>
+      <find>Radar</find>
+      <find>radar</find>
+      <find>visibility</find>
+      <find>indsg</find>
+      <find>scatter</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -175,8 +185,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="861" />
-    <option name="y" value="147" />
+    <option name="x" value="433" />
+    <option name="y" value="133" />
     <option name="width" value="1552" />
     <option name="height" value="819" />
   </component>
@@ -286,15 +296,15 @@
       <option name="presentableId" value="Default" />
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
-      <workItem from="1540947326819" duration="77363000" />
+      <workItem from="1540947326819" duration="78774000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="99668000" />
+    <option name="totallyTimeSpent" value="101079000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="861" y="147" width="1552" height="819" extended-state="0" />
+    <frame x="433" y="133" width="1552" height="819" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2533512" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -519,7 +529,7 @@
           <option name="timeStamp" value="97" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="99" />
+      <option name="time" value="100" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -578,14 +588,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="139">
           <caret line="1" column="30172" lean-forward="false" selection-start-line="1" selection-start-column="30172" selection-end-line="1" selection-end-column="30172" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/d3.v4.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="817" column="17" lean-forward="false" selection-start-line="817" selection-start-column="17" selection-end-line="817" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -681,22 +683,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/scatterplot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="70" column="49" lean-forward="true" selection-start-line="70" selection-start-column="9" selection-end-line="70" selection-end-column="49" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="150" column="37" lean-forward="false" selection-start-line="150" selection-start-column="37" selection-end-line="150" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -705,10 +691,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/myscripts/scatterplot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="94">
+          <caret line="215" column="13" lean-forward="false" selection-start-line="215" selection-start-column="9" selection-end-line="215" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/d3.v4.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="91">
+          <caret line="497" column="8" lean-forward="false" selection-start-line="497" selection-start-column="8" selection-end-line="497" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/d3.v4.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="94">
+          <caret line="870" column="16" lean-forward="false" selection-start-line="870" selection-start-column="4" selection-end-line="870" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myscripts/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="121">
+          <caret line="28" column="19" lean-forward="false" selection-start-line="28" selection-start-column="19" selection-end-line="28" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="119" column="34" lean-forward="false" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="694" column="52" lean-forward="false" selection-start-line="694" selection-start-column="52" selection-end-line="694" selection-end-column="52" />
+        <state relative-caret-position="196">
+          <caret line="1265" column="5" lean-forward="true" selection-start-line="1265" selection-start-column="5" selection-end-line="1265" selection-end-column="5" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
             <element signature="e#15962#21194#0" expanded="false" />
