@@ -25,7 +25,8 @@
     </div>
 </header>
 
-<svg width="2600" height="1800" ></svg>
+<!--<svg width="2600" height="1800" ></svg>-->
+<svg width="2600" height="800" ></svg>
 
 
 <!-- Spinner when loading -->
@@ -51,12 +52,18 @@
         <option value="Heatmap" selected="selected">Heatmap</option>
         <option value="Area Chart">Area Chart</option>
     </select>
-    <br><br>
-    <button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>
-    <select id="irecord">
-        <option value=0 selected="selected">0</option>
-        <option value=1>1</option>
+
+    <label for="indsg"> Summary type: </label>
+    <select id="indsg">
+        <option value="Boxplot">Boxplot</option>
+        <option value="Radar" selected="selected">Radar</option>
     </select>
+    <!--<br><br>-->
+    <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
+    <!--<select id="irecord">-->
+        <!--<option value=0 selected="selected">0</option>-->
+        <!--<option value=1>1</option>-->
+    <!--</select>-->
 
 
 </div>
@@ -91,6 +98,8 @@
 
 <script src="js/box.js"></script>
 <script src="js/boxplot.js"></script>
+<script src="js/binnerN.min.js"></script>
+<script src="myscripts/radarSum.js"></script>
 
 
 </body>

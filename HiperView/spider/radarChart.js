@@ -19,6 +19,9 @@ function RadarChart(id, data, options, name) {
      opacityCircles: 0.1,   //The opacity of the circles of each blob
      strokeWidth: 0.5,        //The width of the stroke around each blob
      roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
+     radiuschange: true,
+     showText: true,
+     bin: false,
      legend: []
     // color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
@@ -172,17 +175,24 @@ function RadarChart(id, data, options, name) {
         .style("stroke-width", "1px");
 
     //Append the labels at each axis
-    axis.append("text")
-        .attr("class", "legend")
-        .style("font-size", "12px")
-        .attr("font-family", "sans-serif")
-        .attr("text-anchor", "middle")
-        .attr("dy", "0.35em")
-        .attr("x", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice[i] - Math.PI/2); })
-        .attr("y", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice[i] - Math.PI/2); })
-        .text(function(d){return d})
-        .call(wrap, cfg.wrapWidth);
-
+    if (cfg.showText) {
+        axis.append("text")
+            .attr("class", "legend")
+            .style("font-size", "12px")
+            .attr("font-family", "sans-serif")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .attr("x", function (d, i) {
+                return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice[i] - Math.PI / 2);
+            })
+            .attr("y", function (d, i) {
+                return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice[i] - Math.PI / 2);
+            })
+            .text(function (d) {
+                return d
+            })
+            .call(wrap, cfg.wrapWidth);
+    }
     /////////////////////////////////////////////////////////
     ///////////// Draw the radar chart blobs ////////////////
     /////////////////////////////////////////////////////////
@@ -229,7 +239,9 @@ function RadarChart(id, data, options, name) {
         .enter().append("circle")
         .attr("class", "radarCircle")
         .attr("r", function(d){
-            return 1+Math.pow((d.index+2),0.3);
+            if (cfg.radiuschange)
+                return 1+Math.pow((d.index+2),0.3);
+            return cfg.dotRadius;
         })
         .attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI/2); })
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
@@ -340,39 +352,51 @@ function RadarChart(id, data, options, name) {
       });
     }//wrap
     //Text indicating at what % each level is
-    axisGrid.selectAll(".axisLabel")
-        .data(d3.range(1,(cfg.levels)).reverse())
-        .enter().append("text")
-        .attr("class", "axisLabel")
-        .attr("x", 4)
-        .attr("y", function(d){return -d*radius/cfg.levels;})
-        .attr("dy", "0.4em")
-        .attr("font-family", "sans-serif")
-        .style("font-size", "12px")
-        .attr("fill", "#111")
-        .text(function(d,i) {
-            var v = (maxValue-minValue) * d/cfg.levels +minValue;
-            return Math.round(v);
-        });
-    var legendg = cfg.legend.map(function(d,i) { return Object.keys(d).map(function(k) {return {key: k, value: d[k],index:i}})}).filter(d => d.length!=0);
-    var subaxis = axisGrid.selectAll(".axisLabelsub")
-        .data(legendg)
-        .enter().append('g').attr('class','axisLabelsub');
-    subaxis.selectAll('.axisLabelsubt')
-        .data(d=>d)
-        .enter().append("text")
-        .attr("class", "axisLabelsubt")
-        .attr("x", function(d,i){ return d.key*radius/cfg.levels * Math.cos(angleSlice[d.index] - Math.PI/2); })
-        .attr("y", function(d,i){ return d.key*radius/cfg.levels * Math.sin(angleSlice[d.index] - Math.PI/2); })
-        // .attr("x", d => {4+d.key*radius/cfg.levels})
-        // .attr("y", function(d){return -d.key*radius/cfg.levels;})
-        .attr("dy", "0.4em")
-        .attr("font-family", "sans-serif")
-        .style("font-size", "12px")
-        .attr("fill", "#111")
-        .text(function(d) {
-            return d.value;
-        });
+    if (cfg.showText) {
+        axisGrid.selectAll(".axisLabel")
+            .data(d3.range(1, (cfg.levels)).reverse())
+            .enter().append("text")
+            .attr("class", "axisLabel")
+            .attr("x", 4)
+            .attr("y", function (d) {
+                return -d * radius / cfg.levels;
+            })
+            .attr("dy", "0.4em")
+            .attr("font-family", "sans-serif")
+            .style("font-size", "12px")
+            .attr("fill", "#111")
+            .text(function (d, i) {
+                var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                return Math.round(v);
+            });
+        var legendg = cfg.legend.map(function (d, i) {
+            return Object.keys(d).map(function (k) {
+                return {key: k, value: d[k], index: i}
+            })
+        }).filter(d => d.length != 0);
+        var subaxis = axisGrid.selectAll(".axisLabelsub")
+            .data(legendg)
+            .enter().append('g').attr('class', 'axisLabelsub');
+        subaxis.selectAll('.axisLabelsubt')
+            .data(d => d)
+            .enter().append("text")
+            .attr("class", "axisLabelsubt")
+            .attr("x", function (d, i) {
+                return d.key * radius / cfg.levels * Math.cos(angleSlice[d.index] - Math.PI / 2);
+            })
+            .attr("y", function (d, i) {
+                return d.key * radius / cfg.levels * Math.sin(angleSlice[d.index] - Math.PI / 2);
+            })
+            // .attr("x", d => {4+d.key*radius/cfg.levels})
+            // .attr("y", function(d){return -d.key*radius/cfg.levels;})
+            .attr("dy", "0.4em")
+            .attr("font-family", "sans-serif")
+            .style("font-size", "12px")
+            .attr("fill", "#111")
+            .text(function (d) {
+                return d.value;
+            });
+    }
     return {radarLine: radarLine,
         rScale: rScale,
         colorTemperature: colorTemperature};

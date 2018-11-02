@@ -147,7 +147,7 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
-	top: 1320px;
+	/*top: 1320px;*/
 	left: 50px;
 }	
 
@@ -157,7 +157,7 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
-	top: 1320px;
+	/*top: 1320px;*/
 	left: 600px;
 }
 
@@ -167,7 +167,7 @@ table, th, td {
 	height: 500px;
 	border-radius: 0px;
 	z-index: 0;
-	top: 1320px;
+	/*top: 1320px;*/
 	left: 1150px;
 }	
 

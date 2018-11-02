@@ -727,6 +727,7 @@ function summaryRadar () {
         h: tipW*1.5 +50,
         maxValue: 0.5,
         levels: levelsR,
+        radiuschange: false,
         roundStrokes: true,
         color: color2,
         legend: [{},

@@ -62,25 +62,30 @@ var startDate = new Date("4/1/2018");
 var endtDate = new Date("1/1/2019");
 var today = new Date();
 
-var maxHostinRack= 60;
-var h_rack = 980;
+var maxHostinRack= 30;//60;
+var h_rack = 490;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
-var sHeight=200;  // Summary panel height
+var sHeight=230;  // Summary panel height
 var top_margin = sHeight+46;  // Start rack spiatial layout
 
 
 var users = [];
 var racks = [];
+var racksnewor = [];
 
 var xTimeScale;
 var baseTemperature =60;
 
 var interval2;
 var simDuration =0;
-var numberOfMinutes = 26*60;
-var iterationstep = 20;
+var numberOfMinutes = 4*60;
+
+var iterationstep = 1;
+var maxstack =7;
+var maxstackminute = 30;
+var timesteppixel = 0.1;
 
 var isRealtime = false;
 if (isRealtime){
@@ -95,8 +100,10 @@ var currentHostX = 0;
 var currentHosty = 0;
 
 var charType = "Heatmap";
+var sumType = "Radar";
 //***********************
-var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"]
+var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
+var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService;
@@ -319,26 +326,26 @@ function main() {
         racks[i].y = top_margin;
     }
     // add main rack and sub rack
-    svg.selectAll(".rackRectmain")
-        .data(racks)
-        .enter().append("rect")
-        .attr("class", "rackRectmain")
-        .attr("x", function (d) {
-            return d.x - 6;
-        })
-        .attr("y", function (d) {
-            return d.y;
-        })
-        .attr("rx", 10)
-        .attr("ry", 10)
-        .attr("width", w_rack - 8)
-        .attr("height", h_rack)
-        .attr("fill", "#fff")
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("box-shadow", "10px 10px 10px #666");
+    // svg.selectAll(".rackRectmain")
+    //     .data(racks)
+    //     .enter().append("rect")
+    //     .attr("class", "rackRectmain")
+    //     .attr("x", function (d) {
+    //         return d.x - 6;
+    //     })
+    //     .attr("y", function (d) {
+    //         return d.y;
+    //     })
+    //     .attr("rx", 10)
+    //     .attr("ry", 10)
+    //     .attr("width", w_rack - 8)
+    //     .attr("height", h_rack)
+    //     .attr("fill", "#fff")
+    //     .attr("stroke", "#000")
+    //     .attr("stroke-width", 1)
+    //     .style("box-shadow", "10px 10px 10px #666");
     //subrack below
-    var racksnewor = [];
+    racksnewor = [];
     racks.forEach(d=>{
         var newl = {};
         newl.id = d.id;
@@ -350,7 +357,7 @@ function main() {
         var newr = {};
         newr.id = d.id;
         newr.pos = 1;
-        newr.x = d.x +w_rack/2;
+        newr.x = d.x +w_rack/2-4;
         newr.y = d.y;
         newr.hosts = d.hosts.filter(e=> !(e.hpcc_node%2));
         racksnewor.push(newr);
@@ -361,7 +368,7 @@ function main() {
         .data(racksnewor)
         .enter().append("rect")
         .attr("class", "rackRect")
-        .attr("x", function (d) {
+        .attr("x", function (d,i) {
             return d.x - 6;
         })
         .attr("y", function (d) {
@@ -369,7 +376,7 @@ function main() {
         })
         .attr("rx", 10)
         .attr("ry", 10)
-        .attr("width", w_rack/2 - 8)
+        .attr("width", (d,i)=>(w_rack/2 - 4))
         .attr("height", h_rack)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
@@ -408,7 +415,7 @@ function main() {
         .attr("font-family", "sans-serif")
         .text("Summary");*/
 
-    for (var i = 1; i <= maxHostinRack/2; i++) {
+    for (var i = 1; i <= maxHostinRack; i++) {
         var yy = getHostY(1,i);
         svg.append("text")
             .attr("class", "hostText")
@@ -425,8 +432,8 @@ function main() {
         var name = hosts[i].name;
         var hpcc_rack = +name.split("-")[1];
         var hpcc_node = +name.split("-")[2].split(".")[0];
-        var xStart = racks[hpcc_rack - 1].x-2;
-        var yy = getHostY(hpcc_rack,hpcc_node);
+        var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x-2;
+        var yy = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
         // set opacity for current measurement text
         hosts[i].mOpacity = 0.1;
 
@@ -608,8 +615,8 @@ function request(){
         count++;
 
         var xTimeSummaryScale = d3.scaleLinear()
-            .domain([currentMiliseconds, currentMiliseconds+0.9*numberOfMinutes*60*1000]) // input
-            .range([30, width]); // output
+            .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
+            .range([0, width]); // output
         Date.prototype.timeNow = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
         }
@@ -618,25 +625,6 @@ function request(){
         }
 
         if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
-            var arr = [];
-            var xx;
-            var lastIndex;
-
-
-            for (var h=0; h<hosts.length;h++){
-                var name = hosts[h].name;
-                var r = hostResults[name];
-                lastIndex = r.arr.length-1;
-                if (lastIndex>=0){   // has some data
-                    var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
-                    if (h==hosts.length-1){
-                        query_time =r.arr[lastIndex].result.query_time;
-                        xx = xTimeSummaryScale(query_time);
-                    }
-                    arr.push(a[0]);
-                }
-            }
-
             // Draw date
             svg.selectAll(".currentDate").remove();
             svg.append("text")
@@ -651,20 +639,81 @@ function request(){
                 .attr("font-family", "sans-serif")
                 .text(""+new Date(currentMiliseconds).toDateString());
 
-            // Boxplot Time
-            svg.append("text")
-                .attr("class", "boxTime")
-                .attr("x", xx-2)
-                .attr("y", hh+10)
-                .attr("fill", "#000")
-                .style("font-style","italic")
-                .style("text-anchor","middle")
-                .style("font-size", "12px")
-                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                .attr("font-family", "sans-serif")
-                .text(new Date(query_time).timeNow());
+            // cal to plot
+            var arr = [];
+            var xx;
+            var lastIndex;
 
-            drawBoxplot(svg, arr, lastIndex, xx-10);
+            switch (sumType) {
+                case "Boxplot":
+                    for(var h = 0;h < hosts.length;h++)
+                    {
+                        var name = hosts[h].name;
+                        var r = hostResults[name];
+                        lastIndex = r.arr.length - 1;
+                        // boxplot
+                        if (lastIndex >= 0) {   // has some data
+                            var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
+                            if (h == hosts.length - 1) {
+                                query_time = r.arr[lastIndex].result.query_time;
+                                xx = xTimeSummaryScale(query_time);
+                            }
+                            arr.push(a[0]);
+                        }
+                    }
+                    // Boxplot Time
+                    svg.append("text")
+                        .attr("class", "boxTime")
+                        .attr("x", xx-2)
+                        .attr("y", hh+10)
+                        .attr("fill", "#000")
+                        .style("font-style","italic")
+                        .style("text-anchor","middle")
+                        .style("font-size", "12px")
+                        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                        .attr("font-family", "sans-serif")
+                        .text(new Date(query_time).timeNow());
+                    drawBoxplot(svg, arr, lastIndex, xx - 10);
+                    break;
+                case "Radar":
+                    for(var h = 0;h < hosts.length;h++)
+                    {
+                        var name = hosts[h].name;
+                        var r = hostResults[name];
+                        lastIndex = r.arr.length - 1;
+                        // boxplot
+                        if (lastIndex >= 0) {   // has some data
+                            var arrServices = [];
+                            serviceList.forEach((ser,indx) => {
+                                var obj = {};
+                                var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                                obj.a = a;
+                                if (h == hosts.length - 1) {
+                                    query_time = r.arr[lastIndex].result.query_time;
+                                    xx = xTimeSummaryScale(query_time);
+                                }
+
+                                arrServices.push(obj);})
+                        }
+                        arr.push(arrServices);
+                    }
+                    // Radar Time
+                    svg.append("text")
+                        .attr("class", "boxTime")
+                        .attr("x", xx-2)
+                        .attr("y", sHeight)
+                        .attr("fill", "#000")
+                        .style("font-style","italic")
+                        .style("text-anchor","middle")
+                        .style("font-size", "12px")
+                        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                        .attr("font-family", "sans-serif")
+                        .text(new Date(query_time).timeNow());
+                    drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+                    break;
+
+            }
+
             count=0;
             iteration+=iterationstep;
         }
@@ -717,7 +766,7 @@ function request(){
 
             svg.selectAll(".measure_"+hosts[i].name)
                 .attr("fill-opacity", hosts[i].mOpacity)
-                .attr("x", hosts[i].xOpacity);
+                .attr("x", hosts[i].xOpacity-10);
 
         }
 
@@ -885,11 +934,15 @@ function gaussianRandom(start, end) {
     return Math.floor(start + gaussianRand() * (end - start + 1));
 }
 
-
+var hostfirst;
 function plotResult(result) {
     // Check if we should reset the starting point
-    if (firstTime)
+    if (firstTime) {
         currentMiliseconds = result.result.query_time;
+        hostfirst = result.data.service.host_name;
+        xTimeScale = d3.scaleLinear()
+            .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]);
+    }
     firstTime = false;
     var name =  result.data.service.host_name;
 
@@ -900,17 +953,28 @@ function plotResult(result) {
     var r = hostResults[name];
     var hpcc_rack = +name.split("-")[1];
     var hpcc_node = +name.split("-")[2].split(".")[0];
-
-    var xStart = racks[hpcc_rack - 1].x+15;
-    xTimeScale = d3.scaleLinear()
-        .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]) // input
-        .range([xStart, xStart+w_rack-2*node_size]); // output
-    var y = getHostY(hpcc_rack,hpcc_node);
+    var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x+15;
+    // var xStart = racks[hpcc_rack - 1].x+15;
+    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size, timesteppixel*numberOfMinutes)]); // output
+        // .range([xStart, xStart+w_rack/2-2*node_size]); // output
+    var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
 
     // Process the array of historical temperatures ***************************************
     var arr = [];
-    for (var i=0; i<r.arr.length;i++){
+    var startinde = 0;
+    // while(maxstackminute)
+    if ((r.arr.length>maxstack)||(r.arr.length==maxstack)){
+        startinde = (r.arr.length-maxstack);
+
+            //var deltaMiliseconds = r.arr[startinde].result.query_time - currentMiliseconds;
+            var deltapos =xTimeScale(r.arr[startinde].result.query_time)-xTimeScale(currentMiliseconds);
+            xTimeScale.range([xStart-deltapos, xStart+Math.min(w_rack/2-2*node_size, timesteppixel*numberOfMinutes)-deltapos]); // output
+            // xTimeScale.domain([r.arr[startinde].result.query_time, currentMiliseconds + numberOfMinutes * maxHostinRack * 1000 - deltaMiliseconds]);
+
+    }
+
+    for (var i=startinde; i<r.arr.length;i++){
         var a = processData(r.arr[i].data.service.plugin_output, selectedService);
         var obj = {};
         obj.temp1 = a[0];
@@ -937,22 +1001,25 @@ function plotResult(result) {
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
+
     if (charType == "Heatmap")
-        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
+        // plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
+        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,d3.min(arr,d=>d.query_time),d3.max(arr,d=>d.query_time));
     else if (charType == "Area Chart")
         plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
 
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
+
     svg.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
         var xMin = xTimeScale(minTime);
         var xMax = xTimeScale(maxTime);
         var x = xTimeScale(arr[i].query_time);
-        if (arr.length>1)
-            x = xMin+ i*(xMax-xMin)/(arr.length);
+        // if (arr.length>1)
+        //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svg.append("rect")
             .attr("class", name)
             .attr("x", x)
@@ -1152,8 +1219,12 @@ function drawSummaryAreaChart(rack, xStart) {
     }
 }
 
-function getHostY(r,n){
-    return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
+function getHostY(r,n,pos){
+    if (pos!== undefined)
+        return  racksnewor[(r - 1)*2+pos].y + Math.ceil(n/2) * h_rack / (maxHostinRack+0.5);
+    else
+        return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
+    // return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 }
 
 d3.select('#inds').on("change", function () {
@@ -1161,7 +1232,10 @@ d3.select('#inds').on("change", function () {
     charType = sect.options[sect.selectedIndex].value;
 });
 
-
+d3.select('#indsg').on("change", function () {
+    var sect = document.getElementById("indsg");
+    sumType = sect.options[sect.selectedIndex].value;
+});
 
 function pauseRequest(){
     clearInterval(interval2);
