@@ -675,6 +675,26 @@ function request(){
                         .text(new Date(query_time).timeNow());
                     drawBoxplot(svg, arr, lastIndex, xx - 10);
                     break;
+                case "Scatterplot":
+                    for(var h = 0;h < hosts.length;h++)
+                    {
+                        var name = hosts[h].name;
+                        var r = hostResults[name];
+                        lastIndex = r.arr.length - 1;
+                        // boxplot
+                        if (lastIndex >= 0) {   // has some data
+                            var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
+                            if (h == hosts.length - 1) {
+                                query_time = r.arr[lastIndex].result.query_time;
+                                xx = xTimeSummaryScale(query_time);
+                            }
+                            arr.push(a[0]);
+                        }
+                    }
+                    // Boxplot Time
+                    drawScatterPlot(svg, hostResults, lastIndex);
+                    //drawBoxplot(svg, arr, lastIndex, xx - 10);
+                    break;
                 case "Radar":
                     for(var h = 0;h < hosts.length;h++)
                     {

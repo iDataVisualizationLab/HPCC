@@ -14,7 +14,54 @@
     <script src="js/jquery.dd.js"></script>
     <script src="js/select.js"></script>
 
+<style>
+    div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: auto;
+        height: auto;
+        padding: 2px;
+        font: 12px sans-serif;
+        background: #bbb;
+        border: 1px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+    div.scatter_y{
+        position: absolute;
+        top:155px;
+        left:-20px;
+        width: 80px;
+        height:20px;
+        line-height: 20px;
+        text-align: center;
+        border: 1px solid #aaaaaa;
+        margin:auto;
+        transform: rotate(-90deg);
+    }
 
+    div.scatter_x{
+        position: absolute;
+        top:210px;
+        left:32px;
+        width: 80px;
+        height:20px;
+        line-height: 20px;
+        text-align: center;
+        border: 1px solid #aaaaaa;
+
+    }
+    div.selection{
+        position: absolute;
+        top:100px;
+        left: 800px;
+        width: 80px;
+        height:150px;
+        line-height: 20px;
+        text-align: center;
+        border: 1px solid #aaaaaa;
+    }
+</style>
 </head>
 
 <body bgcolor="#ccc" text="black" id="mainBody">
@@ -24,7 +71,15 @@
         <h1> High Performance Computing Center </h1>
     </div>
 </header>
-
+<div class="scatter_y" id="data_onYaxis" ondrop="drop(event)" ondragover="allowDrop(event)"><span>fanspeed</span></div>
+<div class="scatter_x" id="data_onXaxis" ondrop="drop(event)" ondragover="allowDrop(event)"><span>temperature</span></div>
+<div class="selection">
+    <span id="drag1" draggable="true" ondragstart="drag(event)">temperature</span>
+    <span id="drag2" draggable="true" ondragstart="drag(event)">fanspeed</span>
+    <span id="drag3" draggable="true" ondragstart="drag(event)">cpuLoad</span>
+    <span id="drag4" draggable="true" ondragstart="drag(event)">memoryUsage</span>
+    <span id="drag5" draggable="true" ondragstart="drag(event)">powerUsage</span>
+</div>
 <!--<svg width="2600" height="1800" ></svg>-->
 <svg width="2600" height="900" ></svg>
 
@@ -57,6 +112,7 @@
     <select id="indsg">
         <option value="Boxplot">Boxplot</option>
         <option value="Radar" selected="selected">Radar</option>
+        <option value="Scatterplot" >Scatterplot</option>
     </select>
     <!--<br><br>-->
     <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
@@ -85,13 +141,14 @@
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
-
+<script type="text/javascript" src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnostics/build/js/outliagnostics.min.js"></script>
 
 <script src="myscripts/util.js"></script>
 <script src="myscripts/hostlist.js"></script>
 <script src="myscripts/service.js"></script>
 <script src="myscripts/service17Oct.js"></script>
 <!--<script src="myscripts/main.js"></script>-->
+<script src="myscripts/scatterplot.js"></script>
 <script src="myscripts/main2.js"></script>
 <script src="myscripts/tooltip.js"></script>
 <script src="spider/radarChart.js"></script>
