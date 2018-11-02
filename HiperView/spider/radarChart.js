@@ -219,7 +219,7 @@ function RadarChart(id, data, options, name) {
         var densityscale = d3.scaleLinear().domain(d3.extent(data, d => d.bin.val.length)).range([0.5, 1]);
     }
     //Create the outlines
-    blobWrapper.append("path")
+    var blobWrapperpath = blobWrapper.append("path")
         .attr("class", "radarStroke")
         .attr("d", function(d,i) { return radarLine(d); })
         .style("stroke-width", d=> {
@@ -230,9 +230,38 @@ function RadarChart(id, data, options, name) {
         .style("stroke-opacity", d=> cfg.bin?densityscale(d.bin.val.length):0.5)
         .style("stroke", function(d,i) { return cfg.color(i); })
         .style("fill", "none")
-        .style("filter" , "url(#glow2)")
-    ;
+        .style("filter" , "url(#glow2)");
+    if (cfg.bin) {
+        var listhost = [];
+        data.forEach(d=>{
+           d.bin.name.forEach(n=>{listhost.push(n)});
+        });
+        blobWrapperpath.on("mouseover", function (d, i) {
+            blobWrapper
+                .transition().duration(500)
+                .style("opacity", 0);
+            blobWrapper.filter(e => e == d)
+                .transition()
+                .style("opacity", 1);
+            listhost.forEach(l=> {
+                if (d.bin.name.filter(e=> e==l).length ==0 ) {
+                    d3.selectAll("." + l)
+                        .transition().duration(500)
+                        .style("opacity", 0);
+                }
+            });
 
+        })
+            .on("mouseout", function () {
+                blobWrapper.transition().duration(200)
+                    .style("opacity", 1);
+                listhost.forEach(l=> {
+                        d3.selectAll("." + l)
+                            .transition().duration(500)
+                            .style("opacity", 1);
+                });
+            });
+    }
 
     //Append the circles
     blobWrapper.selectAll(".radarCircle")

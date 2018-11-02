@@ -93,7 +93,7 @@ function drawRadarsum (svg,arr, index,xx){
     dataSpider3 = bin.bins.map(d=>
     {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
     temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
-        name:d.map(f=>f.name),
+        name:d.map(f=>f.data),
         radius: bin.binRadius};
     return temp;});
     var radarChartsumopt  = {
