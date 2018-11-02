@@ -90,7 +90,12 @@ function drawRadarsum (svg,arr, index,xx){
     //     .domain([0,1])
     //     .range([thresholds[0][0],thresholds[0][1]]);
     // dataSpider3 = bin.bins.map(d=>d.val.map((e,i)=>{return {axis:keys[i],value:scale(e)}}));
-    dataSpider3 = bin.bins.map(d=>bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e,bin:bin.normalizedFun.scaleBackPoints(d)}}));
+    dataSpider3 = bin.bins.map(d=>
+    {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
+    temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
+        name:d.map(f=>f.name),
+        radius: bin.binRadius};
+    return temp;});
     var radarChartsumopt  = {
         w: radarsize -5,
         h: radarsize +20,

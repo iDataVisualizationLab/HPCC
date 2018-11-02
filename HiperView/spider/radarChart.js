@@ -214,18 +214,24 @@ function RadarChart(id, data, options, name) {
         .data(data)
         .enter().append("g")
         .attr("class", "radarWrapper");
-            
 
-        
+    if (cfg.bin) {
+        var densityscale = d3.scaleLinear().domain(d3.extent(data, d => d.bin.val.length)).range([0.5, 1]);
+    }
     //Create the outlines
     blobWrapper.append("path")
         .attr("class", "radarStroke")
         .attr("d", function(d,i) { return radarLine(d); })
-        .style("stroke-width", cfg.strokeWidth + "px")
-        .style("stroke-opacity", 0.5)
+        .style("stroke-width", d=> {
+            if (cfg.bin)
+                return  Math.sqrt(d.bin.radius) + "px";
+            else
+                return cfg.strokeWidth + "px";})
+        .style("stroke-opacity", d=> cfg.bin?densityscale(d.bin.val.length):0.5)
         .style("stroke", function(d,i) { return cfg.color(i); })
         .style("fill", "none")
-        .style("filter" , "url(#glow2)");
+        .style("filter" , "url(#glow2)")
+    ;
 
 
     //Append the circles
