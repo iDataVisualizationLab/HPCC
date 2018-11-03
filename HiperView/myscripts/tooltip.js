@@ -733,13 +733,20 @@ function summaryRadar () {
         legend: [{},
             {},
             {},
-            {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
-            {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
+            {5: thresholds[1][1]},
+            {5: thresholds[2][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[4][1]}]
+            // {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
+            // {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
+            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
+            // {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
     };
     RadarChart(".radarChartsum", dataSpider2, radarChartsumopt,"");
 

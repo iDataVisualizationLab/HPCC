@@ -94,19 +94,19 @@ function RadarChart(id, data, options, name) {
     var g = svg.append("g")
             .attr("id","radarGroup")
             .attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
-    
-     svg.append("text")
-        .attr("class", "currentTimeText")
-        .attr("x", 10)
-        .attr("y", 12)
-        .attr("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-weight","bold")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text(name);
-
+    if (cfg.showText) {
+        svg.append("text")
+            .attr("class", "currentTimeText")
+            .attr("x", 10)
+            .attr("y", 12)
+            .attr("fill", "#000")
+            .style("text-anchor", "start")
+            .style("font-weight", "bold")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text(name);
+    }
     /////////////////////////////////////////////////////////
     ////////// Glow filter for some extra pizzazz ///////////
     /////////////////////////////////////////////////////////
@@ -151,7 +151,8 @@ function RadarChart(id, data, options, name) {
         .style("stroke-width",0.3)
         .style("stroke-opacity",1)
         .style("fill-opacity", cfg.opacityCircles)
-        .style("filter" , "url(#glow)");
+        .style("filter" , "url(#glow)")
+        .style("visibility",(d,i)=> (cfg.bin&&i==0)?"hidden":"visible");
 
 
     /////////////////////////////////////////////////////////
@@ -214,31 +215,36 @@ function RadarChart(id, data, options, name) {
         .data(data)
         .enter().append("g")
         .attr("class", "radarWrapper");
-
     if (cfg.bin) {
-        var densityscale = d3.scaleLinear().domain(d3.extent(data, d => d.bin.val.length)).range([0.5, 1]);
+        var densityscale = d3.scaleLinear().domain(d3.extent(data, d => d.bin.val.length)).range([0.3, 0.75]);
+        var scaleStroke = d3.scaleLinear()
+            .domain([0,1])
+            .range([0,5]);
     }
+
     //Create the outlines
     var blobWrapperpath = blobWrapper.append("path")
         .attr("class", "radarStroke")
         .attr("d", function(d,i) { return radarLine(d); })
         .style("stroke-width", d=> {
-            if (cfg.bin)
-                return  Math.sqrt(d.bin.radius) + "px";
+            if (cfg.bin) {
+                var radius = d.bin.distance;
+                return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius))+ "px";
+            }
             else
                 return cfg.strokeWidth + "px";})
         .style("stroke-opacity", d=> cfg.bin?densityscale(d.bin.val.length):0.5)
         .style("stroke", function(d,i) { return cfg.color(i); })
-        .style("fill", "none")
-        .style("filter" , "url(#glow2)");
+        .style("fill", "none");
+        //.style("filter" , "url(#glow2)");
     if (cfg.bin) {
         var listhost = [];
         data.forEach(d=>{
            d.bin.name.forEach(n=>{listhost.push(n)});
         });
-        blobWrapperpath.on("mouseover", function (d, i) {
+        blobWrapperpath.on("mouseenter", function (d, i) {
             blobWrapper
-                .transition().duration(500)
+                .transition().duration(200)
                 .style("opacity", 0);
             blobWrapper.filter(e => e == d)
                 .transition()
@@ -246,7 +252,7 @@ function RadarChart(id, data, options, name) {
             listhost.forEach(l=> {
                 if (d.bin.name.filter(e=> e==l).length ==0 ) {
                     d3.selectAll("." + l)
-                        .transition().duration(500)
+                        .transition().duration(200)
                         .style("opacity", 0);
                 }
             });

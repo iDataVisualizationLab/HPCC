@@ -42,9 +42,11 @@ function drawBoxplot(svg,arr, index,xx) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");*/
          
     // draw the boxplots
+    var boxdiv = svg.selectAll(".box"+index).remove();
     svg.selectAll(".box"+index)
         .data(data)
         .enter().append("g")
+        .attr("class","box"+index+" graphsum")
         .attr("transform", function(d) { return "translate(" + xx  + "," + 40 + ")"; } )
         .call(chart.width(20));
 }

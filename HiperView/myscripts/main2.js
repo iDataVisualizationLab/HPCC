@@ -67,7 +67,7 @@ var h_rack = 490;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
-var sHeight=230;  // Summary panel height
+var sHeight=260;  // Summary panel height
 var top_margin = sHeight+46;  // Start rack spiatial layout
 
 
@@ -118,7 +118,8 @@ setColorsAndThresholds(initialService);
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";
-
+//*** scale
+var xTimeSummaryScale;
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i] && i==1){  // CPU_load
@@ -476,13 +477,13 @@ function main() {
     // ********* REQUEST ******************************************
     request();
 }
-
+var currentlastIndex;
 function request(){
     var count = 0;
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
-
+    console.log(currentMiliseconds);
     interval2 = setInterval(function(){
         if (isRealtime){
             var xmlhttp = new XMLHttpRequest();
@@ -614,15 +615,15 @@ function request(){
 
         count++;
 
-        var xTimeSummaryScale = d3.scaleLinear()
+        xTimeSummaryScale = d3.scaleLinear()
             .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
             .range([0, width]); // output
         Date.prototype.timeNow = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-        }
+        };
         Date.prototype.timeNow2 = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
-        }
+        };
 
         if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
             // Draw date
@@ -640,80 +641,7 @@ function request(){
                 .text(""+new Date(currentMiliseconds).toDateString());
 
             // cal to plot
-            var arr = [];
-            var xx;
-            var lastIndex;
-
-            switch (sumType) {
-                case "Boxplot":
-                    for(var h = 0;h < hosts.length;h++)
-                    {
-                        var name = hosts[h].name;
-                        var r = hostResults[name];
-                        lastIndex = r.arr.length - 1;
-                        // boxplot
-                        if (lastIndex >= 0) {   // has some data
-                            var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
-                            if (h == hosts.length - 1) {
-                                query_time = r.arr[lastIndex].result.query_time;
-                                xx = xTimeSummaryScale(query_time);
-                            }
-                            arr.push(a[0]);
-                        }
-                    }
-                    // Boxplot Time
-                    svg.append("text")
-                        .attr("class", "boxTime")
-                        .attr("x", xx-2)
-                        .attr("y", hh+10)
-                        .attr("fill", "#000")
-                        .style("font-style","italic")
-                        .style("text-anchor","middle")
-                        .style("font-size", "12px")
-                        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                        .attr("font-family", "sans-serif")
-                        .text(new Date(query_time).timeNow());
-                    drawBoxplot(svg, arr, lastIndex, xx - 10);
-                    break;
-                case "Radar":
-                    for(var h = 0;h < hosts.length;h++)
-                    {
-                        var name = hosts[h].name;
-                        var r = hostResults[name];
-                        lastIndex = r.arr.length - 1;
-                        // boxplot
-                        if (lastIndex >= 0) {   // has some data
-                            var arrServices = [];
-                            serviceList.forEach((ser,indx) => {
-                                var obj = {};
-                                var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
-                                obj.a = a;
-                                if (h == hosts.length - 1) {
-                                    query_time = r.arr[lastIndex].result.query_time;
-                                    xx = xTimeSummaryScale(query_time);
-                                }
-
-                                arrServices.push(obj);})
-                        }
-                        arrServices.name = name;
-                        arr.push(arrServices);
-                    }
-                    // Radar Time
-                    svg.append("text")
-                        .attr("class", "boxTime")
-                        .attr("x", xx-2)
-                        .attr("y", sHeight)
-                        .attr("fill", "#000")
-                        .style("font-style","italic")
-                        .style("text-anchor","middle")
-                        .style("font-size", "12px")
-                        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                        .attr("font-family", "sans-serif")
-                        .text(new Date(query_time).timeNow());
-                    drawRadarsum(svg, arr, lastIndex, xx-radarsize);
-                    break;
-
-            }
+            drawsummary();
 
             count=0;
             iteration+=iterationstep;
@@ -783,7 +711,97 @@ function request(){
             count3 = 10000;
     } , 20);
 }
+function drawsummary(initIndex){
+    var arr = [];
+    var xx;
+    var lastIndex;
 
+    if (initIndex==undefined){
+        currentlastIndex = hostResults[hosts[0].name].arr.length -1;
+        lastIndex = currentlastIndex;
+        query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
+        xx = xTimeSummaryScale(query_time);
+        updateTimeText();
+    }else{
+        lastIndex = initIndex;
+        query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
+        xx = xTimeSummaryScale(query_time);
+    }
+    switch (sumType) {
+        case "Boxplot":
+            for(var h = 0;h < hosts.length;h++)
+            {
+                var name = hosts[h].name;
+                var r = hostResults[name];
+                // lastIndex = initIndex||(r.arr.length - 1);
+                // boxplot
+                if (lastIndex >= 0) {   // has some data
+                    var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
+                    arr.push(a[0]);
+                }
+            }
+            drawBoxplot(svg, arr, lastIndex, xx + radarsize/2);
+            break;
+        case "Scatterplot":
+            for(var h = 0;h < hosts.length;h++)
+            {
+                var name = hosts[h].name;
+                var r = hostResults[name];
+                // lastIndex = initIndex||(r.arr.length - 1);
+                // boxplot
+                if (lastIndex >= 0) {   // has some data
+                    var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
+                    arr.push(a[0]);
+                }
+            }
+            // Boxplot Time
+            drawScatterPlot(svg, hostResults, lastIndex,xx-swidth/2);
+
+            //drawBoxplot(svg, arr, lastIndex, xx - 10);
+            break;
+        case "Radar":
+            for(var h = 0;h < hosts.length;h++)
+            {
+                var name = hosts[h].name;
+                var r = hostResults[name];
+                // lastIndex = initIndex||(r.arr.length - 1);
+                // boxplot
+                if (lastIndex >= 0) {   // has some data
+                    var arrServices = [];
+                    serviceList.forEach((ser,indx) => {
+                        var obj = {};
+                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        obj.a = a;
+                        arrServices.push(obj);})
+                }
+                arrServices.name = name;
+                arr.push(arrServices);
+            }
+            // Radar Time
+            drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+            break;
+
+    };
+}
+
+function updateTimeText(){
+    var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time);
+    var boxtime = svg.selectAll(".boxTime")
+        .data(dataTime)
+        .attr("x", d=>xTimeSummaryScale(d)-2);
+    boxtime.exit().remove();
+    boxtime.enter().append("text")
+        .attr("class", "boxTime")
+        .attr("x", d=>xTimeSummaryScale(d)-2)
+        .attr("y", sHeight)
+        .attr("fill", "#000")
+        .style("font-style","italic")
+        .style("text-anchor","middle")
+        .style("font-size", "12px")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        .attr("font-family", "sans-serif")
+        .text(new Date(query_time).timeNow());
+}
 // Delete unnesseccary files
 function processResult(r){
     var obj = {};
@@ -1236,6 +1254,23 @@ d3.select('#inds').on("change", function () {
 d3.select('#indsg').on("change", function () {
     var sect = document.getElementById("indsg");
     sumType = sect.options[sect.selectedIndex].value;
+    switch(sumType){
+        case "Scatterplot":
+            d3.select("#scatterzone").style("visibility","visible");
+            for (var i =0; i<(currentlastIndex+1);i++) {
+                console.log(i);
+                drawsummary(i);
+            }
+            break;
+        case "Boxplot":
+        case "Radar":
+            d3.select("#scatterzone").style("visibility","hidden");
+            for (var i =0; i<(currentlastIndex+1);i++) {
+                console.log(i);
+                drawsummary(i);
+            }
+            break;
+    }
 });
 
 function pauseRequest(){
@@ -1265,14 +1300,15 @@ function resetRequest(){
     }
 
     // Remove boxplot in Summary panel
-    svg.selectAll(".box").remove();
-    svg.selectAll(".boxx").remove();
-    svg.selectAll("line.median").remove();
-    svg.selectAll("line.center").remove();
-    svg.selectAll("circle.outlier").remove();
-    svg.selectAll("text.box").remove();
-    svg.selectAll("line.whisker").remove();
-    svg.selectAll("text.whisker").remove();
+    svg.selectAll(".graphsum").remove();
+    // svg.selectAll(".box").remove();
+    // svg.selectAll(".boxx").remove();
+    // svg.selectAll("line.median").remove();
+    // svg.selectAll("line.center").remove();
+    // svg.selectAll("circle.outlier").remove();
+    // svg.selectAll("text.box").remove();
+    // svg.selectAll("line.whisker").remove();
+    // svg.selectAll("text.whisker").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
 
     request();

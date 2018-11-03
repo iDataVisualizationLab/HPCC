@@ -1,17 +1,14 @@
 // Ngan - Oct 31 2018
 
 
-var radarsize  = 190;
+var radarsize  = 230;
 function drawRadarsum (svg,arr, index,xx){
-    console.log(index);
-    var radarchart = svg.select(".radar"+index);
-    if (radarchart.empty()) {
-        svg.append("g")
-            .attr("class","radar"+index)
+    svg.select(".box"+index).remove();
+    var radarchart = svg.append("g")
+            .attr("class","radar"+index+" box"+index+" graphsum")
             .attr("transform", function (d) {
-                return "translate(" + xx + "," + 20 + ")";
+                return "translate(" + xx + "," + 10 + ")";
             });
-    }
 
     var undefinededa = [undefinedValue,undefinedValue,undefinedValue];
     // Summarynode
@@ -82,19 +79,19 @@ function drawRadarsum (svg,arr, index,xx){
     var bin = binnerN(dataSpider3.map(d=>{
         var dd = d.map(k=>k.value);
         dd.data = d.name;
-        return dd;}),'leader',100,false,5,30);
+        return dd;}),'leader',30,false,4,15);
     var keys = dataSpider3[0].map(d=>d.axis);
     dataSpider3.length = 0;
     console.log(bin.bins.length);
-    // var scale = d3.scaleLinear()
-    //     .domain([0,1])
-    //     .range([thresholds[0][0],thresholds[0][1]]);
-    // dataSpider3 = bin.bins.map(d=>d.val.map((e,i)=>{return {axis:keys[i],value:scale(e)}}));
+    var distance = function(a, b){
+        let dsum = 0;
+        a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+        return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
     dataSpider3 = bin.bins.map(d=>
     {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
     temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
         name:d.map(f=>f.data),
-        radius: bin.binRadius};
+        distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
     return temp;});
     var radarChartsumopt  = {
         w: radarsize -5,
@@ -110,13 +107,13 @@ function drawRadarsum (svg,arr, index,xx){
         legend: [{},
             {},
             {},
-            {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
-            {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
+            {5: thresholds[1][1]},
+            {5: thresholds[2][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[3][1]},
+            {5: thresholds[4][1]}]
     };
 
     RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
