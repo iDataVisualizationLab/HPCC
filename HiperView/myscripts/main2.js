@@ -278,25 +278,25 @@ function main() {
         .attr("x1", 10)
         .attr("y1", 40)
         .attr("x2", 10)
-        .attr("y2", 214)
+        .attr("y2", sHeight+15)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));;
-
-    svg.append("text")
+        .style("stroke-dasharray", ("2, 2"));
+    var currentTextGroup = svg.append('g')
+        .attr("class", "currentTextGroup")
+        .attr('transform', 'translate(' + 10 + ',' + sHeight-50 + ')');
+    currentTextGroup.append("text")
         .attr("class", "currentText")
-        .attr("x", 10)
-        .attr("y", 164)
+        .attr("y", 0)
         .attr("fill", "#000")
         .style("text-anchor", "start")
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Latest REQUEST");
-    svg.append("text")
+    currentTextGroup.append("text")
         .attr("class", "currentHostText")
-        .attr("x", 10)
-        .attr("y", 182)
+        .attr("y", 18)
         .attr("fill", "#000")
         .style("text-anchor", "start")
         .style("font-weight","bold")
@@ -304,10 +304,9 @@ function main() {
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
         .text("Host");
-    svg.append("text")
+    currentTextGroup.append("text")
         .attr("class", "currentTimeText")
-        .attr("x", 10)
-        .attr("y", 200)
+        .attr("y", 36)
         .attr("fill", "#000")
         .style("text-anchor", "start")
         .style("font-style","italic")
@@ -468,7 +467,7 @@ function main() {
     svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
-        .attr("y1", 215)
+        .attr("y1", sHeight+15)
         .attr("x2", 10)
         .attr("y2", 310)
         .attr("stroke", "#000")
@@ -655,14 +654,13 @@ function request(){
             .attr("x1", x2)
             .attr("x2", currentHostX)
             .attr("y2", currentHostY);
+        svg.selectAll(".currentTextGroup")
+            .attr('transform', 'translate(' + (x2+2) + ',' + (sHeight-50) + ')');
         svg.selectAll(".currentText")
-            .attr("x", x2+2)
             .text("Latest update:");
         svg.selectAll(".currentTimeText")
-            .attr("x", x2+2)
             .text(new Date(query_time).timeNow2());
         svg.selectAll(".currentHostText")
-            .attr("x", x2+2)
             .text(currentHostname);
 
         // Update measurement text and opacity
@@ -778,7 +776,7 @@ function drawsummary(initIndex){
                 arr.push(arrServices);
             }
             // Radar Time
-            drawRadarsum(svg, arr, lastIndex, xx-radarsize*0.7);
+            drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
 
     };

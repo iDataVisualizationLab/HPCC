@@ -4,7 +4,7 @@
 var radarsize  = 230;
 var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15);
 
-d3.radar =
+// d3.radar =
 function drawRadarsum (svg,arr, index,xx){
     svg.select(".box"+index).remove();
     var radarchart = svg.append("g")
