@@ -3,33 +3,52 @@
  */
 var scatterplot_settings = {
     circle_size: 1,
-    data_onXaxis: "temperature", //Temperature, Memory_Usage, CPU_load, Fans_Health, Power
-    data_onYaxis: "fanspeed", ////Temperature, Memory_Usage, CPU_load, Fans_Health, Power
-    global_scale: {
-        temperature: 122,
-        memoryUsage: 100,
-        fanspeed: 17850,
-        cpuLoad: 10,
-        powerUsage: 350
+    data_onXaxis: "cpu1temp", //Temperature, Memory_Usage, CPU_load, Fans_Health, Power
+    data_onYaxis: "fan1peed", ////Temperature, Memory_Usage, CPU_load, Fans_Health, Power
+    active_features: {
+        cpu1temp: {name: "CPU 1 Temp", maxScale:122},
+        cpu2temp: {name: "CPU 2 Temp", maxScale:122},
+        inlettemp: {name: "Inlet Temp", maxScale:122},
+        memoryusg: {name: "Memory Usage", maxScale:100},
+        fan1peed: {name: "Fan 1 Speed", maxScale:17850},
+        fan2peed: {name: "Fan 2 Speed", maxScale:17850},
+        fan3peed: {name: "Fan 3 Speed", maxScale:17850},
+        fan4peed: {name: "Fan 3 Speed", maxScale:17850},
+        jobload: {name: "Job Load", maxScale:10},
+        pwconsumption: {name: "Power Consumption", maxScale:350}
     }
 
 };
+//Bind properties to selection
+d3.select("#selection").selectAll("span").data(Object.entries(scatterplot_settings.active_features).map(function(d){return d[0]}))
+    .enter()
+    .append('span')
+    .style("display",'block')
+    .attr("id",function (d,i) {
+        return "drag"+i;
+    })
+    .text(function (d) {
+        return d;})
+    .attr("draggable",true)
+    .attr("ondragstart","drag(event)");
+
+
 var colorArray = ["#9dbee6", "#afcae6", "#c8dce6", "#e6e6e6", "#e6e6d8", "#e6d49c", "#e6b061", "#e6852f", "#e6531a", "#e61e1a"];
 
 var colorRedBlue = d3.scaleLinear()
     .domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     .range(colorArray);
 
-var sheight = 80,
-    swidth = 80,
+var sheight = 200,
+    swidth = 200,
     offset = 50,
     padding = 25;
 var xScale = d3.scaleLinear()
-    .domain([0, scatterplot_settings.global_scale[scatterplot_settings.data_onXaxis]])
+    .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].maxScale])
     .range([0, swidth]);
 
 var yScale = d3.scaleLinear()
-    .domain([0, scatterplot_settings.global_scale[scatterplot_settings.data_onYaxis]])
+    .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].maxScale])
     .range([sheight, 0]);
 
 
@@ -53,10 +72,10 @@ function ScatterPlotG(g, dataPoints) {
             return d.hostname;
         })
         .attr("cx", function (d) {
-            return xScale(d[scatterplot_settings.data_onXaxis].value);
+            return xScale(d[scatterplot_settings.data_onXaxis]);
         })
         .attr("cy", function (d) {
-            return yScale(d[scatterplot_settings.data_onYaxis].value);
+            return yScale(d[scatterplot_settings.data_onYaxis]);
         })
         .on("mouseover", function (d) {
             showTooltip(d)
@@ -68,34 +87,31 @@ function ScatterPlotG(g, dataPoints) {
 }
 
 
-function drawScatterPlot(svg, hostResults, index) {
-
+function drawScatterPlot(svg, hostResults, index,xx) {
+    svg.select(".box"+index).remove();
     var g = svg.append("g")
-        .attr('class', 'scatterPlot')
-        .attr("transform", "translate(" + (index * (swidth + offset) + padding) + ",50)");
+        .attr('class', 'scatterPlot'+" graphsum"+" box"+index)
+        .attr("transform", "translate(" + xx + ",50)");
 
 
     var dataPoints = [];
     for (var key in hostResults) {
         var obj = {};
-        obj.temperature = {};
-        obj.temperature.query_time = hostResults[key].arrTemperature[hostResults[key].arrTemperature.length - 1].result.query_time;
-        obj.temperature.plugin_output = hostResults[key].arrTemperature[hostResults[key].arrTemperature.length - 1].data.service.plugin_output;
-        obj.temperature.value = d3.max(extractTemperature(obj.temperature.plugin_output));
         obj.hostname = key;
-        obj.cpuLoad = {};
-        obj.cpuLoad.plugin_output = hostResults[key].arrCPU_load[hostResults[key].arrCPU_load.length - 1].data.service.plugin_output;
-        obj.cpuLoad.value = d3.max(extractCPULoad(obj.cpuLoad.plugin_output));
-        obj.cpuLoad.query_time = hostResults[key].arrCPU_load[hostResults[key].arrCPU_load.length - 1].result.query_time;
-        obj.fanspeed = {};
-        obj.fanspeed.plugin_output = hostResults[key].arrFans_health[hostResults[key].arrFans_health.length - 1].data.service.plugin_output;
-        obj.fanspeed.value = d3.max(extractFanHealth(obj.fanspeed.plugin_output));
-        obj.memoryUsage = {};
-        obj.memoryUsage.plugin_output = hostResults[key].arrMemory_usage[hostResults[key].arrMemory_usage.length - 1].data.service.plugin_output;
-        obj.memoryUsage.value = extractMemoryUsage(obj.memoryUsage.plugin_output);
-        obj.powerUsage = {};
-        obj.powerUsage.plugin_output = hostResults[key].arrPower_usage[hostResults[key].arrPower_usage.length - 1].data.service.plugin_output;
-        obj.powerUsage.value = d3.max(extractPowerUsage(obj.powerUsage.plugin_output));
+        var temps = extractTemperature(hostResults[key].arrTemperature[index].data.service.plugin_output);
+        obj.cpu1temp = temps[0];
+        obj.cpu2temp = temps[1];
+        obj.inlettemp = temps[2];
+        obj.memoryusg = extractMemoryUsage(hostResults[key].arrMemory_usage[index].data.service.plugin_output);
+        var fans = extractFanHealth(hostResults[key].arrFans_health[index].data.service.plugin_output);
+        obj.fan1peed =fans[0];
+        obj.fan2peed =fans[1];
+        obj.fan3peed =fans[2];
+        obj.fan4peed =fans[3];
+        obj.jobload =  extractCPULoad(hostResults[key].arrCPU_load[index].data.service.plugin_output);
+        obj.pwconsumption = extractPowerUsage(hostResults[key].arrPower_usage[index].data.service.plugin_output);
+
+
         dataPoints.push(obj);
     }
 
@@ -108,7 +124,7 @@ function drawScatterPlot(svg, hostResults, index) {
 
         .style("fill", function (d) {
             return colorRedBlue(Outlier(dataPoints.map(function (d) {
-                return [xScale(d[scatterplot_settings.data_onXaxis].value), yScale(d[scatterplot_settings.data_onYaxis].value)]
+                return [xScale(d[scatterplot_settings.data_onXaxis]), yScale(d[scatterplot_settings.data_onYaxis])]
             })))
         });
     ScatterPlotG(g, dataPoints);
@@ -126,14 +142,14 @@ function Outlier(data) {
  */
 function extractTemperature(stringInput) {
     if (stringInput == "NaN") {
-        return [0];
+        return [0,0,0];
     }
     if (stringInput.includes("OK")) {
         var pattern = stringInput.match(/\s\d+/g).map(Number); //Extract integer
         return pattern;
     }
     else {
-        return [0];
+        return [0,0,0];
     }
 }
 
@@ -169,7 +185,7 @@ function extractFanHealth(stringInput) {
         return pattern;
     }
     else {
-        return [0];
+        return [0,0,0,0];
     }
 }
 
@@ -189,11 +205,11 @@ function showTooltip(detail) {
         .style("opacity", 1).style('width', '250px');
     div.html('<table>' +
         '<tr><td>Node info:</td><td>' + detail.hostname + '</td></tr>' +
-        '<tr><td>Temperature:</td><td>' + detail.temperature.plugin_output + '</td></tr>' +
-        '<tr><td>Fan Speed:</td><td>' + detail.fanspeed.plugin_output + '</td></tr>' +
-        '<tr><td>Memory Usage:</td><td>' + detail.memoryUsage.plugin_output + '</td></tr>' +
-        '<tr><td>Power Usage:</td><td>' + detail.powerUsage.plugin_output + '</td></tr>' +
-        '<tr><td>CPU Load:</td><td>' + detail.cpuLoad.plugin_output + '</td></tr>' +
+        '<tr><td>CPU Temp:</td><td> CPU 1: ' + detail.cpu1temp + ',CPU 2: '+detail.cpu2temp+'</td></tr>' +
+        '<tr><td>Fan Speed:</td><td>F1: ' + detail.fan1peed + ', F2: '+detail.fan2peed+',F3: '+detail.fan3peed+', F4: '+detail.fan4peed+'</td></tr>' +
+        '<tr><td>Memory Usage:</td><td>' + detail.memoryusg + '</td></tr>' +
+        '<tr><td>Power Usage:</td><td>' + detail.pwconsumption + '</td></tr>' +
+        '<tr><td>CPU Load:</td><td>' + detail.jobload + '</td></tr>' +
         '      </table>'
     )
         .style("left", (d3.event.pageX) + "px")
@@ -238,16 +254,17 @@ function drop(ev) {
 
 function UpdateXAxis() {
     xScale = d3.scaleLinear()
-        .domain([0, scatterplot_settings.global_scale[scatterplot_settings.data_onXaxis]])
+        .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].maxScale])
         .range([0, swidth]);
     d3.selectAll('.scatterPlot').selectAll('circle').attr("cx", function (d) {
-        return xScale(d[scatterplot_settings.data_onXaxis].value);
-    })
+        console.log(d[scatterplot_settings.data_onXaxis]);
+        return xScale(d[scatterplot_settings.data_onXaxis]);
+    });
 
     d3.selectAll(".scatterPlot").nodes().forEach(function (d, i) {
 
         var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
-            return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis].value), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis].value)]
+            return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
         });
         d3.select(d).selectAll('rect').style('fill',function () {
             return colorRedBlue(Outlier(datapoints));
@@ -255,23 +272,19 @@ function UpdateXAxis() {
 
     })
 
-
-
-
 }
 
 function UpdateYAxis() {
     yScale = d3.scaleLinear()
-        .domain([0, scatterplot_settings.global_scale[scatterplot_settings.data_onYaxis]])
+        .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].maxScale])
         .range([sheight, 0]);
-
     d3.selectAll('.scatterPlot').selectAll('circle').attr("cy", function (d) {
-        return yScale(d[scatterplot_settings.data_onYaxis].value);
+        return yScale(d[scatterplot_settings.data_onYaxis]);
     });
     d3.selectAll(".scatterPlot").nodes().forEach(function (d, i) {
 
         var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
-            return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis].value), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis].value)]
+            return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
         });
         d3.select(d).selectAll('rect').style('fill',function () {
             return colorRedBlue(Outlier(datapoints));
