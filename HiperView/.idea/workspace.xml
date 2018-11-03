@@ -71,10 +71,10 @@
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="128">
-              <caret line="286" column="61" lean-forward="false" selection-start-line="286" selection-start-column="61" selection-end-line="286" selection-end-column="62" />
+              <caret line="1310" column="21" lean-forward="false" selection-start-line="1310" selection-start-column="21" selection-end-line="1310" selection-end-column="21" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-                <element signature="e#16223#21455#0" expanded="false" />
+                <element signature="e#16225#21457#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -101,7 +101,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>hostResults</find>
       <find>last</find>
       <find>hostre</find>
       <find>Scatter</find>
@@ -131,6 +130,7 @@
       <find>currentTimeline</find>
       <find>currentHostText</find>
       <find>currentTextGroup</find>
+      <find>reset</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -282,12 +282,12 @@
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
       <workItem from="1540947326819" duration="88235000" />
-      <workItem from="1541217699555" duration="18982000" />
+      <workItem from="1541217699555" duration="19331000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="129522000" />
+    <option name="totallyTimeSpent" value="129871000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="268" y="169" width="1552" height="819" extended-state="0" />
@@ -549,7 +549,7 @@
           <caret line="717" column="28" lean-forward="false" selection-start-line="717" selection-start-column="19" selection-end-line="717" selection-end-column="28" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#16223#21455#0" expanded="false" />
+            <element signature="e#16225#21457#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -733,10 +733,10 @@
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="128">
-          <caret line="286" column="61" lean-forward="false" selection-start-line="286" selection-start-column="61" selection-end-line="286" selection-end-column="62" />
+          <caret line="1310" column="21" lean-forward="false" selection-start-line="1310" selection-start-column="21" selection-end-line="1310" selection-end-column="21" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#16223#21455#0" expanded="false" />
+            <element signature="e#16225#21457#0" expanded="false" />
           </folding>
         </state>
       </provider>

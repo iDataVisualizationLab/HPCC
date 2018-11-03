@@ -284,7 +284,7 @@ function main() {
         .style("stroke-dasharray", ("2, 2"));
     var currentTextGroup = svg.append('g')
         .attr("class", "currentTextGroup")
-        .attr('transform', 'translate(' + 10 + ',' + sHeight-50 + ')');
+        .attr('transform', 'translate(' + 10 + ',' + (sHeight-36) + ')');
     currentTextGroup.append("text")
         .attr("class", "currentText")
         .attr("y", 0)
@@ -655,7 +655,7 @@ function request(){
             .attr("x2", currentHostX)
             .attr("y2", currentHostY);
         svg.selectAll(".currentTextGroup")
-            .attr('transform', 'translate(' + (x2+2) + ',' + (sHeight-50) + ')');
+            .attr('transform', 'translate(' + (x2+2) + ',' + (sHeight-36) + ')');
         svg.selectAll(".currentText")
             .text("Latest update:");
         svg.selectAll(".currentTimeText")
@@ -794,7 +794,7 @@ function updateTimeText(){
         .attr("y", sHeight)
         .attr("fill", "#000")
         .style("font-style","italic")
-        .style("text-anchor","middle")
+        .style("text-anchor","end")
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
@@ -1308,7 +1308,7 @@ function resetRequest(){
     // svg.selectAll("line.whisker").remove();
     // svg.selectAll("text.whisker").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
-
+    updateTimeText();
     request();
 }
 
