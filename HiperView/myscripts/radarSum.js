@@ -2,6 +2,9 @@
 
 
 var radarsize  = 230;
+var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15);
+
+d3.radar =
 function drawRadarsum (svg,arr, index,xx){
     svg.select(".box"+index).remove();
     var radarchart = svg.append("g")
@@ -76,10 +79,11 @@ function drawRadarsum (svg,arr, index,xx){
             }
         }
     }
-    var bin = binnerN(dataSpider3.map(d=>{
-        var dd = d.map(k=>k.value);
-        dd.data = d.name;
-        return dd;}),'leader',30,false,4,15);
+    bin.data(dataSpider3.map(d=>{
+            var dd = d.map(k=>k.value);
+            dd.data = d.name;
+            return dd;}))
+        .calculate();
     var keys = dataSpider3[0].map(d=>d.axis);
     dataSpider3.length = 0;
     console.log(bin.bins.length);

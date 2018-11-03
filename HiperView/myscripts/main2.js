@@ -173,7 +173,7 @@ drawLegend(initialService,arrThresholds, arrColor,dif);
 main();
 addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
 
-
+var Scatterplot = d3.Scatterplot();
 function main() {
 
     for (var att in hostList.data.hostlist) {
@@ -473,7 +473,7 @@ function main() {
         .attr("y2", 310)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));;
+        .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
     request();
 }
@@ -740,7 +740,7 @@ function drawsummary(initIndex){
                     arr.push(a[0]);
                 }
             }
-            drawBoxplot(svg, arr, lastIndex, xx + radarsize/2);
+            drawBoxplot(svg, arr, lastIndex, xx + 10);
             break;
         case "Scatterplot":
             for(var h = 0;h < hosts.length;h++)
@@ -755,7 +755,7 @@ function drawsummary(initIndex){
                 }
             }
             // Boxplot Time
-            drawScatterPlot(svg, hostResults, lastIndex,xx-swidth/2);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx-swidth/2);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;
@@ -778,7 +778,7 @@ function drawsummary(initIndex){
                 arr.push(arrServices);
             }
             // Radar Time
-            drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+            drawRadarsum(svg, arr, lastIndex, xx-radarsize*0.7);
             break;
 
     };
