@@ -485,8 +485,8 @@ function main() {
     // ********* REQUEST ******************************************
     console.log(width-10-radarsize);
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(d3.scaleLinear()
-        .domain([0, maxstack-1])
-        .range([0,width-10-radarsize]))
+        .domain([-0.5, maxstack-1+0.5])
+        .range([0-radarsize,width-10-radarsize]).nice())
         .maxstack(maxstack);
     request();
 }
