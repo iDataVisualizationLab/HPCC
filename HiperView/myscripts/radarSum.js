@@ -15,28 +15,7 @@ d3.radar = function () {
     let bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]);
     let svg;
     let xscale = d3.scaleLinear().domain([0, 7]).range([0, 1000]);
-    let radarChartsumopt  = {
-        w: radarsize -5,
-        h: radarsize +20,
-        radiuschange: false,
-        dotRadius:2,
-        maxValue: 0.5,
-        levels: levelsR,
-        roundStrokes: true,
-        color: color2,
-        showText: false,
-        bin :   true,
-        legend: [{},
-            {},
-            {},
-            {5: thresholds[1][1]},
-            {5: thresholds[2][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[4][1]}]
-    };
+
 
     radarTimeline.draw = function(index){
         if (index >= maxstack) index = maxstack;
@@ -67,7 +46,28 @@ d3.radar = function () {
                 name:d.map(f=>f.data),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
-
+        let radarChartsumopt  = {
+            w: radarsize -5,
+            h: radarsize +20,
+            radiuschange: false,
+            dotRadius:2,
+            maxValue: 0.5,
+            levels: levelsR,
+            roundStrokes: true,
+            color: color2,
+            showText: false,
+            bin :   true,
+            legend: [{},
+                {},
+                {},
+                {5: thresholds[1][1]},
+                {5: thresholds[2][1]},
+                {5: thresholds[3][1]},
+                {5: thresholds[3][1]},
+                {5: thresholds[3][1]},
+                {5: thresholds[3][1]},
+                {5: thresholds[4][1]}]
+        };
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
 
         if (index >= maxstack) radarTimeline.shift();
