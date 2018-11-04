@@ -17,6 +17,7 @@ var svg = d3.select("svg"),
 svg = svg.append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
+var svgsum;
 //.call(d3.zoom()
 //    .scaleExtent([1, 8])
 //    .on("zoom", zoom));
@@ -63,7 +64,7 @@ var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 var maxHostinRack= 30;//60;
-var h_rack = 490;//980;
+var h_rack = 580;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -83,7 +84,7 @@ var simDuration =0;
 var numberOfMinutes = 4*60;
 
 var iterationstep = 1;
-var maxstack =7;
+var maxstack =3;
 var maxstackminute = 30;
 var timesteppixel = 0.1;
 
@@ -120,6 +121,10 @@ var undefinedValue = undefined;
 var undefinedColor = "#666";
 //*** scale
 var xTimeSummaryScale;
+
+var Scatterplot = d3.Scatterplot();
+var Radarplot = d3.radar();
+
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i] && i==1){  // CPU_load
@@ -173,7 +178,6 @@ drawLegend(initialService,arrThresholds, arrColor,dif);
 main();
 addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
 
-var Scatterplot = d3.Scatterplot();
 function main() {
 
     for (var att in hostList.data.hostlist) {
@@ -250,10 +254,11 @@ function main() {
     // })
 
     // Summary Panel ********************************************************************
-    svg.append("rect")
+    svgsum = svg.append("g")
+        .attr("class", "summaryGroup")
+        .attr("transform","translate(" + 1 + "," + 15 + ")");
+    svgsum.append("rect")
         .attr("class", "summaryRect")
-        .attr("x", 1)
-        .attr("y", 15)
         .attr("rx", 10)
         .attr("ry", 10)
         .attr("width", width-2)
@@ -262,6 +267,10 @@ function main() {
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("box-shadow", "10px 10px 10px #666");
+    svgsum.append('svg')
+        .attr("class","summarySvg")
+        .attr("width", width-2)
+        .attr("height", sHeight);
     svg.append("text")
         .attr("class", "summaryText1")
         .attr("x", 20)
@@ -474,6 +483,11 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
+    console.log(width-10-radarsize);
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(d3.scaleLinear()
+        .domain([0, maxstack-1])
+        .range([0,width-10-radarsize]))
+        .maxstack(maxstack);
     request();
 }
 var currentlastIndex;
@@ -741,17 +755,7 @@ function drawsummary(initIndex){
             drawBoxplot(svg, arr, lastIndex, xx + 10);
             break;
         case "Scatterplot":
-            for(var h = 0;h < hosts.length;h++)
-            {
-                var name = hosts[h].name;
-                var r = hostResults[name];
-                // lastIndex = initIndex||(r.arr.length - 1);
-                // boxplot
-                if (lastIndex >= 0) {   // has some data
-                    var a = processData(r.arr[lastIndex].data.service.plugin_output, selectedService);
-                    arr.push(a[0]);
-                }
-            }
+
             // Boxplot Time
             Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx-swidth/2);
 
@@ -775,8 +779,9 @@ function drawsummary(initIndex){
                 arrServices.name = name;
                 arr.push(arrServices);
             }
+            Radarplot.data(arr).draw(lastIndex);
             // Radar Time
-            drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+            //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
 
     };
@@ -1252,6 +1257,7 @@ d3.select('#inds').on("change", function () {
 d3.select('#indsg').on("change", function () {
     var sect = document.getElementById("indsg");
     sumType = sect.options[sect.selectedIndex].value;
+    svg.select(".graphsum").remove();
     switch(sumType){
         case "Scatterplot":
             d3.select("#scatterzone").style("visibility","visible");
@@ -1263,7 +1269,7 @@ d3.select('#indsg').on("change", function () {
         case "Boxplot":
         case "Radar":
             d3.select("#scatterzone").style("visibility","hidden");
-            for (var i =0; i<(currentlastIndex+1);i++) {
+            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+1):0; i<(currentlastIndex+1);i++) {
                 console.log(i);
                 drawsummary(i);
             }
