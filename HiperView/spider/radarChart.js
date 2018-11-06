@@ -219,7 +219,7 @@ function RadarChart(id, data, options, name) {
     ///////////// Draw the radar chart blobs ////////////////
     /////////////////////////////////////////////////////////
     if (cfg.bin) {
-        var densityscale = d3.scaleLinear().domain(d3.extent(data, d => d.bin.val.length)).range([0.3, 0.75]);
+        var densityscale = cfg.scaleDensity;
         var scaleStroke = d3.scaleLinear()
             .domain([0,1])
             .range([0,5]);

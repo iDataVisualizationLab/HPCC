@@ -45,18 +45,6 @@ var tool_tip = d3.tip()
 svg.call(tool_tip);
 function cotenttip (hideLine){
     str="";
-    /* str+="<table border='0.5px'  style='width:100%'>"
-     for (key in d) {
-         if (key== "index")
-             ;// Do nothing
-         else if (key== "nodes")
-             str+=  "<tr><td> Number of nodes</td> <td>  <span style='color:black'>" + d[key].length + "</span> </td></tr>";
-         else{
-             str+=  "<tr><td>"+key+"</td> <td>  <span style='color:black'>" + d[key] + "</span> </td></tr>";
-         }
-     }
-     str+="</table> <br>"
-     */
     hideLine = hideLine||false;
     var classtype =  "radarChartsum";
     if (!hideLine) {
@@ -89,7 +77,12 @@ function mouseoverNode(d1){
     playing = false;
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
-
+    d3.select("body").on("keydown", function() {
+            console.log(d3.event.keyCode);
+            if (d3.event.keyCode ===27) {
+                tool_tip.hide();
+            }
+        });
     // 1. create the svgTip
      svgTip = d3.select("#svgTip")
         .attr("width", tipW + margin.left + margin.right)

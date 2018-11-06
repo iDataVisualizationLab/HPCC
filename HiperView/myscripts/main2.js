@@ -246,6 +246,7 @@ function main() {
             }
         }
     });
+    radarChartsumopt.scaleDensity= d3.scaleLinear().domain([1,hosts.length]).range([0.3, 0.75]);
     // hosts.sort(function (a, b) {
     //     if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
     //         return 1;
