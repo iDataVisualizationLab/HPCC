@@ -271,6 +271,7 @@ table, th, td {
 	animation-delay: 0s;
 	animation-iteration-count: 1;
 	animation-direction: normal;
+	transition: transform 300ms ease-in-out;
 }
 @keyframes translateBefore {
 	0% {
@@ -281,4 +282,13 @@ table, th, td {
 		transform: scale(1) rotate(0deg);
 		opacity: 1;
 	}
+}
+.menuBtn {
+	width: 30px;
+	height: 30px;
+}
+
+
+.rotatehover:hover .pauseicon{
+	transform: rotate(360deg);
 }

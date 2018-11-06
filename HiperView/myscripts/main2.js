@@ -494,6 +494,7 @@ function main() {
 var currentlastIndex;
 var speedup= false;
 function request(){
+    bin.data([]);
     var count = 0;
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
@@ -1209,11 +1210,13 @@ function pauseRequest(e){
     if (e.value=="false"){
         interval2.pause();
         e.value = "true";
-        console.log(e);
+        $(e).addClass('active');
+        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
     }else {
         interval2.resume();
         e.value = "false";
-        console.log(e);
+        $(e).removeClass('active');
+        $(e.querySelector('i')).removeClass('fa-play pauseicon').addClass('fa-pause pauseicon');
     }
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 
@@ -1221,7 +1224,7 @@ function pauseRequest(e){
 
 function resetRequest(){
     firstTime = true;
-    clearInterval(interval2);
+    interval2.pause();
 
     hostResults = {};
     var count =0;

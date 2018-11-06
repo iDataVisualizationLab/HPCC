@@ -99,11 +99,7 @@
 
 
 <div id="controlHolder"  class="controlHolder">
-    <button onclick="pauseRequest(this)" value = false class ="pause"><i class="fas fa-pause pauseicon"></i></button>
-    <button onclick="fastForwardRequest()" style="background-color: #ffd;"><i class="fas fa-forward "></i></button>
-    <button onclick="resetRequest()" style="background-color: #ddf;">Reset</button>
-    <button onclick="saveResults()" style="background-color: #fff;">Save</button>
-    <br><br>
+
     <label for="inds"> Chart type: </label>
     <select id="inds">
         <option value="Heatmap" selected="selected">Heatmap</option>
@@ -116,6 +112,11 @@
         <option value="Radar" selected="selected">Radar</option>
         <option value="Scatterplot" >Scatterplot</option>
     </select>
+    <br><br>
+    <button onclick="pauseRequest(this)" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
+    <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
+    <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
+    <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i></button>
     <!--<br><br>-->
     <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
     <!--<select id="irecord">-->

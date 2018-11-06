@@ -17,8 +17,8 @@
       <file leaf-file-name="tooltip.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="50" column="93" lean-forward="false" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="93" />
+            <state relative-caret-position="153">
+              <caret line="451" column="23" lean-forward="false" selection-start-line="451" selection-start-column="20" selection-end-line="451" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -27,8 +27,8 @@
       <file leaf-file-name="main.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="259" column="13" lean-forward="false" selection-start-line="259" selection-start-column="13" selection-end-line="259" selection-end-column="13" />
+            <state relative-caret-position="272">
+              <caret line="291" column="29" lean-forward="false" selection-start-line="291" selection-start-column="29" selection-end-line="291" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -60,9 +60,11 @@
       <file leaf-file-name="demo.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="145">
-              <caret line="101" column="54" lean-forward="false" selection-start-line="101" selection-start-column="54" selection-end-line="101" selection-end-column="54" />
-              <folding />
+            <state relative-caret-position="248">
+              <caret line="117" column="33" lean-forward="false" selection-start-line="117" selection-start-column="21" selection-end-line="117" selection-end-column="33" />
+              <folding>
+                <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -80,11 +82,11 @@
       <file leaf-file-name="main2.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="1214" column="24" lean-forward="false" selection-start-line="1214" selection-start-column="24" selection-end-line="1214" selection-end-column="24" />
+            <state relative-caret-position="153">
+              <caret line="496" column="13" lean-forward="false" selection-start-line="496" selection-start-column="13" selection-end-line="496" selection-end-column="13" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-                <element signature="e#43594#48458#0" expanded="false" />
+                <element signature="e#43820#48684#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -93,8 +95,8 @@
       <file leaf-file-name="radarSum.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-979">
-              <caret line="5" column="24" lean-forward="false" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
+            <state relative-caret-position="68">
+              <caret line="4" column="7" lean-forward="false" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="7" />
               <folding>
                 <element signature="e#4501#7601#0" expanded="false" />
               </folding>
@@ -113,11 +115,7 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>clearInter</find>
-      <find>request</find>
-      <find>request()</find>
       <find>inter</find>
-      <find>transi</find>
       <find>racks</find>
       <find>racksnewor</find>
       <find>503</find>
@@ -140,9 +138,13 @@
       <find>interval</find>
       <find>interval2</find>
       <find>numberof</find>
-      <find>summaryRect</find>
       <find>playbtn</find>
+      <find>addclass</find>
+      <find>summaryRect</find>
       <find>pause</find>
+      <find>resetRequest</find>
+      <find>resetRequest()</find>
+      <find>transi</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -297,12 +299,12 @@
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
       <workItem from="1540947326819" duration="88235000" />
-      <workItem from="1541217699555" duration="90553000" />
+      <workItem from="1541217699555" duration="93225000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="201093000" />
+    <option name="totallyTimeSpent" value="203765000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="991" y="136" width="1552" height="815" extended-state="0" />
@@ -429,12 +431,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>1198</line>
+          <line>1199</line>
           <option name="timeStamp" value="103" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>632</line>
+          <line>633</line>
           <option name="timeStamp" value="104" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -463,7 +465,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>541</line>
+          <line>542</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="132" />
         </line-breakpoint>
@@ -475,7 +477,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>666</line>
+          <line>667</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="145" />
         </line-breakpoint>
@@ -487,24 +489,24 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>526</line>
+          <line>527</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="160" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>1213</line>
+          <line>1215</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="165" />
+          <option name="timeStamp" value="169" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>1208</line>
+          <line>1213</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="166" />
+          <option name="timeStamp" value="170" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="167" />
+      <option name="time" value="171" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -548,7 +550,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2023">
           <caret line="119" column="34" lean-forward="false" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="34" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -592,7 +596,7 @@
           <caret line="717" column="28" lean-forward="false" selection-start-line="717" selection-start-column="19" selection-end-line="717" selection-end-column="28" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#43594#48458#0" expanded="false" />
+            <element signature="e#43820#48684#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -636,7 +640,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="9" column="198" lean-forward="false" selection-start-line="9" selection-start-column="198" selection-end-line="9" selection-end-column="198" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -707,16 +713,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-979">
-          <caret line="5" column="24" lean-forward="false" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
-          <folding>
-            <element signature="e#4501#7601#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
@@ -752,27 +748,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/myscripts/playbuttonmorph.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="901">
+          <caret line="53" column="18" lean-forward="false" selection-start-line="53" selection-start-column="18" selection-end-line="53" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="50" column="93" lean-forward="false" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="93" />
+        <state relative-caret-position="153">
+          <caret line="451" column="23" lean-forward="false" selection-start-line="451" selection-start-column="20" selection-end-line="451" selection-end-column="23" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/css/main.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="259" column="13" lean-forward="false" selection-start-line="259" selection-start-column="13" selection-end-line="259" selection-end-column="13" />
+        <state relative-caret-position="272">
+          <caret line="291" column="29" lean-forward="false" selection-start-line="291" selection-start-column="29" selection-end-line="291" selection-end-column="29" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/playbuttonmorph.js">
+    <entry file="file://$PROJECT_DIR$/demo.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="901">
-          <caret line="53" column="18" lean-forward="false" selection-start-line="53" selection-start-column="18" selection-end-line="53" selection-end-column="18" />
-          <folding />
+        <state relative-caret-position="248">
+          <caret line="117" column="33" lean-forward="false" selection-start-line="117" selection-start-column="21" selection-end-line="117" selection-end-column="33" />
+          <folding>
+            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -784,21 +790,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo.html">
+    <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="101" column="54" lean-forward="false" selection-start-line="101" selection-start-column="54" selection-end-line="101" selection-end-column="54" />
-          <folding />
+        <state relative-caret-position="68">
+          <caret line="4" column="7" lean-forward="false" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="7" />
+          <folding>
+            <element signature="e#4501#7601#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="1214" column="24" lean-forward="false" selection-start-line="1214" selection-start-column="24" selection-end-line="1214" selection-end-column="24" />
+        <state relative-caret-position="153">
+          <caret line="496" column="13" lean-forward="false" selection-start-line="496" selection-start-column="13" selection-end-line="496" selection-end-column="13" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#43594#48458#0" expanded="false" />
+            <element signature="e#43820#48684#0" expanded="false" />
           </folding>
         </state>
       </provider>
