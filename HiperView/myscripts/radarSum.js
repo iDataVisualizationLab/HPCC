@@ -2,8 +2,16 @@
 
 
 var radarsize  = 230;
-var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15);
-
+var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15).data([]);
+var radarChartsumopt  = {
+    w: radarsize -5,
+    h: radarsize +20,
+    radiuschange: false,
+    dotRadius:2,
+    maxValue: 0.5,
+    roundStrokes: true,
+    showText: false,
+    bin :   true};
 d3.radar = function () {
     let startBinGridSize=30,
         isNormalized =false,
@@ -18,13 +26,14 @@ d3.radar = function () {
 
 
     radarTimeline.draw = function(index){
-        if (index >= maxstack) index = maxstack;
-        let radarchart = svg.append("g")
-            .attr("class","radar"+index+" box"+index+" graphsum")
-            .datum(index)
-            .attr("transform", function (d) {
-                return "translate(" + xscale(index) + "," + 10 + ")";
-            });
+        let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
+        if (radarchart.empty())
+            radarchart = svg.append("g")
+                .attr("class","radar"+index+" box"+index+" graphsum")
+                .datum(index)
+                .attr("transform", function (d) {
+                    return "translate(" + xscale(index) + "," + 10 + ")";
+                });
 
 
         handledata(index);
@@ -46,43 +55,59 @@ d3.radar = function () {
                 name:d.map(f=>f.data),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
-        let radarChartsumopt  = {
-            w: radarsize -5,
-            h: radarsize +20,
-            radiuschange: false,
-            dotRadius:2,
-            maxValue: 0.5,
-            levels: levelsR,
-            roundStrokes: true,
-            color: color2,
-            showText: false,
-            bin :   true,
-            legend: [{},
-                {},
-                {},
-                {5: thresholds[1][1]},
-                {5: thresholds[2][1]},
-                {5: thresholds[3][1]},
-                {5: thresholds[3][1]},
-                {5: thresholds[3][1]},
-                {5: thresholds[3][1]},
-                {5: thresholds[4][1]}]
-        };
+        radarChartsumopt.levels = levelsR;
+        radarChartsumopt.color = color2;
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
-
-        if (index >= maxstack) radarTimeline.shift();
+        bin.data([]);
+        console.log(index);
+        console.log("maxstack-1: "+(maxstack-1));
+        if (index >= maxstack-1) radarTimeline.shift();
 
     };
 
+    radarTimeline.drawpoint = function(index){
+        if (index >= (maxstack-1)) index = maxstack-1;
+        let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
+        if (radarchart.empty())
+            radarchart = svg.append("g")
+                .attr("class","radar"+index+" box"+index+" graphsum")
+                .datum(index)
+                .attr("transform", function (d) {
+                    return "translate(" + xscale(index) + "," + 10 + ")";
+                });
+
+        handledata(index);
+        bin.updateRadius(false).calculatePoint(dataSpider3.map(d=>{
+            var dd = d.map(k=>k.value);
+            dd.data = d.name;
+            return dd;}));
+        var keys = dataSpider3[0].map(d=>d.axis);
+        dataSpider3.length = 0;
+        //console.log(bin.bins.length);
+        var distance = function(a, b){
+            let dsum = 0;
+            a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+            return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
+        dataSpider3 = bin.bins.map(d=>
+        {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
+            temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
+                name:d.map(f=>f.data),
+                distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
+            return temp;});
+        radarChartsumopt.levels = levelsR;
+        radarChartsumopt.color = color2;
+        RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
+        //if (index >= maxstack) radarTimeline.shift();
+
+    };
     radarTimeline.shift = function (){
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {
+                d3.select(this).datum(d=>d-1).attr("class",d=>("radar"+d+" box"+d+" graphsum"));
                 return "translate(" + xscale(d-1) + "," + 10 + ")";
             }).on("end", function(d) {
-                if (d==0)
+                if (d===-1)
                     d3.select(this).remove();
-                else
-                    d3.select(this).datum(d=>d-1).attr("class",d=>("radar"+d+" box"+d+" graphsum"));
             });
     };
 

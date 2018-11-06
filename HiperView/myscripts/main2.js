@@ -625,8 +625,9 @@ function request(){
             }
             iteration = tmp;
         }
-
+        drawsummarypoint(count);
         count++;
+
 
         xTimeSummaryScale = d3.scaleLinear()
             .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
@@ -637,7 +638,6 @@ function request(){
         Date.prototype.timeNow2 = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         };
-
         if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
             // Draw date
             svg.selectAll(".currentDate").remove();
@@ -654,6 +654,7 @@ function request(){
                 .text(""+new Date(currentMiliseconds).toDateString());
 
             // cal to plot
+            bin.data([]);
             drawsummary();
 
             count=0;
@@ -786,7 +787,46 @@ function drawsummary(initIndex){
 
     };
 }
+function drawsummarypoint(h){
+    var arr = [];
+    var xx;
+    var lastIndex;
 
+    //currentlastIndex = hostResults[hosts[count].name].arr.length -1;
+    lastIndex = hostResults[hosts[h].name].arr.length -1;
+    query_time = hostResults[hosts[h].name].arr[lastIndex].result.query_time;
+    //xx = xTimeSummaryScale(query_time);
+    //updateTimeText();
+
+    switch (sumType) {
+        case "Boxplot":
+
+            break;
+        case "Scatterplot":
+
+            break;
+        case "Radar":
+            var name = hosts[h].name;
+            var r = hostResults[name];
+            // lastIndex = initIndex||(r.arr.length - 1);
+            // boxplot
+            if (lastIndex >= 0) {   // has some data
+                var arrServices = [];
+                serviceList.forEach((ser,indx) => {
+                    var obj = {};
+                    var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                    obj.a = a;
+                    arrServices.push(obj);})
+            }
+            arrServices.name = name;
+            arr.push(arrServices);
+            Radarplot.data(arr).drawpoint(lastIndex);
+            // Radar Time
+            //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+            break;
+
+    }
+}
 function updateTimeText(){
     var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time);
     var boxtime = svg.selectAll(".boxTime")
@@ -1270,7 +1310,6 @@ d3.select('#indsg').on("change", function () {
         case "Radar":
             d3.select("#scatterzone").style("visibility","hidden");
             for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+1):0; i<(currentlastIndex+1);i++) {
-                console.log(i);
                 drawsummary(i);
             }
             break;
