@@ -81,12 +81,12 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =0;
-var numberOfMinutes = 4*60;
+var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack =3;
-var maxstackminute = 30;
-var timesteppixel = 0.1;
+var maxstack =7;
+// var timesteppixel = 0.1; // for 4
+var timesteppixel = 0.1; // for 26
 
 var isRealtime = false;
 if (isRealtime){
@@ -98,7 +98,7 @@ var currentMiliseconds;
 var query_time;
 var currentHostname,currentMeasure;
 var currentHostX = 0;
-var currentHosty = 0;
+// var currentHosty = 0;
 
 var charType = "Heatmap";
 var sumType = "Radar";
@@ -487,147 +487,30 @@ function main() {
     console.log(width-10-radarsize);
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(d3.scaleLinear()
         .domain([-0.5, maxstack-1+0.5])
-        .range([0-radarsize,width-10-radarsize]).nice())
+        .range([0-radarsize+20,width-10-radarsize/2]).nice())
         .maxstack(maxstack);
     request();
 }
 var currentlastIndex;
+var speedup= false;
 function request(){
     var count = 0;
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
-    console.log(currentMiliseconds);
+
     interval2 = setInterval(function(){
-        if (isRealtime){
-            var xmlhttp = new XMLHttpRequest();
-            var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name =  result.data.service.host_name;
-                    hostResults[name].arrTemperature.push(result);
-                    if (selectedService == serviceList[0]){
-                        hostResults[name].arr=hostResults[name].arrTemperature;
-                        plotResult(result);
-                    }
-                }
-                else{
-                    console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                }
-
-            };
-            xmlhttp.open("GET", url, true);
-            xmlhttp.send();
-
-            var xmlhttp2 = new XMLHttpRequest();
-            var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
-            xmlhttp2.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name =  result.data.service.host_name;
-                    hostResults[name].arrCPU_load.push(result);
-                    if (selectedService == serviceList[1]){
-                        hostResults[name].arr=hostResults[name].arrCPU_load;
-                        plotResult(result);
-                    }
-                }
-                else{
-                    console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                }
-            };
-            xmlhttp2.open("GET", url2, true);
-            xmlhttp2.send();
-
-
-            var xmlhttp3 = new XMLHttpRequest();
-            var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
-            xmlhttp3.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name =  result.data.service.host_name;
-                    hostResults[name].arrMemory_usage.push(result);
-                    if (selectedService == serviceList[2]){
-                        hostResults[name].arr=hostResults[name].arrMemory_usage;
-                        plotResult(result);
-                    }
-                }
-                else{
-                    console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                }
-            };
-            xmlhttp3.open("GET", url3, true);
-            xmlhttp3.send();
-
-            var xmlhttp4 = new XMLHttpRequest();
-            var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
-            xmlhttp4.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name =  result.data.service.host_name;
-                    hostResults[name].arrFans_health.push(result);
-                    if (selectedService == serviceList[3]){
-                        hostResults[name].arr=hostResults[name].arrFans_health;
-                        plotResult(result);
-                    }
-                }
-                else{
-                    console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                }
-            };
-            xmlhttp4.open("GET", url4, true);
-            xmlhttp4.send();
-
-            var xmlhttp5 = new XMLHttpRequest();
-            var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+power+usage";
-            xmlhttp5.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name =  result.data.service.host_name;
-                    hostResults[name].arrPower_usage.push(result);
-                    if (selectedService == serviceList[4]){
-                        hostResults[name].arr=hostResults[name].arrPower_usage;
-                        plotResult(result);
-                    }
-                }
-                else{
-                    console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-                }
-            };
-            xmlhttp5.open("GET", url5, true);
-            xmlhttp5.send();
-            var result = {};
-        }
-        else{
-            // var result = simulateResults(hosts[count].name);
-            var tmp =iteration;
-            for (i=0;i<iterationstep;i++){
-                var result = simulateResults2(hosts[count].name,iteration, selectedService);
-                // Process the result
-                var name =  result.data.service.host_name;
-                hostResults[name].arr.push(result);
-                plotResult(result);
-                //console.log(hosts[count].name+" "+hostResults[name]);
-                var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-                hostResults[name].arrTemperature.push(result);
-
-                var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-                hostResults[name].arrCPU_load.push(result);
-
-                var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-                hostResults[name].arrMemory_usage.push(result);
-
-                var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-                hostResults[name].arrFans_health.push(result);
-
-                var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-                hostResults[name].arrPower_usage.push(result);
-                iteration++;
-            }
-            iteration = tmp;
-        }
-        drawsummarypoint(count);
-        count++;
+        var oldrack = hosts[count].hpcc_rack;
+        var countarr = [];
+        do{
+            var ri = step(iteration, count);
+            iteration = ri[0];
+            count =ri[1];
+            countarr.push(count);
+            count++;
+        }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && speedup);
+        speedup = false;
+        drawsummarypoint(countarr);
 
 
         xTimeSummaryScale = d3.scaleLinear()
@@ -639,7 +522,7 @@ function request(){
         Date.prototype.timeNow2 = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         };
-        if (count>=hosts.length){// Draw the summary Box plot ***********************************************************
+        if (count >= (hosts.length)){// Draw the summary Box plot ***********************************************************
             // Draw date
             svg.selectAll(".currentDate").remove();
             svg.append("text")
@@ -788,14 +671,14 @@ function drawsummary(initIndex){
 
     };
 }
-function drawsummarypoint(h){
+function drawsummarypoint(harr){
     var arr = [];
     var xx;
     var lastIndex;
 
     //currentlastIndex = hostResults[hosts[count].name].arr.length -1;
-    lastIndex = hostResults[hosts[h].name].arr.length -1;
-    query_time = hostResults[hosts[h].name].arr[lastIndex].result.query_time;
+    lastIndex = hostResults[hosts[harr[0]].name].arr.length -1;
+    query_time = hostResults[hosts[harr[0]].name].arr[lastIndex].result.query_time;
     //xx = xTimeSummaryScale(query_time);
     //updateTimeText();
 
@@ -807,20 +690,24 @@ function drawsummarypoint(h){
 
             break;
         case "Radar":
-            var name = hosts[h].name;
-            var r = hostResults[name];
-            // lastIndex = initIndex||(r.arr.length - 1);
-            // boxplot
-            if (lastIndex >= 0) {   // has some data
-                var arrServices = [];
-                serviceList.forEach((ser,indx) => {
-                    var obj = {};
-                    var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
-                    obj.a = a;
-                    arrServices.push(obj);})
+            for (var i in harr) {
+                var h  = harr[i];
+                var name = hosts[h].name;
+                var r = hostResults[name];
+                // lastIndex = initIndex||(r.arr.length - 1);
+                // boxplot
+                if (lastIndex >= 0) {   // has some data
+                    var arrServices = [];
+                    serviceList.forEach((ser, indx) => {
+                        var obj = {};
+                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        obj.a = a;
+                        arrServices.push(obj);
+                    })
+                }
+                arrServices.name = name;
+                arr.push(arrServices);
             }
-            arrServices.name = name;
-            arr.push(arrServices);
             Radarplot.data(arr).drawpoint(lastIndex);
             // Radar Time
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
@@ -970,7 +857,7 @@ function decimalColorToHTMLcolor(number) {
 }
 
 function simulateResults2(hostname,iter, s){
-    var newService
+    var newService;
     if (s == serviceList[0])
         newService = sampleS[hostname].arrTemperature[iter];
     else if (s == serviceList[1])
@@ -1018,7 +905,7 @@ function plotResult(result) {
     var hpcc_node = +name.split("-")[2].split(".")[0];
     var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x+15;
     // var xStart = racks[hpcc_rack - 1].x+15;
-    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size, timesteppixel*numberOfMinutes)]); // output
+    xTimeScale.range([xStart, xStart+w_rack/2-2*node_size]); // output
         // .range([xStart, xStart+w_rack/2-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
@@ -1032,7 +919,7 @@ function plotResult(result) {
 
             //var deltaMiliseconds = r.arr[startinde].result.query_time - currentMiliseconds;
             var deltapos =xTimeScale(r.arr[startinde].result.query_time)-xTimeScale(currentMiliseconds);
-            xTimeScale.range([xStart-deltapos, xStart+Math.min(w_rack/2-2*node_size, timesteppixel*numberOfMinutes)-deltapos]); // output
+            xTimeScale.range([xStart-deltapos, xStart+w_rack/2-2*node_size-deltapos]); // output
             // xTimeScale.domain([r.arr[startinde].result.query_time, currentMiliseconds + numberOfMinutes * maxHostinRack * 1000 - deltaMiliseconds]);
 
     }
@@ -1342,17 +1229,7 @@ function resetRequest(){
 
         svg.selectAll("."+att).remove();
     }
-
-    // Remove boxplot in Summary panel
     svg.selectAll(".graphsum").remove();
-    // svg.selectAll(".box").remove();
-    // svg.selectAll(".boxx").remove();
-    // svg.selectAll("line.median").remove();
-    // svg.selectAll("line.center").remove();
-    // svg.selectAll("circle.outlier").remove();
-    // svg.selectAll("text.box").remove();
-    // svg.selectAll("line.whisker").remove();
-    // svg.selectAll("text.whisker").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     updateTimeText();
     request();
@@ -1382,4 +1259,141 @@ function loadNewData(event) {
     drawLegend(selectedService,arrThresholds, arrColor,dif);
     resetRequest();
     tool_tip.hide();
+}
+
+// speed up process
+function fastForwardRequest() {
+    speedup = true;
+}
+
+
+function step (iteration, count){
+    if (isRealtime){
+        var xmlhttp = new XMLHttpRequest();
+        var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var result = processResult(JSON.parse(this.responseText));
+                var name =  result.data.service.host_name;
+                hostResults[name].arrTemperature.push(result);
+                if (selectedService == serviceList[0]){
+                    hostResults[name].arr=hostResults[name].arrTemperature;
+                    plotResult(result);
+                }
+            }
+            else{
+                console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            }
+
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+
+        var xmlhttp2 = new XMLHttpRequest();
+        var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
+        xmlhttp2.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var result = processResult(JSON.parse(this.responseText));
+                var name =  result.data.service.host_name;
+                hostResults[name].arrCPU_load.push(result);
+                if (selectedService == serviceList[1]){
+                    hostResults[name].arr=hostResults[name].arrCPU_load;
+                    plotResult(result);
+                }
+            }
+            else{
+                console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            }
+        };
+        xmlhttp2.open("GET", url2, true);
+        xmlhttp2.send();
+
+
+        var xmlhttp3 = new XMLHttpRequest();
+        var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
+        xmlhttp3.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var result = processResult(JSON.parse(this.responseText));
+                var name =  result.data.service.host_name;
+                hostResults[name].arrMemory_usage.push(result);
+                if (selectedService == serviceList[2]){
+                    hostResults[name].arr=hostResults[name].arrMemory_usage;
+                    plotResult(result);
+                }
+            }
+            else{
+                console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            }
+        };
+        xmlhttp3.open("GET", url3, true);
+        xmlhttp3.send();
+
+        var xmlhttp4 = new XMLHttpRequest();
+        var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
+        xmlhttp4.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var result = processResult(JSON.parse(this.responseText));
+                var name =  result.data.service.host_name;
+                hostResults[name].arrFans_health.push(result);
+                if (selectedService == serviceList[3]){
+                    hostResults[name].arr=hostResults[name].arrFans_health;
+                    plotResult(result);
+                }
+            }
+            else{
+                console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            }
+        };
+        xmlhttp4.open("GET", url4, true);
+        xmlhttp4.send();
+
+        var xmlhttp5 = new XMLHttpRequest();
+        var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+power+usage";
+        xmlhttp5.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var result = processResult(JSON.parse(this.responseText));
+                var name =  result.data.service.host_name;
+                hostResults[name].arrPower_usage.push(result);
+                if (selectedService == serviceList[4]){
+                    hostResults[name].arr=hostResults[name].arrPower_usage;
+                    plotResult(result);
+                }
+            }
+            else{
+                console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            }
+        };
+        xmlhttp5.open("GET", url5, true);
+        xmlhttp5.send();
+        var result = {};
+    }
+    else{
+        // var result = simulateResults(hosts[count].name);
+        var tmp =iteration;
+        for (i=0;i<iterationstep;i++){
+            var result = simulateResults2(hosts[count].name,iteration, selectedService);
+            // Process the result
+            var name =  result.data.service.host_name;
+            hostResults[name].arr.push(result);
+            plotResult(result);
+            //console.log(hosts[count].name+" "+hostResults[name]);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+            hostResults[name].arrTemperature.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
+            hostResults[name].arrCPU_load.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
+            hostResults[name].arrMemory_usage.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
+            hostResults[name].arrFans_health.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
+            hostResults[name].arrPower_usage.push(result);
+            iteration++;
+        }
+        iteration = tmp;
+    }
+    return [iteration, count];
 }

@@ -78,7 +78,6 @@ function mouseoverNode(d1){
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
     d3.select("body").on("keydown", function() {
-            console.log(d3.event.keyCode);
             if (d3.event.keyCode ===27) {
                 tool_tip.hide();
             }
