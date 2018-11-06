@@ -499,7 +499,7 @@ function request(){
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
 
-    interval2 = setInterval(function(){
+    interval2 = new IntervalTimer(function () {
         var oldrack = hosts[count].hpcc_rack;
         var countarr = [];
         do{
@@ -1204,9 +1204,19 @@ d3.select('#indsg').on("change", function () {
     }
 });
 
-function pauseRequest(){
-    clearInterval(interval2);
+function pauseRequest(e){
+    // clearInterval(interval2);
+    if (e.value=="false"){
+        interval2.pause();
+        e.value = "true";
+        console.log(e);
+    }else {
+        interval2.resume();
+        e.value = "false";
+        console.log(e);
+    }
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
+
 }
 
 function resetRequest(){
