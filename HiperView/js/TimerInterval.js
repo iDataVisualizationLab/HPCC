@@ -28,6 +28,11 @@ function IntervalTimer(callback, interval) {
         state = 1;
     };
 
+    this.stop = function () {
+        state = 0;
+        window.clearInterval(timerId);
+    };
+
     startTime = new Date();
     timerId = window.setInterval(callback, interval);
     state = 1;

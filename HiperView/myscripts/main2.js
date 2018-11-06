@@ -1205,27 +1205,34 @@ d3.select('#indsg').on("change", function () {
     }
 });
 
-function pauseRequest(e){
+function pauseRequest(){
     // clearInterval(interval2);
+    var e = d3.select('.pause').node();
     if (e.value=="false"){
         interval2.pause();
         e.value = "true";
         $(e).addClass('active');
         $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
+        svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
     }else {
-        interval2.resume();
-        e.value = "false";
-        $(e).removeClass('active');
-        $(e.querySelector('i')).removeClass('fa-play pauseicon').addClass('fa-pause pauseicon');
+        pausechange();
     }
-    svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 
+}
+
+function pausechange(){
+    var e = d3.select('.pause').node();
+    interval2.resume();
+    e.value = "false";
+    $(e).removeClass('active');
+    $(e.querySelector('i')).removeClass('fa-play pauseicon').addClass('fa-pause pauseicon');
+    svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
 }
 
 function resetRequest(){
     firstTime = true;
-    interval2.pause();
-
+    pausechange();
+    interval2.stop();
     hostResults = {};
     var count =0;
     for (var att in hostList.data.hostlist) {

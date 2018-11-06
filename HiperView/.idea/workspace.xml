@@ -60,8 +60,8 @@
       <file leaf-file-name="demo.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="117" column="33" lean-forward="false" selection-start-line="117" selection-start-column="21" selection-end-line="117" selection-end-column="33" />
+            <state relative-caret-position="214">
+              <caret line="115" column="76" lean-forward="false" selection-start-line="115" selection-start-column="71" selection-end-line="115" selection-end-column="76" />
               <folding>
                 <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
               </folding>
@@ -72,8 +72,8 @@
       <file leaf-file-name="TimerInterval.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/TimerInterval.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="84" lean-forward="true" selection-start-line="0" selection-start-column="11" selection-end-line="0" selection-end-column="84" />
+            <state relative-caret-position="255">
+              <caret line="30" column="13" lean-forward="false" selection-start-line="30" selection-start-column="9" selection-end-line="30" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -83,10 +83,10 @@
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="153">
-              <caret line="496" column="13" lean-forward="false" selection-start-line="496" selection-start-column="13" selection-end-line="496" selection-end-column="13" />
+              <caret line="1234" column="18" lean-forward="false" selection-start-line="1234" selection-start-column="18" selection-end-line="1234" selection-end-column="18" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-                <element signature="e#43820#48684#0" expanded="false" />
+                <element signature="e#44020#48884#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -115,12 +115,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>inter</find>
-      <find>racks</find>
-      <find>racksnewor</find>
-      <find>503</find>
-      <find>scaleDensity</find>
-      <find>step</find>
       <find>step(</find>
       <find>iteration</find>
       <find>draws</find>
@@ -141,10 +135,16 @@
       <find>playbtn</find>
       <find>addclass</find>
       <find>summaryRect</find>
-      <find>pause</find>
       <find>resetRequest</find>
-      <find>resetRequest()</find>
       <find>transi</find>
+      <find>resetRequest()</find>
+      <find>pauseRequest()</find>
+      <find>pause</find>
+      <find>pauseRequest(</find>
+      <find>pausechange</find>
+      <find>resetr</find>
+      <find>pausec</find>
+      <find>scaleDensity</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -163,10 +163,10 @@
         <option value="$PROJECT_DIR$/myscripts/radarSum.js" />
         <option value="$PROJECT_DIR$/spider/radarChart.js" />
         <option value="$PROJECT_DIR$/myscripts/tooltip.js" />
-        <option value="$PROJECT_DIR$/js/TimerInterval.js" />
         <option value="$PROJECT_DIR$/myscripts/playbuttonmorph.js" />
         <option value="$PROJECT_DIR$/css/main.css" />
         <option value="$PROJECT_DIR$/demo.html" />
+        <option value="$PROJECT_DIR$/js/TimerInterval.js" />
         <option value="$PROJECT_DIR$/myscripts/main2.js" />
       </list>
     </option>
@@ -299,12 +299,12 @@
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
       <workItem from="1540947326819" duration="88235000" />
-      <workItem from="1541217699555" duration="93225000" />
+      <workItem from="1541217699555" duration="95458000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="203765000" />
+    <option name="totallyTimeSpent" value="205998000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="991" y="136" width="1552" height="815" extended-state="0" />
@@ -495,18 +495,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>1215</line>
+          <line>1232</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="169" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/myscripts/main2.js</url>
-          <line>1213</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="170" />
+          <option name="timeStamp" value="172" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="171" />
+      <option name="time" value="173" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -596,7 +590,7 @@
           <caret line="717" column="28" lean-forward="false" selection-start-line="717" selection-start-column="19" selection-end-line="717" selection-end-column="28" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#43820#48684#0" expanded="false" />
+            <element signature="e#44020#48884#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -713,17 +707,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="221" column="44" lean-forward="false" selection-start-line="221" selection-start-column="44" selection-end-line="221" selection-end-column="44" />
-          <folding>
-            <element signature="e#12896#13219#0" expanded="false" />
-            <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/util.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -772,24 +755,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="117" column="33" lean-forward="false" selection-start-line="117" selection-start-column="21" selection-end-line="117" selection-end-column="33" />
-          <folding>
-            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/TimerInterval.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="84" lean-forward="true" selection-start-line="0" selection-start-column="11" selection-end-line="0" selection-end-column="84" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -800,13 +765,42 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="214">
+          <caret line="115" column="76" lean-forward="false" selection-start-line="115" selection-start-column="71" selection-end-line="115" selection-end-column="76" />
+          <folding>
+            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/TimerInterval.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="30" column="13" lean-forward="false" selection-start-line="30" selection-start-column="9" selection-end-line="30" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="221" column="44" lean-forward="false" selection-start-line="221" selection-start-column="44" selection-end-line="221" selection-end-column="44" />
+          <folding>
+            <element signature="e#12896#13219#0" expanded="false" />
+            <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
-          <caret line="496" column="13" lean-forward="false" selection-start-line="496" selection-start-column="13" selection-end-line="496" selection-end-column="13" />
+          <caret line="1234" column="18" lean-forward="false" selection-start-line="1234" selection-start-column="18" selection-end-line="1234" selection-end-column="18" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
-            <element signature="e#43820#48684#0" expanded="false" />
+            <element signature="e#44020#48884#0" expanded="false" />
           </folding>
         </state>
       </provider>
