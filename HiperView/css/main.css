@@ -258,8 +258,9 @@ table, th, td {
 	text-align: center;
 }
 .pause.active {
-	background-color: #b5ff79;
+	background-color: #99f59a;
 	text-align: center;
+
 }
 .fa-pause{
 	background-color: #ffd;
@@ -284,8 +285,8 @@ table, th, td {
 	}
 }
 .menuBtn {
-	width: 30px;
 	height: 30px;
+
 }
 
 

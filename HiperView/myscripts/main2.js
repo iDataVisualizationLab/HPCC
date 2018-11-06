@@ -892,7 +892,7 @@ function plotResult(result) {
         currentMiliseconds = result.result.query_time;
         hostfirst = result.data.service.host_name;
         xTimeScale = d3.scaleLinear()
-            .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*maxHostinRack*1000]);
+            .domain([0, maxstack-1]);
     }
     firstTime = false;
     var name =  result.data.service.host_name;
@@ -906,7 +906,7 @@ function plotResult(result) {
     var hpcc_node = +name.split("-")[2].split(".")[0];
     var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x+15;
     // var xStart = racks[hpcc_rack - 1].x+15;
-    xTimeScale.range([xStart, xStart+w_rack/2-2*node_size]); // output
+    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size,node_size*maxstack)]); // output
         // .range([xStart, xStart+w_rack/2-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
@@ -919,8 +919,8 @@ function plotResult(result) {
         startinde = (r.arr.length-maxstack);
 
             //var deltaMiliseconds = r.arr[startinde].result.query_time - currentMiliseconds;
-            var deltapos =xTimeScale(r.arr[startinde].result.query_time)-xTimeScale(currentMiliseconds);
-            xTimeScale.range([xStart-deltapos, xStart+w_rack/2-2*node_size-deltapos]); // output
+            //var deltapos =xTimeScale(r.arr[startinde].result.query_time)-xTimeScale(currentMiliseconds);
+            //xTimeScale.range([xStart-deltapos, xStart+w_rack/2-2*node_size-deltapos]); // output
             // xTimeScale.domain([r.arr[startinde].result.query_time, currentMiliseconds + numberOfMinutes * maxHostinRack * 1000 - deltaMiliseconds]);
 
     }
@@ -932,7 +932,7 @@ function plotResult(result) {
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
-        obj.x = xTimeScale(obj.query_time);
+        obj.x = xTimeScale(i);
         arr.push(obj);
         currentHostX = obj.x ;
         currentMeasure = obj.temp1;
@@ -955,7 +955,7 @@ function plotResult(result) {
 
     if (charType == "Heatmap")
         // plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
-        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,d3.min(arr,d=>d.query_time),d3.max(arr,d=>d.query_time));
+        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y);
     else if (charType == "Area Chart")
         plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
 
@@ -966,9 +966,9 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     svg.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
-        var xMin = xTimeScale(minTime);
-        var xMax = xTimeScale(maxTime);
-        var x = xTimeScale(arr[i].query_time);
+        var xMin = xTimeScale(0);
+        var xMax = xTimeScale(maxstack-1);
+        var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svg.append("rect")
@@ -1072,7 +1072,7 @@ function drawSummaryAreaChart(rack, xStart) {
                 obj.temp2 = a[1];
                 obj.temp3 = a[2];
                 obj.query_time = r.arr[i].result.query_time;
-                obj.x = xTimeScale(obj.query_time);
+                obj.x = xTimeScale(i);
                 if (obj.x >maxX)
                     maxX = obj.x ;  // The latest x position, to draw the baseline 60 F
 
