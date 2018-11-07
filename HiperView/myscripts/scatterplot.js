@@ -38,7 +38,7 @@ d3.Scatterplot = function () {
         .text(function (d) {
             return d;})
         .attr("draggable",true)
-        .attr("ondragstart","drag(event)");
+        .attr("ondragstart","Scatterplot.drag(event)");
     let colorArray = ["#9dbee6", "#afcae6", "#c8dce6", "#e6e6e6", "#e6e6d8", "#e6d49c", "#e6b061", "#e6852f", "#e6531a", "#e61e1a"];
 
     let colorRedBlue = d3.scaleLinear()
@@ -87,13 +87,12 @@ d3.Scatterplot = function () {
             .on("mouseout", function (d) {
                 hideTooltip();
             });
-
     }
 
     Scatterplot.draw =function (index, xx){
         svg.select(".box" + index).remove();
         var g = svg.append("g")
-            .attr('class', 'scatterPlot' + " graphsum" + " box" + index)
+            .attr("class",("scatter"+(index)+" box"+(index)+" graphsum"))
             .attr("transform", "translate(" + xx + ",50)");
 
 
@@ -131,8 +130,9 @@ d3.Scatterplot = function () {
                 })))
             });
         ScatterPlotG(g, dataPoints);
+        if (index >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40);
 
-    }
+    };
 
     function Outlier(data) {
         return outliagnostics(data).outlyingScore;
@@ -228,15 +228,15 @@ d3.Scatterplot = function () {
 
     }
 
-    function allowDrop(ev) {
+    Scatterplot.allowDrop = function (ev) {
         ev.preventDefault();
-    }
+    };
 
-    function drag(ev) {
+    Scatterplot.drag = function(ev) {
         ev.dataTransfer.setData("src", ev.target.id);
-    }
+    };
 
-    function drop(ev) {
+    Scatterplot.drop = function (ev) {
         var src = document.getElementById(ev.dataTransfer.getData("src")).cloneNode(true);
         while (ev.currentTarget.hasChildNodes()) {
             ev.currentTarget.removeChild(ev.currentTarget.firstChild);
@@ -244,27 +244,27 @@ d3.Scatterplot = function () {
         ev.currentTarget.appendChild(src);
         if (ev.currentTarget.id == "data_onYaxis") {
             scatterplot_settings.data_onYaxis = src.textContent;
-            UpdateYAxis();
+            Scatterplot.UpdateYAxis();
 
         }
         ;
         if (ev.currentTarget.id == "data_onXaxis") {
             scatterplot_settings.data_onXaxis = src.textContent;
-            UpdateXAxis();
+            Scatterplot.UpdateXAxis();
         }
         ;
-    }
+    };
 
-    function UpdateXAxis() {
+    Scatterplot.UpdateXAxis = function(){
         xScale = d3.scaleLinear()
             .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].maxScale])
             .range([0, swidth]);
-        d3.selectAll('.scatterPlot').selectAll('circle').attr("cx", function (d) {
+        d3.selectAll('.graphsum').selectAll('circle').attr("cx", function (d) {
             console.log(d[scatterplot_settings.data_onXaxis]);
             return xScale(d[scatterplot_settings.data_onXaxis]);
         });
 
-        d3.selectAll(".scatterPlot").nodes().forEach(function (d, i) {
+        d3.selectAll(".graphsum").nodes().forEach(function (d, i) {
 
             var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
                 return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
@@ -277,14 +277,14 @@ d3.Scatterplot = function () {
 
     }
 
-    function UpdateYAxis() {
+    Scatterplot.UpdateYAxis = function() {
         yScale = d3.scaleLinear()
             .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].maxScale])
             .range([sheight, 0]);
-        d3.selectAll('.scatterPlot').selectAll('circle').attr("cy", function (d) {
+        d3.selectAll('.graphsum').selectAll('circle').attr("cy", function (d) {
             return yScale(d[scatterplot_settings.data_onYaxis]);
         });
-        d3.selectAll(".scatterPlot").nodes().forEach(function (d, i) {
+        d3.selectAll(".graphsum").nodes().forEach(function (d, i) {
 
             var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
                 return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
