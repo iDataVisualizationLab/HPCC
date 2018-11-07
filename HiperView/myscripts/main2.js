@@ -85,6 +85,7 @@ var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
 var maxstack =7;
+var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
 
@@ -96,6 +97,7 @@ if (isRealtime){
 
 var currentMiliseconds;
 var query_time;
+var lastIndex;
 var currentHostname,currentMeasure;
 var currentHostX = 0;
 // var currentHosty = 0;
@@ -283,18 +285,19 @@ function main() {
         .attr("font-family", "sans-serif")
         .text("Quanah HPC system: " + hosts.length+" hosts distributed in 10 racks" );
 
-    svg.append("line")
-        .attr("class", "currentTimeline")
-        .attr("x1", 10)
-        .attr("y1", 40)
-        .attr("x2", 10)
-        .attr("y2", sHeight+15)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));
+
     var currentTextGroup = svg.append('g')
         .attr("class", "currentTextGroup")
         .attr('transform', 'translate(' + 10 + ',' + (sHeight-36) + ')');
+    svgsum.append("line")
+        .attr("class", "currentTimeline")
+        .attr("x1", 10)
+        .attr("y1", 20)
+        .attr("x2", 10)
+        .attr("y2", sHeight)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .style("stroke-dasharray", ("2, 2"));
     currentTextGroup.append("text")
         .attr("class", "currentText")
         .attr("y", 0)
@@ -461,7 +464,7 @@ function main() {
 
         svg.append("text")
             .attr("class", "measure_"+hosts[i].name)
-            .attr("x", xStart+w_rack-20)
+            .attr("x", xStart+w_rack/2-20)
             .attr("y", yy-4)
             .attr("fill", "#000")
             .attr("fill-opacity", hosts[i].mOpacity)
@@ -484,10 +487,9 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
-    console.log(width-10-radarsize);
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(d3.scaleLinear()
-        .domain([-0.5, maxstack-1+0.5])
-        .range([0-radarsize+20,width-10-radarsize/2]).nice())
+    xTimeSummaryScale =d3.scaleLinear()
+        .domain([0, maxstack-1]);
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xTimeSummaryScale.range([0+10,width-radarsize*1.5]))
         .maxstack(maxstack);
     request();
 }
@@ -499,6 +501,7 @@ function request(){
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
+    lastIndex = 0;
 
     interval2 = new IntervalTimer(function () {
         var oldrack = hosts[count].hpcc_rack;
@@ -514,9 +517,13 @@ function request(){
         drawsummarypoint(countarr);
 
 
-        xTimeSummaryScale = d3.scaleLinear()
-            .domain([currentMiliseconds, currentMiliseconds+numberOfMinutes*60*1000]) // input
-            .range([0, width]); // output
+        xTimeSummaryScale = d3.scalePoint()
+            .domain(Array.apply(null, {length: maxstack}).map(Function.call, Number)) // input
+            .range([10,width-radarsize*1.5])
+            .padding(0); // output
+        xTimeSummaryScaleStep = d3.scaleSqrt()
+            .domain([0, hosts.length-1]) // input
+            .range([0, xTimeSummaryScale.step()]);
         Date.prototype.timeNow = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
         };
@@ -546,7 +553,8 @@ function request(){
             iteration+=iterationstep;
         }
         // Update the current timeline in Summary panel
-        var x2 = xTimeSummaryScale(query_time);
+        console.log(lastIndex);
+        var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))+xTimeSummaryScaleStep(count);
         svg.selectAll(".currentTimeline")
             .attr("x1", x2)
             .attr("x2", x2);
@@ -569,7 +577,7 @@ function request(){
                 hosts[i].mOpacity = 1;
                 hosts[i].xOpacity = currentHostX+38;
 
-                if (hosts[i].xOpacity>racks[hosts[i].hpcc_rack - 1].x+w_rack-20)
+                if (hosts[i].xOpacity>(racksnewor[(hosts[i].hpcc_rack - 1)*2 + (hosts[i].hpcc_node%2?0:1)].x-2)+width/2)
                     hosts[i].mOpacity =0;
 
                 var mea = currentMeasure;
@@ -612,18 +620,17 @@ function request(){
 function drawsummary(initIndex){
     var arr = [];
     var xx;
-    var lastIndex;
 
     if (initIndex==undefined){
         currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        xx = xTimeSummaryScale(query_time);
+        xx = xTimeSummaryScale(lastIndex);
         updateTimeText();
     }else{
         lastIndex = initIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        xx = xTimeSummaryScale(query_time);
+        xx = xTimeSummaryScale(lastIndex);
     }
     switch (sumType) {
         case "Boxplot":
@@ -675,7 +682,6 @@ function drawsummary(initIndex){
 function drawsummarypoint(harr){
     var arr = [];
     var xx;
-    var lastIndex;
 
     //currentlastIndex = hostResults[hosts[count].name].arr.length -1;
     lastIndex = hostResults[hosts[harr[0]].name].arr.length -1;
@@ -717,14 +723,17 @@ function drawsummarypoint(harr){
     }
 }
 function updateTimeText(){
-    var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time);
+    var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time).filter((d,i)=> i>(lastIndex-maxstack+1));
+    console.log(dataTime);
     var boxtime = svg.selectAll(".boxTime")
-        .data(dataTime)
-        .attr("x", d=>xTimeSummaryScale(d)-2);
+        .data(dataTime);
+    boxtime.transition().duration(500)
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack)
+        .text(d=> new Date(d).timeNow())
     boxtime.exit().remove();
     boxtime.enter().append("text")
         .attr("class", "boxTime")
-        .attr("x", d=>xTimeSummaryScale(d)-2)
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack)
         .attr("y", sHeight)
         .attr("fill", "#000")
         .style("font-style","italic")
@@ -932,7 +941,7 @@ function plotResult(result) {
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
-        obj.x = xTimeScale(i);
+        obj.x = xTimeScale(i-startinde);
         arr.push(obj);
         currentHostX = obj.x ;
         currentMeasure = obj.temp1;
@@ -1191,7 +1200,6 @@ d3.select('#indsg').on("change", function () {
         case "Scatterplot":
             d3.select("#scatterzone").style("visibility","visible");
             for (var i =0; i<(currentlastIndex+1);i++) {
-                console.log(i);
                 drawsummary(i);
             }
             break;

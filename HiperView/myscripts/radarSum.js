@@ -59,8 +59,6 @@ d3.radar = function () {
         radarChartsumopt.color = color2;
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
         bin.data([]);
-        console.log(index);
-        console.log("maxstack-1: "+(maxstack-1));
         if (index >= maxstack-1) radarTimeline.shift();
 
     };
