@@ -1217,15 +1217,20 @@ function pauseRequest(){
     // clearInterval(interval2);
     var e = d3.select('.pause').node();
     if (e.value=="false"){
-        interval2.pause();
-        e.value = "true";
-        $(e).addClass('active');
-        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
-        svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
+        playchange();
     }else {
         pausechange();
     }
 
+}
+
+function playchange(){
+    var e = d3.select('.pause').node();
+    interval2.pause();
+    e.value = "true";
+    $(e).addClass('active');
+    $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
+    svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
 
 function pausechange(){

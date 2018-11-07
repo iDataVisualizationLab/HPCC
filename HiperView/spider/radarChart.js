@@ -281,6 +281,7 @@ function RadarChart(id, data, options, name) {
            d.bin.name.forEach(n=>{listhost.push(n)});
         });
         blobWrapperpath.on("mouseenter", function (d, i) {
+            playchange();
             blobWrapper
                 .transition().duration(200)
                 .style("opacity", 0);
