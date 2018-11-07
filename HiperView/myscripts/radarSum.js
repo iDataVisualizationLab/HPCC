@@ -29,12 +29,11 @@ d3.radar = function () {
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
         if (radarchart.empty())
             radarchart = svg.append("g")
-                .attr("class","radar"+index+" box"+index+" graphsum")
+                .attr("class", "radar" + index + " box" + index + " graphsum")
                 .datum(index)
                 .attr("transform", function (d) {
                     return "translate(" + xscale(index) + "," + 10 + ")";
                 });
-
 
         handledata(index);
         bin.data(dataSpider3.map(d=>{

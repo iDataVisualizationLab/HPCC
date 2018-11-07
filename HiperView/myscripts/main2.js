@@ -553,7 +553,6 @@ function request(){
             iteration+=iterationstep;
         }
         // Update the current timeline in Summary panel
-        console.log(lastIndex);
         var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))+xTimeSummaryScaleStep(count);
         svg.selectAll(".currentTimeline")
             .attr("x1", x2)
@@ -617,6 +616,11 @@ function request(){
             count3 = 10000;
     } , 20);
 }
+
+function scaleThreshold(i){
+    return i<maxstack?i:(maxstack-1);
+}
+
 function drawsummary(initIndex){
     var arr = [];
     var xx;
@@ -625,12 +629,16 @@ function drawsummary(initIndex){
         currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        xx = xTimeSummaryScale(lastIndex);
+        xx = xTimeSummaryScale(scaleThreshold(lastIndex));
         updateTimeText();
     }else{
         lastIndex = initIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        xx = xTimeSummaryScale(lastIndex);
+        var temp = maxstack-(currentlastIndex-initIndex);
+        if (currentlastIndex>=maxstack)
+            xx = xTimeSummaryScale(temp);
+        else
+            xx = xTimeSummaryScale(lastIndex);
     }
     switch (sumType) {
         case "Boxplot":
@@ -650,7 +658,7 @@ function drawsummary(initIndex){
         case "Scatterplot":
 
             // Boxplot Time
-            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx-swidth/2);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx+swidth/2);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;
@@ -678,6 +686,7 @@ function drawsummary(initIndex){
             break;
 
     };
+    lastIndex = currentlastIndex;
 }
 function drawsummarypoint(harr){
     var arr = [];
@@ -724,7 +733,6 @@ function drawsummarypoint(harr){
 }
 function updateTimeText(){
     var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time).filter((d,i)=> i>(lastIndex-maxstack+1));
-    console.log(dataTime);
     var boxtime = svg.selectAll(".boxTime")
         .data(dataTime);
     boxtime.transition().duration(500)
@@ -1199,14 +1207,16 @@ d3.select('#indsg').on("change", function () {
     switch(sumType){
         case "Scatterplot":
             d3.select("#scatterzone").style("visibility","visible");
-            for (var i =0; i<(currentlastIndex+1);i++) {
+            svg.selectAll(".graphsum").remove();
+            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
                 drawsummary(i);
             }
             break;
         case "Boxplot":
         case "Radar":
+            svg.selectAll(".graphsum").remove();
             d3.select("#scatterzone").style("visibility","hidden");
-            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+1):0; i<(currentlastIndex+1);i++) {
+            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
                 drawsummary(i);
             }
             break;
