@@ -46,11 +46,21 @@ function drawBoxplot(svg,arr, index,xx) {
     svg.selectAll(".box"+index)
         .data(data)
         .enter().append("g")
-        .attr("class","box"+index+" graphsum")
+        .attr("class","box"+index+" box"+index+" graphsum")
         .attr("transform", function(d) { return "translate(" + xx  + "," + 40 + ")"; } )
         .call(chart.width(20));
+    if (index >= maxstack-1) shiftplot(svg,"box",xTimeSummaryScale.step()/2,40);
 }
-
+function shiftplot(svg,classname,deltax, y) {
+        var charts = svg.selectAll(".graphsum").transition().duration(500)
+            .attr("transform", function (d,i) {
+                d3.select(this).attr("class",(classname+(i-1)+" box"+(i-1)+" graphsum"));
+                return "translate(" + (xLinearSummaryScale(i-1)+deltax) + "," + y + ")";
+            }).on("end", function(d) {
+                if (d3.select(this).attr("class")==(classname+(-1)+" box"+(-1)+" graphsum"))
+                    d3.select(this).remove();
+            });
+}
 // Returns a function to compute the interquartile range.
 function iqr(k) {
     return function(d, i) {

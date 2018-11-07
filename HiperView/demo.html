@@ -42,28 +42,33 @@
         border: 1px solid #aaaaaa;
         margin:auto;
         transform: rotate(-90deg);
+        cursor: all-scroll;
     }
 
     div.scatter_x{
         position: absolute;
-        top:210px;
+        top:275px;
         left:32px;
         width: 80px;
         height:20px;
         line-height: 20px;
         text-align: center;
         border: 1px solid #aaaaaa;
+        cursor: all-scroll;
 
     }
     div.selection{
         position: absolute;
-        top:100px;
+        top:120px;
         left: 800px;
         width: 80px;
         height:150px;
         line-height: 20px;
         text-align: center;
         border: 1px solid #aaaaaa;
+    }
+    #scatterzone span{
+        cursor: all-scroll;
     }
 </style>
 </head>
@@ -76,8 +81,8 @@
     </div>
 </header>
 <div id ="scatterzone">
-    <div class="scatter_y" id="data_onYaxis" ondrop="drop(event)" ondragover="allowDrop(event)"><span>fan1peed</span></div>
-    <div class="scatter_x" id="data_onXaxis" ondrop="drop(event)" ondragover="allowDrop(event)"><span>cpu1temp</span></div>
+    <div class="scatter_y" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>fan1peed</span></div>
+    <div class="scatter_x" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>cpu1temp</span></div>
     <div class="selection" id="selection">
     </div>
 </div>

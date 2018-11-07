@@ -123,6 +123,7 @@ var undefinedValue = undefined;
 var undefinedColor = "#666";
 //*** scale
 var xTimeSummaryScale;
+var xLinearSummaryScale;
 
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
@@ -487,9 +488,10 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
-    xTimeSummaryScale =d3.scaleLinear()
-        .domain([0, maxstack-1]);
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xTimeSummaryScale.range([0+10,width-radarsize*1.5]))
+    xLinearSummaryScale = d3.scaleLinear()
+        .domain([0, maxstack-1])
+        .range([0+10,width-radarsize*1.5]);
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     request();
 }
@@ -521,6 +523,7 @@ function request(){
             .domain(Array.apply(null, {length: maxstack}).map(Function.call, Number)) // input
             .range([10,width-radarsize*1.5])
             .padding(0); // output
+        Scatterplot.init(xTimeSummaryScale(0)+swidth/2);
         xTimeSummaryScaleStep = d3.scaleSqrt()
             .domain([0, hosts.length-1]) // input
             .range([0, xTimeSummaryScale.step()]);
@@ -618,7 +621,7 @@ function request(){
 }
 
 function scaleThreshold(i){
-    return i<maxstack?i:(maxstack-1);
+    return i<maxstack?i:(maxstack-2);
 }
 
 function drawsummary(initIndex){
@@ -634,11 +637,14 @@ function drawsummary(initIndex){
     }else{
         lastIndex = initIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        var temp = maxstack-(currentlastIndex-initIndex);
-        if (currentlastIndex>=maxstack)
+        var temp = (maxstack-2)-(currentlastIndex-initIndex);
+        if (currentlastIndex > maxstack-2)
             xx = xTimeSummaryScale(temp);
-        else
+        else {
+            temp = lastIndex;
             xx = xTimeSummaryScale(lastIndex);
+        }
+
     }
     switch (sumType) {
         case "Boxplot":
@@ -653,12 +659,12 @@ function drawsummary(initIndex){
                     arr.push(a[0]);
                 }
             }
-            drawBoxplot(svg, arr, lastIndex, xx + 10);
+            drawBoxplot(svg, arr, temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp, xx + xTimeSummaryScale.step()/2);
             break;
         case "Scatterplot":
 
             // Boxplot Time
-            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx+swidth/2);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+swidth/2);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;
@@ -680,12 +686,12 @@ function drawsummary(initIndex){
                 arrServices.name = name;
                 arr.push(arrServices);
             }
-            Radarplot.data(arr).draw(lastIndex);
+            Radarplot.data(arr).draw(temp===undefined?lastIndex:temp);
             // Radar Time
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
 
-    };
+    }
     lastIndex = currentlastIndex;
 }
 function drawsummarypoint(harr){
@@ -1208,7 +1214,7 @@ d3.select('#indsg').on("change", function () {
         case "Scatterplot":
             d3.select("#scatterzone").style("visibility","visible");
             svg.selectAll(".graphsum").remove();
-            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
                 drawsummary(i);
             }
             break;
@@ -1216,7 +1222,7 @@ d3.select('#indsg').on("change", function () {
         case "Radar":
             svg.selectAll(".graphsum").remove();
             d3.select("#scatterzone").style("visibility","hidden");
-            for (var i =currentlastIndex>(maxstack-1)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
                 drawsummary(i);
             }
             break;
