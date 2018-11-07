@@ -523,6 +523,7 @@ function request(){
             .domain(Array.apply(null, {length: maxstack}).map(Function.call, Number)) // input
             .range([10,width-radarsize*1.5])
             .padding(0); // output
+        Scatterplot.init(xTimeSummaryScale(0)+swidth/2);
         xTimeSummaryScaleStep = d3.scaleSqrt()
             .domain([0, hosts.length-1]) // input
             .range([0, xTimeSummaryScale.step()]);
@@ -643,9 +644,7 @@ function drawsummary(initIndex){
             temp = lastIndex;
             xx = xTimeSummaryScale(lastIndex);
         }
-        console.log("initIndex: " + initIndex);
-        console.log("currentlastIndex: " + currentlastIndex);
-        console.log("temp: " + temp);
+
     }
     switch (sumType) {
         case "Boxplot":
@@ -665,7 +664,7 @@ function drawsummary(initIndex){
         case "Scatterplot":
 
             // Boxplot Time
-            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,xx+swidth/2);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+swidth/2);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;

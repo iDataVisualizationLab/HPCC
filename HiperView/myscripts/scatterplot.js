@@ -20,8 +20,8 @@ var scatterplot_settings = {
     }
 
 };
-var sheight = 200,
-    swidth = 200;
+var sheight = 190,
+    swidth = 190;
 //Bind properties to selection
 
 
@@ -65,6 +65,10 @@ d3.Scatterplot = function () {
      * @param dataPoints in an array containing a set of x, y coordinate dataPoints =[{x:3, y:4, color:red, size:3},{},{}]
      * @constructor
      */
+    Scatterplot.init  = function(xx){
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-45)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx+5)+"px");
+    };
     function ScatterPlotG(g, dataPoints) {
 
 
@@ -89,10 +93,10 @@ d3.Scatterplot = function () {
             });
     }
 
-    Scatterplot.draw =function (index, xx){
-        svg.select(".box" + index).remove();
+    Scatterplot.draw =function (index, indexo,xx){
+        svg.select(".box" + indexo).remove();
         var g = svg.append("g")
-            .attr("class",("scatter"+(index)+" box"+(index)+" graphsum"))
+            .attr("class",("scatter"+(indexo)+" box"+(indexo)+" graphsum"))
             .attr("transform", "translate(" + xx + ",50)");
 
 
@@ -130,7 +134,7 @@ d3.Scatterplot = function () {
                 })))
             });
         ScatterPlotG(g, dataPoints);
-        if (index >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40);
 
     };
 
