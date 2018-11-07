@@ -1,7 +1,7 @@
 // Ngan - Oct 31 2018
 
 
-var radarsize  = 230;
+var radarsize  = 270;
 var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15).data([]);
 var radarChartsumopt  = {
     w: radarsize -5,
@@ -32,7 +32,7 @@ d3.radar = function () {
                 .attr("class", "radar" + index + " box" + index + " graphsum")
                 .datum(index)
                 .attr("transform", function (d) {
-                    return "translate(" + xscale(index) + "," + 10 + ")";
+                    return "translate(" + xscale(index) + "," + (-30) + ")";
                 });
 
         handledata(index);
@@ -70,7 +70,7 @@ d3.radar = function () {
                 .attr("class","radar"+index+" box"+index+" graphsum")
                 .datum(index)
                 .attr("transform", function (d) {
-                    return "translate(" + xscale(index) + "," + 10 + ")";
+                    return "translate(" + xscale(index) + "," + (-30) + ")";
                 });
 
         handledata(index);

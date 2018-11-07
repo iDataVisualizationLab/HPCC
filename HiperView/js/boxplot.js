@@ -1,7 +1,7 @@
 var labels = true; // show the text labels beside individual boxplots?
 
 var ww = 800;
-var hh = 190;
+var hh = 260;
 
 // parse in the data
 
@@ -47,8 +47,8 @@ function drawBoxplot(svg,arr, index,xx) {
         .data(data)
         .enter().append("g")
         .attr("class","box"+index+" box"+index+" graphsum")
-        .attr("transform", function(d) { return "translate(" + xx  + "," + 40 + ")"; } )
-        .call(chart.width(20));
+        .attr("transform", function(d) { return "translate(" + xx  + "," + 20 + ")"; } )
+        .call(chart.width(30));
     if (index >= maxstack-1) shiftplot(svg,"box",xTimeSummaryScale.step()/2,40);
 }
 function shiftplot(svg,classname,deltax, y) {

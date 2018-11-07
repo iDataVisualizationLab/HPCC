@@ -69,7 +69,7 @@ var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
 var sHeight=260;  // Summary panel height
-var top_margin = sHeight+46;  // Start rack spiatial layout
+var top_margin = sHeight+96;  // Start rack spiatial layout
 
 
 var users = [];
@@ -275,16 +275,8 @@ function main() {
         .attr("class","summarySvg")
         .attr("width", width-2)
         .attr("height", sHeight);
-    svg.append("text")
-        .attr("class", "summaryText1")
-        .attr("x", 20)
-        .attr("y", 35)
-        .attr("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-size", "16px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Quanah HPC system: " + hosts.length+" hosts distributed in 10 racks" );
+    d3.select(".summaryText1")
+        .html("Quanah HPC system: <b>" + hosts.length+"</b> hosts distributed in 10 racks" );
 
 
     var currentTextGroup = svg.append('g')
@@ -293,7 +285,7 @@ function main() {
     svgsum.append("line")
         .attr("class", "currentTimeline")
         .attr("x1", 10)
-        .attr("y1", 20)
+        .attr("y1", 0)
         .attr("x2", 10)
         .attr("y2", sHeight)
         .attr("stroke", "#000")
@@ -535,17 +527,7 @@ function request(){
         };
         if (count >= (hosts.length)){// Draw the summary Box plot ***********************************************************
             // Draw date
-            svg.selectAll(".currentDate").remove();
-            svg.append("text")
-                .attr("class", "currentDate")
-                .attr("x", 600)
-                .attr("y", 35)
-                .attr("fill", "#000")
-                .style("font-style","italic")
-                .style("text-anchor","left")
-                .style("font-size", "14px")
-                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                .attr("font-family", "sans-serif")
+            d3.select(".currentDate")
                 .text(""+new Date(currentMiliseconds).toDateString());
 
             // cal to plot
