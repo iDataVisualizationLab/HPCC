@@ -49,6 +49,7 @@ function drawBoxplot(svg,arr, index,xx) {
         .attr("class","box"+index+" graphsum")
         .attr("transform", function(d) { return "translate(" + xx  + "," + 40 + ")"; } )
         .call(chart.width(20));
+    if (index >= maxstack-1) radarTimeline.shift();
 }
 
 // Returns a function to compute the interquartile range.
