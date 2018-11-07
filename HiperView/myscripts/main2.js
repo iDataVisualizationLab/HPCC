@@ -123,6 +123,7 @@ var undefinedValue = undefined;
 var undefinedColor = "#666";
 //*** scale
 var xTimeSummaryScale;
+var xLinearSummaryScale;
 
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
@@ -487,9 +488,10 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
-    xTimeSummaryScale =d3.scaleLinear()
-        .domain([0, maxstack-1]);
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xTimeSummaryScale.range([0+10,width-radarsize*1.5]))
+    xLinearSummaryScale = d3.scaleLinear()
+        .domain([0, maxstack-1])
+        .range([0+10,width-radarsize*1.5]);
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     request();
 }
@@ -618,7 +620,7 @@ function request(){
 }
 
 function scaleThreshold(i){
-    return i<maxstack?i:(maxstack-1);
+    return i<maxstack?i:(maxstack-2);
 }
 
 function drawsummary(initIndex){
@@ -658,7 +660,7 @@ function drawsummary(initIndex){
                     arr.push(a[0]);
                 }
             }
-            drawBoxplot(svg, arr, temp, xx + 10);
+            drawBoxplot(svg, arr, temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp, xx + xTimeSummaryScale.step()/2);
             break;
         case "Scatterplot":
 
