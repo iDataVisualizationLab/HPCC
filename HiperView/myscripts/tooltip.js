@@ -77,11 +77,6 @@ function mouseoverNode(d1){
     playing = false;
     var r = hostResults[d1.className.baseVal];
     tool_tip.show(r);
-    d3.select("body").on("keydown", function() {
-            if (d3.event.keyCode ===27) {
-                tool_tip.hide();
-            }
-        });
     // 1. create the svgTip
      svgTip = d3.select("#svgTip")
         .attr("width", tipW + margin.left + margin.right)

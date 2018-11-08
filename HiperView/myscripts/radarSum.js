@@ -1,7 +1,7 @@
 // Ngan - Oct 31 2018
 
 
-var radarsize  = 270;
+var radarsize  = 300;
 var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15).data([]);
 var radarChartsumopt  = {
     w: radarsize -5,
