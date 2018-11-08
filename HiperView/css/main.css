@@ -37,12 +37,16 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	z-index: 0;
 	top: 2px;
 	left: 270px;
-	width: 400px;
+	/*width: 400px;*/
 	height: 80px;
 	border-radius: 6px;
 	border: 0px solid rgba(0,0,0, 1);
 	background-color: rgba(225,225,225, 0);
 	font: normal 18px Impact, Charcoal, sans-serif !important;
+}
+
+#holder1 div {
+	display: inline-block;
 }
 
 #controlHolder {
@@ -292,4 +296,12 @@ table, th, td {
 
 .rotatehover:hover .pauseicon{
 	transform: rotate(360deg);
+}
+
+.currentDate {
+	vertical-align: middle;
+	display: inline-block;
+	margin: auto;
+	padding-left: 50px;
+	color: #af314d;
 }
