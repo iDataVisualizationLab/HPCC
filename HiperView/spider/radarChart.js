@@ -289,7 +289,7 @@ function RadarChart(id, data, options, name) {
                 .transition()
                 .style("opacity", 1);
             listhost.forEach(l=> {
-                if (d.bin.name.filter(e=> e==l).length ==0 ) {
+                if (d.bin.name.filter(e=> e===l).length ===0 ) {
                     d3.selectAll("." + l)
                         .transition().duration(200)
                         .style("opacity", 0);

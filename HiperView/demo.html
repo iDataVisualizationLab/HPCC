@@ -35,7 +35,7 @@
         position: absolute;
         top:155px;
         left:-20px;
-        width: 80px;
+        width: 160px;
         height:20px;
         line-height: 20px;
         text-align: center;
@@ -49,7 +49,7 @@
         position: absolute;
         top:275px;
         left:32px;
-        width: 80px;
+        width: 160px;
         height:20px;
         line-height: 20px;
         text-align: center;
@@ -59,10 +59,7 @@
     }
     div.selection{
         position: absolute;
-        top:120px;
-        left: 800px;
-        width: 80px;
-        height:150px;
+        opacity: 0;
         line-height: 20px;
         text-align: center;
         border: 1px solid #aaaaaa;
@@ -98,7 +95,7 @@
 <!-- Select datasets -->
 <div id="holder1"  class="holder1">
     <div>Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select></div>
-    <h2 class ="currentDate"></h2>
+    <h3 class ="currentDate"></h3>
 </div>
 
 
@@ -119,7 +116,7 @@
         <option value="Scatterplot" >Scatterplot</option>
     </select>
     <br><br>
-    <button onclick="pauseRequest(this)" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
+    <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
     <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
     <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
     <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>

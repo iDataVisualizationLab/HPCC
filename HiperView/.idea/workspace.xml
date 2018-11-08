@@ -17,8 +17,8 @@
       <file leaf-file-name="tooltip.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="451" column="23" lean-forward="false" selection-start-line="451" selection-start-column="20" selection-end-line="451" selection-end-column="23" />
+            <state relative-caret-position="93">
+              <caret line="78" column="21" lean-forward="false" selection-start-line="78" selection-start-column="21" selection-end-line="78" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -27,8 +27,8 @@
       <file leaf-file-name="main2.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="110">
-              <caret line="71" column="27" lean-forward="false" selection-start-line="71" selection-start-column="27" selection-end-line="71" selection-end-column="27" />
+            <state relative-caret-position="229">
+              <caret line="71" column="26" lean-forward="false" selection-start-line="71" selection-start-column="26" selection-end-line="71" selection-end-column="26" />
               <folding>
                 <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
                 <element signature="e#44410#49274#0" expanded="false" />
@@ -40,9 +40,22 @@
       <file leaf-file-name="main.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="110">
-              <caret line="141" column="6" lean-forward="false" selection-start-line="141" selection-start-column="1" selection-end-line="141" selection-end-column="6" />
+            <state relative-caret-position="211">
+              <caret line="305" column="19" lean-forward="true" selection-start-line="305" selection-start-column="19" selection-end-line="305" selection-end-column="19" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="radarChart.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-400">
+              <caret line="239" column="51" lean-forward="true" selection-start-line="239" selection-start-column="23" selection-end-line="239" selection-end-column="51" />
+              <folding>
+                <element signature="e#12924#13247#0" expanded="false" />
+                <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -50,8 +63,8 @@
       <file leaf-file-name="scatterplot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/scatterplot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="68" column="8" lean-forward="false" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="8" />
+            <state relative-caret-position="17">
+              <caret line="30" column="86" lean-forward="false" selection-start-line="30" selection-start-column="66" selection-end-line="30" selection-end-column="86" />
               <folding />
             </state>
           </provider>
@@ -60,10 +73,9 @@
       <file leaf-file-name="demo.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="100" column="34" lean-forward="true" selection-start-line="100" selection-start-column="34" selection-end-line="100" selection-end-column="34" />
+            <state relative-caret-position="119">
+              <caret line="97" column="27" lean-forward="false" selection-start-line="97" selection-start-column="16" selection-end-line="97" selection-end-column="27" />
               <folding>
-                <element signature="n#style#0;n#head#0;n#!!top" expanded="false" />
                 <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
               </folding>
             </state>
@@ -80,21 +92,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="boxplot.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/boxplot.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="71">
-              <caret line="50" column="27" lean-forward="false" selection-start-line="50" selection-start-column="27" selection-end-line="50" selection-end-column="27" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="radarSum.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="radarSum.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="72" column="67" lean-forward="false" selection-start-line="72" selection-start-column="67" selection-end-line="72" selection-end-column="67" />
+            <state relative-caret-position="51">
+              <caret line="3" column="19" lean-forward="false" selection-start-line="3" selection-start-column="19" selection-end-line="3" selection-end-column="19" />
               <folding>
                 <element signature="e#4437#7537#0" expanded="false" />
               </folding>
@@ -113,13 +115,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>numberof</find>
-      <find>addclass</find>
-      <find>summary</find>
-      <find>drawsummary</find>
-      <find>xtimesum</find>
-      <find>xTimeSummaryScale</find>
-      <find>drawsumm</find>
       <find>pause</find>
       <find>d3.scatt</find>
       <find>all</find>
@@ -135,14 +130,21 @@
       <find>summaryRect</find>
       <find>drag</find>
       <find>summaryText1</find>
-      <find>currentDate</find>
       <find>hol</find>
       <find>text1</find>
       <find>radar</find>
-      <find>draw</find>
-      <find>scatter</find>
       <find>Ví</find>
+      <find>scatter</find>
+      <find>scatterplot_settings</find>
+      <find>key</find>
+      <find>addclass</find>
       <find>top_margin</find>
+      <find>currentDate</find>
+      <find>selection</find>
+      <find>pauseRequest</find>
+      <find>mouse</find>
+      <find>SHeight</find>
+      <find>draw</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -156,14 +158,14 @@
         <option value="$PROJECT_DIR$/myscripts/main.js" />
         <option value="../../src/scripts/binnerN.js" />
         <option value="$PROJECT_DIR$/js/binnerN.min.js" />
-        <option value="$PROJECT_DIR$/myscripts/tooltip.js" />
         <option value="$PROJECT_DIR$/myscripts/playbuttonmorph.js" />
         <option value="$PROJECT_DIR$/js/TimerInterval.js" />
-        <option value="$PROJECT_DIR$/spider/radarChart.js" />
+        <option value="$PROJECT_DIR$/js/boxplot.js" />
         <option value="$PROJECT_DIR$/myscripts/scatterplot.js" />
+        <option value="$PROJECT_DIR$/myscripts/tooltip.js" />
         <option value="$PROJECT_DIR$/demo.html" />
         <option value="$PROJECT_DIR$/css/main.css" />
-        <option value="$PROJECT_DIR$/js/boxplot.js" />
+        <option value="$PROJECT_DIR$/spider/radarChart.js" />
         <option value="$PROJECT_DIR$/myscripts/main2.js" />
         <option value="$PROJECT_DIR$/myscripts/radarSum.js" />
       </list>
@@ -297,12 +299,12 @@
       <updated>1540918684099</updated>
       <workItem from="1540918685304" duration="22305000" />
       <workItem from="1540947326819" duration="88235000" />
-      <workItem from="1541217699555" duration="126486000" />
+      <workItem from="1541217699555" duration="129756000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="237026000" />
+    <option name="totallyTimeSpent" value="240296000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="327" y="126" width="1552" height="815" extended-state="0" />
@@ -359,22 +361,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/tooltip.js</url>
-          <line>552</line>
+          <line>547</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/tooltip.js</url>
-          <line>567</line>
+          <line>562</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/tooltip.js</url>
-          <line>423</line>
+          <line>418</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/myscripts/tooltip.js</url>
-          <line>625</line>
+          <line>620</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -526,7 +528,7 @@
         <state relative-caret-position="1853">
           <caret line="114" column="19" lean-forward="false" selection-start-line="114" selection-start-column="19" selection-end-line="114" selection-end-column="19" />
           <folding>
-            <element signature="e#12922#13245#0" expanded="false" />
+            <element signature="e#12924#13247#0" expanded="false" />
             <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
           </folding>
         </state>
@@ -545,7 +547,6 @@
         <state relative-caret-position="2023">
           <caret line="119" column="34" lean-forward="false" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="34" />
           <folding>
-            <element signature="n#style#0;n#head#0;n#!!top" expanded="false" />
             <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
           </folding>
         </state>
@@ -625,7 +626,7 @@
         <state relative-caret-position="5984">
           <caret line="357" column="24" lean-forward="false" selection-start-line="357" selection-start-column="8" selection-end-line="357" selection-end-column="24" />
           <folding>
-            <element signature="e#12922#13245#0" expanded="false" />
+            <element signature="e#12924#13247#0" expanded="false" />
             <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
           </folding>
         </state>
@@ -636,7 +637,6 @@
         <state relative-caret-position="153">
           <caret line="9" column="198" lean-forward="false" selection-start-line="9" selection-start-column="198" selection-end-line="9" selection-end-column="198" />
           <folding>
-            <element signature="n#style#0;n#head#0;n#!!top" expanded="false" />
             <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
           </folding>
         </state>
@@ -701,14 +701,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="451" column="23" lean-forward="false" selection-start-line="451" selection-start-column="20" selection-end-line="451" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/jquery-1.9.0.min.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -725,21 +717,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="12" column="83" lean-forward="false" selection-start-line="12" selection-start-column="79" selection-end-line="12" selection-end-column="83" />
-          <folding>
-            <element signature="e#12922#13245#0" expanded="false" />
-            <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="110">
           <caret line="601" column="39" lean-forward="false" selection-start-line="601" selection-start-column="28" selection-end-line="601" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/boxplot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="50" column="27" lean-forward="false" selection-start-line="50" selection-start-column="27" selection-end-line="50" selection-end-column="27" />
           <folding />
         </state>
       </provider>
@@ -752,36 +741,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/css/main.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="141" column="6" lean-forward="false" selection-start-line="141" selection-start-column="1" selection-end-line="141" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/scatterplot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="68" column="8" lean-forward="false" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="8" />
+        <state relative-caret-position="17">
+          <caret line="30" column="86" lean-forward="false" selection-start-line="30" selection-start-column="66" selection-end-line="30" selection-end-column="86" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/boxplot.js">
+    <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="71">
-          <caret line="50" column="27" lean-forward="false" selection-start-line="50" selection-start-column="27" selection-end-line="50" selection-end-column="27" />
+        <state relative-caret-position="93">
+          <caret line="78" column="21" lean-forward="false" selection-start-line="78" selection-start-column="21" selection-end-line="78" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/css/main.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="305" column="19" lean-forward="true" selection-start-line="305" selection-start-column="19" selection-end-line="305" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="100" column="34" lean-forward="true" selection-start-line="100" selection-start-column="34" selection-end-line="100" selection-end-column="34" />
+        <state relative-caret-position="119">
+          <caret line="97" column="27" lean-forward="false" selection-start-line="97" selection-start-column="16" selection-end-line="97" selection-end-column="27" />
           <folding>
-            <element signature="n#style#0;n#head#0;n#!!top" expanded="false" />
             <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="true" />
           </folding>
         </state>
@@ -789,8 +777,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main2.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="71" column="27" lean-forward="false" selection-start-line="71" selection-start-column="27" selection-end-line="71" selection-end-column="27" />
+        <state relative-caret-position="229">
+          <caret line="71" column="26" lean-forward="false" selection-start-line="71" selection-start-column="26" selection-end-line="71" selection-end-column="26" />
           <folding>
             <element signature="n#!!block;n#setColorsAndThresholds#0" expanded="false" />
             <element signature="e#44410#49274#0" expanded="false" />
@@ -800,10 +788,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/radarSum.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="72" column="67" lean-forward="false" selection-start-line="72" selection-start-column="67" selection-end-line="72" selection-end-column="67" />
+        <state relative-caret-position="51">
+          <caret line="3" column="19" lean-forward="false" selection-start-line="3" selection-start-column="19" selection-end-line="3" selection-end-column="19" />
           <folding>
             <element signature="e#4437#7537#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spider/radarChart.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-400">
+          <caret line="239" column="51" lean-forward="true" selection-start-line="239" selection-start-column="23" selection-end-line="239" selection-end-column="51" />
+          <folding>
+            <element signature="e#12924#13247#0" expanded="false" />
+            <element signature="n#!!block;n#wrap#0;n#!!block;n#RadarChart#0" expanded="false" />
           </folding>
         </state>
       </provider>

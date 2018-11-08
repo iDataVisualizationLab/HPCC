@@ -66,8 +66,8 @@ d3.Scatterplot = function () {
      * @constructor
      */
     Scatterplot.init  = function(xx){
-        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-45)+"px");
-        d3.select("#scatterzone").select(".scatter_x").style('left',(xx+5)+"px");
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-85)+"px").style('top',(sheight+30)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx+5)+"px").style('top',(105+sheight+20)+"px");
     };
     function ScatterPlotG(g, dataPoints) {
 

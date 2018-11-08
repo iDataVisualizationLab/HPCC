@@ -68,8 +68,8 @@ var h_rack = 580;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
-var sHeight=260;  // Summary panel height
-var top_margin = sHeight+96;  // Start rack spiatial layout
+var sHeight=310;  // Summary panel height
+var top_margin = sHeight+46;  // Start rack spiatial layout
 
 
 var users = [];
@@ -1428,3 +1428,15 @@ function step (iteration, count){
     }
     return [iteration, count];
 }
+
+d3.select("html").on("keydown", function() {
+    switch(d3.event.keyCode){
+        case 27:
+            tool_tip.hide();
+            break;
+        case 13:
+            pauseRequest();
+            break;
+    }
+
+});
