@@ -417,11 +417,11 @@ function mouseoverLine(d,i){
     //Dim all blobs
     // console.log('time: '+d.query_time);
     var radar = d3.selectAll(".radarWrapper");
-    radar.filter( e => e.indexSamp !== d.indexSamp )
+    radar.filter( e => (e!=undefined)?(e.indexSamp !== d.indexSamp):false)
         .transition().duration(500)
         .style("opacity", 0);
         // .style("visibility", "hidden");
-    radar.filter( e => e.indexSamp === d.indexSamp )
+    radar.filter( e => (e!=undefined)?(e.indexSamp === d.indexSamp):false)
         .transition().duration(500)
         .style("opacity", 1);
         // .style("visibility", "visible");

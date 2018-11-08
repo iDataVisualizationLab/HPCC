@@ -282,30 +282,70 @@ function RadarChart(id, data, options, name) {
         });
         blobWrapperpath.on("mouseenter", function (d, i) {
             playchange();
-            blobWrapper
-                .transition().duration(200)
-                .style("opacity", 0);
-            blobWrapper.filter(e => e == d)
-                .transition()
-                .style("opacity", 1);
-            listhost.forEach(l=> {
-                if (d.bin.name.filter(e=> e===l).length ===0 ) {
-                    d3.selectAll("." + l)
-                        .transition().duration(200)
-                        .style("opacity", 0);
-                }
+            // blobWrapper
+            //     .transition().duration(200)
+            //     .style("opacity", 0);
+            var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper");
+            allbold.transition().duration(200)
+                .style("visibility", 'hidden');
+            // blobWrapper.filter(e => e == d)
+            //     .transition()
+            //     .style("opacity", 1);
+            // link to other blod
+            var binlist = d.bin.name;
+            var matchbold = allbold.filter(a=>{
+                var keys = false;
+                a.bin.name.forEach(e=>{keys = keys||(binlist.find(f => f === e) !== undefined)});
+                return keys;
+            }).nodes();
+            matchbold.forEach(t=> {
+                let clonedNode = t.cloneNode(true);
+                var fff = t.__data__.bin;
+                var ff = fff.scaledval.filter((e,i)=>(binlist.find(f => f === fff.name[i]) !== undefined));
+                let path = d3.select(clonedNode).attrs({
+                    cloned: true,
+
+                }).style("visibility", 'visible')
+                    .selectAll(".radarStroke");
+
+                path.style("stroke-opacity", ()=> {
+                    var ff = t.__data__;
+                    return densityscale(ff.bin.name.filter(e=>(binlist.find(f => f === e) !== undefined)).length);
+                    })
+                    .style("stroke-width", ()=> {
+                            var radius = fff.distancefunc(ff);
+                            console.log(scaleStroke(radius));
+                            return (radius === 0 ? cfg.strokeWidth :scaleStroke(radius)+ "px");
+                    })
+                    .style("cursor","pointer")
+                    .on("mouseenter",null)
+                    .on("mouseout", function () {
+                        clearclone();
+                    })
+                    .on("click",()=>{
+                        document.querySelectorAll("g[cloned='true']").forEach(node=>{
+                            d3.select(node).selectAll(".radarStroke").on("mouseout",null);
+                        });
+                    });
+                let clonedParentNode = t.parentNode.cloneNode(false);
+                t.parentNode.appendChild(clonedNode);
+            });
+            // d3.select(".summaryGroup").selectAll(".graphsum");
+            // d3.select(".summaryGroup").selectAll(".graphsum").nodes()
+            hosts.forEach(l=> {
+                if(d.bin.name.filter(e=> e===l.name).length ===0)
+                    d3.selectAll("." + l.name)
+                    .transition().duration(500)
+                    .style("visibility", 'hidden');
+            });
+            hosts.forEach(l=> {
+                if(d.bin.name.filter(e=> e===l.name).length ===0)
+                    d3.selectAll("." + l.name)
+                        .transition().duration(500)
+                        .style("visibility", 'hidden');
             });
 
         })
-            .on("mouseout", function () {
-                blobWrapper.transition().duration(200)
-                    .style("opacity", 1);
-                listhost.forEach(l=> {
-                        d3.selectAll("." + l)
-                            .transition().duration(500)
-                            .style("opacity", 1);
-                });
-            });
     }
 
     //Update the circles

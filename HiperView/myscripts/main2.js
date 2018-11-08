@@ -1217,6 +1217,7 @@ function pauseRequest(){
     if (e.value=="false"){
         playchange();
     }else {
+        clearclone();
         pausechange();
     }
 

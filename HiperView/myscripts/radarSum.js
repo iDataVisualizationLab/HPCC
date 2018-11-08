@@ -17,13 +17,17 @@ d3.radar = function () {
         isNormalized =false,
         BinRange = [4,15],
         arr = [],
-        maxstack= 4;
+        maxstack= 4,
+        margin=-30;
     let radarTimeline ={};
     let indexdata =[];
     let bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]);
     let svg;
     let xscale = d3.scaleLinear().domain([0, 7]).range([0, 1000]);
-
+    let distance = function(a, b){
+        let dsum = 0;
+        a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+        return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
 
     radarTimeline.draw = function(index){
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
@@ -32,7 +36,7 @@ d3.radar = function () {
                 .attr("class", "radar" + index + " box" + index + " graphsum")
                 .datum(index)
                 .attr("transform", function (d) {
-                    return "translate(" + xscale(index) + "," + (-30) + ")";
+                    return "translate(" + xscale(index) + "," + margin + ")";
                 });
 
         handledata(index);
@@ -44,14 +48,12 @@ d3.radar = function () {
         var keys = dataSpider3[0].map(d=>d.axis);
         dataSpider3.length = 0;
         console.log(bin.bins.length);
-        var distance = function(a, b){
-            let dsum = 0;
-            a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
-            return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
         dataSpider3 = bin.bins.map(d=>
         {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
             temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
                 name:d.map(f=>f.data),
+                scaledval: d,
+                distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
         radarChartsumopt.levels = levelsR;
@@ -62,6 +64,8 @@ d3.radar = function () {
 
     };
 
+
+
     radarTimeline.drawpoint = function(index){
         if (index >= (maxstack-1)) index = maxstack-1;
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
@@ -70,7 +74,7 @@ d3.radar = function () {
                 .attr("class","radar"+index+" box"+index+" graphsum")
                 .datum(index)
                 .attr("transform", function (d) {
-                    return "translate(" + xscale(index) + "," + (-30) + ")";
+                    return "translate(" + xscale(index) + "," + margin + ")";
                 });
 
         handledata(index);
@@ -81,14 +85,12 @@ d3.radar = function () {
         var keys = dataSpider3[0].map(d=>d.axis);
         dataSpider3.length = 0;
         //console.log(bin.bins.length);
-        var distance = function(a, b){
-            let dsum = 0;
-            a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
-            return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
         dataSpider3 = bin.bins.map(d=>
         {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
             temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
                 name:d.map(f=>f.data),
+                scaledval: d,
+                distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
         radarChartsumopt.levels = levelsR;
@@ -101,7 +103,7 @@ d3.radar = function () {
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {
                 d3.select(this).datum(d=>d-1).attr("class",d=>("radar"+d+" box"+d+" graphsum"));
-                return "translate(" + xscale(d-1) + "," + 10 + ")";
+                return "translate(" + xscale(d-1) + "," + -30 + ")";
             }).on("end", function(d) {
                 if (d===-1)
                     d3.select(this).remove();
@@ -202,3 +204,17 @@ d3.radar = function () {
     };
     return radarTimeline;
 };
+
+function clearclone (){
+        document.querySelectorAll("g[cloned='true']").forEach(node=>{
+            node.parentNode.removeChild(node);
+        });
+        d3.select(".summaryGroup").selectAll(".radarWrapper")
+            .transition().duration(200)
+            .style("visibility", 'visible');
+        hosts.forEach(l=> {
+                d3.selectAll("." + l.name)
+                    .transition().duration(500)
+                    .style("visibility", 'visible');
+        });
+}
