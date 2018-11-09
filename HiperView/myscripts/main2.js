@@ -872,12 +872,27 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname].arrMemory_usage[iter];
     else if (s == serviceList[3])
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4])
-        newService = sampleS[hostname].arrPower_usage[iter];
+    else if (s == serviceList[4]) {
+        if (sampleS[hostname]["arrPower_usage"]== undefined) {
+            var simisval = handlemissingdata(hostname,iter);
+            sampleS[hostname]["arrPower_usage"] = [simisval];
+        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined){
+            var simisval = handlemissingdata(hostname,iter);
+            sampleS[hostname]["arrPower_usage"][iter] = simisval;
+        }
+        newService = sampleS[hostname]["arrPower_usage"][iter];
+    }
     return newService;
 }
 
-
+function handlemissingdata(hostname,iter){
+    var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+    var simval = processData(simisval.data.service.plugin_output, serviceList[0])[0];
+    var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
+    if (simval!==undefinedValue)
+        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*2)+" W";
+    return simisval;
+}
 function gaussianRand() {
     var rand = 0;
     for (var i = 0; i < 6; i += 1) {

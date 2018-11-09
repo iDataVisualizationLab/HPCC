@@ -314,7 +314,6 @@ function RadarChart(id, data, options, name) {
                     })
                     .style("stroke-width", ()=> {
                             var radius = fff.distancefunc(ff);
-                            console.log(scaleStroke(radius));
                             return (radius === 0 ? cfg.strokeWidth :scaleStroke(radius)+ "px");
                     })
                     .style("cursor","pointer")
