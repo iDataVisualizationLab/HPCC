@@ -887,10 +887,13 @@ function simulateResults2(hostname,iter, s){
 
 function handlemissingdata(hostname,iter){
     var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-    var simval = processData(simisval.data.service.plugin_output, serviceList[0])[0];
+    var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
+    // simval = (simval[0]+simval[1])/2;
+    simval = (simval[0]+simval[1]+20);
     var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
     if (simval!==undefinedValue)
-        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*2)+" W";
+        //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
+        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+simval*3.2+" W";
     return simisval;
 }
 function gaussianRand() {
