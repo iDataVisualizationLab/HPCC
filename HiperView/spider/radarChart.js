@@ -323,7 +323,9 @@ function RadarChart(id, data, options, name) {
                     })
                     .on("click",()=>{
                         document.querySelectorAll("g[cloned='true']").forEach(node=>{
-                            d3.select(node).selectAll(".radarStroke").on("mouseout",null);
+                            var nodes = d3.select(node).selectAll(".radarStroke").on("mouseout",null)
+                                .on("click",null);
+                            //nodes.on("click",clearclone());
                         });
                     });
                 let clonedParentNode = t.parentNode.cloneNode(false);

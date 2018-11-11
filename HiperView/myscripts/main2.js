@@ -480,9 +480,15 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
-    xLinearSummaryScale = d3.scaleLinear()
-        .domain([0, maxstack-1])
-        .range([0+10,width-radarsize*1.5]);
+    xLinearSummaryScale = function (xIndex) {
+        let range = [0-70,width-2-70];
+        let domain = [0, maxstack-1];
+        let rwidth = (range[1]-range[0]+1) / (domain[1]-domain[0]+1);
+        return xIndex>domain[1]? (xIndex-domain[0])*2*rwidth+range[0]:(xIndex-domain[0])*rwidth+range[0];
+    };
+        // d3.scaleLinear()
+        // .domain([0, maxstack-1])
+        // .range([0+10,width-radarsize*1.5]);
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     request();
@@ -512,8 +518,8 @@ function request(){
 
 
         xTimeSummaryScale = d3.scalePoint()
-            .domain(Array.apply(null, {length: maxstack}).map(Function.call, Number)) // input
-            .range([10,width-radarsize*1.5])
+            .domain(Array.apply(null, {length: maxstack+1}).map(Function.call, Number)) // input
+            .range([0-70,width-70])
             .padding(0); // output
         Scatterplot.init(xTimeSummaryScale(0)+swidth/2);
         xTimeSummaryScaleStep = d3.scaleSqrt()
@@ -1281,6 +1287,7 @@ function resetRequest(){
     }
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
+    Radarplot.init();
     updateTimeText();
     request();
 }

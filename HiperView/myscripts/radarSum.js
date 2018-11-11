@@ -28,7 +28,9 @@ d3.radar = function () {
         let dsum = 0;
         a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
         return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
-
+    radarTimeline.init = function(){
+        bin.data([]).updateRadius(true);
+    };
     radarTimeline.draw = function(index){
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
         if (radarchart.empty())
