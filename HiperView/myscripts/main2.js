@@ -481,10 +481,11 @@ function main() {
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
     xLinearSummaryScale = function (xIndex) {
-        let range = [0-70,width-2-70];
+        // let range = [0-radarsize/6-radarsize/12,width-10 ];
+        let range = [0-radarsize/12,width+radarsize/12];
         let domain = [0, maxstack-1];
-        let rwidth = (range[1]-range[0]+1) / (domain[1]-domain[0]+1);
-        return xIndex>domain[1]? (xIndex-domain[0])*2*rwidth+range[0]:(xIndex-domain[0])*rwidth+range[0];
+        let rwidth = (range[1]-range[0]-radarsize) / (domain[1]-domain[0]);
+        return (xIndex>domain[1])? ((xIndex-domain[0])*2*rwidth+range[0]):((xIndex-domain[0])*rwidth+range[0]);
     };
         // d3.scaleLinear()
         // .domain([0, maxstack-1])
@@ -519,7 +520,7 @@ function request(){
 
         xTimeSummaryScale = d3.scalePoint()
             .domain(Array.apply(null, {length: maxstack+1}).map(Function.call, Number)) // input
-            .range([0-70,width-70])
+            .range([0+radarsize/12,width-radarsize/12])
             .padding(0); // output
         Scatterplot.init(xTimeSummaryScale(0)+swidth/2);
         xTimeSummaryScaleStep = d3.scaleSqrt()
