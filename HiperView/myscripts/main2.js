@@ -768,9 +768,9 @@ function processData(str, serviceName) {
         }
         else{
             var arrString =  str.split(" ");
-            a[0] = +arrString[2];
-            a[1] = +arrString[6];
-            a[2] = +arrString[10];
+            a[0] = +arrString[2]||undefinedValue;
+            a[1] = +arrString[6]||undefinedValue;
+            a[2] = +arrString[10]||undefinedValue;
         }
         return a;
     }
@@ -823,7 +823,6 @@ function processData(str, serviceName) {
         return a;
     }
     else if (serviceName == serviceList[4]) {
-        //console.log(str);
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
             a[0] = undefinedValue;
@@ -898,9 +897,11 @@ function handlemissingdata(hostname,iter){
     // simval = (simval[0]+simval[1])/2;
     simval = (simval[0]+simval[1]+20);
     var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
-    if (simval!==undefinedValue)
+    if (simval!==undefinedValue && !isNaN(simval) )
         //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+simval*3.2+" W";
+        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
+    else
+        simisval.data.service.plugin_output = "UNKNOWN";
     return simisval;
 }
 function gaussianRand() {

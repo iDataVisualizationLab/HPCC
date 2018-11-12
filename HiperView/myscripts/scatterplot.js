@@ -134,7 +134,7 @@ d3.Scatterplot = function () {
                 })))
             });
         ScatterPlotG(g, dataPoints);
-        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,50,50);
 
     };
 
@@ -197,6 +197,7 @@ d3.Scatterplot = function () {
     }
 
     function extractPowerUsage(stringInput) {
+        console.log(stringInput);
         if (stringInput.includes("OK")) {
             var pattern = stringInput.match(/\s\d+/g).map(Number); //Extract float "OK - The average power consumed in the last one minute = 235 W" => [235]
             return pattern;
