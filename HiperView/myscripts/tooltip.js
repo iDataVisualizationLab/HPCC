@@ -43,6 +43,7 @@ var tool_tip = d3.tip()
     .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
+
 function cotenttip (hideLine){
     str="";
     hideLine = hideLine||false;

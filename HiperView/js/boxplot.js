@@ -55,7 +55,7 @@ function drawBoxplot(svg,arr, index,xx) {
         var charts = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d,i) {
                 d3.select(this).attr("class",(classname+(i-1)+" box"+(i-1)+" graphsum"));
-                return "translate(" + (xLinearSummaryScale(i-1)+xLinearSummaryScale.offsetx+deltax+offsetx) + "," + y + ")";
+                return "translate(" + (xLinearSummaryScale(i-1)+xLinearSummaryScale.offsetx()+deltax+offsetx) + "," + y + ")";
             }).on("end", function(d) {
                 if (d3.select(this).attr("class")==(classname+(-1)+" box"+(-1)+" graphsum"))
                     d3.select(this).remove();
