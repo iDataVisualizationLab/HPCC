@@ -487,6 +487,7 @@ function main() {
         let rwidth = (range[1]-range[0]-radarsize) / (domain[1]-domain[0]);
         return (xIndex>domain[1])? ((xIndex-domain[0])*2*rwidth+range[0]):((xIndex-domain[0])*rwidth+range[0]);
     };
+    xLinearSummaryScale.offsetx = 0-radarsize/12;
         // d3.scaleLinear()
         // .domain([0, maxstack-1])
         // .range([0+10,width-radarsize*1.5]);
@@ -653,7 +654,7 @@ function drawsummary(initIndex){
         case "Scatterplot":
 
             // Boxplot Time
-            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+swidth/2);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+25);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;

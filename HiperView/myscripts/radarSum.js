@@ -4,7 +4,7 @@
 var radarsize  = 300;
 var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15).data([]);
 var radarChartsumopt  = {
-    margin: {top: 0, right: 0, bottom: 0, left: 0},
+    margin: {top: 20, right: 0, bottom: 0, left: 0},
     w: radarsize -5,
     h: radarsize +20,
     radiuschange: false,

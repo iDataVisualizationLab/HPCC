@@ -3,7 +3,7 @@
  */
 
 var scatterplot_settings = {
-    circle_size: 1,
+    circle_size: 2,
     data_onXaxis: "cpu1temp", //Temperature, Memory_Usage, CPU_load, Fans_Health, Power
     data_onYaxis: "fan1peed", ////Temperature, Memory_Usage, CPU_load, Fans_Health, Power
     active_features: {
@@ -20,8 +20,8 @@ var scatterplot_settings = {
     }
 
 };
-var sheight = 190,
-    swidth = 190;
+var sheight = 250,
+    swidth = 250;
 //Bind properties to selection
 
 
@@ -66,8 +66,8 @@ d3.Scatterplot = function () {
      * @constructor
      */
     Scatterplot.init  = function(xx){
-        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-85)+"px").style('top',(sheight+30)+"px");
-        d3.select("#scatterzone").select(".scatter_x").style('left',(xx+5)+"px").style('top',(105+sheight+20)+"px");
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-85-swidth/2+25)+"px").style('top',(sheight+25)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+27)+"px").style('top',(105+sheight+15)+"px");
     };
     function ScatterPlotG(g, dataPoints) {
 
@@ -92,12 +92,25 @@ d3.Scatterplot = function () {
                 hideTooltip();
             });
     }
+    d3.selection.prototype.moveToFront = function() {
+        return this.each(function(){
+            this.parentNode.appendChild(this);
+        });
+    };
+    d3.selection.prototype.moveToBack = function() {
+        return this.each(function() {
+            var firstChild = this.parentNode.firstChild;
+            if (firstChild) {
+                this.parentNode.insertBefore(this, firstChild);
+            }
+        });
+    };
 
     Scatterplot.draw =function (index, indexo,xx){
         svg.select(".box" + indexo).remove();
         var g = svg.append("g")
             .attr("class",("scatter"+(indexo)+" box"+(indexo)+" graphsum"))
-            .attr("transform", "translate(" + xx + ",50)");
+            .attr("transform", "translate(" + xx + ",40)");
 
 
         var dataPoints = [];
@@ -123,18 +136,19 @@ d3.Scatterplot = function () {
 
 
         g.append("rect").attr("class", "scatterPlotRect")
-            .attr("x", (-0.5))
-            .attr("y", (-0.5))
-            .attr("width", swidth + 2)
-            .attr("height", sheight + 2)
-
+            .attr("x", (-2.5))
+            .attr("y", (-2.5))
+            .attr("width", swidth + 5)
+            .attr("height", sheight + 5)
+            .style("stroke",'black')
             .style("fill", function (d) {
                 return colorRedBlue(Outlier(dataPoints.map(function (d) {
                     return [xScale(d[scatterplot_settings.data_onXaxis]), yScale(d[scatterplot_settings.data_onYaxis])]
                 })))
-            });
+            })
+            .on("mouseover",d=> g.moveToFront());
         ScatterPlotG(g, dataPoints);
-        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,50,50);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40,0);
 
     };
 
@@ -197,7 +211,6 @@ d3.Scatterplot = function () {
     }
 
     function extractPowerUsage(stringInput) {
-        console.log(stringInput);
         if (stringInput.includes("OK")) {
             var pattern = stringInput.match(/\s\d+/g).map(Number); //Extract float "OK - The average power consumed in the last one minute = 235 W" => [235]
             return pattern;
