@@ -687,7 +687,6 @@ function drawsummary(initIndex){
 function drawsummarypoint(harr){
     var arr = [];
     var xx;
-
     //currentlastIndex = hostResults[hosts[count].name].arr.length -1;
     lastIndex = hostResults[hosts[harr[0]].name].arr.length -1;
     query_time = hostResults[hosts[harr[0]].name].arr[lastIndex].result.query_time;
@@ -1219,6 +1218,7 @@ d3.select('#indsg').on("change", function () {
     var sect = document.getElementById("indsg");
     sumType = sect.options[sect.selectedIndex].value;
     svg.select(".graphsum").remove();
+    pannelselection(false);
     switch(sumType){
         case "Scatterplot":
             d3.select("#scatterzone").style("visibility","visible");

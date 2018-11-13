@@ -305,3 +305,10 @@ table, th, td {
 	padding-left: 50px;
 	color: #000000;
 }
+
+#selectionheader {
+	background: #dddddd;
+}
+#selection span{
+	background-color: rgba(255,255,255,0.5);
+}

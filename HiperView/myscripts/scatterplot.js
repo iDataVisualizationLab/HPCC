@@ -68,6 +68,7 @@ d3.Scatterplot = function () {
     Scatterplot.init  = function(xx){
         d3.select("#scatterzone").select(".scatter_y").style('left',(xx-85-swidth/2+25)+"px").style('top',(sheight+25)+"px");
         d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+27)+"px").style('top',(105+sheight+15)+"px");
+        dragElement(document.getElementById("selection"));
     };
     function ScatterPlotG(g, dataPoints) {
 
@@ -107,6 +108,7 @@ d3.Scatterplot = function () {
     };
 
     Scatterplot.draw =function (index, indexo,xx){
+        pannelselection(true);
         svg.select(".box" + indexo).remove();
         var g = svg.append("g")
             .attr("class",("scatter"+(indexo)+" box"+(indexo)+" graphsum"))
@@ -148,7 +150,7 @@ d3.Scatterplot = function () {
             })
             .on("mouseover",d=> g.moveToFront());
         ScatterPlotG(g, dataPoints);
-        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40,0);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40,5);
 
     };
 
@@ -162,16 +164,19 @@ d3.Scatterplot = function () {
      * @returns {Array} of values , empty array if there is an error
      */
     function extractTemperature(stringInput) {
-        if (stringInput == "NaN") {
-            return [0, 0, 0];
+        var a = [];
+        if (stringInput.indexOf("timed out")>=0 || stringInput.indexOf("(No output on stdout)")>=0 || stringInput.indexOf("UNKNOWN")>=0 ){
+            a[0] = 0;
+            a[1] = 0;
+            a[2] = 0;
         }
-        if (stringInput.includes("OK")) {
-            var pattern = stringInput.match(/\s\d+/g).map(Number); //Extract integer
-            return pattern;
+        else{
+            var arrString =  stringInput.split(" ");
+            a[0] = +arrString[2]||0;
+            a[1] = +arrString[6]||0;
+            a[2] = +arrString[10]||0;
         }
-        else {
-            return [0, 0, 0];
-        }
+        return a;
     }
 
     /**
@@ -322,5 +327,14 @@ d3.Scatterplot = function () {
         return arguments.length ? (svg = _, Scatterplot) : svg;
 
     };
+    // Make the DIV element draggable: from W3 code
+
     return Scatterplot;
 };
+function pannelselection(show){
+    var pansum = d3.select("#selection");
+    if (show)
+        pansum.style('opacity',1);
+    else
+        pansum.style('opacity',0);
+}
