@@ -68,7 +68,7 @@ var h_rack = 580;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
-var sHeight=310;  // Summary panel height
+var sHeight=280;  // Summary panel height
 var top_margin = sHeight+46;  // Start rack spiatial layout
 
 
@@ -541,8 +541,10 @@ function request(){
             count=0;
             iteration+=iterationstep;
         }
+        var rescaleTime = d3.scaleLinear().range([0,radarsize]).domain(xTimeSummaryScaleStep.domain());
         // Update the current timeline in Summary panel
-        var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))+xTimeSummaryScaleStep(count);
+        var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))
+        +((lastIndex<(maxstack-1))?xTimeSummaryScaleStep(count):rescaleTime(xTimeSummaryScaleStep(count)));
         svg.selectAll(".currentTimeline")
             .attr("x1", x2)
             .attr("x2", x2);
@@ -650,7 +652,7 @@ function drawsummary(initIndex){
         case "Scatterplot":
 
             // Boxplot Time
-            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+25);
+            Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+80);
 
             //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;

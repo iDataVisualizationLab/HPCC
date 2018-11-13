@@ -20,8 +20,8 @@ var scatterplot_settings = {
     }
 
 };
-var sheight = 250,
-    swidth = 250;
+var sheight = 230,
+    swidth = 230;
 //Bind properties to selection
 
 
@@ -40,7 +40,7 @@ d3.Scatterplot = function () {
         .attr("draggable",true)
         .attr("ondragstart","Scatterplot.drag(event)");
     let colorArray = ["#9dbee6", "#afcae6", "#c8dce6", "#e6e6e6", "#e6e6d8", "#e6d49c", "#e6b061", "#e6852f", "#e6531a", "#e61e1a"];
-
+    let margin = {top: 30, right: 0, bottom: 0, left: 0};
     let colorRedBlue = d3.scaleLinear()
         .domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
         .range(colorArray);
@@ -66,8 +66,8 @@ d3.Scatterplot = function () {
      * @constructor
      */
     Scatterplot.init  = function(xx){
-        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-85-swidth/2+25)+"px").style('top',(sheight+25)+"px");
-        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+27)+"px").style('top',(105+sheight+15)+"px");
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-swidth/2-10)+"px").style('top',(sheight+15)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+80)+"px").style('top',(95+sheight+15)+"px");
         dragElement(document.getElementById("selection"));
     };
     function ScatterPlotG(g, dataPoints) {
@@ -112,7 +112,7 @@ d3.Scatterplot = function () {
         svg.select(".box" + indexo).remove();
         var g = svg.append("g")
             .attr("class",("scatter"+(indexo)+" box"+(indexo)+" graphsum"))
-            .attr("transform", "translate(" + xx + ",40)");
+            .attr("transform", "translate(" + xx + ","+margin.top+")");
 
 
         var dataPoints = [];
@@ -150,7 +150,7 @@ d3.Scatterplot = function () {
             })
             .on("mouseover",d=> g.moveToFront());
         ScatterPlotG(g, dataPoints);
-        if (indexo >= maxstack-1) shiftplot(svg,"scatter",xTimeSummaryScale.step()/2,40,5);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",80,margin.top,0);
 
     };
 
