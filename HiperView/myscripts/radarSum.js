@@ -212,12 +212,10 @@ function clearclone (){
         document.querySelectorAll("g[cloned='true']").forEach(node=>{
             node.parentNode.removeChild(node);
         });
-        d3.select(".summaryGroup").selectAll(".radarWrapper")
-            .transition().duration(200)
-            .style("visibility", 'visible');
+        d3.select(".summaryGroup").selectAll(".radarWrapper").transition().delay(50)
+            .style("opacity", 1);
         hosts.forEach(l=> {
                 d3.selectAll("." + l.name)
-                    .transition().duration(500)
                     .style("visibility", 'visible');
         });
 }

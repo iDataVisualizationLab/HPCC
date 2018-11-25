@@ -280,75 +280,69 @@ function RadarChart(id, data, options, name) {
         data.forEach(d=>{
            d.bin.name.forEach(n=>{listhost.push(n)});
         });
-        blobWrapperpath.on("mouseenter", function (d, i) {
+        blobWrapperpath.on("mouseenter",mouseenterfunctionbold );
+    }
+    function mouseenterfunctionbold (d, i) {
+        if (d3.select(d3.select(this).node().parentNode).style("opacity")==1) {
             playchange();
-            // blobWrapper
-            //     .transition().duration(200)
-            //     .style("opacity", 0);
-            var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper");
-            allbold.transition().duration(200)
-                .style("visibility", 'hidden');
-            // blobWrapper.filter(e => e == d)
-            //     .transition()
-            //     .style("opacity", 1);
+            var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a != undefined);
+            allbold.transition()
+                .style("opacity", 0);
             // link to other blod
             var binlist = d.bin.name;
-            var matchbold = allbold.filter(a=>{
-                var keys = false;
-                a.bin.name.forEach(e=>{keys = keys||(binlist.find(f => f === e) !== undefined)});
-                return keys;
+            var matchbold = allbold.filter(a => {
+                if (a != undefined) {
+                    var keys = false;
+                    a.bin.name.forEach(e => {
+                        keys = keys || (binlist.find(f => f === e) !== undefined)
+                    });
+                    return keys;
+                } else
+                    return false;
             }).nodes();
-            matchbold.forEach(t=> {
+            matchbold.forEach(t => {
                 let clonedNode = t.cloneNode(true);
                 var fff = t.__data__.bin;
-                var ff = fff.scaledval.filter((e,i)=>(binlist.find(f => f === fff.name[i]) !== undefined));
+                var ff = fff.scaledval.filter((e, i) => (binlist.find(f => f === fff.name[i]) !== undefined));
                 let path = d3.select(clonedNode).attrs({
                     cloned: true,
-
-                }).style("visibility", 'visible')
+                }).style("opacity", 1)
                     .selectAll(".radarStroke");
 
-                path.style("stroke-opacity", ()=> {
+                path.style("stroke-opacity", () => {
                     var ff = t.__data__;
-                    return densityscale(ff.bin.name.filter(e=>(binlist.find(f => f === e) !== undefined)).length);
+                    return densityscale(ff.bin.name.filter(e => (binlist.find(f => f === e) !== undefined)).length);
+                })
+                    .style("stroke-width", () => {
+                        var radius = fff.distancefunc(ff);
+                        return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius) + "px");
                     })
-                    .style("stroke-width", ()=> {
-                            var radius = fff.distancefunc(ff);
-                            return (radius === 0 ? cfg.strokeWidth :scaleStroke(radius)+ "px");
-                    })
-                    .style("cursor","pointer")
-                    .on("mouseenter",null)
-                    .on("mouseout", function () {
+                    .style("cursor", "pointer")
+                    .on("mouseenter", null)
+                    .on("mouseleave ", function () {
                         clearclone();
                     })
-                    .on("click",()=>{
-                        document.querySelectorAll("g[cloned='true']").forEach(node=>{
-                            var nodes = d3.select(node).selectAll(".radarStroke").on("mouseout",null)
-                                .on("click",null);
+                    .on("click", () => {
+                        document.querySelectorAll("g[cloned='true']").forEach(node => {
+                            var nodes = d3.select(node).selectAll(".radarStroke").on("mouseleave ", null)
+                                .on("click", null);
                             //nodes.on("click",clearclone());
                         });
                     });
-                let clonedParentNode = t.parentNode.cloneNode(false);
                 t.parentNode.appendChild(clonedNode);
             });
-            // d3.select(".summaryGroup").selectAll(".graphsum");
-            // d3.select(".summaryGroup").selectAll(".graphsum").nodes()
-            hosts.forEach(l=> {
-                if(d.bin.name.filter(e=> e===l.name).length ===0)
+            hosts.forEach(l => {
+                if (d.bin.name.filter(e => e === l.name).length === 0)
                     d3.selectAll("." + l.name)
-                    .transition().duration(500)
-                    .style("visibility", 'hidden');
-            });
-            hosts.forEach(l=> {
-                if(d.bin.name.filter(e=> e===l.name).length ===0)
-                    d3.selectAll("." + l.name)
-                        .transition().duration(500)
                         .style("visibility", 'hidden');
             });
-
-        })
+            hosts.forEach(l => {
+                if (d.bin.name.filter(e => e === l.name).length === 0)
+                    d3.selectAll("." + l.name)
+                        .style("visibility", 'hidden');
+            });
+        }
     }
-
     //Update the circles
     blobWrapper = g.selectAll(".radarWrapper");
     //Append the circles
@@ -372,7 +366,7 @@ function RadarChart(id, data, options, name) {
         })
         .style("fill-opacity", 0.5)
         .style("stroke", "#000")
-        .style("stroke-width", 0.2);;
+        .style("stroke-width", 0.2);
     circleWrapper.exit().remove();
     circleWrapper
         .enter().append("circle")
@@ -437,7 +431,7 @@ function RadarChart(id, data, options, name) {
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
         .style("fill", "none")
         .style("pointer-events", "all")
-        .on("mouseover", function(d,i) {
+        .on("mouseenter", function(d,i) {
             newX =  parseFloat(d3.select(this).attr('cx')) - 10;
             newY =  parseFloat(d3.select(this).attr('cy')) - 10;
 
@@ -448,7 +442,7 @@ function RadarChart(id, data, options, name) {
                 .transition().duration(200)
                 .style('opacity', 1);
         })
-        .on("mouseout", function(){
+        .on("mouseleave", function(){
             tooltip.transition().duration(200)
                 .style("opacity", 0);
         });
@@ -461,7 +455,7 @@ function RadarChart(id, data, options, name) {
         .attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI/2); })
         .style("fill", "none")
         .style("pointer-events", "all")
-        .on("mouseover", function(d,i) {
+        .on("mouseenter", function(d,i) {
             newX =  parseFloat(d3.select(this).attr('cx')) - 10;
             newY =  parseFloat(d3.select(this).attr('cy')) - 10;
                     
@@ -472,7 +466,7 @@ function RadarChart(id, data, options, name) {
                 .transition().duration(200)
                 .style('opacity', 1);
         })
-        .on("mouseout", function(){
+        .on("mouseleave", function(){
             tooltip.transition().duration(200)
                 .style("opacity", 0);
         });
