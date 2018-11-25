@@ -280,9 +280,10 @@ function RadarChart(id, data, options, name) {
         data.forEach(d=>{
            d.bin.name.forEach(n=>{listhost.push(n)});
         });
-        blobWrapperpath.on("mouseenter",mouseenterfunctionbold );
+        blobWrapperpath.on("mouseover",mouseenterfunctionbold );
     }
     function mouseenterfunctionbold (d, i) {
+        var state = state||false;
         if (d3.select(d3.select(this).node().parentNode).style("opacity")==1) {
             playchange();
             var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a != undefined);
@@ -318,14 +319,21 @@ function RadarChart(id, data, options, name) {
                         return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius) + "px");
                     })
                     .style("cursor", "pointer")
-                    .on("mouseenter", null)
+                    .on("mouseover", null)
                     .on("mouseleave ", function () {
                         clearclone();
                     })
                     .on("click", () => {
+                        state = !state;
+                        console.log(state);
                         document.querySelectorAll("g[cloned='true']").forEach(node => {
-                            var nodes = d3.select(node).selectAll(".radarStroke").on("mouseleave ", null)
-                                .on("click", null);
+                            var nodes = d3.select(node).selectAll(".radarStroke");
+                            if (state)
+                                nodes.on("mouseleave ", null);
+                            else
+                                nodes.on("mouseleave ", function () {
+                                    clearclone();
+                                });
                             //nodes.on("click",clearclone());
                         });
                     });
