@@ -287,7 +287,7 @@ function RadarChart(id, data, options, name) {
         if (d3.select(d3.select(this).node().parentNode).style("opacity")==1) {
             playchange();
             var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a != undefined);
-            allbold.transition()
+            allbold
                 .style("opacity", 0);
             // link to other blod
             var binlist = d.bin.name;
