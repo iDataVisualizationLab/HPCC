@@ -11,7 +11,8 @@ var RACK_NUM = 10;
 var HOST_NUM = 60;
 var CPU_NUM = 2;
 var TS_NUM = 19;
-
+var color,opa;
+var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 var selectedTimestamp = 1;
 var INTERSECTED;
 var isInit = true;
@@ -68,14 +69,17 @@ if (isRealtime){
 }
 
 
+//***********************
+var undefinedValue = undefined;
+
 var charType = "Heatmap";
 //***********************
-var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
+var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
 var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
-    arrCPU_load: {key: "Job_load", val: ["arrCPU_load"]},
+    arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
-    arrPower_usage:{key: "Power_consum", val: ["arrPower_usage"]}};
+    arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService = "Temperature";
@@ -94,7 +98,11 @@ var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
 
 init();
+var svg = d3.select("#instructions").append("svg").attr("width", 1000).attr("height",800);
 animate();
+var rectip = svg.append('rect').attr('id','placetip').attr('x',100).attr('y',100).attr('width',100).attr('height',100)
+    .on("click",function(d,i){
+        mouseoverNode(d)});
 
 // init
 
@@ -443,8 +451,10 @@ function loadData()
 
 function step (iteration, count){
     //console.log(hosts[count].name+" "+hostResults[name]);
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+    var result = simulateResults2(hosts[count].name,iteration, selectedService);
     var name =  result.data.service.host_name;
+    hostResults[name].arr.push(result);
+    var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
     hostResults[name].arrTemperature.push(result);
 
     var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
@@ -458,4 +468,52 @@ function step (iteration, count){
 
     var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
     hostResults[name].arrPower_usage.push(result);
+}
+
+function setColorsAndThresholds(s) {
+    for (var i=0; i<serviceList.length;i++){
+        if (s == serviceList[i] && i==1){  // CPU_load
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+
+        }
+        else if (s == serviceList[i] && i==2){  // Memory_usage
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+
+        }
+        else if (s == serviceList[i]){
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left = thresholds[i][0]-dif;
+            if (left<0 && i!=0) // Temperature can be less than 0
+                left=0;
+            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+        }
+    }
 }

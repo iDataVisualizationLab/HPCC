@@ -241,19 +241,19 @@ function updateTooltip( host )
     // constructing tooltip
     var tmp = host.name.split("_")
     var host_name = "compute-"+tmp[1]+"-"+tmp[3]
-    rectip.datum(host_name);
+    rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
 
-    var tooltip_html = document.getElementsByClassName("radarChart")[0];
-    tooltip_html.style.backgroundColor = "gray";
-    domtoimage.toJpeg( tooltip_html ).then( function(url) { tooltip_png.src = url; tooltip_html.style.display = "none";} );
-       
-    tooltip.visible = true;
-    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
-
-    tooltip.position.x = pos.x;
-    tooltip.position.y = pos.y;
-    tooltip.position.z = pos.z - 0.3;
+    // var tooltip_html = document.getElementsByClassName("radarChart")[0];
+    // tooltip_html.style.backgroundColor = "gray";
+    // domtoimage.toJpeg( tooltip_html ).then( function(url) { tooltip_png.src = url; tooltip_html.style.display = "none";} );
+    //
+    // tooltip.visible = true;
+    // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+    //
+    // tooltip.position.x = pos.x;
+    // tooltip.position.y = pos.y;
+    // tooltip.position.z = pos.z - 0.3;
 }
 
 function processData(str, serviceName)
