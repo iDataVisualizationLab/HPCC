@@ -242,25 +242,18 @@ function updateTooltip( host )
     var tmp = host.name.split("_");
     var host_name = "compute-"+tmp[1]+"-"+tmp[3];
     var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
-    updateTooltip3D(host_name);
-    tooltip.position.x = pos.x;
-    tooltip.position.y = pos.y;
-    tooltip.position.z = pos.z - 0.5;
+    //updateTooltip3D(host_name);
+    // tooltip.position.x = pos.x;
+    // tooltip.position.y = pos.y;
+    // tooltip.position.z = pos.z - 0.5;
     //tooltip.visible = true;
     console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
+    d3.select('#d3-tip').attr("position", "absolute")
+        .style("top", "0px")
+        .style("left","0px");
 
-    // var tooltip_html = document.getElementsByClassName("radarChart")[0];
-    // tooltip_html.style.backgroundColor = "gray";
-    // domtoimage.toJpeg( tooltip_html ).then( function(url) { tooltip_png.src = url; tooltip_html.style.display = "none";} );
-    //
-    // tooltip.visible = true;
-    // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
-    //
-    // tooltip.position.x = pos.x;
-    // tooltip.position.y = pos.y;
-    // tooltip.position.z = pos.z - 0.3;
 }
 
 function processData(str, serviceName)

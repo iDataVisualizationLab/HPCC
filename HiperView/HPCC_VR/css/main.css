@@ -78,3 +78,41 @@ a {
 }
 
 
+.d3-tip {
+    line-height: 1;
+    padding: 10px;
+    background: rgba(255, 255, 255, 1);
+    color: #000;
+    border: 1px solid rgba(0,0,0, 1);
+    border-radius: 10px;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+
+.d3-tip .playbtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transform: translate(-10px, 10px);
+    -ms-transform: translate(-10px, 10px);
+    background-color: #66b215;
+    color: #ffffff;
+    font-size: 11px;
+    padding: 11px 11px;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    text-align: center;
+}
+.d3-tip .playbtn.playing{
+    background-color: #b20f02;
+}
+.d3-tip .playbar{
+    stroke: black;
+    stroke-dasharray: 2,2;
+}

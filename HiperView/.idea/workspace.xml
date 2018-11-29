@@ -14,27 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="testhtml.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HPCC_VR/testhtml.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="123" lean-forward="false" selection-start-line="11" selection-start-column="123" selection-end-line="11" selection-end-column="123" />
-              <folding>
-                <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#p#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="32" column="104" lean-forward="true" selection-start-line="32" selection-start-column="104" selection-end-line="32" selection-end-column="104" />
+            <state relative-caret-position="289">
+              <caret line="47" column="35" lean-forward="true" selection-start-line="47" selection-start-column="35" selection-end-line="47" selection-end-column="35" />
               <folding>
                 <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
@@ -42,11 +26,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="d3.tip.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/d3.tip.js">
+      <file leaf-file-name="main.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HPCC_VR/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="131">
-              <caret line="15" column="35" lean-forward="true" selection-start-line="15" selection-start-column="35" selection-end-line="15" selection-end-column="35" />
+            <state relative-caret-position="1345">
+              <caret line="117" column="1" lean-forward="false" selection-start-line="117" selection-start-column="1" selection-end-line="117" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="subconfig.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/subconfig.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -72,11 +66,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="104" column="30" lean-forward="true" selection-start-line="104" selection-start-column="30" selection-end-line="104" selection-end-column="30" />
+            <state relative-caret-position="119">
+              <caret line="106" column="0" lean-forward="false" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
               <folding>
                 <element signature="n#!!block;n#initCamera#0" expanded="false" />
                 <element signature="n#!!block;n#initInteractions#0" expanded="false" />
@@ -90,18 +84,18 @@
       <file leaf-file-name="Infrastructure.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/Infrastructure.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="83">
-              <caret line="185" column="54" lean-forward="false" selection-start-line="185" selection-start-column="37" selection-end-line="185" selection-end-column="54" />
+            <state relative-caret-position="119">
+              <caret line="156" column="8" lean-forward="false" selection-start-line="156" selection-start-column="8" selection-end-line="156" selection-end-column="8" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="UpdateFunctions.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="UpdateFunctions.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/UpdateFunctions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="419" column="8" lean-forward="true" selection-start-line="419" selection-start-column="8" selection-end-line="419" selection-end-column="8" />
+            <state relative-caret-position="117">
+              <caret line="247" column="40" lean-forward="true" selection-start-line="245" selection-start-column="7" selection-end-line="247" selection-end-column="40" />
               <folding>
                 <element signature="n#!!block;n#processData#0" expanded="false" />
               </folding>
@@ -114,15 +108,13 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>tooltip.</find>
-      <find>AFRAME</find>
       <find>ani</find>
       <find>group</find>
       <find>meshbasic</find>
@@ -134,7 +126,6 @@
       <find>step</find>
       <find>hostObj</find>
       <find>verticesNeedUpdate</find>
-      <find>DodecahedronGeometry</find>
       <find>light =</find>
       <find>hpcc_light</find>
       <find>scene</find>
@@ -146,11 +137,14 @@
       <find>roo</find>
       <find>root</find>
       <find>d3.tip</find>
-      <find>tool</find>
       <find>too</find>
-      <find>updateTooltip3D</find>
       <find>fps</find>
+      <find>rada</find>
+      <find>DodecahedronGeometry</find>
+      <find>updateTooltip3D</find>
+      <find>rect</find>
       <find>mouseover</find>
+      <find>tool</find>
     </findStrings>
     <dirStrings>
       <dir>E:\nvtng\Projects\GitHub\HPCC\HiperView</dir>
@@ -179,11 +173,13 @@
         <option value="$PROJECT_DIR$/HPCC_VR/scripts/lib/QuickHull.js" />
         <option value="$PROJECT_DIR$/HPCC_VR/testhtml.html" />
         <option value="$PROJECT_DIR$/myscripts/tooltip.js" />
+        <option value="$PROJECT_DIR$/demo.html" />
+        <option value="$PROJECT_DIR$/HPCC_VR/scripts/main.js" />
+        <option value="$PROJECT_DIR$/HPCC_VR/scripts/subconfig.js" />
+        <option value="$PROJECT_DIR$/HPCC_VR/css/main.css" />
+        <option value="$PROJECT_DIR$/HPCC_VR/index.html" />
         <option value="$PROJECT_DIR$/HPCC_VR/scripts/Infrastructure.js" />
         <option value="$PROJECT_DIR$/HPCC_VR/scripts/UpdateFunctions.js" />
-        <option value="$PROJECT_DIR$/HPCC_VR/index.html" />
-        <option value="$PROJECT_DIR$/HPCC_VR/scripts/main.js" />
-        <option value="$PROJECT_DIR$/demo.html" />
       </list>
     </option>
   </component>
@@ -233,6 +229,23 @@
               <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
               <item name="HiperView" type="462c0819:PsiDirectoryNode" />
               <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
+              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
+              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
+              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
@@ -291,7 +304,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.demo.html">
+  <component name="RunManager" selected="JavaScript Debug.index.html">
     <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/demo.html" />
     <configuration name="demo.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/demo.html" />
     <configuration name="index.html" type="JavascriptDebugType" factoryName="JavaScript Debug" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/HPCC_VR/index.html" />
@@ -334,12 +347,12 @@
       <workItem from="1542406721446" duration="2271000" />
       <workItem from="1542678840173" duration="545000" />
       <workItem from="1543045198009" duration="10044000" />
-      <workItem from="1543170729594" duration="53625000" />
+      <workItem from="1543170729594" duration="56518000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="386947000" />
+    <option name="totallyTimeSpent" value="389840000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="860" y="174" width="1552" height="873" extended-state="0" />
@@ -556,22 +569,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/css/main.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1921">
-          <caret line="113" column="12" lean-forward="false" selection-start-line="113" selection-start-column="12" selection-end-line="113" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15470">
@@ -835,14 +832,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/lib/ConvexGeometry.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="77" column="24" lean-forward="false" selection-start-line="77" selection-start-column="10" selection-end-line="77" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/lib/QuickHull.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-832">
@@ -872,20 +861,12 @@
         <state relative-caret-position="187">
           <caret line="11" column="123" lean-forward="false" selection-start-line="11" selection-start-column="123" selection-end-line="11" selection-end-column="123" />
           <folding>
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#p#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#p#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="83">
-          <caret line="40" column="25" lean-forward="true" selection-start-line="40" selection-start-column="25" selection-end-line="40" selection-end-column="25" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -897,51 +878,83 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/Infrastructure.js">
+    <entry file="file://$PROJECT_DIR$/demo.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="83">
-          <caret line="185" column="54" lean-forward="false" selection-start-line="185" selection-start-column="37" selection-end-line="185" selection-end-column="54" />
+        <state relative-caret-position="228">
+          <caret line="168" column="31" lean-forward="false" selection-start-line="168" selection-start-column="13" selection-end-line="168" selection-end-column="33" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/UpdateFunctions.js">
+    <entry file="file://$PROJECT_DIR$/myscripts/tooltip.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="419" column="8" lean-forward="true" selection-start-line="419" selection-start-column="8" selection-end-line="419" selection-end-column="8" />
-          <folding>
-            <element signature="n#!!block;n#processData#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="100">
+          <caret line="41" column="4" lean-forward="false" selection-start-line="41" selection-start-column="4" selection-end-line="41" selection-end-column="24" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/lib/ConvexGeometry.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="32" column="104" lean-forward="true" selection-start-line="32" selection-start-column="104" selection-end-line="32" selection-end-column="104" />
-          <folding>
-            <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
+        <state relative-caret-position="149">
+          <caret line="77" column="24" lean-forward="false" selection-start-line="77" selection-start-column="10" selection-end-line="77" selection-end-column="24" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo.html">
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/subconfig.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="77" column="10" lean-forward="true" selection-start-line="77" selection-start-column="10" selection-end-line="77" selection-end-column="10" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/css/main.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1345">
+          <caret line="117" column="1" lean-forward="false" selection-start-line="117" selection-start-column="1" selection-end-line="117" selection-end-column="1" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="104" column="30" lean-forward="true" selection-start-line="104" selection-start-column="30" selection-end-line="104" selection-end-column="30" />
+        <state relative-caret-position="119">
+          <caret line="106" column="0" lean-forward="false" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
           <folding>
             <element signature="n#!!block;n#initCamera#0" expanded="false" />
             <element signature="n#!!block;n#initInteractions#0" expanded="false" />
             <element signature="n#!!block;n#initRoom#0" expanded="false" />
             <element signature="n#!!block;n#initHPCC#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="47" column="35" lean-forward="true" selection-start-line="47" selection-start-column="35" selection-end-line="47" selection-end-column="35" />
+          <folding>
+            <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/Infrastructure.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="156" column="8" lean-forward="false" selection-start-line="156" selection-start-column="8" selection-end-line="156" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/UpdateFunctions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="117">
+          <caret line="247" column="40" lean-forward="true" selection-start-line="245" selection-start-column="7" selection-end-line="247" selection-end-column="40" />
+          <folding>
+            <element signature="n#!!block;n#processData#0" expanded="false" />
           </folding>
         </state>
       </provider>

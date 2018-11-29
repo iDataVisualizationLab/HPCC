@@ -104,6 +104,7 @@ var rectip = svg.append('rect').attr('id','placetip').attr('x',0).attr('y',0).at
     .style('opacity',0)
     .on("click",function(d,i){
         mouseoverNode(d)});
+
 // var fragment = document.createDocumentFragment();
 // fragment.appendChild(document.getElementById('d3-tip'));
 // document.getElementById('instructions').appendChild(fragment);
