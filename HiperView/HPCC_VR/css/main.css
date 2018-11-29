@@ -34,7 +34,7 @@ a {
     cursor: pointer;
 }
 #instructions path {
-    fill-opacity: 0;
+    fill-opacity: 0 !important;
     fill: none;
 }
 #instructions button {

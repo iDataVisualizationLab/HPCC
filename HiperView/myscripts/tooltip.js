@@ -170,7 +170,7 @@ function mouseoverNode(d1){
             .attr("d", line1)
             .attr("stroke", function () {
                 return color2(0);
-            })
+            }).attr('fill','none')
             .attr("stroke-width",1); // 11. Calls the line generator
     // Appends a circle for each datapoint ****** CPU1
     svgTip.selectAll(".dot1")
@@ -214,7 +214,7 @@ function mouseoverNode(d1){
     svgTip.append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("class", "line2") // Assign a class for styling
-        .attr("d", line2)
+        .attr("d", line2).attr('fill','none')
         .attr("stroke", function () {
             return color2(1);
         })
@@ -260,7 +260,7 @@ function mouseoverNode(d1){
         .datum(arr) // 10. Binds data to the line
         .attr("class", "line3") // Assign a class for styling
         .attr("d", line3)
-        .attr("stroke","#000")
+        .attr("stroke","#000").attr('fill','none')
         .attr("stroke-width",1)
         .style("stroke-dasharray", ("3, 3"));
     svgTip.append("text")
