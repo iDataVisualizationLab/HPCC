@@ -254,12 +254,13 @@ function updateTooltip( host )
     d3.select('#d3-tip').attr("position", "absolute")
         .style("top", "0px")
         .style("left","246px");
-    //requestupdatetooltiip();
+    requestupdatetooltiip();
 
 }
     function requestupdatetooltiip(){
-        $("#tip")[0].setAttribute('material',{fps:1.5});
-        setTimeout(()=>{$("#tip")[0].setAttribute('material',{fps:0});}, 500);
+        d3.select('#tip').attr('material',{fps:1.5});
+        $('#tip')[0].components.material.shader.__render();
+        setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
     }
 function processData(str, serviceName)
 {
