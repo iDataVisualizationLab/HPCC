@@ -78,7 +78,7 @@ function initQuanah()
         }
 
         x = (!(host_num%2))*width/2;
-        // addQuanahLabel( "Host " + host_num, "host", host );
+        addQuanahLabel( "Host " + host_num, "host", host );
         host.position.set( x, y, 0 );
 
         return host;
@@ -154,7 +154,7 @@ function initQuanah()
 
     function addTooltip()
     {
-        tooltip = d3.select("#tip").node().object3D;
+        tooltip = d3.select("#tipgroup").node().object3D;
         // // textures
         // var loader = new THREE.TextureLoader();
         // var texture = loader.load( 'media/textures/disc.png' );
