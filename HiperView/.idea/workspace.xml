@@ -30,11 +30,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="31" column="29" lean-forward="false" selection-start-line="31" selection-start-column="21" selection-end-line="31" selection-end-column="29" />
+            <state relative-caret-position="187">
+              <caret line="32" column="104" lean-forward="true" selection-start-line="32" selection-start-column="104" selection-end-line="32" selection-end-column="104" />
               <folding>
                 <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
@@ -72,7 +72,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="main.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="136">
@@ -168,7 +168,6 @@
         <option value="$PROJECT_DIR$/js/binnerN.min.js" />
         <option value="$PROJECT_DIR$/css/main.css" />
         <option value="$PROJECT_DIR$/spider/index.html" />
-        <option value="$PROJECT_DIR$/demo.html" />
         <option value="$PROJECT_DIR$/js/d3.scaleAdjust.js" />
         <option value="$PROJECT_DIR$/js/boxplot.js" />
         <option value="$PROJECT_DIR$/myscripts/scatterplot.js" />
@@ -184,6 +183,7 @@
         <option value="$PROJECT_DIR$/HPCC_VR/scripts/UpdateFunctions.js" />
         <option value="$PROJECT_DIR$/HPCC_VR/index.html" />
         <option value="$PROJECT_DIR$/HPCC_VR/scripts/main.js" />
+        <option value="$PROJECT_DIR$/demo.html" />
       </list>
     </option>
   </component>
@@ -233,49 +233,6 @@
               <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
               <item name="HiperView" type="462c0819:PsiDirectoryNode" />
               <item name="css" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="html" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="media" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="media" type="462c0819:PsiDirectoryNode" />
-              <item name="img" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
-              <item name="HPCC_VR" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="HiperView" type="b2602c69:ProjectViewProjectNode" />
@@ -334,7 +291,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.testhtml.html">
+  <component name="RunManager" selected="JavaScript Debug.demo.html">
     <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/demo.html" />
     <configuration name="demo.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/demo.html" />
     <configuration name="index.html" type="JavascriptDebugType" factoryName="JavaScript Debug" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:64320/HiperView/HPCC_VR/index.html" />
@@ -377,12 +334,12 @@
       <workItem from="1542406721446" duration="2271000" />
       <workItem from="1542678840173" duration="545000" />
       <workItem from="1543045198009" duration="10044000" />
-      <workItem from="1543170729594" duration="53428000" />
+      <workItem from="1543170729594" duration="53625000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="386750000" />
+    <option name="totallyTimeSpent" value="386947000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="860" y="174" width="1552" height="873" extended-state="0" />
@@ -636,7 +593,7 @@
         <state relative-caret-position="153">
           <caret line="9" column="198" lean-forward="false" selection-start-line="9" selection-start-column="198" selection-end-line="9" selection-end-column="198" />
           <folding>
-            <element signature="n#style#0;n#button#1;n#div#3;n#body#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#button#1;n#div#4;n#body#0;n#!!top" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -825,14 +782,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="111">
-          <caret line="166" column="0" lean-forward="false" selection-start-line="166" selection-start-column="0" selection-end-line="166" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="127">
@@ -966,6 +915,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="32" column="104" lean-forward="true" selection-start-line="32" selection-start-column="104" selection-end-line="32" selection-end-column="104" />
+          <folding>
+            <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="130">
+          <caret line="77" column="10" lean-forward="true" selection-start-line="77" selection-start-column="10" selection-end-line="77" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/HPCC_VR/scripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
@@ -975,16 +942,6 @@
             <element signature="n#!!block;n#initInteractions#0" expanded="false" />
             <element signature="n#!!block;n#initRoom#0" expanded="false" />
             <element signature="n#!!block;n#initHPCC#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HPCC_VR/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="31" column="29" lean-forward="false" selection-start-line="31" selection-start-column="21" selection-end-line="31" selection-end-column="29" />
-          <folding>
-            <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
