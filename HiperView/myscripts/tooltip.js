@@ -43,7 +43,9 @@ var tool_tip = d3.tip()
     .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
-
+var fragment = document.createDocumentFragment();
+fragment.appendChild(document.getElementById('d3-tip'));
+document.getElementById('instructions').appendChild(fragment);
 function cotenttip (hideLine){
     str="";
     hideLine = hideLine||false;
@@ -742,7 +744,7 @@ function summaryRadar () {
 
 
 // Make the DIV element draggable: from W3 code
-dragElement(document.getElementById("Summarynode"));
+//dragElement(document.getElementById("Summarynode"));
 
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
