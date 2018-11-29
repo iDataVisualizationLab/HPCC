@@ -154,16 +154,62 @@ function initQuanah()
 
     function addTooltip()
     {
-        var tt_height = height/3;
-        var tt_width = height/3;
+        // var tt_texture = new THREE.TextureLoader().load( "media/img/" + serviceList[0] + ".png" );
+        // var tt_geometry = new THREE.PlaneGeometry( tt_width, tt_height, tt_width );
+        // var tt_material = new THREE.MeshBasicMaterial( { map: tt_texture } );
+        // scene.add( new THREE.AxesHelper( 20 ) );
+        // textures
+        var loader = new THREE.TextureLoader();
+        var texture = loader.load( 'media/textures/disc.png' );
+        tooltip = new THREE.Group();
+        // points
+        var vertices = new THREE.DodecahedronGeometry( 1).vertices;
+        vertices.forEach(p=> {
+            p.x = p.x*0.1*ROOM_SIZE;
+            p.y = p.y*0.1*ROOM_SIZE;
+            p.z = p.z*0.1*ROOM_SIZE;});
+        console.log(vertices);
+        // for ( var i = 0; i < vertices.length; i ++ ) {
+        //     //vertices[ i ].add( randomPoint().multiplyScalar( 2 ) ); // wiggle the points
+        // }
+        var pointsMaterial = new THREE.PointsMaterial( {
+            color: 0x0080ff,
+            map: texture,
+            size: 0.01,
+            alphaTest: 0.5
+        } );
+        var pointsGeometry = new THREE.Geometry().setFromPoints( vertices );
+        console.log(pointsGeometry);
+        var points = new THREE.Points( pointsGeometry, pointsMaterial );
+        tooltip.add( points );
+        //convex hull
+        var meshMaterial = new THREE.MeshPhongMaterial( {
+            color: 0x0080ff,
+            wireframe: true,
+            opacity: 0.5,
+            transparent: true
+        } );
+        var meshGeometry = new THREE.ConvexGeometry( vertices );
+        var mesh = new THREE.Mesh( meshGeometry, meshMaterial );
+        mesh.material.side = THREE.BackSide; // back faces
+        mesh.renderOrder = 0;
+        tooltip.add( mesh );
+        var mesh = new THREE.Mesh( meshGeometry, meshMaterial.clone() );
+        mesh.material.side = THREE.FrontSide; // front faces
+        mesh.renderOrder = 1;
+        tooltip.add( mesh );
+        //tooltip = new THREE.Mesh( tt_geometry, tt_material );
+        tooltip.visible = true;
 
-        var tt_texture = new THREE.TextureLoader().load( "media/img/" + serviceList[0] + ".png" );
-        var tt_geometry = new THREE.PlaneGeometry( tt_width, tt_height, tt_width );
-        var tt_material = new THREE.MeshBasicMaterial( { map: tt_texture } );
-        tooltip = new THREE.Mesh( tt_geometry, tt_material );
-        tooltip.visible = false;
-
+        // geometrysub = new THREE.SphereBufferGeometry( 100, 12, 12 );
+        // geometrysub.computeBoundingSphere();
+        // var material = new THREE.MeshBasicMaterial( { color: 0xfefefe, wireframe: true, opacity: 0.5 } );
+        // var scaleFactor = 1/geometrysub.boundingSphere.radius;
+        // geometrysub.scale( scaleFactor, scaleFactor, scaleFactor );
+        // mesh = new THREE.Mesh( geometrysub, material );
+        // tooltip.add( mesh );
         scene.add( tooltip );
+        //scene.add( tooltip );
     }
 }
 
@@ -171,10 +217,10 @@ function animateTooltip()
 {
     if( !pngLoaded && tooltip_png.src != "" )
     {
-        var tt_texture = new THREE.TextureLoader().load( tooltip_png.src );
-        tooltip.material = new THREE.MeshBasicMaterial( { map: tt_texture } );
-        tooltip.material.transparency = true;
-        tooltip.material.opacity = 0.8;
-        pngLoaded = true;
+        //var tt_texture = new THREE.TextureLoader().load( tooltip_png.src );
+        //tooltip.material = new THREE.MeshBasicMaterial( { map: tt_texture } );
+        //tooltip.material.transparency = true;
+        //tooltip.material.opacity = 0.8;
+        //pngLoaded = true;
     }
 }

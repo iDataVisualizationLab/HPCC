@@ -239,8 +239,15 @@ function updateTooltip( host )
     };
 
     // constructing tooltip
-    var tmp = host.name.split("_")
-    var host_name = "compute-"+tmp[1]+"-"+tmp[3]
+    var tmp = host.name.split("_");
+    var host_name = "compute-"+tmp[1]+"-"+tmp[3];
+    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+    updateTooltip3D(host_name);
+    tooltip.position.x = pos.x;
+    tooltip.position.y = pos.y;
+    tooltip.position.z = pos.z - 0.5;
+    //tooltip.visible = true;
+    console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
 
@@ -337,4 +344,89 @@ function processData(str, serviceName)
         }
         return a;
     }
+}
+function updateTooltip3D(host_name)
+{
+    var levels = 6;
+    var currentval = [];
+    d3.keys(serviceListattr).forEach(d => {
+        serviceListattr[d].val.forEach(key2=>{
+            currentval.push(json[host_name][key2][time]);
+        })
+    });
+
+    // Standardize data for Radar chart
+    for (var j=0; j<currentval.length;j++){
+        if (currentval[j] == undefinedValue || isNaN(currentval[j]))
+            currentval[j] = -15;
+        else if (j==2){   ////  Job load ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[1][0],thresholds[1][1]])
+                .range([thresholds[0][0],thresholds[0][1]]);
+
+            currentval[j] =  scale(currentval[j]);
+        }
+        else if (j==4 || j==5 ){   ////  Fans SPEED ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[3][0],thresholds[3][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+
+            currentval[j] =  scale(currentval[j]);
+        }
+        else if (j==6){   ////  Power Consumption ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[4][0],thresholds[4][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            currentval[j] =  scale(currentval[j]);
+        }
+    }
+    // textures
+    var loader = new THREE.TextureLoader();
+    var texture = loader.load( 'media/textures/disc.png' );
+
+    // points
+    var vertices = new THREE.DodecahedronGeometry(1).vertices;
+    vertices.forEach((p,i)=> {
+        p.x = p.x*0.1*ROOM_SIZE*(currentval[i/2]||50)/200*levels;
+        p.y = p.y*0.1*ROOM_SIZE*(currentval[i/2]||50)/200*levels;
+        p.z = p.z*0.1*ROOM_SIZE*(currentval[i/2]||50)/200*levels;});
+    //console.log(currentval);
+    console.log(vertices);
+    scene.remove(tooltip);
+    tooltip = new THREE.Group();
+    scene.add( tooltip );
+    // renew
+    var loader = new THREE.TextureLoader();
+    var texture = loader.load( 'media/textures/disc.png' );
+    // for ( var i = 0; i < vertices.length; i ++ ) {
+    //     //vertices[ i ].add( randomPoint().multiplyScalar( 2 ) ); // wiggle the points
+    // }
+    var pointsMaterial = new THREE.PointsMaterial( {
+        color: 0x0080ff,
+        map: texture,
+        size: 0.01,
+        alphaTest: 0.5
+    } );
+    var pointsGeometry = new THREE.Geometry().setFromPoints( vertices );
+
+    var points = new THREE.Points( pointsGeometry, pointsMaterial );
+    tooltip.add( points );
+    //convex hull
+    var meshMaterial = new THREE.MeshPhongMaterial( {
+        color: 0x0080ff,
+        opacity: 0.5,
+        wireframe: true,
+        transparent: true
+    } );
+    var meshGeometry = new THREE.ConvexGeometry( vertices );
+    var mesh = new THREE.Mesh( meshGeometry, meshMaterial );
+    mesh.material.side = THREE.BackSide; // back faces
+    mesh.renderOrder = 0;
+    tooltip.add( mesh );
+    var mesh = new THREE.Mesh( meshGeometry, meshMaterial.clone() );
+    mesh.material.side = THREE.FrontSide; // front faces
+    mesh.renderOrder = 1;
+    tooltip.add( mesh );
+    //tooltip = new THREE.Mesh( tt_geometry, tt_material );
+    tooltip.visible = true;
 }

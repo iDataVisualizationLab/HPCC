@@ -43,7 +43,9 @@ var tool_tip = d3.tip()
     .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
-
+var fragment = document.createDocumentFragment();
+fragment.appendChild(document.getElementById('d3-tip'));
+document.getElementById('instructions').appendChild(fragment);
 function cotenttip (hideLine){
     str="";
     hideLine = hideLine||false;

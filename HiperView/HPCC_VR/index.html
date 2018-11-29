@@ -17,6 +17,9 @@
 		<script src="scripts/lib/d3.min.js"></script>
 		<script src="scripts/lib/three.min.js"></script>
 		<script src="scripts/lib/BoxLineGeometry.js"></script>
+		<script src="scripts/lib/QuickHull.js"></script>
+		<script src="scripts/lib/aframe-html-shader.min.js"></script>
+		<script src="scripts/lib/ConvexGeometry.js"></script>
 		<script src="scripts/lib/CSS3DRenderer.js"></script>
 		<script src="scripts/lib/dom-to-image.js"></script>
 		<script src="scripts/lib/d3.tip.js"></script>
@@ -26,8 +29,8 @@
 	<body>
         
         <div id="blocker">
-
-			<div id="instructions">
+            <div id="svgplace"></div>
+			<div id="instructions" style="width:100%;height:100%;background:rgba(142, 142, 141, 0.3); ">
 				<!-- <span style="font-size:40px">Click to play</span>
 				<br>
 				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around) -->
@@ -35,17 +38,23 @@
 			</div>
 
 		</div>
-
+        <!--<div style="width: 100%; height: 100%; position: fixed; left: 0; top: 0; z-index: -1; overflow: hidden">-->
+            <!--<div id="planeHTML" style="background: linear-gradient(red, yellow, green); width: 500px; height: 200px; font-size: 64px; padding-top: 15px; color: #222; font-weight: 600; display: flex; align-items: center; text-align: center; border-radius: 200px">-->
+                <!--<p style="border: 1px #FFF">ARE YOU HUNGRY?</p>-->
+            <!--</div>-->
+        <!--</div>-->
 		<a-scene>
 
 			<div id="holder"></div>
+            <a-plane material="shader: html; target: #instructions ; transparent: true; side: double;fps:0.5;" position="0 0 0"></a-plane>
 
-			<a-entity position="0 -1.5 0">
+            <a-entity position="0 -1.5 0">
 				<a-camera look-controls>
 					<a-cursor></a-cursor>
 				</a-camera>
 			  </a-entity>
-			<a-light></a-light>
+			<a-entity light="type: directional; color:#EEE; intensity: 2.5" position="0 0 0" rotation="0 0 0"></a-entity>
+            <a-sky color="#ECECEC"></a-sky>
 			<!--<script src="scripts/lib/tooltip.js"></script>-->
 
 			<script src="data/serviceWed27Sep.js"></script>
@@ -66,6 +75,7 @@
 			<script src="scripts/lib/radarChart.js"></script>
 
 		</a-scene>
+
 
 	</body>
 </html>

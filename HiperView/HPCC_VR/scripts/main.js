@@ -98,12 +98,15 @@ var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
 
 init();
-var svg = d3.select("#instructions").append("svg").attr("width", 1000).attr("height",800);
+var svg = d3.select("#svgplace").append("svg").attr("width", 2).attr("height",2);
 animate();
-var rectip = svg.append('rect').attr('id','placetip').attr('x',100).attr('y',100).attr('width',100).attr('height',100)
+var rectip = svg.append('rect').attr('id','placetip').attr('x',0).attr('y',0).attr('width',2).attr('height',2)
+    .style('opacity',0)
     .on("click",function(d,i){
         mouseoverNode(d)});
-
+// var fragment = document.createDocumentFragment();
+// fragment.appendChild(document.getElementById('d3-tip'));
+// document.getElementById('instructions').appendChild(fragment);
 // init
 
 function init()
@@ -114,7 +117,7 @@ function init()
     loadJSON();
     initScene();
     initCamera();
-    initLight();
+    // initLight();
     initInteractions();
 
 
@@ -208,6 +211,7 @@ function initLight()
     document.querySelector('a-light').object3D.name = "hpcc_light_group";
     light = document.querySelector('a-light').object3D.children[0];
     light.name = "hpcc_light";
+    light.intensity = 5;
 }
 
 function initInteractions()
