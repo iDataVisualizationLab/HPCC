@@ -57,7 +57,7 @@ function onMouseDown( event )
             }
         }
 
-        tooltip.visible = false;
+        //tooltip.visible = false;
         return false
     }
     

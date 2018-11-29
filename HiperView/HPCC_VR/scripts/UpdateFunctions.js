@@ -241,21 +241,26 @@ function updateTooltip( host )
     // constructing tooltip
     var tmp = host.name.split("_");
     var host_name = "compute-"+tmp[1]+"-"+tmp[3];
-    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
     //updateTooltip3D(host_name);
-    // tooltip.position.x = pos.x;
-    // tooltip.position.y = pos.y;
-    // tooltip.position.z = pos.z - 0.5;
+    tooltip.position.x = pos.x;
+    tooltip.position.y = -0.2;
+    tooltip.position.z = pos.z - 0.5;
+    //tooltip.setRotationFromMatrix( camera.matrix )
     //tooltip.visible = true;
     console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")
         .style("top", "0px")
-        .style("left","0px");
+        .style("left","246px");
+    //requestupdatetooltiip();
 
 }
-
+    function requestupdatetooltiip(){
+        $("#tip")[0].setAttribute('material',{fps:1.5});
+        setTimeout(()=>{$("#tip")[0].setAttribute('material',{fps:0});}, 500);
+    }
 function processData(str, serviceName)
 {
     if (serviceName == serviceList[0]){

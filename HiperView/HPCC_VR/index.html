@@ -30,7 +30,7 @@
         
         <div id="blocker">
             <div id="svgplace"></div>
-			<div id="instructions" style="height:100%;">
+			<div id="instructions">
 				<!-- <span style="font-size:40px">Click to play</span>
 				<br>
 				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around) -->
@@ -46,7 +46,7 @@
 		<a-scene>
 
 			<div id="holder"></div>
-            <a-plane id ="tip" material="shader: html; target: #instructions ; transparent: true; side: double;fps:0.5;" position="0 0 0"></a-plane>
+            <a-plane id ="tip" material="shader: html; target: #instructions ; transparent: true; side: double; fps:1.5;" position="0 0 0"></a-plane>
 
             <a-entity position="0 -1.5 0">
 				<a-camera look-controls>

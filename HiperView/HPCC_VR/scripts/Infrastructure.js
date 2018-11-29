@@ -212,12 +212,15 @@ function initQuanah()
 
 function animateTooltip()
 {
-    if( !pngLoaded && tooltip_png.src != "" )
-    {
-        //var tt_texture = new THREE.TextureLoader().load( tooltip_png.src );
-        //tooltip.material = new THREE.MeshBasicMaterial( { map: tt_texture } );
-        //tooltip.material.transparency = true;
-        //tooltip.material.opacity = 0.8;
-        //pngLoaded = true;
-    }
+    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
+    tooltip.rotation.y = Math.atan2( ( pos.x - tooltip.position.x ), ( pos.z - tooltip.position.z ) );
+    // tooltip
+    // if( !pngLoaded && tooltip_png.src != "" )
+    // {
+    //     //var tt_texture = new THREE.TextureLoader().load( tooltip_png.src );
+    //     //tooltip.material = new THREE.MeshBasicMaterial( { map: tt_texture } );
+    //     //tooltip.material.transparency = true;
+    //     //tooltip.material.opacity = 0.8;
+    //     //pngLoaded = true;
+    // }
 }
