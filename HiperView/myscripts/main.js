@@ -516,6 +516,7 @@ function request(){
             console.log(ri);
         }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && (isRealtime||speedup));
         speedup = false;
+        if (countarr.length>0)
         drawsummarypoint(countarr);
 
 
