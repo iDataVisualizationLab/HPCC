@@ -506,10 +506,12 @@ function request(){
         var countarr = [];
         do{
             var ri = step(iteration, count);
-            iteration = ri[0];
-            count =ri[1];
-            countarr.push(count);
-            count++;
+            if (ri) {
+                iteration = ri[0];
+                count = ri[1];
+                countarr.push(count);
+                count++;
+            }
         }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && speedup);
         speedup = false;
         drawsummarypoint(countarr);
@@ -1324,141 +1326,150 @@ function fastForwardRequest() {
 
 
 function step (iteration, count){
-    if (isRealtime){
-        var resultStep ={};
-        var xmlhttp = new XMLHttpRequest();
-        var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
-        xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrTemperature.push(result);
-                if (selectedService == serviceList[0]){
-                    hostResults[name].arr=hostResults[name].arrTemperature;
-                    resultStep = result;
-                    //plotResult(result);
+    var tmp =iteration;
+    var  i =0;
+    while (i<iterationstep) {
+        if (isRealtime) {
+            var resultStep = {};
+            var xmlhttp = new XMLHttpRequest();
+            var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+temperature";
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name].arrTemperature.push(result);
+                    if (selectedService == serviceList[0]) {
+                        hostResults[name].arr = hostResults[name].arrTemperature;
+                        resultStep = result;
+                        //plotResult(result);
+                    }
                 }
-            }
-            else{
-                console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
-
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-
-        var xmlhttp2 = new XMLHttpRequest();
-        var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
-        xmlhttp2.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrCPU_load.push(result);
-                if (selectedService == serviceList[1]){
-                    hostResults[name].arr=hostResults[name].arrCPU_load;
-                    resultStep = result;
-                    //plotResult(result);
+                else {
+                    console.log(count + "ERROR__check+temperature__ this.readyState:" + this.readyState + " this.status:" + this.status + " " + this.responseText);
                 }
-            }
-            else{
-                console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
-        };
-        xmlhttp2.open("GET", url2, true);
-        xmlhttp2.send();
 
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
 
-        var xmlhttp3 = new XMLHttpRequest();
-        var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
-        xmlhttp3.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrMemory_usage.push(result);
-                if (selectedService == serviceList[2]){
-                    hostResults[name].arr=hostResults[name].arrMemory_usage;
-                    resultStep = result;
-                    //plotResult(result);
+            var xmlhttp2 = new XMLHttpRequest();
+            var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+cpu+load";
+            xmlhttp2.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name].arrCPU_load.push(result);
+                    if (selectedService == serviceList[1]) {
+                        hostResults[name].arr = hostResults[name].arrCPU_load;
+                        resultStep = result;
+                        //plotResult(result);
+                    }
                 }
-            }
-            else{
-                console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
-        };
-        xmlhttp3.open("GET", url3, true);
-        xmlhttp3.send();
-
-        var xmlhttp4 = new XMLHttpRequest();
-        var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
-        xmlhttp4.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrFans_health.push(result);
-                if (selectedService == serviceList[3]){
-                    hostResults[name].arr=hostResults[name].arrFans_health;
-                    resultStep = result;
-                    //plotResult(result);
+                else {
+                    console.log(count + "ERROR__check+cpu+load__ this.readyState:" + this.readyState + " this.status:" + this.status + " " + this.responseText);
                 }
-            }
-            else{
-                console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
-        };
-        xmlhttp4.open("GET", url4, true);
-        xmlhttp4.send();
+            };
+            xmlhttp2.open("GET", url2, true);
+            xmlhttp2.send();
 
-        var xmlhttp5 = new XMLHttpRequest();
-        var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+power+usage";
-        xmlhttp5.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrPower_usage.push(result);
-                if (selectedService == serviceList[4]){
-                    hostResults[name].arr=hostResults[name].arrPower_usage;
-                    resultStep = result;
-                    //plotResult(result);
+
+            var xmlhttp3 = new XMLHttpRequest();
+            var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+memory+usage";
+            xmlhttp3.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name].arrMemory_usage.push(result);
+                    if (selectedService == serviceList[2]) {
+                        hostResults[name].arr = hostResults[name].arrMemory_usage;
+                        resultStep = result;
+                        //plotResult(result);
+                    }
                 }
-            }
-            else{
-                console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
-        };
-        xmlhttp5.open("GET", url5, true);
-        xmlhttp5.send();
-        if (!jQuery.isEmptyObject(resultStep))
-            plotResult(resultStep);
-        var result = {};
-    }
-    else{
-        // var result = simulateResults(hosts[count].name);
-        var tmp =iteration;
-        for (i=0;i<iterationstep;i++){
-            var result = simulateResults2(hosts[count].name,iteration, selectedService);
-            // Process the result
-            var name =  result.data.service.host_name;
-            hostResults[name].arr.push(result);
-            plotResult(result);
-            //console.log(hosts[count].name+" "+hostResults[name]);
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-            hostResults[name].arrTemperature.push(result);
+                else {
+                    console.log(count + "ERROR__check+memory+usage__ this.readyState:" + this.readyState + " this.status:" + this.status + " " + this.responseText);
+                }
+            };
+            xmlhttp3.open("GET", url3, true);
+            xmlhttp3.send();
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-            hostResults[name].arrCPU_load.push(result);
+            var xmlhttp4 = new XMLHttpRequest();
+            var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+fans+health";
+            xmlhttp4.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name].arrFans_health.push(result);
+                    if (selectedService == serviceList[3]) {
+                        hostResults[name].arr = hostResults[name].arrFans_health;
+                        resultStep = result;
+                        //plotResult(result);
+                    }
+                }
+                else {
+                    console.log(count + "ERROR__check+fans+health__ this.readyState:" + this.readyState + " this.status:" + this.status + " " + this.responseText);
+                }
+            };
+            xmlhttp4.open("GET", url4, true);
+            xmlhttp4.send();
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-            hostResults[name].arrMemory_usage.push(result);
+            var xmlhttp5 = new XMLHttpRequest();
+            var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+power+usage";
+            xmlhttp5.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name].arrPower_usage.push(result);
+                    if (selectedService == serviceList[4]) {
+                        hostResults[name].arr = hostResults[name].arrPower_usage;
+                        resultStep = result;
+                        //plotResult(result);
+                    }
+                }
+                else {
+                    console.log(count + "ERROR__check+power+usage__ this.readyState:" + this.readyState + " this.status:" + this.status + " " + this.responseText);
+                }
+            };
+            xmlhttp5.open("GET", url5, true);
+            xmlhttp5.send();
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-            hostResults[name].arrFans_health.push(result);
-
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-            hostResults[name].arrPower_usage.push(result);
-            iteration++;
+            //var result = {};
         }
-        iteration = tmp;
+        else {
+            // var result = simulateResults(hosts[count].name);
+            //var tmp =iteration;
+            for (i = 0; i < iterationstep; i++) {
+                var result = simulateResults2(hosts[count].name, iteration, selectedService);
+                // Process the result
+                var name = result.data.service.host_name;
+                hostResults[name].arr.push(result);
+                resultStep = result;//plotResult(result);
+                //console.log(hosts[count].name+" "+hostResults[name]);
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[0]);
+                hostResults[name].arrTemperature.push(result);
+
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[1]);
+                hostResults[name].arrCPU_load.push(result);
+
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[2]);
+                hostResults[name].arrMemory_usage.push(result);
+
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[3]);
+                hostResults[name].arrFans_health.push(result);
+
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[4]);
+                hostResults[name].arrPower_usage.push(result);
+                //iteration++;
+            }
+            //iteration = tmp;
+        }
+        if (!jQuery.isEmptyObject(resultStep)) {
+            iteration++;
+            i++;
+            plotResult(resultStep);
+        }
     }
+    iteration = tmp;
     return [iteration, count];
 }
 
