@@ -1429,7 +1429,7 @@ function step (iteration, count){
         };
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
-        if (!jQuery.isEmptyObject(resultStep)){
+        if (checkfullrespond){
             plotResult(resultStep);
         }else{
             return false;
@@ -1466,7 +1466,11 @@ function step (iteration, count){
     }
     return [iteration, count];
 }
-
+function checkfullrespond(iteration,name){
+    var checkKey = true;
+    serviceListattr.forEach(d=>{checkKey = checkKey&&(hostResults[name][d][iteration]!==undefined)});
+    return checkKey;
+}
 d3.select("html").on("keydown", function() {
     switch(d3.event.keyCode){
         case 27:
