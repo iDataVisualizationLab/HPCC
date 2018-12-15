@@ -226,7 +226,7 @@ function updateCPUMarker( obj )
     cpu_marker.position.y = pos.y + 0.005;
     cpu_marker.position.z = pos.z;
 }
-
+var oldhostclicked;
 function updateTooltip( host )
 {
     // event function
@@ -237,25 +237,34 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-
+    if (oldhostclicked)
+        oldhostclicked.children[2].material.color.setHex(0x000000);
+    oldhostclicked = host;
+    oldhostclicked.children[2].material.color.setHex(0xff0000);
     // constructing tooltip
     var tmp = host.name.split("_");
     var host_name = "compute-"+tmp[1]+"-"+tmp[3];
-    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
     //updateTooltip3D(host_name);
-    // tooltip.position.x = pos.x;
-    // tooltip.position.y = pos.y;
-    // tooltip.position.z = pos.z - 0.5;
+    tooltip.position.x = pos.x;
+    tooltip.position.y = 0.1;
+    tooltip.position.z = pos.z - 0.3;
+    //tooltip.setRotationFromMatrix( camera.matrix )
     //tooltip.visible = true;
     console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")
         .style("top", "0px")
-        .style("left","0px");
+        .style("left","246px");
+    requestupdatetooltiip();
 
 }
-
+    function requestupdatetooltiip(){
+        d3.select('#tip').attr('material',{fps:1.5});
+        $('#tip')[0].components.material.shader.__render();
+        setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
+    }
 function processData(str, serviceName)
 {
     if (serviceName == serviceList[0]){
