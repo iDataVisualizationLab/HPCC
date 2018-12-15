@@ -1325,6 +1325,7 @@ function fastForwardRequest() {
 
 function step (iteration, count){
     if (isRealtime){
+        var resultStep ={};
         var xmlhttp = new XMLHttpRequest();
         var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
         xmlhttp.onreadystatechange = function() {
@@ -1334,7 +1335,8 @@ function step (iteration, count){
                 hostResults[name].arrTemperature.push(result);
                 if (selectedService == serviceList[0]){
                     hostResults[name].arr=hostResults[name].arrTemperature;
-                    plotResult(result);
+                    resultStep = result;
+                    //plotResult(result);
                 }
             }
             else{
@@ -1354,7 +1356,8 @@ function step (iteration, count){
                 hostResults[name].arrCPU_load.push(result);
                 if (selectedService == serviceList[1]){
                     hostResults[name].arr=hostResults[name].arrCPU_load;
-                    plotResult(result);
+                    resultStep = result;
+                    //plotResult(result);
                 }
             }
             else{
@@ -1374,7 +1377,8 @@ function step (iteration, count){
                 hostResults[name].arrMemory_usage.push(result);
                 if (selectedService == serviceList[2]){
                     hostResults[name].arr=hostResults[name].arrMemory_usage;
-                    plotResult(result);
+                    resultStep = result;
+                    //plotResult(result);
                 }
             }
             else{
@@ -1393,7 +1397,8 @@ function step (iteration, count){
                 hostResults[name].arrFans_health.push(result);
                 if (selectedService == serviceList[3]){
                     hostResults[name].arr=hostResults[name].arrFans_health;
-                    plotResult(result);
+                    resultStep = result;
+                    //plotResult(result);
                 }
             }
             else{
@@ -1412,7 +1417,8 @@ function step (iteration, count){
                 hostResults[name].arrPower_usage.push(result);
                 if (selectedService == serviceList[4]){
                     hostResults[name].arr=hostResults[name].arrPower_usage;
-                    plotResult(result);
+                    resultStep = result;
+                    //plotResult(result);
                 }
             }
             else{
@@ -1421,6 +1427,7 @@ function step (iteration, count){
         };
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
+        plotResult(resultStep);
         var result = {};
     }
     else{
