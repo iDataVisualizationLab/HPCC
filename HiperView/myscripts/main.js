@@ -510,8 +510,8 @@ function request(){
                 iteration = ri[0];
                 count = ri[1];
                 countarr.push(count);
-                count++;
             }
+            count++;
             console.log('ri rqeust debug');
             console.log(ri);
         }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && (isRealtime||speedup));
@@ -1433,6 +1433,8 @@ function step (iteration, count){
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
         if (checkfullrespond(iteration,hosts[count].name)){
+            console.log("DEBUG!!!!");
+            console.log (resultStep);
             plotResult(resultStep);
         }else{
             return false;
