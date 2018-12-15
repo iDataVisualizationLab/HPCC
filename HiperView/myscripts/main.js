@@ -1427,7 +1427,8 @@ function step (iteration, count){
         };
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
-        plotResult(resultStep);
+        if (!jQuery.isEmptyObject(resultStep))
+            plotResult(resultStep);
         var result = {};
     }
     else{
