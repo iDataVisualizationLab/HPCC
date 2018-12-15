@@ -1429,7 +1429,7 @@ function step (iteration, count){
         };
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
-        if (checkfullrespond){
+        if (checkfullrespond(iteration,hosts[count].name)){
             plotResult(resultStep);
         }else{
             return false;
