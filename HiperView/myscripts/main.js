@@ -512,7 +512,9 @@ function request(){
                 countarr.push(count);
                 count++;
             }
-        }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && speedup);
+            console.log('ri rqeust debug');
+            console.log(ri);
+        }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && (isRealtime||speedup));
         speedup = false;
         drawsummarypoint(countarr);
 
@@ -1434,7 +1436,7 @@ function step (iteration, count){
         }else{
             return false;
         }
-        var result = {};
+        //var result = {};
     }
     else{
         // var result = simulateResults(hosts[count].name);
