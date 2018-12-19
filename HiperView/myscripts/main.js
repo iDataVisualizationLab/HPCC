@@ -91,7 +91,7 @@ var timesteppixel = 0.1; // for 26
 
 var isRealtime = true;
 if (isRealtime){
-    simDuration = 500;
+    simDuration = 100;
     numberOfMinutes = 26*60;
 }
 
@@ -481,7 +481,7 @@ function main() {
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
     xLinearSummaryScale = d3.scaleAdjust().range([0-radarsize/12,width+radarsize/12]).domain([0, maxstack-1]).itemsize(radarsize);
-    console.log(xLinearSummaryScale.step());
+    //console.log(xLinearSummaryScale.step());
     //xLinearSummaryScale.offsetx = 0-radarsize/12;
     xTimeSummaryScale =xLinearSummaryScale;
         // d3.scaleLinear()
@@ -506,20 +506,30 @@ function request(){
         var countarr = [];
         do{
             var ri = step(iteration, count);
-            if (ri) {
-                iteration = ri[0];
-                count = ri[1];
-                countarr.push(count);
-            }
+            iteration = ri[0];
+            count =ri[1];
+            countarr.push(count);
             count++;
-            console.log('ri rqeust debug');
-            console.log(ri);
-        }while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && (isRealtime||speedup));
+        }
+        while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && speedup);
         speedup = false;
-        if (countarr.length>0)
-        drawsummarypoint(countarr);
 
+        if (isRealtime==false || iteration>0)  //Avoid the error on first iteration when running on HPPC due to the asynchronous API call
+            drawsummarypoint(countarr);
 
+        if (count >= (hosts.length)){// Draw the summary Box plot ***********************************************************
+            // Draw date
+            d3.select(".currentDate")
+                .text(""+new Date(currentMiliseconds).toDateString());
+
+            // cal to plot
+            bin.data([]);
+            drawsummary();
+
+            count=0;
+            iteration+=iterationstep;
+        }
+        
         // xTimeSummaryScale = d3.scalePoint()
         //     .domain(Array.apply(null, {length: maxstack+1}).map(Function.call, Number)) // input
         //     .range([0+radarsize/12,width-radarsize/12])
@@ -534,18 +544,8 @@ function request(){
         Date.prototype.timeNow2 = function () {
             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         };
-        if (count >= (hosts.length)){// Draw the summary Box plot ***********************************************************
-            // Draw date
-            d3.select(".currentDate")
-                .text(""+new Date(currentMiliseconds).toDateString());
 
-            // cal to plot
-            bin.data([]);
-            drawsummary();
 
-            count=0;
-            iteration+=iterationstep;
-        }
         var rescaleTime = d3.scaleLinear().range([0,radarsize]).domain(xTimeSummaryScaleStep.domain());
         // Update the current timeline in Summary panel
         var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))
@@ -690,9 +690,12 @@ function drawsummary(initIndex){
 function drawsummarypoint(harr){
     var arr = [];
     var xx;
-    //currentlastIndex = hostResults[hosts[count].name].arr.length -1;
-    lastIndex = hostResults[hosts[harr[0]].name].arr.length -1;
-    query_time = hostResults[hosts[harr[0]].name].arr[lastIndex].result.query_time;
+    lastIndex = hostResults[hosts[harr[0]].name].arrTemperature.length -1;
+    console.log("harr[0]="+harr[0]);
+    console.log("hosts[harr[0]].name="+hosts[harr[0]].name);
+    console.log("hostResults[hosts[harr[0]].name].arrTemperature.length="+hostResults[hosts[harr[0]].name].arrTemperature.length)
+    query_time = hostResults[hosts[harr[0]].name].arrTemperature[lastIndex].result.query_time;
+    
     //xx = xTimeSummaryScale(query_time);
     //updateTimeText();
 
@@ -1330,7 +1333,6 @@ function fastForwardRequest() {
 
 function step (iteration, count){
     if (isRealtime){
-        var resultStep ={};
         var xmlhttp = new XMLHttpRequest();
         var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
         xmlhttp.onreadystatechange = function() {
@@ -1340,13 +1342,12 @@ function step (iteration, count){
                 hostResults[name].arrTemperature.push(result);
                 if (selectedService == serviceList[0]){
                     hostResults[name].arr=hostResults[name].arrTemperature;
-                    resultStep = result;
-                    //plotResult(result);
+                    plotResult(result);
                 }
             }
-            else{
-                console.log(count+"ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
+            //else{
+            //    console.log(count+" ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            //}
 
         };
         xmlhttp.open("GET", url, true);
@@ -1361,13 +1362,12 @@ function step (iteration, count){
                 hostResults[name].arrCPU_load.push(result);
                 if (selectedService == serviceList[1]){
                     hostResults[name].arr=hostResults[name].arrCPU_load;
-                    resultStep = result;
-                    //plotResult(result);
+                    plotResult(result);
                 }
             }
-            else{
-                console.log(count+"ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
+            //else{ 
+            //    console.log(count+" ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            //}
         };
         xmlhttp2.open("GET", url2, true);
         xmlhttp2.send();
@@ -1382,13 +1382,12 @@ function step (iteration, count){
                 hostResults[name].arrMemory_usage.push(result);
                 if (selectedService == serviceList[2]){
                     hostResults[name].arr=hostResults[name].arrMemory_usage;
-                    resultStep = result;
-                    //plotResult(result);
+                    plotResult(result);
                 }
             }
-            else{
-                console.log(count+"ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
+            //else{
+            //    console.log(count+" ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            //}
         };
         xmlhttp3.open("GET", url3, true);
         xmlhttp3.send();
@@ -1402,13 +1401,12 @@ function step (iteration, count){
                 hostResults[name].arrFans_health.push(result);
                 if (selectedService == serviceList[3]){
                     hostResults[name].arr=hostResults[name].arrFans_health;
-                    resultStep = result;
-                    //plotResult(result);
+                    plotResult(result);
                 }
             }
-            else{
-                console.log(count+"ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
+            //else{
+             //   console.log(count+" ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            //}
         };
         xmlhttp4.open("GET", url4, true);
         xmlhttp4.send();
@@ -1422,24 +1420,16 @@ function step (iteration, count){
                 hostResults[name].arrPower_usage.push(result);
                 if (selectedService == serviceList[4]){
                     hostResults[name].arr=hostResults[name].arrPower_usage;
-                    resultStep = result;
-                    //plotResult(result);
+                    plotResult(result);
                 }
             }
-            else{
-                console.log(count+"ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            }
+            //else{
+            //    console.log(count+" ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
+            //}
         };
         xmlhttp5.open("GET", url5, true);
         xmlhttp5.send();
-        if (checkfullrespond(iteration,hosts[count].name)){
-            console.log("DEBUG!!!!");
-            console.log (resultStep);
-            plotResult(resultStep);
-        }else{
-            return false;
-        }
-        //var result = {};
+        var result = {};
     }
     else{
         // var result = simulateResults(hosts[count].name);
@@ -1471,11 +1461,7 @@ function step (iteration, count){
     }
     return [iteration, count];
 }
-function checkfullrespond(iteration,name){
-    var checkKey = true;
-    serviceListattr.forEach(d=>{checkKey = checkKey&&(hostResults[name][d][iteration]!==undefined)});
-    return checkKey;
-}
+
 d3.select("html").on("keydown", function() {
     switch(d3.event.keyCode){
         case 27:

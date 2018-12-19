@@ -50,7 +50,7 @@ d3.radar = function () {
             .calculate();
         var keys = dataSpider3[0].map(d=>d.axis);
         dataSpider3.length = 0;
-        console.log(bin.bins.length);
+        console.log("numBins: "+bin.bins.length);
         dataSpider3 = bin.bins.map(d=>
         {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
             temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
