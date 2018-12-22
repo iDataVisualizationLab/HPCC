@@ -90,7 +90,7 @@ var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
 
-var isRealtime = true;
+var isRealtime = false;
 if (isRealtime){
     simDuration = 1000;
     simDurationinit = 1000;

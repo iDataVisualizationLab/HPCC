@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5c8d484a-6de3-4579-b6d4-f3b2dc8b394b" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/HiperView.zip" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HiperView/myscripts/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/myscripts/main.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -38,7 +37,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JavaScript" value="3392" />
+          <entry key="JavaScript" value="3397" />
         </counts>
       </usages-collector>
     </session>
@@ -61,7 +60,7 @@
         <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="124">
-              <caret line="92" column="22" lean-forward="true" selection-start-line="92" selection-start-column="22" selection-end-line="92" selection-end-column="22" />
+              <caret line="92" column="22" selection-start-line="92" selection-start-column="22" selection-end-line="92" selection-end-column="22" />
               <folding>
                 <element signature="e#17185#17338#0" />
                 <element signature="e#17379#21255#0" />
@@ -261,12 +260,12 @@
       <workItem from="1545282196805" duration="6028000" />
       <workItem from="1545338639394" duration="5777000" />
       <workItem from="1545411096688" duration="631000" />
-      <workItem from="1545413199148" duration="34537000" />
+      <workItem from="1545413199148" duration="35126000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74307000" />
+    <option name="totallyTimeSpent" value="74896000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -378,7 +377,7 @@
     <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="124">
-          <caret line="92" column="22" lean-forward="true" selection-start-line="92" selection-start-column="22" selection-end-line="92" selection-end-column="22" />
+          <caret line="92" column="22" selection-start-line="92" selection-start-column="22" selection-end-line="92" selection-end-column="22" />
           <folding>
             <element signature="e#17185#17338#0" />
             <element signature="e#17379#21255#0" />
