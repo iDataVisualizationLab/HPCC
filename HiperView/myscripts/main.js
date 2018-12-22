@@ -507,108 +507,116 @@ function request(){
     var countarr = [];
     var requeststatus =true;
     interval2 = new IntervalTimer(function (simDuration) {
+        var midlehandle = function (ri){
+            let returniteration = ri[0];
+            let returnCount = ri[1];
+            countarr.push(returnCount);
+            count += 1;
+        };
+        var drawprocess = function ()  {
+
+            drawsummarypoint(countarr);
+            countarr.length = 0;
+            // fullset draw
+            if (count >= (hosts.length)) {// Draw the summary Box plot ***********************************************************
+                // Draw date
+                d3.select(".currentDate")
+                    .text("" + new Date(currentMiliseconds).toDateString());
+
+                // cal to plot
+                bin.data([]);
+                drawsummary();
+
+                count = 0;
+                countbuffer = 0;
+                requeststatus = true;
+                iteration += iterationstep;
+            }
+            Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
+            xTimeSummaryScaleStep = d3.scaleSqrt()
+                .domain([0, hosts.length - 1]) // input
+                .range([0, xTimeSummaryScale.step()]);
+            Date.prototype.timeNow = function () {
+                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes();
+            };
+            Date.prototype.timeNow2 = function () {
+                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
+            };
+
+
+            var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
+            // Update the current timeline in Summary panel
+            var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
+                + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count) : rescaleTime(xTimeSummaryScaleStep(count)));
+            svg.selectAll(".currentTimeline")
+                .attr("x1", x2)
+                .attr("x2", x2);
+            svg.selectAll(".connectTimeline")
+                .attr("x1", x2)
+                .attr("x2", currentHostX)
+                .attr("y2", currentHostY);
+            svg.selectAll(".currentTextGroup")
+                .attr('transform', 'translate(' + (x2 + 2) + ',' + (sHeight - 36) + ')');
+            svg.selectAll(".currentText")
+                .text("Latest update:");
+            svg.selectAll(".currentTimeText")
+                .text(new Date(query_time).timeNow2());
+            svg.selectAll(".currentHostText")
+                .text(currentHostname);
+
+            // Update measurement text and opacity
+            for (var i = 0; i < hosts.length; i++) {
+                if (hosts[i].name == currentHostname) {
+                    hosts[i].mOpacity = 1;
+                    hosts[i].xOpacity = currentHostX + 38;
+
+                    if (hosts[i].xOpacity > (racksnewor[(hosts[i].hpcc_rack - 1) * 2 + (hosts[i].hpcc_node % 2 ? 0 : 1)].x - 2) + width / 2)
+                        hosts[i].mOpacity = 0;
+
+                    var mea = currentMeasure;
+                    if (selectedService == "Job_load" || selectedService == "Memory_usage") {
+                        mea = currentMeasure.toFixed(2);
+                    }
+                    else if (selectedService == "Power_consumption") {
+                        mea = Math.round(currentMeasure);
+                    }
+                    svg.selectAll(".measure_" + hosts[i].name)
+                        .attr("fill", color(currentMeasure))
+                        .text(mea);
+                }
+                else {
+                    if (hosts[i].mOpacity > 0)
+                        hosts[i].mOpacity -= 0.01;
+                    if (hosts[i].xOpacity == undefined)
+                        hosts[i].xOpacity = currentHostX + 38;
+                }
+
+
+                svg.selectAll(".measure_" + hosts[i].name)
+                    .attr("fill-opacity", hosts[i].mOpacity)
+                    .attr("x", hosts[i].xOpacity - 10);
+
+            }
+        };
         if (requeststatus) {
             var oldrack = hosts[countbuffer].hpcc_rack;
-            console.log('REquest query');
-            console.log(countbuffer + " " + iteration);
-            if ((countbuffer < hosts.length) && (hosts[countbuffer].hpcc_rack === oldrack) && speedup) {
-                simDuration = simDuration / 2;
-            } else {
-                speedup = false;
-                simDuration = simDurationinit;
+            if (isRealtime) {
+                step(iteration, countbuffer).then((ri) => {
+                    midlehandle(ri);
+                    drawprocess();
+                });
+                countbuffer++;
             }
-            step(iteration, countbuffer).then((ri) => {
-                console.log(countbuffer + " " + iteration);
-                let returniteration = ri[0];
-                let returnCount = ri[1];
-                countarr.push(returnCount);
-                count += 1;
-                console.log('Return query');
-                console.log(returnCount + " " + returniteration);
-                drawsummarypoint(countarr);
-                countarr.length = 0;
-                // fullset draw
-                if (count >= (hosts.length)) {// Draw the summary Box plot ***********************************************************
-                    // Draw date
-                    d3.select(".currentDate")
-                        .text("" + new Date(currentMiliseconds).toDateString());
-
-                    // cal to plot
-                    bin.data([]);
-                    drawsummary();
-
-                    count = 0;
-                    countbuffer = 0;
-                    requeststatus = true;
-                    iteration += iterationstep;
-                }
-                Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
-                xTimeSummaryScaleStep = d3.scaleSqrt()
-                    .domain([0, hosts.length - 1]) // input
-                    .range([0, xTimeSummaryScale.step()]);
-                Date.prototype.timeNow = function () {
-                    return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes();
-                };
-                Date.prototype.timeNow2 = function () {
-                    return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
-                };
-
-
-                var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
-                // Update the current timeline in Summary panel
-                var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
-                    + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count) : rescaleTime(xTimeSummaryScaleStep(count)));
-                svg.selectAll(".currentTimeline")
-                    .attr("x1", x2)
-                    .attr("x2", x2);
-                svg.selectAll(".connectTimeline")
-                    .attr("x1", x2)
-                    .attr("x2", currentHostX)
-                    .attr("y2", currentHostY);
-                svg.selectAll(".currentTextGroup")
-                    .attr('transform', 'translate(' + (x2 + 2) + ',' + (sHeight - 36) + ')');
-                svg.selectAll(".currentText")
-                    .text("Latest update:");
-                svg.selectAll(".currentTimeText")
-                    .text(new Date(query_time).timeNow2());
-                svg.selectAll(".currentHostText")
-                    .text(currentHostname);
-
-                // Update measurement text and opacity
-                for (var i = 0; i < hosts.length; i++) {
-                    if (hosts[i].name == currentHostname) {
-                        hosts[i].mOpacity = 1;
-                        hosts[i].xOpacity = currentHostX + 38;
-
-                        if (hosts[i].xOpacity > (racksnewor[(hosts[i].hpcc_rack - 1) * 2 + (hosts[i].hpcc_node % 2 ? 0 : 1)].x - 2) + width / 2)
-                            hosts[i].mOpacity = 0;
-
-                        var mea = currentMeasure;
-                        if (selectedService == "Job_load" || selectedService == "Memory_usage") {
-                            mea = currentMeasure.toFixed(2);
-                        }
-                        else if (selectedService == "Power_consumption") {
-                            mea = Math.round(currentMeasure);
-                        }
-                        svg.selectAll(".measure_" + hosts[i].name)
-                            .attr("fill", color(currentMeasure))
-                            .text(mea);
-                    }
-                    else {
-                        if (hosts[i].mOpacity > 0)
-                            hosts[i].mOpacity -= 0.01;
-                        if (hosts[i].xOpacity == undefined)
-                            hosts[i].xOpacity = currentHostX + 38;
-                    }
-
-
-                    svg.selectAll(".measure_" + hosts[i].name)
-                        .attr("fill-opacity", hosts[i].mOpacity)
-                        .attr("x", hosts[i].xOpacity - 10);
-
-                }
-            });
-            countbuffer++;
+            else
+            {
+                do {
+                    let ri = step(iteration, countbuffer);
+                    midlehandle(ri);
+                    countbuffer++;
+                }while ((countbuffer < hosts.length) && (hosts[countbuffer].hpcc_rack === oldrack) && speedup);
+                speedup = false;
+                drawprocess();
+            }
             if (countbuffer>= (hosts.length))
                 requeststatus = false; //stop request
 
@@ -1386,7 +1394,6 @@ function step (iteration, count){
     }
     else{
         // var result = simulateResults(hosts[count].name);
-        return new Promise ((resolve,reject)=> {
             var tmp = iteration;
             for (i = 0; i < iterationstep; i++) {
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
@@ -1412,8 +1419,7 @@ function step (iteration, count){
                 iteration++;
             }
             iteration = tmp;
-            resolve ([iteration, count]);
-        })
+        return [iteration, count];
     }
     //return [iteration, count];
 }
