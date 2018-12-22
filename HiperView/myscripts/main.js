@@ -81,6 +81,7 @@ var baseTemperature =60;
 
 var interval2;
 var simDuration =0;
+var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
@@ -91,7 +92,8 @@ var timesteppixel = 0.1; // for 26
 
 var isRealtime = true;
 if (isRealtime){
-    simDuration = 100;
+    simDuration = 1000;
+    simDurationinit = 1000;
     numberOfMinutes = 26*60;
 }
 
@@ -107,6 +109,7 @@ var sumType = "Radar";
 //***********************
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
+var serviceQuery =["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService;
@@ -496,110 +499,121 @@ var speedup= false;
 function request(){
     bin.data([]);
     var count = 0;
+    var countbuffer = 0;
     var iteration = 0;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
     lastIndex = 0;
-
-    interval2 = new IntervalTimer(function () {
-        var oldrack = hosts[count].hpcc_rack;
-        var countarr = [];
-        do{
-            var ri = step(iteration, count);
-            iteration = ri[0];
-            count =ri[1];
-            countarr.push(count);
-            count++;
-        }
-        while((count < hosts.length) &&(hosts[count].hpcc_rack === oldrack ) && speedup);
-        speedup = false;
-
-        if (isRealtime==false || iteration>0)  //Avoid the error on first iteration when running on HPPC due to the asynchronous API call
-            drawsummarypoint(countarr);
-
-        if (count >= (hosts.length)){// Draw the summary Box plot ***********************************************************
-            // Draw date
-            d3.select(".currentDate")
-                .text(""+new Date(currentMiliseconds).toDateString());
-
-            // cal to plot
-            bin.data([]);
-            drawsummary();
-
-            count=0;
-            iteration+=iterationstep;
-        }
-        
-        // xTimeSummaryScale = d3.scalePoint()
-        //     .domain(Array.apply(null, {length: maxstack+1}).map(Function.call, Number)) // input
-        //     .range([0+radarsize/12,width-radarsize/12])
-        //     .padding(0); // output
-        Scatterplot.init(xTimeSummaryScale(0)+swidth/2);
-        xTimeSummaryScaleStep = d3.scaleSqrt()
-            .domain([0, hosts.length-1]) // input
-            .range([0, xTimeSummaryScale.step()]);
-        Date.prototype.timeNow = function () {
-            return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-        };
-        Date.prototype.timeNow2 = function () {
-            return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
-        };
-
-
-        var rescaleTime = d3.scaleLinear().range([0,radarsize]).domain(xTimeSummaryScaleStep.domain());
-        // Update the current timeline in Summary panel
-        var x2 = xTimeSummaryScale(lastIndex<maxstack?lastIndex:(maxstack-1))
-        +((lastIndex<(maxstack-1))?xTimeSummaryScaleStep(count):rescaleTime(xTimeSummaryScaleStep(count)));
-        svg.selectAll(".currentTimeline")
-            .attr("x1", x2)
-            .attr("x2", x2);
-        svg.selectAll(".connectTimeline")
-            .attr("x1", x2)
-            .attr("x2", currentHostX)
-            .attr("y2", currentHostY);
-        svg.selectAll(".currentTextGroup")
-            .attr('transform', 'translate(' + (x2+2) + ',' + (sHeight-36) + ')');
-        svg.selectAll(".currentText")
-            .text("Latest update:");
-        svg.selectAll(".currentTimeText")
-            .text(new Date(query_time).timeNow2());
-        svg.selectAll(".currentHostText")
-            .text(currentHostname);
-
-        // Update measurement text and opacity
-        for (var i = 0; i < hosts.length; i++) {
-            if (hosts[i].name==currentHostname){
-                hosts[i].mOpacity = 1;
-                hosts[i].xOpacity = currentHostX+38;
-
-                if (hosts[i].xOpacity>(racksnewor[(hosts[i].hpcc_rack - 1)*2 + (hosts[i].hpcc_node%2?0:1)].x-2)+width/2)
-                    hosts[i].mOpacity =0;
-
-                var mea = currentMeasure;
-                if (selectedService=="Job_load" || selectedService=="Memory_usage"){
-                    mea = currentMeasure.toFixed(2);
-                }
-                else if (selectedService=="Power_consumption"){
-                    mea = Math.round(currentMeasure);
-                }
-                svg.selectAll(".measure_"+hosts[i].name)
-                    .attr("fill", color(currentMeasure))
-                    .text(mea);
+    var countarr = [];
+    var requeststatus =true;
+    interval2 = new IntervalTimer(function (simDuration) {
+        if (requeststatus) {
+            var oldrack = hosts[countbuffer].hpcc_rack;
+            console.log('REquest query');
+            console.log(countbuffer + " " + iteration);
+            if ((countbuffer < hosts.length) && (hosts[countbuffer].hpcc_rack === oldrack) && speedup) {
+                simDuration = simDuration / 2;
+            } else {
+                speedup = false;
+                simDuration = simDurationinit;
             }
-            else{
-                if (hosts[i].mOpacity >0)
-                    hosts[i].mOpacity -= 0.01;
-                if (hosts[i].xOpacity==undefined)
-                    hosts[i].xOpacity = currentHostX+38;
-            }
+            step(iteration, countbuffer).then((ri) => {
+                console.log(countbuffer + " " + iteration);
+                let returniteration = ri[0];
+                let returnCount = ri[1];
+                countarr.push(returnCount);
+                count += 1;
+                console.log('Return query');
+                console.log(returnCount + " " + returniteration);
+                drawsummarypoint(countarr);
+                countarr.length = 0;
+                // fullset draw
+                if (count >= (hosts.length)) {// Draw the summary Box plot ***********************************************************
+                    // Draw date
+                    d3.select(".currentDate")
+                        .text("" + new Date(currentMiliseconds).toDateString());
+
+                    // cal to plot
+                    bin.data([]);
+                    drawsummary();
+
+                    count = 0;
+                    countbuffer = 0;
+                    requeststatus = true;
+                    iteration += iterationstep;
+                }
+                Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
+                xTimeSummaryScaleStep = d3.scaleSqrt()
+                    .domain([0, hosts.length - 1]) // input
+                    .range([0, xTimeSummaryScale.step()]);
+                Date.prototype.timeNow = function () {
+                    return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes();
+                };
+                Date.prototype.timeNow2 = function () {
+                    return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
+                };
 
 
-            svg.selectAll(".measure_"+hosts[i].name)
-                .attr("fill-opacity", hosts[i].mOpacity)
-                .attr("x", hosts[i].xOpacity-10);
+                var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
+                // Update the current timeline in Summary panel
+                var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
+                    + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count) : rescaleTime(xTimeSummaryScaleStep(count)));
+                svg.selectAll(".currentTimeline")
+                    .attr("x1", x2)
+                    .attr("x2", x2);
+                svg.selectAll(".connectTimeline")
+                    .attr("x1", x2)
+                    .attr("x2", currentHostX)
+                    .attr("y2", currentHostY);
+                svg.selectAll(".currentTextGroup")
+                    .attr('transform', 'translate(' + (x2 + 2) + ',' + (sHeight - 36) + ')');
+                svg.selectAll(".currentText")
+                    .text("Latest update:");
+                svg.selectAll(".currentTimeText")
+                    .text(new Date(query_time).timeNow2());
+                svg.selectAll(".currentHostText")
+                    .text(currentHostname);
 
+                // Update measurement text and opacity
+                for (var i = 0; i < hosts.length; i++) {
+                    if (hosts[i].name == currentHostname) {
+                        hosts[i].mOpacity = 1;
+                        hosts[i].xOpacity = currentHostX + 38;
+
+                        if (hosts[i].xOpacity > (racksnewor[(hosts[i].hpcc_rack - 1) * 2 + (hosts[i].hpcc_node % 2 ? 0 : 1)].x - 2) + width / 2)
+                            hosts[i].mOpacity = 0;
+
+                        var mea = currentMeasure;
+                        if (selectedService == "Job_load" || selectedService == "Memory_usage") {
+                            mea = currentMeasure.toFixed(2);
+                        }
+                        else if (selectedService == "Power_consumption") {
+                            mea = Math.round(currentMeasure);
+                        }
+                        svg.selectAll(".measure_" + hosts[i].name)
+                            .attr("fill", color(currentMeasure))
+                            .text(mea);
+                    }
+                    else {
+                        if (hosts[i].mOpacity > 0)
+                            hosts[i].mOpacity -= 0.01;
+                        if (hosts[i].xOpacity == undefined)
+                            hosts[i].xOpacity = currentHostX + 38;
+                    }
+
+
+                    svg.selectAll(".measure_" + hosts[i].name)
+                        .attr("fill-opacity", hosts[i].mOpacity)
+                        .attr("x", hosts[i].xOpacity - 10);
+
+                }
+            });
+            countbuffer++;
+            if (countbuffer>= (hosts.length))
+                requeststatus = false; //stop request
+
+            console.log('OUT!!!');
         }
-
     } , simDuration);
 
     var count3=0;
@@ -1330,136 +1344,78 @@ function fastForwardRequest() {
     speedup = true;
 }
 
+function requestService(count,serin) {
+    return new Promise(function(resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(e) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name][serviceListattr[serin]].push(result);
+                    if (selectedService === serviceList[serin]) {
+                        hostResults[name].arr = hostResults[name][serviceListattr[serin]];
+                        plotResult(result);
+                    }
+                    console.log(name+"   "+serviceListattr[serin]);
+                    console.log('can you run to here!?');
+                    resolve(xhr.response);
+                } else {
+                    reject(xhr.status);
+                }
+            }
+        };
+        xhr.ontimeout = function () {
+            reject('timeout');
+        };
+        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[serin], true);
+        xhr.send();
+    })
+}
+
+function requestRT(iteration,count) {
+    var promises =  serviceList.map(function (d,i){
+        return requestService(count,i);
+    });
+    return Promise.all(promises).then(()=>{return [iteration, count];});
+}
 
 function step (iteration, count){
     if (isRealtime){
-        var xmlhttp = new XMLHttpRequest();
-        var url = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+temperature";
-        xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrTemperature.push(result);
-                if (selectedService == serviceList[0]){
-                    hostResults[name].arr=hostResults[name].arrTemperature;
-                    plotResult(result);
-                }
-            }
-            //else{
-            //    console.log(count+" ERROR__check+temperature__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            //}
-
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-
-        var xmlhttp2 = new XMLHttpRequest();
-        var url2 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+cpu+load";
-        xmlhttp2.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrCPU_load.push(result);
-                if (selectedService == serviceList[1]){
-                    hostResults[name].arr=hostResults[name].arrCPU_load;
-                    plotResult(result);
-                }
-            }
-            //else{ 
-            //    console.log(count+" ERROR__check+cpu+load__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            //}
-        };
-        xmlhttp2.open("GET", url2, true);
-        xmlhttp2.send();
-
-
-        var xmlhttp3 = new XMLHttpRequest();
-        var url3 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+memory+usage";
-        xmlhttp3.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrMemory_usage.push(result);
-                if (selectedService == serviceList[2]){
-                    hostResults[name].arr=hostResults[name].arrMemory_usage;
-                    plotResult(result);
-                }
-            }
-            //else{
-            //    console.log(count+" ERROR__check+memory+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            //}
-        };
-        xmlhttp3.open("GET", url3, true);
-        xmlhttp3.send();
-
-        var xmlhttp4 = new XMLHttpRequest();
-        var url4 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+fans+health";
-        xmlhttp4.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrFans_health.push(result);
-                if (selectedService == serviceList[3]){
-                    hostResults[name].arr=hostResults[name].arrFans_health;
-                    plotResult(result);
-                }
-            }
-            //else{
-             //   console.log(count+" ERROR__check+fans+health__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            //}
-        };
-        xmlhttp4.open("GET", url4, true);
-        xmlhttp4.send();
-
-        var xmlhttp5 = new XMLHttpRequest();
-        var url5 = "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname="+hosts[count].name+"&servicedescription=check+power+usage";
-        xmlhttp5.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var result = processResult(JSON.parse(this.responseText));
-                var name =  result.data.service.host_name;
-                hostResults[name].arrPower_usage.push(result);
-                if (selectedService == serviceList[4]){
-                    hostResults[name].arr=hostResults[name].arrPower_usage;
-                    plotResult(result);
-                }
-            }
-            //else{
-            //    console.log(count+" ERROR__check+power+usage__ this.readyState:"+this.readyState+" this.status:"+this.status+" "+this.responseText);
-            //}
-        };
-        xmlhttp5.open("GET", url5, true);
-        xmlhttp5.send();
-        var result = {};
+            return requestRT(iteration,count);
     }
     else{
         // var result = simulateResults(hosts[count].name);
-        var tmp =iteration;
-        for (i=0;i<iterationstep;i++){
-            var result = simulateResults2(hosts[count].name,iteration, selectedService);
-            // Process the result
-            var name =  result.data.service.host_name;
-            hostResults[name].arr.push(result);
-            plotResult(result);
-            //console.log(hosts[count].name+" "+hostResults[name]);
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-            hostResults[name].arrTemperature.push(result);
+        return new Promise ((resolve,reject)=> {
+            var tmp = iteration;
+            for (i = 0; i < iterationstep; i++) {
+                var result = simulateResults2(hosts[count].name, iteration, selectedService);
+                // Process the result
+                var name = result.data.service.host_name;
+                hostResults[name].arr.push(result);
+                plotResult(result);
+                //console.log(hosts[count].name+" "+hostResults[name]);
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[0]);
+                hostResults[name].arrTemperature.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-            hostResults[name].arrCPU_load.push(result);
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[1]);
+                hostResults[name].arrCPU_load.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-            hostResults[name].arrMemory_usage.push(result);
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[2]);
+                hostResults[name].arrMemory_usage.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-            hostResults[name].arrFans_health.push(result);
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[3]);
+                hostResults[name].arrFans_health.push(result);
 
-            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-            hostResults[name].arrPower_usage.push(result);
-            iteration++;
-        }
-        iteration = tmp;
+                var result = simulateResults2(hosts[count].name, iteration, serviceList[4]);
+                hostResults[name].arrPower_usage.push(result);
+                iteration++;
+            }
+            iteration = tmp;
+            resolve ([iteration, count]);
+        })
     }
-    return [iteration, count];
+    //return [iteration, count];
 }
 
 d3.select("html").on("keydown", function() {
