@@ -308,7 +308,78 @@ table, th, td {
 
 #selectionheader {
 	background: #dddddd;
+	text-align: center;
 }
 #selection span{
 	background-color: rgba(255,255,255,0.5);
+}
+
+#scatterzone {
+	visibility: hidden;
+}
+div.tooltip {
+	position: absolute;
+	text-align: center;
+	width: auto;
+	height: auto;
+	padding: 2px;
+	font: 12px sans-serif;
+	background: #bbb;
+	border: 1px;
+	border-radius: 8px;
+	pointer-events: none;
+}
+div.scatter_y{
+	position: absolute;
+	top:155px;
+	left:-20px;
+	width: 160px;
+	height:20px;
+	line-height: 20px;
+	text-align: center;
+	border: 1px solid #aaaaaa;
+	margin:auto;
+	transform: rotate(-90deg);
+	cursor: all-scroll;
+}
+
+div.scatter_x{
+	position: absolute;
+	top:275px;
+	left:32px;
+	width: 160px;
+	height:20px;
+	line-height: 20px;
+	text-align: center;
+	border: 1px solid #aaaaaa;
+	cursor: all-scroll;
+
+}
+div.selection{
+	position: absolute;
+	opacity: 0;
+	line-height: 20px;
+	text-align: left;
+	border: 1px solid #aaaaaa;
+	left: 14px;
+	top: 98px;
+}
+div.selection div,span {
+	padding: 2px 5px;
+}
+
+#scatterzone span{
+	cursor: all-scroll;
+}
+
+#scatterzone .activeX{
+	background: #000000;
+	color: white;
+	font-weight: bold;
+}
+
+#scatterzone .activeY{
+	background: #9c9c9c;
+	color: white;
+	font-weight: bold;
 }

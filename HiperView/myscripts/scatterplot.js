@@ -4,56 +4,60 @@
 
 var scatterplot_settings = {
     circle_size: 2,
-    data_onXaxis: "cpu1temp", //Temperature, Memory_Usage, CPU_load, Fans_Health, Power
-    data_onYaxis: "fan1peed", ////Temperature, Memory_Usage, CPU_load, Fans_Health, Power
+    data_onXaxis: "cpu1temp",
+    data_onYaxis: "fan1peed",
     active_features: {
-        cpu1temp: {name: "CPU 1 Temp", maxScale:122},
-        cpu2temp: {name: "CPU 2 Temp", maxScale:122},
-        inlettemp: {name: "Inlet Temp", maxScale:122},
-        memoryusg: {name: "Memory Usage", maxScale:100},
-        fan1peed: {name: "Fan 1 Speed", maxScale:17850},
-        fan2peed: {name: "Fan 2 Speed", maxScale:17850},
-        fan3peed: {name: "Fan 3 Speed", maxScale:17850},
-        fan4peed: {name: "Fan 3 Speed", maxScale:17850},
-        jobload: {name: "Job Load", maxScale:10},
-        pwconsumption: {name: "Power Consumption", maxScale:350}
+        cpu1temp: {name: "CPU 1 Temp", scale:[0,122]},
+        cpu2temp: {name: "CPU 2 Temp", scale:[0,122]},
+        inlettemp: {name: "Inlet Temp", scale:[0,122]},
+        memoryusg: {name: "Memory Usage", scale:[0,100]},
+        fan1peed: {name: "Fan 1 Speed", scale:[0,17850]},
+        fan2peed: {name: "Fan 2 Speed", scale:[0,17850]},
+        fan3peed: {name: "Fan 3 Speed", scale:[0,17850]},
+        fan4peed: {name: "Fan 4 Speed", scale:[0,17850]},
+        jobload: {name: "Job Load", scale:[0,10]},
+        pwconsumption: {name: "Power Consumption", scale:[0,350]}
     }
 
 };
-var sheight = 230,
-    swidth = 230;
+var sheight = 180,
+    swidth = 180;
+var sizeAxisBox = 100;
 //Bind properties to selection
 
 
 
 //
 d3.Scatterplot = function () {
-    d3.select("#selection").selectAll("span").data(Object.entries(scatterplot_settings.active_features).map(function(d){return d[0]}))
+    d3.select("#selection").selectAll("span").data(d3.entries(scatterplot_settings.active_features))
         .enter()
         .append('span')
         .style("display",'block')
         .attr("id",function (d,i) {
-            return "drag"+i;
+            return d.key;
         })
         .text(function (d) {
-            return d;})
+            return d.value.name;})
         .attr("draggable",true)
         .attr("ondragstart","Scatterplot.drag(event)");
+    $('#selection '+'#'+scatterplot_settings.data_onXaxis).addClass('activeX');
+    $('#selection '+'#'+scatterplot_settings.data_onYaxis).addClass('activeY');
     let colorArray = ["#9dbee6", "#afcae6", "#c8dce6", "#e6e6e6", "#e6e6d8", "#e6d49c", "#e6b061", "#e6852f", "#e6531a", "#e61e1a"];
-    let margin = {top: 30, right: 0, bottom: 0, left: 0};
+    let margin = {top: 50, right: 0, bottom: 0, left: sizeAxisBox};
+    let padding = 5;
     let colorRedBlue = d3.scaleLinear()
         .domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
         .range(colorArray);
     let hostResults =[];
-    let offset = 50,
-        padding = 25;
+    // let offset = 50,
+    //     padding = 25;
     let xScale = d3.scaleLinear()
-        .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].maxScale])
-        .range([0, swidth]);
+        .domain(scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].scale)
+        .range([padding, swidth-padding]);
 
     let yScale = d3.scaleLinear()
-        .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].maxScale])
-        .range([sheight, 0]);
+        .domain(scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].scale)
+        .range([sheight-padding, padding]);
     let svg;
     let Scatterplot ={};
 
@@ -66,8 +70,21 @@ d3.Scatterplot = function () {
      * @constructor
      */
     Scatterplot.init  = function(xx){
-        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-swidth/2-10)+"px").style('top',(sheight+15)+"px");
-        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+80)+"px").style('top',(95+sheight+15)+"px");
+
+        //FIX ME ** suggestion make variable for service
+        scatterplot_settings.active_features.cpu1temp.scale =
+            scatterplot_settings.active_features.cpu2temp.scale =
+            scatterplot_settings.active_features.inlettemp.scale =thresholds[0];
+        scatterplot_settings.active_features.jobload.scale =thresholds[1];
+        scatterplot_settings.active_features.memoryusg.scale =thresholds[2];
+        scatterplot_settings.active_features.fan1peed.scale =
+            scatterplot_settings.active_features.fan2peed.scale =
+            scatterplot_settings.active_features.fan3peed.scale =
+            scatterplot_settings.active_features.fan4peed.scale = thresholds[3];
+        scatterplot_settings.active_features.memoryusg.scale =thresholds[4];
+
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-swidth/2-10+margin.left)+"px").style('top',(sheight+margin.top-15)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+85+margin.left)+"px").style('top',(97+sheight+margin.top-15)+"px");
         dragElement(document.getElementById("selection"));
     };
     function ScatterPlotG(g, dataPoints) {
@@ -81,11 +98,16 @@ d3.Scatterplot = function () {
                 return d.hostname;
             })
             .attr("cx", function (d) {
-                return xScale(d[scatterplot_settings.data_onXaxis]);
+                let cx = xScale(d[scatterplot_settings.data_onXaxis]);
+                cx = isNaN(cx)?-100:cx;
+                return cx;
             })
             .attr("cy", function (d) {
-                return yScale(d[scatterplot_settings.data_onYaxis]);
+                let cy = yScale(d[scatterplot_settings.data_onYaxis]);
+                cy = isNaN(cy)?-100:cy;
+                return cy;
             })
+            .style('visibility',function(d){return (d[scatterplot_settings.data_onXaxis]&&d[scatterplot_settings.data_onYaxis]||0)? 'visible':'hidden'})
             .on("mouseover", function (d) {
                 showTooltip(d)
             })
@@ -112,29 +134,49 @@ d3.Scatterplot = function () {
         svg.select(".box" + indexo).remove();
         var g = svg.append("g")
             .attr("class",("scatter"+(indexo)+" box"+(indexo)+" graphsum"))
-            .attr("transform", "translate(" + xx + ","+margin.top+")");
+            .attr("transform", "translate(" + (xx+margin.left) + ","+margin.top+")");
 
 
         var dataPoints = [];
         for (var key in hostResults) {
             var obj = {};
             obj.hostname = key;
-            var temps = extractTemperature(hostResults[key].arrTemperature[index].data.service.plugin_output);
+            var indx = 0;
+            var temps = processData(hostResults[key][serviceListattr[indx]][index].data.service.plugin_output,serviceList[indx]);
             obj.cpu1temp = temps[0];
             obj.cpu2temp = temps[1];
             obj.inlettemp = temps[2];
-            obj.memoryusg = extractMemoryUsage(hostResults[key].arrMemory_usage[index].data.service.plugin_output);
-            var fans = extractFanHealth(hostResults[key].arrFans_health[index].data.service.plugin_output);
+            indx = 2;
+            obj.memoryusg = processData(hostResults[key][serviceListattr[indx]][index].data.service.plugin_output,serviceList[indx])[0];
+            indx = 3;
+            var fans = processData(hostResults[key][serviceListattr[indx]][index].data.service.plugin_output,serviceList[indx]);
             obj.fan1peed = fans[0];
             obj.fan2peed = fans[1];
             obj.fan3peed = fans[2];
             obj.fan4peed = fans[3];
-            obj.jobload = extractCPULoad(hostResults[key].arrCPU_load[index].data.service.plugin_output);
-            obj.pwconsumption = extractPowerUsage(hostResults[key].arrPower_usage[index].data.service.plugin_output);
+            indx = 1;
+            obj.jobload = processData(hostResults[key][serviceListattr[indx]][index].data.service.plugin_output,serviceList[indx])[0];
+            indx = 4;
+            obj.pwconsumption = processData(hostResults[key][serviceListattr[indx]][index].data.service.plugin_output,serviceList[indx])[0];
+            // var obj = {};
+            // obj.hostname = key;
+            // var temps = extractTemperature(hostResults[key].arrTemperature[index].data.service.plugin_output);
+            // obj.cpu1temp = temps[0];
+            // obj.cpu2temp = temps[1];
+            // obj.inlettemp = temps[2];
+            // obj.memoryusg = extractMemoryUsage(hostResults[key].arrMemory_usage[index].data.service.plugin_output);
+            // var fans = extractFanHealth(hostResults[key].arrFans_health[index].data.service.plugin_output);
+            // obj.fan1peed = fans[0];
+            // obj.fan2peed = fans[1];
+            // obj.fan3peed = fans[2];
+            // obj.fan4peed = fans[3];
+            // obj.jobload = extractCPULoad(hostResults[key].arrCPU_load[index].data.service.plugin_output);
+            // obj.pwconsumption = extractPowerUsage(hostResults[key].arrPower_usage[index].data.service.plugin_output);
 
 
             dataPoints.push(obj);
         }
+
 
 
         g.append("rect").attr("class", "scatterPlotRect")
@@ -144,13 +186,12 @@ d3.Scatterplot = function () {
             .attr("height", sheight + 5)
             .style("stroke",'black')
             .style("fill", function (d) {
-                return colorRedBlue(Outlier(dataPoints.map(function (d) {
-                    return [xScale(d[scatterplot_settings.data_onXaxis]), yScale(d[scatterplot_settings.data_onYaxis])]
-                })))
+                return colorRedBlue(Outlier(dataPoints.filter(d=>(d[scatterplot_settings.data_onXaxis]&&d[scatterplot_settings.data_onYaxis]||0))
+                    .map(d=> [xScale(d[scatterplot_settings.data_onXaxis]), yScale(d[scatterplot_settings.data_onYaxis])])));
             })
             .on("mouseover",d=> g.moveToFront());
         ScatterPlotG(g, dataPoints);
-        if (indexo >= maxstack-1) shiftplot(svg,"scatter",80,margin.top,0);
+        if (indexo >= maxstack-1) shiftplot(svg,"scatter",80,margin.top,margin.left);
 
     };
 
@@ -265,14 +306,18 @@ d3.Scatterplot = function () {
             ev.currentTarget.removeChild(ev.currentTarget.firstChild);
         }
         ev.currentTarget.appendChild(src);
-        if (ev.currentTarget.id == "data_onYaxis") {
-            scatterplot_settings.data_onYaxis = src.textContent;
+        if (ev.currentTarget.id === "data_onYaxis") {
+            $('#selection '+'#'+scatterplot_settings.data_onYaxis).removeClass('activeY');
+            scatterplot_settings.data_onYaxis = src.id;
+            $('#selection '+'#'+scatterplot_settings.data_onYaxis).addClass('activeY');
             Scatterplot.UpdateYAxis();
 
         }
         ;
-        if (ev.currentTarget.id == "data_onXaxis") {
-            scatterplot_settings.data_onXaxis = src.textContent;
+        if (ev.currentTarget.id === "data_onXaxis") {
+            $('#selection '+'#'+scatterplot_settings.data_onXaxis).removeClass('activeX');
+            scatterplot_settings.data_onXaxis = src.id;
+            $('#selection '+'#'+scatterplot_settings.data_onXaxis).addClass('activeX');
             Scatterplot.UpdateXAxis();
         }
         ;
@@ -280,16 +325,17 @@ d3.Scatterplot = function () {
 
     Scatterplot.UpdateXAxis = function(){
         xScale = d3.scaleLinear()
-            .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].maxScale])
-            .range([0, swidth]);
-        d3.selectAll('.graphsum').selectAll('circle').attr("cx", function (d) {
-            console.log(d[scatterplot_settings.data_onXaxis]);
-            return xScale(d[scatterplot_settings.data_onXaxis]);
-        });
+            .domain(scatterplot_settings.active_features[scatterplot_settings.data_onXaxis].scale)
+            .range([padding, swidth-padding]);
+        d3.selectAll('.graphsum').selectAll('circle').transition().attr("cx", function (d) {
+            return isNaN(d[scatterplot_settings.data_onXaxis])?-100:xScale(d[scatterplot_settings.data_onXaxis]);
+        }).style('visibility',function(d){return !(isNaN(d[scatterplot_settings.data_onXaxis])||isNaN(d[scatterplot_settings.data_onYaxis]))? 'visible':'hidden'});
 
         d3.selectAll(".graphsum").nodes().forEach(function (d, i) {
 
-            var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
+            var datapoints = d3.select(d).selectAll('circle').filter(d=>
+                !(isNaN(d[scatterplot_settings.data_onXaxis])||isNaN(d[scatterplot_settings.data_onYaxis]))).nodes()
+                .map(function (d) {
                 return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
             });
             d3.select(d).selectAll('rect').style('fill', function () {
@@ -302,14 +348,16 @@ d3.Scatterplot = function () {
 
     Scatterplot.UpdateYAxis = function() {
         yScale = d3.scaleLinear()
-            .domain([0, scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].maxScale])
-            .range([sheight, 0]);
-        d3.selectAll('.graphsum').selectAll('circle').attr("cy", function (d) {
-            return yScale(d[scatterplot_settings.data_onYaxis]);
-        });
+            .domain(scatterplot_settings.active_features[scatterplot_settings.data_onYaxis].scale)
+            .range([sheight-padding, padding]);
+        d3.selectAll('.graphsum').selectAll('circle').transition().attr("cy", function (d) {
+            return isNaN(d[scatterplot_settings.data_onYaxis])?-100:yScale(d[scatterplot_settings.data_onYaxis]);
+        }).style('visibility',function(d){return (!(isNaN(d[scatterplot_settings.data_onXaxis])||isNaN(d[scatterplot_settings.data_onYaxis])))? 'visible':'hidden'});
         d3.selectAll(".graphsum").nodes().forEach(function (d, i) {
 
-            var datapoints = d3.select(d).selectAll('circle').nodes().map(function (d) {
+            var datapoints = d3.select(d).selectAll('circle').filter(d=>
+                !(isNaN(d[scatterplot_settings.data_onXaxis])||isNaN(d[scatterplot_settings.data_onYaxis]))).nodes()
+                .map(function (d) {
                 return [xScale(d3.select(d).data()[0][scatterplot_settings.data_onXaxis]), yScale(d3.select(d).data()[0][scatterplot_settings.data_onYaxis])]
             });
             d3.select(d).selectAll('rect').style('fill', function () {

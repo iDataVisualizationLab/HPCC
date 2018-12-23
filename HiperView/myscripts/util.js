@@ -101,7 +101,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     var y = 30;
     var r = 20;
     var barW= 5;
-    if (selectedService=="Memory_usage" || selectedService=="Job_load")
+    if (selectedService==="Memory_usage" || selectedService==="Job_load")
         barW =8;
     var xScale = d3.scaleLinear()
         .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
@@ -143,9 +143,9 @@ function drawLegend(s,arrThresholds, arrColor, dif){
         .style("font-size", "12px")
         .attr("font-family", "sans-serif")
         .text(function (d,i) {
-            if (selectedService==serviceList[2] && (i==0 || i==2 || i==4 || i==6))  // memory
+            if (selectedService===serviceList[2] && (i==0 || i==2 || i==4 || i==6))  // memory
                 return "";
-            else if (selectedService==serviceList[3] && i==0)  // Fan speed
+            else if (selectedService===serviceList[3] && i==0)  // Fan speed
                 return "";
             else
                 return Math.round(d);

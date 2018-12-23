@@ -620,7 +620,6 @@ function request(){
             if (countbuffer>= (hosts.length))
                 requeststatus = false; //stop request
 
-            console.log('OUT!!!');
         }
     } , simDuration);
 
@@ -674,14 +673,13 @@ function drawsummary(initIndex){
                     arr.push(a[0]);
                 }
             }
-            drawBoxplot(svg, arr, temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp, xx + xTimeSummaryScale.step()/2);
+            drawBoxplot(svg, arr, temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp, xx + xTimeSummaryScale.step()-ww);
             break;
         case "Scatterplot":
 
-            // Boxplot Time
+
             Scatterplot.svg(svg).data(hostResults).draw(lastIndex,temp===undefined?(lastIndex>(maxstack-1)?(maxstack-1):lastIndex):temp,xx+80);
 
-            //drawBoxplot(svg, arr, lastIndex, xx - 10);
             break;
         case "Radar":
             for(var h = 0;h < hosts.length;h++)
@@ -713,9 +711,6 @@ function drawsummarypoint(harr){
     var arr = [];
     var xx;
     lastIndex = hostResults[hosts[harr[0]].name].arrTemperature.length -1;
-    console.log("harr[0]="+harr[0]);
-    console.log("hosts[harr[0]].name="+hosts[harr[0]].name);
-    console.log("hostResults[hosts[harr[0]].name].arrTemperature.length="+hostResults[hosts[harr[0]].name].arrTemperature.length)
     query_time = hostResults[hosts[harr[0]].name].arrTemperature[lastIndex].result.query_time;
     
     //xx = xTimeSummaryScale(query_time);
@@ -1365,8 +1360,6 @@ function requestService(count,serin) {
                         hostResults[name].arr = hostResults[name][serviceListattr[serin]];
                         plotResult(result);
                     }
-                    console.log(name+"   "+serviceListattr[serin]);
-                    console.log('can you run to here!?');
                     resolve(xhr.response);
                 } else {
                     reject(xhr.status);
