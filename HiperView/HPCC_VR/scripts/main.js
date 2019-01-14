@@ -138,34 +138,44 @@ function init()
     window.addEventListener( 'mousemove', onMouseMove, false );
 
     // request();
+
+    function init_plot() {
+        var params = {};
+        params.div_id = "div_plot_area";
+        
+        params.data = [
+          {"x": 0.49, "y": 60.30, "z": 1.39},
+          {"x": 0.20, "y": 42.42, "z": 3.40},
+          {"x": 0.35, "y": 43.89, "z": 2.09},
+          {"x": 0.19, "y": 84.96, "z": 3.92},
+          {"x": 0.30, "y": 77.37, "z": 3.75},
+          {"x": 0.41, "y": 21.91, "z": 1.27},
+          {"x": 0.02, "y": 72.37, "z": 0.58},
+          {"x": 0.68, "y": 69.11, "z": 3.10},
+          {"x": 0.19, "y":  0.75, "z": 2.06},
+          {"x": 0.87, "y": 56.15, "z": 1.98},
+          {"x": 0.84, "y": 68.93, "z": 3.39},
+          {"x": 0.07, "y": 33.94, "z": 0.31},
+          {"x": 0.40, "y": 13.79, "z": 3.02},
+          {"x": 0.51, "y": 50.63, "z": 2.17},
+          {"x": 0.48, "y": 37.98, "z": 2.46},
+          {"x": 0.61, "y": 14.89, "z": 3.52},
+          {"x": 0.03, "y": 82.20, "z": 3.05},
+          {"x": 0.81, "y": 72.28, "z": 1.33},
+          {"x": 0.63, "y": 54.21, "z": 3.84},
+          {"x": 0.99, "y": 93.96, "z": 0.36}
+        ];
+        
+        three_d.make_scatter(params);
+      }
+      
+      init_plot();
 }
 
 function initImageHolder()
 {
     tooltip_png = new Image();
     tooltip_png.id = "png_tooltip"
-}
-
-function initD3Holder()
-{
-    // var chart = d3.parsets().dimensions( ["species","sepal_length","sepal_width","petal_length","petal_width"] );
-	// var vis = d3.select( "#vis" ).append( "svg" ).attr( "width" , chart.width() ).attr( "height", chart.height() );
-    // d3.csv( "../../TitanicVR/resources/datasets/iris.csv", function(error, csv) { vis.datum( csv ).call( chart ); } );
-    
-    // renderer_css3d = new THREE.CSS3DRenderer();
-    // renderer_css3d.setSize(width, height);
-    // renderer_css3d.domElement.style.position = 'absolute';
-    // document.getElementById('container').appendChild(renderer.domElement);
-
-
-    // const object = new THREE.CSS3DObject(this)
-    // d.object = object;
-
-    // object.position.x = d.random.position.x;
-    // object.position.y = d.random.position.y;
-    // object.position.z = d.random.position.z;
-
-    // scene.add(object);
 }
 
 
@@ -256,7 +266,8 @@ function initRoom()
 
 function initHPCC()
 {
-    for (var att in hostList.data.hostlist) {
+    for (var att in hostList.data.hostlist)
+    {
         var h = {};
         h.name = att;
         h.hpcc_rack = +att.split("-")[1];
@@ -295,6 +306,7 @@ function initHPCC()
             else return -1;
         })
     }
+
     for (var i = 0; i < racks.length; i++) {
         racks[i].hosts.sort(function (a, b) {
             if (a.hpcc_node > b.hpcc_node) {
@@ -304,6 +316,7 @@ function initHPCC()
         })
 
     }
+
     hosts.sort(function (a, b) {
         if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
             return 1;
@@ -339,7 +352,6 @@ function animate()
     requestAnimationFrame( animate );
     animateControlPanel();
     animateTooltip();
-    // console.log(imageHolder.src);
 }
 
 function render()
@@ -454,7 +466,8 @@ function loadData()
     }
 }
 
-function step (iteration, count){
+function step (iteration, count)
+{
     //console.log(hosts[count].name+" "+hostResults[name]);
     var result = simulateResults2(hosts[count].name,iteration, selectedService);
     var name =  result.data.service.host_name;
@@ -475,7 +488,8 @@ function step (iteration, count){
     hostResults[name].arrPower_usage.push(result);
 }
 
-function setColorsAndThresholds(s) {
+function setColorsAndThresholds(s)
+{
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i] && i==1){  // CPU_load
             dif = (thresholds[i][1]-thresholds[i][0])/4;
