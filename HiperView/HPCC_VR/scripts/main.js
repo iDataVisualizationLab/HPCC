@@ -16,7 +16,11 @@ var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', 
 var selectedTimestamp = 1;
 var INTERSECTED;
 var isInit = true;
+
+// D3
 var oldhostclicked;
+var svg;
+var rectip;
 
 var updateHost;
 var updateTimestamp;
@@ -80,6 +84,7 @@ var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatur
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
     arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
+var serviceQuery =["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService = "Temperature";
@@ -98,29 +103,23 @@ var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
 
 init();
-var svg = d3.select("#svgplace").append("svg").attr("width", 2).attr("height",2);
 animate();
-var rectip = svg.append('rect').attr('id','placetip').attr('x',0).attr('y',0).attr('width',2).attr('height',2)
-    .style('opacity',0)
-    .on("click",function(d,i){
-        mouseoverNode(d)});
 
 function init()
 {
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
+    initD3();
     loadJSON();
     initScene();
     initCamera();
     // initLight();
     initInteractions();
 
-
     initRoom();
     initControlPanel();
     initQuanah();
-    // initD3Holder();
     // initHPCC();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
@@ -128,7 +127,7 @@ function init()
     window.addEventListener( 'touchend', onDocRelease, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
 
-    // request();
+    // requestRT();
 }
 
 
@@ -210,24 +209,33 @@ function loadJSON()
     // ngan
     function step(iteration, count)
     {
-        //console.log(hosts[count].name+" "+hostResults[name]);
-        var result = simulateResults2(hosts[count].name,iteration, selectedService);
-        var name =  result.data.service.host_name;
-        hostResults[name].arr.push(result);
-        var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-        hostResults[name].arrTemperature.push(result);
+        if( isRealtime )
+        {
+            return requestRT(iteration,count);
+        }
+        else
+        {
+            // console.log(requestRT(iteration,count));
 
-        var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-        hostResults[name].arrCPU_load.push(result);
+            //console.log(hosts[count].name+" "+hostResults[name]);
+            var result = simulateResults2(hosts[count].name,iteration, selectedService);
+            var name =  result.data.service.host_name;
+            hostResults[name].arr.push(result);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+            hostResults[name].arrTemperature.push(result);
 
-        var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-        hostResults[name].arrMemory_usage.push(result);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
+            hostResults[name].arrCPU_load.push(result);
 
-        var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-        hostResults[name].arrFans_health.push(result);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
+            hostResults[name].arrMemory_usage.push(result);
 
-        var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-        hostResults[name].arrPower_usage.push(result);
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
+            hostResults[name].arrFans_health.push(result);
+
+            var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
+            hostResults[name].arrPower_usage.push(result);
+        }
     }
 
     function simulateResults2(hostname,iter, s)
@@ -269,6 +277,18 @@ function loadJSON()
             simisval.data.service.plugin_output = "UNKNOWN";
         return simisval;
     }
+}
+
+// INITS
+
+// ngan
+function initD3()
+{
+    svg = d3.select("#svgplace").append("svg").attr("width", 2).attr("height",2);
+    rectip = svg.append('rect').attr('id','placetip').attr('x',0).attr('y',0).attr('width',2).attr('height',2)
+        .style('opacity',0)
+        .on("click",function(d,i){
+            mouseoverNode(d)});
 }
 
 function initCamera()
