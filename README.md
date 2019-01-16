@@ -18,7 +18,7 @@ Thursday Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/de
 
 Current branch:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
 
-VR: https://lvrg12.github.io/HPCC_TTU/
+VR: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 
 September 22, 2018
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/suddenIncrease_Sep22.png)
