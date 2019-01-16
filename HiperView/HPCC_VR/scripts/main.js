@@ -16,7 +16,7 @@ var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', 
 var selectedTimestamp = 1;
 var INTERSECTED;
 var isInit = true;
-var pngLoaded = false;
+var oldhostclicked;
 
 var updateHost;
 var updateTimestamp;
@@ -105,11 +105,6 @@ var rectip = svg.append('rect').attr('id','placetip').attr('x',0).attr('y',0).at
     .on("click",function(d,i){
         mouseoverNode(d)});
 
-// var fragment = document.createDocumentFragment();
-// fragment.appendChild(document.getElementById('d3-tip'));
-// document.getElementById('instructions').appendChild(fragment);
-// init
-
 function init()
 {
     container = document.createElement( 'div' );
@@ -125,74 +120,155 @@ function init()
     initRoom();
     initControlPanel();
     initQuanah();
-    initImageHolder();
     // initD3Holder();
     // initHPCC();
-    // initRenderer();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
-    // window.addEventListener( 'onclick', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );
     window.addEventListener( 'touchend', onDocRelease, false );
-
     window.addEventListener( 'mousemove', onMouseMove, false );
 
     // request();
-
-    function init_plot() {
-        var params = {};
-        params.div_id = "div_plot_area";
-        
-        params.data = [
-          {"x": 0.49, "y": 60.30, "z": 1.39},
-          {"x": 0.20, "y": 42.42, "z": 3.40},
-          {"x": 0.35, "y": 43.89, "z": 2.09},
-          {"x": 0.19, "y": 84.96, "z": 3.92},
-          {"x": 0.30, "y": 77.37, "z": 3.75},
-          {"x": 0.41, "y": 21.91, "z": 1.27},
-          {"x": 0.02, "y": 72.37, "z": 0.58},
-          {"x": 0.68, "y": 69.11, "z": 3.10},
-          {"x": 0.19, "y":  0.75, "z": 2.06},
-          {"x": 0.87, "y": 56.15, "z": 1.98},
-          {"x": 0.84, "y": 68.93, "z": 3.39},
-          {"x": 0.07, "y": 33.94, "z": 0.31},
-          {"x": 0.40, "y": 13.79, "z": 3.02},
-          {"x": 0.51, "y": 50.63, "z": 2.17},
-          {"x": 0.48, "y": 37.98, "z": 2.46},
-          {"x": 0.61, "y": 14.89, "z": 3.52},
-          {"x": 0.03, "y": 82.20, "z": 3.05},
-          {"x": 0.81, "y": 72.28, "z": 1.33},
-          {"x": 0.63, "y": 54.21, "z": 3.84},
-          {"x": 0.99, "y": 93.96, "z": 0.36}
-        ];
-        
-        three_d.make_scatter(params);
-      }
-      
-      init_plot();
-}
-
-function initImageHolder()
-{
-    tooltip_png = new Image();
-    tooltip_png.id = "png_tooltip"
 }
 
 
-
+// ngan
 function loadJSON()
 {
-    // $.ajax({
-    //     type: 'GET',
-    //     url: "data/hpcc_data__32_.json",
-    //     async: false,
-    //     dataType: 'json',
-    //     success: function (data) {
-    //       json = data
-    //     }
-    //   });
     json = {};
-    loadData();
+
+    // loading data
+    for (var att in hostList.data.hostlist)
+    {
+        var h = {};
+        h.name = att;
+        h.hpcc_rack = +att.split("-")[1];
+        h.hpcc_node = +att.split("-")[2].split(".")[0];
+        h.index = hosts.length;
+
+        // to contain the historical query results
+        hostResults[h.name] = {};
+        hostResults[h.name].index = h.index;
+        hostResults[h.name].arr = [];
+        hostResults[h.name].arrTemperature = [];
+        hostResults[h.name].arrCPU_load = [];
+        hostResults[h.name].arrMemory_usage = [];
+        hostResults[h.name].arrFans_health= [];
+        hostResults[h.name].arrPower_usage= [];
+        hosts.push(h);
+        // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
+
+        // Compute RACK list
+        var rackIndex = isContainRack(racks, h.hpcc_rack);
+        if (rackIndex >= 0) {  // found the user in the users list
+            racks[rackIndex].hosts.push(h);
+        }
+        else {
+            var obj = {};
+            obj.id = h.hpcc_rack;
+            obj.hosts = [];
+            obj.hosts.push(h);
+            racks.push(obj);
+        }
+        // Sort RACK list
+        racks = racks.sort(function (a, b) {
+            if (a.id > b.id) {
+                return 1;
+            }
+            else return -1;
+        })
+    }
+
+    for (var i = 0; i < racks.length; i++)
+    {
+        racks[i].hosts.sort(function (a, b) {
+            if (a.hpcc_node > b.hpcc_node) {
+                return 1;
+            }
+            else return -1;
+        })
+
+    }
+
+    for (count = 0; count < hosts.length; count++)
+    {
+        var name = hosts[count].name;
+        json[name] = {};
+        d3.keys(serviceListattr).forEach(d=>serviceListattr[d].val.forEach(e=>json[name][e]=[]));
+        for (iteration = 0; iteration<sampleS[name].arrTemperature.length; iteration++){
+            step(iteration, count);
+            for (key in serviceListattr){
+                var attrkey = serviceListattr[key];
+                var result = processData(hostResults[name][key][iteration].data.service.plugin_output, attrkey.key);
+                attrkey.val.forEach((d,i)=>{
+                    json[name][d].push(result[i]);
+                });
+            }
+        }
+    }
+
+    // ngan
+    function step(iteration, count)
+    {
+        //console.log(hosts[count].name+" "+hostResults[name]);
+        var result = simulateResults2(hosts[count].name,iteration, selectedService);
+        var name =  result.data.service.host_name;
+        hostResults[name].arr.push(result);
+        var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
+        hostResults[name].arrTemperature.push(result);
+
+        var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
+        hostResults[name].arrCPU_load.push(result);
+
+        var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
+        hostResults[name].arrMemory_usage.push(result);
+
+        var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
+        hostResults[name].arrFans_health.push(result);
+
+        var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
+        hostResults[name].arrPower_usage.push(result);
+    }
+
+    function simulateResults2(hostname,iter, s)
+    {
+        var newService;
+        if (s == serviceList[0])
+            newService = sampleS[hostname].arrTemperature[iter];
+        else if (s == serviceList[1])
+            newService = sampleS[hostname].arrCPU_load[iter];
+        else if (s == serviceList[2])
+            newService = sampleS[hostname].arrMemory_usage[iter];
+        else if (s == serviceList[3])
+            newService = sampleS[hostname].arrFans_health[iter];
+        else if (s == serviceList[4]) {
+            if (sampleS[hostname]["arrPower_usage"]== undefined) {
+                var simisval = handlemissingdata(hostname,iter);
+                sampleS[hostname]["arrPower_usage"] = [simisval];
+            }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined){
+                var simisval = handlemissingdata(hostname,iter);
+                sampleS[hostname]["arrPower_usage"][iter] = simisval;
+            }
+            newService = sampleS[hostname]["arrPower_usage"][iter];
+        }
+
+        return newService;
+    }
+
+    function handlemissingdata(hostname,iter)
+    {
+        var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+        var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
+        // simval = (simval[0]+simval[1])/2;
+        simval = (simval[0]+simval[1]+20);
+        var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
+        if (simval!==undefinedValue && !isNaN(simval) )
+        //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
+            simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
+        else
+            simisval.data.service.plugin_output = "UNKNOWN";
+        return simisval;
+    }
 }
 
 function initCamera()
@@ -337,14 +413,6 @@ function initHPCC()
     }
 }
 
-function initRenderer()
-{
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    container.appendChild( renderer.domElement );
-}
-
 // Animate & Render
 
 function animate()
@@ -357,182 +425,4 @@ function animate()
 function render()
 {
     renderer_css3d.render( scene, camera );
-}
-
-
-// Ngan
-function simulateResults2(hostname,iter, s){
-    var newService;
-    if (s == serviceList[0])
-        newService = sampleS[hostname].arrTemperature[iter];
-    else if (s == serviceList[1])
-        newService = sampleS[hostname].arrCPU_load[iter];
-    else if (s == serviceList[2])
-        newService = sampleS[hostname].arrMemory_usage[iter];
-    else if (s == serviceList[3])
-        newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) {
-        if (sampleS[hostname]["arrPower_usage"]== undefined) {
-            var simisval = handlemissingdata(hostname,iter);
-            sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined){
-            var simisval = handlemissingdata(hostname,iter);
-            sampleS[hostname]["arrPower_usage"][iter] = simisval;
-        }
-        newService = sampleS[hostname]["arrPower_usage"][iter];
-    }
-    return newService;
-}
-
-function handlemissingdata(hostname,iter){
-    var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-    var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
-    // simval = (simval[0]+simval[1])/2;
-    simval = (simval[0]+simval[1]+20);
-    var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
-    if (simval!==undefinedValue && !isNaN(simval) )
-    //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
-    else
-        simisval.data.service.plugin_output = "UNKNOWN";
-    return simisval;
-}
-
-function loadData()
-{
-    for (var att in hostList.data.hostlist) {
-        var h = {};
-        h.name = att;
-        h.hpcc_rack = +att.split("-")[1];
-        h.hpcc_node = +att.split("-")[2].split(".")[0];
-        h.index = hosts.length;
-
-        // to contain the historical query results
-        hostResults[h.name] = {};
-        hostResults[h.name].index = h.index;
-        hostResults[h.name].arr = [];
-        hostResults[h.name].arrTemperature = [];
-        hostResults[h.name].arrCPU_load = [];
-        hostResults[h.name].arrMemory_usage = [];
-        hostResults[h.name].arrFans_health= [];
-        hostResults[h.name].arrPower_usage= [];
-        hosts.push(h);
-        // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
-
-        // Compute RACK list
-        var rackIndex = isContainRack(racks, h.hpcc_rack);
-        if (rackIndex >= 0) {  // found the user in the users list
-            racks[rackIndex].hosts.push(h);
-        }
-        else {
-            var obj = {};
-            obj.id = h.hpcc_rack;
-            obj.hosts = [];
-            obj.hosts.push(h);
-            racks.push(obj);
-        }
-        // Sort RACK list
-        racks = racks.sort(function (a, b) {
-            if (a.id > b.id) {
-                return 1;
-            }
-            else return -1;
-        })
-    }
-    for (var i = 0; i < racks.length; i++) {
-        racks[i].hosts.sort(function (a, b) {
-            if (a.hpcc_node > b.hpcc_node) {
-                return 1;
-            }
-            else return -1;
-        })
-
-    }
-    for (count = 0; count < hosts.length; count++)
-    {
-        var name = hosts[count].name;
-        json[name] = {};
-        d3.keys(serviceListattr).forEach(d=>serviceListattr[d].val.forEach(e=>json[name][e]=[]));
-        for (iteration = 0; iteration<sampleS[name].arrTemperature.length; iteration++){
-            step(iteration, count);
-            for (key in serviceListattr){
-                var attrkey = serviceListattr[key];
-                var result = processData(hostResults[name][key][iteration].data.service.plugin_output, attrkey.key);
-                attrkey.val.forEach((d,i)=>{
-                    json[name][d].push(result[i]);
-                });
-            }
-        }
-    }
-}
-
-function step (iteration, count)
-{
-    //console.log(hosts[count].name+" "+hostResults[name]);
-    var result = simulateResults2(hosts[count].name,iteration, selectedService);
-    var name =  result.data.service.host_name;
-    hostResults[name].arr.push(result);
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[0]);
-    hostResults[name].arrTemperature.push(result);
-
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[1]);
-    hostResults[name].arrCPU_load.push(result);
-
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[2]);
-    hostResults[name].arrMemory_usage.push(result);
-
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[3]);
-    hostResults[name].arrFans_health.push(result);
-
-    var result = simulateResults2(hosts[count].name,iteration, serviceList[4]);
-    hostResults[name].arrPower_usage.push(result);
-}
-
-function setColorsAndThresholds(s)
-{
-    for (var i=0; i<serviceList.length;i++){
-        if (s == serviceList[i] && i==1){  // CPU_load
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-            left=0;
-            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);
-
-        }
-        else if (s == serviceList[i] && i==2){  // Memory_usage
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-            left=0;
-            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);
-
-        }
-        else if (s == serviceList[i]){
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-            left = thresholds[i][0]-dif;
-            if (left<0 && i!=0) // Temperature can be less than 0
-                left=0;
-            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);
-        }
-    }
 }

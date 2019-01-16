@@ -181,10 +181,9 @@ function updatePowerConsumption( keys, obj )
 
 function updateColorRange( service )
 {
-    setColorsAndThresholds( service );
+    setColorsAndThresholdsTooltip( service );
 
     var arrColor, arrDom;
-
     switch( service )
     {
         case "Temperature":
@@ -215,7 +214,6 @@ function updateColorRange( service )
         .domain(arrDom)
         .range(arrColor)
         .interpolate(d3.interpolateHcl);
-
 }
 
 function updateCPUMarker( obj )
@@ -226,7 +224,10 @@ function updateCPUMarker( obj )
     cpu_marker.position.y = pos.y + 0.005;
     cpu_marker.position.z = pos.z;
 }
-var oldhostclicked;
+
+// ngan
+// tooltip update
+
 function updateTooltip( host )
 {
     // event function
@@ -251,7 +252,7 @@ function updateTooltip( host )
     tooltip.position.z = pos.z - 0.3;
     //tooltip.setRotationFromMatrix( camera.matrix )
     //tooltip.visible = true;
-    console.log(tooltip);
+    // console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")
@@ -260,11 +261,63 @@ function updateTooltip( host )
     requestupdatetooltiip();
 
 }
-    function requestupdatetooltiip(){
+
+function setColorsAndThresholdsTooltip(s)
+{
+    for (var i=0; i<serviceList.length;i++){
+        if (s == serviceList[i] && i==1){  // CPU_load
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+
+        }
+        else if (s == serviceList[i] && i==2){  // Memory_usage
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+
+        }
+        else if (s == serviceList[i]){
+            dif = (thresholds[i][1]-thresholds[i][0])/4;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left = thresholds[i][0]-dif;
+            if (left<0 && i!=0) // Temperature can be less than 0
+                left=0;
+            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+        }
+    }
+}
+
+function requestupdatetooltiip()
+{
         d3.select('#tip').attr('material',{fps:1.5});
         $('#tip')[0].components.material.shader.__render();
         setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
-    }
+}
+
 function processData(str, serviceName)
 {
     if (serviceName == serviceList[0]){
@@ -347,6 +400,7 @@ function processData(str, serviceName)
         return a;
     }
 }
+
 function updateTooltip3D(host_name)
 {
     var levels = 6;
