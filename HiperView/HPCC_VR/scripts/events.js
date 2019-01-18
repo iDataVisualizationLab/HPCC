@@ -51,7 +51,7 @@ function onMouseDown( event )
                 if( intersects.length > 0 )
                 {
                     INTERSECTED = intersects[ 0 ].object.parent;
-                    updateTooltip(INTERSECTED);
+                    // updateTooltip(INTERSECTED);
                     return true;
                 }
             }

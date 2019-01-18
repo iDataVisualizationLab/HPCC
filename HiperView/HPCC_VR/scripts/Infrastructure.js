@@ -78,7 +78,7 @@ function initQuanah()
         }
 
         x = (!(host_num%2))*width/2;
-        addQuanahLabel( "Host " + host_num, "host", host );
+        // addQuanahLabel( "Host " + host_num, "host", host );
         host.position.set( x, y, 0 );
 
         return host;

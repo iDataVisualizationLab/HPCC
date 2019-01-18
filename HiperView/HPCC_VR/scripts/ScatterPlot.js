@@ -1,18 +1,22 @@
 function ScatterPlot( data, bin_size, scale )
 {
     // building scatter plot
-    this.population = data.length;
+    var population = data.length;
 
-    this.xrange = getRange( 0 );
-    this.yrange = getRange( 1 );
-    this.xrange = getRange( 2 );
+    var xrange = setRange( 0 );
+    var yrange = setRange( 1 );
+    var zrange = setRange( 2 );
 
-    this.graph = new THREE.Group();
-    this.grid = setGrid();
-    this.points = setPoints();
+    var graph = new THREE.Group();
+    var grid = setGrid();
+    var points = setPoints();
 
-    this.graph.add( this.grid );
-    this.graph.add( this.points );
+    graph.add( grid );
+    graph.add( points );
+
+    this.graph = graph;
+    this.grid = grid;
+    this.points = points;
 
 
     // functions
@@ -22,12 +26,12 @@ function ScatterPlot( data, bin_size, scale )
         return scale * val * 5 / range;
     }
 
-    function getRange( axis )
+    function setRange( axis )
     {
         var max = data[0][axis];
         var min = data[0][axis];
 
-        for( var i=0; i<this.population; i++ )
+        for( var i=0; i<population; i++ )
         {
             var p = data[i][axis];
             max = max > p ? max : p;
@@ -42,23 +46,27 @@ function ScatterPlot( data, bin_size, scale )
     function setGrid()
     {
         var grid = new THREE.Group();
-        var material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 5 } );
+        var material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
+        // var geometry = new THREE.BoxBufferGeometry( 1,1,1 );
+        // var edges = new THREE.EdgesGeometry( geometry );
+        // var line = new THREE.LineSegments( edges, material );
+        // grid.add( line );
 
         // x axis
         var x_geometry = new THREE.Geometry();
-        x_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( this.xrange, 0, 0 ) );
+        x_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( fit(xrange,xrange), 0, 0 ) );
         var x_axis = new THREE.Line( x_geometry, material );
         grid.add( x_axis );
 
         // y axis
         var y_geometry = new THREE.Geometry();
-        y_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, this.yrange, 0 ) );
+        y_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, fit(yrange,yrange), 0 ) );
         var y_axis = new THREE.Line( y_geometry, material );
         grid.add( y_axis );
 
         // z axis
         var z_geometry = new THREE.Geometry();
-        z_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, this.zrange, ) );
+        z_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, fit(zrange,zrange), ) );
         var z_axis = new THREE.Line( z_geometry, material );
         grid.add( z_axis );
 
@@ -69,17 +77,17 @@ function ScatterPlot( data, bin_size, scale )
     {
         var points = new THREE.Group();
 
-        for( var p=0; p<this.population; p++ )
+        for( var p=0; p<population; p++ )
         {
             var material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-            if( p == 4 ) var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-            var geometry = new THREE.SphereGeometry( 0.002, 16, 16 );
+            var geometry = new THREE.SphereGeometry( 0.002, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
-            point.position.set( fit( data[p][0] ), fit( data[p][1] ), fit( data[p][2] )  );
+
+            point.position.set( fit( data[p][0], xrange ), fit( data[p][1], yrange ), fit( data[p][2], zrange )  );
             points.add( point );
         }
 
-        return points
+        return points;
     }
 
 }

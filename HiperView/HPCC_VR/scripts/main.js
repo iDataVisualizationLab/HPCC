@@ -124,7 +124,7 @@ function init()
     initControlPanel();
     initQuanah();
     // initHPCC();
-    // initScatterPlotTest();
+    initScatterPlotTest();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );
@@ -136,7 +136,12 @@ function init()
 
 function initScatterPlotTest()
 {
-    var points = [ [0,0,0], [1,1,1], [2,2,2], [3,3,3], [4,0,0] ];
+    var points = [];
+    for( var i=0; i<100; i++ )
+    {
+        points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
+    }
+
     var scatter_plot = new ScatterPlot(points,null,0.05);
     console.log(scatter_plot);
     scene.add( scatter_plot.graph );
@@ -451,7 +456,7 @@ function animate()
 {
     requestAnimationFrame( animate );
     animateControlPanel();
-    animateTooltip();
+    // animateTooltip();
 }
 
 function render()
