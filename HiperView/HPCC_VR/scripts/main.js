@@ -137,7 +137,7 @@ function init()
 function initScatterPlotTest()
 {
     var points = [];
-    for( var i=0; i<100; i++ )
+    for( var i=0; i<300; i++ )
     {
         points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
     }
