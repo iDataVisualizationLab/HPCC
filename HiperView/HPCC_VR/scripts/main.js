@@ -10,7 +10,7 @@ var ROOM_SIZE = 1;
 var RACK_NUM = 10;
 var HOST_NUM = 60;
 var CPU_NUM = 2;
-var TS_NUM = 40;
+var TS_NUM = null;
 var color,opa;
 var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 var selectedTimestamp = 1;
@@ -112,6 +112,9 @@ function init()
 
     initD3();
     loadJSON();
+
+    TS_NUM = json["compute-1-1"]["arrCPU_load"].length;
+
     initScene();
     initCamera();
     // initLight();

@@ -160,8 +160,9 @@ function initTimeControlPanel()
             } );
 
             var text = new THREE.Mesh( text_geometry, text_material );
-            // var y = ( timestamp.length == 1 ) ? r/5.75 : r/4.5 ;
-            text.position.set( r * 0.85, 0.025, extrudeSettings.depth + 0.005 );
+            var y = ( TS_NUM > 20 ) ? r/10 : r/5 ;
+            // console.log(r);
+            text.position.set( r * 0.85, y, extrudeSettings.depth + 0.005 );
             text.rotateZ( -Math.PI/2 + 2*Math.PI/n / 2 );
 
             text.name = "time_label_"+timestamp;
