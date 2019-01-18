@@ -10,7 +10,7 @@ var ROOM_SIZE = 1;
 var RACK_NUM = 10;
 var HOST_NUM = 60;
 var CPU_NUM = 2;
-var TS_NUM = 19;
+var TS_NUM = 40;
 var color,opa;
 var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 var selectedTimestamp = 1;
@@ -121,6 +121,7 @@ function init()
     initControlPanel();
     initQuanah();
     // initHPCC();
+    // initScatterPlotTest();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );
@@ -128,6 +129,14 @@ function init()
     window.addEventListener( 'mousemove', onMouseMove, false );
 
     // requestRT();
+}
+
+function initScatterPlotTest()
+{
+    var points = [ [0,0,0], [1,1,1], [2,2,2], [3,3,3], [4,0,0] ];
+    var scatter_plot = new ScatterPlot(points,null,0.05);
+    console.log(scatter_plot);
+    scene.add( scatter_plot.graph );
 }
 
 

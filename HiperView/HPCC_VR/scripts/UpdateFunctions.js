@@ -88,7 +88,7 @@ function updateService( service, keys, obj )
         case "Fans_speed":
             updateFansSpeed( keys, obj );
             break;
-        case "Power_consumption":
+        case "Power_usage":
             updatePowerConsumption( keys, obj );
             break;
         default:
@@ -176,7 +176,21 @@ function updateFansSpeed( keys, obj )
 
 function updatePowerConsumption( keys, obj )
 {
-    return 0;
+    var rack = keys[0];
+    var host = keys[1];
+    var time = keys[3];
+
+    var key1 = "compute-"+rack+"-"+host;
+    var key2 = "arrPower_usage";
+
+    if( json[key1][key2][time] !=null )
+        var usage = color_funct(json[key1][key2][time]);
+    else
+        var usage = 0x222222;
+
+    updateCPUMarker( obj );
+    obj.material.color = new THREE.Color( usage );
+
 }
 
 function updateColorRange( service )
@@ -202,7 +216,7 @@ function updateColorRange( service )
             arrDom = [0, 5000, 9000, 10000, 12000];
             arrColor = ['#ff0000','#ffff00','#008000','#ffff00','#ff0000'];
             break;
-        case "Power_consumption":
+        case "Power_usage":
             arrDom = [20, 60, 80, 100];
             arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
             break;
@@ -242,17 +256,14 @@ function updateTooltip( host )
         oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
     oldhostclicked.children[2].material.color.setHex(0xff0000);
+
     // constructing tooltip
     var tmp = host.name.split("_");
     var host_name = "compute-"+tmp[1]+"-"+tmp[3];
     var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
-    //updateTooltip3D(host_name);
     tooltip.position.x = pos.x;
     tooltip.position.y = 0.1;
     tooltip.position.z = pos.z - 0.3;
-    //tooltip.setRotationFromMatrix( camera.matrix )
-    //tooltip.visible = true;
-    // console.log(tooltip);
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")

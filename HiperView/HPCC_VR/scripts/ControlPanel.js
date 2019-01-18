@@ -153,15 +153,15 @@ function initTimeControlPanel()
         {
             var text_geometry = new THREE.TextGeometry( timestamp, {
                 font: font,
-                size: r/8,
+                size: r/16,
                 height: 0,
                 curveSegments: 12,
                 bevelEnabled: false
             } );
 
             var text = new THREE.Mesh( text_geometry, text_material );
-            var y = ( timestamp.length == 1 ) ? r/5.75 : r/4.5 ;
-            text.position.set( r * 0.8, y, extrudeSettings.depth + 0.005 );
+            // var y = ( timestamp.length == 1 ) ? r/5.75 : r/4.5 ;
+            text.position.set( r * 0.85, 0.025, extrudeSettings.depth + 0.005 );
             text.rotateZ( -Math.PI/2 + 2*Math.PI/n / 2 );
 
             text.name = "time_label_"+timestamp;
