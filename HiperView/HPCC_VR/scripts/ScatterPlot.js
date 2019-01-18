@@ -46,29 +46,43 @@ function ScatterPlot( data, bin_size, scale )
     function setGrid()
     {
         var grid = new THREE.Group();
-        var material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
-        // var geometry = new THREE.BoxBufferGeometry( 1,1,1 );
-        // var edges = new THREE.EdgesGeometry( geometry );
-        // var line = new THREE.LineSegments( edges, material );
-        // grid.add( line );
+        var x = fit(xrange,xrange);
+        var y = fit(yrange,yrange);
+        var z = fit(zrange,zrange);
 
-        // x axis
-        var x_geometry = new THREE.Geometry();
-        x_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( fit(xrange,xrange), 0, 0 ) );
-        var x_axis = new THREE.Line( x_geometry, material );
-        grid.add( x_axis );
+        // box
+        var box_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
+        var box_geometry = new THREE.Geometry();
+        box_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), 
+                                    new THREE.Vector3( x, 0, 0 ),
+                                    new THREE.Vector3( x, y, 0 ),
+                                    new THREE.Vector3( 0, y, 0 ),
+                                    new THREE.Vector3( 0, 0, 0 ),
+                                    new THREE.Vector3( 0, 0, z ),
+                                    new THREE.Vector3( x, 0, z ),
+                                    new THREE.Vector3( x, y, z ),
+                                    new THREE.Vector3( 0, y, z ),
+                                    new THREE.Vector3( 0, 0, z ),
+                                    new THREE.Vector3( 0, y, z ),
+                                    new THREE.Vector3( 0, y, 0 ),
+                                    new THREE.Vector3( x, y, 0 ),
+                                    new THREE.Vector3( x, y, z ),
+                                    new THREE.Vector3( x, 0, z ),
+                                    new THREE.Vector3( x, 0, 0 ) );
+        var box = new THREE.Line( box_geometry, box_material );
+        grid.add( box );
 
-        // y axis
-        var y_geometry = new THREE.Geometry();
-        y_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, fit(yrange,yrange), 0 ) );
-        var y_axis = new THREE.Line( y_geometry, material );
-        grid.add( y_axis );
+        // // y axis
+        // var y_geometry = new THREE.Geometry();
+        // y_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, fit(yrange,yrange), 0 ) );
+        // var y_axis = new THREE.Line( y_geometry, material );
+        // grid.add( y_axis );
 
-        // z axis
-        var z_geometry = new THREE.Geometry();
-        z_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, fit(zrange,zrange), ) );
-        var z_axis = new THREE.Line( z_geometry, material );
-        grid.add( z_axis );
+        // // z axis
+        // var z_geometry = new THREE.Geometry();
+        // z_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, fit(zrange,zrange), ) );
+        // var z_axis = new THREE.Line( z_geometry, material );
+        // grid.add( z_axis );
 
         return grid;
     }
