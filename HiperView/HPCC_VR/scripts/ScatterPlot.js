@@ -1,4 +1,4 @@
-function ScatterPlot( data, bin_size, scale )
+function ScatterPlot( services, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -47,7 +47,7 @@ function ScatterPlot( data, bin_size, scale )
         info.min = min;
         info.range = max - min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
-        info.legend = "long long title";
+        info.legend = services[axis];
 
         return info;
     }

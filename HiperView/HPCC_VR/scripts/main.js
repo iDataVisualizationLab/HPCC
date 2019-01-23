@@ -150,7 +150,7 @@ function initScatterPlotTest()
     //     points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
     // }
 
-    scatter_plot = new ScatterPlot(points,null,0.25);
+    scatter_plot = new ScatterPlot(selectedServices,points,null,0.25);
     scene.add( scatter_plot.graph );
 
     function extractPoints( host, service )
