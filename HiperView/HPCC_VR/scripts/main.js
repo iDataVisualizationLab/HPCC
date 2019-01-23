@@ -137,16 +137,18 @@ function init()
 
 function initScatterPlotTest()
 {
-    // for( var i=0; i<300; i++ )
-    // {
-    //     points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
-    // }
 
-    console.log(json);
+    // console.log(json);
 
     var selectedHost = "compute-1-1";
     var selectedServices = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
     var points = extractPoints(selectedHost,selectedServices);
+
+    // var points = [];
+    // for( var i=0; i<300; i++ )
+    // {
+    //     points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
+    // }
 
     scatter_plot = new ScatterPlot(points,null,0.25);
     scene.add( scatter_plot.graph );

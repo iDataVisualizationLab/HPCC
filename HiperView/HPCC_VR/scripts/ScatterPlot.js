@@ -46,7 +46,7 @@ function ScatterPlot( data, bin_size, scale )
         info.max = max;
         info.min = min;
         info.range = max - min;
-        info.name = "";
+        info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
 
         return info;
     }
@@ -76,46 +76,99 @@ function ScatterPlot( data, bin_size, scale )
                                     new THREE.Vector3( scale, 0, 0 ) );
         var box = new THREE.Line( box_geometry, box_material );
         grid.add( box );
+        grid.add( setMarks() );
 
         // marks
-        var no_marks = 5;
-        var xmark = [];
-        var ymark = [];
-        var zmark = [];
 
-        var mark_material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 1 } );
-        var mark_length = -1*scale/15;
-        var mark_geometry, v, start, end;
-        
-        for( var i=0; i<no_marks; i++ )
+        function setMarks()
         {
-            v = scale * i/(no_marks-1);
+            var marks = new THREE.Group();
+            var no_marks = 5;
+            var xmark = [];
+            var ymark = [];
+            var zmark = [];
 
-            // x marks
-            mark_geometry = new THREE.Geometry();
-            start = new THREE.Vector3( v, 0, 0 );
-            end = new THREE.Vector3( v, mark_length, 0 );
-            mark_geometry.vertices.push( start, end );
-            xmark.push( new THREE.Line( mark_geometry.clone(), mark_material.clone() ) );
-            grid.add(xmark[i]);
+            var mark_material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 1 } );
+            var mark_length = -1*scale/15;
+            var line, mark_geometry, v, start, end;
+            
+            for( var i=0; i<no_marks; i++ )
+            {
+                v = scale * i/(no_marks-1);
 
-            // y marks
-            mark_geometry = new THREE.Geometry();
-            start = new THREE.Vector3( 0, v, 0 );
-            end = new THREE.Vector3( mark_length, v, 0 );
-            mark_geometry.vertices.push( start, end );
-            ymark.push( new THREE.Line( mark_geometry.clone(), mark_material.clone() ) );
-            grid.add(ymark[i]);
+                // x marks
+                mark_geometry = new THREE.Geometry();
+                start = new THREE.Vector3( v, 0, 0 );
+                end = new THREE.Vector3( v, mark_length, 0 );
+                mark_geometry.vertices.push( start, end );
+                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                addLegend( line, x, i, end );
+                xmark.push( line );
+                marks.add(xmark[i]);
 
-            // z marks
-            mark_geometry = new THREE.Geometry();
-            start = new THREE.Vector3( 0, 0, v );
-            end = new THREE.Vector3( 0, mark_length, v );
-            mark_geometry.vertices.push( start, end );
-            zmark.push( new THREE.Line( mark_geometry.clone(), mark_material.clone() ) );
-            grid.add(zmark[i]);
+                // y marks
+                mark_geometry = new THREE.Geometry();
+                start = new THREE.Vector3( 0, v, 0 );
+                end = new THREE.Vector3( 0, v, mark_length );
+                mark_geometry.vertices.push( start, end );
+                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                addLegend( line, y, i, end );
+                ymark.push( line );
+                marks.add( ymark[i] );
 
+                // z marks
+                mark_geometry = new THREE.Geometry();
+                start = new THREE.Vector3( 0, 0, v );
+                end = new THREE.Vector3( mark_length, 0, v );
+                mark_geometry.vertices.push( start, end );
+                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                addLegend( line, z, i, end );
+                zmark.push( line );
+                marks.add(zmark[i]);
 
+            }
+
+            function addLegend( obj, axis, interval, pos )
+            {
+
+                var num = axis.min + axis.range * interval / (no_marks-1);
+                num = Math.round(num*100)/100;
+                // console.log(legend);
+
+                var loader = new THREE.FontLoader();
+                var legend_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    var legend_geometry = new THREE.TextGeometry( num + "", {
+                        font: font,
+                        size: scale/25,
+                        height: 0,
+                        curveSegments: 12,
+                        bevelEnabled: false
+                    } );
+
+                    var legend = new THREE.Mesh( legend_geometry, legend_material );
+
+                    if( axis.name == "x" )
+                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
+                    if( axis.name == "y" )
+                    {
+                        legend.position.set( pos.x, pos.y, pos.z );
+                        legend.rotation.set( 0, Math.PI/2, 0 );
+                    }
+                    if( axis.name == "z" )
+                    {
+                        legend.position.set( pos.x + mark_length/2, pos.y, pos.z );
+                        legend.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                    }
+
+                    obj.add( legend );
+                } );
+
+            }
+
+            return marks;
         }
 
         return grid;
