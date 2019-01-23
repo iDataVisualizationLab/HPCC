@@ -6,6 +6,7 @@ function ScatterPlot( data, bin_size, scale )
     var xrange = setRange( 0 );
     var yrange = setRange( 1 );
     var zrange = setRange( 2 );
+    var range = xrange
 
     var graph = new THREE.Group();
     var grid = setGrid();
@@ -72,17 +73,34 @@ function ScatterPlot( data, bin_size, scale )
         var box = new THREE.Line( box_geometry, box_material );
         grid.add( box );
 
-        // // y axis
-        // var y_geometry = new THREE.Geometry();
-        // y_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, fit(yrange,yrange), 0 ) );
-        // var y_axis = new THREE.Line( y_geometry, material );
-        // grid.add( y_axis );
+        // marks
+        var no_marks = 3;
+        var xmark = [];
+        var ymark = [];
+        var zmark = [];
 
-        // // z axis
-        // var z_geometry = new THREE.Geometry();
-        // z_geometry.vertices.push( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, fit(zrange,zrange), ) );
-        // var z_axis = new THREE.Line( z_geometry, material );
-        // grid.add( z_axis );
+        var mark_material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 1 } );
+        
+        // z marks
+        for( var i=0; i<no_marks; i++ )
+        {
+            var mark_geometry = new THREE.Geometry();
+            var start = new THREE.Vector3( 0, 0, i * range/3 );
+            var end = new THREE.Vector3( 0, -1*fit(range/10,range), i * range/3 );
+
+            mark_geometry.vertices.push( start, end );
+
+            zmark.push( new THREE.Line( mark_geometry.clone(), mark_material.clone() ) );
+        }
+
+        for( var i=0; i<no_marks; i++ )
+        {
+            // grid.add(xmark[i]);
+            // grid.add(ymark[i]);
+            grid.add(zmark[i]);
+        }
+
+        // grid.add( zmark[0] );
 
         return grid;
     }

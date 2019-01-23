@@ -34,6 +34,7 @@ var tooltip;
 var tooltip_png;
 var service_control_panel;
 var time_control_panel;
+var scatter_plot;
 
 // HPCC
 var hosts = [];
@@ -142,7 +143,7 @@ function initScatterPlotTest()
         points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
     }
 
-    var scatter_plot = new ScatterPlot(points,null,0.05);
+    scatter_plot = new ScatterPlot(points,null,0.05);
     console.log(scatter_plot);
     scene.add( scatter_plot.graph );
 }
