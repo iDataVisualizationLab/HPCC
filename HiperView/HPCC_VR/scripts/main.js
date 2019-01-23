@@ -137,15 +137,39 @@ function init()
 
 function initScatterPlotTest()
 {
-    var points = [];
-    for( var i=0; i<300; i++ )
+    // for( var i=0; i<300; i++ )
+    // {
+    //     points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
+    // }
+
+    console.log(json);
+
+    var selectedHost = "compute-1-1";
+    var selectedServices = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
+    var points = extractPoints(selectedHost,selectedServices);
+
+    scatter_plot = new ScatterPlot(points,null,0.25);
+    scene.add( scatter_plot.graph );
+
+    function extractPoints( host, service )
     {
-        points.push([Math.floor(Math.random() * 10),Math.floor(Math.random() * 10),Math.floor(Math.random() * 10)])
+        var p = [], tmp;
+
+        for( var i=0; i<json[host][service[0]].length; i++ )
+        {
+            tmp = []
+
+            // if no service exists put 0
+            tmp.push( json[host][service[0]] ? json[host][service[0]][i] : 0 );
+            tmp.push( json[host][service[1]] ? json[host][service[1]][i] : 0 );
+            tmp.push( json[host][service[2]] ? json[host][service[2]][i] : 0 );
+
+            p.push( tmp )
+        }
+
+        return p;
     }
 
-    scatter_plot = new ScatterPlot(points,null,0.05);
-    console.log(scatter_plot);
-    scene.add( scatter_plot.graph );
 }
 
 
