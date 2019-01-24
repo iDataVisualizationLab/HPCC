@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5c8d484a-6de3-4579-b6d4-f3b2dc8b394b" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/HiperView/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/css/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HiperView/demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/demo.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HiperView/js/boxplot.js" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/js/boxplot.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HiperView/myscripts/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/myscripts/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HiperView/myscripts/scatterplot.js" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/myscripts/scatterplot.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HiperView/myscripts/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/HiperView/myscripts/util.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -25,27 +21,30 @@
     <session id="1029923364">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="8" />
+          <entry key="project.closed" value="9" />
           <entry key="project.open.time.0" value="8" />
+          <entry key="project.open.time.16" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.opened" value="12" />
+          <entry key="project.open.time.6" value="1" />
+          <entry key="project.open.time.7" value="1" />
+          <entry key="project.opened" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="CSS" value="1" />
-          <entry key="HTML" value="1" />
-          <entry key="JavaScript" value="9" />
+          <entry key="HTML" value="3" />
+          <entry key="JavaScript" value="16" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="CSS" value="57" />
           <entry key="HTML" value="98" />
-          <entry key="JavaScript" value="4170" />
+          <entry key="JavaScript" value="4590" />
         </counts>
       </usages-collector>
     </session>
@@ -55,24 +54,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="675" column="137" selection-start-line="675" selection-start-column="137" selection-end-line="675" selection-end-column="137" />
+            <state relative-caret-position="39">
+              <caret line="87" column="7" selection-start-line="87" selection-start-column="4" selection-end-line="87" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HiperView/myscripts/tooltip.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="260">
+              <caret line="411" column="13" lean-forward="true" selection-start-line="411" selection-start-column="13" selection-end-line="411" selection-end-column="13" />
               <folding>
-                <element signature="e#17185#17338#0" />
-                <element signature="e#17379#21255#0" />
+                <element signature="e#13460#14407#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HiperView/myscripts/scatterplot.js">
+        <entry file="file://$PROJECT_DIR$/HiperView/js/d3.scaleAdjust.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="31" />
+            <state relative-caret-position="17">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
             </state>
           </provider>
         </entry>
@@ -80,7 +87,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/js/boxplot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
+            <state relative-caret-position="714">
               <caret line="51" column="76" selection-start-line="51" selection-start-column="76" selection-end-line="51" selection-end-column="76" />
             </state>
           </provider>
@@ -98,8 +105,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="27" column="25" lean-forward="true" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="33" />
+            <state relative-caret-position="459">
+              <caret line="27" column="25" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="33" />
             </state>
           </provider>
         </entry>
@@ -107,8 +114,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="295">
-              <caret line="371" column="23" lean-forward="true" selection-start-line="371" selection-start-column="23" selection-end-line="371" selection-end-column="23" />
+            <state relative-caret-position="6307">
+              <caret line="371" column="23" selection-start-line="371" selection-start-column="23" selection-end-line="371" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -117,36 +124,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>pwcons</find>
-      <find>hostre</find>
-      <find>data</find>
-      <find>scatter</find>
-      <find>serviceList</find>
-      <find>scatterplot</find>
-      <find>servicelist</find>
-      <find>hostResults</find>
-      <find>xscale</find>
-      <find>.range</find>
-      <find>datapoint</find>
-      <find>datapoints</find>
-      <find>Outlier</find>
-      <find>.circle</find>
-      <find>xsca</find>
-      <find>ScatterPlotG</find>
-      <find>console.log(scatterplot_settin</find>
-      <find>scatterplot_settings.data_onYaxis</find>
-      <find>scatter_x</find>
-      <find>scatterzone</find>
+      <find>loadJSON</find>
+      <find>hostList</find>
       <find>update</find>
-      <find>selection</find>
-      <find>data_onXaxis</find>
-      <find>var servicelist</find>
-      <find>select</find>
-      <find>selectionheader</find>
-      <find>scatterplot_settings.data_onXaxis</find>
-      <find>border</find>
-      <find>boxplot</find>
-      <find>activex</find>
+      <find>inter</find>
+      <find>json</find>
+      <find>isRealtime</find>
+      <find>updateTemperature</find>
+      <find>updateService</find>
+      <find>setInterval</find>
+      <find>stopUpdate</find>
+      <find>updateValues</find>
+      <find>reset</find>
+      <find>reset()</find>
+      <find>midlehandle</find>
+      <find>step</find>
+      <find>resetService</find>
+      <find>timestamps</find>
+      <find>countbuffer</find>
+      <find>time</find>
+      <find>xtime</find>
+      <find>xtimesum</find>
+      <find>currentTimeline</find>
+      <find>xtimes</find>
+      <find>graph</find>
+      <find>a1</find>
+      <find>xScale</find>
+      <find>tipH</find>
+      <find>dataSpider</find>
+      <find>r</find>
+      <find>r.</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -165,10 +172,13 @@
         <option value="$PROJECT_DIR$/HiperView/js/TimerInterval.js" />
         <option value="$PROJECT_DIR$/HiperView/myscripts/util.js" />
         <option value="$PROJECT_DIR$/HiperView/demo.html" />
-        <option value="$PROJECT_DIR$/HiperView/myscripts/scatterplot.js" />
         <option value="$PROJECT_DIR$/HiperView/css/main.css" />
         <option value="$PROJECT_DIR$/HiperView/js/boxplot.js" />
+        <option value="$PROJECT_DIR$/HiperView/myscripts/scatterplot.js" />
+        <option value="$PROJECT_DIR$/HiperView/HPCC_VR/scripts/UpdateFunctions.js" />
+        <option value="$PROJECT_DIR$/HiperView/HPCC_VR/scripts/main.js" />
         <option value="$PROJECT_DIR$/HiperView/myscripts/main.js" />
+        <option value="$PROJECT_DIR$/HiperView/myscripts/tooltip.js" />
       </list>
     </option>
   </component>
@@ -224,6 +234,12 @@
               <item name="HPCC" type="462c0819:PsiDirectoryNode" />
               <item name="HiperView" type="462c0819:PsiDirectoryNode" />
               <item name="myscripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HPCC" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HPCC" type="462c0819:PsiDirectoryNode" />
+              <item name="HiperView" type="462c0819:PsiDirectoryNode" />
+              <item name="spider" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -285,12 +301,15 @@
       <workItem from="1545282196805" duration="6028000" />
       <workItem from="1545338639394" duration="5777000" />
       <workItem from="1545411096688" duration="631000" />
-      <workItem from="1545413199148" duration="51279000" />
+      <workItem from="1545413199148" duration="52131000" />
+      <workItem from="1545606704347" duration="606000" />
+      <workItem from="1546728966757" duration="417000" />
+      <workItem from="1548295345756" duration="13874000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91049000" />
+    <option name="totallyTimeSpent" value="106798000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -305,18 +324,18 @@
     <frame x="762" y="145" width="1727" height="878" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23515297" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24415118" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49970007" visible="true" weight="0.39731544" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49910018" visible="true" weight="0.39731544" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50029993" side_tool="true" visible="true" weight="0.39731544" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5008998" side_tool="true" weight="0.39731544" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.14630872" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -330,6 +349,18 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/HiperView/myscripts/tooltip.js</url>
+          <line>384</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/index.html" />
@@ -361,20 +392,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HiperView/myscripts/radarSum.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HiperView/myscripts/tooltip.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="35" column="4" selection-start-line="35" selection-start-column="4" selection-end-line="35" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/js/TimerInterval.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-120">
@@ -399,41 +416,109 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/myscripts/radarSum.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="27" column="25" lean-forward="true" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="33" />
+        <state relative-caret-position="459">
+          <caret line="27" column="25" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="33" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/css/main.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="295">
-          <caret line="371" column="23" lean-forward="true" selection-start-line="371" selection-start-column="23" selection-end-line="371" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HiperView/js/boxplot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="51" column="76" selection-start-line="51" selection-start-column="76" selection-end-line="51" selection-end-column="76" />
+        <state relative-caret-position="6307">
+          <caret line="371" column="23" selection-start-line="371" selection-start-column="23" selection-end-line="371" selection-end-column="23" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/myscripts/scatterplot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="31" />
+        <state relative-caret-position="1076">
+          <caret line="202" lean-forward="true" selection-start-line="202" selection-end-line="202" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/testhtml.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-605" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="214">
+          <caret line="59" column="42" selection-start-line="59" selection-start-column="30" selection-end-line="59" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/scripts/Infrastructure.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="19" column="16" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="16" />
+          <folding>
+            <element signature="n#!!block;n#addRack#0;n#!!block;n#initQuanah#0" />
+            <element signature="n#!!block;n#addHost#0;n#!!block;n#initQuanah#0" />
+            <element signature="n#!!block;n#addCPU#0;n#!!block;n#initQuanah#0" />
+            <element signature="n#!!block;n#addQuanahLabel#0;n#!!block;n#initQuanah#0" />
+            <element signature="n#!!block;n#addCPUMarker#0;n#!!block;n#initQuanah#0" />
+            <element signature="n#!!block;n#addTooltip#0;n#!!block;n#initQuanah#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/scripts/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="68" column="22" selection-start-line="68" selection-start-column="17" selection-end-line="68" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/scripts/UpdateFunctions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="31" column="34" lean-forward="true" selection-start-line="31" selection-start-column="34" selection-end-line="31" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/HPCC_VR/scripts/ControlPanel.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="141">
+          <caret line="277" column="9" lean-forward="true" selection-start-line="277" selection-start-column="9" selection-end-line="277" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/js/boxplot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="714">
+          <caret line="51" column="76" selection-start-line="51" selection-start-column="76" selection-end-line="51" selection-end-column="76" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/js/d3.scaleAdjust.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="675" column="137" selection-start-line="675" selection-start-column="137" selection-end-line="675" selection-end-column="137" />
+        <state relative-caret-position="39">
+          <caret line="87" column="7" selection-start-line="87" selection-start-column="4" selection-end-line="87" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/myscripts/tooltip.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="411" column="13" lean-forward="true" selection-start-line="411" selection-start-column="13" selection-end-line="411" selection-end-column="13" />
           <folding>
-            <element signature="e#17185#17338#0" />
-            <element signature="e#17379#21255#0" />
+            <element signature="e#13460#14407#0" />
           </folding>
         </state>
       </provider>

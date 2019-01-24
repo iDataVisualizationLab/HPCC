@@ -196,7 +196,9 @@ d3.Scatterplot = function () {
     };
 
     function Outlier(data) {
-        return outliagnostics(data).outlyingScore;
+        var outscore = outliagnostics(data).outlyingScore;
+        console.log(outscore);
+        return outscore;
     }
 
     /**

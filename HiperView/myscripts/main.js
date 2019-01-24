@@ -483,13 +483,9 @@ function main() {
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
-    xLinearSummaryScale = d3.scaleAdjust().range([0-radarsize/12,width+radarsize/12]).domain([0, maxstack-1]).itemsize(radarsize);
-    //console.log(xLinearSummaryScale.step());
-    //xLinearSummaryScale.offsetx = 0-radarsize/12;
+    xLinearSummaryScale = d3.scaleAdjust().range([0-radarsize/24,width+radarsize/24]).domain([0, maxstack-1]).itemsize(radarsize);
+    //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
     xTimeSummaryScale =xLinearSummaryScale;
-        // d3.scaleLinear()
-        // .domain([0, maxstack-1])
-        // .range([0+10,width-radarsize*1.5]);
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     request();
@@ -547,7 +543,7 @@ function request(){
             var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
             // Update the current timeline in Summary panel
             var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
-                + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count) : rescaleTime(xTimeSummaryScaleStep(count)));
+                + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count===0? hosts.length:count) : rescaleTime(xTimeSummaryScaleStep(count)));
             svg.selectAll(".currentTimeline")
                 .attr("x1", x2)
                 .attr("x2", x2);
