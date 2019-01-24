@@ -67,7 +67,7 @@ var baseTemperature = 60;
 var interval2;
 var simDuration = 1;
 var numberOfMinutes = 6*60;
-var isRealtime = false;
+var isRealtime = true;
 if (isRealtime){
     simDuration = 1000;
     numberOfMinutes = 6*60;
