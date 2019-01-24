@@ -62,10 +62,10 @@ var users = [];
 var racks = [];
 
 var xTimeScale;
-var baseTemperature =60;
+var baseTemperature = 60;
 
 var interval2;
-var simDuration =1;
+var simDuration = 1;
 var numberOfMinutes = 6*60;
 var isRealtime = false;
 if (isRealtime){
@@ -132,7 +132,6 @@ function init()
     window.addEventListener( 'touchend', onDocRelease, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
 
-    // requestRT();
 }
 
 function initScatterPlotTest()
