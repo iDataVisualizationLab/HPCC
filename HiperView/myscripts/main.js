@@ -42,6 +42,9 @@ var hostResults = {};
 var links =[];
 var node,link;
 
+// log variable
+var timelog=[];
+
 // START: loader spinner settings ****************************
 var opts = {
     lines: 25, // The number of lines to draw
@@ -90,7 +93,7 @@ var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
 
-var isRealtime = true;
+var isRealtime = false;
 if (isRealtime){
     simDuration = 1000;
     simDurationinit = 1000;
@@ -497,6 +500,7 @@ function request(){
     var count = 0;
     var countbuffer = 0;
     var iteration = 0;
+    var haveMiddle = false;
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
     lastIndex = 0;
@@ -526,10 +530,11 @@ function request(){
                 count = 0;
                 countbuffer = 0;
                 requeststatus = true;
+                haveMiddle = false;
                 iteration += iterationstep;
             }
             Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
-            xTimeSummaryScaleStep = d3.scaleSqrt()
+            xTimeSummaryScaleStep = d3.scaleLinear()
                 .domain([0, hosts.length - 1]) // input
                 .range([0, xTimeSummaryScale.step()]);
             Date.prototype.timeNow = function () {
@@ -544,6 +549,15 @@ function request(){
             // Update the current timeline in Summary panel
             var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
                 + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count===0? hosts.length:count) : rescaleTime(xTimeSummaryScaleStep(count)));
+
+            // mark time
+            // console.log(count);
+            // console.log((count > hosts.length/2 && !haveMiddle));
+            if (( (count > hosts.length/2) && !haveMiddle))
+            {
+                updateTimeText(count);
+                haveMiddle = true;
+            }
             svg.selectAll(".currentTimeline")
                 .attr("x1", x2)
                 .attr("x2", x2);
@@ -643,7 +657,7 @@ function drawsummary(initIndex){
         lastIndex = currentlastIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
         xx = xTimeSummaryScale(scaleThreshold(lastIndex));
-        updateTimeText();
+        // updateTimeText(); //time in end
     }else{
         lastIndex = initIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
@@ -743,17 +757,18 @@ function drawsummarypoint(harr){
 
     }
 }
-function updateTimeText(){
-    var dataTime = hostResults[hosts[hosts.length-1].name].arr.map(d=>d.result.query_time).filter((d,i)=> i>(lastIndex-maxstack+1));
+function updateTimeText(index){
+    if (index!= undefined)timelog.push (hostResults[hosts[(index||hosts.length)-1].name].arr.map(d=>d.result.query_time)[lastIndex]);
+    if (timelog.length>maxstack) timelog.shift();
     var boxtime = svg.selectAll(".boxTime")
-        .data(dataTime);
+        .data(timelog);
     boxtime.transition().duration(500)
-        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack)
-        .text(d=> new Date(d).timeNow())
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
+        .text(d=> new Date(d).timeNow());
     boxtime.exit().remove();
     boxtime.enter().append("text")
         .attr("class", "boxTime")
-        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack)
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
         .attr("y", sHeight)
         .attr("fill", "#000")
         .style("font-style","italic")
@@ -763,7 +778,7 @@ function updateTimeText(){
         .attr("font-family", "sans-serif")
         .text(new Date(query_time).timeNow());
 }
-// Delete unnesseccary files
+// Delete unnecessary files
 function processResult(r){
     var obj = {};
     obj.result = {};
@@ -1308,6 +1323,7 @@ function resetRequest(){
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init();
+    timelog = [];
     updateTimeText();
     request();
 }
