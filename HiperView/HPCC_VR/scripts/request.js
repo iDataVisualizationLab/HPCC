@@ -16,6 +16,11 @@ function requestService(count,serin)
                 if (xhr.status === 200) {
                     var result = processResult(JSON.parse(this.responseText));
                     var name = result.data.service.host_name;
+                    console.log(results);
+                    console.log(name);
+                    console.log(serin);
+                    console.log(serviceListattr);
+                    console.log(serviceListattr[serin]);
                     hostResults[name][serviceListattr[serin]].push(result);
                     if (selectedService === serviceList[serin])
                     {
