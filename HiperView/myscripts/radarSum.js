@@ -210,10 +210,13 @@ d3.radar = function () {
 
 function clearclone (){
         document.querySelectorAll("g[cloned='true']").forEach(node=>{
-            node.parentNode.removeChild(node);
+            //node.parentNode.removeChild(node);
+            d3.select(node).attr('cloned',null);
         });
-        d3.select(".summaryGroup").selectAll(".radarWrapper").transition().delay(50)
+        var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper");
+        allbold.transition().delay(50)
             .style("opacity", 1);
+        allbold.selectAll(".radarStroke").style('pointer-events','auto');
         hosts.forEach(l=> {
                 d3.selectAll("." + l.name)
                     .style("visibility", 'visible');

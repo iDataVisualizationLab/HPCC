@@ -652,7 +652,7 @@ function drawsummary(initIndex){
     var arr = [];
     var xx;
 
-    if (initIndex==undefined){
+    if (initIndex===undefined){
         currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;

@@ -274,25 +274,30 @@ function RadarChart(id, data, options, name) {
         .style("stroke", function(d,i) { return cfg.color(i); })
         .style("fill", "none");
         //.style("filter" , "url(#glow2)");
-    blobWrapperpath = blobWrapperg.selectAll(".radarStroke");
+    blobWrapperpath = g.selectAll(".radarWrapper").selectAll(".radarStroke");
     if (cfg.bin) {
         var listhost = [];
         data.forEach(d=>{
            d.bin.name.forEach(n=>{listhost.push(n)});
         });
-        blobWrapperpath.on("mouseover",mouseenterfunctionbold );
+        blobWrapperpath.on("mouseenter",mouseenterfunctionbold );
     }
     function mouseenterfunctionbold (d, i) {
         var state = state||false;
-        if (d3.select(d3.select(this).node().parentNode).style("opacity")==1) {
+        //console.dir(d3.selectAll(document.elementsFromPoint(d3.event.x, d3.event.y)).filter("path"));
+        //console.log(d3.event);
+        // let overlapElements = d3.selectAll(document.elementsFromPoint(d3.event.x, d3.event.y)).filter("path");
+        console.log(d3.select(d3.select(this).node().parentNode).attr("cloned"));
+        if (!d3.select(d3.select(this).node().parentNode).attr("cloned")) {
             playchange();
-            var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a != undefined);
+            var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a !== undefined);
             allbold
                 .style("opacity", 0);
+            allbold.selectAll(".radarStroke").style('pointer-events','none');
             // link to other blod
             var binlist = d.bin.name;
             var matchbold = allbold.filter(a => {
-                if (a != undefined) {
+                if (a !== undefined) {
                     var keys = false;
                     a.bin.name.forEach(e => {
                         keys = keys || (binlist.find(f => f === e) !== undefined)
@@ -302,13 +307,14 @@ function RadarChart(id, data, options, name) {
                     return false;
             }).nodes();
             matchbold.forEach(t => {
-                let clonedNode = t.cloneNode(true);
+
+                let clonedNode = t;//.cloneNode(true);
                 var fff = t.__data__.bin;
                 var ff = fff.scaledval.filter((e, i) => (binlist.find(f => f === fff.name[i]) !== undefined));
                 let path = d3.select(clonedNode).attrs({
                     cloned: true,
                 }).style("opacity", 1)
-                    .selectAll(".radarStroke");
+                    .selectAll(".radarStroke").style('pointer-events','auto');
 
                 path.style("stroke-opacity", () => {
                     var ff = t.__data__;
@@ -319,9 +325,10 @@ function RadarChart(id, data, options, name) {
                         return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius) + "px");
                     })
                     .style("cursor", "pointer")
-                    .on("mouseover", null)
+                    //.on("mouseenter", null)
                     .on("mouseleave ", function () {
                         clearclone();
+                        //d3.select(".summaryGroup").selectAll(".radarStroke").on("mouseenter",mouseenterfunctionbold);
                     })
                     .on("click", () => {
                         state = !state;
@@ -333,11 +340,12 @@ function RadarChart(id, data, options, name) {
                             else
                                 nodes.on("mouseleave ", function () {
                                     clearclone();
+                                    //d3.select(".summaryGroup").selectAll(".radarStroke").on("mouseenter",mouseenterfunctionbold);
                                 });
                             //nodes.on("click",clearclone());
                         });
                     });
-                t.parentNode.appendChild(clonedNode);
+                //t.parentNode.appendChild(clonedNode);
             });
             hosts.forEach(l => {
                 if (d.bin.name.filter(e => e === l.name).length === 0)
