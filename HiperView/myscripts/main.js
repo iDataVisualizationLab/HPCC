@@ -12,9 +12,14 @@ var margin = {top: 5, right: 0, bottom: 50, left: 0};
 
 var svg = d3.select("svg"),
     width = +document.getElementById("mainBody").offsetWidth,
-    height = +svg.attr("height")-margin.top-margin.bottom;
+    height = +svg.attr("height")-margin.top-margin.bottom,
+    heightdevice = + document.getElementById("mainBody").offsetHeight,
 
-svg = svg.append("g")
+svg = svg
+    .attrs({
+        width: width,
+    })
+    .append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
 var svgsum;
@@ -1281,7 +1286,37 @@ function pauseRequest(){
     }
 
 }
+function realTimeRequest(){
+    clearclone();
+    var e = d3.select('.record').node();
+    if (e.value ==="false"){
+        e.value = "true";
+        $(e).addClass('active');
+        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
+        realTimesetting (true);
+        console.log('online');
+    }else {
+        e.value = "false";
+        $(e).removeClass('active');
+        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
+        realTimesetting (false);
+        console.log('offline');
+    }
 
+}
+function realTimesetting (option){
+    isRealtime = option;
+    if (option){
+        simDuration = 1000;
+        simDurationinit = 1000;
+        numberOfMinutes = 26*60;
+    }else{
+        simDuration =0;
+        simDurationinit = 0;
+        numberOfMinutes = 26*60;
+    }
+    resetRequest();
+}
 function playchange(){
     var e = d3.select('.pause').node();
     interval2.pause();

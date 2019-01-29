@@ -43,6 +43,26 @@ d3.radar = function () {
                 });
 
         handledata(index);
+        // TESTING ZONE
+        let scagOptions ={
+            startBinGridSize: 30,
+            minBins: 4,
+            maxBins: 15,
+            outlyingCoefficient: 1.25
+        };
+
+        scag = scagnosticsnd(dataSpider3.map(d=>{
+            var dd = d.map(k=>k.value);
+            dd.data = d.name;
+            return dd;}), scagOptions);
+        console.log(dataSpider3.map(d=>{
+            var dd = d.map(k=>k.value);
+            dd.data = d.name;
+            return dd;})[0]);
+        console.log(scag.bins.length);
+        console.log(scag.outlyingPoints);
+
+        //TESTING ZONE
         bin.data(dataSpider3.map(d=>{
             var dd = d.map(k=>k.value);
             dd.data = d.name;
@@ -214,7 +234,7 @@ function clearclone (){
             d3.select(node).attr('cloned',null);
         });
         var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper");
-        allbold.transition().delay(50)
+        allbold//.transition().delay(50)
             .style("opacity", 1);
         allbold.selectAll(".radarStroke").style('pointer-events','auto');
         hosts.forEach(l=> {

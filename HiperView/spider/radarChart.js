@@ -291,8 +291,7 @@ function RadarChart(id, data, options, name) {
         if (!d3.select(d3.select(this).node().parentNode).attr("cloned")) {
             playchange();
             var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a !== undefined);
-            allbold
-                .style("opacity", 0);
+            allbold.style("opacity", 0);
             allbold.selectAll(".radarStroke").style('pointer-events','none');
             // link to other blod
             var binlist = d.bin.name;
@@ -328,7 +327,6 @@ function RadarChart(id, data, options, name) {
                     //.on("mouseenter", null)
                     .on("mouseleave ", function () {
                         clearclone();
-                        //d3.select(".summaryGroup").selectAll(".radarStroke").on("mouseenter",mouseenterfunctionbold);
                     })
                     .on("click", () => {
                         state = !state;
@@ -340,9 +338,7 @@ function RadarChart(id, data, options, name) {
                             else
                                 nodes.on("mouseleave ", function () {
                                     clearclone();
-                                    //d3.select(".summaryGroup").selectAll(".radarStroke").on("mouseenter",mouseenterfunctionbold);
                                 });
-                            //nodes.on("click",clearclone());
                         });
                     });
                 //t.parentNode.appendChild(clonedNode);
@@ -352,11 +348,11 @@ function RadarChart(id, data, options, name) {
                     d3.selectAll("." + l.name)
                         .style("visibility", 'hidden');
             });
-            hosts.forEach(l => {
-                if (d.bin.name.filter(e => e === l.name).length === 0)
-                    d3.selectAll("." + l.name)
-                        .style("visibility", 'hidden');
-            });
+            // hosts.forEach(l => {
+            //     if (d.bin.name.filter(e => e === l.name).length === 0)
+            //         d3.selectAll("." + l.name)
+            //             .style("visibility", 'hidden');
+            // });
         }
     }
     //Update the circles
@@ -561,7 +557,7 @@ function RadarChart(id, data, options, name) {
             return Object.keys(d).map(function (k) {
                 return {key: k, value: d[k], index: i}
             })
-        }).filter(d => d.length != 0);
+        }).filter(d => d.length = 0);
 
         var subaxisg = axisGrid.selectAll(".axisLabelsub")
             .data(legendg);
