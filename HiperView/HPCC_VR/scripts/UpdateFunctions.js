@@ -298,7 +298,7 @@ function updateTooltip( host )
 
     // constructing tooltip
     var tmp = host.name.split("_");
-    var host_name = "compute-"+tmp[1]+"-"+tmp[3];
+    var host_name = host.name;
     var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
     tooltip.position.x = pos.x;
     tooltip.position.y = 0.1;
