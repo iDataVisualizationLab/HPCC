@@ -240,36 +240,40 @@ function updateCPUMarker( obj )
 }
 
 // scatterplot update
-function updateScatterPlot( host, services )
+function updateScatterPlot( timestamp, services )
 {
-    // delete previous scatterplot
-    if( scatter_plot )
-    {
-        while (scatter_plot.graph.children.length)
-        {
-            scatter_plot.graph.remove(scatter_plot.graph.children[0]);
-        }
-        scatter_plot = null;
-    }
+    services = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
+    var hostkeys = Object.keys(json);
 
     // make new scatter plot
-    services = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
+    if( scatter_plot == null )
+    {
+        scatter_plot = new ScatterPlot( services, hostkeys, extractPoints(selectedTimestamp), null, 0.25 );
+        scene.add( scatter_plot.graph );
+    }
+    else
+    {
+        for( var h=0; h<hostkeys.length; h++ )
+        {
+            var x = json[hostkeys[h]][services[0]][timestamp];
+            var y = json[hostkeys[h]][services[1]][timestamp];
+            var z = json[hostkeys[h]][services[2]][timestamp];
 
-    scatter_plot = new ScatterPlot( services, extractPoints(host,services), null, 0.25 );
-    scene.add( scatter_plot.graph );
+            scatter_plot.updatePoint( hostkeys[h], x, y, z );
+        }
+    }
 
-    function extractPoints( host, service )
+    function extractPoints( timestamp )
     {
         var p = [], tmp;
 
-        for( var i=0; i<json[host][service[0]].length; i++ )
+        for( var h=0; h<hostkeys.length; h++ )
         {
-            tmp = []
+            tmp = [];
 
-            // if no service exists put 0
-            tmp.push( json[host][service[0]] ? json[host][service[0]][i] : 0 );
-            tmp.push( json[host][service[1]] ? json[host][service[1]][i] : 0 );
-            tmp.push( json[host][service[2]] ? json[host][service[2]][i] : 0 );
+            tmp.push( json[hostkeys[h]][services[0]][timestamp] );
+            tmp.push( json[hostkeys[h]][services[1]][timestamp] );
+            tmp.push( json[hostkeys[h]][services[2]][timestamp] );
 
             p.push( tmp )
         }
@@ -291,10 +295,10 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-    if (oldhostclicked)
-        oldhostclicked.children[2].material.color.setHex(0x000000);
+    // if (oldhostclicked)
+        // oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
-    oldhostclicked.children[2].material.color.setHex(0xff0000);
+    // oldhostclicked.children[2].material.color.setHex(0xff0000);
 
     // constructing tooltip
     var tmp = host.name.split("_");

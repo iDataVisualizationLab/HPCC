@@ -125,6 +125,7 @@ function init()
     initRoom();
     initControlPanel();
     initQuanah();
+    initScatterPlot();
     // initHPCC();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
@@ -434,6 +435,11 @@ function initHPCC()
         }
         return foundIndex;
     }
+}
+
+function initScatterPlot()
+{
+    updateScatterPlot( null, null );
 }
 
 // Animate & Render
