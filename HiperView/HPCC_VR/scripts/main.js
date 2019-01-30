@@ -17,6 +17,7 @@ var selectedTimestamp = 1;
 var INTERSECTED;
 var isInit = true;
 var niceOffset = false;
+
 // D3
 var oldhostclicked;
 var svg;
@@ -26,6 +27,7 @@ var maxstack = 7;
 var updateHost;
 var updateTimestamp;
 var move_timer;
+var selectedSPService = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"];
 
 var CP_SPEED = 0.01;
 
@@ -439,7 +441,23 @@ function initHPCC()
 
 function initScatterPlot()
 {
-    updateScatterPlot( null, null );
+    var hostkeys = Object.keys(json);
+    
+    var data = [], tmp;
+
+    for( var h=0; h<hostkeys.length; h++ )
+    {
+        tmp = [];
+
+        tmp.push( json[hostkeys[h]][selectedSPService[0]][selectedTimestamp] );
+        tmp.push( json[hostkeys[h]][selectedSPService[1]][selectedTimestamp] );
+        tmp.push( json[hostkeys[h]][selectedSPService[2]][selectedTimestamp] );
+
+        data.push( tmp )
+    }
+
+    scatter_plot = new ScatterPlot( selectedSPService, hostkeys, data, null, 0.25 );
+    scene.add( scatter_plot.graph );
 }
 
 // Animate & Render

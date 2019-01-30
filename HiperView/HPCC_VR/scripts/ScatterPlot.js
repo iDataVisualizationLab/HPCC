@@ -337,7 +337,6 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
     var updatePoint = function updatePoint( host, x, y, z )
     {
-        console.log("updating");
         this.points.obj[host].position.x = fit(x,this.x);
         this.points.obj[host].position.y = fit(y,this.y);
         this.points.obj[host].position.z = fit(z,this.z);

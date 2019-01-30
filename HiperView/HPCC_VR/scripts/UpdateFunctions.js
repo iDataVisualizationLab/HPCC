@@ -37,7 +37,10 @@ function updateValues( timestamp )
     {
 
         if( hostObj[rack][host] )
+        {
             updateService( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
+            updateScatterPlot( "compute-"+rack+"-"+host, timestamp )
+        }
 
         if( cpu+1 <= CPU_NUM )
             cpu++;
@@ -62,6 +65,7 @@ function updateValues( timestamp )
                         timestamp++;
                         updateSelectedTimestamp( timestamp+"" );
                         updateValues( timestamp );
+                        updateScatterPlot(selectedTimestamp,null);
 
                         if( time == TS_NUM-1 )
                             isInit = false;
@@ -240,46 +244,12 @@ function updateCPUMarker( obj )
 }
 
 // scatterplot update
-function updateScatterPlot( timestamp, services )
+function updateScatterPlot( host, timestamp )
 {
-    services = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
-    var hostkeys = Object.keys(json);
-
-    // make new scatter plot
-    if( scatter_plot == null )
-    {
-        scatter_plot = new ScatterPlot( services, hostkeys, extractPoints(selectedTimestamp), null, 0.25 );
-        scene.add( scatter_plot.graph );
-    }
-    else
-    {
-        for( var h=0; h<hostkeys.length; h++ )
-        {
-            var x = json[hostkeys[h]][services[0]][timestamp];
-            var y = json[hostkeys[h]][services[1]][timestamp];
-            var z = json[hostkeys[h]][services[2]][timestamp];
-
-            scatter_plot.updatePoint( hostkeys[h], x, y, z );
-        }
-    }
-
-    function extractPoints( timestamp )
-    {
-        var p = [], tmp;
-
-        for( var h=0; h<hostkeys.length; h++ )
-        {
-            tmp = [];
-
-            tmp.push( json[hostkeys[h]][services[0]][timestamp] );
-            tmp.push( json[hostkeys[h]][services[1]][timestamp] );
-            tmp.push( json[hostkeys[h]][services[2]][timestamp] );
-
-            p.push( tmp )
-        }
-
-        return p;
-    }
+    var x = json[host][selectedSPService[0]] ? json[host][selectedSPService[0]][timestamp] : null;
+    var y = json[host][selectedSPService[1]] ? json[host][selectedSPService[1]][timestamp] : null;
+    var z = json[host][selectedSPService[2]] ? json[host][selectedSPService[2]][timestamp] : null;
+    scatter_plot.updatePoint( host, x, y, z );
 }
 
 // ngan
