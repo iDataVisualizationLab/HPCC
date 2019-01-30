@@ -40,9 +40,11 @@ var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .attr("id", "d3-tip")
     .offset(()=> {
+        if (niceOffset){
         let heightTip =+ $('#d3-tip')[0].offsetHeight;
-        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -100-tipW:100];})
-    .html(function(d1,hideLine) {
+        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -100-tipW:100];
+        } return [0,0];})
+        .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
 d3.select('#d3-tip')

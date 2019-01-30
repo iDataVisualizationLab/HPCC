@@ -16,7 +16,7 @@ var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', 
 var selectedTimestamp = 1;
 var INTERSECTED;
 var isInit = true;
-
+var niceOffset = false;
 // D3
 var oldhostclicked;
 var svg;
