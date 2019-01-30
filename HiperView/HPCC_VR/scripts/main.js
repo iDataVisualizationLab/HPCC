@@ -126,7 +126,7 @@ function init()
     initControlPanel();
     initQuanah();
     // initHPCC();
-    initScatterPlotTest();
+    // initScatterPlotTest();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );

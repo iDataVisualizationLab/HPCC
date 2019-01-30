@@ -95,101 +95,101 @@ function updateService( service, keys, obj )
             break;
     }
 
-}
+    function updateTemperature( keys, obj )
+    {
+        var rack = keys[0];
+        var host = keys[1];
+        var cpu = keys[2];
+        var time = keys[3];
 
-function updateTemperature( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var cpu = keys[2];
-    var time = keys[3];
+        var key1 = "compute-"+rack+"-"+host;
+        var key2 = "arrTemperatureCPU"+cpu;
 
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrTemperatureCPU"+cpu;
+        if( json[key1][key2][time] !=null )
+            var temperature = color_funct(json[key1][key2][time]);
+        else
+            var temperature = 0x222222;
 
-    if( json[key1][key2][time] !=null )
-        var temperature = color_funct(json[key1][key2][time]);
-    else
-        var temperature = 0x222222;
+        updateCPUMarker( obj );
+        obj.material.color = new THREE.Color( temperature );
 
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( temperature );
+    }
 
-}
+    function updateCPULoad( keys, obj )
+    {
+        var rack = keys[0];
+        var host = keys[1];
+        var time = keys[3];
 
-function updateCPULoad( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var time = keys[3];
+        var key1 = "compute-"+rack+"-"+host;
+        var key2 = "arrCPU_load";
 
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrCPU_load";
+        if( json[key1][key2][time] !=null )
+            var load = color_funct(json[key1][key2][time]);
+        else
+            var load = 0x222222;
 
-    if( json[key1][key2][time] !=null )
-        var load = color_funct(json[key1][key2][time]);
-    else
-        var load = 0x222222;
+        updateCPUMarker( obj );
+        obj.material.color = new THREE.Color( load );
 
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( load );
+    }
 
-}
+    function updateMemoryUsage( keys, obj )
+    {
+        var rack = keys[0];
+        var host = keys[1];
+        var time = keys[3];
 
-function updateMemoryUsage( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var time = keys[3];
+        var key1 = "compute-"+rack+"-"+host;
+        var key2 = "arrMemory_usage";
 
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrMemory_usage";
+        if( json[key1][key2][time] !=null )
+            var usage = color_funct(json[key1][key2][time]);
+        else
+            var usage = 0x222222;
 
-    if( json[key1][key2][time] !=null )
-        var usage = color_funct(json[key1][key2][time]);
-    else
-        var usage = 0x222222;
+        updateCPUMarker( obj );
+        obj.material.color = new THREE.Color( usage );
 
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( usage );
+    }
 
-}
+    function updateFansSpeed( keys, obj )
+    {
+        var rack = keys[0];
+        var host = keys[1];
+        var cpu = keys[2];
+        var time = keys[3];
 
-function updateFansSpeed( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var cpu = keys[2];
-    var time = keys[3];
+        var key1 = "compute-"+rack+"-"+host;
+        var key2 = "arrFans_speed"+cpu;
 
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrFans_speed"+cpu;
+        if( json[key1][key2][time] !=null )
+            var speed = color_funct(json[key1][key2][time]);
+        else
+            var speed = 0x222222;
 
-    if( json[key1][key2][time] !=null )
-        var speed = color_funct(json[key1][key2][time]);
-    else
-        var speed = 0x222222;
+        updateCPUMarker( obj );
+        obj.material.color = new THREE.Color( speed );
+    }
 
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( speed );
-}
+    function updatePowerConsumption( keys, obj )
+    {
+        var rack = keys[0];
+        var host = keys[1];
+        var time = keys[3];
 
-function updatePowerConsumption( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var time = keys[3];
+        var key1 = "compute-"+rack+"-"+host;
+        var key2 = "arrPower_usage";
 
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrPower_usage";
+        if( json[key1][key2][time] !=null )
+            var usage = color_funct(json[key1][key2][time]);
+        else
+            var usage = 0x222222;
 
-    if( json[key1][key2][time] !=null )
-        var usage = color_funct(json[key1][key2][time]);
-    else
-        var usage = 0x222222;
+        updateCPUMarker( obj );
+        obj.material.color = new THREE.Color( usage );
 
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( usage );
+    }
 
 }
 
@@ -237,6 +237,45 @@ function updateCPUMarker( obj )
     cpu_marker.position.x = pos.x;
     cpu_marker.position.y = pos.y + 0.005;
     cpu_marker.position.z = pos.z;
+}
+
+// scatterplot update
+function updateScatterPlot( host, services )
+{
+    // delete previous scatterplot
+    if( scatter_plot )
+    {
+        while (scatter_plot.graph.children.length)
+        {
+            scatter_plot.graph.remove(scatter_plot.graph.children[0]);
+        }
+        scatter_plot = null;
+    }
+
+    // make new scatter plot
+    services = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
+
+    scatter_plot = new ScatterPlot( services, extractPoints(host,services), null, 0.25 );
+    scene.add( scatter_plot.graph );
+
+    function extractPoints( host, service )
+    {
+        var p = [], tmp;
+
+        for( var i=0; i<json[host][service[0]].length; i++ )
+        {
+            tmp = []
+
+            // if no service exists put 0
+            tmp.push( json[host][service[0]] ? json[host][service[0]][i] : 0 );
+            tmp.push( json[host][service[1]] ? json[host][service[1]][i] : 0 );
+            tmp.push( json[host][service[2]] ? json[host][service[2]][i] : 0 );
+
+            p.push( tmp )
+        }
+
+        return p;
+    }
 }
 
 // ngan

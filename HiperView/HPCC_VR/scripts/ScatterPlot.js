@@ -1,4 +1,4 @@
-function ScatterPlot( services, data, bin_size, scale )
+function ScatterPlot( axes, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -10,6 +10,7 @@ function ScatterPlot( services, data, bin_size, scale )
     var graph = new THREE.Group();
     var grid = setGrid();
     var points = setPoints();
+    // var axesmenu = setAxesMenu();
 
     graph.add( grid );
     graph.add( points );
@@ -17,13 +18,18 @@ function ScatterPlot( services, data, bin_size, scale )
     this.graph = graph;
     this.grid = grid;
     this.points = points;
+    // this.axesmenu = axesmenu;
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.data = data;
 
 
     // functions
 
     function fit( val, axis )
     {
-        // console.log(axis);
+        if( val == undefined ) return 0;
 
         if( axis.range == 0 ) return 0;
 
@@ -39,6 +45,10 @@ function ScatterPlot( services, data, bin_size, scale )
         for( var i=0; i<population; i++ )
         {
             var p = data[i][axis];
+
+            if( !p )
+                continue;
+
             max = max > p ? max : p;
             min = min < p ? min : p;
         }
@@ -47,7 +57,7 @@ function ScatterPlot( services, data, bin_size, scale )
         info.min = min;
         info.range = max - min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
-        info.legend = services[axis];
+        info.legend = axes[axis];
 
         return info;
     }
@@ -55,6 +65,7 @@ function ScatterPlot( services, data, bin_size, scale )
     function setGrid()
     {
         var grid = new THREE.Group();
+        grid.name = "scatterplot-grid";
 
         // box
         var box_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
@@ -87,6 +98,7 @@ function ScatterPlot( services, data, bin_size, scale )
         function setMarks()
         {
             var marks = new THREE.Group();
+            marks.name = "scatterplot-marks";
             var no_marks = 5;
             var xmark = [];
             var ymark = [];
@@ -153,6 +165,7 @@ function ScatterPlot( services, data, bin_size, scale )
                     } );
 
                     var legend = new THREE.Mesh( legend_geometry, legend_material );
+                    legend.name = "mark";
 
                     if( axis.name == "x" )
                         legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
@@ -178,7 +191,12 @@ function ScatterPlot( services, data, bin_size, scale )
         function addAxisLegend( obj, axis )
         {
             var loader = new THREE.FontLoader();
-            var legend_material = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
+            var legend_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+
+            // legend background/hitbox
+            var hitbox_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+            var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
+            var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
 
             loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
 
@@ -191,22 +209,76 @@ function ScatterPlot( services, data, bin_size, scale )
                 } );
 
                 var legend = new THREE.Mesh( legend_geometry, legend_material );
+                axis.obj = hitbox;
+                hitbox.add( legend );
+                setAxesMenu( hitbox );
+                legend.position.set( scale/-3.5, scale/-75, scale/500);
+                hitbox.type = "axis";
 
                 if( axis.name == "x" )
-                    legend.position.set( 0, scale/-4, scale );
+                {
+                    hitbox.name = "x-axis";
+                    hitbox.position.set( scale/2, scale/-4, scale );
+                }
                 if( axis.name == "y" )
                 {
-                    legend.position.set( 0, 0, scale/-4 );
-                    legend.rotation.set( 0, Math.PI/2, 0 );
+                    hitbox.name = "y-axis";
+                    hitbox.position.set( 0, scale, scale/-1.25 );
+                    hitbox.rotation.set( 0, Math.PI/2, 0 );
                 }
                 if( axis.name == "z" )
                 {
-                    legend.position.set( scale/-4, 0, 0 );
-                    legend.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                    hitbox.name = "z-axis";
+                    hitbox.position.set( scale/-4, 0, scale/2 );
+                    hitbox.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
                 }
 
-                obj.add( legend );
+                obj.add( hitbox );
             } );
+        }
+
+        function setAxesMenu( obj )
+        {
+            var axesmenu = new THREE.Group();
+            axesmenu.name = "scatterplot-axesmenu";
+
+            for( var a=0; a<axes.length; a++ )
+            {
+                getOption( axesmenu, a );
+            }
+
+            function getOption( menu, a )
+            {
+                var loader = new THREE.FontLoader();
+                var legend_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+                // axis option background/hitbox
+                var hitbox_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+                var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
+                var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
+
+                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    var legend_geometry = new THREE.TextGeometry( axes[a], {
+                        font: font,
+                        size: scale/20,
+                        height: 0,
+                        curveSegments: 12,
+                        bevelEnabled: false
+                    } );
+    
+                    var legend = new THREE.Mesh( legend_geometry, legend_material );
+                    hitbox.add( legend );
+                    legend.position.set( scale/-3.5, scale/-75, scale/500);
+                    hitbox.type = "axis-option";
+                    hitbox.position.y = ( a + 1 ) * scale/-10;
+                    menu.add( hitbox );
+                } );
+            }
+
+            axesmenu.visible = false;
+            obj.menu = axesmenu;
+            obj.add( axesmenu );
         }
 
         return grid;
@@ -215,14 +287,47 @@ function ScatterPlot( services, data, bin_size, scale )
     function setPoints()
     {
         var points = new THREE.Group();
+        points.name = "scatterplot-points";
+        var pos = [null, null, null];
 
         for( var p=0; p<population; p++ )
         {
-            var material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+            var color = 0x000000;
+            if( data[p][0] )
+            {
+                pos[0] = fit( data[p][0], x );
+            }
+            else
+            {
+                pos[0] = 0;
+                color = 0xff0000;
+            }
+
+            if( data[p][1] )
+            {
+                pos[1] = fit( data[p][1], y );
+            }
+            else
+            {
+                pos[1] = 0;
+                color = 0xff0000;
+            }
+
+            if( data[p][2] )
+            {
+                pos[2] = fit( data[p][2], z );
+            }
+            else
+            {
+                pos[2] = 0;
+                color = 0xff0000;
+            }
+
+            var material = new THREE.MeshBasicMaterial( { color: color } );
             var geometry = new THREE.SphereGeometry( 0.005, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
-            point.position.set( fit( data[p][0], x ), fit( data[p][1], y ), fit( data[p][2], z )  );
+            point.position.set( pos[0], pos[1], pos[2] );
             points.add( point );
         }
 

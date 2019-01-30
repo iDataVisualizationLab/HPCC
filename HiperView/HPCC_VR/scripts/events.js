@@ -33,6 +33,8 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
         console.log(INTERSECTED.name);
+    else if( isScatterPlotClicked() )
+        console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
         console.log(INTERSECTED.name);
     else
@@ -42,7 +44,6 @@ function onMouseDown( event )
     // check if a quanah host was clicked
     function isHostClicked()
     {
-
         for( var r=0; r<RACK_NUM; r++ )
         {
             for( var h=0; h<quanah.children[r].children.length; h++ )
@@ -51,7 +52,8 @@ function onMouseDown( event )
                 if( intersects.length > 0 )
                 {
                     INTERSECTED = intersects[ 0 ].object.parent;
-                    updateTooltip(INTERSECTED);
+                    updateTooltip( INTERSECTED );
+                    updateScatterPlot( INTERSECTED.name, null );
                     return true;
                 }
             }
@@ -103,6 +105,48 @@ function onMouseDown( event )
         }
         else
         {
+            return false;
+        }
+    }
+
+    // check if scatter plot was clicked
+    function isScatterPlotClicked()
+    {
+        intersects = raycaster.intersectObjects( scatter_plot.grid.children );
+        if ( intersects.length > 0 )  // scatter plot grid was selected
+        {
+            INTERSECTED = intersects[ 0 ].object;
+
+            if( INTERSECTED.type == "axis" ) // an axis was selected
+            {
+                INTERSECTED.menu.visible = true;
+                return true;
+            }
+            if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME
+            {
+                // reset();
+                return true;
+            }
+        }
+        else
+        {
+            // intersects = raycaster.intersectObjects( scatter_plot.x.obj.menu.children );
+            // if ( intersects.length > 0 )  // x axis option was selected
+            // {
+            //     INTERSECTED = intersects[ 0 ].object;
+
+            //     if( INTERSECTED.option == 0 ) // option 0 was selected
+            //     {
+            //         INTERSECTED.menu.visible = false;
+            //         // updateScatterPlot( oldhostclicked, services )
+            //         return true;
+            //     }
+            // }
+            // else
+            // {
+            //     return false;
+            // }
+
             return false;
         }
     }
