@@ -39,10 +39,17 @@ var axes = ["CPU1 Temp", "CPU2 Temp ", "Inlet Temp","Job load",
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .attr("id", "d3-tip")
-    .offset([-200, 100])
+    .offset(()=> {
+        let heightTip =+ $('#d3-tip')[0].offsetHeight;
+        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -100-tipW:100];})
     .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
+d3.select('#d3-tip')
+    .on('mouseenter',()=> {d3.select('#d3-tip').transition().style('opacity', 1)
+        .style('pointer-events', 'all');})
+    .on('mouseleave',()=> {d3.select('#d3-tip').transition().delay(4000).duration(4000).style('opacity', 0)
+        .on('end',()=> d3.select('#d3-tip').style('pointer-events', 'none'))});
 var fragment = document.createDocumentFragment();
 fragment.appendChild(document.getElementById('d3-tip'));
 document.getElementById('instructions').appendChild(fragment);

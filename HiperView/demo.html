@@ -11,6 +11,7 @@
     <link href="css/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="css/dd.css" />
     <script src="js/jquery-1.9.0.min.js"></script>
+    <script src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnosticsnd/build/js/scagnosticsnd.min.js"></script>
     <script src="js/jquery.dd.js"></script>
     <script src="js/select.js"></script>
     <script src="js/TimerInterval.js"></script>
@@ -18,7 +19,6 @@
 </head>
 
 <body bgcolor="#ccc" text="black" id="mainBody">
-
 <header class="ttu-main-header" id="nav">
     <div class="logo__lockup"><a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>
         <h1 class="summaryText1">  </h1>
@@ -65,6 +65,7 @@
         <option value="Scatterplot" >Scatterplot</option>
     </select>
     <br><br>
+    <button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>
     <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
     <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
     <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
