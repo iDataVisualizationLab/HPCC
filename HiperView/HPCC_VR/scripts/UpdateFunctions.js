@@ -252,10 +252,10 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-    // if (oldhostclicked)
-        // oldhostclicked.children[2].material.color.setHex(0x000000);
+    if (oldhostclicked)
+        oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
-    // oldhostclicked.children[2].material.color.setHex(0xff0000);
+    oldhostclicked.children[2].material.color.setHex(0xff0000);
 
     // constructing tooltip
     var tmp = host.name.split("_");

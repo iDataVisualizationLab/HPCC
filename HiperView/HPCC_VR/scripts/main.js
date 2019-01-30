@@ -21,6 +21,7 @@ var isInit = true;
 var oldhostclicked;
 var svg;
 var rectip;
+var maxstack = 7;
 
 var updateHost;
 var updateTimestamp;
