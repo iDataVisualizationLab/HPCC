@@ -55,7 +55,7 @@ function initQuanah()
         var host_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 0.5 } );
         var host = new THREE.LineSegments( host_geometry, host_material );
         // var host = new THREE.Group();
-        host.name = "rack_"+rack_num+"_host_"+host_num;
+        host.name = "compute-"+rack_num+"-"+host_num;
         host.type = "host";
 
         host.position.set( 0, 0, 0 );
