@@ -48,7 +48,6 @@ function ScatterPlot( axes, data, bin_size, scale )
 
             if( !p )
                 continue;
-
             max = max > p ? max : p;
             min = min < p ? min : p;
         }
