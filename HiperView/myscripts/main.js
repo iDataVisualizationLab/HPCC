@@ -129,6 +129,8 @@ var color,opa;
 var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 setColorsAndThresholds(initialService);
 
+//********tooltip***************
+var niceOffset = true;
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";
@@ -494,7 +496,7 @@ function main() {
     xLinearSummaryScale = d3.scaleAdjust().range([0-radarsize/24,width+radarsize/24]).domain([0, maxstack-1]).itemsize(radarsize);
     //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
     xTimeSummaryScale =xLinearSummaryScale;
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,15]).scale(xLinearSummaryScale)
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,10]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     request();
 }

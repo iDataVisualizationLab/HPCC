@@ -2,7 +2,7 @@
 
 
 var radarsize  = 300;
-var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(15).data([]);
+var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(10).data([]);
 var radarChartsumopt  = {
     margin: {top: 5, right: 0, bottom: 0, left: 0},
     w: radarsize -5,
@@ -16,7 +16,7 @@ var radarChartsumopt  = {
 d3.radar = function () {
     let startBinGridSize=30,
         isNormalized =false,
-        BinRange = [3,15],
+        BinRange = [3,10],
         arr = [],
         maxstack= 4,
         margin=-30;
@@ -46,22 +46,42 @@ d3.radar = function () {
         // TESTING ZONE
         let scagOptions ={
             startBinGridSize: 30,
-            minBins: 4,
-            maxBins: 15,
-            outlyingCoefficient: 1.25
+            minBins: 50,
+            maxBins: 150,
+            outlyingCoefficient: 1.5,
+            incrementA:2,
+            incrementB:0,
+            decrementA:0.5,
+            decrementB:0,
         };
-
+        // scag = scagnosticsnd(handledata(index), scagOptions);
         scag = scagnosticsnd(dataSpider3.map(d=>{
             var dd = d.map(k=>k.value);
             dd.data = d.name;
             return dd;}), scagOptions);
-        console.log(dataSpider3.map(d=>{
-            var dd = d.map(k=>k.value);
-            dd.data = d.name;
-            return dd;})[0]);
-        console.log(scag.bins.length);
-        console.log(scag.outlyingPoints);
-
+        console.log('Outlying detect: bin='+scag.bins.length);
+        console.log(scag.outlyingPoints.map(d=>d.data));
+        console.log(scag.outlyingBins);
+        let outlyingPoints = [];
+        dataSpider3 = dataSpider3.filter(d=> {
+            let temp2 = scag.outlyingPoints.filter(e=>e.data===d.name);
+            let temp = JSON.parse(JSON.stringify(d));
+            if (temp2.length) {
+                let tempscaleval = [temp2[0]];
+                tempscaleval.val =temp2[0];
+                temp.indexSamp = d.indexSamp;
+                temp.name = d.name;
+                temp.bin ={val: [d.map(k=>k.value)],
+                    name:[temp2[0].data],
+                    scaledval: tempscaleval,
+                    distancefunc: (e)=>0,
+                    distance: 0};
+                outlyingPoints.push(temp);
+                temp.type = "outlying";
+                return 0;
+            }
+            return 1;
+        });
         //TESTING ZONE
         bin.data(dataSpider3.map(d=>{
             var dd = d.map(k=>k.value);
@@ -79,9 +99,11 @@ d3.radar = function () {
                 distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
+        outlyingPoints.forEach(o=> dataSpider3.push(o));
+        console.log('current group + outlying: '+dataSpider3.length);
         radarChartsumopt.levels = levelsR;
-        radarChartsumopt.color = color2;
-        RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
+        //radarChartsumopt.color = color2;
+        RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), dataSpider3, radarChartsumopt,"");
         bin.data([]);
         if (index >= maxstack-1) radarTimeline.shift();
 
@@ -117,7 +139,7 @@ d3.radar = function () {
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
         radarChartsumopt.levels = levelsR;
-        radarChartsumopt.color = color2;
+        //radarChartsumopt.color = color2;
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
         //if (index >= maxstack) radarTimeline.shift();
 
@@ -172,33 +194,68 @@ d3.radar = function () {
                 arr1.indexSamp = index;
                 dataSpider3.push(arr1);
 
-                // Standardize data for Radar chart
-                for (var j=0; j<dataSpider3[i].length;j++){
-                    if (dataSpider3[i][j].value == undefinedValue || isNaN(dataSpider3[i][j].value))
-                        dataSpider3[i][j].value = -15;
+
+            }
+            // let meanAxes = axes.map((a,i)=> d3.mean(dataSpider3,d=>d[i].value));
+            // datawithoutNULL = [];
+            // dataSpider3.forEach((d,i)=>{
+            //     let tempHost = [];
+            //     d.forEach((s,j)=>{
+            //         if (s.value === undefinedValue || isNaN(s.value))
+            //             tempHost[j] = meanAxes[j];
+            //         else if (j==3){   ////  Job load ***********************
+            //             var scale = d3.scaleLinear()
+            //                 .domain([thresholds[1][0],thresholds[1][1]])
+            //                 .range([thresholds[0][0],thresholds[0][1]]);
+            //
+            //             tempHost[j] =  scale(s.value);
+            //         }
+            //         else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
+            //             var scale = d3.scaleLinear()
+            //                 .domain([thresholds[3][0],thresholds[3][1]])
+            //                 .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            //
+            //             tempHost[j] =  scale(s.value);
+            //         }
+            //         else if (j==9){   ////  Power Consumption ***********************
+            //             var scale = d3.scaleLinear()
+            //                 .domain([thresholds[4][0],thresholds[4][1]])
+            //                 .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            //             tempHost[j] =  scale(s.value);
+            //         }
+            //     });
+            //     tempHost.data = d.name;
+            //     datawithoutNULL.push(tempHost);
+            // });
+            // Standardize data for Radar chart
+            dataSpider3.forEach((d,i)=>{
+                d.forEach((s,j)=>{
+                    if (s.value == undefinedValue || isNaN(s.value))
+                        s.value = -15;
                     else if (j==3){   ////  Job load ***********************
                         var scale = d3.scaleLinear()
                             .domain([thresholds[1][0],thresholds[1][1]])
                             .range([thresholds[0][0],thresholds[0][1]]);
 
-                        dataSpider3[i][j].value =  scale(dataSpider3[i][j].value);
+                        s.value =  scale(s.value);
                     }
                     else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
                         var scale = d3.scaleLinear()
                             .domain([thresholds[3][0],thresholds[3][1]])
                             .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
 
-                        dataSpider3[i][j].value =  scale(dataSpider3[i][j].value);
+                        s.value =  scale(s.value);
                     }
                     else if (j==9){   ////  Power Consumption ***********************
                         var scale = d3.scaleLinear()
                             .domain([thresholds[4][0],thresholds[4][1]])
                             .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-                        dataSpider3[i][j].value =  scale(dataSpider3[i][j].value);
+                        s.value =  scale(s.value);
                     }
-                }
-            }
+                });
+            });
         }
+        //return datawithoutNULL;
     }
 
     radarTimeline.data = function (_) {
