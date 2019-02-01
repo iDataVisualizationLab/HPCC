@@ -93,7 +93,6 @@ function onMouseDown( event )
                 isInit = false;
                 selectedTimestamp = parseInt(INTERSECTED.name);
                 reset();
-                updateScatterPlot(selectedTimestamp,null);
                 return true;
             }
             if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME
