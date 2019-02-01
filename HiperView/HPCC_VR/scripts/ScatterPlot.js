@@ -85,6 +85,13 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                                     new THREE.Vector3( scale, 0, scale ),
                                     new THREE.Vector3( scale, 0, 0 ) );
         var box = new THREE.Line( box_geometry, box_material );
+        box.name = "scatterplot-grid";
+
+        var back_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        var back_material = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.2, side: THREE.BackSide} );
+        var background = new THREE.Mesh( back_geometry, back_material );
+        background.position.set(scale/2,scale/2,scale/2);
+        // box.add( background );
 
         grid.add( box );
         grid.add( setMarks() );
@@ -322,7 +329,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 color = 0xff0000;
             }
 
-            var material = new THREE.MeshBasicMaterial( { color: color } );
+            var material = new THREE.MeshPhongMaterial( { color: color } );
             var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
@@ -335,13 +342,44 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
         return points;
     }
 
-    var updatePoint = function updatePoint( host, x, y, z )
+
+    var updatePoint = function updatePoint( host, x, y, z, color )
     {
-        this.points.obj[host].position.x = fit(x,this.x);
-        this.points.obj[host].position.y = fit(y,this.y);
-        this.points.obj[host].position.z = fit(z,this.z);
+        // update color
+        this.points.obj[host].material.color = new THREE.Color( color );
+
+        // update position
+        x = fit(x,this.x);
+        y = fit(y,this.y);
+        z = fit(z,this.z);
+        var obj = this.points.obj[host];
+
+        var intervals = 10;
+        var xinterval = (x - obj.position.x)/intervals;
+        var yinterval = (y - obj.position.y)/intervals;
+        var zinterval = (z - obj.position.z)/intervals;
+        var count = 0;
+
+        var movePoint = setInterval( function()
+        {
+            obj.position.x += xinterval;
+            obj.position.y += yinterval;
+            obj.position.z += zinterval;
+            count++;
+
+            if( count == intervals )
+            {
+                clearInterval( movePoint );
+            }
+
+        }, 0.1 );
     }
 
     this.updatePoint = updatePoint;
+
+}
+
+function animateScatterPlot()
+{
 
 }

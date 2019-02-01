@@ -121,7 +121,7 @@ function init()
 
     initScene();
     initCamera();
-    // initLight();
+    initLight();
     initInteractions();
 
     initRoom();
@@ -321,10 +321,25 @@ function initScene()
 
 function initLight()
 {
-    document.querySelector('a-light').object3D.name = "hpcc_light_group";
-    light = document.querySelector('a-light').object3D.children[0];
-    light.name = "hpcc_light";
-    light.intensity = 5;
+    var light1 = document.getElementById("light1").object3D;
+    var light2 = document.getElementById("light2").object3D;
+    var light3 = document.getElementById("light3").object3D;
+    // var light4 = document.getElementById("light4").object3D;
+
+    var height = ROOM_SIZE/2-ROOM_SIZE/5
+
+    light1.position.set( ROOM_SIZE * 2, height, ROOM_SIZE/1.75 );
+    light2.position.set( 0, height, ROOM_SIZE/1.75 );
+    light3.position.set( ROOM_SIZE * -2, height, ROOM_SIZE/1.75 );
+
+
+    // back lights
+    // light1.position.set( ROOM_SIZE * 1.25, height, ROOM_SIZE/-2);
+    // light2.position.set( ROOM_SIZE * -1.25, height, ROOM_SIZE/-2);
+
+    // front lights
+    // light3.position.set( ROOM_SIZE * 1.25, height, ROOM_SIZE/2);
+    // light4.position.set( ROOM_SIZE * -1.25, height, ROOM_SIZE/2);
 }
 
 function initInteractions()
@@ -357,7 +372,7 @@ function initRoom()
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(repeats[i][0],repeats[i][1]);
-        materials[i] = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide, map: texture } );
+        materials[i] = new THREE.MeshPhongMaterial( { color: 0xffffff, side: THREE.BackSide, map: texture } );
     }
 
     var room = new THREE.Mesh( geometry, materials );
@@ -467,6 +482,7 @@ function animate()
     requestAnimationFrame( animate );
     animateControlPanel();
     // animateTooltip();
+    // animateScatterPlot();
 }
 
 function render()

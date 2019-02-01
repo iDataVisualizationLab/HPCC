@@ -246,10 +246,26 @@ function updateCPUMarker( obj )
 // scatterplot update
 function updateScatterPlot( host, timestamp )
 {
-    var x = json[host][selectedSPService[0]][timestamp] ? json[host][selectedSPService[0]][timestamp] : null;
-    var y = json[host][selectedSPService[1]][timestamp] ? json[host][selectedSPService[1]][timestamp] : null;
-    var z = json[host][selectedSPService[2]][timestamp] ? json[host][selectedSPService[2]][timestamp] : null;
-    scatter_plot.updatePoint( host, x, y, z );
+    var x, y, z, color;
+    // console.log(host);
+
+    if( json[host] )
+    {
+
+        x = json[host][selectedSPService[0]][timestamp] ? json[host][selectedSPService[0]][timestamp] : null;
+        y = json[host][selectedSPService[1]][timestamp] ? json[host][selectedSPService[1]][timestamp] : null;
+        z = json[host][selectedSPService[2]][timestamp] ? json[host][selectedSPService[2]][timestamp] : null;
+        color = color_funct(json[host][selectedSPService[0]][timestamp]);
+    }
+    else
+    {
+        // x = null;
+        // y = null;
+        // z = null;
+        return 0;
+    }
+
+    scatter_plot.updatePoint( host, x, y, z, color );
 }
 
 // ngan
