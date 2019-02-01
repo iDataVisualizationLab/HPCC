@@ -37,7 +37,10 @@ function updateValues( timestamp )
     {
 
         if( hostObj[rack][host] )
+        {
             updateService( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
+            updateScatterPlot( "compute-"+rack+"-"+host, timestamp )
+        }
 
         if( cpu+1 <= CPU_NUM )
             cpu++;
@@ -62,6 +65,7 @@ function updateValues( timestamp )
                         timestamp++;
                         updateSelectedTimestamp( timestamp+"" );
                         updateValues( timestamp );
+                        updateScatterPlot(selectedTimestamp,null);
 
                         if( time == TS_NUM-1 )
                             isInit = false;
@@ -240,42 +244,12 @@ function updateCPUMarker( obj )
 }
 
 // scatterplot update
-function updateScatterPlot( host, services )
+function updateScatterPlot( host, timestamp )
 {
-    // delete previous scatterplot
-    if( scatter_plot )
-    {
-        while (scatter_plot.graph.children.length)
-        {
-            scatter_plot.graph.remove(scatter_plot.graph.children[0]);
-        }
-        scatter_plot = null;
-    }
-
-    // make new scatter plot
-    services = ["arrTemperatureCPU1","arrMemory_usage","arrFans_speed1"]
-
-    scatter_plot = new ScatterPlot( services, extractPoints(host,services), null, 0.25 );
-    scene.add( scatter_plot.graph );
-
-    function extractPoints( host, service )
-    {
-        var p = [], tmp;
-
-        for( var i=0; i<json[host][service[0]].length; i++ )
-        {
-            tmp = []
-
-            // if no service exists put 0
-            tmp.push( json[host][service[0]] ? json[host][service[0]][i] : 0 );
-            tmp.push( json[host][service[1]] ? json[host][service[1]][i] : 0 );
-            tmp.push( json[host][service[2]] ? json[host][service[2]][i] : 0 );
-
-            p.push( tmp )
-        }
-
-        return p;
-    }
+    var x = json[host][selectedSPService[0]] ? json[host][selectedSPService[0]][timestamp] : null;
+    var y = json[host][selectedSPService[1]] ? json[host][selectedSPService[1]][timestamp] : null;
+    var z = json[host][selectedSPService[2]] ? json[host][selectedSPService[2]][timestamp] : null;
+    scatter_plot.updatePoint( host, x, y, z );
 }
 
 // ngan
@@ -291,10 +265,10 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-    if (oldhostclicked)
-        oldhostclicked.children[2].material.color.setHex(0x000000);
+    // if (oldhostclicked)
+        // oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
-    oldhostclicked.children[2].material.color.setHex(0xff0000);
+    // oldhostclicked.children[2].material.color.setHex(0xff0000);
 
     // constructing tooltip
     var tmp = host.name.split("_");

@@ -52,8 +52,7 @@ function onMouseDown( event )
                 if( intersects.length > 0 )
                 {
                     INTERSECTED = intersects[ 0 ].object.parent;
-                    updateTooltip( INTERSECTED );
-                    updateScatterPlot( INTERSECTED.name, null );
+                    // updateTooltip( INTERSECTED );
                     return true;
                 }
             }
@@ -94,6 +93,7 @@ function onMouseDown( event )
                 isInit = false;
                 selectedTimestamp = parseInt(INTERSECTED.name);
                 reset();
+                updateScatterPlot(selectedTimestamp,null);
                 return true;
             }
             if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME

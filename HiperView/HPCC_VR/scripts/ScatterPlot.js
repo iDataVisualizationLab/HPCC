@@ -1,4 +1,4 @@
-function ScatterPlot( axes, data, bin_size, scale )
+function ScatterPlot( axes, dataid, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -23,7 +23,6 @@ function ScatterPlot( axes, data, bin_size, scale )
     this.y = y;
     this.z = z;
     this.data = data;
-
 
     // functions
 
@@ -288,6 +287,7 @@ function ScatterPlot( axes, data, bin_size, scale )
         var points = new THREE.Group();
         points.name = "scatterplot-points";
         var pos = [null, null, null];
+        points.obj = {};
 
         for( var p=0; p<population; p++ )
         {
@@ -323,14 +323,25 @@ function ScatterPlot( axes, data, bin_size, scale )
             }
 
             var material = new THREE.MeshBasicMaterial( { color: color } );
-            var geometry = new THREE.SphereGeometry( 0.005, 8, 8 );
+            var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
             point.position.set( pos[0], pos[1], pos[2] );
+            point.name = dataid[p];
             points.add( point );
+            points.obj[dataid[p]] = point;
         }
 
         return points;
     }
+
+    var updatePoint = function updatePoint( host, x, y, z )
+    {
+        this.points.obj[host].position.x = fit(x,this.x);
+        this.points.obj[host].position.y = fit(y,this.y);
+        this.points.obj[host].position.z = fit(z,this.z);
+    }
+
+    this.updatePoint = updatePoint;
 
 }
