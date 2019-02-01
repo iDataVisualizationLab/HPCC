@@ -329,7 +329,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 color = 0xff0000;
             }
 
-            var material = new THREE.MeshBasicMaterial( { color: color } );
+            var material = new THREE.MeshPhongMaterial( { color: color } );
             var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
@@ -337,7 +337,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
             point.name = dataid[p];
             points.add( point );
             points.obj[dataid[p]] = point;
-            points.obj[dataid[p]].moving = false;
+            // points.obj[dataid[p]].moving = false;
         }
 
         return points;
@@ -355,12 +355,12 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
         z = fit(z,this.z);
         var obj = this.points.obj[host];
 
-        while( obj.moving == true )
-        {
-            obj.reset = true;
-        }
+        // while( obj.moving == true )
+        // {
+        //     obj.reset = true;
+        // }
 
-        obj.moving = true;
+        // obj.moving = true;
 
         var intervals = 10;
         var xinterval = (x - obj.position.x)/intervals;
@@ -377,18 +377,18 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
             if( count == intervals )
             {
-                obj.moving = false;
+                // obj.moving = false;
                 clearInterval( movePoint );
             }
 
-            if( obj.reset == true )
-            {
-                obj.position.x = x;
-                obj.position.y = y;
-                obj.position.z = z;
-                obj.moving = false;
-                clearInterval( movePoint );
-            }
+            // if( obj.reset == true )
+            // {
+            //     obj.position.x = x;
+            //     obj.position.y = y;
+            //     obj.position.z = z;
+            //     obj.moving = false;
+            //     clearInterval( movePoint );
+            // }
 
         }, 0.01 );
     }
