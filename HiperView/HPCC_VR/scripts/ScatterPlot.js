@@ -10,15 +10,15 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
     var graph = new THREE.Group();
     var grid = setGrid();
     var points = setPoints();
-    // var axesmenu = setAxesMenu();
 
     graph.add( grid );
     graph.add( points );
 
+    graph.position.set( ROOM_SIZE * 2.5, 0, 0 );
+
     this.graph = graph;
     this.grid = grid;
     this.points = points;
-    // this.axesmenu = axesmenu;
     this.x = x;
     this.y = y;
     this.z = z;
@@ -176,8 +176,8 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                         legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
                     if( axis.name == "y" )
                     {
-                        legend.position.set( pos.x, pos.y, pos.z );
-                        legend.rotation.set( 0, Math.PI/2, 0 );
+                        legend.position.set( pos.x, pos.y, pos.z * 3 );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                     }
                     if( axis.name == "z" )
                     {
@@ -229,7 +229,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 {
                     hitbox.name = "y-axis";
                     hitbox.position.set( 0, scale, scale/-1.25 );
-                    hitbox.rotation.set( 0, Math.PI/2, 0 );
+                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                 }
                 if( axis.name == "z" )
                 {
@@ -368,36 +368,35 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
         var zinterval = (z - obj.position.z)/intervals;
         var count = 0;
 
-        var movePoint = setInterval( function()
-        {
-            obj.position.x += xinterval;
-            obj.position.y += yinterval;
-            obj.position.z += zinterval;
-            count++;
+        obj.position.x = x;
+        obj.position.y = y;
+        obj.position.z = z;
 
-            if( count == intervals )
-            {
-                // obj.moving = false;
-                clearInterval( movePoint );
-            }
+        // var movePoint = setInterval( function()
+        // {
+        //     obj.position.x += xinterval;
+        //     obj.position.y += yinterval;
+        //     obj.position.z += zinterval;
+        //     count++;
 
-            // if( obj.reset == true )
-            // {
-            //     obj.position.x = x;
-            //     obj.position.y = y;
-            //     obj.position.z = z;
-            //     obj.moving = false;
-            //     clearInterval( movePoint );
-            // }
+        //     if( count == intervals )
+        //     {
+        //         // obj.moving = false;
+        //         clearInterval( movePoint );
+        //     }
 
-        }, 0.01 );
+        //     // if( obj.reset == true )
+        //     // {
+        //     //     obj.position.x = x;
+        //     //     obj.position.y = y;
+        //     //     obj.position.z = z;
+        //     //     obj.moving = false;
+        //     //     clearInterval( movePoint );
+        //     // }
+
+        // }, 10 );
     }
 
     this.updatePoint = updatePoint;
-
-}
-
-function animateScatterPlot()
-{
 
 }
