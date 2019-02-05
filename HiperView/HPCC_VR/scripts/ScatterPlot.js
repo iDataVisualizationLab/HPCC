@@ -120,7 +120,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 // x marks
                 mark_geometry = new THREE.Geometry();
                 start = new THREE.Vector3( v, 0, scale );
-                end = new THREE.Vector3( v, mark_length, scale );
+                end = new THREE.Vector3( v, 0, scale + mark_length * -1 );
                 mark_geometry.vertices.push( start, end );
                 line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
                 addIntervalLegend( line, x, i, end );
@@ -140,7 +140,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 // z marks
                 mark_geometry = new THREE.Geometry();
                 start = new THREE.Vector3( 0, 0, v );
-                end = new THREE.Vector3( mark_length, 0, v );
+                end = new THREE.Vector3( 0, mark_length, v );
                 mark_geometry.vertices.push( start, end );
                 line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
                 addIntervalLegend( line, z, i, end );
@@ -181,8 +181,8 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                     }
                     if( axis.name == "z" )
                     {
-                        legend.position.set( pos.x + mark_length/2, pos.y, pos.z );
-                        legend.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                     }
 
                     obj.add( legend );
@@ -223,7 +223,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 if( axis.name == "x" )
                 {
                     hitbox.name = "x-axis";
-                    hitbox.position.set( scale/2, scale/-4, scale );
+                    hitbox.position.set( scale/2, scale/-4, scale + scale/15 );
                 }
                 if( axis.name == "y" )
                 {
@@ -234,8 +234,8 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
                 if( axis.name == "z" )
                 {
                     hitbox.name = "z-axis";
-                    hitbox.position.set( scale/-4, 0, scale/2 );
-                    hitbox.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                    hitbox.position.set( 0, scale/-4, scale/2 );
+                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                 }
 
                 obj.add( hitbox );
