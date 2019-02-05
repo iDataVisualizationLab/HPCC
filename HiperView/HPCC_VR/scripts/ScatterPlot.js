@@ -362,7 +362,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
         // obj.moving = true;
 
-        var intervals = 10;
+        var intervals = 2;
         var xinterval = (x - obj.position.x)/intervals;
         var yinterval = (y - obj.position.y)/intervals;
         var zinterval = (z - obj.position.z)/intervals;
@@ -394,7 +394,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
         //     //     clearInterval( movePoint );
         //     // }
 
-        // }, 10 );
+        // }, 2 );
     }
 
     this.updatePoint = updatePoint;

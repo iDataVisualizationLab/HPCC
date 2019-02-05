@@ -281,18 +281,17 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-    // if (oldhostclicked)
-        // oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
-    // oldhostclicked.children[2].material.color.setHex(0xff0000);
+
+    // highligh clickedhost
 
     // constructing tooltip
     var tmp = host.name.split("_");
     var host_name = host.name;
-    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
-    tooltip.position.x = pos.x;
-    tooltip.position.y = 0.1;
-    tooltip.position.z = pos.z - 0.3;
+    // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
+
+    tooltip.position.set(0,0,0);
+
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")

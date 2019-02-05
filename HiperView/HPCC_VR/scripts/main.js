@@ -27,7 +27,7 @@ var maxstack = 7;
 var updateHost;
 var updateTimestamp;
 var move_timer;
-var selectedSPService = ["arrTemperatureCPU1","arrMemory_usage","arrPower_usage"];
+var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
 
 var CP_SPEED = 0.01;
 
@@ -481,7 +481,7 @@ function animate()
 {
     requestAnimationFrame( animate );
     animateControlPanel();
-    // animateTooltip();
+    animateTooltip();
 }
 
 function render()
