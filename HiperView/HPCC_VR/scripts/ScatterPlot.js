@@ -362,7 +362,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
         // obj.moving = true;
 
-        var intervals = 2;
+        var intervals = 10;
         var xinterval = (x - obj.position.x)/intervals;
         var yinterval = (y - obj.position.y)/intervals;
         var zinterval = (z - obj.position.z)/intervals;

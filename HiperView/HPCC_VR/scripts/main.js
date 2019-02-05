@@ -38,6 +38,8 @@ var tooltip_png;
 var service_control_panel;
 var time_control_panel;
 var scatter_plot;
+var parallel_set;
+var FONT = 'media/fonts/helvetiker_regular.typeface.json';
 
 // HPCC
 var hosts = [];
@@ -128,6 +130,7 @@ function init()
     initControlPanel();
     initQuanah();
     initScatterPlot();
+    initParallelSet();
     // initHPCC();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
@@ -137,7 +140,6 @@ function init()
 
 }
 
-// ngan
 function loadJSON()
 {
     json = {};
@@ -287,7 +289,6 @@ function loadJSON()
 
 // INITS
 
-// ngan
 function initD3()
 {
     svg = d3.select("#svgplace").append("svg").attr("width", 2).attr("height",2);
@@ -473,6 +474,12 @@ function initScatterPlot()
 
     scatter_plot = new ScatterPlot( selectedSPService, hostkeys, data, null, 0.25 );
     scene.add( scatter_plot.graph );
+}
+
+function initParallelSet()
+{
+    parallel_set = new ParallelSet( 0.25, FONT );
+    scene.add( parallel_set.graph );
 }
 
 // Animate & Render
