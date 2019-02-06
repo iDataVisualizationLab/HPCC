@@ -249,41 +249,38 @@ function updateScatterPlot( host, timestamp )
     if( json[host] == undefined )
         return 0;
 
-    var x = json[host][selectedSPService[0]][timestamp] ? json[host][selectedSPService[0]][timestamp] : null;
-    var y = json[host][selectedSPService[1]][timestamp] ? json[host][selectedSPService[1]][timestamp] : null;
-    var z = json[host][selectedSPService[2]][timestamp] ? json[host][selectedSPService[2]][timestamp] : null;
+    var x = json[host][selectedSPService[0]][timestamp-1] ? json[host][selectedSPService[0]][timestamp-1] : null;
+    var y = json[host][selectedSPService[1]][timestamp-1] ? json[host][selectedSPService[1]][timestamp-1] : null;
+    var z = json[host][selectedSPService[2]][timestamp-1] ? json[host][selectedSPService[2]][timestamp-1] : null;
     var point = scatter_plot.points.obj[host];
 
     x = scatter_plot.fit(x,scatter_plot.x);
     y = scatter_plot.fit(y,scatter_plot.y);
     z = scatter_plot.fit(z,scatter_plot.z);
 
-    point.material.color = new THREE.Color( color_funct(json[host][selectedSPService[0]][timestamp]) );
+    point.material.color = new THREE.Color( color_funct(json[host][selectedSPService[0]][timestamp-1]) );
     point.position.x = x;
     point.position.y = y;
     point.position.z = z;
 
-    // var intervals = 20;
-    // var xinterval = (x - point.position.x)/intervals;
-    // var yinterval = (y - point.position.y)/intervals;
-    // var zinterval = (z - point.position.z)/intervals;
-    // var count = 0;
+    var intervals = 20;
+    point.xinterval = (x - point.position.x)/intervals;
+    point.yinterval = (y - point.position.y)/intervals;
+    point.zinterval = (z - point.position.z)/intervals;
+    var count = 0;
 
-    // var movePoint = setInterval( function()
-    // {
+    point.movePoint = setInterval( function()
+    {
 
-    //     point.position.x += xinterval;
-    //     point.position.y += yinterval;
-    //     point.position.z += zinterval;
-    //     count++;
+        point.position.x += point.xinterval;
+        point.position.y += point.yinterval;
+        point.position.z += point.zinterval;
+        count++;
 
-    //     if( count == intervals )
-    //     {
-    //         point.moving = false;
-    //         clearInterval( movePoint );
-    //     }
+        if( count == intervals )
+            clearInterval( point.movePoint );
 
-    // }, 1 );
+    }, 100 );
 
 }
 
