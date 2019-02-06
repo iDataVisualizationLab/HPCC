@@ -91,7 +91,8 @@ function ParallelSet( size, font, data, startField, ignoreFields, binFields )
     function setSurface( obj )
     {
         var surface_geometry = new THREE.BoxGeometry( LEN * table[0].length, LEN/20, LEN*1.5 );
-        var surface = new THREE.Mesh( surface_geometry, new THREE.MeshPhongMaterial( { color: 0xbababa, shininess: 50 } ) );
+        var texture = new THREE.TextureLoader().load( "media/textures/woodtable.jpg" );
+        var surface = new THREE.Mesh( surface_geometry, new THREE.MeshPhongMaterial( { color: 0xfefefe, map: texture } ) );
         surface.position.set( (LEN/2) * (table[0].length-1), -LEN/25, LEN/2);
         surface.name = "table";
         obj.add( surface );

@@ -246,26 +246,45 @@ function updateCPUMarker( obj )
 // scatterplot update
 function updateScatterPlot( host, timestamp )
 {
-    var x, y, z, color;
-    // console.log(host);
-
-    if( json[host] )
-    {
-
-        x = json[host][selectedSPService[0]][timestamp] ? json[host][selectedSPService[0]][timestamp] : null;
-        y = json[host][selectedSPService[1]][timestamp] ? json[host][selectedSPService[1]][timestamp] : null;
-        z = json[host][selectedSPService[2]][timestamp] ? json[host][selectedSPService[2]][timestamp] : null;
-        color = color_funct(json[host][selectedSPService[0]][timestamp]);
-    }
-    else
-    {
-        // x = null;
-        // y = null;
-        // z = null;
+    if( json[host] == undefined )
         return 0;
-    }
 
-    scatter_plot.updatePoint( host, x, y, z, color );
+    var x = json[host][selectedSPService[0]][timestamp] ? json[host][selectedSPService[0]][timestamp] : null;
+    var y = json[host][selectedSPService[1]][timestamp] ? json[host][selectedSPService[1]][timestamp] : null;
+    var z = json[host][selectedSPService[2]][timestamp] ? json[host][selectedSPService[2]][timestamp] : null;
+    var point = scatter_plot.points.obj[host];
+
+    x = scatter_plot.fit(x,scatter_plot.x);
+    y = scatter_plot.fit(y,scatter_plot.y);
+    z = scatter_plot.fit(z,scatter_plot.z);
+
+    point.material.color = new THREE.Color( color_funct(json[host][selectedSPService[0]][timestamp]) );
+    point.position.x = x;
+    point.position.y = y;
+    point.position.z = z;
+
+    // var intervals = 20;
+    // var xinterval = (x - point.position.x)/intervals;
+    // var yinterval = (y - point.position.y)/intervals;
+    // var zinterval = (z - point.position.z)/intervals;
+    // var count = 0;
+
+    // var movePoint = setInterval( function()
+    // {
+
+    //     point.position.x += xinterval;
+    //     point.position.y += yinterval;
+    //     point.position.z += zinterval;
+    //     count++;
+
+    //     if( count == intervals )
+    //     {
+    //         point.moving = false;
+    //         clearInterval( movePoint );
+    //     }
+
+    // }, 1 );
+
 }
 
 // ngan

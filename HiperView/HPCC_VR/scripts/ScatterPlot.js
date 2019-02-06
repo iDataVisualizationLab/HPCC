@@ -27,9 +27,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
     function fit( val, axis )
     {
         if( val == undefined ) return 0;
-
         if( axis.range == 0 ) return 0;
-
         return scale * (val - axis.min) / axis.range;
     }
 
@@ -291,7 +289,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
     {
         var points = new THREE.Group();
         points.name = "scatterplot-points";
-        var pos = [null, null, null];
+        var pos = [0, 0, 0];
         points.obj = {};
 
         for( var p=0; p<population; p++ )
@@ -304,7 +302,6 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
             else
             {
                 pos[0] = 0;
-                color = 0xff0000;
             }
 
             if( data[p][1] )
@@ -314,7 +311,6 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
             else
             {
                 pos[1] = 0;
-                color = 0xff0000;
             }
 
             if( data[p][2] )
@@ -324,7 +320,6 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
             else
             {
                 pos[2] = 0;
-                color = 0xff0000;
             }
 
             var material = new THREE.MeshPhongMaterial( { color: color } );
@@ -333,68 +328,20 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
             point.position.set( pos[0], pos[1], pos[2] );
             point.name = dataid[p];
+            point.moving = false;
+            point.reset = false;
             points.add( point );
             points.obj[dataid[p]] = point;
-            // points.obj[dataid[p]].moving = false;
         }
 
         return points;
     }
 
-
-    var updatePoint = function updatePoint( host, x, y, z, color )
+    this.fit = function fit( val, axis )
     {
-        // update color
-        this.points.obj[host].material.color = new THREE.Color( color );
-
-        // update position
-        x = fit(x,this.x);
-        y = fit(y,this.y);
-        z = fit(z,this.z);
-        var obj = this.points.obj[host];
-
-        // while( obj.moving == true )
-        // {
-        //     obj.reset = true;
-        // }
-
-        // obj.moving = true;
-
-        var intervals = 10;
-        var xinterval = (x - obj.position.x)/intervals;
-        var yinterval = (y - obj.position.y)/intervals;
-        var zinterval = (z - obj.position.z)/intervals;
-        var count = 0;
-
-        obj.position.x = x;
-        obj.position.y = y;
-        obj.position.z = z;
-
-        // var movePoint = setInterval( function()
-        // {
-        //     obj.position.x += xinterval;
-        //     obj.position.y += yinterval;
-        //     obj.position.z += zinterval;
-        //     count++;
-
-        //     if( count == intervals )
-        //     {
-        //         // obj.moving = false;
-        //         clearInterval( movePoint );
-        //     }
-
-        //     // if( obj.reset == true )
-        //     // {
-        //     //     obj.position.x = x;
-        //     //     obj.position.y = y;
-        //     //     obj.position.z = z;
-        //     //     obj.moving = false;
-        //     //     clearInterval( movePoint );
-        //     // }
-
-        // }, 2 );
+        if( val == undefined ) return 0;
+        if( axis.range == 0 ) return 0;
+        return scale * (val - axis.min) / axis.range;
     }
-
-    this.updatePoint = updatePoint;
 
 }

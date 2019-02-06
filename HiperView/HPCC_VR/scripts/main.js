@@ -133,7 +133,6 @@ function init()
     initQuanah();
     initScatterPlot();
     initParallelSet();
-    // initHPCC();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );
