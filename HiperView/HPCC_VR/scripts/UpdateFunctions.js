@@ -263,24 +263,24 @@ function updateScatterPlot( host, timestamp )
     point.position.y = y;
     point.position.z = z;
 
-    var intervals = 20;
-    point.xinterval = (x - point.position.x)/intervals;
-    point.yinterval = (y - point.position.y)/intervals;
-    point.zinterval = (z - point.position.z)/intervals;
-    var count = 0;
+    // var intervals = 20;
+    // point.xinterval = (x - point.position.x)/intervals;
+    // point.yinterval = (y - point.position.y)/intervals;
+    // point.zinterval = (z - point.position.z)/intervals;
+    // var count = 0;
 
-    point.movePoint = setInterval( function()
-    {
+    // point.movePoint = setInterval( function()
+    // {
 
-        point.position.x += point.xinterval;
-        point.position.y += point.yinterval;
-        point.position.z += point.zinterval;
-        count++;
+    //     point.position.x += point.xinterval;
+    //     point.position.y += point.yinterval;
+    //     point.position.z += point.zinterval;
+    //     count++;
 
-        if( count == intervals )
-            clearInterval( point.movePoint );
+    //     if( count == intervals )
+    //         clearInterval( point.movePoint );
 
-    }, 100 );
+    // }, 100 );
 
 }
 
