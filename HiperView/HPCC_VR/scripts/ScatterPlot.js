@@ -14,8 +14,6 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
     graph.add( grid );
     graph.add( points );
 
-    graph.position.set( ROOM_SIZE * 2.5, 0, 0 );
-
     this.graph = graph;
     this.grid = grid;
     this.points = points;

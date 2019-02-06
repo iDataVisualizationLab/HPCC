@@ -1,29 +1,15 @@
-function ParallelSet( size, font )
+function ParallelSet( size, font, data, startField, ignoreFields, binFields )
 {
     var manager, group;
     var FILTERED = 0;
-    var startField;
-    var ignoreFields;
-    var table;
     var HIVE = false, ARCH = true, STEAM = false;
     var grid;
-    var chart;
     var chartTmp;
     var LEN = size;
     var TIMER;
     var CSV_FILE = "data/titanic.csv";
     var FONT = font;
-
-    startField = "class";
-    ignoreFields = [];
-
-    for(var i=0; i<ignoreFields.length; i++)
-        ignoreFields[i] = ignoreFields[i].toLowerCase();
-
-    // var binFields = [ ["sepal_length",4], ["sepal_width",4], ["petal_length",4], ["petal_width",4] ];
-    var binFields = [];
-    var csv = loadFile();
-    table = new ProcessedTable( startField, ignoreFields, binFields, csv );
+    var table = new ProcessedTable( startField, ignoreFields, binFields, data );
     var CHART_RATIO = LEN / table.length;
     
     // parallelset info
@@ -79,14 +65,12 @@ function ParallelSet( size, font )
         }
     }
 
-    this.chart = chart;
-
     function loadFile()
     {
         var tmp = $.csv.toArrays($.ajax({
             url: CSV_FILE,
             async: false,
-            success: function (csvd) { data = $.csv.toArrays(csvd); },
+            success: function (csvd) { this.data = $.csv.toArrays(csvd); },
             dataType: "text",
         }).responseText);
 
@@ -111,6 +95,98 @@ function ParallelSet( size, font )
         surface.position.set( (LEN/2) * (table[0].length-1), -LEN/25, LEN/2);
         surface.name = "table";
         obj.add( surface );
+    }
+
+    function ProcessedTable( startFieldName, ignoreFields, binFields, table )
+    {
+        this.type = "ProcessedTable";
+
+        // lowering case of startfield
+        // startFieldName = startFieldName.toLowerCase();
+
+        // lowering case of feature names
+        // for(var i=0; i<table[0].length; i++)
+        //     table[0][i] = table[0][i].toLowerCase();
+
+        // lowering case of ignoreFields
+        // for(var i=0; i<ignoreFields.length; i++)
+        //     ignoreFields[i] = ignoreFields[i].toLowerCase();
+
+        // removing ignoreFields from table
+        for( var i=0; i<ignoreFields.length; i++)
+        {
+            var index = table[0].indexOf(ignoreFields[i]);
+            for( var j=0; j<table.length; j++)
+                table[j].splice(index, 1);
+        }
+
+        var binIndex = [];
+        // getting index of binFields
+        for( var i=0; i<binFields.length; i++ )
+        {
+            binFields[i][0] = binFields[i].toLowerCase();
+            binIndex.push(table[0].indexOf(binFields[i]));
+        }
+
+        // binning fields
+        if( binFields.length > 0 )
+        {
+            // finding ranges of each field
+            var ranges = [], mins = [];
+            for( var i=0; i<binFields.length; i++ )
+            {
+                var min = parseInt(table[1][binIndex[i]]);
+                var max = parseInt(table[1][binIndex[i]]);
+                for(var j=1; j<table.length; j++)
+                {
+                    if( table[j][binIndex[i]] == undefined )
+                        continue;
+
+                    var num = parseInt(table[j][binIndex[i]]);
+                    if( num < min )
+                        min = num;
+                    if( num > max )
+                        max = num;
+                }
+                mins.push(min);
+                ranges.push(max-min);
+            }
+
+            // binning data
+            for( var r=1; r<table.length; r++ )
+            {
+                for( var f=0; f<binIndex.length; f++ )
+                {
+                    table[r][binIndex[f]] = getInterval( table[r][binIndex[f]], ranges[f], mins[f] );
+                }
+            }
+
+            function getInterval( n, range, min )
+            {
+                if( n == undefined )
+                    return "undefined";
+                if( n < range/3 + min )
+                    return "low";
+                if( n > 2*range/3 + min )
+                    return "high";
+                return "medium";
+            }
+        }
+
+        // moving startField to index 0
+        if( startFieldName != table[0][0] )
+        {
+            var index = table[0].indexOf(startFieldName);
+            var tmp;
+            for( var r=0; r<table.length; r++ )
+            {
+                tmp = table[r][0];
+                table[r][0] = table[r][index];
+                table[r][index] = tmp;
+            }
+        }
+
+        return table;
     }
 
     function ProcessedData( table, filterVar )
@@ -180,6 +256,7 @@ function ParallelSet( size, font )
 
         //initializing start options values
         var colors = [0x1f77b4,0xff7f0e,0x2ca02c,0xd62728,0x9467bd,0x8c564b,0xe377c2,0x7f7f7f, 0xbcbd22, 0x17becf
+                    ,0x1f77b4,0xff7f0e,0x2ca02c,0xd62728,0x9467bd,0x8c564b,0xe377c2,0x7f7f7f, 0xbcbd22, 0x17becf
                     ,0x1f77b4,0xff7f0e,0x2ca02c,0xd62728,0x9467bd,0x8c564b,0xe377c2,0x7f7f7f, 0xbcbd22, 0x17becf
                     ,0x1f77b4,0xff7f0e,0x2ca02c,0xd62728,0x9467bd,0x8c564b,0xe377c2,0x7f7f7f, 0xbcbd22, 0x17becf
                     ,0x1f77b4,0xff7f0e,0x2ca02c,0xd62728,0x9467bd,0x8c564b,0xe377c2,0x7f7f7f, 0xbcbd22, 0x17becf];
@@ -292,102 +369,6 @@ function ParallelSet( size, font )
 
     }
 
-    function ProcessedTable( startFieldName, ignoreFields, binFields, table)
-    {
-        this.type = "ProcessedTable";
-
-        // lowering case of feature names
-        for(var i=0; i<table[0].length; i++)
-            table[0][i] = table[0][i].toLowerCase();
-
-
-        // removing ignoreFields from table
-        for( var i=0; i<ignoreFields.length; i++)
-        {
-            var index = table[0].indexOf(ignoreFields[i]);
-            for( var j=0; j<table.length; j++)
-                table[j].splice(index, 1);
-        }
-
-        // binning fields
-        if( binFields.length > 0 )
-        {
-            var min_max = [];
-            for( var i=0; i<binFields.length; i++ )
-            {
-                var index = table[0].indexOf(binFields[i][0]);
-                min_max.push( [ parseInt(table[1][index]), parseInt(table[1][index]) ] );
-
-                for(var j=1; j<table.length; j++)
-                {
-                    var num = parseInt(table[j][index]);
-
-                    if( num < min_max[i][0] )
-                        min_max[i][0] = num;
-
-                    if( num > min_max[i][1] )
-                        min_max[i][1] = num;
-                }
-            }
-
-
-            for( var i=0; i<binFields.length; i++ )
-            {
-                var index = table[0].indexOf(binFields[i][0]);
-
-                var range = min_max[i][1] - min_max[i][0];
-
-                var interval = [];
-
-                var interval1 = range / 4 + min_max[i][0];
-                var interval2 = 2 * (range / 4) + min_max[i][0];
-                var interval3 = 3 * (range / 4) + min_max[i][0];
-
-                for( var k=1; k<binFields[i][1]; k++ )
-                {
-                    interval.push( k * (range / binFields[i][1]) + min_max[i][0])
-                }
-
-                for(var j=1; j<table.length; j++)
-                {
-                    var num = parseInt(table[j][index]);
-                    var bin = getInterval(num);
-                    // var bin = ( num < interval1 ) ? "low" : ( num < interval2 ) ? "medium-low" : ( num < interval3 ) ? "medium-high" : "high";
-                    table[j][index] = bin;
-                }
-
-                function getInterval( num )
-                {
-                    var x = 0;
-
-                    while( x < interval.length )
-                    {
-                        if( num < interval[x] )
-                            return "interval " + (x+1);
-                        
-                        x++;
-                    }
-                    return "interval " + x;
-                }
-            }
-        }
-
-        // moving startField to index 0
-        if( startFieldName != table[0][0] )
-        {
-            var index = table[0].indexOf(startFieldName);
-            var tmp;
-            for( var r=0; r<table.length; r++ )
-            {
-                tmp = table[r][0];
-                table[r][0] = table[r][index];
-                table[r][index] = tmp;
-            }
-        }
-
-        return table;
-    }
-
     function Grid( columns, len, fieldNames, optionNames, obj, firstField, colors )
     {
         this.type = "Grid";
@@ -418,7 +399,7 @@ function ParallelSet( size, font )
             {
                 var z = len + len/5;
                 var y = 0;
-                text = text.toUpperCase();
+                text = serviceValues[serviceKeys.indexOf(text)].toUpperCase();
                 xR = -1.5708;
             }
             else
@@ -500,12 +481,8 @@ function ParallelSet( size, font )
 
         function addLegend( firstField, colors )
         {
-            var separation = 0.65;
+            var separation = LEN * 0.65;
             var legend = new THREE.Group();
-
-            // word_lengths = []
-            // for( var l=0; l<firstField.length; l++ )
-            //     word_lengths.append(firstField[l].length*0.05);
 
             for( var l=0; l<firstField.length; l++ )
                 addTextLegend(firstField[l],colors[l],l*separation);
@@ -525,7 +502,6 @@ function ParallelSet( size, font )
         
                     var textMesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: color }) );
                     textMesh.position.set( x, 0, 0 );
-                    // textMesh.rotateX( -Math.PI/2);
                     legend.add( textMesh );
                 } );
             }

@@ -24,6 +24,8 @@ var svg;
 var rectip;
 var maxstack = 7;
 
+var serviceValues = ["Temperature1","Temperature2","CPU_load","Memory_usage","Fans_speed1","Fans_speed2","Power_usage"];
+var serviceKeys = ["arrTemperatureCPU1", "arrTemperatureCPU2", "arrCPU_load", "arrMemory_usage", "arrFans_speed1", "arrFans_speed2", "arrPower_usage"];
 var updateHost;
 var updateTimestamp;
 var move_timer;
@@ -90,7 +92,7 @@ var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatur
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
     arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
-var serviceQuery =["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
+var serviceQuery = ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService = "Temperature";
@@ -325,22 +327,13 @@ function initLight()
     var light1 = document.getElementById("light1").object3D;
     var light2 = document.getElementById("light2").object3D;
     var light3 = document.getElementById("light3").object3D;
-    // var light4 = document.getElementById("light4").object3D;
 
     var height = ROOM_SIZE/2-ROOM_SIZE/5
 
-    light1.position.set( ROOM_SIZE * 2, height, ROOM_SIZE/1.75 );
-    light2.position.set( 0, height, ROOM_SIZE/1.75 );
-    light3.position.set( ROOM_SIZE * -2, height, ROOM_SIZE/1.75 );
-
-
-    // back lights
-    // light1.position.set( ROOM_SIZE * 1.25, height, ROOM_SIZE/-2);
-    // light2.position.set( ROOM_SIZE * -1.25, height, ROOM_SIZE/-2);
-
-    // front lights
-    // light3.position.set( ROOM_SIZE * 1.25, height, ROOM_SIZE/2);
-    // light4.position.set( ROOM_SIZE * -1.25, height, ROOM_SIZE/2);
+    light1.position.set( ROOM_SIZE * 2, height, 0 );
+    light2.position.set( 0, height, 0 );
+    light3.position.set( ROOM_SIZE * -2, height, 0 );
+    
 }
 
 function initInteractions()
@@ -458,9 +451,9 @@ function initHPCC()
 function initScatterPlot()
 {
     var hostkeys = Object.keys(json);
-    
     var data = [], tmp;
 
+    // building data
     for( var h=0; h<hostkeys.length; h++ )
     {
         tmp = [];
@@ -473,12 +466,32 @@ function initScatterPlot()
     }
 
     scatter_plot = new ScatterPlot( selectedSPService, hostkeys, data, null, 0.25 );
+    scatter_plot.graph.position.set( ROOM_SIZE * 2.5, 0, 0 );
     scene.add( scatter_plot.graph );
 }
 
 function initParallelSet()
 {
-    parallel_set = new ParallelSet( 0.25, FONT );
+    var table = [serviceKeys];
+    var tmp = [];
+
+    // building data
+    for( var host in json )
+    {
+        tmp = [];
+        for( var s=0; s<serviceKeys.length; s++ )
+        {
+            if( json[host][serviceKeys[s]] )
+                tmp.push(json[host][serviceKeys[s]][19]);
+            else
+                tmp.push(undefined);
+        }
+        table.push(tmp);
+    }
+
+    parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], serviceKeys );
+    parallel_set.graph.position.set( 0.8, -0.15, 0.9 );
+    parallel_set.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( parallel_set.graph );
 }
 
