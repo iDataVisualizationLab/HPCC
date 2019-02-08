@@ -33,7 +33,7 @@ function initServiceControlPanel()
         service_control_panel.add( plane );
     }
 
-    service_control_panel.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
+    service_control_panel.position.set( ROOM_SIZE * 2.5, 0, 0 );
     scene.add( service_control_panel );
 
 

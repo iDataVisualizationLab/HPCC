@@ -463,7 +463,8 @@ function initScatterPlot()
     }
 
     scatter_plot = new ScatterPlot( selectedSPService, hostkeys, data, null, 0.25 );
-    scatter_plot.graph.position.set( ROOM_SIZE * 2.5, 0, 0 );
+    scatter_plot.graph.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
+    scatter_plot.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot.graph );
 }
 
