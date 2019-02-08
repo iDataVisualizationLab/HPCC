@@ -1,6 +1,6 @@
 function stopUpdate()
 {
-    clearInterval(updateHost);
+    clearInterval(fillHost);
 }
 
 function resetService()
@@ -33,12 +33,12 @@ function updateValues( timestamp )
     updateColorRange(service);
 
     var rack = 1, host = 1, cpu = 1;
-    updateHost = setInterval(function ()
+    fillHost = setInterval(function ()
     {
 
         if( hostObj[rack][host] )
         {
-            updateService( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
+            updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
 
             // update scatterplot point per host (i.e. not per cpu)
             if( cpu == 1 )
@@ -77,160 +77,44 @@ function updateValues( timestamp )
     }, 1 );
 }
 
-function updateService( service, keys, obj )
+function updateHost( service, keys, obj )
 {
-    switch( service )
-    {
-        case "Temperature":
-            updateTemperature( keys, obj );
-            break;
-        case "CPU_load":
-            updateCPULoad( keys, obj );
-            break;
-        case "Memory_usage":
-            updateMemoryUsage( keys, obj );
-            break;
-        case "Fans_speed":
-            updateFansSpeed( keys, obj );
-            break;
-        case "Power_usage":
-            updatePowerConsumption( keys, obj );
-            break;
-        default:
-            break;
-    }
+    var rack = keys[0];
+    var host = keys[1];
+    var cpu = keys[2];
+    var time = keys[3];
 
-    function updateTemperature( keys, obj )
-    {
-        var rack = keys[0];
-        var host = keys[1];
-        var cpu = keys[2];
-        var time = keys[3];
+    var key1 = "compute-"+rack+"-"+host;
+    var key2 = service.includes("1") ? service.replace("1",cpu) : service;
 
-        var key1 = "compute-"+rack+"-"+host;
-        var key2 = "arrTemperatureCPU"+cpu;
+    if( json[key1][key2][time] !=null )
+        var color = color_funct(json[key1][key2][time]);
+    else
+        var color = 0x222222;
 
-        if( json[key1][key2][time] !=null )
-            var temperature = color_funct(json[key1][key2][time]);
-        else
-            var temperature = 0x222222;
-
-        updateCPUMarker( obj );
-        obj.material.color = new THREE.Color( temperature );
-
-    }
-
-    function updateCPULoad( keys, obj )
-    {
-        var rack = keys[0];
-        var host = keys[1];
-        var time = keys[3];
-
-        var key1 = "compute-"+rack+"-"+host;
-        var key2 = "arrCPU_load";
-
-        if( json[key1][key2][time] !=null )
-            var load = color_funct(json[key1][key2][time]);
-        else
-            var load = 0x222222;
-
-        updateCPUMarker( obj );
-        obj.material.color = new THREE.Color( load );
-
-    }
-
-    function updateMemoryUsage( keys, obj )
-    {
-        var rack = keys[0];
-        var host = keys[1];
-        var time = keys[3];
-
-        var key1 = "compute-"+rack+"-"+host;
-        var key2 = "arrMemory_usage";
-
-        if( json[key1][key2][time] !=null )
-            var usage = color_funct(json[key1][key2][time]);
-        else
-            var usage = 0x222222;
-
-        updateCPUMarker( obj );
-        obj.material.color = new THREE.Color( usage );
-
-    }
-
-    function updateFansSpeed( keys, obj )
-    {
-        var rack = keys[0];
-        var host = keys[1];
-        var cpu = keys[2];
-        var time = keys[3];
-
-        var key1 = "compute-"+rack+"-"+host;
-        var key2 = "arrFans_speed"+cpu;
-
-        if( json[key1][key2][time] !=null )
-            var speed = color_funct(json[key1][key2][time]);
-        else
-            var speed = 0x222222;
-
-        updateCPUMarker( obj );
-        obj.material.color = new THREE.Color( speed );
-    }
-
-    function updatePowerConsumption( keys, obj )
-    {
-        var rack = keys[0];
-        var host = keys[1];
-        var time = keys[3];
-
-        var key1 = "compute-"+rack+"-"+host;
-        var key2 = "arrPower_usage";
-
-        if( json[key1][key2][time] !=null )
-            var usage = color_funct(json[key1][key2][time]);
-        else
-            var usage = 0x222222;
-
-        updateCPUMarker( obj );
-        obj.material.color = new THREE.Color( usage );
-
-    }
+    updateCPUMarker( obj );
+    obj.material.color = new THREE.Color( color );
 
 }
 
 function updateColorRange( service )
 {
-    setColorsAndThresholdsTooltip( service );
+    setColorsAndThresholdsTooltip( service.replace("arr","")
+                                        .replace("CPU1","")
+                                        .replace("CPU2","")
+                                        .replace("1","")
+                                        .replace("2","")
+                                        .replace("Power_usage","Power_consumption") );
 
-    // var arrColor, arrDom;
-    switch( service )
-    {
-        case "Temperature":
-            arrDom = [20, 60, 80, 100];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        case "CPU_load":
-            arrDom = [0, 0.2, 0.3, 0.5];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        case "Memory_usage":
-            arrDom = [0, 25, 50, 75, 100];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        case "Fans_speed":
-            arrDom = [0, 5000, 9000, 10000, 12000];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        case "Power_usage":
-            arrDom = [20, 60, 80, 100];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        default:
-            break;
-    }
+    // var min = SERVICE[service]["dom"][0];
+    // var max = SERVICE[service]["dom"][1];
+
+    // var arrDom = [min,null,null,max];
+    // arrDom[1] = min + (max-min)/3;
+    // arrDom[2] = min + 2*(max-min)/3;
     
     color_funct = d3.scaleLinear()
-        .domain(arrDom)
+        .domain(SERVICE[service].threshold)
         .range(arrColor)
         .interpolate(d3.interpolateHcl);
 }
@@ -316,50 +200,37 @@ function updateTooltip( host )
 
 function setColorsAndThresholdsTooltip(s)
 {
-    for (var i=0; i<serviceList.length;i++){
-        if (s == serviceList[i] && i==1){  // CPU_load
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+    for (var i=0; i<serviceList.length;i++)
+    {
+        dif = (thresholds[i][1]-thresholds[i][0])/4;
+        mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        if (s == serviceList[i] && i==1) // CPU_load
+        {
             left=0;
             arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);
-
         }
-        else if (s == serviceList[i] && i==2){  // Memory_usage
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        else if (s == serviceList[i] && i==2) // Memory_usage
+        {  
             left=0;
             arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
-                .range([1,1,0.3,0.06,0.3,1,1]);
-
         }
-        else if (s == serviceList[i]){
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        else if (s == serviceList[i])
+        {
             left = thresholds[i][0]-dif;
             if (left<0 && i!=0) // Temperature can be less than 0
                 left=0;
             arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-            color = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-            opa = d3.scaleLinear()
+        }
+
+
+        color = d3.scaleLinear()
+                    .domain(arrThresholds)
+                    .range(arrColor)
+                    .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+
+        opa = d3.scaleLinear()
                 .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
                 .range([1,1,0.3,0.06,0.3,1,1]);
-        }
     }
 }
 

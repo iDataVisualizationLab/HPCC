@@ -21,9 +21,9 @@ var CP_SPEED = 0.01;
 
 var color, opa;
 var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-var arrDom;
+// var arrDom;
 var isInit = true;
-var updateHost;
+var fillHost;
 var updateTimestamp;
 var move_timer;
 
@@ -107,7 +107,7 @@ var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatur
 var serviceQuery = ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
-var selectedService = "Temperature";
+var selectedService = "arrTemperatureCPU1";
 
 
 
@@ -152,7 +152,40 @@ function init()
 
             if( SERVICE[service]["dom"][1] < Math.max(...json[host][service]) )
                 SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
-            
+        }
+    }
+
+    for( var i=0; i<serviceList.length; i++ )
+    {
+        var dif, mid, left, service;
+        dif = (thresholds[i][1]-thresholds[i][0])/4;
+        mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        if( i == 1 )
+        {
+            left=0;
+            SERVICE["arrCPU_load"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+        }
+        else if( i == 2 )
+        {
+            left=0;
+            SERVICE["arrMemory_usage"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+        }
+        else if( i == 0 )
+        {
+            left = thresholds[i][0]-dif;
+            SERVICE["arrTemperatureCPU1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            SERVICE["arrTemperatureCPU2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+        }
+        else if( i == 3 )
+        {
+            left = 0;
+            SERVICE["arrPower_usage"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+        }
+        else if( i == 4 )
+        {
+            left = 0;
+            SERVICE["arrFans_speed1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            SERVICE["arrFans_speed2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
         }
     }
 
@@ -257,9 +290,8 @@ function loadJSON()
         }
         else
         {
-            // console.log(requestRT(iteration,count));
+            var selectedService = serviceList[0];
 
-            //console.log(hosts[count].name+" "+hostResults[name]);
             var result = simulateResults2(hosts[count].name,iteration, selectedService);
             var name =  result.data.service.host_name;
             hostResults[name].arr.push(result);
