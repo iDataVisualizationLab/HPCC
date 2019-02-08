@@ -1,4 +1,4 @@
-function ScatterPlot( axes, dataid, data, bin_size, scale )
+function ScatterPlot( axes, ranges, dataid, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -34,22 +34,9 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
     function setInfo( axis )
     {
         var info = {};
-        var max = data[0][axis];
-        var min = data[0][axis];
-
-        for( var i=0; i<population; i++ )
-        {
-            var p = data[i][axis];
-
-            if( !p )
-                continue;
-            max = max > p ? max : p;
-            min = min < p ? min : p;
-        }
-
-        info.max = max;
-        info.min = min;
-        info.range = max - min;
+        info.min = ranges[axis][0];
+        info.max = ranges[axis][1];
+        info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
 

@@ -400,7 +400,7 @@ function ParallelSet( size, font, data, startField, ignoreFields, binFields )
             {
                 var z = len + len/5;
                 var y = 0;
-                text = serviceValues[serviceKeys.indexOf(text)].toUpperCase();
+                text = SERVICE[text]["value"].toUpperCase();
                 xR = -1.5708;
             }
             else

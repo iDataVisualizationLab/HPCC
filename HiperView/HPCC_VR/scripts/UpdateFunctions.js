@@ -79,8 +79,6 @@ function updateValues( timestamp )
 
 function updateService( service, keys, obj )
 {
-    // console.log("updating " + keys );
-
     switch( service )
     {
         case "Temperature":
@@ -204,7 +202,7 @@ function updateColorRange( service )
 {
     setColorsAndThresholdsTooltip( service );
 
-    var arrColor, arrDom;
+    // var arrColor, arrDom;
     switch( service )
     {
         case "Temperature":
@@ -213,15 +211,15 @@ function updateColorRange( service )
             break;
         case "CPU_load":
             arrDom = [0, 0.2, 0.3, 0.5];
-            arrColor = ['#ffff00','#c8df00','#91bf00','#589f00','#008000'];
+            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
             break;
         case "Memory_usage":
             arrDom = [0, 25, 50, 75, 100];
-            arrColor = ['#ffff00','#c8df00','#91bf00','#589f00','#008000'];
+            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
             break;
         case "Fans_speed":
             arrDom = [0, 5000, 9000, 10000, 12000];
-            arrColor = ['#ff0000','#ffff00','#008000','#ffff00','#ff0000'];
+            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
             break;
         case "Power_usage":
             arrDom = [20, 60, 80, 100];
@@ -377,15 +375,15 @@ function processData(str, serviceName)
     if (serviceName == serviceList[0]){
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split(" ");
-            a[0] = +arrString[2]||undefinedValue;
-            a[1] = +arrString[6]||undefinedValue;
-            a[2] = +arrString[10]||undefinedValue;
+            a[0] = +arrString[2]||undefined;
+            a[1] = +arrString[6]||undefined;
+            a[2] = +arrString[10]||undefined;
         }
         return a;
     }
@@ -393,40 +391,40 @@ function processData(str, serviceName)
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
             || str.indexOf("CPU Load: null")>=0){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
             a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
     else if (serviceName == serviceList[2]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
             a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
     else if (serviceName == serviceList[3]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-            a[3] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
+            a[3] = undefined;
         }
         else{
             var arr4 =  str.split(" RPM ");
@@ -440,16 +438,16 @@ function processData(str, serviceName)
     else if (serviceName == serviceList[4]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var maxConsumtion = 3.2;  // over 100%
             var arr4 =  str.split(" ");
             a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
@@ -467,7 +465,7 @@ function updateTooltip3D(host_name)
 
     // Standardize data for Radar chart
     for (var j=0; j<currentval.length;j++){
-        if (currentval[j] == undefinedValue || isNaN(currentval[j]))
+        if (currentval[j] == undefined || isNaN(currentval[j]))
             currentval[j] = -15;
         else if (j==2){   ////  Job load ***********************
             var scale = d3.scaleLinear()

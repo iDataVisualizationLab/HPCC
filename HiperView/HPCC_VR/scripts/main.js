@@ -1,21 +1,42 @@
 var container, camera, scene, renderer_css3d, effect, clock, controls;
 var raycaster, mouse, pointer;
 var cameraHolder;
+
 var json;
 var color_funct;
 var hostObj = {};
 var timeObj = {};
 
+// selected
+var selectedTimestamp = 1;
+var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
+
 var ROOM_SIZE = 1;
 var RACK_NUM = 10;
 var HOST_NUM = 60;
 var CPU_NUM = 2;
-var TS_NUM = null;
-var color,opa;
-var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-var selectedTimestamp = 1;
+var TS_NUM;
 var INTERSECTED;
+var CP_SPEED = 0.01;
+
+var color, opa;
+var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
+var arrDom;
 var isInit = true;
+var updateHost;
+var updateTimestamp;
+var move_timer;
+
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [null,null] },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [null,null] },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [null,null] },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [null,null] },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [null,null] },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [null,null] },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [null,null] },
+            };
+
+
 var niceOffset = false;
 
 // D3
@@ -24,14 +45,8 @@ var svg;
 var rectip;
 var maxstack = 7;
 
-var serviceValues = ["Temperature1","Temperature2","CPU_load","Memory_usage","Fans_speed1","Fans_speed2","Power_usage"];
-var serviceKeys = ["arrTemperatureCPU1", "arrTemperatureCPU2", "arrCPU_load", "arrMemory_usage", "arrFans_speed1", "arrFans_speed2", "arrPower_usage"];
-var updateHost;
-var updateTimestamp;
-var move_timer;
-var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
-
-var CP_SPEED = 0.01;
+// var serviceValues = ["Temperature1","Temperature2","CPU_load","Memory_usage","Fans_speed1","Fans_speed2","Power_usage"];
+// var serviceKeys = ["arrTemperatureCPU1", "arrTemperatureCPU2", "arrCPU_load", "arrMemory_usage", "arrFans_speed1", "arrFans_speed2", "arrPower_usage"];
 
 var quanah;
 var cpu_marker;
@@ -80,11 +95,8 @@ if (isRealtime){
     numberOfMinutes = 6*60;
 }
 
-
-//***********************
-var undefinedValue = undefined;
-
 var charType = "Heatmap";
+var undefinedValue = undefined;
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
 var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
@@ -122,6 +134,27 @@ function init()
     loadJSON();
 
     TS_NUM = json["compute-1-1"]["arrCPU_load"].length;
+    for( var host in json )
+    {
+        if(!json.hasOwnProperty(host)) continue;
+        for( var service in json[host] )
+        {
+            if(!json[host].hasOwnProperty(service)) continue;
+
+            if( SERVICE[service]["dom"][0] == null )
+            {
+                SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
+                SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
+            }
+
+            if( SERVICE[service]["dom"][0] > Math.min(...json[host][service]) )
+                SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
+
+            if( SERVICE[service]["dom"][1] < Math.max(...json[host][service]) )
+                SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
+            
+        }
+    }
 
     initScene();
     initCamera();
@@ -462,7 +495,13 @@ function initScatterPlot()
         data.push( tmp )
     }
 
-    scatter_plot = new ScatterPlot( selectedSPService, hostkeys, data, null, 0.25 );
+    var ranges = [  SERVICE[selectedSPService[0]]["dom"],
+                    SERVICE[selectedSPService[1]]["dom"],
+                    SERVICE[selectedSPService[2]]["dom"]];
+
+    console.log(ranges);
+
+    scatter_plot = new ScatterPlot( selectedSPService, ranges, hostkeys, data, null, 0.25 );
     scatter_plot.graph.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
     scatter_plot.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot.graph );
@@ -470,24 +509,24 @@ function initScatterPlot()
 
 function initParallelSet()
 {
-    var table = [serviceKeys];
+    var table = [Object.keys(SERVICE)];
     var tmp = [];
 
     // building data
     for( var host in json )
     {
         tmp = [];
-        for( var s=0; s<serviceKeys.length; s++ )
+        for( var s=0; s<table[0].length; s++ )
         {
-            if( json[host][serviceKeys[s]] )
-                tmp.push(json[host][serviceKeys[s]][19]);
+            if( json[host][table[0][s]] )
+                tmp.push(json[host][table[0][s]][19]);
             else
                 tmp.push(undefined);
         }
         table.push(tmp);
     }
 
-    parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], serviceKeys );
+    parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
     parallel_set.graph.position.set( 0.8, -0.15, 0.9 );
     parallel_set.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( parallel_set.graph );
