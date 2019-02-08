@@ -499,9 +499,7 @@ function initScatterPlot()
                     SERVICE[selectedSPService[1]]["dom"],
                     SERVICE[selectedSPService[2]]["dom"]];
 
-    console.log(ranges);
-
-    scatter_plot = new ScatterPlot( selectedSPService, ranges, hostkeys, data, null, 0.25 );
+    scatter_plot = new ScatterPlot( selectedSPService, ranges, 5, hostkeys, data, null, 0.25 );
     scatter_plot.graph.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
     scatter_plot.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot.graph );

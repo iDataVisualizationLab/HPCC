@@ -1,4 +1,4 @@
-function ScatterPlot( axes, ranges, dataid, data, bin_size, scale )
+function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -87,7 +87,7 @@ function ScatterPlot( axes, ranges, dataid, data, bin_size, scale )
         {
             var marks = new THREE.Group();
             marks.name = "scatterplot-marks";
-            var no_marks = 5;
+            var no_marks = intervals;
             var xmark = [];
             var ymark = [];
             var zmark = [];
