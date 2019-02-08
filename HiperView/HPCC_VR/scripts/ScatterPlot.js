@@ -281,7 +281,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
         for( var p=0; p<population; p++ )
         {
-            var color = 0x000000;
             if( data[p][0] )
             {
                 pos[0] = fit( data[p][0], x );
@@ -309,7 +308,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
                 pos[2] = 0;
             }
 
-            var material = new THREE.MeshPhongMaterial( { color: color } );
+            var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
             var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 

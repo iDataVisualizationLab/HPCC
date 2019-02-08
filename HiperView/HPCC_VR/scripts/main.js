@@ -176,12 +176,12 @@ function init()
             SERVICE["arrTemperatureCPU1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
             SERVICE["arrTemperatureCPU2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
         }
-        else if( i == 3 )
+        else if( i == 4 )
         {
             left = 0;
             SERVICE["arrPower_usage"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
         }
-        else if( i == 4 )
+        else if( i == 3 )
         {
             left = 0;
             SERVICE["arrFans_speed1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];

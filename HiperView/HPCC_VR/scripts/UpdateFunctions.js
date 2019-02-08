@@ -88,12 +88,15 @@ function updateHost( service, keys, obj )
     var key2 = service.includes("1") ? service.replace("1",cpu) : service;
 
     if( json[key1][key2][time] !=null )
-        var color = color_funct(json[key1][key2][time]);
+    {
+        obj.visible = true;
+        obj.material.color = new THREE.Color( color_funct(json[key1][key2][time]) );
+        updateCPUMarker( obj );
+    }
     else
-        var color = 0x222222;
-
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( color );
+    {
+        obj.visible = false;
+    }
 
 }
 

@@ -90,7 +90,7 @@ function initQuanah()
         var cpu_height = height/60;
 
         var cpu_geometry = new THREE.BoxGeometry( width/2, cpu_height, depth );
-        var cpu_material = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+        var cpu_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
         var cpu = new THREE.Mesh( cpu_geometry, cpu_material );
         cpu.name = "rack_"+rack_num+"_host_"+host_num+"_cpu_"+cpu_num;
         cpu.type = "cpu";
