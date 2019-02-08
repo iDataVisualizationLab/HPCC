@@ -39,7 +39,10 @@ function updateValues( timestamp )
         if( hostObj[rack][host] )
         {
             updateService( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
-            updateScatterPlot( "compute-"+rack+"-"+host, timestamp )
+
+            // update scatterplot point per host (i.e. not per cpu)
+            if( cpu == 1 )
+                updateScatterPlot( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )
@@ -65,7 +68,6 @@ function updateValues( timestamp )
                         timestamp++;
                         updateSelectedTimestamp( timestamp+"" );
                         updateValues( timestamp );
-                        updateScatterPlot(selectedTimestamp,null);
 
                         if( time == TS_NUM-1 )
                             isInit = false;
@@ -77,6 +79,7 @@ function updateValues( timestamp )
 
 function updateService( service, keys, obj )
 {
+    // console.log("updating " + keys );
 
     switch( service )
     {
@@ -249,38 +252,34 @@ function updateScatterPlot( host, timestamp )
     if( json[host] == undefined )
         return 0;
 
+    var point = scatter_plot.points.obj[host];
     var x = json[host][selectedSPService[0]][timestamp-1] ? json[host][selectedSPService[0]][timestamp-1] : null;
     var y = json[host][selectedSPService[1]][timestamp-1] ? json[host][selectedSPService[1]][timestamp-1] : null;
     var z = json[host][selectedSPService[2]][timestamp-1] ? json[host][selectedSPService[2]][timestamp-1] : null;
-    var point = scatter_plot.points.obj[host];
 
     x = scatter_plot.fit(x,scatter_plot.x);
     y = scatter_plot.fit(y,scatter_plot.y);
     z = scatter_plot.fit(z,scatter_plot.z);
 
     point.material.color = new THREE.Color( color_funct(json[host][selectedSPService[0]][timestamp-1]) );
-    point.position.x = x;
-    point.position.y = y;
-    point.position.z = z;
 
-    // var intervals = 20;
-    // point.xinterval = (x - point.position.x)/intervals;
-    // point.yinterval = (y - point.position.y)/intervals;
-    // point.zinterval = (z - point.position.z)/intervals;
-    // var count = 0;
+    var intervals = 20;
+    var xinterval = (x - point.position.x)/intervals;
+    var yinterval = (y - point.position.y)/intervals;
+    var zinterval = (z - point.position.z)/intervals;
+    var count = 0;
 
-    // point.movePoint = setInterval( function()
-    // {
+    var movePoint = setInterval( function()
+    {
+        point.position.x += xinterval;
+        point.position.y += yinterval;
+        point.position.z += zinterval;
+        count++;
 
-    //     point.position.x += point.xinterval;
-    //     point.position.y += point.yinterval;
-    //     point.position.z += point.zinterval;
-    //     count++;
+        if( count == intervals )
+            clearInterval( movePoint );
 
-    //     if( count == intervals )
-    //         clearInterval( point.movePoint );
-
-    // }, 100 );
+    }, 20 );
 
 }
 

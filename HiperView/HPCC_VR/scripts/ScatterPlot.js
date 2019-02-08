@@ -9,7 +9,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var points = setPoints();
+    var points = setPoints( true );
 
     graph.add( grid );
     graph.add( points );
@@ -285,7 +285,7 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
         return grid;
     }
 
-    function setPoints()
+    function setPoints( isInit )
     {
         var points = new THREE.Group();
         points.name = "scatterplot-points";
@@ -326,10 +326,11 @@ function ScatterPlot( axes, dataid, data, bin_size, scale )
             var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
-            point.position.set( pos[0], pos[1], pos[2] );
+            if( isInit )
+                point.position.set( 0, 0, 0 );
+            else
+                point.position.set( pos[0], pos[1], pos[2] );
             point.name = dataid[p];
-            point.moving = false;
-            point.reset = false;
             points.add( point );
             points.obj[dataid[p]] = point;
         }

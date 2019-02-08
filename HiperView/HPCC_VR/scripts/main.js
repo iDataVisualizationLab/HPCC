@@ -456,11 +456,9 @@ function initScatterPlot()
     for( var h=0; h<hostkeys.length; h++ )
     {
         tmp = [];
-
         tmp.push( json[hostkeys[h]][selectedSPService[0]][selectedTimestamp] );
         tmp.push( json[hostkeys[h]][selectedSPService[1]][selectedTimestamp] );
         tmp.push( json[hostkeys[h]][selectedSPService[2]][selectedTimestamp] );
-
         data.push( tmp )
     }
 
