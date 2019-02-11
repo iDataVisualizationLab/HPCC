@@ -532,8 +532,8 @@ function initScatterPlot()
                     SERVICE[selectedSPService[2]]["dom"]];
 
     scatter_plot = new ScatterPlot( selectedSPService, ranges, 5, hostkeys, data, null, 0.25 );
-    scatter_plot.graph.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
-    scatter_plot.graph.rotation.set( 0, Math.PI, 0 );
+    scatter_plot.graph.position.set( ROOM_SIZE * 2.5, 0, 0 );
+    scatter_plot.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot.graph );
 }
 
@@ -558,7 +558,7 @@ function initParallelSet()
 
     parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
     parallel_set.graph.position.set( 0.8, -0.15, 0.9 );
-    parallel_set.graph.rotation.set( 0, Math.PI, 0 );
+    parallel_set.graph.rotation.set( 0, Math.PI/2, 0 );
     scene.add( parallel_set.graph );
 }
 
