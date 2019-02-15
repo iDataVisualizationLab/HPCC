@@ -56,6 +56,7 @@ var service_control_panel;
 var time_control_panel;
 var scatter_plot;
 var parallel_set;
+var lever;
 var FONT = 'media/fonts/helvetiker_regular.typeface.json';
 
 // HPCC
@@ -437,6 +438,50 @@ function initRoom()
     room.name = "hpcc_room";
     room.type = "room";
     scene.add( room );
+
+    initLever();
+}
+
+function initLever()
+{
+    lever = new THREE.Group();
+    lever.name = "hpcc_lever";
+
+    // lever case
+    var back_geometry = new THREE.BoxGeometry( ROOM_SIZE/20, ROOM_SIZE/10, ROOM_SIZE/80 );
+    var back_material = new THREE.MeshPhongMaterial( { color: 0x555555 } );
+    var back = new THREE.Mesh( back_geometry, back_material );
+    back.name = "lever-case";
+    lever.add( back );
+
+    // rotation pivot
+    var pivot = new THREE.Object3D();
+    pivot.name = "lever-pivot";
+
+    // lever tube
+    var tube_geometry = new THREE.CylinderGeometry( ROOM_SIZE/200, ROOM_SIZE/200, ROOM_SIZE/15, 16 );
+    var tube_material = new THREE.MeshPhongMaterial( { color: 0xaaaaaa } );
+    var tube = new THREE.Mesh( tube_geometry, tube_material );
+    tube.name = "lever-tube";
+    tube.position.set( 0, 0, ROOM_SIZE/30 );
+    tube.rotation.set( Math.PI/2, 0, 0 );
+    pivot.add( tube );
+
+    // lever handle
+    var handle_geometry = new THREE.SphereGeometry( ROOM_SIZE/70, 16, 16 );
+    var handle_material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+    var handle = new THREE.Mesh( handle_geometry, handle_material );
+    handle.position.set( 0, 0, ROOM_SIZE/15 );
+    handle.name = "lever-handle";
+    pivot.add( handle );
+
+    // set rotation and position
+    lever.add( pivot );
+    lever.pivot = pivot;
+    pivot.rotation.set( Math.PI/-4, 0, 0 );
+    lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
+    scene.add( lever );
+
 }
 
 function initHPCC()
@@ -557,9 +602,10 @@ function initParallelSet()
     }
 
     parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
-    parallel_set.graph.position.set( 0.8, -0.15, 0.9 );
-    parallel_set.graph.rotation.set( 0, Math.PI/2, 0 );
+    parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
+    parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
+    parallel_set.graph.visible = false;
 }
 
 // Animate & Render

@@ -35,6 +35,8 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isScatterPlotClicked() )
         console.log(INTERSECTED.name);
+    else if( isLeverClicked() )
+        console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
         console.log(INTERSECTED.name);
     else
@@ -146,6 +148,33 @@ function onMouseDown( event )
             //     return false;
             // }
 
+            return false;
+        }
+    }
+
+    // check if lever was clicked
+    function isLeverClicked()
+    {
+        intersects = raycaster.intersectObjects( lever.pivot.children );
+        if ( intersects.length > 0 )
+        {
+            INTERSECTED = intersects[ 0 ].object.parent;
+            if( lever.pivot.rotation.x < 0 ) // lever is on scatter plot
+            {
+                scatter_plot.graph.visible = false;
+                parallel_set.graph.visible = true;
+                lever.pivot.rotation.x = Math.PI/4;
+            }
+            else // lever is on parallel coordinates
+            {
+                scatter_plot.graph.visible = true;
+                parallel_set.graph.visible = false;
+                lever.pivot.rotation.x = Math.PI/-4;
+            }
+            return true;
+        }
+        else
+        {
             return false;
         }
     }
