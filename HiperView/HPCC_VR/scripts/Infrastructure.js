@@ -41,7 +41,7 @@ function initQuanah()
             }
         }
 
-        addQuanahLabel( "Rack " + rack_num, "rack", rack );
+        addQuanahLabel( "RACK " + rack_num, "rack", rack );
 
         rack.position.set( x, y, z );
         return rack;

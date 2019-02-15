@@ -168,6 +168,25 @@ function updateScatterPlot( host, timestamp )
 
 }
 
+// lever update
+function updateLever( start, end )
+{
+    var intervals = 10;
+    var interval = (start - end)/intervals;
+    var count = 0;
+
+    var rotateLever = setInterval( function()
+    {
+        lever.pivot.rotation.x -= interval;
+        count++;
+
+        if( count == intervals )
+            clearInterval( rotateLever );
+
+    }, 20 );
+}
+
+
 // ngan
 // tooltip update
 

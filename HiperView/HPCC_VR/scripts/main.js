@@ -475,12 +475,39 @@ function initLever()
     handle.name = "lever-handle";
     pivot.add( handle );
 
+    addLeverLabel( "Scatter Plot", ROOM_SIZE/10, lever );
+    addLeverLabel( "Parallel Set", ROOM_SIZE/-8, lever );
+
+
     // set rotation and position
     lever.add( pivot );
     lever.pivot = pivot;
     pivot.rotation.set( Math.PI/-4, 0, 0 );
     lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
     scene.add( lever );
+
+    function addLeverLabel( text, y, obj )
+    {
+        var loader = new THREE.FontLoader();
+        var material_text = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+        loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+            var geometry = new THREE.TextGeometry( text, {
+                font: font,
+                size: ROOM_SIZE/30,
+                height: 0,
+                curveSegments: 12,
+                bevelEnabled: false
+            } );
+
+            var textMesh = new THREE.Mesh( geometry, material_text );
+            textMesh.position.set( ROOM_SIZE/-9, y, ROOM_SIZE/100 );
+            textMesh.name = "lever-label-"+text;
+            obj.add( textMesh );
+        } );
+
+    }
 
 }
 
