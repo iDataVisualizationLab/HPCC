@@ -54,6 +54,7 @@ var tooltip;
 var tooltip_png;
 var service_control_panel;
 var time_control_panel;
+var scatter_plot_matrix;
 var scatter_plot;
 var parallel_set;
 var lever;
@@ -393,11 +394,11 @@ function initLight()
     var light2 = document.getElementById("light2").object3D;
     var light3 = document.getElementById("light3").object3D;
 
-    var height = ROOM_SIZE/2-ROOM_SIZE/5
+    var height = ROOM_SIZE*2;
 
-    light1.position.set( ROOM_SIZE * 2, height, 0 );
-    light2.position.set( 0, height, 0 );
-    light3.position.set( ROOM_SIZE * -2, height, 0 );
+    light1.position.set( ROOM_SIZE*-1, ROOM_SIZE, ROOM_SIZE );
+    light2.position.set( ROOM_SIZE*3, ROOM_SIZE, ROOM_SIZE );
+    light3.position.set( ROOM_SIZE*7, ROOM_SIZE, ROOM_SIZE );
     
 }
 
@@ -409,9 +410,9 @@ function initInteractions()
 
 function initRoom()
 {
-    var height = ROOM_SIZE;
-    var width = ROOM_SIZE * 6;
-    var depth = ROOM_SIZE * 2;
+    var height = ROOM_SIZE * 2;
+    var width = ROOM_SIZE * 12;
+    var depth = ROOM_SIZE * 4;
     var geometry = new THREE.BoxGeometry( width, height, depth );
 
     var textures = ["whiteblockwall","whiteblockwall","whiteceiling","silvermetalmeshfloor","whiteblockwall","whiteblockwall"];
@@ -435,6 +436,7 @@ function initRoom()
     }
 
     var room = new THREE.Mesh( geometry, materials );
+    room.position.set( ROOM_SIZE*3, ROOM_SIZE/2, ROOM_SIZE );
     room.name = "hpcc_room";
     room.type = "room";
     scene.add( room );
