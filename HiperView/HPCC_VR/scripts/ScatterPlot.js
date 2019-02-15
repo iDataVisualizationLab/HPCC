@@ -1,3 +1,29 @@
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, bin_size, scale )
+{
+    this.matrix = {};
+    this.graph = new THREE.Group();
+
+    for( var p=0; p<axes_matrix.length; p++ )
+    {
+        this.length = p+1;
+        this.matrix[p] = new ScatterPlot( axes_matrix[p],
+                                        ranges_matrix[p],
+                                        intervals,
+                                        dataid,
+                                        data_matrix[p],
+                                        bin_size,
+                                        scale );
+        this.graph.add( this.matrix[p].graph );
+        this.matrix[p].graph.position.z = p * scale * 2;
+    }
+
+    this.addTo = function addTo( obj )
+    {
+        for( var p=0; p<this.length; p++ )
+            obj.add( this.matrix[p].graph );
+    }
+}
+
 function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 {
     // building scatter plot
@@ -17,6 +43,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.graph = graph;
     this.grid = grid;
     this.points = points;
+    this.axes = axes;
     this.x = x;
     this.y = y;
     this.z = z;
@@ -199,7 +226,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
                 var legend = new THREE.Mesh( legend_geometry, legend_material );
                 axis.obj = hitbox;
                 hitbox.add( legend );
-                setAxesMenu( hitbox );
+                // setAxesMenu( hitbox );
                 legend.position.set( scale/-3.5, scale/-75, scale/500);
                 hitbox.type = "axis";
 

@@ -33,8 +33,8 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
         console.log(INTERSECTED.name);
-    else if( isScatterPlotClicked() )
-        console.log(INTERSECTED.name);
+    // else if( isScatterPlotClicked() )
+    //     console.log(INTERSECTED.name);
     else if( isLeverClicked() )
         console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )

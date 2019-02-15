@@ -42,7 +42,7 @@ function updateValues( timestamp )
 
             // update scatterplot point per host (i.e. not per cpu)
             if( cpu == 1 )
-                updateScatterPlot( "compute-"+rack+"-"+host, timestamp );
+                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )
@@ -132,21 +132,28 @@ function updateCPUMarker( obj )
 }
 
 // scatterplot update
-function updateScatterPlot( host, timestamp )
+function updateScatterPlotMatrix( host, timestamp )
+{
+    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
+        updateScatterPlot( host, timestamp, scatter_plot_matrix.matrix[sp] );
+}
+
+function updateScatterPlot( host, timestamp, sp )
 {
     if( json[host] == undefined )
         return 0;
 
-    var point = scatter_plot.points.obj[host];
-    var x = json[host][selectedSPService[0]][timestamp-1] ? json[host][selectedSPService[0]][timestamp-1] : null;
-    var y = json[host][selectedSPService[1]][timestamp-1] ? json[host][selectedSPService[1]][timestamp-1] : null;
-    var z = json[host][selectedSPService[2]][timestamp-1] ? json[host][selectedSPService[2]][timestamp-1] : null;
+    var services = sp.axes;
+    var point = sp.points.obj[host];
+    var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
+    var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
+    var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
 
-    x = scatter_plot.fit(x,scatter_plot.x);
-    y = scatter_plot.fit(y,scatter_plot.y);
-    z = scatter_plot.fit(z,scatter_plot.z);
+    x = sp.fit(x,sp.x);
+    y = sp.fit(y,sp.y);
+    z = sp.fit(z,sp.z);
 
-    point.material.color = new THREE.Color( color_funct(json[host][selectedSPService[0]][timestamp-1]) );
+    point.material.color = new THREE.Color( color_funct(json[host][services[0]][timestamp-1]) );
 
     var intervals = 20;
     var xinterval = (x - point.position.x)/intervals;
