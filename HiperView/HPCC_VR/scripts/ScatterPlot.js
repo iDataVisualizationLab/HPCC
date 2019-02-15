@@ -3,6 +3,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     this.matrix = {};
     this.graph = new THREE.Group();
 
+    var x = 0, y = 0, z = 0;
+
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
@@ -14,7 +16,16 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         bin_size,
                                         scale );
         this.graph.add( this.matrix[p].graph );
-        this.matrix[p].graph.position.z = p * scale * 2;
+
+        if( axes_matrix[p][1].includes("Fan") )
+        {
+            this.matrix[p].graph.position.y = y++ * scale * 2;
+        }
+        else if( axes_matrix[p][2].includes("Temperature") )
+        {
+            this.matrix[p].graph.position.z = z++ * scale * 2;
+        }
+
     }
 
     this.addTo = function addTo( obj )
