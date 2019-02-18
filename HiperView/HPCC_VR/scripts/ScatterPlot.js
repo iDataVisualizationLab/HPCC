@@ -246,7 +246,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
             loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
 
-                var legend_geometry = new THREE.TextGeometry( obj.legend, {
+                var legend_geometry = new THREE.TextGeometry( SERVICE[obj.legend].value, {
                     font: font,
                     size: scale/20,
                     height: 0,
