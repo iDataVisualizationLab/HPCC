@@ -16,9 +16,9 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.graph.add( this.matrix[p].graph );
 
         // setting inner scatter plot position
-        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 2; // temperature
-        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 2; // fans speed
-        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 2; // other service
+        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 1.5; // temperature
+        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 1.5; // fans speed
+        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 1.5; // other service
 
         // hiding legends
         if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
@@ -34,6 +34,9 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
             SERVICE[axes_matrix[p][0]].sp_pos == 0 )
             this.matrix[p].toggleAxisLegend( 2 );
+        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][1]].sp_pos != 0 )
+            this.matrix[p].toggleAxisLegend( 0 );
         
     }
 }
