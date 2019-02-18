@@ -594,7 +594,7 @@ function initScatterPlotMatrix()
     var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
     // var x = [ "arrTemperatureCPU1" ];
     // var y = [ "arrFans_speed1" ];
-    // var z = [ "arrPower_usage"];
+    // var z = [ "arrCPU_load"];
 
     for( other in z )
     {
