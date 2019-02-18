@@ -52,7 +52,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     var graph = new THREE.Group();
     var grid = setGrid();
     var points = setPoints( true );
-    var scag = setScagnostics();
+    // var scag = setScagnostics();
 
     graph.add( grid );
     graph.add( points );
@@ -68,7 +68,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.y = y;
     this.z = z;
     this.data = data;
-    this.scag = scag;
+    // this.scag = scag;
 
     // functions
 

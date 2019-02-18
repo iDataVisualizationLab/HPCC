@@ -90,7 +90,7 @@ function updateHost( service, keys, obj )
     if( json[key1][key2][time] !=null )
     {
         obj.visible = true;
-        obj.material.color = new THREE.Color( color_funct(json[key1][key2][time]) );
+        obj.material.color = new THREE.Color( color(json[key1][key2][time]) );
         updateCPUMarker( obj );
     }
     else
@@ -115,11 +115,6 @@ function updateColorRange( service )
     // var arrDom = [min,null,null,max];
     // arrDom[1] = min + (max-min)/3;
     // arrDom[2] = min + 2*(max-min)/3;
-    
-    color_funct = d3.scaleLinear()
-        .domain(SERVICE[service].threshold)
-        .range(arrColor)
-        .interpolate(d3.interpolateHcl);
 }
 
 function updateCPUMarker( obj )
@@ -153,7 +148,7 @@ function updateScatterPlot( host, timestamp, sp )
     y = sp.fit(y,sp.y);
     z = sp.fit(z,sp.z);
 
-    point.material.color = new THREE.Color( color_funct(json[host][services[0]][timestamp-1]) );
+    point.material.color = new THREE.Color( color(json[host][selectedService][timestamp-1]) );
 
     var intervals = 20;
     var xinterval = (x - point.position.x)/intervals;
