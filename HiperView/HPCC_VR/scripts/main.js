@@ -592,6 +592,9 @@ function initScatterPlotMatrix()
     var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
     var y = [ "arrFans_speed1", "arrFans_speed2" ];
     var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
+    // var x = [ "arrTemperatureCPU1" ];
+    // var y = [ "arrFans_speed1" ];
+    // var z = [ "arrPower_usage"];
 
     for( other in z )
     {
@@ -618,79 +621,11 @@ function initScatterPlotMatrix()
         }
     }
 
-    // // building data tmp1,fan1,power ------------------------------------------------
-    // s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU1"];
-    // selectedSPServices.push(s);
-    // data = []
-    // for( var h=0; h<hostkeys.length; h++ )
-    // {
-    //     tmp = [];
-    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-    //     data.push( tmp )
-    // }
-    // datas.push(data);
-    // ranges.push([SERVICE[s[0]]["dom"],
-    //             SERVICE[s[1]]["dom"],
-    //             SERVICE[s[2]]["dom"]] );
-
-    // // building data tmp2,fan1,power ------------------------------------------------
-    // s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU2"];
-    // selectedSPServices.push(s);
-    // data = []
-    // for( var h=0; h<hostkeys.length; h++ )
-    // {
-    //     tmp = [];
-    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-    //     data.push( tmp )
-    // }
-    // datas.push(data);
-    // ranges.push([SERVICE[s[0]]["dom"],
-    //             SERVICE[s[1]]["dom"],
-    //             SERVICE[s[2]]["dom"]] );
-
-    // // building data tmp1,fan2,power ------------------------------------------------
-    // s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU1"];
-    // selectedSPServices.push(s);
-    // data = []
-    // for( var h=0; h<hostkeys.length; h++ )
-    // {
-    //     tmp = [];
-    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-    //     data.push( tmp )
-    // }
-    // datas.push(data);
-    // ranges.push([SERVICE[s[0]]["dom"],
-    //             SERVICE[s[1]]["dom"],
-    //             SERVICE[s[2]]["dom"]] );
-
-    // // building data tmp2,fan2,power ------------------------------------------------
-    // s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU2"];
-    // selectedSPServices.push(s);
-    // data = []
-    // for( var h=0; h<hostkeys.length; h++ )
-    // {
-    //     tmp = [];
-    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-    //     data.push( tmp )
-    // }
-    // datas.push(data);
-    // ranges.push([SERVICE[s[0]]["dom"],
-    //             SERVICE[s[1]]["dom"],
-    //             SERVICE[s[2]]["dom"]] );
-
     // building scatter plot matrix ----------------------------------------------------
     scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, null, 0.25  );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
-    scatter_plot_matrix.addTo( scene );
+    scene.add( scatter_plot_matrix.graph );
 }
 
 function initParallelSet()

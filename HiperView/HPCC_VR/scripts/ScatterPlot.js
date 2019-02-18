@@ -16,15 +16,25 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.graph.add( this.matrix[p].graph );
 
         // setting inner scatter plot position
-        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 2;
-        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 2;
-        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 2;
+        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 2; // temperature
+        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 2; // fans speed
+        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 2; // other service
 
-    }
-
-    this.addTo = function addTo( obj )
-    {
-        obj.add( this.graph );
+        // hiding legends
+        if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 0 );
+        if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
+        {
+            this.matrix[p].toggleAxisLegend( 1 );
+            this.matrix[p].toggleAxisLegend( 2 );
+        }
+        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 1 );
+        if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 2 );
+        
     }
 }
 
@@ -252,8 +262,10 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
                     hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                 }
 
-                obj.add( hitbox );
             } );
+
+            axis.obj = hitbox;
+            obj.add( hitbox );
         }
 
         function setAxesMenu( obj )
@@ -360,6 +372,16 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         if( val == undefined ) return 0;
         if( axis.range == 0 ) return 0;
         return scale * (val - axis.min) / axis.range;
+    }
+
+    this.toggleAxisLegend = function( axis )
+    {
+        if( axis == 0 )
+            this.x.obj.visible = !this.x.obj.visible;
+        if( axis == 1 )
+            this.y.obj.visible = !this.y.obj.visible;
+        if( axis == 2 )
+            this.z.obj.visible = !this.z.obj.visible;
     }
 
 }
