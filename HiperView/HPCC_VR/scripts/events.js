@@ -161,13 +161,13 @@ function onMouseDown( event )
             INTERSECTED = intersects[ 0 ].object.parent;
             if( lever.pivot.rotation.x < 0) // lever is on scatter plot
             {
-                scatter_plot.graph.visible = false;
+                scatter_plot_matrix.graph.visible = false;
                 parallel_set.graph.visible = true;
                 updateLever( Math.PI/-4, Math.PI/4 );
             }
             else // lever is on parallel coordinates
             {
-                scatter_plot.graph.visible = true;
+                scatter_plot_matrix.graph.visible = true;
                 parallel_set.graph.visible = false;
                 updateLever( Math.PI/4, Math.PI/-4 );
             }

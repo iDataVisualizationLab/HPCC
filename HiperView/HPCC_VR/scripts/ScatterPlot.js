@@ -3,8 +3,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     this.matrix = {};
     this.graph = new THREE.Group();
 
-    var x = 0, y = 0, z = 0;
-
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
@@ -17,21 +15,16 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         scale );
         this.graph.add( this.matrix[p].graph );
 
-        if( axes_matrix[p][1].includes("Fan") )
-        {
-            this.matrix[p].graph.position.y = y++ * scale * 2;
-        }
-        else if( axes_matrix[p][2].includes("Temperature") )
-        {
-            this.matrix[p].graph.position.z = z++ * scale * 2;
-        }
+        // setting inner scatter plot position
+        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 2;
+        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 2;
+        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 2;
 
     }
 
     this.addTo = function addTo( obj )
     {
-        for( var p=0; p<this.length; p++ )
-            obj.add( this.matrix[p].graph );
+        obj.add( this.graph );
     }
 }
 
@@ -249,8 +242,8 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
                 if( axis.name == "y" )
                 {
                     hitbox.name = "y-axis";
-                    hitbox.position.set( 0, scale, scale/-1.25 );
-                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
+                    hitbox.position.set( 0, scale/2, scale/-3 );
+                    hitbox.rotation.set( 0, Math.PI/-2, Math.PI/2 );
                 }
                 if( axis.name == "z" )
                 {

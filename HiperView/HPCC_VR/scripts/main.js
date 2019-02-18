@@ -27,13 +27,13 @@ var fillHost;
 var updateTimestamp;
 var move_timer;
 
-var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [null,null] },
-                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [null,null] },
-                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [null,null] },
-                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [null,null] },
-                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [null,null] },
-                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [null,null] },
-                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [null,null] },
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [null,null], sp_pos: 0 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [null,null], sp_pos: 1  },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [null,null], sp_pos: 2 },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [null,null], sp_pos: 1 },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [null,null], sp_pos: 0 },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [null,null], sp_pos: 1 },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [null,null], sp_pos: 0 },
             };
 
 
@@ -44,9 +44,6 @@ var oldhostclicked;
 var svg;
 var rectip;
 var maxstack = 7;
-
-// var serviceValues = ["Temperature1","Temperature2","CPU_load","Memory_usage","Fans_speed1","Fans_speed2","Power_usage"];
-// var serviceKeys = ["arrTemperatureCPU1", "arrTemperatureCPU2", "arrCPU_load", "arrMemory_usage", "arrFans_speed1", "arrFans_speed2", "arrPower_usage"];
 
 var quanah;
 var cpu_marker;
@@ -592,73 +589,102 @@ function initScatterPlotMatrix()
     var hostkeys = Object.keys(json);
     var tmp, datas = [], s, ranges = [], selectedSPServices = [];
 
-    // building data tmp1,fan1,power ------------------------------------------------
-    s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU1"];
-    selectedSPServices.push(s);
-    data = []
-    for( var h=0; h<hostkeys.length; h++ )
-    {
-        tmp = [];
-        tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-        data.push( tmp )
-    }
-    datas.push(data);
-    ranges.push([SERVICE[s[0]]["dom"],
-                SERVICE[s[1]]["dom"],
-                SERVICE[s[2]]["dom"]] );
+    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
+    var y = [ "arrFans_speed1", "arrFans_speed2" ];
+    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
 
-    // building data tmp2,fan1,power ------------------------------------------------
-    s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU2"];
-    selectedSPServices.push(s);
-    data = []
-    for( var h=0; h<hostkeys.length; h++ )
+    for( other in z )
     {
-        tmp = [];
-        tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-        data.push( tmp )
+        for( fan in y )
+        {
+            for( temp in x )
+            {
+                s = [z[other],y[fan],x[temp]];
+                selectedSPServices.push(s);
+                data = []
+                for( var h=0; h<hostkeys.length; h++ )
+                {
+                    tmp = [];
+                    tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+                    tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+                    tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+                    data.push( tmp )
+                }
+                datas.push(data);
+                ranges.push([SERVICE[s[0]]["dom"],
+                            SERVICE[s[1]]["dom"],
+                            SERVICE[s[2]]["dom"]] );
+            }
+        }
     }
-    datas.push(data);
-    ranges.push([SERVICE[s[0]]["dom"],
-                SERVICE[s[1]]["dom"],
-                SERVICE[s[2]]["dom"]] );
 
-    // building data tmp1,fan2,power ------------------------------------------------
-    s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU1"];
-    selectedSPServices.push(s);
-    data = []
-    for( var h=0; h<hostkeys.length; h++ )
-    {
-        tmp = [];
-        tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-        data.push( tmp )
-    }
-    datas.push(data);
-    ranges.push([SERVICE[s[0]]["dom"],
-                SERVICE[s[1]]["dom"],
-                SERVICE[s[2]]["dom"]] );
+    // // building data tmp1,fan1,power ------------------------------------------------
+    // s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU1"];
+    // selectedSPServices.push(s);
+    // data = []
+    // for( var h=0; h<hostkeys.length; h++ )
+    // {
+    //     tmp = [];
+    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+    //     data.push( tmp )
+    // }
+    // datas.push(data);
+    // ranges.push([SERVICE[s[0]]["dom"],
+    //             SERVICE[s[1]]["dom"],
+    //             SERVICE[s[2]]["dom"]] );
 
-    // building data tmp2,fan2,power ------------------------------------------------
-    s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU2"];
-    selectedSPServices.push(s);
-    data = []
-    for( var h=0; h<hostkeys.length; h++ )
-    {
-        tmp = [];
-        tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-        tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-        data.push( tmp )
-    }
-    datas.push(data);
-    ranges.push([SERVICE[s[0]]["dom"],
-                SERVICE[s[1]]["dom"],
-                SERVICE[s[2]]["dom"]] );
+    // // building data tmp2,fan1,power ------------------------------------------------
+    // s = ["arrPower_usage","arrFans_speed1","arrTemperatureCPU2"];
+    // selectedSPServices.push(s);
+    // data = []
+    // for( var h=0; h<hostkeys.length; h++ )
+    // {
+    //     tmp = [];
+    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+    //     data.push( tmp )
+    // }
+    // datas.push(data);
+    // ranges.push([SERVICE[s[0]]["dom"],
+    //             SERVICE[s[1]]["dom"],
+    //             SERVICE[s[2]]["dom"]] );
+
+    // // building data tmp1,fan2,power ------------------------------------------------
+    // s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU1"];
+    // selectedSPServices.push(s);
+    // data = []
+    // for( var h=0; h<hostkeys.length; h++ )
+    // {
+    //     tmp = [];
+    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+    //     data.push( tmp )
+    // }
+    // datas.push(data);
+    // ranges.push([SERVICE[s[0]]["dom"],
+    //             SERVICE[s[1]]["dom"],
+    //             SERVICE[s[2]]["dom"]] );
+
+    // // building data tmp2,fan2,power ------------------------------------------------
+    // s = ["arrPower_usage","arrFans_speed2","arrTemperatureCPU2"];
+    // selectedSPServices.push(s);
+    // data = []
+    // for( var h=0; h<hostkeys.length; h++ )
+    // {
+    //     tmp = [];
+    //     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+    //     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+    //     data.push( tmp )
+    // }
+    // datas.push(data);
+    // ranges.push([SERVICE[s[0]]["dom"],
+    //             SERVICE[s[1]]["dom"],
+    //             SERVICE[s[2]]["dom"]] );
 
     // building scatter plot matrix ----------------------------------------------------
     scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, null, 0.25  );
