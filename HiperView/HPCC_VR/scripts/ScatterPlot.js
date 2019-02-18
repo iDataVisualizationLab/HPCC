@@ -37,7 +37,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
             SERVICE[axes_matrix[p][1]].sp_pos != 0 )
             this.matrix[p].toggleAxisLegend( 0 );
-        
     }
 }
 
@@ -53,6 +52,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     var graph = new THREE.Group();
     var grid = setGrid();
     var points = setPoints( true );
+    var scag = setScagnostics();
 
     graph.add( grid );
     graph.add( points );
@@ -68,6 +68,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.y = y;
     this.z = z;
     this.data = data;
+    this.scag = scag;
 
     // functions
 
@@ -89,6 +90,21 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         info.obj = setAxis( axis, info );
 
         return info;
+    }
+
+    function setScagnostics()
+    {
+        var tmp = [], tmp2;
+        for( var i=0; i<data.length; i++ )
+        {
+            tmp2 = [0,0,0];
+            tmp2[0] = data[i][0] == undefined ? 0 : data[i][0] ;
+            tmp2[1] = data[i][1] == undefined ? 0 : data[i][1] ;
+            tmp2[2] = data[i][2] == undefined ? 0 : data[i][2] ;
+            tmp.push( tmp2 );
+        }
+
+        return scagnostics3d( tmp );
     }
 
     function setGrid()
