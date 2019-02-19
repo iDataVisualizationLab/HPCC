@@ -1,0 +1,172 @@
+.linkLine {
+    stroke: black;
+    stroke-width: 1px;
+    fill: none;
+    pointer-events: none;
+}
+
+.gapLine {
+    stroke: #000000;
+    stroke-width: 2px;
+    fill: none;
+    pointer-events: none;
+}
+
+.disablePoint {
+    color: gray;
+    opacity: 0.1;
+}
+
+.datapoint {
+    stroke: white;
+    stroke-width: 0.5px;
+}
+
+.axisLabel {
+    /*font-weight: bold;*/
+    font: 16px sans-serif;
+    fill: #ffffff;
+}
+.d3-tip {
+    pointer-events: none;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+}
+body {
+    font: 14px sans-serif;
+
+}
+
+#header {
+    /*background-color: #ffffff;*/
+    background: #485563;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #29323c, #485563);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #29323c, #485563); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    /*background-color: #a71d31;*/
+    /*background-image: linear-gradient(315deg, #a71d31 0%, #3f0d12 74%);*/
+}
+#header a,#header .brand-logo{
+    /*font-family: 'Passion One', cursive;*/
+    /*font-family: 'Russo One', sans-serif;*/
+    font-family: 'Fredoka One', cursive;
+    color: #ffffff
+}
+
+.titletext {
+    margin-top: 0;
+}
+#currentservice {
+    /*background-color: #f7f285;*/
+    /*color: black;*/
+}
+#header svg {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.brand-logo{
+    font-family: 'Staatliches', cursive;
+    /*background-color: #3f0d12;*/
+    /*background-image: linear-gradient(315deg, #3f0d12 0%, #a71d31 74%);*/
+    /*-webkit-background-clip: text;*/
+    /*-webkit-text-fill-color: transparent;*/
+}
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 14px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+    pointer-events: none;
+}
+
+#mainPlot {
+    max-width:1200px;
+    max-height:1200px;
+}
+
+#controls {
+    padding-top: 10px;
+}
+
+
+.pin-top {
+    position: relative;
+}
+
+
+.pin-bottom {
+    position: relative;
+}
+
+.pinned {
+    position: fixed !important;
+}
+html, body, .block {
+    height: 100%;
+}
+.container {
+    color: black;
+}
+#blue {
+    background-color: #fff0e9 !important;
+}
+#red {
+    background-color: #e3ffff !important;
+}
+
+.input-field p, .input-field .select-wrapper {
+    display: inline-block;
+    clear: both;
+    float: none;
+}
+
+.linkLineg text {
+    text-shadow: 1px 1px #fff8ff;
+    text-anchor: start;
+}
+.dropdown-content {
+    background-color: #1b1111c4;
+}
+ul {
+    font-size: 14px;
+}
+
+.card-panel {
+    background-color: #555;
+    color: #ffffff;
+}
+
+.bodyContent {
+    background: #141E30;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+blockquote{
+    border-left: 5px solid #ffffff;
+}
+
+.disableWord {
+    opacity:0.1;
+}

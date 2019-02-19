@@ -1,0 +1,320 @@
+.linkLine {
+    stroke: black;
+    stroke-width: 1px;
+    fill: none;
+    pointer-events: none;
+}
+
+.gapLine {
+    stroke: #000000;
+    stroke-width: 2px;
+    fill: none;
+    pointer-events: none;
+}
+
+.disablePoint {
+    color: gray;
+    opacity: 0.1;
+}
+
+.datapoint {
+    stroke: white;
+    stroke-width: 0.1px;
+}
+
+.axisLabel {
+    /*font-weight: bold;*/
+    font: 16px sans-serif;
+    fill: #ffffff;
+}
+
+.light .axisLabel {
+    fill: #000000;
+}
+
+.d3-tip {
+    pointer-events: none;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+}
+body {
+    font: 14px sans-serif;
+    background-color: #232b33;
+    color: white;
+}
+body.light {
+    background-color: white;
+    color: black;
+}
+#header {
+        /*background-color: #ffffff;*/
+    background: #485563;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #29323c, #485563);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #29323c, #485563); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    /*background-color: #a71d31;*/
+    /*background-image: linear-gradient(315deg, #a71d31 0%, #3f0d12 74%);*/
+}
+.light #header {
+    background:  #f3f3f3;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #f3f3f3, #ececec);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #f3f3f3, #ececec); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+#header, #header a,#header .brand-logo{
+    font-family: 'Fredoka One', cursive;
+    color: #ffffff
+}
+
+.light #header,.light #header a,.light #header .brand-logo {
+    color: #484848
+}
+
+.titletext {
+    margin-top: 0;
+}
+#currentservice {
+    /*background-color: #f7f285;*/
+    /*color: black;*/
+}
+#header svg {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.brand-logo{
+    font-family: 'Staatliches', cursive;
+    /*background-color: #3f0d12;*/
+    /*background-image: linear-gradient(315deg, #3f0d12 0%, #a71d31 74%);*/
+    /*-webkit-background-clip: text;*/
+    /*-webkit-text-fill-color: transparent;*/
+}
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 14px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+    pointer-events: none;
+}
+
+/*#mainPlot {*/
+    /*max-width:1200px;*/
+    /*max-height:1200px;*/
+/*}*/
+
+#controls {
+    padding-top: 10px;
+}
+
+
+   .pin-top {
+       position: relative;
+   }
+
+
+   .pin-bottom {
+       position: relative;
+   }
+
+   .pinned {
+       position: fixed !important;
+   }
+html, body, .block {
+    height: 100%;
+}
+.container {
+    color: black;
+}
+
+
+.input-field p, .input-field .select-wrapper {
+    display: inline-block;
+    clear: both;
+    float: none;
+}
+
+.linkLineg text {
+    fill: #ffffff;
+    /*text-shadow: 1px 1px #fff8ff;*/
+    text-anchor: start;
+}
+
+.light .linkLineg text {
+    fill: #000000;
+}
+
+.linkText {
+    fill: #ffffff;
+    /*text-shadow: 1px 1px #fff8ff;*/
+    text-anchor: start;
+    text-shadow: 1px 1px #000000;
+}
+
+.light .linkText {
+    fill: #000000;
+    text-shadow: 1px 1px #fff8ff;
+}
+
+.dropdown-content {
+    background-color: #1b1111c4;
+    min-width: 200px;
+}
+
+.light .dropdown-content {
+    background-color: rgba(229, 235, 238, 0.77);
+}
+ul {
+    font-size: 14px;
+}
+
+.card-panel {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-color: #272727;
+    color: #ffffff;
+}
+
+.card-panel:not(#network) {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.card-image:not(#network) {
+    padding-top: 24px;
+}
+
+.light .card-panel {
+    background-color: white;
+    color: #000000;
+}
+
+.bodyContent {
+    background: #141E30;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+blockquote{
+    border-left: 5px solid #ffffff;
+}
+
+.disableWord {
+    opacity:0.1;
+}
+
+.cover {
+    position: fixed;
+    margin: 0;
+    width:100%;
+    height:100%;
+    background: #485563;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #29323cc4, #485563);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #29323cc4, #485563); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    z-index: 10;
+}
+
+.light  .cover {
+    background:  #f3f3f3;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #f3f3f3c4, #ececec);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #f3f3f3c4, #ececec); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.cover .spinnerC {
+    position: fixed;
+    margin: 0;
+    /* position: absolute; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.cover.hidden {
+    display: none;
+}
+
+
+.brush rect.selection {
+    fill: rgba(185,185,185,0.92);
+    stroke: none;
+}
+.brush:hover rect.selection {
+    stroke: #ffffff;
+    stroke-dasharray: 5,5;
+}
+.brush rect.selection:hover {
+    stroke-dasharray: none;
+}
+
+.light .brush rect.selection {
+    fill: rgba(100,100,100,0.41);
+    stroke: #fff;
+}
+.light .brush:hover rect.selection {
+    stroke: #222;
+    stroke-dasharray: 5,5;
+}
+
+.light .brush rect.selection:hover {
+    stroke-dasharray: none;
+}
+
+/*legend*/
+.floatTitle {
+    z-index: 0;
+    position: absolute;
+    padding: 10px;
+}
+
+.color-block, .color-bar {
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    margin: 1px 4px 1px 0px;
+}
+
+.floatTitle .tally::first-letter{
+    text-transform: uppercase;
+}
+
+sup {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+/*#legend-svg {*/
+    /*position: absolute;*/
+    /*left: calc(50% - 100px);*/
+/*}*/
+
+.menuFloat {
+    position: fixed;
+    right: 0px;
+}
+
+.linkGap {
+    stroke: black;
+}
+
+.light .linkGap {
+    stroke: black;
+}

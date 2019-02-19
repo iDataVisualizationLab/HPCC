@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="shortcut icon" type="image/x-icon" href="src/media/PhaseSpaceLogo.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Passion+One|Russo+One&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href= "src/css/main.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="src/lib/d3.tip.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+
+
+</head>
+<body>
+
+    <nav class="pushpin-demo-nav" data-target="blue">
+        <ul id="listvar" class="dropdown-content">
+
+        </ul>
+
+
+            <div class="nav-wrapper" id="header">
+
+                <div class="brand-logo center input-field col s12 inline" >
+                    Phase space of
+                    <a class="dropdown-trigger" href="#!" data-target="listvar"><p id = "currentservice" class="titletext">Temperature</p><i class="material-icons right">arrow_drop_down</i></a>
+                </div>
+                <ul id="nav-mobile" class="left hide-on-med-and-down">
+                    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">Hipper View</a></li>
+                    <li><a href="#!" value="dark" id = "DarkTheme">Light</a></li>
+                </ul>
+            </div>
+    </nav>
+    <div class = "menuFloat">
+        <svg class="col s1" id="legend-svg"></svg>
+    </div>
+        <div class= "row">
+            <div class="row">
+                <div class="col s6 m6 ">
+                    <div class="card-panel z-depth-1 row">
+                        <div class="card-image row" id="mainPlot">
+                            <svg class="col s11" id="content"></svg>
+                        </div>
+                        <blockquote><h6 id="labelSum">Phase Space of Temperature</h6></blockquote>
+                        <div class="card-content">
+                            <p>Inspired by Physics momentum.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col s6 m6">
+
+                    <div class="card-panel z-depth-1">
+                        <div class="card-image center-align" id="network">
+
+                            <svg id="networkcontent"></svg>
+                        </div>
+                        <blockquote><h6>Clustering derivation </h6></blockquote>
+                        <div class="card-content">
+                            <p>To enhance the information and detect outlying in data.</p>
+                        </div>
+                    </div>
+
+                </div>
+        </div>
+
+
+<!--load dataset-->
+<script src="src/data/hostlist.js"></script>
+<script src="src/data/serviceWed26Sep.js"></script>
+<!--load scripts-->
+<script src="src/scripts/readData.js"></script>
+<script src="src/scripts/ulti.js"></script>
+<script src="src/scripts/main.js"></script>
