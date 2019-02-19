@@ -161,7 +161,7 @@ function colorlegend (g){
         .attr("dy", "1em")
         .attr("font-weight", "bold")
         .style("text-anchor", "middle")
-        .text("Derivation from the average curve");
+        .text("Derivation from attractor");
     var gradient = legendSvg.append('defs')
         .append('linearGradient')
         .attr('id', 'gradient')
