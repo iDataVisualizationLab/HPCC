@@ -497,14 +497,14 @@ function update_ticks(d, extent) {
         // single tick
         if (extent) {
             // restore previous extent
-            brush_el.call(yscale[d].brush = d3.svg.brush().y(yscale[d]).extent(extent).on("brush", brush));
+            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).extent(extent).on("brush", brush));
         } else {
-            brush_el.call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush));
+            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush));
         }
     } else {
         // all ticks
         d3.selectAll(".brush")
-            .each(function(d) { d3.select(this).call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush)); })
+            .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush)); })
     }
 
     brush_count++;
@@ -624,7 +624,7 @@ window.onresize = function() {
         .attr("transform", function(d) { return "translate(" + xscale(d) + ")"; })
     // update brush placement
     d3.selectAll(".brush")
-        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush)); })
+        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush)); })
     brush_count++;
 
     // update axis placement
