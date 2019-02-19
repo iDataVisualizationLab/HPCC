@@ -50,7 +50,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 }
 #linkHolder {
 	position:absolute;
-	padding: 10px;
+	padding: 5px;
 	z-index: 0;
 	top: 1px;
 	right: 760px;
@@ -58,6 +58,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	border-radius: 6px;
 	background-color: #ddd;
 	box-shadow: 5px 5px 5px #444;
+	text-align:center;
 }
 #linkHolder ul{
 	padding: unset
@@ -308,7 +309,10 @@ table, th, td {
 	height: 30px;
 
 }
-
+.menuIcon{
+	height:45px;
+	margin: 0px 10px;
+}
 
 .rotatehover:hover .pauseicon{
 	transform: rotate(360deg);
@@ -398,4 +402,30 @@ div.selection div,span {
 	background: #9c9c9c;
 	color: white;
 	font-weight: bold;
+}
+.tooltip {
+	position: relative;
+	display: inline-block;
+	border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+	visibility: hidden;
+	width: 120px;
+	background-color: black;
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px 0;
+
+	/* Position the tooltip */
+	position: absolute;
+	z-index: 1;
+	top: 100%;
+	left: 50%;
+	margin-left: -60px;
+}
+
+.tooltip:hover .tooltiptext {
+	visibility: visible;
 }
