@@ -5,8 +5,15 @@
     pointer-events: none;
 }
 
-.gapLine {
+.light .gapLine {
     stroke: #000000;
+    stroke-width: 2px;
+    fill: none;
+    pointer-events: none;
+}
+
+.gapLine {
+    stroke: #ffffff;
     stroke-width: 2px;
     fill: none;
     pointer-events: none;
@@ -218,6 +225,9 @@ ul {
 blockquote{
     border-left: 5px solid #ffffff;
 }
+.light blockquote{
+    border-left: 5px solid #545454;
+}
 
 .disableWord {
     opacity:0.1;
@@ -313,8 +323,14 @@ sup {
 
 .linkGap {
     stroke: black;
+    opacity: 1;
 }
 
 .light .linkGap {
     stroke: black;
+    opacity: 0.5;
+}
+
+.deactive {
+    opacity: 0.2;
 }

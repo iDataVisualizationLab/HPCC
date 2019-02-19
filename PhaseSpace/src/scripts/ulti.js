@@ -343,7 +343,7 @@ function initNetgap (){
     netConfig.g = netsvg.append("g").attr('transform',`translate(${netConfig.margin.left},${netConfig.margin.top})`);
     netConfig.g.append("g")
         .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.9)
+        //.attr("stroke-opacity", 0.9)
         .attr("stroke-width", 1)
         .attr('class','linkgroup');
     function zoomed() {
@@ -450,7 +450,7 @@ function drawNetgap(nodenLink){
             let maxSudden = d3.max(dd.values,d=>d.values[0].df);
             let maxSuddenPoint = dd.values.find(d=>d.values[0].df===maxSudden);
             mouseoverHandel(maxSuddenPoint);
-            let connect = d3.selectAll(".linkGap").filter(d=>d.source.key===dd.key||d.target.key===dd.key).style('stroke-opacity',1);
+            let connect = d3.selectAll(".linkGap").filter(d=>d.source.key===dd.key||d.target.key===dd.key).classed('deactive',false);//.style('stroke-opacity',1);
             connect.data().forEach(d=>{
                 let id = "#mini"+(d.source.key!==dd.key?d.source.key:d.target.key);
                 d3.select(id).style('opacity',1);
@@ -505,8 +505,8 @@ function drawNetgap(nodenLink){
             netConfig.simulation.stop();
             netsvg.selectAll(".linkLineg").style('opacity',0.5);
             d3.select("#mini"+dd.key).style('opacity',1);
-            d3.selectAll(".linkGap").style('stroke-opacity',0.5);
-            let connect = d3.selectAll(".linkGap").filter(d=>d.source.key===dd.key||d.target.key===dd.key).style('stroke-opacity',1);
+            d3.selectAll(".linkGap").classed('deactive',true);
+            let connect = d3.selectAll(".linkGap").filter(d=>d.source.key===dd.key||d.target.key===dd.key).classed('deactive',false);//.style('stroke-opacity',1);
             connect.data().forEach(d=>{
                 let id = "#mini"+(d.source.key!== dd.key?d.source.key:d.target.key);
                 d3.select(id).style('opacity',1);
@@ -517,7 +517,7 @@ function drawNetgap(nodenLink){
             netConfig.simulation.alphaTarget(.3).restart();
 
             netsvg.selectAll(".linkLineg").style('opacity',1);
-            netsvg.selectAll(".linkGap").style('stroke-opacity',0.5);
+            netsvg.selectAll(".linkGap").classed('deactive',false);//.style('stroke-opacity',0.5);
             tip.hide()})
         .call(dragForce(netConfig.simulation));
 

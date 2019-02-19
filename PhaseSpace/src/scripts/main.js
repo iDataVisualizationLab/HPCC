@@ -76,6 +76,7 @@ function init(){
 
 $( document ).ready(function(){
     $('.dropdown-trigger').dropdown();
+    $('.sidenav').sidenav();
     // $('.dropdown-button2').dropdown({
     //         inDuration: 300,
     //         outDuration: 225,
