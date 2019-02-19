@@ -21,8 +21,8 @@
     <session id="1029923364">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="19" />
-          <entry key="project.open.time.0" value="11" />
+          <entry key="project.closed" value="20" />
+          <entry key="project.open.time.0" value="12" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.16" value="1" />
           <entry key="project.open.time.2" value="3" />
@@ -32,7 +32,7 @@
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.9" value="2" />
-          <entry key="project.opened" value="24" />
+          <entry key="project.opened" value="25" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -59,26 +59,26 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
+            <state relative-caret-position="11764">
               <caret line="698" column="101" selection-start-line="698" selection-start-column="28" selection-end-line="698" selection-end-column="101" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1802">
-              <caret line="106" selection-start-line="106" selection-end-line="106" selection-end-column="52" />
+            <state relative-caret-position="17">
+              <caret line="12" column="42" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="42" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/spider/radarChart.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="386">
-              <caret line="159" column="86" lean-forward="true" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
+              <caret line="159" column="86" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
             </state>
           </provider>
         </entry>
@@ -154,8 +154,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>fill</find>
-      <find>color2</find>
       <find>Radarplot</find>
       <find>leaderbin</find>
       <find>color</find>
@@ -184,6 +182,8 @@
       <find>step</find>
       <find>step(</find>
       <find>def</find>
+      <find>N</find>
+      <find>scr</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -209,8 +209,8 @@
         <option value="$PROJECT_DIR$/HiperView/spider/RadarBoxplot.js" />
         <option value="$PROJECT_DIR$/HiperView/myscripts/radarSum.js" />
         <option value="$PROJECT_DIR$/HiperView/spider/radarChart.js" />
-        <option value="$PROJECT_DIR$/HiperView/demo.html" />
         <option value="$PROJECT_DIR$/HiperView/myscripts/main.js" />
+        <option value="$PROJECT_DIR$/HiperView/demo.html" />
       </list>
     </option>
   </component>
@@ -226,7 +226,7 @@
       <path value="$PROJECT_DIR$/SC2018/Presentation/plugin/multiplex/package.json" />
     </packageJsonPaths>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="width" value="2580" />
     <option name="height" value="1100" />
   </component>
@@ -349,11 +349,12 @@
       <workItem from="1550208891310" duration="13000" />
       <workItem from="1550517244914" duration="479000" />
       <workItem from="1550520907787" duration="134000" />
+      <workItem from="1550591499900" duration="218000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="256619000" />
+    <option name="totallyTimeSpent" value="256837000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -365,10 +366,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="2580" height="1100" extended-state="0" />
+    <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17698413" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17845787" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -379,7 +380,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50278217" side_tool="true" visible="true" weight="0.30196485" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50278217" side_tool="true" visible="true" weight="0.3163597" />
       <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49801272" weight="0.3163597" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -565,15 +566,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
+        <state relative-caret-position="11764">
           <caret line="698" column="101" selection-start-line="698" selection-start-column="28" selection-end-line="698" selection-end-column="101" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1802">
-          <caret line="106" selection-start-line="106" selection-end-line="106" selection-end-column="52" />
         </state>
       </provider>
     </entry>
@@ -628,7 +622,14 @@
     <entry file="file://$PROJECT_DIR$/HiperView/spider/radarChart.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="386">
-          <caret line="159" column="86" lean-forward="true" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
+          <caret line="159" column="86" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="12" column="42" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="42" />
         </state>
       </provider>
     </entry>
