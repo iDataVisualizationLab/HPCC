@@ -6,7 +6,7 @@
 .ddcommon ul{padding:0;margin:0;}
 .ddcommon ul li{list-style-type:none;}
 .borderRadiusTp ul li:last-child{-moz-border-radius:0 0 5px 5px ; border-radius:0 0 5px 5px;border-bottom:0 none #c3c3c3; }
-.borderRadiusBtm ul li:first-child{-moz-border-radius:5px 5px 0 0; border-radius:5px 5px 0 0 ;border-bottom:1 solid #c3c3c3; }
+.borderRadiusBtm ul li:first-child{-moz-border-radius:5px 5px 0 0; border-radius:5px 5px 0 0 ;border-bottom: 1px solid #c3c3c3; }
 
 .ddcommon .disabled img, .ddcommon .disabled span, .ddcommon.disabledAll{
 opacity: .5; /* standard: ff gt 1.5, opera, safari */
@@ -22,8 +22,8 @@ color:#999999;
 .ddOutOfVision{position:relative; display:-moz-inline-stack; display:inline-block; zoom:1; *display:inline;}
 .borderRadius .shadow{-moz-box-shadow:0px 0px 0px 0px #888888;-webkit-box-shadow:0px 0px 0px 0px #888888;box-shadow: 0px 0px 0px -0px #888888;}
 .borderRadiusBtm .shadow{-moz-box-shadow:0px 0px 0px -0px #888888;-webkit-box-shadow:0px 0px 0px -0px #888888;box-shadow: 0px 0px 0px -0px #888888}
-.borderRadiusTp .border, .borderRadius .border{-moz-border-radius:0px 0px 0px -0px ; border-radius:0px 0px 0px -0px;}
-.borderRadiusBtm .border{-moz-border-radius:0px 0px 0px -0px; border-radius:0px 0px 0px -0px;}
+.borderRadiusTp .border, .borderRadius .border{-moz-border-radius:0px 0px 0px -0px ; border-radius:0px 0px 0px 0px;}
+.borderRadiusBtm .border{-moz-border-radius:0px 0px 0px -0px; border-radius:0px 0px 0px 0px;}
 img.fnone{float:none !important}
 .ddcommon .divider{width:0; height:100%; position:absolute;}
 .ddcommon .ddArrow{display:inline-block; position:absolute; top:50%; right:4px;}
@@ -45,9 +45,9 @@ img.fnone{float:none !important}
 /*************** default theme **********************/
 .dd{border:1px solid #c3c3c3;}
 .dd .divider{border-left:1px solid #c3c3c3; border-right:1px solid #fff;; right:24px;}
-.dd .ddArrow{width:16px;height:16px; margin-top:-8px; background:url(../../images/msdropdown/skin1/dd_arrow.gif) no-repeat;}
+.dd .ddArrow{width:16px;height:16px; margin-top:-8px; background:url(../images/msdropdown/skin1/dd_arrow.gif) no-repeat;}
 .dd .ddArrow:hover{background-position:0 100%;}
-.dd .ddTitle{color:#000;background:#e2e2e4 url(../../images/msdropdown/skin1/title-bg.gif) repeat-x left top;}
+.dd .ddTitle{color:#000;background:#e2e2e4 url(../images/msdropdown/skin1/title-bg.gif) repeat-x left top;}
 .dd .ddTitle .ddTitleText{padding:0px 0px 0px 0px;}
 .dd .ddTitle .ddTitleText .ddTitleText{padding:0;}
 .dd .ddTitle .description{font-size:12px; color:#666}
