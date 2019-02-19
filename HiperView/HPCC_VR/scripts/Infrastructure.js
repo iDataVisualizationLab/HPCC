@@ -41,7 +41,7 @@ function initQuanah()
             }
         }
 
-        addQuanahLabel( "Rack " + rack_num, "rack", rack );
+        addQuanahLabel( "RACK " + rack_num, "rack", rack );
 
         rack.position.set( x, y, z );
         return rack;
@@ -78,7 +78,7 @@ function initQuanah()
         }
 
         x = (!(host_num%2))*width/2;
-        addQuanahLabel( "Host " + host_num, "host", host );
+        // addQuanahLabel( "Host " + host_num, "host", host );
         host.position.set( x, y, 0 );
 
         return host;

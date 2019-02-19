@@ -33,7 +33,9 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
         console.log(INTERSECTED.name);
-    else if( isScatterPlotClicked() )
+    // else if( isScatterPlotClicked() )
+    //     console.log(INTERSECTED.name);
+    else if( isLeverClicked() )
         console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
         console.log(INTERSECTED.name);
@@ -53,7 +55,6 @@ function onMouseDown( event )
                 {
                     INTERSECTED = intersects[ 0 ].object.parent;
                     updateTooltip( INTERSECTED );
-                    updateScatterPlot( INTERSECTED.name, null );
                     return true;
                 }
             }
@@ -147,6 +148,33 @@ function onMouseDown( event )
             //     return false;
             // }
 
+            return false;
+        }
+    }
+
+    // check if lever was clicked
+    function isLeverClicked()
+    {
+        intersects = raycaster.intersectObjects( lever.pivot.children );
+        if ( intersects.length > 0 )
+        {
+            INTERSECTED = intersects[ 0 ].object.parent;
+            if( lever.pivot.rotation.x < 0) // lever is on scatter plot
+            {
+                scatter_plot_matrix.graph.visible = false;
+                parallel_set.graph.visible = true;
+                updateLever( Math.PI/-4, Math.PI/4 );
+            }
+            else // lever is on parallel coordinates
+            {
+                scatter_plot_matrix.graph.visible = true;
+                parallel_set.graph.visible = false;
+                updateLever( Math.PI/4, Math.PI/-4 );
+            }
+            return true;
+        }
+        else
+        {
             return false;
         }
     }

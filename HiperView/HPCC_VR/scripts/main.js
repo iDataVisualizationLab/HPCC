@@ -1,41 +1,59 @@
 var container, camera, scene, renderer_css3d, effect, clock, controls;
 var raycaster, mouse, pointer;
 var cameraHolder;
+
 var json;
-var color_funct;
 var hostObj = {};
 var timeObj = {};
+
+// selected
+var selectedTimestamp = 1;
+var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
 
 var ROOM_SIZE = 1;
 var RACK_NUM = 10;
 var HOST_NUM = 60;
 var CPU_NUM = 2;
-var TS_NUM = null;
-var color,opa;
-var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-var selectedTimestamp = 1;
+var TS_NUM;
 var INTERSECTED;
+var CP_SPEED = 0.01;
+
+var color, opa;
+var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
+// var arrDom;
 var isInit = true;
+var fillHost;
+var updateTimestamp;
+var move_timer;
+
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 0 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 1  },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 2 },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 1 },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 0 },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 1 },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 0 },
+            };
+
+
 var niceOffset = false;
+
 // D3
 var oldhostclicked;
 var svg;
 var rectip;
 var maxstack = 7;
 
-var updateHost;
-var updateTimestamp;
-var move_timer;
-
-var CP_SPEED = 0.01;
-
 var quanah;
 var cpu_marker;
 var tooltip;
-var tooltip_png;
 var service_control_panel;
 var time_control_panel;
+var scatter_plot_matrix;
 var scatter_plot;
+var parallel_set;
+var lever;
+var FONT = 'media/fonts/helvetiker_regular.typeface.json';
 
 // HPCC
 var hosts = [];
@@ -74,11 +92,8 @@ if (isRealtime){
     numberOfMinutes = 6*60;
 }
 
-
-//***********************
-var undefinedValue = undefined;
-
 var charType = "Heatmap";
+var undefinedValue = undefined;
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
 var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
@@ -86,10 +101,10 @@ var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatur
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
     arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
-var serviceQuery =["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
+var serviceQuery = ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
-var selectedService = "Temperature";
+var selectedService = "arrTemperatureCPU1";
 
 
 
@@ -116,16 +131,72 @@ function init()
     loadJSON();
 
     TS_NUM = json["compute-1-1"]["arrCPU_load"].length;
+    // for( var host in json )
+    // {
+    //     if(!json.hasOwnProperty(host)) continue;
+    //     for( var service in json[host] )
+    //     {
+    //         if(!json[host].hasOwnProperty(service)) continue;
+
+    //         if( SERVICE[service]["dom"][0] == null )
+    //         {
+    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
+    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
+    //         }
+
+    //         if( SERVICE[service]["dom"][0] > Math.min(...json[host][service]) )
+    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
+
+    //         if( SERVICE[service]["dom"][1] < Math.max(...json[host][service]) )
+    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
+    //     }
+    // }
+
+    // for( var i=0; i<serviceList.length; i++ )
+    // {
+    //     var dif, mid, left, service;
+    //     dif = (thresholds[i][1]-thresholds[i][0])/4;
+    //     mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+    //     if( i == 1 )
+    //     {
+    //         left=0;
+    //         SERVICE["arrCPU_load"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+    //     }
+    //     else if( i == 2 )
+    //     {
+    //         left=0;
+    //         SERVICE["arrMemory_usage"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+    //     }
+    //     else if( i == 0 )
+    //     {
+    //         left = thresholds[i][0]-dif;
+    //         SERVICE["arrTemperatureCPU1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+    //         SERVICE["arrTemperatureCPU2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+    //     }
+    //     else if( i == 4 )
+    //     {
+    //         left = 0;
+    //         SERVICE["arrPower_usage"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+    //     }
+    //     else if( i == 3 )
+    //     {
+    //         left = 0;
+    //         SERVICE["arrFans_speed1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+    //         SERVICE["arrFans_speed2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+    //     }
+    // }
 
     initScene();
     initCamera();
-    // initLight();
+    initLight();
     initInteractions();
 
     initRoom();
     initControlPanel();
     initQuanah();
-    // initHPCC();
+    initParallelSet();
+
+    initScatterPlotMatrix();
 
     window.addEventListener( 'mousedown', onMouseDown, false );
     window.addEventListener( 'touchstart', onDocTouch, false );
@@ -134,7 +205,6 @@ function init()
 
 }
 
-// ngan
 function loadJSON()
 {
     json = {};
@@ -218,9 +288,8 @@ function loadJSON()
         }
         else
         {
-            // console.log(requestRT(iteration,count));
+            var selectedService = serviceList[0];
 
-            //console.log(hosts[count].name+" "+hostResults[name]);
             var result = simulateResults2(hosts[count].name,iteration, selectedService);
             var name =  result.data.service.host_name;
             hostResults[name].arr.push(result);
@@ -284,7 +353,6 @@ function loadJSON()
 
 // INITS
 
-// ngan
 function initD3()
 {
     svg = d3.select("#svgplace").append("svg").attr("width", 2).attr("height",2);
@@ -318,10 +386,16 @@ function initScene()
 
 function initLight()
 {
-    document.querySelector('a-light').object3D.name = "hpcc_light_group";
-    light = document.querySelector('a-light').object3D.children[0];
-    light.name = "hpcc_light";
-    light.intensity = 5;
+    var light1 = document.getElementById("light1").object3D;
+    var light2 = document.getElementById("light2").object3D;
+    var light3 = document.getElementById("light3").object3D;
+
+    var height = ROOM_SIZE*2;
+
+    light1.position.set( ROOM_SIZE*-1, ROOM_SIZE, ROOM_SIZE );
+    light2.position.set( ROOM_SIZE*3, ROOM_SIZE, ROOM_SIZE );
+    light3.position.set( ROOM_SIZE*7, ROOM_SIZE, ROOM_SIZE );
+    
 }
 
 function initInteractions()
@@ -332,9 +406,9 @@ function initInteractions()
 
 function initRoom()
 {
-    var height = ROOM_SIZE;
-    var width = ROOM_SIZE * 6;
-    var depth = ROOM_SIZE * 2;
+    var height = ROOM_SIZE * 2;
+    var width = ROOM_SIZE * 12;
+    var depth = ROOM_SIZE * 4;
     var geometry = new THREE.BoxGeometry( width, height, depth );
 
     var textures = ["whiteblockwall","whiteblockwall","whiteceiling","silvermetalmeshfloor","whiteblockwall","whiteblockwall"];
@@ -354,13 +428,85 @@ function initRoom()
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(repeats[i][0],repeats[i][1]);
-        materials[i] = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide, map: texture } );
+        materials[i] = new THREE.MeshPhongMaterial( { color: 0xffffff, side: THREE.BackSide, map: texture } );
     }
 
     var room = new THREE.Mesh( geometry, materials );
+    room.position.set( ROOM_SIZE*3, ROOM_SIZE/2, ROOM_SIZE );
     room.name = "hpcc_room";
     room.type = "room";
     scene.add( room );
+
+    initLever();
+}
+
+function initLever()
+{
+    lever = new THREE.Group();
+    lever.name = "hpcc_lever";
+
+    // lever case
+    var back_geometry = new THREE.BoxGeometry( ROOM_SIZE/20, ROOM_SIZE/10, ROOM_SIZE/80 );
+    var back_material = new THREE.MeshPhongMaterial( { color: 0x555555 } );
+    var back = new THREE.Mesh( back_geometry, back_material );
+    back.name = "lever-case";
+    lever.add( back );
+
+    // rotation pivot
+    var pivot = new THREE.Object3D();
+    pivot.name = "lever-pivot";
+
+    // lever tube
+    var tube_geometry = new THREE.CylinderGeometry( ROOM_SIZE/200, ROOM_SIZE/200, ROOM_SIZE/15, 16 );
+    var tube_material = new THREE.MeshPhongMaterial( { color: 0xaaaaaa } );
+    var tube = new THREE.Mesh( tube_geometry, tube_material );
+    tube.name = "lever-tube";
+    tube.position.set( 0, 0, ROOM_SIZE/30 );
+    tube.rotation.set( Math.PI/2, 0, 0 );
+    pivot.add( tube );
+
+    // lever handle
+    var handle_geometry = new THREE.SphereGeometry( ROOM_SIZE/70, 16, 16 );
+    var handle_material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+    var handle = new THREE.Mesh( handle_geometry, handle_material );
+    handle.position.set( 0, 0, ROOM_SIZE/15 );
+    handle.name = "lever-handle";
+    pivot.add( handle );
+
+    addLeverLabel( "Scatter Plot", ROOM_SIZE/10, lever );
+    addLeverLabel( "Parallel Set", ROOM_SIZE/-8, lever );
+
+
+    // set rotation and position
+    lever.add( pivot );
+    lever.pivot = pivot;
+    pivot.rotation.set( Math.PI/-4, 0, 0 );
+    lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
+    scene.add( lever );
+
+    function addLeverLabel( text, y, obj )
+    {
+        var loader = new THREE.FontLoader();
+        var material_text = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+        loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+            var geometry = new THREE.TextGeometry( text, {
+                font: font,
+                size: ROOM_SIZE/30,
+                height: 0,
+                curveSegments: 12,
+                bevelEnabled: false
+            } );
+
+            var textMesh = new THREE.Mesh( geometry, material_text );
+            textMesh.position.set( ROOM_SIZE/-9, y, ROOM_SIZE/100 );
+            textMesh.name = "lever-label-"+text;
+            obj.add( textMesh );
+        } );
+
+    }
+
 }
 
 function initHPCC()
@@ -436,13 +582,83 @@ function initHPCC()
     }
 }
 
+function initScatterPlotMatrix()
+{
+    var hostkeys = Object.keys(json);
+    var tmp, datas = [], s, ranges = [], selectedSPServices = [];
+
+    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
+    var y = [ "arrFans_speed1", "arrFans_speed2" ];
+    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
+    // var x = [ "arrTemperatureCPU1" ];
+    // var y = [ "arrFans_speed1" ];
+    // var z = [ "arrCPU_load"];
+
+    for( other in z )
+    {
+        for( fan in y )
+        {
+            for( temp in x )
+            {
+                s = [z[other],y[fan],x[temp]];
+                selectedSPServices.push(s);
+                data = []
+                for( var h=0; h<hostkeys.length; h++ )
+                {
+                    tmp = [];
+                    tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
+                    tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
+                    tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
+                    data.push( tmp )
+                }
+                datas.push(data);
+                ranges.push([SERVICE[s[0]]["dom"],
+                            SERVICE[s[1]]["dom"],
+                            SERVICE[s[2]]["dom"]] );
+            }
+        }
+    }
+
+    // building scatter plot matrix ----------------------------------------------------
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, null, 0.25  );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
+    scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
+    scene.add( scatter_plot_matrix.graph );
+}
+
+function initParallelSet()
+{
+    var table = [Object.keys(SERVICE)];
+    var tmp = [];
+
+    // building data
+    for( var host in json )
+    {
+        tmp = [];
+        for( var s=0; s<table[0].length; s++ )
+        {
+            if( json[host][table[0][s]] )
+                tmp.push(json[host][table[0][s]][19]);
+            else
+                tmp.push(undefined);
+        }
+        table.push(tmp);
+    }
+
+    parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
+    parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
+    parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
+    scene.add( parallel_set.graph );
+    parallel_set.graph.visible = false;
+}
+
 // Animate & Render
 
 function animate()
 {
     requestAnimationFrame( animate );
     animateControlPanel();
-    // animateTooltip();
+    animateTooltip();
 }
 
 function render()

@@ -1,4 +1,46 @@
-function ScatterPlot( axes, data, bin_size, scale )
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, bin_size, scale )
+{
+    this.matrix = {};
+    this.graph = new THREE.Group();
+
+    for( var p=0; p<axes_matrix.length; p++ )
+    {
+        this.length = p+1;
+        this.matrix[p] = new ScatterPlot( axes_matrix[p],
+                                        ranges_matrix[p],
+                                        intervals,
+                                        dataid,
+                                        data_matrix[p],
+                                        bin_size,
+                                        scale );
+        this.graph.add( this.matrix[p].graph );
+
+        // setting inner scatter plot position
+        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 1.5; // temperature
+        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 1.5; // fans speed
+        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 1.5; // other service
+
+        // hiding legends
+        if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 0 );
+        if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
+        {
+            this.matrix[p].toggleAxisLegend( 1 );
+            this.matrix[p].toggleAxisLegend( 2 );
+        }
+        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 1 );
+        if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+            this.matrix[p].toggleAxisLegend( 2 );
+        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+            SERVICE[axes_matrix[p][1]].sp_pos != 0 )
+            this.matrix[p].toggleAxisLegend( 0 );
+    }
+}
+
+function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 {
     // building scatter plot
     var population = data.length;
@@ -9,56 +51,60 @@ function ScatterPlot( axes, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var points = setPoints();
-    // var axesmenu = setAxesMenu();
+    var points = setPoints( true );
+    var scag = setScagnostics();
 
     graph.add( grid );
     graph.add( points );
+    graph.add( x.obj );
+    graph.add( y.obj );
+    graph.add( z.obj );
 
     this.graph = graph;
     this.grid = grid;
     this.points = points;
-    // this.axesmenu = axesmenu;
+    this.axes = axes;
     this.x = x;
     this.y = y;
     this.z = z;
     this.data = data;
-
+    this.scag = scag;
 
     // functions
 
     function fit( val, axis )
     {
         if( val == undefined ) return 0;
-
         if( axis.range == 0 ) return 0;
-
         return scale * (val - axis.min) / axis.range;
     }
 
     function setInfo( axis )
     {
         var info = {};
-        var max = data[0][axis];
-        var min = data[0][axis];
-
-        for( var i=0; i<population; i++ )
-        {
-            var p = data[i][axis];
-
-            if( !p )
-                continue;
-            max = max > p ? max : p;
-            min = min < p ? min : p;
-        }
-
-        info.max = max;
-        info.min = min;
-        info.range = max - min;
+        info.min = ranges[axis][0];
+        info.max = ranges[axis][1];
+        info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
+        info.obj = setAxis( axis, info );
 
         return info;
+    }
+
+    function setScagnostics()
+    {
+        var tmp = [], tmp2;
+        for( var i=0; i<data.length; i++ )
+        {
+            tmp2 = [0,0,0];
+            tmp2[0] = data[i][0] == undefined ? 0 : data[i][0] ;
+            tmp2[1] = data[i][1] == undefined ? 0 : data[i][1] ;
+            tmp2[2] = data[i][2] == undefined ? 0 : data[i][2] ;
+            tmp.push( tmp2 );
+        }
+
+        return scagnostics3d( tmp );
     }
 
     function setGrid()
@@ -86,22 +132,36 @@ function ScatterPlot( axes, data, bin_size, scale )
                                     new THREE.Vector3( scale, 0, scale ),
                                     new THREE.Vector3( scale, 0, 0 ) );
         var box = new THREE.Line( box_geometry, box_material );
+        box.name = "scatterplot-grid";
 
+        // // scatterplot background
+        // var back_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        // var back_material = new THREE.MeshBasicMaterial( {  color: 0x000000,
+        //                                                     transparent: true,
+        //                                                     opacity: 0.1,
+        //                                                     side: THREE.BackSide } );
+        // var background = new THREE.Mesh( back_geometry, back_material );
+        // background.position.set(scale/2,scale/2,scale/2);
+        // box.add( background );
         grid.add( box );
-        grid.add( setMarks() );
 
-        addAxisLegend( grid, x );
-        addAxisLegend( grid, y );
-        addAxisLegend( grid, z );
+        return grid;
+    }
+
+    function setAxis( axis, obj )
+    {
+        var group = new THREE.Group();
+        group.add( setMarks() );
+        addAxisLegend( group );
+
+        return group;
 
         function setMarks()
         {
             var marks = new THREE.Group();
-            marks.name = "scatterplot-marks";
-            var no_marks = 5;
-            var xmark = [];
-            var ymark = [];
-            var zmark = [];
+            marks.name = "axis-marks";
+            var no_marks = intervals;
+            var axismark = [];
 
             var mark_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
             var mark_length = -1*scale/15;
@@ -111,44 +171,47 @@ function ScatterPlot( axes, data, bin_size, scale )
             {
                 v = scale * i/(no_marks-1);
 
-                // x marks
-                mark_geometry = new THREE.Geometry();
-                start = new THREE.Vector3( v, 0, scale );
-                end = new THREE.Vector3( v, mark_length, scale );
-                mark_geometry.vertices.push( start, end );
-                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                addIntervalLegend( line, x, i, end );
-                xmark.push( line );
-                marks.add(xmark[i]);
-
-                // y marks
-                mark_geometry = new THREE.Geometry();
-                start = new THREE.Vector3( 0, v, 0 );
-                end = new THREE.Vector3( 0, v, mark_length );
-                mark_geometry.vertices.push( start, end );
-                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                addIntervalLegend( line, y, i, end );
-                ymark.push( line );
-                marks.add( ymark[i] );
-
-                // z marks
-                mark_geometry = new THREE.Geometry();
-                start = new THREE.Vector3( 0, 0, v );
-                end = new THREE.Vector3( mark_length, 0, v );
-                mark_geometry.vertices.push( start, end );
-                line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                addIntervalLegend( line, z, i, end );
-                zmark.push( line );
-                marks.add(zmark[i]);
+                if( axis == 0 )  // x marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( v, 0, scale );
+                    end = new THREE.Vector3( v, 0, scale + mark_length * -1 );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add(axismark[i]);
+                }
+                else if( axis == 1 )  // y marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( 0, v, 0 );
+                    end = new THREE.Vector3( 0, v, mark_length );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add( axismark[i] );
+                }
+                else  // z marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( 0, 0, v );
+                    end = new THREE.Vector3( 0, mark_length, v );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add(axismark[i]);
+                }
 
             }
 
-            function addIntervalLegend( obj, axis, interval, pos )
+            function addIntervalLegend( line, interval, pos )
             {
 
-                var num = axis.min + axis.range * interval / (no_marks-1);
+                var num = obj.min + obj.range * interval / (no_marks-1);
                 num = Math.round(num*100)/100;
-                // console.log(legend);
 
                 var loader = new THREE.FontLoader();
                 var legend_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
@@ -166,20 +229,20 @@ function ScatterPlot( axes, data, bin_size, scale )
                     var legend = new THREE.Mesh( legend_geometry, legend_material );
                     legend.name = "mark";
 
-                    if( axis.name == "x" )
+                    if( axis == 0 )
                         legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
-                    if( axis.name == "y" )
+                    else if( axis == 1 )
                     {
-                        legend.position.set( pos.x, pos.y, pos.z );
-                        legend.rotation.set( 0, Math.PI/2, 0 );
+                        legend.position.set( pos.x, pos.y, pos.z * 3 );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                     }
-                    if( axis.name == "z" )
+                    else
                     {
-                        legend.position.set( pos.x + mark_length/2, pos.y, pos.z );
-                        legend.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                     }
 
-                    obj.add( legend );
+                    line.add( legend );
                 } );
 
             }
@@ -187,7 +250,7 @@ function ScatterPlot( axes, data, bin_size, scale )
             return marks;
         }
 
-        function addAxisLegend( obj, axis )
+        function addAxisLegend( group )
         {
             var loader = new THREE.FontLoader();
             var legend_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
@@ -199,7 +262,7 @@ function ScatterPlot( axes, data, bin_size, scale )
 
             loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
 
-                var legend_geometry = new THREE.TextGeometry( axis.legend, {
+                var legend_geometry = new THREE.TextGeometry( SERVICE[obj.legend].value, {
                     font: font,
                     size: scale/20,
                     height: 0,
@@ -208,32 +271,32 @@ function ScatterPlot( axes, data, bin_size, scale )
                 } );
 
                 var legend = new THREE.Mesh( legend_geometry, legend_material );
-                axis.obj = hitbox;
                 hitbox.add( legend );
-                setAxesMenu( hitbox );
+                // setAxesMenu( hitbox );
                 legend.position.set( scale/-3.5, scale/-75, scale/500);
                 hitbox.type = "axis";
 
-                if( axis.name == "x" )
+                if( obj.name == "x" )
                 {
                     hitbox.name = "x-axis";
-                    hitbox.position.set( scale/2, scale/-4, scale );
+                    hitbox.position.set( scale/2, scale/-4, scale + scale/15 );
                 }
-                if( axis.name == "y" )
+                if( obj.name == "y" )
                 {
                     hitbox.name = "y-axis";
-                    hitbox.position.set( 0, scale, scale/-1.25 );
-                    hitbox.rotation.set( 0, Math.PI/2, 0 );
+                    hitbox.position.set( 0, scale/2, scale/-3 );
+                    hitbox.rotation.set( 0, Math.PI/-2, Math.PI/2 );
                 }
-                if( axis.name == "z" )
+                if( obj.name == "z" )
                 {
                     hitbox.name = "z-axis";
-                    hitbox.position.set( scale/-4, 0, scale/2 );
-                    hitbox.rotation.set( Math.PI/-2, 0, Math.PI/-2 );
+                    hitbox.position.set( 0, scale/-4, scale/2 );
+                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
                 }
 
-                obj.add( hitbox );
             } );
+
+            group.add( hitbox );
         }
 
         function setAxesMenu( obj )
@@ -280,18 +343,17 @@ function ScatterPlot( axes, data, bin_size, scale )
             obj.add( axesmenu );
         }
 
-        return grid;
     }
 
-    function setPoints()
+    function setPoints( isInit )
     {
         var points = new THREE.Group();
         points.name = "scatterplot-points";
-        var pos = [null, null, null];
+        var pos = [0, 0, 0];
+        points.obj = {};
 
         for( var p=0; p<population; p++ )
         {
-            var color = 0x000000;
             if( data[p][0] )
             {
                 pos[0] = fit( data[p][0], x );
@@ -299,7 +361,6 @@ function ScatterPlot( axes, data, bin_size, scale )
             else
             {
                 pos[0] = 0;
-                color = 0xff0000;
             }
 
             if( data[p][1] )
@@ -309,7 +370,6 @@ function ScatterPlot( axes, data, bin_size, scale )
             else
             {
                 pos[1] = 0;
-                color = 0xff0000;
             }
 
             if( data[p][2] )
@@ -319,18 +379,41 @@ function ScatterPlot( axes, data, bin_size, scale )
             else
             {
                 pos[2] = 0;
-                color = 0xff0000;
             }
 
-            var material = new THREE.MeshBasicMaterial( { color: color } );
-            var geometry = new THREE.SphereGeometry( 0.005, 8, 8 );
+            var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+            var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
-            point.position.set( pos[0], pos[1], pos[2] );
+            if( isInit )
+                point.position.set( 0, 0, 0 );
+            else
+                point.position.set( pos[0], pos[1], pos[2] );
+            point.name = dataid[p];
             points.add( point );
+            points.obj[dataid[p]] = point;
         }
 
         return points;
+    }
+
+    // public functions
+
+    this.fit = function fit( val, axis )
+    {
+        if( val == undefined ) return 0;
+        if( axis.range == 0 ) return 0;
+        return scale * (val - axis.min) / axis.range;
+    }
+
+    this.toggleAxisLegend = function( axis )
+    {
+        if( axis == 0 )
+            this.x.obj.visible = !this.x.obj.visible;
+        if( axis == 1 )
+            this.y.obj.visible = !this.y.obj.visible;
+        if( axis == 2 )
+            this.z.obj.visible = !this.z.obj.visible;
     }
 
 }
