@@ -358,9 +358,13 @@ function path(d, ctx, color) {
     dimensions.map(function(p,i) {
         var x = xscale(p),
             y = yscale[p](d[p]);
-        var cp1x = x - 0.88*(x-x0);
+        // var cp1x = x - 0.88*(x-x0);
+        // var cp1y = y0;
+        // var cp2x = x - 0.12*(x-x0);
+        // var cp2y = y;
+        var cp1x = x - 0.5*(x-x0);
         var cp1y = y0;
-        var cp2x = x - 0.12*(x-x0);
+        var cp2x = x - 0.5*(x-x0);
         var cp2y = y;
         ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         x0 = x;
