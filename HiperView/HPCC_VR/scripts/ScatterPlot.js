@@ -1,4 +1,4 @@
-function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, bin_size, scale )
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned )
 {
     this.matrix = {};
     this.graph = new THREE.Group();
@@ -11,7 +11,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         intervals,
                                         dataid,
                                         data_matrix[p],
-                                        scale );
+                                        scale,
+                                        isBinned );
         this.graph.add( this.matrix[p].graph );
 
         // setting inner scatter plot position
@@ -39,11 +40,10 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     }
 }
 
-function ScatterPlot( axes, ranges, intervals, dataid, data, scale )
+function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 {
     // building scatter plot
     var population = data.length;
-    var bin, binCount;
 
     var x = setInfo( 0 );
     var y = setInfo( 1 );
@@ -51,50 +51,40 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    // var points = setPoints( true );
 
-    initBins( intervals - 1 );
-    var bins = setBins();
+    if( !isBinned )
+        var points = setPoints( true );
+    else
+        var bins = setBins();
 
     // var scag = setScagnostics();
 
     graph.add( grid );
-    // graph.add( points );
     graph.add( x.obj );
     graph.add( y.obj );
     graph.add( z.obj );
-    graph.add( bins );
+
+    if( !isBinned )
+        graph.add( points );
+    else
+        graph.add( bins );
 
     this.graph = graph;
     this.grid = grid;
-    // this.points = points;
     this.axes = axes;
     this.x = x;
     this.y = y;
     this.z = z;
     this.data = data;
-    this.bins = bins;
-    this.bin = bin;
+
+    if( !isBinned )
+        this.points = points;
+    else
+        this.bins = bins;
+
     // this.scag = scag;
 
     // functions
-
-    function initBins( size )
-    {
-        bin = {}, binCount = {};
-        for( var bx=0; bx<size; bx++ )
-        {
-            bin[bx] = {}, binCount[bx] = {};
-            for( var by=0; by<size; by++ )
-            {
-                bin[bx][by] = {}, binCount[bx][by] = {};
-                for( var bz=0; bz<size; bz++ )
-                {
-                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
-                }
-            }
-        }
-    }
 
     function setInfo( axis )
     {
@@ -443,6 +433,23 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale )
     function setBins()
     {
         var bins = new THREE.Group();
+        var bin, binCount;
+        var binSize = intervals - 1;
+
+        // inititializing variables
+        bin = {}, binCount = {};
+        for( var bx=0; bx<binSize; bx++ )
+        {
+            bin[bx] = {}, binCount[bx] = {};
+            for( var by=0; by<binSize; by++ )
+            {
+                bin[bx][by] = {}, binCount[bx][by] = {};
+                for( var bz=0; bz<binSize; bz++ )
+                {
+                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
+                }
+            }
+        }
 
         // setting binCount
         var xb, yb, zb;
@@ -485,6 +492,9 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale )
                 }
             }
         }
+
+        bins.bin = bin;
+        bins.binCount = binCount;
 
         return bins;
     }

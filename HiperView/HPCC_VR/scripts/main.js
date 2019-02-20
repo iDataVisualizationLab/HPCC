@@ -566,7 +566,7 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 5, 0.25  );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );
