@@ -533,12 +533,12 @@ function initScatterPlotMatrix()
     var hostkeys = Object.keys(json);
     var tmp, datas = [], s, ranges = [], selectedSPServices = [];
 
-    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    // var x = [ "arrTemperatureCPU1" ];
-    // var y = [ "arrFans_speed1" ];
-    // var z = [ "arrCPU_load"];
+    // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
+    // var y = [ "arrFans_speed1", "arrFans_speed2" ];
+    // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
+    var x = [ "arrTemperatureCPU1" ];
+    var y = [ "arrFans_speed1" ];
+    var z = [ "arrPower_usage"];
 
     for( other in z )
     {
@@ -563,7 +563,6 @@ function initScatterPlotMatrix()
                             SERVICE[s[2]]["dom"]] );
             }
         }
-        break;
     }
 
     // building scatter plot matrix ----------------------------------------------------

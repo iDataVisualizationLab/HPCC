@@ -51,10 +51,10 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var bin = setBins( bin_size );
+    var bins = setBins( bin_size );
     var points = setPoints( true );
+    loadBins();
     // var scag = setScagnostics();
-    console.log(bin);
 
     graph.add( grid );
     graph.add( points );
@@ -70,6 +70,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.y = y;
     this.z = z;
     this.data = data;
+    this.bins = bins;
     // this.scag = scag;
 
     // functions
@@ -109,6 +110,18 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
         info.obj = setAxis( axis, info );
+        info.binSize = bin_size;
+        // info.bin = function( n )
+        // {
+        //     console.log(n);
+        //     var interval = this.range/this.binSize+this.min;
+        //     for( var b=0; b<this.binSize; b++ )
+        //     {
+        //         if( n>b*interval & n<(b+1)*interval)
+        //             return b;
+        //     }
+        //     return null;
+        // }
 
         return info;
     }
@@ -416,6 +429,36 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         }
 
         return points;
+    }
+
+    function loadBins()
+    {
+        // var count = {}, xb, yb, zb;
+        // for( var p=0; p<population; p++ )
+        // {
+        //     xb = x.bin( data[p][0] );
+        //     yb = y.bin( data[p][1] );
+        //     zb = z.bin( data[p][2] );
+            
+        //     count[xb] = count[xb] ? count[xb] : {};
+        //     count[xb][yb] = count[xb][yb] ? count[xb][yb] : {};
+        //     count[xb][yb][zb] = count[xb][yb][zb] ? count[xb][yb][zb]++ : 1;
+        // }
+
+        // console.log(count);
+
+            // var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+            // var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
+            // var point = new THREE.Mesh( geometry, material );
+
+            // if( isInit )
+            //     point.position.set( 0, 0, 0 );
+            // else
+            //     point.position.set( pos[0], pos[1], pos[2] );
+            // point.name = dataid[p];
+            // points.add( point );
+            // points.obj[dataid[p]] = point;
+
     }
 
     // public functions
