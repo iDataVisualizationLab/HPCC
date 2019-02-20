@@ -239,3 +239,62 @@ button#exclude-data:hover {
 .dark ::-webkit-scrollbar-thumb {
     background: #444;
 }
+
+.floatLink{
+    position: fixed;
+    bottom: 0;
+    left:0;
+    z-index: 10;
+    padding: 5px;
+    text-align:center;
+}
+.floatLink a{
+    padding: 0;
+    margin: 0;
+}
+.floatLink div{
+    border: 1px solid rgba(216, 216, 216,0.5);
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 5px 5px 5px #444;
+    margin:5px;
+    height:30px;
+    width:30px;
+    line-height: 20px;
+    text-align:center;
+}
+.floatLink div:hover{
+    height:50px;
+    width:50px;
+    border-radius: 25px;
+}
+.menuIcon{
+    display: block;
+    margin: auto;
+    width: 70%;
+    padding:15%;
+}
+.tooltip {
+    position: relative;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: -1;
+    bottom: 100%;
+    left: 0%;
+    margin-left: 10px;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

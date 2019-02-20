@@ -352,7 +352,7 @@ function path(d, ctx, color) {
 function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
     ctx.beginPath();
-    var x0 = xscale(0)-15,
+    var x0 = xscale(dimensions[0])-15,
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0,y0);
     dimensions.map(function(p,i) {
@@ -664,7 +664,7 @@ window.onresize = function() {
     d3.selectAll(".brush")
         .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
             .extent([[-10,0], [10,height]])
-            .on("brush end", brush)); })
+            .on("brush end", brush)); });
     brush_count++;
 
     // update axis placement
