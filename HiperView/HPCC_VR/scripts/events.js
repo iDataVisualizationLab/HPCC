@@ -33,6 +33,10 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
         console.log(INTERSECTED.name);
+    // else if( isScatterPlotClicked() )
+    //     console.log(INTERSECTED.name);
+    else if( isLeverClicked() )
+        console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
         console.log(INTERSECTED.name);
     else
@@ -42,7 +46,6 @@ function onMouseDown( event )
     // check if a quanah host was clicked
     function isHostClicked()
     {
-
         for( var r=0; r<RACK_NUM; r++ )
         {
             for( var h=0; h<quanah.children[r].children.length; h++ )
@@ -51,7 +54,7 @@ function onMouseDown( event )
                 if( intersects.length > 0 )
                 {
                     INTERSECTED = intersects[ 0 ].object.parent;
-                    updateTooltip(INTERSECTED);
+                    updateTooltip( INTERSECTED );
                     return true;
                 }
             }
@@ -100,6 +103,75 @@ function onMouseDown( event )
                 // reset();
                 return true;
             }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // check if scatter plot was clicked
+    function isScatterPlotClicked()
+    {
+        intersects = raycaster.intersectObjects( scatter_plot.grid.children );
+        if ( intersects.length > 0 )  // scatter plot grid was selected
+        {
+            INTERSECTED = intersects[ 0 ].object;
+
+            if( INTERSECTED.type == "axis" ) // an axis was selected
+            {
+                INTERSECTED.menu.visible = true;
+                return true;
+            }
+            if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME
+            {
+                // reset();
+                return true;
+            }
+        }
+        else
+        {
+            // intersects = raycaster.intersectObjects( scatter_plot.x.obj.menu.children );
+            // if ( intersects.length > 0 )  // x axis option was selected
+            // {
+            //     INTERSECTED = intersects[ 0 ].object;
+
+            //     if( INTERSECTED.option == 0 ) // option 0 was selected
+            //     {
+            //         INTERSECTED.menu.visible = false;
+            //         // updateScatterPlot( oldhostclicked, services )
+            //         return true;
+            //     }
+            // }
+            // else
+            // {
+            //     return false;
+            // }
+
+            return false;
+        }
+    }
+
+    // check if lever was clicked
+    function isLeverClicked()
+    {
+        intersects = raycaster.intersectObjects( lever.pivot.children );
+        if ( intersects.length > 0 )
+        {
+            INTERSECTED = intersects[ 0 ].object.parent;
+            if( lever.pivot.rotation.x < 0) // lever is on scatter plot
+            {
+                scatter_plot_matrix.graph.visible = false;
+                parallel_set.graph.visible = true;
+                updateLever( Math.PI/-4, Math.PI/4 );
+            }
+            else // lever is on parallel coordinates
+            {
+                scatter_plot_matrix.graph.visible = true;
+                parallel_set.graph.visible = false;
+                updateLever( Math.PI/4, Math.PI/-4 );
+            }
+            return true;
         }
         else
         {

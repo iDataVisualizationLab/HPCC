@@ -18,11 +18,11 @@ function IntervalTimer(callback, interval) {
         window.setTimeout(this.timeoutCallback, remaining);
     };
 
-    this.timeoutCallback = function () {
+    this.timeoutCallback = function (intervalin) {
         if (state != 3) return;
 
         callback();
-
+        interval = intervalin||interval;
         startTime = new Date();
         timerId = window.setInterval(callback, interval);
         state = 1;

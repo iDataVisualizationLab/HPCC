@@ -39,10 +39,19 @@ var axes = ["CPU1 Temp", "CPU2 Temp ", "Inlet Temp","Job load",
 var tool_tip = d3.tip()
     .attr("class", "d3-tip")
     .attr("id", "d3-tip")
-    .offset([-200, 100])
-    .html(function(d1,hideLine) {
+    .offset(()=> {
+        if (niceOffset){
+        let heightTip =+ $('#d3-tip')[0].offsetHeight;
+        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -100-tipW:100];
+        } return [0,0];})
+        .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
+d3.select('#d3-tip')
+    .on('mouseenter',()=> {d3.select('#d3-tip').transition().style('opacity', 1)
+        .style('pointer-events', 'all');})
+    .on('mouseleave',()=> {d3.select('#d3-tip').transition().delay(4000).duration(4000).style('opacity', 0)
+        .on('end',()=> d3.select('#d3-tip').style('pointer-events', 'none'))});
 var fragment = document.createDocumentFragment();
 fragment.appendChild(document.getElementById('d3-tip'));
 document.getElementById('instructions').appendChild(fragment);
@@ -91,7 +100,10 @@ function mouseoverNode(d1){
 
     // 2. Process the array of historical temperatures
     var arr = [];
-    for (var i=0; i<r.arr.length;i++){
+    // adjust stacks
+    let startRecord = r.arr.length-maxstack;
+    startRecord = startRecord <0 ? 0 :startRecord;
+    for (var i = startRecord; i<r.arr.length;i++){
         // var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
         var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
         var obj = {};
@@ -112,7 +124,7 @@ function mouseoverNode(d1){
     // 3. get Time
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
     var maxTime = 0;
-    for (var i=0; i<r.arr.length;i++){
+    for (var i=startRecord; i<r.arr.length;i++){
         var qtime =r.arr[i].result.query_time;
         minTime = Math.min(minTime,qtime);
         maxTime = Math.max(maxTime,qtime);
@@ -321,11 +333,10 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
-
     dataSpider = [];
     dataSpider.name = d1.className.baseVal;
     if (r.arr.length>0){
-        for (var i=0;i<r.arr.length;i++){
+        for (var i=startRecord;i<r.arr.length;i++){
             var arrServices = [];
             var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
             var obj = {};
@@ -383,28 +394,29 @@ function mouseoverNode(d1){
             dataSpider.push(arr1);
            
             // Standardize data for Radar chart
-            for (var j=0; j<dataSpider[i].length;j++){
-                if (dataSpider[i][j].value == undefinedValue || isNaN(dataSpider[i][j].value))
-                    dataSpider[i][j].value = -15;
+            let currenti = i-startRecord;
+            for (var j=0; j<dataSpider[currenti].length;j++){
+                if (dataSpider[currenti][j].value == undefinedValue || isNaN(dataSpider[currenti][j].value))
+                    dataSpider[currenti][j].value = -15;
                 else if (j==3){   ////  Job load ***********************
                      var scale = d3.scaleLinear()
                         .domain([thresholds[1][0],thresholds[1][1]])
                         .range([thresholds[0][0],thresholds[0][1]]); 
                     
-                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
                 }
                 else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
                     var scale = d3.scaleLinear()
                         .domain([thresholds[3][0],thresholds[3][1]])
                         .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
                     
-                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
                 }
                 else if (j==9){   ////  Power Consumption ***********************
                     var scale = d3.scaleLinear()
                         .domain([thresholds[4][0],thresholds[4][1]])
                         .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-                    dataSpider[i][j].value =  scale(dataSpider[i][j].value);   
+                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
                 }
             }
         }

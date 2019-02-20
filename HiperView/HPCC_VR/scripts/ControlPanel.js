@@ -7,7 +7,9 @@ function initControlPanel()
 // service control panel init
 function initServiceControlPanel()
 {
-    var num = serviceList.length ;
+    var serviceCP = ["arrTemperatureCPU1", "arrCPU_load", "arrMemory_usage", "arrFans_speed1", "arrPower_usage"];
+
+    var num = serviceCP.length ;
     var s = ROOM_SIZE * 0.25
     var r = s/(2*Math.tan(Math.PI/num)) + s/15;
 
@@ -16,16 +18,16 @@ function initServiceControlPanel()
 
     for( var i=0; i<num; i++ )
     {
-        var texture = new THREE.TextureLoader().load( "media/img/" + serviceList[i] + ".png" );
+        var texture = new THREE.TextureLoader().load( "media/img/" + serviceCP[i] + ".png" );
         var geometry = new THREE.PlaneGeometry( s, s, s );
         var material = new THREE.MeshBasicMaterial( { side: THREE.DoubleSide, map: texture } );
         var plane = new THREE.Mesh( geometry, material );
 
-        addServiceOutline( plane, serviceList[i] );
-        addServiceLabel( plane, serviceList[i] );
+        addServiceOutline( plane, serviceCP[i] );
+        addServiceLabel( plane, serviceCP[i] );
 
         plane.type = "service_button";
-        plane.name = serviceList[i];
+        plane.name = serviceCP[i];
 
         plane.rotation.set( 0, i*2*Math.PI/num, 0 );
         plane.translateZ(r);
@@ -33,7 +35,7 @@ function initServiceControlPanel()
         service_control_panel.add( plane );
     }
 
-    service_control_panel.position.set( ROOM_SIZE * 2.5, 0, 0 );
+    service_control_panel.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
     scene.add( service_control_panel );
 
 
@@ -47,9 +49,10 @@ function initServiceControlPanel()
 
         var loader = new THREE.FontLoader();
         var text_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+        var label = SERVICE[service]["value"].replace("1","");
         loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font )
         {
-            var text_geometry = new THREE.TextGeometry( service, {
+            var text_geometry = new THREE.TextGeometry( label, {
                 font: font,
                 size: s/15,
                 height: 0,
@@ -58,7 +61,7 @@ function initServiceControlPanel()
             } );
 
             var text = new THREE.Mesh( text_geometry, text_material );
-            var x = ( service == serviceList[4] ) ? -s/2.5 : -s/4;
+            var x = ( service == serviceCP[4] ) ? -s/2.5 : -s/4;
             text.position.set( x, 0, 0.005 );
 
             text.name = "service_label_"+service;
@@ -129,7 +132,7 @@ function initTimeControlPanel()
     addCover();
     addButton();
 
-    time_control_panel.position.set( ROOM_SIZE * -3, 0, 0 );
+    time_control_panel.position.set( ROOM_SIZE * -3, 0, -0.5 );
     time_control_panel.rotation.y = Math.PI/2;
     scene.add(time_control_panel);
 
@@ -153,15 +156,16 @@ function initTimeControlPanel()
         {
             var text_geometry = new THREE.TextGeometry( timestamp, {
                 font: font,
-                size: r/8,
+                size: r/16,
                 height: 0,
                 curveSegments: 12,
                 bevelEnabled: false
             } );
 
             var text = new THREE.Mesh( text_geometry, text_material );
-            var y = ( timestamp.length == 1 ) ? r/5.75 : r/4.5 ;
-            text.position.set( r * 0.8, y, extrudeSettings.depth + 0.005 );
+            var y = ( TS_NUM > 20 ) ? r/10 : r/5 ;
+            // console.log(r);
+            text.position.set( r * 0.85, y, extrudeSettings.depth + 0.005 );
             text.rotateZ( -Math.PI/2 + 2*Math.PI/n / 2 );
 
             text.name = "time_label_"+timestamp;

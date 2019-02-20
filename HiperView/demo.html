@@ -11,77 +11,24 @@
     <link href="css/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="css/dd.css" />
     <script src="js/jquery-1.9.0.min.js"></script>
+    <script src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnosticsnd/build/js/scagnosticsnd.min.js"></script>
     <script src="js/jquery.dd.js"></script>
     <script src="js/select.js"></script>
     <script src="js/TimerInterval.js"></script>
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
-<style>
-    #scatterzone {
-        visibility: hidden;
-    }
-    div.tooltip {
-        position: absolute;
-        text-align: center;
-        width: auto;
-        height: auto;
-        padding: 2px;
-        font: 12px sans-serif;
-        background: #bbb;
-        border: 1px;
-        border-radius: 8px;
-        pointer-events: none;
-    }
-    div.scatter_y{
-        position: absolute;
-        top:155px;
-        left:-20px;
-        width: 160px;
-        height:20px;
-        line-height: 20px;
-        text-align: center;
-        border: 1px solid #aaaaaa;
-        margin:auto;
-        transform: rotate(-90deg);
-        cursor: all-scroll;
-    }
-
-    div.scatter_x{
-        position: absolute;
-        top:275px;
-        left:32px;
-        width: 160px;
-        height:20px;
-        line-height: 20px;
-        text-align: center;
-        border: 1px solid #aaaaaa;
-        cursor: all-scroll;
-
-    }
-    div.selection{
-        position: absolute;
-        opacity: 0;
-        line-height: 20px;
-        text-align: center;
-        border: 1px solid #aaaaaa;
-    }
-    #scatterzone span{
-        cursor: all-scroll;
-    }
-</style>
 </head>
 
 <body bgcolor="#ccc" text="black" id="mainBody">
-
 <header class="ttu-main-header" id="nav">
     <div class="logo__lockup"><a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>
         <h1 class="summaryText1">  </h1>
     </div>
 </header>
 <div id ="scatterzone">
-    <div class="scatter_y" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>fan1peed</span></div>
-    <div class="scatter_x" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>cpu1temp</span></div>
+    <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
+    <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
     <div class="selection" id="selection">
-        <div id="selectionheader">Click here to move</div>
+        <div id="selectionheader">Click & Drag</div>
     </div>
 </div>
 <div id="instructions"></div>
@@ -100,7 +47,19 @@
     <h3 class ="currentDate"></h3>
 </div>
 
+<div id="linkHolder"  class="controlHolder">
+    <ul id="nav-mobile" class="left hide-on-med-and-down">
+        <li><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
+            <img type="image/x-icon" src="images/PhaseSpaceLogo.ico" class="menuIcon "/>
+            <span class="tooltiptext">Phase Space</span></a>
+            </li>
+        <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
+            <img type="image/x-icon" src="images/VR.ico" class="menuIcon"/>
+            <span class="tooltiptext">Vitural Reality</span>
+        </a></li>
+    </ul>
 
+</div>
 
 
 <div id="controlHolder"  class="controlHolder">
@@ -118,6 +77,7 @@
         <option value="Scatterplot" >Scatterplot</option>
     </select>
     <br><br>
+    <button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>
     <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
     <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
     <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>

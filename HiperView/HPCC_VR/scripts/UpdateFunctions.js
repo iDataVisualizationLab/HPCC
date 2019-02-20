@@ -1,6 +1,6 @@
 function stopUpdate()
 {
-    clearInterval(updateHost);
+    clearInterval(fillHost);
 }
 
 function resetService()
@@ -33,11 +33,17 @@ function updateValues( timestamp )
     updateColorRange(service);
 
     var rack = 1, host = 1, cpu = 1;
-    updateHost = setInterval(function ()
+    fillHost = setInterval(function ()
     {
 
         if( hostObj[rack][host] )
-            updateService( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
+        {
+            updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
+
+            // update scatterplot point per host (i.e. not per cpu)
+            if( cpu == 1 )
+                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
+        }
 
         if( cpu+1 <= CPU_NUM )
             cpu++;
@@ -71,151 +77,44 @@ function updateValues( timestamp )
     }, 1 );
 }
 
-function updateService( service, keys, obj )
+function updateHost( service, keys, obj )
 {
+    var rack = keys[0];
+    var host = keys[1];
+    var cpu = keys[2];
+    var time = keys[3];
 
-    switch( service )
+    var key1 = "compute-"+rack+"-"+host;
+    var key2 = service.includes("1") ? service.replace("1",cpu) : service;
+
+    if( json[key1][key2][time] !=null )
     {
-        case "Temperature":
-            updateTemperature( keys, obj );
-            break;
-        case "CPU_load":
-            updateCPULoad( keys, obj );
-            break;
-        case "Memory_usage":
-            updateMemoryUsage( keys, obj );
-            break;
-        case "Fans_speed":
-            updateFansSpeed( keys, obj );
-            break;
-        case "Power_consumption":
-            updatePowerConsumption( keys, obj );
-            break;
-        default:
-            break;
+        obj.visible = true;
+        obj.material.color = new THREE.Color( color(json[key1][key2][time]) );
+        updateCPUMarker( obj );
+    }
+    else
+    {
+        obj.visible = false;
     }
 
-}
-
-function updateTemperature( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var cpu = keys[2];
-    var time = keys[3];
-
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrTemperatureCPU"+cpu;
-
-    if( json[key1][key2][time] !=null )
-        var temperature = color_funct(json[key1][key2][time]);
-    else
-        var temperature = 0x222222;
-
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( temperature );
-
-}
-
-function updateCPULoad( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var time = keys[3];
-
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrCPU_load";
-
-    if( json[key1][key2][time] !=null )
-        var load = color_funct(json[key1][key2][time]);
-    else
-        var load = 0x222222;
-
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( load );
-
-}
-
-function updateMemoryUsage( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var time = keys[3];
-
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrMemory_usage";
-
-    if( json[key1][key2][time] !=null )
-        var usage = color_funct(json[key1][key2][time]);
-    else
-        var usage = 0x222222;
-
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( usage );
-
-}
-
-function updateFansSpeed( keys, obj )
-{
-    var rack = keys[0];
-    var host = keys[1];
-    var cpu = keys[2];
-    var time = keys[3];
-
-    var key1 = "compute-"+rack+"-"+host;
-    var key2 = "arrFans_speed"+cpu;
-
-    if( json[key1][key2][time] !=null )
-        var speed = color_funct(json[key1][key2][time]);
-    else
-        var speed = 0x222222;
-
-    updateCPUMarker( obj );
-    obj.material.color = new THREE.Color( speed );
-}
-
-function updatePowerConsumption( keys, obj )
-{
-    return 0;
 }
 
 function updateColorRange( service )
 {
-    setColorsAndThresholds( service );
+    setColorsAndThresholdsTooltip( service.replace("arr","")
+                                        .replace("CPU1","")
+                                        .replace("CPU2","")
+                                        .replace("1","")
+                                        .replace("2","")
+                                        .replace("Power_usage","Power_consumption") );
 
-    var arrColor, arrDom;
+    // var min = SERVICE[service]["dom"][0];
+    // var max = SERVICE[service]["dom"][1];
 
-    switch( service )
-    {
-        case "Temperature":
-            arrDom = [20, 60, 80, 100];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        case "CPU_load":
-            arrDom = [0, 0.2, 0.3, 0.5];
-            arrColor = ['#ffff00','#c8df00','#91bf00','#589f00','#008000'];
-            break;
-        case "Memory_usage":
-            arrDom = [0, 25, 50, 75, 100];
-            arrColor = ['#ffff00','#c8df00','#91bf00','#589f00','#008000'];
-            break;
-        case "Fans_speed":
-            arrDom = [0, 5000, 9000, 10000, 12000];
-            arrColor = ['#ff0000','#ffff00','#008000','#ffff00','#ff0000'];
-            break;
-        case "Power_consumption":
-            arrDom = [20, 60, 80, 100];
-            arrColor = ['#44f', '#1a9850','#fee08b', '#d73027'];
-            break;
-        default:
-            break;
-    }
-    
-    color_funct = d3.scaleLinear()
-        .domain(arrDom)
-        .range(arrColor)
-        .interpolate(d3.interpolateHcl);
-
+    // var arrDom = [min,null,null,max];
+    // arrDom[1] = min + (max-min)/3;
+    // arrDom[2] = min + 2*(max-min)/3;
 }
 
 function updateCPUMarker( obj )
@@ -226,7 +125,73 @@ function updateCPUMarker( obj )
     cpu_marker.position.y = pos.y + 0.005;
     cpu_marker.position.z = pos.z;
 }
-var oldhostclicked;
+
+// scatterplot update
+function updateScatterPlotMatrix( host, timestamp )
+{
+    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
+        updateScatterPlot( host, timestamp, scatter_plot_matrix.matrix[sp] );
+}
+
+function updateScatterPlot( host, timestamp, sp )
+{
+    if( json[host] == undefined )
+        return 0;
+
+    var services = sp.axes;
+    var point = sp.points.obj[host];
+    var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
+    var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
+    var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
+
+    x = sp.fit(x,sp.x);
+    y = sp.fit(y,sp.y);
+    z = sp.fit(z,sp.z);
+
+    point.material.color = new THREE.Color( color(json[host][selectedService][timestamp-1]) );
+
+    var intervals = 20;
+    var xinterval = (x - point.position.x)/intervals;
+    var yinterval = (y - point.position.y)/intervals;
+    var zinterval = (z - point.position.z)/intervals;
+    var count = 0;
+
+    var movePoint = setInterval( function()
+    {
+        point.position.x += xinterval;
+        point.position.y += yinterval;
+        point.position.z += zinterval;
+        count++;
+
+        if( count == intervals )
+            clearInterval( movePoint );
+
+    }, 20 );
+
+}
+
+// lever update
+function updateLever( start, end )
+{
+    var intervals = 10;
+    var interval = (start - end)/intervals;
+    var count = 0;
+
+    var rotateLever = setInterval( function()
+    {
+        lever.pivot.rotation.x -= interval;
+        count++;
+
+        if( count == intervals )
+            clearInterval( rotateLever );
+
+    }, 20 );
+}
+
+
+// ngan
+// tooltip update
+
 function updateTooltip( host )
 {
     // event function
@@ -237,21 +202,17 @@ function updateTooltip( host )
         this[0].dispatchEvent(event);
         return $(this);
     };
-    if (oldhostclicked)
-        oldhostclicked.children[2].material.color.setHex(0x000000);
     oldhostclicked = host;
-    oldhostclicked.children[2].material.color.setHex(0xff0000);
+
+    // highligh clickedhost
+
     // constructing tooltip
     var tmp = host.name.split("_");
-    var host_name = "compute-"+tmp[1]+"-"+tmp[3];
-    var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
-    //updateTooltip3D(host_name);
-    tooltip.position.x = pos.x;
-    tooltip.position.y = 0.1;
-    tooltip.position.z = pos.z - 0.3;
-    //tooltip.setRotationFromMatrix( camera.matrix )
-    //tooltip.visible = true;
-    console.log(tooltip);
+    var host_name = host.name;
+    // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
+
+    tooltip.position.set(0,0,0);
+
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")
@@ -260,25 +221,64 @@ function updateTooltip( host )
     requestupdatetooltiip();
 
 }
-    function requestupdatetooltiip(){
+
+function setColorsAndThresholdsTooltip(s)
+{
+    for (var i=0; i<serviceList.length;i++)
+    {
+        dif = (thresholds[i][1]-thresholds[i][0])/4;
+        mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        if (s == serviceList[i] && i==1) // CPU_load
+        {
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+        }
+        else if (s == serviceList[i] && i==2) // Memory_usage
+        {  
+            left=0;
+            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+        }
+        else if (s == serviceList[i])
+        {
+            left = thresholds[i][0]-dif;
+            if (left<0 && i!=0) // Temperature can be less than 0
+                left=0;
+            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+        }
+
+
+        color = d3.scaleLinear()
+                    .domain(arrThresholds)
+                    .range(arrColor)
+                    .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+
+        opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.3,0.06,0.3,1,1]);
+    }
+}
+
+function requestupdatetooltiip()
+{
         d3.select('#tip').attr('material',{fps:1.5});
         $('#tip')[0].components.material.shader.__render();
         setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
-    }
+}
+
 function processData(str, serviceName)
 {
     if (serviceName == serviceList[0]){
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split(" ");
-            a[0] = +arrString[2]||undefinedValue;
-            a[1] = +arrString[6]||undefinedValue;
-            a[2] = +arrString[10]||undefinedValue;
+            a[0] = +arrString[2]||undefined;
+            a[1] = +arrString[6]||undefined;
+            a[2] = +arrString[10]||undefined;
         }
         return a;
     }
@@ -286,40 +286,40 @@ function processData(str, serviceName)
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
             || str.indexOf("CPU Load: null")>=0){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split("CPU Load: ")[1];
             a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
     else if (serviceName == serviceList[2]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
             a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
     else if (serviceName == serviceList[3]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-            a[3] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
+            a[3] = undefined;
         }
         else{
             var arr4 =  str.split(" RPM ");
@@ -333,20 +333,21 @@ function processData(str, serviceName)
     else if (serviceName == serviceList[4]) {
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[0] = undefined;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         else{
             var maxConsumtion = 3.2;  // over 100%
             var arr4 =  str.split(" ");
             a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+            a[1] = undefined;
+            a[2] = undefined;
         }
         return a;
     }
 }
+
 function updateTooltip3D(host_name)
 {
     var levels = 6;
@@ -359,7 +360,7 @@ function updateTooltip3D(host_name)
 
     // Standardize data for Radar chart
     for (var j=0; j<currentval.length;j++){
-        if (currentval[j] == undefinedValue || isNaN(currentval[j]))
+        if (currentval[j] == undefined || isNaN(currentval[j]))
             currentval[j] = -15;
         else if (j==2){   ////  Job load ***********************
             var scale = d3.scaleLinear()
