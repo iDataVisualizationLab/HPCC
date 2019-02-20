@@ -21,22 +21,18 @@ Slides for Dell Talk at SC2018: https://idatavisualizationlab.github.io/HPCC/SC2
 ## HPCViz: Monitoring Health Status of High Performance Computing Centers
 Demo video:  https://idatavisualizationlab.github.io/HPCC/HPCViz/
 
-Demo App:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
+Oct 10, 2018::  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
 
-Wednesday Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOverheatSep26
+Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/demo.html
 
-Thursday Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/demo.html
+Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOverheatSep26
 
-Current branch:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
 
-VR: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 
-September 22, 2018
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/suddenIncrease_Sep22.png)
 
-September 23, 2018
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/sudden_Sep23_1.png)
+September 26, 2018:
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/Picture1.png)
 
-# Outlier detection:
-https://outliagnostics.github.io/demos.html 
+
+
 
