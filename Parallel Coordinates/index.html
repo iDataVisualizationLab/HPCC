@@ -4,9 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <title>High performance Computing  Explorer</title>
     <link rel="stylesheet" type="text/css" href="parallel.css" />
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="http://colorbrewer2.org/export/colorbrewer.js"></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="src/lib/jquery-3.2.1.min.js"></script>
+    <script src="src/lib/d3.v5.min.js"></script>
     <script src="src/lib/underscore-min.js"></script>
 </head>
 <body>
@@ -39,19 +38,16 @@
         <div class="bright">
             <h3>What is this?</h3>
             <p>
-                A multidimensional explorer of <a href="nutrients.csv">HPCC data</a> from the <a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a>.
+                A multidimensional explorer of HPCC data from the <a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a>.
             </p>
             <p>
-                The parallel coordinates displays the nutrient content of racks in the database across 11 dimensions, colored by Rack group.
+                The parallel coordinates displays the sensors content of racks in the database across 11 dimensions, colored by Rack group.
             </p>
             <p>
                 <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
             </p>
             <p>
-                <a href="http://eagereyes.org/techniques/parallel-coordinates#brushing">Brush</a> the visualization to update other charts on this page.
-            </p>
-            <p>
-                Let me know what you think on <a href="http://www.reddit.com/r/d3js/comments/xh2ks/nutrition_parallel_coordinates_canvas/">Reddit</a>.
+                <a href="https://github.com/d3/d3-brush">Brush</a> the visualization to update other charts on this page.
             </p>
         </div>
 
@@ -69,11 +65,15 @@
             <h3>Credits &amp; License</h3>
             <p>
                 Adapted from examples by<br/>
-                <a href="http://bl.ocks.org/1341021">Mike Bostock</a> and <a href="http://bl.ocks.org/1341281">Jason Davies</a><br/>
+                <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
+                and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
             </p>
             <p>
                 Copyright &copy; 2012, Kai Chang<br/>
                 All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
+            </p>
+            <p>
+                Modified &copy; 2019, Ngan Nguyen<br/>
             </p>
             </p>
         </div>

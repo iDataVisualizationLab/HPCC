@@ -99,13 +99,15 @@ var svg = d3.select("svg")
             .on("end", function(d) {
                 if (!this.__dragged__) {
                     // no movement, invert axis
-                    var extent = invert_axis(d);
+                    var extent = invert_axis(d,this);
 
                 } else {
                     // reorder axes
                     d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
 
                     var extent = yscale[d].brush.extent();
+                    console.log(extent)
+                    // var extent = d3.brushSelection(this).map(yscale[d].invert).sort();
                 }
 
                 // remove axis if dragged all the way left
@@ -142,7 +144,9 @@ var svg = d3.select("svg")
     // Add and store a brush for each axis.
     g.append("svg:g")
         .attr("class", "brush")
-        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brush(yscale[d]).on("brush", brush)); })
+        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
+            .extent([[-10,0], [10,height]])
+            .on("brush end", brush)); })
         .selectAll("rect")
         .style("visibility", null)
         .attr("x", -23)
@@ -295,11 +299,22 @@ function unhighlight() {
     highlighted.clearRect(0,0,w,h);
 }
 
-function invert_axis(d) {
+function invert_axis(d,element) {
     // save extent before inverting
-    if (!yscale[d].brush.empty()) {
-        var extent = yscale[d].brush.extent();
-    }
+    var extent;
+    svg.selectAll(".brush")
+        .filter(ds=>ds===d)
+        .filter(function(ds) {
+            yscale[ds].brushSelectionValue = d3.brushSelection(this);
+            return d3.brushSelection(this);
+        })
+        .each(function(d) {
+            // Get extents of brush along each active selection axis (the Y axes)
+            extent = d3.brushSelection(this).map(yscale[d].invert);
+        });
+    // if (!yscale[d].brush.empty()) {
+    //     var extent = yscale[d].brush.extent();
+    // }
     if (yscale[d].inverted == true) {
         yscale[d].range([h, 0]);
         d3.selectAll('.label')
@@ -370,8 +385,20 @@ function position(d) {
 // TODO refactor
 function brush() {
     brush_count++;
-    var actives = dimensions.filter(function(p) { return yscale[p].brush.length!=1; }),
-        extents = actives.map(function(p) { return yscale[p].brush.extent(); });
+
+    var actives = [],
+        extents = [];
+
+    svg.selectAll(".brush")
+        .filter(function(d) {
+            yscale[d].brushSelectionValue = d3.brushSelection(this);
+            return d3.brushSelection(this);
+        })
+        .each(function(d) {
+            // Get extents of brush along each active selection axis (the Y axes)
+            actives.push(d);
+            extents.push(d3.brushSelection(this).map(yscale[d].invert).sort());
+        });
 
     // hack to hide ticks beyond extent
     var b = d3.selectAll('.dimension').nodes()
@@ -384,7 +411,7 @@ function brush() {
                     .style('font-weight', 'bold')
                     .style('font-size', '13px')
                     .style('display', function() {
-                        var value = d3.select(this).data();
+                        var value = d3.select(this).data()[0];
                         return extent[0] <= value && value <= extent[1] ? null : "none"
                     });
             } else {
@@ -418,7 +445,7 @@ function brush() {
                 return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
             }) ? selected.push(d) : null;
         });
-
+    console.log(selected);
     // free text search
     var query = d3.select("#search").node().value;
     if (query.length > 0) {
@@ -467,7 +494,7 @@ function paths(selected, ctx, count) {
         opacity = d3.min([2/Math.pow(n,0.3),1]),
         timer = (new Date()).getTime();
 
-    selection_stats(opacity, n, data.length)
+    selection_stats(opacity, n, data.length);
 
     shuffled_data = _.shuffle(selected);
 
@@ -497,14 +524,14 @@ function update_ticks(d, extent) {
         // single tick
         if (extent) {
             // restore previous extent
-            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).extent(extent).on("brush", brush));
+            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).extent(extent).on("brush end", brush));
         } else {
-            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush));
+            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).on("brush end", brush));
         }
     } else {
         // all ticks
         d3.selectAll(".brush")
-            .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush)); })
+            .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush end", brush)); })
     }
 
     brush_count++;
@@ -558,9 +585,20 @@ function rescale() {
 
 // Get polylines within extents
 function actives() {
-    var actives = dimensions.filter(function(p) { return !yscale[p].brush.empty(); }),
-        extents = actives.map(function(p) { return yscale[p].brush.extent(); });
-
+    // var actives = dimensions.filter(function(p) { return !yscale[p].brush.empty(); }),
+    //     extents = actives.map(function(p) { return yscale[p].brush.extent(); });
+    var actives = [],
+        extents = [];
+    svg.selectAll(".brush")
+        .filter(function(d) {
+            yscale[d].brushSelectionValue = d3.brushSelection(this);
+            return d3.brushSelection(this);
+        })
+        .each(function(d) {
+            // Get extents of brush along each active selection axis (the Y axes)
+            actives.push(d);
+            extents.push(d3.brushSelection(this).map(yscale[d].invert));
+        });
     // filter extents and excluded groups
     var selected = [];
     data
@@ -624,7 +662,9 @@ window.onresize = function() {
         .attr("transform", function(d) { return "translate(" + xscale(d) + ")"; })
     // update brush placement
     d3.selectAll(".brush")
-        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush", brush)); })
+        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
+            .extent([[-10,0], [10,height]])
+            .on("brush end", brush)); })
     brush_count++;
 
     // update axis placement

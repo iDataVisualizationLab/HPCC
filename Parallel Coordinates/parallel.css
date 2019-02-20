@@ -35,19 +35,19 @@ canvas, svg {
 #chart {
     position: relative;
 }
-.brush rect.extent {
+.brush rect.selection {
     fill: rgba(100,100,100,0.15);
     stroke: #fff;
 }
-.dark .brush rect.extent {
+.dark .brush rect.selection {
     fill: rgba(100,100,100,0.15);
     stroke: #ddd;
 }
-.brush:hover rect.extent {
+.brush:hover rect.selection {
     stroke: #222;
     stroke-dasharray: 5,5;
 }
-.brush rect.extent:hover {
+.brush rect.selection:hover {
     stroke-dasharray: none;
 }
 .resize rect {
