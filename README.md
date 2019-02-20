@@ -3,10 +3,14 @@
 
 HiperView :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
 
-Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html
-
 Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/PhaseSpace.png)
+HiperVR
 
+
+Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperVR.png)
+HiperVR
 
 # 2018
 
