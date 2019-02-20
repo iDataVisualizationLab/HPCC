@@ -131,60 +131,6 @@ function init()
     loadJSON();
 
     TS_NUM = json["compute-1-1"]["arrCPU_load"].length;
-    // for( var host in json )
-    // {
-    //     if(!json.hasOwnProperty(host)) continue;
-    //     for( var service in json[host] )
-    //     {
-    //         if(!json[host].hasOwnProperty(service)) continue;
-
-    //         if( SERVICE[service]["dom"][0] == null )
-    //         {
-    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
-    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
-    //         }
-
-    //         if( SERVICE[service]["dom"][0] > Math.min(...json[host][service]) )
-    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
-
-    //         if( SERVICE[service]["dom"][1] < Math.max(...json[host][service]) )
-    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
-    //     }
-    // }
-
-    // for( var i=0; i<serviceList.length; i++ )
-    // {
-    //     var dif, mid, left, service;
-    //     dif = (thresholds[i][1]-thresholds[i][0])/4;
-    //     mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-    //     if( i == 1 )
-    //     {
-    //         left=0;
-    //         SERVICE["arrCPU_load"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
-    //     }
-    //     else if( i == 2 )
-    //     {
-    //         left=0;
-    //         SERVICE["arrMemory_usage"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
-    //     }
-    //     else if( i == 0 )
-    //     {
-    //         left = thresholds[i][0]-dif;
-    //         SERVICE["arrTemperatureCPU1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //         SERVICE["arrTemperatureCPU2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    //     else if( i == 4 )
-    //     {
-    //         left = 0;
-    //         SERVICE["arrPower_usage"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    //     else if( i == 3 )
-    //     {
-    //         left = 0;
-    //         SERVICE["arrFans_speed1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //         SERVICE["arrFans_speed2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    // }
 
     initScene();
     initCamera();
@@ -617,10 +563,11 @@ function initScatterPlotMatrix()
                             SERVICE[s[2]]["dom"]] );
             }
         }
+        break;
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, null, 0.25  );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, 5, 0.25  );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );

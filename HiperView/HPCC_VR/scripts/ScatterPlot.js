@@ -51,8 +51,10 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
+    var bin = setBins( bin_size );
     var points = setPoints( true );
-    var scag = setScagnostics();
+    // var scag = setScagnostics();
+    console.log(bin);
 
     graph.add( grid );
     graph.add( points );
@@ -68,9 +70,28 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.y = y;
     this.z = z;
     this.data = data;
-    this.scag = scag;
+    // this.scag = scag;
 
     // functions
+
+    function setBins( size )
+    {
+        var bin = {};
+        for( var x=0; x<size; x++ )
+        {
+            bin[x] = {}
+            for( var y=0; y<size; y++ )
+            {
+                bin[x][y] = {};
+                for( var z=0; z<size; z++ )
+                {
+                    bin[x][y][z] = null;
+                }
+            }
+        }
+
+        return bin;
+    }
 
     function fit( val, axis )
     {
