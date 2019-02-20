@@ -1,5 +1,5 @@
 
-# HPCC - 2019
+# 2019
 
 HiperView :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
 
@@ -7,7 +7,10 @@ Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 
 Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
 
-# HiperView: Visualizing Multidimensional Health Status of High Performance Systems
+
+# 2018
+
+## HiperView: Visualizing Multidimensional Health Status of High Performance Systems
 
 Demo :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
 
@@ -15,7 +18,7 @@ Overheat: https://idatavisualizationlab.github.io/HPCC/HiperOverheatSep26/demo.h
 
 Slides for Dell Talk at SC2018: https://idatavisualizationlab.github.io/HPCC/SC2018/Presentation/HiperView.html#/
 
-# HPCViz: Monitoring Health Status of High Performance Computing Centers
+## HPCViz: Monitoring Health Status of High Performance Computing Centers
 Demo video:  https://idatavisualizationlab.github.io/HPCC/HPCViz/
 
 Demo App:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
