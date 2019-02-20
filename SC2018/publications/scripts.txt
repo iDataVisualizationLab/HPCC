@@ -1,0 +1,32 @@
+// copy file to redfish
+scp HiperView.zip tnhondan@redfish.hpcc.ttu.edu:~
+ssh tnhondan@redfish.hpcc.ttu.edu
+scp HiperView.zip root@10.10.1.4:/usr/local/nagios/share/
+
+// Goto Naigios serve
+ssh root@10.10.1.4
+cd /usr/local/nagios/share/
+unzip HiperView.zip
+
+
+// Run the server from local machine
+// Set firefox proxies
+ssh -C2qTnN -D 8090 tnhondan@redfish.hpcc.ttu.edu
+
+
+
+
+// copy file to redfish
+scp viz.zip tnhondan@redfish.hpcc.ttu.edu:~
+ssh tnhondan@redfish.hpcc.ttu.edu
+scp viz.zip root@10.10.1.4:/usr/local/nagios/share/
+
+// Goto Naigios serve
+ssh root@10.10.1.4
+cd /usr/local/nagios/share/
+unzip viz.zip
+
+
+// Run the server from local machine
+// Set firefox proxies
+ssh -C2qTnN -D 8090 tnhondan@redfish.hpcc.ttu.edu

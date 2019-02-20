@@ -1,0 +1,80 @@
+
+body { font: 15px Arial;}
+
+path {
+	fill: none;
+}
+text.textUsernames {
+	stroke-width: 0.5px;
+	text-shadow:
+			1px 0px 1px #444, 0px 1px 1px #999,
+			2px 1px 1px #444, 1px 2px 1px #999,
+			3px 2px 1px #444, 2px 3px 1px #999;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: grey;
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+#controlHolder {
+	position:absolute;
+	z-index: 0;
+	top: 50px;
+	left: 150px;
+	border: 0px solid rgba(0,0,0, 1);
+	background-color: none;
+}
+
+#searchHolder {
+	position:absolute;
+	z-index: 0;
+	top: 15px;
+	left: 427px;
+	border: 0px solid rgba(100,0,0, 1);
+	background-color: none;
+}
+
+#streamHolder {
+	position:absolute;
+	z-index: 0;
+	top: 1050px;
+	left:10px;
+	border: 1px solid rgba(0,0,0, 1);
+	background-color: rgba(255,255,255, 0.75);
+	border-radius: 6px;
+	box-shadow: 10px 10px 10px #444;
+}
+
+/* tooltip */
+.d3-tip {
+	line-height: 1;
+	padding: 10px;
+	font-size: 14px;
+	font-family: "sans-serif";
+	background: rgba(204, 204, 204, 0.96);
+	color: #000;
+	border: 1px solid rgba(0,0,0, 1);
+	border-radius: 12px;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+	margin: -1px 0 0 0;
+	top: 100%;
+	left: 0;
+}
+
+table, th, td {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+	padding: 2px;
+	background-color: #fff;
+}
+
+#graph {
+	width: 900px;
+	height: 500px;
+}

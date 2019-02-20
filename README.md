@@ -1,39 +1,36 @@
 
-# HPCC - 2019
+# 2019
 
 HiperView :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
-
-Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperView.png)
 
 Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/PhaseSpace.png)
 
-# HiperView: Visualizing Multidimensional Health Status of High Performance Systems
+Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperVR.png)
 
-Demo :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+# 2018
 
-Overheat: https://idatavisualizationlab.github.io/HPCC/HiperOverheatSep26/demo.html
+### HiperView: Visualizing Multidimensional Health Status of High Performance Systems
+
+Overheat on Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HiperOverheatSep26/demo.html
 
 Slides for Dell Talk at SC2018: https://idatavisualizationlab.github.io/HPCC/SC2018/Presentation/HiperView.html#/
 
-# HPCViz: Monitoring Health Status of High Performance Computing Centers
+### HPCViz: Monitoring Health Status of High Performance Computing Centers
+
 Demo video:  https://idatavisualizationlab.github.io/HPCC/HPCViz/
 
-Demo App:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
+Oct 10, 2018::  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
 
-Wednesday Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOverheatSep26
+Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/demo.html
 
-Thursday Oct 4, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOct4/demo.html
+Sep 26, 2018: https://idatavisualizationlab.github.io/HPCC/HPCVizOverheatSep26
 
-Current branch:  https://idatavisualizationlab.github.io/HPCC/HPCViz/demo.html
+September 26, 2018:
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/Picture1.png)
 
-VR: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 
-September 22, 2018
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/suddenIncrease_Sep22.png)
 
-September 23, 2018
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HPCViz/Images_cases/sudden_Sep23_1.png)
-
-# Outlier detection:
-https://outliagnostics.github.io/demos.html 
 
