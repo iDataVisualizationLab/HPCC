@@ -11,7 +11,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         intervals,
                                         dataid,
                                         data_matrix[p],
-                                        bin_size,
                                         scale );
         this.graph.add( this.matrix[p].graph );
 
@@ -40,10 +39,11 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     }
 }
 
-function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
+function ScatterPlot( axes, ranges, intervals, dataid, data, scale )
 {
     // building scatter plot
     var population = data.length;
+    var bin, binCount;
 
     var x = setInfo( 0 );
     var y = setInfo( 1 );
@@ -51,54 +51,49 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var bins = setBins( bin_size );
-    var points = setPoints( true );
-    loadBins();
+    // var points = setPoints( true );
+
+    initBins( intervals - 1 );
+    var bins = setBins();
+
     // var scag = setScagnostics();
 
     graph.add( grid );
-    graph.add( points );
+    // graph.add( points );
     graph.add( x.obj );
     graph.add( y.obj );
     graph.add( z.obj );
+    graph.add( bins );
 
     this.graph = graph;
     this.grid = grid;
-    this.points = points;
+    // this.points = points;
     this.axes = axes;
     this.x = x;
     this.y = y;
     this.z = z;
     this.data = data;
     this.bins = bins;
+    this.bin = bin;
     // this.scag = scag;
 
     // functions
 
-    function setBins( size )
+    function initBins( size )
     {
-        var bin = {};
-        for( var x=0; x<size; x++ )
+        bin = {}, binCount = {};
+        for( var bx=0; bx<size; bx++ )
         {
-            bin[x] = {}
-            for( var y=0; y<size; y++ )
+            bin[bx] = {}, binCount[bx] = {};
+            for( var by=0; by<size; by++ )
             {
-                bin[x][y] = {};
-                for( var z=0; z<size; z++ )
+                bin[bx][by] = {}, binCount[bx][by] = {};
+                for( var bz=0; bz<size; bz++ )
                 {
-                    bin[x][y][z] = null;
+                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
                 }
             }
         }
-
-        return bin;
-    }
-
-    function fit( val, axis )
-    {
-        if( val == undefined ) return 0;
-        if( axis.range == 0 ) return 0;
-        return scale * (val - axis.min) / axis.range;
     }
 
     function setInfo( axis )
@@ -110,18 +105,32 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
         info.obj = setAxis( axis, info );
-        info.binSize = bin_size;
-        // info.bin = function( n )
-        // {
-        //     console.log(n);
-        //     var interval = this.range/this.binSize+this.min;
-        //     for( var b=0; b<this.binSize; b++ )
-        //     {
-        //         if( n>b*interval & n<(b+1)*interval)
-        //             return b;
-        //     }
-        //     return null;
-        // }
+        info.binSize = intervals - 1;
+
+        info.bin = function( n )
+        {
+            var interval = this.range/this.binSize+this.min;
+            for( var b=0; b<this.binSize; b++ )
+            {
+                if( n>b*interval & n<(b+1)*interval)
+                    return b;
+            }
+            return 0;
+        }
+
+        info.fit = function( n )
+        {
+            if( n == undefined ) return 0;
+            if( this.range == 0 ) return 0;
+            return scale * (n - this.min) / this.range;
+        }
+
+        info.match = function( b )
+        {
+            var interval = this.range/this.binSize;
+            var pos = b*interval*1 + this.min + interval/2;
+            return this.fit(pos);
+        }
 
         return info;
     }
@@ -390,7 +399,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         {
             if( data[p][0] )
             {
-                pos[0] = fit( data[p][0], x );
+                pos[0] = x.fit( data[p][0] );
             }
             else
             {
@@ -399,7 +408,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
             if( data[p][1] )
             {
-                pos[1] = fit( data[p][1], y );
+                pos[1] = y.fit( data[p][1] );
             }
             else
             {
@@ -408,7 +417,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
             if( data[p][2] )
             {
-                pos[2] = fit( data[p][2], z );
+                pos[2] = z.fit( data[p][2] );
             }
             else
             {
@@ -431,44 +440,56 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         return points;
     }
 
-    function loadBins()
+    function setBins()
     {
-        // var count = {}, xb, yb, zb;
-        // for( var p=0; p<population; p++ )
-        // {
-        //     xb = x.bin( data[p][0] );
-        //     yb = y.bin( data[p][1] );
-        //     zb = z.bin( data[p][2] );
+        var bins = new THREE.Group();
+
+        // setting binCount
+        var xb, yb, zb;
+        for( var p=0; p<population; p++ )
+        {
+            xb = x.bin( data[p][0] );
+            yb = y.bin( data[p][1] );
+            zb = z.bin( data[p][2] );
             
-        //     count[xb] = count[xb] ? count[xb] : {};
-        //     count[xb][yb] = count[xb][yb] ? count[xb][yb] : {};
-        //     count[xb][yb][zb] = count[xb][yb][zb] ? count[xb][yb][zb]++ : 1;
-        // }
+            binCount[xb][yb][zb] = binCount[xb][yb][zb]+1;
+        }
 
-        // console.log(count);
+        // setting bin
+        for( xb in bin )
+        {
+            if( !bin.hasOwnProperty(xb) ) continue;
 
-            // var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-            // var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
-            // var point = new THREE.Mesh( geometry, material );
+            for( yb in bin )
+            {
+                if( !bin[xb].hasOwnProperty(yb) ) continue;
 
-            // if( isInit )
-            //     point.position.set( 0, 0, 0 );
-            // else
-            //     point.position.set( pos[0], pos[1], pos[2] );
-            // point.name = dataid[p];
-            // points.add( point );
-            // points.obj[dataid[p]] = point;
+                for( zb in bin[xb][yb] )
+                {
+                    if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
 
+                    if( !binCount[xb][yb][zb] ) continue;
+
+                    // if( xb != 2 | yb != 2 | zb != 2 ) continue;
+
+                    var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+                    var geometry = new THREE.SphereGeometry( 0.0005 * binCount[xb][yb][zb], 16, 16 );
+                    var point = new THREE.Mesh( geometry, material );
+                    point.count = binCount[xb][yb][zb];
+                    point.position.x = x.match( xb );
+                    point.position.y = y.match( yb );
+                    point.position.z = z.match( zb );
+
+                    bins.add( point );
+                    bin[xb][yb][zb] = point;
+                }
+            }
+        }
+
+        return bins;
     }
 
     // public functions
-
-    this.fit = function fit( val, axis )
-    {
-        if( val == undefined ) return 0;
-        if( axis.range == 0 ) return 0;
-        return scale * (val - axis.min) / axis.range;
-    }
 
     this.toggleAxisLegend = function( axis )
     {

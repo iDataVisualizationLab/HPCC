@@ -533,12 +533,12 @@ function initScatterPlotMatrix()
     var hostkeys = Object.keys(json);
     var tmp, datas = [], s, ranges = [], selectedSPServices = [];
 
-    // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    // var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    var x = [ "arrTemperatureCPU1" ];
-    var y = [ "arrFans_speed1" ];
-    var z = [ "arrPower_usage"];
+    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
+    var y = [ "arrFans_speed1", "arrFans_speed2" ];
+    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
+    // var x = [ "arrTemperatureCPU1" ];
+    // var y = [ "arrFans_speed1" ];
+    // var z = [ "arrPower_usage"];
 
     for( other in z )
     {
@@ -566,7 +566,7 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, 5, 0.25  );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 5, 0.25  );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );

@@ -41,8 +41,8 @@ function updateValues( timestamp )
             updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
 
             // update scatterplot point per host (i.e. not per cpu)
-            if( cpu == 1 )
-                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
+            // if( cpu == 1 )
+            //     updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )
@@ -144,9 +144,9 @@ function updateScatterPlot( host, timestamp, sp )
     var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
     var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
 
-    x = sp.fit(x,sp.x);
-    y = sp.fit(y,sp.y);
-    z = sp.fit(z,sp.z);
+    x = sp.x.fit(x);
+    y = sp.y.fit(y);
+    z = sp.z.fit(z);
 
     point.material.color = new THREE.Color( color(json[host][selectedService][timestamp-1]) );
 
