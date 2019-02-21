@@ -473,18 +473,17 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
                 {
                     if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
 
-                    var r = binCount[xb][yb][zb] ? 0.0005 * binCount[xb][yb][zb] : 0.00025;
+                    var s = binCount[xb][yb][zb] ? binCount[xb][yb][zb]/(population/6) : 1/(population/6);
                     // if( !binCount[xb][yb][zb] ) continue;
 
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
                     var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-                    var geometry = new THREE.SphereGeometry( r, 16, 16 );
+                    var geometry = new THREE.SphereGeometry( scale/intervals/1.5, 16, 16 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
-                    point.position.x = x.match( xb );
-                    point.position.y = y.match( yb );
-                    point.position.z = z.match( zb );
+                    point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
+                    point.scale.set( s, s, s );
 
                     point.visible = binCount[xb][yb][zb] != 0;
 
