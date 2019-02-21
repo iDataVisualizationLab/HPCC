@@ -99,6 +99,7 @@ var normalTs =0.6; //time sampling
 var timesteppixel = 0.1; // for 26
 
 var isRealtime = false;
+var db = 'nagios';
 if (isRealtime){
     simDuration = 1000;
     simDurationinit = 1000;
@@ -117,10 +118,19 @@ var sumType = "Radar";
 //***********************
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
-var serviceQuery =["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"];
+var serviceQuery ={
+    nagios: ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"],
+    influxdb: ["cpu_temperature","cpu+load" ,"memory+usage" ,"fan_speed" ,"system_power_usage"],
+};
+var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
+    arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
+    arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
+    arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
+    arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService;
+
 
 var arrThresholds;
 var dif, mid,left;
@@ -1418,7 +1428,33 @@ function requestService(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[serin], true);
+        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        xhr.send();
+    })
+}
+function requestServiceInFlux(count,serin) {
+    return new Promise(function(resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(e) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var result = processResult(JSON.parse(this.responseText));
+                    var name = result.data.service.host_name;
+                    hostResults[name][serviceListattr[serin]].push(result);
+                    if (selectedService === serviceList[serin]) {
+                        hostResults[name].arr = hostResults[name][serviceListattr[serin]];
+                        plotResult(result);
+                    }
+                    resolve(xhr.response);
+                } else {
+                    reject(xhr.status);
+                }
+            }
+        };
+        xhr.ontimeout = function () {
+            reject('timeout');
+        };
+        xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_test&q=" + hosts[count].name + " WHERE host='10.101.1.1' LIMIT 1"+serviceQuery[db][serin], true);
         xhr.send();
     })
 }

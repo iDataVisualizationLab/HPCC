@@ -21,16 +21,28 @@
     <session id="1029923364">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+<<<<<<< HEAD
+          <entry key="project.closed" value="20" />
+          <entry key="project.open.time.0" value="12" />
+          <entry key="project.open.time.1" value="1" />
+=======
           <entry key="project.closed" value="9" />
           <entry key="project.open.time.0" value="8" />
+>>>>>>> parent of 5270af6... add phasespace
           <entry key="project.open.time.16" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.6" value="1" />
+<<<<<<< HEAD
+          <entry key="project.open.time.7" value="2" />
+          <entry key="project.open.time.9" value="2" />
+          <entry key="project.opened" value="25" />
+=======
           <entry key="project.open.time.7" value="1" />
           <entry key="project.opened" value="15" />
+>>>>>>> parent of 5270af6... add phasespace
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -57,8 +69,23 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+            <state relative-caret-position="11764">
+              <caret line="698" column="101" selection-start-line="698" selection-start-column="28" selection-end-line="698" selection-end-column="101" />
+=======
             <state relative-caret-position="187">
               <caret line="131" column="17" selection-start-line="131" selection-start-column="17" selection-end-line="131" selection-end-column="17" />
+>>>>>>> parent of 5270af6... add phasespace
+            </state>
+          </provider>
+        </entry>
+      </file>
+<<<<<<< HEAD
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17">
+              <caret line="12" column="42" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="42" />
             </state>
           </provider>
         </entry>
@@ -66,8 +93,15 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HiperView/spider/radarChart.js">
           <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="386">
+              <caret line="159" column="86" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HiperView/spider/radarChart.js">
+          <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1802">
               <caret line="382" column="32" selection-start-line="382" selection-start-column="32" selection-end-line="382" selection-end-column="32" />
+>>>>>>> parent of 5270af6... add phasespace
             </state>
           </provider>
         </entry>
@@ -146,6 +180,8 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
+<<<<<<< HEAD
+=======
       <find>radarLine</find>
       <find>radialArea</find>
       <find>curveCardinalClosed</find>
@@ -159,6 +195,7 @@
       <find>maxNumOfBins</find>
       <find>fill</find>
       <find>color2</find>
+>>>>>>> parent of 5270af6... add phasespace
       <find>Radarplot</find>
       <find>leaderbin</find>
       <find>hostResults</find>
@@ -176,6 +213,23 @@
       <find>distance</find>
       <find>outlying</find>
       <find>Nice</find>
+<<<<<<< HEAD
+      <find>serin</find>
+      <find>serviceQuery</find>
+      <find>mul</find>
+      <find>wed</find>
+      <find>samples</find>
+      <find>simulateResults2</find>
+      <find>hostResults</find>
+      <find>hostList</find>
+      <find>simula</find>
+      <find>step</find>
+      <find>step(</find>
+      <find>def</find>
+      <find>N</find>
+      <find>scr</find>
+=======
+>>>>>>> parent of 5270af6... add phasespace
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -203,6 +257,7 @@
         <option value="$PROJECT_DIR$/HiperView/myscripts/radarSum.js" />
         <option value="$PROJECT_DIR$/HiperView/spider/radarChart.js" />
         <option value="$PROJECT_DIR$/HiperView/myscripts/main.js" />
+        <option value="$PROJECT_DIR$/HiperView/demo.html" />
       </list>
     </option>
   </component>
@@ -219,10 +274,15 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
+<<<<<<< HEAD
+    <option name="width" value="2580" />
+    <option name="height" value="1100" />
+=======
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1727" />
     <option name="height" value="878" />
+>>>>>>> parent of 5270af6... add phasespace
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -328,12 +388,30 @@
       <workItem from="1545413199148" duration="52131000" />
       <workItem from="1545606704347" duration="606000" />
       <workItem from="1546728966757" duration="417000" />
+<<<<<<< HEAD
+      <workItem from="1548295345756" duration="146660000" />
+      <workItem from="1549035220340" duration="5789000" />
+      <workItem from="1549237167650" duration="1345000" />
+      <workItem from="1549241138375" duration="1686000" />
+      <workItem from="1549243456107" duration="1535000" />
+      <workItem from="1549318418120" duration="214000" />
+      <workItem from="1549319955154" duration="5840000" />
+      <workItem from="1550208891310" duration="13000" />
+      <workItem from="1550517244914" duration="479000" />
+      <workItem from="1550520907787" duration="134000" />
+      <workItem from="1550591499900" duration="218000" />
+=======
       <workItem from="1548295345756" duration="146446000" />
+>>>>>>> parent of 5270af6... add phasespace
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
+    <option name="totallyTimeSpent" value="256837000" />
+=======
     <option name="totallyTimeSpent" value="239370000" />
+>>>>>>> parent of 5270af6... add phasespace
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -348,7 +426,11 @@
     <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
+<<<<<<< HEAD
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17845787" />
+=======
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16176471" />
+>>>>>>> parent of 5270af6... add phasespace
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -359,8 +441,13 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
+<<<<<<< HEAD
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50278217" side_tool="true" visible="true" weight="0.3163597" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49801272" weight="0.3163597" />
+=======
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5023847" side_tool="true" visible="true" weight="0.39653304" />
       <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49841017" weight="0.3163597" />
+>>>>>>> parent of 5270af6... add phasespace
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -559,6 +646,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/js/binnerN.min.js">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="11764">
+          <caret line="698" column="101" selection-start-line="698" selection-start-column="28" selection-end-line="698" selection-end-column="101" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/myscripts/radarSum.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+        </state>
+      </provider>
+=======
         <state relative-caret-position="321">
           <caret line="1919" column="25" lean-forward="true" selection-start-line="1919" selection-start-column="25" selection-end-line="1919" selection-end-column="25" />
         </state>
@@ -576,6 +676,7 @@
     </entry>
     <entry file="http://localhost:64320/HPCC/HiperView/myscripts/radarSum.js">
       <provider selected="true" editor-type-id="httpFileEditor" />
+>>>>>>> parent of 5270af6... add phasespace
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/js/jquery-1.9.0.min.js">
       <provider selected="true" editor-type-id="text-editor">
@@ -620,8 +721,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HiperView/myscripts/main.js">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="386">
+          <caret line="159" column="86" selection-start-line="147" selection-start-column="9" selection-end-line="159" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HiperView/demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="12" column="42" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="42" />
+=======
         <state relative-caret-position="187">
           <caret line="131" column="17" selection-start-line="131" selection-start-column="17" selection-end-line="131" selection-end-column="17" />
+>>>>>>> parent of 5270af6... add phasespace
         </state>
       </provider>
     </entry>
