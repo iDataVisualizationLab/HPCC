@@ -39,6 +39,11 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
             SERVICE[axes_matrix[p][1]].sp_pos != 0 )
             this.matrix[p].toggleAxisLegend( 0 );
     }
+
+    // test scatter plot matrix positing
+
+
+
 }
 
 function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
@@ -52,7 +57,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    // var scag = setScagnostics();
+    var scag = setScagnostics();
 
     if( !isBinned )
         var points = setPoints( true );
@@ -76,7 +81,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
     this.y = y;
     this.z = z;
     this.data = data;
-    // this.scag = scag;
+    this.scag = scag;
 
     if( !isBinned )
         this.points = points;
