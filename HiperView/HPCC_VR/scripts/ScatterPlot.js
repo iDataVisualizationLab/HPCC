@@ -433,6 +433,9 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
         var bins = new THREE.Group();
         var bin, binCount;
         var binSize = intervals - 1;
+        var getBinOf = {};
+        var oneElementSize = 1 / ( population/6 );
+        var default_size = scale/intervals/1.5;
 
         // inititializing variables
         bin = {}, binCount = {};
@@ -458,6 +461,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
             zb = z.bin( data[p][2] );
             
             binCount[xb][yb][zb] = binCount[xb][yb][zb]+1;
+            getBinOf[dataid[p]] = [xb,yb,zb];
         }
 
         // setting bin
@@ -473,13 +477,12 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
                 {
                     if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
 
-                    var s = binCount[xb][yb][zb] ? binCount[xb][yb][zb]/(population/6) : 1/(population/6);
-                    // if( !binCount[xb][yb][zb] ) continue;
+                    var s = (binCount[xb][yb][zb]+1) * oneElementSize;
 
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
                     var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-                    var geometry = new THREE.SphereGeometry( scale/intervals/1.5, 16, 16 );
+                    var geometry = new THREE.SphereGeometry( default_size, 8, 8 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
                     point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
@@ -495,6 +498,8 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
         bins.bin = bin;
         bins.binCount = binCount;
+        bins.getBinOf = getBinOf;
+        bins.oneElementSize = oneElementSize;
 
         return bins;
     }
@@ -509,6 +514,42 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
             this.y.obj.visible = !this.y.obj.visible;
         if( axis == 2 )
             this.z.obj.visible = !this.z.obj.visible;
+    }
+
+    this.updateBin = function( bin, new_size )
+    {
+        var intervals = 10;
+        var sinterval = (new_size - bin.scale.x)/intervals;
+        var count = 0;
+    
+        var resizeBin = setInterval( function()
+        {
+            bin.scale.x += sinterval;
+            bin.scale.y += sinterval;
+            bin.scale.z += sinterval;
+            count++;
+    
+            if( count == intervals )
+                clearInterval( resizeBin );
+    
+        }, 1 );
+    }
+
+    this.getTotalBinCount = function()
+    {
+        var total = 0;
+        var bin = this.bins.bin;
+        var binCount = this.bins.binCount;
+
+        for( xb in bin )
+            if( bin.hasOwnProperty(xb) )
+                for( yb in bin[xb] )
+                    if( bin[xb].hasOwnProperty(yb) )
+                        for( zb in bin[xb][yb] )
+                            if( bin[xb][yb].hasOwnProperty(zb) )
+                                total+=binCount[xb][yb][zb];
+
+        return total;
     }
 
 }
