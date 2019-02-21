@@ -130,10 +130,10 @@ function updateCPUMarker( obj )
 function updateScatterPlotMatrix( host, timestamp )
 {
     for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
-    {
-        // updateScatterPlotPoints( host, timestamp, scatter_plot_matrix.matrix[sp] );
-        updateScatterPlotBins( host, timestamp, scatter_plot_matrix.matrix[sp] );
-    }
+        if( scatter_plot_matrix.isBinned )
+            updateScatterPlotBins( host, timestamp, scatter_plot_matrix.matrix[sp] );
+        else
+            updateScatterPlotPoints( host, timestamp, scatter_plot_matrix.matrix[sp] );
 }
 
 function updateScatterPlotPoints( host, timestamp, sp )
@@ -178,32 +178,36 @@ function updateScatterPlotBins( host, timestamp, sp )
     if( json[host] == undefined )
         return 0;
 
+    // get host raw coordinates
     var services = sp.axes;
     var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
     var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
     var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
 
+    // get old host bin coordinates
     var o_xb = sp.bins.getBinOf[host][0];
     var o_yb = sp.bins.getBinOf[host][1];
     var o_zb = sp.bins.getBinOf[host][2];
 
+    // get new host bin coordinates
     var n_xb = sp.x.bin(x);
     var n_yb = sp.y.bin(y);
     var n_zb = sp.z.bin(z);
 
+    // update current host bin coordinates
     sp.bins.getBinOf[host][0] = n_xb;
     sp.bins.getBinOf[host][1] = n_yb;
     sp.bins.getBinOf[host][2] = n_zb;
 
+    // update binCount
     var o_new_size = ( --sp.bins.binCount[o_xb][o_yb][o_zb] ) * sp.bins.oneElementSize; // increase one to count and get new size
     var n_new_size = ( ++sp.bins.binCount[n_xb][n_yb][n_zb] ) * sp.bins.oneElementSize; // decrease one to count and get new size
 
-    sp.bins.bin[o_xb][o_yb][o_zb].scale.set( o_new_size, o_new_size, o_new_size );
-    sp.bins.bin[n_xb][n_yb][n_zb].scale.set( n_new_size, n_new_size, n_new_size );
+    // update bin size
+    sp.bins.bin[o_xb][o_yb][o_zb].scale.set( o_new_size, o_new_size, o_new_size );      // decrease old bin
+    sp.bins.bin[n_xb][n_yb][n_zb].scale.set( n_new_size, n_new_size, n_new_size );      // increase new bin
 
-    // sp.updateBin( sp.bins.bin[o_xb][o_yb][o_zb], o_new_size );                          // decrease old bin
-    // sp.updateBin( sp.bins.bin[n_xb][n_yb][n_zb], n_new_size );                          // increase new bin
-
+    // update unused bins
     sp.bins.bin[o_xb][o_yb][o_zb].visible = sp.bins.binCount[o_xb][o_yb][o_zb] != 0;
     sp.bins.bin[n_xb][n_yb][n_zb].visible = sp.bins.binCount[n_xb][n_yb][n_zb] != 0;
 }

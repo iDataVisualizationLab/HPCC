@@ -2,6 +2,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 {
     this.matrix = {};
     this.graph = new THREE.Group();
+    this.isBinned = isBinned;
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
@@ -97,10 +98,10 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
         info.bin = function( n )
         {
-            var interval = this.range/this.binSize+this.min;
+            var interval = this.range/this.binSize;
             for( var b=0; b<this.binSize; b++ )
             {
-                if( n>b*interval & n<(b+1)*interval)
+                if( n>b*interval + this.min & n<(b+1)*interval+this.min)
                     return b;
             }
             return 0;
@@ -434,7 +435,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
         var bin, binCount;
         var binSize = intervals - 1;
         var getBinOf = {};
-        var oneElementSize = 1 / ( population/6 );
+        var oneElementSize = 1 / ( population/4 );
         var default_size = scale/intervals/1.5;
 
         // inititializing variables
@@ -481,7 +482,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
-                    var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+                    var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: 0.75 } );
                     var geometry = new THREE.SphereGeometry( default_size, 8, 8 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
