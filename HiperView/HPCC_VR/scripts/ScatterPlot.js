@@ -51,13 +51,12 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
     var graph = new THREE.Group();
     var grid = setGrid();
+    // var scag = setScagnostics();
 
     if( !isBinned )
         var points = setPoints( true );
     else
         var bins = setBins();
-
-    // var scag = setScagnostics();
 
     graph.add( grid );
     graph.add( x.obj );
@@ -76,13 +75,12 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
     this.y = y;
     this.z = z;
     this.data = data;
+    // this.scag = scag;
 
     if( !isBinned )
         this.points = points;
     else
         this.bins = bins;
-
-    // this.scag = scag;
 
     // functions
 
@@ -475,17 +473,20 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
                 {
                     if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
 
-                    if( !binCount[xb][yb][zb] ) continue;
+                    var r = binCount[xb][yb][zb] ? 0.0005 * binCount[xb][yb][zb] : 0.00025;
+                    // if( !binCount[xb][yb][zb] ) continue;
 
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
                     var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-                    var geometry = new THREE.SphereGeometry( 0.0005 * binCount[xb][yb][zb], 16, 16 );
+                    var geometry = new THREE.SphereGeometry( r, 16, 16 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
                     point.position.x = x.match( xb );
                     point.position.y = y.match( yb );
                     point.position.z = z.match( zb );
+
+                    point.visible = binCount[xb][yb][zb] != 0;
 
                     bins.add( point );
                     bin[xb][yb][zb] = point;
