@@ -141,7 +141,15 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
             tmp.push( tmp2 );
         }
 
-        return scagnostics3d( tmp );
+        var scagOptions = {
+            startBinGridSize: 2,
+            minBin: 2,
+            maxBin: 2
+        };
+
+        scagOptions = {};
+
+        return scagnostics3d( tmp, scagOptions );
     }
 
     function setGrid()
