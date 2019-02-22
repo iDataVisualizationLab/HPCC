@@ -531,7 +531,7 @@ function initHPCC()
 function initScatterPlotMatrix()
 {
     var hostkeys = Object.keys(json);
-    var tmp, datas = [], s, ranges = [], selectedSPServices = [];
+    var tmp, datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
 
     // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
     // var y = [ "arrFans_speed1", "arrFans_speed2" ];
@@ -546,18 +546,22 @@ function initScatterPlotMatrix()
         {
             for( temp in x )
             {
-                s = [z[other],y[fan],x[temp]];
+                var s = [z[other],y[fan],x[temp]];
                 selectedSPServices.push(s);
-                data = []
+                var data = [];
+                var datakey = {};
+
                 for( var h=0; h<hostkeys.length; h++ )
                 {
+                    datakey[hostkeys[h]] = h;
                     tmp = [];
                     tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
                     tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
                     tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
                     data.push( tmp )
                 }
-                datas.push(data);
+                datakeys.push( datakey );
+                datas.push( data );
                 ranges.push([SERVICE[s[0]]["dom"],
                             SERVICE[s[1]]["dom"],
                             SERVICE[s[2]]["dom"]] );
@@ -566,7 +570,7 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );

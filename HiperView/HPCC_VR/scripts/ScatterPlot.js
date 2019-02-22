@@ -1,4 +1,4 @@
-function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned )
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned, datakeys )
 {
     this.matrix = {};
     this.graph = new THREE.Group();
@@ -13,7 +13,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         dataid,
                                         data_matrix[p],
                                         scale,
-                                        isBinned );
+                                        isBinned,
+                                        datakeys[p] );
         this.graph.add( this.matrix[p].graph );
 
         // setting inner scatter plot position
@@ -46,7 +47,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 
 }
 
-function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
+function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, datakey )
 {
     // building scatter plot
     var population = data.length;
@@ -80,8 +81,9 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
     this.x = x;
     this.y = y;
     this.z = z;
+    this.datakey = datakey;
     this.data = data;
-    this.scag = scag;
+    this.scag = null;
 
     if( !isBinned )
         this.points = points;
@@ -141,13 +143,13 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
             tmp.push( tmp2 );
         }
 
-        var scagOptions = {
-            startBinGridSize: 2,
-            minBin: 2,
-            maxBin: 2
-        };
+        // var scagOptions = {
+        //     startBinGridSize: 2,
+        //     minBin: 2,
+        //     maxBin: 2
+        // };
 
-        scagOptions = {};
+        var scagOptions = {};
 
         return scagnostics3d( tmp, scagOptions );
     }
