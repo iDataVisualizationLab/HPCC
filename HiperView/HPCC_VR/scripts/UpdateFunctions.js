@@ -135,20 +135,22 @@ function updateScatterPlotMatrix( host, timestamp )
 
     for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
     {
+        var plot = scatter_plot_matrix.matrix[sp];
+
         // get host raw new coordinates
-        var services = scatter_plot_matrix.matrix[sp].axes;
-        var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
-        var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
-        var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
+        var services = plot.axes;
+        var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : 0;
+        var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : 0;
+        var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
 
-        // update matrix scagnostic
-
+        // update matrix data & scagnostic
+        plot.updateData( plot.datakey[host], x, y, z );
 
         // update matrix content
         if( scatter_plot_matrix.isBinned )
-            updateScatterPlotBins( host, x, y, z, scatter_plot_matrix.matrix[sp] );
+            updateScatterPlotBins( host, x, y, z, plot );
         else
-            updateScatterPlotPoints( host, x, y, z, scatter_plot_matrix.matrix[sp] );
+            updateScatterPlotPoints( host, x, y, z, plot );
     }
 }
 
