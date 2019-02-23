@@ -30,12 +30,12 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( 6-z ) * scale * 1.5;
 
 
-        // adding axis labels
-        var label_geometry = new THREE.BoxGeometry( scale, scale, scale );
-        var label_material = new THREE.MeshBasicMaterial( {  color: 0xff0000 } );
-        var label = new THREE.Mesh( back_geometry, back_material );
-        background.position.set(scale/2,scale/2,scale/2);
-        box.add( background );
+        // // adding axis labels
+        // var label_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        // var label_material = new THREE.MeshBasicMaterial( {  color: 0xff0000 } );
+        // var label = new THREE.Mesh( back_geometry, back_material );
+        // background.position.set(scale/2,scale/2,scale/2);
+        // box.add( background );
     }
 
     function summation( n )
