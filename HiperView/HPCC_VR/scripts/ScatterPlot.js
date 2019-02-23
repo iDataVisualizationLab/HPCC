@@ -5,24 +5,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     this.graph.visible = false;
     this.isBinned = isBinned;
 
-    // // hiding legends
-    // if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
-    //     this.matrix[p].toggleAxisLegend( 0 );
-    // if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
-    // {
-    //     this.matrix[p].toggleAxisLegend( 1 );
-    //     this.matrix[p].toggleAxisLegend( 2 );
-    // }
-    // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-    //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-    //     this.matrix[p].toggleAxisLegend( 1 );
-    // if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
-    //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-    //     this.matrix[p].toggleAxisLegend( 2 );
-    // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-    //     SERVICE[axes_matrix[p][1]].sp_pos != 0 )
-    //     this.matrix[p].toggleAxisLegend( 0 );
-
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
@@ -46,6 +28,14 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.matrix[p].graph.position.set( xpos, ypos, 0 );
         this.matrix[p].graph.position.x = this.matrix[p].graph.position.x + summation(z-1) * scale * 1.8;
         this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( 6-z ) * scale * 1.5;
+
+
+        // adding axis labels
+        var label_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        var label_material = new THREE.MeshBasicMaterial( {  color: 0xff0000 } );
+        var label = new THREE.Mesh( back_geometry, back_material );
+        background.position.set(scale/2,scale/2,scale/2);
+        box.add( background );
     }
 
     function summation( n )
