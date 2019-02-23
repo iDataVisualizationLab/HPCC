@@ -1,7 +1,8 @@
-function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, bin_size, scale )
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned )
 {
     this.matrix = {};
     this.graph = new THREE.Group();
+    this.isBinned = isBinned;
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
@@ -11,8 +12,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         intervals,
                                         dataid,
                                         data_matrix[p],
-                                        bin_size,
-                                        scale );
+                                        scale,
+                                        isBinned );
         this.graph.add( this.matrix[p].graph );
 
         // setting inner scatter plot position
@@ -38,9 +39,14 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
             SERVICE[axes_matrix[p][1]].sp_pos != 0 )
             this.matrix[p].toggleAxisLegend( 0 );
     }
+
+    // test scatter plot matrix positing
+
+
+
 }
 
-function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
+function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 {
     // building scatter plot
     var population = data.length;
@@ -51,18 +57,25 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var points = setPoints( true );
     var scag = setScagnostics();
 
+    if( !isBinned )
+        var points = setPoints( true );
+    else
+        var bins = setBins();
+
     graph.add( grid );
-    graph.add( points );
     graph.add( x.obj );
     graph.add( y.obj );
     graph.add( z.obj );
 
+    if( !isBinned )
+        graph.add( points );
+    else
+        graph.add( bins );
+
     this.graph = graph;
     this.grid = grid;
-    this.points = points;
     this.axes = axes;
     this.x = x;
     this.y = y;
@@ -70,14 +83,12 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
     this.data = data;
     this.scag = scag;
 
-    // functions
+    if( !isBinned )
+        this.points = points;
+    else
+        this.bins = bins;
 
-    function fit( val, axis )
-    {
-        if( val == undefined ) return 0;
-        if( axis.range == 0 ) return 0;
-        return scale * (val - axis.min) / axis.range;
-    }
+    // functions
 
     function setInfo( axis )
     {
@@ -88,6 +99,32 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
         info.obj = setAxis( axis, info );
+        info.binSize = intervals - 1;
+
+        info.bin = function( n )
+        {
+            var interval = this.range/this.binSize;
+            for( var b=0; b<this.binSize; b++ )
+            {
+                if( n>b*interval + this.min & n<(b+1)*interval+this.min)
+                    return b;
+            }
+            return 0;
+        }
+
+        info.fit = function( n )
+        {
+            if( n == undefined ) return 0;
+            if( this.range == 0 ) return 0;
+            return scale * (n - this.min) / this.range;
+        }
+
+        info.match = function( b )
+        {
+            var interval = this.range/this.binSize;
+            var pos = b*interval*1 + this.min + interval/2;
+            return this.fit(pos);
+        }
 
         return info;
     }
@@ -356,7 +393,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         {
             if( data[p][0] )
             {
-                pos[0] = fit( data[p][0], x );
+                pos[0] = x.fit( data[p][0] );
             }
             else
             {
@@ -365,7 +402,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
             if( data[p][1] )
             {
-                pos[1] = fit( data[p][1], y );
+                pos[1] = y.fit( data[p][1] );
             }
             else
             {
@@ -374,7 +411,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
 
             if( data[p][2] )
             {
-                pos[2] = fit( data[p][2], z );
+                pos[2] = z.fit( data[p][2] );
             }
             else
             {
@@ -397,14 +434,83 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
         return points;
     }
 
-    // public functions
-
-    this.fit = function fit( val, axis )
+    function setBins()
     {
-        if( val == undefined ) return 0;
-        if( axis.range == 0 ) return 0;
-        return scale * (val - axis.min) / axis.range;
+        var bins = new THREE.Group();
+        var bin, binCount;
+        var binSize = intervals - 1;
+        var getBinOf = {};
+        var oneElementSize = 1 / ( population/4 );
+        var default_size = scale/intervals/1.5;
+
+        // inititializing variables
+        bin = {}, binCount = {};
+        for( var bx=0; bx<binSize; bx++ )
+        {
+            bin[bx] = {}, binCount[bx] = {};
+            for( var by=0; by<binSize; by++ )
+            {
+                bin[bx][by] = {}, binCount[bx][by] = {};
+                for( var bz=0; bz<binSize; bz++ )
+                {
+                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
+                }
+            }
+        }
+
+        // setting binCount
+        var xb, yb, zb;
+        for( var p=0; p<population; p++ )
+        {
+            xb = x.bin( data[p][0] );
+            yb = y.bin( data[p][1] );
+            zb = z.bin( data[p][2] );
+            
+            binCount[xb][yb][zb] = binCount[xb][yb][zb]+1;
+            getBinOf[dataid[p]] = [xb,yb,zb];
+        }
+
+        // setting bin
+        for( xb in bin )
+        {
+            if( !bin.hasOwnProperty(xb) ) continue;
+
+            for( yb in bin )
+            {
+                if( !bin[xb].hasOwnProperty(yb) ) continue;
+
+                for( zb in bin[xb][yb] )
+                {
+                    if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
+
+                    var s = (binCount[xb][yb][zb]+1) * oneElementSize;
+
+                    // if( xb != 2 | yb != 2 | zb != 2 ) continue;
+
+                    var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: 0.75 } );
+                    var geometry = new THREE.SphereGeometry( default_size, 8, 8 );
+                    var point = new THREE.Mesh( geometry, material );
+                    point.count = binCount[xb][yb][zb];
+                    point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
+                    point.scale.set( s, s, s );
+
+                    point.visible = binCount[xb][yb][zb] != 0;
+
+                    bins.add( point );
+                    bin[xb][yb][zb] = point;
+                }
+            }
+        }
+
+        bins.bin = bin;
+        bins.binCount = binCount;
+        bins.getBinOf = getBinOf;
+        bins.oneElementSize = oneElementSize;
+
+        return bins;
     }
+
+    // public functions
 
     this.toggleAxisLegend = function( axis )
     {
@@ -414,6 +520,42 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, bin_size, scale )
             this.y.obj.visible = !this.y.obj.visible;
         if( axis == 2 )
             this.z.obj.visible = !this.z.obj.visible;
+    }
+
+    this.updateBin = function( bin, new_size )
+    {
+        var intervals = 10;
+        var sinterval = (new_size - bin.scale.x)/intervals;
+        var count = 0;
+    
+        var resizeBin = setInterval( function()
+        {
+            bin.scale.x += sinterval;
+            bin.scale.y += sinterval;
+            bin.scale.z += sinterval;
+            count++;
+    
+            if( count == intervals )
+                clearInterval( resizeBin );
+    
+        }, 1 );
+    }
+
+    this.getTotalBinCount = function()
+    {
+        var total = 0;
+        var bin = this.bins.bin;
+        var binCount = this.bins.binCount;
+
+        for( xb in bin )
+            if( bin.hasOwnProperty(xb) )
+                for( yb in bin[xb] )
+                    if( bin[xb].hasOwnProperty(yb) )
+                        for( zb in bin[xb][yb] )
+                            if( bin[xb][yb].hasOwnProperty(zb) )
+                                total+=binCount[xb][yb][zb];
+
+        return total;
     }
 
 }
