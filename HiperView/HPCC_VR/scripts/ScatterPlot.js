@@ -58,15 +58,20 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.graph.add( plot );
 
         var x = SERVICE[axes_matrix[p][0]].sp_pos;
-        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + 6;
+        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + Object.keys(SERVICE).length;
         var z = SERVICE[axes_matrix[p][2]].sp_pos;
 
         var xpos = x * scale * 1.5;
         var ypos = y * scale * 1.5;
-        var zpos = z * scale * 1.5;
 
         plot.position.set( xpos, ypos, 0 );
-        plot.position.x = plot.position.x + z/1.5 ;
+        plot.position.x = plot.position.x + summation(z-1) * scale * 1.8;
+        plot.position.y = plot.position.y - ( 6-z ) * scale * 1.5;
+    }
+
+    function summation( n )
+    {
+        return ( n * ( n + 1 ) ) / 2;
     }
 
 }

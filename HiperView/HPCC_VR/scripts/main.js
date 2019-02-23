@@ -571,6 +571,7 @@ function initScatterPlotMatrix()
                     // data.push( [ s1 ? s1 : 0, s2 ? s2 : 0, s3 ? s3 : 0 ] );
                     data.push( [0,0,0] );
                 }
+
                 datakeys.push( datakey );
                 datas.push( data );
                 ranges.push([SERVICE[s[0]]["dom"],
@@ -581,8 +582,8 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.10, true, datakeys );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, ROOM_SIZE * -1, ROOM_SIZE * -0.9 );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );
 
