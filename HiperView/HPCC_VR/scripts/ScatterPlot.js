@@ -6,6 +6,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
+
         this.length = p+1;
         this.matrix[p] = new ScatterPlot( axes_matrix[p],
                                         ranges_matrix[p],
@@ -22,28 +23,51 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 1.5; // fans speed
         this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 1.5; // other service
 
-        // hiding legends
-        if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 0 );
-        if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
-        {
-            this.matrix[p].toggleAxisLegend( 1 );
-            this.matrix[p].toggleAxisLegend( 2 );
-        }
-        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 1 );
-        if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 2 );
-        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][1]].sp_pos != 0 )
-            this.matrix[p].toggleAxisLegend( 0 );
+        // // hiding legends
+        // if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
+        //     this.matrix[p].toggleAxisLegend( 0 );
+        // if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
+        // {
+        //     this.matrix[p].toggleAxisLegend( 1 );
+        //     this.matrix[p].toggleAxisLegend( 2 );
+        // }
+        // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+        //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+        //     this.matrix[p].toggleAxisLegend( 1 );
+        // if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
+        //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+        //     this.matrix[p].toggleAxisLegend( 2 );
+        // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+        //     SERVICE[axes_matrix[p][1]].sp_pos != 0 )
+        //     this.matrix[p].toggleAxisLegend( 0 );
     }
 
-    // test scatter plot matrix positing
+    for( var p=0; p<axes_matrix.length; p++ )
+    {
+        this.length = p+1;
+        var plot = this.matrix[p].graph;
 
+        this.matrix[p] = new ScatterPlot( axes_matrix[p],
+                                        ranges_matrix[p],
+                                        intervals,
+                                        dataid,
+                                        data_matrix[p],
+                                        scale,
+                                        isBinned,
+                                        datakeys[p] );
+        this.graph.add( plot );
 
+        var x = SERVICE[axes_matrix[p][0]].sp_pos;
+        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + 6;
+        var z = SERVICE[axes_matrix[p][2]].sp_pos;
+
+        var xpos = x * scale * 1.5;
+        var ypos = y * scale * 1.5;
+        var zpos = z * scale * 1.5;
+
+        plot.position.set( xpos, ypos, 0 );
+        plot.position.x = plot.position.x + z/1.5 ;
+    }
 
 }
 
@@ -58,7 +82,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    // var scag = scagnostics3d( data );
 
     if( !isBinned )
         var points = setPoints();
@@ -66,9 +89,9 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         var bins = setBins();
 
     graph.add( grid );
-    graph.add( x.obj );
-    graph.add( y.obj );
-    graph.add( z.obj );
+    // graph.add( x.obj );
+    // graph.add( y.obj );
+    // graph.add( z.obj );
 
     if( !isBinned )
         graph.add( points );
@@ -100,7 +123,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
-        info.obj = setAxis( axis, info );
+        // info.obj = setAxis( axis, info );
         info.binSize = intervals - 1;
 
         info.bin = function( n )

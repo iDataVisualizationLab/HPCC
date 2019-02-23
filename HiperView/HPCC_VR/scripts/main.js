@@ -8,7 +8,6 @@ var timeObj = {};
 
 // selected
 var selectedTimestamp = 1;
-var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
 
 var ROOM_SIZE = 1;
 var RACK_NUM = 10;
@@ -26,13 +25,13 @@ var fillHost;
 var updateTimestamp;
 var move_timer;
 
-var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 0 },
-                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 1  },
-                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 2 },
-                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 1 },
-                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 0 },
-                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 1 },
-                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 0 },
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 5 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 6 },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 0 },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 3 },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 1 },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 2 },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
 
@@ -536,17 +535,29 @@ function initScatterPlotMatrix()
     // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
     // var y = [ "arrFans_speed1", "arrFans_speed2" ];
     // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    var x = [ "arrTemperatureCPU1" ];
-    var y = [ "arrFans_speed1" ];
-    var z = [ "arrPower_usage"];
+    // var x = [ "arrTemperatureCPU1" ];
+    // var y = [ "arrFans_speed1" ];
+    // var z = [ "arrPower_usage"];
 
-    for( other in z )
+    var element = Object.keys( SERVICE );
+    // element.pop();
+    // element.pop();
+
+    var slist = [];
+
+    for( x in element )
     {
-        for( fan in y )
+        for( y in element )
         {
-            for( temp in x )
+            for( z in element )
             {
-                var s = [z[other],y[fan],x[temp]];
+                var s = [ element[x], element[y], element[z] ].sort();
+
+                if( isRepeated( s, slist ) )
+                    continue;
+                else
+                    slist.push( s.toString() );
+
                 selectedSPServices.push(s);
                 var data = [];
                 var datakey = {};
@@ -570,12 +581,26 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.10, true, datakeys );
     scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );
 
-    foo = scatter_plot_matrix.matrix[0];
+    scatter_plot_matrix.axis_combinations = slist;
+
+    function isRepeated( a, A )
+    {
+        if( a[0] == a[1] | a[0] == a[2] | a[1] == a[2] )
+            return true;
+
+        a = a.toString();
+        for( var r=0; r<A.length; r++ )
+        {
+            if( a == A[r] )
+                return true;
+        }
+        return false;
+    }
 }
 
 function initParallelSet()
