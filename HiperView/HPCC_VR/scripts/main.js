@@ -533,12 +533,12 @@ function initScatterPlotMatrix()
     var hostkeys = Object.keys(json);
     var datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
 
-    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    // var x = [ "arrTemperatureCPU1" ];
-    // var y = [ "arrFans_speed1" ];
-    // var z = [ "arrPower_usage"];
+    // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
+    // var y = [ "arrFans_speed1", "arrFans_speed2" ];
+    // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
+    var x = [ "arrTemperatureCPU1" ];
+    var y = [ "arrFans_speed1" ];
+    var z = [ "arrPower_usage"];
 
     for( other in z )
     {
@@ -550,14 +550,13 @@ function initScatterPlotMatrix()
                 selectedSPServices.push(s);
                 var data = [];
                 var datakey = {};
-                var s1, s2, s3;
 
                 for( var h=0; h<hostkeys.length; h++ )
                 {
                     datakey[hostkeys[h]] = h;
-                    s1 = json[hostkeys[h]][s[0]][selectedTimestamp];
-                    s2 = json[hostkeys[h]][s[1]][selectedTimestamp];
-                    s3 = json[hostkeys[h]][s[2]][selectedTimestamp];
+                    var s1 = json[hostkeys[h]][s[0]][selectedTimestamp];
+                    var s2 = json[hostkeys[h]][s[1]][selectedTimestamp];
+                    var s3 = json[hostkeys[h]][s[2]][selectedTimestamp];
                     // data.push( [ s1 ? s1 : 0, s2 ? s2 : 0, s3 ? s3 : 0 ] );
                     data.push( [0,0,0] );
                 }

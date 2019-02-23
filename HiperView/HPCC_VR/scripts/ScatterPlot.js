@@ -529,13 +529,34 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         // run scagnostics when all data is declared
         if( this.data.length-1 == key )
         {
-            var workerScag = new Worker("scripts/worker/scag_worker.js");
-            workerScag.postMessage( p.data );
-            workerScag.onmessage = function( event )
-            {
-                p.scag = event.data;
-                console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
-            };
+            // var workerScag = new Worker("scripts/worker/scag_worker.js");
+            // workerScag.postMessage( p.data );
+            // workerScag.onmessage = function( event )
+            // {
+            //     p.scag = event.data;
+            //     console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
+            // };
+
+            promiseScag( p.data ).then( message =>
+                {
+                    console.log(message.outlyingScore);
+                    p.scag = message;
+                } );
+        }
+
+        function promiseScag( data )
+        {
+            return new Promise( resolve => 
+                {
+                    var options = {
+                            startBinGridSize: 10,
+                            minBins: 5,
+                            maxBins: 20
+                        }
+                    var scag = scagnosticsnd( data, options );
+
+                    resolve(scag)
+                } );
         }
     }
 
