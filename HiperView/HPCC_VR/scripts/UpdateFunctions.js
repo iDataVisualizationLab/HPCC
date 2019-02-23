@@ -41,8 +41,8 @@ function updateValues( timestamp )
             updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
 
             // update scatterplot point per host (i.e. not per cpu)
-            // if( cpu == 1 )
-                // updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
+            if( cpu == 1 )
+                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )

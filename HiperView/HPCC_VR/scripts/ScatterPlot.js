@@ -2,11 +2,29 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 {
     this.matrix = {};
     this.graph = new THREE.Group();
+    this.graph.visible = false;
     this.isBinned = isBinned;
+
+    // // hiding legends
+    // if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
+    //     this.matrix[p].toggleAxisLegend( 0 );
+    // if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
+    // {
+    //     this.matrix[p].toggleAxisLegend( 1 );
+    //     this.matrix[p].toggleAxisLegend( 2 );
+    // }
+    // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+    //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+    //     this.matrix[p].toggleAxisLegend( 1 );
+    // if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
+    //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
+    //     this.matrix[p].toggleAxisLegend( 2 );
+    // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
+    //     SERVICE[axes_matrix[p][1]].sp_pos != 0 )
+    //     this.matrix[p].toggleAxisLegend( 0 );
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
-
         this.length = p+1;
         this.matrix[p] = new ScatterPlot( axes_matrix[p],
                                         ranges_matrix[p],
@@ -18,45 +36,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         datakeys[p] );
         this.graph.add( this.matrix[p].graph );
 
-        // setting inner scatter plot position
-        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 1.5; // temperature
-        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 1.5; // fans speed
-        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 1.5; // other service
-
-        // // hiding legends
-        // if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
-        //     this.matrix[p].toggleAxisLegend( 0 );
-        // if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
-        // {
-        //     this.matrix[p].toggleAxisLegend( 1 );
-        //     this.matrix[p].toggleAxisLegend( 2 );
-        // }
-        // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-        //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-        //     this.matrix[p].toggleAxisLegend( 1 );
-        // if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
-        //     SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-        //     this.matrix[p].toggleAxisLegend( 2 );
-        // if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-        //     SERVICE[axes_matrix[p][1]].sp_pos != 0 )
-        //     this.matrix[p].toggleAxisLegend( 0 );
-    }
-
-    for( var p=0; p<axes_matrix.length; p++ )
-    {
-        this.length = p+1;
-        var plot = this.matrix[p].graph;
-
-        this.matrix[p] = new ScatterPlot( axes_matrix[p],
-                                        ranges_matrix[p],
-                                        intervals,
-                                        dataid,
-                                        data_matrix[p],
-                                        scale,
-                                        isBinned,
-                                        datakeys[p] );
-        this.graph.add( plot );
-
         var x = SERVICE[axes_matrix[p][0]].sp_pos;
         var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + Object.keys(SERVICE).length;
         var z = SERVICE[axes_matrix[p][2]].sp_pos;
@@ -64,9 +43,9 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         var xpos = x * scale * 1.5;
         var ypos = y * scale * 1.5;
 
-        plot.position.set( xpos, ypos, 0 );
-        plot.position.x = plot.position.x + summation(z-1) * scale * 1.8;
-        plot.position.y = plot.position.y - ( 6-z ) * scale * 1.5;
+        this.matrix[p].graph.position.set( xpos, ypos, 0 );
+        this.matrix[p].graph.position.x = this.matrix[p].graph.position.x + summation(z-1) * scale * 1.8;
+        this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( 6-z ) * scale * 1.5;
     }
 
     function summation( n )
@@ -565,6 +544,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             //     console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
             // };
 
+            // compute scag via promise
             promiseScag( p.data ).then( message =>
                 {
                     console.log(message.outlyingScore);

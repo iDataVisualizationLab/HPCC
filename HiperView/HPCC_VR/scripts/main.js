@@ -425,7 +425,7 @@ function initLever()
     // set rotation and position
     lever.add( pivot );
     lever.pivot = pivot;
-    pivot.rotation.set( Math.PI/-4, 0, 0 );
+    pivot.rotation.set( Math.PI/4, 0, 0 );
     lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
     scene.add( lever );
 
@@ -531,14 +531,6 @@ function initScatterPlotMatrix()
 {
     var hostkeys = Object.keys(json);
     var datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
-
-    // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    // var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    // var x = [ "arrTemperatureCPU1" ];
-    // var y = [ "arrFans_speed1" ];
-    // var z = [ "arrPower_usage"];
-
     var element = Object.keys( SERVICE );
     // element.pop();
     // element.pop();
@@ -616,7 +608,7 @@ function initParallelSet()
         for( var s=0; s<table[0].length; s++ )
         {
             if( json[host][table[0][s]] )
-                tmp.push(json[host][table[0][s]][19]);
+                tmp.push(json[host][table[0][s]][0]);
             else
                 tmp.push(undefined);
         }
@@ -627,7 +619,7 @@ function initParallelSet()
     parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
-    parallel_set.graph.visible = false;
+    parallel_set.graph.visible = true;
 }
 
 // Animate & Render
