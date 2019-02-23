@@ -39,17 +39,22 @@ function readData() {
         hostResults[h.name].arrMemory_usage = [];
         hostResults[h.name].arrFans_health = [];
         hostResults[h.name].arrPower_usage = [];
+        hostResults[h.name].arrTime = [];
         hosts.push(h);
         readDataList(count,0);
         count++;
 
         function readDataList(count,iteration) {
             for (i = 0; i < iterationstep; i++) {
+                var query_time = undefined;
+                var name= undefined;
                 serviceListattr.forEach((sv,si)=> {
                     var result = simulateResults2(hosts[count].name, iteration, serviceList[si]);
-                    var name = result.data.service.host_name;
+                    query_time = result.result.query_time||query_time;
+                    name = result.data.service.host_name||name;
                     hostResults[name][sv].push(processData(result.data.service.plugin_output, serviceList[si]));
                 });
+                hostResults[name]['arrTime'].push(query_time);
                 iteration++;
             }
             return iteration;
@@ -203,7 +208,7 @@ function object2DataPrallel(ob){
             });
             eachIn.timestep = i;
             eachIn.group = rack;
-            eachIn.name = com.key;
+            eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
             eachIn.id = com.key+"-"+count;
             count++;
             newdata.push(eachIn);
