@@ -435,9 +435,9 @@ function changeGroupTarget(key) {
 }
 function rangeToString(arr){
     let midleRange = arr.slice(1,this.length-1);
-    let mapRangeName = ["<"+midleRange[0]];
-    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push(midleRange[i]+'-'+d));
-    mapRangeName.push(">"+midleRange[midleRange.length-1]);
+    let mapRangeName = ["(<"+midleRange[0]+")"];
+    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push("("+midleRange[i]+'-'+d+")"));
+    mapRangeName.push("(>"+midleRange[midleRange.length-1]+")");
     return mapRangeName;
 }
 function position(d) {
