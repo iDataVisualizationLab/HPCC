@@ -76,7 +76,12 @@ body.light {
     font-family: 'Fredoka One', cursive;
     color: #ffffff
 }
-
+#header img{
+    width:10em;
+}
+.sidenav img{
+    width:10em;
+}
 .light #header,.light #header a,.light #header .brand-logo {
     color: #484848
 }
