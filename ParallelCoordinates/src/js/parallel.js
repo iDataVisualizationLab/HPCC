@@ -59,7 +59,7 @@ var orderLegend;
 var svgLengend = d3.select('#colorContinuos').append('div').append('svg')
     .attr("class", "legendView")
     .attr("width", 20)
-    .attr("height", h);
+    .attr("height", h).style('display','none');
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
@@ -167,7 +167,8 @@ var svg = d3.select("svg")
         .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
         .append("svg:text")
         .attr("text-anchor", "middle")
-        .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
+        // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
+        .attr("y", -14)
         .attr("x", 0)
         .attr("class", "label")
         .text(String)
@@ -811,16 +812,23 @@ function search(selection,str) {
 
 $( document ).ready(function() {
     let comboBox = d3.select("#groupName");
+    let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
+    listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
     comboBox.select('.dropdown-content')
-        .selectAll('a').data(d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})))).join('a')
+        .selectAll('a').data(listOption).join('a')
         .text(d=>d.text)
         .on('click',d=>{
-            console.log(d);
             comboBox.select('.dropbtn').text(d.text);
-            selectedService = d.arr;
-            setColorsAndThresholds(d.service);
-            drawLegend(d.service,arrThresholds, arrColor,dif);
-            changeGroupTarget(selectedService);
+            if (d.arr==='rack'){
+                selectedService = null;
+                svgLengend.style('display','none');
+            }else {
+                selectedService = d.arr;
+                setColorsAndThresholds(d.service);
+                drawLegend(d.service, arrThresholds, arrColor, dif);
+                svgLengend.style('display',null);
+            }
+            changeGroupTarget(d.arr);
             legend = create_legend(colors,brush);
             brush();
         });
