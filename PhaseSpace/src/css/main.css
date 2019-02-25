@@ -77,7 +77,10 @@ body.light {
     color: #ffffff
 }
 #header img{
-    width:3em;
+    padding-top: 0.5em;
+    display: block;
+    height: auto;
+    max-width: 3em;
 }
 .sidenav img{
     width:10em;
