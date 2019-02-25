@@ -429,7 +429,7 @@ function changeGroupTarget(key) {
         var thresholdScale = d3.bisector(function(d) { return d; }).left;
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1,this.length-1);
-        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}});
+        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse();
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }
