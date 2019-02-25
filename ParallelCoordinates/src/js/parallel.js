@@ -50,6 +50,37 @@ background = document.getElementById('background').getContext('2d');
 background.strokeStyle = "rgba(0,100,160,0.1)";
 background.lineWidth = 1.7;
 
+//legend prt
+var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
+var levelStep = 4;
+var arrThresholds;
+var selectedService = null;
+var svgLengend = d3.select('#colorContinuos').append('div').append('svg')
+    .attr("class", "legendView")
+    .attr("width", 20)
+    .attr("height", h);
+function setColorsAndThresholds(s) {
+    for (var i=0; i<serviceList.length;i++){
+        if (s == serviceList[i]){
+            dif = (thresholds[i][1]-thresholds[i][0])/levelStep;
+            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+            left = thresholds[i][0]-dif;
+            if (left<0 && i!=0) // Temperature can be less than 0
+                left=0;
+            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            color = d3.scaleLinear()
+                .domain(arrThresholds)
+                .range(arrColor)
+                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+            opa = d3.scaleLinear()
+                .domain([left,thresholds[i][0],mid, thresholds[i][1], thresholds[i][1]+dif])
+                .range([1,1,0.1,1,1]);
+        }
+    }
+}
+// setColorsAndThresholds(serviceList[0]);
+// drawLegend(serviceList[0],arrThresholds, arrColor,dif);
+
 // SVG for ticks, labels, and interactions
 var svg = d3.select("svg")
     .attr("width", w + m[1] + m[3])
@@ -188,11 +219,16 @@ function grayscale(pixels, args) {
 };
 
 function create_legend(colors,brush) {
+    if (selectedService) {
+        setColorsAndThresholds(serviceList[0]);
+        drawLegend(serviceList[0], arrThresholds, arrColor, dif);
+    }
+    colorbyCategory(data,"group");
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
         .selectAll(".row")
-        .data( _.keys(colors).sort() )
+        .data( colors.domain().sort() )
 
     // filter by group
     var legend = legend_data
@@ -213,7 +249,8 @@ function create_legend(colors,brush) {
 
     legend
         .append("span")
-        .style("background", function(d,i) { return color(d,0.85)})
+        .style("background", function(d,i) { return color(d)})
+        .style("opacity",0.85)
         .attr("class", "color-bar");
 
     legend
@@ -231,7 +268,7 @@ function create_legend(colors,brush) {
 // render polylines i to i+render_speed
 function render_range(selection, i, max, opacity) {
     selection.slice(i,max).forEach(function(d) {
-        path(d, foreground, color(d.group,opacity));
+        path(d, foreground, colorCanvas(d.group,opacity));
     });
 };
 
@@ -254,7 +291,8 @@ function data_table(sample) {
     table
         .append("span")
         .attr("class", "color-block")
-        .style("background", function(d) { return color(d.group,0.85) })
+        .style("background", function(d) { return color(d.group) })
+        .style("opacity",0.85);
 
     table
         .append("span")
@@ -289,7 +327,7 @@ function selection_stats(opacity, n, total) {
 function highlight(d) {
     d3.select("#foreground").style("opacity", "0.25");
     d3.selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
-    path(d, highlighted, color(d.group,1));
+    path(d, highlighted, colorCanvas(d.group,1));
 }
 
 // Remove highlight
@@ -374,8 +412,8 @@ function path(d, ctx, color) {
     ctx.stroke();
 };
 
-function color(d,a) {
-    var c = d3.hsl(colors[d]);
+function colorCanvas(d,a) {
+    var c = d3.hsl(colors(d));
     c.opacity=a;
     return c;
 }
@@ -449,7 +487,6 @@ function brush() {
                 return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
             }) ? selected.push(d) : null;
         });
-    console.log(selected);
     // free text search
     var query = d3.select("#search").node().value;
     if (query.length > 0) {
@@ -469,7 +506,7 @@ function brush() {
         .groupBy(function(d) { return d.group; })
 
     // include empty groups
-    _(colors).each(function(v,k) { tallies[k] = tallies[k] || []; });
+    _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
 
     legend
         .style("text-decoration", function(d) { return _.contains(excluded_groups,d) ? "line-through" : null; })

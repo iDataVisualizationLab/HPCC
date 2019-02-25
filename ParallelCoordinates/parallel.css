@@ -298,3 +298,12 @@ button#exclude-data:hover {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+.legendView {
+    position: relative;
+    top: auto;
+    float: left;
+    margin-left: auto;
+    left: auto;
+    right: auto;
+    min-height: 1px;
+}

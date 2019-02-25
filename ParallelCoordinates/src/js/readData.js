@@ -187,9 +187,9 @@ function object2Data(ob){
     return d3.entries(ob);
 }
 var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
-var colors;
+var colors = d3.scaleOrdinal();
+var color,opa;
 function object2DataPrallel(ob){
-    colors = {};
     var temp = object2Data(ob);
     var count = 0;
     var newdata =[];
@@ -198,7 +198,6 @@ function object2DataPrallel(ob){
         var namet = com.key.split('-');
         var rack = namet[1];
         var host = namet[2];
-        colors[rack] = colorscale(rack);
         for (i = 0; i<comlength; i++){
             var eachIn = {};
             serviceListattrnest.forEach(s=>{
@@ -217,3 +216,12 @@ function object2DataPrallel(ob){
     });
     return newdata;
 }
+
+function colorbyCategory(data,key) {
+    var listKey = _(data).unique(key).map(d=>d[key]);
+    var listcolor= listKey.map(colorscale);
+    colors.domain(listKey).range(listcolor);
+    color = colors;
+}
+
+function 
