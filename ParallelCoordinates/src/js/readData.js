@@ -2,7 +2,7 @@ var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_c
 var serviceLists = [{text: "Temperature", id: 0,
     sub:[{text: 'CPU1 Temp', id: 0},{text: 'CPU2 Temp', id: 1},{text: 'Inlet Temp', id: 2}]},
     {text: "Job_load", id: 1,sub:[{text: 'Job load', id: 0}]},
-    {text: "Memory usage", id: 2,sub:[{text: 'Memory usage', id: 0}]},
+    {text: "Memory_usage", id: 2,sub:[{text: 'Memory usage', id: 0}]},
     {text: "Fans_speed", id: 3,sub:[{text: 'Fan1 speed', id: 0},{text: 'Fan2 speed', id: 1},{text: 'Fan3 speed', id: 2},{text: 'Fan4 speed', id: 3}]},
     {text: "Power_consum", id: 4,sub:[{text: 'Power consumption', id: 0}]}];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];

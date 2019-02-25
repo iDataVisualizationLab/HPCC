@@ -234,19 +234,7 @@ function create_legend(colors,brush) {
     var legendAll = legend_data.join(
         enter=>{
             let legend = enter.append("div")
-            .attr("title", "Hide group")
-            .on("click", function(d) {
-                // toggle food group
-                if (_.contains(excluded_groups, d)) {
-                    d3.select(this).attr("title", "Hide group")
-                    excluded_groups = _.difference(excluded_groups,[d]);
-                    brush();
-                } else {
-                    d3.select(this).attr("title", "Show group")
-                    excluded_groups.push(d);
-                    brush();
-                }
-            });
+            .attr("title", "Hide group");
             legend
                 .append("span")
                 .style("opacity",0.85)
@@ -262,9 +250,19 @@ function create_legend(colors,brush) {
                 .text(function(d,i) { return " " + d});
             return legend;
         }
-    );
+    ).on("click", function(d) {
+        // toggle food group
+        if (_.contains(excluded_groups, d)) {
+            d3.select(this).attr("title", "Hide group")
+            excluded_groups = _.difference(excluded_groups,[d]);
+            brush();
+        } else {
+            d3.select(this).attr("title", "Show group")
+            excluded_groups.push(d);
+            brush();
+        }
+    });
     legendAll.selectAll(".color-bar").style("background", function(d,i) { return colors(d)});
-
     return legendAll;
 }
 
@@ -461,7 +459,6 @@ function brush() {
             actives.push(d);
             extents.push(d3.brushSelection(this).map(yscale[d].invert).sort((a,b)=>a-b));
         });
-    console.log(extents);
     // hack to hide ticks beyond extent
     var b = d3.selectAll('.dimension').nodes()
         .forEach(function(element, i) {
@@ -818,6 +815,7 @@ $( document ).ready(function() {
         .selectAll('a').data(d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})))).join('a')
         .text(d=>d.text)
         .on('click',d=>{
+            console.log(d);
             comboBox.select('.dropbtn').text(d.text);
             selectedService = d.arr;
             setColorsAndThresholds(d.service);
