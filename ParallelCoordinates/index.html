@@ -89,7 +89,7 @@
                 All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
             </p>
             <p>
-                Modified &copy; 2019, Ngan Nguyen<br/>
+                Modified 2019, Ngan Nguyen<br/>
             </p>
             </p>
         </div>
@@ -98,7 +98,16 @@
         <small>
             <!--Last rendered <strong id="render-speed"></strong> lines-->
         </small>
-        <h3>Rack Groups</h3>
+        <h3>Group by <div class="dropdown" id="groupName">
+            <button class="dropbtn">Rack</button>
+            <div class="dropdown-content">
+                <a href="#">Link 1</a>
+                <a href="#">Link 2</a>
+                <a href="#">Link 3</a>
+            </div>
+        </div>
+        </h3>
+        <div id="colorContinuos"></div>
         <p id="legend">
         </p>
     </div>
@@ -113,6 +122,7 @@
 <script src="src/data/serviceWed26Sep.js"></script>
 <!--<script src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
 
+<script src="src/js/ulti.js"></script>
 <script src="src/js/readData.js"></script>
 <script src="src/js/parallel.js"></script>
 </html>
