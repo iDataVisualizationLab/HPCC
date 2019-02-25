@@ -55,10 +55,12 @@ var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', 
 var levelStep = 4;
 var arrThresholds;
 var selectedService = null;
+var orderLegend;
 var svgLengend = d3.select('#colorContinuos').append('div').append('svg')
     .attr("class", "legendView")
     .attr("width", 20)
     .attr("height", h);
+
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i]){
@@ -219,56 +221,57 @@ function grayscale(pixels, args) {
 };
 
 function create_legend(colors,brush) {
-    if (selectedService) {
-        setColorsAndThresholds(serviceList[0]);
-        drawLegend(serviceList[0], arrThresholds, arrColor, dif);
+        if (selectedService) {
+        colorbyValue(orderLegend);
+    }else{
+        colorbyCategory(data,"group");
     }
-    colorbyCategory(data,"group");
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
         .selectAll(".row")
-        .data( colors.domain().sort() )
+        .data( colors.domain() );
+    var legendAll = legend_data.join(
+        enter=>{
+            let legend = enter.append("div")
+            .attr("title", "Hide group")
+            .on("click", function(d) {
+                // toggle food group
+                if (_.contains(excluded_groups, d)) {
+                    d3.select(this).attr("title", "Hide group")
+                    excluded_groups = _.difference(excluded_groups,[d]);
+                    brush();
+                } else {
+                    d3.select(this).attr("title", "Show group")
+                    excluded_groups.push(d);
+                    brush();
+                }
+            });
+            legend
+                .append("span")
+                .style("opacity",0.85)
+                .attr("class", "color-bar");
 
-    // filter by group
-    var legend = legend_data
-        .enter().append("div")
-        .attr("title", "Hide group")
-        .on("click", function(d) {
-            // toggle food group
-            if (_.contains(excluded_groups, d)) {
-                d3.select(this).attr("title", "Hide group")
-                excluded_groups = _.difference(excluded_groups,[d]);
-                brush();
-            } else {
-                d3.select(this).attr("title", "Show group")
-                excluded_groups.push(d);
-                brush();
-            }
-        });
+            legend
+                .append("span")
+                .attr("class", "tally")
+                .text(function(d,i) { return 0});
 
-    legend
-        .append("span")
-        .style("background", function(d,i) { return color(d)})
-        .style("opacity",0.85)
-        .attr("class", "color-bar");
+            legend
+                .append("span")
+                .text(function(d,i) { return " " + d});
+            return legend;
+        }
+    );
+    legendAll.selectAll(".color-bar").style("background", function(d,i) { return colors(d)});
 
-    legend
-        .append("span")
-        .attr("class", "tally")
-        .text(function(d,i) { return 0});
-
-    legend
-        .append("span")
-        .text(function(d,i) { return " " + d});
-
-    return legend;
+    return legendAll;
 }
 
 // render polylines i to i+render_speed
 function render_range(selection, i, max, opacity) {
     selection.slice(i,max).forEach(function(d) {
-        path(d, foreground, colorCanvas(d.group,opacity));
+        path(d, foreground, colorCanvas(selectedService==null?d.group:d[selectedService],opacity));
     });
 };
 
@@ -291,7 +294,7 @@ function data_table(sample) {
     table
         .append("span")
         .attr("class", "color-block")
-        .style("background", function(d) { return color(d.group) })
+        .style("background", function(d) { return color(selectedService==null?d.group:d[selectedService]) })
         .style("opacity",0.85);
 
     table
@@ -327,7 +330,7 @@ function selection_stats(opacity, n, total) {
 function highlight(d) {
     d3.select("#foreground").style("opacity", "0.25");
     d3.selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
-    path(d, highlighted, colorCanvas(d.group,1));
+    path(d, highlighted, colorCanvas(selectedService==null?d.group:d[selectedService],1));
 }
 
 // Remove highlight
@@ -413,11 +416,28 @@ function path(d, ctx, color) {
 };
 
 function colorCanvas(d,a) {
-    var c = d3.hsl(colors(d));
+    var c = d3.hsl(color(d));
     c.opacity=a;
     return c;
 }
-
+function changeGroupTarget(key) {
+    if (key === 'rack' )
+        data.forEach(d=>d.group = d.rack)
+    else {
+        var thresholdScale = d3.bisector(function(d) { return d; }).left;
+        let nameLegend = rangeToString(arrThresholds);
+        let arrmidle = arrThresholds.slice(1,this.length-1);
+        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}});
+        data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
+    }
+}
+function rangeToString(arr){
+    let midleRange = arr.slice(1,this.length-1);
+    let mapRangeName = ["<"+midleRange[0]];
+    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push(midleRange[i]+'-'+d));
+    mapRangeName.push(">"+midleRange[midleRange.length-1]);
+    return mapRangeName;
+}
 function position(d) {
     var v = dragging[d];
     return v == null ? xscale(d) : v;
@@ -439,9 +459,9 @@ function brush() {
         .each(function(d) {
             // Get extents of brush along each active selection axis (the Y axes)
             actives.push(d);
-            extents.push(d3.brushSelection(this).map(yscale[d].invert).sort());
+            extents.push(d3.brushSelection(this).map(yscale[d].invert).sort((a,b)=>a-b));
         });
-
+    console.log(extents);
     // hack to hide ticks beyond extent
     var b = d3.selectAll('.dimension').nodes()
         .forEach(function(element, i) {
@@ -503,7 +523,7 @@ function brush() {
 
     // total by food group
     var tallies = _(selected)
-        .groupBy(function(d) { return d.group; })
+        .groupBy(function(d) { return d.group; });
 
     // include empty groups
     _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
@@ -518,7 +538,7 @@ function brush() {
 
     legend.selectAll(".color-bar")
         .style("width", function(d) {
-            return Math.ceil(600*tallies[d].length/data.length) + "px"
+            return Math.ceil($('#legend').width()*tallies[d].length/data.length) + "px"
         });
 
     legend.selectAll(".tally")
@@ -791,3 +811,19 @@ function search(selection,str) {
     pattern = new RegExp(str,"i")
     return _(selection).filter(function(d) { return pattern.exec(d.name); });
 }
+
+$( document ).ready(function() {
+    let comboBox = d3.select("#groupName");
+    comboBox.select('.dropdown-content')
+        .selectAll('a').data(d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})))).join('a')
+        .text(d=>d.text)
+        .on('click',d=>{
+            comboBox.select('.dropbtn').text(d.text);
+            selectedService = d.arr;
+            setColorsAndThresholds(d.service);
+            drawLegend(d.service,arrThresholds, arrColor,dif);
+            changeGroupTarget(selectedService);
+            legend = create_legend(colors,brush);
+            brush();
+        });
+});

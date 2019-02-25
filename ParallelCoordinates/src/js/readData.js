@@ -1,17 +1,17 @@
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
 var serviceLists = [{text: "Temperature", id: 0,
-    sub:[{text: 'Temperature - CPU1', id: 0},{text: 'Temperature - CPU2', id: 1},{text: 'Temperature - Intel', id: 2}]},
-    {text: "Job_load", id: 1,sub:[{text: 'Job_load', id: 0}]},
-    {text: "Memory_usage", id: 2,sub:[{text: 'Memory_usage', id: 0}]},
-    {text: "Fans_speed", id: 3,sub:[{text: 'Fan1', id: 0},{text: 'Fan2', id: 1},{text: 'Fan3', id: 2},{text: 'Fan4', id: 3}]},
-    {text: "Power_consum", id: 4,sub:[{text: 'Power_consum', id: 0}]}];
+    sub:[{text: 'CPU1 Temp', id: 0},{text: 'CPU2 Temp', id: 1},{text: 'Inlet Temp', id: 2}]},
+    {text: "Job_load", id: 1,sub:[{text: 'Job load', id: 0}]},
+    {text: "Memory usage", id: 2,sub:[{text: 'Memory usage', id: 0}]},
+    {text: "Fans_speed", id: 3,sub:[{text: 'Fan1 speed', id: 0},{text: 'Fan2 speed', id: 1},{text: 'Fan3 speed', id: 2},{text: 'Fan4 speed', id: 3}]},
+    {text: "Power_consum", id: 4,sub:[{text: 'Power consumption', id: 0}]}];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
 var serviceListattrnest = [
-    {key:"arrTemperature", sub:["CPU1","CPU2","inlet"]},
-    {key:"arrCPU_load", sub:["CPU_load"]},
-    {key:"arrMemory_usage", sub:["Memory_usage"]},
-    {key:"arrFans_health", sub:["Fan_1","Fan_2","Fan_3","Fan_4"]},
-    {key:"arrPower_usage", sub:["Power_consum"]}];
+    {key:"arrTemperature", sub:["CPU1 Temp","CPU2 Temp","Inlet Temp"]},
+    {key:"arrCPU_load", sub:["Job load"]},
+    {key:"arrMemory_usage", sub:["Memory usage"]},
+    {key:"arrFans_health", sub:["Fan1 speed","Fan2 speed","Fan3 speed","Fan4 speed"]},
+    {key:"arrPower_usage", sub:["Power consumption"]}];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var chosenService = 0;
 //***********************
@@ -206,6 +206,7 @@ function object2DataPrallel(ob){
                 });
             });
             eachIn.timestep = i;
+            eachIn.rack = rack;
             eachIn.group = rack;
             eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
             eachIn.id = com.key+"-"+count;
@@ -223,5 +224,7 @@ function colorbyCategory(data,key) {
     colors.domain(listKey).range(listcolor);
     color = colors;
 }
-
-function 
+function colorbyValue(order) {
+    var listcolor= order.map(d=>color(d.value));
+    colors.domain(order.map(d=>d.text)).range(listcolor);
+}
