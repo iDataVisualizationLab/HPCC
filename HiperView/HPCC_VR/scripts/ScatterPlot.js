@@ -4,6 +4,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     this.graph = new THREE.Group();
     this.graph.visible = false;
     this.isBinned = isBinned;
+    var axisNo = Object.keys(SERVICE).length
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
@@ -19,23 +20,42 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         this.graph.add( this.matrix[p].graph );
 
         var x = SERVICE[axes_matrix[p][0]].sp_pos;
-        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + Object.keys(SERVICE).length;
+        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + axisNo;
         var z = SERVICE[axes_matrix[p][2]].sp_pos;
 
         var xpos = x * scale * 1.5;
         var ypos = y * scale * 1.5;
 
         this.matrix[p].graph.position.set( xpos, ypos, 0 );
-        this.matrix[p].graph.position.x = this.matrix[p].graph.position.x + summation(z-1) * scale * 1.8;
-        this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( 6-z ) * scale * 1.5;
+        this.matrix[p].graph.position.x = this.matrix[p].graph.position.x + summation(z-1) * scale * 2;
+        this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( axisNo - 1 -z ) * scale * 1.5;
 
+    }
 
-        // // adding axis labels
-        // var label_geometry = new THREE.BoxGeometry( scale, scale, scale );
-        // var label_material = new THREE.MeshBasicMaterial( {  color: 0xff0000 } );
-        // var label = new THREE.Mesh( back_geometry, back_material );
-        // background.position.set(scale/2,scale/2,scale/2);
-        // box.add( background );
+    // this.labels = new THRE.Group();
+    for( var z=axisNo-1; z>1; z-- )
+    {
+        // add z label
+        var Z_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        var Z_material = new THREE.MeshBasicMaterial( {  color: 0xff0000, transparent: true, opacity: 0.5 } );
+        var Z = new THREE.Mesh( Z_geometry, Z_material );
+        Z.position.x = summation(z-1) * scale * 2 + scale/2 + (z-1)*scale*1.5;
+        Z.position.y = (z+1) * scale * 1.5 + scale/2;
+        Z.position.z = scale/2;
+        this.graph.add( Z );
+
+        for( var a=z+1; a>1; a-- )
+        {
+            // add x and y labels
+            var aZ_geometry = new THREE.BoxGeometry( scale, scale, scale );
+            var aZ_material = new THREE.MeshBasicMaterial( {  color: 0xff0000, transparent: true, opacity: 0.5 } );
+            var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+            aZ.position.x = summation(z-1) * scale * 2 + scale/2;       // align with z group
+            aZ.translateX( (z+1-a) * scale * 1.5 );                     // align with x group
+            aZ.position.y = a * scale * 1.5 + scale/2;
+            aZ.position.z = scale/2;
+            this.graph.add( aZ );
+        }
     }
 
     function summation( n )
@@ -398,8 +418,8 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         var bin, binCount;
         var binSize = intervals - 1;
         var getBinOf = {};
-        var oneElementSize = 1 / ( population/4 );
-        var default_size = scale/intervals/1.5;
+        var oneElementSize = 1 / ( population );
+        var default_size = scale/intervals;
 
         // inititializing variables
         bin = {}, binCount = {};
@@ -446,7 +466,8 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
                     var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: 0.75 } );
-                    var geometry = new THREE.SphereGeometry( default_size, 8, 8 );
+                    // var geometry = new THREE.BoxGeometry( default_size, default_size, default_size );
+                    var geometry = new THREE.SphereGeometry( default_size/2, 8, 8 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
                     point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );

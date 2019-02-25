@@ -557,10 +557,6 @@ function initScatterPlotMatrix()
                 for( var h=0; h<hostkeys.length; h++ )
                 {
                     datakey[hostkeys[h]] = h;
-                    var s1 = json[hostkeys[h]][s[0]][selectedTimestamp];
-                    var s2 = json[hostkeys[h]][s[1]][selectedTimestamp];
-                    var s3 = json[hostkeys[h]][s[2]][selectedTimestamp];
-                    // data.push( [ s1 ? s1 : 0, s2 ? s2 : 0, s3 ? s3 : 0 ] );
                     data.push( [0,0,0] );
                 }
 

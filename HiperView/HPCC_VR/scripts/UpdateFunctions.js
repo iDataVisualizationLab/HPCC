@@ -41,8 +41,8 @@ function updateValues( timestamp )
             updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
 
             // update scatterplot point per host (i.e. not per cpu)
-            // if( cpu == 1 )
-            //     updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
+            if( cpu == 1 )
+                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )
@@ -150,17 +150,22 @@ function updateScatterPlotMatrix( host, timestamp )
         if( scatter_plot_matrix.isBinned )
             updateScatterPlotBins( host, x, y, z, plot );
         else
-            updateScatterPlotPoints( host, x, y, z, plot );
+        {
+            var c =  color( json[host][selectedService][timestamp-1] );
+            updateScatterPlotPoints( host, x, y, z, c, plot );
+        }
     }
 }
 
-function updateScatterPlotPoints( host, x, y, z, sp )
+function updateScatterPlotPoints( host, x, y, z, color, sp )
 {
+    var point = sp.points.obj[host];
+
     x = sp.x.fit(x);
     y = sp.y.fit(y);
     z = sp.z.fit(z);
 
-    point.material.color = new THREE.Color( color(json[host][selectedService][timestamp-1]) );
+    point.material.color = new THREE.Color( color );
 
     var intervals = 20;
     var xinterval = (x - point.position.x)/intervals;
