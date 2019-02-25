@@ -8,7 +8,6 @@ var timeObj = {};
 
 // selected
 var selectedTimestamp = 1;
-var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
 
 var ROOM_SIZE = 1;
 var RACK_NUM = 10;
@@ -26,13 +25,13 @@ var fillHost;
 var updateTimestamp;
 var move_timer;
 
-var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 0 },
-                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 1  },
-                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 2 },
-                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 1 },
-                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 0 },
-                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 1 },
-                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 0 },
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 5 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 6 },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 0 },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 3 },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 1 },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 2 },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
 
@@ -50,7 +49,7 @@ var tooltip;
 var service_control_panel;
 var time_control_panel;
 var scatter_plot_matrix;
-var scatter_plot;
+var foo;
 var parallel_set;
 var lever;
 var FONT = 'media/fonts/helvetiker_regular.typeface.json';
@@ -426,7 +425,7 @@ function initLever()
     // set rotation and position
     lever.add( pivot );
     lever.pivot = pivot;
-    pivot.rotation.set( Math.PI/-4, 0, 0 );
+    pivot.rotation.set( Math.PI/4, 0, 0 );
     lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
     scene.add( lever );
 
@@ -531,33 +530,42 @@ function initHPCC()
 function initScatterPlotMatrix()
 {
     var hostkeys = Object.keys(json);
-    var tmp, datas = [], s, ranges = [], selectedSPServices = [];
+    var datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
+    var element = Object.keys( SERVICE );
+    // element.pop();
+    // element.pop();
 
-    // var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    // var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    // var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    var x = [ "arrTemperatureCPU1" ];
-    var y = [ "arrFans_speed1" ];
-    var z = [ "arrPower_usage"];
+    var slist = [];
 
-    for( other in z )
+    for( x in element )
     {
-        for( fan in y )
+        for( y in element )
         {
-            for( temp in x )
+            for( z in element )
             {
-                s = [z[other],y[fan],x[temp]];
+                var s = [ element[x], element[y], element[z] ].sort();
+
+                if( isRepeated( s, slist ) )
+                    continue;
+                else
+                    slist.push( s.toString() );
+
                 selectedSPServices.push(s);
-                data = []
+                var data = [];
+                var datakey = {};
+
                 for( var h=0; h<hostkeys.length; h++ )
                 {
-                    tmp = [];
-                    tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-                    tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-                    tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-                    data.push( tmp )
+                    datakey[hostkeys[h]] = h;
+                    var s1 = json[hostkeys[h]][s[0]][selectedTimestamp];
+                    var s2 = json[hostkeys[h]][s[1]][selectedTimestamp];
+                    var s3 = json[hostkeys[h]][s[2]][selectedTimestamp];
+                    // data.push( [ s1 ? s1 : 0, s2 ? s2 : 0, s3 ? s3 : 0 ] );
+                    data.push( [0,0,0] );
                 }
-                datas.push(data);
+
+                datakeys.push( datakey );
+                datas.push( data );
                 ranges.push([SERVICE[s[0]]["dom"],
                             SERVICE[s[1]]["dom"],
                             SERVICE[s[2]]["dom"]] );
@@ -566,10 +574,26 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, ROOM_SIZE * -1, ROOM_SIZE * -0.9 );
     scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
     scene.add( scatter_plot_matrix.graph );
+
+    scatter_plot_matrix.axis_combinations = slist;
+
+    function isRepeated( a, A )
+    {
+        if( a[0] == a[1] | a[0] == a[2] | a[1] == a[2] )
+            return true;
+
+        a = a.toString();
+        for( var r=0; r<A.length; r++ )
+        {
+            if( a == A[r] )
+                return true;
+        }
+        return false;
+    }
 }
 
 function initParallelSet()
@@ -584,7 +608,7 @@ function initParallelSet()
         for( var s=0; s<table[0].length; s++ )
         {
             if( json[host][table[0][s]] )
-                tmp.push(json[host][table[0][s]][19]);
+                tmp.push(json[host][table[0][s]][0]);
             else
                 tmp.push(undefined);
         }
@@ -595,7 +619,7 @@ function initParallelSet()
     parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
-    parallel_set.graph.visible = false;
+    parallel_set.graph.visible = true;
 }
 
 // Animate & Render

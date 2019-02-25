@@ -41,8 +41,8 @@ function updateValues( timestamp )
             updateHost( service, [rack,host,cpu,time], hostObj[rack][host][cpu] );
 
             // update scatterplot point per host (i.e. not per cpu)
-            if( cpu == 1 )
-                updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
+            // if( cpu == 1 )
+            //     updateScatterPlotMatrix( "compute-"+rack+"-"+host, timestamp );
         }
 
         if( cpu+1 <= CPU_NUM )
@@ -129,24 +129,33 @@ function updateCPUMarker( obj )
 // scatterplot update
 function updateScatterPlotMatrix( host, timestamp )
 {
-    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
-        if( scatter_plot_matrix.isBinned )
-            updateScatterPlotBins( host, timestamp, scatter_plot_matrix.matrix[sp] );
-        else
-            updateScatterPlotPoints( host, timestamp, scatter_plot_matrix.matrix[sp] );
-}
-
-function updateScatterPlotPoints( host, timestamp, sp )
-{
+    // check if host exists
     if( json[host] == undefined )
         return 0;
 
-    var services = sp.axes;
-    var point = sp.points.obj[host];
-    var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
-    var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
-    var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
+    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
+    {
+        var plot = scatter_plot_matrix.matrix[sp];
 
+        // get host raw new coordinates
+        var services = plot.axes;
+        var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : 0;
+        var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : 0;
+        var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
+
+        // update matrix data & scagnostic
+        plot.updateData( plot.datakey[host], x, y, z );
+
+        // update matrix content
+        if( scatter_plot_matrix.isBinned )
+            updateScatterPlotBins( host, x, y, z, plot );
+        else
+            updateScatterPlotPoints( host, x, y, z, plot );
+    }
+}
+
+function updateScatterPlotPoints( host, x, y, z, sp )
+{
     x = sp.x.fit(x);
     y = sp.y.fit(y);
     z = sp.z.fit(z);
@@ -173,17 +182,8 @@ function updateScatterPlotPoints( host, timestamp, sp )
 
 }
 
-function updateScatterPlotBins( host, timestamp, sp )
+function updateScatterPlotBins( host, x, y, z, sp )
 {
-    if( json[host] == undefined )
-        return 0;
-
-    // get host raw coordinates
-    var services = sp.axes;
-    var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
-    var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
-    var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
-
     // get old host bin coordinates
     var o_xb = sp.bins.getBinOf[host][0];
     var o_yb = sp.bins.getBinOf[host][1];

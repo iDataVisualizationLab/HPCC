@@ -1,7 +1,8 @@
-function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned )
+function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_matrix, scale, isBinned, datakeys )
 {
     this.matrix = {};
     this.graph = new THREE.Group();
+    this.graph.visible = false;
     this.isBinned = isBinned;
 
     for( var p=0; p<axes_matrix.length; p++ )
@@ -13,40 +14,38 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                         dataid,
                                         data_matrix[p],
                                         scale,
-                                        isBinned );
+                                        isBinned,
+                                        datakeys[p] );
         this.graph.add( this.matrix[p].graph );
 
-        // setting inner scatter plot position
-        this.matrix[p].graph.position.z = SERVICE[axes_matrix[p][2]].sp_pos * scale * 1.5; // temperature
-        this.matrix[p].graph.position.y = SERVICE[axes_matrix[p][1]].sp_pos * scale * 1.5; // fans speed
-        this.matrix[p].graph.position.x = SERVICE[axes_matrix[p][0]].sp_pos * scale * 1.5; // other service
+        var x = SERVICE[axes_matrix[p][0]].sp_pos;
+        var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + Object.keys(SERVICE).length;
+        var z = SERVICE[axes_matrix[p][2]].sp_pos;
 
-        // hiding legends
-        if( SERVICE[axes_matrix[p][2]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 0 );
-        if( SERVICE[axes_matrix[p][0]].sp_pos != 0 )
-        {
-            this.matrix[p].toggleAxisLegend( 1 );
-            this.matrix[p].toggleAxisLegend( 2 );
-        }
-        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 1 );
-        if( SERVICE[axes_matrix[p][1]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][0]].sp_pos == 0 )
-            this.matrix[p].toggleAxisLegend( 2 );
-        if( SERVICE[axes_matrix[p][2]].sp_pos != 0 &
-            SERVICE[axes_matrix[p][1]].sp_pos != 0 )
-            this.matrix[p].toggleAxisLegend( 0 );
+        var xpos = x * scale * 1.5;
+        var ypos = y * scale * 1.5;
+
+        this.matrix[p].graph.position.set( xpos, ypos, 0 );
+        this.matrix[p].graph.position.x = this.matrix[p].graph.position.x + summation(z-1) * scale * 1.8;
+        this.matrix[p].graph.position.y = this.matrix[p].graph.position.y - ( 6-z ) * scale * 1.5;
+
+
+        // // adding axis labels
+        // var label_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        // var label_material = new THREE.MeshBasicMaterial( {  color: 0xff0000 } );
+        // var label = new THREE.Mesh( back_geometry, back_material );
+        // background.position.set(scale/2,scale/2,scale/2);
+        // box.add( background );
     }
 
-    // test scatter plot matrix positing
-
-
+    function summation( n )
+    {
+        return ( n * ( n + 1 ) ) / 2;
+    }
 
 }
 
-function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
+function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, datakey )
 {
     // building scatter plot
     var population = data.length;
@@ -57,17 +56,16 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
     var graph = new THREE.Group();
     var grid = setGrid();
-    var scag = setScagnostics();
 
     if( !isBinned )
-        var points = setPoints( true );
+        var points = setPoints();
     else
         var bins = setBins();
 
     graph.add( grid );
-    graph.add( x.obj );
-    graph.add( y.obj );
-    graph.add( z.obj );
+    // graph.add( x.obj );
+    // graph.add( y.obj );
+    // graph.add( z.obj );
 
     if( !isBinned )
         graph.add( points );
@@ -80,8 +78,9 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
     this.x = x;
     this.y = y;
     this.z = z;
+    this.datakey = datakey;
     this.data = data;
-    this.scag = scag;
+    this.scag = null;
 
     if( !isBinned )
         this.points = points;
@@ -98,7 +97,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
         info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
-        info.obj = setAxis( axis, info );
+        // info.obj = setAxis( axis, info );
         info.binSize = intervals - 1;
 
         info.bin = function( n )
@@ -127,21 +126,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
         }
 
         return info;
-    }
-
-    function setScagnostics()
-    {
-        var tmp = [], tmp2;
-        for( var i=0; i<data.length; i++ )
-        {
-            tmp2 = [0,0,0];
-            tmp2[0] = data[i][0] == undefined ? 0 : data[i][0] ;
-            tmp2[1] = data[i][1] == undefined ? 0 : data[i][1] ;
-            tmp2[2] = data[i][2] == undefined ? 0 : data[i][2] ;
-            tmp.push( tmp2 );
-        }
-
-        return scagnostics3d( tmp );
     }
 
     function setGrid()
@@ -382,7 +366,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
     }
 
-    function setPoints( isInit )
+    function setPoints()
     {
         var points = new THREE.Group();
         points.name = "scatterplot-points";
@@ -391,41 +375,15 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
 
         for( var p=0; p<population; p++ )
         {
-            if( data[p][0] )
-            {
-                pos[0] = x.fit( data[p][0] );
-            }
-            else
-            {
-                pos[0] = 0;
-            }
-
-            if( data[p][1] )
-            {
-                pos[1] = y.fit( data[p][1] );
-            }
-            else
-            {
-                pos[1] = 0;
-            }
-
-            if( data[p][2] )
-            {
-                pos[2] = z.fit( data[p][2] );
-            }
-            else
-            {
-                pos[2] = 0;
-            }
+            pos[0] = x.fit( data[p][0] );
+            pos[1] = y.fit( data[p][1] );
+            pos[2] = z.fit( data[p][2] );
 
             var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
             var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
-            if( isInit )
-                point.position.set( 0, 0, 0 );
-            else
-                point.position.set( pos[0], pos[1], pos[2] );
+            point.position.set( 0, 0, 0 );
             point.name = dataid[p];
             points.add( point );
             points.obj[dataid[p]] = point;
@@ -556,6 +514,48 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned )
                                 total+=binCount[xb][yb][zb];
 
         return total;
+    }
+
+    this.updateData = function( key, x, y, z )
+    {
+        var p = this;
+        p.data[key][0] = x;
+        p.data[key][1] = y;
+        p.data[key][2] = z;
+
+        // run scagnostics when all data is declared
+        if( this.data.length-1 == key )
+        {
+            // var workerScag = new Worker("scripts/worker/scag_worker.js");
+            // workerScag.postMessage( p.data );
+            // workerScag.onmessage = function( event )
+            // {
+            //     p.scag = event.data;
+            //     console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
+            // };
+
+            // compute scag via promise
+            promiseScag( p.data ).then( message =>
+                {
+                    console.log(message.outlyingScore);
+                    p.scag = message;
+                } );
+        }
+
+        function promiseScag( data )
+        {
+            return new Promise( resolve => 
+                {
+                    var options = {
+                            startBinGridSize: 10,
+                            minBins: 5,
+                            maxBins: 20
+                        }
+                    var scag = scagnosticsnd( data, options );
+
+                    resolve(scag)
+                } );
+        }
     }
 
 }
