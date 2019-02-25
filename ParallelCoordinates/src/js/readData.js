@@ -205,7 +205,7 @@ function object2DataPrallel(ob){
                     eachIn[sub] = com.value[s.key][i][sj]
                 });
             });
-            eachIn.timestep = i;
+            eachIn.timestep = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
             eachIn.rack = rack;
             eachIn.group = rack;
             eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);

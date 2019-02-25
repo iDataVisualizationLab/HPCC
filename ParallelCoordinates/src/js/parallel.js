@@ -97,10 +97,12 @@ var svg = d3.select("svg")
 
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function(k) {
-        return (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
+        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+            .domain(d3.extent(data, function(d) { return d[k]; }))
+            .range([h, 0]))||(_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
             .domain(d3.extent(data, function(d) { return +d[k]; }))
-            .range([h, 0]));
-    }).sort());
+            .range([h, 0]))));
+    }));
 
     // Add a group element for each dimension.
     var g = svg.selectAll(".dimension")
@@ -164,7 +166,8 @@ var svg = d3.select("svg")
     g.append("svg:g")
         .attr("class", "axis")
         .attr("transform", "translate(0,0)")
-        .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
+        .each(function(d) {
+            return d3.select(this).call(axis.scale(yscale[d])); })
         .append("svg:text")
         .attr("text-anchor", "middle")
         // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
