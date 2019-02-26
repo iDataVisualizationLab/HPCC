@@ -349,7 +349,7 @@ button#exclude-data:hover {
     padding-top: 0.5em;
     display: block;
     height: auto;
-    max-width: 3em;
+    max-width: 10em;
 }
 .sidenav img{
     width:10em;
