@@ -560,20 +560,20 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             // };
 
             // compute scag via promise
-            // promiseScag( p.data ).then( message =>
-            //     {
-            //         console.log("*****************************")
-            //         console.log(message.outlyingScore);
-            //         console.log(message.clumpyScore);
-            //         console.log(message.convexScore);
-            //         console.log(message.monotonicScore);
-            //         console.log(message.skewedScore);
-            //         console.log(message.skinnyScore);
-            //         console.log(message.sparseScore);
-            //         console.log(message.striatedScore);
-            //         console.log(message.stringyScore);
-            //         p.scag = message;
-            //     } );
+            promiseScag( p.data ).then( message =>
+                {
+                    console.log("*****************************")
+                    console.log("outl " + message.outlyingScore);
+                    console.log("clum " + message.clumpyScore);
+                    console.log("conv " + message.convexScore);
+                    console.log("mono " + message.monotonicScore);
+                    console.log("skwe " + message.skewedScore);
+                    console.log("skin " + message.skinnyScore);
+                    console.log("spar " + message.sparseScore);
+                    console.log("stra " + message.striatedScore);
+                    console.log("stry " + message.stringyScore);
+                    p.scag = message;
+                } );
         }
 
         function promiseScag( data )

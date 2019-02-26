@@ -483,7 +483,7 @@ function filterScatterPlotMatrix()
         for( score in SCORE )
         {
             if( !SCORE.hasOwnProperty(score) ) continue;                        // check if attribute is valid
-            if( scatter_plot_matrix.matrix[sp].scag[score] < SCORE[score] )     // check if sp's score is less than filter
+            if( scatter_plot_matrix.matrix[sp].scag[score] > SCORE[score] )     // check if sp's score is greater than filter
                 scatter_plot_matrix.matrix[sp].visible = true;                  // show if true
             else
                 scatter_plot_matrix.matrix[sp].visible = false;                 // hide if false

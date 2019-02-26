@@ -149,7 +149,7 @@ function onMouseDown( event )
                 score_control_panel.rotation.x-=score_control_panel.rotation_interval;
             else if( INTERSECTED.type == "arrow_down" )
                 score_control_panel.rotation.x+=score_control_panel.rotation_interval;
-            else
+            else if( INTERSECTED.type == "arrow_left" | INTERSECTED.type == "arrow_right" )
             {
                 var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
                 if( INTERSECTED.type == "arrow_left" & SCORE[INTERSECTED.name]>0 )
@@ -162,7 +162,6 @@ function onMouseDown( event )
                     slider.position.y-=slider.initial/5;
                     SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
                 }
-                console.log(SCORE[INTERSECTED.name]);
             }
                 
             return true;
