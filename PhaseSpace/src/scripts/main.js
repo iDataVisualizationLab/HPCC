@@ -124,7 +124,6 @@ $( document ).ready(function(){
 
 });
 function changeVar(d){
-    console.log(d);
     chosenService =d.mainService;
     service_part = d.id;
     $('#labelSum').text('Phase Space of '+serviceLists[chosenService].text);

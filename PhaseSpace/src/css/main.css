@@ -142,18 +142,18 @@ body.light {
 }
 
 
-   .pin-top {
-       position: relative;
-   }
+.pin-top {
+   position: relative;
+}
 
 
-   .pin-bottom {
-       position: relative;
-   }
+.pin-bottom {
+   position: relative;
+}
 
-   .pinned {
-       position: fixed !important;
-   }
+.pinned {
+   position: fixed !important;
+}
 html, body, .block {
     height: 100%;
 }

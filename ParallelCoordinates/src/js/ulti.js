@@ -50,3 +50,16 @@ function linspace(start, end, n) {
     out.push(end);
     return out;
 }
+
+function switchTheme(){
+    if (this.value==="light"){
+        this.value = "dark";
+        this.text = "Light";
+        d3.select('body').classed('light',false);
+        return;
+    }
+    this.value = "light";
+    this.text = "Dark";
+    d3.select('body').classed('light',true);
+    return
+}

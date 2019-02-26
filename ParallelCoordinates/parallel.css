@@ -5,20 +5,29 @@ html, body {
     padding: 0;
 }
 body {
-    font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
-    font-size: 12px;
+    font: small sans-serif;
+    background-color: #353535;
+    color: white;
+
+    /*font-family: Ubuntu, Tahoma, Helvetica, sans-serif;*/
+    /*font-size: 12px;*/
     line-height: 1.4em;
-    background: #f7f7f7;
-    color: #404040;
+    /*background: #f7f7f7;*/
+    /*color: #404040;*/
 }
-body.dark {
-    background: #131313;
-    color: #e3e3e3;
+body.light {
+    background-color: white;
+    color: black;
+}
+/*body.dark {*/
+    /*background: #131313;*/
+    /*color: #e3e3e3;*/
+/*}*/
+.light a {
+    text-decoration: none;
+    color: #1f6eb4;
 }
 a {
-    text-decoration: none;
-}
-.dark a {
     color: #5ae;
 }
 #wrap {
@@ -35,11 +44,11 @@ canvas, svg {
 #chart {
     position: relative;
 }
-.brush rect.selection {
+.light .brush rect.selection {
     fill: rgba(100,100,100,0.15);
     stroke: #fff;
 }
-.dark .brush rect.selection {
+.brush rect.selection {
     fill: rgba(100,100,100,0.15);
     stroke: #ddd;
 }
@@ -53,39 +62,40 @@ canvas, svg {
 .resize rect {
     fill: none;
 }
+.light .background {
+    fill: none;
+}
 .background {
     fill: none;
 }
-.dark .background {
-    fill: none;
+.light .axis line, .light .axis path {
+    stroke: #777;
 }
 .axis line, .axis path {
     fill: none;
     stroke: #777;
     stroke-width: 1;
 }
-.dark .axis line, .dark .axis path {
-    stroke: #777;
-}
 .axis .tick {
     width: 200px;
 }
-.axis text {
+.light .axis text {
     fill: #111;
-    text-anchor: right;
-    font-size: 11px;
     text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+.light .axis text.label {
+    fill: #111;
+}
+.axis text {
+    fill: #f2f2f2;
+    text-anchor: end;
+    font-size: 11px;
+    text-shadow: 0 1px 0 #000, 1px 0 0 #000, 0 -1px 0 #000, -1px 0 0 #000;
 }
 .axis text.label {
     font-size: 12px;
     cursor: move;
     padding-bottom: 24px;
-}
-.dark .axis text {
-    fill: #f2f2f2;
-    text-shadow: 0 1px 0 #000, 1px 0 0 #000, 0 -1px 0 #000, -1px 0 0 #000;
-}
-.dark .axis text.label {
     fill: #ddd;
 }
 .quarter, .third, .half {
@@ -116,14 +126,14 @@ p {
 small {
     line-height: 1.2em;
 }
-button[disabled=disabled] {
-    color: #555 !important;
+.light button[disabled=disabled] {
     opacity: 0.4;
 }
 .settings button[disabled=disabled] {
     display: none;
 }
-.dark button[disabled=disabled] {
+button[disabled=disabled] {
+    color: #555 !important;
     opacity: 0.2;
 }
 button#keep-data,
@@ -138,31 +148,37 @@ button#exclude-data:hover {
 }
 #food-list {
     width: 100%;
-    height: 460px;
+    height: 400px;
     overflow-x: auto;
     overflow-y: auto;
     white-space: nowrap;
 }
-#legend {
-    text-align: left;
-    overflow-y: auto;
+.light #legend {
     border-left: 1px solid rgba(140,140,140,0.5);
 }
-.row {
+#legend .row {
     cursor: pointer;
 }
-.row:hover {
+#legend .row:hover {
     font-size: 16px;
     line-height: 1.3em;
 }
-.off {
+.light .off {
     color: #999;
 }
-.dark .off {
+.off {
     color: #555;
 }
-.dark #legend {
+#legend {
+    text-align: left;
+    overflow-y: auto;
     border-left: 1px solid #777;
+}
+#legend .row {
+    margin-bottom: 0px;
+}
+.marginBottom0 {
+    margin-bottom: 0px;
 }
 .color-block, .color-bar {
     display: inline-block;
@@ -194,21 +210,22 @@ button#exclude-data:hover {
     width: 268px;
     float: left;
 }
-#header {
-    border-bottom: 1px solid rgba(100,100,100,0.35);
+
+
+.light #header2 {
     background: #e2e2e2;
+}
+#header2 {
+    border-bottom: 1px solid rgba(100,100,100,0.35);
+    background: #040404;
     padding: 6px 24px 4px;
     line-height: 24px;
 }
-.dark #header {
-    background: #040404;
-    color: #f3f3f3;
-}
-#header h1 {
+#header2 h1 {
     display: inline-block;
     margin: 0px 14px 0 0;
 }
-#header button {
+#header2 button {
     vertical-align: top;
 }
 .controls {
@@ -224,20 +241,20 @@ button#exclude-data:hover {
     height: 10px;
 }
 
-::-webkit-scrollbar-track {
+.light ::-webkit-scrollbar-track {
     background: #ddd;
-    border-radius: 12px;
 }
 
-::-webkit-scrollbar-thumb {
+.light ::-webkit-scrollbar-thumb {
     background: #b5b5b5;
+}
+::-webkit-scrollbar-track {
+    background: #222;
     border-radius: 12px;
 }
-.dark ::-webkit-scrollbar-track {
-    background: #222;
-}
-.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: #444;
+    border-radius: 12px;
 }
 
 .floatLink{
@@ -308,42 +325,99 @@ button#exclude-data:hover {
     min-height: 1px;
 }
 
-.dropbtn {
-    background-color: #3f3e45;
-    color: white;
-    padding: 0.5em;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
+
+#header {
+    /*background-color: #ffffff;*/
+    background: #485563;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #29323c, #485563);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #29323c, #485563); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    /*background-color: #a71d31;*/
+    /*background-image: linear-gradient(315deg, #a71d31 0%, #3f0d12 74%);*/
+}
+.light #header {
+    background:  #f3f3f3;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #f3f3f3, #ececec);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #f3f3f3, #ececec); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
-.dropdown {
-    position: relative;
+#header, #header a, #header .brand-logo{
+    font-family: 'Fredoka One', cursive;
+    color: #ffffff
+}
+#header img{
+    padding-top: 0.5em;
+    display: block;
+    height: auto;
+    max-width: 10em;
+}
+.sidenav img{
+    width:10em;
+}
+.light #header,.light #header a,.light #header .brand-logo {
+    color: #484848
+}
+
+.titletext {
+    margin-top: 0;
+}
+#currentservice {
+    /*background-color: #f7f285;*/
+    /*color: black;*/
+}
+#header svg {
     display: inline-block;
-}
-
-.dropdown-content {
-    display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    top: 0;
+    left: 0;
 }
 
-.dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
+.brand-logo{
+    font-family: 'Staatliches', cursive;
+    /*background-color: #3f0d12;*/
+    /*background-image: linear-gradient(315deg, #3f0d12 0%, #a71d31 74%);*/
+    /*-webkit-background-clip: text;*/
+    /*-webkit-text-fill-color: transparent;*/
+}
+#controls {
+    padding-top: 10px;
 }
 
-.dropdown-content a:hover {background-color: #f1f1f1}
 
-.dropdown:hover .dropdown-content {
-    display: block;
+.pin-top {
+    position: relative;
 }
 
-.dropdown:hover .dropbtn {
-    background-color: #020402;
+
+.pin-bottom {
+    position: relative;
+}
+
+.pinned {
+    position: fixed !important;
+}
+
+#listvar {
+    background-color: black;
+}
+#listvar li:hover {
+    background-color: #404040;
+}
+#listvar a {
+    font-size: small;
+    color: white;
+}
+
+nav ul li.active {
+    background-color: rgba(255,255,255,0.7);
+}
+nav ul li.active a{
+    color: black !important;
+}
+
+.light nav ul li.active {
+    background-color: rgba(0,0,0,0.7);
+}
+.light nav ul li.active a{
+    color: white !important;
 }

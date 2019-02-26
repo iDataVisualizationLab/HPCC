@@ -560,7 +560,7 @@ function paths(selected, ctx, count) {
 
     shuffled_data = _.shuffle(selected);
 
-    data_table(shuffled_data.slice(0,25));
+    data_table(shuffled_data.slice(0,20));
 
     ctx.clearRect(0,0,w+1,h+1);
 
@@ -777,8 +777,7 @@ d3.select("#search").on("keyup", brush);
 // Appearance toggles
 d3.select("#hide-ticks").on("click", hide_ticks);
 d3.select("#show-ticks").on("click", show_ticks);
-d3.select("#dark-theme").on("click", dark_theme);
-d3.select("#light-theme").on("click", light_theme);
+
 
 function hide_ticks() {
     d3.selectAll(".axis g").style("display", "none");
@@ -796,43 +795,40 @@ function show_ticks() {
     d3.selectAll("#hide-ticks").attr("disabled", null);
 };
 
-function dark_theme() {
-    d3.select("body").attr("class", "dark");
-    d3.selectAll("#dark-theme").attr("disabled", "disabled");
-    d3.selectAll("#light-theme").attr("disabled", null);
-}
-
-function light_theme() {
-    d3.select("body").attr("class", null);
-    d3.selectAll("#light-theme").attr("disabled", "disabled");
-    d3.selectAll("#dark-theme").attr("disabled", null);
-}
-
 function search(selection,str) {
     pattern = new RegExp(str,"i")
     return _(selection).filter(function(d) { return pattern.exec(d.name); });
 }
 
 $( document ).ready(function() {
-    let comboBox = d3.select("#groupName");
+    $('.tabs').tabs();
+    $('.dropdown-trigger').dropdown();
+    $('.sidenav').sidenav();
+
+    let comboBox = d3.select("#listvar");
     let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
     listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
-    comboBox.select('.dropdown-content')
-        .selectAll('a').data(listOption).join('a')
-        .text(d=>d.text)
-        .on('click',d=>{
-            comboBox.select('.dropbtn').text(d.text);
-            if (d.arr==='rack'){
-                selectedService = null;
-                svgLengend.style('display','none');
-            }else {
-                selectedService = d.arr;
-                setColorsAndThresholds(d.service);
-                drawLegend(d.service, arrThresholds, arrColor, dif);
-                svgLengend.style('display',null);
-            }
-            changeGroupTarget(d.arr);
-            legend = create_legend(colors,brush);
-            brush();
-        });
+    comboBox
+        .selectAll('li').data(listOption)
+        .join(enter => enter.append("li") .attr('tabindex','0').append("a")
+                .attr('href',"#"))
+        .text(d=>{console.log(d); return d.text})
+        .on('click',changeVar);
+
+    d3.select("#DarkTheme").on("click",switchTheme);
 });
+function changeVar(d){
+    $('#groupName').text(d.text);
+    if (d.arr==='rack'){
+        selectedService = null;
+        svgLengend.style('display','none');
+    }else {
+        selectedService = d.arr;
+        setColorsAndThresholds(d.service);
+        drawLegend(d.service, arrThresholds, arrColor, dif);
+        svgLengend.style('display',null);
+    }
+    changeGroupTarget(d.arr);
+    legend = create_legend(colors,brush);
+    brush();
+}
