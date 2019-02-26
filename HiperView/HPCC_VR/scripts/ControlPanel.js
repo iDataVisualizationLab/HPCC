@@ -2,6 +2,7 @@ function initControlPanel()
 {
     initServiceControlPanel();
     initTimeControlPanel();
+    initScoreControlPanel();
 }
 
 // service control panel init
@@ -225,6 +226,121 @@ function initTimeControlPanel()
         time_control_panel.add( button );
         timeObj[button.name] = button;
 
+    }
+
+}
+
+// score control panel init
+function initScoreControlPanel()
+{
+    var score = Object.keys(SCORE);
+
+    var num = score.length ;
+    var s = ROOM_SIZE * 0.1;
+    var r = s/(2*Math.tan(Math.PI/num)) + s/15;
+
+    score_control_panel = new THREE.Group();
+    score_control_panel.slider = {};
+    score_control_panel.name = "score_control_panel";
+
+    for( var i=0; i<num; i++ )
+    {
+        // adding plane
+        var plane_geometry = new THREE.PlaneGeometry( s, s*3, s );
+        var plane_material = new THREE.MeshBasicMaterial( { color: 0x777777 } );
+        var plane = new THREE.Mesh( plane_geometry, plane_material );
+        plane.type = "score_plane";
+        plane.name = score[i];
+        addScoreLabel( plane, score[i] );
+
+        // adding black space
+        var height_geometry = new THREE.PlaneGeometry( s/15, s*2.5, s );
+        var height_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+        var height = new THREE.Mesh( height_geometry, height_material );
+        plane.add( height );
+        height.translateZ( 0.001 );
+
+        // positioning plane
+        plane.rotation.set( 0, i*2*Math.PI/num, 0 );
+        plane.translateZ(r);
+        
+        // adding slider
+        var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/3, 32 );
+        var slider_material = new THREE.MeshBasicMaterial( { color: 0xdddddd } );
+        var slider = new THREE.Mesh( slider_geometry, slider_material );
+        slider.name = score[i];
+        slider.type = "slider";
+        slider.score = 1;
+        slider.initial = s*2.5/2;
+        score_control_panel.slider[name] = slider;
+
+        // positioning slider
+        slider.translateY( s*2.5/2 );
+        slider.rotation.set( 0, i*2*Math.PI/num, 0 );
+        slider.translateZ(r + s/40);
+        slider.rotateZ( Math.PI/2 );
+
+        // adding plane and slider
+        score_control_panel.add( plane );
+        score_control_panel.add( score_control_panel.slider[name] );
+    }
+
+    score_control_panel.position.set( ROOM_SIZE * 4, 0, 0 );
+    scene.add( score_control_panel );
+
+
+    // functions
+
+    function addScoreLabel( obj, label )
+    {
+        var banner_geometry = new THREE.PlaneGeometry( s, s/4, s );
+        var banner_material = new THREE.MeshBasicMaterial( { side: THREE.DoubleSide, color: 0x777777 } );
+        var banner = new THREE.Mesh( banner_geometry, banner_material );
+
+        var loader = new THREE.FontLoader();
+        var text_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+        loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font )
+        {
+            var text_geometry = new THREE.TextGeometry( label, {
+                font: font,
+                size: s/15,
+                height: 0,
+                curveSegments: 12,
+                bevelEnabled: false
+            } );
+
+            var text = new THREE.Mesh( text_geometry, text_material );
+            var x = -s/4;
+            text.position.set( x, 0, 0.005 );
+
+            text.name = "score_label_"+label;
+            text.type = "score_label";
+
+            banner.add( text );
+        } );
+
+
+        banner.position.set( 0, s*1.7 , 0 );
+        obj.add( banner );
+
+    }
+
+    function addSlider( obj, name )
+    {
+        var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/3, 32 );
+        var slider_material = new THREE.MeshBasicMaterial( { color: 0xdddddd } );
+        var slider = new THREE.Mesh( slider_geometry, slider_material );
+        slider.name = name;
+        slider.type = "slider";
+
+        slider.translateZ( s/40 );
+        slider.translateY( s*2.5/2 );
+        slider.rotateZ( Math.PI/2 );
+        slider.score = 1;
+        slider.initial = s*2.5/2;
+        score_control_panel.slider[name] = slider;
+        score_control_panel.sliders.add( slider );
+        obj.add( score_control_panel.slider[name] );
     }
 
 }

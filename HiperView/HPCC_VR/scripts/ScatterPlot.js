@@ -466,8 +466,8 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
                     var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: 0.75 } );
-                    // var geometry = new THREE.BoxGeometry( default_size, default_size, default_size );
-                    var geometry = new THREE.SphereGeometry( default_size/2, 8, 8 );
+                    var geometry = new THREE.BoxGeometry( default_size, default_size, default_size );
+                    // var geometry = new THREE.SphereGeometry( default_size/2, 8, 8 );
                     var point = new THREE.Mesh( geometry, material );
                     point.count = binCount[xb][yb][zb];
                     point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
@@ -556,11 +556,20 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             // };
 
             // compute scag via promise
-            promiseScag( p.data ).then( message =>
-                {
-                    console.log(message.outlyingScore);
-                    p.scag = message;
-                } );
+            // promiseScag( p.data ).then( message =>
+            //     {
+            //         console.log("*****************************")
+            //         console.log(message.outlyingScore);
+            //         console.log(message.clumpyScore);
+            //         console.log(message.convexScore);
+            //         console.log(message.monotonicScore);
+            //         console.log(message.skewedScore);
+            //         console.log(message.skinnyScore);
+            //         console.log(message.sparseScore);
+            //         console.log(message.striatedScore);
+            //         console.log(message.stringyScore);
+            //         p.scag = message;
+            //     } );
         }
 
         function promiseScag( data )
@@ -572,7 +581,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
                             minBins: 5,
                             maxBins: 20
                         }
-                    var scag = scagnosticsnd( data, options );
+                    var scag = scagnostics3d( data, options );
 
                     resolve(scag)
                 } );

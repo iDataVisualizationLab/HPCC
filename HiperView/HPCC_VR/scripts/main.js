@@ -34,6 +34,17 @@ var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Tempera
                 arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
+var SCORE = { outlyingScore: 1,
+                clumpyScore: 1,
+                convexScore: 1,
+                monotonicScore: 1,
+                skewedScore: 1,
+                skinnyScore: 1,
+                sparseScore: 1,
+                striatedScore: 1,
+                stringyScore: 1
+            };
+
 
 var niceOffset = false;
 
@@ -48,6 +59,7 @@ var cpu_marker;
 var tooltip;
 var service_control_panel;
 var time_control_panel;
+var score_control_panel;
 var scatter_plot_matrix;
 var foo;
 var parallel_set;

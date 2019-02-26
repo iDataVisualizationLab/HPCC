@@ -1,5 +1,13 @@
 // EVENTS
 
+var mouseDown = 0;
+document.body.onmousedown = function() { 
+  ++mouseDown;
+}
+document.body.onmouseup = function() {
+  --mouseDown;
+}
+
 // on resizing window
 function onResize()
 {
@@ -32,6 +40,8 @@ function onMouseDown( event )
     else if( isServiceControlPanelClicked() )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
+        console.log(INTERSECTED.name);
+    else if( isScoreControlPanelClicked() )
         console.log(INTERSECTED.name);
     // else if( isScatterPlotClicked() )
     //     console.log(INTERSECTED.name);
@@ -101,6 +111,40 @@ function onMouseDown( event )
             {
                 isInit = false;
                 // reset();
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // check if score control panel was clicked
+    function isScoreControlPanelClicked()
+    {
+        intersects = raycaster.intersectObjects( score_control_panel.children );
+        if ( intersects.length > 0 )  // time control panel was clicked
+        {
+            INTERSECTED = intersects[ 0 ].object;
+
+            if( INTERSECTED.type == "slider" ) // change timestamp
+            {
+                var timeout = setInterval( function()
+                {
+                    if( mouseDown )
+                    {
+                        INTERSECTED.position.y = mouse.y;
+                        // if( INTERSECTED.position.y>INTERSECTED.initial || INTERSECTED.position.y<INTERSECTED.initial*-1 )
+                        //     clearInterval( timeout );
+                    }
+                    else
+                    {
+                        clearInterval( timeout );
+                    }
+
+                }, 10 );
+
                 return true;
             }
         }
