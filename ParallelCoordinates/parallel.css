@@ -88,7 +88,7 @@ canvas, svg {
 }
 .axis text {
     fill: #f2f2f2;
-    text-anchor: end;
+    /*text-anchor: end;*/
     font-size: 11px;
     text-shadow: 0 1px 0 #000, 1px 0 0 #000, 0 -1px 0 #000, -1px 0 0 #000;
 }

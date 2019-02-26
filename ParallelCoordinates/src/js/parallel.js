@@ -4,7 +4,7 @@
 
 var width, height;
 
-var m = [60, 0, 10, 0],
+var m = [40, 0, 10, 0],
     w,
     h,
     xscale,
@@ -33,6 +33,7 @@ var orderLegend;
 var svgLengend;
 
 $( document ).ready(function() {
+    console.log('ready')
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
@@ -49,15 +50,15 @@ $( document ).ready(function() {
 
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
-
 });
 
 function init() {
-    width = document.body.clientWidth;
+    width = $("#Maincontent").width()-10;
+    console.log(width);
     height = d3.max([document.body.clientHeight-540, 240]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
-    xscale = d3.scalePoint().range([0, w]).padding(1);
+    xscale = d3.scalePoint().range([0, w]).padding(0.3);
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
     d3.select("#chart")
@@ -92,8 +93,8 @@ function init() {
         .attr("height", h).style('display','none');
 // SVG for ticks, labels, and interactions
     svg = d3.select("svg")
-        .attr("width", w + m[1] + m[3])
-        .attr("height", h + m[0] + m[2])
+        .attr("width", width)
+        .attr("height", height)
         .append("svg:g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
@@ -140,7 +141,7 @@ function init() {
                 });
                 brush_count++;
                 this.__dragged__ = true;
-
+                brush();
                 // Feedback for axis deletion if dropped
                 if (dragging[d] < 12 || dragging[d] > w - 12) {
                     d3.select(this).select(".background").style("fill", "#b00");
@@ -437,20 +438,42 @@ function path(d, ctx, color) {
     var x0 = xscale(dimensions[0])-15,
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0,y0);
+    let valid = true;
     dimensions.map(function(p,i) {
         var x = xscale(p),
             y = yscale[p](d[p]);
-        // var cp1x = x - 0.88*(x-x0);
-        // var cp1y = y0;
-        // var cp2x = x - 0.12*(x-x0);
-        // var cp2y = y;
-        var cp1x = x - 0.5*(x-x0);
-        var cp1y = y0;
-        var cp2x = x - 0.5*(x-x0);
-        var cp2y = y;
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-        x0 = x;
-        y0 = y;
+        if (y===undefined) {
+            if (valid) {
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x0,y0);
+                ctx.setLineDash([5, 15]);
+            } else{
+
+            }
+            valid = false;
+        }else if (valid) {
+            var cp1x = x - 0.5 * (x - x0);
+            var cp1y = y0;
+            var cp2x = x - 0.5 * (x - x0);
+            var cp2y = y;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+            x0 = x;
+            y0 = y;
+        }else {
+            var cp1x = x - 0.5 * (x - x0);
+            var cp1y = y0;
+            var cp2x = x - 0.5 * (x - x0);
+            var cp2y = y;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.setLineDash([]);
+            ctx.moveTo(x,y);
+            valid = true;
+            x0 = x;
+            y0 = y;
+        }
     });
     ctx.lineTo(x0+15, y0);                               // right edge
     ctx.stroke();
@@ -736,7 +759,7 @@ function export_csv() {
 window.onresize = function() {
     width = document.body.clientWidth,
         height = d3.max([document.body.clientHeight-500, 220]);
-
+    console.log(width)
     w = width - m[1] - m[3],
         h = height - m[0] - m[2];
 
@@ -754,7 +777,7 @@ window.onresize = function() {
         .select("g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
-    xscale = d3.scalePoint().range([0, w]).padding(1).domain(dimensions);
+    xscale = d3.scalePoint().range([0, w]).padding(0.3).domain(dimensions);
     dimensions.forEach(function(d) {
         yscale[d].range([h, 0]);
     });
