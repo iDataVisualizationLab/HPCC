@@ -562,16 +562,16 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             // compute scag via promise
             promiseScag( p.data ).then( message =>
                 {
-                    // console.log("*****************************")
-                    // console.log("outl " + message.outlyingScore);
-                    // console.log("clum " + message.clumpyScore);
-                    // console.log("conv " + message.convexScore);
-                    // console.log("mono " + message.monotonicScore);
-                    // console.log("skwe " + message.skewedScore);
-                    // console.log("skin " + message.skinnyScore);
-                    // console.log("spar " + message.sparseScore);
-                    // console.log("stra " + message.striatedScore);
-                    // console.log("stry " + message.stringyScore);
+                    console.log("*****************************")
+                    console.log("outl " + message.outlyingScore);
+                    console.log("clum " + message.clumpyScore);
+                    console.log("conv " + message.convexScore);
+                    console.log("mono " + message.monotonicScore);
+                    console.log("skwe " + message.skewedScore);
+                    console.log("skin " + message.skinnyScore);
+                    console.log("spar " + message.sparseScore);
+                    console.log("stra " + message.striatedScore);
+                    console.log("stry " + message.stringyScore);
                     p.scag = message;
                     filterScatterPlot( p );
                 } );
@@ -581,10 +581,11 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         {
             return new Promise( resolve => 
                 {
+                    console.log( data );
                     var options = {
                             startBinGridSize: 10,
-                            minBins: 5,
-                            maxBins: 20
+                            minBins: 10,
+                            maxBins: 100
                         }
                     var scag = scagnostics3d( data, options );
 
