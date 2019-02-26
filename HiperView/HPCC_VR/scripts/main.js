@@ -546,8 +546,8 @@ function initScatterPlotMatrix()
     var element = Object.keys( SERVICE );
     // element.pop();
     // element.pop();
-    element.pop();
-    element.pop();
+    // element.pop();
+    // element.pop();
 
     var slist = [];
 
