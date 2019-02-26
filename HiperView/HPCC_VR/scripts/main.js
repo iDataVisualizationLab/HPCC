@@ -544,10 +544,10 @@ function initScatterPlotMatrix()
     var hostkeys = Object.keys(json);
     var datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
     var element = Object.keys( SERVICE );
-    element.pop();
-    element.pop();
-    element.pop();
-    element.pop();
+    // element.pop();
+    // element.pop();
+    // element.pop();
+    // element.pop();
 
     var slist = [];
 
@@ -639,7 +639,6 @@ function animate()
     requestAnimationFrame( animate );
     animateControlPanel();
     animateTooltip();
-    filterScatterPlotMatrix();
 }
 
 function render()

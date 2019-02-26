@@ -466,7 +466,7 @@ function animateControlPanel()
     timeObj["REALTIME"].rotation.y -= CP_SPEED/4;
 }
 
-// filter scatter plot matrix
+// filter all scatter plot matrix
 function filterScatterPlotMatrix()
 {
     // check if scatter plot matrix has been initialized
@@ -479,14 +479,30 @@ function filterScatterPlotMatrix()
         if( scatter_plot_matrix.matrix[sp] == undefined ) continue;             // check if sp has been initialized
         if( scatter_plot_matrix.matrix[sp].scag == null ) continue;             // check if scag has been calculated
 
+        var filter_result = true;
+
         // loop through scores
         for( score in SCORE )
         {
             if( !SCORE.hasOwnProperty(score) ) continue;                        // check if attribute is valid
-            if( scatter_plot_matrix.matrix[sp].scag[score] > SCORE[score] )     // check if sp's score is greater than filter
-                scatter_plot_matrix.matrix[sp].visible = true;                  // show if true
-            else
-                scatter_plot_matrix.matrix[sp].visible = false;                 // hide if false
+            filter_result &= (scatter_plot_matrix.matrix[sp].scag[score] >= SCORE[score]);
+            if(!filter_result) break;
         }
+        scatter_plot_matrix.matrix[sp].graph.visible = filter_result == true;
     }
+}
+
+// filter scatter plot
+function filterScatterPlot( sp )
+{
+    var filter_result = true;
+    
+    // loop through scores
+    for( score in SCORE )
+    {
+        if( !SCORE.hasOwnProperty(score) ) continue;
+        filter_result &= (sp.scag[score] >= SCORE[score]);
+        if(!filter_result) break;
+    }
+    sp.graph.visible = filter_result == true;
 }

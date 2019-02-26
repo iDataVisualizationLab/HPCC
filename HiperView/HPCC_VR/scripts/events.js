@@ -162,6 +162,8 @@ function onMouseDown( event )
                     slider.position.y-=slider.initial/5;
                     SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
                 }
+
+                filterScatterPlotMatrix();
             }
                 
             return true;
