@@ -52,6 +52,12 @@ $( document ).ready(function() {
     init();
 });
 
+function getBrush(d) {
+    return d3.brushY(yscale[d])
+        .extent([[-10, 0], [10, h]])
+        .on("brush end", brush);
+}
+
 function init() {
     width = $("#Maincontent").width()-10;
     console.log(width);
@@ -153,13 +159,11 @@ function init() {
                 if (!this.__dragged__) {
                     // no movement, invert axis
                     var extent = invert_axis(d, this);
-
                 } else {
                     // reorder axes
                     d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
 
                     var extent = yscale[d].brush.extent();
-                    console.log(extent)
                     // var extent = d3.brushSelection(this).map(yscale[d].invert).sort();
                 }
 
@@ -201,9 +205,7 @@ function init() {
     g.append("svg:g")
         .attr("class", "brush")
         .each(function (d) {
-            d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
-                .extent([[-10, 0], [10, h]])
-                .on("brush end", brush));
+            d3.select(this).call(yscale[d].brush = getBrush(d));
         })
         .selectAll("rect")
         .style("visibility", null)
@@ -382,7 +384,7 @@ function unhighlight() {
     highlighted.clearRect(0,0,w,h);
 }
 
-function invert_axis(d,element) {
+function invert_axis(d) {
     // save extent before inverting
     var extent;
     svg.selectAll(".brush")
@@ -395,9 +397,7 @@ function invert_axis(d,element) {
             // Get extents of brush along each active selection axis (the Y axes)
             extent = d3.brushSelection(this).map(yscale[d].invert);
         });
-    // if (!yscale[d].brush.empty()) {
-    //     var extent = yscale[d].brush.extent();
-    // }
+    console.log(extent)
     if (yscale[d].inverted == true) {
         yscale[d].range([h, 0]);
         d3.selectAll('.label')
@@ -648,14 +648,14 @@ function update_ticks(d, extent) {
         // single tick
         if (extent) {
             // restore previous extent
-            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).extent(extent).on("brush end", brush));
+            brush_el.call(yscale[d].brush = getBrush(d)).call(yscale[d].brush.move, extent.map(yscale[d]).sort((a,b)=>a-b));
         } else {
-            brush_el.call(yscale[d].brush = d3.brushY(yscale[d]).on("brush end", brush));
+            brush_el.call(yscale[d].brush = getBrush(d));
         }
     } else {
         // all ticks
         d3.selectAll(".brush")
-            .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d]).on("brush end", brush)); })
+            .each(function(d) { d3.select(this).call(yscale[d].brush = getBrush(d)); })
     }
 
     brush_count++;
