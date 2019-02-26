@@ -10,6 +10,9 @@ Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
 Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperVR.png)
 
+Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ParrallelCoordinate.png)
+
 # 2018
 
 ### HiperView: Visualizing Multidimensional Health Status of High Performance Systems

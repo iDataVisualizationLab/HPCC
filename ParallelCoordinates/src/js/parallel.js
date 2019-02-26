@@ -429,15 +429,15 @@ function changeGroupTarget(key) {
         var thresholdScale = d3.bisector(function(d) { return d; }).left;
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1,this.length-1);
-        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}});
+        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse();
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }
 function rangeToString(arr){
     let midleRange = arr.slice(1,this.length-1);
-    let mapRangeName = ["<"+midleRange[0]];
-    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push(midleRange[i]+'-'+d));
-    mapRangeName.push(">"+midleRange[midleRange.length-1]);
+    let mapRangeName = ["(<"+midleRange[0]+")"];
+    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push("("+midleRange[i]+'-'+d+")"));
+    mapRangeName.push("(>"+midleRange[midleRange.length-1]+")");
     return mapRangeName;
 }
 function position(d) {

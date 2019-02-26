@@ -206,8 +206,8 @@ function object2DataPrallel(ob){
                 });
             });
             eachIn.timestep = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
-            eachIn.rack = rack;
-            eachIn.group = rack;
+            eachIn.rack = "Rack "+rack;
+            eachIn.group = "Rack "+rack;
             eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
             eachIn.id = com.key+"-"+count;
             count++;

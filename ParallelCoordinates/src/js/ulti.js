@@ -17,9 +17,9 @@ function drawLegend(s,arrThresholds, arrColor, dif){
         .append('linearGradient')
         .attr('id', 'gradient')
         .attr('x1', '0%') // bottom
-        .attr('y1', '0%')
+        .attr('y1', '100%')
         .attr('x2', '0%') // to top
-        .attr('y2', '100%')
+        .attr('y2', '0%')
         .attr('spreadMethod', 'pad');
     gradient.selectAll('stop').data(pct)
         .join('stop')
