@@ -637,6 +637,7 @@ function animate()
     requestAnimationFrame( animate );
     animateControlPanel();
     animateTooltip();
+    // filterScatterPlotMatrix();
 }
 
 function render()

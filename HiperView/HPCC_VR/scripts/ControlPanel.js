@@ -408,6 +408,32 @@ function updateSelectedTimestamp( name )
 function animateControlPanel()
 {
     service_control_panel.rotation.y -= CP_SPEED;
+    score_control_panel.rotation.z += CP_SPEED/8;
     time_control_panel.rotation.z += CP_SPEED/4;
     timeObj["REALTIME"].rotation.y -= CP_SPEED/4;
+}
+
+// filter scatter plot matrix
+function filterScatterPlotMatrix()
+{
+    // check if scatter plot matrix has been initialized
+    if( scatter_plot_matrix == undefined ) return 0;
+
+    // loop through matrix
+    for( sp in scatter_plot_matrix.matrix )
+    {
+        if( !scatter_plot_matrix.matrix.hasOwnProperty(sp) ) continue;          // check if attribute is valid
+        if( scatter_plot_matrix.matrix[sp] == undefined ) continue;             // check if sp has been initialized
+        if( scatter_plot_matrix.matrix[sp].scag == null ) continue;             // check if scag has been calculated
+
+        // loop through scores
+        for( score in SCORE )
+        {
+            if( !SCORE.hasOwnProperty(score) ) continue;                        // check if attribute is valid
+            if( scatter_plot_matrix.matrix[sp].scag[score] < SCORE[score] )     // check if sp's score is less than filter
+                scatter_plot_matrix.matrix[sp].visible = true;                  // show if true
+            else
+                scatter_plot_matrix.matrix[sp].visible = false;                 // hide if false
+        }
+    }
 }
