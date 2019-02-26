@@ -777,8 +777,7 @@ d3.select("#search").on("keyup", brush);
 // Appearance toggles
 d3.select("#hide-ticks").on("click", hide_ticks);
 d3.select("#show-ticks").on("click", show_ticks);
-d3.select("#dark-theme").on("click", dark_theme);
-d3.select("#light-theme").on("click", light_theme);
+
 
 function hide_ticks() {
     d3.selectAll(".axis g").style("display", "none");
@@ -796,24 +795,14 @@ function show_ticks() {
     d3.selectAll("#hide-ticks").attr("disabled", null);
 };
 
-function dark_theme() {
-    d3.select("body").attr("class", "dark");
-    d3.selectAll("#dark-theme").attr("disabled", "disabled");
-    d3.selectAll("#light-theme").attr("disabled", null);
-}
-
-function light_theme() {
-    d3.select("body").attr("class", null);
-    d3.selectAll("#light-theme").attr("disabled", "disabled");
-    d3.selectAll("#dark-theme").attr("disabled", null);
-}
-
 function search(selection,str) {
     pattern = new RegExp(str,"i")
     return _(selection).filter(function(d) { return pattern.exec(d.name); });
 }
 
 $( document ).ready(function() {
+    $('.sidenav').sidenav();
+
     let comboBox = d3.select("#groupName");
     let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
     listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
@@ -835,4 +824,5 @@ $( document ).ready(function() {
             legend = create_legend(colors,brush);
             brush();
         });
+    d3.select("#DarkTheme").on("click",switchTheme);
 });

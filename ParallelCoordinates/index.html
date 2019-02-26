@@ -3,14 +3,52 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <title>High performance Computing  Explorer</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Passion+One|Russo+One&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+
+
     <link rel="stylesheet" type="text/css" href="parallel.css" />
     <script type="text/javascript" src="src/lib/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="src/lib/d3.v5.min.js"></script>
     <script src="src/lib/underscore-min.js"></script>
 </head>
 <body>
-<div id="header">
-    <h1>HPCC Explorer</h1>
+<nav class="pushpin-demo-nav" data-target="blue">
+
+    <div class="nav-wrapper" id="header">
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <div class="brand-logo center col s12 inline" >
+            Parallel Coordinates
+        </div>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li class="avatar"><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
+            <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+            <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+            <li><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
+        </ul>
+        <ul class="right">
+            <li><a href="#!" value="dark" id = "DarkTheme">Light</a></li>
+        </ul>
+    </div>
+</nav>
+<ul class="sidenav" id="mobile-demo">
+    <h3>Other projects</h3>
+    <li><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University" class="avatar"></a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+</ul>
+
+<div id="header2">
+    <!--<h1>HPCC Explorer</h1>-->
     <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
     <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
     <button title="Export data as CSV" id="export-data">Export</button>
@@ -21,8 +59,6 @@
         <span class="settings">
         <button id="hide-ticks">Hide Ticks</button>
         <button id="show-ticks" disabled="disabled">Show Ticks</button>
-        <button id="dark-theme">Dark</button>
-        <button id="light-theme" disabled="disabled">Light</button>
       </span>
     </div>
     <div style="clear:both;"></div>
@@ -98,7 +134,7 @@
         <small>
             <!--Last rendered <strong id="render-speed"></strong> lines-->
         </small>
-        <h3>Group by <div class="dropdown" id="groupName">
+        <h3>Group by <div class="dropdownClassic" id="groupName">
             <button class="dropbtn">Rack</button>
             <div class="dropdown-content">
                 <a href="#">Link 1</a>
