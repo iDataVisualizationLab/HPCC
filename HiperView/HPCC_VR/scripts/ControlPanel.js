@@ -237,17 +237,18 @@ function initScoreControlPanel()
 
     var num = score.length ;
     var s = ROOM_SIZE * 0.1;
-    var r = s/(2*Math.tan(Math.PI/num)) + s/15;
+    var r = (s/2)/(2*Math.tan(Math.PI/num)) + s/20;
 
     score_control_panel = new THREE.Group();
     score_control_panel.slider = {};
     score_control_panel.name = "score_control_panel";
+    score_control_panel.rotation_interval = 2*Math.PI/num;
 
     for( var i=0; i<num; i++ )
     {
         // adding plane
-        var plane_geometry = new THREE.PlaneGeometry( s, s*3, s );
-        var plane_material = new THREE.MeshBasicMaterial( { color: 0x777777 } );
+        var plane_geometry = new THREE.PlaneGeometry( s/2, s*3, s );
+        var plane_material = new THREE.MeshPhongMaterial( { side: THREE.DoubleSide, color: 0x777777 } );
         var plane = new THREE.Mesh( plane_geometry, plane_material );
         plane.type = "score_plane";
         plane.name = score[i];
@@ -255,7 +256,7 @@ function initScoreControlPanel()
 
         // adding black space
         var height_geometry = new THREE.PlaneGeometry( s/15, s*2.5, s );
-        var height_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+        var height_material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
         var height = new THREE.Mesh( height_geometry, height_material );
         plane.add( height );
         height.translateZ( 0.001 );
@@ -265,10 +266,10 @@ function initScoreControlPanel()
         plane.translateZ(r);
         
         // adding slider
-        var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/3, 32 );
-        var slider_material = new THREE.MeshBasicMaterial( { color: 0xdddddd } );
+        var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/4, 32 );
+        var slider_material = new THREE.MeshPhongMaterial( { color: 0xdddddd } );
         var slider = new THREE.Mesh( slider_geometry, slider_material );
-        slider.name = score[i];
+        slider.name = "slider-" + score[i];
         slider.type = "slider";
         slider.score = 1;
         slider.initial = s*2.5/2;
@@ -280,12 +281,83 @@ function initScoreControlPanel()
         slider.translateZ(r + s/40);
         slider.rotateZ( Math.PI/2 );
 
+        // adding up and down arrows
+        var arrowu = new THREE.Shape();
+        arrowu.moveTo( 0, 0 );
+        arrowu.lineTo( 0, s/4 );
+        arrowu.lineTo( s/8, s/8 );
+        arrowu.lineTo( 0, 0 );
+        var extrudeSettings = { amount: 0.001, bevelEnabled: false };
+        var arrowu_geometry = new THREE.ExtrudeGeometry( arrowu, extrudeSettings );
+        var arrowu_mesh = new THREE.Mesh( arrowu_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowu_mesh.type = "arrow_up";
+
+        var arrowd = new THREE.Shape();
+        arrowd.moveTo( 0, 0 );
+        arrowd.lineTo( 0, s/4 );
+        arrowd.lineTo( s/-8, s/8 );
+        arrowd.lineTo( 0, 0 );
+        var arrowd_geometry = new THREE.ExtrudeGeometry( arrowd, extrudeSettings );
+        var arrowd_mesh = new THREE.Mesh( arrowd_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowd_mesh.type = "arrow_down";
+
+        // positioning up and down arrows
+        arrowu_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowd_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowu_mesh.translateZ(r + s/40);
+        arrowd_mesh.translateZ(r + s/40);
+        arrowu_mesh.translateY(s*2);
+        arrowd_mesh.translateY(s*2);
+        arrowu_mesh.translateX(s/10);
+        arrowd_mesh.translateX(s/-18);
+
+        // adding left and right arrows
+        var arrowl = new THREE.Shape();
+        arrowl.moveTo( 0, 0 );
+        arrowl.lineTo( s/4, 0 );
+        arrowl.lineTo( s/8, s/8 );
+        arrowl.lineTo( 0, 0 );
+        var extrudeSettings = { amount: 0.001, bevelEnabled: false };
+        var arrowl_geometry = new THREE.ExtrudeGeometry( arrowl, extrudeSettings );
+        var arrowl_mesh = new THREE.Mesh( arrowl_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowl_mesh.type = "arrow_left";
+        arrowl_mesh.name = score[i];
+
+        var arrowr = new THREE.Shape();
+        arrowr.moveTo( 0, 0 );
+        arrowr.lineTo( s/-4, 0 );
+        arrowr.lineTo( s/-8, s/-8 );
+        arrowr.lineTo( 0, 0 );
+        var arrowr_geometry = new THREE.ExtrudeGeometry( arrowr, extrudeSettings );
+        var arrowr_mesh = new THREE.Mesh( arrowr_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowr_mesh.type = "arrow_right";
+        arrowr_mesh.name = score[i];
+
+        // positioning left and right arrows
+        arrowl_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowr_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowl_mesh.translateZ(r + s/40);
+        arrowr_mesh.translateZ(r + s/40);
+        arrowl_mesh.translateY(s*1.3);
+        arrowr_mesh.translateY(s*-1.3);
+        arrowl_mesh.translateX(s/-8);
+        arrowr_mesh.translateX(s/8);
+
         // adding plane and slider
         score_control_panel.add( plane );
         score_control_panel.add( score_control_panel.slider[name] );
+        score_control_panel.add( arrowu_mesh );
+        score_control_panel.add( arrowd_mesh );
+        score_control_panel.add( arrowl_mesh );
+        score_control_panel.add( arrowr_mesh );
+
     }
 
-    score_control_panel.position.set( ROOM_SIZE * 4, 0, 0 );
+    // adding number labels
+    // pending
+
+    score_control_panel.position.set( ROOM_SIZE * 4, ROOM_SIZE / 10, 0 );
+    score_control_panel.rotateZ( Math.PI/2 );
     scene.add( score_control_panel );
 
 
@@ -293,7 +365,7 @@ function initScoreControlPanel()
 
     function addScoreLabel( obj, label )
     {
-        var banner_geometry = new THREE.PlaneGeometry( s, s/4, s );
+        var banner_geometry = new THREE.PlaneGeometry( s, s/2, s );
         var banner_material = new THREE.MeshBasicMaterial( { side: THREE.DoubleSide, color: 0x777777 } );
         var banner = new THREE.Mesh( banner_geometry, banner_material );
 
@@ -310,8 +382,7 @@ function initScoreControlPanel()
             } );
 
             var text = new THREE.Mesh( text_geometry, text_material );
-            var x = -s/4;
-            text.position.set( x, 0, 0.005 );
+            text.position.set( -s/3, 0, 0.005 );
 
             text.name = "score_label_"+label;
             text.type = "score_label";
@@ -320,27 +391,10 @@ function initScoreControlPanel()
         } );
 
 
-        banner.position.set( 0, s*1.7 , 0 );
+        banner.position.set( 0, s*1.6 + s/2, 0 );
+        banner.rotateZ( Math.PI/-2 );
         obj.add( banner );
 
-    }
-
-    function addSlider( obj, name )
-    {
-        var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/3, 32 );
-        var slider_material = new THREE.MeshBasicMaterial( { color: 0xdddddd } );
-        var slider = new THREE.Mesh( slider_geometry, slider_material );
-        slider.name = name;
-        slider.type = "slider";
-
-        slider.translateZ( s/40 );
-        slider.translateY( s*2.5/2 );
-        slider.rotateZ( Math.PI/2 );
-        slider.score = 1;
-        slider.initial = s*2.5/2;
-        score_control_panel.slider[name] = slider;
-        score_control_panel.sliders.add( slider );
-        obj.add( score_control_panel.slider[name] );
     }
 
 }
@@ -408,7 +462,6 @@ function updateSelectedTimestamp( name )
 function animateControlPanel()
 {
     service_control_panel.rotation.y -= CP_SPEED;
-    // score_control_panel.rotation.y -= CP_SPEED/8;
     time_control_panel.rotation.z += CP_SPEED/4;
     timeObj["REALTIME"].rotation.y -= CP_SPEED/4;
 }
@@ -430,7 +483,7 @@ function filterScatterPlotMatrix()
         for( score in SCORE )
         {
             if( !SCORE.hasOwnProperty(score) ) continue;                        // check if attribute is valid
-            if( scatter_plot_matrix.matrix[sp].scag[score] < SCORE[score] )     // check if sp's score is less than filter
+            if( scatter_plot_matrix.matrix[sp].scag[score] > SCORE[score] )     // check if sp's score is greater than filter
                 scatter_plot_matrix.matrix[sp].visible = true;                  // show if true
             else
                 scatter_plot_matrix.matrix[sp].visible = false;                 // hide if false
