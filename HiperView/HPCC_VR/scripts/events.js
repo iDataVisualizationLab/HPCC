@@ -1,12 +1,7 @@
 // EVENTS
-
 var mouseDown = 0;
-document.body.onmousedown = function() { 
-  ++mouseDown;
-}
-document.body.onmouseup = function() {
-  --mouseDown;
-}
+document.body.onmousedown = function() { ++mouseDown; };
+document.body.onmouseup = function() { --mouseDown; };
 
 // on resizing window
 function onResize()
@@ -26,6 +21,9 @@ function onMouseMove( event )
 // on mouse clicked / screen touched
 function onMouseDown( event )
 {
+    var mouseDownHold;
+    clearInterval( mouseDownHold );
+
     event.preventDefault();
 
     // for some reason 2 event happen at the same time
@@ -130,7 +128,7 @@ function onMouseDown( event )
 
             if( INTERSECTED.type == "slider" ) // change timestamp
             {
-                var timeout = setInterval( function()
+                mouseDownHold = setInterval( function()
                 {
                     if( mouseDown )
                     {
@@ -140,7 +138,7 @@ function onMouseDown( event )
                     }
                     else
                     {
-                        clearInterval( timeout );
+                        clearInterval( mouseDownHold );
                     }
 
                 }, 10 );

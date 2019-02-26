@@ -408,7 +408,7 @@ function updateSelectedTimestamp( name )
 function animateControlPanel()
 {
     service_control_panel.rotation.y -= CP_SPEED;
-    score_control_panel.rotation.z += CP_SPEED/8;
+    // score_control_panel.rotation.y -= CP_SPEED/8;
     time_control_panel.rotation.z += CP_SPEED/4;
     timeObj["REALTIME"].rotation.y -= CP_SPEED/4;
 }

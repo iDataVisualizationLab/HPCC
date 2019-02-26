@@ -46,11 +46,12 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         Z.position.z = scale/2;
         this.graph.add( Z );
 
+        var currentA = 0;
         for( var a=z+1; a>1; a-- )
         {
             // add x and y labels
             var aZ_geometry = new THREE.BoxGeometry( scale, scale, scale );
-            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[y] + ".png" );
+            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
             var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
             var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
             aZ.position.x = summation(z-1) * scale * 2 + scale/2;       // align with z group
