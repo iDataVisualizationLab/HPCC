@@ -126,36 +126,47 @@ function onMouseDown( event )
         {
             INTERSECTED = intersects[ 0 ].object;
 
-            if( INTERSECTED.type == "slider" ) // change timestamp
+            // if( INTERSECTED.type == "slider" ) // change timestamp
+            // {
+            //     var mouseX = INTERSECTED.position.y;
+            //     mouseDownHold = setInterval( function()
+            //     {
+            //         if( mouseDown )
+            //         {
+            //             INTERSECTED.position.y = mouseX - mouse.x;
+            //         }
+            //         else
+            //         {
+            //             clearInterval( mouseDownHold );
+            //         }
+
+            //     }, 10 );
+
+            //     return true;
+            // }
+            // else
+            if( INTERSECTED.type == "arrow_up" )
+                score_control_panel.rotation.x-=score_control_panel.rotation_interval;
+            else if( INTERSECTED.type == "arrow_down" )
+                score_control_panel.rotation.x+=score_control_panel.rotation_interval;
+            else
             {
-                var mouseX = mouse.x;
-                mouseDownHold = setInterval( function()
+                var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
+                if( INTERSECTED.type == "arrow_left" & SCORE[INTERSECTED.name]>0 )
                 {
-                    if( mouseDown )
-                    {
-                        // if( mouseX != mouse.X )
-                        INTERSECTED.position.y = mouse.x;
-                        // INTERSECTED.position.y = INTERSECTED.position.y + (mouse.x - -1*mouseX )/100;
-                        // if( INTERSECTED.position.y>INTERSECTED.initial || INTERSECTED.position.y<INTERSECTED.initial*-1 )
-                        //     clearInterval( timeout );
-                    }
-                    else
-                    {
-                        clearInterval( mouseDownHold );
-                    }
-
-                }, 10 );
-
-                return true;
+                    slider.position.y+=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 - 1 ) / 10;
+                }
+                else if( INTERSECTED.type == "arrow_right" & SCORE[INTERSECTED.name]<1 )
+                {
+                    slider.position.y-=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
+                }
+                console.log(SCORE[INTERSECTED.name]);
             }
-            else if( INTERSECTED.type == "arrow" )
-            {
-                if( INTERSECTED.name == "up" )
-                    score_control_panel.rotation.x-=score_control_panel.rotation_interval;
-                if( INTERSECTED.name == "down" )
-                    score_control_panel.rotation.x+=score_control_panel.rotation_interval;
-                return true;
-            }
+                
+            return true;
+
         }
         else
         {

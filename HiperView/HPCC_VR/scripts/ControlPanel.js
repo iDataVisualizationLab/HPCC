@@ -269,7 +269,7 @@ function initScoreControlPanel()
         var slider_geometry = new THREE.CylinderGeometry( s/40, s/40, s/4, 32 );
         var slider_material = new THREE.MeshPhongMaterial( { color: 0xdddddd } );
         var slider = new THREE.Mesh( slider_geometry, slider_material );
-        slider.name = score[i];
+        slider.name = "slider-" + score[i];
         slider.type = "slider";
         slider.score = 1;
         slider.initial = s*2.5/2;
@@ -281,7 +281,7 @@ function initScoreControlPanel()
         slider.translateZ(r + s/40);
         slider.rotateZ( Math.PI/2 );
 
-        // adding arrows
+        // adding up and down arrows
         var arrowu = new THREE.Shape();
         arrowu.moveTo( 0, 0 );
         arrowu.lineTo( 0, s/4 );
@@ -289,9 +289,8 @@ function initScoreControlPanel()
         arrowu.lineTo( 0, 0 );
         var extrudeSettings = { amount: 0.001, bevelEnabled: false };
         var arrowu_geometry = new THREE.ExtrudeGeometry( arrowu, extrudeSettings );
-        var arrowu_mesh = new THREE.Mesh( arrowu_geometry, new THREE.MeshPhongMaterial( { color: 0x777777 }) );
-        arrowu_mesh.type = "arrow";
-        arrowu_mesh.name = "up";
+        var arrowu_mesh = new THREE.Mesh( arrowu_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowu_mesh.type = "arrow_up";
 
         var arrowd = new THREE.Shape();
         arrowd.moveTo( 0, 0 );
@@ -299,11 +298,10 @@ function initScoreControlPanel()
         arrowd.lineTo( s/-8, s/8 );
         arrowd.lineTo( 0, 0 );
         var arrowd_geometry = new THREE.ExtrudeGeometry( arrowd, extrudeSettings );
-        var arrowd_mesh = new THREE.Mesh( arrowd_geometry, new THREE.MeshPhongMaterial( { color: 0x777777 }) );
-        arrowd_mesh.type = "arrow";
-        arrowd_mesh.name = "down";
+        var arrowd_mesh = new THREE.Mesh( arrowd_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowd_mesh.type = "arrow_down";
 
-        // positioning arrows
+        // positioning up and down arrows
         arrowu_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
         arrowd_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
         arrowu_mesh.translateZ(r + s/40);
@@ -313,11 +311,45 @@ function initScoreControlPanel()
         arrowu_mesh.translateX(s/10);
         arrowd_mesh.translateX(s/-18);
 
+        // adding left and right arrows
+        var arrowl = new THREE.Shape();
+        arrowl.moveTo( 0, 0 );
+        arrowl.lineTo( s/4, 0 );
+        arrowl.lineTo( s/8, s/8 );
+        arrowl.lineTo( 0, 0 );
+        var extrudeSettings = { amount: 0.001, bevelEnabled: false };
+        var arrowl_geometry = new THREE.ExtrudeGeometry( arrowl, extrudeSettings );
+        var arrowl_mesh = new THREE.Mesh( arrowl_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowl_mesh.type = "arrow_left";
+        arrowl_mesh.name = score[i];
+
+        var arrowr = new THREE.Shape();
+        arrowr.moveTo( 0, 0 );
+        arrowr.lineTo( s/-4, 0 );
+        arrowr.lineTo( s/-8, s/-8 );
+        arrowr.lineTo( 0, 0 );
+        var arrowr_geometry = new THREE.ExtrudeGeometry( arrowr, extrudeSettings );
+        var arrowr_mesh = new THREE.Mesh( arrowr_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
+        arrowr_mesh.type = "arrow_right";
+        arrowr_mesh.name = score[i];
+
+        // positioning left and right arrows
+        arrowl_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowr_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowl_mesh.translateZ(r + s/40);
+        arrowr_mesh.translateZ(r + s/40);
+        arrowl_mesh.translateY(s*1.3);
+        arrowr_mesh.translateY(s*-1.3);
+        arrowl_mesh.translateX(s/-8);
+        arrowr_mesh.translateX(s/8);
+
         // adding plane and slider
         score_control_panel.add( plane );
         score_control_panel.add( score_control_panel.slider[name] );
         score_control_panel.add( arrowu_mesh );
         score_control_panel.add( arrowd_mesh );
+        score_control_panel.add( arrowl_mesh );
+        score_control_panel.add( arrowr_mesh );
 
     }
 
