@@ -2,17 +2,16 @@
 // Copyright (c) 2012, Kai Chang
 // Released under the BSD License: http://opensource.org/licenses/BSD-3-Clause
 
-var width = document.body.clientWidth,
-    height = d3.max([document.body.clientHeight-540, 240]);
+var width, height;
 
 var m = [60, 0, 10, 0],
-    w = width - m[1] - m[3],
-    h = height - m[0] - m[2],
-    xscale = d3.scalePoint().range([0, w]).padding(1),
+    w,
+    h,
+    xscale,
     yscale = {},
     dragging = {},
     line =  d3.line(),
-    axis = d3.axisLeft().ticks(1+height/50),
+    axis,
     data,
     foreground,
     background,
@@ -21,34 +20,9 @@ var m = [60, 0, 10, 0],
     legend,
     render_speed = 50,
     brush_count = 0,
-    excluded_groups = [];
+    excluded_groups = [],
+    svg;
 
-// Scale chart and canvas height
-d3.select("#chart")
-    .style("height", (h + m[0] + m[2]) + "px")
-
-d3.selectAll("canvas")
-    .attr("width", w)
-    .attr("height", h)
-    .style("padding", m.join("px ") + "px");
-
-
-// Foreground canvas for primary view
-foreground = document.getElementById('foreground').getContext('2d');
-foreground.globalCompositeOperation = "destination-over";
-foreground.strokeStyle = "rgba(0,100,160,0.1)";
-foreground.lineWidth = 1.7;
-foreground.fillText("Loading...",w/2,h/2);
-
-// Highlight canvas for temporary interactions
-highlighted = document.getElementById('highlight').getContext('2d');
-highlighted.strokeStyle = "rgba(0,100,160,1)";
-highlighted.lineWidth = 4;
-
-// Background canvas
-background = document.getElementById('background').getContext('2d');
-background.strokeStyle = "rgba(0,100,160,0.1)";
-background.lineWidth = 1.7;
 
 //legend prt
 var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
@@ -56,10 +30,197 @@ var levelStep = 4;
 var arrThresholds;
 var selectedService = null;
 var orderLegend;
-var svgLengend = d3.select('#colorContinuos').append('div').append('svg')
-    .attr("class", "legendView")
-    .attr("width", 20)
-    .attr("height", h).style('display','none');
+var svgLengend;
+
+$( document ).ready(function() {
+    $('.tabs').tabs();
+    $('.dropdown-trigger').dropdown();
+    $('.sidenav').sidenav();
+
+    let comboBox = d3.select("#listvar");
+    let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
+    listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
+    comboBox
+        .selectAll('li').data(listOption)
+        .join(enter => enter.append("li") .attr('tabindex','0').append("a")
+            .attr('href',"#"))
+        .text(d=>{console.log(d); return d.text})
+        .on('click',changeVar);
+
+    d3.select("#DarkTheme").on("click",switchTheme);
+    init();
+
+});
+
+function init() {
+    width = document.body.clientWidth;
+    height = d3.max([document.body.clientHeight-540, 240]);
+    w = width - m[1] - m[3];
+    h = height - m[0] - m[2];
+    xscale = d3.scalePoint().range([0, w]).padding(1);
+    axis = d3.axisLeft().ticks(1+height/50);
+    // Scale chart and canvas height
+    d3.select("#chart")
+        .style("height", (h + m[0] + m[2]) + "px")
+
+    d3.selectAll("canvas")
+        .attr("width", w)
+        .attr("height", h)
+        .style("padding", m.join("px ") + "px");
+
+
+// Foreground canvas for primary view
+    foreground = document.getElementById('foreground').getContext('2d');
+    foreground.globalCompositeOperation = "destination-over";
+    foreground.strokeStyle = "rgba(0,100,160,0.1)";
+    foreground.lineWidth = 1.7;
+    foreground.fillText("Loading...",w/2,h/2);
+
+// Highlight canvas for temporary interactions
+    highlighted = document.getElementById('highlight').getContext('2d');
+    highlighted.strokeStyle = "rgba(0,100,160,1)";
+    highlighted.lineWidth = 4;
+
+// Background canvas
+    background = document.getElementById('background').getContext('2d');
+    background.strokeStyle = "rgba(0,100,160,0.1)";
+    background.lineWidth = 1.7;
+
+    svgLengend = d3.select('#colorContinuos').append('div').append('svg')
+        .attr("class", "legendView")
+        .attr("width", 20)
+        .attr("height", h).style('display','none');
+// SVG for ticks, labels, and interactions
+    svg = d3.select("svg")
+        .attr("width", w + m[1] + m[3])
+        .attr("height", h + m[0] + m[2])
+        .append("svg:g")
+        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+// Load the data and visualization
+
+    // Convert quantitative scales to floats
+    data = object2DataPrallel(readData());
+
+    // Extract the list of numerical dimensions and create a scale for each.
+    xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
+        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+            .domain(d3.extent(data, function (d) {
+                return d[k];
+            }))
+            .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
+            .domain(d3.extent(data, function (d) {
+                return +d[k];
+            }))
+            .range([h, 0]))));
+    }));
+
+    // Add a group element for each dimension.
+    var g = svg.selectAll(".dimension")
+        .data(dimensions)
+        .enter().append("svg:g")
+        .attr("class", "dimension")
+        .attr("transform", function (d) {
+            return "translate(" + xscale(d) + ")";
+        })
+        .call(d3.drag()
+            .on("start", function (d) {
+                dragging[d] = this.__origin__ = xscale(d);
+                this.__dragged__ = false;
+                d3.select("#foreground").style("opacity", "0.35");
+            })
+            .on("drag", function (d) {
+                dragging[d] = Math.min(w, Math.max(0, this.__origin__ += d3.event.dx));
+                dimensions.sort(function (a, b) {
+                    return position(a) - position(b);
+                });
+                xscale.domain(dimensions);
+                g.attr("transform", function (d) {
+                    return "translate(" + position(d) + ")";
+                });
+                brush_count++;
+                this.__dragged__ = true;
+
+                // Feedback for axis deletion if dropped
+                if (dragging[d] < 12 || dragging[d] > w - 12) {
+                    d3.select(this).select(".background").style("fill", "#b00");
+                } else {
+                    d3.select(this).select(".background").style("fill", null);
+                }
+            })
+            .on("end", function (d) {
+                if (!this.__dragged__) {
+                    // no movement, invert axis
+                    var extent = invert_axis(d, this);
+
+                } else {
+                    // reorder axes
+                    d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
+
+                    var extent = yscale[d].brush.extent();
+                    console.log(extent)
+                    // var extent = d3.brushSelection(this).map(yscale[d].invert).sort();
+                }
+
+                // remove axis if dragged all the way left
+                if (dragging[d] < 12 || dragging[d] > w - 12) {
+                    remove_axis(d, g);
+                }
+
+                // TODO required to avoid a bug
+                xscale.domain(dimensions);
+                update_ticks(d, extent);
+
+                // rerender
+                d3.select("#foreground").style("opacity", null);
+                brush();
+                delete this.__dragged__;
+                delete this.__origin__;
+                delete dragging[d];
+            }))
+
+    // Add an axis and title.
+    g.append("svg:g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0,0)")
+        .each(function (d) {
+            return d3.select(this).call(axis.scale(yscale[d]));
+        })
+        .append("svg:text")
+        .attr("text-anchor", "middle")
+        // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
+        .attr("y", -14)
+        .attr("x", 0)
+        .attr("class", "label")
+        .text(String)
+        .append("title")
+        .text("Click to invert. Drag to reorder");
+
+    // Add and store a brush for each axis.
+    g.append("svg:g")
+        .attr("class", "brush")
+        .each(function (d) {
+            d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
+                .extent([[-10, 0], [10, h]])
+                .on("brush end", brush));
+        })
+        .selectAll("rect")
+        .style("visibility", null)
+        .attr("x", -23)
+        .attr("width", 36)
+        .append("title")
+        .text("Drag up or down to brush along this axis");
+
+    g.selectAll(".extent")
+        .append("title")
+        .text("Drag or resize this filter");
+
+
+    legend = create_legend(colors, brush);
+
+    // Render full foreground
+    brush();
+}
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
@@ -80,128 +241,6 @@ function setColorsAndThresholds(s) {
         }
     }
 }
-// setColorsAndThresholds(serviceList[0]);
-// drawLegend(serviceList[0],arrThresholds, arrColor,dif);
-
-// SVG for ticks, labels, and interactions
-var svg = d3.select("svg")
-    .attr("width", w + m[1] + m[3])
-    .attr("height", h + m[0] + m[2])
-    .append("svg:g")
-    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
-
-// Load the data and visualization
-
-    // Convert quantitative scales to floats
-    data = object2DataPrallel(readData());
-
-    // Extract the list of numerical dimensions and create a scale for each.
-    xscale.domain(dimensions = d3.keys(data[0]).filter(function(k) {
-        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
-            .domain(d3.extent(data, function(d) { return d[k]; }))
-            .range([h, 0]))||(_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
-            .domain(d3.extent(data, function(d) { return +d[k]; }))
-            .range([h, 0]))));
-    }));
-
-    // Add a group element for each dimension.
-    var g = svg.selectAll(".dimension")
-        .data(dimensions)
-        .enter().append("svg:g")
-        .attr("class", "dimension")
-        .attr("transform", function(d) { return "translate(" + xscale(d) + ")"; })
-        .call(d3.drag()
-            .on("start", function(d) {
-                dragging[d] = this.__origin__ = xscale(d);
-                this.__dragged__ = false;
-                d3.select("#foreground").style("opacity", "0.35");
-            })
-            .on("drag", function(d) {
-                dragging[d] = Math.min(w, Math.max(0, this.__origin__ += d3.event.dx));
-                dimensions.sort(function(a, b) { return position(a) - position(b); });
-                xscale.domain(dimensions);
-                g.attr("transform", function(d) { return "translate(" + position(d) + ")"; });
-                brush_count++;
-                this.__dragged__ = true;
-
-                // Feedback for axis deletion if dropped
-                if (dragging[d] < 12 || dragging[d] > w-12) {
-                    d3.select(this).select(".background").style("fill", "#b00");
-                } else {
-                    d3.select(this).select(".background").style("fill", null);
-                }
-            })
-            .on("end", function(d) {
-                if (!this.__dragged__) {
-                    // no movement, invert axis
-                    var extent = invert_axis(d,this);
-
-                } else {
-                    // reorder axes
-                    d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
-
-                    var extent = yscale[d].brush.extent();
-                    console.log(extent)
-                    // var extent = d3.brushSelection(this).map(yscale[d].invert).sort();
-                }
-
-                // remove axis if dragged all the way left
-                if (dragging[d] < 12 || dragging[d] > w-12) {
-                    remove_axis(d,g);
-                }
-
-                // TODO required to avoid a bug
-                xscale.domain(dimensions);
-                update_ticks(d, extent);
-
-                // rerender
-                d3.select("#foreground").style("opacity", null);
-                brush();
-                delete this.__dragged__;
-                delete this.__origin__;
-                delete dragging[d];
-            }))
-
-    // Add an axis and title.
-    g.append("svg:g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0,0)")
-        .each(function(d) {
-            return d3.select(this).call(axis.scale(yscale[d])); })
-        .append("svg:text")
-        .attr("text-anchor", "middle")
-        // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
-        .attr("y", -14)
-        .attr("x", 0)
-        .attr("class", "label")
-        .text(String)
-        .append("title")
-        .text("Click to invert. Drag to reorder");
-
-    // Add and store a brush for each axis.
-    g.append("svg:g")
-        .attr("class", "brush")
-        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
-            .extent([[-10,0], [10,height]])
-            .on("brush end", brush)); })
-        .selectAll("rect")
-        .style("visibility", null)
-        .attr("x", -23)
-        .attr("width", 36)
-        .append("title")
-        .text("Drag up or down to brush along this axis");
-
-    g.selectAll(".extent")
-        .append("title")
-        .text("Drag or resize this filter");
-
-
-    legend = create_legend(colors,brush);
-
-    // Render full foreground
-    brush();
-
-
 
 // copy one canvas to another, grayscale
 function gray_copy(source, target) {
@@ -331,14 +370,14 @@ function selection_stats(opacity, n, total) {
 // Highlight single polyline
 function highlight(d) {
     d3.select("#foreground").style("opacity", "0.25");
-    d3.selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
+    d3.select("#legend").selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
     path(d, highlighted, colorCanvas(selectedService==null?d.group:d[selectedService],1));
 }
 
 // Remove highlight
 function unhighlight() {
     d3.select("#foreground").style("opacity", null);
-    d3.selectAll(".row").style("opacity", null);
+    d3.select("#legend").selectAll(".row").style("opacity", null);
     highlighted.clearRect(0,0,w,h);
 }
 
@@ -725,7 +764,7 @@ window.onresize = function() {
     // update brush placement
     d3.selectAll(".brush")
         .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
-            .extent([[-10,0], [10,height]])
+            .extent([[-10,0], [10,h]])
             .on("brush end", brush)); });
     brush_count++;
 
@@ -800,33 +839,19 @@ function search(selection,str) {
     return _(selection).filter(function(d) { return pattern.exec(d.name); });
 }
 
-$( document ).ready(function() {
-    $('.tabs').tabs();
-    $('.dropdown-trigger').dropdown();
-    $('.sidenav').sidenav();
-
-    let comboBox = d3.select("#listvar");
-    let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
-    listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
-    comboBox
-        .selectAll('li').data(listOption)
-        .join(enter => enter.append("li") .attr('tabindex','0').append("a")
-                .attr('href',"#"))
-        .text(d=>{console.log(d); return d.text})
-        .on('click',changeVar);
-
-    d3.select("#DarkTheme").on("click",switchTheme);
-});
 function changeVar(d){
     $('#groupName').text(d.text);
     if (d.arr==='rack'){
         selectedService = null;
         svgLengend.style('display','none');
+        d3.selectAll('.dimension.axisActive').classed('axisActive',false);
     }else {
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         drawLegend(d.service, arrThresholds, arrColor, dif);
         svgLengend.style('display',null);
+        d3.selectAll('.dimension.axisActive').classed('axisActive',false);
+        d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
     changeGroupTarget(d.arr);
     legend = create_legend(colors,brush);

@@ -328,12 +328,15 @@ button#exclude-data:hover {
 
 #header {
     /*background-color: #ffffff;*/
-    background: #485563;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #29323c, #485563);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #29323c, #485563); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    /*background: #485563;  !* fallback for old browsers *!*/
+    /*background: -webkit-linear-gradient(to right, #29323c, #485563);  !* Chrome 10-25, Safari 5.1-6 *!*/
+    /*background: linear-gradient(to right, #29323c, #485563); !* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ *!*/
+    background: #200122;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #6f0000, #200122);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #6f0000, #200122); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
-    /*background-color: #a71d31;*/
-    /*background-image: linear-gradient(315deg, #a71d31 0%, #3f0d12 74%);*/
+
+
 }
 .light #header {
     background:  #f3f3f3;  /* fallback for old browsers */
@@ -343,7 +346,10 @@ button#exclude-data:hover {
 
 #header, #header a, #header .brand-logo{
     font-family: 'Fredoka One', cursive;
-    color: #ffffff
+    color: #ffffff;
+}
+#header .tab a {
+    opacity:0.5;
 }
 #header img{
     padding-top: 0.5em;
@@ -404,20 +410,31 @@ button#exclude-data:hover {
     background-color: #404040;
 }
 #listvar a {
-    font-size: small;
+    /*font-size: small;*/
     color: white;
 }
 
 nav ul li.active {
-    background-color: rgba(255,255,255,0.7);
+    background-color: rgba(255,255,255,0.26);
+    border-bottom: 5px solid #ffffff73;
 }
 nav ul li.active a{
-    color: black !important;
+    opacity: 1!important;
 }
 
 .light nav ul li.active {
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.1);
+    border-bottom: 5px solid #505050;
 }
-.light nav ul li.active a{
-    color: white !important;
+
+.axisActive .label{
+    fill: #5ae !important;
+}
+.page-footer {
+    background-color: #ffffff0f;
+}
+
+.light .page-footer {
+    background-color: #0000000f;
+    color: #444444;
 }

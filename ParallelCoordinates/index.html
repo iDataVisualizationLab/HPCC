@@ -30,10 +30,10 @@
         <!--</div>-->
         <ul id="nav-mobile" class="left hide-on-med-and-down">
             <li class="avatar"><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
-            <li ><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
-            <li ><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
-            <li ><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
-            <li class="active"><a class="active" href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Parallel Coordinates</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
+            <li class="tab active"><a class="active" href="#">Parallel Coordinates</a></li>
         </ul>
         <ul class="right">
             <li><a href="#!" value="dark" id = "DarkTheme">Light</a></li>
@@ -47,108 +47,114 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
-
-<div id="header2">
-    <!--<h1>HPCC Explorer</h1>-->
-    <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
-    <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
-    <button title="Export data as CSV" id="export-data">Export</button>
-    <div class="controls">
-        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
-        <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
-        Lines at <strong id="opacity"></strong> opacity.
-        <span class="settings">
-        <button id="hide-ticks">Hide Ticks</button>
-        <button id="show-ticks" disabled="disabled">Show Ticks</button>
-      </span>
+<div id="Maincontent">
+    <div id="header2" class="row s12 marginBottom0">
+        <!--<h1>HPCC Explorer</h1>-->
+        <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
+        <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
+        <button title="Export data as CSV" id="export-data">Export</button>
+        <div class="controls">
+            <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
+            <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
+            Lines at <strong id="opacity"></strong> opacity.
+            <span class="settings">
+            <button id="hide-ticks">Hide Ticks</button>
+            <button id="show-ticks" disabled="disabled">Show Ticks</button>
+          </span>
+        </div>
+        <div style="clear:both;"></div>
     </div>
-    <div style="clear:both;"></div>
-</div>
-<div id="chart">
-    <canvas id="background"></canvas>
-    <canvas id="foreground"></canvas>
-    <canvas id="highlight"></canvas>
-    <svg></svg>
-</div>
-<div class="floatLink">
-
-    <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html" class="tooltip">
-        <img type="image/x-icon" src="src/images/hipper.gif" class="menuIcon "/>
-        <span class="tooltiptext">HipperView</span></a>
+    <div id="chart" class="row s12">
+        <canvas id="background"></canvas>
+        <canvas id="foreground"></canvas>
+        <canvas id="highlight"></canvas>
+        <svg></svg>
     </div>
-    <div><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
-        <img type="image/x-icon" src="src/images/PhaseSpaceLogo.ico" class="menuIcon "/>
-        <span class="tooltiptext">Phase Space</span></a>
-    </div>
-    <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
-        <img type="image/x-icon" src="src/images/VR.ico" class="menuIcon"/>
-        <span class="tooltiptext">Vitural Reality</span>
-    </a></div>
+    <div class="floatLink">
 
-</div>
-<div id="wrap">
-    <div class="third" id="controls">
-        <div class="bright">
-            <h5>What is this?</h5>
-            <p>
-                A multidimensional explorer of HPCC data from the <a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a>.
-            </p>
-            <p>
-                The parallel coordinates displays the sensors content of racks in the database across 11 dimensions, colored by Rack group.
-            </p>
-            <p>
-                <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
-            </p>
-            <p>
-                <a href="https://github.com/d3/d3-brush">Brush</a> the visualization to update other charts on this page.
+        <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html" class="tooltip">
+            <img type="image/x-icon" src="src/images/hipper.gif" class="menuIcon "/>
+            <span class="tooltiptext">HipperView</span></a>
+        </div>
+        <div><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
+            <img type="image/x-icon" src="src/images/PhaseSpaceLogo.ico" class="menuIcon "/>
+            <span class="tooltiptext">Phase Space</span></a>
+        </div>
+        <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
+            <img type="image/x-icon" src="src/images/VR.ico" class="menuIcon"/>
+            <span class="tooltiptext">Vitural Reality</span>
+        </a></div>
+
+    </div>
+    <div id="wrap" class="row s12">
+        <div class="col s4" id="controls">
+
+
+            <div class="little-box">
+                <h5>Controls</h5>
+                <p>
+                    <strong>Brush</strong>: Drag vertically along an axis.<br/>
+                    <strong>Remove Brush</strong>: Tap the axis background.<br/>
+                    <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
+                    <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                    <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
+                </p>
+            </div>
+        </div>
+        <div  class="col s4">
+            <small>
+                <!--Last rendered <strong id="render-speed"></strong> lines-->
+            </small>
+            <ul id="listvar" class="dropdown-content  s12">
+
+            </ul>
+            <h5 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h5>
+            <div id="colorContinuos"></div>
+            <p id="legend">
             </p>
         </div>
-
-        <div class="little-box">
-            <h5>Controls</h5>
-            <p>
-                <strong>Brush</strong>: Drag vertically along an axis.<br/>
-                <strong>Remove Brush</strong>: Tap the axis background.<br/>
-                <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
-                <strong>Invert Axis</strong>: Tap an axis label.<br/>
-                <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
-            </p>
-        </div>
-        <div class="little-box">
-            <h5>Credits &amp; License</h5>
-            <p>
-                Adapted from examples by<br/>
-                <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
-                and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
-            </p>
-            <p>
-                Copyright &copy; 2012, Kai Chang<br/>
-                All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
-            </p>
-            <p>
-                Modified 2019, Ngan Nguyen<br/>
-            </p>
+        <div class="col s4">
+            <h5>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h5>
+            <p id="food-list">
             </p>
         </div>
     </div>
-    <div  class="third">
-        <small>
-            <!--Last rendered <strong id="render-speed"></strong> lines-->
-        </small>
-        <ul id="listvar" class="dropdown-content  s8">
-
-        </ul>
-        <h5 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h5>
-        <div id="colorContinuos"></div>
-        <p id="legend">
-        </p>
-    </div>
-    <div class="third">
-        <h5>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h5>
-        <p id="food-list">
-        </p>
-    </div>
 </div>
+<footer class="page-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
+                    <h5>What is this?</h5>
+                    <p>
+                        A multidimensional explorer of HPCC data from the <a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a>.
+                    </p>
+                    <p>
+                        The parallel coordinates displays the sensors content of racks in the database across 11 dimensions, colored by Rack group.
+                    </p>
+                    <p>
+                        <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
+                    </p>
+                    <p>
+                        <a href="https://github.com/d3/d3-brush">Brush</a> the visualization to update other charts on this page.
+                    </p>
+            </div>
+            <div class="col l4 offset-l2 s12">
+                <h5>Credits &amp; License</h5>
+                <p>
+                    Adapted from examples by
+                    <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
+                    and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            &copy; 2012, Kai Chang All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
+            <a class="grey-text text-lighten-4 right" href="#!">Modified 2019, Ngan Nguyen</a>
+        </div>
+    </div>
+</footer>
 </body>
 <!--data load-->
 <script src="src/data/serviceWed26Sep.js"></script>
