@@ -34,15 +34,15 @@ var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Tempera
                 arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
-var SCORE = { outlyingScore: 1,
-                clumpyScore: 1,
-                convexScore: 1,
-                monotonicScore: 1,
-                skewedScore: 1,
-                skinnyScore: 1,
-                sparseScore: 1,
-                striatedScore: 1,
-                stringyScore: 1
+var SCORE = { outlyingScore: 0,
+                clumpyScore: 0,
+                convexScore: 0,
+                monotonicScore: 0,
+                skewedScore: 0,
+                skinnyScore: 0,
+                sparseScore: 0,
+                striatedScore: 0,
+                stringyScore: 0
             };
 
 

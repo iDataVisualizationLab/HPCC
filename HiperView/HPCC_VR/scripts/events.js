@@ -128,11 +128,14 @@ function onMouseDown( event )
 
             if( INTERSECTED.type == "slider" ) // change timestamp
             {
+                var mouseX = mouse.x;
                 mouseDownHold = setInterval( function()
                 {
                     if( mouseDown )
                     {
-                        INTERSECTED.position.y = mouse.y;
+                        // if( mouseX != mouse.X )
+                        INTERSECTED.position.y = mouse.x;
+                        // INTERSECTED.position.y = INTERSECTED.position.y + (mouse.x - -1*mouseX )/100;
                         // if( INTERSECTED.position.y>INTERSECTED.initial || INTERSECTED.position.y<INTERSECTED.initial*-1 )
                         //     clearInterval( timeout );
                     }
@@ -143,6 +146,14 @@ function onMouseDown( event )
 
                 }, 10 );
 
+                return true;
+            }
+            else if( INTERSECTED.type == "arrow" )
+            {
+                if( INTERSECTED.name == "up" )
+                    score_control_panel.rotation.x-=score_control_panel.rotation_interval;
+                if( INTERSECTED.name == "down" )
+                    score_control_panel.rotation.x+=score_control_panel.rotation_interval;
                 return true;
             }
         }
