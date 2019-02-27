@@ -21,6 +21,7 @@
     <script src="src/lib/underscore-min.js"></script>
 </head>
 <body>
+
 <nav class="pushpin-demo-nav" data-target="blue">
 
     <div class="nav-wrapper" id="header">
@@ -36,7 +37,7 @@
             <li class="tab active"><a class="active" href="#">Parallel Coordinates</a></li>
         </ul>
         <ul class="right">
-            <li><a href="#!" value="dark" id = "DarkTheme">Light</a></li>
+            <li><a href="#!" value="dark" id = "DarkTheme" class="waves-effect waves-light">Light</a></li>
         </ul>
     </div>
 </nav>
@@ -47,6 +48,19 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
+
+    <div id="mySidenav" class="sidenavs">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+        <div  class="col s4">
+            <ul id="listvar" class="dropdown-content  s12">
+
+            </ul>
+            <h5 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h5>
+            <div id="colorContinuos"></div>
+            <p id="legend" class="col">
+            </p>
+        </div>
+    </div>
 <div id="Maincontent" class="row s12">
     <div id="header2" class="row s12 marginBottom0">
         <!--<h1>HPCC Explorer</h1>-->
@@ -70,7 +84,7 @@
         <canvas id="highlight"></canvas>
         <svg></svg>
     </div>
-    <div class="floatLink">
+    <div class="floatLink" id="help">
 
         <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html" class="tooltip">
             <img type="image/x-icon" src="src/images/hipper.gif" class="menuIcon "/>
@@ -86,6 +100,12 @@
         </a></div>
 
     </div>
+    <div class="tap-target" data-target="DarkTheme">
+        <div class="tap-target-content">
+            <h5>Title</h5>
+            <p>A bunch of text</p>
+        </div>
+    </div>
     <div id="wrap" class="row s12">
         <div class="col s4" id="controls">
 
@@ -100,18 +120,6 @@
                     <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
                 </p>
             </div>
-        </div>
-        <div  class="col s4">
-            <small>
-                <!--Last rendered <strong id="render-speed"></strong> lines-->
-            </small>
-            <ul id="listvar" class="dropdown-content  s12">
-
-            </ul>
-            <h5 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h5>
-            <div id="colorContinuos"></div>
-            <p id="legend" class="col">
-            </p>
         </div>
         <div class="col s4">
             <h5>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h5>

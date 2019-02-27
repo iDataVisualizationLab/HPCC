@@ -8,9 +8,7 @@ body {
     font: small sans-serif;
     background-color: #353535;
     color: white;
-
-    /*font-family: Ubuntu, Tahoma, Helvetica, sans-serif;*/
-    /*font-size: 12px;*/
+    overflow-x: hidden;
     line-height: 1.4em;
     /*background: #f7f7f7;*/
     /*color: #404040;*/
@@ -335,7 +333,7 @@ button#exclude-data:hover {
     background: -webkit-linear-gradient(to right, #6f0000, #200122);  /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(to right, #6f0000, #200122); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
-
+    z-index: 10;
 
 }
 .light #header {
@@ -437,4 +435,47 @@ nav ul li.active a{
 .light .page-footer {
     background-color: #0000000f;
     color: #444444;
+}
+
+.sidenavs {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sideIn.sidenavs {
+    width: 400px;
+}
+.sideIn#Maincontent {
+    margin-left: 400px;
+}
+
+.sidenavs a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+}
+
+.sidenavs a:hover, .offcanvas a:focus{
+    color: #f1f1f1;
+}
+
+#Maincontent {
+    margin-left: 0px;
+    transition: all 0.5s;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenavs {padding-top: 15px;}
+    .sidenavs a {font-size: 18px;}
 }

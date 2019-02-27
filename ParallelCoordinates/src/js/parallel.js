@@ -37,6 +37,7 @@ $( document ).ready(function() {
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
+    $('.tap-target').tapTarget();
 
     let comboBox = d3.select("#listvar");
     let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
@@ -51,7 +52,17 @@ $( document ).ready(function() {
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
+function openNav() {
+    d3.select("#mySidenav").classed("sideIn",true);
+    d3.select("#Maincontent").classed("sideIn",true);
+    _.delay(resetSize, 500);
+}
 
+function closeNav() {
+    d3.select("#mySidenav").classed("sideIn",false);
+    d3.select("#Maincontent").classed("sideIn",false);
+    _.delay(resetSize, 500);
+}
 function getBrush(d) {
     return d3.brushY(yscale[d])
         .extent([[-10, 0], [10, h]])
@@ -60,7 +71,6 @@ function getBrush(d) {
 
 function init() {
     width = $("#Maincontent").width()-10;
-    console.log(width);
     height = d3.max([document.body.clientHeight-540, 240]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
@@ -68,7 +78,7 @@ function init() {
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
     d3.select("#chart")
-        .style("height", (h + m[0] + m[2]) + "px")
+        .style("height", (h + m[0] + m[2]) + "px");
 
     d3.selectAll("canvas")
         .attr("width", w)
@@ -98,7 +108,7 @@ function init() {
         .attr("width", 20)
         .attr("height", h).style('display','none');
 // SVG for ticks, labels, and interactions
-    svg = d3.select("svg")
+    svg = d3.select("#chart").select("svg")
         .attr("width", width)
         .attr("height", height)
         .append("svg:g")
@@ -145,7 +155,6 @@ function init() {
                 g.attr("transform", function (d) {
                     return "translate(" + position(d) + ")";
                 });
-                brush_count++;
                 this.__dragged__ = true;
                 brush();
                 // Feedback for axis deletion if dropped
@@ -513,7 +522,6 @@ function position(d) {
 // Handles a brush event, toggling the display of foreground lines.
 // TODO refactor
 function brush() {
-    brush_count++;
 
     var actives = [],
         extents = [];
@@ -662,8 +670,6 @@ function update_ticks(d, extent) {
             .each(function(d) { d3.select(this).call(yscale[d].brush = getBrush(d)); })
     }
 
-    brush_count++;
-
     show_ticks();
 
     // update axes
@@ -759,13 +765,11 @@ function export_csv() {
     window.open("text/csv").document.write(styles + csv);
 }
 
-// scale to window size
-window.onresize = function() {
-    width = document.body.clientWidth,
-        height = d3.max([document.body.clientHeight-500, 220]);
-    console.log(width)
-    w = width - m[1] - m[3],
-        h = height - m[0] - m[2];
+function resetSize() {
+    width = $("#Maincontent").width();
+    height = d3.max([document.body.clientHeight-540, 240]);
+    w = width - m[1] - m[3];
+    h = height - m[0] - m[2];
 
     d3.select("#chart")
         .style("height", (h + m[0] + m[2]) + "px")
@@ -775,33 +779,43 @@ window.onresize = function() {
         .attr("height", h)
         .style("padding", m.join("px ") + "px");
 
-    d3.select("svg")
+    d3.select("#chart").select("svg")
         .attr("width", w + m[1] + m[3])
         .attr("height", h + m[0] + m[2])
         .select("g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
     xscale = d3.scalePoint().range([0, w]).padding(0.3).domain(dimensions);
-    dimensions.forEach(function(d) {
+    dimensions.forEach(function (d) {
         yscale[d].range([h, 0]);
     });
 
     d3.selectAll(".dimension")
-        .attr("transform", function(d) { return "translate(" + xscale(d) + ")"; })
+        .attr("transform", function (d) {
+            return "translate(" + xscale(d) + ")";
+        })
     // update brush placement
     d3.selectAll(".brush")
-        .each(function(d) { d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
-            .extent([[-10,0], [10,h]])
-            .on("brush end", brush)); });
-    brush_count++;
+        .each(function (d) {
+            d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
+                .extent([[-10, 0], [10, h]])
+                .on("brush end", brush));
+        });
 
     // update axis placement
-    axis = axis.ticks(1+height/50),
+    axis = axis.ticks(1 + height / 50),
         d3.selectAll(".axis")
-            .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
+            .each(function (d) {
+                d3.select(this).call(axis.scale(yscale[d]));
+            });
 
     // render data
     brush();
+}
+
+// scale to window size
+window.onresize = function() {
+    resetSize();
 };
 
 // Remove all but selected from the dataset
