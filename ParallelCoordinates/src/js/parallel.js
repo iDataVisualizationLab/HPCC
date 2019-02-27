@@ -77,10 +77,10 @@ function init() {
     xscale = d3.scalePoint().range([0, w]).padding(0.3);
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
-    d3.select("#chart")
+    let chart = d3.select("#chart")
         .style("height", (h + m[0] + m[2]) + "px");
 
-    d3.selectAll("canvas")
+    chart.selectAll("canvas")
         .attr("width", w)
         .attr("height", h)
         .style("padding", m.join("px ") + "px");
@@ -106,7 +106,8 @@ function init() {
     svgLengend = d3.select('#colorContinuos').append('div').append('svg')
         .attr("class", "legendView")
         .attr("width", 20)
-        .attr("height", h).style('display','none');
+        .attr("height", 0)
+        .style('display','none');
 // SVG for ticks, labels, and interactions
     svg = d3.select("#chart").select("svg")
         .attr("width", width)
@@ -500,10 +501,12 @@ function changeGroupTarget(key) {
     if (key === 'rack' )
         data.forEach(d=>d.group = d.rack)
     else {
-        var thresholdScale = d3.bisector(function(d) { return d; }).left;
+        var thresholdScale = function(scale,d) {
+            if(d) return d3.bisector(function(d) { return d; }).left(scale,d);
+                return "null"};
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1,this.length-1);
-        orderLegend = nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse();
+        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),'null']);
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }
@@ -612,7 +615,7 @@ function brush() {
 
     legend.selectAll(".color-bar")
         .style("width", function(d) {
-            return Math.ceil($('#legend').width()*tallies[d].length/data.length) + "px"
+            return Math.ceil(($('#mySidenav').width()-legendw-20)*tallies[d].length/data.length) + "px"
         });
 
     legend.selectAll(".tally")
@@ -771,19 +774,26 @@ function resetSize() {
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
 
-    d3.select("#chart")
+    let chart = d3.select("#chart")
         .style("height", (h + m[0] + m[2]) + "px")
 
-    d3.selectAll("canvas")
+    chart.selectAll("canvas")
         .attr("width", w)
         .attr("height", h)
         .style("padding", m.join("px ") + "px");
 
-    d3.select("#chart").select("svg")
+    chart.select("svg")
         .attr("width", w + m[1] + m[3])
         .attr("height", h + m[0] + m[2])
         .select("g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+    // Foreground canvas for primary view
+    foreground.lineWidth = 1.7;
+// Highlight canvas for temporary interactions
+    highlighted.lineWidth = 4;
+
+// Background canvas
+    background.lineWidth = 1.7;
 
     xscale = d3.scalePoint().range([0, w]).padding(0.3).domain(dimensions);
     dimensions.forEach(function (d) {
@@ -793,7 +803,7 @@ function resetSize() {
     d3.selectAll(".dimension")
         .attr("transform", function (d) {
             return "translate(" + xscale(d) + ")";
-        })
+        });
     // update brush placement
     d3.selectAll(".brush")
         .each(function (d) {

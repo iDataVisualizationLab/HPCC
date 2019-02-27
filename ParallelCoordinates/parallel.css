@@ -175,6 +175,10 @@ button#exclude-data:hover {
 #legend .row {
     margin-bottom: 0px;
 }
+
+#highlight {
+    lineWidth: 4;
+}
 .marginBottom0 {
     margin-bottom: 0px;
 }
@@ -211,11 +215,11 @@ button#exclude-data:hover {
 
 
 .light #header2 {
-    background: #e2e2e2;
+    background: rgba(0, 0, 0, 0.21);
 }
 #header2 {
     border-bottom: 1px solid rgba(100,100,100,0.35);
-    background: #040404;
+    background: rgba(0, 0, 0, 0.21);
     padding: 6px 24px 4px;
     line-height: 24px;
 }
@@ -444,7 +448,7 @@ nav ul li.active a{
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #111;
+    background: rgba(0, 0, 0, 0.21);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -460,8 +464,6 @@ nav ul li.active a{
 .sidenavs a {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
-    font-size: 25px;
-    color: #818181;
     display: block;
     transition: 0.3s
 }
@@ -478,4 +480,41 @@ nav ul li.active a{
 @media screen and (max-height: 450px) {
     .sidenavs {padding-top: 15px;}
     .sidenavs a {font-size: 18px;}
+}
+
+.closebtn{
+    position: fixed;
+    top: 50%;
+    left:-40px;
+}
+.sideIn .closebtn{
+    top: 50%;
+    left: 380px;
+    transition: 0.5s;
+}
+
+.openbtn{
+    position: absolute;
+    top: 50%;
+    left:-30px;
+}
+
+.overlaySide{
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0px;
+    left: -20px;
+    background-color: rgba(0,0,0,0);
+    z-index: 999;
+    width: 40px;
+    height: 100%;
+}
+
+.overlaySide:hover .openbtn{
+    left: 20px;
+}
+
+.sideIn .overlaySide {
+    left:-80px;
 }

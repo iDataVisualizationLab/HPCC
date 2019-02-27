@@ -48,20 +48,29 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
-
     <div id="mySidenav" class="sidenavs">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-        <div  class="col s4">
-            <ul id="listvar" class="dropdown-content  s12">
+        <div class="row s12">
+            <div  class="col s12">
+                <ul id="listvar" class="dropdown-content  s12">
 
-            </ul>
-            <h5 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h5>
-            <div id="colorContinuos"></div>
-            <p id="legend" class="col">
-            </p>
+                </ul>
+                <h6 class="row inline marginBottom0"><span class="left">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h6>
+                <div id="colorContinuos"></div>
+                <p id="legend" class="col">
+                </p>
+            </div>
+            <div class="col s12">
+                <h5>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h5>
+                <p id="food-list">
+                </p>
+            </div>
         </div>
     </div>
 <div id="Maincontent" class="row s12">
+    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
+    <div class="overlaySide">
+        <a href="javascript:void(0)" class="openbtn btn-floating btn waves-effect waves-light" onclick="openNav()"><i class="material-icons">chevron_right</i></a>
+    </div>
     <div id="header2" class="row s12 marginBottom0">
         <!--<h1>HPCC Explorer</h1>-->
         <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
@@ -84,22 +93,6 @@
         <canvas id="highlight"></canvas>
         <svg></svg>
     </div>
-    <div class="floatLink" id="help">
-
-        <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html" class="tooltip">
-            <img type="image/x-icon" src="src/images/hipper.gif" class="menuIcon "/>
-            <span class="tooltiptext">HipperView</span></a>
-        </div>
-        <div><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
-            <img type="image/x-icon" src="src/images/PhaseSpaceLogo.ico" class="menuIcon "/>
-            <span class="tooltiptext">Phase Space</span></a>
-        </div>
-        <div><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
-            <img type="image/x-icon" src="src/images/VR.ico" class="menuIcon"/>
-            <span class="tooltiptext">Vitural Reality</span>
-        </a></div>
-
-    </div>
     <div class="tap-target" data-target="DarkTheme">
         <div class="tap-target-content">
             <h5>Title</h5>
@@ -121,17 +114,11 @@
                 </p>
             </div>
         </div>
-        <div class="col s4">
-            <h5>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h5>
-            <p id="food-list">
-            </p>
-        </div>
     </div>
-</div>
-<footer class="page-footer">
-    <div class="container">
-        <div class="row">
-            <div class="col l6 s12">
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
                     <h5>What is this?</h5>
                     <p>
                         A multidimensional explorer of HPCC data from the <a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a>.
@@ -145,24 +132,26 @@
                     <p>
                         <a href="https://github.com/d3/d3-brush">Brush</a> the visualization to update other charts on this page.
                     </p>
-            </div>
-            <div class="col l4 offset-l2 s12">
-                <h5>Credits &amp; License</h5>
-                <p>
-                    Adapted from examples by
-                    <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
-                    and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
-                </p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5>Credits &amp; License</h5>
+                    <p>
+                        Adapted from examples by
+                        <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
+                        and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="footer-copyright">
-        <div class="container">
-            &copy; 2012, Kai Chang All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
-            <a class="grey-text text-lighten-4 right" href="#!">Modified 2019, Ngan Nguyen</a>
+        <div class="footer-copyright">
+            <div class="container">
+                &copy; 2012, Kai Chang All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.
+                <a class="grey-text text-lighten-4 right" href="#!">Modified 2019, Ngan Nguyen</a>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
+</div>
+
 </body>
 <!--data load-->
 <script src="src/data/serviceWed26Sep.js"></script>
