@@ -129,7 +129,6 @@ function updateCPUMarker( obj )
 // scatterplot update
 function updateScatterPlotMatrix( host, timestamp )
 {
-    console.log(timestamp);
     // check if host exists
     if( json[host] == undefined )
         return 0;
