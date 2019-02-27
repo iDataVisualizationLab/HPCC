@@ -2,9 +2,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 {
     this.matrix = {};
     this.graph = new THREE.Group();
-    this.graph.visible = false;
     this.isBinned = isBinned;
-    // this.matrixKey = {};
     var axis = Object.keys(SERVICE).sort();
     var axisNo = axis.length
 
@@ -29,6 +27,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         sp.graph.position.set( scale/-2, scale/-2, scale/-2 );
         this.graph.add( hitbox );
         this.matrix[p] = sp;
+        hitbox.children[0].visible = true;
 
         var x = SERVICE[axes_matrix[p][0]].sp_pos;
         var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + axisNo;
@@ -43,7 +42,9 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         hitbox.xr = hitbox.position.x;
         hitbox.yr = hitbox.position.y;
         hitbox.zr = hitbox.position.z;
-        // this.matrixKey[""+x+""+y+""+z] = this.matrix[p];
+
+        // hitbox.visible = false;
+        // hitbox.children[0].visible = true;
 
     }
 

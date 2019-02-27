@@ -437,8 +437,8 @@ function initLever()
     // set rotation and position
     lever.add( pivot );
     lever.pivot = pivot;
-    pivot.rotation.set( Math.PI/4, 0, 0 );
-    lever.position.set( ROOM_SIZE * 2.6, ROOM_SIZE / 10, ROOM_SIZE*-1 );
+    pivot.rotation.set( Math.PI/-4, 0, 0 );
+    lever.position.set( ROOM_SIZE * 2.8, ROOM_SIZE / 10, ROOM_SIZE*-1 );
     scene.add( lever );
 
     function addLeverLabel( text, y, obj )
@@ -585,9 +585,10 @@ function initScatterPlotMatrix()
 
     // building scatter plot matrix ----------------------------------------------------
     scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 6.75, ROOM_SIZE * -1, ROOM_SIZE * 2.5 );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 7, ROOM_SIZE * -1, ROOM_SIZE * 2.5 );
     scatter_plot_matrix.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot_matrix.graph );
+    scatter_plot_matrix.graph.visible = true;
 
     function isRepeated( a, A )
     {
@@ -627,7 +628,7 @@ function initParallelSet()
     parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
-    parallel_set.graph.visible = true;
+    parallel_set.graph.visible = false;
 }
 
 // Animate & Render

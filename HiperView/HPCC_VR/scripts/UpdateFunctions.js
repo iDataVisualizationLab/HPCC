@@ -279,7 +279,7 @@ function updateTooltip( host )
     var host_name = host.name;
     // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
 
-    tooltip.position.set(0,0,0);
+    tooltip.position.set(ROOM_SIZE*4,0,0);
 
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');
