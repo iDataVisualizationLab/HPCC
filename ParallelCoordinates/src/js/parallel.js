@@ -163,8 +163,11 @@ function init() {
                     // reorder axes
                     d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
 
-                    var extent = yscale[d].brush.extent();
-                    // var extent = d3.brushSelection(this).map(yscale[d].invert).sort();
+                    // var extent = yscale[d].brush.extent();
+                    var extent = d3.brushSelection(this);
+                    if (extent)
+                        extent = extent.map(yscale[d].invert).sort((a,b)=>a-b);
+                    console.log(extent)
                 }
 
                 // remove axis if dragged all the way left
@@ -648,6 +651,7 @@ function update_ticks(d, extent) {
         // single tick
         if (extent) {
             // restore previous extent
+            console.log(extent);
             brush_el.call(yscale[d].brush = getBrush(d)).call(yscale[d].brush.move, extent.map(yscale[d]).sort((a,b)=>a-b));
         } else {
             brush_el.call(yscale[d].brush = getBrush(d));
