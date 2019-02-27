@@ -1,7 +1,9 @@
 /// drawLegend *****************************************************************
+let legendw= 20;
+let legendh= 20;
 function drawLegend(s,arrThresholds, arrColor, dif){
     var r = 20;
-
+    legendh =arrThresholds.length*16;
     var xStep = dif/10.;
     var xStepLength = (arrThresholds[arrThresholds.length-1]-arrThresholds[0])/xStep;
 
@@ -32,9 +34,9 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             .attr('x1', 0)
             .attr('y1', 0)
             .attr('width', r)
-            .attr('height', arrThresholds.length*16)
+            .attr('height', legendh)
             .style('fill', 'url(#gradient)');
-
+    svgLengend.attr("height", legendh);
 }
 
 function linspace(start, end, n) {
