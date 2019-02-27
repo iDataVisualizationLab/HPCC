@@ -25,6 +25,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                     isBinned,
                                     datakeys[p] );
         hitbox.add( sp.graph );
+        hitbox.scatter_plot = sp;
         sp.graph.position.set( scale/-2, scale/-2, scale/-2 );
         this.graph.add( hitbox );
         this.matrix[p] = sp;
@@ -85,13 +86,14 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
     // building scatter plot
     var population = data.length;
 
+    var graph = new THREE.Group();
+    graph.type = "scatter-plot";
+    graph.name = "";
+
     var x = setInfo( 0 );
     var y = setInfo( 1 );
     var z = setInfo( 2 );
 
-    var graph = new THREE.Group();
-    graph.type = "scatter-plot";
-    graph.name = "";
     var grid = setGrid();
 
     if( !isBinned )
@@ -100,9 +102,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         var bins = setBins();
 
     graph.add( grid );
-    // graph.add( x.obj );
-    // graph.add( y.obj );
-    // graph.add( z.obj );
 
     if( !isBinned )
         graph.add( points );
@@ -134,7 +133,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
-        // info.obj = setAxis( axis, info );
         info.binSize = intervals - 1;
 
         info.bin = function( n )
@@ -204,203 +202,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         grid.add( box );
 
         return grid;
-    }
-
-    function setAxis( axis, obj )
-    {
-        var group = new THREE.Group();
-        group.add( setMarks() );
-        addAxisLegend( group );
-
-        return group;
-
-        function setMarks()
-        {
-            var marks = new THREE.Group();
-            marks.name = "axis-marks";
-            var no_marks = intervals;
-            var axismark = [];
-
-            var mark_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
-            var mark_length = -1*scale/15;
-            var line, mark_geometry, v, start, end;
-
-            for( var i=0; i<no_marks; i++ )
-            {
-                v = scale * i/(no_marks-1);
-
-                if( axis == 0 )  // x marks
-                {
-                    mark_geometry = new THREE.Geometry();
-                    start = new THREE.Vector3( v, 0, scale );
-                    end = new THREE.Vector3( v, 0, scale + mark_length * -1 );
-                    mark_geometry.vertices.push( start, end );
-                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                    addIntervalLegend( line, i, end );
-                    axismark.push( line );
-                    marks.add(axismark[i]);
-                }
-                else if( axis == 1 )  // y marks
-                {
-                    mark_geometry = new THREE.Geometry();
-                    start = new THREE.Vector3( 0, v, 0 );
-                    end = new THREE.Vector3( 0, v, mark_length );
-                    mark_geometry.vertices.push( start, end );
-                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                    addIntervalLegend( line, i, end );
-                    axismark.push( line );
-                    marks.add( axismark[i] );
-                }
-                else  // z marks
-                {
-                    mark_geometry = new THREE.Geometry();
-                    start = new THREE.Vector3( 0, 0, v );
-                    end = new THREE.Vector3( 0, mark_length, v );
-                    mark_geometry.vertices.push( start, end );
-                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
-                    addIntervalLegend( line, i, end );
-                    axismark.push( line );
-                    marks.add(axismark[i]);
-                }
-
-            }
-
-            function addIntervalLegend( line, interval, pos )
-            {
-
-                var num = obj.min + obj.range * interval / (no_marks-1);
-                num = Math.round(num*100)/100;
-
-                var loader = new THREE.FontLoader();
-                var legend_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-
-                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-                    var legend_geometry = new THREE.TextGeometry( num + "", {
-                        font: font,
-                        size: scale/30,
-                        height: 0,
-                        curveSegments: 12,
-                        bevelEnabled: false
-                    } );
-
-                    var legend = new THREE.Mesh( legend_geometry, legend_material );
-                    legend.name = "mark";
-
-                    if( axis == 0 )
-                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
-                    else if( axis == 1 )
-                    {
-                        legend.position.set( pos.x, pos.y, pos.z * 3 );
-                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
-                    }
-                    else
-                    {
-                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
-                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
-                    }
-
-                    line.add( legend );
-                } );
-
-            }
-
-            return marks;
-        }
-
-        function addAxisLegend( group )
-        {
-            var loader = new THREE.FontLoader();
-            var legend_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-
-            // legend background/hitbox
-            var hitbox_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-            var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
-            var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
-
-            loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-                var legend_geometry = new THREE.TextGeometry( SERVICE[obj.legend].value, {
-                    font: font,
-                    size: scale/20,
-                    height: 0,
-                    curveSegments: 12,
-                    bevelEnabled: false
-                } );
-
-                var legend = new THREE.Mesh( legend_geometry, legend_material );
-                hitbox.add( legend );
-                // setAxesMenu( hitbox );
-                legend.position.set( scale/-3.5, scale/-75, scale/500);
-                hitbox.type = "axis";
-
-                if( obj.name == "x" )
-                {
-                    hitbox.name = "x-axis";
-                    hitbox.position.set( scale/2, scale/-4, scale + scale/15 );
-                }
-                if( obj.name == "y" )
-                {
-                    hitbox.name = "y-axis";
-                    hitbox.position.set( 0, scale/2, scale/-3 );
-                    hitbox.rotation.set( 0, Math.PI/-2, Math.PI/2 );
-                }
-                if( obj.name == "z" )
-                {
-                    hitbox.name = "z-axis";
-                    hitbox.position.set( 0, scale/-4, scale/2 );
-                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
-                }
-
-            } );
-
-            group.add( hitbox );
-        }
-
-        function setAxesMenu( obj )
-        {
-            var axesmenu = new THREE.Group();
-            axesmenu.name = "scatterplot-axesmenu";
-
-            for( var a=0; a<axes.length; a++ )
-            {
-                getOption( axesmenu, a );
-            }
-
-            function getOption( menu, a )
-            {
-                var loader = new THREE.FontLoader();
-                var legend_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-
-                // axis option background/hitbox
-                var hitbox_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-                var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
-                var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
-
-                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-                    var legend_geometry = new THREE.TextGeometry( axes[a], {
-                        font: font,
-                        size: scale/20,
-                        height: 0,
-                        curveSegments: 12,
-                        bevelEnabled: false
-                    } );
-    
-                    var legend = new THREE.Mesh( legend_geometry, legend_material );
-                    hitbox.add( legend );
-                    legend.position.set( scale/-3.5, scale/-75, scale/500);
-                    hitbox.type = "axis-option";
-                    hitbox.position.y = ( a + 1 ) * scale/-10;
-                    menu.add( hitbox );
-                } );
-            }
-
-            axesmenu.visible = false;
-            obj.menu = axesmenu;
-            obj.add( axesmenu );
-        }
-
     }
 
     function setPoints()
@@ -613,6 +414,204 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
                     resolve( obj );
                 } );
         }
+    }
+
+    this.drawAxis = function( axis, obj )
+    {
+        var group = new THREE.Group();
+        group.name = "axis-label-"+obj.name;
+        group.add( setMarks() );
+        addAxisLegend( group );
+
+        this.graph.add( group );
+
+        function setMarks()
+        {
+            var marks = new THREE.Group();
+            marks.name = "axis-marks";
+            var no_marks = intervals;
+            var axismark = [];
+
+            var mark_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
+            var mark_length = -1*scale/15;
+            var line, mark_geometry, v, start, end;
+
+            for( var i=0; i<no_marks; i++ )
+            {
+                v = scale * i/(no_marks-1);
+
+                if( axis == 0 )  // x marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( v, 0, scale );
+                    end = new THREE.Vector3( v, 0, scale + mark_length * -1 );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add(axismark[i]);
+                }
+                else if( axis == 1 )  // y marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( 0, v, 0 );
+                    end = new THREE.Vector3( 0, v, mark_length );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add( axismark[i] );
+                }
+                else  // z marks
+                {
+                    mark_geometry = new THREE.Geometry();
+                    start = new THREE.Vector3( 0, 0, v );
+                    end = new THREE.Vector3( 0, mark_length, v );
+                    mark_geometry.vertices.push( start, end );
+                    line = new THREE.Line( mark_geometry.clone(), mark_material.clone() );
+                    addIntervalLegend( line, i, end );
+                    axismark.push( line );
+                    marks.add(axismark[i]);
+                }
+
+            }
+
+            function addIntervalLegend( line, interval, pos )
+            {
+
+                var num = obj.min + obj.range * interval / (no_marks-1);
+                num = Math.round(num*100)/100;
+
+                var loader = new THREE.FontLoader();
+                var legend_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+
+                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    var legend_geometry = new THREE.TextGeometry( num + "", {
+                        font: font,
+                        size: scale/30,
+                        height: 0,
+                        curveSegments: 12,
+                        bevelEnabled: false
+                    } );
+
+                    var legend = new THREE.Mesh( legend_geometry, legend_material );
+                    legend.name = "mark";
+
+                    if( axis == 0 )
+                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
+                    else if( axis == 1 )
+                    {
+                        legend.position.set( pos.x, pos.y, pos.z * 3 );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
+                    }
+                    else
+                    {
+                        legend.position.set( pos.x, pos.y + mark_length/2, pos.z );
+                        legend.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
+                    }
+
+                    line.add( legend );
+                } );
+
+            }
+
+            return marks;
+        }
+
+        function addAxisLegend( group )
+        {
+            var loader = new THREE.FontLoader();
+            var legend_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+
+            // legend background/hitbox
+            var hitbox_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+            var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
+            var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
+
+            loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                var legend_geometry = new THREE.TextGeometry( SERVICE[obj.legend].value, {
+                    font: font,
+                    size: scale/20,
+                    height: 0,
+                    curveSegments: 12,
+                    bevelEnabled: false
+                } );
+
+                var legend = new THREE.Mesh( legend_geometry, legend_material );
+                hitbox.add( legend );
+                // setAxesMenu( hitbox );
+                legend.position.set( scale/-3.5, scale/-75, scale/500);
+                hitbox.type = "axis";
+
+                if( obj.name == "x" )
+                {
+                    hitbox.name = "x-axis";
+                    hitbox.position.set( scale/2, scale/-4, scale + scale/15 );
+                }
+                if( obj.name == "y" )
+                {
+                    hitbox.name = "y-axis";
+                    hitbox.position.set( 0, scale/2, scale/-3 );
+                    hitbox.rotation.set( 0, Math.PI/-2, Math.PI/2 );
+                }
+                if( obj.name == "z" )
+                {
+                    hitbox.name = "z-axis";
+                    hitbox.position.set( 0, scale/-4, scale/2 );
+                    hitbox.rotation.set( Math.PI/2, Math.PI/-2, Math.PI/2 );
+                }
+
+            } );
+
+            group.add( hitbox );
+        }
+
+        function setAxesMenu( obj )
+        {
+            var axesmenu = new THREE.Group();
+            axesmenu.name = "scatterplot-axesmenu";
+
+            for( var a=0; a<axes.length; a++ )
+            {
+                getOption( axesmenu, a );
+            }
+
+            function getOption( menu, a )
+            {
+                var loader = new THREE.FontLoader();
+                var legend_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+                // axis option background/hitbox
+                var hitbox_material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+                var hitbox_geometry = new THREE.BoxGeometry( scale, scale/10, scale/500 );
+                var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
+
+                loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    var legend_geometry = new THREE.TextGeometry( axes[a], {
+                        font: font,
+                        size: scale/20,
+                        height: 0,
+                        curveSegments: 12,
+                        bevelEnabled: false
+                    } );
+    
+                    var legend = new THREE.Mesh( legend_geometry, legend_material );
+                    hitbox.add( legend );
+                    legend.position.set( scale/-3.5, scale/-75, scale/500);
+                    hitbox.type = "axis-option";
+                    hitbox.position.y = ( a + 1 ) * scale/-10;
+                    menu.add( hitbox );
+                } );
+            }
+
+            axesmenu.visible = false;
+            obj.menu = axesmenu;
+            obj.add( axesmenu );
+        }
+
     }
 
 }

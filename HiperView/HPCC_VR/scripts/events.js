@@ -32,6 +32,9 @@ function onMouseDown( event )
 
     if( sp_focus != null )
     {
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-x") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-y") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-z") );
         moveScatterPlot( sp_focus, sp_focus.xr, sp_focus.yr, sp_focus.zr );
         sp_focus = null;
     }
@@ -180,6 +183,11 @@ function onMouseDown( event )
             {
                 // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
                 sp_focus = INTERSECTED;
+
+                sp_focus.scatter_plot.drawAxis( 0, sp_focus.scatter_plot.x );
+                sp_focus.scatter_plot.drawAxis( 1, sp_focus.scatter_plot.y );
+                sp_focus.scatter_plot.drawAxis( 2, sp_focus.scatter_plot.z );
+
                 moveScatterPlot( INTERSECTED, 0, 1.125, 1 );
                 return true;
             }
