@@ -422,7 +422,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         var bin, binCount;
         var binSize = intervals - 1;
         var getBinOf = {};
-        var oneElementSize = 1 / ( population );
+        var oneElementSize = 1 / ( population/4 );
         var default_size = scale/intervals;
 
         // inititializing variables
