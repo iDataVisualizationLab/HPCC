@@ -144,7 +144,7 @@ function updateScatterPlotMatrix( host, timestamp )
         var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
 
         // update matrix data & scagnostic
-        plot.updateData( plot.datakey[host], x, y, z );
+        // plot.updateData( plot.datakey[host], x, y, z );
 
         // update matrix content
         if( scatter_plot_matrix.isBinned )
@@ -205,14 +205,14 @@ function updateScatterPlotBins( host, x, y, z, sp )
     sp.bins.getBinOf[host][2] = n_zb;
 
     // update binCount
-    var o_new_size = ( --sp.bins.binCount[o_xb][o_yb][o_zb] ) * sp.bins.oneElementSize; // increase one to count and get new size
-    var n_new_size = ( ++sp.bins.binCount[n_xb][n_yb][n_zb] ) * sp.bins.oneElementSize; // decrease one to count and get new size
+    var o_new_op = ( --sp.bins.binCount[o_xb][o_yb][o_zb] ) * sp.bins.oneElement;   // increase one to count
+    var n_new_op = ( ++sp.bins.binCount[n_xb][n_yb][n_zb] ) * sp.bins.oneElement;   // decrease one to count
 
     // update bin size
-    sp.bins.bin[o_xb][o_yb][o_zb].scale.set( o_new_size, o_new_size, o_new_size );      // decrease old bin
-    sp.bins.bin[n_xb][n_yb][n_zb].scale.set( n_new_size, n_new_size, n_new_size );      // increase new bin
+    sp.bins.bin[o_xb][o_yb][o_zb].material.opacity = o_new_op;                      // decrease old bin
+    sp.bins.bin[n_xb][n_yb][n_zb].material.opacity = n_new_op;                      // increase new bin
 
-    // update unused bins
+    // dont show if empty
     sp.bins.bin[o_xb][o_yb][o_zb].visible = sp.bins.binCount[o_xb][o_yb][o_zb] != 0;
     sp.bins.bin[n_xb][n_yb][n_zb].visible = sp.bins.binCount[n_xb][n_yb][n_zb] != 0;
 }

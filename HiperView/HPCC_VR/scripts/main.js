@@ -438,7 +438,7 @@ function initLever()
     lever.add( pivot );
     lever.pivot = pivot;
     pivot.rotation.set( Math.PI/4, 0, 0 );
-    lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
+    lever.position.set( ROOM_SIZE * 2.6, ROOM_SIZE / 10, ROOM_SIZE*-1 );
     scene.add( lever );
 
     function addLeverLabel( text, y, obj )

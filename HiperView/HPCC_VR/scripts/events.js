@@ -41,8 +41,8 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isScoreControlPanelClicked() )
         console.log(INTERSECTED.name);
-    // else if( isScatterPlotClicked() )
-    //     console.log(INTERSECTED.name);
+    else if( isScatterPlotClicked() )
+        console.log(INTERSECTED.name);
     else if( isLeverClicked() )
         console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
@@ -122,97 +122,61 @@ function onMouseDown( event )
     function isScoreControlPanelClicked()
     {
         intersects = raycaster.intersectObjects( score_control_panel.children );
-        if ( intersects.length > 0 )  // time control panel was clicked
+        if ( intersects.length > 0 )  // score control panel was clicked
         {
             INTERSECTED = intersects[ 0 ].object;
 
-            // if( INTERSECTED.type == "slider" ) // change timestamp
-            // {
-            //     var mouseX = INTERSECTED.position.y;
-            //     mouseDownHold = setInterval( function()
-            //     {
-            //         if( mouseDown )
-            //         {
-            //             INTERSECTED.position.y = mouseX - mouse.x;
-            //         }
-            //         else
-            //         {
-            //             clearInterval( mouseDownHold );
-            //         }
-
-            //     }, 10 );
-
-            //     return true;
-            // }
-            // else
             if( INTERSECTED.type == "arrow_up" )
-                score_control_panel.rotation.x-=score_control_panel.rotation_interval;
+                score_control_panel.cylinder.rotation.y-=score_control_panel.rotation_interval;
             else if( INTERSECTED.type == "arrow_down" )
-                score_control_panel.rotation.x+=score_control_panel.rotation_interval;
-            else if( INTERSECTED.type == "arrow_left" | INTERSECTED.type == "arrow_right" )
-            {
-                var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
-                if( INTERSECTED.type == "arrow_left" & SCORE[INTERSECTED.name]>0 )
-                {
-                    slider.position.y+=slider.initial/5;
-                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 - 1 ) / 10;
-                }
-                else if( INTERSECTED.type == "arrow_right" & SCORE[INTERSECTED.name]<1 )
-                {
-                    slider.position.y-=slider.initial/5;
-                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
-                }
-
-                filterScatterPlotMatrix();
-            }
-                
+                score_control_panel.cylinder.rotation.y+=score_control_panel.rotation_interval;
             return true;
-
         }
         else
         {
-            return false;
+            intersects = raycaster.intersectObjects( score_control_panel.cylinder.children );
+            if ( intersects.length > 0 )  // cylinder was clicked
+            {
+                INTERSECTED = intersects[ 0 ].object;
+                if( INTERSECTED.type == "arrow_left" & SCORE[INTERSECTED.name]>0 )
+                {
+                    var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
+                    slider.position.y+=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 - 1 ) / 10;
+                    filterScatterPlotMatrix();
+                    return true;
+                }
+                else if( INTERSECTED.type == "arrow_right" & SCORE[INTERSECTED.name]<1 )
+                {
+                    var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
+                    slider.position.y-=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
+                    filterScatterPlotMatrix();
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
         }
     }
 
     // check if scatter plot was clicked
     function isScatterPlotClicked()
     {
-        intersects = raycaster.intersectObjects( scatter_plot.grid.children );
+        intersects = raycaster.intersectObjects( scatter_plot_matrix.graph.children );
         if ( intersects.length > 0 )  // scatter plot grid was selected
         {
             INTERSECTED = intersects[ 0 ].object;
-
-            if( INTERSECTED.type == "axis" ) // an axis was selected
+            if( INTERSECTED.type == "scatter-plot-hitbox" ) // an axis was selected
             {
-                INTERSECTED.menu.visible = true;
-                return true;
-            }
-            if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME
-            {
-                // reset();
+                console.log(INTERSECTED.children[0]);
                 return true;
             }
         }
         else
         {
-            // intersects = raycaster.intersectObjects( scatter_plot.x.obj.menu.children );
-            // if ( intersects.length > 0 )  // x axis option was selected
-            // {
-            //     INTERSECTED = intersects[ 0 ].object;
-
-            //     if( INTERSECTED.option == 0 ) // option 0 was selected
-            //     {
-            //         INTERSECTED.menu.visible = false;
-            //         // updateScatterPlot( oldhostclicked, services )
-            //         return true;
-            //     }
-            // }
-            // else
-            // {
-            //     return false;
-            // }
-
             return false;
         }
     }

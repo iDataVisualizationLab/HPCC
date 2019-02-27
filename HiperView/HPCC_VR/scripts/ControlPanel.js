@@ -240,9 +240,11 @@ function initScoreControlPanel()
     var r = (s/2)/(2*Math.tan(Math.PI/num)) + s/20;
 
     score_control_panel = new THREE.Group();
-    score_control_panel.slider = {};
     score_control_panel.name = "score_control_panel";
     score_control_panel.rotation_interval = 2*Math.PI/num;
+    var cylinder = new THREE.Group();
+    cylinder.slider = {};
+    cylinder.name = "score-cylinder";
 
     for( var i=0; i<num; i++ )
     {
@@ -262,7 +264,7 @@ function initScoreControlPanel()
         height.translateZ( 0.001 );
 
         // positioning plane
-        plane.rotation.set( 0, i*2*Math.PI/num, 0 );
+        plane.rotation.set( 0, i*score_control_panel.rotation_interval, 0 );
         plane.translateZ(r);
         
         // adding slider
@@ -273,43 +275,13 @@ function initScoreControlPanel()
         slider.type = "slider";
         slider.score = 1;
         slider.initial = s*2.5/2;
-        score_control_panel.slider[name] = slider;
+        cylinder.slider[name] = slider;
 
         // positioning slider
         slider.translateY( s*2.5/2 );
-        slider.rotation.set( 0, i*2*Math.PI/num, 0 );
+        slider.rotation.set( 0, i*score_control_panel.rotation_interval, 0 );
         slider.translateZ(r + s/40);
         slider.rotateZ( Math.PI/2 );
-
-        // adding up and down arrows
-        var arrowu = new THREE.Shape();
-        arrowu.moveTo( 0, 0 );
-        arrowu.lineTo( 0, s/4 );
-        arrowu.lineTo( s/8, s/8 );
-        arrowu.lineTo( 0, 0 );
-        var extrudeSettings = { amount: 0.001, bevelEnabled: false };
-        var arrowu_geometry = new THREE.ExtrudeGeometry( arrowu, extrudeSettings );
-        var arrowu_mesh = new THREE.Mesh( arrowu_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
-        arrowu_mesh.type = "arrow_up";
-
-        var arrowd = new THREE.Shape();
-        arrowd.moveTo( 0, 0 );
-        arrowd.lineTo( 0, s/4 );
-        arrowd.lineTo( s/-8, s/8 );
-        arrowd.lineTo( 0, 0 );
-        var arrowd_geometry = new THREE.ExtrudeGeometry( arrowd, extrudeSettings );
-        var arrowd_mesh = new THREE.Mesh( arrowd_geometry, new THREE.MeshPhongMaterial( { color: 0xdddddd }) );
-        arrowd_mesh.type = "arrow_down";
-
-        // positioning up and down arrows
-        arrowu_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
-        arrowd_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
-        arrowu_mesh.translateZ(r + s/40);
-        arrowd_mesh.translateZ(r + s/40);
-        arrowu_mesh.translateY(s*2);
-        arrowd_mesh.translateY(s*2);
-        arrowu_mesh.translateX(s/10);
-        arrowd_mesh.translateX(s/-18);
 
         // adding left and right arrows
         var arrowl = new THREE.Shape();
@@ -334,8 +306,8 @@ function initScoreControlPanel()
         arrowr_mesh.name = score[i];
 
         // positioning left and right arrows
-        arrowl_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
-        arrowr_mesh.rotation.set( 0, i*2*Math.PI/num, 0 );
+        arrowl_mesh.rotation.set( 0, i*score_control_panel.rotation_interval, 0 );
+        arrowr_mesh.rotation.set( 0, i*score_control_panel.rotation_interval, 0 );
         arrowl_mesh.translateZ(r + s/40);
         arrowr_mesh.translateZ(r + s/40);
         arrowl_mesh.translateY(s*1.3);
@@ -344,19 +316,50 @@ function initScoreControlPanel()
         arrowr_mesh.translateX(s/8);
 
         // adding plane and slider
-        score_control_panel.add( plane );
-        score_control_panel.add( score_control_panel.slider[name] );
-        score_control_panel.add( arrowu_mesh );
-        score_control_panel.add( arrowd_mesh );
-        score_control_panel.add( arrowl_mesh );
-        score_control_panel.add( arrowr_mesh );
+        cylinder.add( plane );
+        cylinder.add( cylinder.slider[name] );
+        cylinder.add( arrowl_mesh );
+        cylinder.add( arrowr_mesh );
 
     }
+
+    // adding up and down arrows
+    var arrowu = new THREE.Shape();
+    arrowu.moveTo( 0, 0 );
+    arrowu.lineTo( 0, s/4 );
+    arrowu.lineTo( s/8, s/8 );
+    arrowu.lineTo( 0, 0 );
+    var extrudeSettings = { amount: 0.001, bevelEnabled: false };
+    var arrowu_geometry = new THREE.ExtrudeGeometry( arrowu, extrudeSettings );
+    var arrowu_mesh = new THREE.Mesh( arrowu_geometry, new THREE.MeshPhongMaterial( { color: 0x777777 }) );
+    arrowu_mesh.type = "arrow_up";
+
+    var arrowd = new THREE.Shape();
+    arrowd.moveTo( 0, 0 );
+    arrowd.lineTo( 0, s/4 );
+    arrowd.lineTo( s/-8, s/8 );
+    arrowd.lineTo( 0, 0 );
+    var arrowd_geometry = new THREE.ExtrudeGeometry( arrowd, extrudeSettings );
+    var arrowd_mesh = new THREE.Mesh( arrowd_geometry, new THREE.MeshPhongMaterial( { color: 0x777777 }) );
+    arrowd_mesh.type = "arrow_down";
+
+    // positioning up and down arrows
+    arrowu_mesh.translateZ(r + s/40);
+    arrowd_mesh.translateZ(r + s/40);
+    arrowu_mesh.translateY(s*2.7);
+    arrowd_mesh.translateY(s*2.7);
+    arrowu_mesh.translateX(s/20);
+    arrowd_mesh.translateX(s/-20);
+
+    score_control_panel.add( arrowu_mesh );
+    score_control_panel.add( arrowd_mesh );
 
     // adding number labels
     // pending
 
-    score_control_panel.position.set( ROOM_SIZE * 4, ROOM_SIZE / 10, 0 );
+    score_control_panel.cylinder = cylinder;
+    score_control_panel.add( score_control_panel.cylinder );
+    score_control_panel.position.set( ROOM_SIZE * 3.1, ROOM_SIZE / 10, ROOM_SIZE * -0.8 );
     score_control_panel.rotateZ( Math.PI/2 );
     scene.add( score_control_panel );
 
@@ -366,7 +369,7 @@ function initScoreControlPanel()
     function addScoreLabel( obj, label )
     {
         var banner_geometry = new THREE.PlaneGeometry( s, s/2, s );
-        var banner_material = new THREE.MeshBasicMaterial( { side: THREE.DoubleSide, color: 0x777777 } );
+        var banner_material = new THREE.MeshPhongMaterial( { side: THREE.DoubleSide, color: 0x777777 } );
         var banner = new THREE.Mesh( banner_geometry, banner_material );
 
         var loader = new THREE.FontLoader();
@@ -496,7 +499,7 @@ function filterScatterPlotMatrix()
 function filterScatterPlot( sp )
 {
     var filter_result = true;
-    
+
     // loop through scores
     for( score in SCORE )
     {
