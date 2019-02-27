@@ -217,6 +217,27 @@ function updateScatterPlotBins( host, x, y, z, sp )
     sp.bins.bin[n_xb][n_yb][n_zb].visible = sp.bins.binCount[n_xb][n_yb][n_zb] != 0;
 }
 
+function moveScatterPlot( obj, x, y, z )
+{
+    var intervals = 20;
+    // var xinterval = (x - obj.position.x)/intervals;
+    var yinterval = (y - obj.position.y)/intervals;
+    var zinterval = (z - obj.position.z)/intervals;
+    var count = 0;
+
+    var move = setInterval( function()
+    {
+        // obj.position.x -= xinterval;
+        obj.position.y += yinterval;
+        obj.position.z += zinterval;
+        count++;
+
+        if( count == intervals )
+            clearInterval( move );
+
+    }, 20 );
+}
+
 // lever update
 function updateLever( start, end )
 {

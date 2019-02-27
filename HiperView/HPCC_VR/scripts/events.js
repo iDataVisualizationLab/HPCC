@@ -2,6 +2,7 @@
 var mouseDown = 0;
 document.body.onmousedown = function() { ++mouseDown; };
 document.body.onmouseup = function() { --mouseDown; };
+var sp_focus = null;
 
 // on resizing window
 function onResize()
@@ -28,6 +29,12 @@ function onMouseDown( event )
 
     // for some reason 2 event happen at the same time
     if( event.isTrusted ) return;
+
+    if( sp_focus != null )
+    {
+        moveScatterPlot( sp_focus, sp_focus.xr, sp_focus.yr, sp_focus.zr );
+        sp_focus = null;
+    }
 
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
     var intersects;
@@ -171,7 +178,9 @@ function onMouseDown( event )
             INTERSECTED = intersects[ 0 ].object;
             if( INTERSECTED.type == "scatter-plot-hitbox" ) // an axis was selected
             {
-                console.log(INTERSECTED.children[0]);
+                // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+                sp_focus = INTERSECTED;
+                moveScatterPlot( INTERSECTED, 0, 1.125, 1 );
                 return true;
             }
         }

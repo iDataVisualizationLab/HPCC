@@ -363,7 +363,7 @@ function initInteractions()
 
 function initRoom()
 {
-    var height = ROOM_SIZE * 2;
+    var height = ROOM_SIZE * 2.5;
     var width = ROOM_SIZE * 12;
     var depth = ROOM_SIZE * 4;
     var geometry = new THREE.BoxGeometry( width, height, depth );
@@ -389,7 +389,7 @@ function initRoom()
     }
 
     var room = new THREE.Mesh( geometry, materials );
-    room.position.set( ROOM_SIZE*3, ROOM_SIZE/2, ROOM_SIZE );
+    room.position.set( ROOM_SIZE*3, ROOM_SIZE/1.25, ROOM_SIZE );
     room.name = "hpcc_room";
     room.type = "room";
     scene.add( room );
@@ -585,11 +585,9 @@ function initScatterPlotMatrix()
 
     // building scatter plot matrix ----------------------------------------------------
     scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, true, datakeys );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, ROOM_SIZE * -1, ROOM_SIZE * -0.9 );
-    scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 6.75, ROOM_SIZE * -1, ROOM_SIZE * 2.5 );
+    scatter_plot_matrix.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot_matrix.graph );
-
-    scatter_plot_matrix.axis_combinations = slist;
 
     function isRepeated( a, A )
     {

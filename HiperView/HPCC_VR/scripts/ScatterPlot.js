@@ -39,6 +39,9 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         hitbox.position.set( xpos, ypos, 0 );
         hitbox.position.x = hitbox.position.x + summation(z-1) * scale * 2;
         hitbox.position.y = hitbox.position.y - ( axisNo - 1 -z ) * scale * 1.5;
+        hitbox.xr = hitbox.position.x;
+        hitbox.yr = hitbox.position.y;
+        hitbox.zr = hitbox.position.z;
         // this.matrixKey[""+x+""+y+""+z] = this.matrix[p];
 
     }
