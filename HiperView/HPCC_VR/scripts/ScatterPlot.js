@@ -56,24 +56,54 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         var Z_texture = new THREE.TextureLoader().load( "media/img/" + axis[z] + ".png" );
         var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.5, side: THREE.DoubleSide } );
         var Z = new THREE.Mesh( Z_geometry, Z_material );
-        Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.25;
+        Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.25 + scale/2;
         Z.position.y = (z+1) * scale * 1.25;
         Z.position.z = scale/2
         Z.rotation.y = Math.PI/2;
 
         this.graph.add( Z );
 
-        var currentA = 0;
-        for( var a=z+1; a>1; a-- )
+        // var currentA = 0;
+        // for( var a=z+1; a>1; a-- )
+        // {
+        //     // add x and y labels
+        //     var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
+        //     var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
+        //     var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
+        //     var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+        //     aZ.position.x = summation(z-1) * scale * 2;       // align with z group
+        //     aZ.translateX( (z+1-a) * scale * 1.25 );          // align with x group
+        //     aZ.position.y = a * scale * 1.25;
+        //     this.graph.add( aZ );
+        // }
+
+        // y axis
+        var currentA1 = 1;
+        for( var a=z; a>1; a-- )
         {
             // add x and y labels
             var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
-            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
+            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA1++] + ".png" );
+            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
+            var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+            aZ.position.x = summation(z-1) * scale * 2;       // align with z group
+            aZ.translateX( scale * -1.25 );          // align with x group
+            aZ.position.y = a * scale * 1.25;
+            this.graph.add( aZ );
+        }
+
+        // x axis
+        var currentA2 = 0;
+        for( var a=z+1; a>2; a-- )
+        {
+            // add x and y labels
+            var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
+            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA2++] + ".png" );
             var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
             var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
             aZ.position.x = summation(z-1) * scale * 2;       // align with z group
             aZ.translateX( (z+1-a) * scale * 1.25 );                     // align with x group
-            aZ.position.y = a * scale * 1.25;
+            aZ.position.y = scale * 1.25;
             this.graph.add( aZ );
         }
     }
