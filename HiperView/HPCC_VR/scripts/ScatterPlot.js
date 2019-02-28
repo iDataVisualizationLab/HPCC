@@ -9,7 +9,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
-        var hitbox_geometry = new THREE.BoxGeometry( scale, scale, 8 );
+        var hitbox_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
         var hitbox_material = new THREE.MeshBasicMaterial( { visible: false } );
         var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
         hitbox.type = "scatter-plot-hitbox";

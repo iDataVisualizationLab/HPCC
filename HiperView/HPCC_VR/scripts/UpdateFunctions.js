@@ -167,23 +167,27 @@ function updateScatterPlotPoints( host, x, y, z, color, sp )
 
     point.material.color = new THREE.Color( color );
 
-    var intervals = 20;
-    var xinterval = (x - point.position.x)/intervals;
-    var yinterval = (y - point.position.y)/intervals;
-    var zinterval = (z - point.position.z)/intervals;
-    var count = 0;
+    point.position.x = x;
+    point.position.y = y;
+    point.position.z = z;
 
-    var movePoint = setInterval( function()
-    {
-        point.position.x += xinterval;
-        point.position.y += yinterval;
-        point.position.z += zinterval;
-        count++;
+    // var intervals = 20;
+    // var xinterval = (x - point.position.x)/intervals;
+    // var yinterval = (y - point.position.y)/intervals;
+    // var zinterval = (z - point.position.z)/intervals;
+    // var count = 0;
 
-        if( count == intervals )
-            clearInterval( movePoint );
+    // var movePoint = setInterval( function()
+    // {
+    //     point.position.x += xinterval;
+    //     point.position.y += yinterval;
+    //     point.position.z += zinterval;
+    //     count++;
 
-    }, 20 );
+    //     if( count == intervals )
+    //         clearInterval( movePoint );
+
+    // }, 20 );
 
 }
 
