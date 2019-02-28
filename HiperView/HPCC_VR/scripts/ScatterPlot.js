@@ -2,16 +2,14 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
 {
     this.matrix = {};
     this.graph = new THREE.Group();
-    this.graph.visible = false;
     this.isBinned = isBinned;
-    // this.matrixKey = {};
     var axis = Object.keys(SERVICE).sort();
     var axisNo = axis.length
 
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
-        var hitbox_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        var hitbox_geometry = new THREE.BoxGeometry( scale, scale, 8 );
         var hitbox_material = new THREE.MeshBasicMaterial( { visible: false } );
         var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
         hitbox.type = "scatter-plot-hitbox";
@@ -25,6 +23,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                     isBinned,
                                     datakeys[p] );
         hitbox.add( sp.graph );
+        hitbox.scatter_plot = sp;
         sp.graph.position.set( scale/-2, scale/-2, scale/-2 );
         this.graph.add( hitbox );
         this.matrix[p] = sp;
@@ -39,7 +38,12 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         hitbox.position.set( xpos, ypos, 0 );
         hitbox.position.x = hitbox.position.x + summation(z-1) * scale * 2;
         hitbox.position.y = hitbox.position.y - ( axisNo - 1 -z ) * scale * 1.5;
-        // this.matrixKey[""+x+""+y+""+z] = this.matrix[p];
+        hitbox.xr = hitbox.position.x;
+        hitbox.yr = hitbox.position.y;
+        hitbox.zr = hitbox.position.z;
+
+        // hitbox.visible = true;
+        // sp.graph.visible = true;
 
     }
 
@@ -82,13 +86,14 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
     // building scatter plot
     var population = data.length;
 
+    var graph = new THREE.Group();
+    graph.type = "scatter-plot";
+    graph.name = "";
+
     var x = setInfo( 0 );
     var y = setInfo( 1 );
     var z = setInfo( 2 );
 
-    var graph = new THREE.Group();
-    graph.type = "scatter-plot";
-    graph.name = "";
     var grid = setGrid();
 
     if( !isBinned )
@@ -97,9 +102,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         var bins = setBins();
 
     graph.add( grid );
-    // graph.add( x.obj );
-    // graph.add( y.obj );
-    // graph.add( z.obj );
 
     if( !isBinned )
         graph.add( points );
@@ -131,7 +133,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         info.range = info.max - info.min;
         info.name = axis == 0 ? "x" : axis == 1 ? "y" : "z";
         info.legend = axes[axis];
-        // info.obj = setAxis( axis, info );
         info.binSize = intervals - 1;
 
         info.bin = function( n )
@@ -203,13 +204,226 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
         return grid;
     }
 
-    function setAxis( axis, obj )
+    function setPoints()
+    {
+        var points = new THREE.Group();
+        points.name = "scatterplot-points";
+        var pos = [0, 0, 0];
+        points.obj = {};
+
+        for( var p=0; p<population; p++ )
+        {
+            pos[0] = x.fit( data[p][0] );
+            pos[1] = y.fit( data[p][1] );
+            pos[2] = z.fit( data[p][2] );
+
+            var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+            var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
+            var point = new THREE.Mesh( geometry, material );
+
+            point.position.set( 0, 0, 0 );
+            point.name = dataid[p];
+            points.add( point );
+            points.obj[dataid[p]] = point;
+        }
+
+        return points;
+    }
+
+    function setBins()
+    {
+        var bins = new THREE.Group();
+        var bin, binCount;
+        var binSize = intervals - 1;
+        var getBinOf = {};
+        var oneElement = 1 / ( population );
+        var default_opacity = 0;
+
+        // inititializing variables
+        bin = {}, binCount = {};
+        for( var bx=0; bx<binSize; bx++ )
+        {
+            bin[bx] = {}, binCount[bx] = {};
+            for( var by=0; by<binSize; by++ )
+            {
+                bin[bx][by] = {}, binCount[bx][by] = {};
+                for( var bz=0; bz<binSize; bz++ )
+                {
+                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
+                }
+            }
+        }
+
+        // setting binCount
+        var xb, yb, zb;
+        for( var p=0; p<population; p++ )
+        {
+            xb = x.bin( data[p][0] );
+            yb = y.bin( data[p][1] );
+            zb = z.bin( data[p][2] );
+            
+            binCount[xb][yb][zb] = binCount[xb][yb][zb]+1;
+            getBinOf[dataid[p]] = [xb,yb,zb];
+        }
+
+        // setting bin
+        for( xb in bin )
+        {
+            if( !bin.hasOwnProperty(xb) ) continue;
+
+            for( yb in bin )
+            {
+                if( !bin[xb].hasOwnProperty(yb) ) continue;
+
+                for( zb in bin[xb][yb] )
+                {
+                    if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
+
+                    var o = binCount[xb][yb][zb] * oneElement;
+
+                    // if( xb != 2 | yb != 2 | zb != 2 ) continue;
+
+                    var material = new THREE.MeshBasicMaterial( { color: 0x000000, transparent: true, opacity: default_opacity } );
+                    var geometry = new THREE.BoxGeometry( scale/binSize, scale/binSize, scale/binSize );
+                    // var geometry = new THREE.SphereGeometry( scale/binSize/2, 8, 8 );
+                    var point = new THREE.Mesh( geometry, material );
+                    point.count = binCount[xb][yb][zb];
+                    point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
+
+                    bins.add( point );
+                    bin[xb][yb][zb] = point;
+                }
+            }
+        }
+
+        bins.bin = bin;
+        bins.binCount = binCount;
+        bins.getBinOf = getBinOf;
+        bins.oneElement = oneElement;
+
+        return bins;
+    }
+
+    // public functions
+
+    this.toggleAxisLegend = function( axis )
+    {
+        if( axis == 0 )
+            this.x.obj.visible = !this.x.obj.visible;
+        if( axis == 1 )
+            this.y.obj.visible = !this.y.obj.visible;
+        if( axis == 2 )
+            this.z.obj.visible = !this.z.obj.visible;
+    }
+
+    this.updateBinSize = function( bin, new_size )
+    {
+        var intervals = 10;
+        var sinterval = (new_size - bin.scale.x)/intervals;
+        var count = 0;
+    
+        var resizeBin = setInterval( function()
+        {
+            bin.scale.x += sinterval;
+            bin.scale.y += sinterval;
+            bin.scale.z += sinterval;
+            count++;
+    
+            if( count == intervals )
+                clearInterval( resizeBin );
+    
+        }, 1 );
+    }
+
+    this.getTotalBinCount = function()
+    {
+        var total = 0;
+        var bin = this.bins.bin;
+        var binCount = this.bins.binCount;
+
+        for( xb in bin )
+            if( bin.hasOwnProperty(xb) )
+                for( yb in bin[xb] )
+                    if( bin[xb].hasOwnProperty(yb) )
+                        for( zb in bin[xb][yb] )
+                            if( bin[xb][yb].hasOwnProperty(zb) )
+                                total+=binCount[xb][yb][zb];
+
+        return total;
+    }
+
+    this.updateData = function( key, x, y, z )
+    {
+        var p = this;
+        p.data[key][0] = x;
+        p.data[key][1] = y;
+        p.data[key][2] = z;
+
+        // run scagnostics when all data is declared
+        if( this.data.length-1 == key )
+        {
+            // var workerScag = new Worker("scripts/worker/scag_worker.js");
+            // workerScag.postMessage( p.data );
+            // workerScag.onmessage = function( event )
+            // {
+            //     p.scag = event.data;
+            //     console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
+            // };
+
+            // compute scag via promise
+            promiseScag( p.data ).then( message =>
+                {
+                    // console.log("*****************************")
+                    // console.log("outl " + message.outlyingScore);
+                    // console.log("clum " + message.clumpyScore);
+                    // console.log("conv " + message.convexScore);
+                    // console.log("mono " + message.monotonicScore);
+                    // console.log("skwe " + message.skewedScore);
+                    // console.log("skin " + message.skinnyScore);
+                    // console.log("spar " + message.sparseScore);
+                    // console.log("stra " + message.striatedScore);
+                    // console.log("stry " + message.stringyScore);
+                    p.scag = message;
+                    filterScatterPlot( p );
+                } );
+        }
+
+        function promiseScag( data )
+        {
+            return new Promise( resolve => 
+                {
+                    var options = {
+                            startBinGridSize: 10,
+                            minBins: 5,
+                            maxBins: 20
+                        }
+                    var scag = scagnostics3d( data, options );
+
+                    var obj = {
+                        outlyingScore: scag.outlyingScore,
+                        clumpyScore: scag.clumpyScore,
+                        convexScore: scag.convexScore,
+                        monotonicScore: scag.monotonicScore,
+                        skewedScore: scag.skewedScore,
+                        skinnyScore: scag.skinnyScore,
+                        sparseScore: scag.sparseScore,
+                        striatedScore: scag.striatedScore,
+                        stringyScore: scag.stringyScore
+                    };
+
+                    resolve( obj );
+                } );
+        }
+    }
+
+    this.drawAxis = function( axis, obj )
     {
         var group = new THREE.Group();
+        group.name = "axis-label-"+obj.name;
         group.add( setMarks() );
         addAxisLegend( group );
 
-        return group;
+        this.graph.add( group );
 
         function setMarks()
         {
@@ -398,218 +612,6 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             obj.add( axesmenu );
         }
 
-    }
-
-    function setPoints()
-    {
-        var points = new THREE.Group();
-        points.name = "scatterplot-points";
-        var pos = [0, 0, 0];
-        points.obj = {};
-
-        for( var p=0; p<population; p++ )
-        {
-            pos[0] = x.fit( data[p][0] );
-            pos[1] = y.fit( data[p][1] );
-            pos[2] = z.fit( data[p][2] );
-
-            var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-            var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
-            var point = new THREE.Mesh( geometry, material );
-
-            point.position.set( 0, 0, 0 );
-            point.name = dataid[p];
-            points.add( point );
-            points.obj[dataid[p]] = point;
-        }
-
-        return points;
-    }
-
-    function setBins()
-    {
-        var bins = new THREE.Group();
-        var bin, binCount;
-        var binSize = intervals - 1;
-        var getBinOf = {};
-        var oneElement = 1 / ( population );
-        var default_opacity = 0;
-
-        // inititializing variables
-        bin = {}, binCount = {};
-        for( var bx=0; bx<binSize; bx++ )
-        {
-            bin[bx] = {}, binCount[bx] = {};
-            for( var by=0; by<binSize; by++ )
-            {
-                bin[bx][by] = {}, binCount[bx][by] = {};
-                for( var bz=0; bz<binSize; bz++ )
-                {
-                    bin[bx][by][bz] = null, binCount[bx][by][bz] = 0;
-                }
-            }
-        }
-
-        // setting binCount
-        var xb, yb, zb;
-        for( var p=0; p<population; p++ )
-        {
-            xb = x.bin( data[p][0] );
-            yb = y.bin( data[p][1] );
-            zb = z.bin( data[p][2] );
-            
-            binCount[xb][yb][zb] = binCount[xb][yb][zb]+1;
-            getBinOf[dataid[p]] = [xb,yb,zb];
-        }
-
-        // setting bin
-        for( xb in bin )
-        {
-            if( !bin.hasOwnProperty(xb) ) continue;
-
-            for( yb in bin )
-            {
-                if( !bin[xb].hasOwnProperty(yb) ) continue;
-
-                for( zb in bin[xb][yb] )
-                {
-                    if( !bin[xb][yb].hasOwnProperty(zb) ) continue;
-
-                    var o = binCount[xb][yb][zb] * oneElement;
-
-                    // if( xb != 2 | yb != 2 | zb != 2 ) continue;
-
-                    var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: default_opacity } );
-                    var geometry = new THREE.BoxGeometry( scale/binSize, scale/binSize, scale/binSize );
-                    // var geometry = new THREE.SphereGeometry( scale/binSize/2, 8, 8 );
-                    var point = new THREE.Mesh( geometry, material );
-                    point.count = binCount[xb][yb][zb];
-                    point.position.set( x.match( xb ), y.match( yb ), z.match( zb ) );
-
-                    bins.add( point );
-                    bin[xb][yb][zb] = point;
-                }
-            }
-        }
-
-        bins.bin = bin;
-        bins.binCount = binCount;
-        bins.getBinOf = getBinOf;
-        bins.oneElement = oneElement;
-
-        return bins;
-    }
-
-    // public functions
-
-    this.toggleAxisLegend = function( axis )
-    {
-        if( axis == 0 )
-            this.x.obj.visible = !this.x.obj.visible;
-        if( axis == 1 )
-            this.y.obj.visible = !this.y.obj.visible;
-        if( axis == 2 )
-            this.z.obj.visible = !this.z.obj.visible;
-    }
-
-    this.updateBinSize = function( bin, new_size )
-    {
-        var intervals = 10;
-        var sinterval = (new_size - bin.scale.x)/intervals;
-        var count = 0;
-    
-        var resizeBin = setInterval( function()
-        {
-            bin.scale.x += sinterval;
-            bin.scale.y += sinterval;
-            bin.scale.z += sinterval;
-            count++;
-    
-            if( count == intervals )
-                clearInterval( resizeBin );
-    
-        }, 1 );
-    }
-
-    this.getTotalBinCount = function()
-    {
-        var total = 0;
-        var bin = this.bins.bin;
-        var binCount = this.bins.binCount;
-
-        for( xb in bin )
-            if( bin.hasOwnProperty(xb) )
-                for( yb in bin[xb] )
-                    if( bin[xb].hasOwnProperty(yb) )
-                        for( zb in bin[xb][yb] )
-                            if( bin[xb][yb].hasOwnProperty(zb) )
-                                total+=binCount[xb][yb][zb];
-
-        return total;
-    }
-
-    this.updateData = function( key, x, y, z )
-    {
-        var p = this;
-        p.data[key][0] = x;
-        p.data[key][1] = y;
-        p.data[key][2] = z;
-
-        // run scagnostics when all data is declared
-        if( this.data.length-1 == key )
-        {
-            // var workerScag = new Worker("scripts/worker/scag_worker.js");
-            // workerScag.postMessage( p.data );
-            // workerScag.onmessage = function( event )
-            // {
-            //     p.scag = event.data;
-            //     console.log( p.axes[0] + " " + p.axes[1] + " " + p.axes[2] + " " + p.scag.outlyingScore );
-            // };
-
-            // compute scag via promise
-            promiseScag( p.data ).then( message =>
-                {
-                    // console.log("*****************************")
-                    // console.log("outl " + message.outlyingScore);
-                    // console.log("clum " + message.clumpyScore);
-                    // console.log("conv " + message.convexScore);
-                    // console.log("mono " + message.monotonicScore);
-                    // console.log("skwe " + message.skewedScore);
-                    // console.log("skin " + message.skinnyScore);
-                    // console.log("spar " + message.sparseScore);
-                    // console.log("stra " + message.striatedScore);
-                    // console.log("stry " + message.stringyScore);
-                    p.scag = message;
-                    filterScatterPlot( p );
-                } );
-        }
-
-        function promiseScag( data )
-        {
-            return new Promise( resolve => 
-                {
-                    var options = {
-                            startBinGridSize: 10,
-                            minBins: 5,
-                            maxBins: 20
-                        }
-                    var scag = scagnostics3d( data, options );
-
-                    var obj = {
-                        outlyingScore: scag.outlyingScore,
-                        clumpyScore: scag.clumpyScore,
-                        convexScore: scag.convexScore,
-                        monotonicScore: scag.monotonicScore,
-                        skewedScore: scag.skewedScore,
-                        skinnyScore: scag.skinnyScore,
-                        sparseScore: scag.sparseScore,
-                        striatedScore: scag.striatedScore,
-                        stringyScore: scag.stringyScore
-                    };
-
-                    resolve( obj );
-                } );
-        }
     }
 
 }

@@ -2,6 +2,7 @@
 var mouseDown = 0;
 document.body.onmousedown = function() { ++mouseDown; };
 document.body.onmouseup = function() { --mouseDown; };
+var sp_focus = null;
 
 // on resizing window
 function onResize()
@@ -28,6 +29,15 @@ function onMouseDown( event )
 
     // for some reason 2 event happen at the same time
     if( event.isTrusted ) return;
+
+    if( sp_focus != null )
+    {
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-x") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-y") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-z") );
+        moveScatterPlot( sp_focus, sp_focus.xr, sp_focus.yr, sp_focus.zr );
+        sp_focus = null;
+    }
 
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
     var intersects;
@@ -171,7 +181,14 @@ function onMouseDown( event )
             INTERSECTED = intersects[ 0 ].object;
             if( INTERSECTED.type == "scatter-plot-hitbox" ) // an axis was selected
             {
-                console.log(INTERSECTED.children[0]);
+                // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+                sp_focus = INTERSECTED;
+
+                sp_focus.scatter_plot.drawAxis( 0, sp_focus.scatter_plot.x );
+                sp_focus.scatter_plot.drawAxis( 1, sp_focus.scatter_plot.y );
+                sp_focus.scatter_plot.drawAxis( 2, sp_focus.scatter_plot.z );
+
+                moveScatterPlot( INTERSECTED, 0, 1.125, 1 );
                 return true;
             }
         }

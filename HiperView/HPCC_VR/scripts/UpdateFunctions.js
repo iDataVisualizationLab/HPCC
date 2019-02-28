@@ -144,7 +144,7 @@ function updateScatterPlotMatrix( host, timestamp )
         var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
 
         // update matrix data & scagnostic
-        // plot.updateData( plot.datakey[host], x, y, z );
+        plot.updateData( plot.datakey[host], x, y, z );
 
         // update matrix content
         if( scatter_plot_matrix.isBinned )
@@ -217,6 +217,27 @@ function updateScatterPlotBins( host, x, y, z, sp )
     sp.bins.bin[n_xb][n_yb][n_zb].visible = sp.bins.binCount[n_xb][n_yb][n_zb] != 0;
 }
 
+function moveScatterPlot( obj, x, y, z )
+{
+    var intervals = 20;
+    // var xinterval = (x - obj.position.x)/intervals;
+    var yinterval = (y - obj.position.y)/intervals;
+    var zinterval = (z - obj.position.z)/intervals;
+    var count = 0;
+
+    var move = setInterval( function()
+    {
+        // obj.position.x -= xinterval;
+        obj.position.y += yinterval;
+        obj.position.z += zinterval;
+        count++;
+
+        if( count == intervals )
+            clearInterval( move );
+
+    }, 20 );
+}
+
 // lever update
 function updateLever( start, end )
 {
@@ -258,7 +279,7 @@ function updateTooltip( host )
     var host_name = host.name;
     // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
 
-    tooltip.position.set(0,0,0);
+    tooltip.position.set(ROOM_SIZE*4,0,0);
 
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');

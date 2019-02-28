@@ -359,8 +359,9 @@ function initScoreControlPanel()
 
     score_control_panel.cylinder = cylinder;
     score_control_panel.add( score_control_panel.cylinder );
-    score_control_panel.position.set( ROOM_SIZE * 3.1, ROOM_SIZE / 10, ROOM_SIZE * -0.8 );
+    score_control_panel.position.set( ROOM_SIZE * -2, ROOM_SIZE / 10, ROOM_SIZE * 1.5 );
     score_control_panel.rotateZ( Math.PI/2 );
+    score_control_panel.rotateX( Math.PI/2 );
     scene.add( score_control_panel );
 
 
