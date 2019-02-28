@@ -105,7 +105,7 @@ function init() {
 
     svgLengend = d3.select('#colorContinuos').append('div').append('svg')
         .attr("class", "legendView")
-        .attr("width", 20)
+        .attr("width", 0)
         .attr("height", 0)
         .style('display','none');
 // SVG for ticks, labels, and interactions
@@ -280,11 +280,12 @@ function grayscale(pixels, args) {
 };
 
 function create_legend(colors,brush) {
-        if (selectedService) {
+    if (selectedService) {
         colorbyValue(orderLegend);
     }else{
         colorbyCategory(data,"group");
     }
+    barScale.range([0,svgLengend.node().parentElement.offsetWidth]);
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
@@ -503,17 +504,17 @@ function changeGroupTarget(key) {
     else {
         var thresholdScale = function(scale,d) {
             if(d) return d3.bisector(function(d) { return d; }).left(scale,d);
-                return "null"};
+                return undefined};
         let nameLegend = rangeToString(arrThresholds);
-        let arrmidle = arrThresholds.slice(1,this.length-1);
-        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),'null']);
+        let arrmidle = arrThresholds.slice(1);
+        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),[{text: undefined, value: undefined}]]);
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }
 function rangeToString(arr){
     let midleRange = arr.slice(1,this.length-1);
     let mapRangeName = ["(<"+midleRange[0]+")"];
-    midleRange.slice(1,this.length-1).forEach((d,i)=>mapRangeName.push("("+midleRange[i]+'-'+d+")"));
+    midleRange.slice(1).forEach((d,i)=>mapRangeName.push("("+midleRange[i]+'-'+d+")"));
     mapRangeName.push("(>"+midleRange[midleRange.length-1]+")");
     return mapRangeName;
 }
@@ -612,14 +613,24 @@ function brush() {
                 ? "row"
                 : "row off";
         });
+    barScale.domain([0,data.length]);
+    if (selectedService){
+        legend.selectAll(".color-bar")
+            .style("width", function(d) {
+                return Math.ceil((barScale(tallies[d].length)));
+            });
 
-    legend.selectAll(".color-bar")
-        .style("width", function(d) {
-            return Math.ceil(($('#mySidenav').width()-legendw-20)*tallies[d].length/data.length) + "px"
-        });
+        legend.selectAll(".tally")
+            .text(function(d,i) { return tallies[d].length });
+    }else {
+        legend.selectAll(".color-bar")
+            .style("width", function(d) {
+                return Math.ceil((barScale(tallies[d].length))) + "px";
+            });
 
-    legend.selectAll(".tally")
-        .text(function(d,i) { return tallies[d].length });
+        legend.selectAll(".tally")
+            .text(function(d,i) { return tallies[d].length });
+    }
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
@@ -896,15 +907,16 @@ function changeVar(d){
         selectedService = null;
         svgLengend.style('display','none');
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
+        changeGroupTarget(d.arr);
+        legend = create_legend(colors,brush);
     }else {
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
-        drawLegend(d.service, arrThresholds, arrColor, dif);
+        changeGroupTarget(d.arr);
+        legend = drawLegend(d.service, arrThresholds, arrColor, dif);
         svgLengend.style('display',null);
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
-    changeGroupTarget(d.arr);
-    legend = create_legend(colors,brush);
     brush();
 }
