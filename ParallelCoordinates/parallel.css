@@ -154,10 +154,13 @@ button#exclude-data:hover {
 .light #legend {
     border-left: 1px solid rgba(140,140,140,0.5);
 }
-#legend .row {
+#colorContinuos text{
+    fill: currentColor;
+}
+#legend .row, #colorContinuos .row {
     cursor: pointer;
 }
-#legend .row:hover {
+#legend .row:hover, #colorContinuos .row:hover {
     font-size: 16px;
     line-height: 1.3em;
 }
@@ -167,7 +170,7 @@ button#exclude-data:hover {
 .off {
     color: #555;
 }
-#legend {
+#legend{
     text-align: left;
     overflow-y: auto;
     border-left: 1px solid #777;
