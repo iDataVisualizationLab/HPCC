@@ -242,6 +242,35 @@ function moveScatterPlot( obj, x, y, z )
     }, 20 );
 }
 
+function highlightScatterPlot( hitbox, on )
+{
+    // skip highlight process if hitbox does not change
+    if( hitbox.highlighted == on ) return 0;
+
+    hitbox.highlighted = on;
+    var sp = hitbox.children[0];
+    if( on ) sp.visible = true;
+
+    var intervals = 20;
+    var z = on ? 0 : scatter_plot_matrix.scale * -1;
+    var zinterval = ( z-sp.position.z ) /intervals;
+    var count = 0;
+
+    var move = setInterval( function()
+    {
+        sp.position.z += zinterval;
+        count++;
+
+        if( count == intervals )
+        {
+            if( !on ) sp.visible = false;
+            hitbox.material.visible = !on;
+            clearInterval( move );
+        }
+
+    }, 20 );
+}
+
 // lever update
 function updateLever( start, end )
 {

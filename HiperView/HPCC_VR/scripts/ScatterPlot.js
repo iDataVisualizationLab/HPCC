@@ -3,6 +3,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     this.matrix = {};
     this.graph = new THREE.Group();
     this.isBinned = isBinned;
+    this.scale = scale;
     var axis = Object.keys(SERVICE).sort();
     var axisNo = axis.length
 
@@ -10,7 +11,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     {
         this.length = p+1;
         var hitbox_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
-        var hitbox_material = new THREE.MeshBasicMaterial( { visible: false } );
+        var hitbox_material = new THREE.MeshBasicMaterial( { color: 0x000000, transparent: true, opacity: 0.75 } );
         var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
         hitbox.type = "scatter-plot-hitbox";
         hitbox.name = axes_matrix[p].toString();
@@ -22,9 +23,11 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
                                     scale,
                                     isBinned,
                                     datakeys[p] );
+        sp.graph.visible = false;
+        sp.hitbox = hitbox;
         hitbox.add( sp.graph );
         hitbox.scatter_plot = sp;
-        sp.graph.position.set( scale/-2, scale/-2, scale/-2 );
+        sp.graph.position.set( scale/-2, scale/-2, scale * -1 );
         this.graph.add( hitbox );
         this.matrix[p] = sp;
 
@@ -41,9 +44,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         hitbox.xr = hitbox.position.x;
         hitbox.yr = hitbox.position.y;
         hitbox.zr = hitbox.position.z;
-
-        // hitbox.visible = true;
-        // sp.graph.visible = true;
+        hitbox.highlighted = false;
 
     }
 
@@ -53,7 +54,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         // add z label
         var Z_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
         var Z_texture = new THREE.TextureLoader().load( "media/img/" + axis[z] + ".png" );
-        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.25 } );
+        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.5 } );
         var Z = new THREE.Mesh( Z_geometry, Z_material );
         Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.5;
         Z.position.y = (z+1) * scale * 1.5;
@@ -65,7 +66,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
             // add x and y labels
             var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
             var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
-            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.25 } );
+            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
             var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
             aZ.position.x = summation(z-1) * scale * 2;       // align with z group
             aZ.translateX( (z+1-a) * scale * 1.5 );                     // align with x group

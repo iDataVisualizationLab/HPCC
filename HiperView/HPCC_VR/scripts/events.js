@@ -179,9 +179,9 @@ function onMouseDown( event )
         if ( intersects.length > 0 )  // scatter plot grid was selected
         {
             INTERSECTED = intersects[ 0 ].object;
-            if( INTERSECTED.type == "scatter-plot-hitbox" ) // an axis was selected
+            if( INTERSECTED.type == "scatter-plot-hitbox" & INTERSECTED.highlighted ) // an axis was selected
             {
-                // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld )
+                // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
                 sp_focus = INTERSECTED;
 
                 sp_focus.scatter_plot.drawAxis( 0, sp_focus.scatter_plot.x );

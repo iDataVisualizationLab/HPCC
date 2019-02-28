@@ -278,7 +278,7 @@ function initScoreControlPanel()
         cylinder.slider[name] = slider;
 
         // positioning slider
-        slider.translateY( s*2.5/2 );
+        slider.translateY( slider.initial - SCORE[score[i]] * 10 * slider.initial/5 );
         slider.rotation.set( 0, i*score_control_panel.rotation_interval, 0 );
         slider.translateZ(r + s/40);
         slider.rotateZ( Math.PI/2 );
@@ -492,7 +492,7 @@ function filterScatterPlotMatrix()
             filter_result &= (scatter_plot_matrix.matrix[sp].scag[score] >= SCORE[score]);
             if(!filter_result) break;
         }
-        scatter_plot_matrix.matrix[sp].graph.visible = filter_result == true;
+        highlightScatterPlot( scatter_plot_matrix.matrix[sp].hitbox, filter_result );
     }
 }
 
@@ -508,5 +508,5 @@ function filterScatterPlot( sp )
         filter_result &= (sp.scag[score] >= SCORE[score]);
         if(!filter_result) break;
     }
-    sp.graph.visible = filter_result == true;
+    highlightScatterPlot( sp.hitbox, filter_result );
 }
