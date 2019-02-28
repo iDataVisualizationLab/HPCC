@@ -9,7 +9,7 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
     for( var p=0; p<axes_matrix.length; p++ )
     {
         this.length = p+1;
-        var hitbox_geometry = new THREE.BoxGeometry( scale, scale, scale );
+        var hitbox_geometry = new THREE.BoxGeometry( scale, scale, 8 );
         var hitbox_material = new THREE.MeshBasicMaterial( { visible: false } );
         var hitbox = new THREE.Mesh( hitbox_geometry, hitbox_material );
         hitbox.type = "scatter-plot-hitbox";
@@ -27,7 +27,6 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         sp.graph.position.set( scale/-2, scale/-2, scale/-2 );
         this.graph.add( hitbox );
         this.matrix[p] = sp;
-        hitbox.children[0].visible = true;
 
         var x = SERVICE[axes_matrix[p][0]].sp_pos;
         var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + axisNo;
@@ -43,8 +42,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         hitbox.yr = hitbox.position.y;
         hitbox.zr = hitbox.position.z;
 
-        // hitbox.visible = false;
-        // hitbox.children[0].visible = true;
+        // hitbox.visible = true;
+        // sp.graph.visible = true;
 
     }
 
@@ -284,7 +283,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
 
                     // if( xb != 2 | yb != 2 | zb != 2 ) continue;
 
-                    var material = new THREE.MeshPhongMaterial( { color: 0x000000, transparent: true, opacity: default_opacity } );
+                    var material = new THREE.MeshBasicMaterial( { color: 0x000000, transparent: true, opacity: default_opacity } );
                     var geometry = new THREE.BoxGeometry( scale/binSize, scale/binSize, scale/binSize );
                     // var geometry = new THREE.SphereGeometry( scale/binSize/2, 8, 8 );
                     var point = new THREE.Mesh( geometry, material );

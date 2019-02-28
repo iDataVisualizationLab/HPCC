@@ -144,7 +144,7 @@ function updateScatterPlotMatrix( host, timestamp )
         var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
 
         // update matrix data & scagnostic
-        // plot.updateData( plot.datakey[host], x, y, z );
+        plot.updateData( plot.datakey[host], x, y, z );
 
         // update matrix content
         if( scatter_plot_matrix.isBinned )
