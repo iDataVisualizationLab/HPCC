@@ -35,12 +35,12 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         var y = SERVICE[axes_matrix[p][1]].sp_pos * -1 + axisNo;
         var z = SERVICE[axes_matrix[p][2]].sp_pos;
 
-        var xpos = x * scale * 1.5;
-        var ypos = y * scale * 1.5;
+        var xpos = x * scale * 1.25;
+        var ypos = y * scale * 1.25;
 
         hitbox.position.set( xpos, ypos, 0 );
         hitbox.position.x = hitbox.position.x + summation(z-1) * scale * 2;
-        hitbox.position.y = hitbox.position.y - ( axisNo - 1 -z ) * scale * 1.5;
+        hitbox.position.y = hitbox.position.y - ( axisNo - 1 -z ) * scale * 1.25;
         hitbox.xr = hitbox.position.x;
         hitbox.yr = hitbox.position.y;
         hitbox.zr = hitbox.position.z;
@@ -54,10 +54,13 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         // add z label
         var Z_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
         var Z_texture = new THREE.TextureLoader().load( "media/img/" + axis[z] + ".png" );
-        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.5 } );
+        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.5, side: THREE.DoubleSide } );
         var Z = new THREE.Mesh( Z_geometry, Z_material );
-        Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.5;
-        Z.position.y = (z+1) * scale * 1.5;
+        Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.25;
+        Z.position.y = (z+1) * scale * 1.25;
+        Z.position.z = scale/2
+        Z.rotation.y = Math.PI/2;
+
         this.graph.add( Z );
 
         var currentA = 0;
@@ -69,8 +72,8 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
             var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
             var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
             aZ.position.x = summation(z-1) * scale * 2;       // align with z group
-            aZ.translateX( (z+1-a) * scale * 1.5 );                     // align with x group
-            aZ.position.y = a * scale * 1.5;
+            aZ.translateX( (z+1-a) * scale * 1.25 );                     // align with x group
+            aZ.position.y = a * scale * 1.25;
             this.graph.add( aZ );
         }
     }
