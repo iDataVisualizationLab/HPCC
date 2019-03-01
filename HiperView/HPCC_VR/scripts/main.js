@@ -25,8 +25,8 @@ var fillHost;
 var updateTimestamp;
 var move_timer;
 
-var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 5 },
-                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 6 },
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [0,98], sp_pos: 5 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [0,98], sp_pos: 6 },
                 arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 0 },
                 arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 3 },
                 arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 1 },
@@ -34,7 +34,7 @@ var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Tempera
                 arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
-var SCORE = { outlyingScore: 0.1,
+var SCORE = { outlyingScore: 0.2,
                 clumpyScore: 0,
                 convexScore: 0,
                 monotonicScore: 0,
@@ -585,7 +585,7 @@ function initScatterPlotMatrix()
 
     // building scatter plot matrix ----------------------------------------------------
     scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, false, datakeys );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 7, ROOM_SIZE * -0.5, ROOM_SIZE * 2.99 );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 7, ROOM_SIZE * -0.9, ROOM_SIZE * 2.99 );
     scatter_plot_matrix.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot_matrix.graph );
     scatter_plot_matrix.graph.visible = true;
@@ -629,6 +629,18 @@ function initParallelSet()
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
     parallel_set.graph.visible = false;
+}
+
+// Extra
+
+function geAllIdsByName( parent, name )
+{
+    var match = [];
+    for( var c=0; c<parent.children.length; c++ )
+        if( parent.children[c].name == name )
+            match.push(parent.children[c].id);
+
+    return match;
 }
 
 // Animate & Render

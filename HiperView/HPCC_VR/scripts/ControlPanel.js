@@ -355,7 +355,28 @@ function initScoreControlPanel()
     score_control_panel.add( arrowd_mesh );
 
     // adding number labels
-    // pending
+    var line_geometry = new THREE.Geometry();
+    var line_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
+    line_geometry.vertices.push( new THREE.Vector3( 0, 0, r+s/40 ), new THREE.Vector3( s*2.5, 0, r+s/40 ) );
+    var line = new THREE.Line( line_geometry, line_material );
+
+    for( var m=0; m<11; m++ )
+    {
+        var mark_geometry = new THREE.Geometry();
+        var mark_material = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 1 } );
+        mark_geometry.vertices.push(new THREE.Vector3( 0, 0, 0),new THREE.Vector3( 0, s/20, 0 ));
+        var mark = new THREE.Line( mark_geometry, mark_material );
+        addMarkLabel( m/10, mark );
+        line.add( mark );
+        mark.position.z = r+s/40;
+        mark.position.x = m*s*2.5/10;
+    }
+
+    line.translateY( s*2.5/2 );
+    line.translateX( s/10 );
+    line.rotateZ( Math.PI/2 );
+    line.rotateZ( Math.PI );
+    score_control_panel.add( line );
 
     score_control_panel.cylinder = cylinder;
     score_control_panel.add( score_control_panel.cylinder );
@@ -401,6 +422,25 @@ function initScoreControlPanel()
 
     }
 
+    function addMarkLabel( label, obj )
+    {
+        var loader = new THREE.FontLoader();
+        var text_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+        loader.load( 'media/fonts/helvetiker_regular.typeface.json', function ( font )
+        {
+            var text_geometry = new THREE.TextGeometry( label+"", {
+                font: font,
+                size: s/20,
+                height: 0,
+                curveSegments: 12,
+                bevelEnabled: false
+            } );
+
+            var text = new THREE.Mesh( text_geometry, text_material );
+            text.position.set( -s/40, s/20, 0 );
+            obj.add( text );
+        } );
+    }
 }
 
 // update service control panel colors
@@ -473,8 +513,12 @@ function animateControlPanel()
 // filter all scatter plot matrix
 function filterScatterPlotMatrix()
 {
+
     // check if scatter plot matrix has been initialized
     if( scatter_plot_matrix == undefined ) return 0;
+
+    // reset lebel highlight
+    scatter_plot_matrix.resetLabelHighlight();
 
     // loop through matrix
     for( sp in scatter_plot_matrix.matrix )

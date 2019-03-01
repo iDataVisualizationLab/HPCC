@@ -179,7 +179,7 @@ function onMouseDown( event )
         if ( intersects.length > 0 )  // scatter plot grid was selected
         {
             INTERSECTED = intersects[ 0 ].object;
-            if( INTERSECTED.type == "scatter-plot-hitbox" & INTERSECTED.highlighted ) // an axis was selected
+            if( INTERSECTED.type == "scatter-plot-hitbox" & INTERSECTED.highlighted ) // a scatter plot was selected
             {
                 // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
                 sp_focus = INTERSECTED;
@@ -188,7 +188,19 @@ function onMouseDown( event )
                 sp_focus.scatter_plot.drawAxis( 1, sp_focus.scatter_plot.y );
                 sp_focus.scatter_plot.drawAxis( 2, sp_focus.scatter_plot.z );
 
-                moveScatterPlot( INTERSECTED, 0, 1.125, 1 );
+                moveScatterPlot( INTERSECTED, 0, 1.05, 1 );
+                return true;
+            }
+            else if( INTERSECTED.type == "axis-filter" ) // an axis was selected
+            {
+                var axis_id = geAllIdsByName( scatter_plot_matrix.graph, INTERSECTED.name );
+                for( var l=0; l<axis_id.length; l++ )
+                    scatter_plot_matrix.graph.getObjectById(axis_id[l]).material.opacity = 1;
+
+                for( sp in scatter_plot_matrix.matrix )
+                    if( !scatter_plot_matrix.matrix[sp].hitbox.name.includes(INTERSECTED.name) )
+                        highlightScatterPlot( scatter_plot_matrix.matrix[sp].hitbox, false );
+
                 return true;
             }
         }

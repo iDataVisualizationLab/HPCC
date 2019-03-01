@@ -54,63 +54,77 @@ function ScatterPlotMatrix( axes_matrix, ranges_matrix, intervals, dataid, data_
         // add z label
         var Z_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
         var Z_texture = new THREE.TextureLoader().load( "media/img/" + axis[z] + ".png" );
-        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.5, side: THREE.DoubleSide } );
+        var Z_material = new THREE.MeshBasicMaterial( {  map: Z_texture, transparent: true, opacity: 0.25, side: THREE.DoubleSide } );
         var Z = new THREE.Mesh( Z_geometry, Z_material );
+        Z.type = "axis-filter";
+        Z.name = axis[z];
         Z.position.x = summation(z-1) * scale * 2 + (z-1)*scale*1.25 + scale/2;
         Z.position.y = (z+1) * scale * 1.25;
         Z.position.z = scale/2
         Z.rotation.y = Math.PI/2;
-
         this.graph.add( Z );
 
-        // var currentA = 0;
-        // for( var a=z+1; a>1; a-- )
-        // {
-        //     // add x and y labels
-        //     var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
-        //     var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
-        //     var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
-        //     var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
-        //     aZ.position.x = summation(z-1) * scale * 2;       // align with z group
-        //     aZ.translateX( (z+1-a) * scale * 1.25 );          // align with x group
-        //     aZ.position.y = a * scale * 1.25;
-        //     this.graph.add( aZ );
-        // }
-
-        // y axis
-        var currentA1 = 1;
-        for( var a=z; a>1; a-- )
+        var currentA = 0;
+        for( var a=z+1; a>1; a-- )
         {
             // add x and y labels
             var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
-            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA1++] + ".png" );
-            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
+            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA++] + ".png" );
+            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.25 } );
             var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+            aZ.type = "axis-filter";
+            aZ.name = axis[currentA-1];
             aZ.position.x = summation(z-1) * scale * 2;       // align with z group
-            aZ.translateX( scale * -1.25 );          // align with x group
+            aZ.translateX( (z+1-a) * scale * 1.25 );          // align with x group
             aZ.position.y = a * scale * 1.25;
             this.graph.add( aZ );
         }
 
-        // x axis
-        var currentA2 = 0;
-        for( var a=z+1; a>2; a-- )
-        {
-            // add x and y labels
-            var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
-            var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA2++] + ".png" );
-            var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.5 } );
-            var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
-            aZ.position.x = summation(z-1) * scale * 2;       // align with z group
-            aZ.translateX( (z+1-a) * scale * 1.25 );                     // align with x group
-            aZ.position.y = scale * 1.25;
-            this.graph.add( aZ );
-        }
+        // // y axis
+        // var currentA1 = 1;
+        // for( var a=z; a>1; a-- )
+        // {
+        //     // add x and y labels
+        //     var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
+        //     var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA1++] + ".png" );
+        //     var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.25 } );
+        //     var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+        //     aZ.type = "axis-filter";
+        //     aZ.name = axis[currentA1-1];
+        //     aZ.position.x = summation(z-1) * scale * 2;       // align with z group
+        //     aZ.translateX( scale * -1.25 );          // align with x group
+        //     aZ.position.y = a * scale * 1.25;
+        //     this.graph.add( aZ );
+        // }
+
+        // // x axis
+        // var currentA2 = 0;
+        // for( var a=z+1; a>2; a-- )
+        // {
+        //     // add x and y labels
+        //     var aZ_geometry = new THREE.PlaneGeometry( scale, scale, 8 );
+        //     var aZ_texture = new THREE.TextureLoader().load( "media/img/" + axis[currentA2++] + ".png" );
+        //     var aZ_material = new THREE.MeshBasicMaterial( {  map: aZ_texture, transparent: true, opacity: 0.25 } );
+        //     var aZ = new THREE.Mesh( aZ_geometry, aZ_material );
+        //     aZ.type = "axis-filter";
+        //     aZ.name = axis[currentA2-1];
+        //     aZ.position.x = summation(z-1) * scale * 2;       // align with z group
+        //     aZ.translateX( (z+1-a) * scale * 1.25 );                     // align with x group
+        //     aZ.position.y = scale * 1.25;
+        //     this.graph.add( aZ );
+        // }
     }
 
     function summation( n )
     {
         return ( n * ( n + 1 ) ) / 2;
+    }
+
+    this.resetLabelHighlight = function()
+    {
+        for( var l=0; l<this.graph.children.length; l++ )
+            if( this.graph.children[l].type == "axis-filter" )
+                this.graph.children[l].material.opacity = 0.25;
     }
 
 }
@@ -252,7 +266,7 @@ function ScatterPlot( axes, ranges, intervals, dataid, data, scale, isBinned, da
             pos[2] = z.fit( data[p][2] );
 
             var material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
-            var geometry = new THREE.SphereGeometry( 0.0025, 8, 8 );
+            var geometry = new THREE.SphereGeometry( 0.0015, 8, 8 );
             var point = new THREE.Mesh( geometry, material );
 
             point.position.set( 0, 0, 0 );
