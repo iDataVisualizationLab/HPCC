@@ -438,7 +438,7 @@ function initLever()
     lever.add( pivot );
     lever.pivot = pivot;
     pivot.rotation.set( Math.PI/-4, 0, 0 );
-    lever.position.set( ROOM_SIZE * 2.8, ROOM_SIZE / 10, ROOM_SIZE*-1 );
+    lever.position.set( ROOM_SIZE * 4.75, ROOM_SIZE / 10, ROOM_SIZE*-1 );
     scene.add( lever );
 
     function addLeverLabel( text, y, obj )
@@ -625,7 +625,7 @@ function initParallelSet()
     }
 
     parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
-    parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
+    parallel_set.graph.position.set( ROOM_SIZE * 4.75, -0.15, -0.65 );
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
     parallel_set.graph.visible = false;
