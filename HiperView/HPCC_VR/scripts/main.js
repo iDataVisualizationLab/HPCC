@@ -34,7 +34,7 @@ var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Tempera
                 arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
             };
 
-var SCORE = { outlyingScore: 0.2,
+var SCORE = { outlyingScore: 0.4,
                 clumpyScore: 0,
                 convexScore: 0,
                 monotonicScore: 0,

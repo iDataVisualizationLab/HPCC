@@ -36,7 +36,7 @@ function initServiceControlPanel()
         service_control_panel.add( plane );
     }
 
-    service_control_panel.position.set( ROOM_SIZE * -2.5, 0, 0.5 );
+    service_control_panel.position.set( ROOM_SIZE * -1.5, 0, 0.5 );
     scene.add( service_control_panel );
 
 
@@ -133,8 +133,9 @@ function initTimeControlPanel()
     addCover();
     addButton();
 
-    time_control_panel.position.set( ROOM_SIZE * -3, 0, -0.5 );
-    time_control_panel.rotation.y = Math.PI/2;
+    time_control_panel.position.set( ROOM_SIZE * -1.25, 0.5, 0.5 );
+    time_control_panel.rotateY( Math.PI/2 )
+    time_control_panel.rotateX( Math.PI/8 );
     scene.add(time_control_panel);
 
     // functions
@@ -380,9 +381,10 @@ function initScoreControlPanel()
 
     score_control_panel.cylinder = cylinder;
     score_control_panel.add( score_control_panel.cylinder );
-    score_control_panel.position.set( ROOM_SIZE * -2, ROOM_SIZE / 10, ROOM_SIZE * 1.5 );
+    score_control_panel.position.set( ROOM_SIZE * -1.25, -0.25, 0.45 );
     score_control_panel.rotateZ( Math.PI/2 );
     score_control_panel.rotateX( Math.PI/2 );
+    score_control_panel.rotateY( 2*Math.PI/num );
     scene.add( score_control_panel );
 
 
