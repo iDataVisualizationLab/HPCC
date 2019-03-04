@@ -8,7 +8,6 @@ let margin = ({top: 20, right: 50, bottom: 50, left: 50});
 
 let service_part =0;
 
-let currentColor ="black";
 const wssvg = d3.select("#WScontent"),
     netsvg = d3.select("#networkcontent"),
     scsvg = d3.select("#Scattercontent");
@@ -223,7 +222,7 @@ function initOther(){
         else if (category=='miscellaneous')
             return colors[1] ; // leaf node
         else
-            return '#000000';
+            return colors[4];
     };
     wsConfig.time2index = d3.scaleTime().domain(d3.extent(data, function(d) { return d.timestep; })).rangeRound([0,d3.nest().key(d=>d.timestep).entries(data).length-1]);
     filterConfig.time = wsConfig.time2index.range();

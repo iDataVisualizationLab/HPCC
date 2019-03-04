@@ -81,6 +81,14 @@ function drawLegend(s,arrThresholds, arrColor, dif){
                 .attr("dx",'1em')
                 .text(function(d,i) { return 0});
 
+            legend
+                .append("rect")
+                .attr("class", "invisibleRect")
+                .style("fill","#ffffff")
+                .style("opacity",0)
+                .style('width',barw)
+                .style('height',(d,i)=>yScale(revertThreshold[i])-yScale(orderLegend[i].value));
+
             return legend;
         },update =>{
             let legend = update.selectAll(".row");

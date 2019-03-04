@@ -507,7 +507,7 @@ function changeGroupTarget(key) {
                 return undefined};
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1);
-        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),[{text: undefined, value: undefined}]]);
+        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),[{text: undefined, value: arrThresholds[1]+arrmidle[0]-arrmidle[1]}]]);
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }

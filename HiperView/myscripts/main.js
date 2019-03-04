@@ -355,24 +355,7 @@ function main() {
         racks[i].y = top_margin;
     }
     // add main rack and sub rack
-    // svg.selectAll(".rackRectmain")
-    //     .data(racks)
-    //     .enter().append("rect")
-    //     .attr("class", "rackRectmain")
-    //     .attr("x", function (d) {
-    //         return d.x - 6;
-    //     })
-    //     .attr("y", function (d) {
-    //         return d.y;
-    //     })
-    //     .attr("rx", 10)
-    //     .attr("ry", 10)
-    //     .attr("width", w_rack - 8)
-    //     .attr("height", h_rack)
-    //     .attr("fill", "#fff")
-    //     .attr("stroke", "#000")
-    //     .attr("stroke-width", 1)
-    //     .style("box-shadow", "10px 10px 10px #666");
+
     //subrack below
     racksnewor = [];
     racks.forEach(d=>{
