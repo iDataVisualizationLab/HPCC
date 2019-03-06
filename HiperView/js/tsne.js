@@ -5,42 +5,43 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
     "use strict";
 
     // utility function
-    var assert = function(condition, message) {
+    const assert = function(condition, message) {
         if (!condition) { throw message || "Assertion failed"; }
-    }
+    };
 
     // syntax sugar
-    var getopt = function(opt, field, defaultval) {
+    const getopt = function(opt, field, defaultval) {
         if(opt.hasOwnProperty(field)) {
             return opt[field];
         } else {
             return defaultval;
         }
-    }
+    };
 
     // return 0 mean unit standard deviation random number
-    var return_v = false;
-    var v_val = 0.0;
-    var gaussRandom = function() {
+    let return_v = false;
+    let v_val = 0.0;
+    let maxtries = 50;
+    const gaussRandom = function() {
         if(return_v) {
             return_v = false;
             return v_val;
         }
-        var u = 2*Math.random()-1;
-        var v = 2*Math.random()-1;
-        var r = u*u + v*v;
+        const u = 2*Math.random()-1;
+        const v = 2*Math.random()-1;
+        const r = u*u + v*v;
         if(r == 0 || r > 1) return gaussRandom();
-        var c = Math.sqrt(-2*Math.log(r)/r);
+        const c = Math.sqrt(-2*Math.log(r)/r);
         v_val = v*c; // cache this for next function call for efficiency
         return_v = true;
         return u*c;
-    }
+    };
 
     // return random normal number
-    var randn = function(mu, std){ return mu+gaussRandom()*std; }
+    const randn = function(mu, std){ return mu+gaussRandom()*std; }
 
     // utilitity that creates contiguous vector of zeros of size n
-    var zeros = function(n) {
+    const zeros = function(n) {
         if(typeof(n)==='undefined' || isNaN(n)) { return []; }
         if(typeof ArrayBuffer === 'undefined') {
             // lacking browser support
@@ -50,7 +51,7 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
         } else {
             return new Float64Array(n); // typed arrays are faster
         }
-    }
+    };
 
     // utility that returns 2d array filled with random numbers
     // or with value s, if provided
@@ -72,19 +73,20 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
     }
 
     // compute L2 distance between two vectors
-    var L2 = function(x1, x2) {
-        var D = x1.length;
+    const L2 = function(x1, x2) {
         var d = 0;
-        for(var i=0;i<D;i++) {
-            var x1i = x1[i];
-            var x2i = x2[i];
-            d += (x1i-x2i)*(x1i-x2i);
-        }
+        x1.forEach((x1i,i)=> d += (x1i-x2[i])*(x1i-x2[i]));
         return d;
-    }
+    };
+    // compute L2 distance fast between two vectors base on new dimension
+    // this can update to prediction
+    const L2update = function(d,x1i, x2i) {
+        x1.forEach((x1i,i)=> d += (x1i-x2[i])*(x1i-x2[i]));
+        return d;
+    };
 
     // compute pairwise distance in all vectors in X
-    var xtod = function(X) {
+    const xtod = function(X) {
         var N = X.length;
         var dist = zeros(N * N); // allocate contiguous array
         for(var i=0;i<N;i++) {
@@ -95,10 +97,21 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
             }
         }
         return dist;
-    }
+    };
+
+    // distance update locate points
+    const xtodupdate = function(X_new,index_array) {
+        index_array.forEach(i=>{
+            X_new.forEach((xj,j)=>{
+                var d = L2update(X[i], xj); // fast update dimantion , add only
+                this.dist[i*this.N+j] = d;
+                this.dist[j*this.N+i] = d;
+            });
+        });
+    };
 
     // compute (p_{i|j} + p_{j|i})/(2n)
-    var d2p = function(D, perplexity, tol) {
+    var d2p = function(D, perplexity, tol,maxtries) {
         var Nf = Math.sqrt(D.length); // this better be an integer
         var N = Math.floor(Nf);
         assert(N === Nf, "D should have square number of elements.");
@@ -111,7 +124,6 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
             var betamax = Infinity;
             var beta = 1; // initial value of precision
             var done = false;
-            var maxtries = 50;
 
             // perform binary search to find a suitable precision beta
             // so that the entropy of the distribution is appropriate
@@ -186,12 +198,15 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
         this.perplexity = getopt(opt, "perplexity", 30); // effective number of nearest neighbors
         this.dim = getopt(opt, "dim", 2); // by default 2-D tSNE
         this.epsilon = getopt(opt, "epsilon", 10); // learning rate
-
+        this.maxtries = getopt(opt, "maxtries", 50); //
         this.iter = 0;
     }
 
     tSNE.prototype = {
 
+        setmaxtries: function(maxtri) {
+            this.maxtries = maxtri;
+        },
         // this function takes a set of high-dimensional points
         // and creates matrix P from them using gaussian kernel
         initDataRaw: function(X) {
@@ -199,8 +214,8 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
             var D = X[0].length;
             assert(N > 0, " X is empty? You must have some data!");
             assert(D > 0, " X[0] is empty? Where is the data?");
-            var dists = xtod(X); // convert X to distances using gaussian kernel
-            this.P = d2p(dists, this.perplexity, 1e-4); // attach to object
+            this.dists  = xtod(X); // convert X to distances using gaussian kernel
+            this.P = d2p(this.dists, this.perplexity, 1e-4, this.maxtries); // attach to object
             this.N = N; // back up the size of the dataset
             this.initSolution(); // refresh this
         },
@@ -212,15 +227,15 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
             var N = D.length;
             assert(N > 0, " X is empty? You must have some data!");
             // convert D to a (fast) typed array version
-            var dists = zeros(N * N); // allocate contiguous array
+            this.dists  = zeros(N * N); // allocate contiguous array
             for(var i=0;i<N;i++) {
                 for(var j=i+1;j<N;j++) {
                     var d = D[i][j];
-                    dists[i*N+j] = d;
-                    dists[j*N+i] = d;
+                    this.dists [i*N+j] = d;
+                    this.dists [j*N+i] = d;
                 }
             }
-            this.P = d2p(dists, this.perplexity, 1e-4);
+            this.P = d2p(this.dists , this.perplexity, 1e-4, this.maxtries);
             this.N = N;
             this.initSolution(); // refresh this
         },
@@ -234,6 +249,13 @@ var tsnejs = tsnejs || { REVISION: 'ALPHA' };
             this.iter = 0;
         },
 
+        // change and update data only
+        updateData: function(X){
+            this.dists = xtod(X); // convert X to distances using gaussian kernel
+            this.P = d2p(this.dists , this.perplexity, 1e-4, this.maxtries); // attach to object
+            //this.iter = 0; // reset iter
+            // this.initSolution(); // refresh this
+        },
         // return pointer to current solution
         getSolution: function() {
             return this.Y;
