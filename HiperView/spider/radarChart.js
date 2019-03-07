@@ -376,14 +376,6 @@ function RadarChart(id, data, options, name) {
                     .selectAll(".radarStroke").style('pointer-events','auto');
 
                 path
-                //     .style("stroke-opacity", () => {
-                //     var ff = t.__data__;
-                //     return densityscale(ff.bin.name.filter(e => (binlist.find(f => f === e) !== undefined)).length);
-                // })
-                    // .style("stroke-width", () => {
-                    //     var radius = fff.distancefunc(ff);
-                    //     return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius) + "px");
-                    // })
                     .style("cursor", "pointer")
                     //.on("mouseenter", null)
                     .on("mouseleave ", function () {

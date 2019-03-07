@@ -3,13 +3,12 @@
 
 
 
-
 d3.Tsneplot = function () {
     let graphicopt = {
         margin: {top: 5, right: 0, bottom: 0, left: 0},
         width: 1000,
             height: 600,
-            scalezoom: 1,
+            scalezoom: 10,
             widthView: function(){return this.width*this.scalezoom},
         heightView: function(){return this.height*this.scalezoom},
         widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
@@ -24,7 +23,7 @@ d3.Tsneplot = function () {
         arr = [],
         tsne = new tsnejs.tSNE(graphicopt.opt);
     let Tsneplot ={};
-    let svg, g,linepointer,radarcreate,
+    let svg, g,linepointer,radarcreate,glowEffect,
         ss = 1,
         tx = 0,
         ty =0;
@@ -68,6 +67,18 @@ d3.Tsneplot = function () {
             .append("rect")
             .attr("width", graphicopt.widthG())
             .attr("height", graphicopt.heightG());
+        glowEffect = svg.append('defs').append('filter').attr('id', 'glowTSne'),
+            feGaussianBlur = glowEffect.append('feGaussianBlur').attr('stdDeviation', 2.5).attr('result', 'coloredBlur'),
+            feMerge = glowEffect.append('feMerge'),
+            feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+            feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+        //blink ();
+        function blink (){
+            feGaussianBlur.transition('glow')
+                .transition().duration(500).attr('stdDeviation', 50)
+                .transition().duration(100).attr('stdDeviation', 200)
+                .on('end', blink)
+        }
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(0,${graphicopt.margin.top})`)
@@ -80,6 +91,18 @@ d3.Tsneplot = function () {
             .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
+        let menu = g.append('g').attr('class','menuTsne')
+            .attr('transform','translate(10,10)');
+        menu.append('rect').attr("rx", 10)
+            .attr("ry", 10)
+            .attr("width", 200)
+            .attr("height", 40)
+            .attr("fill", "#fff")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1)
+            .style("box-shadow", "10px 10px 10px #666");
+        menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
+        menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
         g = g.append('g')
             .attr('class','graph');
         function zoomed() {
@@ -89,16 +112,17 @@ d3.Tsneplot = function () {
         }
         var zoom = d3.zoom()
         // .scaleExtent([1/netConfig.scalezoom, 40])
-            .scaleExtent([0.25, 40])
+            .scaleExtent([0.25, 100])
             //.translateExtent([[-netConfig.width/2,-netConfig.height/2], [netConfig.width*1.5,netConfig.height*1.5]])
             .on("zoom", zoomed);
         svg.call(zoom);
         // tsnesvg.call(tip);
-        zoom.scaleTo(svg, 1/graphicopt.scalezoom);
+        ss= graphicopt.scalezoom;
         svg.call(zoom.translateBy, graphicopt.widthG() / 2,graphicopt.heightG() / 2);
+        // svg.call(zoom.scaleBy, graphicopt.scalezoom);
 
         graphicopt.step = function () {
-            tsne.step(); // do a few steps
+            svg.select('.cost').text(tsne.step().toFixed(2)); // do a few steps
             updateEmbedding();
         };
         function updateEmbedding() {
@@ -108,26 +132,47 @@ d3.Tsneplot = function () {
             g.selectAll('.linkLineg')
                 .transition('move')
                 .duration(100)
-                .attr("transform", function(d, i) { return "translate(" +
-                (Y[i][0]*10*ss+tx) + "," +
-                (Y[i][1]*10*ss+ty ) + ")"; });
-            let curentHostpos = currenthost.node().getBoundingClientRect();
-            linepointer.attr("x2", curentHostpos.x)
-                .attr("y2", curentHostpos.y);
+                .attr("transform", function(d, i) {
+                    return "translate(" +
+                (Y[i][0]*ss+tx) + "," +
+                (Y[i][1]*ss+ty) + ")"; });
+            //let curentHostpos = currenthost.node().getBoundingClientRect();
+            linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*ss+tx,graphicopt.widthG()),0) )
+                .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
+
 
         }
     };
-    let currenthost;
+    let currenthost = {};
     Tsneplot.draw = function(name){
         if (first){
             Tsneplot.redraw();
         }else {
             needUpdate = true;
-            currenthost = g.select('.'+name);
             g.selectAll(".linkLineg")
-                .data(arr).select('path')
+                .data(arr,d=>d.name).select('path')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d));
+
+            currenthost.name = name;
+            currenthost.g = g.selectAll(".linkLineg").filter((d,i)=>{
+                if (d.name===name){
+                    currenthost.index = i;
+                    return true;
+                }   return false;});
+            currenthost.g.select('path')
+                .style("filter", "url(#glowTSne)")
+                .style("stroke-width", 1)
+                .style("stroke-opacity", 1)
+                .transition('hightlightp').delay(2000).duration(1000)
+                .style("filter",null)
+                .style("stroke-width", 0.5)
+                .style("stroke-opacity", 0.5);
+            currenthost.g.select('text').style("opacity", 1)
+                .transition('hightlight').duration(3000).style("opacity",0);
+            // currenthost.g.select('.hightlight').style("opacity", 1)
+            //     .transition('hightlight').ease(d3.easeLinear).duration(3000).style("opacity", 0);
+
         }
     };
 
@@ -159,10 +204,21 @@ d3.Tsneplot = function () {
         }
     };
 
-
+    let colorScale =d3.scaleSequential(d3.interpolateSpectral);
+    let meanArr=[];
+    function distanace(a,b){
+        let sum =0;
+        a.forEach((d,i)=>sum+=(d-b[i])*(d-b[i]));
+        return sum;
+    }
     function updateData(){
         if (needUpdate) {
+            meanArr = arr[0].map((dd,i)=>d3.mean(arr.map(d=>d[i])));
+            console.log(meanArr);
+            arr.forEach(d=> d.gap = distanace(d,meanArr));
             tsne.updateData(arr);
+            colorScale.domain(d3.extent(arr,d=>d.gap).reverse());
+            g.selectAll('path').style('stroke',d=>colorScale(d.gap));
             needUpdate = false;
         }
     }
@@ -186,14 +242,16 @@ d3.Tsneplot = function () {
 
         datapointN.append("path")
             .attr("d", d => radarcreate(d))
-            .attr('stroke', 'black')
-            .attr('fill', 'rgb(100,100,255)')
-            .attr("transform", "translate(" + (0) + "," + (0) + ")");;
+            .attr('fill', 'none')
+            .attr("transform", "translate(" + (0) + "," + (0) + ")")
+            .style("stroke-width", 0.5)
+            .style("stroke-opacity", 0.5);
 
         datapointN.append("text")
             .attr("text-anchor", "top")
             .attr("transform", "translate(5, -5)")
-            .attr("font-size", 12);
+            .attr("font-size", 12)
+            .style('opacity',0);
 
         datapoint.exit().remove();
 

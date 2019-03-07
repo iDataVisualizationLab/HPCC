@@ -153,9 +153,10 @@ var xLinearSummaryScale;
 
 
 var TsnePlotopt  = {
-    margin: {top: top_margin, right: 0, bottom: 0, left: 0},
+    margin: {top: 0, right: 0, bottom: 0, left: 0},
+    offset: {top: top_margin},
     width: width,
-    height: height,
+    height: height-top_margin,
     scalezoom: 1,
     widthView: function(){return this.width*this.scalezoom},
     heightView: function(){return this.height*this.scalezoom},
@@ -503,7 +504,8 @@ function main() {
 
 
     initDetailView();
-    svgStore.tsnesvg =svg.append("svg").attr("class", "T_sneSvg");
+    svgStore.tsnesvg =svg.append('g').attr("class", "largePanel").attr('transform',`translate(0,${top_margin})`)
+        .append("svg").attr("class", "T_sneSvg");
 
     // Draw line to connect current host and timeline in the Summary panel
     let linepointer = svg.append("line")
@@ -1181,7 +1183,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-function plotTsne(name){
+function plotTsne(nameh){
     if (globalTrend)
         startIndex =0;
     else
@@ -1217,7 +1219,7 @@ function plotTsne(name){
         arrServices.name = name;
         arr.push(arrServices);
     }
-    TSneplot.data(arr).draw(name);
+    TSneplot.data(arr).draw(nameh);
 }
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
