@@ -116,13 +116,16 @@ d3.Tsneplot = function () {
             //.translateExtent([[-netConfig.width/2,-netConfig.height/2], [netConfig.width*1.5,netConfig.height*1.5]])
             .on("zoom", zoomed);
         svg.call(zoom);
-        // tsnesvg.call(tip);
+
         ss= graphicopt.scalezoom;
         svg.call(zoom.translateBy, graphicopt.widthG() / 2,graphicopt.heightG() / 2);
         // svg.call(zoom.scaleBy, graphicopt.scalezoom);
 
         graphicopt.step = function () {
-            svg.select('.cost').text(tsne.step().toFixed(2)); // do a few steps
+            let cost=0;
+            for (let i = 0; i<5;i++)
+                cost = tsne.step().toFixed(2)
+            svg.select('.cost').text(cost); // do a few steps
             updateEmbedding();
         };
         function updateEmbedding() {
@@ -182,7 +185,7 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.resume  = function (){
-        intervalUI = setInterval(graphicopt.step,10);
+        intervalUI = setInterval(graphicopt.step,50);
         intervalCalculate = setInterval(updateData,2000);
     };
 

@@ -162,7 +162,7 @@ var TsnePlotopt  = {
     heightView: function(){return this.height*this.scalezoom},
     widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
     heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
-    dotRadius: 50,
+    dotRadius: 30,
     opt:{
         epsilon : 10, // epsilon is learning rate (10 = default)
         perplexity : 30, // roughly how many neighbors each point influences (30 = default)
@@ -559,7 +559,7 @@ function request(){
                 // cal to plot
                 bin.data([]);
                 drawsummary();
-
+                shiftTimeText();
                 count = 0;
                 countbuffer = 0;
                 requeststatus = true;
@@ -794,6 +794,15 @@ function drawsummarypoint(harr){
 
     }
 }
+function shiftTimeText(){
+    if (timelog.length > maxstack-1){ timelog.shift();
+    svg.selectAll(".boxTime").filter((d,i)=>i).transition().duration(500)
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2);
+    svg.select(".boxTime").transition().duration(500)
+        .attr("x", xTimeSummaryScale(0)+ width/maxstack/2)
+        .transition().remove();
+    }
+}
 function updateTimeText(index){
     if (index!= undefined)timelog.push (hostResults[hosts[(index||hosts.length)-1].name].arr.map(d=>d.result.query_time)[lastIndex]);
     if (timelog.length>maxstack) timelog.shift();
@@ -801,7 +810,10 @@ function updateTimeText(index){
         .data(timelog);
     boxtime.transition().duration(500)
         .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
-        .text(d=> new Date(d).timeNow());
+        .text(d=> {
+            let temp = new Date(d);
+            return temp.getHours()+":"+temp.getMinutes();
+        });
     boxtime.exit().remove();
     boxtime.enter().append("text")
         .attr("class", "boxTime")
@@ -1455,6 +1467,7 @@ function resetRequest(){
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init();
+    TSneplot.reset(true);
     timelog = [];
     updateTimeText();
     request();
