@@ -137,11 +137,11 @@ d3.Tsneplot = function () {
                 .duration(100)
                 .attr("transform", function(d, i) {
                     return "translate(" +
-                (Y[i][0]*ss+tx) + "," +
-                (Y[i][1]*ss+ty) + ")"; });
+                (Y[i][0]*10*ss+tx) + "," +
+                (Y[i][1]*10*ss+ty) + ")"; });
             //let curentHostpos = currenthost.node().getBoundingClientRect();
-            linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*ss+tx,graphicopt.widthG()),0) )
-                .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
+            linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*10*ss+tx,graphicopt.widthG()),0) )
+                .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*10*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
 
 
         }
