@@ -150,7 +150,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 label {
 	font-size: 12px;
-	color: #040507;
+	color: currentColor;
 }
 
 table, th, td {
@@ -345,6 +345,8 @@ table, th, td {
 
 #scatterzone {
 	visibility: hidden;
+	position: fixed;
+	top: 70px;
 }
 div.tooltip {
 	position: absolute;
@@ -560,7 +562,7 @@ nav ul li.active a{
 	background: rgba(0, 0, 0, 0.21);
 	overflow-x: hidden;
 	transition: 0.5s;
-	padding-top: 60px;
+	padding-top: 80px;
 }
 
 .sideIn.sidenavs {
@@ -642,4 +644,15 @@ nav ul li.active a{
 }
 #header2 .row {
 	margin-bottom: 5px;
+}
+
+.sidenavs select{
+	padding: 0;
+	height:auto;
+	display: inline-block;
+	width: auto;
+}
+
+p.divider {
+	margin-left: 1em !important;
 }

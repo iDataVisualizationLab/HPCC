@@ -1617,13 +1617,13 @@ d3.select("html").on("keydown", function() {
 function openNav() {
     d3.select("#mySidenav").classed("sideIn",true);
     d3.select("#Maincontent").classed("sideIn",true);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 
 function closeNav() {
     d3.select("#mySidenav").classed("sideIn",false);
     d3.select("#Maincontent").classed("sideIn",false);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 
 $( document ).ready(function() {
@@ -1637,7 +1637,12 @@ $( document ).ready(function() {
 
 });
 function discovery(d){
-    d3.select(d).style('left','20px').transition().delay(5000).duration(1000).style('left',null);
+    d3.select(d).style('left','20px')
+        .classed("pulse",true)
+        .transition().delay(5000).duration(1000)
+        .style('left',null).on('end',function() {
+            d3.select(d).classed("pulse",false);
+    });
 
 }
 function switchTheme(){
