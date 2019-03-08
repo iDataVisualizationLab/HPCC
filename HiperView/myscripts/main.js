@@ -285,7 +285,7 @@ function initDetailView() {
             .attr("y", function (d) {
                 return d.y - 6;
             })
-            .attr("fill", "#000")
+            .attr("fill", "currentColor")
             .style("text-anchor", "middle")
             .style("font-size", 16)
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
@@ -314,7 +314,7 @@ function initDetailView() {
                 .attr("class", "hostText")
                 .attr("x", 32)
                 .attr("y", yy + 1)
-                .attr("fill", "#000")
+                .attr("fill", "currentColor")
                 .style("text-anchor", "end")
                 .style("font-size", "12px")
                 .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
@@ -1612,3 +1612,45 @@ d3.select("html").on("keydown", function() {
     }
 
 });
+
+// ui part
+function openNav() {
+    d3.select("#mySidenav").classed("sideIn",true);
+    d3.select("#Maincontent").classed("sideIn",true);
+    _.delay(resetSize, 500);
+}
+
+function closeNav() {
+    d3.select("#mySidenav").classed("sideIn",false);
+    d3.select("#Maincontent").classed("sideIn",false);
+    _.delay(resetSize, 500);
+}
+
+$( document ).ready(function() {
+    console.log('ready')
+    $('.tabs').tabs();
+    $('.sidenav').sidenav();
+    discovery('#sideNavbtn');
+    //$('.tap-target').tapTarget({onOpen: discovery});
+
+    d3.select("#DarkTheme").on("click",switchTheme);
+
+});
+function discovery(d){
+    d3.select(d).style('left','20px').transition().delay(5000).duration(1000).style('left',null);
+
+}
+function switchTheme(){
+    if (this.value==="light"){
+        this.value = "dark";
+        this.text = "Light";
+        d3.select('body').classed('light',false);
+        d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png");
+        return;
+    }
+    this.value = "light";
+    this.text = "Dark";
+    d3.select('body').classed('light',true);
+    d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
+    return;
+}

@@ -8,105 +8,158 @@
 
     <title>HiperView</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
-    <link href="css/main.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="css/dd.css" />
     <script src="js/jquery-1.9.0.min.js"></script>
     <script src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnosticsnd/build/js/scagnosticsnd.min.js"></script>
     <script src="js/jquery.dd.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/dd.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="js/select.js"></script>
     <script src="js/TimerInterval.js"></script>
     <script src="js/tsne.js"></script>
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
 </head>
 
-<body bgcolor="#ccc" text="black" id="mainBody">
-<header class="ttu-main-header" id="nav">
-    <div class="logo__lockup"><a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>
-        <h1 class="summaryText1">  </h1>
+<body text="black" id="mainBody">
+<nav class="pushpin-demo-nav" data-target="blue">
+
+    <div class="nav-wrapper" id="header">
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <!--<div class="brand-logo center col s12 inline" >-->
+        <!--Parallel Coordinates-->
+        <!--</div>-->
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
+            <li class="tab active"><a class="active" href="#">HiperView</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+        </ul>
+        <ul class="right">
+            <li><a href="#!" value="dark" id = "DarkTheme" class="waves-effect waves-light">Light</a></li>
+        </ul>
     </div>
-</header>
-<div id ="scatterzone">
-    <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
-    <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
-    <div class="selection" id="selection">
-        <div id="selectionheader">Click & Drag</div>
+</nav>
+<ul class="sidenav " id="mobile-demo">
+    <h5></h5>
+    <li><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University" class="avatar"></a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+</ul>
+<div id="mySidenav" class="sidenavs">
+    <div class="row s12">
+        <div  class="col s12">
+            <!--<ul id="listvar" class="dropdown-content  s12">-->
+
+            <!--</ul>-->
+            <!--<h6 class="row marginBottom0"><span class="col">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h6>-->
+            <!--<div id="colorContinuos"></div>-->
+            <!--<p id="legend" class="col">-->
+            <!--</p>-->
+        </div>
+        <div class="col s12">
+            <!--<h6>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h6>-->
+            <!--<p id="food-list">-->
+            <!--</p>-->
+        </div>
+        <div class="col s12">
+            <h5>Controls</h5>
+            <p>
+                <strong>Zoom</strong>: Scroll mouse button to zoom.<br/>
+            </p>
+        </div>
     </div>
 </div>
-<div id="instructions"></div>
-<!--<svg width="2600" height="1800" ></svg>-->
-<svg width="2600" height="1000" ></svg>
+<div id="Maincontent" class="row s12">
+    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
+    <div class="overlaySide">
+        <a class="openbtn btn-floating btn waves-effect waves-light" id="sideNavbtn" onclick="openNav()">
+            <i class="material-icons">chevron_right</i></a>
+    </div>
+    <div id="header2" class="row s12 marginBottom0">
+        <!--<h1>HPCC Explorer</h1>-->
+        <h6 class="summaryText1">  </h6>
+        <div class="controls">
+            <div id="controlHolder"  class="controlHolder">
+                <div class ="row s12 inline">
+                <label for="inds"> Chart type: </label>
+                <select id="inds">
+                    <option value="Heatmap" selected="selected">Heatmap</option>
+                    <option value="Area Chart">Area Chart</option>
+                    <option value="T-sne Chart">T-sne Chart</option>
+                </select>
+                <label for="indsg"> Summary type: </label>
+                <select id="indsg">
+                    <option value="Boxplot">Boxplot</option>
+                    <option value="Radar" selected="selected">Radar</option>
+                    <option value="Scatterplot" >Scatterplot</option>
+                </select>
+                </div>
+                <div class ="row s12 inline">
+                <button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>
+                <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
+                <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
+                <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
+                <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>
+                </div>
 
 
-<!-- Spinner when loading -->
-<div id="loadingSpinner">
-    <!-- <span id="progressText"> -->
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+    <!--<header class="ttu-main-header" id="nav">-->
+        <!--<div class="logo__lockup">-->
+            <!--&lt;!&ndash;<a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/">&ndash;&gt;-->
+            <!--&lt;!&ndash;<img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>&ndash;&gt;-->
+            <!--<h1 class="summaryText1">  </h1>-->
+        <!--</div>-->
+    <!--</header>-->
+    <div id ="scatterzone">
+        <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
+        <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
+        <div class="selection" id="selection">
+            <div id="selectionheader">Click & Drag</div>
+        </div>
+    </div>
+    <div id="instructions"></div>
+    <!--<svg width="2600" height="1800" ></svg>-->
+    <svg width="2600" height="1000" ></svg>
+
+
+    <!-- Spinner when loading -->
+    <div id="loadingSpinner">
+        <!-- <span id="progressText"> -->
+    </div>
+
+    <!-- Select datasets -->
+    <div id="holder1"  class="holder1">
+        <div>Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select></div>
+        <h3 class ="currentDate"></h3>
+    </div>
+
+
+
+
+    <div id="legendHolder"  class="legendHolder">
+    </div>
+
+    <div id="radarChart1" class="radarChartss"></div>
+    <div id="radarChart2" class="radarChartss"></div>
+    <div id="radarChart3" class="radarChartss"></div>
+    <!--tooltip total-->
+    <div id="Summarynode">
+        <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+        <div id="Summarynodeheader">Click here to move</div>
+        <div id = "Summarynodeg"></div>
+    </div>
 </div>
-
-<!-- Select datasets -->
-<div id="holder1"  class="holder1">
-    <div>Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select></div>
-    <h3 class ="currentDate"></h3>
-</div>
-
-<div id="linkHolder"  class="controlHolder">
-    <ul id="nav-mobile" class="left hide-on-med-and-down">
-        <li><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
-            <img type="image/x-icon" src="images/PhaseSpaceLogo.ico" class="menuIcon "/>
-            <span class="tooltiptext">Phase Space</span></a>
-            </li>
-        <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
-            <img type="image/x-icon" src="images/VR.ico" class="menuIcon"/>
-            <span class="tooltiptext">Vitural Reality</span>
-        </a></li>
-    </ul>
-
-</div>
-
-
-<div id="controlHolder"  class="controlHolder">
-
-    <label for="inds"> Chart type: </label>
-    <select id="inds">
-        <option value="Heatmap" selected="selected">Heatmap</option>
-        <option value="Area Chart">Area Chart</option>
-        <option value="T-sne Chart">T-sne Chart</option>
-    </select>
-
-    <label for="indsg"> Summary type: </label>
-    <select id="indsg">
-        <option value="Boxplot">Boxplot</option>
-        <option value="Radar" selected="selected">Radar</option>
-        <option value="Scatterplot" >Scatterplot</option>
-    </select>
-    <br><br>
-    <button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>
-    <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
-    <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
-    <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
-    <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>
-    <!--<br><br>-->
-    <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
-    <!--<select id="irecord">-->
-        <!--<option value=0 selected="selected">0</option>-->
-        <!--<option value=1>1</option>-->
-    <!--</select>-->
-
-
-</div>
-
-<div id="legendHolder"  class="legendHolder">
-</div>
-
-<div id="radarChart1" class="radarChartss"></div>
-<div id="radarChart2" class="radarChartss"></div>
-<div id="radarChart3" class="radarChartss"></div>
-<!--tooltip total-->
-<div id="Summarynode">
-    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-    <div id="Summarynodeheader">Click here to move</div>
-    <div id = "Summarynodeg"></div>
-</div>
-
 <!-- load the d3.js library -->
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>
