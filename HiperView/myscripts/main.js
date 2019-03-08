@@ -63,7 +63,7 @@ var opts = {
     className: 'spinner', // The CSS class to assign to the spinner
 };
 var target = document.getElementById('loadingSpinner');
-var spinner = new Spinner(opts).spin(target);
+var spinner;
 // END: loader spinner settings ****************************
 
 var simulation, link, node;
@@ -221,10 +221,7 @@ function setColorsAndThresholds(s) {
     }
 }
 //***********************
-drawLegend(initialService,arrThresholds, arrColor,dif);
 
-main();
-addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
 
 function initDetailView() {
     if (svg.select('.detailView').empty())
@@ -499,8 +496,6 @@ function main() {
         .text("Time");
 
 
-    // Spinner Stop ********************************************************************
-    spinner.stop();
 
 
     initDetailView();
@@ -1355,35 +1350,6 @@ function getHostY(r,n,pos){
     // return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 }
 
-d3.select('#inds').on("change", function () {
-    var sect = document.getElementById("inds");
-    charType = sect.options[sect.selectedIndex].value;
-});
-
-d3.select('#indsg').on("change", function () {
-    var sect = document.getElementById("indsg");
-    sumType = sect.options[sect.selectedIndex].value;
-    svg.select(".graphsum").remove();
-    pannelselection(false);
-    switch(sumType){
-        case "Scatterplot":
-            d3.select("#scatterzone").style("visibility","visible");
-            svg.selectAll(".graphsum").remove();
-            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                drawsummary(i);
-            }
-            break;
-        case "Boxplot":
-        case "Radar":
-            svg.selectAll(".graphsum").remove();
-            d3.select("#scatterzone").style("visibility","hidden");
-            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                drawsummary(i);
-            }
-            break;
-    }
-});
-
 function pauseRequest(){
     // clearInterval(interval2);
     var e = d3.select('.pause').node();
@@ -1445,8 +1411,9 @@ function pausechange(){
 }
 
 function resetRequest(){
-    firstTime = true;
     pausechange();
+    tool_tip.hide();
+    firstTime = true;
     interval2.stop();
     hostResults = {};
     var count =0;
@@ -1472,7 +1439,9 @@ function resetRequest(){
     updateTimeText();
     request();
 }
+function loadData(){
 
+}
 function addDatasetsOptions() {
     var select = document.getElementById("datasetsSelect");
     for(var i = 0; i < serviceList.length; i++) {
@@ -1627,13 +1596,83 @@ function closeNav() {
 }
 
 $( document ).ready(function() {
-    console.log('ready')
+    console.log('ready');
     $('.tabs').tabs();
     $('.sidenav').sidenav();
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
+
+    d3.select('#inds').on("change", function () {
+        var sect = document.getElementById("inds");
+        charType = sect.options[sect.selectedIndex].value;
+    });
+
+    d3.select('#indsg').on("change", function () {
+        var sect = document.getElementById("indsg");
+        sumType = sect.options[sect.selectedIndex].value;
+        svg.select(".graphsum").remove();
+        pannelselection(false);
+        switch(sumType){
+            case "Scatterplot":
+                d3.select("#scatterzone").style("visibility","visible");
+                svg.selectAll(".graphsum").remove();
+                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+                    drawsummary(i);
+                }
+                break;
+            case "Boxplot":
+            case "Radar":
+                svg.selectAll(".graphsum").remove();
+                d3.select("#scatterzone").style("visibility","hidden");
+                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+                    drawsummary(i);
+                }
+                break;
+        }
+    });
+    d3.select('#datacom').on("change", function () {
+        d3.select('.cover').classed('hidden', false);
+        spinner.spin(target);
+        const choice = this.value;
+        const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        setTimeout(() => {
+            if (choice !== "realtime")
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error) throw error;
+                    sampleS = data;
+                    realTimesetting(false);
+                    d3.select(".currentDate")
+                        .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
+                    resetRequest();
+                    d3.select('.cover').classed('hidden', true);
+                    spinner.stop();
+                });
+            else {
+                realTimesetting(true);
+                d3.select('.cover').classed('hidden', true);
+                spinner.stop();
+            }
+        },0);
+    });
+    spinner = new Spinner(opts).spin(target);
+    setTimeout(() => {
+        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
+            if (error) throw error;
+            d3.select(".cover").select('h5').text('drawLegend...');
+            d3.select(".currentDate")
+                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
+            drawLegend(initialService, arrThresholds, arrColor, dif);
+            sampleS = data;
+            main();
+            d3.select(".cover").select('h5').text('loading data...');
+            addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+            d3.select('.cover').classed('hidden',true);
+            spinner.stop();
+        });
+    },0);
+    // Spinner Stop ********************************************************************
 
 });
 function discovery(d){
