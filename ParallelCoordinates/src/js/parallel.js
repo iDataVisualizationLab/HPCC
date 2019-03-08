@@ -37,7 +37,8 @@ $( document ).ready(function() {
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
-    $('.tap-target').tapTarget();
+    discovery('#sideNavbtn');
+    //$('.tap-target').tapTarget({onOpen: discovery});
 
     let comboBox = d3.select("#listvar");
     let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
@@ -52,6 +53,10 @@ $( document ).ready(function() {
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
+function discovery(d){
+    d3.select(d).style('left','20px').transition().delay(5000).duration(1000).style('left',null);
+
+}
 function openNav() {
     d3.select("#mySidenav").classed("sideIn",true);
     d3.select("#Maincontent").classed("sideIn",true);
@@ -71,7 +76,7 @@ function getBrush(d) {
 
 function init() {
     width = $("#Maincontent").width()-10;
-    height = d3.max([document.body.clientHeight-540, 240]);
+    height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
     xscale = d3.scalePoint().range([0, w]).padding(0.3);

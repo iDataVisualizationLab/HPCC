@@ -64,12 +64,23 @@
                 <p id="food-list">
                 </p>
             </div>
+            <div class="col s12">
+                <h5>Controls</h5>
+                <p>
+                    <strong>Brush</strong>: Drag vertically along an axis.<br/>
+                    <strong>Remove Brush</strong>: Tap the axis background.<br/>
+                    <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
+                    <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                    <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
+                </p>
+            </div>
         </div>
     </div>
 <div id="Maincontent" class="row s12">
     <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
     <div class="overlaySide">
-        <a href="javascript:void(0)" class="openbtn btn-floating btn waves-effect waves-light" onclick="openNav()"><i class="material-icons">chevron_right</i></a>
+        <a class="openbtn btn-floating btn waves-effect waves-light" id="sideNavbtn" onclick="openNav()">
+            <i class="material-icons">chevron_right</i></a>
     </div>
     <div id="header2" class="row s12 marginBottom0">
         <!--<h1>HPCC Explorer</h1>-->
@@ -93,28 +104,13 @@
         <canvas id="highlight"></canvas>
         <svg></svg>
     </div>
-    <div class="tap-target" data-target="DarkTheme">
+    <div class="tap-target" data-target="sideNavbtn">
         <div class="tap-target-content">
             <h5>Title</h5>
             <p>A bunch of text</p>
         </div>
     </div>
-    <div id="wrap" class="row s12">
-        <div class="col s4" id="controls">
 
-
-            <div class="little-box">
-                <h5>Controls</h5>
-                <p>
-                    <strong>Brush</strong>: Drag vertically along an axis.<br/>
-                    <strong>Remove Brush</strong>: Tap the axis background.<br/>
-                    <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
-                    <strong>Invert Axis</strong>: Tap an axis label.<br/>
-                    <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
-                </p>
-            </div>
-        </div>
-    </div>
     <footer class="page-footer">
         <div class="container">
             <div class="row">
