@@ -786,7 +786,7 @@ function export_csv() {
 
 function resetSize() {
     width = $("#Maincontent").width();
-    height = d3.max([document.body.clientHeight-540, 240]);
+    height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
 
