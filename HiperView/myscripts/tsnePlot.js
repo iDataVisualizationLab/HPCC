@@ -67,6 +67,21 @@ d3.Tsneplot = function () {
             .append("rect")
             .attr("width", graphicopt.widthG())
             .attr("height", graphicopt.heightG());
+        const rg = svg.append("defs").append("radialGradient")
+            .attr("id", "rGradient");
+        const legntharrColor = arrColor.length-1;
+
+        arrColor.forEach((d,i)=>{
+            rg.append("stop")
+                .attr("offset", i/legntharrColor*100+"%")
+                .attr("stop-color", d)
+                .attr("stop-opacity",i/legntharrColor);
+            if (i!=legntharrColor)
+                rg.append("stop")
+                    .attr("offset", (i+1)/legntharrColor*100+"%")
+                    .attr("stop-color", arrColor[i+1])
+                    .attr("stop-opacity", i/legntharrColor);
+        });
         glowEffect = svg.append('defs').append('filter').attr('id', 'glowTSne'),
             feGaussianBlur = glowEffect.append('feGaussianBlur').attr('stdDeviation', 2.5).attr('result', 'coloredBlur'),
             feMerge = glowEffect.append('feMerge'),
@@ -152,8 +167,12 @@ d3.Tsneplot = function () {
             Tsneplot.redraw();
         }else {
             needUpdate = true;
-            g.selectAll(".linkLineg")
-                .data(arr,d=>d.name).select('path')
+            let newdata = g.selectAll(".linkLineg")
+                .data(arr,d=>d.name);
+            newdata.select('clipPath').select('path')
+                .transition('expand').duration(100).ease(d3.easePolyInOut)
+                .attr("d", d => radarcreate(d));
+            newdata.select('.tSNEborder')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d));
 
@@ -163,7 +182,7 @@ d3.Tsneplot = function () {
                     currenthost.index = i;
                     return true;
                 }   return false;});
-            currenthost.g.select('path')
+            currenthost.g.select('.tSNEborder')
                 .style("filter", "url(#glowTSne)")
                 .style("stroke-width", 1)
                 .style("stroke-opacity", 1)
@@ -216,19 +235,16 @@ d3.Tsneplot = function () {
     }
     function updateData(){
         if (needUpdate) {
-            meanArr = arr[0].map((dd,i)=>d3.mean(arr.map(d=>d[i])));
-            console.log(meanArr);
-            arr.forEach(d=> d.gap = distanace(d,meanArr));
+            // meanArr = arr[0].map((dd,i)=>d3.mean(arr.map(d=>d[i])));
+            // console.log(meanArr);
+            // arr.forEach(d=> d.gap = distanace(d,meanArr));
             tsne.updateData(arr);
-            colorScale.domain(d3.extent(arr,d=>d.gap).reverse());
-            g.selectAll('path').style('stroke',d=>colorScale(d.gap));
+            // colorScale.domain(d3.extent(arr,d=>d.gap).reverse());
+            // g.selectAll('path').style('stroke',d=>colorScale(d.gap));
             needUpdate = false;
         }
     }
-    Tsneplot.drawpoint = function(){
-        tsne.updateData(handledata());
-        graphicopt.step();
-    };
+
 
     function handledata(){
 
@@ -243,13 +259,25 @@ d3.Tsneplot = function () {
             .enter().append("g")
             .attr("class", d=>"linkLineg "+d.name);
 
-        datapointN.append("path")
+        datapointN.append("clipPath")
+            .attr("id",d=>"tSNE"+d.name)
+            .append("path")
+            .attr("d", d => radarcreate(d));
+        datapointN
+            .append("rect")
+            .style('fill', 'url(#rGradient)')
+            .attr("clip-path", d=>"url(#tSNE"+d.name+")")
+            .attr("x",-graphicopt.dotRadius)
+            .attr("y",-graphicopt.dotRadius)
+            .attr("width",graphicopt.dotRadius*2)
+            .attr("height",graphicopt.dotRadius*2);
+        datapointN
+            .append("path")
+            .attr("class","tSNEborder")
             .attr("d", d => radarcreate(d))
-            .attr('fill', 'none')
-            .attr("transform", "translate(" + (0) + "," + (0) + ")")
+            .style("stroke", 'black')
             .style("stroke-width", 0.5)
             .style("stroke-opacity", 0.5);
-
         datapointN.append("text")
             .attr("text-anchor", "top")
             .attr("transform", "translate(5, -5)")
