@@ -46,8 +46,8 @@ d3.radar = function () {
         // TESTING ZONE
         let scagOptions ={
             startBinGridSize: 30,
-            minBins: 50,
-            maxBins: 150,
+            minBins: 20,
+            maxBins: 100,
             outlyingCoefficient: 1.5,
             incrementA:2,
             incrementB:0,

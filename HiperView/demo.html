@@ -77,6 +77,16 @@
                 </select>
             </div>
             <div  class="row s12">
+                <label for="datasetsSelect" class="col"> Visualizing: </label>
+                <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
+                    <img src="" class="circle">
+                    <span class="title"></span>
+                    <i class="material-icons right">arrow_drop_down</i>
+                </div>
+                <ul id="datasetsSelect" class="col collection dropdown-content">
+                </ul>
+            </div>
+            <div  class="row s12">
                 <label for="inds" class="col"> Chart type: </label>
                 <select id="inds" class="col">
                     <option value="Heatmap" selected="selected">Heatmap</option>
@@ -91,21 +101,6 @@
                     <option value="Radar" selected="selected">Radar</option>
                     <option value="Scatterplot" >Scatterplot</option>
                 </select>
-            </div>
-            <div  class="row s12">
-                <!--<div id="holder1"  class="holder1">-->
-                <!--<div>Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select></div>-->
-                <!--</div>-->
-                <label for="datasetsSelect" class="col"> Visualizing: </label>
-                <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
-                    <img src="" class="circle">
-                    <span class="title"></span>
-                </div>
-                <ul id="datasetsSelect" class="col collection dropdown-content">
-                    <!--<option value="Boxplot">Boxplot</option>-->
-                    <!--<option value="Radar" selected="selected">Radar</option>-->
-                    <!--<option value="Scatterplot" >Scatterplot</option>-->
-                </ul>
             </div>
             <!--</ul>-->
             <!--<h6 class="row marginBottom0"><span class="col">Group by</span><a class="dropdown-trigger col s6" href="#!" data-target="listvar"><p id = "groupName" class="titletext col">Rack</p><i class="material-icons right col">arrow_drop_down</i></a> </h6>-->
