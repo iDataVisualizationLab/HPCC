@@ -1443,25 +1443,35 @@ function loadData(){
 
 }
 function addDatasetsOptions() {
-    var select = document.getElementById("datasetsSelect");
-    for(var i = 0; i < serviceList.length; i++) {
-        var opt = serviceList[i];
-        var el = document.createElement("option");
-        el.textContent = opt;
-        el.value = opt;
-        el["data-image"]="images/"+serviceList[i]+".png";
-        select.appendChild(el);
-    }
+    let select= d3.select("#datasetsSelect")
+        .selectAll('li')
+        .data(serviceList)
+        .enter()
+        .append('li')
+        .attr('class','collection-item avatar')
+        .attr('value',d=>d);
+    select.append('img')
+        .attr('class',"circle")
+        .attr('src',d=>"images/"+d+".png");
+    select.append('h4').attr('class','title').text(d=>d);
+
+    select.on("click",loadNewData);
     document.getElementById('datasetsSelect').value = initialService;  //************************************************
     selectedService = document.getElementById("datasetsSelect").value;
+    const trig = d3.select("#datasetsSelectTrigger");
+    trig.select('img').attr('src',"images/"+selectedService+".png");
+    trig.select('span').text(selectedService);
+
     //loadData();
 }
 
-function loadNewData(event) {
+function loadNewData(d) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
     //svg.selectAll("*").remove();
-    selectedService = this.options[this.selectedIndex].text;
-
+    selectedService = d;
+    const trig = d3.select("#datasetsSelectTrigger");
+    trig.select('img').attr('src',"images/"+selectedService+".png");
+    trig.select('span').text(selectedService);
     setColorsAndThresholds(selectedService);
     drawLegend(selectedService,arrThresholds, arrColor,dif);
     resetRequest();
@@ -1597,6 +1607,7 @@ function closeNav() {
 
 $( document ).ready(function() {
     console.log('ready');
+    $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
     $('.sidenav').sidenav();
     discovery('#sideNavbtn');

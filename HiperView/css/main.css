@@ -689,3 +689,21 @@ p.divider {
 .cover.hidden {
 	display: none;
 }
+
+#datasetsSelectTrigger img{
+	width: 30px;
+	height: 30px;
+	overflow: hidden;
+	display: inline-block;
+	vertical-align: middle;
+
+}
+#datasetsSelectTrigger{
+	color:black;
+	background-color: rgba(255,255,255,0.9);
+	padding: 5px;
+	border: 1px solid #f2f2f2;
+	border-radius: 2px;
+	height: 3rem;
+
+}
