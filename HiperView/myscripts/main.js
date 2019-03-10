@@ -1045,20 +1045,7 @@ function plotResult(result) {
 
     }
 
-    for (var i=startinde; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output, selectedService);
-        var obj = {};
-        obj.temp1 = a[0];
-        obj.temp2 = a[1];
-        obj.temp3 = a[2];
-        obj.query_time =r.arr[i].result.query_time;
-        obj.x = xTimeScale(i-startinde);
-        arr.push(obj);
-        currentHostX = obj.x ;
-        currentMeasure = obj.temp1;
-    }
 
-    currentHostY = y;
 
 
     // get Time
@@ -1074,11 +1061,26 @@ function plotResult(result) {
 
     switch (charType) {
         case "Heatmap":
-            initDetailView();
-            plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y);
-            break;
         case "Area Chart":
+            for (var i=startinde; i<r.arr.length;i++){
+                var a = processData(r.arr[i].data.service.plugin_output, selectedService);
+                var obj = {};
+                obj.temp1 = a[0];
+                obj.temp2 = a[1];
+                obj.temp3 = a[2];
+                obj.query_time =r.arr[i].result.query_time;
+                obj.x = xTimeScale(i-startinde);
+                arr.push(obj);
+                currentHostX = obj.x ;
+                currentMeasure = obj.temp1;
+            }
+
+            currentHostY = y;
+
             initDetailView();
+            if (charType === "Heatmap")
+            plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y);
+            else
             plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y);
             break;
         case "T-sne Chart":
@@ -1212,14 +1214,14 @@ function plotTsne(nameh){
                     var scale = d3.scaleLinear()
                                     .domain([thresholds[indx][0],thresholds[indx][1]])
                                     .range([0,1]);
-                    a = a.map(d=>scale(d)||0);
+                    a = a.map(d=>scale(d)||0.5);
                     switch(indx){
                         case 0:
                         case 3:
                             arrServices = d3.merge([arrServices,a]);
                             break;
                         default:
-                            arrServices.push(a[0]||0)
+                            arrServices.push(a[0]||0.5)
                     }
                 })
         }
@@ -1607,6 +1609,7 @@ function closeNav() {
 
 $( document ).ready(function() {
     console.log('ready');
+    $('.collapsible').collapsible();
     $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
     $('.sidenav').sidenav();
@@ -1698,13 +1701,13 @@ function discovery(d){
 function switchTheme(){
     if (this.value==="light"){
         this.value = "dark";
-        this.text = "Light";
+        this.querySelector('span').textContent = "Light";
         d3.select('body').classed('light',false);
         d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png");
         return;
     }
     this.value = "light";
-    this.text = "Dark";
+    this.querySelector('span').textContent = "Dark";
     d3.select('body').classed('light',true);
     d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
     return;

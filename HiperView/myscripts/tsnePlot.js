@@ -21,7 +21,18 @@ d3.Tsneplot = function () {
                 maxtries: 50
         }},
         arr = [],
-        tsne = new tsnejs.tSNE(graphicopt.opt);
+        isbusy = false,
+        // tsne = new tsnejs.tSNE(graphicopt.opt);
+        tsne = new Worker ('myscripts/tSNEworker.js');
+    tsne.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (data.action==='step'){
+            updateEmbedding(data.result.solution,data.result.cost);
+        }
+    }, false);
+    tsne.postMessage({action:"inittsne",value:graphicopt.opt});
     let Tsneplot ={};
     let svg, g,linepointer,radarcreate,glowEffect,
         ss = 1,
@@ -70,17 +81,25 @@ d3.Tsneplot = function () {
         const rg = svg.append("defs").append("radialGradient")
             .attr("id", "rGradient");
         const legntharrColor = arrColor.length-1;
-
+        rg.append("stop")
+            .attr("offset","0%")
+            .attr("stop-opacity", 0);
+        rg.append("stop")
+            .attr("offset", 3 / legntharrColor * 100 + "%")
+            .attr("stop-color", arrColor[4])
+            .attr("stop-opacity", 0);
         arrColor.forEach((d,i)=>{
-            rg.append("stop")
-                .attr("offset", i/legntharrColor*100+"%")
-                .attr("stop-color", d)
-                .attr("stop-opacity",i/legntharrColor);
-            if (i!=legntharrColor)
+            if (i>3) {
                 rg.append("stop")
-                    .attr("offset", (i+1)/legntharrColor*100+"%")
-                    .attr("stop-color", arrColor[i+1])
-                    .attr("stop-opacity", i/legntharrColor);
+                    .attr("offset", i / legntharrColor * 100 + "%")
+                    .attr("stop-color", d)
+                    .attr("stop-opacity", i / legntharrColor);
+                if (i != legntharrColor)
+                    rg.append("stop")
+                        .attr("offset", (i + 1) / legntharrColor * 100 + "%")
+                        .attr("stop-color", arrColor[i + 1])
+                        .attr("stop-opacity", i / legntharrColor);
+            }
         });
         glowEffect = svg.append('defs').append('filter').attr('id', 'glowTSne'),
             feGaussianBlur = glowEffect.append('feGaussianBlur').attr('stdDeviation', 2.5).attr('result', 'coloredBlur'),
@@ -137,30 +156,30 @@ d3.Tsneplot = function () {
         // svg.call(zoom.scaleBy, graphicopt.scalezoom);
 
         graphicopt.step = function () {
-            let cost=0;
-            for (let i = 0; i<5;i++)
-                cost = tsne.step().toFixed(2)
-            svg.select('.cost').text(cost); // do a few steps
-            updateEmbedding();
+            if (!isbusy) {
+                isbusy = true;
+                tsne.postMessage({action: 'step'});
+            }
         };
-        function updateEmbedding() {
-            // get current solution
-            var Y = tsne.getSolution();
-            // move the groups accordingly
-            g.selectAll('.linkLineg')
-                .transition('move')
-                .duration(100)
-                .attr("transform", function(d, i) {
-                    return "translate(" +
-                (Y[i][0]*10*ss+tx) + "," +
-                (Y[i][1]*10*ss+ty) + ")"; });
-            //let curentHostpos = currenthost.node().getBoundingClientRect();
-            linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*10*ss+tx,graphicopt.widthG()),0) )
-                .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*10*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
-
-
-        }
     };
+    function updateEmbedding(Y,cost) {
+        svg.select('.cost').text(cost.toFixed(2));
+        // get current solution
+        // var Y = tsne.getSolution();
+        // move the groups accordingly
+        g.selectAll('.linkLineg')
+            .transition('move')
+            .duration(100)
+            .attr("transform", function(d, i) {
+                return "translate(" +
+                    (Y[i][0]*10*ss+tx) + "," +
+                    (Y[i][1]*10*ss+ty) + ")"; });
+        //let curentHostpos = currenthost.node().getBoundingClientRect();
+        linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*10*ss+tx,graphicopt.widthG()),0) )
+            .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*10*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
+
+
+    }
     let currenthost = {};
     Tsneplot.draw = function(name){
         if (first){
@@ -192,29 +211,34 @@ d3.Tsneplot = function () {
                 .style("stroke-opacity", 0.5);
             currenthost.g.select('text').style("opacity", 1)
                 .transition('hightlight').duration(3000).style("opacity",0);
-            // currenthost.g.select('.hightlight').style("opacity", 1)
-            //     .transition('hightlight').ease(d3.easeLinear).duration(3000).style("opacity", 0);
+
+            if (!isbusy) {
+                isbusy = true;
+                tsne.postMessage({action: "updateData", value: arr});
+            }
+
 
         }
     };
 
     Tsneplot.pause  = function (){
         clearInterval(intervalUI);
-        clearInterval(intervalCalculate);
+        // clearInterval(intervalCalculate);
     };
 
     Tsneplot.resume  = function (){
         intervalUI = setInterval(graphicopt.step,50);
-        intervalCalculate = setInterval(updateData,2000);
+        // intervalCalculate = setInterval(updateData,2000);
     };
 
     Tsneplot.redraw  = function (){
         svg.style('visibility','visible');
-        tsne.initDataRaw(arr);
+        tsne.postMessage({action:"initDataRaw",value:arr})//.initDataRaw(arr);
         drawEmbedding(arr);
         first = false;
-        for (let  i =0; i<40;i++)
-            tsne.step();
+        isbusy = false;
+        // for (let  i =0; i<40;i++)
+        //     tsne.step();
         Tsneplot.resume();
     };
 
