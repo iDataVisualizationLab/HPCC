@@ -23,7 +23,8 @@ function RadarChart(id, data, options, name) {
      showText: true,
      bin: false,
      legend: [],
-        color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
+        color: function(){return 'rgb(167, 167, 167)'}
+        //d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
     
     //Put all of the options into a variable called cfg
