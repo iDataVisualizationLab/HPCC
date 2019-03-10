@@ -20,3 +20,29 @@
     background: #444;
     border-radius: 12px;
 }
+
+#mySidenav .collapsible {
+    border: none;
+}
+#mySidenav .collapsible .collapsible-header{
+    background-color: transparent;
+    font-size: large
+}
+
+#mySidenav .collapsible .collapsible-body{
+    /*background-color: #ffffff3d;*/
+    padding: 1rem;
+}
+
+#search {
+    font-size: inherit;
+}
+
+#DarkTheme {
+    background-color: #8a001a;
+}
+
+.light #DarkTheme {
+    background-color: #565656;
+    color: white !important;
+}
