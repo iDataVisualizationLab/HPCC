@@ -16,8 +16,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+    <link href="css/theme.css" rel="stylesheet" type="text/css" />
     <link href="css/main.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="css/dd.css" />
+    <!--<link rel="stylesheet" type="text/css" href="css/dd.css" />-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="js/underscore-min.js"></script>
     <!--<script src="js/select.js"></script>-->
@@ -160,14 +161,21 @@
     <div id="instructions"></div>
     <!--<svg width="2600" height="1800" ></svg>-->
     <div>
-        <div id ="scatterzone">
-            <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
-            <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
-            <div class="selection" id="selection">
-                <div id="selectionheader">Click & Drag</div>
+        <div class="row s12" style="overflow-x: auto">
+            <div id ="scatterzone">
+                <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
+                <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
+                <div class="selection" id="selection">
+                    <div id="selectionheader">Click & Drag</div>
+                </div>
             </div>
+            <svg width="2600" height="1000" ></svg>
         </div>
-        <svg width="2600" height="1000" ></svg>
+        <div class="row s12 valign-wrapper center-align">
+            <div id="radarChart1" class="radarChartss col s4"></div>
+            <div id="radarChart2" class="radarChartss col s4"></div>
+            <div id="radarChart3" class="radarChartss col s4"></div>
+        </div>
     </div>
 
 
@@ -176,15 +184,6 @@
     <div id="legendHolder"  class="legendHolder">
     </div>
 
-    <div id="radarChart1" class="radarChartss"></div>
-    <div id="radarChart2" class="radarChartss"></div>
-    <div id="radarChart3" class="radarChartss"></div>
-    <!--tooltip total-->
-    <div id="Summarynode">
-        <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-        <div id="Summarynodeheader">Click here to move</div>
-        <div id = "Summarynodeg"></div>
-    </div>
 </div>
 <!-- load the d3.js library -->
 <script src="js/d3.v4.js"></script>

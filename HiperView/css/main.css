@@ -1,3 +1,10 @@
+:root {
+	--primary-color: rgba(241,196,15 ,1);
+	--secondary-color: teal;
+
+	--slider: 0;
+	--sideNavwidth: 350px;
+}
 
 body { font: 12px Arial;
 	background-color: #353535;
@@ -166,36 +173,39 @@ table, th, td {
 }
 
 .radarChartss {
+	margin: auto;
 	border: 1px solid rgba(120,120,120, 1);
-	border-radius: 6px;
+	border-radius: 0px;
 	background-color: #fff;
 	box-shadow: 5px 5px 5px #444;
+	width: 500px !important;
+	height: 500px;
 }
-#radarChart1 {
-	position:absolute;
-	width: 500px;
-	height: 500px;
-	border-radius: 0px;
-	z-index: 0;
-	left: 50px;
-}	
+/*#radarChart1 {*/
 
-#radarChart2 {
-	position:absolute;
-	width: 500px;
-	height: 500px;
-	border-radius: 0px;
-	left: 600px;
-}
+	/*width: 500px;*/
+	/*height: 500px;*/
+	/*border-radius: 0px;*/
+	/*z-index: 0;*/
+	/*left: 50px;*/
+/*}	*/
 
-#radarChart3 {
-	position:absolute;
-	width: 500px;
-	height: 500px;
-	border-radius: 0px;
-	z-index: 0;
-	left: 1150px;
-}	
+/*#radarChart2 {*/
+
+	/*width: 500px;*/
+	/*height: 500px;*/
+	/*border-radius: 0px;*/
+	/*left: 600px;*/
+/*}*/
+
+/*#radarChart3 {*/
+
+	/*width: 500px;*/
+	/*height: 500px;*/
+	/*border-radius: 0px;*/
+	/*z-index: 0;*/
+	/*left: 1150px;*/
+/*}	*/
 
 .ticks {
 	font: 12px sans-serif;
@@ -564,10 +574,10 @@ nav ul li.active a{
 }
 
 .sideIn.sidenavs {
-	width: 400px;
+	width: var(--sideNavwidth);
 }
 .sideIn#Maincontent {
-	margin-left: 400px;
+	margin-left: var(--sideNavwidth);
 }
 
 .sidenavs a {
@@ -598,7 +608,7 @@ nav ul li.active a{
 }
 .sideIn .closebtn{
 	top: 50%;
-	left: 380px;
+	left: calc(var(--sideNavwidth) - 20px);
 	transition: 0.5s;
 }
 
