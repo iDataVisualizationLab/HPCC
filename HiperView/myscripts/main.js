@@ -1045,20 +1045,7 @@ function plotResult(result) {
 
     }
 
-    for (var i=startinde; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output, selectedService);
-        var obj = {};
-        obj.temp1 = a[0];
-        obj.temp2 = a[1];
-        obj.temp3 = a[2];
-        obj.query_time =r.arr[i].result.query_time;
-        obj.x = xTimeScale(i-startinde);
-        arr.push(obj);
-        currentHostX = obj.x ;
-        currentMeasure = obj.temp1;
-    }
 
-    currentHostY = y;
 
 
     // get Time
@@ -1074,11 +1061,26 @@ function plotResult(result) {
 
     switch (charType) {
         case "Heatmap":
-            initDetailView();
-            plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y);
-            break;
         case "Area Chart":
+            for (var i=startinde; i<r.arr.length;i++){
+                var a = processData(r.arr[i].data.service.plugin_output, selectedService);
+                var obj = {};
+                obj.temp1 = a[0];
+                obj.temp2 = a[1];
+                obj.temp3 = a[2];
+                obj.query_time =r.arr[i].result.query_time;
+                obj.x = xTimeScale(i-startinde);
+                arr.push(obj);
+                currentHostX = obj.x ;
+                currentMeasure = obj.temp1;
+            }
+
+            currentHostY = y;
+
             initDetailView();
+            if (charType === "Heatmap")
+            plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y);
+            else
             plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y);
             break;
         case "T-sne Chart":
@@ -1212,14 +1214,14 @@ function plotTsne(nameh){
                     var scale = d3.scaleLinear()
                                     .domain([thresholds[indx][0],thresholds[indx][1]])
                                     .range([0,1]);
-                    a = a.map(d=>scale(d)||0);
+                    a = a.map(d=>scale(d)||0.5);
                     switch(indx){
                         case 0:
                         case 3:
                             arrServices = d3.merge([arrServices,a]);
                             break;
                         default:
-                            arrServices.push(a[0]||0)
+                            arrServices.push(a[0]||0.5)
                     }
                 })
         }
