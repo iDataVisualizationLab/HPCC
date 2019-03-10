@@ -43,11 +43,11 @@
         <ul id="nav-mobile" class="left hide-on-med-and-down">
             <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
             <li class="tab active"><a class="active" href="#">HiperView</a></li>
-            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
             <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
             <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
         </ul>
         <ul class="right">
+            <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
             <li><a href="#!" value="dark" id = "DarkTheme" class="waves-effect waves-light">Light</a></li>
         </ul>
     </div>
@@ -66,9 +66,9 @@
             <h5>Setting</h5>
             <br>
             <!--<ul id="listvar" class="dropdown-content  s12">-->
+            <label for="datacom" class="col s4"> Dataset: </label>
             <div  class="row s12">
-                <label for="datacom" class="col"> Dataset: </label>
-                <select id="datacom" class="col">
+                <select id="datacom" class="col s7">
                     <option value="serviceWed26Sep" selected="selected">26 Sep 2018</option>
                     <option value="serviceWed27Sep">27 Sep 2018</option>
                     <option value="serviceWed04Oct" >04 Oct 2018</option>
@@ -77,8 +77,8 @@
                     <option value="realtime">Real time</option>
                 </select>
             </div>
+            <label for="datasetsSelect" class="col s4"> Visualizing: </label>
             <div  class="row s12">
-                <label for="datasetsSelect" class="col"> Visualizing: </label>
                 <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                     <img src="" class="circle">
                     <span class="title"></span>
@@ -87,17 +87,17 @@
                 <ul id="datasetsSelect" class="col collection dropdown-content">
                 </ul>
             </div>
+            <label for="inds" class="col s4"> Chart type: </label>
             <div  class="row s12">
-                <label for="inds" class="col"> Chart type: </label>
-                <select id="inds" class="col">
+                <select id="inds" class="col s7">
                     <option value="Heatmap" selected="selected">Heatmap</option>
                     <option value="Area Chart">Area Chart</option>
                     <option value="T-sne Chart">t-SNE Chart</option>
                 </select>
             </div>
+            <label for="indsg" class="col s4"> Summary type: </label>
             <div  class="row s12">
-                <label for="indsg" class="col"> Summary type: </label>
-                <select id="indsg" class="col">
+                <select id="indsg" class="col s7">
                     <option value="Boxplot">Boxplot</option>
                     <option value="Radar" selected="selected">Radar</option>
                     <option value="Scatterplot" >Scatterplot</option>

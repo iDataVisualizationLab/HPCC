@@ -307,7 +307,7 @@ function mouseoverNode(d1){
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Temperature (°F)");
+        .text("Temperature (°C)");
 
     //************************************************************* Date and Time
     svgTip.append("text")
