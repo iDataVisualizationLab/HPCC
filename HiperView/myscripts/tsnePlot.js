@@ -31,6 +31,25 @@ d3.Tsneplot = function () {
         if (data.action==='step'){
             updateEmbedding(data.result.solution,data.result.cost);
         }
+        if (data.action==="updateTracker")
+        {
+            console.log(data.value.map(e=>e.name));
+            const dataTop = d3.select('.top10').selectAll('div')
+                .data(data.value,d=>d.name);
+            dataTop.exit()
+                .attr('class','remove')
+                .style('order',(d,i)=>999)
+                .transition()
+                .duration(500)
+                .remove();
+            const newdiv = dataTop.enter().append("div")
+                .style('order',(d,i)=>i+1)
+                .attr('class','top10_item slideRight');
+            newdiv.append("span").text(d=>d.name);
+
+            dataTop
+                .style('order',(d,i)=>i+1);
+        }
     }, false);
     tsne.postMessage({action:"inittsne",value:graphicopt.opt});
     let Tsneplot ={};
@@ -117,7 +136,7 @@ d3.Tsneplot = function () {
             .attr('class','pannel')
             .attr('transform',`translate(0,${graphicopt.margin.top})`)
             .attr("clip-path", "url(#clip)");
-        g.append('rect').attr("rx", 10)
+        const rect = g.append('rect').attr("rx", 10)
             .attr("ry", 10)
             .attr("width", graphicopt.widthG()-2)
             .attr("height", graphicopt.heightG())
@@ -135,8 +154,11 @@ d3.Tsneplot = function () {
             .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
-        menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
-        menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
+        const subzone = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
+        subzone.select(".details").append("span").text('Cost: ');
+        subzone.select(".details").append("span").attr('class','cost');
+        // menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
+        // menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
         g = g.append('g')
             .attr('class','graph');
         function zoomed() {
@@ -149,10 +171,10 @@ d3.Tsneplot = function () {
             .scaleExtent([0.25, 100])
             //.translateExtent([[-netConfig.width/2,-netConfig.height/2], [netConfig.width*1.5,netConfig.height*1.5]])
             .on("zoom", zoomed);
-        svg.call(zoom);
+        rect.call(zoom);
 
         ss= graphicopt.scalezoom;
-        svg.call(zoom.translateBy, graphicopt.widthG() / 2,graphicopt.heightG() / 2);
+        rect.call(zoom.translateBy, graphicopt.widthG() / 2,graphicopt.heightG() / 2);
         // svg.call(zoom.scaleBy, graphicopt.scalezoom);
 
         graphicopt.step = function () {
@@ -163,7 +185,7 @@ d3.Tsneplot = function () {
         };
     };
     function updateEmbedding(Y,cost) {
-        svg.select('.cost').text(cost.toFixed(2));
+        d3.select("#subzone").select('.cost').text(cost.toFixed(2));
         // get current solution
         // var Y = tsne.getSolution();
         // move the groups accordingly
@@ -219,6 +241,11 @@ d3.Tsneplot = function () {
 
 
         }
+    };
+
+    Tsneplot.getTop10  = function (){
+        tsne.postMessage({action:"updateTracker"});
+        // clearInterval(intervalCalculate);
     };
 
     Tsneplot.pause  = function (){

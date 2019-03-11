@@ -10,7 +10,7 @@
 // Set the dimensions of the canvas / graph
 var margin = {top: 5, right: 0, bottom: 50, left: 0};
 
-var svg = d3.select("svg"),
+var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
     height = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
@@ -554,6 +554,7 @@ function request(){
                 // cal to plot
                 bin.data([]);
                 drawsummary();
+                TSneplot.getTop10();
                 shiftTimeText();
                 count = 0;
                 countbuffer = 0;

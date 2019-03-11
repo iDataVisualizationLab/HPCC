@@ -85,7 +85,6 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	position:absolute;
 	padding: 10px;
 	z-index: 0;
-	top: 70px;
 	/*top: 1px;*/
 	right: 400px;
 	border: 1px solid rgba(120,120,120, 1);
@@ -98,7 +97,6 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 #legendHolder {
 	position:absolute;
 	z-index: 0;
-	top: 70px;
 	right:10px;
 	border: 1px solid rgba(0,0,0, 0.2);
 	background-color: rgba(255,255,255, 0.75);
@@ -576,6 +574,7 @@ nav ul li.active a{
 	width: var(--sideNavwidth);
 }
 .sideIn#Maincontent {
+	position: relative;
 	margin-left: var(--sideNavwidth);
 }
 .sideIn #scatterzone {
@@ -718,4 +717,66 @@ p.divider {
 	border-radius: 2px;
 	height: 3rem;
 
+}
+.subpanel {
+	background-color: #383838b5;
+	float: left;
+	left:10px;
+	position: absolute;
+	transition: 0.5s;
+}
+.top10{
+	display: flex;
+	flex-direction: column;
+	/*-webkit-align-items: center;*/
+	/*-ms-flex-align: center;*/
+	/*align-items: center;*/
+	justify-content:flex-start;
+}
+.top10_item {
+	/*flex: .00001;*/
+	/*overflow-x: hidden;*/
+	/*-webkit-animation: flexGrow 2s ease forwards;*/
+	/*-o-animation: flexGrow 2s ease forwards;*/
+	/*animation: flexGrow 2s ease forwards;*/
+	transition: all 1s ease-out;
+}
+
+.top10_item.remove {
+	flex: 1;
+	-webkit-animation: flexRemove 500ms ease forwards;
+	-o-animation: flexRemove 500ms ease forwards;
+	animation: flexRemove 500ms ease forwards;
+}
+
+@-webkit-keyframes flexRemove {
+	to {
+		flex: 0.0001;
+	}
+}
+@-o-keyframes flexRemove {
+	to {
+		flex: 0001;
+	}
+}
+@keyframes flexRemove {
+	to {
+		flex: 0001;
+	}
+}
+
+@-webkit-keyframes flexGrow {
+	to {
+		flex: 1;
+	}
+}
+@-o-keyframes flexGrow {
+	to {
+		flex: 1;
+	}
+}
+@keyframes flexGrow {
+	to {
+		flex: 1;
+	}
 }
