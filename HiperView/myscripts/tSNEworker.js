@@ -5,7 +5,7 @@ importScripts("../js/underscore-min.js");
 let tsne,sol,
     stepnumber = 2,
     countstack =0,
-    stack = 20,
+    stack = 200,
     cost,
     stop = false,
     store_step,
@@ -21,11 +21,11 @@ addEventListener('message',function ({data}){
 
                 for (let  i =0; i<5;i++) {
                     cost = tsne.step();
-                    postMessage({action:'step', result: {cost: cost, solution: tsne.getSolution()}});
                 }
                 hostname = data.value.map(d=>d.name);
                 store_step = initStore(hostname,tsne.getSolution());
                 store_step_temp = copyStore(store_step);
+                postMessage({action:'step', result: {cost: cost, solution: tsne.getSolution()}});
                 postMessage({action:data.action, status:"done" });
                 countstack = 0;
                 break;

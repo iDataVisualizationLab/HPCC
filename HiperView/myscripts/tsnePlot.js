@@ -25,10 +25,12 @@ d3.Tsneplot = function () {
         isbusy = false,
         // tsne = new tsnejs.tSNE(graphicopt.opt);
         tsne = new Worker ('myscripts/tSNEworker.js');
-    let sizebox = 40;
+    let sizebox = 50;
     let maxlist = 20;
     let Tsneplot ={};
     let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,
+        scaleX_small = d3.scaleLinear(),
+        scaleY_small = d3.scaleLinear(),
         store={},
         ss = 1,
         tx = 0,
@@ -36,7 +38,11 @@ d3.Tsneplot = function () {
     let needUpdate = false;
     let first = true;
     function updateRenderRanking(data) {
-        console.log(data.top10)
+        var max = d3.max(d3.extent(d3.merge(d3.extent(data.top10,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
+        console.log(max)
+        scaleX_small.domain([-max,max]);
+        scaleY_small.domain(scaleX_small.domain());
+        // console.log(data.top10);
         const dataTop = panel.select('.top10').selectAll('.top10_item')
             .data(data.top10, d => d.name);
         // EXIT
@@ -60,11 +66,16 @@ d3.Tsneplot = function () {
             .duration((d, i) => i * 100)
             .style('opacity', 1)
             .attr('transform', (d, i) => 'translate(0,' + (i + 1) * sizebox + ")");
-
-        newdiv.append("text").text(d => d.name);
+        newdiv.append('rect').attrs(
+            {class : 'detailDecoration',
+                y: -(sizebox-2)/2,
+                width: 190,
+                height: sizebox-2,
+            });
+        newdiv.append("text").text(d => d.name).attr('x',4);
         const gDetail = newdiv.append("g")
             .attr('class','gd')
-            .attr('transform', 'translate(120,0)')
+            .attr('transform', 'translate(120,'+(-sizebox/2)+')')
             .datum(d=>d);
         gDetail.append("path")
             .attr("d",trackercreate)
@@ -92,8 +103,8 @@ d3.Tsneplot = function () {
             .attrs(graphicopt.top10.details.circle.attr)
             .styles(graphicopt.top10.details.circle.style)
             .merge(newg).attrs(d=> {return {
-                cx:d[0],
-                cy:d[1],}
+                cx:scaleX_small(d[0]),
+                cy:scaleY_small(d[1]),}
             });
     }
     tsne.addEventListener('message',({data})=>{
@@ -138,8 +149,8 @@ d3.Tsneplot = function () {
             .angle(function(d,i) {  return angleSlice[i]; });
 
         trackercreate = d3.line()
-            .x(function(d) { return d[0]; })
-            .y(function(d) { return d[1]; })
+            .x(d=> scaleX_small(d[0]))
+            .y(d=> scaleY_small(d[1]))
             .curve(d3.curveCardinal);
 
 
@@ -198,14 +209,16 @@ d3.Tsneplot = function () {
             .attr("ry", 10)
             .attr("width", graphicopt.widthG()-2)
             .attr("height", graphicopt.heightG())
-            .attr("fill", "#fff")
-            .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
 
         panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
         panel.select(".details").append("span").text('Cost: ');
         panel.select(".details").append("span").attr('class','cost');
+
+        const sizegraph = sizebox - 5;
+        scaleX_small.range([0,sizegraph]);
+        scaleY_small.range([0,sizegraph]);
         panel.select(".top10DIV").style('max-height', sizebox*10+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});

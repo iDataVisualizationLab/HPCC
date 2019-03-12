@@ -1,7 +1,7 @@
 :root {
-	--primary-color: rgba(241,196,15 ,1);
-	--secondary-color: teal;
-
+	--primary-color: rgb(0, 0, 0);
+	--secondary-color: rgba(255, 255, 255, 0.79);
+	--containBlack: #e4e4e4;
 	--slider: 0;
 	--sideNavwidth: 350px;
 }
@@ -728,6 +728,20 @@ p.divider {
 	padding-right: 10px;
 	display: none;
 }
+.light .subpanel{
+	background-color: rgba(255, 255, 255, 0.71);
+}
+.pannel rect ,.summaryRect, .rackRect{
+	fill: var(--containBlack);
+	stroke: white;
+}
+.light rect {
+	fill: white;
+	stroke: black;
+}
+.light .subzone {
+
+}
 .subpanel.active {
 	display: block;
 }
@@ -741,6 +755,14 @@ p.divider {
 }
 .top10_item circle{
 	fill: black;
+}
+.top10_item .detailDecoration{
+	fill: rgb(162, 162, 162);
+	rx:10;
+}
+
+.light .top10_item .detailDecoration{
+	fill: white;
 }
 
 .top10_item circle.new{
