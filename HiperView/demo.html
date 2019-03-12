@@ -117,61 +117,6 @@
                 <div class="collapsible-body"><strong>Zoom</strong>: Scroll mouse button to zoom.<br/></div>
             </li>
         </ul>
-        <!--<div  class="col s12">-->
-            <!--<h5>Setting</h5>-->
-            <!--<br>-->
-            <!--<label for="datacom" class="col s4"> Dataset: </label>-->
-            <!--<div  class="row s12">-->
-                <!--<select id="datacom" class="col s7">-->
-                    <!--<option value="serviceWed26Sep" selected="selected">26 Sep 2018</option>-->
-                    <!--<option value="serviceWed27Sep">27 Sep 2018</option>-->
-                    <!--<option value="serviceWed04Oct" >04 Oct 2018</option>-->
-                    <!--<option value="service15Oct">15 Oct 2018</option>-->
-                    <!--<option value="service17Oct">17 Oct 2018</option>-->
-                    <!--<option value="realtime">Real time</option>-->
-                <!--</select>-->
-            <!--</div>-->
-            <!--<label for="datasetsSelect" class="col s4"> Visualizing: </label>-->
-            <!--<div  class="row s12">-->
-                <!--<div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">-->
-                    <!--<img src="" class="circle">-->
-                    <!--<span class="title"></span>-->
-                    <!--<i class="material-icons right">arrow_drop_down</i>-->
-                <!--</div>-->
-                <!--<ul id="datasetsSelect" class="col collection dropdown-content">-->
-                <!--</ul>-->
-            <!--</div>-->
-            <!--<label for="indsg" class="col s4"> Summary type: </label>-->
-            <!--<div  class="row s12">-->
-                <!--<select id="indsg" class="col s7">-->
-                    <!--<option value="Boxplot">Boxplot</option>-->
-                    <!--<option value="Radar" selected="selected">Radar</option>-->
-                    <!--<option value="Scatterplot" >Scatterplot</option>-->
-                <!--</select>-->
-            <!--</div>-->
-            <!--<label for="inds" class="col s4"> Chart type: </label>-->
-            <!--<div  class="row s12">-->
-                <!--<select id="inds" class="col s7">-->
-                    <!--<option value="Heatmap" selected="selected">Heatmap</option>-->
-                    <!--<option value="Area Chart">Area Chart</option>-->
-                    <!--<option value="T-sne Chart">t-SNE Chart</option>-->
-                <!--</select>-->
-            <!--</div>-->
-        <!--</div>-->
-        <!--<p class="divider col s11"></p>-->
-        <!--<div class="col s12">-->
-            <!--<h5>Search</h5>-->
-            <!--&lt;!&ndash;<h6>Sample of 20 entries <input type="text" id="search" placeholder="Search Racks..."></input></h6>&ndash;&gt;-->
-            <!--&lt;!&ndash;<p id="food-list">&ndash;&gt;-->
-            <!--&lt;!&ndash;</p>&ndash;&gt;-->
-        <!--</div>-->
-        <!--<p class="divider col s11"></p>-->
-        <!--<div class="col s12">-->
-            <!--<h5>Controls</h5>-->
-            <!--<p>-->
-                <!--<strong>Zoom</strong>: Scroll mouse button to zoom.<br/>-->
-            <!--</p>-->
-        <!--</div>-->
     </div>
 </div>
 
@@ -199,6 +144,9 @@
 
 
         </div>
+        <div id="legendHolder"  class="legendHolder">
+        </div>
+
         <div style="clear:both;"></div>
     </div>
     <!--<header class="ttu-main-header" id="nav">-->
@@ -211,7 +159,7 @@
 
     <div id="instructions"></div>
     <!--<svg width="2600" height="1800" ></svg>-->
-    <div>
+    <div style="position: relative;">
         <div class="row s12" style="overflow-x: auto">
             <div id ="scatterzone">
                 <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
@@ -220,19 +168,21 @@
                     <div id="selectionheader">Click & Drag</div>
                 </div>
             </div>
-            <svg width="2600" height="1000" ></svg>
+            <div id ="subzone" class="subpanel card-panel ">
+                <div class="details" ></div>
+                <div class="top10DIV">
+                    <svg class="top10" >
+
+                    </svg>
+                </div>
+            </div>
+            <svg width="2600" height="1000" class="mainsvg" ></svg>
         </div>
         <div class="row s12 valign-wrapper center-align">
             <div id="radarChart1" class="radarChartss col s4"></div>
             <div id="radarChart2" class="radarChartss col s4"></div>
             <div id="radarChart3" class="radarChartss col s4"></div>
         </div>
-    </div>
-
-
-
-
-    <div id="legendHolder"  class="legendHolder">
     </div>
 
 </div>

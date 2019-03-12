@@ -175,10 +175,6 @@ function RadarChart(id, data, options, name) {
             .attr("r", function (d, i) {
                 return radius / cfg.levels * d;
             })
-            //.style("fill", function(d){
-            //    var v = (maxValue-minValue) * d/cfg.levels +minValue;
-            //    return colorTemperature(v);
-            //})
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
@@ -206,10 +202,10 @@ function RadarChart(id, data, options, name) {
             .attr("x1", 0)
             .attr("y1", 0)
             .attr("x2", function (d, i) {
-                return rScale(maxValue * 1.05) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(maxValue * (cfg.bin?((cfg.levels-1)/cfg.levels):1.05)) * Math.cos(angleSlice[i] - Math.PI / 2);
             })
             .attr("y2", function (d, i) {
-                return rScale(maxValue * 1.05) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(maxValue *( cfg.bin?((cfg.levels-1)/cfg.levels):1.05)) * Math.sin(angleSlice[i] - Math.PI / 2);
             })
             .attr("class", "line")
             .style("stroke", "white")

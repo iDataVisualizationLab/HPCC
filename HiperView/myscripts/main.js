@@ -10,7 +10,7 @@
 // Set the dimensions of the canvas / graph
 var margin = {top: 5, right: 0, bottom: 50, left: 0};
 
-var svg = d3.select("svg"),
+var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
     height = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
@@ -164,11 +164,30 @@ var TsnePlotopt  = {
     heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
     dotRadius: 30,
     opt:{
-        epsilon : 10, // epsilon is learning rate (10 = default)
+        epsilon : 40, // epsilon is learning rate (10 = default)
         perplexity : 30, // roughly how many neighbors each point influences (30 = default)
         dim : 2, // dimensionality of the embedding (2 = default)
         maxtries: 50
-    }};
+    },
+    top10:{
+        details :{
+            circle: {
+                attr: {
+                    r : 2,
+                },
+                style: {
+                    opacity: 0.2
+                }
+            },
+            path: {
+                style: {
+                    'stroke': 'black',
+                    'stroke-width': 0.5,
+                }
+            }
+        }
+    }
+};
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
@@ -554,6 +573,8 @@ function request(){
                 // cal to plot
                 bin.data([]);
                 drawsummary();
+                if (charType==="T-sne Chart")
+                    TSneplot.getTop10();
                 shiftTimeText();
                 count = 0;
                 countbuffer = 0;
@@ -838,9 +859,23 @@ function predict (arr,ser){
     try{
         return processData(arr[arr.length-1].data.service.plugin_output,ser);
     } catch(e){
+        let average = 0;
         switch (ser){
+            case serviceList[0]:
+                average = (thresholds[0][1]-thresholds[0][0])/2
+                return [average,average,average];
+            case serviceList[1]:
+                average = (thresholds[1][1]-thresholds[1][0])/2
+                return [average,average,average];
+            case serviceList[2]:
+                average = (thresholds[2][1]-thresholds[2][0])/2
+                return [average,average,average];
             case serviceList[3]:
-                return [0,0,0,0];
+                average = (thresholds[3][1]-thresholds[3][0])/2
+                return [average,average,average,average];
+            case serviceList[4]:
+                average = (thresholds[4][1]-thresholds[4][0])/2
+                return [average,average,average];
             default:
                 return [0,0,0];
         }

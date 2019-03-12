@@ -15,32 +15,115 @@ d3.Tsneplot = function () {
         heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
         dotRadius: 2,
             opt:{
-            epsilon : 10, // epsilon is learning rate (10 = default)
+                epsilon : 20, // epsilon is learning rate (10 = default)
                 perplexity : 30, // roughly how many neighbors each point influences (30 = default)
                 dim : 2, // dimensionality of the embedding (2 = default)
                 maxtries: 50
-        }},
+            }
+    },
         arr = [],
         isbusy = false,
         // tsne = new tsnejs.tSNE(graphicopt.opt);
         tsne = new Worker ('myscripts/tSNEworker.js');
-    tsne.addEventListener('message',({data})=>{
-        if (data.status==='done') {
-            isbusy = false;
-        }
-        if (data.action==='step'){
-            updateEmbedding(data.result.solution,data.result.cost);
-        }
-    }, false);
-    tsne.postMessage({action:"inittsne",value:graphicopt.opt});
+    let sizebox = 50;
+    let maxlist = 20;
     let Tsneplot ={};
-    let svg, g,linepointer,radarcreate,glowEffect,
+    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,
+        scaleX_small = d3.scaleLinear(),
+        scaleY_small = d3.scaleLinear(),
+        store={},
         ss = 1,
         tx = 0,
         ty =0;
     let needUpdate = false;
     let first = true;
+    function updateRenderRanking(data) {
+        var max = d3.max(d3.extent(d3.merge(d3.extent(data.top10,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
+        console.log(max)
+        scaleX_small.domain([-max,max]);
+        scaleY_small.domain(scaleX_small.domain());
+        // console.log(data.top10);
+        const dataTop = panel.select('.top10').selectAll('.top10_item')
+            .data(data.top10, d => d.name);
+        // EXIT
+        dataTop.exit().moveToBack()
+            .transition()
+            .attr('transform', function (d) {
+                return 'translate(20,' + getTransformation(d3.select(this).attr('transform')).translateY + ')'
+            })
+            .transition('exit')
+            .duration((d, i) => i * 100)
+            .style('opacity', 0)
+            .attr('transform', 'translate(20,' + (maxlist + 1) * sizebox + ")")
+            .remove();
+        // ENTER
+        const newdiv = dataTop.enter().append("g")
+            .attr('class', 'top10_item');
+        newdiv
+            .attr('transform', 'translate(0,' + (maxlist + 1) * sizebox + ")")
+            .style('opacity', 0)
+            .transition('update')
+            .duration((d, i) => i * 100)
+            .style('opacity', 1)
+            .attr('transform', (d, i) => 'translate(0,' + (i + 1) * sizebox + ")");
+        newdiv.append('rect').attrs(
+            {class : 'detailDecoration',
+                y: -(sizebox-2)/2,
+                width: 190,
+                height: sizebox-2,
+            });
+        newdiv.append("text").text(d => d.name).attr('x',4);
+        const gDetail = newdiv.append("g")
+            .attr('class','gd')
+            .attr('transform', 'translate(120,'+(-sizebox/2)+')')
+            .datum(d=>d);
+        gDetail.append("path")
+            .attr("d",trackercreate)
+            .styles(graphicopt.top10.details.path.style);
+        gDetail.call(createDetailCircle);
+
+        // UPDATE
+        dataTop
+            .transition()
+            .duration((d, i) => i * 100)
+            .attr('transform', (d, i) => 'translate(0,' + (i + 1) * sizebox + ")");
+
+        const gd = dataTop.select('.gd').datum(d=>d);
+        gd.select("path")
+            .attr("d",trackercreate);
+        gd
+            .call(createDetailCircle);
+    }
+    function createDetailCircle (g){
+        let newg = g.selectAll('circle').data(d=>d);
+        newg.exit().remove();
+        newg.classed('new',false);
+        return newg.enter().append('circle')
+            .classed('new',true)
+            .attrs(graphicopt.top10.details.circle.attr)
+            .styles(graphicopt.top10.details.circle.style)
+            .merge(newg).attrs(d=> {return {
+                cx:scaleX_small(d[0]),
+                cy:scaleY_small(d[1]),}
+            });
+    }
+    tsne.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (data.action==='step'){
+            store.Y = data.result.solution;
+            store.cost = data.result.cost;
+            updateEmbedding(store.Y,store.cost);
+        }
+        if (data.action==="updateTracker")
+        {
+            updateRenderRanking(data);
+        }
+    }, false);
+
     Tsneplot.init = function(){
+        tsne.postMessage({action:"inittsne",value:graphicopt.opt});
         // radar
         var total = 10,                 //The number of different axes
             angle1= Math.PI * 2 / total,
@@ -64,6 +147,11 @@ d3.Tsneplot = function () {
             .curve(d3.curveCardinalClosed.tension(0))
             .radius(function(d) { return rScale(d); })
             .angle(function(d,i) {  return angleSlice[i]; });
+
+        trackercreate = d3.line()
+            .x(d=> scaleX_small(d[0]))
+            .y(d=> scaleY_small(d[1]))
+            .curve(d3.curveCardinal);
 
 
         svg.attrs({
@@ -117,32 +205,32 @@ d3.Tsneplot = function () {
             .attr('class','pannel')
             .attr('transform',`translate(0,${graphicopt.margin.top})`)
             .attr("clip-path", "url(#clip)");
-        g.append('rect').attr("rx", 10)
+        const rect = g.append('rect').attr("rx", 10)
             .attr("ry", 10)
             .attr("width", graphicopt.widthG()-2)
             .attr("height", graphicopt.heightG())
-            .attr("fill", "#fff")
-            .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
-        let menu = g.append('g').attr('class','menuTsne')
-            .attr('transform','translate(10,10)');
-        menu.append('rect').attr("rx", 10)
-            .attr("ry", 10)
-            .attr("width", 200)
-            .attr("height", 40)
-            .attr("fill", "#fff")
-            .attr("stroke", "#000")
-            .attr("stroke-width", 1)
-            .style("box-shadow", "10px 10px 10px #666");
-        menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
-        menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
+
+        panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
+        panel.select(".details").append("span").text('Cost: ');
+        panel.select(".details").append("span").attr('class','cost');
+
+        const sizegraph = sizebox - 5;
+        scaleX_small.range([0,sizegraph]);
+        scaleY_small.range([0,sizegraph]);
+        panel.select(".top10DIV").style('max-height', sizebox*10+"px");
+        panel.select(".top10").attrs({width: 200,
+        height: sizebox*20});
+        // menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
+        // menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
         g = g.append('g')
             .attr('class','graph');
         function zoomed() {
             ss = d3.event.transform.k;
             tx = d3.event.transform.x;
             ty = d3.event.transform.y;
+            if (store.Y) updateEmbedding(store.Y,store.cost);
         }
         var zoom = d3.zoom()
         // .scaleExtent([1/netConfig.scalezoom, 40])
@@ -163,12 +251,12 @@ d3.Tsneplot = function () {
         };
     };
     function updateEmbedding(Y,cost) {
-        svg.select('.cost').text(cost.toFixed(2));
+        d3.select("#subzone").select('.cost').text(cost.toFixed(2));
         // get current solution
         // var Y = tsne.getSolution();
         // move the groups accordingly
         g.selectAll('.linkLineg')
-            .transition('move')
+            .transition()
             .duration(100)
             .attr("transform", function(d, i) {
                 return "translate(" +
@@ -221,6 +309,11 @@ d3.Tsneplot = function () {
         }
     };
 
+    Tsneplot.getTop10  = function (){
+        tsne.postMessage({action:"updateTracker"});
+        // clearInterval(intervalCalculate);
+    };
+
     Tsneplot.pause  = function (){
         clearInterval(intervalUI);
         // clearInterval(intervalCalculate);
@@ -232,6 +325,7 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.redraw  = function (){
+        panel.classed("active",true);
         svg.style('visibility','visible');
         tsne.postMessage({action:"initDataRaw",value:arr})//.initDataRaw(arr);
         drawEmbedding(arr);
@@ -244,6 +338,7 @@ d3.Tsneplot = function () {
 
     Tsneplot.remove  = function (){
         if (!first){
+            panel.classed("active",false);
             svg.style('visibility','hidden');
             Tsneplot.pause();
             g.selectAll('*').remove();
