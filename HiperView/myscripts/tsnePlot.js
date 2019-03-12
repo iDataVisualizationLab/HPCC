@@ -24,6 +24,8 @@ d3.Tsneplot = function () {
         isbusy = false,
         // tsne = new tsnejs.tSNE(graphicopt.opt);
         tsne = new Worker ('myscripts/tSNEworker.js');
+    let sizebox = 40;
+    let maxlist = 20;
     tsne.addEventListener('message',({data})=>{
         if (data.status==='done') {
             isbusy = false;
@@ -33,22 +35,31 @@ d3.Tsneplot = function () {
         }
         if (data.action==="updateTracker")
         {
-            console.log(data.value.map(e=>e.name));
-            const dataTop = d3.select('.top10').selectAll('div')
+            const dataTop = d3.select('.top10').selectAll('g')
                 .data(data.value,d=>d.name);
-            dataTop.exit()
-                .attr('class','remove')
-                .style('order',(d,i)=>999)
+            dataTop.exit().moveToBack()
                 .transition()
-                .duration(500)
+                .attr('transform',function(d){
+                    return 'translate(20,'+getTransformation(d3.select(this).attr('transform')).translateY+')'})
+                .transition()
+                .duration((d,i)=>i*100)
+                .style('opacity',0)
+                .attr('transform','translate(20,'+(maxlist+1)*sizebox+")")
                 .remove();
-            const newdiv = dataTop.enter().append("div")
-                .style('order',(d,i)=>i+1)
-                .attr('class','top10_item slideRight');
-            newdiv.append("span").text(d=>d.name);
-
+            const newdiv = dataTop.enter().append("g")
+                .attr('class','top10_item');
+            newdiv
+                .attr('transform','translate(0,'+(maxlist+1)*sizebox+")")
+                .style('opacity',0)
+            .transition()
+            .duration((d,i)=>i*100)
+                .style('opacity',1)
+                .attr('transform',(d,i)=>'translate(0,'+(i+1)*sizebox+")")
+            newdiv.append("text").text(d=>d.name);
             dataTop
-                .style('order',(d,i)=>i+1);
+                .transition()
+                .duration((d,i)=>i*100)
+                .attr('transform',(d,i)=>'translate(0,'+(i+1)*sizebox+")");
         }
     }, false);
     tsne.postMessage({action:"inittsne",value:graphicopt.opt});
@@ -157,6 +168,9 @@ d3.Tsneplot = function () {
         const subzone = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
         subzone.select(".details").append("span").text('Cost: ');
         subzone.select(".details").append("span").attr('class','cost');
+        subzone.select(".top10DIV").style('max-height', sizebox*20+"px");
+        subzone.select(".top10").attrs({width: sizebox*10,
+        height: sizebox*20})
         // menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
         // menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
         g = g.append('g')

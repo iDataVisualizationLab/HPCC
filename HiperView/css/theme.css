@@ -50,7 +50,8 @@
 .slideRight{
     animation-name: slideRight;
     -webkit-animation-name: slideRight;
-
+    animation-delay: 500ms;
+    -webkit-animation-delay: 2s; /* Safari 4.0 - 8.0 */
     animation-duration: 1s;
     -webkit-animation-duration: 1s;
 

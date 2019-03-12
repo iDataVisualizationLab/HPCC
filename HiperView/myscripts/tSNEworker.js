@@ -72,5 +72,5 @@ function distance (a,b) {
 }
 
 function getTop10 () {
-    return _(store_step).sortBy(d=>d.dis).reverse().slice(0,10);
+    return _(store_step).sortBy(d=>d.dis).reverse().slice(0,20);
 }
