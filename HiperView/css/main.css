@@ -115,6 +115,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 /* tooltip */
 #Summarynode, .d3-tip {
+	z-index: 99;
 	line-height: 1;
 	padding: 10px;
 	background: rgba(255, 255, 255, 1);
@@ -724,6 +725,11 @@ p.divider {
 	left:10px;
 	position: absolute;
 	transition: 0.5s;
+	padding-right: 10px;
+	display: none;
+}
+.subpanel.active {
+	display: block;
 }
 
 .top10DIV {
@@ -733,8 +739,12 @@ p.divider {
 .top10 {
 
 }
-.top10_item {
+.top10_item circle{
+	fill: black;
+}
 
+.top10_item circle.new{
+	fill: red;
 }
 
 .top10_item.remove {
