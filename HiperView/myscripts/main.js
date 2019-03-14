@@ -245,8 +245,12 @@ function setColorsAndThresholds(s) {
 
 
 function initDetailView() {
-    if (svg.select('.detailView').empty())
-        svgStore.detailView = svg.append('g').attr('class', 'detailView');
+    if (svg.select('.detailView').empty()) {
+        svgStore.detailView ={};
+        svgStore.detailView.g = svg.append('g').attr('class', 'detailView');
+        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
+        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
+    }
     if (svg.select('.rackRect').empty()) {
         // Draw racks **********************
         for (var i = 0; i < racks.length; i++) {
@@ -275,7 +279,7 @@ function initDetailView() {
 
         });
 
-        svgStore.detailView.selectAll(".rackRect")
+        svgStore.detailView.label.selectAll(".rackRect")
             .data(racksnewor)
             .enter().append("rect")
             .attr("class", "rackRect")
@@ -293,7 +297,7 @@ function initDetailView() {
             .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
-        svgStore.detailView.selectAll(".rackRectText1")
+        svgStore.detailView.label.selectAll(".rackRectText1")
             .data(racks)
             .enter().append("text")
             .attr("class", "rackRectText1")
@@ -328,7 +332,7 @@ function initDetailView() {
 
         for (var i = 1; i <= maxHostinRack; i++) {
             var yy = getHostY(1, i);
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "hostText")
                 .attr("x", 32)
                 .attr("y", yy + 1)
@@ -349,7 +353,7 @@ function initDetailView() {
             hosts[i].mOpacity = 0.1;
 
 
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "hostId")
                 .attr("x", xStart)
                 .attr("y", yy + 1)
@@ -360,7 +364,7 @@ function initDetailView() {
                 .attr("font-family", "sans-serif")
                 .text("" + hpcc_node);
 
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "measure_" + hosts[i].name)
                 .attr("x", xStart + w_rack / 2 - 20)
                 .attr("y", yy - 4)
@@ -1139,15 +1143,15 @@ function plotResult(result) {
 
 }
 function initTsneView() {
-    if (!svgStore.detailView.select('.rackRect').empty()) {
-        svgStore.detailView.selectAll('*').remove();
+    if (!svgStore.detailView.g.select('.rackRect').empty()) {
+        svgStore.detailView.g.selectAll('*').remove();
         TSneplot.reset(true);
     }
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
-    svgStore.detailView.selectAll(".RackSummary").remove();
-    svgStore.detailView.selectAll("."+name).remove();
+    svgStore.detailView.g.selectAll(".RackSummary").remove();
+    svgStore.detailView.items.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
         var xMin = xTimeScale(0);
@@ -1155,7 +1159,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
-        svgStore.detailView.append("rect")
+        svgStore.detailView.items.append("rect")
             .attr("class", name)
             .attr("x", x)
             .attr("y", y-10)
@@ -1178,7 +1182,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         ;//.on("mouseout", mouseoutNode);
 
         if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
-            svgStore.detailView.append("rect")
+            svgStore.detailView.items.append("rect")
                 .attr("class", name)
                 .attr("x", x)
                 .attr("y", y+node_size-9)
@@ -1216,8 +1220,8 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
         .y1(function(d) { return y-yScale(d.temp1); })
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll("."+name).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("class", name)
         .attr("stroke","#000")
@@ -1230,7 +1234,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
             mouseoverNode (this);
         })
     ;//.on("mouseout", mouseoutNode);
-    svgStore.detailView.selectAll("."+name).transition().duration(1000)
+    svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
         .style("fill",function (d) {
             return color(d[d.length-1].temp1);
         })
@@ -1312,8 +1316,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.min)})
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll(".RackSummaryMin"+rack).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMin"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
         .attr("class", "RackSummary RackSummaryMin"+rack)
         .attr("stroke","#000")
@@ -1328,8 +1332,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.max)})
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll(".RackSummaryMax"+rack).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMax"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
         .attr("class", "RackSummary RackSummaryMax"+rack)
         .attr("stroke","#000")
@@ -1339,8 +1343,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .style("fill","#e99");
 
     if (rack==1) {
-        svgStore.detailView.selectAll(".baseline").remove();
-        svgStore.detailView.append("line")
+        svgStore.detailView.items.selectAll(".baseline").remove();
+        svgStore.detailView.items.append("line")
             .attr("class", "RackSummary baseline")
             .attr("x1", xStart)
             .attr("x2", maxX+10)
@@ -1350,8 +1354,8 @@ function drawSummaryAreaChart(rack, xStart) {
             .attr("stroke","#000")
             .attr("stroke-width",0.5);
 
-        svgStore.detailView.selectAll(".baselineText").remove();
-        svgStore.detailView.append("text")
+        svgStore.detailView.items.selectAll(".baselineText").remove();
+        svgStore.detailView.items.append("text")
             .attr("class", "RackSummary baselineText")
             .attr("x", 12+maxX)
             .attr("y", y+2)
