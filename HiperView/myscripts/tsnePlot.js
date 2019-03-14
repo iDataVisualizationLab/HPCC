@@ -256,8 +256,8 @@ d3.Tsneplot = function () {
         // var Y = tsne.getSolution();
         // move the groups accordingly
         g.selectAll('.linkLineg')
-            .transition()
-            .duration(100)
+            .transition('move')
+            .duration(1000)
             .attr("transform", function(d, i) {
                 return "translate(" +
                     (Y[i][0]*10*ss+tx) + "," +

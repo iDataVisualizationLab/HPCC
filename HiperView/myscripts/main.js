@@ -191,6 +191,8 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
+let getDataWorker = new Worker ('myscripts/getDataWorker.js');
+let isbusy = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
@@ -443,12 +445,7 @@ function main() {
         }
     });
     radarChartsumopt.scaleDensity= d3.scaleLinear().domain([1,hosts.length]).range([0.3, 0.75]);
-    // hosts.sort(function (a, b) {
-    //     if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
-    //         return 1;
-    //     }
-    //     else return -1;
-    // })
+
 
     // Summary Panel ********************************************************************
     svgsum = svg.append("g")
@@ -537,6 +534,20 @@ function main() {
     xTimeSummaryScale =xLinearSummaryScale;
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,10]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
+    getDataWorker.postMessage({action:"init",value:{
+            serviceList:serviceList,
+            serviceListattr:serviceListattr,
+            thresholds:thresholds,
+            hosts:hosts
+        }});
+    getDataWorker.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (data.action==='returnData'){
+            TSneplot.data(data.result.arr).draw(data.result.nameh);
+        }
+    }, false);
     TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).init();
     request();
 }
@@ -1228,42 +1239,16 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
 }
 
 function plotTsne(nameh){
-    if (globalTrend)
-        startIndex =0;
-    else
-        startIndex = lastIndex;
-    let arr =[];
-    for(var h = 0;h < hosts.length;h++)
-    {
-        var name = hosts[h].name;
-        var r = hostResults[name];
-        var arrServices = [];
-        for (var stepIndex = startIndex; stepIndex<= lastIndex; stepIndex++) {
-                serviceList.forEach((ser, indx) => {
-                    var a
-                    if (r[serviceListattr[indx]][stepIndex]) {
-                        a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser);
-                    }else {
-                        a = predict (r[serviceListattr[indx]],ser)
-                    }
-                    var scale = d3.scaleLinear()
-                                    .domain([thresholds[indx][0],thresholds[indx][1]])
-                                    .range([0,1]);
-                    a = a.map(d=>scale(d)||0.5);
-                    switch(indx){
-                        case 0:
-                        case 3:
-                            arrServices = d3.merge([arrServices,a]);
-                            break;
-                        default:
-                            arrServices.push(a[0]||0.5)
-                    }
-                })
-        }
-        arrServices.name = name;
-        arr.push(arrServices);
+    if(!isbusy) {
+        isbusy = true;
+        getDataWorker.postMessage({
+            action: "getbatchData", value: {
+                lastIndex: lastIndex,
+                hostResults: hostResults,
+                host: nameh
+            }
+        });
     }
-    TSneplot.data(arr).draw(nameh);
 }
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
