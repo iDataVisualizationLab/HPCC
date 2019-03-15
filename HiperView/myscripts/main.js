@@ -191,6 +191,8 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
+let getDataWorker = new Worker ('myscripts/getDataWorker.js');
+let isbusy = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
@@ -243,8 +245,12 @@ function setColorsAndThresholds(s) {
 
 
 function initDetailView() {
-    if (svg.select('.detailView').empty())
-        svgStore.detailView = svg.append('g').attr('class', 'detailView');
+    if (svg.select('.detailView').empty()) {
+        svgStore.detailView ={};
+        svgStore.detailView.g = svg.append('g').attr('class', 'detailView');
+        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
+        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
+    }
     if (svg.select('.rackRect').empty()) {
         // Draw racks **********************
         for (var i = 0; i < racks.length; i++) {
@@ -273,7 +279,7 @@ function initDetailView() {
 
         });
 
-        svgStore.detailView.selectAll(".rackRect")
+        svgStore.detailView.label.selectAll(".rackRect")
             .data(racksnewor)
             .enter().append("rect")
             .attr("class", "rackRect")
@@ -291,7 +297,7 @@ function initDetailView() {
             .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
-        svgStore.detailView.selectAll(".rackRectText1")
+        svgStore.detailView.label.selectAll(".rackRectText1")
             .data(racks)
             .enter().append("text")
             .attr("class", "rackRectText1")
@@ -326,7 +332,7 @@ function initDetailView() {
 
         for (var i = 1; i <= maxHostinRack; i++) {
             var yy = getHostY(1, i);
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "hostText")
                 .attr("x", 32)
                 .attr("y", yy + 1)
@@ -347,7 +353,7 @@ function initDetailView() {
             hosts[i].mOpacity = 0.1;
 
 
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "hostId")
                 .attr("x", xStart)
                 .attr("y", yy + 1)
@@ -358,7 +364,7 @@ function initDetailView() {
                 .attr("font-family", "sans-serif")
                 .text("" + hpcc_node);
 
-            svgStore.detailView.append("text")
+            svgStore.detailView.label.append("text")
                 .attr("class", "measure_" + hosts[i].name)
                 .attr("x", xStart + w_rack / 2 - 20)
                 .attr("y", yy - 4)
@@ -443,12 +449,7 @@ function main() {
         }
     });
     radarChartsumopt.scaleDensity= d3.scaleLinear().domain([1,hosts.length]).range([0.3, 0.75]);
-    // hosts.sort(function (a, b) {
-    //     if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
-    //         return 1;
-    //     }
-    //     else return -1;
-    // })
+
 
     // Summary Panel ********************************************************************
     svgsum = svg.append("g")
@@ -537,6 +538,20 @@ function main() {
     xTimeSummaryScale =xLinearSummaryScale;
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,10]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
+    getDataWorker.postMessage({action:"init",value:{
+            serviceList:serviceList,
+            serviceListattr:serviceListattr,
+            thresholds:thresholds,
+            hosts:hosts
+        }});
+    getDataWorker.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (data.action==='returnData'){
+            TSneplot.data(data.result.arr).draw(data.result.nameh);
+        }
+    }, false);
     TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).init();
     request();
 }
@@ -1128,15 +1143,15 @@ function plotResult(result) {
 
 }
 function initTsneView() {
-    if (!svgStore.detailView.select('.rackRect').empty()) {
-        svgStore.detailView.selectAll('*').remove();
+    if (!svgStore.detailView.g.select('.rackRect').empty()) {
+        svgStore.detailView.g.selectAll('*').remove();
         TSneplot.reset(true);
     }
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
-    svgStore.detailView.selectAll(".RackSummary").remove();
-    svgStore.detailView.selectAll("."+name).remove();
+    svgStore.detailView.g.selectAll(".RackSummary").remove();
+    svgStore.detailView.items.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
         var xMin = xTimeScale(0);
@@ -1144,7 +1159,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
-        svgStore.detailView.append("rect")
+        svgStore.detailView.items.append("rect")
             .attr("class", name)
             .attr("x", x)
             .attr("y", y-10)
@@ -1167,7 +1182,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         ;//.on("mouseout", mouseoutNode);
 
         if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
-            svgStore.detailView.append("rect")
+            svgStore.detailView.items.append("rect")
                 .attr("class", name)
                 .attr("x", x)
                 .attr("y", y+node_size-9)
@@ -1205,8 +1220,8 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
         .y1(function(d) { return y-yScale(d.temp1); })
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll("."+name).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("class", name)
         .attr("stroke","#000")
@@ -1219,7 +1234,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
             mouseoverNode (this);
         })
     ;//.on("mouseout", mouseoutNode);
-    svgStore.detailView.selectAll("."+name).transition().duration(1000)
+    svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
         .style("fill",function (d) {
             return color(d[d.length-1].temp1);
         })
@@ -1228,42 +1243,16 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
 }
 
 function plotTsne(nameh){
-    if (globalTrend)
-        startIndex =0;
-    else
-        startIndex = lastIndex;
-    let arr =[];
-    for(var h = 0;h < hosts.length;h++)
-    {
-        var name = hosts[h].name;
-        var r = hostResults[name];
-        var arrServices = [];
-        for (var stepIndex = startIndex; stepIndex<= lastIndex; stepIndex++) {
-                serviceList.forEach((ser, indx) => {
-                    var a
-                    if (r[serviceListattr[indx]][stepIndex]) {
-                        a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser);
-                    }else {
-                        a = predict (r[serviceListattr[indx]],ser)
-                    }
-                    var scale = d3.scaleLinear()
-                                    .domain([thresholds[indx][0],thresholds[indx][1]])
-                                    .range([0,1]);
-                    a = a.map(d=>scale(d)||0.5);
-                    switch(indx){
-                        case 0:
-                        case 3:
-                            arrServices = d3.merge([arrServices,a]);
-                            break;
-                        default:
-                            arrServices.push(a[0]||0.5)
-                    }
-                })
-        }
-        arrServices.name = name;
-        arr.push(arrServices);
+    if(!isbusy) {
+        isbusy = true;
+        getDataWorker.postMessage({
+            action: "getbatchData", value: {
+                lastIndex: lastIndex,
+                hostResults: hostResults,
+                host: nameh
+            }
+        });
     }
-    TSneplot.data(arr).draw(nameh);
 }
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
@@ -1327,8 +1316,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.min)})
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll(".RackSummaryMin"+rack).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMin"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
         .attr("class", "RackSummary RackSummaryMin"+rack)
         .attr("stroke","#000")
@@ -1343,8 +1332,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.max)})
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.selectAll(".RackSummaryMax"+rack).remove();
-    svgStore.detailView.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMax"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
         .attr("class", "RackSummary RackSummaryMax"+rack)
         .attr("stroke","#000")
@@ -1354,8 +1343,8 @@ function drawSummaryAreaChart(rack, xStart) {
         .style("fill","#e99");
 
     if (rack==1) {
-        svgStore.detailView.selectAll(".baseline").remove();
-        svgStore.detailView.append("line")
+        svgStore.detailView.items.selectAll(".baseline").remove();
+        svgStore.detailView.items.append("line")
             .attr("class", "RackSummary baseline")
             .attr("x1", xStart)
             .attr("x2", maxX+10)
@@ -1365,8 +1354,8 @@ function drawSummaryAreaChart(rack, xStart) {
             .attr("stroke","#000")
             .attr("stroke-width",0.5);
 
-        svgStore.detailView.selectAll(".baselineText").remove();
-        svgStore.detailView.append("text")
+        svgStore.detailView.items.selectAll(".baselineText").remove();
+        svgStore.detailView.items.append("text")
             .attr("class", "RackSummary baselineText")
             .attr("x", 12+maxX)
             .attr("y", y+2)

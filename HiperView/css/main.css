@@ -1,7 +1,7 @@
 :root {
 	--primary-color: rgb(0, 0, 0);
 	--secondary-color: rgba(255, 255, 255, 0.79);
-	--containBlack: #e4e4e4;
+	--containBlack: #ffffff;
 	--slider: 0;
 	--sideNavwidth: 350px;
 }
@@ -735,10 +735,16 @@ p.divider {
 	fill: var(--containBlack);
 	stroke: white;
 }
-.light rect {
+.light .pannel rect ,.light .summaryRect,.light .rackRect {
 	fill: white;
 	stroke: black;
 }
+/*.detailViewItems rect {*/
+	/*fill-opacity: 0.5;*/
+/*}*/
+/*.light .detailViewItems rect {*/
+	/*fill-opacity: unset;*/
+/*}*/
 .light .subzone {
 
 }
