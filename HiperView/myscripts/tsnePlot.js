@@ -55,6 +55,7 @@ d3.Tsneplot = function () {
             .duration((d, i) => i * 100)
             .style('opacity', 0)
             .attr('transform', 'translate(20,' + (maxlist + 1) * sizebox + ")")
+            .on('interrupt',function(d){d3.active(this).remove})
             .remove();
         // ENTER
         const newdiv = dataTop.enter().append("g")
@@ -230,7 +231,7 @@ d3.Tsneplot = function () {
             ss = d3.event.transform.k;
             tx = d3.event.transform.x;
             ty = d3.event.transform.y;
-            if (store.Y) updateEmbedding(store.Y,store.cost);
+            if (store.Y) updateEmbedding(store.Y,store.cost, true);
         }
         var zoom = d3.zoom()
         // .scaleExtent([1/netConfig.scalezoom, 40])
@@ -250,18 +251,24 @@ d3.Tsneplot = function () {
             }
         };
     };
-    function updateEmbedding(Y,cost) {
+    function updateEmbedding(Y,cost, skipAnimation) {
         d3.select("#subzone").select('.cost').text(cost.toFixed(2));
-        // get current solution
-        // var Y = tsne.getSolution();
-        // move the groups accordingly
-        g.selectAll('.linkLineg')
-            .transition('move')
-            .duration(1000)
-            .attr("transform", function(d, i) {
-                return "translate(" +
-                    (Y[i][0]*10*ss+tx) + "," +
-                    (Y[i][1]*10*ss+ty) + ")"; });
+        let updatePoints = g.selectAll('.linkLineg');
+        if (skipAnimation ===undefined || skipAnimation==false)
+            updatePoints = updatePoints
+                .transition()
+                .duration(10)
+                // .on('interrupt end',function(d){
+                //     console.log(this.__transition__.count)
+                //     d3.active(this).attr("transform", function(d, i) {
+                //     return "translate(" +
+                //         (Y[i][0]*10*ss+tx) + "," +
+                //         (Y[i][1]*10*ss+ty) + ")"; });});
+        updatePoints
+                .attr("transform", function(d, i) {
+                    return "translate(" +
+                        (Y[i][0]*10*ss+tx) + "," +
+                        (Y[i][1]*10*ss+ty) + ")"; });
         //let curentHostpos = currenthost.node().getBoundingClientRect();
         linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*10*ss+tx,graphicopt.widthG()),0) )
             .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*10*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);

@@ -1,7 +1,7 @@
 :root {
 	--primary-color: rgb(0, 0, 0);
 	--secondary-color: rgba(255, 255, 255, 0.79);
-	--containBlack: #e4e4e4;
+	--containBlack: #ffffff;
 	--slider: 0;
 	--sideNavwidth: 350px;
 }
