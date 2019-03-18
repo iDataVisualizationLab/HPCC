@@ -351,6 +351,36 @@ function data_table(sample) {
 
     var table = d3.select("#compute-list")
         .html("")
+        .selectAll("li")
+        .data(sample)
+        .enter().append("li")
+        .on("mouseover", highlight)
+        .on("mouseout", unhighlight);
+
+    table
+        .append("span")
+        .attr("class", "color-block")
+        .style("background", function(d) { return color(selectedService==null?d.group:d[selectedService]) })
+        .style("opacity",0.85);
+
+    table
+        .append("span")
+        .text(function(d) { return d.name; })
+}
+// complex data table
+function complex_data_table(sample) {
+    // sort by first column
+    // var sample = sample.sort(function(a,b) {
+    //     var col = d3.keys(a)[0];
+    //     return a[col] < b[col] ? -1 : 1;
+    // });
+    // sort by Name
+    var samplenest = d3.nest()
+        .key(d=>d.rack).sortKeys(collator.compare)
+        .key(d=>d.compute).sortKeys(collator.compare)
+        .sortValues((a,b)=>a.timestep-b.timestep)
+        .entries(sample);
+    var table = d3.select("#compute-list").selectAll('')
         .selectAll(".row")
         .data(sample)
         .enter().append("div")
@@ -367,7 +397,6 @@ function data_table(sample) {
         .append("span")
         .text(function(d) { return d.name; })
 }
-
 // Adjusts rendering speed
 function optimize(timer) {
     var delta = (new Date()).getTime() - timer;
