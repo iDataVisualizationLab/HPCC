@@ -219,7 +219,7 @@ function object2DataPrallel(ob){
 }
 
 function colorbyCategory(data,key) {
-    var listKey = _(data).unique(key).map(d=>d[key]);
+    var listKey = _(data).unique(key).map(d=>d[key]).naturalSort();
     var listcolor= listKey.map(colorscale);
     colors.domain(listKey).range(listcolor);
     color = colors;
