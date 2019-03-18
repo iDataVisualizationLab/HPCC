@@ -207,7 +207,7 @@ function object2DataPrallel(ob){
             });
             eachIn.timestep = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
             eachIn.rack = "Rack "+rack;
-            eachIn.compute = com.key.split('-')[2];
+            eachIn.compute = com.key;
             eachIn.group = "Rack "+rack;
             eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
             eachIn.id = com.key+"-"+count;
