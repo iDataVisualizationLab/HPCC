@@ -290,7 +290,7 @@ function create_legend(colors,brush) {
     }else{
         colorbyCategory(data,"group");
     }
-    barScale.range([0,svgLengend.node().parentElement.offsetWidth]);
+    barScale.range([0,Math.max(svgLengend.node().parentElement.offsetWidth,400)]);
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
@@ -302,6 +302,10 @@ function create_legend(colors,brush) {
             .attr("title", "Hide group");
             legend
                 .append("span")
+                .attr("class","col s3")
+                .text(function(d,i) { return " " + d});
+            legend
+                .append("span")
                 .style("opacity",0.85)
                 .attr("class", "color-bar");
 
@@ -310,9 +314,6 @@ function create_legend(colors,brush) {
                 .attr("class", "tally")
                 .text(function(d,i) { return 0});
 
-            legend
-                .append("span")
-                .text(function(d,i) { return " " + d});
             return legend;
         }
     ).on("click", function(d) {
@@ -915,6 +916,7 @@ function changeVar(d){
         changeGroupTarget(d.arr);
         legend = create_legend(colors,brush);
     }else {
+        legend.remove();
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         changeGroupTarget(d.arr);
