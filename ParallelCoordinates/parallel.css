@@ -606,3 +606,17 @@ nav ul li.active a{
 [tooltip]:hover::after,[tooltip]:hover::before {
     opacity:1
 }
+
+
+/*new list type*/
+.collapsible-body {
+    padding: 10px
+}
+.collapsible.rack .collapsible-header{
+    background-color: transparent;
+    padding: 5px;
+}
+.rack.active>.collapsible-header, .compute.active .collapsible-header{
+    background-color: white !important;
+    color: black;
+}
