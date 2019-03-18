@@ -61,7 +61,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     let smallarr = arr[0] - arr[1]+arr[0];
         arr = arr.reverse();
     let revertThreshold = arr.slice(1);
-    revertThreshold.push(smallarr)
+    revertThreshold.push(smallarr);
     var legendAll = legend_data.join(
         enter=>{
             let legend = enter.append("g")
@@ -151,3 +151,14 @@ function switchTheme(){
     d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
     return;
 }
+
+const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+Array.prototype.naturalSort= function(_){
+    if (arguments.length) {
+        return this.sort(function (as, bs) {
+            return collator.compare(as[_],bs[_]);
+        });
+    }else {
+        return this.sort(collator.compare);
+    }
+};

@@ -18,7 +18,7 @@ var m = [40, 0, 10, 0],
     highlighted,
     dimensions,
     legend,
-    render_speed = 50,
+    render_speed = 1,
     brush_count = 0,
     excluded_groups = [],
     svg;
@@ -47,7 +47,7 @@ $( document ).ready(function() {
         .selectAll('li').data(listOption)
         .join(enter => enter.append("li") .attr('tabindex','0').append("a")
             .attr('href',"#"))
-        .text(d=>{console.log(d); return d.text})
+        .text(d=>{return d.text})
         .on('click',changeVar);
 
     d3.select("#DarkTheme").on("click",switchTheme);
@@ -290,7 +290,7 @@ function create_legend(colors,brush) {
     }else{
         colorbyCategory(data,"group");
     }
-    barScale.range([0,svgLengend.node().parentElement.offsetWidth]);
+    barScale.range([0,Math.max(svgLengend.node().parentElement.offsetWidth,400)]);
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
@@ -302,6 +302,10 @@ function create_legend(colors,brush) {
             .attr("title", "Hide group");
             legend
                 .append("span")
+                .attr("class","col s3")
+                .text(function(d,i) { return " " + d});
+            legend
+                .append("span")
                 .style("opacity",0.85)
                 .attr("class", "color-bar");
 
@@ -310,9 +314,6 @@ function create_legend(colors,brush) {
                 .attr("class", "tally")
                 .text(function(d,i) { return 0});
 
-            legend
-                .append("span")
-                .text(function(d,i) { return " " + d});
             return legend;
         }
     ).on("click", function(d) {
@@ -341,12 +342,14 @@ function render_range(selection, i, max, opacity) {
 // simple data table
 function data_table(sample) {
     // sort by first column
-    var sample = sample.sort(function(a,b) {
-        var col = d3.keys(a)[0];
-        return a[col] < b[col] ? -1 : 1;
-    });
+    // var sample = sample.sort(function(a,b) {
+    //     var col = d3.keys(a)[0];
+    //     return a[col] < b[col] ? -1 : 1;
+    // });
+    // sort by Name
+    var sample = sample.naturalSort("name");
 
-    var table = d3.select("#food-list")
+    var table = d3.select("#compute-list")
         .html("")
         .selectAll(".row")
         .data(sample)
@@ -392,7 +395,18 @@ function selection_stats(opacity, n, total) {
 // Highlight single polyline
 function highlight(d) {
     d3.select("#foreground").style("opacity", "0.25");
-    d3.select("#legend").selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
+    if (selectedService){
+        const val = d[selectedService];
+        const gourpBeloing = orderLegend.find(dv=>val>=dv.minvalue && val<dv.value)||{text:undefined};
+
+        console.log(val);
+        console.log(gourpBeloing);
+        d3.select("#colorContinuos").selectAll(".row").style("opacity", function(p) { return (gourpBeloing.text === p) ? null : "0.3" });
+    }else {
+        d3.select("#legend").selectAll(".row").style("opacity", function (p) {
+            return (d.group == p) ? null : "0.3"
+        });
+    }
     path(d, highlighted, colorCanvas(selectedService==null?d.group:d[selectedService],1));
 }
 
@@ -400,6 +414,11 @@ function highlight(d) {
 function unhighlight() {
     d3.select("#foreground").style("opacity", null);
     d3.select("#legend").selectAll(".row").style("opacity", null);
+    if (selectedService){
+        d3.select("#colorContinuos").selectAll(".row").style("opacity", null);
+    }else {
+        d3.select("#legend").selectAll(".row").style("opacity", null);
+    }
     highlighted.clearRect(0,0,w,h);
 }
 
@@ -508,11 +527,12 @@ function changeGroupTarget(key) {
         data.forEach(d=>d.group = d.rack)
     else {
         var thresholdScale = function(scale,d) {
-            if(d) return d3.bisector(function(d) { return d; }).left(scale,d);
+            if(d) return d3.bisector(function(d) { return d; }).right(scale,d);
                 return undefined};
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1);
-        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),[{text: undefined, value: arrThresholds[1]+arrmidle[0]-arrmidle[1]}]]);
+        orderLegend = d3.merge([nameLegend.map((d,i)=>{
+            return{text: d, value: arrmidle[i], minvalue: arrThresholds[i]}}).reverse(),[{text: undefined, value: arrThresholds[1]+arrmidle[0]-arrmidle[1], minvalue: -Infinity}]]);
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }
@@ -915,6 +935,7 @@ function changeVar(d){
         changeGroupTarget(d.arr);
         legend = create_legend(colors,brush);
     }else {
+        legend.remove();
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         changeGroupTarget(d.arr);
