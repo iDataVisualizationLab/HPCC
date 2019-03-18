@@ -18,7 +18,7 @@ var m = [40, 0, 10, 0],
     highlighted,
     dimensions,
     legend,
-    render_speed = 50,
+    render_speed = 1,
     brush_count = 0,
     excluded_groups = [],
     svg;
@@ -342,12 +342,14 @@ function render_range(selection, i, max, opacity) {
 // simple data table
 function data_table(sample) {
     // sort by first column
-    var sample = sample.sort(function(a,b) {
-        var col = d3.keys(a)[0];
-        return a[col] < b[col] ? -1 : 1;
-    });
+    // var sample = sample.sort(function(a,b) {
+    //     var col = d3.keys(a)[0];
+    //     return a[col] < b[col] ? -1 : 1;
+    // });
+    // sort by Name
+    var sample = sample.naturalSort("name");
 
-    var table = d3.select("#food-list")
+    var table = d3.select("#compute-list")
         .html("")
         .selectAll(".row")
         .data(sample)
