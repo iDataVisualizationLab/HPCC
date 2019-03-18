@@ -47,7 +47,7 @@ $( document ).ready(function() {
         .selectAll('li').data(listOption)
         .join(enter => enter.append("li") .attr('tabindex','0').append("a")
             .attr('href',"#"))
-        .text(d=>{console.log(d); return d.text})
+        .text(d=>{return d.text})
         .on('click',changeVar);
 
     d3.select("#DarkTheme").on("click",switchTheme);
@@ -395,7 +395,18 @@ function selection_stats(opacity, n, total) {
 // Highlight single polyline
 function highlight(d) {
     d3.select("#foreground").style("opacity", "0.25");
-    d3.select("#legend").selectAll(".row").style("opacity", function(p) { return (d.group == p) ? null : "0.3" });
+    if (selectedService){
+        const val = d[selectedService];
+        const gourpBeloing = orderLegend.find(dv=>val>=dv.minvalue && val<dv.value)||{text:undefined};
+
+        console.log(val);
+        console.log(gourpBeloing);
+        d3.select("#colorContinuos").selectAll(".row").style("opacity", function(p) { return (gourpBeloing.text === p) ? null : "0.3" });
+    }else {
+        d3.select("#legend").selectAll(".row").style("opacity", function (p) {
+            return (d.group == p) ? null : "0.3"
+        });
+    }
     path(d, highlighted, colorCanvas(selectedService==null?d.group:d[selectedService],1));
 }
 
@@ -403,6 +414,11 @@ function highlight(d) {
 function unhighlight() {
     d3.select("#foreground").style("opacity", null);
     d3.select("#legend").selectAll(".row").style("opacity", null);
+    if (selectedService){
+        d3.select("#colorContinuos").selectAll(".row").style("opacity", null);
+    }else {
+        d3.select("#legend").selectAll(".row").style("opacity", null);
+    }
     highlighted.clearRect(0,0,w,h);
 }
 
@@ -511,11 +527,12 @@ function changeGroupTarget(key) {
         data.forEach(d=>d.group = d.rack)
     else {
         var thresholdScale = function(scale,d) {
-            if(d) return d3.bisector(function(d) { return d; }).left(scale,d);
+            if(d) return d3.bisector(function(d) { return d; }).right(scale,d);
                 return undefined};
         let nameLegend = rangeToString(arrThresholds);
         let arrmidle = arrThresholds.slice(1);
-        orderLegend = d3.merge([nameLegend.map((d,i)=>{return{text: d, value: arrmidle[i]}}).reverse(),[{text: undefined, value: arrThresholds[1]+arrmidle[0]-arrmidle[1]}]]);
+        orderLegend = d3.merge([nameLegend.map((d,i)=>{
+            return{text: d, value: arrmidle[i], minvalue: arrThresholds[i]}}).reverse(),[{text: undefined, value: arrThresholds[1]+arrmidle[0]-arrmidle[1], minvalue: -Infinity}]]);
         data.forEach(d => d.group = nameLegend[thresholdScale(arrmidle,d[key])]);
     }
 }

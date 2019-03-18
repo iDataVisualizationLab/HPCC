@@ -61,7 +61,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     let smallarr = arr[0] - arr[1]+arr[0];
         arr = arr.reverse();
     let revertThreshold = arr.slice(1);
-    revertThreshold.push(smallarr)
+    revertThreshold.push(smallarr);
     var legendAll = legend_data.join(
         enter=>{
             let legend = enter.append("g")
