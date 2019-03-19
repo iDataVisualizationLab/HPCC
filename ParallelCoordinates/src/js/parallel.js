@@ -55,7 +55,12 @@ $( document ).ready(function() {
     init();
 });
 function discovery(d){
-    d3.select(d).style('left','20px').transition().delay(5000).duration(1000).style('left',null);
+    d3.select(d).style('left','20px')
+        .classed("pulse",true)
+        .transition().delay(5000).duration(1000)
+        .style('left',null).on('end',function() {
+        d3.select(d).classed("pulse",false);
+    });
 
 }
 function openNav() {
@@ -370,12 +375,6 @@ function data_table(sample) {
 }
 // complex data table
 function complex_data_table(sample) {
-    // sort by first column
-    // var sample = sample.sort(function(a,b) {
-    //     var col = d3.keys(a)[0];
-    //     return a[col] < b[col] ? -1 : 1;
-    // });
-    // sort by Name
     var samplenest = d3.nest()
         .key(d=>d.rack).sortKeys(collator.compare)
         .key(d=>d.compute).sortKeys(collator.compare)
@@ -433,19 +432,7 @@ function complex_data_table(sample) {
         }
     )
     $('.collapsible').collapsible();
-        // .enter().append("div")
-        // .on("mouseover", highlight)
-        // .on("mouseout", unhighlight);
-    //
-    // table
-    //     .append("span")
-    //     .attr("class", "color-block")
-    //     .style("background", function(d) { return color(selectedService==null?d.group:d[selectedService]) })
-    //     .style("opacity",0.85);
-    //
-    // table
-    //     .append("span")
-    //     .text(function(d) { return d.name; })
+
 }
 // Adjusts rendering speed
 function optimize(timer) {
@@ -749,9 +736,11 @@ function paths(selected, ctx, count) {
 
     selection_stats(opacity, n, data.length);
 
-    shuffled_data = _.shuffle(selected);
+    //shuffled_data = _.shuffle(selected);
 
-    complex_data_table(shuffled_data.slice(0,20));
+    // complex_data_table(shuffled_data.slice(0,20));
+    shuffled_data = selected;
+    complex_data_table(shuffled_data);
 
     ctx.clearRect(0,0,w+1,h+1);
 

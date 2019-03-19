@@ -118,18 +118,7 @@ var charType = "Heatmap";
 var sumType = "Radar";
 let globalTrend = false;
 //***********************
-var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
-var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
-var serviceQuery ={
-    nagios: ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"],
-    influxdb: ["cpu_temperature","cpu+load" ,"memory+usage" ,"fan_speed" ,"system_power_usage"],
-};
-var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
-    arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
-    arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
-    arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
-    arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
-var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
+
 var initialService = "Temperature";
 var selectedService;
 
@@ -252,6 +241,8 @@ function initDetailView() {
         svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
     }
     if (svg.select('.rackRect').empty()) {
+        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
+        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
         // Draw racks **********************
         for (var i = 0; i < racks.length; i++) {
             racks[i].x = 35 + racks[i].id * (w_rack + w_gap) - w_rack + 10;
@@ -539,10 +530,8 @@ function main() {
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,10]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
     getDataWorker.postMessage({action:"init",value:{
-            serviceList:serviceList,
-            serviceListattr:serviceListattr,
-            thresholds:thresholds,
-            hosts:hosts
+            hosts:hosts,
+            db:db,
         }});
     getDataWorker.addEventListener('message',({data})=>{
         if (data.status==='done') {
@@ -897,87 +886,8 @@ function predict (arr,ser){
     }
 }
 
-function processData(str, serviceName) {
-    if (serviceName == serviceList[0]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var arrString =  str.split(" ");
-            a[0] = +arrString[2]||undefinedValue;
-            a[1] = +arrString[6]||undefinedValue;
-            a[2] = +arrString[10]||undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[1]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
-            || str.indexOf("CPU Load: null")>=0){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var arrString =  str.split("CPU Load: ")[1];
-            a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[2]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
-            a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[3]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-            a[3] = undefinedValue;
-        }
-        else{
-            var arr4 =  str.split(" RPM ");
-            a[0] = +arr4[0].split("FAN_1 ")[1];
-            a[1] = +arr4[1].split("FAN_2 ")[1];
-            a[2] = +arr4[2].split("FAN_3 ")[1];
-            a[3] = +arr4[3].split("FAN_4 ")[1];
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[4]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var maxConsumtion = 3.2;  // over 100%
-            var arr4 =  str.split(" ");
-            a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
-    }
-}
+
+let processData = processData_old;
 
 function decimalColorToHTMLcolor(number) {
     //converts to a integer
@@ -1407,11 +1317,14 @@ function realTimeRequest(){
 }
 function realTimesetting (option){
     isRealtime = option;
+    getDataWorker.postMessage({action:'isRealtime',value:option});
     if (option){
+        processData = processData_metrix;
         simDuration = 1000;
         simDurationinit = 1000;
         numberOfMinutes = 26*60;
     }else{
+        processData = processData_old;
         simDuration =0;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
@@ -1531,7 +1444,8 @@ function requestService(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        // xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription="+serviceQuery[db][serviceList[serin]].query, true);
         xhr.send();
     })
 }
@@ -1557,7 +1471,8 @@ function requestServiceInFlux(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_test&q=" + hosts[count].name + " WHERE host='10.101.1.1' LIMIT 1"+serviceQuery[db][serin], true);
+        // xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_test&q=" + hosts[count].name + " WHERE host='10.101.1.1' LIMIT 1"+serviceQuery[db][serin], true);
+        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
         xhr.send();
     })
 }
