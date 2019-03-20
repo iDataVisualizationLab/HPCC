@@ -9,7 +9,6 @@
     <title>HiperView</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
     <script src="js/jquery-1.9.0.min.js"></script>
-    <script src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnosticsnd/build/js/scagnosticsnd.min.js"></script>
     <script src="js/jquery.dd.js"></script>
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
@@ -81,7 +80,8 @@
                             <option value="serviceWed04Oct" >04 Oct 2018</option>
                             <option value="service15Oct">15 Oct 2018</option>
                             <option value="service17Oct">17 Oct 2018</option>
-                            <option value="realtime">Real time</option>
+                            <option value="nagios">Nagios</option>
+                            <option value="influxdb">Influxdb</option>
                         </select>
                     </div>
                     <label for="datasetsSelect" class="col s4"> Visualizing: </label>
@@ -195,7 +195,7 @@
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
-<script type="text/javascript" src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnostics/build/js/outliagnostics.min.js"></script>
+
 
 <script src="myscripts/util.js"></script>
 <script src="myscripts/hostlist.js"></script>
@@ -203,6 +203,8 @@
 <!--<script src="myscripts/service17Oct.js"></script>-->
 <!--<script src="myscripts/serviceWed26Sep.js"></script>-->
 <!--<script src="myscripts/main.js"></script>-->
+<script src="js/outliagnostics.min.js"></script>
+<script src="js/scagnosticsnd.min.js"></script>
 <script src="js/box.js"></script>
 <script src="js/boxplot.js"></script>
 <script src="js/binnerN.min.js"></script>

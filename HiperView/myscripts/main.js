@@ -309,17 +309,6 @@ function initDetailView() {
             });
 
         // Draw host names **********************
-        /*svg.append("text")
-            .attr("class", "hostText")
-            .attr("x", 0)
-            .attr("y", top_margin-15)
-            .attr("fill", "#000")
-            .style("font-weight","bold")
-            .style("text-anchor", "start")
-            .style("font-size", "12px")
-            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-            .attr("font-family", "sans-serif")
-            .text("Summary");*/
 
         for (var i = 1; i <= maxHostinRack; i++) {
             var yy = getHostY(1, i);
@@ -848,7 +837,8 @@ function updateTimeText(index){
         .text(new Date(query_time).timeNow());
 }
 // Delete unnecessary files
-function processResult(r){
+let processResult = processResult_old;
+function processResult_old(r){
     var obj = {};
     obj.result = {};
     obj.result.query_time = r.result.query_time;
@@ -858,6 +848,21 @@ function processResult(r){
     obj.data.service.plugin_output = r.data.service.plugin_output
     return obj;
 }
+const processResult_nagios = processResult_old;
+function processResult_influxdb(r,hostname){
+    var obj = {};
+    obj.result = {};
+    if (r.results[0].series){
+        obj.result.query_time = new Date(r.results[0].series[0].values[0][0]);
+    }else
+        obj.result.query_time = new Date();
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = hostname;
+    obj.data.service.plugin_output = r;
+    return obj;
+}
+
 
 function predict (arr,ser){
     try{
@@ -1297,29 +1302,12 @@ function pauseRequest(){
     }
 
 }
-function realTimeRequest(){
-    clearclone();
-    var e = d3.select('.record').node();
-    if (e.value ==="false"){
-        e.value = "true";
-        $(e).addClass('active');
-        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
-        realTimesetting (true);
-        console.log('online');
-    }else {
-        e.value = "false";
-        $(e).removeClass('active');
-        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
-        realTimesetting (false);
-        console.log('offline');
-    }
 
-}
-function realTimesetting (option){
+function realTimesetting (option,db){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
-        processData = processData_metrix;
+        processData = eval('processData_'+db);
         simDuration = 1000;
         simDurationinit = 1000;
         numberOfMinutes = 26*60;
@@ -1422,7 +1410,7 @@ function fastForwardRequest() {
     speedup = true;
 }
 
-function requestService(count,serin) {
+function requestServicenagios(count,serin) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(e) {
@@ -1449,14 +1437,20 @@ function requestService(count,serin) {
         xhr.send();
     })
 }
-function requestServiceInFlux(count,serin) {
+function ip2hostname (address) {
+    const strArr = address.split(".");
+    return "compute-"+ strArr[2] + "-" + strArr[3];
+}
+
+function requestServiceinfluxdb(count,serin) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
+        const ip = "10.101."+ hosts[count].hpcc_rack +"." + hosts[count].hpcc_node;
         xhr.onreadystatechange = function(e) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name = result.data.service.host_name;
+                    var name = hosts[count].name;
+                    var result = processResult(JSON.parse(this.responseText),name);
                     hostResults[name][serviceListattr[serin]].push(result);
                     if (selectedService === serviceList[serin]) {
                         hostResults[name].arr = hostResults[name][serviceListattr[serin]];
@@ -1471,17 +1465,22 @@ function requestServiceInFlux(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        // xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_test&q=" + hosts[count].name + " WHERE host='10.101.1.1' LIMIT 1"+serviceQuery[db][serin], true);
-        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        const query = getstringQuery_influx(ip,serin);
+        xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_monitoring_db&q=" + query, true);
         xhr.send();
     })
 }
+let requestService = eval('requestService'+db);
 
 function requestRT(iteration,count) {
-    var promises =  serviceList.map(function (d,i){
-        return requestService(count,i);
+    var promises;
+    promises = serviceList.map(function (d, i) {
+        return requestService(count, i);
     });
-    return Promise.all(promises).then(()=>{return [iteration, count];});
+
+    return Promise.all(promises).then(() => {
+        return [iteration, count];
+    });
 }
 
 function step (iteration, count){
@@ -1591,10 +1590,11 @@ $( document ).ready(function() {
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
-            if (choice !== "realtime")
+            if (choice !== "nagios" && choice !== "influxdb")
                 d3.json("data/" + choice + ".json", function (error, data) {
                     if (error) throw error;
                     sampleS = data;
+                    processResult = processResult_old;
                     realTimesetting(false);
                     d3.select(".currentDate")
                         .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
@@ -1603,7 +1603,10 @@ $( document ).ready(function() {
                     spinner.stop();
                 });
             else {
-                realTimesetting(true);
+                realTimesetting(true,choice);
+                db = choice;
+                requestService = eval('requestService'+choice);
+                processResult = eval('processResult_'+choice);
                 d3.select('.cover').classed('hidden', true);
                 spinner.stop();
             }

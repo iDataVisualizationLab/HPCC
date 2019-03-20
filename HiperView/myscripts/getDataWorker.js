@@ -1,4 +1,5 @@
 importScripts("../js/d3.v4.js");
+importScripts("../js/underscore-min.js");
 importScripts("setting.js");
 let undefinedValue,
 globalTrend=false,
@@ -12,10 +13,12 @@ addEventListener('message',function ({data}){
             db = data.value.db;
             break;
         case 'isRealtime':
+            db = data.db;
             if(data.value)
-                processData = processData_metrix;
+                processData = eval('processData_'+data.db);
             else
                 processData = processData_old;
+            break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex);
             postMessage({action:'returnData', result: {arr: arr, nameh: data.value.host}});
