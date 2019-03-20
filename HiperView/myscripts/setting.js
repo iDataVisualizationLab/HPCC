@@ -116,7 +116,12 @@ function processData_influxdb(result, serviceName) {
         if (val[i].series) // no error
         {
             const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
-            return d3.range(serviceAttribute[s].numberOfEntries).map(d => subob[serviceAttribute[s].format(d + 1)]*(serviceAttribute[s].rescale||1));
+            return d3.range(serviceAttribute[s].numberOfEntries).map(d =>{
+                const localVal = subob[serviceAttribute[s].format(d + 1)];
+                if (localVal!=null)
+                    return subob[serviceAttribute[s].format(d + 1)]*(serviceAttribute[s].rescale||1);
+                else return undefined;
+            });
         }else{
             return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
         }
