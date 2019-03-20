@@ -43,10 +43,86 @@ var serviceQuery ={
             "rescale": 1/3.2,
         }
     },
-    influxdb: ["cpu_temperature","cpu+load" ,"memory+usage" ,"fan_speed" ,"system_power_usage"],
+    influxdb: {
+        "Temperature":{
+            "CPU_Temperature" : {
+                format: (d) => `CPU${d} Temp`,
+                "numberOfEntries": 2,
+            },
+            "Inlet_Temperature" : {
+                format: () => `Inlet Temp`,
+                "numberOfEntries": 1,
+            }
+        },
+        "Job_load":{
+            "CPU_Usage": {
+                format: () => "cpuusage",
+                "numberOfEntries": 1,
+            }
+        },
+        "Memory_usage":{
+            "Memory_Usage": {
+                format: () => "memoryusage",
+                "numberOfEntries": 1,
+                "rescale": 1 / 191.908,
+            }
+        },
+        "Fans_speed":{
+            "Fan_Speed" : {
+                format: (d) => `FAN_${d}`,
+                "numberOfEntries": 4,
+            }
+        },
+        "Power_consum":{
+            "Node_Power_Usage" : {
+                "format": () => "powerusage_watts",
+                "numberOfEntries": 1,
+                "rescale": 1 / 3.2,
+            }
+        }
+    },
 };
+function getstringQueryAll_influx (ip){
+    let count = 0;
+    return serviceList.map(s=> {
+        return d3.keys(serviceQuery.influxdb[s]).map(ser=>{
+            const subs = serviceQuery.influxdb[s][ser];
+            let str = "SELECT ";
+            str +=  d3.range(subs.numberOfEntries).map(i=>'"'+subs.format(i+1)+'"').join(',');
+            str +=  ',"host" FROM '+ser+' WHERE host=\''+ip+'\' ORDER BY DESC LIMIT 1';
+            serviceQuery.influxdb[s][ser].statement_id = count;
+            count++;
+            return str;
+        }).join('%3B')
+    }).join('%3B');
+}
 
-function processData_metrix(str, serviceName) {
+function getstringQuery_influx (ip,serviceI){
+    const s = serviceList[serviceI];
+    return d3.keys(serviceQuery.influxdb[s]).map(ser=>{
+            const subs = serviceQuery.influxdb[s][ser];
+            let str = "SELECT ";
+            str +=  d3.range(subs.numberOfEntries).map(i=>'"'+subs.format(i+1)+'"').join(',');
+            str +=  ',"host" FROM '+ser+' WHERE host=\''+ip+'\' ORDER BY DESC LIMIT 1';
+            return str;
+        }).join('%3B');
+}
+
+function processData_influxdb(result, serviceName) {
+    let val = result.results;
+    const serviceAttribute = serviceQuery[db][serviceName];
+    const query_return = d3.keys(serviceAttribute);
+    return d3.merge(query_return.map((s,i)=>{
+        if (val[i].series) // no error
+        {
+            const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
+            return d3.range(serviceAttribute[s].numberOfEntries).map(d => subob[serviceAttribute[s].format(d + 1)]*(serviceAttribute[s].rescale||1));
+        }else{
+            return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+        }
+    }));
+}
+function processData_nagios(str, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return_type = serviceAttribute.type;
     if (query_return_type === "json"){
