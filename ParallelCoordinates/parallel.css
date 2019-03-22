@@ -611,9 +611,10 @@ nav ul li.active a{
 
 /*new list type*/
 .collapsible-body {
-    padding: 10px
+    padding: 5px 0px 0px 10px;
 }
 .collapsible.rack .collapsible-header{
+    font-size: medium !important;
     background-color: transparent;
     padding: 5px;
 }
@@ -626,4 +627,5 @@ nav ul li.active a{
 table [type="checkbox"]:not(:checked), [type="checkbox"]:checked, table [type="radio"]:not(:checked), [type="radio"]:checked {
     opacity: 1;
     pointer-events: all;
+    position: inherit;
 }

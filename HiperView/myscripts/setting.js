@@ -64,7 +64,7 @@ var serviceQuery ={
             "Memory_Usage": {
                 format: () => "memoryusage",
                 "numberOfEntries": 1,
-                "rescale": 1 / 191.908,
+                "rescale": 100 / 191.908,
             }
         },
         "Fans_speed":{
