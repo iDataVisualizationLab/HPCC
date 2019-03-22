@@ -96,7 +96,7 @@ $( document ).ready(function() {
         .join(enter => {
             const tr = enter.append("tr");
             const alltr = tr.selectAll('td')
-                .data(d=>[{key:'enable',value:d.enable,type:"checkbox"},{key:'text',value:d.text},{key:'colorBy',value:false,type:"radio"}]).enter()
+                .data(d=>[{key:'enable',value:d.enable,type:"checkbox"},{key:'colorBy',value:false,type:"radio"},{key:'text',value:d.text}]).enter()
                 .append("td");
             alltr.filter(d=>d.type==="radio")
                 .append("input")
@@ -108,8 +108,6 @@ $( document ).ready(function() {
                         value: pdata.service}
                 }).on('change',function (d){
                 changeVar(d3.select(this.parentElement.parentElement).datum())});
-            alltr.filter(d=>d.type===undefined)
-                .text(d=>d.value);
             alltr.filter(d=>d.type==="checkbox")
                 .append("input")
                 .attrs(function (d,i){
@@ -117,6 +115,8 @@ $( document ).ready(function() {
                         type: "checkbox",
                         checked: d.value?"checked":null}
                 });
+            alltr.filter(d=>d.type===undefined)
+                .text(d=>d.value);
         });
     // comboBox
     //     .selectAll('li').data(listOption)
