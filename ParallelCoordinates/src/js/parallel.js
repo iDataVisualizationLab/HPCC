@@ -272,7 +272,10 @@ function init() {
 
 
     // legend = create_legend(colors, brush);
-    const selecteds = d3.select("#axisSetting").selectAll('tr').filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
+    const selecteds = d3.select("#axisSetting")
+        .select('tbody')
+        .selectAll('tr')
+        .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
     _.bind(selecteds.on("change"),selecteds.node())();
     // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
