@@ -14,5 +14,10 @@
   "license": "ISC",
   "dependencies": {
     "sortablejs": "^1.8.4"
+  },
+  "devDependencies": {
+    "rollup-plugin-commonjs": "^9.2.1",
+    "rollup-plugin-eslint": "^5.0.0",
+    "rollup-plugin-node-resolve": "^4.0.1"
   }
 }

@@ -15,11 +15,18 @@ function saveConf(namekey) {
     localStorage.setItem(namekey, JSON.stringify(conf[namekey]));
 }
 
-/// drawLegend *****************************************************************
-let legendw= 80;
-let legendh= 20;
-let barw = 300;
-let barScale = d3.scaleLinear();
+function openNav() {
+    d3.select("#mySidenav").classed("sideIn",true);
+    d3.select("#Maincontent").classed("sideIn",true);
+    // _.delay(resetSize, 500);
+}
+
+function closeNav() {
+    d3.select("#mySidenav").classed("sideIn",false);
+    d3.select("#Maincontent").classed("sideIn",false);
+    // _.delay(resetSize, 500);
+}
+
 function drawLegend(s,arrThresholds, arrColor, dif){
     colorbyValue(orderLegend);
     legendw =400;
@@ -168,14 +175,12 @@ function switchTheme(){
     d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
     return;
 }
+function discovery(d){
+    d3.select(d).style('left','20px')
+        .classed("pulse",true)
+        .transition().delay(5000).duration(1000)
+        .style('left',null).on('end',function() {
+        d3.select(d).classed("pulse",false);
+    });
 
-const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-Array.prototype.naturalSort= function(_){
-    if (arguments.length) {
-        return this.sort(function (as, bs) {
-            return collator.compare(as[_],bs[_]);
-        });
-    }else {
-        return this.sort(collator.compare);
-    }
-};
+}
