@@ -1,10 +1,10 @@
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
-var serviceLists = [{text: "Temperature", id: 0,
-    sub:[{text: 'CPU1 Temp', id: 0},{text: 'CPU2 Temp', id: 1},{text: 'Inlet Temp', id: 2}]},
-    {text: "Job_load", id: 1,sub:[{text: 'Job load', id: 0}]},
-    {text: "Memory_usage", id: 2,sub:[{text: 'Memory usage', id: 0}]},
-    {text: "Fans_speed", id: 3,sub:[{text: 'Fan1 speed', id: 0},{text: 'Fan2 speed', id: 1},{text: 'Fan3 speed', id: 2},{text: 'Fan4 speed', id: 3}]},
-    {text: "Power_consum", id: 4,sub:[{text: 'Power consumption', id: 0}]}];
+var serviceLists = [{text: "Temperature", id: 0, enable:true,
+    sub:[{text: 'CPU1 Temp', id: 0, enable:true},{text: 'CPU2 Temp', id: 1, enable:true},{text: 'Inlet Temp', id: 2, enable:true}]},
+    {text: "Job_load", id: 1, enable:true ,sub:[{text: 'Job load', id: 0, enable:true}]},
+    {text: "Memory_usage", id: 2 , enable:true ,sub:[{text: 'Memory usage', id: 0, enable:true}]},
+    {text: "Fans_speed", id: 3 , enable:true ,sub:[{text: 'Fan1 speed', id: 0, enable:true},{text: 'Fan2 speed', id: 1, enable:true},{text: 'Fan3 speed', id: 2, enable:true},{text: 'Fan4 speed', id: 3, enable:true}]},
+    {text: "Power_consum", id: 4 , enable:true ,sub:[{text: 'Power consumption', id: 0, enable:true}]}];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
 var serviceListattrnest = [
     {key:"arrTemperature", sub:["CPU1 Temp","CPU2 Temp","Inlet Temp"]},
@@ -14,6 +14,16 @@ var serviceListattrnest = [
     {key:"arrPower_usage", sub:["Power consumption"]}];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var chosenService = 0;
+var conf={};
+conf.serviceList = serviceList;
+conf.serviceLists = serviceLists;
+conf.serviceListattr = serviceListattr;
+conf.serviceListattrnest = serviceListattrnest;
+//***********************
+checkConf('serviceList');
+checkConf('serviceLists');
+checkConf('serviceListattr');
+checkConf('serviceListattrnest');
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";

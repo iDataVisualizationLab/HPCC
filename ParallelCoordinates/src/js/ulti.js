@@ -1,3 +1,20 @@
+//
+
+
+function checkConf(namekey) {
+    var retrievedObject = localStorage.getItem(namekey);
+    if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
+        conf[namekey] = JSON.parse(retrievedObject);
+        console.log('retrievedObject: ', JSON.parse(retrievedObject));
+    } else {
+        saveConf(namekey);
+    }
+}
+
+function saveConf(namekey) {
+    localStorage.setItem(namekey, JSON.stringify(conf[namekey]));
+}
+
 /// drawLegend *****************************************************************
 let legendw= 80;
 let legendh= 20;
@@ -5,7 +22,7 @@ let barw = 300;
 let barScale = d3.scaleLinear();
 function drawLegend(s,arrThresholds, arrColor, dif){
     colorbyValue(orderLegend);
-    legendw =svgLengend.node().parentElement.offsetWidth;
+    legendw =400;
     legendh =arrThresholds.length*20;
     let m = {l:40,r:0,t:10,b:10}; // magrin
     let lh = legendh - m.t -m.b;
@@ -52,11 +69,10 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             .style('fill', 'url(#gradient)');
 
     svgLengend.attr("height", legendh).attr("width", legendw);
-
+    /*
     var legend_data = lg
         .selectAll(".row")
         .data( colors.domain(),d=>d);
-        // .data( arrThresholds.slice(1) );
     let arr = arrThresholds.slice();
     let smallarr = arr[0] - arr[1]+arr[0];
         arr = arr.reverse();
@@ -121,6 +137,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     });
 
     return lg.selectAll(".row");
+    */
 }
 
 function linspace(start, end, n) {

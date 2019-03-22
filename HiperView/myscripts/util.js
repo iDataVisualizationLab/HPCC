@@ -2,6 +2,11 @@ var w = 380,
     h = 82;
 var firstTime =true;
 
+
+// time format
+Date.prototype.timeNow = function () {return d3.timeFormat("%H:%M %p")(this)};
+Date.prototype.timeNow2 = function () {return d3.timeFormat("%H:%M:%S %p")(this)};
+
 var svgLengend = d3.select('.legendHolder').append('svg')
     .attr("class", "legendView")
     .attr("width", w)
@@ -242,7 +247,7 @@ function areaChart(){
 }
 
 function saveResults(){
-    var filename = "HPCC_results.json";
+    var filename = "service"+d3.timeFormat("%a%d%b_%H%M")(new Date())+".json";
     var type = "json";
     var str = JSON.stringify(hostResults);
 
@@ -444,8 +449,7 @@ function saveResults(){
         obj.s1 = [];
         obj.Scagnostics0 = [0, 0, 0, 0, 0, 0, 0, 0, 0]; 
         for (var att in  dataS.CountriesData){
-            var hostArray = dataS.CountriesData[att];   
-            console.log(y+ " "+att);
+            var hostArray = dataS.CountriesData[att];
             var v0 = hostArray[y].s0;
             var v1 = hostArray[y].s1;
             obj.s0.push(v0);

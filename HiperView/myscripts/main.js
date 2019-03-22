@@ -579,12 +579,6 @@ function request(){
             xTimeSummaryScaleStep = d3.scaleLinear()
                 .domain([0, hosts.length - 1]) // input
                 .range([0, xTimeSummaryScale.step()]);
-            Date.prototype.timeNow = function () {
-                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes();
-            };
-            Date.prototype.timeNow2 = function () {
-                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
-            };
 
 
             var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());

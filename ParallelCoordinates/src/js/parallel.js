@@ -18,7 +18,7 @@ var m = [40, 0, 10, 0],
     highlighted,
     dimensions,
     legend,
-    render_speed = 1,
+    render_speed = 50,
     brush_count = 0,
     excluded_groups = [],
     svg;
@@ -28,12 +28,12 @@ var m = [40, 0, 10, 0],
 var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
 var levelStep = 4;
 var arrThresholds;
-var selectedService = null;
+var selectedService = "CPU1 Temp";
 var orderLegend;
 var svgLengend;
 
 $( document ).ready(function() {
-    console.log('ready')
+    console.log('ready');
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
@@ -41,16 +41,44 @@ $( document ).ready(function() {
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
-    let comboBox = d3.select("#listvar");
-    let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
-    listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
-    comboBox
-        .selectAll('li').data(listOption)
-        .join(enter => enter.append("li") .attr('tabindex','0').append("a")
-            .attr('href',"#"))
-        .text(d=>{return d.text})
-        .on('click',changeVar);
-
+    // let comboBox = d3.select("#listvar");
+    let listOption = d3.merge(conf.serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr: conf.serviceListattrnest[d.id].sub[e.id], text:e.text, enable:e.enable}})));
+    // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
+    let table = d3.select("#axisSetting").select('tbody');
+    table
+        .selectAll('tr').data(listOption)
+        .join(enter => {
+            const tr = enter.append("tr");
+            const alltr = tr.selectAll('td')
+                .data(d=>[{key:'enable',value:d.enable,type:"checkbox"},{key:'text',value:d.text},{key:'colorBy',value:false,type:"radio"}]).enter()
+                .append("td");
+            alltr.filter(d=>d.type==="radio")
+                .append("input")
+                .attrs(function (d,i){
+                    const pdata = d3.select(this.parentElement.parentElement).datum();
+                    return {
+                    type: "radio",
+                    name: "colorby",
+                    value: pdata.service}
+                }).on('change',function (d){
+                    changeVar(d3.select(this.parentElement.parentElement).datum())});
+            alltr.filter(d=>d.type===undefined)
+                .text(d=>d.value);
+            alltr.filter(d=>d.type==="checkbox")
+                .append("input")
+                .attrs(function (d,i){
+                    return {
+                        type: "checkbox",
+                        checked: d.value?"checked":null}
+                });
+        });
+    // comboBox
+    //     .selectAll('li').data(listOption)
+    //     .join(enter => enter.append("li") .attr('tabindex','0').append("a")
+    //         .attr('href',"#"))
+    //     .text(d=>{return d.text})
+    //     .on('click',changeVar);
+    $('tbody').sortable();
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
@@ -66,13 +94,13 @@ function discovery(d){
 function openNav() {
     d3.select("#mySidenav").classed("sideIn",true);
     d3.select("#Maincontent").classed("sideIn",true);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 
 function closeNav() {
     d3.select("#mySidenav").classed("sideIn",false);
     d3.select("#Maincontent").classed("sideIn",false);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 function getBrush(d) {
     return d3.brushY(yscale[d])
@@ -114,11 +142,11 @@ function init() {
     background.strokeStyle = "rgba(0,100,160,0.1)";
     background.lineWidth = 1.7;
 
-    svgLengend = d3.select('#colorContinuos').append('div').append('svg')
-        .attr("class", "legendView")
-        .attr("width", 0)
-        .attr("height", 0)
-        .style('display','none');
+    // svgLengend = d3.select('#colorContinuos').append('div').append('svg')
+    //     .attr("class", "legendView")
+    //     .attr("width", 0)
+    //     .attr("height", 0)
+    //     .style('display','none');
 // SVG for ticks, labels, and interactions
     svg = d3.select("#chart").select("svg")
         .attr("width", width)
@@ -243,8 +271,10 @@ function init() {
         .text("Drag or resize this filter");
 
 
-    legend = create_legend(colors, brush);
-
+    // legend = create_legend(colors, brush);
+    const selecteds = d3.select("#axisSetting").selectAll('tr').filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
+    _.bind(selecteds.on("change"),selecteds.node())();
+    // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
     brush();
 }
@@ -697,6 +727,7 @@ function brush() {
     // include empty groups
     _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
 
+    /*
     legend
         .style("text-decoration", function(d) { return _.contains(excluded_groups,d) ? "line-through" : null; })
         .attr("class", function(d) {
@@ -721,7 +752,7 @@ function brush() {
 
         legend.selectAll(".tally")
             .text(function(d,i) { return tallies[d].length });
-    }
+    }*/
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
@@ -995,20 +1026,22 @@ function search(selection,str) {
 }
 
 function changeVar(d){
-    $('#groupName').text(d.text);
+    // $('#groupName').text(d.text);
     if (d.arr==='rack'){
         selectedService = null;
-        svgLengend.style('display','none');
+        // svgLengend.style('display','none');
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         changeGroupTarget(d.arr);
-        legend = create_legend(colors,brush);
+        //legend = create_legend(colors,brush);
     }else {
-        legend.remove();
+        try {
+            legend.remove();
+        }catch(e){}
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         changeGroupTarget(d.arr);
-        legend = drawLegend(d.service, arrThresholds, arrColor, dif);
-        svgLengend.style('display',null);
+        //legend = drawLegend(d.service, arrThresholds, arrColor, dif);
+        // svgLengend.style('display',null);
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
