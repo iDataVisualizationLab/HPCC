@@ -38,18 +38,46 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
     $('.collapsible').collapsible();
+    $('tbody').sortable();
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
-    let comboBox = d3.select("#listvar");
-    let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
+    // let comboBox = d3.select("#listvar");
+    let listOption = d3.merge(conf.serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr: conf.serviceListattrnest[d.id].sub[e.id], text:e.text, enable:e.enable}})));
     // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
-    comboBox
-        .selectAll('li').data(listOption)
-        .join(enter => enter.append("li") .attr('tabindex','0').append("a")
-            .attr('href',"#"))
-        .text(d=>{return d.text})
-        .on('click',changeVar);
+    let table = d3.select("#axisSetting");
+    table
+        .selectAll('tr').data(listOption)
+        .join(enter => {
+            const tr = enter.append("tr");
+            const alltr = tr.selectAll('td')
+                .data(d=>[{key:'enable',value:d.enable,type:"checkbox"},{key:'text',value:d.text},{key:'colorBy',value:false,type:"radio"}]).enter()
+                .append("td");
+            alltr.filter(d=>d.type==="radio")
+                .append("input")
+                .attrs(function (d,i){
+                    const pdata = d3.select(this.parentElement.parentElement).datum();
+                    return {
+                    type: "radio",
+                    name: "colorby",
+                    value: pdata.service}
+                }).on('click',function (d){changeVar(d3.select(this.parentElement.parentElement).datum())});
+            alltr.filter(d=>d.type===undefined)
+                .text(d=>d.value);
+            alltr.filter(d=>d.type==="checkbox")
+                .append("input")
+                .attrs(function (d,i){
+                    return {
+                        type: "checkbox",
+                        checked: d.value?"checked":null}
+                });
+        });
+    // comboBox
+    //     .selectAll('li').data(listOption)
+    //     .join(enter => enter.append("li") .attr('tabindex','0').append("a")
+    //         .attr('href',"#"))
+    //     .text(d=>{return d.text})
+    //     .on('click',changeVar);
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
@@ -243,7 +271,7 @@ function init() {
 
 
     // legend = create_legend(colors, brush);
-    changeVar(d3.select("#listvar").selectAll('li').data().find(d=>d.arr==selectedService));
+    changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
     brush();
 }
@@ -995,7 +1023,7 @@ function search(selection,str) {
 }
 
 function changeVar(d){
-    $('#groupName').text(d.text);
+    // $('#groupName').text(d.text);
     if (d.arr==='rack'){
         selectedService = null;
         // svgLengend.style('display','none');

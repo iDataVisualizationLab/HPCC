@@ -1,18 +1,18 @@
 //
 
 
-function checkConf() {
-    var retrievedObject = localStorage.getItem('configuration');
-    if (retrievedObject) {
-        conf = retrievedObject;
+function checkConf(namekey) {
+    var retrievedObject = localStorage.getItem(namekey);
+    if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
+        conf[namekey] = JSON.parse(retrievedObject);
         console.log('retrievedObject: ', JSON.parse(retrievedObject));
     } else {
-        saveConf();
+        saveConf(namekey);
     }
 }
 
-function saveConf() {
-    localStorage.setItem('configuration', JSON.stringify(conf));
+function saveConf(namekey) {
+    localStorage.setItem(namekey, JSON.stringify(conf[namekey]));
 }
 
 /// drawLegend *****************************************************************
