@@ -609,23 +609,3 @@ nav ul li.active a{
 }
 
 
-/*new list type*/
-.collapsible-body {
-    padding: 5px 0px 0px 10px;
-}
-.collapsible.rack .collapsible-header{
-    font-size: medium !important;
-    background-color: transparent;
-    padding: 5px;
-}
-.rack.active>.collapsible-header, .compute.active .collapsible-header{
-    background-color: #9c9c9c !important;
-    color: black;
-}
-
-
-table [type="checkbox"]:not(:checked), [type="checkbox"]:checked, table [type="radio"]:not(:checked), [type="radio"]:checked {
-    opacity: 1;
-    pointer-events: all;
-    position: inherit;
-}
