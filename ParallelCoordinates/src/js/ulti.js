@@ -1,3 +1,20 @@
+//
+
+
+function checkConf() {
+    var retrievedObject = localStorage.getItem('configuration');
+    if (retrievedObject) {
+        conf = retrievedObject;
+        console.log('retrievedObject: ', JSON.parse(retrievedObject));
+    } else {
+        saveConf();
+    }
+}
+
+function saveConf() {
+    localStorage.setItem('configuration', JSON.stringify(conf));
+}
+
 /// drawLegend *****************************************************************
 let legendw= 80;
 let legendh= 20;
@@ -52,11 +69,10 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             .style('fill', 'url(#gradient)');
 
     svgLengend.attr("height", legendh).attr("width", legendw);
-
+    /*
     var legend_data = lg
         .selectAll(".row")
         .data( colors.domain(),d=>d);
-        // .data( arrThresholds.slice(1) );
     let arr = arrThresholds.slice();
     let smallarr = arr[0] - arr[1]+arr[0];
         arr = arr.reverse();
@@ -121,6 +137,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     });
 
     return lg.selectAll(".row");
+    */
 }
 
 function linspace(start, end, n) {

@@ -18,7 +18,7 @@ var m = [40, 0, 10, 0],
     highlighted,
     dimensions,
     legend,
-    render_speed = 1,
+    render_speed = 50,
     brush_count = 0,
     excluded_groups = [],
     svg;
@@ -28,12 +28,12 @@ var m = [40, 0, 10, 0],
 var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
 var levelStep = 4;
 var arrThresholds;
-var selectedService = null;
+var selectedService = "CPU1 Temp";
 var orderLegend;
 var svgLengend;
 
 $( document ).ready(function() {
-    console.log('ready')
+    console.log('ready');
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
@@ -43,14 +43,13 @@ $( document ).ready(function() {
 
     let comboBox = d3.select("#listvar");
     let listOption = d3.merge(serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr:serviceListattrnest[d.id].sub[e.id], text:e.text}})));
-    listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
+    // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
     comboBox
         .selectAll('li').data(listOption)
         .join(enter => enter.append("li") .attr('tabindex','0').append("a")
             .attr('href',"#"))
         .text(d=>{return d.text})
         .on('click',changeVar);
-
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
@@ -243,8 +242,8 @@ function init() {
         .text("Drag or resize this filter");
 
 
-    legend = create_legend(colors, brush);
-
+    // legend = create_legend(colors, brush);
+    changeVar(d3.select("#listvar").selectAll('li').data().find(d=>d.arr==selectedService));
     // Render full foreground
     brush();
 }
@@ -697,6 +696,7 @@ function brush() {
     // include empty groups
     _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
 
+    /*
     legend
         .style("text-decoration", function(d) { return _.contains(excluded_groups,d) ? "line-through" : null; })
         .attr("class", function(d) {
@@ -721,7 +721,7 @@ function brush() {
 
         legend.selectAll(".tally")
             .text(function(d,i) { return tallies[d].length });
-    }
+    }*/
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
@@ -1003,7 +1003,9 @@ function changeVar(d){
         changeGroupTarget(d.arr);
         legend = create_legend(colors,brush);
     }else {
-        legend.remove();
+        try {
+            legend.remove();
+        }catch(e){}
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         changeGroupTarget(d.arr);

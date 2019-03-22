@@ -617,6 +617,6 @@ nav ul li.active a{
     padding: 5px;
 }
 .rack.active>.collapsible-header, .compute.active .collapsible-header{
-    background-color: white !important;
+    background-color: #9c9c9c !important;
     color: black;
 }

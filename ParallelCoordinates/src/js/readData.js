@@ -14,6 +14,9 @@ var serviceListattrnest = [
     {key:"arrPower_usage", sub:["Power consumption"]}];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var chosenService = 0;
+var conf=serviceLists;
+//***********************
+checkConf();
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";
