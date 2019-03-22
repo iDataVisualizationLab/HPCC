@@ -22,7 +22,7 @@ let barw = 300;
 let barScale = d3.scaleLinear();
 function drawLegend(s,arrThresholds, arrColor, dif){
     colorbyValue(orderLegend);
-    legendw =svgLengend.node().parentElement.offsetWidth;
+    legendw =400;
     legendh =arrThresholds.length*20;
     let m = {l:40,r:0,t:10,b:10}; // magrin
     let lh = legendh - m.t -m.b;

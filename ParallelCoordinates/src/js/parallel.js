@@ -65,13 +65,13 @@ function discovery(d){
 function openNav() {
     d3.select("#mySidenav").classed("sideIn",true);
     d3.select("#Maincontent").classed("sideIn",true);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 
 function closeNav() {
     d3.select("#mySidenav").classed("sideIn",false);
     d3.select("#Maincontent").classed("sideIn",false);
-    _.delay(resetSize, 500);
+    // _.delay(resetSize, 500);
 }
 function getBrush(d) {
     return d3.brushY(yscale[d])
@@ -113,11 +113,11 @@ function init() {
     background.strokeStyle = "rgba(0,100,160,0.1)";
     background.lineWidth = 1.7;
 
-    svgLengend = d3.select('#colorContinuos').append('div').append('svg')
-        .attr("class", "legendView")
-        .attr("width", 0)
-        .attr("height", 0)
-        .style('display','none');
+    // svgLengend = d3.select('#colorContinuos').append('div').append('svg')
+    //     .attr("class", "legendView")
+    //     .attr("width", 0)
+    //     .attr("height", 0)
+    //     .style('display','none');
 // SVG for ticks, labels, and interactions
     svg = d3.select("#chart").select("svg")
         .attr("width", width)
@@ -998,10 +998,10 @@ function changeVar(d){
     $('#groupName').text(d.text);
     if (d.arr==='rack'){
         selectedService = null;
-        svgLengend.style('display','none');
+        // svgLengend.style('display','none');
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         changeGroupTarget(d.arr);
-        legend = create_legend(colors,brush);
+        //legend = create_legend(colors,brush);
     }else {
         try {
             legend.remove();
@@ -1009,8 +1009,8 @@ function changeVar(d){
         selectedService = d.arr;
         setColorsAndThresholds(d.service);
         changeGroupTarget(d.arr);
-        legend = drawLegend(d.service, arrThresholds, arrColor, dif);
-        svgLengend.style('display',null);
+        //legend = drawLegend(d.service, arrThresholds, arrColor, dif);
+        // svgLengend.style('display',null);
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
