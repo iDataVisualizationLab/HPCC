@@ -38,14 +38,13 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
     $('.collapsible').collapsible();
-    $('tbody').sortable();
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     // let comboBox = d3.select("#listvar");
     let listOption = d3.merge(conf.serviceLists.map(d=>d.sub.map(e=>{return {service: d.text, arr: conf.serviceListattrnest[d.id].sub[e.id], text:e.text, enable:e.enable}})));
     // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
-    let table = d3.select("#axisSetting");
+    let table = d3.select("#axisSetting").select('tbody');
     table
         .selectAll('tr').data(listOption)
         .join(enter => {
@@ -61,7 +60,8 @@ $( document ).ready(function() {
                     type: "radio",
                     name: "colorby",
                     value: pdata.service}
-                }).on('click',function (d){changeVar(d3.select(this.parentElement.parentElement).datum())});
+                }).on('change',function (d){
+                    changeVar(d3.select(this.parentElement.parentElement).datum())});
             alltr.filter(d=>d.type===undefined)
                 .text(d=>d.value);
             alltr.filter(d=>d.type==="checkbox")
@@ -78,6 +78,7 @@ $( document ).ready(function() {
     //         .attr('href',"#"))
     //     .text(d=>{return d.text})
     //     .on('click',changeVar);
+    $('tbody').sortable();
     d3.select("#DarkTheme").on("click",switchTheme);
     init();
 });
@@ -271,7 +272,9 @@ function init() {
 
 
     // legend = create_legend(colors, brush);
-    changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
+    const selecteds = d3.select("#axisSetting").selectAll('tr').filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
+    _.bind(selecteds.on("change"),selecteds.node())();
+    // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
     brush();
 }
