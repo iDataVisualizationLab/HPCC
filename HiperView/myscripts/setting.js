@@ -89,7 +89,7 @@ function getstringQueryAll_influx (ip){
             const subs = serviceQuery.influxdb[s][ser];
             let str = "SELECT ";
             str +=  d3.range(subs.numberOfEntries).map(i=>'"'+subs.format(i+1)+'"').join(',');
-            str +=  ',"host" FROM '+ser+' WHERE host=\''+ip+'\' ORDER BY DESC LIMIT 1';
+            str +=  ',"host" FROM '+ser+' WHERE host=\''+ip+'\' ORDER BY time DESC LIMIT 1';
             serviceQuery.influxdb[s][ser].statement_id = count;
             count++;
             return str;
@@ -97,32 +97,45 @@ function getstringQueryAll_influx (ip){
     }).join('%3B');
 }
 
-function getstringQuery_influx (ip,serviceI){
+function getstringQuery_influx (ip,serviceI,timerange){
     const s = serviceList[serviceI];
     return d3.keys(serviceQuery.influxdb[s]).map(ser=>{
             const subs = serviceQuery.influxdb[s][ser];
             let str = "SELECT ";
             str +=  d3.range(subs.numberOfEntries).map(i=>'"'+subs.format(i+1)+'"').join(',');
-            str +=  ',"host" FROM '+ser+' WHERE host=\''+ip+'\' ORDER BY DESC LIMIT 1';
+            str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
+            if (timerange){
+                str += 'AND time > \''+timerange[0]+'\'';
+                if (timerange[1])
+                    str += ' AND time < \''+timerange[1]+'\'';
+                else
+                    str += ' LIMIT 1';
+            }else {
+                str += ' ORDER BY time DESC LIMIT 1';
+            }
             return str;
         }).join('%3B');
 }
 
 function processData_influxdb(result, serviceName) {
-    let val = result.results;
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return = d3.keys(serviceAttribute);
-    return d3.merge(query_return.map((s,i)=>{
+
+    let val = result.results;
+    return d3.merge(query_return.map((s, i) => {
         if (val[i].series) // no error
         {
             const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
-            return d3.range(serviceAttribute[s].numberOfEntries).map(d =>{
-                const localVal = subob[serviceAttribute[s].format(d + 1)];
-                if (localVal!=null)
-                    return subob[serviceAttribute[s].format(d + 1)]*(serviceAttribute[s].rescale||1);
-                else return undefined;
-            });
-        }else{
+            if (subob.error==="None")
+                return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
+                    const localVal = subob[serviceAttribute[s].format(d + 1)];
+                    if (localVal != null)
+                        return subob[serviceAttribute[s].format(d + 1)] * (serviceAttribute[s].rescale || 1);
+                    else return undefined;
+                });
+            else
+                return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+        } else {
             return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
         }
     }));
