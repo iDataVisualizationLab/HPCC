@@ -546,6 +546,7 @@ function request(){
     lastIndex = 0;
     var countarr = [];
     var requeststatus =true;
+    var countrecord = 0;
     interval2 = new IntervalTimer(function (simDuration) {
         var midlehandle = function (ri){
             let returniteration = ri[0];
@@ -653,7 +654,15 @@ function request(){
             if (isRealtime) {
                 step(iteration, countbuffer).then((ri) => {
                     midlehandle(ri);
-                    drawprocess();
+                    if (!recordonly)
+                        drawprocess();
+                    else {
+                        countrecord = countrecord +1;
+                        if (countbuffer>= (hosts.length)){
+                            console.log("done");
+                            interval2.stop();
+                        }
+                    }
                 });
                 countbuffer++;
             }
@@ -742,7 +751,10 @@ function drawsummary(initIndex){
                     var arrServices = [];
                     serviceList.forEach((ser,indx) => {
                         var obj = {};
-                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        let dataextract = r[serviceListattr[indx]][lastIndex];
+                        if (dataextract)
+                            dataextract = dataextract.data.service.plugin_output;
+                        var a = processData(dataextract, ser);
                         obj.a = a;
                         arrServices.push(obj);})
                 }
@@ -782,7 +794,10 @@ function drawsummarypoint(harr){
                     var arrServices = [];
                     serviceList.forEach((ser, indx) => {
                         var obj = {};
-                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        let dataextract = r[serviceListattr[indx]][lastIndex];
+                        if (dataextract)
+                            dataextract = dataextract.data.service.plugin_output;
+                        var a = processData(dataextract, ser);
                         obj.a = a;
                         arrServices.push(obj);
                     })
@@ -843,17 +858,31 @@ function processResult_old(r){
     return obj;
 }
 const processResult_nagios = processResult_old;
-function processResult_influxdb(r,hostname){
+function processResult_influxdb(r,hostname,index){
     var obj = {};
     obj.result = {};
     if (r.results[0].series){
-        obj.result.query_time = new Date(r.results[0].series[0].values[0][0]);
+        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
     }else
         obj.result.query_time = new Date();
     obj.data = {};
     obj.data.service={};
     obj.data.service.host_name = hostname;
-    obj.data.service.plugin_output = r;
+    if (index != undefined ) {
+        obj.data.service.plugin_output = {results: r.results.map(d => {
+            let temp = {};
+            temp.statement_id = d.statement_id;
+            temp.series = [];
+            let tempsub = {};
+            const series = d.series[0];
+            tempsub.name = series.name;
+            tempsub.columns = series.columns;
+            tempsub.values = [series.values[index]];
+            temp.series.push(tempsub);
+            return temp;
+        })};
+    } else
+        obj.data.service.plugin_output = r;
     return obj;
 }
 
@@ -927,10 +956,10 @@ function simulateResults2(hostname,iter, s){
     else if (s == serviceList[3])
         newService = sampleS[hostname].arrFans_health[iter];
     else if (s == serviceList[4]) {
-        if (sampleS[hostname]["arrPower_usage"]== undefined) {
+        if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined){
+        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined  && db!="influxdb"){
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"][iter] = simisval;
         }
@@ -965,7 +994,7 @@ function gaussianRandom(start, end) {
 }
 
 var hostfirst;
-function plotResult(result) {
+function plotResult(result,name) {
     // Check if we should reset the starting point
     if (firstTime) {
         currentMiliseconds = result.result.query_time;
@@ -974,7 +1003,7 @@ function plotResult(result) {
             .domain([0, maxstack-1]);
     }
     firstTime = false;
-    var name =  result.data.service.host_name;
+
 
     query_time = result.result.query_time;  // for drawing current timeline in Summary panel
     currentHostname = name;
@@ -1306,7 +1335,7 @@ function realTimesetting (option,db){
         simDurationinit = 1000;
         numberOfMinutes = 26*60;
     }else{
-        processData = processData_old;
+        processData = db?eval('processData_'+db):processData_old;
         simDuration =0;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
@@ -1444,11 +1473,23 @@ function requestServiceinfluxdb(count,serin) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     var name = hosts[count].name;
-                    var result = processResult(JSON.parse(this.responseText),name);
-                    hostResults[name][serviceListattr[serin]].push(result);
+                    const responseJSON = JSON.parse(this.responseText);
+                    let index = 0;
+                    if (!recordonly){
+                        var result = processResult(responseJSON,name);
+                        hostResults[name][serviceListattr[serin]].push(result);
+                    }else {
+                        if (responseJSON.results[0].series) {
+                            const returnLength = responseJSON.results[0].series[0].values.length;
+                            for (let i = 0; i < returnLength; i++)
+                                hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name, i));
+                        }else
+                            hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name));
+                    }
                     if (selectedService === serviceList[serin]) {
                         hostResults[name].arr = hostResults[name][serviceListattr[serin]];
-                        plotResult(result);
+                        if (!recordonly)
+                            plotResult(result,hosts[count].name);
                     }
                     resolve(xhr.response);
                 } else {
@@ -1459,12 +1500,18 @@ function requestServiceinfluxdb(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        const query = getstringQuery_influx(ip,serin);
+        let query;
+        if (recordonly)
+            query = getstringQuery_influx(ip,serin,timerange);
+        else
+            query = getstringQuery_influx(ip,serin);
+        console.log(query)
         xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_monitoring_db&q=" + query, true);
         xhr.send();
     })
 }
 let requestService = eval('requestService'+db);
+let timerange = ["2019-03-21T15:20:00Z","2019-03-21T18:00:00Z"];
 
 function requestRT(iteration,count) {
     var promises;
@@ -1476,7 +1523,7 @@ function requestRT(iteration,count) {
         return [iteration, count];
     });
 }
-
+var recordonly = false;
 function step (iteration, count){
     if (isRealtime){
             return requestRT(iteration,count);
@@ -1487,7 +1534,7 @@ function step (iteration, count){
             for (i = 0; i < iterationstep; i++) {
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
                 // Process the result
-                var name = result.data.service.host_name;
+                var name = hosts[count].name;
                 hostResults[name].arr.push(result);
                 //console.log(hosts[count].name+" "+hostResults[name]);
                 var result = simulateResults2(hosts[count].name, iteration, serviceList[0]);
@@ -1505,7 +1552,7 @@ function step (iteration, count){
                 var result = simulateResults2(hosts[count].name, iteration, serviceList[4]);
                 hostResults[name].arrPower_usage.push(result);
 
-                plotResult(result);
+                plotResult(result, name);
                 iteration++;
             }
             iteration = tmp;
@@ -1588,8 +1635,14 @@ $( document ).ready(function() {
                 d3.json("data/" + choice + ".json", function (error, data) {
                     if (error) throw error;
                     sampleS = data;
-                    processResult = processResult_old;
-                    realTimesetting(false);
+                    if (choice.includes('influxdb')){
+                        processResult = processResult_influxdb;
+                        db = "influxdb";
+                        realTimesetting(false,"influxdb");
+                    }else {
+                        processResult = processResult_old;
+                        realTimesetting(false);
+                    }
                     d3.select(".currentDate")
                         .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
                     resetRequest();
