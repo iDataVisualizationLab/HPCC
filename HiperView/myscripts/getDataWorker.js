@@ -14,10 +14,15 @@ addEventListener('message',function ({data}){
             break;
         case 'isRealtime':
             db = data.db;
-            if(data.value)
-                processData = eval('processData_'+data.db);
-            else
-                processData = processData_old;
+            if(data.value) {
+
+                processData = eval('processData_' + data.db);
+            }else {
+                if (db ==='influxdb')
+                    processData = eval('processData_' + data.db);
+                else
+                    processData = processData_old;
+            }
             break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex);

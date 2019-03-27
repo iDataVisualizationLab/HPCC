@@ -1012,7 +1012,6 @@ var minTime,maxTime;
 var hostfirst;
 function plotResult(result,name) {
     // Check if we should reset the starting point
-    console.log(result)
     if (firstTime) {
         currentMiliseconds = result.result.query_time;
         hostfirst = result.data.service.host_name;
