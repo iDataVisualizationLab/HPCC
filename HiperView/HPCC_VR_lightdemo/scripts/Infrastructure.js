@@ -17,7 +17,7 @@ function initQuanah()
     quanah.position.x = ROOM_SIZE * 2;
 
     addCPUMarker();
-    addTooltip();
+    // addTooltip();
     resetService();
     reset();
 
