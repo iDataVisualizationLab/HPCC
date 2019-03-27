@@ -965,6 +965,22 @@ function simulateResults2(hostname,iter, s){
         }
         newService = sampleS[hostname]["arrPower_usage"][iter];
     }
+    if (newService === undefined){
+        newService ={}
+        newService.result = {};
+        newService.result.query_time = query_time;
+        newService.data = {};
+        newService.data.service={};
+        newService.data.service.host_name = hostname;
+        newService.data.service.plugin_output = undefined;
+    }else {
+        if (db == "influxdb")
+            try {
+                newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
+            }catch(e){
+
+            }
+    }
     return newService;
 }
 
@@ -992,20 +1008,25 @@ function gaussianRand() {
 function gaussianRandom(start, end) {
     return Math.floor(start + gaussianRand() * (end - start + 1));
 }
-
+var minTime,maxTime;
 var hostfirst;
 function plotResult(result,name) {
     // Check if we should reset the starting point
+    console.log(result)
     if (firstTime) {
         currentMiliseconds = result.result.query_time;
         hostfirst = result.data.service.host_name;
         xTimeScale = d3.scaleLinear()
-            .domain([0, maxstack-1]);
+            .domain([0, maxstack-1])
+        // get Time
+        minTime = currentMiliseconds;  // some max number
     }
     firstTime = false;
 
-
-    query_time = result.result.query_time;  // for drawing current timeline in Summary panel
+    if (result.result.query_time)
+        query_time = result.result.query_time||query_time;  // for drawing current timeline in Summary panel
+    else
+        result.result.query_time = query_time+1000;
     currentHostname = name;
 
     // Process the array data ***************************************
@@ -1023,7 +1044,7 @@ function plotResult(result,name) {
     var arr = [];
     var startinde = 0;
     // while(maxstackminute)
-    if ((r.arr.length>maxstack)||(r.arr.length==maxstack)){
+    if ((r.arr.length>maxstack)||(r.arr.length === maxstack)){
         startinde = (r.arr.length-maxstack);
 
             //var deltaMiliseconds = r.arr[startinde].result.query_time - currentMiliseconds;
@@ -1036,14 +1057,14 @@ function plotResult(result,name) {
 
 
 
-    // get Time
-    var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
-    var maxTime = 0;
-    for (var i=0; i<r.arr.length;i++){
-        var qtime =r.arr[i].result.query_time;
-        minTime = Math.min(minTime,qtime);
-        maxTime = Math.max(maxTime,qtime);
-    }
+
+    // var maxTime = 0;
+    // for (var i=0; i<r.arr.length;i++){
+    //     var qtime =r.arr[i].result.query_time;
+    //     minTime = Math.min(minTime,qtime);
+    //     maxTime = Math.max(maxTime,qtime);
+    // }
+    maxTime =query_time;
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
@@ -1051,7 +1072,19 @@ function plotResult(result,name) {
         case "Heatmap":
         case "Area Chart":
             for (var i=startinde; i<r.arr.length;i++){
-                var a = processData(r.arr[i].data.service.plugin_output, selectedService);
+                let a ;
+                try {
+                    a = processData(r.arr[i].data.service.plugin_output, selectedService);
+                } catch (e){
+                    a = processData(undefined, selectedService);
+                    r.arr[i] ={}
+                    r.arr[i].result = {};
+                    r.arr[i].result.query_time = query_time;
+                    r.arr[i].data = {};
+                    r.arr[i].data.service={};
+                    r.arr[i].data.service.host_name = currentHostname;
+                    r.arr[i].data.service.plugin_output = undefined;
+                }
                 var obj = {};
                 obj.temp1 = a[0];
                 obj.temp2 = a[1];

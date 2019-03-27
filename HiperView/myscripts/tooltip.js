@@ -113,11 +113,10 @@ function mouseoverNode(d1){
         obj.query_time =r.arr[i].result.query_time;
         obj.indexSamp = i;
         if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue)
-            ;
+            arr.push(obj);
         else
             arr.push(obj);
     }
-
    
     
 

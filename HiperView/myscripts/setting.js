@@ -120,24 +120,29 @@ function getstringQuery_influx (ip,serviceI,timerange){
 function processData_influxdb(result, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return = d3.keys(serviceAttribute);
+    if (result) {
 
-    let val = result.results;
-    return d3.merge(query_return.map((s, i) => {
-        if (val[i].series) // no error
-        {
-            const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
-            if (subob.error==="None")
-                return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
-                    const localVal = subob[serviceAttribute[s].format(d + 1)];
-                    if (localVal != null)
-                        return subob[serviceAttribute[s].format(d + 1)] * (serviceAttribute[s].rescale || 1);
-                    else return undefined;
-                });
-            else
+        let val = result.results;
+        return d3.merge(query_return.map((s, i) => {
+            if (val[i].series) // no error
+            {
+                const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
+                if (subob.error === "None" || subob.error === null)
+                    return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
+                        const localVal = subob[serviceAttribute[s].format(d + 1)];
+                        if (localVal != null)
+                            return subob[serviceAttribute[s].format(d + 1)] * (serviceAttribute[s].rescale || 1);
+                        else return undefined;
+                    });
+                else
+                    return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+            } else {
                 return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
-        } else {
+            }
+        }));
+    }
+    return d3.merge(query_return.map((s, i) => {
             return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
-        }
     }));
 }
 function processData_nagios(str, serviceName) {
