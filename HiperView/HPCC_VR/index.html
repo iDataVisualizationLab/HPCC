@@ -21,6 +21,8 @@
 		<script src="scripts/lib/QuickHull.js"></script>
 		<script src="scripts/lib/aframe-html-shader.min.js"></script>
 		<script src="scripts/lib/d3.tip.js"></script>
+		<script src="scripts/lib/SceneUtils.js"></script>
+		<!-- <script src="scripts/worker/scag_worker.js"></script> -->
 
 
 	</head>
@@ -38,7 +40,7 @@
             	<a-plane id ="tip" scale = "0.5 0.5 0.5" material="shader: html; target: #instructions ; transparent: true; side: double;" position="0 0 0"></a-plane>
 			</a-entity>
 
-            <a-entity position="0 -1.5 0">
+            <a-entity position="2 -1.40 0">
 				<a-camera look-controls>
 					<a-cursor></a-cursor>
 				</a-camera>
@@ -49,13 +51,17 @@
 			<a-entity id="light3" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
 			<!-- <a-entity id="light4" light="type: point; color: #EEE; intensity: 0.5"></a-entity> -->
 
-            <a-sky color="#ECECEC"></a-sky>
+			<a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']" line="color: #118A7E"></a-entity>
+			<!-- <a-sky color="#ECECEC"></a-sky> -->
+
+			
 			<!--<script src="scripts/lib/tooltip.js"></script>-->
 
-			<!-- <script src="data/serviceWed27Sep.js"></script> -->
+			<script src="data/serviceWed27Sep.js"></script>
 			<script src="scripts/lib/d3.parsets.js"></script>
 			<script src="scripts/lib/ParallelSet.js"></script>
 			<script src="scripts/lib/scagnostics3d.min.js"></script>
+			<script src="scripts/lib/scagnosticsnd.min.js"></script>
 			<script src="scripts/ScatterPlot.js"></script>
 			<script src="scripts/Infrastructure.js"></script>
 			<script src="scripts/ControlPanel.js"></script>
@@ -63,7 +69,7 @@
 			<script src="../myscripts/util.js"></script>
 			<script src="../myscripts/hostlist.js"></script>
 			<script src="../myscripts/service.js"></script>
-			<script src="data/service17Oct.js"></script>
+			<!-- <script src="data/service17Oct.js"></script> -->
 			<script src="scripts/request.js"></script>
 			<script src="scripts/UpdateFunctions.js"></script>
 			<script src="scripts/events.js"></script>

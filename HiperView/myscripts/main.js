@@ -10,7 +10,7 @@
 // Set the dimensions of the canvas / graph
 var margin = {top: 5, right: 0, bottom: 50, left: 0};
 
-var svg = d3.select("svg"),
+var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
     height = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
@@ -22,6 +22,7 @@ svg = svg
     .append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
+var svgStore={};
 var svgsum;
 //.call(d3.zoom()
 //    .scaleExtent([1, 8])
@@ -62,7 +63,7 @@ var opts = {
     className: 'spinner', // The CSS class to assign to the spinner
 };
 var target = document.getElementById('loadingSpinner');
-var spinner = new Spinner(opts).spin(target);
+var spinner;
 // END: loader spinner settings ****************************
 
 var simulation, link, node;
@@ -115,19 +116,9 @@ var currentHostX = 0;
 
 var charType = "Heatmap";
 var sumType = "Radar";
+let globalTrend = false;
 //***********************
-var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
-var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
-var serviceQuery ={
-    nagios: ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"power+usage"],
-    influxdb: ["cpu_temperature","cpu+load" ,"memory+usage" ,"fan_speed" ,"system_power_usage"],
-};
-var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
-    arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
-    arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
-    arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
-    arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
-var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
+
 var initialService = "Temperature";
 var selectedService;
 
@@ -144,12 +135,53 @@ var niceOffset = true;
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";
+var undefinedResult = "timed out";
 //*** scale
 var xTimeSummaryScale;
 var xLinearSummaryScale;
 
+
+var TsnePlotopt  = {
+    margin: {top: 0, right: 0, bottom: 0, left: 0},
+    offset: {top: top_margin},
+    width: width,
+    height: height-top_margin,
+    scalezoom: 1,
+    widthView: function(){return this.width*this.scalezoom},
+    heightView: function(){return this.height*this.scalezoom},
+    widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
+    heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
+    dotRadius: 30,
+    opt:{
+        epsilon : 40, // epsilon is learning rate (10 = default)
+        perplexity : 30, // roughly how many neighbors each point influences (30 = default)
+        dim : 2, // dimensionality of the embedding (2 = default)
+        maxtries: 50
+    },
+    top10:{
+        details :{
+            circle: {
+                attr: {
+                    r : 2,
+                },
+                style: {
+                    opacity: 0.2
+                }
+            },
+            path: {
+                style: {
+                    'stroke': 'black',
+                    'stroke-width': 0.5,
+                }
+            }
+        }
+    }
+};
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
+var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
+let getDataWorker = new Worker ('myscripts/getDataWorker.js');
+let isbusy = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
@@ -199,10 +231,134 @@ function setColorsAndThresholds(s) {
     }
 }
 //***********************
-drawLegend(initialService,arrThresholds, arrColor,dif);
 
-main();
-addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+
+function initDetailView() {
+    if (svg.select('.detailView').empty()) {
+        svgStore.detailView ={};
+        svgStore.detailView.g = svg.append('g').attr('class', 'detailView');
+        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
+        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
+    }
+    if (svg.select('.rackRect').empty()) {
+        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
+        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
+        // Draw racks **********************
+        for (var i = 0; i < racks.length; i++) {
+            racks[i].x = 35 + racks[i].id * (w_rack + w_gap) - w_rack + 10;
+            racks[i].y = top_margin;
+        }
+        // add main rack and sub rack
+
+        //subrack below
+        racksnewor = [];
+        racks.forEach(d => {
+            var newl = {};
+            newl.id = d.id;
+            newl.pos = 0;
+            newl.x = d.x;
+            newl.y = d.y;
+            newl.hosts = d.hosts.filter(e => e.hpcc_node % 2);
+            racksnewor.push(newl);
+            var newr = {};
+            newr.id = d.id;
+            newr.pos = 1;
+            newr.x = d.x + w_rack / 2 - 4;
+            newr.y = d.y;
+            newr.hosts = d.hosts.filter(e => !(e.hpcc_node % 2));
+            racksnewor.push(newr);
+
+        });
+
+        svgStore.detailView.label.selectAll(".rackRect")
+            .data(racksnewor)
+            .enter().append("rect")
+            .attr("class", "rackRect")
+            .attr("x", function (d, i) {
+                return d.x - 6;
+            })
+            .attr("y", function (d) {
+                return d.y;
+            })
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("width", (d, i) => (w_rack / 2 - 4))
+            .attr("height", h_rack)
+            .attr("fill", "#fff")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1)
+            .style("box-shadow", "10px 10px 10px #666");
+        svgStore.detailView.label.selectAll(".rackRectText1")
+            .data(racks)
+            .enter().append("text")
+            .attr("class", "rackRectText1")
+            .attr("x", function (d) {
+                return d.x + w_rack / 2 - 20;
+            })
+            .attr("y", function (d) {
+                return d.y - 6;
+            })
+            .attr("fill", "currentColor")
+            .style("text-anchor", "middle")
+            .style("font-size", 16)
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text(function (d) {
+                return "Rack " + d.id;
+                //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
+            });
+
+        // Draw host names **********************
+
+        for (var i = 1; i <= maxHostinRack; i++) {
+            var yy = getHostY(1, i);
+            svgStore.detailView.label.append("text")
+                .attr("class", "hostText")
+                .attr("x", 32)
+                .attr("y", yy + 1)
+                .attr("fill", "currentColor")
+                .style("text-anchor", "end")
+                .style("font-size", "12px")
+                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                .attr("font-family", "sans-serif")
+                .text("Host");
+        }
+        for (var i = 0; i < hosts.length; i++) {
+            var name = hosts[i].name;
+            var hpcc_rack = +name.split("-")[1];
+            var hpcc_node = +name.split("-")[2].split(".")[0];
+            var xStart = racksnewor[(hpcc_rack - 1) * 2 + (hpcc_node % 2 ? 0 : 1)].x - 2;
+            var yy = getHostY(hpcc_rack, hpcc_node, hpcc_node % 2);
+            // set opacity for current measurement text
+            hosts[i].mOpacity = 0.1;
+
+
+            svgStore.detailView.label.append("text")
+                .attr("class", "hostId")
+                .attr("x", xStart)
+                .attr("y", yy + 1)
+                .attr("fill", "#000")
+                .style("text-anchor", "start")
+                .style("font-size", "12px")
+                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+                .attr("font-family", "sans-serif")
+                .text("" + hpcc_node);
+
+            svgStore.detailView.label.append("text")
+                .attr("class", "measure_" + hosts[i].name)
+                .attr("x", xStart + w_rack / 2 - 20)
+                .attr("y", yy - 4)
+                .attr("fill", "#000")
+                .attr("fill-opacity", hosts[i].mOpacity)
+                .style("text-anchor", "end")
+                .style("font-size", "11px")
+                .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
+                .attr("font-family", "sans-serif")
+                .text("");
+        }
+    }
+    TSneplot.remove();
+}
 
 function main() {
 
@@ -273,12 +429,7 @@ function main() {
         }
     });
     radarChartsumopt.scaleDensity= d3.scaleLinear().domain([1,hosts.length]).range([0.3, 0.75]);
-    // hosts.sort(function (a, b) {
-    //     if (a.hpcc_rack*1000+a.hpcc_node > b.hpcc_rack*1000+b.hpcc_node) {
-    //         return 1;
-    //     }
-    //     else return -1;
-    // })
+
 
     // Summary Panel ********************************************************************
     svgsum = svg.append("g")
@@ -346,154 +497,13 @@ function main() {
 
 
 
-    // Spinner Stop ********************************************************************
-    spinner.stop();
 
-    // Draw racks **********************
-    for (var i = 0; i < racks.length; i++) {
-        racks[i].x = 35+ racks[i].id * (w_rack + w_gap) - w_rack + 10;
-        racks[i].y = top_margin;
-    }
-    // add main rack and sub rack
-    // svg.selectAll(".rackRectmain")
-    //     .data(racks)
-    //     .enter().append("rect")
-    //     .attr("class", "rackRectmain")
-    //     .attr("x", function (d) {
-    //         return d.x - 6;
-    //     })
-    //     .attr("y", function (d) {
-    //         return d.y;
-    //     })
-    //     .attr("rx", 10)
-    //     .attr("ry", 10)
-    //     .attr("width", w_rack - 8)
-    //     .attr("height", h_rack)
-    //     .attr("fill", "#fff")
-    //     .attr("stroke", "#000")
-    //     .attr("stroke-width", 1)
-    //     .style("box-shadow", "10px 10px 10px #666");
-    //subrack below
-    racksnewor = [];
-    racks.forEach(d=>{
-        var newl = {};
-        newl.id = d.id;
-        newl.pos = 0;
-        newl.x = d.x;
-        newl.y = d.y;
-        newl.hosts = d.hosts.filter(e=> e.hpcc_node%2);
-        racksnewor.push(newl);
-        var newr = {};
-        newr.id = d.id;
-        newr.pos = 1;
-        newr.x = d.x +w_rack/2-4;
-        newr.y = d.y;
-        newr.hosts = d.hosts.filter(e=> !(e.hpcc_node%2));
-        racksnewor.push(newr);
-
-    });
-
-    svg.selectAll(".rackRect")
-        .data(racksnewor)
-        .enter().append("rect")
-        .attr("class", "rackRect")
-        .attr("x", function (d,i) {
-            return d.x - 6;
-        })
-        .attr("y", function (d) {
-            return d.y;
-        })
-        .attr("rx", 10)
-        .attr("ry", 10)
-        .attr("width", (d,i)=>(w_rack/2 - 4))
-        .attr("height", h_rack)
-        .attr("fill", "#fff")
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("box-shadow", "10px 10px 10px #666");
-    svg.selectAll(".rackRectText1")
-        .data(racks)
-        .enter().append("text")
-        .attr("class", "rackRectText1")
-        .attr("x", function (d) {
-            return d.x + w_rack / 2 - 20;
-        })
-        .attr("y", function (d) {
-            return d.y - 6;
-        })
-        .attr("fill", "#000")
-        .style("text-anchor", "middle")
-        .style("font-size", 16)
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text(function (d) {
-            return "Rack " + d.id ;
-            //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
-        });
-
-    // Draw host names **********************
-    /*svg.append("text")
-        .attr("class", "hostText")
-        .attr("x", 0)
-        .attr("y", top_margin-15)
-        .attr("fill", "#000")
-        .style("font-weight","bold")
-        .style("text-anchor", "start")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Summary");*/
-
-    for (var i = 1; i <= maxHostinRack; i++) {
-        var yy = getHostY(1,i);
-        svg.append("text")
-            .attr("class", "hostText")
-            .attr("x", 32)
-            .attr("y", yy+1)
-            .attr("fill", "#000")
-            .style("text-anchor", "end")
-            .style("font-size", "12px")
-            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-            .attr("font-family", "sans-serif")
-            .text("Host");
-    }
-    for (var i = 0; i < hosts.length; i++) {
-        var name = hosts[i].name;
-        var hpcc_rack = +name.split("-")[1];
-        var hpcc_node = +name.split("-")[2].split(".")[0];
-        var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x-2;
-        var yy = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
-        // set opacity for current measurement text
-        hosts[i].mOpacity = 0.1;
-
-
-        svg.append("text")
-            .attr("class", "hostId")
-            .attr("x", xStart)
-            .attr("y", yy+1)
-            .attr("fill", "#000")
-            .style("text-anchor", "start")
-            .style("font-size", "12px")
-            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-            .attr("font-family", "sans-serif")
-            .text(""+hpcc_node);
-
-        svg.append("text")
-            .attr("class", "measure_"+hosts[i].name)
-            .attr("x", xStart+w_rack/2-20)
-            .attr("y", yy-4)
-            .attr("fill", "#000")
-            .attr("fill-opacity", hosts[i].mOpacity)
-            .style("text-anchor", "end")
-            .style("font-size", "11px")
-            .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
-            .attr("font-family", "sans-serif")
-            .text("");
-    }
-
+    initDetailView();
+    svgStore.tsnesvg =svg.append('g').attr("class", "largePanel").attr('transform',`translate(0,${top_margin})`)
+        .append("svg").attr("class", "T_sneSvg");
 
     // Draw line to connect current host and timeline in the Summary panel
-    svg.append("line")
+    let linepointer = svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
         .attr("y1", sHeight+15)
@@ -508,6 +518,19 @@ function main() {
     xTimeSummaryScale =xLinearSummaryScale;
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4,10]).scale(xLinearSummaryScale)
         .maxstack(maxstack);
+    getDataWorker.postMessage({action:"init",value:{
+            hosts:hosts,
+            db:db,
+        }});
+    getDataWorker.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (data.action==='returnData'){
+            TSneplot.data(data.result.arr).draw(data.result.nameh);
+        }
+    }, false);
+    TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).init();
     request();
 }
 var currentlastIndex;
@@ -523,6 +546,7 @@ function request(){
     lastIndex = 0;
     var countarr = [];
     var requeststatus =true;
+    var countrecord = 0;
     interval2 = new IntervalTimer(function (simDuration) {
         var midlehandle = function (ri){
             let returniteration = ri[0];
@@ -543,7 +567,9 @@ function request(){
                 // cal to plot
                 bin.data([]);
                 drawsummary();
-
+                if (charType==="T-sne Chart")
+                    TSneplot.getTop10();
+                shiftTimeText();
                 count = 0;
                 countbuffer = 0;
                 requeststatus = true;
@@ -554,12 +580,6 @@ function request(){
             xTimeSummaryScaleStep = d3.scaleLinear()
                 .domain([0, hosts.length - 1]) // input
                 .range([0, xTimeSummaryScale.step()]);
-            Date.prototype.timeNow = function () {
-                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes();
-            };
-            Date.prototype.timeNow2 = function () {
-                return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
-            };
 
 
             var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
@@ -578,10 +598,14 @@ function request(){
             svg.selectAll(".currentTimeline")
                 .attr("x1", x2)
                 .attr("x2", x2);
+
             svg.selectAll(".connectTimeline")
                 .attr("x1", x2)
-                .attr("x2", currentHostX)
-                .attr("y2", currentHostY);
+            if (charType!=="T-sne Chart")
+                svg.selectAll(".connectTimeline")
+                    .attr("x2", currentHostX)
+                    .attr("y2", currentHostY);
+
             svg.selectAll(".currentTextGroup")
                 .attr('transform', 'translate(' + (x2 + 2) + ',' + (sHeight - 36) + ')');
             svg.selectAll(".currentText")
@@ -630,7 +654,15 @@ function request(){
             if (isRealtime) {
                 step(iteration, countbuffer).then((ri) => {
                     midlehandle(ri);
-                    drawprocess();
+                    if (!recordonly)
+                        drawprocess();
+                    else {
+                        countrecord = countrecord +1;
+                        if (countbuffer>= (hosts.length)){
+                            console.log("done");
+                            interval2.stop();
+                        }
+                    }
                 });
                 countbuffer++;
             }
@@ -719,7 +751,10 @@ function drawsummary(initIndex){
                     var arrServices = [];
                     serviceList.forEach((ser,indx) => {
                         var obj = {};
-                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        let dataextract = r[serviceListattr[indx]][lastIndex];
+                        if (dataextract)
+                            dataextract = dataextract.data.service.plugin_output;
+                        var a = processData(dataextract, ser);
                         obj.a = a;
                         arrServices.push(obj);})
                 }
@@ -759,7 +794,10 @@ function drawsummarypoint(harr){
                     var arrServices = [];
                     serviceList.forEach((ser, indx) => {
                         var obj = {};
-                        var a = processData(r[serviceListattr[indx]][lastIndex].data.service.plugin_output, ser);
+                        let dataextract = r[serviceListattr[indx]][lastIndex];
+                        if (dataextract)
+                            dataextract = dataextract.data.service.plugin_output;
+                        var a = processData(dataextract, ser);
                         obj.a = a;
                         arrServices.push(obj);
                     })
@@ -774,6 +812,15 @@ function drawsummarypoint(harr){
 
     }
 }
+function shiftTimeText(){
+    if (timelog.length > maxstack-1){ timelog.shift();
+    svg.selectAll(".boxTime").filter((d,i)=>i).transition().duration(500)
+        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2);
+    svg.select(".boxTime").transition().duration(500)
+        .attr("x", xTimeSummaryScale(0)+ width/maxstack/2)
+        .transition().remove();
+    }
+}
 function updateTimeText(index){
     if (index!= undefined)timelog.push (hostResults[hosts[(index||hosts.length)-1].name].arr.map(d=>d.result.query_time)[lastIndex]);
     if (timelog.length>maxstack) timelog.shift();
@@ -781,7 +828,10 @@ function updateTimeText(index){
         .data(timelog);
     boxtime.transition().duration(500)
         .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
-        .text(d=> new Date(d).timeNow());
+        .text(d=> {
+            let temp = new Date(d);
+            return temp.getHours()+":"+temp.getMinutes();
+        });
     boxtime.exit().remove();
     boxtime.enter().append("text")
         .attr("class", "boxTime")
@@ -796,7 +846,8 @@ function updateTimeText(index){
         .text(new Date(query_time).timeNow());
 }
 // Delete unnecessary files
-function processResult(r){
+let processResult = processResult_old;
+function processResult_old(r){
     var obj = {};
     obj.result = {};
     obj.result.query_time = r.result.query_time;
@@ -806,88 +857,65 @@ function processResult(r){
     obj.data.service.plugin_output = r.data.service.plugin_output
     return obj;
 }
+const processResult_nagios = processResult_old;
+function processResult_influxdb(r,hostname,index){
+    var obj = {};
+    obj.result = {};
+    if (r.results[0].series){
+        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+    }else
+        obj.result.query_time = new Date();
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = hostname;
+    if (index != undefined ) {
+        obj.data.service.plugin_output = {results: r.results.map(d => {
+            let temp = {};
+            temp.statement_id = d.statement_id;
+            temp.series = [];
+            let tempsub = {};
+            const series = d.series[0];
+            tempsub.name = series.name;
+            tempsub.columns = series.columns;
+            tempsub.values = [series.values[index]];
+            temp.series.push(tempsub);
+            return temp;
+        })};
+    } else
+        obj.data.service.plugin_output = r;
+    return obj;
+}
 
-function processData(str, serviceName) {
-    if (serviceName == serviceList[0]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
+
+function predict (arr,ser){
+    try{
+        return processData(arr[arr.length-1].data.service.plugin_output,ser);
+    } catch(e){
+        let average = 0;
+        switch (ser){
+            case serviceList[0]:
+                average = (thresholds[0][1]-thresholds[0][0])/2
+                return [average,average,average];
+            case serviceList[1]:
+                average = (thresholds[1][1]-thresholds[1][0])/2
+                return [average,average,average];
+            case serviceList[2]:
+                average = (thresholds[2][1]-thresholds[2][0])/2
+                return [average,average,average];
+            case serviceList[3]:
+                average = (thresholds[3][1]-thresholds[3][0])/2
+                return [average,average,average,average];
+            case serviceList[4]:
+                average = (thresholds[4][1]-thresholds[4][0])/2
+                return [average,average,average];
+            default:
+                return [0,0,0];
         }
-        else{
-            var arrString =  str.split(" ");
-            a[0] = +arrString[2]||undefinedValue;
-            a[1] = +arrString[6]||undefinedValue;
-            a[2] = +arrString[10]||undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[1]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
-            || str.indexOf("CPU Load: null")>=0){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var arrString =  str.split("CPU Load: ")[1];
-            a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[2]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
-            a[0] = +arrString;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[3]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-            a[3] = undefinedValue;
-        }
-        else{
-            var arr4 =  str.split(" RPM ");
-            a[0] = +arr4[0].split("FAN_1 ")[1];
-            a[1] = +arr4[1].split("FAN_2 ")[1];
-            a[2] = +arr4[2].split("FAN_3 ")[1];
-            a[3] = +arr4[3].split("FAN_4 ")[1];
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[4]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefinedValue;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        else{
-            var maxConsumtion = 3.2;  // over 100%
-            var arr4 =  str.split(" ");
-            a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = undefinedValue;
-            a[2] = undefinedValue;
-        }
-        return a;
     }
 }
+
+
+let processData = processData_old;
 
 function decimalColorToHTMLcolor(number) {
     //converts to a integer
@@ -928,14 +956,30 @@ function simulateResults2(hostname,iter, s){
     else if (s == serviceList[3])
         newService = sampleS[hostname].arrFans_health[iter];
     else if (s == serviceList[4]) {
-        if (sampleS[hostname]["arrPower_usage"]== undefined) {
+        if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined){
+        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined  && db!="influxdb"){
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"][iter] = simisval;
         }
         newService = sampleS[hostname]["arrPower_usage"][iter];
+    }
+    if (newService === undefined){
+        newService ={}
+        newService.result = {};
+        newService.result.query_time = query_time;
+        newService.data = {};
+        newService.data.service={};
+        newService.data.service.host_name = hostname;
+        newService.data.service.plugin_output = undefined;
+    }else {
+        if (db == "influxdb")
+            try {
+                newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
+            }catch(e){
+
+            }
     }
     return newService;
 }
@@ -964,20 +1008,24 @@ function gaussianRand() {
 function gaussianRandom(start, end) {
     return Math.floor(start + gaussianRand() * (end - start + 1));
 }
-
+var minTime,maxTime;
 var hostfirst;
-function plotResult(result) {
+function plotResult(result,name) {
     // Check if we should reset the starting point
     if (firstTime) {
         currentMiliseconds = result.result.query_time;
         hostfirst = result.data.service.host_name;
         xTimeScale = d3.scaleLinear()
-            .domain([0, maxstack-1]);
+            .domain([0, maxstack-1])
+        // get Time
+        minTime = currentMiliseconds;  // some max number
     }
     firstTime = false;
-    var name =  result.data.service.host_name;
 
-    query_time = result.result.query_time;  // for drawing current timeline in Summary panel
+    if (result.result.query_time)
+        query_time = result.result.query_time||query_time;  // for drawing current timeline in Summary panel
+    else
+        result.result.query_time = query_time+1000;
     currentHostname = name;
 
     // Process the array data ***************************************
@@ -995,7 +1043,7 @@ function plotResult(result) {
     var arr = [];
     var startinde = 0;
     // while(maxstackminute)
-    if ((r.arr.length>maxstack)||(r.arr.length==maxstack)){
+    if ((r.arr.length>maxstack)||(r.arr.length === maxstack)){
         startinde = (r.arr.length-maxstack);
 
             //var deltaMiliseconds = r.arr[startinde].result.query_time - currentMiliseconds;
@@ -1005,45 +1053,75 @@ function plotResult(result) {
 
     }
 
-    for (var i=startinde; i<r.arr.length;i++){
-        var a = processData(r.arr[i].data.service.plugin_output, selectedService);
-        var obj = {};
-        obj.temp1 = a[0];
-        obj.temp2 = a[1];
-        obj.temp3 = a[2];
-        obj.query_time =r.arr[i].result.query_time;
-        obj.x = xTimeScale(i-startinde);
-        arr.push(obj);
-        currentHostX = obj.x ;
-        currentMeasure = obj.temp1;
-    }
-
-    currentHostY = y;
 
 
-    // get Time
-    var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
-    var maxTime = 0;
-    for (var i=0; i<r.arr.length;i++){
-        var qtime =r.arr[i].result.query_time;
-        minTime = Math.min(minTime,qtime);
-        maxTime = Math.max(maxTime,qtime);
-    }
+
+
+    // var maxTime = 0;
+    // for (var i=0; i<r.arr.length;i++){
+    //     var qtime =r.arr[i].result.query_time;
+    //     minTime = Math.min(minTime,qtime);
+    //     maxTime = Math.max(maxTime,qtime);
+    // }
+    maxTime =query_time;
     if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
         pauseRequest();
 
+    switch (charType) {
+        case "Heatmap":
+        case "Area Chart":
+            for (var i=startinde; i<r.arr.length;i++){
+                let a ;
+                try {
+                    a = processData(r.arr[i].data.service.plugin_output, selectedService);
+                } catch (e){
+                    a = processData(undefined, selectedService);
+                    r.arr[i] ={}
+                    r.arr[i].result = {};
+                    r.arr[i].result.query_time = query_time;
+                    r.arr[i].data = {};
+                    r.arr[i].data.service={};
+                    r.arr[i].data.service.host_name = currentHostname;
+                    r.arr[i].data.service.plugin_output = undefined;
+                }
+                var obj = {};
+                obj.temp1 = a[0];
+                obj.temp2 = a[1];
+                obj.temp3 = a[2];
+                obj.query_time =r.arr[i].result.query_time;
+                obj.x = xTimeScale(i-startinde);
+                arr.push(obj);
+                currentHostX = obj.x ;
+                currentMeasure = obj.temp1;
+            }
 
-    if (charType == "Heatmap")
-        // plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime);
-        plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y);
-    else if (charType == "Area Chart")
-        plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y);
+            currentHostY = y;
 
+            initDetailView();
+            if (charType === "Heatmap")
+            plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y);
+            else
+            plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y);
+            break;
+        case "T-sne Chart":
+            initTsneView();
+            if (!speedup) {
+                plotTsne(name);
+            }
+    }
+
+
+}
+function initTsneView() {
+    if (!svgStore.detailView.g.select('.rackRect').empty()) {
+        svgStore.detailView.g.selectAll('*').remove();
+        TSneplot.reset(true);
+    }
 }
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
-
-    svg.selectAll("."+name).remove();
+    svgStore.detailView.g.selectAll(".RackSummary").remove();
+    svgStore.detailView.items.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
         var xMin = xTimeScale(0);
@@ -1051,7 +1129,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
-        svg.append("rect")
+        svgStore.detailView.items.append("rect")
             .attr("class", name)
             .attr("x", x)
             .attr("y", y-10)
@@ -1074,7 +1152,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         ;//.on("mouseout", mouseoutNode);
 
         if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
-            svg.append("rect")
+            svgStore.detailView.items.append("rect")
                 .attr("class", name)
                 .attr("x", x)
                 .attr("y", y+node_size-9)
@@ -1101,8 +1179,6 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-
-
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
     var yScale = d3.scaleLinear()
         .domain([baseTemperature, 120]) //  baseTemperature=60
@@ -1114,8 +1190,8 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
         .y1(function(d) { return y-yScale(d.temp1); })
         .curve(d3.curveCatmullRom);
 
-    svg.selectAll("."+name).remove();
-    svg.append("path")
+    svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("class", name)
         .attr("stroke","#000")
@@ -1128,7 +1204,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
             mouseoverNode (this);
         })
     ;//.on("mouseout", mouseoutNode);
-    svg.selectAll("."+name).transition().duration(1000)
+    svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
         .style("fill",function (d) {
             return color(d[d.length-1].temp1);
         })
@@ -1136,6 +1212,18 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
+function plotTsne(nameh){
+    if(!isbusy) {
+        isbusy = true;
+        getDataWorker.postMessage({
+            action: "getbatchData", value: {
+                lastIndex: lastIndex,
+                hostResults: hostResults,
+                host: nameh
+            }
+        });
+    }
+}
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
     var binStep = 8; // pixels
@@ -1198,10 +1286,10 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.min)})
         .curve(d3.curveCatmullRom);
 
-    svg.selectAll(".RackSummaryMin"+rack).remove();
-    svg.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMin"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
-        .attr("class", "RackSummaryMin"+rack)
+        .attr("class", "RackSummary RackSummaryMin"+rack)
         .attr("stroke","#000")
         .attr("stroke-width",0.2)
         .attr("d", areaMin)
@@ -1214,10 +1302,10 @@ function drawSummaryAreaChart(rack, xStart) {
         .y1(function(d) { return y-yScale(d.max)})
         .curve(d3.curveCatmullRom);
 
-    svg.selectAll(".RackSummaryMax"+rack).remove();
-    svg.append("path")
+    svgStore.detailView.items.selectAll(".RackSummaryMax"+rack).remove();
+    svgStore.detailView.items.append("path")
         .datum(arr3) // 10. Binds data to the line
-        .attr("class", "RackSummaryMax"+rack)
+        .attr("class", "RackSummary RackSummaryMax"+rack)
         .attr("stroke","#000")
         .attr("stroke-width",0.2)
         .attr("d", areaMax)
@@ -1225,9 +1313,9 @@ function drawSummaryAreaChart(rack, xStart) {
         .style("fill","#e99");
 
     if (rack==1) {
-        svg.selectAll(".baseline").remove();
-        svg.append("line")
-            .attr("class", "baseline")
+        svgStore.detailView.items.selectAll(".baseline").remove();
+        svgStore.detailView.items.append("line")
+            .attr("class", "RackSummary baseline")
             .attr("x1", xStart)
             .attr("x2", maxX+10)
             .attr("y1", y-yScale(baseTemperature))
@@ -1236,9 +1324,9 @@ function drawSummaryAreaChart(rack, xStart) {
             .attr("stroke","#000")
             .attr("stroke-width",0.5);
 
-        svg.selectAll(".baselineText").remove();
-        svg.append("text")
-            .attr("class", "baselineText")
+        svgStore.detailView.items.selectAll(".baselineText").remove();
+        svgStore.detailView.items.append("text")
+            .attr("class", "RackSummary baselineText")
             .attr("x", 12+maxX)
             .attr("y", y+2)
             .attr("fill", "#000")
@@ -1258,35 +1346,6 @@ function getHostY(r,n,pos){
     // return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 }
 
-d3.select('#inds').on("change", function () {
-    var sect = document.getElementById("inds");
-    charType = sect.options[sect.selectedIndex].value;
-});
-
-d3.select('#indsg').on("change", function () {
-    var sect = document.getElementById("indsg");
-    sumType = sect.options[sect.selectedIndex].value;
-    svg.select(".graphsum").remove();
-    pannelselection(false);
-    switch(sumType){
-        case "Scatterplot":
-            d3.select("#scatterzone").style("visibility","visible");
-            svg.selectAll(".graphsum").remove();
-            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                drawsummary(i);
-            }
-            break;
-        case "Boxplot":
-        case "Radar":
-            svg.selectAll(".graphsum").remove();
-            d3.select("#scatterzone").style("visibility","hidden");
-            for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                drawsummary(i);
-            }
-            break;
-    }
-});
-
 function pauseRequest(){
     // clearInterval(interval2);
     var e = d3.select('.pause').node();
@@ -1298,31 +1357,17 @@ function pauseRequest(){
     }
 
 }
-function realTimeRequest(){
-    clearclone();
-    var e = d3.select('.record').node();
-    if (e.value ==="false"){
-        e.value = "true";
-        $(e).addClass('active');
-        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
-        realTimesetting (true);
-        console.log('online');
-    }else {
-        e.value = "false";
-        $(e).removeClass('active');
-        $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
-        realTimesetting (false);
-        console.log('offline');
-    }
 
-}
-function realTimesetting (option){
+function realTimesetting (option,db){
     isRealtime = option;
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
+        processData = eval('processData_'+db);
         simDuration = 1000;
         simDurationinit = 1000;
         numberOfMinutes = 26*60;
     }else{
+        processData = db?eval('processData_'+db):processData_old;
         simDuration =0;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
@@ -1348,8 +1393,9 @@ function pausechange(){
 }
 
 function resetRequest(){
-    firstTime = true;
     pausechange();
+    tool_tip.hide();
+    firstTime = true;
     interval2.stop();
     hostResults = {};
     var count =0;
@@ -1370,31 +1416,44 @@ function resetRequest(){
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init();
+    TSneplot.reset(true);
     timelog = [];
     updateTimeText();
     request();
 }
+function loadData(){
 
+}
 function addDatasetsOptions() {
-    var select = document.getElementById("datasetsSelect");
-    for(var i = 0; i < serviceList.length; i++) {
-        var opt = serviceList[i];
-        var el = document.createElement("option");
-        el.textContent = opt;
-        el.value = opt;
-        el["data-image"]="images/"+serviceList[i]+".png";
-        select.appendChild(el);
-    }
+    let select= d3.select("#datasetsSelect")
+        .selectAll('li')
+        .data(serviceList)
+        .enter()
+        .append('li')
+        .attr('class','collection-item avatar')
+        .attr('value',d=>d);
+    select.append('img')
+        .attr('class',"circle")
+        .attr('src',d=>"images/"+d+".png");
+    select.append('h4').attr('class','title').text(d=>d);
+
+    select.on("click",loadNewData);
     document.getElementById('datasetsSelect').value = initialService;  //************************************************
     selectedService = document.getElementById("datasetsSelect").value;
+    const trig = d3.select("#datasetsSelectTrigger");
+    trig.select('img').attr('src',"images/"+selectedService+".png");
+    trig.select('span').text(selectedService);
+
     //loadData();
 }
 
-function loadNewData(event) {
+function loadNewData(d) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
     //svg.selectAll("*").remove();
-    selectedService = this.options[this.selectedIndex].text;
-
+    selectedService = d;
+    const trig = d3.select("#datasetsSelectTrigger");
+    trig.select('img').attr('src',"images/"+selectedService+".png");
+    trig.select('span').text(selectedService);
     setColorsAndThresholds(selectedService);
     drawLegend(selectedService,arrThresholds, arrColor,dif);
     resetRequest();
@@ -1406,7 +1465,7 @@ function fastForwardRequest() {
     speedup = true;
 }
 
-function requestService(count,serin) {
+function requestServicenagios(count,serin) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(e) {
@@ -1428,22 +1487,41 @@ function requestService(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        // xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription=check+"+serviceQuery[db][serin], true);
+        xhr.open('get', "http://10.10.1.4/nagios/cgi-bin/statusjson.cgi?query=service&hostname=" + hosts[count].name + "&servicedescription="+serviceQuery[db][serviceList[serin]].query, true);
         xhr.send();
     })
 }
-function requestServiceInFlux(count,serin) {
+function ip2hostname (address) {
+    const strArr = address.split(".");
+    return "compute-"+ strArr[2] + "-" + strArr[3];
+}
+
+function requestServiceinfluxdb(count,serin) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
+        const ip = "10.101."+ hosts[count].hpcc_rack +"." + hosts[count].hpcc_node;
         xhr.onreadystatechange = function(e) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    var result = processResult(JSON.parse(this.responseText));
-                    var name = result.data.service.host_name;
-                    hostResults[name][serviceListattr[serin]].push(result);
+                    var name = hosts[count].name;
+                    const responseJSON = JSON.parse(this.responseText);
+                    let index = 0;
+                    if (!recordonly){
+                        var result = processResult(responseJSON,name);
+                        hostResults[name][serviceListattr[serin]].push(result);
+                    }else {
+                        if (responseJSON.results[0].series) {
+                            const returnLength = responseJSON.results[0].series[0].values.length;
+                            for (let i = 0; i < returnLength; i++)
+                                hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name, i));
+                        }else
+                            hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name));
+                    }
                     if (selectedService === serviceList[serin]) {
                         hostResults[name].arr = hostResults[name][serviceListattr[serin]];
-                        plotResult(result);
+                        if (!recordonly)
+                            plotResult(result,hosts[count].name);
                     }
                     resolve(xhr.response);
                 } else {
@@ -1454,18 +1532,30 @@ function requestServiceInFlux(count,serin) {
         xhr.ontimeout = function () {
             reject('timeout');
         };
-        xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_test&q=" + hosts[count].name + " WHERE host='10.101.1.1' LIMIT 1"+serviceQuery[db][serin], true);
+        let query;
+        if (recordonly)
+            query = getstringQuery_influx(ip,serin,timerange);
+        else
+            query = getstringQuery_influx(ip,serin);
+        console.log(query)
+        xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_monitoring_db&q=" + query, true);
         xhr.send();
     })
 }
+let requestService = eval('requestService'+db);
+let timerange = ["2019-03-21T15:20:00Z","2019-03-21T18:00:00Z"];
 
 function requestRT(iteration,count) {
-    var promises =  serviceList.map(function (d,i){
-        return requestService(count,i);
+    var promises;
+    promises = serviceList.map(function (d, i) {
+        return requestService(count, i);
     });
-    return Promise.all(promises).then(()=>{return [iteration, count];});
-}
 
+    return Promise.all(promises).then(() => {
+        return [iteration, count];
+    });
+}
+var recordonly = false;
 function step (iteration, count){
     if (isRealtime){
             return requestRT(iteration,count);
@@ -1476,9 +1566,8 @@ function step (iteration, count){
             for (i = 0; i < iterationstep; i++) {
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
                 // Process the result
-                var name = result.data.service.host_name;
+                var name = hosts[count].name;
                 hostResults[name].arr.push(result);
-                plotResult(result);
                 //console.log(hosts[count].name+" "+hostResults[name]);
                 var result = simulateResults2(hosts[count].name, iteration, serviceList[0]);
                 hostResults[name].arrTemperature.push(result);
@@ -1494,6 +1583,8 @@ function step (iteration, count){
 
                 var result = simulateResults2(hosts[count].name, iteration, serviceList[4]);
                 hostResults[name].arrPower_usage.push(result);
+
+                plotResult(result, name);
                 iteration++;
             }
             iteration = tmp;
@@ -1513,3 +1604,132 @@ d3.select("html").on("keydown", function() {
     }
 
 });
+
+// ui part
+function openNav() {
+    d3.select("#mySidenav").classed("sideIn",true);
+    d3.select("#Maincontent").classed("sideIn",true);
+    // _.delay(resetSize, 500);
+}
+
+function closeNav() {
+    d3.select("#mySidenav").classed("sideIn",false);
+    d3.select("#Maincontent").classed("sideIn",false);
+    // _.delay(resetSize, 500);
+}
+
+$( document ).ready(function() {
+    console.log('ready');
+    $('.collapsible').collapsible();
+    $('.dropdown-trigger').dropdown();
+    $('.tabs').tabs();
+    $('.sidenav').sidenav();
+    discovery('#sideNavbtn');
+    //$('.tap-target').tapTarget({onOpen: discovery});
+
+    d3.select("#DarkTheme").on("click",switchTheme);
+
+    d3.select('#inds').on("change", function () {
+        var sect = document.getElementById("inds");
+        charType = sect.options[sect.selectedIndex].value;
+    });
+
+    d3.select('#indsg').on("change", function () {
+        var sect = document.getElementById("indsg");
+        sumType = sect.options[sect.selectedIndex].value;
+        svg.select(".graphsum").remove();
+        pannelselection(false);
+        switch(sumType){
+            case "Scatterplot":
+                d3.select("#scatterzone").style("visibility","visible");
+                svg.selectAll(".graphsum").remove();
+                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+                    drawsummary(i);
+                }
+                break;
+            case "Boxplot":
+            case "Radar":
+                svg.selectAll(".graphsum").remove();
+                d3.select("#scatterzone").style("visibility","hidden");
+                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
+                    drawsummary(i);
+                }
+                break;
+        }
+    });
+    d3.select('#datacom').on("change", function () {
+        d3.select('.cover').classed('hidden', false);
+        spinner.spin(target);
+        const choice = this.value;
+        const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        setTimeout(() => {
+            if (choice !== "nagios" && choice !== "influxdb")
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error) throw error;
+                    sampleS = data;
+                    if (choice.includes('influxdb')){
+                        processResult = processResult_influxdb;
+                        db = "influxdb";
+                        realTimesetting(false,"influxdb");
+                    }else {
+                        processResult = processResult_old;
+                        realTimesetting(false);
+                    }
+                    d3.select(".currentDate")
+                        .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
+                    resetRequest();
+                    d3.select('.cover').classed('hidden', true);
+                    spinner.stop();
+                });
+            else {
+                realTimesetting(true,choice);
+                db = choice;
+                requestService = eval('requestService'+choice);
+                processResult = eval('processResult_'+choice);
+                d3.select('.cover').classed('hidden', true);
+                spinner.stop();
+            }
+        },0);
+    });
+    spinner = new Spinner(opts).spin(target);
+    setTimeout(() => {
+        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
+            if (error) throw error;
+            d3.select(".cover").select('h5').text('drawLegend...');
+            d3.select(".currentDate")
+                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
+            drawLegend(initialService, arrThresholds, arrColor, dif);
+            sampleS = data;
+            main();
+            d3.select(".cover").select('h5').text('loading data...');
+            addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+            d3.select('.cover').classed('hidden',true);
+            spinner.stop();
+        });
+    },0);
+    // Spinner Stop ********************************************************************
+
+});
+function discovery(d){
+    d3.select(d).style('left','20px')
+        .classed("pulse",true)
+        .transition().delay(5000).duration(1000)
+        .style('left',null).on('end',function() {
+            d3.select(d).classed("pulse",false);
+    });
+
+}
+function switchTheme(){
+    if (this.value==="light"){
+        this.value = "dark";
+        this.querySelector('span').textContent = "Light";
+        d3.select('body').classed('light',false);
+        d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png");
+        return;
+    }
+    this.value = "light";
+    this.querySelector('span').textContent = "Dark";
+    d3.select('body').classed('light',true);
+    d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
+    return;
+}

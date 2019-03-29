@@ -1,0 +1,106 @@
+/* Scrollbars */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.light ::-webkit-scrollbar-track {
+    background: #ddd;
+}
+
+.light ::-webkit-scrollbar-thumb {
+    background: #b5b5b5;
+}
+::-webkit-scrollbar-track {
+    background: #222;
+    border-radius: 12px;
+}
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 12px;
+}
+
+#mySidenav .collapsible {
+    border: none;
+}
+#mySidenav .collapsible .collapsible-header{
+    background-color: transparent;
+    font-size: large
+}
+
+#mySidenav .collapsible .collapsible-body{
+    /*background-color: #ffffff3d;*/
+    padding: 1rem;
+}
+
+#search {
+    font-size: inherit;
+}
+
+#DarkTheme {
+    background-color: #8a001a;
+}
+
+.light #DarkTheme {
+    background-color: #565656;
+    color: white !important;
+}
+
+.slideRight{
+    animation-name: slideRight;
+    -webkit-animation-name: slideRight;
+    animation-delay: 500ms;
+    -webkit-animation-delay: 2s; /* Safari 4.0 - 8.0 */
+    animation-duration: 1s;
+    -webkit-animation-duration: 1s;
+
+    animation-timing-function: ease-in-out;
+    -webkit-animation-timing-function: ease-in-out;
+
+    visibility: visible !important;
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(-20px);
+    }
+    50%{
+        transform: translateX(8%);
+    }
+    65%{
+        transform: translateX(-10px);
+    }
+    80%{
+        transform: translateX(4%);
+    }
+    95%{
+        transform: translateX(-5px);
+    }
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+@-webkit-keyframes slideRight {
+    0% {
+        -webkit-transform: translateX(-150%);
+    }
+    50%{
+        -webkit-transform: translateX(8%);
+    }
+    65%{
+        -webkit-transform: translateX(-4%);
+    }
+    80%{
+        -webkit-transform: translateX(4%);
+    }
+    95%{
+        -webkit-transform: translateX(-2%);
+    }
+    100% {
+        -webkit-transform: translateX(0%);
+    }
+}
+
+/*

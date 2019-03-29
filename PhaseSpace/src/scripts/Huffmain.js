@@ -8,7 +8,6 @@ let margin = ({top: 20, right: 50, bottom: 50, left: 50});
 
 let service_part =0;
 
-let currentColor ="black";
 const wssvg = d3.select("#WScontent"),
     netsvg = d3.select("#networkcontent"),
     scsvg = d3.select("#Scattercontent");
@@ -223,7 +222,7 @@ function initOther(){
         else if (category=='miscellaneous')
             return colors[1] ; // leaf node
         else
-            return '#000000';
+            return colors[4];
     };
     wsConfig.time2index = d3.scaleTime().domain(d3.extent(data, function(d) { return d.timestep; })).rangeRound([0,d3.nest().key(d=>d.timestep).entries(data).length-1]);
     filterConfig.time = wsConfig.time2index.range();
@@ -600,23 +599,17 @@ function brushedTime (){
 
 
 function filterTop(dataR){
+    var cal1 = new Date();
     let data =[];
     let topkeys = [];
+    // let timefilter = filterConfig.time.map(wsConfig.time2index.invert);
+    // let firstChain = _.chain(dataRaw)
+    //     .filter(d=>d.timestep>=timefilter[0]&&d.timestep<=timefilter[1]);
+    // filterConfig.limitSudden = 0;
+    // firstChain.groupBy("timestep").each(d=>{filterConfig.limitSudden = d3.mean([filterConfig.limitSudden,d3.max(d,e=>e.df)])});
+    // filterConfig.limitSudden = filterConfig.limitSudden*0.25;
+    // firstChain.filter(d=>d.df>filterConfig.limitSudden)
 
-    // _.chain(dataRaw)
-    //     .sortBy(d=>d.timestep)
-    //     .groupBy(d=>d.topic)
-    //     .groupBy(d=>d.timestep)
-    //     .map(d=>)
-    //
-    //     .groupBy(d=>d.key).map(d=>d[0])
-    //     .filter(d=>{
-    //         let cT = d.timestep;
-    //         return ((cT >= TR[0]) && (cT <= TR[1])); //in range time
-    //     })
-    //     .groupBy(d=>d.topic)
-    //     .map(d=>{return {topic: d[0].topic, terms:d.length}})
-    //     .value();
 
     let nettemp = d3.nest()
         .key(d=>d.topic).sortValues(d=>d.timestep)
@@ -645,6 +638,9 @@ function filterTop(dataR){
             });
         });
     });
+
+    var cal2 = new Date();
+    console.log("--------filterTop----"+(cal2-cal1));
     return data;
 }
 function callSum(){

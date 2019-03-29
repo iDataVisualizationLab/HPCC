@@ -2,6 +2,11 @@ var w = 380,
     h = 82;
 var firstTime =true;
 
+
+// time format
+Date.prototype.timeNow = function () {return d3.timeFormat("%H:%M %p")(this)};
+Date.prototype.timeNow2 = function () {return d3.timeFormat("%H:%M:%S %p")(this)};
+
 var svgLengend = d3.select('.legendHolder').append('svg')
     .attr("class", "legendView")
     .attr("width", w)
@@ -242,7 +247,7 @@ function areaChart(){
 }
 
 function saveResults(){
-    var filename = "HPCC_results.json";
+    var filename = "service"+d3.timeFormat("%a%d%b_%H%M")(new Date())+".json";
     var type = "json";
     var str = JSON.stringify(hostResults);
 
@@ -444,8 +449,7 @@ function saveResults(){
         obj.s1 = [];
         obj.Scagnostics0 = [0, 0, 0, 0, 0, 0, 0, 0, 0]; 
         for (var att in  dataS.CountriesData){
-            var hostArray = dataS.CountriesData[att];   
-            console.log(y+ " "+att);
+            var hostArray = dataS.CountriesData[att];
             var v0 = hostArray[y].s0;
             var v1 = hostArray[y].s1;
             obj.s0.push(v0);
@@ -471,4 +475,49 @@ function saveResults(){
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+}
+
+d3.selection.prototype.moveToFront = function() {
+    return this.each(function(){
+        this.parentNode.appendChild(this);
+    });
+};
+
+d3.selection.prototype.moveToBack = function() {
+    this.each(function() {
+        this.parentNode.firstChild
+        && this.parentNode.insertBefore(this, firstChild);
+    });
+};
+function getTransformation(transform) {
+    // Create a dummy g for calculation purposes only. This will never
+    // be appended to the DOM and will be discarded once this function
+    // returns.
+    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    // Set the transform attribute to the provided string value.
+    g.setAttributeNS(null, "transform", transform);
+
+    // consolidate the SVGTransformList containing all transformations
+    // to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
+    // its SVGMatrix.
+    var matrix = g.transform.baseVal.consolidate().matrix;
+
+    // Below calculations are taken and adapted from the private function
+    // transform/decompose.js of D3's module d3-interpolate.
+    var {a, b, c, d, e, f} = matrix;   // ES6, if this doesn't work, use below assignment
+    // var a=matrix.a, b=matrix.b, c=matrix.c, d=matrix.d, e=matrix.e, f=matrix.f; // ES5
+    var scaleX, scaleY, skewX;
+    if (scaleX = Math.sqrt(a * a + b * b)) a /= scaleX, b /= scaleX;
+    if (skewX = a * c + b * d) c -= a * skewX, d -= b * skewX;
+    if (scaleY = Math.sqrt(c * c + d * d)) c /= scaleY, d /= scaleY, skewX /= scaleY;
+    if (a * d < b * c) a = -a, b = -b, skewX = -skewX, scaleX = -scaleX;
+    return {
+        translateX: e,
+        translateY: f,
+        rotate: Math.atan2(b, a) * 180 / Math.PI,
+        skewX: Math.atan(skewX) * 180 / Math.PI,
+        scaleX: scaleX,
+        scaleY: scaleY
+    };
 }

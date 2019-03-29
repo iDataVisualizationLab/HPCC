@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>Phase space</title>
     <link rel="shortcut icon" type="image/x-icon" href="src/media/PhaseSpaceLogo.ico" />
-    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Passion+One|Russo+One&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Passion+One|Russo+One&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -19,7 +21,7 @@
     <script src="src/lib/d3.tip.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+
 
 
 </head>
@@ -38,8 +40,10 @@
                     <a class="dropdown-trigger" href="#!" data-target="listvar"><p id = "currentservice" class="titletext">Temperature</p><i class="material-icons right">arrow_drop_down</i></a>
                 </div>
                 <ul id="nav-mobile" class="left hide-on-med-and-down">
-                    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
-                    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+                    <li class="avatar"><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/src/media/logo.png" alt="TTU"></a></li>
+                    <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+                    <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+                    <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
                 </ul>
                 <ul class="right">
                     <li><a href="#!" value="dark" id = "DarkTheme">Light</a></li>
@@ -48,8 +52,10 @@
     </nav>
     <ul class="sidenav" id="mobile-demo">
         <h3>Other projects</h3>
+        <li><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University" class="avatar"></a></li>
         <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
         <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+        <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
     </ul>
     <div class = "menuFloat">
         <svg class="col s1" id="legend-svg"></svg>

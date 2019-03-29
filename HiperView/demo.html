@@ -8,122 +8,213 @@
 
     <title>HiperView</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
-    <link href="css/main.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="css/dd.css" />
     <script src="js/jquery-1.9.0.min.js"></script>
-    <script src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnosticsnd/build/js/scagnosticsnd.min.js"></script>
     <script src="js/jquery.dd.js"></script>
-    <script src="js/select.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+    <link href="css/theme.css" rel="stylesheet" type="text/css" />
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+    <!--<link rel="stylesheet" type="text/css" href="css/dd.css" />-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="js/underscore-min.js"></script>
+    <!--<script src="js/select.js"></script>-->
     <script src="js/TimerInterval.js"></script>
+    <script src="js/tsne.js"></script>
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
 </head>
 
-<body bgcolor="#ccc" text="black" id="mainBody">
-<header class="ttu-main-header" id="nav">
-    <div class="logo__lockup"><a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>
-        <h1 class="summaryText1">  </h1>
-    </div>
-</header>
-<div id ="scatterzone">
-    <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
-    <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
-    <div class="selection" id="selection">
-        <div id="selectionheader">Click & Drag</div>
+<body text="black" id="mainBody">
+<div class="cover">
+    <h5 class="spinnerC center" style="top: 60%;" >loading data...</h5>
+    <div class="spinnerC center" id="loadingSpinner" >
     </div>
 </div>
-<div id="instructions"></div>
-<!--<svg width="2600" height="1800" ></svg>-->
-<svg width="2600" height="1000" ></svg>
+<nav class="pushpin-demo-nav" data-target="blue">
 
-
-<!-- Spinner when loading -->
-<div id="loadingSpinner">
-    <!-- <span id="progressText"> -->
-</div>
-
-<!-- Select datasets -->
-<div id="holder1"  class="holder1">
-    <div>Visualizing <select id="datasetsSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select></div>
-    <h3 class ="currentDate"></h3>
-</div>
-
-<div id="linkHolder"  class="controlHolder">
-    <ul id="nav-mobile" class="left hide-on-med-and-down">
-        <li><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html" class="tooltip">
-            <img type="image/x-icon" src="images/PhaseSpaceLogo.ico" class="menuIcon "/>
-            <span class="tooltiptext">Phase Space</span></a>
+    <div class="nav-wrapper" id="header">
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <!--<div class="brand-logo center col s12 inline" >-->
+        <!--Parallel Coordinates-->
+        <!--</div>-->
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
+            <li class="tab active"><a class="active" href="#">HiperView</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
+            <li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+        </ul>
+        <ul class="right">
+            <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+            <li><a href="#!" value="dark" id = "DarkTheme" class="btn waves-effect waves-effect waves-yellow">
+                <i class="material-icons left">brightness_6</i><span>Light</span></a></li>
+        </ul>
+    </div>
+</nav>
+<ul class="sidenav " id="mobile-demo">
+    <h5></h5>
+    <li><a href="http://www.depts.ttu.edu/hpcc/"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University" class="avatar"></a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+</ul>
+<div id="mySidenav" class="sidenavs">
+    <div class="row s12">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header search-wrapper focused">
+                    <input type="text" id="search" placeholder="Search Racks...">
+                    <i class="material-icons">search</i>
+                </div>
+                <div class="collapsible-body"><span>Resevered for hierarchy.</span></div>
             </li>
-        <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html" class="tooltip">
-            <img type="image/x-icon" src="images/VR.ico" class="menuIcon"/>
-            <span class="tooltiptext">Vitural Reality</span>
-        </a></li>
-    </ul>
-
+            <li class="active">
+                <div class="collapsible-header"><i class="material-icons">settings</i>  Setting</div>
+                <div class="collapsible-body">
+                    <label for="datacom" class="col s4"> Dataset: </label>
+                    <div  class="row s12">
+                        <select id="datacom" class="col s7">
+                            <option value="serviceWed26Sep" selected="selected">26 Sep 2018</option>
+                            <option value="serviceWed27Sep">27 Sep 2018</option>
+                            <option value="serviceWed04Oct" >04 Oct 2018</option>
+                            <option value="service15Oct">15 Oct 2018</option>
+                            <option value="service17Oct">17 Oct 2018</option>
+                            <option value="influxdbThus21Mar_1520">21 Mar 2019</option>
+                            <option value="influxdb">Real-time Influxdb</option>
+                            <option value="nagios">Real-time Nagios</option>
+                            <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
+                        </select>
+                    </div>
+                    <label for="datasetsSelect" class="col s4"> Visualizing: </label>
+                    <div  class="row s12">
+                        <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
+                            <img src="" class="circle">
+                            <span class="title"></span>
+                            <i class="material-icons right">arrow_drop_down</i>
+                        </div>
+                        <ul id="datasetsSelect" class="col collection dropdown-content">
+                        </ul>
+                    </div>
+                    <label for="indsg" class="col s4"> Summary type: </label>
+                    <div  class="row s12">
+                        <select id="indsg" class="col s7">
+                            <option value="Boxplot">Boxplot</option>
+                            <option value="Radar" selected="selected">Radar</option>
+                            <option value="Scatterplot" >Scatterplot</option>
+                        </select>
+                    </div>
+                    <label for="inds" class="col s4"> Chart type: </label>
+                    <div  class="row s12">
+                        <select id="inds" class="col s7">
+                            <option value="Heatmap" selected="selected">Heatmap</option>
+                            <option value="Area Chart">Area Chart</option>
+                            <option value="T-sne Chart">t-SNE Chart</option>
+                        </select>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">help</i>Controls</div>
+                <div class="collapsible-body"><strong>Zoom</strong>: Scroll mouse button to zoom.<br/></div>
+            </li>
+        </ul>
+    </div>
 </div>
 
+<div id="Maincontent" class="row s12">
+    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
+    <div class="overlaySide">
+        <a class="openbtn btn-floating btn waves-effect waves-light" id="sideNavbtn" onclick="openNav()">
+            <i class="material-icons">chevron_right</i></a>
+    </div>
+    <div id="header2" class="row s12 marginBottom0">
+        <!--<h1>HPCC Explorer</h1>-->
+        <div class="col valign-wrapper">
+            <h6 class="summaryText1">  </h6>
+            <h5 class ="currentDate center-align"></h5>
+        </div>
+        <div class="controls">
+            <div id="controlHolder"  class="controlHolder">
 
-<div id="controlHolder"  class="controlHolder">
+                <!--<button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>-->
+                <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
+                <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
+                <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
+                <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>
+            </div>
 
-    <label for="inds"> Chart type: </label>
-    <select id="inds">
-        <option value="Heatmap" selected="selected">Heatmap</option>
-        <option value="Area Chart">Area Chart</option>
-    </select>
 
-    <label for="indsg"> Summary type: </label>
-    <select id="indsg">
-        <option value="Boxplot">Boxplot</option>
-        <option value="Radar" selected="selected">Radar</option>
-        <option value="Scatterplot" >Scatterplot</option>
-    </select>
-    <br><br>
-    <button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>
-    <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
-    <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
-    <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
-    <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>
-    <!--<br><br>-->
-    <!--<button onclick="summaryRadar()" style="background-color: #ffd;">Summary</button>-->
-    <!--<select id="irecord">-->
-        <!--<option value=0 selected="selected">0</option>-->
-        <!--<option value=1>1</option>-->
-    <!--</select>-->
+        </div>
+        <div id="legendHolder"  class="legendHolder">
+        </div>
 
+        <div style="clear:both;"></div>
+    </div>
+    <!--<header class="ttu-main-header" id="nav">-->
+    <!--<div class="logo__lockup">-->
+    <!--&lt;!&ndash;<a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/">&ndash;&gt;-->
+    <!--&lt;!&ndash;<img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>&ndash;&gt;-->
+    <!--<h1 class="summaryText1">  </h1>-->
+    <!--</div>-->
+    <!--</header>-->
+
+    <div id="instructions"></div>
+    <!--<svg width="2600" height="1800" ></svg>-->
+    <div style="position: relative;">
+        <div class="row s12" style="overflow-x: auto">
+            <div id ="scatterzone">
+                <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
+                <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
+                <div class="selection" id="selection">
+                    <div id="selectionheader">Click & Drag</div>
+                </div>
+            </div>
+            <div id ="subzone" class="subpanel card-panel ">
+                <h6>Rank of entries</h6>
+                <div class="top10DIV">
+                    <svg class="top10" >
+
+                    </svg>
+                </div>
+                <div class="details" ></div>
+            </div>
+            <svg width="2600" height="1000" class="mainsvg" ></svg>
+        </div>
+        <div class="row s12 valign-wrapper center-align">
+            <div id="radarChart1" class="radarChartss col s4"></div>
+            <div id="radarChart2" class="radarChartss col s4"></div>
+            <div id="radarChart3" class="radarChartss col s4"></div>
+        </div>
+    </div>
 
 </div>
-
-<div id="legendHolder"  class="legendHolder">
-</div>
-
-<div id="radarChart1" class="radarChartss"></div>
-<div id="radarChart2" class="radarChartss"></div>
-<div id="radarChart3" class="radarChartss"></div>
-<!--tooltip total-->
-<div id="Summarynode">
-    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-    <div id="Summarynodeheader">Click here to move</div>
-    <div id = "Summarynodeg"></div>
-</div>
-
 <!-- load the d3.js library -->
 <script src="js/d3.v4.js"></script>
 <script src="js/d3.tip.js"></script>
 <script src="js/d3.scaleAdjust.js"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
-<script type="text/javascript" src="https://idatavisualizationlab.github.io/Scagnostics2018/scagnostics/build/js/outliagnostics.min.js"></script>
+
 
 <script src="myscripts/util.js"></script>
 <script src="myscripts/hostlist.js"></script>
 <script src="myscripts/service.js"></script>
 <!--<script src="myscripts/service17Oct.js"></script>-->
-<script src="myscripts/serviceWed26Sep.js"></script>
+<!--<script src="myscripts/serviceWed26Sep.js"></script>-->
 <!--<script src="myscripts/main.js"></script>-->
+<script src="js/outliagnostics.min.js"></script>
+<script src="js/scagnosticsnd.min.js"></script>
 <script src="js/box.js"></script>
 <script src="js/boxplot.js"></script>
 <script src="js/binnerN.min.js"></script>
+<script src="myscripts/setting.js"></script>
 <script src="myscripts/radarSum.js"></script>
 <script src="myscripts/scatterplot.js"></script>
+<script src="myscripts/tsnePlot.js"></script>
 <script src="myscripts/main.js"></script>
 <script src="myscripts/tooltip.js"></script>
 <script src="spider/radarChart.js"></script>

@@ -23,7 +23,8 @@ function RadarChart(id, data, options, name) {
      showText: true,
      bin: false,
      legend: [],
-        color: d3.scaleOrdinal(d3.schemeCategory10) //Color function
+        color: function(){return 'rgb(167, 167, 167)'}
+        //d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
     
     //Put all of the options into a variable called cfg
@@ -174,10 +175,6 @@ function RadarChart(id, data, options, name) {
             .attr("r", function (d, i) {
                 return radius / cfg.levels * d;
             })
-            //.style("fill", function(d){
-            //    var v = (maxValue-minValue) * d/cfg.levels +minValue;
-            //    return colorTemperature(v);
-            //})
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
@@ -205,10 +202,10 @@ function RadarChart(id, data, options, name) {
             .attr("x1", 0)
             .attr("y1", 0)
             .attr("x2", function (d, i) {
-                return rScale(maxValue * 1.05) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(maxValue * (cfg.bin?((cfg.levels-1)/cfg.levels):1.05)) * Math.cos(angleSlice[i] - Math.PI / 2);
             })
             .attr("y2", function (d, i) {
-                return rScale(maxValue * 1.05) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(maxValue *( cfg.bin?((cfg.levels-1)/cfg.levels):1.05)) * Math.sin(angleSlice[i] - Math.PI / 2);
             })
             .attr("class", "line")
             .style("stroke", "white")
@@ -376,14 +373,6 @@ function RadarChart(id, data, options, name) {
                     .selectAll(".radarStroke").style('pointer-events','auto');
 
                 path
-                //     .style("stroke-opacity", () => {
-                //     var ff = t.__data__;
-                //     return densityscale(ff.bin.name.filter(e => (binlist.find(f => f === e) !== undefined)).length);
-                // })
-                    // .style("stroke-width", () => {
-                    //     var radius = fff.distancefunc(ff);
-                    //     return (radius === 0 ? cfg.strokeWidth : scaleStroke(radius) + "px");
-                    // })
                     .style("cursor", "pointer")
                     //.on("mouseenter", null)
                     .on("mouseleave ", function () {

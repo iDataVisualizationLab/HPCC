@@ -76,7 +76,15 @@ body.light {
     font-family: 'Fredoka One', cursive;
     color: #ffffff
 }
-
+#header img{
+    padding-top: 0.5em;
+    display: block;
+    height: auto;
+    max-width: 3em;
+}
+.sidenav img{
+    width:10em;
+}
 .light #header,.light #header a,.light #header .brand-logo {
     color: #484848
 }
@@ -134,18 +142,18 @@ body.light {
 }
 
 
-   .pin-top {
-       position: relative;
-   }
+.pin-top {
+   position: relative;
+}
 
 
-   .pin-bottom {
-       position: relative;
-   }
+.pin-bottom {
+   position: relative;
+}
 
-   .pinned {
-       position: fixed !important;
-   }
+.pinned {
+   position: fixed !important;
+}
 html, body, .block {
     height: 100%;
 }

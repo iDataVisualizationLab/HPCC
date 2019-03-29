@@ -113,11 +113,10 @@ function mouseoverNode(d1){
         obj.query_time =r.arr[i].result.query_time;
         obj.indexSamp = i;
         if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue)
-            ;
+            arr.push(obj);
         else
             arr.push(obj);
     }
-
    
     
 
@@ -307,7 +306,7 @@ function mouseoverNode(d1){
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Temperature (°F)");
+        .text("Temperature (°C)");
 
     //************************************************************* Date and Time
     svgTip.append("text")

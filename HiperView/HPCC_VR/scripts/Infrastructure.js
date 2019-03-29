@@ -14,6 +14,7 @@ function initQuanah()
     }
 
     scene.add(quanah);
+    quanah.position.x = ROOM_SIZE * 2;
 
     addCPUMarker();
     addTooltip();

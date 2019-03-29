@@ -1,4 +1,8 @@
 // EVENTS
+var mouseDown = 0;
+document.body.onmousedown = function() { ++mouseDown; };
+document.body.onmouseup = function() { --mouseDown; };
+var sp_focus = null;
 
 // on resizing window
 function onResize()
@@ -18,10 +22,22 @@ function onMouseMove( event )
 // on mouse clicked / screen touched
 function onMouseDown( event )
 {
+    var mouseDownHold;
+    clearInterval( mouseDownHold );
+
     event.preventDefault();
 
     // for some reason 2 event happen at the same time
     if( event.isTrusted ) return;
+
+    if( sp_focus != null )
+    {
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-x") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-y") );
+        sp_focus.scatter_plot.graph.remove( sp_focus.scatter_plot.graph.getObjectByName("axis-label-z") );
+        moveScatterPlot( sp_focus, sp_focus.xr, sp_focus.yr, sp_focus.zr );
+        sp_focus = null;
+    }
 
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
     var intersects;
@@ -33,8 +49,10 @@ function onMouseDown( event )
         console.log(INTERSECTED.name);
     else if( isTimeControlPanelClicked() )
         console.log(INTERSECTED.name);
-    // else if( isScatterPlotClicked() )
-    //     console.log(INTERSECTED.name);
+    else if( isScoreControlPanelClicked() )
+        console.log(INTERSECTED.name);
+    else if( isScatterPlotClicked() )
+        console.log(INTERSECTED.name);
     else if( isLeverClicked() )
         console.log(INTERSECTED.name);
     else if( isSomethingElseClicked() )
@@ -110,44 +128,84 @@ function onMouseDown( event )
         }
     }
 
-    // check if scatter plot was clicked
-    function isScatterPlotClicked()
+    // check if score control panel was clicked
+    function isScoreControlPanelClicked()
     {
-        intersects = raycaster.intersectObjects( scatter_plot.grid.children );
-        if ( intersects.length > 0 )  // scatter plot grid was selected
+        intersects = raycaster.intersectObjects( score_control_panel.children );
+        if ( intersects.length > 0 )  // score control panel was clicked
         {
             INTERSECTED = intersects[ 0 ].object;
 
-            if( INTERSECTED.type == "axis" ) // an axis was selected
+            if( INTERSECTED.type == "arrow_up" )
+                score_control_panel.cylinder.rotation.y-=score_control_panel.rotation_interval;
+            else if( INTERSECTED.type == "arrow_down" )
+                score_control_panel.cylinder.rotation.y+=score_control_panel.rotation_interval;
+            return true;
+        }
+        else
+        {
+            intersects = raycaster.intersectObjects( score_control_panel.cylinder.children );
+            if ( intersects.length > 0 )  // cylinder was clicked
             {
-                INTERSECTED.menu.visible = true;
+                INTERSECTED = intersects[ 0 ].object;
+                if( INTERSECTED.type == "arrow_left" & SCORE[INTERSECTED.name]>0 )
+                {
+                    var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
+                    slider.position.y+=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 - 1 ) / 10;
+                    filterScatterPlotMatrix();
+                    return true;
+                }
+                else if( INTERSECTED.type == "arrow_right" & SCORE[INTERSECTED.name]<1 )
+                {
+                    var slider = score_control_panel.getObjectByName("slider-" + INTERSECTED.name);
+                    slider.position.y-=slider.initial/5;
+                    SCORE[INTERSECTED.name] = ( SCORE[INTERSECTED.name]*10 + 1 ) / 10;
+                    filterScatterPlotMatrix();
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    // check if scatter plot was clicked
+    function isScatterPlotClicked()
+    {
+        intersects = raycaster.intersectObjects( scatter_plot_matrix.graph.children );
+        if ( intersects.length > 0 )  // scatter plot grid was selected
+        {
+            INTERSECTED = intersects[ 0 ].object;
+            if( INTERSECTED.type == "scatter-plot-hitbox" & INTERSECTED.highlighted ) // a scatter plot was selected
+            {
+                // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
+                sp_focus = INTERSECTED;
+
+                sp_focus.scatter_plot.drawAxis( 0, sp_focus.scatter_plot.x );
+                sp_focus.scatter_plot.drawAxis( 1, sp_focus.scatter_plot.y );
+                sp_focus.scatter_plot.drawAxis( 2, sp_focus.scatter_plot.z );
+
+                moveScatterPlot( INTERSECTED, 0, 1.05, 1 );
                 return true;
             }
-            if( INTERSECTED.type == "REALTIME" ) // change time to REALTIME
+            else if( INTERSECTED.type == "axis-filter" ) // an axis was selected
             {
-                // reset();
+                var axis_id = geAllIdsByName( scatter_plot_matrix.graph, INTERSECTED.name );
+                for( var l=0; l<axis_id.length; l++ )
+                    scatter_plot_matrix.graph.getObjectById(axis_id[l]).material.opacity = 1;
+
+                for( sp in scatter_plot_matrix.matrix )
+                    if( !scatter_plot_matrix.matrix[sp].hitbox.name.includes(INTERSECTED.name) )
+                        highlightScatterPlot( scatter_plot_matrix.matrix[sp].hitbox, false );
+
                 return true;
             }
         }
         else
         {
-            // intersects = raycaster.intersectObjects( scatter_plot.x.obj.menu.children );
-            // if ( intersects.length > 0 )  // x axis option was selected
-            // {
-            //     INTERSECTED = intersects[ 0 ].object;
-
-            //     if( INTERSECTED.option == 0 ) // option 0 was selected
-            //     {
-            //         INTERSECTED.menu.visible = false;
-            //         // updateScatterPlot( oldhostclicked, services )
-            //         return true;
-            //     }
-            // }
-            // else
-            // {
-            //     return false;
-            // }
-
             return false;
         }
     }

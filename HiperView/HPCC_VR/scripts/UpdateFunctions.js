@@ -129,45 +129,146 @@ function updateCPUMarker( obj )
 // scatterplot update
 function updateScatterPlotMatrix( host, timestamp )
 {
-    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
-        updateScatterPlot( host, timestamp, scatter_plot_matrix.matrix[sp] );
-}
-
-function updateScatterPlot( host, timestamp, sp )
-{
+    // check if host exists
     if( json[host] == undefined )
         return 0;
 
-    var services = sp.axes;
+    for( var sp=0; sp<scatter_plot_matrix.length; sp++ )
+    {
+        var plot = scatter_plot_matrix.matrix[sp];
+
+        // get host raw new coordinates
+        var services = plot.axes;
+        var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : 0;
+        var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : 0;
+        var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : 0;
+
+        // update matrix data & scagnostic
+        plot.updateData( plot.datakey[host], x, y, z );
+
+        // update matrix content
+        if( scatter_plot_matrix.isBinned )
+            updateScatterPlotBins( host, x, y, z, plot );
+        else
+        {
+            var c =  color( json[host][selectedService][timestamp-1] );
+            updateScatterPlotPoints( host, x, y, z, c, plot );
+        }
+    }
+}
+
+function updateScatterPlotPoints( host, x, y, z, color, sp )
+{
     var point = sp.points.obj[host];
-    var x = json[host][services[0]][timestamp-1] ? json[host][services[0]][timestamp-1] : null;
-    var y = json[host][services[1]][timestamp-1] ? json[host][services[1]][timestamp-1] : null;
-    var z = json[host][services[2]][timestamp-1] ? json[host][services[2]][timestamp-1] : null;
 
-    x = sp.fit(x,sp.x);
-    y = sp.fit(y,sp.y);
-    z = sp.fit(z,sp.z);
+    x = sp.x.fit(x);
+    y = sp.y.fit(y);
+    z = sp.z.fit(z);
 
-    point.material.color = new THREE.Color( color(json[host][selectedService][timestamp-1]) );
+    point.material.color = new THREE.Color( color );
 
+    point.position.x = x;
+    point.position.y = y;
+    point.position.z = z;
+
+    // var intervals = 20;
+    // var xinterval = (x - point.position.x)/intervals;
+    // var yinterval = (y - point.position.y)/intervals;
+    // var zinterval = (z - point.position.z)/intervals;
+    // var count = 0;
+
+    // var movePoint = setInterval( function()
+    // {
+    //     point.position.x += xinterval;
+    //     point.position.y += yinterval;
+    //     point.position.z += zinterval;
+    //     count++;
+
+    //     if( count == intervals )
+    //         clearInterval( movePoint );
+
+    // }, 20 );
+
+}
+
+function updateScatterPlotBins( host, x, y, z, sp )
+{
+    // get old host bin coordinates
+    var o_xb = sp.bins.getBinOf[host][0];
+    var o_yb = sp.bins.getBinOf[host][1];
+    var o_zb = sp.bins.getBinOf[host][2];
+
+    // get new host bin coordinates
+    var n_xb = sp.x.bin(x);
+    var n_yb = sp.y.bin(y);
+    var n_zb = sp.z.bin(z);
+
+    // update current host bin coordinates
+    sp.bins.getBinOf[host][0] = n_xb;
+    sp.bins.getBinOf[host][1] = n_yb;
+    sp.bins.getBinOf[host][2] = n_zb;
+
+    // update binCount
+    var o_new_op = ( --sp.bins.binCount[o_xb][o_yb][o_zb] ) * sp.bins.oneElement;   // increase one to count
+    var n_new_op = ( ++sp.bins.binCount[n_xb][n_yb][n_zb] ) * sp.bins.oneElement;   // decrease one to count
+
+    // update bin size
+    sp.bins.bin[o_xb][o_yb][o_zb].material.opacity = o_new_op;                      // decrease old bin
+    sp.bins.bin[n_xb][n_yb][n_zb].material.opacity = n_new_op;                      // increase new bin
+
+    // dont show if empty
+    sp.bins.bin[o_xb][o_yb][o_zb].visible = sp.bins.binCount[o_xb][o_yb][o_zb] != 0;
+    sp.bins.bin[n_xb][n_yb][n_zb].visible = sp.bins.binCount[n_xb][n_yb][n_zb] != 0;
+}
+
+function moveScatterPlot( obj, x, y, z )
+{
     var intervals = 20;
-    var xinterval = (x - point.position.x)/intervals;
-    var yinterval = (y - point.position.y)/intervals;
-    var zinterval = (z - point.position.z)/intervals;
+    // var xinterval = (x - obj.position.x)/intervals;
+    var yinterval = (y - obj.position.y)/intervals;
+    var zinterval = (z - obj.position.z)/intervals;
     var count = 0;
 
-    var movePoint = setInterval( function()
+    var move = setInterval( function()
     {
-        point.position.x += xinterval;
-        point.position.y += yinterval;
-        point.position.z += zinterval;
+        // obj.position.x -= xinterval;
+        obj.position.y += yinterval;
+        obj.position.z += zinterval;
         count++;
 
         if( count == intervals )
-            clearInterval( movePoint );
+            clearInterval( move );
 
     }, 20 );
+}
 
+function highlightScatterPlot( hitbox, on )
+{
+    // skip highlight process if hitbox does not change
+    if( hitbox.highlighted == on ) return 0;
+
+    hitbox.highlighted = on;
+    var sp = hitbox.children[0];
+    if( on ) sp.visible = true;
+
+    var intervals = 20;
+    var z = on ? 0 : scatter_plot_matrix.scale * -1;
+    var zinterval = ( z-sp.position.z ) /intervals;
+    var count = 0;
+
+    var move = setInterval( function()
+    {
+        sp.position.z += zinterval;
+        count++;
+
+        if( count == intervals )
+        {
+            if( !on ) sp.visible = false;
+            hitbox.material.visible = !on;
+            clearInterval( move );
+        }
+
+    }, 20 );
 }
 
 // lever update
@@ -211,7 +312,7 @@ function updateTooltip( host )
     var host_name = host.name;
     // var pos = new THREE.Vector3().setFromMatrixPosition( camera.matrixWorld );
 
-    tooltip.position.set(0,0,0);
+    tooltip.position.set(ROOM_SIZE*4,0,0);
 
     rectip.datum({className:{baseVal:host_name}});
     $('#placetip').triggerSVGEvent('click');

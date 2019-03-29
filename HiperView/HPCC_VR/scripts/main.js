@@ -8,7 +8,6 @@ var timeObj = {};
 
 // selected
 var selectedTimestamp = 1;
-var selectedSPService = ["arrTemperatureCPU1","arrFans_speed1","arrPower_usage"];
 
 var ROOM_SIZE = 1;
 var RACK_NUM = 10;
@@ -26,13 +25,24 @@ var fillHost;
 var updateTimestamp;
 var move_timer;
 
-var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [3,98], sp_pos: 0 },
-                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [3,98], sp_pos: 1  },
-                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 2 },
-                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 1 },
-                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 0 },
-                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 1 },
-                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 0 },
+var SERVICE = { arrTemperatureCPU1: { key: "arrTemperatureCPU1", value: "Temperature1", dom: [0,98], sp_pos: 5 },
+                arrTemperatureCPU2: { key: "arrTemperatureCPU2", value: "Temperature2", dom: [0,98], sp_pos: 6 },
+                arrCPU_load: { key: "arrCPU_load", value: "CPU_load", dom: [0,10], sp_pos: 0 },
+                arrMemory_usage: { key: "arrMemory_usage", value: "Memory_usage", dom: [0,99], sp_pos: 3 },
+                arrFans_speed1: { key: "arrFans_speed1", value: "Fans_speed1", dom: [1050,17850], sp_pos: 1 },
+                arrFans_speed2: { key: "arrFans_speed2", value: "Fans_speed2", dom: [1050,17850], sp_pos: 2 },
+                arrPower_usage: { key: "arrPower_usage", value: "Power_usage", dom: [0,200], sp_pos: 4 },
+            };
+
+var SCORE = { outlyingScore: 0.4,
+                clumpyScore: 0,
+                convexScore: 0,
+                monotonicScore: 0,
+                skewedScore: 0,
+                skinnyScore: 0,
+                sparseScore: 0,
+                striatedScore: 0,
+                stringyScore: 0
             };
 
 
@@ -49,8 +59,9 @@ var cpu_marker;
 var tooltip;
 var service_control_panel;
 var time_control_panel;
+var score_control_panel;
 var scatter_plot_matrix;
-var scatter_plot;
+var foo;
 var parallel_set;
 var lever;
 var FONT = 'media/fonts/helvetiker_regular.typeface.json';
@@ -131,60 +142,6 @@ function init()
     loadJSON();
 
     TS_NUM = json["compute-1-1"]["arrCPU_load"].length;
-    // for( var host in json )
-    // {
-    //     if(!json.hasOwnProperty(host)) continue;
-    //     for( var service in json[host] )
-    //     {
-    //         if(!json[host].hasOwnProperty(service)) continue;
-
-    //         if( SERVICE[service]["dom"][0] == null )
-    //         {
-    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
-    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
-    //         }
-
-    //         if( SERVICE[service]["dom"][0] > Math.min(...json[host][service]) )
-    //             SERVICE[service]["dom"][0] = Math.min(...json[host][service]);
-
-    //         if( SERVICE[service]["dom"][1] < Math.max(...json[host][service]) )
-    //             SERVICE[service]["dom"][1] = Math.max(...json[host][service]);
-    //     }
-    // }
-
-    // for( var i=0; i<serviceList.length; i++ )
-    // {
-    //     var dif, mid, left, service;
-    //     dif = (thresholds[i][1]-thresholds[i][0])/4;
-    //     mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-    //     if( i == 1 )
-    //     {
-    //         left=0;
-    //         SERVICE["arrCPU_load"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
-    //     }
-    //     else if( i == 2 )
-    //     {
-    //         left=0;
-    //         SERVICE["arrMemory_usage"].threshold = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
-    //     }
-    //     else if( i == 0 )
-    //     {
-    //         left = thresholds[i][0]-dif;
-    //         SERVICE["arrTemperatureCPU1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //         SERVICE["arrTemperatureCPU2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    //     else if( i == 4 )
-    //     {
-    //         left = 0;
-    //         SERVICE["arrPower_usage"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    //     else if( i == 3 )
-    //     {
-    //         left = 0;
-    //         SERVICE["arrFans_speed1"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //         SERVICE["arrFans_speed2"].threshold = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
-    //     }
-    // }
 
     initScene();
     initCamera();
@@ -406,7 +363,7 @@ function initInteractions()
 
 function initRoom()
 {
-    var height = ROOM_SIZE * 2;
+    var height = ROOM_SIZE * 2.5;
     var width = ROOM_SIZE * 12;
     var depth = ROOM_SIZE * 4;
     var geometry = new THREE.BoxGeometry( width, height, depth );
@@ -432,7 +389,7 @@ function initRoom()
     }
 
     var room = new THREE.Mesh( geometry, materials );
-    room.position.set( ROOM_SIZE*3, ROOM_SIZE/2, ROOM_SIZE );
+    room.position.set( ROOM_SIZE*3, ROOM_SIZE/1.25, ROOM_SIZE );
     room.name = "hpcc_room";
     room.type = "room";
     scene.add( room );
@@ -481,7 +438,7 @@ function initLever()
     lever.add( pivot );
     lever.pivot = pivot;
     pivot.rotation.set( Math.PI/-4, 0, 0 );
-    lever.position.set( ROOM_SIZE * 2.7, 0.15, ROOM_SIZE*-1 );
+    lever.position.set( ROOM_SIZE * 4.75, ROOM_SIZE / 10, ROOM_SIZE*-1 );
     scene.add( lever );
 
     function addLeverLabel( text, y, obj )
@@ -585,33 +542,40 @@ function initHPCC()
 function initScatterPlotMatrix()
 {
     var hostkeys = Object.keys(json);
-    var tmp, datas = [], s, ranges = [], selectedSPServices = [];
+    var datas = [], s, ranges = [], selectedSPServices = [], datakeys = [];
+    var element = Object.keys( SERVICE );
+    // element.pop();
+    // element.pop();
+    // element.pop();
+    // element.pop();
 
-    var x = [ "arrTemperatureCPU1", "arrTemperatureCPU2" ];
-    var y = [ "arrFans_speed1", "arrFans_speed2" ];
-    var z = [ "arrPower_usage", "arrMemory_usage", "arrCPU_load" ];
-    // var x = [ "arrTemperatureCPU1" ];
-    // var y = [ "arrFans_speed1" ];
-    // var z = [ "arrCPU_load"];
+    var slist = [];
 
-    for( other in z )
+    for( x in element )
     {
-        for( fan in y )
+        for( y in element )
         {
-            for( temp in x )
+            for( z in element )
             {
-                s = [z[other],y[fan],x[temp]];
+                var s = [ element[x], element[y], element[z] ].sort();
+
+                if( isRepeated( s, slist ) )
+                    continue;
+                else
+                    slist.push( s.toString() );
+
                 selectedSPServices.push(s);
-                data = []
+                var data = [];
+                var datakey = {};
+
                 for( var h=0; h<hostkeys.length; h++ )
                 {
-                    tmp = [];
-                    tmp.push( json[hostkeys[h]][s[0]][selectedTimestamp] );
-                    tmp.push( json[hostkeys[h]][s[1]][selectedTimestamp] );
-                    tmp.push( json[hostkeys[h]][s[2]][selectedTimestamp] );
-                    data.push( tmp )
+                    datakey[hostkeys[h]] = h;
+                    data.push( [0,0,0] );
                 }
-                datas.push(data);
+
+                datakeys.push( datakey );
+                datas.push( data );
                 ranges.push([SERVICE[s[0]]["dom"],
                             SERVICE[s[1]]["dom"],
                             SERVICE[s[2]]["dom"]] );
@@ -620,10 +584,25 @@ function initScatterPlotMatrix()
     }
 
     // building scatter plot matrix ----------------------------------------------------
-    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 5, hostkeys, datas, null, 0.25  );
-    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 3, 0, ROOM_SIZE );
-    scatter_plot_matrix.graph.rotation.set( 0, 0, 0 );
+    scatter_plot_matrix = new ScatterPlotMatrix( selectedSPServices, ranges, 6, hostkeys, datas, 0.25, false, datakeys );
+    scatter_plot_matrix.graph.position.set( ROOM_SIZE * 7, ROOM_SIZE * -0.9, ROOM_SIZE * 2.99 );
+    scatter_plot_matrix.graph.rotation.set( 0, Math.PI, 0 );
     scene.add( scatter_plot_matrix.graph );
+    scatter_plot_matrix.graph.visible = true;
+
+    function isRepeated( a, A )
+    {
+        if( a[0] == a[1] | a[0] == a[2] | a[1] == a[2] )
+            return true;
+
+        a = a.toString();
+        for( var r=0; r<A.length; r++ )
+        {
+            if( a == A[r] )
+                return true;
+        }
+        return false;
+    }
 }
 
 function initParallelSet()
@@ -638,7 +617,7 @@ function initParallelSet()
         for( var s=0; s<table[0].length; s++ )
         {
             if( json[host][table[0][s]] )
-                tmp.push(json[host][table[0][s]][19]);
+                tmp.push(json[host][table[0][s]][0]);
             else
                 tmp.push(undefined);
         }
@@ -646,10 +625,22 @@ function initParallelSet()
     }
 
     parallel_set = new ParallelSet( 0.25, FONT, table, "arrTemperatureCPU1", [], table[0] );
-    parallel_set.graph.position.set( ROOM_SIZE * 2.9, -0.15, -0.65 );
+    parallel_set.graph.position.set( ROOM_SIZE * 4.75, -0.15, -0.65 );
     parallel_set.graph.rotation.set( 0, -Math.PI/2, 0 );
     scene.add( parallel_set.graph );
     parallel_set.graph.visible = false;
+}
+
+// Extra
+
+function geAllIdsByName( parent, name )
+{
+    var match = [];
+    for( var c=0; c<parent.children.length; c++ )
+        if( parent.children[c].name == name )
+            match.push(parent.children[c].id);
+
+    return match;
 }
 
 // Animate & Render
