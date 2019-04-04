@@ -144,6 +144,30 @@ d3.radar = function () {
         //if (index >= maxstack) radarTimeline.shift();
 
     };
+
+    radarTimeline.drawSummarypoint = function(index){
+        if (index >= (maxstack-1)) index = maxstack-1;
+        let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
+        if (radarchart.empty())
+            radarchart = svg.append("g")
+                .attr("class","radar"+index+" box"+index+" graphsum")
+                .datum(index)
+                .attr("transform", function (d) {
+                    return "translate(" + xscale(index) + "," + margin + ")";
+                });
+
+        handledata(index);
+
+        var keys = dataSpider3[0].map(d=>d.axis);
+        dataSpider3.length = 0;
+        //console.log(bin.bins.length);
+        dataSpider3 = d3.mean(dataSpider3);
+        radarChartsumopt.levels = levelsR;
+        //radarChartsumopt.color = color2;
+        RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
+        //if (index >= maxstack) radarTimeline.shift();
+
+    };
     radarTimeline.shift = function (){
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {
