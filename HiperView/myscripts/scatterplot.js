@@ -83,8 +83,8 @@ d3.Scatterplot = function () {
             scatterplot_settings.active_features.fan4peed.scale = thresholds[3];
         scatterplot_settings.active_features.memoryusg.scale =thresholds[4];
 
-        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-swidth/2-10+margin.left)+"px").style('top',(sheight+margin.top-15)+"px");
-        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+85+margin.left)+"px").style('top',(97+sheight+margin.top-15)+"px");
+        d3.select("#scatterzone").select(".scatter_y").style('left',(xx-swidth/2-12+margin.left)+"px").style('top',(sheight+margin.top-15-75)+"px");
+        d3.select("#scatterzone").select(".scatter_x").style('left',(xx-swidth/2+85+margin.left)+"px").style('top',(97+sheight+margin.top-15-75)+"px");
         dragElement(document.getElementById("selection"));
     };
     function ScatterPlotG(g, dataPoints) {
