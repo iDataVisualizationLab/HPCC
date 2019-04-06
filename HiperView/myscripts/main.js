@@ -809,6 +809,32 @@ function drawsummarypoint(harr){
             // Radar Time
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
+        case "RadarSummary":
+            for (var i in harr) {
+                var h  = harr[i];
+                var name = hosts[h].name;
+                var r = hostResults[name];
+                // lastIndex = initIndex||(r.arr.length - 1);
+                // boxplot
+                if (lastIndex >= 0) {   // has some data
+                    var arrServices = [];
+                    serviceList.forEach((ser, indx) => {
+                        var obj = {};
+                        let dataextract = r[serviceListattr[indx]][lastIndex];
+                        if (dataextract)
+                            dataextract = dataextract.data.service.plugin_output;
+                        var a = processData(dataextract, ser);
+                        obj.a = a;
+                        arrServices.push(obj);
+                    })
+                }
+                arrServices.name = name;
+                arr.push(arrServices);
+            }
+            Radarplot.data(arr).drawSummarypoint(lastIndex);
+            break;
+
+
 
     }
 }
