@@ -632,7 +632,7 @@ nav ul li.active a{
 	height: 100%;
 }
 
-.overlaySide:hover .openbtn{
+.overlaySide:hover .openbtn, .overlaySide:active .openbtn{
 	left: 20px;
 }
 
