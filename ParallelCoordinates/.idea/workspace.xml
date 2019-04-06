@@ -27,6 +27,7 @@
           <entry key="HTML" value="1" />
           <entry key="JSON" value="2" />
           <entry key="JavaScript" value="11" />
+          <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
@@ -86,6 +87,15 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="380">
               <caret line="166" column="59" lean-forward="true" selection-start-line="166" selection-start-column="59" selection-end-line="166" selection-end-column="59" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitattributes">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="49" lean-forward="true" selection-start-column="49" selection-end-column="49" />
             </state>
           </provider>
         </entry>
@@ -253,19 +263,32 @@
       <workItem from="1553273680798" duration="24000" />
       <workItem from="1553273723302" duration="12959000" />
       <workItem from="1553555278516" duration="2897000" />
+<<<<<<< HEAD
       <workItem from="1554090245933" duration="151000" />
+=======
+      <workItem from="1553706278547" duration="97000" />
+>>>>>>> 8cef6b93fa6a73f9ef4aefde230eb31116b054d0
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
     <option name="totallyTimeSpent" value="16031000" />
+=======
+    <option name="totallyTimeSpent" value="15977000" />
+>>>>>>> 8cef6b93fa6a73f9ef4aefde230eb31116b054d0
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
+<<<<<<< HEAD
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8840737" visible="true" weight="0.2563593" />
       <window_info id="Structure" order="1" sideWeight="0.115926325" side_tool="true" visible="true" weight="0.2563593" />
+=======
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8836834" visible="true" weight="0.2563593" />
+      <window_info id="Structure" order="1" sideWeight="0.11631664" side_tool="true" visible="true" weight="0.2563593" />
+>>>>>>> 8cef6b93fa6a73f9ef4aefde230eb31116b054d0
       <window_info id="Favorites" order="2" sideWeight="0.5005171" side_tool="true" weight="0.25198412" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -276,7 +299,11 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
+<<<<<<< HEAD
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32936078" />
+=======
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.32936078" />
+>>>>>>> 8cef6b93fa6a73f9ef4aefde230eb31116b054d0
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -363,6 +390,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="311">
@@ -374,6 +402,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1370">
           <caret line="210" column="1" selection-start-line="210" selection-start-column="1" selection-end-line="210" selection-end-column="1" />
+=======
+    <entry file="file://$PROJECT_DIR$/.gitattributes">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="49" lean-forward="true" selection-start-column="49" selection-end-column="49" />
+>>>>>>> 8cef6b93fa6a73f9ef4aefde230eb31116b054d0
         </state>
       </provider>
     </entry>
