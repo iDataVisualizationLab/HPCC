@@ -204,7 +204,7 @@ function RadarChart(id, data, options, name) {
             .attr("r", function (d, i) {
                 return radius / cfg.levels * d;
             })
-            .style("fill", "#CDCDCD")
+            .style("fill", cfg.gradient?'white':"#CDCDCD")
             .style("stroke", function (d) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
                 return cfg.gradient? '#d0d0d0': colorTemperature(v);
@@ -237,7 +237,7 @@ function RadarChart(id, data, options, name) {
                 return rScale(maxValue *( cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) * Math.sin(angleSlice[i] - Math.PI / 2);
             })
             .attr("class", "line")
-            .style("stroke", "white")
+            .style("stroke", cfg.gradient?'#eaeaea':"white")
             .style("stroke-width", "1px");
 
         //Append the labels at each axis
