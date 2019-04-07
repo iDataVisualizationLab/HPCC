@@ -160,12 +160,21 @@ $( document ).ready(function() {
             // return 1; — insert after target
             // console.log(originalEvent);
             // console.log(d3.event);
-            console.log( this.pre);
             const currentAxis = d3.select(evt.dragged).datum();
+            const relatedtAxis = d3.select(evt.related).datum();
             const chosenAxis = svg.selectAll(".dimension").filter(d=>d==currentAxis.arr);
+
+
             d3.event ={};
-            d3.event.dx = originalEvent.clientY - this.pre;
+            // d3.event.dx = originalEvent.clientY - this.pre; // simulate the drag behavior
+            d3.event.dx = position(relatedtAxis.arr) - position(currentAxis.arr); // simulate the drag behavior
+            d3.event.dx = d3.event.dx + ((d3.event.dx>0)?1:-1)  ;
             _.bind(dragged,chosenAxis.node(),chosenAxis.datum())();
+                console.log("--------dragMenu-----");
+
+                console.log( d3.event.dx);
+
+                console.log("--------ENDdragMenu-----");
             this.pre = originalEvent.clientY;
         }});
     // d3.select("tbody").selectAll('tr').call(d3.drag()
@@ -193,10 +202,10 @@ function dragstart (d) {
     d3.select("#foreground").style("opacity", "0.35");
 }
 function dragged (d) {
-    console.log(d3.event.dx)
     dragging[d] = Math.min(w, Math.max(0, this.__origin__ += d3.event.dx));
-    console.log(dragging[d])
+
     dimensions.sort(function (a, b) {
+
         return position(a) - position(b);
     });
     xscale.domain(dimensions);
