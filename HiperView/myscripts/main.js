@@ -527,7 +527,11 @@ function main() {
             isbusy = false;
         }
         if (data.action==='returnData'){
-            TSneplot.data(data.result.arr).draw(data.result.nameh);
+            if (charType==="T-sne Chart")
+                TSneplot.data(data.result.arr).draw(data.result.nameh);
+            if (sumType === "RadarSummary") {
+                Radarplot.data(data.result.arr).drawSummarypoint(lastIndex );
+            }
         }
     }, false);
     TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).init();
@@ -700,7 +704,7 @@ function scaleThreshold(i){
 function drawsummary(initIndex){
     var arr = [];
     var xx;
-
+    console.log(lastIndex)
     if (initIndex===undefined){
         currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
@@ -765,7 +769,9 @@ function drawsummary(initIndex){
             // Radar Time
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
-
+        case "RadarSummary":
+            if (lastIndex >= maxstack-1) Radarplot.shift();
+            break;
     }
     lastIndex = currentlastIndex;
 }
@@ -810,28 +816,8 @@ function drawsummarypoint(harr){
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
         case "RadarSummary":
-            for (var i in harr) {
-                var h  = harr[i];
-                var name = hosts[h].name;
-                var r = hostResults[name];
-                // lastIndex = initIndex||(r.arr.length - 1);
-                // boxplot
-                if (lastIndex >= 0) {   // has some data
-                    var arrServices = [];
-                    serviceList.forEach((ser, indx) => {
-                        var obj = {};
-                        let dataextract = r[serviceListattr[indx]][lastIndex];
-                        if (dataextract)
-                            dataextract = dataextract.data.service.plugin_output;
-                        var a = processData(dataextract, ser);
-                        obj.a = a;
-                        arrServices.push(obj);
-                    })
-                }
-                arrServices.name = name;
-                arr.push(arrServices);
-            }
-            Radarplot.data(arr).drawSummarypoint(lastIndex);
+            getData(name)
+            // Radarplot.data(arr).drawSummarypoint(lastIndex);
             break;
 
 
@@ -1132,7 +1118,7 @@ function plotResult(result,name) {
         case "T-sne Chart":
             initTsneView();
             if (!speedup) {
-                plotTsne(name);
+                getData(name);
             }
     }
 
@@ -1238,7 +1224,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-function plotTsne(nameh){
+function getData(nameh){
     if(!isbusy) {
         isbusy = true;
         getDataWorker.postMessage({
@@ -1250,6 +1236,7 @@ function plotTsne(nameh){
         });
     }
 }
+
 function drawSummaryAreaChart(rack, xStart) {
     var arr2 = [];
     var binStep = 8; // pixels

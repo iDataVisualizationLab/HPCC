@@ -102,6 +102,8 @@ d3.radar = function () {
         outlyingPoints.forEach(o=> dataSpider3.push(o));
         console.log('current group + outlying: '+dataSpider3.length);
         radarChartsumopt.levels = levelsR;
+        radarChartsumopt.bin = true;
+        radarChartsumopt.gradient = false;
         //radarChartsumopt.color = color2;
         RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), dataSpider3, radarChartsumopt,"");
         bin.data([]);
@@ -139,6 +141,7 @@ d3.radar = function () {
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
             return temp;});
         radarChartsumopt.levels = levelsR;
+        radarChartsumopt.gradient = false;
         //radarChartsumopt.color = color2;
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
         //if (index >= maxstack) radarTimeline.shift();
@@ -146,6 +149,7 @@ d3.radar = function () {
     };
 
     radarTimeline.drawSummarypoint = function(index){
+
         if (index >= (maxstack-1)) index = maxstack-1;
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
         if (radarchart.empty())
@@ -156,29 +160,35 @@ d3.radar = function () {
                     return "translate(" + xscale(index) + "," + margin + ")";
                 });
 
-        handledata(index);
-
-        var keys = dataSpider3[0].map(d=>d.axis);
-        dataSpider3.length = 0;
-        //console.log(bin.bins.length);
-        dataSpider3 = d3.mean(dataSpider3);
+        const values = [handledataRate()];
+        radarChartsumopt.gradient = true;
+        radarChartsumopt.bin = false;
         radarChartsumopt.levels = levelsR;
         //radarChartsumopt.color = color2;
-        RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
-        //if (index >= maxstack) radarTimeline.shift();
+        RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), values, radarChartsumopt,"");
+
 
     };
     radarTimeline.shift = function (){
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {
-                d3.select(this).datum(d=>d-1).attr("class",d=>("radar"+d+" box"+d+" graphsum"));
+                const selection = d3.select(this).datum(d=>d-1);
+                selection.attr("class",d=>("radar"+d+" box"+d+" graphsum"));
+                selection.select('clipPath').attr("id",d=> "sumradar"+d );
+                selection.select('rect').attr("clip-path",d=> "url(#sumradar"+d+")" );
+
                 return "translate(" + xscale(d-1) + "," + -30 + ")";
             }).on("end", function(d) {
                 if (d===-1)
                     d3.select(this).remove();
             });
     };
-
+    var scaleNormal = d3.scaleLinear()
+        .domain([0,1])
+        .range([thresholds[0][0],thresholds[0][1]]);
+    function handledataRate (){
+        return _(arr).unzip().map((d,i)=>{return {axis: axes[i], value: scaleNormal(ss.mean(d)),minval: scaleNormal(ss.quantile(d,0.25)),maxval: scaleNormal(ss.quantile(d, 0.75))}});
+    }
     function handledata(index){
         // Summarynode
 
