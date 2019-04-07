@@ -530,7 +530,8 @@ function main() {
             if (charType==="T-sne Chart")
                 TSneplot.data(data.result.arr).draw(data.result.nameh);
             if (sumType === "RadarSummary") {
-                Radarplot.data(data.result.arr).drawSummarypoint(lastIndex );
+                console.log(data.result.index);
+                Radarplot.data(data.result.arr).drawSummarypoint(data.result.index );
             }
         }
     }, false);
@@ -770,7 +771,11 @@ function drawsummary(initIndex){
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
         case "RadarSummary":
-            if (lastIndex >= maxstack-1) Radarplot.shift();
+            console.log("-----------------")
+            console.log(temp===undefined?lastIndex:temp)
+            console.log("-----------------")
+            getData(name,temp===undefined?lastIndex:temp,true);
+            if ((temp===undefined?lastIndex:temp) >= maxstack-1) Radarplot.shift();
             break;
     }
     lastIndex = currentlastIndex;
@@ -816,7 +821,7 @@ function drawsummarypoint(harr){
             //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
             break;
         case "RadarSummary":
-            getData(name)
+            getData(name,lastIndex)
             // Radarplot.data(arr).drawSummarypoint(lastIndex);
             break;
 
@@ -1118,7 +1123,7 @@ function plotResult(result,name) {
         case "T-sne Chart":
             initTsneView();
             if (!speedup) {
-                getData(name);
+                getData(name,lastIndex);
             }
     }
 
@@ -1224,12 +1229,12 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
     drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
-function getData(nameh){
-    if(!isbusy) {
+function getData(nameh,index,skip){
+    if(!isbusy || skip === true) {
         isbusy = true;
         getDataWorker.postMessage({
             action: "getbatchData", value: {
-                lastIndex: lastIndex,
+                lastIndex: index,
                 hostResults: hostResults,
                 host: nameh
             }
@@ -1662,6 +1667,7 @@ $( document ).ready(function() {
                 break;
             case "Boxplot":
             case "Radar":
+            case "RadarSummary":
                 svg.selectAll(".graphsum").remove();
                 d3.select("#scatterzone").style("visibility","hidden");
                 for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {

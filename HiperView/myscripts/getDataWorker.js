@@ -26,7 +26,7 @@ addEventListener('message',function ({data}){
             break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex);
-            postMessage({action:'returnData', result: {arr: arr, nameh: data.value.host}});
+            postMessage({action:'returnData', result: {arr: arr, nameh: data.value.host, index: data.value.lastIndex}});
             postMessage({action:data.action, status:"done" });
             break;
     }
