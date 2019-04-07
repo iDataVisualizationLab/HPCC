@@ -435,8 +435,9 @@ nav ul li.active a{
     border-bottom: 5px solid #505050;
 }
 
-.axisActive .label{
+.axisActive .label, .axisActive td{
     fill: #5ae !important;
+    color: #5ae;
 }
     .page-footer {
         background-color: #ffffff0f;

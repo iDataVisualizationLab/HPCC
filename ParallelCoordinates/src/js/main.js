@@ -17,7 +17,7 @@ var m = [40, 0, 10, 0],
     render_speed = 50,
     brush_count = 0,
     excluded_groups = [],
-    svg;
+    svg,g,listMetric;
 
 
 //legend prt
@@ -95,6 +95,7 @@ $( document ).ready(function() {
         .selectAll('tr').data(listOption)
         .join(enter => {
             const tr = enter.append("tr");
+            tr.attr('data-id',d=>d.arr);
             const alltr = tr.selectAll('td')
                 .data(d=>[{key:'enable',value:d.enable,type:"checkbox"},{key:'colorBy',value:false,type:"radio"},{key:'text',value:d.text}]).enter()
                 .append("td");
@@ -107,13 +108,39 @@ $( document ).ready(function() {
                         name: "colorby",
                         value: pdata.service}
                 }).on('change',function (d){
+                d3.select('tr.axisActive').classed('axisActive', false);
+                d3.select(this.parentElement.parentElement).classed('axisActive', true);
                 changeVar(d3.select(this.parentElement.parentElement).datum())});
-            alltr.filter(d=>d.type==="checkbox")
+                alltr.filter(d=>d.type==="checkbox")
                 .append("input")
                 .attrs(function (d,i){
                     return {
                         type: "checkbox",
                         checked: d.value?"checked":null}
+                }).on('change',function (d){
+                    const pdata = d3.select(this.parentElement.parentElement).datum();
+                    d.value = this.checked;
+                    console.log(pdata.arr)
+                    if(this.checked) {
+                        add_axis(pdata.arr, g);
+                        d3.select(this.parentElement.parentElement).classed('disable', false);
+                    }
+                    else {
+                        remove_axis(pdata.arr, g);
+                        d3.select(this.parentElement.parentElement).classed('disable',true);
+                    }
+                    // TODO required to avoid a bug
+                    var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d=>d==pdata.arr));
+                    if (extent)
+                        extent = extent.map(yscale[d].invert).sort((a,b)=>a-b);
+
+                    xscale.domain(dimensions);
+                    update_ticks(pdata.arr, extent);
+                    const disable_dims = _.difference(listMetric.toArray(),dimensions);
+                    listMetric.sort(_.union(dimensions,disable_dims));
+                    // rerender
+                    d3.select("#foreground").style("opacity", null);
+                    brush();
                 });
             alltr.filter(d=>d.type===undefined)
                 .text(d=>d.value);
@@ -125,9 +152,11 @@ $( document ).ready(function() {
     //     .text(d=>{return d.text})
     //     .on('click',changeVar);
     // $('tbody').sortable();
-    Sortable.create($('tbody')[0], {animation: 150,
+    listMetric = Sortable.create($('tbody')[0], {animation: 150,
+        sort: true,
+        dataIdAttr: 'data-id',
+        filter: ".disable",
         onStart: function (/**Event*/evt) {
-        console.log(evt.originalEvent.clientY);
             evt.oldIndex;  // element index within parent
             const currentAxis = d3.select(evt.item).datum();
             const chosenAxis = svg.selectAll(".dimension").filter(d=>d==currentAxis.arr);
@@ -245,6 +274,8 @@ function dragend(d) {
     xscale.domain(dimensions);
     update_ticks(d, extent);
 
+    const disable_dims = _.difference(listMetric.toArray(),dimensions);
+    listMetric.sort(_.union(dimensions,disable_dims));
     // rerender
     d3.select("#foreground").style("opacity", null);
     brush();
@@ -252,6 +283,60 @@ function dragend(d) {
     delete this.__origin__;
     delete dragging[d];
 }
+
+function update_Dimension() {
+    g = svg.selectAll(".dimension")
+        .data(dimensions,d=>d).join(enter => {
+            const new_dim = enter.append("svg:g")
+                .attr("class", "dimension")
+                .attr("transform", function (d) {
+                    return "translate(" + xscale(d) + ")";
+                })
+                .call(d3.drag()
+                    .on("start", dragstart)
+                    .on("drag", dragged)
+                    .on("end", dragend));
+                // Add an axis and title.
+                new_dim.append("svg:g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0,0)")
+                .each(function (d) {
+                    return d3.select(this).call(axis.scale(yscale[d]));
+                })
+                .append("svg:text")
+                .attr("text-anchor", "middle")
+                // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
+                .attr("y", -14)
+                .attr("x", 0)
+                .attr("class", "label")
+                .text(String)
+                .append("title")
+                .text("Click to invert. Drag to reorder");
+
+            // Add and store a brush for each axis.
+                new_dim.append("svg:g")
+                .attr("class", "brush")
+                .each(function (d) {
+                    d3.select(this).call(yscale[d].brush = getBrush(d));
+                })
+                .selectAll("rect")
+                .style("visibility", null)
+                .attr("x", -23)
+                .attr("width", 36)
+                .append("title")
+                .text("Drag up or down to brush along this axis");
+
+                new_dim.selectAll(".extent")
+                .append("title")
+                .text("Drag or resize this filter");
+                return new_dim;
+            },
+            update =>{
+            return  update.attr("transform", function (d) {
+                return "translate(" + xscale(d) + ")";});
+            });
+}
+
 function init() {
     width = $("#Maincontent").width()-10;
     height = d3.max([document.body.clientHeight-150, 300]);
@@ -317,51 +402,7 @@ function init() {
     }));
 
     // Add a group element for each dimension.
-    var g = svg.selectAll(".dimension")
-        .data(dimensions)
-        .enter().append("svg:g")
-        .attr("class", "dimension")
-        .attr("transform", function (d) {
-            return "translate(" + xscale(d) + ")";
-        })
-        .call(d3.drag()
-            .on("start", dragstart)
-            .on("drag", dragged)
-            .on("end", dragend))
-
-    // Add an axis and title.
-    g.append("svg:g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0,0)")
-        .each(function (d) {
-            return d3.select(this).call(axis.scale(yscale[d]));
-        })
-        .append("svg:text")
-        .attr("text-anchor", "middle")
-        // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
-        .attr("y", -14)
-        .attr("x", 0)
-        .attr("class", "label")
-        .text(String)
-        .append("title")
-        .text("Click to invert. Drag to reorder");
-
-    // Add and store a brush for each axis.
-    g.append("svg:g")
-        .attr("class", "brush")
-        .each(function (d) {
-            d3.select(this).call(yscale[d].brush = getBrush(d));
-        })
-        .selectAll("rect")
-        .style("visibility", null)
-        .attr("x", -23)
-        .attr("width", 36)
-        .append("title")
-        .text("Drag up or down to brush along this axis");
-
-    g.selectAll(".extent")
-        .append("title")
-        .text("Drag or resize this filter");
+    update_Dimension();
 
 
     // legend = create_legend(colors, brush);
@@ -554,7 +595,7 @@ function complex_data_table(sample) {
             lit.append("span")
                 .text(function(d) { return d3.timeFormat("%B %d %Y %H:%M")(d.timestep); });
 
-            return legend;
+            return lir;
         }
     )
     $('.collapsible').collapsible();
@@ -1081,11 +1122,20 @@ function exclude_data() {
     rescale();
 }
 
+function add_axis(d,g) {
+    dimensions.splice(dimensions.length-1, 0, d);
+    xscale.domain(dimensions);
+    // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
+    update_Dimension();
+    update_ticks();
+}
+
 function remove_axis(d,g) {
     dimensions = _.difference(dimensions, [d]);
     xscale.domain(dimensions);
+    g = g.data(dimensions,d=>d);
     g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
-    g.filter(function(p) { return p == d; }).remove();
+    g.exit().remove();
     update_ticks();
 }
 
