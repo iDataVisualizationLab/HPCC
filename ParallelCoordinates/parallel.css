@@ -609,4 +609,6 @@ nav ul li.active a{
     opacity:1
 }
 
-
+table .disable {
+    color: rgba(255, 255, 255, 0.39);
+}

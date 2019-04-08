@@ -49,11 +49,16 @@ conf.serviceList = serviceList;
 conf.serviceLists = serviceLists;
 conf.serviceListattr = serviceListattr;
 conf.serviceListattrnest = serviceListattrnest;
+
+function Loadtostore() {
+    checkConf('serviceList');
+    checkConf('serviceLists');
+    checkConf('serviceListattr');
+    checkConf('serviceListattrnest');
+}
+
 //***********************
-checkConf('serviceList');
-checkConf('serviceLists');
-checkConf('serviceListattr');
-checkConf('serviceListattrnest');
+Loadtostore();
 //***********************
 var undefinedValue = undefined;
 var undefinedColor = "#666";
@@ -136,8 +141,11 @@ $( document ).ready(function() {
 
                     xscale.domain(dimensions);
                     update_ticks(pdata.arr, extent);
-                    const disable_dims = _.difference(listMetric.toArray(),dimensions);
-                    listMetric.sort(_.union(dimensions,disable_dims));
+
+                    // reorder list
+                    // const disable_dims = _.difference(listMetric.toArray(),dimensions);
+                    // listMetric.sort(_.union(dimensions,disable_dims));
+
                     // rerender
                     d3.select("#foreground").style("opacity", null);
                     brush();
@@ -160,7 +168,6 @@ $( document ).ready(function() {
             evt.oldIndex;  // element index within parent
             const currentAxis = d3.select(evt.item).datum();
             const chosenAxis = svg.selectAll(".dimension").filter(d=>d==currentAxis.arr);
-            this.pre = evt.originalEvent.clientY;
             _.bind(dragstart,chosenAxis.node(),chosenAxis.datum())();
         },
         onEnd: function (/**Event*/evt) {
@@ -198,13 +205,9 @@ $( document ).ready(function() {
             // d3.event.dx = originalEvent.clientY - this.pre; // simulate the drag behavior
             d3.event.dx = position(relatedtAxis.arr) - position(currentAxis.arr); // simulate the drag behavior
             d3.event.dx = d3.event.dx + ((d3.event.dx>0)?1:-1)  ;
-            _.bind(dragged,chosenAxis.node(),chosenAxis.datum())();
-                console.log("--------dragMenu-----");
+            if (!isNaN(d3.event.dx))
+                _.bind(dragged,chosenAxis.node(),chosenAxis.datum())();
 
-                console.log( d3.event.dx);
-
-                console.log("--------ENDdragMenu-----");
-            this.pre = originalEvent.clientY;
         }});
     // d3.select("tbody").selectAll('tr').call(d3.drag()
     //     .on("start", function (d) {
@@ -238,6 +241,7 @@ function dragged (d) {
         return position(a) - position(b);
     });
     xscale.domain(dimensions);
+    reorderDimlist();
     svg.selectAll(".dimension").attr("transform", function (d) {
         return "translate(" + position(d) + ")";
     });
@@ -250,6 +254,27 @@ function dragged (d) {
         d3.select(this).select(".background").style("fill", null);
     }
 }
+
+function reorderDimlist() {
+// reorder list
+    let pre = 0;
+    let next = 0;
+    dimensions.find(dim => {
+        const pos = _.indexOf(listMetric.toArray(), dim);
+        next = pos != -1 ? pos : next;
+        if (next < pre)
+            return true;
+        else
+            pre = next;
+        return false;
+    });
+    if (next < pre) {
+        let order_list = listMetric.toArray();
+        swap(order_list, pre, next);
+        listMetric.sort(order_list);
+    }
+}
+
 function dragend(d) {
     if (!this.__dragged__) {
         // no movement, invert axis
@@ -274,8 +299,7 @@ function dragend(d) {
     xscale.domain(dimensions);
     update_ticks(d, extent);
 
-    const disable_dims = _.difference(listMetric.toArray(),dimensions);
-    listMetric.sort(_.union(dimensions,disable_dims));
+    reorderDimlist();
     // rerender
     d3.select("#foreground").style("opacity", null);
     brush();
@@ -283,7 +307,11 @@ function dragend(d) {
     delete this.__origin__;
     delete dragging[d];
 }
-
+function swap (a,indexa,indexb){
+    const temp = a[indexa];
+    a[indexa] = a[indexb];
+    a[indexb] = temp;
+}
 function update_Dimension() {
     g = svg.selectAll(".dimension")
         .data(dimensions,d=>d).join(enter => {
@@ -893,6 +921,7 @@ function brush() {
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
+    Loadtostore();
 }
 
 // render a set of polylines on a canvas
