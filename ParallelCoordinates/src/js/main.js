@@ -1152,7 +1152,9 @@ function exclude_data() {
 }
 
 function add_axis(d,g) {
-    dimensions.splice(dimensions.length-1, 0, d);
+    // dimensions.splice(dimensions.length-1, 0, d);
+    dimensions.push(d);
+    dimensions = _.intersection(listMetric.toArray(),dimensions)    ;
     xscale.domain(dimensions);
     // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
     update_Dimension();
