@@ -573,7 +573,7 @@ function complex_data_table(sample) {
     var samplenest = d3.nest()
         .key(d=>d.rack).sortKeys(collator.compare)
         .key(d=>d.compute).sortKeys(collator.compare)
-        .sortValues((a,b)=>a.timestep-b.timestep)
+        .sortValues((a,b)=>a.Time-b.Time)
         .entries(sample);
     d3.select("#compute-list").html('');
     var table = d3.select("#compute-list")
@@ -621,7 +621,7 @@ function complex_data_table(sample) {
                 .style("background", function(d) { return color(selectedService==null?d.group:d[selectedService]) })
                 .style("opacity",0.85);
             lit.append("span")
-                .text(function(d) { return d3.timeFormat("%B %d %Y %H:%M")(d.timestep); });
+                .text(function(d) { return d3.timeFormat("%B %d %Y %H:%M")(d.Time); });
 
             return lir;
         }
@@ -734,6 +734,7 @@ function path(d, ctx, color) {
 function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
     ctx.beginPath();
+    ctx.setLineDash([]);
     var x0 = xscale(dimensions[0])-15,
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0,y0);
@@ -742,13 +743,12 @@ function path(d, ctx, color) {
         var x = xscale(p),
             y = yscale[p](d[p]);
         if (y===undefined) {
+            console.log(p)
             if (valid) {
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(x0,y0);
                 ctx.setLineDash([5, 15]);
-            } else{
-
             }
             valid = false;
         }else if (valid) {
