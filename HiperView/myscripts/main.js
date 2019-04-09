@@ -1674,7 +1674,7 @@ $( document ).ready(function() {
                     drawsummary(i);
                 }
                 break;
-        }ta
+        }
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
