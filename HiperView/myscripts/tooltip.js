@@ -112,8 +112,11 @@ function mouseoverNode(d1){
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
         obj.indexSamp = i;
-        if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue)
-            arr.push(obj);
+        console.log(obj)
+        if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue) {
+         console.log(obj)
+            // arr.push(obj);
+        }
         else
             arr.push(obj);
     }
