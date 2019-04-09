@@ -87,6 +87,7 @@ let legendh= 20;
 let barw = 300;
 let barScale = d3.scaleLinear();
 let db = 'nagios';
+let animationtime = false ;
 const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 Array.prototype.naturalSort= function(_){
     if (arguments.length) {
@@ -240,13 +241,14 @@ $( document ).ready(function() {
     // data
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
+        animationtime=true;
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("../HiperView/data/" + choice + ".json").then( function (data) {
-                    sampleS = data;
+                d3.json("../HiperView/data/" + choice + ".json").then( function (data2) {
+                    sampleS = data2;
                     if (choice.includes('influxdb')){
                         // processResult = processResult_influxdb;
                         db = "influxdb";
@@ -275,12 +277,12 @@ $( document ).ready(function() {
 
 
     setTimeout(() => {
-        d3.json("../HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data) {
+        d3.json("../HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data2) {
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
             // drawLegend(initialService, arrThresholds, arrColor, dif);
-            sampleS = data;
+            sampleS = data2;
             init();
             d3.select(".cover").select('h5').text('loading data...');
             // addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
@@ -440,6 +442,12 @@ function update_Dimension() {
                 return new_dim;
             },
             update =>{
+                // Add an axis and title.
+                update.select(".axis")
+                    .attr("transform", "translate(0,0)")
+                    .each(function (d) {
+                        return d3.select(this).call(axis.scale(yscale[d]));
+                    });
             return  update.attr("transform", function (d) {
                 return "translate(" + xscale(d) + ")";});
             });
@@ -526,6 +534,7 @@ function init() {
 
 function resetRequest() {
     // Convert quantitative scales to floats
+    animationtime = false;
     data = object2DataPrallel(readData());
     d3.keys(data[0]).filter(function (k) {
         return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
@@ -538,6 +547,8 @@ function resetRequest() {
             }))
             .range([h, 0]))));
     });
+    // Add a group element for each dimension.
+    update_Dimension();
     brush();
 }
 function setColorsAndThresholds(s) {
@@ -631,8 +642,13 @@ function create_legend(colors,brush) {
 
 // render polylines i to i+render_speed
 function render_range(selection, i, max, opacity) {
-    selection.slice(i,max).forEach(function(d) {
+    selection.slice(i,max).some(function(d) {
         path(d, foreground, colorCanvas(selectedService==null?d.group:d[selectedService],opacity));
+        if (animationtime){
+            timel.stop();
+            animationtime = false;
+            return true
+        }
     });
 };
 
@@ -1037,7 +1053,10 @@ function paths(selected, ctx, count) {
 
     // render all lines until finished or a new brush event
     function animloop(){
-        if (i >= n || count < brush_count) return true;
+        if (i >= n || count < brush_count || animationtime) {
+            timel.stop()
+            return true;
+        }
         var max = d3.min([i+render_speed, n]);
         render_range(shuffled_data, i, max, opacity);
         render_stats(max,n,render_speed);
@@ -1045,9 +1064,9 @@ function paths(selected, ctx, count) {
         timer = optimize(timer);  // adjusts render_speed
     };
 
-    d3.timer(animloop);
+    timel = d3.timer(animloop);
 }
-
+let timel
 // transition ticks for reordering, rescaling and inverting
 function update_ticks(d, extent) {
     // update brushes

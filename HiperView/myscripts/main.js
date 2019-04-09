@@ -530,7 +530,7 @@ function main() {
             if (charType==="T-sne Chart")
                 TSneplot.data(data.result.arr).draw(data.result.nameh);
             if (sumType === "RadarSummary") {
-                console.log(data.result.index);
+                // console.log(data.result.index);
                 Radarplot.data(data.result.arr).drawSummarypoint(data.result.index );
             }
         }
@@ -1226,7 +1226,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
             return color(d[d.length-1].temp1);
         })
 
-    drawSummaryAreaChart(hpcc_rack, xStart);
+    // drawSummaryAreaChart(hpcc_rack, xStart);
 }
 
 function getData(nameh,index,skip){

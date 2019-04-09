@@ -132,4 +132,12 @@
 .cover.hidden {
     display: none;
 }
+
+#search {
+    color: white;
+}
+
+.light #search {
+    color: black;
+}
 /*
