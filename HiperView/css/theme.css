@@ -135,9 +135,26 @@
 
 #search {
     color: white;
+    border-radius: 10px;
+    border: 1px solid #666666;
+}
+#search::placeholder {
+    color: #61676d;
+}
+.light #search::placeholder {
+    color: #61676d;
 }
 
 .light #search {
     color: black;
+    border: 1px solid #8e8e8e;
+}
+
+#search:focus {
+    background-color: white;
+    color: black;
+    border: 1px solid #26a69a;
+    -webkit-box-shadow: 0 1px 0 0 #26a69a;
+    box-shadow: 0 1px 0 0 #26a69a;
 }
 /*
