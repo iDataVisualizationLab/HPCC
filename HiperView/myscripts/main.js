@@ -1691,6 +1691,7 @@ $( document ).ready(function() {
                         db = "influxdb";
                         realTimesetting(false,"influxdb");
                     }else {
+                        db = "nagios";
                         processResult = processResult_old;
                         realTimesetting(false);
                     }
