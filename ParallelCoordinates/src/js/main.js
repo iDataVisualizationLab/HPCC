@@ -87,7 +87,7 @@ let legendh= 20;
 let barw = 300;
 let barScale = d3.scaleLinear();
 let db = 'nagios';
-let animationtime = false ;
+// let animationtime = false ;
 const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 Array.prototype.naturalSort= function(_){
     if (arguments.length) {
@@ -241,7 +241,7 @@ $( document ).ready(function() {
     // data
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
-        animationtime=true;
+        // animationtime=true;
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
@@ -535,7 +535,7 @@ function init() {
 
 function resetRequest() {
     // Convert quantitative scales to floats
-    animationtime = false;
+    // animationtime = false;
     data = object2DataPrallel(readData());
     d3.keys(data[0]).filter(function (k) {
         return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
@@ -643,13 +643,13 @@ function create_legend(colors,brush) {
 
 // render polylines i to i+render_speed
 function render_range(selection, i, max, opacity) {
-    selection.slice(i,max).some(function(d) {
+    selection.slice(i,max).forEach(function(d) {
         path(d, foreground, colorCanvas(selectedService==null?d.group:d[selectedService],opacity));
-        if (animationtime){
-            timel.stop();
-            animationtime = false;
-            return true
-        }
+        // if (animationtime){
+        //     timel.stop();
+        //     animationtime = false;
+        //     return true
+        // }
     });
 };
 
@@ -1054,8 +1054,8 @@ function paths(selected, ctx, count) {
 
     // render all lines until finished or a new brush event
     function animloop(){
-        if (i >= n || count < brush_count || animationtime) {
-            timel.stop()
+        if (i >= n || count < brush_count) {
+            // timel.stop()
             return true;
         }
         var max = d3.min([i+render_speed, n]);
@@ -1065,7 +1065,7 @@ function paths(selected, ctx, count) {
         timer = optimize(timer);  // adjusts render_speed
     };
 
-    timel = d3.timer(animloop);
+    d3.timer(animloop);
 }
 let timel
 // transition ticks for reordering, rescaling and inverting
@@ -1240,7 +1240,7 @@ function resetSize() {
 
 // scale to window size
 window.onresize = function() {
-    animationtime = false;
+    // animationtime = false;
     resetSize();
 };
 
