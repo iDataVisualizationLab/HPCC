@@ -1240,6 +1240,7 @@ function resetSize() {
 
 // scale to window size
 window.onresize = function() {
+    animationtime = false;
     resetSize();
 };
 
