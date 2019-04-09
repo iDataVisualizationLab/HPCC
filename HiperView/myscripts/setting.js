@@ -245,3 +245,56 @@ function processData_old(str, serviceName) {
         return a;
     }
 }
+
+function simulateResults2(hostname,iter, s){
+    var newService;
+    if (s == serviceList[0])
+        newService = sampleS[hostname].arrTemperature[iter];
+    else if (s == serviceList[1])
+        newService = sampleS[hostname].arrCPU_load[iter];
+    else if (s == serviceList[2])
+        newService = sampleS[hostname].arrMemory_usage[iter];
+    else if (s == serviceList[3])
+        newService = sampleS[hostname].arrFans_health[iter];
+    else if (s == serviceList[4]) {
+        if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
+            var simisval = handlemissingdata(hostname,iter);
+            sampleS[hostname]["arrPower_usage"] = [simisval];
+        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined  && db!="influxdb"){
+            var simisval = handlemissingdata(hostname,iter);
+            sampleS[hostname]["arrPower_usage"][iter] = simisval;
+        }
+        newService = sampleS[hostname]["arrPower_usage"][iter];
+    }
+    if (newService === undefined){
+        newService ={}
+        newService.result = {};
+        newService.result.query_time = query_time;
+        newService.data = {};
+        newService.data.service={};
+        newService.data.service.host_name = hostname;
+        newService.data.service.plugin_output = undefined;
+    }else {
+        if (db == "influxdb")
+            try {
+                newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
+            }catch(e){
+
+            }
+    }
+    return newService;
+}
+
+function handlemissingdata(hostname,iter){
+    var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+    var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
+    // simval = (simval[0]+simval[1])/2;
+    simval = (simval[0]+simval[1]+20);
+    var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
+    if (simval!==undefinedValue && !isNaN(simval) )
+    //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
+        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
+    else
+        simisval.data.service.plugin_output = "UNKNOWN";
+    return simisval;
+}

@@ -15,15 +15,22 @@
 
 
     <link rel="stylesheet" type="text/css" href="parallel.css" />
+    <link rel="stylesheet" type="text/css" href="../HiperView/css/theme.css" />
     <link rel="stylesheet" type="text/css" href="theme.css" />
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="src/lib/d3.v5.min.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
     <script src="src/lib/underscore-min.js"></script>
-</head>
-<body>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 
+</head>
+<body text="black" id="mainBody">
+<div class="cover">
+    <h5 class="spinnerC center" style="top: 60%;" >loading data...</h5>
+    <div class="spinnerC center" id="loadingSpinner" >
+    </div>
+</div>
 <nav class="pushpin-demo-nav" data-target="blue">
 
     <div class="nav-wrapper" id="header">
@@ -78,8 +85,9 @@
                             <option value="serviceWed04Oct" >04 Oct 2018</option>
                             <option value="service15Oct">15 Oct 2018</option>
                             <option value="service17Oct">17 Oct 2018</option>
-                            <option value="influxdb">Real-time Influxdb</option>
-                            <option value="nagios">Real-time Nagios</option>
+                            <option value="influxdbThus21Mar_1520">21 Mar 2019</option>
+                            <!--<option value="influxdb">Real-time Influxdb</option>-->
+                            <!--<option value="nagios">Real-time Nagios</option>-->
                         </select>
                     </div>
                         <table class="table table-striped table-hover row s12" id = "axisSetting">
@@ -193,7 +201,8 @@
 
 </body>
 <!--data load-->
-<script src="src/data/serviceWed26Sep.js"></script>
+<script src="../HiperView/myscripts/setting.js"></script>
+<!--<script src="src/data/serviceWed26Sep.js"></script>-->
 <!--<script src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
 <script src="src/js/ulti.js"></script>
 <script src="src/js/readData.js"></script>

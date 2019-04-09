@@ -56,10 +56,26 @@ function Loadtostore() {
     checkConf('serviceListattr');
     checkConf('serviceListattrnest');
 }
+let processData = processData_old;
 
 //***********************
 Loadtostore();
 //***********************
+// START: loader spinner settings ****************************
+var opts = {
+    lines: 25, // The number of lines to draw
+    length: 15, // The length of each line
+    width: 5, // The line thickness
+    radius: 25, // The radius of the inner circle
+    color: '#f00', // #rgb or #rrggbb or array of colors
+    speed: 2, // Rounds per second
+    trail: 50, // Afterglow percentage
+    className: 'spinner', // The CSS class to assign to the spinner
+};
+var target = document.getElementById('loadingSpinner');
+var spinner;
+// END: loader spinner settings ****************************
+
 var undefinedValue = undefined;
 var undefinedColor = "#666";
 var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -70,7 +86,7 @@ let legendw= 80;
 let legendh= 20;
 let barw = 300;
 let barScale = d3.scaleLinear();
-
+let db = 'nagios';
 const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 Array.prototype.naturalSort= function(_){
     if (arguments.length) {
@@ -125,7 +141,6 @@ $( document ).ready(function() {
                 }).on('change',function (d){
                     const pdata = d3.select(this.parentElement.parentElement).datum();
                     d.value = this.checked;
-                    console.log(pdata.arr)
                     if(this.checked) {
                         add_axis(pdata.arr, g);
                         d3.select(this.parentElement.parentElement).classed('disable', false);
@@ -221,8 +236,74 @@ $( document ).ready(function() {
     //         _.bind(dragged,chosenAxis.node(),chosenAxis.datum(),'table')();
     //     }));
     d3.select("#DarkTheme").on("click",switchTheme);
-    init();
+
+    // data
+    d3.select('#datacom').on("change", function () {
+        d3.select('.cover').classed('hidden', false);
+        spinner.spin(target);
+        const choice = this.value;
+        const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        setTimeout(() => {
+            if (choice !== "nagios" && choice !== "influxdb")
+                d3.json("../HiperView/data/" + choice + ".json").then( function (data) {
+                    sampleS = data;
+                    if (choice.includes('influxdb')){
+                        // processResult = processResult_influxdb;
+                        db = "influxdb";
+                        realTimesetting(false,"influxdb");
+                    }else {
+                        // processResult = processResult_old;
+                        realTimesetting(false);
+                    }
+                    d3.select(".currentDate")
+                        .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
+                    resetRequest();
+                    d3.select('.cover').classed('hidden', true);
+                    spinner.stop();
+                });
+            else {
+                realTimesetting(true,choice);
+                db = choice;
+                requestService = eval('requestService'+choice);
+                processResult = eval('processResult_'+choice);
+                d3.select('.cover').classed('hidden', true);
+                spinner.stop();
+            }
+        },0);
+    });
+    spinner = new Spinner(opts).spin(target);
+
+
+    setTimeout(() => {
+        d3.json("../HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data) {
+            d3.select(".cover").select('h5').text('drawLegend...');
+            d3.select(".currentDate")
+                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
+            // drawLegend(initialService, arrThresholds, arrColor, dif);
+            sampleS = data;
+            init();
+            d3.select(".cover").select('h5').text('loading data...');
+            // addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+            d3.select('.cover').classed('hidden',true);
+            spinner.stop();
+        });
+    },0);
+    // Spinner Stop ********************************************************************
+
+    // init();
 });
+
+function realTimesetting (option,db){
+    isRealtime = option;
+    // getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
+    if (option){
+        processData = eval('processData_'+db);
+    }else{
+        processData = db?eval('processData_'+db):processData_old;
+    }
+    resetRequest();
+}
+
 function getBrush(d) {
     return d3.brushY(yscale[d])
         .extent([[-10, 0], [10, h]])
@@ -287,7 +368,6 @@ function dragend(d) {
         var extent = d3.brushSelection(this);
         if (extent)
             extent = extent.map(yscale[d].invert).sort((a,b)=>a-b);
-        console.log(extent)
     }
 
     // remove axis if dragged all the way left
@@ -444,6 +524,22 @@ function init() {
     brush();
 }
 
+function resetRequest() {
+    // Convert quantitative scales to floats
+    data = object2DataPrallel(readData());
+    d3.keys(data[0]).filter(function (k) {
+        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+            .domain(d3.extent(data, function (d) {
+                return d[k];
+            }))
+            .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
+            .domain(d3.extent(data, function (d) {
+                return +d[k];
+            }))
+            .range([h, 0]))));
+    });
+    brush();
+}
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList.length;i++){
         if (s == serviceList[i]){
@@ -660,8 +756,6 @@ function highlight(d) {
         const val = d[selectedService];
         const gourpBeloing = orderLegend.find(dv=>val>=dv.minvalue && val<dv.value)||{text:undefined};
 
-        console.log(val);
-        console.log(gourpBeloing);
         d3.select("#colorContinuos").selectAll(".row").style("opacity", function(p) { return (gourpBeloing.text === p) ? null : "0.3" });
     }else {
         d3.select("#legend").selectAll(".row").style("opacity", function (p) {
@@ -696,7 +790,8 @@ function invert_axis(d) {
             // Get extents of brush along each active selection axis (the Y axes)
             extent = d3.brushSelection(this).map(yscale[d].invert);
         });
-    console.log(extent)
+
+
     if (yscale[d].inverted == true) {
         yscale[d].range([h, 0]);
         d3.selectAll('.label')
@@ -743,7 +838,6 @@ function path(d, ctx, color) {
         var x = xscale(p),
             y = yscale[p](d[p]);
         if (y===undefined) {
-            console.log(p)
             if (valid) {
                 ctx.stroke();
                 ctx.beginPath();
