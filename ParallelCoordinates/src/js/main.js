@@ -923,7 +923,6 @@ function position(d) {
 // Handles a brush event, toggling the display of foreground lines.
 // TODO refactor
 function brush() {
-
     var actives = [],
         extents = [];
 
@@ -1269,7 +1268,7 @@ function exclude_data() {
 function add_axis(d,g) {
     // dimensions.splice(dimensions.length-1, 0, d);
     dimensions.push(d);
-    dimensions = _.intersection(listMetric.toArray(),dimensions)    ;
+    dimensions = _.intersection(_.union(listMetric.toArray(),['Time']),dimensions)    ;
     xscale.domain(dimensions);
     // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
     update_Dimension();
