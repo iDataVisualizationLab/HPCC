@@ -94,7 +94,7 @@ var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack =7;
+var maxstack = 18;
 var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
@@ -134,7 +134,8 @@ setColorsAndThresholds(initialService);
 var niceOffset = true;
 //***********************
 var undefinedValue = undefined;
-var undefinedColor = "#666";
+// var undefinedColor = "#666";
+var undefinedColor = "#c6c6c6";
 var undefinedResult = "timed out";
 //*** scale
 var xTimeSummaryScale;
@@ -539,7 +540,7 @@ function main() {
     request();
 }
 var currentlastIndex;
-var speedup= false;
+var speedup= 0;
 function request(){
     bin.data([]);
     var count = 0;
@@ -677,8 +678,8 @@ function request(){
                     let ri = step(iteration, countbuffer);
                     midlehandle(ri);
                     countbuffer++;
-                }while ((countbuffer < hosts.length) && (hosts[countbuffer].hpcc_rack === oldrack) && speedup);
-                speedup = false;
+                }while ((countbuffer < hosts.length) && (speedup==2||(hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
+                speedup = 0;
                 drawprocess();
             }
             if (countbuffer>= (hosts.length))
@@ -1033,7 +1034,7 @@ function plotResult(result,name) {
         currentMiliseconds = result.result.query_time;
         hostfirst = result.data.service.host_name;
         xTimeScale = d3.scaleLinear()
-            .domain([0, maxstack-1])
+            .domain([0, maxstack-1]);
         // get Time
         minTime = currentMiliseconds;  // some max number
     }
@@ -1051,7 +1052,7 @@ function plotResult(result,name) {
     var hpcc_node = +name.split("-")[2].split(".")[0];
     var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x+15;
     // var xStart = racks[hpcc_rack - 1].x+15;
-    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size,node_size*maxstack)]); // output
+    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size,node_size*maxstack)-20]); // output
         // .range([xStart, xStart+w_rack/2-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
@@ -1147,7 +1148,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svgStore.detailView.items.append("rect")
-            .attr("class", name)
+            .attr("class", name+' '+'detailItem')
             .attr("x", x)
             .attr("y", y-10)
             .attr("width", node_size)
@@ -1480,7 +1481,11 @@ function loadNewData(d) {
 
 // speed up process
 function fastForwardRequest() {
-    speedup = true;
+    speedup = 1;
+}
+function extremefastForwardRequest() {
+
+    speedup = 2;
 }
 
 function requestServicenagios(count,serin) {
@@ -1552,7 +1557,7 @@ function requestServiceinfluxdb(count,serin) {
         };
         let query;
         if (recordonly)
-            query = getstringQuery_influx(ip,serin,timerange);
+            query = getstringQuery_influx(ip,serin,timerange,timestep_query);
         else
             query = getstringQuery_influx(ip,serin);
         console.log(query)
@@ -1561,7 +1566,8 @@ function requestServiceinfluxdb(count,serin) {
     })
 }
 let requestService = eval('requestService'+db);
-let timerange = ["2019-03-21T15:20:00Z","2019-03-21T18:00:00Z"];
+let timerange = ["2019-03-21T14:00:00Z","2019-03-21T16:30:00Z"];
+let timestep_query = "5m";
 
 function requestRT(iteration,count) {
     var promises;
