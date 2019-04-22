@@ -271,21 +271,48 @@ d3.Scatterplot = function () {
     function showTooltip(detail) {
         div.transition()
             .duration(200)
-            .style("opacity", 1).style('width', '250px');
+            .style("opacity", 1).style('width', '180px');
         div.html('<table>' +
-            '<tr><td>Node info:</td><td>' + detail.hostname + '</td></tr>' +
-            '<tr><td>CPU Temp:</td><td> CPU 1: ' + detail.cpu1temp + ',CPU 2: ' + detail.cpu2temp + '</td></tr>' +
-            '<tr><td>Fan Speed:</td><td>F1: ' + detail.fan1peed + ', F2: ' + detail.fan2peed + ',F3: ' + detail.fan3peed + ', F4: ' + detail.fan4peed + '</td></tr>' +
-            '<tr><td>Memory Usage:</td><td>' + detail.memoryusg + '</td></tr>' +
-            '<tr><td>Power Usage:</td><td>' + detail.pwconsumption + '</td></tr>' +
-            '<tr><td>CPU Load:</td><td>' + detail.jobload + '</td></tr>' +
+            '<thead>'+
+            '<tr><th colspan="2">' + detail.hostname + '</th></tr>' +
+            '</thead>'+
+            '<tbody>' +
+            // '<tr><td colspan="2">CPU Temp</td> </tr>' +
+            '<tr class = "inside"><td >CPU1 Temp</td><td '+formatstyle(detail.cpu1temp,0)+'>' + formatnumber(detail.cpu1temp)+ '</td></tr>' +
+            '<tr class = "inside"><td >CPU2 Temp</td><td '+formatstyle(detail.cpu2temp,0)+'>' + formatnumber(detail.cpu2temp)+ '</td></tr>' +
+            '<tr class = "inside"><td >Inlet Temp</td><td '+formatstyle(detail.inlettemp,0)+'>' + formatnumber(detail.inlettemp)+ '</td></tr>' +
+            '<tr class = "inside"><td>Job Load</td><td '+formatstyle(detail.jobload,1)+'>' + formatnumber(detail.jobload) + '</td></tr>' +
+            '<tr class = "inside"><td>Memory Usage</td><td '+formatstyle(detail.memoryusg,2)+'>' + formatnumber(detail.memoryusg) + '</td></tr>' +
+            // '<tr><td colspan="2">Fan Speed</td> </tr>' +
+            '<tr class = "inside"><td >Fan1 speed</td><td '+formatstyle(detail.fan1peed,3)+'>' + formatnumber(detail.fan1peed)+ '</td></tr>' +
+            '<tr class = "inside"><td >Fan2 speed</td><td '+formatstyle(detail.fan2peed,3)+'>' + formatnumber(detail.fan2peed)+ '</td></tr>' +
+            '<tr class = "inside"><td >Fan3 speed</td><td '+formatstyle(detail.fan3peed,3)+'>' + formatnumber(detail.fan3peed)+ '</td></tr>' +
+            '<tr class = "inside"><td >Fan4 speed</td><td '+formatstyle(detail.fan4peed,3)+'>' + formatnumber(detail.fan4peed)+ '</td></tr>' +
+            '<tr class = "inside"><td>Power Usage</td><td '+formatstyle(detail.pwconsumption,4)+'>' + formatnumber(detail.pwconsumption) + '</td></tr>' +
+            '</tbody>' +
             '      </table>'
         )
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
 
     }
+    function formatnumber (d){
+        if(d)
+            if (d<1)
+                return d.toFixed(1);
+            else
+                return Math.round(d);
+        else
+            return d;
+    }
+    function formatstyle (d,serin){
+        if (d>thresholds[serin][1])
+            return 'style="color:'+arrColor[6]+';"';
+        if (d> (thresholds[serin][1] - (thresholds[serin][1]-thresholds[serin][0])*0.25))
+            return 'style="color:'+arrColor[5]+';"';
+        return '';
 
+    }
     function hideTooltip() {
         div.transition()
             .duration(200)

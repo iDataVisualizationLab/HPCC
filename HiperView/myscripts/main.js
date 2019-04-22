@@ -94,7 +94,7 @@ var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack = 18;
+var maxstack = 10;
 var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
@@ -114,7 +114,7 @@ var currentHostname,currentMeasure;
 var currentHostX = 0;
 // var currentHosty = 0;
 
-var charType = "Heatmap";
+var charType = "Area Chart";
 var sumType = "Radar";
 let globalTrend = false;
 //***********************
@@ -433,6 +433,18 @@ function main() {
 
 
     // Summary Panel ********************************************************************
+    var maingradient = svg.append("defs").append("linearGradient")
+        .attr("id","mainColor")
+        .attr('x1','0%')
+        .attr('y1','100%')
+        .attr('x2','0%')
+        .attr('y2','0%');
+    maingradient.selectAll('stop').data(arrColor)
+        .enter().append('stop')
+        .attr('offset',(d,i)=> (i-1)/4 )
+        .style('stop-color',d=>d)
+        .style('stop-opacity',(d,i)=>opa.range()[i]);
+
     svgsum = svg.append("g")
         .attr("class", "summaryGroup")
         .attr("transform","translate(" + 1 + "," + 15 + ")");
@@ -553,6 +565,7 @@ function request(){
     var countarr = [];
     var requeststatus =true;
     var countrecord = 0;
+    var missingtimetex = false;
     interval2 = new IntervalTimer(function (simDuration) {
         var midlehandle = function (ri){
             let returniteration = ri[0];
@@ -575,6 +588,9 @@ function request(){
                 drawsummary();
                 if (charType==="T-sne Chart")
                     TSneplot.getTop10();
+                if (!haveMiddle) {
+                    updateTimeText(Math.round(hosts.length/2));
+                }
                 shiftTimeText();
                 count = 0;
                 countbuffer = 0;
@@ -601,6 +617,7 @@ function request(){
                 updateTimeText(count);
                 haveMiddle = true;
             }
+
             svg.selectAll(".currentTimeline")
                 .attr("x1", x2)
                 .attr("x2", x2);
@@ -1052,7 +1069,7 @@ function plotResult(result,name) {
     var hpcc_node = +name.split("-")[2].split(".")[0];
     var xStart = racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x+15;
     // var xStart = racks[hpcc_rack - 1].x+15;
-    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size,node_size*maxstack)-20]); // output
+    xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size-20,node_size*maxstack)]); // output
         // .range([xStart, xStart+w_rack/2-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
@@ -1196,19 +1213,33 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     // *****************************************
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
-
-function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
+function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,startinde){
     var yScale = d3.scaleLinear()
-        .domain([baseTemperature, 120]) //  baseTemperature=60
-        .range([0, 22]); // output
+        .domain([(thresholds[0][1]-thresholds[0][0])/2,thresholds[0][1]]) //  baseTemperature=60
+        .range([0, node_size*2]); // output
 
     var area = d3.area()
+        .defined(function(d) { return d.temp1; })
         .x(function(d) { return d.x; })
         .y0(function(d) { return y; })
         .y1(function(d) { return y-yScale(d.temp1); })
         .curve(d3.curveCatmullRom);
 
     svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items
+        .append('clipPath').attr("class", name)
+        .attr("id", "cp"+name).append("path")
+        .datum(arr) // 10. Binds data to the line
+        .attr("d", area);
+    svgStore.detailView.items
+        .append('rect')
+        .attr("class", name)
+        .attr('width',xTimeScale.range()[1]-xTimeScale.range()[0])
+        .attr('height',yScale.range()[1]*2)
+        .attr('x',arr[0].x)
+        .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
+        .attr("clip-path","url(#cp"+name+")");
+
     svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("class", name)
@@ -1222,13 +1253,45 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
             mouseoverNode (this);
         })
     ;//.on("mouseout", mouseoutNode);
-    svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
-        .style("fill",function (d) {
-            return color(d[d.length-1].temp1);
-        })
+    // svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
+    //     .style("fill",function (d) {
+    //         return color(d[d.length-1].temp1);
+    //     })
 
-    // drawSummaryAreaChart(hpcc_rack, xStart);
+    // drawSummaryAreaChart(hpcc_rack, xTimeScale(0),startinde);
 }
+// function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y){
+//     var yScale = d3.scaleLinear()
+//         .domain([baseTemperature, 120]) //  baseTemperature=60
+//         .range([0, 22]); // output
+//
+//     var area = d3.area()
+//         .x(function(d) { return d.x; })
+//         .y0(function(d) { return y; })
+//         .y1(function(d) { return y-yScale(d.temp1); })
+//         .curve(d3.curveCatmullRom);
+//
+//     svgStore.detailView.items.selectAll("."+name).remove();
+//     svgStore.detailView.items.append("path")
+//         .datum(arr) // 10. Binds data to the line
+//         .attr("class", name)
+//         .attr("stroke","#000")
+//         .attr("stroke-width",0.2)
+//         .attr("d", area)
+//         .attr("fill-opacity",function (d) {
+//             return opa(d[d.length-1].temp1);
+//         })
+//         .on("mouseover", function (d) {
+//             mouseoverNode (this);
+//         })
+//     ;//.on("mouseout", mouseoutNode);
+//     svgStore.detailView.items.selectAll("."+name).transition().duration(1000)
+//         .style("fill",function (d) {
+//             return color(d[d.length-1].temp1);
+//         })
+//
+//     // drawSummaryAreaChart(hpcc_rack, xStart);
+// }
 
 function getData(nameh,index,skip){
     if(!isbusy || skip === true) {

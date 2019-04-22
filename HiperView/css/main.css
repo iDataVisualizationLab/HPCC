@@ -159,13 +159,34 @@ label {
 	color: currentColor;
 }
 
-table, th, td {
-	border: 1px solid #ccc;
+/*table, th, td {*/
+	/*border: 1px solid #ccc;*/
+	/*border-collapse: collapse;*/
+	/*padding: 2px;*/
+	/*background-color: #fff;*/
+/*}*/
+.tooltip table, th, td{
 	border-collapse: collapse;
 	padding: 2px;
-	background-color: #fff;
 }
 
+.tooltip {
+	color: black;
+	border: 1px solid #000000;
+	border-radius: 5px;
+}
+
+.tooltip .inside {
+	background-color: #fff;
+	border-radius: 8px;
+}
+.tooltip .inside td {
+	border: 1px solid #ccc;
+}
+.tooltip .inside td:nth-child(even) {
+	vertical-align: middle;
+	text-align: right;
+}
 #graph {
 	width: 900px;
 	height: 500px;
@@ -359,10 +380,10 @@ div.tooltip {
 	text-align: center;
 	width: auto;
 	height: auto;
-	padding: 2px;
+	padding: 5px;
 	font: 12px sans-serif;
 	background: #bbb;
-	border: 1px;
+	border: 1px solid #000000;
 	border-radius: 8px;
 	pointer-events: none;
 }
@@ -393,6 +414,7 @@ div.scatter_x{
 
 }
 div.selection{
+	color:black;
 	position: absolute;
 	opacity: 0;
 	line-height: 20px;
