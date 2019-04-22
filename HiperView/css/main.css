@@ -96,7 +96,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 #legendHolder {
 	position:absolute;
-	z-index: 0;
+	z-index: 2;
 	right:10px;
 	border: 1px solid rgba(0,0,0, 0.2);
 	background-color: rgba(255,255,255, 0.75);

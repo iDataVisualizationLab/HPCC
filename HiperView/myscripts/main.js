@@ -1238,7 +1238,9 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,startinde){
         .attr('height',yScale.range()[1]*2)
         .attr('x',arr[0].x)
         .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
-        .attr("clip-path","url(#cp"+name+")");
+        .attr("clip-path","url(#cp"+name+")").on("mouseover", function (d) {
+        mouseoverNode (this);
+    });
 
     svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
