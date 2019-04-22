@@ -97,12 +97,15 @@ function getstringQueryAll_influx (ip){
     }).join('%3B');
 }
 
-function getstringQuery_influx (ip,serviceI,timerange){
+function getstringQuery_influx (ip,serviceI,timerange,timestep){
     const s = serviceList[serviceI];
     return d3.keys(serviceQuery.influxdb[s]).map(ser=>{
             const subs = serviceQuery.influxdb[s][ser];
             let str = "SELECT ";
-            str +=  d3.range(subs.numberOfEntries).map(i=>'"'+subs.format(i+1)+'"').join(',');
+            if (timestep)
+                str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('MAX("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+            else
+                str +=  d3.range(subs.numberOfEntries).map(i=> '"'+subs.format(i+1)+'"').join(',');
             str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
             if (timerange){
                 str += 'AND time > \''+timerange[0]+'\'';
@@ -110,6 +113,8 @@ function getstringQuery_influx (ip,serviceI,timerange){
                     str += ' AND time < \''+timerange[1]+'\'';
                 else
                     str += ' LIMIT 1';
+                if (timestep)
+                    str += ' GROUP BY time('+timestep+'),* SLIMIT 1';
             }else {
                 str += ' ORDER BY time DESC LIMIT 1';
             }
