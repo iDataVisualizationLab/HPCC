@@ -1159,13 +1159,11 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     svgStore.detailView.items.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
-        var xMin = xTimeScale(0);
-        var xMax = xTimeScale(maxstack-1);
         var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svgStore.detailView.items.append("rect")
-            .attr("class", name+' '+'detailItem')
+            .attr("class", name)
             .attr("x", x)
             .attr("y", y-10)
             .attr("width", node_size)
@@ -1631,8 +1629,8 @@ function requestServiceinfluxdb(count,serin) {
     })
 }
 let requestService = eval('requestService'+db);
-let timerange = ["2019-03-21T14:00:00Z","2019-03-21T16:30:00Z"];
-let timestep_query = "5m";
+let timerange = ["2019-03-21T14:00:00Z","2019-03-21T17:30:00Z"];
+let timestep_query = "1m";
 
 function requestRT(iteration,count) {
     var promises;
