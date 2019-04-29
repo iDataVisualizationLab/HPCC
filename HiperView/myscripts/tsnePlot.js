@@ -28,7 +28,7 @@ d3.Tsneplot = function () {
     let sizebox = 50;
     let maxlist = 20;
     let Tsneplot ={};
-    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,
+    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,panel_user,
         scaleX_small = d3.scaleLinear(),
         scaleY_small = d3.scaleLinear(),
         store={},
@@ -39,7 +39,6 @@ d3.Tsneplot = function () {
     let first = true;
     function updateRenderRanking(data) {
         var max = d3.max(d3.extent(d3.merge(d3.extent(data.top10,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
-        console.log(max)
         scaleX_small.domain([-max,max]);
         scaleY_small.domain(scaleX_small.domain());
         // console.log(data.top10);
@@ -54,19 +53,19 @@ d3.Tsneplot = function () {
             .transition('exit')
             .duration((d, i) => i * 100)
             .style('opacity', 0)
-            .attr('transform', 'translate(20,' + (maxlist + 1) * sizebox + ")")
+            .attr('transform', 'translate(20,' + (maxlist + 0.5) * sizebox + ")")
             .on('interrupt',function(d){d3.active(this).remove})
             .remove();
         // ENTER
         const newdiv = dataTop.enter().append("g")
             .attr('class', 'top10_item');
         newdiv
-            .attr('transform', 'translate(0,' + (maxlist + 1) * sizebox + ")")
+            .attr('transform', 'translate(0,' + (maxlist + 0.5) * sizebox + ")")
             .style('opacity', 0)
             .transition('update')
             .duration((d, i) => i * 100)
             .style('opacity', 1)
-            .attr('transform', (d, i) => 'translate(0,' + (i + 1) * sizebox + ")");
+            .attr('transform', (d, i) => 'translate(0,' + (i + 0.5) * sizebox + ")");
         newdiv.append('rect').attrs(
             {class : 'detailDecoration',
                 y: -(sizebox-2)/2,
@@ -87,7 +86,7 @@ d3.Tsneplot = function () {
         dataTop
             .transition()
             .duration((d, i) => i * 100)
-            .attr('transform', (d, i) => 'translate(0,' + (i + 1) * sizebox + ")");
+            .attr('transform', (d, i) => 'translate(0,' + (i + 0.5) * sizebox + ")");
 
         const gd = dataTop.select('.gd').datum(d=>d);
         gd.select("path")
@@ -98,9 +97,9 @@ d3.Tsneplot = function () {
     function createDetailCircle (g){
         let newg = g.selectAll('circle').data(d=>d);
         newg.exit().remove();
-        newg.classed('new',false);
+        // newg.classed('new',false);
         return newg.enter().append('circle')
-            .classed('new',true)
+            // .classed('new',true)
             .attrs(graphicopt.top10.details.circle.attr)
             .styles(graphicopt.top10.details.circle.style)
             .merge(newg).attrs(d=> {return {
@@ -223,8 +222,11 @@ d3.Tsneplot = function () {
         panel.select(".top10DIV").style('max-height', sizebox*10+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});
-        // menu.append('text').attr("dy", "2em").attr("x",10).text('Cost: ');
-        // menu.append('text').attr("dy", "2em").attr("x",40).attr('class','cost');
+
+        panel_user = d3.select("#userList").style('top',graphicopt.offset.top+'px');
+        panel_user.select(".top10DIV").style('max-height', sizebox*10+"px");
+
+
         g = g.append('g')
             .attr('class','graph');
         function zoomed() {
@@ -307,6 +309,9 @@ d3.Tsneplot = function () {
             currenthost.g.select('text').style("opacity", 1)
                 .transition('hightlight').duration(3000).style("opacity",0);
 
+            //update user
+            // drawUserlist();
+
             if (!isbusy) {
                 isbusy = true;
                 tsne.postMessage({action: "updateData", value: arr});
@@ -315,7 +320,6 @@ d3.Tsneplot = function () {
 
         }
     };
-
     Tsneplot.getTop10  = function (){
         tsne.postMessage({action:"updateTracker"});
         // clearInterval(intervalCalculate);
@@ -333,6 +337,7 @@ d3.Tsneplot = function () {
 
     Tsneplot.redraw  = function (){
         panel.classed("active",true);
+        panel_user.classed("active",true);
         svg.style('visibility','visible');
         tsne.postMessage({action:"initDataRaw",value:arr})//.initDataRaw(arr);
         drawEmbedding(arr);
@@ -377,13 +382,60 @@ d3.Tsneplot = function () {
         return arr;
     }
 
+    function drawUserlist() {
+        let userl = current_userData();
+        //ranking----
+        userl.sort((a,b)=>b.values.length-a.values.length);
+
+        const totalUser = userl.length;
+        let userli = panel_user.select('tbody')
+            .selectAll('tr').data(userl,d=>d.key).attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '));
+        //remove
+        userli.exit().remove();
+        //new
+        let contain_n = userli.enter().append('tr')
+            .attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '))
+            .on('mouseover',function(d){
+                const list_node = _(d.values.map(e=>e.nodes)).uniq();
+                filterhost = list_node;
+                d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
+                    .select(".radarStroke").dispatch('mouseenter');
+            }).on('mouseleave',function(d){
+                d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
+            });
+        contain_n.append('td')
+            .attr('class','title')
+            .text(d=>d.key);
+        contain_n.append('td')
+            .attr('class','jobs alignRight')
+            .text(d=>d.values.length);
+        contain_n.append('td')
+            .attr('class','nodes alignRight')
+            .text(d=> _(d.values.map(e=>e.nodes)).uniq().length);
+
+        //update
+
+        userli.select('.jobs').filter(function(d){return ~~d3.select(this).text()!==d})
+            .text(d=>d.values.length)
+            .style('background-color','yellow')
+            .transition()
+            .duration(2000)
+            .style('background-color',null);
+        userli.select('.nodes') .text(d=>_(d.values.map(e=>e.nodes)).uniq().length);
+    }
+
     function drawEmbedding(data) {
 
         let datapoint = g.selectAll(".linkLineg")
             .data(data);
         let datapointN = datapoint
             .enter().append("g")
-            .attr("class", d=>"linkLineg "+d.name);
+            .attr("class", d=>"linkLineg "+d.name)
+            .on('mouseover',function(d){
+                d3.select(this).select('text').style('opacity',1);
+            }).on('mouseout',function(d){
+                d3.select(this).select('text').style('opacity',0);
+            });
 
         datapointN.append("clipPath")
             .attr("id",d=>"tSNE"+d.name)
@@ -439,9 +491,7 @@ d3.Tsneplot = function () {
 
     };
 
-    Tsneplot.graphicopt = function (_) {
-        return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;
-
-    };
+    Tsneplot.graphicopt = function (_) {return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;};
+    Tsneplot.drawUserlist = function () {drawUserlist()};
     return Tsneplot;
 };

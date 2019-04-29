@@ -43,7 +43,7 @@ function plotTsne(hostResults,lastIndex){
         var r = hostResults[name];
         var arrServices = [];
         for (var stepIndex = startIndex; stepIndex<= lastIndex; stepIndex++) {
-            serviceList.forEach((ser, indx) => {
+            serviceList_selected.forEach((ser, indx) => {
                 var a;
                 if (r[serviceListattr[indx]][stepIndex]) {
                     a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser);

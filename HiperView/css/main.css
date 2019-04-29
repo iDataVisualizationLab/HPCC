@@ -96,7 +96,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 #legendHolder {
 	position:absolute;
-	z-index: 0;
+	z-index: 2;
 	right:10px;
 	border: 1px solid rgba(0,0,0, 0.2);
 	background-color: rgba(255,255,255, 0.75);
@@ -714,14 +714,31 @@ p.divider {
 
 }
 .subpanel {
-	background-color: #383838b5;
-	float: left;
-	left:10px;
+	color: black;
+	background-color: rgba(183, 183, 183, 0.71);
 	position: absolute;
 	transition: 0.5s;
-	padding-right: 10px;
+	padding: 10px;
 	display: none;
+	border-radius: 10px;
+	border: black solid 1px;
 }
+
+#refeshUser{
+	margin-left: 10px;
+	color: black;
+}
+
+.floatLeft {
+	float: left;
+	left:10px;
+}
+
+.floatRight {
+	float: right;
+	right:10px;
+}
+
 .light .subpanel{
 	background-color: rgba(255, 255, 255, 0.71);
 }
@@ -746,9 +763,53 @@ p.divider {
 	display: block;
 }
 
+#userList {
+	min-width: 250px;
+}
 .top10DIV {
 	overflow-y: auto;
 }
+.top10DIV .collection {
+	color: black;
+	border:unset;
+	border-collapse: separate;
+	border-spacing: 0 2px;
+}
+.alignRight {
+	text-align: right;
+}
+.collection .collection-item {
+	border: unset;
+}
+.collection .collection-item td {
+	border-radius: 0;
+	padding: 0px 10px
+}
+.displayNone {
+	display: none;
+}
+
+.collection .collection-item td:first-child {
+	-webkit-border-top-left-radius: 10px;
+	-moz-border-top-left-radius: 10px;
+	border-top-left-radius: 10px;
+
+	-webkit-border-bottom-left-radius: 10px;
+	-moz-border-bottom-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+
+.collection .collection-item td:last-child {
+	-webkit-border-top-right-radius: 10px;
+	-moz-border-top-right-radius: 10px;
+	border-top-right-radius: 10px;
+
+	-webkit-border-bottom-right-radius: 10px;
+	-moz-border-bottom-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
+
+
 
 .top10 {
 

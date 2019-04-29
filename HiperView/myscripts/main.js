@@ -141,6 +141,7 @@ var undefinedResult = "timed out";
 var xTimeSummaryScale;
 var xLinearSummaryScale;
 
+var filterhost=[];
 
 var TsnePlotopt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -185,7 +186,7 @@ let getDataWorker = new Worker ('myscripts/getDataWorker.js');
 let isbusy = false;
 
 function setColorsAndThresholds(s) {
-    for (var i=0; i<serviceList.length;i++){
+    for (var i=0; i<serviceList_selected.length;i++){
         if (s == serviceList[i] && i==1){  // CPU_load
             dif = (thresholds[i][1]-thresholds[i][0])/4;
             mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
@@ -374,11 +375,12 @@ function main() {
         hostResults[h.name] = {};
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
-        hostResults[h.name].arrTemperature = [];
-        hostResults[h.name].arrCPU_load = [];
-        hostResults[h.name].arrMemory_usage = [];
-        hostResults[h.name].arrFans_health= [];
-        hostResults[h.name].arrPower_usage= [];
+        serviceListattr.forEach(d=>hostResults[att][d]=[]);
+        // hostResults[h.name].arrTemperature = [];
+        // hostResults[h.name].arrCPU_load = [];
+        // hostResults[h.name].arrMemory_usage = [];
+        // hostResults[h.name].arrFans_health= [];
+        // hostResults[h.name].arrPower_usage= [];
         hosts.push(h);
         // console.log(att+" "+h.hpcc_rack+" "+h.hpcc_node);
 
@@ -574,11 +576,13 @@ function request(){
             count += 1;
         };
         var drawprocess = function ()  {
-
             drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
-            if (count >= (hosts.length)) {// Draw the summary Box plot ***********************************************************
+            if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
+
+                // getJoblist(lastIndex,true);
+
                 // Draw date
                 d3.select(".currentDate")
                     .text("" + new Date(currentMiliseconds).toDateString());
@@ -695,7 +699,7 @@ function request(){
                     let ri = step(iteration, countbuffer);
                     midlehandle(ri);
                     countbuffer++;
-                }while ((countbuffer < hosts.length) && (speedup==2||(hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
+                }while ((countbuffer < hosts.length) && (speedup===2||(hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
                 speedup = 0;
                 drawprocess();
             }
@@ -772,14 +776,16 @@ function drawsummary(initIndex){
                 // boxplot
                 if (lastIndex >= 0) {   // has some data
                     var arrServices = [];
-                    serviceList.forEach((ser,indx) => {
+                    serviceList_selected.forEach((ser,indx) => {
                         var obj = {};
                         let dataextract = r[serviceListattr[indx]][lastIndex];
                         if (dataextract)
                             dataextract = dataextract.data.service.plugin_output;
                         var a = processData(dataextract, ser);
                         obj.a = a;
-                        arrServices.push(obj);})
+                        arrServices.push(obj);
+
+                    })
                 }
                 arrServices.name = name;
                 arr.push(arrServices);
@@ -821,14 +827,16 @@ function drawsummarypoint(harr){
                 // boxplot
                 if (lastIndex >= 0) {   // has some data
                     var arrServices = [];
-                    serviceList.forEach((ser, indx) => {
-                        var obj = {};
-                        let dataextract = r[serviceListattr[indx]][lastIndex];
-                        if (dataextract)
-                            dataextract = dataextract.data.service.plugin_output;
-                        var a = processData(dataextract, ser);
-                        obj.a = a;
-                        arrServices.push(obj);
+                    serviceList_selected.forEach((ser, indx) => {
+                        try {
+                            var obj = {};
+                            let dataextract = r[serviceListattr[indx]][lastIndex];
+                            if (dataextract)
+                                dataextract = dataextract.data.service.plugin_output;
+                            var a = processData(dataextract, ser);
+                            obj.a = a;
+                            arrServices.push(obj);
+                        }catch(e){}
                     })
                 }
                 arrServices.name = name;
@@ -889,7 +897,7 @@ function processResult_old(r){
     obj.data = {};
     obj.data.service={};
     obj.data.service.host_name = r.data.service.host_name;
-    obj.data.service.plugin_output = r.data.service.plugin_output
+    obj.data.service.plugin_output = r.data.service.plugin_output;
     return obj;
 }
 const processResult_nagios = processResult_old;
@@ -903,7 +911,7 @@ function processResult_influxdb(r,hostname,index){
     obj.data = {};
     obj.data.service={};
     obj.data.service.host_name = hostname;
-    if (index != undefined ) {
+    if (index !== undefined ) {
         obj.data.service.plugin_output = {results: r.results.map(d => {
             let temp = {};
             temp.statement_id = d.statement_id;
@@ -982,26 +990,20 @@ function decimalColorToHTMLcolor(number) {
 
 function simulateResults2(hostname,iter, s){
     var newService;
-    if (s == serviceList[0])
-        newService = sampleS[hostname].arrTemperature[iter];
-    else if (s == serviceList[1])
-        newService = sampleS[hostname].arrCPU_load[iter];
-    else if (s == serviceList[2])
-        newService = sampleS[hostname].arrMemory_usage[iter];
-    else if (s == serviceList[3])
-        newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) {
-        if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
+    let serviceIndex =  serviceList.findIndex(d=>d===s);
+    newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
+    if (serviceIndex === 4) {
+        if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined  && db!="influxdb"){
+        }else if (sampleS[hostname]["arrPower_usage"][iter]=== undefined  && db!=="influxdb"){
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"][iter] = simisval;
         }
         newService = sampleS[hostname]["arrPower_usage"][iter];
     }
     if (newService === undefined){
-        newService ={}
+        newService ={};
         newService.result = {};
         newService.result.query_time = query_time;
         newService.data = {};
@@ -1009,7 +1011,7 @@ function simulateResults2(hostname,iter, s){
         newService.data.service.host_name = hostname;
         newService.data.service.plugin_output = undefined;
     }else {
-        if (db == "influxdb")
+        if (db === "influxdb")
             try {
                 newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
             }catch(e){
@@ -1099,8 +1101,8 @@ function plotResult(result,name) {
     //     maxTime = Math.max(maxTime,qtime);
     // }
     maxTime =query_time;
-    if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
-        pauseRequest();
+    // if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
+    //     playchange();
 
     switch (charType) {
         case "Heatmap":
@@ -1159,19 +1161,17 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
     svgStore.detailView.items.selectAll("."+name).remove();
     for (var i=0; i<arr.length;i++){
         var obj = arr[i];
-        var xMin = xTimeScale(0);
-        var xMax = xTimeScale(maxstack-1);
         var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svgStore.detailView.items.append("rect")
-            .attr("class", name+' '+'detailItem')
+            .attr("class", name)
             .attr("x", x)
             .attr("y", y-10)
             .attr("width", node_size)
             .attr("height", node_size )
             .attr("fill", function (d) {
-                if (obj.temp1==undefinedValue)
+                if (obj.temp1===undefinedValue)
                     return undefinedColor;
                 else
                     return color(obj.temp1);
@@ -1186,7 +1186,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,minTime,maxTime){
             })
         ;//.on("mouseout", mouseoutNode);
 
-        if (selectedService=="Temperature" || selectedService=="Fans_speed")    {
+        if (selectedService==="Temperature" || selectedService==="Fans_speed")    {
             svgStore.detailView.items.append("rect")
                 .attr("class", name)
                 .attr("x", x)
@@ -1238,7 +1238,9 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,startinde){
         .attr('height',yScale.range()[1]*2)
         .attr('x',arr[0].x)
         .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
-        .attr("clip-path","url(#cp"+name+")");
+        .attr("clip-path","url(#cp"+name+")").on("mouseover", function (d) {
+        mouseoverNode (this);
+    });
 
     svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
@@ -1486,11 +1488,12 @@ function resetRequest(){
         hostResults[att] = {};
         hostResults[att].index = count;
         hostResults[att].arr = [];
-        hostResults[att].arrTemperature = [];
-        hostResults[att].arrCPU_load = [];
-        hostResults[att].arrMemory_usage = [];
-        hostResults[att].arrFans_health= [];
-        hostResults[att].arrPower_usage= [];
+        serviceListattr.forEach(d=>hostResults[att][d]=[]);
+        // hostResults[att].arrTemperature = [];
+        // hostResults[att].arrCPU_load = [];
+        // hostResults[att].arrMemory_usage = [];
+        // hostResults[att].arrFans_health= [];
+        // hostResults[att].arrPower_usage= [];
         count++;
 
         svg.selectAll("."+att).remove();
@@ -1598,6 +1601,7 @@ function requestServiceinfluxdb(count,serin) {
                         hostResults[name][serviceListattr[serin]].push(result);
                     }else {
                         if (responseJSON.results[0].series) {
+                            responseJSON.results[0].series[0].values = _(responseJSON.results[0].series[0].values).uniq(d=>d[0]);
                             const returnLength = responseJSON.results[0].series[0].values.length;
                             for (let i = 0; i < returnLength; i++)
                                 hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name, i));
@@ -1629,7 +1633,8 @@ function requestServiceinfluxdb(count,serin) {
     })
 }
 let requestService = eval('requestService'+db);
-let timerange = ["2019-03-21T14:00:00Z","2019-03-21T16:30:00Z"];
+// let timerange = ["2019-03-21T14:00:00Z","2019-03-21T17:30:00Z"]; // event 21 march 2019
+let timerange = ["2019-04-26T00:00:00Z","2019-04-27T00:00:00Z"];
 let timestep_query = "5m";
 
 function requestRT(iteration,count) {
@@ -1637,7 +1642,8 @@ function requestRT(iteration,count) {
     promises = serviceList.map(function (d, i) {
         return requestService(count, i);
     });
-
+    // new data metrix
+    // promises.push(requestService(count, i));
     return Promise.all(promises).then(() => {
         return [iteration, count];
     });
@@ -1655,21 +1661,11 @@ function step (iteration, count){
                 // Process the result
                 var name = hosts[count].name;
                 hostResults[name].arr.push(result);
-                //console.log(hosts[count].name+" "+hostResults[name]);
-                var result = simulateResults2(hosts[count].name, iteration, serviceList[0]);
-                hostResults[name].arrTemperature.push(result);
-
-                var result = simulateResults2(hosts[count].name, iteration, serviceList[1]);
-                hostResults[name].arrCPU_load.push(result);
-
-                var result = simulateResults2(hosts[count].name, iteration, serviceList[2]);
-                hostResults[name].arrMemory_usage.push(result);
-
-                var result = simulateResults2(hosts[count].name, iteration, serviceList[3]);
-                hostResults[name].arrFans_health.push(result);
-
-                var result = simulateResults2(hosts[count].name, iteration, serviceList[4]);
-                hostResults[name].arrPower_usage.push(result);
+                // console.log(hosts[count].name+" "+hostResults[name]);
+                serviceList_selected.forEach ((s,index)=>{
+                    var result = simulateResults2(hosts[count].name, iteration, serviceList[index]);
+                    hostResults[name][serviceListattr[index]].push(result);
+                });
 
                 plotResult(result, name);
                 iteration++;
@@ -1679,7 +1675,22 @@ function step (iteration, count){
     }
     //return [iteration, count];
 }
-
+function getJoblist (iteration,reset){
+    try {
+        if (reset===true || reset===undefined)
+            jobList = [];
+        hosts.forEach(h => {
+            var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
+            const resultObj = processData(result.data.service.plugin_output, "Job_scheduling")[0];
+            if (resultObj)
+                jobList = _.union(jobList, resultObj);
+        });
+        TSneplot.drawUserlist();
+    }catch(e){}
+}
+function current_userData () {
+    return d3.nest().key(function(uD){return uD.user}).entries( jobList);
+}
 d3.select("html").on("keydown", function() {
     switch(d3.event.keyCode){
         case 27:
