@@ -1,5 +1,8 @@
-var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
-var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
+// system variable
+var jobList=[];
+var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
+var serviceList_selected = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
+var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
 
 var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
     arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
@@ -79,6 +82,13 @@ var serviceQuery ={
                 "numberOfEntries": 1,
                 "rescale": 1 / 3.2,
             }
+        },
+        "Job_scheduling":{
+            "Job_Info" : {
+                "format": () => "job_data",
+                "numberOfEntries": 1,
+                "type": 'object',
+            }
         }
     },
 };
@@ -103,10 +113,16 @@ function getstringQuery_influx (ip,serviceI,timerange,timestep){
             const subs = serviceQuery.influxdb[s][ser];
             let str = "SELECT ";
             if (timestep)
-                str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('MAX("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                if(subs.type==="object")
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('DISTINCT("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                else
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('MAX("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
             else
                 str +=  d3.range(subs.numberOfEntries).map(i=> '"'+subs.format(i+1)+'"').join(',');
-            str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
+            if(subs.type==="object")
+                str +=  ' FROM '+ser+' WHERE host=\''+ip+'\'';
+            else
+                str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
             if (timerange){
                 str += 'AND time > \''+timerange[0]+'\'';
                 if (timerange[1])
@@ -126,17 +142,19 @@ function processData_influxdb(result, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return = d3.keys(serviceAttribute);
     if (result) {
-
         let val = result.results;
         return d3.merge(query_return.map((s, i) => {
             if (val[i].series) // no error
             {
                 const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
-                if (subob.error === "None" || subob.error === null)
+                if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
                         const localVal = subob[serviceAttribute[s].format(d + 1)];
-                        if (localVal != null)
-                            return subob[serviceAttribute[s].format(d + 1)] * (serviceAttribute[s].rescale || 1);
+                        if (localVal != null) {
+                            if (serviceAttribute[s].type==='object')
+                                return string2JSON(localVal);
+                            return localVal * (serviceAttribute[s].rescale || 1);
+                        }
                         else return undefined;
                     });
                 else
@@ -149,6 +167,13 @@ function processData_influxdb(result, serviceName) {
     return d3.merge(query_return.map((s, i) => {
             return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
     }));
+}
+function string2JSON (str){
+    try {
+        return JSON.parse("["+str.replace(/'/g,'"').replace(/;/g,',')+"]")
+    }catch(e){
+        return undefined;
+    }
 }
 function processData_nagios(str, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
@@ -170,7 +195,7 @@ function processData_nagios(str, serviceName) {
     }
 }
 function processData_old(str, serviceName) {
-    if (serviceName == serviceList[0]){
+    if (serviceName === serviceList[0]){
         var a = [];
         if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
             a[0] = undefinedValue;

@@ -521,3 +521,9 @@ function getTransformation(transform) {
         scaleY: scaleY
     };
 }
+
+$.fn.exchangePositionWith = function(selector) {
+    var other = $(selector);
+    this.after(other.clone());
+    other.after(this).remove();
+};

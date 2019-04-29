@@ -417,9 +417,8 @@ function RadarChart(id, data, options, name) {
         //console.dir(d3.selectAll(document.elementsFromPoint(d3.event.x, d3.event.y)).filter("path"));
         //console.log(d3.event);
         // let overlapElements = d3.selectAll(document.elementsFromPoint(d3.event.x, d3.event.y)).filter("path");
-        console.log(d3.select(d3.select(this).node().parentNode).attr("cloned"));
         if (!d3.select(d3.select(this).node().parentNode).attr("cloned")) {
-            playchange();
+            // playchange();
             var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper").filter(a => a !== undefined);
             allbold.style("opacity", 0);
             allbold.selectAll(".radarStroke").style('pointer-events','none');
@@ -427,11 +426,12 @@ function RadarChart(id, data, options, name) {
             var binlist = d.bin.name;
             var matchbold = allbold.filter(a => {
                 if (a !== undefined) {
-                    var keys = false;
-                    a.bin.name.forEach(e => {
-                        keys = keys || (binlist.find(f => f === e) !== undefined)
-                    });
-                    return keys;
+                    // var keys = false;
+                    // a.bin.name.forEach(e => {
+                    //     keys = keys || (binlist.find(f => f === e) !== undefined)
+                    // });
+                    // return keys;
+                    return _.intersection(a.bin.name,binlist).length;
                 } else
                     return false;
             }).nodes();
