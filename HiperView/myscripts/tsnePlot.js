@@ -401,7 +401,7 @@ d3.Tsneplot = function () {
                 // d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
                 //     .select(".radarStroke").dispatch('mouseenter');
                 hosts.forEach(l => {
-                    d3.selectAll("." + l.name)
+                    d3.selectAll("." + l.name+':not(tr)')
                         .classed("displayNone", true);
                     // .style("visibility", 'hidden');
                 });
