@@ -215,7 +215,7 @@ d3.Tsneplot = function () {
         panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
         panel.select(".details").append("span").text('t-SNE cost: ');
         panel.select(".details").append("span").attr('class','cost');
-        const maxsubheight = graphicopt.heightView()-58;
+        const maxsubheight = graphicopt.heightView()-57;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         scaleY_small.range([0,sizegraph]);
