@@ -1765,10 +1765,11 @@ $( document ).ready(function() {
             if (choice !== "nagios" && choice !== "influxdb")
                 d3.json("data/" + choice + ".json", function (error, data) {
                     if (error) {
-                        d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + choice + ".json", function (error, data) {
+                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
                             if (error) throw error;
                             loadata(data)
                         });
+                        return;
                     }
                     loadata(data)
                 });
@@ -1803,10 +1804,11 @@ $( document ).ready(function() {
     setTimeout(() => {
         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
             if (error) {
-                d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
                     if (error) throw error;
                     loadata(data)
                 });
+                return
             }
             loadata(data)
         });
