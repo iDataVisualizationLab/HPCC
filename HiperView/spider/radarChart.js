@@ -469,10 +469,14 @@ function RadarChart(id, data, options, name) {
                 //t.parentNode.appendChild(clonedNode);
             });
             hosts.forEach(l => {
-                if (d.bin.name.filter(e => e === l.name).length === 0)
                     d3.selectAll("." + l.name)
                         .classed("displayNone", true);
                         // .style("visibility", 'hidden');
+            });
+            filterhost.forEach(l => {
+                    d3.selectAll("." + l)
+                        .classed("displayNone", false);
+                // .style("visibility", 'hidden');
             });
             // hosts.forEach(l => {
             //     if (d.bin.name.filter(e => e === l.name).length === 0)

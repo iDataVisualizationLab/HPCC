@@ -328,8 +328,8 @@ function clearclone (){
         allbold//.transition().delay(50)
             .style("opacity", 1);
         allbold.selectAll(".radarStroke").style('pointer-events','auto');
-    filterhost.forEach(l=> {
-                d3.selectAll("." + l)
+    hosts.forEach(l=> {
+                d3.selectAll("." + l.name)
                     .classed("displayNone", false);
                     // .style("visibility", 'visible');
         });
