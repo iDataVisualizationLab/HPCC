@@ -215,12 +215,12 @@ d3.Tsneplot = function () {
         panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
         panel.select(".details").append("span").text('t-SNE cost: ');
         panel.select(".details").append("span").attr('class','cost');
-        const maxsubheight = graphicopt.heightView()-60;
+        const maxsubheight = graphicopt.heightView()-58;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         scaleY_small.range([0,sizegraph]);
         // panel.select(".top10DIV").style('max-height', sizebox*10+"px");
-        panel.select(".top10DIV").style('max-height', maxsubheight+"px");
+        panel.select(".top10DIV").style('max-height', (maxsubheight-5)+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});
 
