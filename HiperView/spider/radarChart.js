@@ -474,7 +474,7 @@ function RadarChart(id, data, options, name) {
                         // .style("visibility", 'hidden');
             });
             filterhost.forEach(l => {
-                    d3.selectAll("." + l)
+                    d3.selectAll("." + filterhost.join(', .'))
                         .classed("displayNone", false);
                 // .style("visibility", 'hidden');
             });

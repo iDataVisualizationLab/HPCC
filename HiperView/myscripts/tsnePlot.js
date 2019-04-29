@@ -394,14 +394,25 @@ d3.Tsneplot = function () {
         userli.exit().remove();
         //new
         let contain_n = userli.enter().append('tr')
-            .attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '))
+            .attr('class',d=>'collection-item '+ d.unqinode.join(' '))
             .on('mouseover',function(d){
-                const list_node = _(d.values.map(e=>e.nodes)).uniq();
-                filterhost = list_node;
-                d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
-                    .select(".radarStroke").dispatch('mouseenter');
+                const list_node = d.unqinode;
+                filterhost = _.union(filterhost,list_node);
+                // d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
+                //     .select(".radarStroke").dispatch('mouseenter');
+                hosts.forEach(l => {
+                    d3.selectAll("." + l.name)
+                        .classed("displayNone", true);
+                    // .style("visibility", 'hidden');
+                });
+                filterhost.forEach(l => {
+                    d3.selectAll("." + filterhost.join(', .'))
+                        .classed("displayNone", false);
+                    // .style("visibility", 'hidden');
+                });
             }).on('mouseleave',function(d){
-                d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
+                // d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
+                d3.selectAll(".displayNone").classed('displayNone',false);
             });
         contain_n.append('td')
             .attr('class','title')
@@ -411,7 +422,7 @@ d3.Tsneplot = function () {
             .text(d=>d.values.length);
         contain_n.append('td')
             .attr('class','nodes alignRight')
-            .text(d=> _(d.values.map(e=>e.nodes)).uniq().length);
+            .text(d=>d.unqinode.length);
 
         //update
 

@@ -1682,14 +1682,18 @@ function getJoblist (iteration,reset){
         hosts.forEach(h => {
             var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
             const resultObj = processData(result.data.service.plugin_output, "Job_scheduling")[0];
-            if (resultObj)
+            if (resultObj) {
+                resultObj.forEach(d=>d.nodes= d.nodes.split(','));
                 jobList = _.union(jobList, resultObj);
+            }
         });
         TSneplot.drawUserlist();
     }catch(e){}
 }
 function current_userData () {
-    return d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    let jobByuser = d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    jobByuser.forEach(d=>d.unqinode= _.chain(d.values).map(d=>d.nodes).flatten().uniq().value());
+    return jobByuser;
 }
 d3.select("html").on("keydown", function() {
     switch(d3.event.keyCode){
