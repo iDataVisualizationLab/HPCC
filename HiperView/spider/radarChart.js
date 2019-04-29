@@ -412,6 +412,7 @@ function RadarChart(id, data, options, name) {
         });
         blobWrapperpath.on("mouseenter",mouseenterfunctionbold );
     }
+
     function mouseenterfunctionbold (d, i) {
         var state = state||false;
         //console.dir(d3.selectAll(document.elementsFromPoint(d3.event.x, d3.event.y)).filter("path"));
@@ -424,6 +425,7 @@ function RadarChart(id, data, options, name) {
             allbold.selectAll(".radarStroke").style('pointer-events','none');
             // link to other blod
             var binlist = d.bin.name;
+            filterhost = _.union(filterhost,d.bin.name)
             var matchbold = allbold.filter(a => {
                 if (a !== undefined) {
                     // var keys = false;
@@ -431,7 +433,7 @@ function RadarChart(id, data, options, name) {
                     //     keys = keys || (binlist.find(f => f === e) !== undefined)
                     // });
                     // return keys;
-                    return _.intersection(a.bin.name,binlist).length;
+                    return _.intersection(a.bin.name,filterhost).length;
                 } else
                     return false;
             }).nodes();
@@ -469,7 +471,8 @@ function RadarChart(id, data, options, name) {
             hosts.forEach(l => {
                 if (d.bin.name.filter(e => e === l.name).length === 0)
                     d3.selectAll("." + l.name)
-                        .style("visibility", 'hidden');
+                        .style("display", 'none');
+                        // .style("visibility", 'hidden');
             });
             // hosts.forEach(l => {
             //     if (d.bin.name.filter(e => e === l.name).length === 0)

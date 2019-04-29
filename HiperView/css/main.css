@@ -724,6 +724,11 @@ p.divider {
 	border: black solid 1px;
 }
 
+#refeshUser{
+	margin-left: 10px;
+	color: black;
+}
+
 .floatLeft {
 	float: left;
 	left:10px;
@@ -780,6 +785,10 @@ p.divider {
 	border-radius: 0;
 	padding: 0px 10px
 }
+.displayNone {
+	display: none;
+}
+
 .collection .collection-item td:first-child {
 	-webkit-border-top-left-radius: 10px;
 	-moz-border-top-left-radius: 10px;

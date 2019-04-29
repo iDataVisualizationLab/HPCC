@@ -324,12 +324,14 @@ function clearclone (){
             //node.parentNode.removeChild(node);
             d3.select(node).attr('cloned',null);
         });
+    filterhost=[];
         var allbold = d3.select(".summaryGroup").selectAll(".radarWrapper");
         allbold//.transition().delay(50)
             .style("opacity", 1);
         allbold.selectAll(".radarStroke").style('pointer-events','auto');
         hosts.forEach(l=> {
                 d3.selectAll("." + l.name)
-                    .style("visibility", 'visible');
+                    .style("display", 'unset');
+                    // .style("visibility", 'visible');
         });
 }

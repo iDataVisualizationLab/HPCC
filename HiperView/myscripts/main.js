@@ -141,6 +141,7 @@ var undefinedResult = "timed out";
 var xTimeSummaryScale;
 var xLinearSummaryScale;
 
+var filterhost=[];
 
 var TsnePlotopt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -580,7 +581,7 @@ function request(){
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
 
-                getJoblist(lastIndex,true);
+                // getJoblist(lastIndex,true);
 
                 // Draw date
                 d3.select(".currentDate")
@@ -1100,7 +1101,6 @@ function plotResult(result,name) {
     //     maxTime = Math.max(maxTime,qtime);
     // }
     maxTime =query_time;
-    console.log(maxTime)
     // if (maxTime-minTime>0.8*numberOfMinutes*60*1000)  // Limit time to STOP***********************
     //     playchange();
 
@@ -1677,14 +1677,15 @@ function step (iteration, count){
 }
 function getJoblist (iteration,reset){
     try {
-        if (reset)
+        if (reset===true || reset===undefined)
             jobList = [];
         hosts.forEach(h => {
-            var result = simulateResults2(h.name, iteration, "Job_scheduling");
+            var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
             const resultObj = processData(result.data.service.plugin_output, "Job_scheduling")[0];
             if (resultObj)
                 jobList = _.union(jobList, resultObj);
         });
+        TSneplot.drawUserlist();
     }catch(e){}
 }
 function current_userData () {

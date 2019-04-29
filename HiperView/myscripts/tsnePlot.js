@@ -39,7 +39,6 @@ d3.Tsneplot = function () {
     let first = true;
     function updateRenderRanking(data) {
         var max = d3.max(d3.extent(d3.merge(d3.extent(data.top10,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
-        console.log(max)
         scaleX_small.domain([-max,max]);
         scaleY_small.domain(scaleX_small.domain());
         // console.log(data.top10);
@@ -311,7 +310,7 @@ d3.Tsneplot = function () {
                 .transition('hightlight').duration(3000).style("opacity",0);
 
             //update user
-            drawUserlist();
+            // drawUserlist();
 
             if (!isbusy) {
                 isbusy = true;
@@ -390,15 +389,16 @@ d3.Tsneplot = function () {
 
         const totalUser = userl.length;
         let userli = panel_user.select('tbody')
-            .selectAll('tr').data(userl,d=>d.key);
+            .selectAll('tr').data(userl,d=>d.key).attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '));
         //remove
         userli.exit().remove();
         //new
         let contain_n = userli.enter().append('tr')
-            .attr('class','collection-item')
+            .attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '))
             .on('mouseover',function(d){
                 const list_node = _(d.values.map(e=>e.nodes)).uniq();
-                d3.selectAll('.radarWrapper').filter(d=>_.intersection(list_node,d.bin.name).length)
+                filterhost = list_node;
+                d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
                     .select(".radarStroke").dispatch('mouseenter');
             }).on('mouseleave',function(d){
                 d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
@@ -414,7 +414,13 @@ d3.Tsneplot = function () {
             .text(d=> _(d.values.map(e=>e.nodes)).uniq().length);
 
         //update
-        userli.select('.jobs').text(d=>d.values.length);
+
+        userli.select('.jobs').filter(function(d){return ~~d3.select(this).text()!==d})
+            .text(d=>d.values.length)
+            .style('background-color','yellow')
+            .transition()
+            .duration(2000)
+            .style('background-color',null);
         userli.select('.nodes') .text(d=>_(d.values.map(e=>e.nodes)).uniq().length);
     }
 
@@ -485,9 +491,7 @@ d3.Tsneplot = function () {
 
     };
 
-    Tsneplot.graphicopt = function (_) {
-        return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;
-
-    };
+    Tsneplot.graphicopt = function (_) {return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;};
+    Tsneplot.drawUserlist = function () {drawUserlist()};
     return Tsneplot;
 };
