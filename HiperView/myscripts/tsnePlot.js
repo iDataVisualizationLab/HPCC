@@ -220,7 +220,7 @@ d3.Tsneplot = function () {
         scaleX_small.range([0,sizegraph]);
         scaleY_small.range([0,sizegraph]);
         // panel.select(".top10DIV").style('max-height', sizebox*10+"px");
-        panel.select(".top10DIV").style('max-height', (maxsubheight-5)+"px");
+        panel.select(".top10DIV").style('max-height', (maxsubheight-7)+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});
 
