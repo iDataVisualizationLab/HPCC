@@ -1763,16 +1763,16 @@ $( document ).ready(function() {
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("data/" + choice + ".json", function (error, data) {
-                    if (error) {
+//                 d3.json("data/" + choice + ".json", function (error, data) {
+//                     if (error) {
                         d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
                             if (error) throw error;
                             loadata(data)
                         });
-                        return;
-                    }
-                    loadata(data)
-                });
+//                         return;
+//                     }
+//                     loadata(data)
+//                 });
             else {
                 realTimesetting(true,choice);
                 db = choice;
@@ -1802,16 +1802,16 @@ $( document ).ready(function() {
     });
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
-        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
-            if (error) {
+//         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
+//             if (error) {
                 d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
                     if (error) throw error;
                     loadata(data)
                 });
-                return
-            }
-            loadata(data)
-        });
+//                 return
+//             }
+//             loadata(data)
+//         });
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
