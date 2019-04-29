@@ -21,6 +21,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="js/underscore-min.js"></script>
     <script src="js/simple-statistics.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
     <!--<script src="js/select.js"></script>-->
     <script src="js/TimerInterval.js"></script>
     <script src="js/tsne.js"></script>
@@ -186,14 +188,14 @@
                 <div class="details" ></div>
             </div>
             <div id ="userList" class="subpanel card-panel floatRight">
-                <h6>User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
+                <h6 class="valign-wrapper">User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
                 <div class="top10DIV">
                     <table class = "collection">
                         <thead>
                         <tr>
                             <th>Username</th>
-                            <th># Jobs</th>
-                            <th># Nodes</th>
+                            <th class="alignRight"># Jobs</th>
+                            <th class="alignRight"># Nodes</th>
                         </tr>
                         </thead>
                         <tbody>

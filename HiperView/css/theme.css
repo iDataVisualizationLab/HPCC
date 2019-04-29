@@ -13,12 +13,13 @@
     background: #767676;
 }
 ::-webkit-scrollbar-track {
-    background: #222;
+    background: #a9a9a9;
     border-radius: 12px;
 }
 ::-webkit-scrollbar-thumb {
     background: #b5b5b5;
     border-radius: 12px;
+    border: #6b6b6b solid 1px;
 }
 
 #mySidenav .collapsible {

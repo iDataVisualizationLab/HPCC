@@ -718,15 +718,22 @@ p.divider {
 	background-color: rgba(183, 183, 183, 0.71);
 	position: absolute;
 	transition: 0.5s;
-	padding: 10px;
+	padding: 0px 10px;
 	display: none;
 	border-radius: 10px;
 	border: black solid 1px;
+	padding-right: 5px;
 }
 
 #refeshUser{
 	margin-left: 10px;
 	color: black;
+	height: 25px;
+	line-height: 25px;
+	padding: 0 5px;
+}
+#refeshUser i {
+	font-size: 1rem;
 }
 
 .floatLeft {
@@ -768,12 +775,15 @@ p.divider {
 }
 .top10DIV {
 	overflow-y: auto;
+	margin-bottom: 5px ;
 }
 .top10DIV .collection {
 	color: black;
 	border:unset;
 	border-collapse: separate;
-	border-spacing: 0 2px;
+	border-spacing: 0 1px;
+	padding-right: 10px;
+	margin-top: 0;
 }
 .alignRight {
 	text-align: right;
@@ -790,23 +800,23 @@ p.divider {
 }
 
 .collection .collection-item td:first-child {
-	-webkit-border-top-left-radius: 10px;
-	-moz-border-top-left-radius: 10px;
-	border-top-left-radius: 10px;
+	-webkit-border-top-left-radius: 5px;
+	-moz-border-top-left-radius: 5px;
+	border-top-left-radius: 5px;
 
-	-webkit-border-bottom-left-radius: 10px;
-	-moz-border-bottom-left-radius: 10px;
-	border-bottom-left-radius: 10px;
+	-webkit-border-bottom-left-radius: 5px;
+	-moz-border-bottom-left-radius: 5px;
+	border-bottom-left-radius: 5px;
 }
 
 .collection .collection-item td:last-child {
-	-webkit-border-top-right-radius: 10px;
-	-moz-border-top-right-radius: 10px;
-	border-top-right-radius: 10px;
+	-webkit-border-top-right-radius: 5px;
+	-moz-border-top-right-radius: 5px;
+	border-top-right-radius: 5px;
 
-	-webkit-border-bottom-right-radius: 10px;
-	-moz-border-bottom-right-radius: 10px;
-	border-bottom-right-radius: 10px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-bottom-right-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 
 
@@ -818,7 +828,7 @@ p.divider {
 	fill: black;
 }
 .top10_item .detailDecoration{
-	fill: rgb(162, 162, 162);
+	fill: rgb(255, 255, 255);
 	rx:10;
 }
 

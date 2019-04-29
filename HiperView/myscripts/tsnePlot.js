@@ -28,7 +28,7 @@ d3.Tsneplot = function () {
     let sizebox = 50;
     let maxlist = 20;
     let Tsneplot ={};
-    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,panel_user,
+    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,panel_user,list_user,
         scaleX_small = d3.scaleLinear(),
         scaleY_small = d3.scaleLinear(),
         store={},
@@ -215,17 +215,23 @@ d3.Tsneplot = function () {
         panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
         panel.select(".details").append("span").text('t-SNE cost: ');
         panel.select(".details").append("span").attr('class','cost');
-
+        const maxsubheight = graphicopt.heightView()-60;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         scaleY_small.range([0,sizegraph]);
-        panel.select(".top10DIV").style('max-height', sizebox*10+"px");
+        // panel.select(".top10DIV").style('max-height', sizebox*10+"px");
+        panel.select(".top10DIV").style('max-height', maxsubheight+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});
 
         panel_user = d3.select("#userList").style('top',graphicopt.offset.top+'px');
-        panel_user.select(".top10DIV").style('max-height', sizebox*10+"px");
-
+        panel_user.select(".top10DIV").style('max-height', maxsubheight+"px");
+        list_user = Sortable.create($('tbody')[0], {
+            animation: 500,
+            sort: true,
+            dataIdAttr: 'data-id',
+            filter: ".disable",
+        });
 
         g = g.append('g')
             .attr('class','graph');
@@ -381,20 +387,40 @@ d3.Tsneplot = function () {
 
         return arr;
     }
-
+    function user_sortBY (key){
+        switch (key) {
+            case 'user':
+                list_user.sort(panel_user.select('tbody')
+                    .selectAll('tr').data().map(d=>d.key));
+                break;
+            case 'jobs':
+                list_user.sort(panel_user.select('tbody')
+                    .selectAll('tr').data().map(d=>d.values.length));
+                break;
+            case 'nodes':
+                list_user.sort(panel_user.select('tbody')
+                    .selectAll('tr').data().map(d=>d.unqinode.length));
+                break;
+        }
+    }
     function drawUserlist() {
         let userl = current_userData();
         //ranking----
         userl.sort((a,b)=>b.values.length-a.values.length);
 
         const totalUser = userl.length;
+
+        list_user.sort(userl.map(d=>d.key));
         let userli = panel_user.select('tbody')
-            .selectAll('tr').data(userl,d=>d.key).attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '));
+            .selectAll('tr').data(userl,d=>d.key)
+            .attr('data-id',d=>d.key)
+            .attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '));
         //remove
         userli.exit().remove();
         //new
         let contain_n = userli.enter().append('tr')
             .attr('class',d=>'collection-item '+ d.unqinode.join(' '))
+            .attr('data-id',d=>d.key)
             .on('mouseover',function(d){
                 const list_node = d.unqinode;
                 filterhost = _.union(filterhost,list_node);
@@ -427,13 +453,14 @@ d3.Tsneplot = function () {
 
         //update
 
-        userli.select('.jobs').filter(function(d){return ~~d3.select(this).text()!==d})
+        userli.select('.jobs').filter(function(d){return ~~d3.select(this).text()!==d.values.length})
             .text(d=>d.values.length)
             .style('background-color','yellow')
             .transition()
             .duration(2000)
             .style('background-color',null);
-        userli.select('.nodes') .text(d=>_(d.values.map(e=>e.nodes)).uniq().length);
+        userli.select('.nodes') .text(d=>d.unqinode.length);
+        user_sortBY ('user');
     }
 
     function drawEmbedding(data) {

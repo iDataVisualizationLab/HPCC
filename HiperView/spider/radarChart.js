@@ -446,7 +446,6 @@ function RadarChart(id, data, options, name) {
                     cloned: true,
                 }).style("opacity", 1)
                     .selectAll(".radarStroke").style('pointer-events','auto');
-
                 path
                     .style("cursor", "pointer")
                     //.on("mouseenter", null)
