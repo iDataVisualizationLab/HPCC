@@ -357,6 +357,7 @@ d3.Tsneplot = function () {
     Tsneplot.remove  = function (){
         if (!first){
             panel.classed("active",false);
+            panel_user.classed("active",false);
             svg.style('visibility','hidden');
             Tsneplot.pause();
             g.selectAll('*').remove();
