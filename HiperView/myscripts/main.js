@@ -1772,24 +1772,6 @@ $( document ).ready(function() {
                     }
                     loadata(data)
                 });
-
-                function loadata(data){
-                    sampleS = data;
-                    if (choice.includes('influxdb')){
-                        processResult = processResult_influxdb;
-                        db = "influxdb";
-                        realTimesetting(false,"influxdb");
-                    }else {
-                        db = "nagios";
-                        processResult = processResult_old;
-                        realTimesetting(false);
-                    }
-                    d3.select(".currentDate")
-                        .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
-                    resetRequest();
-                    d3.select('.cover').classed('hidden', true);
-                    spinner.stop();
-                }
             else {
                 realTimesetting(true,choice);
                 db = choice;
@@ -1799,11 +1781,36 @@ $( document ).ready(function() {
                 spinner.stop();
             }
         },0);
+        function loadata(data){
+            sampleS = data;
+            if (choice.includes('influxdb')){
+                processResult = processResult_influxdb;
+                db = "influxdb";
+                realTimesetting(false,"influxdb");
+            }else {
+                db = "nagios";
+                processResult = processResult_old;
+                realTimesetting(false);
+            }
+            d3.select(".currentDate")
+                .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
+            resetRequest();
+            d3.select('.cover').classed('hidden', true);
+            spinner.stop();
+        }
     });
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
-            if (error) throw error;
+            if (error) {
+                d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
+                    if (error) throw error;
+                    loadata(data)
+                });
+            }
+            loadata(data)
+        });
+        function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
@@ -1814,7 +1821,7 @@ $( document ).ready(function() {
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
             d3.select('.cover').classed('hidden',true);
             spinner.stop();
-        });
+        }
     },0);
     // Spinner Stop ********************************************************************
 
