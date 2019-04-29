@@ -1764,7 +1764,16 @@ $( document ).ready(function() {
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
                 d3.json("data/" + choice + ".json", function (error, data) {
-                    if (error) throw error;
+                    if (error) {
+                        d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + choice + ".json", function (error, data) {
+                            if (error) throw error;
+                            loadata(data)
+                        });
+                    }
+                    loadata(data)
+                });
+
+                function loadata(data){
                     sampleS = data;
                     if (choice.includes('influxdb')){
                         processResult = processResult_influxdb;
@@ -1780,7 +1789,7 @@ $( document ).ready(function() {
                     resetRequest();
                     d3.select('.cover').classed('hidden', true);
                     spinner.stop();
-                });
+                }
             else {
                 realTimesetting(true,choice);
                 db = choice;
