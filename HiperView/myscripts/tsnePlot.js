@@ -413,6 +413,7 @@ d3.Tsneplot = function () {
             }).on('mouseleave',function(d){
                 // d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
                 d3.selectAll(".displayNone").classed('displayNone',false);
+                filterhost= [];
             });
         contain_n.append('td')
             .attr('class','title')
