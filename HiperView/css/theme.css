@@ -35,6 +35,10 @@
     padding: 1rem;
 }
 
+#mySidenav .collapsible .active .collapsible-header{
+    border-bottom-color: #00000080;
+}
+
 #search {
     font-size: inherit;
 }

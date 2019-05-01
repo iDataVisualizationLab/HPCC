@@ -1514,15 +1514,15 @@ function loadData(){
 function addDatasetsOptions() {
     let select= d3.select("#datasetsSelect")
         .selectAll('li')
-        .data(serviceList)
+        .data(serviceList_selected)
         .enter()
         .append('li')
-        .attr('class','collection-item avatar')
+        .attr('class','collection-item avatar valign-wrapper')
         .attr('value',d=>d);
     select.append('img')
         .attr('class',"circle")
         .attr('src',d=>"images/"+d+".png");
-    select.append('h4').attr('class','title').text(d=>d);
+    select.append('h6').attr('class','title').text(d=>d);
 
     select.on("click",loadNewData);
     document.getElementById('datasetsSelect').value = initialService;  //************************************************

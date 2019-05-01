@@ -212,19 +212,19 @@ d3.Tsneplot = function () {
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
 
-        panel = d3.select("#subzone").style('top',graphicopt.offset.top+'px');
+        panel = d3.select("#subzone").style('top',(graphicopt.offset.top-4)+'px');
         panel.select(".details").append("span").text('t-SNE cost: ');
         panel.select(".details").append("span").attr('class','cost');
-        const maxsubheight = graphicopt.heightView()-57;
+        const maxsubheight = graphicopt.heightView()-54;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         scaleY_small.range([0,sizegraph]);
         // panel.select(".top10DIV").style('max-height', sizebox*10+"px");
-        panel.select(".top10DIV").style('max-height', (maxsubheight-7)+"px");
+        panel.select(".top10DIV").style('max-height', (maxsubheight-1)+"px");
         panel.select(".top10").attrs({width: 200,
         height: sizebox*20});
 
-        panel_user = d3.select("#userList").style('top',graphicopt.offset.top+'px');
+        panel_user = d3.select("#userList").style('top',(graphicopt.offset.top-4)+'px');
         panel_user.select(".top10DIV").style('max-height', maxsubheight+"px");
         list_user = Sortable.create($('tbody')[0], {
             animation: 500,
