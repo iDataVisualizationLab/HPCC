@@ -141,7 +141,8 @@ var undefinedResult = "timed out";
 var xTimeSummaryScale;
 var xLinearSummaryScale;
 
-var filterhost=[];
+var filterhost;
+var filterhost_user;
 
 var TsnePlotopt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -325,6 +326,7 @@ function initDetailView() {
                 .attr("font-family", "sans-serif")
                 .text("Host");
         }
+        filterhost = hosts.map(d=>d.name);
         for (var i = 0; i < hosts.length; i++) {
             var name = hosts[i].name;
             var hpcc_rack = +name.split("-")[1];
@@ -1692,7 +1694,7 @@ function getJoblist (iteration,reset){
         jobList = _.chain(jobList)
             .groupBy(d=>d.jobID).values().map(d=>d.reduce((a,b)=>{a.nodes = _.union(a.nodes,b.nodes); return a;})).value();
         //draw userlist data
-        TSneplot.drawUserlist();
+        TSneplot.drawUserlist(query_time);
     }catch(e){}
 }
 function current_userData () {

@@ -228,10 +228,13 @@ d3.Tsneplot = function () {
         panel_user.select(".top10DIV").style('max-height', maxsubheight+"px");
         list_user = Sortable.create($('tbody')[0], {
             animation: 500,
-            sort: true,
+            sort: false,
             dataIdAttr: 'data-id',
             filter: ".disable",
         });
+        // search box event
+        $('#search_User').on('input', searchHandler); // register for oninput
+        $('#search_User').on('propertychange', searchHandler); // for IE8
 
         g = g.append('g')
             .attr('class','graph');
@@ -388,40 +391,54 @@ d3.Tsneplot = function () {
 
         return arr;
     }
-    function user_sortBY (key){
+    function user_sortBY (key,data){
         switch (key) {
             case 'user':
-                list_user.sort(panel_user.select('tbody')
-                    .selectAll('tr').data().map(d=>d.key));
+                data.sort((a,b)=>b.key-a.key);
                 break;
             case 'jobs':
-                list_user.sort(panel_user.select('tbody')
-                    .selectAll('tr').data().map(d=>d.values.length));
+                data.sort((a,b)=>b.values.length-a.values.length);
                 break;
             case 'nodes':
-                list_user.sort(panel_user.select('tbody')
-                    .selectAll('tr').data().map(d=>d.unqinode.length));
+                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
                 break;
         }
+        list_user.sort(data.map(d=>d.key));
     }
-    function drawUserlist() {
+    function searchHandler (e){
+        if (e.target.value!=="") {
+            panel_user.selectAll('tr.collection-item[data-id*="' + e.target.value + '"]').classed('displayNone', false);
+            panel_user.selectAll('tr.collection-item:not([data-id*="' + e.target.value + '"]').classed('displayNone', true);
+        }else{
+            panel_user.selectAll('tr.collection-item').classed('displayNone', false);
+        }
+    }
+    function drawUserlist(currentTime) {
+        currentTime =new Date(currentTime);
+        $(userList_lastupdate).text('Last update: '+currentTime.timeNow2());
         let userl = current_userData();
         //ranking----
-        userl.sort((a,b)=>b.values.length-a.values.length);
+        panel_user.select('table').classed('empty',!userl.length);
+        panel_user.select('.search-wrapper').classed('empty',!userl.length);
+
+        // userl.sort((a,b)=>b.values.length-a.values.length);
+        user_sortBY ('nodes',userl);
 
         const totalUser = userl.length;
-
-        list_user.sort(userl.map(d=>d.key));
 
         const sh = 20;
         const sw = 150;
         const tickh = 6;
         const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
-        let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
-        let rangesubmitTime = d3.extent(jobList,d=>new Date (d.submitTime));
-        let xscale = d3.scaleTime().range([0,sw]).domain([d3.min([rangestartTime[0],rangesubmitTime[0]]), d3.max([rangestartTime[1],rangesubmitTime[1]])]);
-        let yscale = function (d) {
-            const r = d3.scaleLinear().range([0,sh]).domain([0,1])(d);
+        // let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
+        let rangesubmitTime = d3.min(jobList,d=>new Date (d.submitTime));
+        let xscale = d3.scaleTime().range([0,sw]).domain([rangesubmitTime,currentTime]);
+        const minstep = 7;
+        let yscale = function (d,l) {
+            let scale = d3.scalePoint().range([0,sh]).domain(d3.range(l));
+                if (scale.step()>minstep)
+                scale = scale.padding((sh-minstep*(l-1))/2/minstep);
+            const r = scale(d);
             return isNaN(r)?sh/2:r;
         };
         let yscaleItem = {};
@@ -429,7 +446,7 @@ d3.Tsneplot = function () {
         let userli = panel_user.select('tbody')
             .selectAll('tr').data(userl,d=>d.key)
             .attr('data-id',d=>d.key)
-            .attr('class',d=>'collection-item '+ _(d.values.map(e=>e.nodes)).uniq().join(' '));
+            .attr('class',d=>'collection-item '+ d.unqinode.join(' '));
         //remove
         userli.exit().remove();
         //new
@@ -438,25 +455,17 @@ d3.Tsneplot = function () {
             .attr('data-id',d=>d.key)
             .on('mouseover',function(d){
                 const list_node = d.unqinode;
-                filterhost = _.union(filterhost,list_node);
-                // filterhost = Array.from(new Set(filterhost.concat(list_node)));
-                // d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
-                //     .select(".radarStroke").dispatch('mouseenter');
-                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).join(':not(tr), .')+':not(tr)')
+                let filterhosttemp = _.intersection(filterhost,list_node);
+                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhosttemp ).join(':not(tr), .')+':not(tr)')
                     .classed("displayNone", true);
-                // hosts.forEach(l => {
-                //     d3.selectAll("." + l.name+':not(tr)')
-                //         .classed("displayNone", true);
-                //     // .style("visibility", 'hidden');
-                // });
-
-                    d3.selectAll("." + filterhost.join(', .'))
+                    d3.selectAll("." + filterhosttemp.join(', .'))
                         .classed("displayNone", false);
-                    // .style("visibility", 'hidden');
             }).on('mouseleave',function(d){
-                // d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
-                d3.selectAll(".displayNone").classed('displayNone',false);
-                filterhost.length = 0;
+                $('#search_User')[0].value =""
+                d3.selectAll("." + _.difference(filterhost,d.unqinode ).join(':not(tr), .')+':not(tr)')
+                    .classed("displayNone", true);
+                d3.selectAll("." + filterhost.join(', .'))
+                    .classed("displayNone", false);
             });
         contain_n.append('td')
             .attr('class','title')
@@ -500,7 +509,7 @@ d3.Tsneplot = function () {
                     t.values.forEach(it=>{
                         if (new Date(it.startTime)>t.max_startTime)
                             t.max_startTime = new Date(it.startTime);
-                        it.y= yscale(i/(temp.length-1))});
+                        it.y= yscale(i,(temp.length))});
                 });
                 return temp;
 
@@ -537,6 +546,29 @@ d3.Tsneplot = function () {
             .attr('y1',(d,i)=>d.values[0].y)
             .attr('y2',(d,i)=>d.values[0].y);
 
+        let timeBoxRunning = mini_timeline.selectAll('line.timeBoxRunning')
+            .data(d=>{
+                let temp =  d3.nest().key(k=>k.startTime)
+                    .rollup((t,i)=>
+                    { return t[0];})
+                    .entries(d.values);
+                return temp;
+            },e=>e.key);
+        timeBoxRunning.exit().remove();
+        timeBoxRunning
+            .enter()
+            .append('line')
+            .attr('class','timeBoxRunning')
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(currentTime))
+            .attr('y1',(d,i)=>d.value.y)
+            .attr('y2',(d,i)=>d.value.y);
+
+        timeBoxRunning.transition().duration(500)
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(currentTime))
+            .attr('y1',(d,i)=>d.value.y)
+            .attr('y2',(d,i)=>d.value.y);
         //draw tick
 
         let linesubmitTime = mini_timeline.selectAll('line.submitTime')
@@ -573,7 +605,6 @@ d3.Tsneplot = function () {
             .attr('x1',d=>xscale(new Date (d.key)))
             .attr('x2',d=>xscale(new Date (d.key)))
             .attr("transform",d=>"translate("+0+", "+d.value+")");
-        user_sortBY ('user');
     }
 
     function drawEmbedding(data) {
@@ -644,6 +675,6 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.graphicopt = function (_) {return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;};
-    Tsneplot.drawUserlist = function () {drawUserlist()};
+    Tsneplot.drawUserlist = function (_) {drawUserlist(_)};
     return Tsneplot;
 };

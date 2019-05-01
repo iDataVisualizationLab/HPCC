@@ -333,5 +333,5 @@ function clearclone (){
                     .classed("displayNone", false);
                     // .style("visibility", 'visible');
         });
-    filterhost.length = 0;
+    filterhost = hosts.map(d=>d.name);
 }
