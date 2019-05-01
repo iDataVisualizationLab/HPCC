@@ -333,5 +333,5 @@ function clearclone (){
                     .classed("displayNone", false);
                     // .style("visibility", 'visible');
         });
-    filterhost=[];
+    filterhost.length = 0;
 }

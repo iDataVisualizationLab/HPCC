@@ -1683,10 +1683,15 @@ function getJoblist (iteration,reset){
             var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
             const resultObj = processData(result.data.service.plugin_output, "Job_scheduling")[0];
             if (resultObj) {
-                resultObj.forEach(d=>d.nodes= d.nodes.split(','));
+                resultObj.forEach(d=>{
+                    d.nodes= d.nodes.split(',')});
                 jobList = _.union(jobList, resultObj);
             }
         });
+        // handle dupliacte jobID
+        jobList = _.chain(jobList)
+            .groupBy(d=>d.jobID).values().map(d=>d.reduce((a,b)=>{a.nodes = _.union(a.nodes,b.nodes); return a;})).value();
+        //draw userlist data
         TSneplot.drawUserlist();
     }catch(e){}
 }

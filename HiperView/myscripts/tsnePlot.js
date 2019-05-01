@@ -412,6 +412,20 @@ d3.Tsneplot = function () {
         const totalUser = userl.length;
 
         list_user.sort(userl.map(d=>d.key));
+
+        const sh = 20;
+        const sw = 150;
+        const tickh = 6;
+        const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
+        let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
+        let rangesubmitTime = d3.extent(jobList,d=>new Date (d.submitTime));
+        let xscale = d3.scaleTime().range([0,sw]).domain([d3.min([rangestartTime[0],rangesubmitTime[0]]), d3.max([rangestartTime[1],rangesubmitTime[1]])]);
+        let yscale = function (d) {
+            const r = d3.scaleLinear().range([0,sh]).domain([0,1])(d);
+            return isNaN(r)?sh/2:r;
+        };
+        let yscaleItem = {};
+        // let xFisheye = d3.fisheye.scale(xscale).focus(0);
         let userli = panel_user.select('tbody')
             .selectAll('tr').data(userl,d=>d.key)
             .attr('data-id',d=>d.key)
@@ -425,22 +439,24 @@ d3.Tsneplot = function () {
             .on('mouseover',function(d){
                 const list_node = d.unqinode;
                 filterhost = _.union(filterhost,list_node);
+                // filterhost = Array.from(new Set(filterhost.concat(list_node)));
                 // d3.selectAll('.radarWrapper').filter(d=>_.intersection(filterhost,d.bin.name).length)
                 //     .select(".radarStroke").dispatch('mouseenter');
-                hosts.forEach(l => {
-                    d3.selectAll("." + l.name+':not(tr)')
-                        .classed("displayNone", true);
-                    // .style("visibility", 'hidden');
-                });
-                filterhost.forEach(l => {
+                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).join(':not(tr), .')+':not(tr)')
+                    .classed("displayNone", true);
+                // hosts.forEach(l => {
+                //     d3.selectAll("." + l.name+':not(tr)')
+                //         .classed("displayNone", true);
+                //     // .style("visibility", 'hidden');
+                // });
+
                     d3.selectAll("." + filterhost.join(', .'))
                         .classed("displayNone", false);
                     // .style("visibility", 'hidden');
-                });
             }).on('mouseleave',function(d){
                 // d3.selectAll("g[cloned='true']").select(".radarStroke").dispatch('mouseleave');
                 d3.selectAll(".displayNone").classed('displayNone',false);
-                filterhost= [];
+                filterhost.length = 0;
             });
         contain_n.append('td')
             .attr('class','title')
@@ -452,6 +468,15 @@ d3.Tsneplot = function () {
             .attr('class','nodes alignRight')
             .text(d=>d.unqinode.length);
 
+        contain_n.append('td')
+            .attr('class','user_timeline')
+            .append('svg')
+            .attrs({'height':sh+margin.top+margin.bottom,
+                    'width': sw+margin.left+margin.right})
+            .append('g')
+            .attr("transform", "translate("+margin.left+", "+margin.top+")");
+
+
         //update
 
         userli.select('.jobs').filter(function(d){return ~~d3.select(this).text()!==d.values.length})
@@ -461,6 +486,93 @@ d3.Tsneplot = function () {
             .duration(2000)
             .style('background-color',null);
         userli.select('.nodes') .text(d=>d.unqinode.length);
+
+        let mini_timeline = panel_user.selectAll('.user_timeline').select('g');
+
+        let timeBox = mini_timeline.selectAll('line.timeBox')
+            .data(d=>{
+                let temp =  d3.nest().key(k=>k.submitTime).entries(d.values);
+                // hard way handle all data
+                temp.sort((a,b)=>new Date(a.key)-new Date(b.key));
+                // yscaleItem[temp[0].user] = temp.length-1; //add length of data item
+                temp.forEach((t,i)=>
+                {   t.max_startTime =new Date(0);
+                    t.values.forEach(it=>{
+                        if (new Date(it.startTime)>t.max_startTime)
+                            t.max_startTime = new Date(it.startTime);
+                        it.y= yscale(i/(temp.length-1))});
+                });
+                return temp;
+
+                // easy way
+                // let temp = _(d.values).uniq(e=>e.submitTime);
+                // temp.sort((a,b)=>new Date(a.submitTime)-new Date(b.submitTime));
+                // // yscaleItem[temp[0].user] = temp.length-1; //add length of data item
+                // temp.forEach((t,i)=> t.y= yscale(i/(temp.length-1)));
+                // return temp;
+            },e=>e.key);
+        timeBox.exit().remove();
+        timeBox
+            .enter()
+            .append('line')
+            .attr('class','timeBox')
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(d.max_startTime))
+            .attr('y1',(d,i)=>d.values[0].y)
+            .attr('y2',(d,i)=>d.values[0].y);
+        // .attr('y1',(d,i)=>yscale(i/yscaleItem[d.user]))
+        //     .attr('y2',(d,i)=>yscale(i/yscaleItem[d.user]));
+        // .on('mousemove',function(d){
+        //     xFisheye.focus(d3.event.x);
+        //     panel_user.selectAll('line.startTime').attr('x',d=>xFisheye(new Date (d.submitTime)))
+        //         .attr('width',d=>xFisheye(new Date (d.startTime))-xFisheye(new Date (d.submitTime)));
+        //     panel_user.selectAll('line.startTime').attr('x1',d=>xFisheye(new Date (d.startTime)))
+        //         .attr('x2',d=>xFisheye(new Date (d.startTime)));
+        //     panel_user.selectAll('line.submitTime').attr('x1',d=>xFisheye(new Date (d.submitTime)))
+        //         .attr('x2',d=>xFisheye(new Date (d.submitTime)));
+        // });
+        timeBox.transition().duration(500)
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(d.max_startTime))
+            .attr('y1',(d,i)=>d.values[0].y)
+            .attr('y2',(d,i)=>d.values[0].y);
+
+        //draw tick
+
+        let linesubmitTime = mini_timeline.selectAll('line.submitTime')
+        // .data(d=>_(d.values).uniq(e=>e.submitTime))
+            .data(d=> d3.nest().key(k=>k.submitTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key);
+        linesubmitTime.exit().remove();
+        linesubmitTime.enter()
+            .append('line')
+            .attr('class','submitTime')
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(new Date (d.key)))
+            .attr('y1',-tickh/2)
+            .attr('y2',tickh/2)
+            .attr("transform",d=>"translate("+0+", "+d.value+")");
+        linesubmitTime.transition().duration(500)
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(new Date (d.key)))
+            .attr("transform",d=>"translate("+0+", "+d.value+")");
+
+        let linestartTime = mini_timeline.selectAll('line.startTime')
+        // .data(d=>_(d.values).uniq(e=>e.startTime))
+            .data(d=>d3.nest().key(k=>k.startTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key);
+        linestartTime.exit().remove();
+        linestartTime
+            .enter()
+            .append('line')
+            .attr('class','startTime')
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(new Date (d.key)))
+            .attr('y1',-tickh/2)
+            .attr('y2',tickh/2)
+            .attr("transform",d=>"translate("+0+", "+d.value+")");
+        linestartTime.transition().duration(500)
+            .attr('x1',d=>xscale(new Date (d.key)))
+            .attr('x2',d=>xscale(new Date (d.key)))
+            .attr("transform",d=>"translate("+0+", "+d.value+")");
         user_sortBY ('user');
     }
 

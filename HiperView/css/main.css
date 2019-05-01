@@ -789,6 +789,7 @@ p.divider {
 	text-align: right;
 }
 .collection .collection-item {
+	line-height: 1rem;
 	border: unset;
 }
 .collection .collection-item td {
@@ -842,4 +843,19 @@ p.divider {
 
 .top10_item.remove {
 
+}
+
+
+.user_timeline line.startTime {
+	stroke: #3fc151;
+}
+
+.user_timeline line.submitTime {
+	stroke: #f1d943;
+}
+
+.user_timeline line.timeBox {
+	stroke: black;
+	stroke-width: 1px;
+	opacity: 0.6;
 }
