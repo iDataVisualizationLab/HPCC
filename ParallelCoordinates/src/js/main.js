@@ -247,7 +247,7 @@ $( document ).ready(function() {
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("../HiperView/data/" + choice + ".json").then( function (data2) {
+                d3.json("/data/" + choice + ".json").then( function (data2) {
                     sampleS = data2;
                     if (choice.includes('influxdb')){
                         // processResult = processResult_influxdb;
