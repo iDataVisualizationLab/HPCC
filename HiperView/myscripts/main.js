@@ -1444,7 +1444,7 @@ function pauseRequest(){
 
 }
 
-function realTimesetting (option,db){
+function realTimesetting (option,db,init){
     isRealtime = option;
     getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
@@ -1458,6 +1458,7 @@ function realTimesetting (option,db){
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
+    if (!init)
     resetRequest();
 }
 function playchange(){
@@ -1815,9 +1816,19 @@ $( document ).ready(function() {
     });
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
+        let choiceinit = d3.select('#datacom').node().value;
+        if (choiceinit.includes('influxdb')){
+            // processResult = processResult_influxdb;
+            db = "influxdb";
+            realTimesetting(false,"influxdb",true);
+        }else {
+            db = "nagios";
+            // processResult = processResult_old;
+            realTimesetting(false,undefined,true);
+        }
 //         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
 //             if (error) {
-                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
                     if (error) throw error;
                     loadata(data)
                 });
