@@ -1469,7 +1469,10 @@ function playchange(){
     $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
-
+function exit_warp () {
+    playchange();
+    TSneplot.remove();
+}
 function pausechange(){
     var e = d3.select('.pause').node();
     interval2.resume();
@@ -1506,6 +1509,7 @@ function resetRequest(){
     Radarplot.init();
     TSneplot.reset(true);
     timelog = [];
+    jobList = undefined;
     updateTimeText();
     request();
 }
@@ -1630,7 +1634,7 @@ function requestServiceinfluxdb(count,serin) {
             query = getstringQuery_influx(ip,serin,timerange,timestep_query);
         else
             query = getstringQuery_influx(ip,serin);
-        console.log(query)
+        console.log(query);
         xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_monitoring_db&q=" + query, true);
         xhr.send();
     })
@@ -1727,7 +1731,25 @@ function closeNav() {
     d3.select("#Maincontent").classed("sideIn",false);
     // _.delay(resetSize, 500);
 }
+// pause when not use , prevent frozen hiperView
+$(window).on("blur focus", function(e) {
+    var prevType = $(this).data("prevType");
 
+    if (prevType != e.type) {   //  reduce double fire issues
+        switch (e.type) {
+            case "blur":
+                $(this).data("playstatus",d3.select('.pause').node().value);
+                playchange();
+                break;
+            case "focus":
+                // $('div').text("Focused");
+                if ($(this).data("playstatus")=="false")
+                    pausechange();
+                break;
+        }
+    }
+    $(this).data("prevType", e.type);
+});
 $( document ).ready(function() {
     console.log('ready');
     $('.collapsible').collapsible();
@@ -1739,13 +1761,13 @@ $( document ).ready(function() {
 
     d3.select("#DarkTheme").on("click",switchTheme);
 
-    d3.select('#inds').on("change", function () {
-        var sect = document.getElementById("inds");
+    d3.select('#chartType_control').on("change", function () {
+        var sect = document.getElementById("chartType_control");
         charType = sect.options[sect.selectedIndex].value;
     });
 
-    d3.select('#indsg').on("change", function () {
-        var sect = document.getElementById("indsg");
+    d3.select('#summaryType_control').on("change", function () {
+        var sect = document.getElementById("summaryType_control");
         sumType = sect.options[sect.selectedIndex].value;
         svg.select(".graphsum").remove();
         pannelselection(false);
@@ -1770,7 +1792,7 @@ $( document ).ready(function() {
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
-        playchange();
+        exit_warp();
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
@@ -1816,9 +1838,12 @@ $( document ).ready(function() {
     });
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
+        //load data
+        charType =  d3.select('#chartType_control').node().value;
+        sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;
         d3.select(".currentDate")
-            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
+            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString()) ;
         if (choiceinit.includes('influxdb')){
             // processResult = processResult_influxdb;
             db = "influxdb";

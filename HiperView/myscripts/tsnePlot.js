@@ -22,9 +22,9 @@ d3.Tsneplot = function () {
             }
     },
         arr = [],
-        isbusy = false,
+        isbusy = false;
         // tsne = new tsnejs.tSNE(graphicopt.opt);
-        tsne = new Worker ('myscripts/tSNEworker.js');
+
     let sizebox = 50;
     let maxlist = 20;
     let Tsneplot ={};
@@ -107,23 +107,26 @@ d3.Tsneplot = function () {
                 cy:scaleY_small(d[1]),}
             });
     }
-    tsne.addEventListener('message',({data})=>{
-        if (data.status==='done') {
-            isbusy = false;
-        }
-        if (data.action==='step'){
-            store.Y = data.result.solution;
-            store.cost = data.result.cost;
-            updateEmbedding(store.Y,store.cost);
-        }
-        if (data.action==="updateTracker")
-        {
-            updateRenderRanking(data);
-        }
-    }, false);
+    function create_worker (){
+        tsne = new Worker ('myscripts/tSNEworker.js');
+        tsne.addEventListener('message',({data})=>{
+            if (data.status==='done') {
+                isbusy = false;
+            }
+            if (data.action==='step'){
+                store.Y = data.result.solution;
+                store.cost = data.result.cost;
+                updateEmbedding(store.Y,store.cost);
+            }
+            if (data.action==="updateTracker")
+            {
+                updateRenderRanking(data);
+            }
+        }, false);
+        tsne.postMessage({action:"inittsne",value:graphicopt.opt});
+    }
 
     Tsneplot.init = function(){
-        tsne.postMessage({action:"inittsne",value:graphicopt.opt});
         // radar
         var total = 10,                 //The number of different axes
             angle1= Math.PI * 2 / total,
@@ -335,6 +338,7 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.pause  = function (){
+        tsne.terminate();
         clearInterval(intervalUI);
         // clearInterval(intervalCalculate);
     };
@@ -345,10 +349,13 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.redraw  = function (){
-        panel.classed("active",true);
-        panel_user.classed("active",true);
+        panel.classed("active",true).select('.top10').selectAll('*').remove();
+        panel_user.classed("active",true).select('.top10DIV tbody').selectAll('*').remove();
+        panel_user.select('table').classed('empty',true);
+        panel_user.select('.search-wrapper').classed('empty',true);
         svg.style('visibility','visible');
-        tsne.postMessage({action:"initDataRaw",value:arr})//.initDataRaw(arr);
+        create_worker();
+        tsne.postMessage({action:"initDataRaw",value:arr});
         drawEmbedding(arr);
         first = false;
         isbusy = false;
@@ -394,12 +401,18 @@ d3.Tsneplot = function () {
     function user_sortBY (key,data){
         switch (key) {
             case 'user':
+                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
+                data.sort((a,b)=>b.values.length-a.values.length);
                 data.sort((a,b)=>b.key-a.key);
                 break;
             case 'jobs':
+                data.sort((a,b)=>b.key-a.key);
+                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
                 data.sort((a,b)=>b.values.length-a.values.length);
                 break;
             case 'nodes':
+                data.sort((a,b)=>b.key-a.key);
+                data.sort((a,b)=>b.values.length-a.values.length);
                 data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
                 break;
         }
