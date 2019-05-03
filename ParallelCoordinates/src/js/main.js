@@ -239,6 +239,7 @@ $( document ).ready(function() {
     d3.select("#DarkTheme").on("click",switchTheme);
 
     // data
+
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
         // animationtime=true;
@@ -269,6 +270,8 @@ $( document ).ready(function() {
                 db = choice;
                 requestService = eval('requestService'+choice);
                 processResult = eval('processResult_'+choice);
+                d3.select(".currentDate")
+                    .text("" + new Date().toDateString());
                 d3.select('.cover').classed('hidden', true);
                 spinner.stop();
             }
@@ -279,6 +282,8 @@ $( document ).ready(function() {
 
     setTimeout(() => {
         let choiceinit = d3.select('#datacom').node().value;
+        d3.select(".currentDate")
+            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
         if (choiceinit.includes('influxdb')){
             // processResult = processResult_influxdb;
             db = "influxdb";

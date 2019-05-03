@@ -1817,6 +1817,8 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         let choiceinit = d3.select('#datacom').node().value;
+        d3.select(".currentDate")
+            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
         if (choiceinit.includes('influxdb')){
             // processResult = processResult_influxdb;
             db = "influxdb";
