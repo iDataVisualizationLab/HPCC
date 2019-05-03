@@ -247,7 +247,7 @@ $( document ).ready(function() {
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("/data/" + choice + ".json").then( function (data2) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json").then( function (data2) {
                     sampleS = data2;
                     if (choice.includes('influxdb')){
                         // processResult = processResult_influxdb;
@@ -278,7 +278,7 @@ $( document ).ready(function() {
 
 
     setTimeout(() => {
-        d3.json("../HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data2) {
+        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data2) {
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());

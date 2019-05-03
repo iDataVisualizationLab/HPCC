@@ -1769,6 +1769,7 @@ $( document ).ready(function() {
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
+        playchange();
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
