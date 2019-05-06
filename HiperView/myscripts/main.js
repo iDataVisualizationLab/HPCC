@@ -1732,25 +1732,26 @@ function closeNav() {
     // _.delay(resetSize, 500);
 }
 // pause when not use , prevent frozen hiperView
-$(window).on("blur focus", function(e) {
-    var prevType = $(this).data("prevType");
 
-    if (prevType != e.type) {   //  reduce double fire issues
-        switch (e.type) {
-            case "blur":
-                $(this).data("playstatus",d3.select('.pause').node().value);
-                playchange();
-                break;
-            case "focus":
-                // $('div').text("Focused");
-                if ($(this).data("playstatus")=="false")
-                    pausechange();
-                break;
-        }
-    }
-    $(this).data("prevType", e.type);
-});
 $( document ).ready(function() {
+    $(window).on("blur focus", function(e) {
+        var prevType = $(this).data("prevType");
+
+        if (prevType != e.type) {   //  reduce double fire issues
+            switch (e.type) {
+                case "blur":
+                    $(this).data("playstatus",d3.select('.pause').node().value);
+                    playchange();
+                    break;
+                case "focus":
+                    // $('div').text("Focused");
+                    if ($(this).data("playstatus")=="false")
+                        pausechange();
+                    break;
+            }
+        }
+        $(this).data("prevType", e.type);
+    });
     console.log('ready');
     $('.collapsible').collapsible();
     $('.dropdown-trigger').dropdown();
