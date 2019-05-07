@@ -239,6 +239,7 @@ $( document ).ready(function() {
     d3.select("#DarkTheme").on("click",switchTheme);
 
     // data
+
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
         // animationtime=true;
@@ -247,7 +248,7 @@ $( document ).ready(function() {
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("../HiperView/data/" + choice + ".json").then( function (data2) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json").then( function (data2) {
                     sampleS = data2;
                     if (choice.includes('influxdb')){
                         // processResult = processResult_influxdb;
@@ -269,6 +270,8 @@ $( document ).ready(function() {
                 db = choice;
                 requestService = eval('requestService'+choice);
                 processResult = eval('processResult_'+choice);
+                d3.select(".currentDate")
+                    .text("" + new Date().toDateString());
                 d3.select('.cover').classed('hidden', true);
                 spinner.stop();
             }
@@ -278,7 +281,19 @@ $( document ).ready(function() {
 
 
     setTimeout(() => {
-        d3.json("../HiperView/data/" + d3.select('#datacom').node().value  + ".json").then(function (data2) {
+        let choiceinit = d3.select('#datacom').node().value;
+        d3.select(".currentDate")
+            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
+        if (choiceinit.includes('influxdb')){
+            // processResult = processResult_influxdb;
+            db = "influxdb";
+            realTimesetting(false,"influxdb",true);
+        }else {
+            db = "nagios"
+            // processResult = processResult_old;
+            realTimesetting(false,undefined,true);
+        }
+        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit  + ".json").then(function (data2) {
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
@@ -296,7 +311,7 @@ $( document ).ready(function() {
     // init();
 });
 
-function realTimesetting (option,db){
+function realTimesetting (option,db,init){
     isRealtime = option;
     // getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
@@ -304,7 +319,8 @@ function realTimesetting (option,db){
     }else{
         processData = db?eval('processData_'+db):processData_old;
     }
-    resetRequest();
+    if(!init)
+        resetRequest();
 }
 
 function getBrush(d) {

@@ -21,6 +21,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="js/underscore-min.js"></script>
     <script src="js/simple-statistics.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
     <!--<script src="js/select.js"></script>-->
     <script src="js/TimerInterval.js"></script>
     <script src="js/tsne.js"></script>
@@ -100,18 +102,18 @@
                         <ul id="datasetsSelect" class="col collection dropdown-content">
                         </ul>
                     </div>
-                    <label for="indsg" class="col s4"> Summary type: </label>
+                    <label for="summaryType_control" class="col s4"> Summary type: </label>
                     <div  class="row s12">
-                        <select id="indsg" class="col s7">
+                        <select id="summaryType_control" class="col s7">
                             <option value="Boxplot">Boxplot</option>
                             <option value="Scatterplot" >Scatterplot</option>
                             <option value="Radar" selected="selected">Radar Groups</option>
                             <option value="RadarSummary">Radar Summary</option>
                         </select>
                     </div>
-                    <label for="inds" class="col s4"> Chart type: </label>
+                    <label for="chartType_control" class="col s4"> Chart type: </label>
                     <div  class="row s12">
-                        <select id="inds" class="col s7">
+                        <select id="chartType_control" class="col s7">
                             <option value="Heatmap">Heatmap</option>
                             <option value="Area Chart" selected="selected">Area Chart</option>
                             <option value="T-sne Chart">t-SNE Chart</option>
@@ -119,10 +121,10 @@
                     </div>
                 </div>
             </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">help</i>Controls</div>
-                <div class="collapsible-body"><strong>Zoom</strong>: Scroll mouse button to zoom.<br/></div>
-            </li>
+            <!--<li>-->
+                <!--<div class="collapsible-header"><i class="material-icons">help</i>Controls</div>-->
+                <!--<div class="collapsible-body"><strong>Zoom</strong>: Scroll mouse button to zoom.<br/></div>-->
+            <!--</li>-->
         </ul>
     </div>
 </div>
@@ -186,14 +188,25 @@
                 <div class="details" ></div>
             </div>
             <div id ="userList" class="subpanel card-panel floatRight">
-                <h6>User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
+                <div class = "row valign-wrapper" style="margin-bottom: 5px;">
+                    <h6 class="valign-wrapper col" style="padding-left: 0;">User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
+                    <div class="search-wrapper focused col empty">
+                        <input type="text" id="search_User" placeholder="Search User...">
+                        <!--<i class="material-icons">search</i>-->
+                    </div>
+                </div>
                 <div class="top10DIV">
-                    <table class = "collection">
+                    <table class = "collection empty">
                         <thead>
                         <tr>
                             <th>Username</th>
-                            <th># Jobs</th>
-                            <th># Nodes</th>
+                            <th class="alignRight">#Jobs</th>
+                            <th class="alignRight">#Hosts</th>
+                            <th class="alignRight">Job
+                                <p style="color: #ffa328;display: inline-block;margin: 0;">submitted</p> -
+                                <p style="color: #3fc151;display: inline-block;margin: 0;">started</p>
+                                <p id="userList_lastupdate" style="font-weight: normal;font-size: smaller;margin: 0;"></p>
+                            </th>
                         </tr>
                         </thead>
                         <tbody>
@@ -237,6 +250,7 @@
 <script src="js/box.js"></script>
 <script src="js/boxplot.js"></script>
 <script src="js/binnerN.min.js"></script>
+<script src="js/fisheye.js"></script>
 <script src="myscripts/setting.js"></script>
 <script src="myscripts/radarSum.js"></script>
 <script src="myscripts/scatterplot.js"></script>

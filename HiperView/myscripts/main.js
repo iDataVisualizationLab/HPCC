@@ -141,7 +141,8 @@ var undefinedResult = "timed out";
 var xTimeSummaryScale;
 var xLinearSummaryScale;
 
-var filterhost=[];
+var filterhost;
+var filterhost_user;
 
 var TsnePlotopt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -325,6 +326,7 @@ function initDetailView() {
                 .attr("font-family", "sans-serif")
                 .text("Host");
         }
+        filterhost = hosts.map(d=>d.name);
         for (var i = 0; i < hosts.length; i++) {
             var name = hosts[i].name;
             var hpcc_rack = +name.split("-")[1];
@@ -1442,7 +1444,7 @@ function pauseRequest(){
 
 }
 
-function realTimesetting (option,db){
+function realTimesetting (option,db,init){
     isRealtime = option;
     getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
@@ -1456,6 +1458,7 @@ function realTimesetting (option,db){
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
+    if (!init)
     resetRequest();
 }
 function playchange(){
@@ -1466,7 +1469,10 @@ function playchange(){
     $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
-
+function exit_warp () {
+    playchange();
+    TSneplot.remove();
+}
 function pausechange(){
     var e = d3.select('.pause').node();
     interval2.resume();
@@ -1503,6 +1509,7 @@ function resetRequest(){
     Radarplot.init();
     TSneplot.reset(true);
     timelog = [];
+    jobList = undefined;
     updateTimeText();
     request();
 }
@@ -1512,15 +1519,15 @@ function loadData(){
 function addDatasetsOptions() {
     let select= d3.select("#datasetsSelect")
         .selectAll('li')
-        .data(serviceList)
+        .data(serviceList_selected)
         .enter()
         .append('li')
-        .attr('class','collection-item avatar')
+        .attr('class','collection-item avatar valign-wrapper')
         .attr('value',d=>d);
     select.append('img')
         .attr('class',"circle")
         .attr('src',d=>"images/"+d+".png");
-    select.append('h4').attr('class','title').text(d=>d);
+    select.append('h6').attr('class','title').text(d=>d);
 
     select.on("click",loadNewData);
     document.getElementById('datasetsSelect').value = initialService;  //************************************************
@@ -1627,7 +1634,7 @@ function requestServiceinfluxdb(count,serin) {
             query = getstringQuery_influx(ip,serin,timerange,timestep_query);
         else
             query = getstringQuery_influx(ip,serin);
-        console.log(query)
+        console.log(query);
         xhr.open('get', "http://10.10.1.4:8086/query?db=hpcc_monitoring_db&q=" + query, true);
         xhr.send();
     })
@@ -1682,14 +1689,23 @@ function getJoblist (iteration,reset){
         hosts.forEach(h => {
             var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
             const resultObj = processData(result.data.service.plugin_output, "Job_scheduling")[0];
-            if (resultObj)
+            if (resultObj) {
+                resultObj.forEach(d=>{
+                    d.nodes= d.nodes.split(',')});
                 jobList = _.union(jobList, resultObj);
+            }
         });
-        TSneplot.drawUserlist();
+        // handle dupliacte jobID
+        jobList = _.chain(jobList)
+            .groupBy(d=>d.jobID).values().map(d=>d.reduce((a,b)=>{a.nodes = _.union(a.nodes,b.nodes); return a;})).value();
+        //draw userlist data
+        TSneplot.drawUserlist(query_time);
     }catch(e){}
 }
 function current_userData () {
-    return d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    let jobByuser = d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    jobByuser.forEach(d=>d.unqinode= _.chain(d.values).map(d=>d.nodes).flatten().uniq().value());
+    return jobByuser;
 }
 d3.select("html").on("keydown", function() {
     switch(d3.event.keyCode){
@@ -1715,8 +1731,27 @@ function closeNav() {
     d3.select("#Maincontent").classed("sideIn",false);
     // _.delay(resetSize, 500);
 }
+// pause when not use , prevent frozen hiperView
 
 $( document ).ready(function() {
+    $(window).on("blur focus", function(e) {
+        var prevType = $(this).data("prevType");
+
+        if (prevType != e.type) {   //  reduce double fire issues
+            switch (e.type) {
+                case "blur":
+                    $(this).data("playstatus",d3.select('.pause').node().value);
+                    playchange();
+                    break;
+                case "focus":
+                    // $('div').text("Focused");
+                    if ($(this).data("playstatus")=="false")
+                        pausechange();
+                    break;
+            }
+        }
+        $(this).data("prevType", e.type);
+    });
     console.log('ready');
     $('.collapsible').collapsible();
     $('.dropdown-trigger').dropdown();
@@ -1727,13 +1762,13 @@ $( document ).ready(function() {
 
     d3.select("#DarkTheme").on("click",switchTheme);
 
-    d3.select('#inds').on("change", function () {
-        var sect = document.getElementById("inds");
+    d3.select('#chartType_control').on("change", function () {
+        var sect = document.getElementById("chartType_control");
         charType = sect.options[sect.selectedIndex].value;
     });
 
-    d3.select('#indsg').on("change", function () {
-        var sect = document.getElementById("indsg");
+    d3.select('#summaryType_control').on("change", function () {
+        var sect = document.getElementById("summaryType_control");
         sumType = sect.options[sect.selectedIndex].value;
         svg.select(".graphsum").remove();
         pannelselection(false);
@@ -1758,20 +1793,23 @@ $( document ).ready(function() {
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
+        exit_warp();
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         setTimeout(() => {
-            if (choice !== "nagios" && choice !== "influxdb")
-                d3.json("data/" + choice + ".json", function (error, data) {
-                    if (error) {
-                        d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + choice + ".json", function (error, data) {
-                            if (error) throw error;
-                            loadata(data)
-                        });
-                    }
-                    loadata(data)
+            if (choice !== "nagios" && choice !== "influxdb") {
+//                 d3.json("data/" + choice + ".json", function (error, data) {
+//                     if (error) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                    if (error) throw error;
+                    loadata1(data)
                 });
+//                         return;
+//                     }
+//                     loadata1(data)
+//                 });
+            }
             else {
                 realTimesetting(true,choice);
                 db = choice;
@@ -1781,7 +1819,7 @@ $( document ).ready(function() {
                 spinner.stop();
             }
         },0);
-        function loadata(data){
+        function loadata1(data){
             sampleS = data;
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
@@ -1801,15 +1839,31 @@ $( document ).ready(function() {
     });
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
-        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
-            if (error) {
-                d3.json("https://github.com/iDataVisualizationLab/HPCC/raw/master/HiperView/data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
+        //load data
+        charType =  d3.select('#chartType_control').node().value;
+        sumType =  d3.select('#summaryType_control').node().value;
+        let choiceinit = d3.select('#datacom').node().value;
+        d3.select(".currentDate")
+            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString()) ;
+        if (choiceinit.includes('influxdb')){
+            // processResult = processResult_influxdb;
+            db = "influxdb";
+            realTimesetting(false,"influxdb",true);
+        }else {
+            db = "nagios";
+            // processResult = processResult_old;
+            realTimesetting(false,undefined,true);
+        }
+//         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
+//             if (error) {
+                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
                     if (error) throw error;
                     loadata(data)
                 });
-            }
-            loadata(data)
-        });
+//                 return
+//             }
+//             loadata(data)
+//         });
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")

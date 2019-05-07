@@ -57,7 +57,8 @@ function RadarChart(id, data, options, name) {
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
     var opaTemperature  = d3.scaleLinear()
                 .domain([left,thresholds[0][0],thresholds[0][0]+2*dif, thresholds[0][1], thresholds[0][1]+dif])
-                .range([0.3,0.2,0.1,0.2,0.3]);              
+                .range([1,0.7,0.05,0.7,1]);
+                // .range([0.3,0.2,0.1,0.2,0.3]);
 
 
     var allAxis = (data[0].map(function(i, j){return i.axis})), //Names of each axis
@@ -425,7 +426,7 @@ function RadarChart(id, data, options, name) {
             allbold.selectAll(".radarStroke").style('pointer-events','none');
             // link to other blod
             var binlist = d.bin.name;
-            filterhost = _.union(filterhost,d.bin.name)
+            filterhost = _.intersection(filterhost,d.bin.name);
             var matchbold = allbold.filter(a => {
                 if (a !== undefined) {
                     // var keys = false;
@@ -446,7 +447,6 @@ function RadarChart(id, data, options, name) {
                     cloned: true,
                 }).style("opacity", 1)
                     .selectAll(".radarStroke").style('pointer-events','auto');
-
                 path
                     .style("cursor", "pointer")
                     //.on("mouseenter", null)
@@ -468,16 +468,18 @@ function RadarChart(id, data, options, name) {
                     });
                 //t.parentNode.appendChild(clonedNode);
             });
-            hosts.forEach(l => {
-                    d3.selectAll("." + l.name)
-                        .classed("displayNone", true);
-                        // .style("visibility", 'hidden');
-            });
-            filterhost.forEach(l => {
-                    d3.selectAll("." + l)
-                        .classed("displayNone", false);
+            d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).join(', .'))
+                .classed("displayNone", true);
+            // hosts.forEach(l => {
+            //         d3.selectAll("." + l.name)
+            //             .classed("displayNone", true);
+            //             // .style("visibility", 'hidden');
+            // });
+
+            d3.selectAll("." + filterhost.join(', .'))
+                .classed("displayNone", false);
                 // .style("visibility", 'hidden');
-            });
+
             // hosts.forEach(l => {
             //     if (d.bin.name.filter(e => e === l.name).length === 0)
             //         d3.selectAll("." + l.name)
