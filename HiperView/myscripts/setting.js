@@ -4,6 +4,15 @@ var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_c
 var serviceList_selected = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
 
+
+var FIELD_MACHINE_ID = "name";
+var VARIABLES = [];
+/**Configuration**/
+const oneWay = true;
+const smooth = false;
+const stepPenalty = false;
+
+
 var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
     arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},

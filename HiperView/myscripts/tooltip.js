@@ -42,7 +42,7 @@ var tool_tip = d3.tip()
     .offset(()=> {
         if (niceOffset){
         let heightTip =+ $('#d3-tip')[0].offsetHeight;
-        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -100-tipW:100];
+        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
         } return [0,0];})
         .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
@@ -67,6 +67,9 @@ function cotenttip (hideLine){
     str += '<div class="'+classtype+'"></div>'; // Spider chart holder
     str += '<button onclick="'+(hideLine?'pannelsummary(false)':'tool_tip.hide()')+'">Close</button>';
     str += '<button onclick="addSVG('+hideLine+')">Add</button>';
+    // str += '<button onclick="saveSVG(this)">Save Image</button>';
+    str += '<button onclick="saveSVG_light(this,\'svg\')" class="modal-trigger" href="#savedialog">Save SVG</button>';
+    str += '<button onclick="saveSVG_light(this,\'png\')" class="modal-trigger" href="#savedialog">Save PNG</button>';
     return str;
 }
 // Add radar chart to the end of html page
@@ -81,8 +84,48 @@ function addSVG(hideLine){
    countRadarChart++;
    if (countRadarChart==4)
     countRadarChart=1;
-}    
+}
 
+function saveSVG_light(event,type){
+    saveSVG_detail = _.partial(saveSVG,event,_,type);
+    $('#savename').val(event.parentNode.querySelector('.hostnameInTip').textContent.split(': ')[1]);// pre fill
+}
+
+function saveSVG_batch(type){
+    saveSVG_detail = _.partial(saveDummy_radar,_,'png');
+    const time = new Date(query_time);
+    let stringDate = time.toLocaleDateString()+'_'+time.toLocaleTimeString();
+    stringDate  =stringDate.replace(/\//gi,'-');
+    $('#savename').val(stringDate);// pre fill
+}
+
+function saveDummy_radar(prefix,type) {
+    getData(null,lastIndex+1);
+    imageRequest = true; //turn on watcher for image request
+    saveSVG_detail = _.partial(saveSVG,_,_,'png',prefix);
+}
+
+function onSaveImage (){
+    saveSVG_detail($('#savename').val());
+}
+let saveSVG_detail;
+let saveSVG = function(event,name,type,prefix){
+    let target = event.parentNode;
+    if (name==="")
+        name = target.querySelector('.hostnameInTip').textContent.split(': ')[1];
+    switch(type) {
+        default:
+            save(serialize(target.querySelector('.radarradarChart'), true));
+            break;
+        case 'png':
+            rasterize(target.querySelector('.radarradarChart'), true).then(svgString=>
+                save(svgString)); // passes Blob and filesize String to the callback
+            break;
+    }
+    function save( dataBlob){
+        saveAs( dataBlob, (prefix||"")+name+'.'+type ); // FileSaver.js function
+    }
+};
 var svgTip;
 var xScale;
 function mouseoverNode(d1){
@@ -111,8 +154,6 @@ function mouseoverNode(d1){
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
-        obj.indexSamp = i;
-        console.log(obj)
         if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue) {
          console.log(obj)
             // arr.push(obj);
@@ -340,29 +381,12 @@ function mouseoverNode(d1){
     if (r.arr.length>0){
         for (var i=startRecord;i<r.arr.length;i++){
             var arrServices = [];
-            var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = processData(r.arrCPU_load[i].data.service.plugin_output, serviceList[1]);
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = processData(r.arrMemory_usage[i].data.service.plugin_output, serviceList[2]);
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = processData(r.arrFans_health[i].data.service.plugin_output, serviceList[3]);
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = processData(r.arrPower_usage[i].data.service.plugin_output, serviceList[4]);
-            var obj = {};
-            obj.a = a;
+            serviceList_selected.forEach((ser,j)=>{
+                var a = processData(r[serviceListattr[j]][i].data.service.plugin_output, ser);
+                var obj = {};
+                obj.a = a;
+                arrServices.push(obj);
+            });
             arrServices.push(obj);
                    
             var arr1 = [];

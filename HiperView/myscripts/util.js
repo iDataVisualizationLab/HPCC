@@ -527,3 +527,57 @@ $.fn.exchangePositionWith = function(selector) {
     this.after(other.clone());
     other.after(this).remove();
 };
+
+
+// Below are the functions that handle actual exporting:
+// getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
+const xmlns = "http://www.w3.org/2000/xmlns/";
+const xlinkns = "http://www.w3.org/1999/xlink";
+const svgns = "http://www.w3.org/2000/svg";
+function serialize(svg,isLight) {
+
+    svg = svg.cloneNode(true);
+    if (isLight) {
+        d3.select(svg).selectAll('.axis').remove();
+        d3.select(svg).selectAll('.axisLabel').remove();
+        d3.select(svg).selectAll('.radarCircle').remove();
+        d3.select(svg).selectAll('.gridCircle').filter((d,i)=>i!=1).remove();
+        d3.select(svg).select('.axisWrapper').append('circle').attr('r',2).style('fill','black'); // ad center
+    }
+    const fragment = window.location.href + "#";
+    const walker = document.createTreeWalker(svg, NodeFilter.SHOW_ELEMENT, null, false);
+    while (walker.nextNode()) {
+        for (const attr of walker.currentNode.attributes) {
+            if (attr.value.includes(fragment)) {
+                attr.value = attr.value.replace(fragment, "#");
+            }
+        }
+    }
+    svg.setAttributeNS(xmlns, "xmlns", svgns);
+    svg.setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
+    const serializer = new window.XMLSerializer;
+    const string = serializer.serializeToString(svg);
+    return new Blob([string], {type: "image/svg+xml"});
+}
+
+function rasterize(svg,isLight) {
+    let resolve, reject;
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+
+    const promise = new Promise((y, n) => (resolve = y, reject = n));
+    const image = new Image;
+    image.onerror = reject;
+    image.onload = () => {
+        const rect = svg.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        context.clearRect ( 0, 0, rect.width, rect.height );
+        context.drawImage(image, 0, 0, rect.width, rect.height);
+        canvas.toBlob(resolve);
+    };
+    image.src = URL.createObjectURL(serialize(svg,isLight));
+    return promise;
+}
+
+

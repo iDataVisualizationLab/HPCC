@@ -21,7 +21,7 @@ d3.Tsneplot = function () {
                 maxtries: 50
             }
     },
-        arr = [],
+        arr = [],tsne = undefined,intervalUI= undefined,
         isbusy = false;
         // tsne = new tsnejs.tSNE(graphicopt.opt);
 
@@ -108,7 +108,7 @@ d3.Tsneplot = function () {
             });
     }
     function create_worker (){
-        tsne = new Worker ('myscripts/tSNEworker.js');
+        tsne = new Worker ('myscripts/worker/tSNEworker.js');
         tsne.addEventListener('message',({data})=>{
             if (data.status==='done') {
                 isbusy = false;
@@ -338,8 +338,10 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.pause  = function (){
-        tsne.terminate();
-        clearInterval(intervalUI);
+        if (tsne)
+            tsne.terminate();
+        if(intervalUI)
+            clearInterval(intervalUI);
         // clearInterval(intervalCalculate);
     };
 
@@ -651,7 +653,8 @@ d3.Tsneplot = function () {
             .attr("d", d => radarcreate(d))
             .style("stroke", 'black')
             .style("stroke-width", 0.5)
-            .style("stroke-opacity", 0.5);
+            .style("stroke-opacity", 0.5).style("fill", "none")
+        ;
         datapointN.append("text")
             .attr("text-anchor", "top")
             .attr("transform", "translate(5, -5)")

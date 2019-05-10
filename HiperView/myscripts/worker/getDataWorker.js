@@ -1,6 +1,4 @@
-importScripts("../js/d3.v4.js");
-importScripts("../js/underscore-min.js");
-importScripts("setting.js");
+importScripts("../../js/d3.v4.js","../../js/underscore-min.js","../setting.js");
 let undefinedValue,
 globalTrend=false,
     hosts,processData,db;
