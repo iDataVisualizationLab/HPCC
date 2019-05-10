@@ -191,7 +191,7 @@ var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
 let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
-let isbusy = false;
+let isbusy = false, imageRequest = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
@@ -829,10 +829,10 @@ function main() {
         if (data.status==='done') {
             isbusy = false;
         }
-        // if (imageRequest){
-        //     imageRequest = false;
-        //     saveSVG_path(data.result.arr);
-        // }
+        if (imageRequest){
+            imageRequest = false;
+            saveSVG_path(data.result.arr);
+        }
         if (data.action==='returnData'){
             if (graphicControl.charType==="T-sne Chart")
                 TSneplot.data(data.result.arr).draw(data.result.nameh);
