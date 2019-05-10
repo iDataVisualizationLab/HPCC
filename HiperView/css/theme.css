@@ -164,3 +164,6 @@
     box-shadow: 0 1px 0 0 #26a69a;
 }
 /*
+
+ */
+.modal { max-width: 400px !important ;}
