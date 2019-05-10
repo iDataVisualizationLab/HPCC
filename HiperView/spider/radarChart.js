@@ -25,99 +25,112 @@ function RadarChart(id, data, options, name) {
         gradient: false,
         arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
         legend: [],
-            color: function(){return 'rgb(167, 167, 167)'}
-            //d3.scaleOrdinal(d3.schemeCategory10) //Color function
-        };
-    
+        color: function () {
+            return 'rgb(167, 167, 167)'
+        }
+        //d3.scaleOrdinal(d3.schemeCategory10) //Color function
+    };
+
     //Put all of the options into a variable called cfg
-    if('undefined' !== typeof options){
-      for(var i in options){
-        if('undefined' !== typeof options[i]){ cfg[i] = options[i]; }
-      }//for i
+    if ('undefined' !== typeof options) {
+        for (var i in options) {
+            if ('undefined' !== typeof options[i]) {
+                cfg[i] = options[i];
+            }
+        }//for i
     }//if
-    
+
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
-    var maxValue = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+    var maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
+        return d3.max(i.map(function (o) {
+            return o.value;
+        }))
+    }));
     // *** TOMMY 2018 ************
     //Compute min max for the temperature
-    var dif = (thresholds[0][1]-thresholds[0][0])/4;
-    var right = thresholds[0][1]+dif; 
+    var dif = (thresholds[0][1] - thresholds[0][0]) / 4;
+    var right = thresholds[0][1] + dif;
 
-    maxValue =right;
+    maxValue = right;
 
-    var minValue = thresholds[0][0]-dif;
-    var colorLength = arrColor.length-1;
-    var arrThresholds = [minValue, thresholds[0][0], thresholds[0][0]+dif, thresholds[0][0]+2*dif,
-                        thresholds[0][0]+3*dif, thresholds[0][1], maxValue];
+    var minValue = thresholds[0][0] - dif;
+    var colorLength = arrColor.length - 1;
+    var arrThresholds = [minValue, thresholds[0][0], thresholds[0][0] + dif, thresholds[0][0] + 2 * dif,
+        thresholds[0][0] + 3 * dif, thresholds[0][1], maxValue];
 
 
     var colorTemperature = d3.scaleLinear()
-                .domain(arrThresholds)
-                .range(arrColor)
-                .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-    var opaTemperature  = d3.scaleLinear()
-                .domain([left,thresholds[0][0],thresholds[0][0]+2*dif, thresholds[0][1], thresholds[0][1]+dif])
-                .range([1,0.7,0.05,0.7,1]);
-                // .range([0.3,0.2,0.1,0.2,0.3]);
+        .domain(arrThresholds)
+        .range(arrColor)
+        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+    var opaTemperature = d3.scaleLinear()
+        .domain([left, thresholds[0][0], thresholds[0][0] + 2 * dif, thresholds[0][1], thresholds[0][1] + dif])
+        .range([1, 0.7, 0.05, 0.7, 1]);
+    // .range([0.3,0.2,0.1,0.2,0.3]);
 
 
-    var allAxis = (data[0].map(function(i, j){return i.axis})), //Names of each axis
+    var allAxis = (data[0].map(function (i, j) {
+            return i.axis
+        })), //Names of each axis
         total = allAxis.length,                 //The number of different axes
-        radius = Math.min(cfg.w/2, cfg.h/2),    //Radius of the outermost circle
+        radius = Math.min(cfg.w / 2, cfg.h / 2),    //Radius of the outermost circle
         Format = d3.format(''),                //Percentage formatting
-    //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
-        angle1= Math.PI * 2 / total;
-        angle2= Math.PI * 2 / (total+4);
-        angleSlice = [];
-        angleSlice2 =[];
-        for (var i=0;i<total;i++){
-            if (i==0 || i==1 || i==2)       // Temperatures
-                angleSlice.push(angle2*(i-1));
-            else if (i==5 || i==6 || i==7 || i==8)  // Fan speeds
-                angleSlice.push(Math.PI/4.62+angle2*(i-1));
-            else if (i==9)  // Power consumption
-                angleSlice.push(Math.PI * 1.5);
-            else    
-                angleSlice.push(angle1*(i-1));
-        }      //TOMMY DANG
-    angleSlice[0] = Math.PI * 2 +angleSlice[0];
-    var meanang = (angleSlice[0]-Math.PI * 2+ angleSlice[1])/2;
-    var dismeanang = 0-(angleSlice[0]-Math.PI * 2);
+        //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
+        angle1 = Math.PI * 2 / total;
+    angle2 = Math.PI * 2 / (total + 4);
+    angleSlice = [];
+    angleSlice2 = [];
+    for (var i = 0; i < total; i++) {
+        if (i == 0 || i == 1 || i == 2)       // Temperatures
+            angleSlice.push(angle2 * (i - 1));
+        else if (i == 5 || i == 6 || i == 7 || i == 8)  // Fan speeds
+            angleSlice.push(Math.PI / 4.62 + angle2 * (i - 1));
+        else if (i == 9)  // Power consumption
+            angleSlice.push(Math.PI * 1.5);
+        else
+            angleSlice.push(angle1 * (i - 1));
+    }      //TOMMY DANG
+    angleSlice[0] = Math.PI * 2 + angleSlice[0];
+    var meanang = (angleSlice[0] - Math.PI * 2 + angleSlice[1]) / 2;
+    var dismeanang = 0 - (angleSlice[0] - Math.PI * 2);
     angleSlice2.push(angleSlice[0]);
-    var temp = (angleSlice[0]-Math.PI * 2+ dismeanang/4);
-    angleSlice2.push(temp<0?temp+Math.PI*2:temp);
-    angleSlice2.push(meanang<0?meanang+Math.PI*2:meanang);
-    temp = (angleSlice[1]- dismeanang/4);
-    angleSlice2.push(temp<0?temp+Math.PI*2:temp);
-        for (var i=1;i<total;i++) {
-            var meanang = (angleSlice[i]+ angleSlice[(i+1)%total])/2;
-            var dismeanang = meanang-angleSlice[i];
-            angleSlice2.push(angleSlice[i]);
-            angleSlice2.push(angleSlice[i]+ dismeanang/4);
-            angleSlice2.push(meanang);
-            angleSlice2.push(angleSlice[(i+1)%total]- dismeanang/4);
-        }
+    var temp = (angleSlice[0] - Math.PI * 2 + dismeanang / 4);
+    angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
+    angleSlice2.push(meanang < 0 ? meanang + Math.PI * 2 : meanang);
+    temp = (angleSlice[1] - dismeanang / 4);
+    angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
+    for (var i = 1; i < total; i++) {
+        var meanang = (angleSlice[i] + angleSlice[(i + 1) % total]) / 2;
+        var dismeanang = meanang - angleSlice[i];
+        angleSlice2.push(angleSlice[i]);
+        angleSlice2.push(angleSlice[i] + dismeanang / 4);
+        angleSlice2.push(meanang);
+        angleSlice2.push(angleSlice[(i + 1) % total] - dismeanang / 4);
+    }
 
-        //angleSlice2.push(angleSlice[0]);
+    //angleSlice2.push(angleSlice[0]);
 
     //Scale for the radius
-        var rScale = d3.scaleLinear()
-            .range([0, radius])
-            .domain([minValue, maxValue]);
-        
+    var rScale = d3.scaleLinear()
+        .range([0, radius])
+        .domain([minValue, maxValue]);
+
     /////////////////////////////////////////////////////////
     //////////// Create the container SVG and g /////////////
     /////////////////////////////////////////////////////////
 
     //Remove whatever chart with the same id/class was present before
-    d3.select(id).selectAll("svg").nodes().forEach(d=>{
-        if (d3.select(d).attr("class")!==("radar"+id.replace(".","")))
-            d3.select(d).remove();
-    });
-    
-    //Initiate the radar chart SVG or update it
     var first = false;
-    var svg = d3.select(id).select(".radar"+id.replace(".",""));
+    if (typeof (id) === "string") {
+        d3.select(id).selectAll("svg").nodes().forEach(d => {
+            if (d3.select(d).attr("class") !== ("radar" + id.replace(".", "")))
+                d3.select(d).remove();
+        });
+
+        //Initiate the radar chart SVG or update it
+        var svg = d3.select(id).select(".radar" + id.replace(".", ""));
+    }else
+        var svg = d3.select(id).select(".radarGen"); // dummy mode or object mode
     var g = svg.select("#radarGroup");
     if (svg.empty()) {
         first = true;
@@ -387,7 +400,7 @@ function RadarChart(id, data, options, name) {
             .style("stroke", (d, i) => cfg.color(i))
             .style("fill", "none");
         blobWrapper
-            .append("path").classed('radarLine',true).call(drawMeanLine);
+            .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     }
     else {
         blobWrapperpath.attr("d", d => radarLine(d)).transition()

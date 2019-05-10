@@ -1,6 +1,6 @@
-importScripts("../js/d3.v4.js");
-importScripts("../js/tsne.js");
-importScripts("../js/underscore-min.js");
+importScripts("../../js/d3.v4.js");
+importScripts("../../js/tsne.js");
+importScripts("../../js/underscore-min.js");
 
 let tsne,sol,
     stepnumber = 2,
