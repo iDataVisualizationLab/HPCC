@@ -829,10 +829,10 @@ function main() {
         if (data.status==='done') {
             isbusy = false;
         }
-        if (imageRequest){
-            imageRequest = false;
-            saveSVG_path(data.result.arr);
-        }
+        // if (imageRequest){
+        //     imageRequest = false;
+        //     saveSVG_path(data.result.arr);
+        // }
         if (data.action==='returnData'){
             if (graphicControl.charType==="T-sne Chart")
                 TSneplot.data(data.result.arr).draw(data.result.nameh);
