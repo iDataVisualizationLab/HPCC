@@ -830,8 +830,11 @@ function main() {
             isbusy = false;
         }
         if (imageRequest){
+            playchange();
+            d3.select('.cover').classed('hidden', false);
+            d3.select('.progressDiv').classed('hidden', false);
             imageRequest = false;
-            onCreateDummy_radar(data.result.arr); // saveImages.js
+            onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
         }
         if (data.action==='returnData'){
             if (graphicControl.charType==="T-sne Chart")
@@ -843,6 +846,16 @@ function main() {
         }
     }, false);
     request();
+}
+function onSavingFile (data){
+    d3.select('.cover .status').text('');
+    const determinate =  d3.select('.determinate').style('width',data.process.toFixed(2)+'%');
+    d3.select('.progressText').text(data.message);
+    if (data.message==='finish'){
+        d3.select('.progressDiv').classed('hidden', true);
+        d3.select('.cover').classed('hidden', true);
+        d3.select('.cover .status').text('load data....');
+    }
 }
 var currentlastIndex;
 var speedup= 0;
@@ -1200,6 +1213,33 @@ function updateTimeText(index){
 }
 // Delete unnecessary files
 let processResult = processResult_old;
+function processResult_influxdb(r,hostname,index){
+    var obj = {};
+    obj.result = {};
+    if (r.results[0].series){
+        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+    }else
+        obj.result.query_time = new Date();
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = hostname;
+    if (index !== undefined ) {
+        obj.data.service.plugin_output = {results: r.results.map(d => {
+                let temp = {};
+                temp.statement_id = d.statement_id;
+                temp.series = [];
+                let tempsub = {};
+                const series = d.series[0];
+                tempsub.name = series.name;
+                tempsub.columns = series.columns;
+                tempsub.values = [series.values[index]];
+                temp.series.push(tempsub);
+                return temp;
+            })};
+    } else
+        obj.data.service.plugin_output = r;
+    return obj;
+}
 function processResult_old(r){
     var obj = {};
     obj.result = {};
@@ -2019,8 +2059,17 @@ $( document ).ready(function() {
             if (choice !== "nagios" && choice !== "influxdb") {
 //                 d3.json("data/" + choice + ".json", function (error, data) {
 //                     if (error) {
-                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                    if (error) throw error;
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error){
+                        M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                            if (error){
+
+                            }
+                            loadata1(data)
+                        });
+                        return;
+                    }
                     loadata1(data)
                 });
 //                         return;
@@ -2072,16 +2121,17 @@ $( document ).ready(function() {
             // processResult = processResult_old;
             realTimesetting(false,undefined,true);
         }
-//         d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
-//             if (error) {
+        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
+            if (error) {
+                    M.toast({html: 'Local data does not exist, try to query from the internet!'});
                 d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
                     if (error) throw error;
                     loadata(data)
                 });
-//                 return
-//             }
-//             loadata(data)
-//         });
+                return;
+            }
+            loadata(data);
+        });
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")

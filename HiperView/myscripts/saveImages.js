@@ -40,7 +40,7 @@ function onSaveDummy_radar(prefix,type) {
     saveSVG_detail = _.partial(saveSVG,_,_,type,prefix);
 }
 
-function onCreateDummy_radar(data) {
+function onCreateDummy_radar(name,data,callback) {
     var zip = new JSZip();
     zip = zip.folder("images");
     let q = [];
@@ -48,37 +48,44 @@ function onCreateDummy_radar(data) {
     dummy_radarChartOptions.showText = false;
     dummy_radarChartOptions.isNormalize = true;
     dummy_radarChartOptions.showHelperPoint = false;
-    pausechange();
     data.forEach( function (d,i){
-        let dummy_div = document.createElement('html');
-        dummy_div = d3.select(dummy_div).append('body').append('div').node();
-        RadarChart(dummy_div, [d], dummy_radarChartOptions,"");
-        q.push(saveSVG_detail(dummy_div,d.name,zip));
-        console.log((i+1)+'/'+data.length);
+        let p = new Promise((resolve, reject)=>{
+            let dummy_div = document.createElement('html');
+            dummy_div = d3.select(dummy_div).append('body').append('div').node();
+            RadarChart(dummy_div, [d], dummy_radarChartOptions,"");
+            resolve({dummy_div,i});
+        }).then(d=>{
+            setTimeout(() =>
+            callback({process: (d.i+1)/data.length*100, message: 'making Image'}),10);
+            return d.dummy_div})
+            .then (dummy_div=>saveSVG_detail(dummy_div,d.name,zip));
+        q.push(p);
     });
     Promise.all(q).then(function() {
         zip.generateAsync({type:"blob"}, function updateCallback(metadata) {
-            console.log("progression: " + metadata.percent.toFixed(2) + " %");
             if(metadata.currentFile) {
+                callback({process: metadata.percent, message: metadata.currentFile});
                 console.log("current file = " + metadata.currentFile);
             }
         })
             .then(function(content) {
                 // see FileSaver.js
-                saveAs(content, "image.zip");
+                callback({process: 100, message: 'finish'});
+                saveAs(content, name + ".zip");
             }).catch((err) => {
                 console.log(err);
             // Handle any error that occurred in any of the previous
             // promises in the chain.
-        });;
+        });
     });
 }
 //</editor-fold >
-
+let onSavingbatchfiles;
 // UI function
 function onSaveImage (){
     // request puase to spped up process then resume after that
     saveSVG_detail($('#savename').val());
+    onSavingbatchfiles = _.partial(onCreateDummy_radar,$('#savename').val());
 }
 
 // ulti function

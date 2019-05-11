@@ -382,11 +382,10 @@ function RadarChart(id, data, options, name) {
         }
         //update the outlines
         blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-        blobWrapperpath.transition()
+        blobWrapperpath.style("fill", "none").transition()
             .attr("d", d => radialAreaGenerator(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
-            .style("stroke", (d, i) => cfg.color(i))
-            .style("fill", "none");
+            .style("stroke", (d, i) => cfg.color(i));
         blobWrapperg.select('clipPath')
             .select('path')
             .transition('expand').ease(d3.easePolyInOut)
@@ -405,20 +404,22 @@ function RadarChart(id, data, options, name) {
             .attr("height",(radius)*2);
         blobWrapper.append("path")
             .attr("class", "radarStroke")
-            .attr("d", d => radialAreaGenerator(d)).transition()
+            .attr("d", d => radialAreaGenerator(d))
+            .style("fill", "none")
+            .transition()
             .style("stroke-width", () => cfg.strokeWidth + "px")
             //.style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
-            .style("stroke", (d, i) => cfg.color(i))
-            .style("fill", "none");
+            .style("stroke", (d, i) => cfg.color(i));
         blobWrapper
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     }
     else {
-        blobWrapperpath.transition().attr("d", d => radarLine(d)).transition()
+        blobWrapperpath.transition().attr("d", d => radarLine(d))
+            .style("fill", "none")
+            .transition()
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
-            .style("stroke", (d, i) => cfg.color(i))
-            .style("fill", "none");
+            .style("stroke", (d, i) => cfg.color(i));
         //Create the outlines
         blobWrapper.append("path")
             .attr("class", "radarStroke")
