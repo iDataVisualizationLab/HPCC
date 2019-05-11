@@ -314,7 +314,7 @@ function simulateResults2(hostname,iter, s){
         newService.data.service.host_name = hostname;
         newService.data.service.plugin_output = undefined;
     }else {
-        if (db == "influxdb")
+        if (db === "influxdb")
             try {
                 newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
             }catch(e){

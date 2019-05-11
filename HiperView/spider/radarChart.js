@@ -23,6 +23,8 @@ function RadarChart(id, data, options, name) {
         showText: true,
         bin: false,
         gradient: false,
+        isNormalize: false,
+        showHelperPoint: true,
         arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
         legend: [],
         color: function () {
@@ -46,17 +48,21 @@ function RadarChart(id, data, options, name) {
             return o.value;
         }))
     }));
+    
+    var range = thresholds[0];
+    if (cfg.isNormalize) range = [0,1];
+
     // *** TOMMY 2018 ************
     //Compute min max for the temperature
-    var dif = (thresholds[0][1] - thresholds[0][0]) / 4;
-    var right = thresholds[0][1] + dif;
+    var dif = (range[1] - range[0]) / 4;
+    var right = range[1] + dif;
 
     maxValue = right;
 
-    var minValue = thresholds[0][0] - dif;
+    var minValue = range[0] - dif;
     var colorLength = arrColor.length - 1;
-    var arrThresholds = [minValue, thresholds[0][0], thresholds[0][0] + dif, thresholds[0][0] + 2 * dif,
-        thresholds[0][0] + 3 * dif, thresholds[0][1], maxValue];
+    var arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
+        range[0] + 3 * dif, range[1], maxValue];
 
 
     var colorTemperature = d3.scaleLinear()
@@ -64,10 +70,9 @@ function RadarChart(id, data, options, name) {
         .range(arrColor)
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
     var opaTemperature = d3.scaleLinear()
-        .domain([left, thresholds[0][0], thresholds[0][0] + 2 * dif, thresholds[0][1], thresholds[0][1] + dif])
+        .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
         .range([1, 0.7, 0.05, 0.7, 1]);
     // .range([0.3,0.2,0.1,0.2,0.3]);
-
 
     var allAxis = (data[0].map(function (i, j) {
             return i.axis
@@ -121,23 +126,29 @@ function RadarChart(id, data, options, name) {
 
     //Remove whatever chart with the same id/class was present before
     var first = false;
-    if (typeof (id) === "string") {
-        d3.select(id).selectAll("svg").nodes().forEach(d => {
-            if (d3.select(d).attr("class") !== ("radar" + id.replace(".", "")))
-                d3.select(d).remove();
-        });
 
-        //Initiate the radar chart SVG or update it
-        var svg = d3.select(id).select(".radar" + id.replace(".", ""));
-    }else
-        var svg = d3.select(id).select(".radarGen"); // dummy mode or object mode
+    d3.select(id).selectAll("svg").nodes().forEach(d => {
+        if (d3.select(d).attr("class") !== ("radar" + correctId (id)))
+            d3.select(d).remove();
+    });
+
+    //Initiate the radar chart SVG or update it
+    var svg = d3.select(id).select(".radar" + correctId (id));
+
+    function correctId (id){
+        if (typeof (id) === "string") {
+            return id.replace(".", "");
+        }else {
+            return "Gen"
+        }
+    }
     var g = svg.select("#radarGroup");
     if (svg.empty()) {
         first = true;
         svg = d3.select(id).append("svg")
             .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
             .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
-            .attr("class", "radar" + id.replace(".",""));
+            .attr("class", "radar" + correctId (id)  +" radarPlot");
         //Append a g element
         g = svg.append("g")
             .attr("id","radarGroup")
@@ -292,7 +303,7 @@ function RadarChart(id, data, options, name) {
     var radarLine = d3.radialLine()
        // .interpolate("linear-closed")
        .curve(d3.curveCatmullRom.alpha(0.5))
-        .radius(function(d) { return rScale(d.value); })
+        .radius(function(d) { return rScale(d.value||d); })
         .angle(function(d,i) {  return angleSlice[i]; });
 
     var radialAreaGenerator = d3.radialArea()
@@ -340,7 +351,7 @@ function RadarChart(id, data, options, name) {
             .style("stroke", (d, i) => 'black')
             .style("stroke-width", () => cfg.strokeWidth + "px")
             //.style("fill-opacity", d => 1)
-            .style("fill", (d, i) => 'none');
+            .style("fill", 'none');
     }
 
     //update the outlines
@@ -382,12 +393,12 @@ function RadarChart(id, data, options, name) {
             .attr("d", d =>radialAreaGenerator(d));
         //Create the outlines
         blobWrapper.append("clipPath")
-            .attr("id",(d,i)=>"sum"+id.replace(".",""))
+            .attr("id",(d,i)=>"sum"+correctId (id))
             .append("path")
             .attr("d", d => radialAreaGenerator(d));
         blobWrapper.append("rect")
             .style('fill', 'url(#rGradient2)')
-            .attr("clip-path",( d,i)=>"url(#sum"+id.replace(".","")+")")
+            .attr("clip-path",( d,i)=>"url(#sum"+correctId (id)+")")
             .attr("x",-radius)
             .attr("y",-radius)
             .attr("width",(radius)*2)
@@ -403,7 +414,7 @@ function RadarChart(id, data, options, name) {
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     }
     else {
-        blobWrapperpath.attr("d", d => radarLine(d)).transition()
+        blobWrapperpath.transition().attr("d", d => radarLine(d)).transition()
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i))
@@ -411,7 +422,7 @@ function RadarChart(id, data, options, name) {
         //Create the outlines
         blobWrapper.append("path")
             .attr("class", "radarStroke")
-            .attr("d", d => radarLine(d)).transition()
+            .attr("d", d => radarLine(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i))
@@ -503,7 +514,7 @@ function RadarChart(id, data, options, name) {
     //Update the circles
     blobWrapper = g.selectAll(".radarWrapper");
     //Append the circles
-    if (!cfg.bin&&!cfg.gradient) {
+    if (!cfg.bin&&!cfg.gradient&&cfg.showHelperPoint) {
         var circleWrapper = blobWrapper.selectAll(".radarCircle")
             .data(function (d, i) {
                 d.forEach(function (d2) {
@@ -585,7 +596,7 @@ function RadarChart(id, data, options, name) {
     /////////////////////////////////////////////////////////
     
     //Wrapper for the invisible circles on top
-    if (!cfg.bin&&!cfg.gradient) {
+    if (!cfg.bin&&!cfg.gradient&&cfg.showHelperPoint) {
         var blobCircleWrapperg = g.selectAll(".radarCircleWrapper")
             .data(data);
         blobCircleWrapperg.exit().remove();

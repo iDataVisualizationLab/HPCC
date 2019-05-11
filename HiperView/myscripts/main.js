@@ -831,7 +831,7 @@ function main() {
         }
         if (imageRequest){
             imageRequest = false;
-            saveSVG_path(data.result.arr);
+            onCreateDummy_radar(data.result.arr); // saveImages.js
         }
         if (data.action==='returnData'){
             if (graphicControl.charType==="T-sne Chart")
@@ -1211,61 +1211,7 @@ function processResult_old(r){
     return obj;
 }
 const processResult_nagios = processResult_old;
-function processResult_influxdb(r,hostname,index){
-    var obj = {};
-    obj.result = {};
-    if (r.results[0].series){
-        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
-    }else
-        obj.result.query_time = new Date();
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
-    if (index !== undefined ) {
-        obj.data.service.plugin_output = {results: r.results.map(d => {
-            let temp = {};
-            temp.statement_id = d.statement_id;
-            temp.series = [];
-            let tempsub = {};
-            const series = d.series[0];
-            tempsub.name = series.name;
-            tempsub.columns = series.columns;
-            tempsub.values = [series.values[index]];
-            temp.series.push(tempsub);
-            return temp;
-        })};
-    } else
-        obj.data.service.plugin_output = r;
-    return obj;
-}
 
-
-function predict (arr,ser){
-    try{
-        return processData(arr[arr.length-1].data.service.plugin_output,ser);
-    } catch(e){
-        let average = 0;
-        switch (ser){
-            case serviceList[0]:
-                average = (thresholds[0][1]-thresholds[0][0])/2
-                return [average,average,average];
-            case serviceList[1]:
-                average = (thresholds[1][1]-thresholds[1][0])/2
-                return [average,average,average];
-            case serviceList[2]:
-                average = (thresholds[2][1]-thresholds[2][0])/2
-                return [average,average,average];
-            case serviceList[3]:
-                average = (thresholds[3][1]-thresholds[3][0])/2
-                return [average,average,average,average];
-            case serviceList[4]:
-                average = (thresholds[4][1]-thresholds[4][0])/2
-                return [average,average,average];
-            default:
-                return [0,0,0];
-        }
-    }
-}
 
 
 let processData = processData_old;
@@ -1771,11 +1717,6 @@ function resetRequest(){
         hostResults[att].index = count;
         hostResults[att].arr = [];
         serviceListattr.forEach(d=>hostResults[att][d]=[]);
-        // hostResults[att].arrTemperature = [];
-        // hostResults[att].arrCPU_load = [];
-        // hostResults[att].arrMemory_usage = [];
-        // hostResults[att].arrFans_health= [];
-        // hostResults[att].arrPower_usage= [];
         count++;
 
         svg.selectAll("."+att).remove();

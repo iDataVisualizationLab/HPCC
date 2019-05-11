@@ -230,63 +230,9 @@ d3.radar = function () {
 
 
             }
-            // let meanAxes = axes.map((a,i)=> d3.mean(dataSpider3,d=>d[i].value));
-            // datawithoutNULL = [];
-            // dataSpider3.forEach((d,i)=>{
-            //     let tempHost = [];
-            //     d.forEach((s,j)=>{
-            //         if (s.value === undefinedValue || isNaN(s.value))
-            //             tempHost[j] = meanAxes[j];
-            //         else if (j==3){   ////  Job load ***********************
-            //             var scale = d3.scaleLinear()
-            //                 .domain([thresholds[1][0],thresholds[1][1]])
-            //                 .range([thresholds[0][0],thresholds[0][1]]);
-            //
-            //             tempHost[j] =  scale(s.value);
-            //         }
-            //         else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
-            //             var scale = d3.scaleLinear()
-            //                 .domain([thresholds[3][0],thresholds[3][1]])
-            //                 .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-            //
-            //             tempHost[j] =  scale(s.value);
-            //         }
-            //         else if (j==9){   ////  Power Consumption ***********************
-            //             var scale = d3.scaleLinear()
-            //                 .domain([thresholds[4][0],thresholds[4][1]])
-            //                 .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-            //             tempHost[j] =  scale(s.value);
-            //         }
-            //     });
-            //     tempHost.data = d.name;
-            //     datawithoutNULL.push(tempHost);
-            // });
             // Standardize data for Radar chart
             dataSpider3.forEach((d,i)=>{
-                d.forEach((s,j)=>{
-                    if (s.value == undefinedValue || isNaN(s.value))
-                        s.value = -15;
-                    else if (j==3){   ////  Job load ***********************
-                        var scale = d3.scaleLinear()
-                            .domain([thresholds[1][0],thresholds[1][1]])
-                            .range([thresholds[0][0],thresholds[0][1]]);
-
-                        s.value =  scale(s.value);
-                    }
-                    else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
-                        var scale = d3.scaleLinear()
-                            .domain([thresholds[3][0],thresholds[3][1]])
-                            .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-
-                        s.value =  scale(s.value);
-                    }
-                    else if (j==9){   ////  Power Consumption ***********************
-                        var scale = d3.scaleLinear()
-                            .domain([thresholds[4][0],thresholds[4][1]])
-                            .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-                        s.value =  scale(s.value);
-                    }
-                });
+                normalizevalue(d);
             });
         }
         //return datawithoutNULL;
