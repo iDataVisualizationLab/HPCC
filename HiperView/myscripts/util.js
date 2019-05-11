@@ -570,10 +570,10 @@ function rasterize(svg,isLight) {
     image.onerror = reject;
     image.onload = () => {
         const rect = svg.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        context.clearRect ( 0, 0, rect.width, rect.height );
-        context.drawImage(image, 0, 0, rect.width, rect.height);
+        canvas.width = rect.width||d3.select(svg).attr('width');
+        canvas.height = rect.height||d3.select(svg).attr('height');
+        context.clearRect ( 0, 0, canvas.width, canvas.height );
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(resolve);
     };
     image.src = URL.createObjectURL(serialize(svg,isLight));

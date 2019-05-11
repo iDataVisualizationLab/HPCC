@@ -163,6 +163,8 @@
                 <button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>
                 <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
                 <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>
+                <button onclick="saveSVG_batch()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog">
+                    <i class="fas fa-download pauseicon" ></i> Download Images</button>
             </div>
 
 
@@ -267,12 +269,14 @@
 <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
 
 
+<script src="js/jszip.min.js"></script>
 <script src="myscripts/util.js"></script>
 <script src="myscripts/hostlist.js"></script>
 <script src="myscripts/service.js"></script>
 <!--<script src="myscripts/service17Oct.js"></script>-->
 <!--<script src="myscripts/serviceWed26Sep.js"></script>-->
 <!--<script src="myscripts/main.js"></script>-->
+<script src="myscripts/saveImages.js"></script>
 <script src="js/outliagnostics.min.js"></script>
 <script src="js/scagnosticsnd.min.js"></script>
 <script src="js/box.js"></script>

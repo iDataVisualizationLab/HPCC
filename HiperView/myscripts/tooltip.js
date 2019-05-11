@@ -86,46 +86,7 @@ function addSVG(hideLine){
     countRadarChart=1;
 }
 
-function saveSVG_light(event,type){
-    saveSVG_detail = _.partial(saveSVG,event,_,type);
-    $('#savename').val(event.parentNode.querySelector('.hostnameInTip').textContent.split(': ')[1]);// pre fill
-}
 
-function saveSVG_batch(type){
-    saveSVG_detail = _.partial(saveDummy_radar,_,'png');
-    const time = new Date(query_time);
-    let stringDate = time.toLocaleDateString()+'_'+time.toLocaleTimeString();
-    stringDate  =stringDate.replace(/\//gi,'-');
-    $('#savename').val(stringDate);// pre fill
-}
-
-function saveDummy_radar(prefix,type) {
-    getData(null,lastIndex+1);
-    imageRequest = true; //turn on watcher for image request
-    saveSVG_detail = _.partial(saveSVG,_,_,'png',prefix);
-}
-
-function onSaveImage (){
-    saveSVG_detail($('#savename').val());
-}
-let saveSVG_detail;
-let saveSVG = function(event,name,type,prefix){
-    let target = event.parentNode;
-    if (name==="")
-        name = target.querySelector('.hostnameInTip').textContent.split(': ')[1];
-    switch(type) {
-        default:
-            save(serialize(target.querySelector('.radarradarChart'), true));
-            break;
-        case 'png':
-            rasterize(target.querySelector('.radarradarChart'), true).then(svgString=>
-                save(svgString)); // passes Blob and filesize String to the callback
-            break;
-    }
-    function save( dataBlob){
-        saveAs( dataBlob, (prefix||"")+name+'.'+type ); // FileSaver.js function
-    }
-};
 var svgTip;
 var xScale;
 function mouseoverNode(d1){
@@ -648,6 +609,34 @@ function pannelsummary(show){
         pansum.style('visibility','hidden');
 }
 
+function normalizevalue(d) {
+    d.forEach((s,j)=>{
+        if (s.value == undefinedValue || isNaN(s.value))
+            s.value = -15;
+        else if (j==3){   ////  Job load ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[1][0],thresholds[1][1]])
+                .range([thresholds[0][0],thresholds[0][1]]);
+
+            s.value =  scale(s.value);
+        }
+        else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[3][0],thresholds[3][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+
+            s.value =  scale(s.value);
+        }
+        else if (j==9){   ////  Power Consumption ***********************
+            var scale = d3.scaleLinear()
+                .domain([thresholds[4][0],thresholds[4][1]])
+                .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
+            s.value =  scale(s.value);
+        }
+    });
+    return d;
+}
+
 function summaryRadar () {
     var undefinededa = [undefinedValue,undefinedValue,undefinedValue];
     var irecord = $('#irecord').children("option:selected").val();
@@ -724,30 +713,7 @@ function summaryRadar () {
             dataSpider2.push(arr1);
 
             // Standardize data for Radar chart
-            for (var j=0; j<dataSpider2[i].length;j++){
-                if (dataSpider2[i][j].value == undefinedValue || isNaN(dataSpider2[i][j].value))
-                    dataSpider2[i][j].value = -15;
-                else if (j==3){   ////  Job load ***********************
-                    var scale = d3.scaleLinear()
-                        .domain([thresholds[1][0],thresholds[1][1]])
-                        .range([thresholds[0][0],thresholds[0][1]]);
-
-                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
-                }
-                else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
-                    var scale = d3.scaleLinear()
-                        .domain([thresholds[3][0],thresholds[3][1]])
-                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-
-                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
-                }
-                else if (j==9){   ////  Power Consumption ***********************
-                    var scale = d3.scaleLinear()
-                        .domain([thresholds[4][0],thresholds[4][1]])
-                        .range([thresholds[0][0],thresholds[0][1]]); //interpolateHsl interpolateHcl interpolateRgb
-                    dataSpider2[i][j].value =  scale(dataSpider2[i][j].value);
-                }
-            }
+            normalizevalue(arr1);
         }
     }
     var radarChartsumopt  = {
