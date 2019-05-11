@@ -31,8 +31,14 @@
 
 <body text="black" id="mainBody">
 <div class="cover">
-    <h5 class="spinnerC center" style="top: 60%;" >loading data...</h5>
+    <div class="progressDiv hidden">
+        <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
+        <div class="progress spinnerC center" style="width: 70%;">
+            <div class="determinate" style="width: 0%"></div>
+        </div>
+    </div>
     <div class="spinnerC center" id="loadingSpinner" >
+        <h5 class="spinnerC center status" style="top: 60px; min-width: 300px;" >loading data...</h5>
     </div>
 </div>
 <nav class="pushpin-demo-nav" data-target="blue">
