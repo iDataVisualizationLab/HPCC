@@ -32,7 +32,6 @@ function RadarChart(id, data, options, name) {
         }
         //d3.scaleOrdinal(d3.schemeCategory10) //Color function
     };
-
     //Put all of the options into a variable called cfg
     if ('undefined' !== typeof options) {
         for (var i in options) {
@@ -128,11 +127,12 @@ function RadarChart(id, data, options, name) {
     var first = false;
 
     d3.select(id).selectAll("svg").nodes().forEach(d => {
-        if (d3.select(d).attr("class") !== ("radar" + correctId (id)))
+        if (!d3.select(d).classed("radar" + correctId (id)))
             d3.select(d).remove();
     });
 
     //Initiate the radar chart SVG or update it
+
     var svg = d3.select(id).select(".radar" + correctId (id));
 
     function correctId (id){
@@ -416,7 +416,6 @@ function RadarChart(id, data, options, name) {
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))
             .style("fill", "none")
-            .transition()
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i));

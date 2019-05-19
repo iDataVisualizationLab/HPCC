@@ -292,7 +292,6 @@ function updateLever( start, end )
 
 // ngan
 // tooltip update
-
 function updateTooltip( host )
 {
     // event function
@@ -363,98 +362,22 @@ function requestupdatetooltiip()
 {
         d3.select('#tip').attr('material',{fps:1.5});
         $('#tip')[0].components.material.shader.__render();
-        setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
+        $('#tip')[0].components.material.shader.__height=1024;
+    var material = Object.assign({}, document.querySelector('#tip').getAttribute('material'))
+    material.debug = '#debug';
+    document.querySelector('#tip').setAttribute('material', material)
+        // setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
 }
 
-function processData(str, serviceName)
-{
-    if (serviceName == serviceList[0]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefined;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        else{
-            var arrString =  str.split(" ");
-            a[0] = +arrString[2]||undefined;
-            a[1] = +arrString[6]||undefined;
-            a[2] = +arrString[10]||undefined;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[1]){
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0
-            || str.indexOf("CPU Load: null")>=0){
-            a[0] = undefined;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        else{
-            var arrString =  str.split("CPU Load: ")[1];
-            a[0] = +arrString;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[2]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefined;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        else{
-            var arrString =  str.split(" Usage Percentage = ")[1].split(" :: ")[0];
-            a[0] = +arrString;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[3]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefined;
-            a[1] = undefined;
-            a[2] = undefined;
-            a[3] = undefined;
-        }
-        else{
-            var arr4 =  str.split(" RPM ");
-            a[0] = +arr4[0].split("FAN_1 ")[1];
-            a[1] = +arr4[1].split("FAN_2 ")[1];
-            a[2] = +arr4[2].split("FAN_3 ")[1];
-            a[3] = +arr4[3].split("FAN_4 ")[1];
-        }
-        return a;
-    }
-    else if (serviceName == serviceList[4]) {
-        var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
-            a[0] = undefined;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        else{
-            var maxConsumtion = 3.2;  // over 100%
-            var arr4 =  str.split(" ");
-            a[0] = +arr4[arr4.length-2]/maxConsumtion;
-            a[1] = undefined;
-            a[2] = undefined;
-        }
-        return a;
-    }
-}
+
+
 
 function updateTooltip3D(host_name)
 {
     var levels = 6;
     var currentval = [];
-    d3.keys(serviceListattr).forEach(d => {
-        serviceListattr[d].val.forEach(key2=>{
+    d3.keys(serviceAttr).forEach(d => {
+        serviceAttr[d].val.forEach(key2=>{
             currentval.push(json[host_name][key2][time]);
         })
     });

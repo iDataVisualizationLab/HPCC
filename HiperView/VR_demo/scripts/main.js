@@ -107,6 +107,7 @@ var charType = "Heatmap";
 var undefinedValue = undefined;
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
+var serviceList_selected = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
 var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
     arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},

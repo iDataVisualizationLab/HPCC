@@ -3,7 +3,7 @@
 function UnzipData(dataRaw){
     let temp = [];
     dataRaw.forEach(d=>{
-        d.value[serviceListattr[chosenService]].forEach((it,i)=>
+        d.value[serviceAttr[chosenService]].forEach((it, i)=>
             temp.push({f: it[service_part],df: 0, key: d.key, timestep:i, undefined:false}));
     });
     return temp;

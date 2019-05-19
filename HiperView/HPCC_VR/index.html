@@ -13,13 +13,13 @@
 		<link rel="stylesheer" type="text/css" href="scripts/lib/d3.parsets.css"/>
 
 		<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+		<script src="scripts/lib/aframe-html-shader.min.js"></script>
 		<script src="scripts/lib/jquery-3.3.1.min.js"></script>
 		<script src="scripts/lib/jquery.csv.min.js"></script>
 		<script src="scripts/lib/d3.min.js"></script>
 		<script src="scripts/lib/three.min.js"></script>
 		<script src="scripts/lib/BoxLineGeometry.js"></script>
 		<script src="scripts/lib/QuickHull.js"></script>
-		<script src="scripts/lib/aframe-html-shader.min.js"></script>
 		<script src="scripts/lib/d3.tip.js"></script>
 		<script src="scripts/lib/SceneUtils.js"></script>
 		<!-- <script src="scripts/worker/scag_worker.js"></script> -->
@@ -27,17 +27,20 @@
 
 	</head>
 	<body>
-        
+
         <div id="blocker">
+			<div id="htmlElement" style="background: #F8F8F8; color: #333; font-size: 48px">Hello, HTML!</div>
             <div id="svgplace"></div>
 			<div id="instructions"></div>
+
 		</div>
+		<div id="debug"></div>
 		<a-scene>
 
 			<div id="holder"></div>
 
 			<a-entity id ="tipgroup">
-            	<a-plane id ="tip" scale = "0.5 0.5 0.5" material="shader: html; target: #instructions ; transparent: true; side: double;" position="0 0 0"></a-plane>
+            	<a-plane id ="tip" scale = "0.5 0.5 0.5" material="shader: html; ratio:null;height:1024;target: #instructions ; transparent: true; side: double;" position="0 0 0"></a-plane>
 			</a-entity>
 
             <a-entity position="2 -1.40 0">
@@ -54,32 +57,33 @@
 			<a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']" line="color: #118A7E"></a-entity>
 			<!-- <a-sky color="#ECECEC"></a-sky> -->
 
-			
+
 			<!--<script src="scripts/lib/tooltip.js"></script>-->
 
-			<script src="data/serviceWed27Sep.js"></script>
-			<script src="scripts/lib/d3.parsets.js"></script>
-			<script src="scripts/lib/ParallelSet.js"></script>
-			<script src="scripts/lib/scagnostics3d.min.js"></script>
-			<script src="scripts/lib/scagnosticsnd.min.js"></script>
-			<script src="scripts/ScatterPlot.js"></script>
-			<script src="scripts/Infrastructure.js"></script>
-			<script src="scripts/ControlPanel.js"></script>
-			<script src="scripts/hostlist.js"></script>
-			<script src="../myscripts/util.js"></script>
-			<script src="../myscripts/hostlist.js"></script>
-			<script src="../myscripts/service.js"></script>
-			<!-- <script src="data/service17Oct.js"></script> -->
-			<script src="scripts/request.js"></script>
-			<script src="scripts/UpdateFunctions.js"></script>
-			<script src="scripts/events.js"></script>
-			<script src="scripts/main.js"></script>
-			<script src="../myscripts/tooltip.js"></script>
-			<script src="../spider/radarChart.js"></script>
-			<script src="scripts/subconfig.js"></script>
+
 
 		</a-scene>
-
+		<script src="data/serviceWed27Sep.js"></script>
+		<script src="scripts/lib/d3.parsets.js"></script>
+		<script src="scripts/lib/ParallelSet.js"></script>
+		<script src="scripts/lib/scagnostics3d.min.js"></script>
+		<script src="scripts/lib/scagnosticsnd.min.js"></script>
+		<script src="scripts/ScatterPlot.js"></script>
+		<script src="scripts/Infrastructure.js"></script>
+		<script src="scripts/ControlPanel.js"></script>
+		<script src="scripts/hostlist.js"></script>
+		<script src="../myscripts/util.js"></script>
+		<script src="../myscripts/hostlist.js"></script>
+		<script src="../myscripts/service.js"></script>
+		<!-- <script src="data/service17Oct.js"></script> -->
+		<script src="scripts/request.js"></script>
+		<script src="scripts/UpdateFunctions.js"></script>
+		<script src="scripts/events.js"></script>
+		<script src="../myscripts/setting.js"></script>
+		<script src="scripts/main.js"></script>
+		<script src="../myscripts/tooltip.js"></script>
+		<script src="../spider/radarChart.js"></script>
+		<script src="scripts/subconfig.js"></script>
 
 	</body>
 </html>

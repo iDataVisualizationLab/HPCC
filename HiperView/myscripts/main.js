@@ -94,7 +94,7 @@ var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack = 10;
+var maxstack = 7;
 var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
@@ -794,7 +794,7 @@ function changeView(v){
         graphicControl.mode = layout.HORIZONTAL;
         getHostY = getHostY_HORIZONTAL;
         w_rack = (width-23)/10-1;
-        maxstack = 10;
+        maxstack = 7;
         d3.select('.mainsvg').attr("height",1000);
         cleanUp();
         playchange();
@@ -1404,7 +1404,7 @@ function plotResult(result,name) {
                     a = processData(r.arr[i].data.service.plugin_output, selectedService);
                 } catch (e){
                     a = processData(undefined, selectedService);
-                    r.arr[i] ={}
+                    r.arr[i] ={};
                     r.arr[i].result = {};
                     r.arr[i].result.query_time = query_time;
                     r.arr[i].data = {};
@@ -1429,7 +1429,7 @@ function plotResult(result,name) {
             if (graphicControl.charType === "Heatmap")
                 plotHeat(arr, name, hpcc_rack, hpcc_node, xStart, y,graphicControl.mode===layout.VERTICAL);
             else
-                plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y);
+                plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y,serviceList.indexOf( selectedService));
             break;
         case "T-sne Chart":
             initTsneView();
@@ -1506,9 +1506,9 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     // *****************************************
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
-function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,startinde){
+function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
     var yScale = d3.scaleLinear()
-        .domain([(thresholds[0][1]-thresholds[0][0])/2,thresholds[0][1]]) //  baseTemperature=60
+        .domain([(thresholds[serindex][1]-thresholds[serindex][0])/2,thresholds[serindex][1]]) //  baseTemperature=60
         .range([0, node_size*2]); // output
 
     var area = d3.area()

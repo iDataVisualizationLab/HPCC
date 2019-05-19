@@ -1,7 +1,8 @@
 body {
     font-family: Monospace;
     background-color: #101010;
-    color: #fff;
+    /*color: #fff;*/
+    color: #000000;
     margin: 0px;
     overflow: hidden;
 }
@@ -32,6 +33,12 @@ a {
     color: #ffffff;
     text-align: center;
     cursor: pointer;
+    z-index: -5;
+}
+#debug {
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }
 #instructions path {
     fill-opacity: 0 !important;

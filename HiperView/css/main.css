@@ -17,7 +17,7 @@ body.light {
 }
 
 path {
-	/*fill: none;*/
+	fill: none;
 }
 text.textUsernames {
 	stroke-width: 0.5px;

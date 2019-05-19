@@ -30,7 +30,7 @@ function readData() {
             for (i = 0; i < iterationstep; i++) {
                 query_time = undefined;
                 var name= undefined;
-                serviceListattr.forEach((sv,si)=> {
+                serviceListattr.forEach((sv, si)=> {
                     var result = simulateResults2(hosts[count].name, iteration, serviceList[si]);
                     query_time = result.result.query_time||query_time;
                     name = result.data.service.host_name||name;

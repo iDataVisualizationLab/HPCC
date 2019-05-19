@@ -453,8 +453,8 @@ function updateTooltip3D(host_name)
 {
     var levels = 6;
     var currentval = [];
-    d3.keys(serviceListattr).forEach(d => {
-        serviceListattr[d].val.forEach(key2=>{
+    d3.keys(serviceAttr).forEach(d => {
+        serviceAttr[d].val.forEach(key2=>{
             currentval.push(json[host_name][key2][time]);
         })
     });
