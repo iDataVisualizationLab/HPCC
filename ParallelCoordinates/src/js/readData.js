@@ -62,22 +62,27 @@ function object2DataPrallel(ob){
         var host = namet[2];
         for (i = 0; i<comlength; i++){
             var eachIn = {};
+            var validkey =true;
             serviceListattrnest.forEach(s=>{
                 s.sub.forEach((sub,sj)=>{
-                    eachIn[sub] = com.value[s.key][i][sj]
+                    eachIn[sub] = com.value[s.key][i][sj];
+                    validkey = validkey&&(eachIn[sub]!==undefined)
                 });
             });
-            eachIn.Time = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
-            eachIn.rack = "Rack "+rack;
-            eachIn.compute = com.key;
-            eachIn.group = "Rack "+rack;
-            eachIn.name = com.key+', '+d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
-            eachIn.id = com.key+"-"+count;
-            count++;
-            newdata.push(eachIn);
+            if (validkey) {
+                eachIn.Time = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
+                eachIn.rack = "Rack " + rack;
+                eachIn.compute = com.key;
+                eachIn.group = "Rack " + rack;
+                eachIn.name = com.key + ', ' + d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
+                eachIn.id = com.key + "-" + count;
+                count++;
+                newdata.push(eachIn);
+            }
         }
 
     });
+    // return newdata.filter(d=>d.Time< new Date('Thu Mar 21 2019 16:20:00 GMT-0500 (Central Daylight Time)'))
     return newdata;
 }
 
