@@ -13,7 +13,14 @@
 		<link rel="stylesheer" type="text/css" href="scripts/lib/d3.parsets.css"/>
 
 		<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
-		<script src="scripts/lib/aframe-html-shader.min.js"></script>
+		<!--&lt;!&ndash; Required to convert named colors to RGB &ndash;&gt;-->
+		<!--<script src="https://cdn.jsdelivr.net/npm/rgbcolor@^1/index.js"></script>-->
+		<!--&lt;!&ndash; Optional if you want blur &ndash;&gt;-->
+		<!--<script src="https://cdn.jsdelivr.net/npm/stackblur-canvas@^1/dist/stackblur.min.js"></script>-->
+		<!--&lt;!&ndash; Main canvg code &ndash;&gt;-->
+		<!--<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>-->
+		<script src="scripts/lib/aframe-html-shader.js"></script>
+		<script src="scripts/lib/html2canvas.min.js"></script>
 		<script src="scripts/lib/jquery-3.3.1.min.js"></script>
 		<script src="scripts/lib/jquery.csv.min.js"></script>
 		<script src="scripts/lib/d3.min.js"></script>
@@ -29,12 +36,12 @@
 	<body>
 
         <div id="blocker">
-			<div id="htmlElement" style="background: #F8F8F8; color: #333; font-size: 48px">Hello, HTML!</div>
+			<!--<div id="htmlElement" style="background: #F8F8F8; color: #333; font-size: 48px">HiperVR loading...</div>-->
             <div id="svgplace"></div>
 			<div id="instructions"></div>
 
 		</div>
-		<div id="debug"></div>
+		<!--<div id="debug"></div>-->
 		<a-scene>
 
 			<div id="holder"></div>

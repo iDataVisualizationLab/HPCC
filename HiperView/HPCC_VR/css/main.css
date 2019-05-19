@@ -11,9 +11,13 @@ a {
 }
 #blocker {
     position: absolute;
+    top:0;
+    left:0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    z-index: 10;
+    pointer-events: none;
+    /*background-color: rgba(0,0,0,0.5);*/
 }
 #instructions {
     width: 1024px;
@@ -33,7 +37,6 @@ a {
     color: #ffffff;
     text-align: center;
     cursor: pointer;
-    z-index: -5;
 }
 #debug {
     position: absolute;

@@ -317,7 +317,7 @@ function updateTooltip( host )
     $('#placetip').triggerSVGEvent('click');
     d3.select('#d3-tip').attr("position", "absolute")
         .style("top", "0px")
-        .style("left","246px");
+        .style("left","10px");
     requestupdatetooltiip();
 
 }
