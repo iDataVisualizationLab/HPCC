@@ -366,5 +366,5 @@ function requestupdatetooltiip()
     var material = Object.assign({}, document.querySelector('#tip').getAttribute('material'))
     material.debug = '#debug';
     document.querySelector('#tip').setAttribute('material', material)
-        setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
+        // setTimeout(()=>{d3.select('#tip').attr('material',{fps:0});}, 100);
 }

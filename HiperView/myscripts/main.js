@@ -94,7 +94,7 @@ var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack = 7;
+var maxstack = 10;
 var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
@@ -794,7 +794,7 @@ function changeView(v){
         graphicControl.mode = layout.HORIZONTAL;
         getHostY = getHostY_HORIZONTAL;
         w_rack = (width-23)/10-1;
-        maxstack = 7;
+        maxstack = 10;
         d3.select('.mainsvg').attr("height",1000);
         cleanUp();
         playchange();
@@ -1991,24 +1991,24 @@ function closeNav() {
 // pause when not use , prevent frozen hiperView
 
 $( document ).ready(function() {
-    $(window).on("blur focus", function(e) {
-        var prevType = $(this).data("prevType");
-
-        if (prevType != e.type) {   //  reduce double fire issues
-            switch (e.type) {
-                case "blur":
-                    $(this).data("playstatus",d3.select('.pause').node().value);
-                    playchange();
-                    break;
-                case "focus":
-                    // $('div').text("Focused");
-                    if ($(this).data("playstatus")=="false")
-                        pausechange();
-                    break;
-            }
-        }
-        $(this).data("prevType", e.type);
-    });
+    // $(window).on("blur focus", function(e) {
+    //     var prevType = $(this).data("prevType");
+    //
+    //     if (prevType != e.type) {   //  reduce double fire issues
+    //         switch (e.type) {
+    //             case "blur":
+    //                 $(this).data("playstatus",d3.select('.pause').node().value);
+    //                 playchange();
+    //                 break;
+    //             case "focus":
+    //                 // $('div').text("Focused");
+    //                 if ($(this).data("playstatus")=="false")
+    //                     pausechange();
+    //                 break;
+    //         }
+    //     }
+    //     $(this).data("prevType", e.type);
+    // });
     console.log('ready');
     $('.collapsible').collapsible();
     $('.modal').modal();
