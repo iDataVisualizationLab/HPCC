@@ -32,6 +32,7 @@ addEventListener('message',function ({data}){
                 tsne = new tsnejs.tSNE(data.value);
                 currentMaxIndex = -1;
                 currentLastIndex = -1;
+                stop = false;
                 break;
             case "maxstack":
                 maxstack = (data.value);
@@ -117,8 +118,11 @@ addEventListener('message',function ({data}){
             case "updateTracker":
                 // updateStore(tsne.getSolution());
                 if (requestIndex > currentMaxIndex ||currentMaxIndex===0 ) {
+                    currentMaxIndex = requestIndex;
+                    currentLastIndex = currentMaxIndex-1;
                     updateStore(tsne.getSolution(), community(),cost);
-                    store_step_temp = copyStore(store_step);
+                    currentLastIndex = currentMaxIndex;
+                    // store_step_temp = copyStore(store_step);
                 }
                 postMessage({action:data.action,  status:"done", top10: getTop10 (store_step,requestIndex) });
                 // store_step_temp = copyStore(store_step);
@@ -186,13 +190,11 @@ function updateStore(sol,clus,cost){
         // const currentLastIndex = store_step[i].length-2;
         if (currentLastIndex >-1 ) {
             // if (store_step[i].dis[currentLastIndex+1]=== undefined)
-                store_step[i].dis[currentLastIndex+1] = store_step[i].dis[currentLastIndex]||0+ distance(store_step[i][currentLastIndex], ss);
+                store_step[i].dis[currentLastIndex+1] = (store_step[i].dis[currentLastIndex]||0)+ distance(store_step[i][currentLastIndex], ss);
         }
         // if (store_step[i].cluster[currentLastIndex+1]=== undefined)
             store_step[i].cluster[currentLastIndex+1] = {timeStep:currentLastIndex+1,val:clus[store_step[i].name]};
     });
-    currentMaxIndex = currentLastIndex+1;
-    currentLastIndex = currentMaxIndex;
 }
 
 function updateTempStore(sol){ // store data point in a step
@@ -228,7 +230,8 @@ function getTop10 (store,requestIndex) {
         let shortdata = data.slice(startpos,NCluster).filter(d=>d); //remove empty
         shortdata.name = data.name;
         shortdata.clusterS = data.cluster.slice(startpos,NCluster).filter(d=>d);
-        shortdata.dis = data.dis[requestIndex||currentMaxIndex];
+        shortdata.dis = data.dis;
+        shortdata.requested = requestIndex||currentMaxIndex;
         //}
         return shortdata;
     });
