@@ -894,3 +894,14 @@ p.divider {
 #savedialog {
 	border-radius: 10px;
 }
+
+.collection .collection-item.avatar{
+	min-height: unset;
+}
+.collection .collection-item.avatar:not(.circle-clipper)>.circle {
+	width:30px;
+	height:30px;
+}
+.collection .collection-item.avatar .title {
+	font-size: 13px;
+}

@@ -94,7 +94,7 @@ var simDurationinit = 0;
 var numberOfMinutes = 26*60;
 
 var iterationstep = 1;
-var maxstack = 10;
+var maxstack = 7;
 var normalTs =0.6; //time sampling
 // var timesteppixel = 0.1; // for 4
 var timesteppixel = 0.1; // for 26
@@ -168,6 +168,12 @@ var TsnePlotopt  = {
         dim : 2, // dimensionality of the embedding (2 = default)
         maxtries: 50
     },
+    display:{
+        symbol:{
+            type: 'path',
+            radius: 30,
+        }
+    },
     top10:{
         details :{
             circle: {
@@ -183,13 +189,26 @@ var TsnePlotopt  = {
                     'stroke': 'black',
                     'stroke-width': 0.5,
                 }
+            },
+            clulster: {
+                attr: {
+                    rx: 3,
+                    ry: 3}
+                ,
+                style: {
+                    stroke: 'white'
+                }
             }
         }
+    },
+    runopt:{
+        zoom:30,
+        simDuration: 1000,
     }
 };
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
-var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt);
+var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
 
@@ -794,7 +813,7 @@ function changeView(v){
         graphicControl.mode = layout.HORIZONTAL;
         getHostY = getHostY_HORIZONTAL;
         w_rack = (width-23)/10-1;
-        maxstack = 10;
+        maxstack = 7;
         d3.select('.mainsvg').attr("height",1000);
         cleanUp();
         playchange();
@@ -838,7 +857,7 @@ function main() {
         }
         if (data.action==='returnData'){
             if (graphicControl.charType==="T-sne Chart")
-                TSneplot.data(data.result.arr).draw(data.result.nameh);
+                TSneplot.data(data.result.arr).draw(data.result.nameh,data.result.index);
             if (graphicControl.sumType === "RadarSummary") {
                 // console.log(data.result.index);
                 Radarplot.data(data.result.arr).drawSummarypoint(data.result.index );
