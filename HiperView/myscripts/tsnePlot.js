@@ -37,6 +37,7 @@ d3.Tsneplot = function () {
         tx = 0,
         ty =0;
     let needUpdate = false;
+    let groupMethod = 'outlier';
     let first = true;
     let returnEvent;
     function updateRenderRanking(data) {
@@ -112,10 +113,14 @@ d3.Tsneplot = function () {
             .call(createClulsterPad);
     }
     function createDetailCircle (g){
-        let newg = g.selectAll('circle').data(d=>d);
+        let newg = g.selectAll('circle').data(d=>d.map((it,i)=>{
+            let temp = it.slice();
+            temp.group = d.clusterS[i].val;
+            return temp;
+        }));
         newg.exit().remove();
         // newg.classed('new',false);
-        return newg.enter().append('circle')
+        let cir = newg.enter().append('circle')
             // .classed('new',true)
             .attrs(graphicopt.top10.details.circle.attr)
             .styles(graphicopt.top10.details.circle.style)
@@ -123,28 +128,41 @@ d3.Tsneplot = function () {
                 cx:scaleX_small(d[0]),
                 cy:scaleY_small(d[1]),}
             });
+        const tempdata = cir.data().clusterS;
+        if(groupMethod==='outlier')
+            cir.styles((d,i)=>{
+                return {'fill': colorCategory(d.group),
+                        'opacity': d.group?1:0.2};
+            });
+
+        return cir;
     }
     function createClulsterPad (g){
         try {
-            g.selectAll('rect').interrupt().selectAll("*").interrupt();
+            g.selectAll('circle').interrupt().selectAll("*").interrupt();
         }catch(e){
             console.log(e)
         }
-        let newg = g.selectAll('rect').data(d=>d,e=>e.timeStep);
+        let newg = g.selectAll('circle').data(d=>d,e=>e.timeStep);
         newg.exit()
             .transition()
             .duration(runopt.simDuration)
             .attr("transform", "scale(" + 0 + ")")
             .remove();
         newg.classed('new',false);
-        return newg.enter().append('rect')
+        return newg.enter().append('circle')
             .classed('new',true)
             .attrs(graphicopt.top10.details.clulster.attr)
+            .attrs(d=>{return{
+                r:  (groupMethod==='outlier'?(d.val?1:0.8):1)* graphicopt.top10.details.clulster.attr.width/2,
+                // height: (groupMethod==='outlier'?(d.val?1:0.7):1)* graphicopt.top10.details.clulster.attr.height,
+            }})
             .styles(graphicopt.top10.details.clulster.style)
             .style("fill",
                 d=>{
                     return colorCategory(d.val)}
-            ).attr('x',(d,i)=>i*graphicopt.eventpad.size)
+            ).attr('cx',(d,i)=> (i+0.5)*graphicopt.eventpad.size)
+            .attr('cy',(d,i)=> graphicopt.eventpad.size/2)
             .style('opacity',0)
             .on('mouseover',function(d){
                 const name = this.parentNode.parentNode.__data__.name;
@@ -163,7 +181,7 @@ d3.Tsneplot = function () {
             .transition()
             .duration(runopt.simDuration)
             .style('opacity',1)
-            .attr('x',(d,i)=>i*graphicopt.eventpad.size);
+                .attr('cx',(d,i)=> (i+0.5)*graphicopt.eventpad.size);
     }
     function create_worker (){
         if (tsne)
@@ -188,10 +206,26 @@ d3.Tsneplot = function () {
             calTime[1] =  performance.now();
             switch (data.action) {
                 case 'step':
-                    store.Y = data.result.solution;
+                    // store.Y = data.result.solution;
                     store.cost = data.result.cost;
                     // runopt.simDuration = Math.max(runopt.simDuration,(calTime[1]-calTime[0])*0.8);
-                    updateEmbedding(store.Y, store.cost);
+                    forcetsne.force('tsne', function (alpha) {
+                        if (forcetsnemode){
+                            store.Y.forEach((d, i) => {
+                                d.fx = data.result.solution[i][0] * runopt.zoom * ss;
+                                d.fy = data.result.solution[i][1] * runopt.zoom * ss;
+                                // d.x = data.result.solution[i][0] * runopt.zoom * ss;
+                                // d.y = data.result.solution[i][1] * runopt.zoom * ss;
+                            });
+                        }else {
+                            store.Y.forEach((d, i) => {
+                                d.fx =  null;
+                                d.fy =  null;
+                                d.x += alpha * (data.result.solution[i][0] * runopt.zoom * ss - d.x);
+                                d.y += alpha * (data.result.solution[i][1] * runopt.zoom * ss - d.y);
+                            });
+                        }
+                    });
                     break;
 
                 case "updateTracker":
@@ -331,7 +365,7 @@ d3.Tsneplot = function () {
         scaleX_small.range([0,sizegraph]);
         // scaleY_small.range([0,sizegraph]);
         scaleY_small.range([sizegraph/4-3,sizegraph*5/4-3]);
-        graphicopt.top10.width = Math.min(graphicopt.width/4,200);
+        graphicopt.top10.width = Math.min(graphicopt.width/4,250);
         if (!graphicopt.eventpad)
             graphicopt.eventpad ={};
         graphicopt.eventpad.size = graphicopt.eventpad.size || 10;
@@ -385,7 +419,22 @@ d3.Tsneplot = function () {
                 tsne.postMessage({action: 'step'});
             }
         };
+        panel.select('.seperate').on('click', function(d){
+            forcetsnemode = !forcetsnemode;
+        });
+        forcetsne = d3.forceSimulation()
+            .alphaDecay(0.005)
+            .alpha(0.1)
+            .force('collide', d3.forceCollide().radius(graphicopt.dotRadius))
+            .on('tick', function () {
+                if (store.cost){
+                    updateEmbedding(store.Y, store.cost);
+                }
+            }).stop();
+
     };
+    let forcetsne;
+    let forcetsnemode = false;
     function updateCluster (data) {
         let group = g.selectAll('.linkLineg')
             .select('circle')
@@ -397,23 +446,23 @@ d3.Tsneplot = function () {
     function updateEmbedding(Y,cost, skiptransition) {
         d3.select("#subzone").select('.cost').text(cost.toFixed(2));
         let group = g.selectAll('.linkLineg');
-        if (skiptransition==true) {
+        if (skiptransition === true) {
             group
                 .interrupt().attr("transform", function(d, i) {
                 return "translate(" +
-                    (Y[i][0]*runopt.zoom*ss+tx) + "," +
-                    (Y[i][1]*runopt.zoom*ss+ty) + ")"; });
+                    (Y[i].x+tx) + "," +
+                    (Y[i].y+ty) + ")"; });
         }else{
             group.transition().duration(runopt.simDuration*1.1)
                 .ease(d3.easeLinear)
                 .attr("transform", function(d, i) {
                     return "translate(" +
-                        (Y[i][0]*runopt.zoom*ss+tx) + "," +
-                        (Y[i][1]*runopt.zoom*ss+ty) + ")"; });
+                        (Y[i].x+tx) + "," +
+                        (Y[i].y+ty) + ")"; });
         }
         //let curentHostpos = currenthost.node().getBoundingClientRect();
-        linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index][0]*runopt.zoom*ss+tx,graphicopt.widthG()),0) )
-            .attr("y2", Math.max(Math.min(Y[currenthost.index][1]*runopt.zoom*ss+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
+        linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index].x+tx,graphicopt.widthG()),0) )
+            .attr("y2", Math.max(Math.min(Y[currenthost.index].y+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
 
 
     }
@@ -423,10 +472,12 @@ d3.Tsneplot = function () {
     Tsneplot.draw = function(name,index){
         currentIndex = index;
         if (first){
+            forcetsne.restart();
             isBusy = false;
             isStable = false;
             Tsneplot.redraw();
         }else {
+            forcetsne.alphaTarget(0.1);
             needUpdate = true;
             let newdata = g.selectAll(".linkLineg")
                 .data(arr,d=>d.name);
@@ -492,6 +543,8 @@ d3.Tsneplot = function () {
         panel_user.select('table').classed('empty',true);
         panel_user.select('.search-wrapper').classed('empty',true);
         svg.style('visibility','visible');
+        store.Y = arr.map(d=>{return {x:0,y:0}});
+        forcetsne.nodes(store.Y);
         create_worker();
         tsne.postMessage({action:"initDataRaw",value:arr,index:currentIndex});
         calTime[0] =  performance.now();
@@ -513,7 +566,7 @@ d3.Tsneplot = function () {
             g.selectAll('*').remove();
         }
     };
-    let colorCategory =d3.scaleOrdinal(d3.schemeCategory10);
+    let colorCategory = groupMethod==='outlier'?function(d){return d?'#8a001a':'gray'}:d3.scaleOrdinal(d3.schemeCategory10);
     let colorScale =d3.scaleSequential(d3.interpolateSpectral);
     let meanArr=[];
     function distanace(a,b){

@@ -168,6 +168,9 @@ var TsnePlotopt  = {
         dim : 2, // dimensionality of the embedding (2 = default)
         maxtries: 50
     },
+    eventpad: {
+        size: 8,
+    },
     display:{
         symbol:{
             type: 'path',
@@ -192,8 +195,7 @@ var TsnePlotopt  = {
             },
             clulster: {
                 attr: {
-                    rx: 3,
-                    ry: 3}
+                   }
                 ,
                 style: {
                     stroke: 'white'

@@ -905,3 +905,11 @@ p.divider {
 .collection .collection-item.avatar .title {
 	font-size: 13px;
 }
+
+.seperate {
+	font-size: 12px;
+	margin-left: 20px;
+}
+.seperate i {
+	transform: rotate(45deg);
+}
