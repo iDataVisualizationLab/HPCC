@@ -1,5 +1,5 @@
 var w = 380,
-    h = 82;
+    h = 72;
 var firstTime =true;
 
 
@@ -19,7 +19,7 @@ var x = d3.scaleLinear()
 
 var slider = svgLengend.append("g")
     .attr("class", "slider")
-    .attr("transform", "translate(" + 116 + "," + 63+ ")");
+    .attr("transform", "translate(" + 116 + "," + 53+ ")");
 
 slider.append("line")
     .attr("class", "track")
@@ -104,7 +104,7 @@ function hue(hhh) {
 function drawLegend(s,arrThresholds, arrColor, dif){
     var x =100;
     var y = 30;
-    var r = 20;
+    var r = 15;
     var barW= 5;
     if (selectedService==="Memory_usage" || selectedService==="Job_load")
         barW =8;
@@ -191,7 +191,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     svgLengend.append("text")
         .attr("class", "legendText1")
         .attr("x", x-7)
-        .attr("y", y+15)
+        .attr("y", y+12.5)
         .style("text-anchor", "end")
         .attr("fill", "#000")
         .style("font-style","italic")
