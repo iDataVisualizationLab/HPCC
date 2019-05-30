@@ -281,20 +281,20 @@ d3.Tsneplot = function () {
             .attr("offset","0%")
             .attr("stop-opacity", 0);
         rg.append("stop")
-            .attr("offset", 3 / legntharrColor * 100 + "%")
+            .attr("offset", 3.5 / legntharrColor * 100 + "%")
             .attr("stop-color", arrColor[4])
             .attr("stop-opacity", 0);
         arrColor.forEach((d,i)=>{
             if (i>3) {
                 rg.append("stop")
-                    .attr("offset", i / legntharrColor * 100 + "%")
+                    .attr("offset", (i+0.5) / legntharrColor * 100 + "%")
                     .attr("stop-color", d)
-                    .attr("stop-opacity", i / legntharrColor);
-                if (i != legntharrColor)
-                    rg.append("stop")
-                        .attr("offset", (i + 1) / legntharrColor * 100 + "%")
-                        .attr("stop-color", arrColor[i + 1])
-                        .attr("stop-opacity", i / legntharrColor);
+                    .attr("stop-opacity", (i+0.5) / legntharrColor);
+                // if (i != legntharrColor)
+                //     rg.append("stop")
+                //         .attr("offset", (i + 1) / legntharrColor * 100 + "%")
+                //         .attr("stop-color", arrColor[i + 1])
+                //         .attr("stop-opacity", i / legntharrColor);
             }
         });
         glowEffect = svg.append('defs').append('filter').attr('id', 'glowTSne'),
