@@ -287,9 +287,9 @@ d3.Tsneplot = function () {
         arrColor.forEach((d,i)=>{
             if (i>3) {
                 rg.append("stop")
-                    .attr("offset", (i+0.5) / legntharrColor * 100 + "%")
+                    .attr("offset", (i+1) / legntharrColor * 100 + "%")
                     .attr("stop-color", d)
-                    .attr("stop-opacity", (i+0.5) / legntharrColor);
+                    .attr("stop-opacity", (i+1) / legntharrColor);
                 // if (i != legntharrColor)
                 //     rg.append("stop")
                 //         .attr("offset", (i + 1) / legntharrColor * 100 + "%")
