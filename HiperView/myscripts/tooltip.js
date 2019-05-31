@@ -609,10 +609,14 @@ function pannelsummary(show){
         pansum.style('visibility','hidden');
 }
 
-function normalizevalue(d) {
+function normalizevalue(d,undefined_mode) {
     d.forEach((s,j)=>{
-        if (s.value == undefinedValue || isNaN(s.value))
-            s.value = -15;
+        if (s.value == undefinedValue || isNaN(s.value)) {
+            if (undefined_mode)
+                s.value = (thresholds[0][1]-thresholds[0][0])/2;
+            else
+                s.value = -15;
+        }
         else if (j==3){   ////  Job load ***********************
             var scale = d3.scaleLinear()
                 .domain([thresholds[1][0],thresholds[1][1]])

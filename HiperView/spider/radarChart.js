@@ -359,8 +359,10 @@ function RadarChart(id, data, options, name) {
     if (cfg.bin) { // bin type
         // area radar shape
         blobWrapperpath.filter(d=>d.type!=="outlying")
+            .classed("outlying",false)
             .call(drawCluster);
         blobWrapperpath.filter(d=>d.type==="outlying")
+            .classed("outlying",true)
             .call(drawOutlying);
         //Create the outlines
         blobWrapper.filter(d=>d.type!=="outlying")
@@ -369,7 +371,7 @@ function RadarChart(id, data, options, name) {
             .call(drawCluster);
         blobWrapper.filter(d=>d.type==="outlying")
             .append("path")
-            .attr("class", "radarStroke")
+            .attr("class", "radarStroke outlying")
             .call(drawOutlying);
     }else if (cfg.gradient){
         function drawMeanLine(paths){

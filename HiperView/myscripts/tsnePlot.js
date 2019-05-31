@@ -360,7 +360,7 @@ d3.Tsneplot = function () {
         panel.select(".details").append("span").text('# community: ');
         panel.select(".details").append("span").attr('class','community');
 
-        const maxsubheight = graphicopt.heightView()-54;
+        const maxsubheight = graphicopt.heightView()-44;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         // scaleY_small.range([0,sizegraph]);
@@ -442,6 +442,13 @@ d3.Tsneplot = function () {
                 (d,i)=>{
                     return colorCategory(data[d.name]===undefined?data[i].val:data[d.name])}
             );
+        if( groupMethod==="outlier")
+            g.selectAll('.linkLineg')
+                .select('.tSNEborder')
+                .style("stroke",
+                    (d,i)=>{
+                        return colorCategory(data[d.name])}
+                );
     }
     function updateEmbedding(Y,cost, skiptransition) {
         d3.select("#subzone").select('.cost').text(cost.toFixed(2));

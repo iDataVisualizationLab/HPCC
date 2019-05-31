@@ -913,3 +913,7 @@ p.divider {
 .seperate i {
 	transform: rotate(45deg);
 }
+
+path.outlying {
+	stroke: #8a001a !important;
+}

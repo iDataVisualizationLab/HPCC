@@ -116,6 +116,8 @@ addEventListener('message',function ({data}){
                     //     stepstable(cost,tsne.getSolution(),result);
                 }else{
                     stop = true;
+                    groups = {};
+                    store_step.forEach((d,i)=>groups[d.name] = d.cluster[requestIndex])
                     stepstable(costa[requestIndex], store_step.map((d,i)=>d[requestIndex]),store_step.map((d,i)=>d.cluster[requestIndex]))
                 }
                 // postMessage({action:'step', result: {cost: cost, solution: sol}});
@@ -159,7 +161,7 @@ addEventListener('message',function ({data}){
                     if (countstack>stack) {
                         countstack =0;
                     }
-                    stepstable(cost, tsne.getSolution(), result,"done");
+                    stepstable(cost, tsne.getSolution(), groups,"done");
                     // postMessage({action:'stable', status:"done"});
                     // postMessage({action: 'step', result: {cost: cost, solution: sol}, status:"done"});
                 }
@@ -258,7 +260,6 @@ function convertLink (P,ids) {
     return links;
 }
 let scagOptions ={
-    isNormalize: true,
     startBinGridSize: 30,
     minBins: 20,
     maxBins: 100,

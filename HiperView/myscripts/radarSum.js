@@ -55,7 +55,7 @@ d3.radar = function () {
             decrementB:0,
         };
         // scag = scagnosticsnd(handledata(index), scagOptions);
-        scag = scagnosticsnd(dataSpider3.map(d=>{
+        scag = scagnosticsnd(dataCalculate.map(d=>{
             var dd = d.map(k=>k.value);
             dd.data = d.name;
             return dd;}), scagOptions);
@@ -193,6 +193,7 @@ d3.radar = function () {
         // Summarynode
 
         dataSpider3 = [];
+        dataCalculate = [];
 
         //dataSpider2.name = 'Summary '+d3.timeFormat('%H:%M %d %b %Y')(r.arr[0].result.query_time);
         if (arr.length>0){
@@ -226,13 +227,22 @@ d3.radar = function () {
                 }
                 arr1.name = arr[i].name;
                 arr1.indexSamp = index;
-                dataSpider3.push(arr1);
 
+                let arr2 = arr1.map(d=>_.clone(d));
+                arr2.name = arr[i].name;
+                arr2.indexSamp = index;
+                dataSpider3.push(arr1);
+                dataCalculate.push(arr2);
 
             }
+
             // Standardize data for Radar chart
             dataSpider3.forEach((d,i)=>{
                 normalizevalue(d);
+            });
+
+            dataCalculate.forEach((d,i)=>{
+                normalizevalue(d,'mean');
             });
         }
         //return datawithoutNULL;
