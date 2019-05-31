@@ -434,7 +434,7 @@ d3.Tsneplot = function () {
 
     };
     let forcetsne;
-    let forcetsnemode = false;
+    let forcetsnemode = true;
     function updateCluster (data) {
         let group = g.selectAll('.linkLineg')
             .select('circle')
