@@ -118,7 +118,7 @@ addEventListener('message',function ({data}){
                     stop = true;
                     groups = {};
                     store_step.forEach((d,i)=>groups[d.name] = d.cluster[requestIndex])
-                    stepstable(costa[requestIndex], store_step.map((d,i)=>d[requestIndex]),store_step.map((d,i)=>d.cluster[requestIndex]))
+                    stepstable(costa[requestIndex], store_step.map((d,i)=>d[requestIndex]),groups)
                 }
                 // postMessage({action:'step', result: {cost: cost, solution: sol}});
                 postMessage({action:data.action, status:"done", maxloop: countstack});
