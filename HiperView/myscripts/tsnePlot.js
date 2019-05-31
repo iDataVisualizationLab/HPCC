@@ -360,7 +360,7 @@ d3.Tsneplot = function () {
         panel.select(".details").append("span").text('# community: ');
         panel.select(".details").append("span").attr('class','community');
 
-        const maxsubheight = graphicopt.heightView()-44;
+        const maxsubheight = graphicopt.heightView()-64;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         // scaleY_small.range([0,sizegraph]);
