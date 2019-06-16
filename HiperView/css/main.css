@@ -723,6 +723,7 @@ p.divider {
 	border-radius: 10px;
 	border: black solid 1px;
 	padding-right: 5px;
+	margin: 0;
 }
 
 #refeshUser{
@@ -766,7 +767,7 @@ p.divider {
 .light .subzone {
 
 }
-.subpanel.active {
+.active .subpanel {
 	display: block;
 }
 
@@ -916,4 +917,36 @@ p.divider {
 
 path.outlying {
 	stroke: #8a001a !important;
+}
+#tsnezone {
+	position: absolute;
+	width:100%;
+}
+.controlHolderDiv {
+	display: flex;
+	justify-content: center;
+	position: absolute;
+	/*top: 0px;*/
+	right: 0px;
+	width: 100%;
+}
+.controlHolderDiv .controlDiv {
+	/*position: absolute;*/
+	/*top: 2px;*/
+	/*right: 2px;*/
+}
+.controlHolderDiv .controlDiv .controlGroup {
+	float: left;
+	display: inline-block;
+	box-sizing: border-box;
+	padding-left: 8px;
+	position: relative;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+.menuBtn.seperate[value='false']:before {
+	content:'Separate'
+}
+.menuBtn.seperate[value='true']:before {
+	content:'Collapse'
 }

@@ -354,13 +354,14 @@ d3.Tsneplot = function () {
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
 
-        panel = d3.select("#subzone").style('top',(graphicopt.offset.top-4)+'px');
+        d3.select("#tsnezone").style('top',(graphicopt.offset.top+4)+'px');
+        panel = d3.select("#subzone");
         panel.select(".details").append("span").text('t-SNE cost: ');
         panel.select(".details").append("span").attr('class','cost');
         panel.select(".details").append("span").text('# community: ');
         panel.select(".details").append("span").attr('class','community');
 
-        const maxsubheight = graphicopt.heightView()-64;
+        const maxsubheight = graphicopt.heightView()-56;
         const sizegraph = sizebox - 5;
         scaleX_small.range([0,sizegraph]);
         // scaleY_small.range([0,sizegraph]);
@@ -381,7 +382,8 @@ d3.Tsneplot = function () {
         // panel.select(".top10").attrs({width: 200,
         // height: sizebox*20});
 
-        panel_user = d3.select("#userList").style('top',(graphicopt.offset.top-4)+'px');
+        // panel_user = d3.select("#userList").style('top',(graphicopt.offset.top-4)+'px');
+        panel_user = d3.select("#userList");
         panel_user.select(".top10DIV").style('max-height', maxsubheight+"px");
         list_user = Sortable.create($('tbody')[0], {
             animation: 500,
@@ -419,8 +421,9 @@ d3.Tsneplot = function () {
                 tsne.postMessage({action: 'step'});
             }
         };
-        panel.select('.seperate').on('click', function(d){
+        d3.select('#tsnezone').select('.seperate').on('click', function(d){
             forcetsnemode = !forcetsnemode;
+            d3.select(this).attr('value',forcetsnemode?'false':'true');
         });
         forcetsne = d3.forceSimulation()
             .alphaDecay(0.005)
@@ -545,8 +548,9 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.redraw  = function (){
-        panel.classed("active",true).select('.top10').selectAll('*').remove();
-        panel_user.classed("active",true).select('.top10DIV tbody').selectAll('*').remove();
+        d3.select('#tsnezone').classed("active",true);
+        panel.select('.top10').selectAll('*').remove();
+        panel_user.select('.top10DIV tbody').selectAll('*').remove();
         panel_user.select('table').classed('empty',true);
         panel_user.select('.search-wrapper').classed('empty',true);
         svg.style('visibility','visible');
@@ -566,8 +570,9 @@ d3.Tsneplot = function () {
 
     Tsneplot.remove  = function (){
         if (!first){
-            panel.classed("active",false);
-            panel_user.classed("active",false);
+            d3.select('#tsnezone').classed("active",false);
+            // panel.classed("active",false);
+            // panel_user.classed("active",false);
             svg.style('visibility','hidden');
             Tsneplot.pause();
             g.selectAll('*').remove();
