@@ -579,5 +579,3 @@ function rasterize(svg,isLight) {
     image.src = URL.createObjectURL(serialize(svg,isLight));
     return promise;
 }
-
-

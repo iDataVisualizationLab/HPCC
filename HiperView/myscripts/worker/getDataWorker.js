@@ -1,7 +1,7 @@
 importScripts("../../js/d3.v4.js","../../js/underscore-min.js","../setting.js");
 let undefinedValue,
 globalTrend=false,
-    hosts,processData,db;
+hosts,processData,db;
 processData = processData_old;
 addEventListener('message',function ({data}){
     switch (data.action) {

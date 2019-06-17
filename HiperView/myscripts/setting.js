@@ -2,9 +2,20 @@
 var jobList=[];
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
 var serviceList_selected = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
+
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
-
-
+var serviceLists = [{text: "Temperature", id: 0, enable:true,
+    sub:[{text: 'CPU1 Temp', id: 0, enable:true},{text: 'CPU2 Temp', id: 1, enable:true},{text: 'Inlet Temp', id: 2, enable:true}]},
+    {text: "Job_load", id: 1, enable:true ,sub:[{text: 'Job load', id: 0, enable:true}]},
+    {text: "Memory_usage", id: 2 , enable:true ,sub:[{text: 'Memory usage', id: 0, enable:true}]},
+    {text: "Fans_speed", id: 3 , enable:true ,sub:[{text: 'Fan1 speed', id: 0, enable:true},{text: 'Fan2 speed', id: 1, enable:true},{text: 'Fan3 speed', id: 2, enable:true},{text: 'Fan4 speed', id: 3, enable:true}]},
+    {text: "Power_consum", id: 4 , enable:true ,sub:[{text: 'Power consumption', id: 0, enable:true}]}];
+var serviceListattrnest = [
+    {key:"arrTemperature", sub:["CPU1 Temp","CPU2 Temp","Inlet Temp"]},
+    {key:"arrCPU_load", sub:["Job load"]},
+    {key:"arrMemory_usage", sub:["Memory usage"]},
+    {key:"arrFans_health", sub:["Fan1 speed","Fan2 speed","Fan3 speed","Fan4 speed"]},
+    {key:"arrPower_usage", sub:["Power consumption"]}];
 var FIELD_MACHINE_ID = "name";
 var VARIABLES = [];
 /**Configuration**/
