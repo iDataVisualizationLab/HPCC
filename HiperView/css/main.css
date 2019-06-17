@@ -921,6 +921,10 @@ path.outlying {
 #tsnezone {
 	position: absolute;
 	width:100%;
+	display: none;
+}
+#tsnezone.active {
+	display: block;
 }
 .controlHolderDiv {
 	display: flex;
