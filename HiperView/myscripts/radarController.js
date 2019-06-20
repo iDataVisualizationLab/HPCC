@@ -31,6 +31,9 @@ let radarController = function () {
         .range(graphicopt.arrColor)
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
 
+    // FUNCTION ZONE
+    let onChangeValueFunc = function(){};
+
     // TODO: REPLACE
 
     //Scale for the radius
@@ -313,7 +316,11 @@ let radarController = function () {
                         return "rotate(" + toDegrees(d.angle()) + "deg)"});
                 //Append the lines
                 function toDegrees(rad) {
-                    return rad * (180/Math.PI);
+                    let deg = rad * (180/Math.PI)%360;
+                    return deg;
+                }
+                function toRadian(deg) {
+                    return deg * (Math.PI/180);
                 }
                 axis.append("line")
                     .attr("x1", 0)
@@ -348,7 +355,18 @@ let radarController = function () {
                     // })
                     .text(function (d) {
                         return d.text;
-                    })
+                    });
+                axis.append("text")
+                    .attr("class", "angleValue")
+                    .style("font-size", "12px")
+                    .attr("font-family", "sans-serif")
+                    .attr("text-anchor", "middle")
+                    .attr("dy", "2em")
+                    .attr("x", 0)
+                    .attr("y", -rScale(1))
+                    .text(function (d) {
+                        return toDegrees(d.angle()).toFixed(2) + 'o';
+                    });
                     // .call(wrap, graphicopt.wrapWidth);
                 axis.append("circle")
                     // .attr("cx", function (d, i) {
@@ -364,13 +382,26 @@ let radarController = function () {
                     .style("fill", graphicopt.gradient?'#eaeaea':"white")
                     .on('mouseover',function(){d3.select(this).attr('r',8)})
                     .on('mouseleave',function(){d3.select(this).attr('r',4)})
-                    .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged));
-                function onDragAxisStarted (){
-
+                    .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
+                function onDragAxisStarted (d){
+                    d.__origin__= d.angle();
+                    d3.select(this.parentElement).classed('active',true);
                 }
                 function onDragAxisDragged (){
-                    let dAngle = Math.atan2(d3.event.dx,d3.event.dy);
-                    d3.select(this.parentElement)
+                    // FIXME: rotation not smooth
+                    let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
+                    d3.select(this.parentElement).transition().style('transform',function (d, i) {
+                        let newAngle = positiveAngle(dAngle);
+                        d.angle = ()=>{return positiveAngle(newAngle);};
+                        return "rotate(" + toDegrees(newAngle) + "deg)"});
+                    d3.select(this.parentElement).select('.angleValue').text(function (d) {
+                        return toDegrees(d.angle()).toFixed(2) + 'o';
+                    });
+                }
+                function onDragAxisEnded (d){
+                    d3.select(this.parentElement).classed('active',false);
+                    d.__origin__= null;
+                    onChangeValueFunc(radarcomp);
                 }
             }
             /////////////////////////////////////////////////////////
@@ -427,6 +458,11 @@ let radarController = function () {
     };
     radarController.div = function (_) {
         return arguments.length ? (div = _, radarController) : div;
+
+    };
+
+    radarController.onChangeValue = function (_) {
+        return arguments.length ? (onChangeValueFunc = _, radarController) : onChangeValueFunc;
 
     };
 

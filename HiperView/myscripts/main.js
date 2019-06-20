@@ -2155,7 +2155,9 @@ $( document ).ready(function() {
             loadata(data);
         });
 
-        MetricController.graphicopt({width:300,height:300}).div(d3.select('#RadarController')).axisSchema(serviceFullList).init();
+        MetricController.graphicopt({width:300,height:300})
+            .div(d3.select('#RadarController'))
+            .axisSchema(serviceFullList).init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")

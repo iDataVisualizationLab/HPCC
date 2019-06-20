@@ -954,3 +954,9 @@ path.outlying {
 .menuBtn.seperate[value='true']:before {
 	content:'Collapse'
 }
+.angleValue {
+	display: none;
+}
+.axis.active .angleValue{
+	display: block;
+}
