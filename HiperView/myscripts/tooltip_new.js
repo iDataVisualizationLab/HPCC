@@ -1,5 +1,5 @@
 // Setup the tool tip.  Note that this is just one example, and that many styling options are available.
-    // See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
+// See original documentation for more details on styling: http://labratrevenge.com/d3-tip/
 
 var tipW = 450;
 var tipH = 200;
@@ -17,6 +17,8 @@ var radarChartOptions = {
     levels: levelsR,
     roundStrokes: true,
     color: color2,
+    isNormalize: true,
+    markedLegend: [thresholds[0]],
     legend: [{},
         {},
         {},
@@ -27,7 +29,7 @@ var radarChartOptions = {
         {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
         {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
         {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
-  };
+};
 var scaleopt;
 //////////////////////////////////////////////////////////////
 ////////////////////////// Data //////////////////////////////
@@ -41,10 +43,10 @@ var tool_tip = d3.tip()
     .attr("id", "d3-tip")
     .offset(()=> {
         if (niceOffset){
-        let heightTip =+ $('#d3-tip')[0].offsetHeight;
-        return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
+            let heightTip =+ $('#d3-tip')[0].offsetHeight;
+            return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
         } return [0,0];})
-        .html(function(d1,hideLine) {
+    .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
 d3.select('#d3-tip')
@@ -81,9 +83,9 @@ function addSVG(hideLine){
     else {
         RadarChart("#radarChart" + countRadarChart, dataSpider, radarChartOptions, dataSpider.name);
     }
-   countRadarChart++;
-   if (countRadarChart==4)
-    countRadarChart=1;
+    countRadarChart++;
+    if (countRadarChart==4)
+        countRadarChart=1;
 }
 
 
@@ -92,9 +94,10 @@ var xScale;
 function mouseoverNode(d1){
     playing = false;
     var r = hostResults[d1.className.baseVal];
+
     tool_tip.show(r);
     // 1. create the svgTip
-     svgTip = d3.select("#svgTip")
+    svgTip = d3.select("#svgTip")
         .attr("width", tipW + margin.left + margin.right)
         .attr("height", tipH + margin.top + margin.bottom)
         .style("attr","#fff")
@@ -116,14 +119,14 @@ function mouseoverNode(d1){
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
         if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue) {
-         console.log(obj)
+            console.log(obj)
             // arr.push(obj);
         }
         else
             arr.push(obj);
     }
-   
-    
+
+
 
     // 3. get Time
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
@@ -141,9 +144,9 @@ function mouseoverNode(d1){
     //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
 
     // 6. Y scale will use the randomly generate number
-        var yScale = d3.scaleLinear()
-            .domain([0, 100]) // input
-            .range([tipH, 0]); // output
+    var yScale = d3.scaleLinear()
+        .domain([0, 100]) // input
+        .range([tipH, 0]); // output
 
     // White Background
     svgTip.append("rect")
@@ -170,9 +173,9 @@ function mouseoverNode(d1){
 
     // 4. Call the y axis in a group tag
     svgTip.append("g")
-            .attr("class", "y axis")
-            .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW+50))
-            .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
+        .attr("class", "y axis")
+        .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW+50))
+        .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
 
     // ****** Append the path ****** CPU1
     var line1 = d3.line()
@@ -181,13 +184,13 @@ function mouseoverNode(d1){
         .curve(d3.curveMonotoneX) // apply smoothing to the line
 
     svgTip.append("path")
-            .datum(arr) // 10. Binds data to the line
-            .attr("class", "line1") // Assign a class for styling
-            .attr("d", line1)
-            .attr("stroke", function () {
-                return color2(0);
-            }).attr('fill','none')
-            .attr("stroke-width",1); // 11. Calls the line generator
+        .datum(arr) // 10. Binds data to the line
+        .attr("class", "line1") // Assign a class for styling
+        .attr("d", line1)
+        .attr("stroke", function () {
+            return color2(0);
+        }).attr('fill','none')
+        .attr("stroke-width",1); // 11. Calls the line generator
     // Appends a circle for each datapoint ****** CPU1
     svgTip.selectAll(".dot1")
         .data(arr)
@@ -258,7 +261,7 @@ function mouseoverNode(d1){
             mouseoutLine (d,i);
         });
 
-     svgTip.append("text")
+    svgTip.append("text")
         .attr("x", tipW-4)
         .attr("y",  yScale(arr[arr.length-1].temp2))
         .attr("fill", function () { return color2(1); })
@@ -337,79 +340,20 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
+    var name = d1.className.baseVal;
     dataSpider = [];
-    dataSpider.name = d1.className.baseVal;
+    dataSpider.name = name;
     if (r.arr.length>0){
         for (var i=startRecord;i<r.arr.length;i++){
-            var arrServices = [];
-            serviceList_selected.forEach((ser,j)=>{
-                var a = processData(r[serviceListattr[j]][i].data.service.plugin_output, ser);
-                var obj = {};
-                obj.a = a;
-                arrServices.push(obj);
-            });
-            arrServices.push(obj);
-                   
-            var arr1 = [];
-            for (var a=0;a<axes.length;a++){
-                var obj ={};
-                obj.axis = axes[a];
-                if (a==0)
-                    obj.value = arrServices[0].a[0];
-                else if (a==1)
-                    obj.value = arrServices[0].a[1];
-                else if (a==2)
-                    obj.value = arrServices[0].a[2];
-                else if (a==3)
-                    obj.value = arrServices[1].a[0];
-                else if (a==4)
-                    obj.value = arrServices[2].a[0];
-                else if (a==5)
-                    obj.value = arrServices[3].a[0];
-                else if (a==6)
-                    obj.value = arrServices[3].a[1];
-                else if (a==7)
-                    obj.value = arrServices[3].a[2];
-                else if (a==8)
-                    obj.value = arrServices[3].a[3];
-                else if (a==9)
-                    obj.value = arrServices[4].a[0];
-                arr1.push(obj);
-            }
+            var arr1 = getDataByName_withLabel(hostResults, name, i, i);
             arr1.indexSamp = i;
             arr1.time = r.arr[i].result.query_time;
             dataSpider.push(arr1);
-           
-            // Standardize data for Radar chart
-            let currenti = i-startRecord;
-            for (var j=0; j<dataSpider[currenti].length;j++){
-                if (dataSpider[currenti][j].value == undefinedValue || isNaN(dataSpider[currenti][j].value))
-                    dataSpider[currenti][j].value = -15;
-                else if (j==3){   ////  Job load ***********************
-                     var scale = d3.scaleLinear()
-                        .domain([thresholds[1][0],thresholds[1][1]])
-                        .range([0,1]);
-                    
-                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
-                }
-                else if (j==5 || j==6 || j==7 || j==8){   ////  Fans SPEED ***********************
-                    var scale = d3.scaleLinear()
-                        .domain([thresholds[3][0],thresholds[3][1]])
-                        .range([0,1]); //interpolateHsl interpolateHcl interpolateRgb
-                    
-                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
-                }
-                else if (j==9){   ////  Power Consumption ***********************
-                    var scale = d3.scaleLinear()
-                        .domain([thresholds[4][0],thresholds[4][1]])
-                        .range([0,1]); //interpolateHsl interpolateHcl interpolateRgb
-                    dataSpider[currenti][j].value =  scale(dataSpider[currenti][j].value);
-                }
-            }
+
         }
     }
-   scaleopt = RadarChart(".radarChart", dataSpider, radarChartOptions,"");
-}   
+    scaleopt = RadarChart(".radarChart", dataSpider, radarChartOptions,"");
+}
 
 function mouseoutNode(d1){
     tool_tip.hide(d1);
@@ -422,11 +366,11 @@ function mouseoverLine(d,i){
     radar.filter( e => (e!=undefined)?(e.indexSamp !== d.indexSamp):false)
         .transition().duration(500)
         .style("opacity", 0);
-        // .style("visibility", "hidden");
+    // .style("visibility", "hidden");
     radar.filter( e => (e!=undefined)?(e.indexSamp === d.indexSamp):false)
         .transition().duration(500)
         .style("opacity", 1);
-        // .style("visibility", "visible");
+    // .style("visibility", "visible");
     //Bring back the hovered over blob
     // console.log("added");
     // radar
@@ -438,7 +382,7 @@ function mouseoutLine(d,i) {
     d3.selectAll(".radarWrapper")
         .transition().duration(200)
         .style("opacity", 1);
-        // .style("visibility", "visible");
+    // .style("visibility", "visible");
 }
 var timestep = 500;
 function playanimation() {
@@ -560,7 +504,7 @@ function playanimation() {
                 wapperout.data(current_data);
                 var blobWrapper = wapperout.enter().selectAll(".radarWrappermove")
                     .data((d, i) => current_data[i]
-                );
+                    );
                 //Create the outlines
                 var path = blobWrapper.selectAll(".radarStroke")
                     .datum((d, i) => current_data[i])
@@ -580,7 +524,7 @@ function playanimation() {
                 //Append the circles
                 blobWrapper.selectAll(".radarCircle")
                     .data((d, i) => current_data[i]
-                ).transition().duration(timestep).ease(d3.easePolyInOut)
+                    ).transition().duration(timestep).ease(d3.easePolyInOut)
                     .attr("r", function (d) {
                         return 1 + Math.pow((d.index + 2), 0.3);
                     })
@@ -627,114 +571,6 @@ function normalizevalue(d,undefined_mode) {
     return d;
 }
 
-function summaryRadar () {
-    var undefinededa = [undefinedValue,undefinedValue,undefinedValue];
-    var irecord = $('#irecord').children("option:selected").val();
-    var r ={host:[],index:[],arr:[],arrCPU_load:[],arrFans_health:[],arrMemory_usage:[],arrPower_usage:[],arrTemperature:[]};
-    for (nam in hostResults) {
-        r['host'].push(nam);
-        var element= hostResults[nam];
-        for (k in element){
-            r[k].push (element[k][irecord]);
-        }
-    }
-    // Summarynode
-    var pansum = d3.select('#Summarynodeg').html(function() {
-        return cotenttip(true); });
-    pannelsummary(true);
-    dataSpider2 = [];
-
-    dataSpider2.name = 'Summary '+d3.timeFormat('%H:%M %d %b %Y')(r.arr[0].result.query_time);
-    if (r.arr.length>0){
-        for (var i=0;i<r.arr.length;i++){
-            var arrServices = [];
-            var a = r.arrTemperature[i]!==undefinedValue?processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]):undefinededa;
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = r.arrCPU_load[i]!==undefinedValue?processData(r.arrCPU_load[i].data.service.plugin_output, serviceList[1]):undefinededa;
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = r.arrMemory_usage[i]!==undefinedValue?processData(r.arrMemory_usage[i].data.service.plugin_output, serviceList[2]):undefinededa;
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = r.arrFans_health[i]!==undefinedValue?processData(r.arrFans_health[i].data.service.plugin_output, serviceList[3]):undefinededa;
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var a = r.arrPower_usage[i]!==undefinedValue?processData(r.arrPower_usage[i].data.service.plugin_output, serviceList[4]):undefinededa;
-            var obj = {};
-            obj.a = a;
-            arrServices.push(obj);
-
-            var arr1 = [];
-            for (var a=0;a<axes.length;a++){
-                var obj ={};
-                obj.axis = axes[a];
-                if (a==0)
-                    obj.value = arrServices[0].a[0];
-                else if (a==1)
-                    obj.value = arrServices[0].a[1];
-                else if (a==2)
-                    obj.value = arrServices[0].a[2];
-                else if (a==3)
-                    obj.value = arrServices[1].a[0];
-                else if (a==4)
-                    obj.value = arrServices[2].a[0];
-                else if (a==5)
-                    obj.value = arrServices[3].a[0];
-                else if (a==6)
-                    obj.value = arrServices[3].a[1];
-                else if (a==7)
-                    obj.value = arrServices[3].a[2];
-                else if (a==8)
-                    obj.value = arrServices[3].a[3];
-                else if (a==9)
-                    obj.value = arrServices[4].a[0];
-                arr1.push(obj);
-            }
-            arr1.indexSamp = irecord;
-            dataSpider2.push(arr1);
-
-            // Standardize data for Radar chart
-            normalizevalue(arr1);
-        }
-    }
-    var radarChartsumopt  = {
-        w: tipW*1.5 -50,
-        h: tipW*1.5 +50,
-        maxValue: 0.5,
-        levels: levelsR,
-        radiuschange: false,
-        roundStrokes: true,
-        color: color2,
-        legend: [{},
-            {},
-            {},
-            {5: thresholds[1][1]},
-            {5: thresholds[2][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[3][1]},
-            {5: thresholds[4][1]}]
-            // {5: Math.floor((thresholds[1][1]-thresholds[1][0])/levelsR*5+thresholds[1][0])},
-            // {5: Math.floor((thresholds[2][1]-thresholds[2][0])/levelsR*5+thresholds[2][0])},
-            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            // {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
-            // {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
-    };
-    RadarChart(".radarChartsum", dataSpider2, radarChartsumopt,"");
-
-}
 
 
 // Make the DIV element draggable: from W3 code

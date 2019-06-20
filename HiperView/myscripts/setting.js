@@ -351,3 +351,54 @@ function handlemissingdata(hostname,iter){
         simisval.data.service.plugin_output = "UNKNOWN";
     return simisval;
 }
+
+function getDataByName_withLabel (hostResults, name,startIndex, lastIndex) {
+    let data = getDataByName(hostResults, name,startIndex, lastIndex);
+    return serviceFullList.map((d,i)=>{return {axis: d.text, value:data[i]}});
+}
+function getDataByName(hostResults, name,startIndex, lastIndex, isPredict) {
+    startIndex = startIndex||0;
+    var r = hostResults[name];
+    var arrServices = [];
+    for (var stepIndex = startIndex; stepIndex <= lastIndex; stepIndex++) {
+        serviceList_selected.forEach((ser, indx) => {
+            var a;
+            if (r[serviceListattr[indx]][stepIndex]) {
+                a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser);
+            }
+            else {
+                a = predict(r[serviceListattr[indx]], ser, isPredict===undefined?false:isPredict);
+            }
+            var scale = d3.scaleLinear()
+                .domain([thresholds[indx][0], thresholds[indx][1]])
+                .range([0, 1]);
+            a = a.map(d => scale(d) || 0.5);
+            switch (indx) {
+                case 0:
+                case 3:
+                    arrServices = d3.merge([arrServices, a]);
+                    break;
+                default:
+                    arrServices.push(a[0] || 0.5)
+            }
+        })
+    }
+    arrServices.name = name;
+    return arrServices;
+}
+function predict (arr,ser, notUsepastValue){
+    try{
+        if (notUsepastValue)
+            throw 'notusepast';
+        return processData(arr[arr.length-1].data.service.plugin_output,ser); // getdata from the past
+    } catch(e){
+        let average = 0;
+        let serviceMain = serviceLists.find(s=>s.text===ser);
+        let service = serviceMain.sub[0];
+        if (service) {
+            average = service.undefinedValue ===undefined?((service.range[1]-service.range[0])/2+service.range[0]):service.undefinedValue;
+           return  d3.range(serviceMain.sub.length).map(a=>average);
+        }
+            return [0,0,0];
+    }
+}

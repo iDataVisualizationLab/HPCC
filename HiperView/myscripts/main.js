@@ -859,11 +859,13 @@ function main() {
             onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
         }
         if (data.action==='returnData'){
-            if (graphicControl.charType==="T-sne Chart")
-                TSneplot.data(data.result.arr).draw(data.result.nameh,data.result.index);
-            if (graphicControl.sumType === "RadarSummary") {
-                // console.log(data.result.index);
-                Radarplot.data(data.result.arr).drawSummarypoint(data.result.index );
+            if (data.result.hindex&& data.result.index < lastIndex+1) {
+                if (graphicControl.charType === "T-sne Chart")
+                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+                if (graphicControl.sumType === "RadarSummary" ) {
+                    // console.log(data.result.index);
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
             }
         }
     }, false);
@@ -1125,7 +1127,7 @@ function drawsummary(initIndex){
                 console.log("-----------------")
                 console.log(temp === undefined ? lastIndex : temp)
                 console.log("-----------------")
-                getData(name, temp === undefined ? lastIndex : temp, true);
+                getData(name, temp === undefined ? lastIndex : temp);
                 if ((temp === undefined ? lastIndex : temp) >= maxstack - 1) Radarplot.shift();
                 break;
         }
@@ -1456,7 +1458,7 @@ function plotResult(result,name) {
         case "T-sne Chart":
             initTsneView();
             if (!speedup) {
-                getData(name,lastIndex);
+                getData(name,lastIndex,true);
             }
     }
 
@@ -1574,14 +1576,15 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
 }
 
 
-function getData(nameh,index,skip){
+function getData(nameh,index,skip,usepast){
     if(!isbusy || skip === true) {
         isbusy = true;
         getDataWorker.postMessage({
             action: "getbatchData", value: {
                 lastIndex: index,
                 hostResults: hostResults,
-                host: nameh
+                host: nameh,
+                usepast: usepast
             }
         });
     }

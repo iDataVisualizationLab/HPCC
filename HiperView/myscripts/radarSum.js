@@ -10,6 +10,7 @@ var radarChartsumopt  = {
     radiuschange: false,
     dotRadius:2,
     maxValue: 0.5,
+    isNormalize:true,
     roundStrokes: true,
     showText: false,
     bin :   true};
@@ -148,7 +149,7 @@ d3.radar = function () {
 
     };
 
-    radarTimeline.drawSummarypoint = function(index){
+    radarTimeline.drawSummarypoint = function(index,hindex){
 
         if (index >= (maxstack-1)) index = maxstack-1;
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
@@ -160,7 +161,7 @@ d3.radar = function () {
                     return "translate(" + xscale(index) + "," + margin + ")";
                 });
 
-        const values = [handledataRate()];
+        const values = [handledataRate(hindex)];
         radarChartsumopt.gradient = true;
         radarChartsumopt.bin = false;
         radarChartsumopt.levels = levelsR;
@@ -183,11 +184,12 @@ d3.radar = function () {
                     d3.select(this).remove();
             });
     };
-    var scaleNormal = d3.scaleLinear()
-        .domain([0,1])
-        .range([thresholds[0][0],thresholds[0][1]]);
-    function handledataRate (){
-        return _(arr).unzip().map((d,i)=>{return {axis: axes[i], value: scaleNormal(ss.mean(d)),minval: scaleNormal(ss.quantile(d,0.25)),maxval: scaleNormal(ss.quantile(d, 0.75))}});
+    // var scaleNormal = d3.scaleLinear()
+    //     .domain([0,1])
+    //     .range([thresholds[0][0],thresholds[0][1]]);
+    function handledataRate (hindex){
+        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: axes[i], value: ss.mean(d),minval: ss.quantile(d,0.25),maxval: ss.quantile(d, 0.75)}});
+        // return _(arr).unzip().map((d,i)=>{return {axis: axes[i], value: scaleNormal(ss.mean(d)),minval: scaleNormal(ss.quantile(d,0.25)),maxval: scaleNormal(ss.quantile(d, 0.75))}});
     }
     function handledata(index){
         // Summarynode

@@ -41,83 +41,93 @@ function RadarChart(id, data, options, name) {
         }//for i
     }//if
 
-    //If the supplied maxValue is smaller than the actual one, replace by the max in the data
-    var maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
-        return d3.max(i.map(function (o) {
-            return o.value;
-        }))
-    }));
-    
-    var range = thresholds[0];
-    if (cfg.isNormalize) range = [0,1];
-
-    // *** TOMMY 2018 ************
-    //Compute min max for the temperature
-    var dif = (range[1] - range[0]) / 4;
-    var right = range[1] + dif;
-
-    maxValue = right;
-
-    var minValue = range[0] - dif;
-    var colorLength = arrColor.length - 1;
-    var arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
-        range[0] + 3 * dif, range[1], maxValue];
+    var maxValue,minValue,range,arrThresholds,colorTemperature,opaTemperature,allAxis,rScale;
+    // NEW SETTING
+    if (data.schema){
+        maxValue = 1;
+        minValue = 0;
 
 
-    var colorTemperature = d3.scaleLinear()
-        .domain(arrThresholds)
-        .range(arrColor)
-        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-    var opaTemperature = d3.scaleLinear()
-        .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
-        .range([1, 0.7, 0.05, 0.7, 1]);
-    // .range([0.3,0.2,0.1,0.2,0.3]);
+    }else{
+        //If the supplied maxValue is smaller than the actual one, replace by the max in the data
+        maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
+            return d3.max(i.map(function (o) {
+                return o.value;
+            }))
+        }));
 
-    var allAxis = (data[0].map(function (i, j) {
-            return i.axis
-        })), //Names of each axis
-        total = allAxis.length,                 //The number of different axes
-        radius = Math.min(cfg.w / 2, cfg.h / 2),    //Radius of the outermost circle
-        Format = d3.format(''),                //Percentage formatting
-        //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
-        angle1 = Math.PI * 2 / total;
-    angle2 = Math.PI * 2 / (total + 4);
-    angleSlice = [];
-    angleSlice2 = [];
-    for (var i = 0; i < total; i++) {
-        if (i == 0 || i == 1 || i == 2)       // Temperatures
-            angleSlice.push(angle2 * (i - 1));
-        else if (i == 5 || i == 6 || i == 7 || i == 8)  // Fan speeds
-            angleSlice.push(Math.PI / 4.62 + angle2 * (i - 1));
-        else if (i == 9)  // Power consumption
-            angleSlice.push(Math.PI * 1.5);
-        else
-            angleSlice.push(angle1 * (i - 1));
-    }      //TOMMY DANG
-    angleSlice[0] = Math.PI * 2 + angleSlice[0];
-    var meanang = (angleSlice[0] - Math.PI * 2 + angleSlice[1]) / 2;
-    var dismeanang = 0 - (angleSlice[0] - Math.PI * 2);
-    angleSlice2.push(angleSlice[0]);
-    var temp = (angleSlice[0] - Math.PI * 2 + dismeanang / 4);
-    angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-    angleSlice2.push(meanang < 0 ? meanang + Math.PI * 2 : meanang);
-    temp = (angleSlice[1] - dismeanang / 4);
-    angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-    for (var i = 1; i < total; i++) {
-        var meanang = (angleSlice[i] + angleSlice[(i + 1) % total]) / 2;
-        var dismeanang = meanang - angleSlice[i];
-        angleSlice2.push(angleSlice[i]);
-        angleSlice2.push(angleSlice[i] + dismeanang / 4);
-        angleSlice2.push(meanang);
-        angleSlice2.push(angleSlice[(i + 1) % total] - dismeanang / 4);
+        range = thresholds[0];
+        if (cfg.isNormalize) range = [0,1];
+
+        // *** TOMMY 2018 ************
+        //Compute min max for the temperature
+        var dif = (range[1] - range[0]) / 4;
+        var right = range[1] + dif;
+
+        maxValue = right;
+
+        minValue = range[0] - dif;
+        var colorLength = arrColor.length - 1;
+        arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
+            range[0] + 3 * dif, range[1], maxValue];
+
+
+        colorTemperature = d3.scaleLinear()
+            .domain(arrThresholds)
+            .range(arrColor)
+            .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+        opaTemperature = d3.scaleLinear()
+            .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
+            .range([1, 0.7, 0.05, 0.7, 1]);
+        // .range([0.3,0.2,0.1,0.2,0.3]);
+
+        var allAxis = (data[0].map(function (i, j) {
+                return i.axis
+            })), //Names of each axis
+            total = allAxis.length,                 //The number of different axes
+            radius = Math.min(cfg.w / 2, cfg.h / 2),    //Radius of the outermost circle
+            Format = d3.format(''),                //Percentage formatting
+            //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
+            angle1 = Math.PI * 2 / total;
+        angle2 = Math.PI * 2 / (total + 4);
+        angleSlice = [];
+        angleSlice2 = [];
+        for (var i = 0; i < total; i++) {
+            if (i == 0 || i == 1 || i == 2)       // Temperatures
+                angleSlice.push(angle2 * (i - 1));
+            else if (i == 5 || i == 6 || i == 7 || i == 8)  // Fan speeds
+                angleSlice.push(Math.PI / 4.62 + angle2 * (i - 1));
+            else if (i == 9)  // Power consumption
+                angleSlice.push(Math.PI * 1.5);
+            else
+                angleSlice.push(angle1 * (i - 1));
+        }      //TOMMY DANG
+        angleSlice[0] = Math.PI * 2 + angleSlice[0];
+        var meanang = (angleSlice[0] - Math.PI * 2 + angleSlice[1]) / 2;
+        var dismeanang = 0 - (angleSlice[0] - Math.PI * 2);
+        angleSlice2.push(angleSlice[0]);
+        var temp = (angleSlice[0] - Math.PI * 2 + dismeanang / 4);
+        angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
+        angleSlice2.push(meanang < 0 ? meanang + Math.PI * 2 : meanang);
+        temp = (angleSlice[1] - dismeanang / 4);
+        angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
+        for (var i = 1; i < total; i++) {
+            var meanang = (angleSlice[i] + angleSlice[(i + 1) % total]) / 2;
+            var dismeanang = meanang - angleSlice[i];
+            angleSlice2.push(angleSlice[i]);
+            angleSlice2.push(angleSlice[i] + dismeanang / 4);
+            angleSlice2.push(meanang);
+            angleSlice2.push(angleSlice[(i + 1) % total] - dismeanang / 4);
+        }
+
+        //angleSlice2.push(angleSlice[0]);
+
+        //Scale for the radius
+        rScale = d3.scaleLinear()
+            .range([0, radius])
+            .domain([minValue, maxValue]);
     }
 
-    //angleSlice2.push(angleSlice[0]);
-
-    //Scale for the radius
-    var rScale = d3.scaleLinear()
-        .range([0, radius])
-        .domain([minValue, maxValue]);
 
     /////////////////////////////////////////////////////////
     //////////// Create the container SVG and g /////////////
