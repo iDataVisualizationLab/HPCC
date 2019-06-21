@@ -27,7 +27,7 @@ function saveSVG_light(event,type){
 
 // <editor-fold multi request>
 function saveSVG_batch(type){
-    saveSVG_detail = _.partial(onSaveDummy_radar,_,type);
+    saveSVG_detail = _.partial(onSaveDummy_radar,_,'jpg');
     const time = new Date(query_time);
     let stringDate = time.toLocaleDateString()+'_'+time.toLocaleTimeString();
     stringDate  =stringDate.replace(/\//gi,'-');
