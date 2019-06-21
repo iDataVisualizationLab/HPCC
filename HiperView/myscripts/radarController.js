@@ -347,6 +347,7 @@ let radarController = function () {
                 function onDragAxisDragged (){
                     // FIXME: rotation not smooth
                     let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
+                    // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
                     d3.select(this.parentElement).transition().style('transform',function (d, i) {
                         let newAngle = positiveAngle(dAngle);
                         d.angle = ()=>{return positiveAngle(newAngle);};

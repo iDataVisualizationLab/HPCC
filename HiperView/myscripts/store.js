@@ -11,7 +11,18 @@ Loadtostore();
 function SaveStore() {
     variablesNames.forEach(d=>{ conf[d] = window[d];saveConf(d);});
 }
+function checkInvalidStore(){
+    var retrievedObject = localStorage.getItem('serviceLists');
+    if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
+        let checkpoint = JSON.parse(retrievedObject);
+        return checkpoint[0].sub[0].angle ===undefined;
+    } else {
+        return true;
+    }
+}
 function Loadtostore() {
+    if(checkInvalidStore())
+        DeleteAllstore();
     variablesNames.forEach(d=>{ window[d] = checkConf(d)});
     // relink object
     serviceFullList = serviceLists2serviceFullList(serviceLists);

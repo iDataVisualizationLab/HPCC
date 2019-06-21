@@ -261,7 +261,7 @@ function RadarChart(id, data, options, name) {
             .attr("dy", "0.35em")
             .attr("x", 0)
             .merge(axis_o.select('.legend'))
-                // .classed('flip_h',(d,i)=>(d.angle>Math.PI/2)&&(d.angle<2*Math.PI/2))
+                // .classed('flip_h',(d,i)=>(d.angle>Math.PI*3/4)&&(d.angle<5*Math.PI/4))
                 .attr("y", function (d, i) {
                     return -rScale(maxValue * cfg.labelFactor);
                 })
