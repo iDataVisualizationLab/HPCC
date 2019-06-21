@@ -40,6 +40,7 @@ d3.Tsneplot = function () {
     let groupMethod = 'outlier';
     let first = true;
     let returnEvent;
+    let schema;
     function updateRenderRanking(data) {
         var max = d3.max(d3.extent(d3.merge(d3.extent(data,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
         scaleX_small.domain([-max,max]);
@@ -267,21 +268,21 @@ d3.Tsneplot = function () {
 
     Tsneplot.init = function(){
         // radar
-        var total = 10,                 //The number of different axes
-            angle1= Math.PI * 2 / total,
-            angle2= Math.PI * 2 / (total+4);
-        angleSlice = [];
-        for (var i=0;i<total;i++){
-            if (i==0 || i==1 || i==2)       // Temperatures
-                angleSlice.push(angle2*(i-1));
-            else if (i==5 || i==6 || i==7 || i==8)  // Fan speeds
-                angleSlice.push(Math.PI/4.62+angle2*(i-1));
-            else if (i==9)  // Power consumption
-                angleSlice.push(Math.PI * 1.5);
-            else
-                angleSlice.push(angle1*(i-1));
-        }      //TOMMY DANG
-        angleSlice[0] = Math.PI * 2 +angleSlice[0];
+        // var total = 10,                 //The number of different axes
+            // angle1= Math.PI * 2 / total,
+            // angle2= Math.PI * 2 / (total+4);
+        angleSlice = schema.map(d=>d.angle);
+        // for (var i=0;i<total;i++){
+        //     if (i==0 || i==1 || i==2)       // Temperatures
+        //         angleSlice.push(angle2*(i-1));
+        //     else if (i==5 || i==6 || i==7 || i==8)  // Fan speeds
+        //         angleSlice.push(Math.PI/4.62+angle2*(i-1));
+        //     else if (i==9)  // Power consumption
+        //         angleSlice.push(Math.PI * 1.5);
+        //     else
+        //         angleSlice.push(angle1*(i-1));
+        // }      //TOMMY DANG
+        // angleSlice[0] = Math.PI * 2 +angleSlice[0];
         var rScale = d3.scaleLinear()
             .range([0, graphicopt.dotRadius])
             .domain([0, 1]);
@@ -899,6 +900,9 @@ d3.Tsneplot = function () {
     };
     Tsneplot.graphicopt = function (_) {return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;};
     Tsneplot.drawUserlist = function (_) {drawUserlist(_)};
+    Tsneplot.schema = function (_) {
+        return arguments.length ? (schema = _, Tsneplot) : schema;
+    };
     Tsneplot.dispatch = function (_) {
         return arguments.length ? (returnEvent = _, Tsneplot) : returnEvent;
     };

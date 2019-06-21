@@ -20,6 +20,7 @@ function RadarChart(id, data, options, name) {
         strokeWidth: 0.5,        //The width of the stroke around each blob
         roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
         radiuschange: true,
+        markedLegend:undefined,
         showText: true,
         bin: false,
         gradient: false,
@@ -27,6 +28,7 @@ function RadarChart(id, data, options, name) {
         showHelperPoint: true,
         arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
         legend: [],
+        schema: undefined,
         color: function () {
             return 'rgb(167, 167, 167)'
         }
@@ -41,92 +43,56 @@ function RadarChart(id, data, options, name) {
         }//for i
     }//if
 
-    var maxValue,minValue,range,arrThresholds,colorTemperature,opaTemperature,allAxis,rScale;
+    var maxValue,minValue,range,arrThresholds,colorTemperature,opaTemperature,allAxis,rScale,scaleMarkedLegend;
+    range = thresholds[0];
     // NEW SETTING
-    if (data.schema){
-        maxValue = 1;
-        minValue = 0;
+    //If the supplied maxValue is smaller than the actual one, replace by the max in the data
+    maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
+        return d3.max(i.map(function (o) {
+            return o.value;
+        }))
+    }));
+
+    if (cfg.isNormalize) range = [0,1];
+    if (cfg.markedLegend) scaleMarkedLegend = d3.scaleLinear().domain(range).range(cfg.markedLegend);
+    // *** TOMMY 2018 ************
+    //Compute min max for the temperature
+    var dif = (range[1] - range[0]) / 4;
+    var right = range[1] + dif;
+
+    maxValue = right;
+
+    minValue = range[0] - dif;
+    var colorLength = arrColor.length - 1;
+    arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
+        range[0] + 3 * dif, range[1], maxValue];
 
 
+    colorTemperature = d3.scaleLinear()
+        .domain(arrThresholds)
+        .range(arrColor)
+        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+    opaTemperature = d3.scaleLinear()
+        .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
+        .range([1, 0.7, 0.05, 0.7, 1]);
+    radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
+    Format = d3.format('');               //Percentage formatting
+
+    if (cfg.schema){
+        range = [0,1];
+        allAxis = cfg.schema;
     }else{
-        //If the supplied maxValue is smaller than the actual one, replace by the max in the data
-        maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
-            return d3.max(i.map(function (o) {
-                return o.value;
-            }))
-        }));
-
-        range = thresholds[0];
-        if (cfg.isNormalize) range = [0,1];
-
-        // *** TOMMY 2018 ************
-        //Compute min max for the temperature
-        var dif = (range[1] - range[0]) / 4;
-        var right = range[1] + dif;
-
-        maxValue = right;
-
-        minValue = range[0] - dif;
-        var colorLength = arrColor.length - 1;
-        arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
-            range[0] + 3 * dif, range[1], maxValue];
-
-
-        colorTemperature = d3.scaleLinear()
-            .domain(arrThresholds)
-            .range(arrColor)
-            .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-        opaTemperature = d3.scaleLinear()
-            .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
-            .range([1, 0.7, 0.05, 0.7, 1]);
-        // .range([0.3,0.2,0.1,0.2,0.3]);
-
-        var allAxis = (data[0].map(function (i, j) {
-                return i.axis
-            })), //Names of each axis
-            total = allAxis.length,                 //The number of different axes
-            radius = Math.min(cfg.w / 2, cfg.h / 2),    //Radius of the outermost circle
-            Format = d3.format(''),                //Percentage formatting
-            //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
-            angle1 = Math.PI * 2 / total;
-        angle2 = Math.PI * 2 / (total + 4);
-        angleSlice = [];
-        angleSlice2 = [];
-        for (var i = 0; i < total; i++) {
-            if (i == 0 || i == 1 || i == 2)       // Temperatures
-                angleSlice.push(angle2 * (i - 1));
-            else if (i == 5 || i == 6 || i == 7 || i == 8)  // Fan speeds
-                angleSlice.push(Math.PI / 4.62 + angle2 * (i - 1));
-            else if (i == 9)  // Power consumption
-                angleSlice.push(Math.PI * 1.5);
-            else
-                angleSlice.push(angle1 * (i - 1));
-        }      //TOMMY DANG
-        angleSlice[0] = Math.PI * 2 + angleSlice[0];
-        var meanang = (angleSlice[0] - Math.PI * 2 + angleSlice[1]) / 2;
-        var dismeanang = 0 - (angleSlice[0] - Math.PI * 2);
-        angleSlice2.push(angleSlice[0]);
-        var temp = (angleSlice[0] - Math.PI * 2 + dismeanang / 4);
-        angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-        angleSlice2.push(meanang < 0 ? meanang + Math.PI * 2 : meanang);
-        temp = (angleSlice[1] - dismeanang / 4);
-        angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-        for (var i = 1; i < total; i++) {
-            var meanang = (angleSlice[i] + angleSlice[(i + 1) % total]) / 2;
-            var dismeanang = meanang - angleSlice[i];
-            angleSlice2.push(angleSlice[i]);
-            angleSlice2.push(angleSlice[i] + dismeanang / 4);
-            angleSlice2.push(meanang);
-            angleSlice2.push(angleSlice[(i + 1) % total] - dismeanang / 4);
-        }
-
-        //angleSlice2.push(angleSlice[0]);
-
-        //Scale for the radius
-        rScale = d3.scaleLinear()
-            .range([0, radius])
-            .domain([minValue, maxValue]);
+        //Names of each axis
+        angleSlice = cfg.angleSlice;
+        allAxis = (data[0].map(function (i, j) {
+                return {text: i.axis, angle: angleSlice[j]};
+            }));
     }
+
+    //Scale for the radius
+    rScale = d3.scaleLinear()
+        .range([0, radius])
+        .domain([minValue, maxValue]);
 
 
     /////////////////////////////////////////////////////////
@@ -182,9 +148,13 @@ function RadarChart(id, data, options, name) {
         else
             temptest.text(name);
     }
-    /////////////////////////////////////////////////////////
-    ////////// Glow filter for some extra pizzazz ///////////
-    /////////////////////////////////////////////////////////
+    function toDegrees(rad) {
+        let deg = rad * (180/Math.PI)%360;
+        return deg;
+    }
+    function toRadian(deg) {
+        return deg * (Math.PI/180);
+    }
     if (first) {
         const rg = svg.append("defs").append("radialGradient")
             .attr("id", "rGradient2");
@@ -251,49 +221,54 @@ function RadarChart(id, data, options, name) {
             .style("visibility", (d, i) => ((cfg.bin||cfg.gradient) && i == 0) ? "hidden" : "visible");
 
 
-        /////////////////////////////////////////////////////////
-        //////////////////// Draw the axes //////////////////////
-        /////////////////////////////////////////////////////////
 
-        //Create the straight lines radiating outward from the center
-        var axis = axisGrid.selectAll(".axis")
-            .data(allAxis)
-            .enter()
-            .append("g")
-            .attr("class", "axis");
-        //Append the lines
-        axis.append("line")
-            .attr("x1", 0)
-            .attr("y1", 0)
-            .attr("x2", function (d, i) {
-                return rScale(maxValue * (cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) * Math.cos(angleSlice[i] - Math.PI / 2);
-            })
-            .attr("y2", function (d, i) {
-                return rScale(maxValue *( cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) * Math.sin(angleSlice[i] - Math.PI / 2);
-            })
-            .attr("class", "line")
-            .style("stroke", cfg.gradient?'#eaeaea':"white")
-            .style("stroke-width", "1px");
 
-        //Append the labels at each axis
-        if (cfg.showText) {
-            axis.append("text")
-                .attr("class", "legend")
-                .style("font-size", "12px")
-                .attr("font-family", "sans-serif")
-                .attr("text-anchor", "middle")
-                .attr("dy", "0.35em")
-                .attr("x", function (d, i) {
-                    return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice[i] - Math.PI / 2);
-                })
+    }
+    /////////////////////////////////////////////////////////
+    //////////////////// Draw the axes //////////////////////
+    /////////////////////////////////////////////////////////
+    var axisGrid = g.select(".axisWrapper");
+    //Create the straight lines radiating outward from the center
+    var axis_o = axisGrid.selectAll(".axis")
+        .data(allAxis,d=>d.text);
+
+    var axis_n = axis_o.enter()
+        .append("g")
+        .attr("class", "axis")
+        .style('transform-origin','0,0');
+    axis_n.merge(axis_o)
+        .style('transform',function (d, i) {
+            return "rotate(" + toDegrees(d.angle) + "deg)"});
+
+    //Append the lines
+    axis_n.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", function (d, i) {
+            return -rScale(maxValue *( cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) ;
+        })
+        .attr("class", "line")
+        .style("stroke", cfg.gradient?'#eaeaea':"white")
+        .style("stroke-width", "1px");
+    //Append the labels at each axis
+    if (cfg.showText) {
+        axis_n.append("text")
+            .attr("class", "legend")
+            .style("font-size", "12px")
+            .attr("font-family", "sans-serif")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .attr("x", 0)
+            .merge(axis_o.select('.legend'))
+                // .classed('flip_h',(d,i)=>(d.angle>Math.PI/2)&&(d.angle<2*Math.PI/2))
                 .attr("y", function (d, i) {
-                    return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice[i] - Math.PI / 2);
+                    return -rScale(maxValue * cfg.labelFactor);
                 })
                 .text(function (d) {
-                    return d
+                    return d.text;
                 })
                 .call(wrap, cfg.wrapWidth);
-        }
     }
     /////////////////////////////////////////////////////////
     ///////////// Draw the radar chart blobs ////////////////
@@ -314,10 +289,10 @@ function RadarChart(id, data, options, name) {
        // .interpolate("linear-closed")
        .curve(d3.curveCatmullRom.alpha(0.5))
         .radius(function(d) { return rScale(d.value||d); })
-        .angle(function(d,i) {  return angleSlice[i]; });
+        .angle(function(d,i) {  return getAngle(d,i); });
 
     var radialAreaGenerator = d3.radialArea()
-        .angle(function(d,i) {  return angleSlice[i]; })
+        .angle(function(d,i) {  return getAngle(d,i); })
         .innerRadius(function(d,i) {
             return rScale(d.minval);
         })
@@ -540,10 +515,10 @@ function RadarChart(id, data, options, name) {
                 return cfg.dotRadius;
             })
             .attr("cx", function (d, i) {
-                return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.cos(getAngle(d,i) - Math.PI / 2);
             })
             .attr("cy", function (d, i) {
-                return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.sin(getAngle(d,i) - Math.PI / 2);
             })
             // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
             .style("fill", function (d) {
@@ -563,10 +538,10 @@ function RadarChart(id, data, options, name) {
                 return cfg.dotRadius;
             })
             .attr("cx", function (d, i) {
-                return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.cos(getAngle(d,i) - Math.PI / 2);
             })
             .attr("cy", function (d, i) {
-                return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.sin(getAngle(d,i) - Math.PI / 2);
             })
             // .style("fill", function(d,i,j) {  return cfg.color(d.index); })
             .style("fill", function (d) {
@@ -622,10 +597,10 @@ function RadarChart(id, data, options, name) {
             })
             .attr("r", cfg.dotRadius * 1.5)
             .attr("cx", function (d, i) {
-                return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.cos(getAngle(d,i) - Math.PI / 2);
             })
             .attr("cy", function (d, i) {
-                return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.sin(getAngle(d,i) - Math.PI / 2);
             })
             .style("fill", "none")
             .style("pointer-events", "all")
@@ -650,10 +625,10 @@ function RadarChart(id, data, options, name) {
             .attr("class", "radarInvisibleCircle")
             .attr("r", cfg.dotRadius * 1.5)
             .attr("cx", function (d, i) {
-                return rScale(d.value) * Math.cos(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.cos(getAngle(d,i) - Math.PI / 2);
             })
             .attr("cy", function (d, i) {
-                return rScale(d.value) * Math.sin(angleSlice[i] - Math.PI / 2);
+                return rScale(d.value) * Math.sin(getAngle(d,i) - Math.PI / 2);
             })
             .style("fill", "none")
             .style("pointer-events", "all")
@@ -680,7 +655,9 @@ function RadarChart(id, data, options, name) {
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
-    
+    function getAngle(d,i){
+        return (allAxis.find(a=>a.text===d.axis)||allAxis[i]).angle;
+    }
     /////////////////////////////////////////////////////////
     /////////////////// Helper Function /////////////////////
     /////////////////////////////////////////////////////////
@@ -726,6 +703,9 @@ function RadarChart(id, data, options, name) {
             .attr("fill", "#111")
             .text(function (d, i) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                if (cfg.markedLegend) {
+                    v = scaleMarkedLegend(v);
+                }
                 return Math.round(v);
             });
         axisLabel.exit().remove();
@@ -741,6 +721,9 @@ function RadarChart(id, data, options, name) {
             .attr("fill", "#111")
             .text(function (d, i) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                if (cfg.markedLegend) {
+                    v = scaleMarkedLegend(v);
+                }
                 return Math.round(v);
             });
         var legendg = cfg.legend.map(function (d, i) {

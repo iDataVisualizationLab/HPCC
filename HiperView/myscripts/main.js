@@ -691,9 +691,9 @@ function drawHorizontalView() {
     //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
     xTimeSummaryScale = xLinearSummaryScale;
     Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4, 10]).scale(xLinearSummaryScale)
-        .maxstack(maxstack);
-
-    TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).init();
+        .maxstack(maxstack).schema(serviceFullList);
+    radarChartOptions.angleSlice = serviceFullList.map(d=>d.angle);
+    TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).schema(serviceFullList).init();
 }
 function drawVerticalView() {
 
@@ -1100,22 +1100,22 @@ function drawsummary(initIndex){
             case "Radar":
                 for (var h = 0; h < hosts.length; h++) {
                     var name = hosts[h].name;
-                    var r = hostResults[name];
-                    // lastIndex = initIndex||(r.arr.length - 1);
-                    // boxplot
-                    if (lastIndex >= 0) {   // has some data
-                        var arrServices = [];
-                        serviceList_selected.forEach((ser, indx) => {
-                            var obj = {};
-                            let dataextract = r[serviceListattr[indx]][lastIndex];
-                            if (dataextract)
-                                dataextract = dataextract.data.service.plugin_output;
-                            var a = processData(dataextract, ser);
-                            obj.a = a;
-                            arrServices.push(obj);
+                    // var r = hostResults[name];
 
-                        })
-                    }
+                    // if (lastIndex >= 0) {   // has some data
+                    //     var arrServices = [];
+                    //     serviceList_selected.forEach((ser, indx) => {
+                    //         var obj = {};
+                    //         let dataextract = r[serviceListattr[indx]][lastIndex];
+                    //         if (dataextract)
+                    //             dataextract = dataextract.data.service.plugin_output;
+                    //         var a = processData(dataextract, ser);
+                    //         obj.a = a;
+                    //         arrServices.push(obj);
+                    //
+                    //     })
+                    // }
+                    arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
                     arrServices.name = name;
                     arr.push(arrServices);
                 }
@@ -1172,20 +1172,21 @@ function drawsummarypoint(harr){
                 var r = hostResults[name];
                 // lastIndex = initIndex||(r.arr.length - 1);
                 // boxplot
-                if (lastIndex >= 0) {   // has some data
-                    var arrServices = [];
-                    serviceList_selected.forEach((ser, indx) => {
-                        try {
-                            var obj = {};
-                            let dataextract = r[serviceListattr[indx]][lastIndex];
-                            if (dataextract)
-                                dataextract = dataextract.data.service.plugin_output;
-                            var a = processData(dataextract, ser);
-                            obj.a = a;
-                            arrServices.push(obj);
-                        }catch(e){}
-                    })
-                }
+                // if (lastIndex >= 0) {   // has some data
+                //     var arrServices = [];
+                //     serviceList_selected.forEach((ser, indx) => {
+                //         try {
+                //             var obj = {};
+                //             let dataextract = r[serviceListattr[indx]][lastIndex];
+                //             if (dataextract)
+                //                 dataextract = dataextract.data.service.plugin_output;
+                //             var a = processData(dataextract, ser);
+                //             obj.a = a;
+                //             arrServices.push(obj);
+                //         }catch(e){}
+                //     })
+                // }
+                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
                 arrServices.name = name;
                 arr.push(arrServices);
             }
@@ -2160,7 +2161,9 @@ $( document ).ready(function() {
 
         MetricController.graphicopt({width:300,height:300})
             .div(d3.select('#RadarController'))
-            .axisSchema(serviceFullList).init();
+            .axisSchema(serviceFullList)
+            .onChangeValue(onSchemaUpdate)
+            .init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")
@@ -2177,6 +2180,17 @@ $( document ).ready(function() {
     // Spinner Stop ********************************************************************
 
 });
+function onSchemaUpdate(schema){
+    console.log(schema);
+    serviceFullList.forEach(ser=>{
+        ser.angle = schema.axis[ser.text].angle();
+    });
+    radarChartOptions.schema = serviceFullList;
+    if (graphicControl.charType === "T-sne Chart")
+        TSneplot.schema(serviceFullList);
+    if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary")
+        Radarplot.schema(serviceFullList);
+}
 function discovery(d){
     d3.select(d).style('left','20px')
         .classed("pulse",true)

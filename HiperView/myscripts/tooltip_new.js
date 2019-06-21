@@ -18,7 +18,7 @@ var radarChartOptions = {
     roundStrokes: true,
     color: color2,
     isNormalize: true,
-    markedLegend: [thresholds[0]],
+    markedLegend: thresholds[0],
     legend: [{},
         {},
         {},
