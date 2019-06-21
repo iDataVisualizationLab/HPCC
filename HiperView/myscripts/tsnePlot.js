@@ -541,6 +541,8 @@ d3.Tsneplot = function () {
             tsne.terminate();
         if(intervalUI)
             clearInterval(intervalUI);
+        if (forcetsne)
+            forcetsne.stop();
         // clearInterval(intervalCalculate);
     };
 
