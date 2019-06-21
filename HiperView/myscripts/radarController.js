@@ -234,6 +234,11 @@ let radarController = function () {
 
 
             if (first) {
+                var filter = g.append('defs').append('filter').attr('id', 'glowc'),
+                    feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
+                    feMerge = filter.append('feMerge'),
+                    feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+                    feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
                 /////////////////////////////////////////////////////////
                 /////////////// Draw the Circular grid //////////////////
                 /////////////////////////////////////////////////////////
@@ -259,7 +264,7 @@ let radarController = function () {
                     .style("stroke-width", 0.3)
                     .style("stroke-opacity", 1)
                     .style("fill-opacity", graphicopt.opacityCircles)
-                    .style("filter", "url(#glow)")
+                    .style("filter", "url(#glowc)")
                     .style("visibility", (d, i) => ((graphicopt.bin||graphicopt.gradient) && i == 0) ? "hidden" : "visible");
 
 
@@ -346,7 +351,12 @@ let radarController = function () {
                 }
                 function onDragAxisDragged (){
                     // FIXME: rotation not smooth
-                    let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
+                    // let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
+                    let newpos = {x: -(graphicopt.widthG()/2+ graphicopt.margin.left+20) + (d3.event.sourceEvent.screenX ),
+                                    y: -(graphicopt.heightG()/2+ graphicopt.margin.top  +graphicopt.height+20) + (d3.event.sourceEvent.screenY) };
+                    console.log(newpos)
+                    let dAngle = Math.atan2(-newpos.y,-newpos.x)-Math.PI/2;
+                    console.log(dAngle);
                     // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
                     d3.select(this.parentElement).transition().style('transform',function (d, i) {
                         let newAngle = positiveAngle(dAngle);
