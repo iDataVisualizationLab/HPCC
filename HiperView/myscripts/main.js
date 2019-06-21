@@ -2190,6 +2190,7 @@ function onSchemaUpdate(schema){
         TSneplot.schema(serviceFullList);
     if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary")
         Radarplot.schema(serviceFullList);
+    SaveStore();
 }
 function discovery(d){
     d3.select(d).style('left','20px')

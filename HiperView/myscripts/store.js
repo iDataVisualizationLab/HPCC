@@ -4,17 +4,21 @@ const variablesNames = ['serviceList','serviceLists','serviceListattr','serviceL
 var conf={};
 variablesNames.forEach(d=>conf[d] = window[d]);
 
-function Loadtostore() {
-    variablesNames.forEach(d=>{ window[d] = checkConf(d)});
-}
-function DeleteAllstore() {
-    variablesNames.forEach(d=>refeshConf(d));
-}
 //***********************
 Loadtostore();
 //***********************
 
-
+function SaveStore() {
+    variablesNames.forEach(d=>{ conf[d] = window[d];saveConf(d);});
+}
+function Loadtostore() {
+    variablesNames.forEach(d=>{ window[d] = checkConf(d)});
+    // relink object
+    serviceFullList = serviceLists2serviceFullList(serviceLists);
+}
+function DeleteAllstore() {
+    variablesNames.forEach(d=>refeshConf(d));
+}
 function checkConf(namekey) {
     var retrievedObject = localStorage.getItem(namekey);
     if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
