@@ -1,9 +1,9 @@
 let radarController = function () {
     let graphicopt = {
-            margin: {top: 5, right: 0, bottom: 0, left: 0},
-            width: 400,
-            height: 400,
-            radius:200,
+            margin: {top: 40, right: 40, bottom: 40, left: 40},
+            width: 300,
+            height: 300,
+            radius: 150,
             scalezoom: 1,
             widthView: function(){return this.width*this.scalezoom},
             heightView: function(){return this.height*this.scalezoom},
@@ -15,6 +15,7 @@ let radarController = function () {
             arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
             arrThresholds: [],
             opacityCircles: 0.1,
+            wrapWidth: 40,
         };
 
     let svg,div;
@@ -36,45 +37,6 @@ let radarController = function () {
 
     // TODO: REPLACE
 
-    //Scale for the radius
-    // var allAxis = (data[0].map(function (i, j) {
-    //         return i.axis
-    //     })), //Names of each axis
-    //     total = allAxis.length,                 //The number of different axes
-    //     radius = Math.min(cfg.w / 2, cfg.h / 2),    //Radius of the outermost circle
-    //     Format = d3.format(''),                //Percentage formatting
-    //     //    angleSlice = Math.PI * 2 / total;       //The width in radians of each "slice"
-    //     angle1 = Math.PI * 2 / total;
-    // angle2 = Math.PI * 2 / (total + 4);
-    // angleSlice = [];
-    // angleSlice2 = [];
-    // for (var i = 0; i < total; i++) {
-    //     if (i == 0 || i == 1 || i == 2)       // Temperatures
-    //         angleSlice.push(angle2 * (i - 1));
-    //     else if (i == 5 || i == 6 || i == 7 || i == 8)  // Fan speeds
-    //         angleSlice.push(Math.PI / 4.62 + angle2 * (i - 1));
-    //     else if (i == 9)  // Power consumption
-    //         angleSlice.push(Math.PI * 1.5);
-    //     else
-    //         angleSlice.push(angle1 * (i - 1));
-    // }      //TOMMY DANG
-    // angleSlice[0] = Math.PI * 2 + angleSlice[0];
-    // var meanang = (angleSlice[0] - Math.PI * 2 + angleSlice[1]) / 2;
-    // var dismeanang = 0 - (angleSlice[0] - Math.PI * 2);
-    // angleSlice2.push(angleSlice[0]);
-    // var temp = (angleSlice[0] - Math.PI * 2 + dismeanang / 4);
-    // angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-    // angleSlice2.push(meanang < 0 ? meanang + Math.PI * 2 : meanang);
-    // temp = (angleSlice[1] - dismeanang / 4);
-    // angleSlice2.push(temp < 0 ? temp + Math.PI * 2 : temp);
-    // for (var i = 1; i < total; i++) {
-    //     var meanang = (angleSlice[i] + angleSlice[(i + 1) % total]) / 2;
-    //     var dismeanang = meanang - angleSlice[i];
-    //     angleSlice2.push(angleSlice[i]);
-    //     angleSlice2.push(angleSlice[i] + dismeanang / 4);
-    //     angleSlice2.push(meanang);
-    //     angleSlice2.push(angleSlice[(i + 1) % total] - dismeanang / 4);
-    // }
     let rScale = d3.scaleLinear()
         .domain([0, 1]);
 
@@ -261,7 +223,7 @@ let radarController = function () {
                 //Append a g element
                 g = svg.append("g")
                     .attr('class','radarControllerg')
-                    .attr('transform',`translate(${graphicopt.width/2+graphicopt.margin.left},${graphicopt.height/2+graphicopt.margin.top})`)
+                    .attr('transform',`translate(${graphicopt.widthG()/2+graphicopt.margin.left},${graphicopt.heightG()/2+graphicopt.margin.top})`)
             }
             svg.attrs({
                 width: graphicopt.width,
@@ -343,19 +305,14 @@ let radarController = function () {
                     .attr("class", "legend")
                     .style("font-size", "12px")
                     .attr("font-family", "sans-serif")
+                    .attr("fill", "currentColor")
                     .attr("text-anchor", "middle")
-                    .attr("dy", "0.35em")
+                    .attr("dy", "-1em")
                     .attr("x", 0)
                     .attr("y", -rScale(graphicopt.labelFactor))
-                    // .attr("x", function (d, i) {
-                    //     return rScale(graphicopt.labelFactor) * Math.cos(d.angle() - Math.PI / 2);
-                    // })
-                    // .attr("y", function (d, i) {
-                    //     return rScale(graphicopt.labelFactor) * Math.sin(d.angle() - Math.PI / 2);
-                    // })
                     .text(function (d) {
-                        return d.text;
-                    });
+                        return d.data.text;
+                    }).call(wrap, graphicopt.wrapWidth);
                 axis.append("text")
                     .attr("class", "angleValue")
                     .style("font-size", "12px")
@@ -441,6 +398,47 @@ let radarController = function () {
             return e;
         }
 
+    }
+    /////////////////////////////////////////////////////////
+    /////////////////// Helper Function /////////////////////
+    /////////////////////////////////////////////////////////
+
+    //Taken from http://bl.ocks.org/mbostock/7555321
+    //Wraps SVG text
+    function wrap(text, width) {
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 0.9, // ems
+                y = text.attr("y"),
+                x = text.attr("x"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                let size = tspan.node().getComputedTextLength();
+                if (size===0)
+                    size = getTextWidth(tspan.text(),tspan.style('font'));
+                if (size > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }//wrap
+    function getTextWidth(text, font) {
+        var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+        var context = canvas.getContext("2d");
+        context.font = font;
+        var metrics = context.measureText(text);
+        return metrics.width;
     }
     radarController.graphicopt = function (_) {
         //Put all of the options into a variable called cfg
