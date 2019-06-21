@@ -200,55 +200,8 @@ d3.radar = function () {
 
         //dataSpider2.name = 'Summary '+d3.timeFormat('%H:%M %d %b %Y')(r.arr[0].result.query_time);
         if (arr.length>0){
-            // for (var i=0;i<arr.length;i++){
-            //     var arrServices = arr[i];
-            //     var arr1 = [];
-            //     for (var a=0;a<axes.length;a++){
-            //         var obj ={};
-            //         obj.axis = axes[a];
-            //         if (a==0)
-            //             obj.value = arrServices[0].a[0];
-            //         else if (a==1)
-            //             obj.value = arrServices[0].a[1];
-            //         else if (a==2)
-            //             obj.value = arrServices[0].a[2];
-            //         else if (a==3)
-            //             obj.value = arrServices[1].a[0];
-            //         else if (a==4)
-            //             obj.value = arrServices[2].a[0];
-            //         else if (a==5)
-            //             obj.value = arrServices[3].a[0];
-            //         else if (a==6)
-            //             obj.value = arrServices[3].a[1];
-            //         else if (a==7)
-            //             obj.value = arrServices[3].a[2];
-            //         else if (a==8)
-            //             obj.value = arrServices[3].a[3];
-            //         else if (a==9)
-            //             obj.value = arrServices[4].a[0];
-            //         arr1.push(obj);
-            //     }
-            //     arr1.name = arr[i].name;
-            //     arr1.indexSamp = index;
-            //
-            //     let arr2 = arr1.map(d=>_.clone(d));
-            //     arr2.name = arr[i].name;
-            //     arr2.indexSamp = index;
-            //     dataSpider3.push(arr1);
-            //     dataCalculate.push(arr2);
-            //
-            // }
-            //
-            // // Standardize data for Radar chart
-            // dataSpider3.forEach((d,i)=>{
-            //     normalizevalue(d);
-            // });
-            //
-            // dataCalculate.forEach((d,i)=>{
-            //     normalizevalue(d,'mean');
-            // });
             arr.forEach(d=>d.indexSamp = index);
-            dataSpider3 = arr;
+            dataSpider3 =  arr;
             dataCalculate = arr;
         }
         //return datawithoutNULL;

@@ -271,7 +271,7 @@ d3.Tsneplot = function () {
         // var total = 10,                 //The number of different axes
             // angle1= Math.PI * 2 / total,
             // angle2= Math.PI * 2 / (total+4);
-        angleSlice = schema.map(d=>d.angle);
+        // angleSlice = schema.map(d=>d.angle).sort((a,b)=>a-b);
         // for (var i=0;i<total;i++){
         //     if (i==0 || i==1 || i==2)       // Temperatures
         //         angleSlice.push(angle2*(i-1));
@@ -288,8 +288,9 @@ d3.Tsneplot = function () {
             .domain([0, 1]);
         radarcreate = d3.radialLine()
             .curve(d3.curveCardinalClosed.tension(0))
-            .radius(function(d) { return rScale(d); })
-            .angle(function(d,i) {  return angleSlice[i]; });
+            .radius(function(d) { return rScale(d.value); })
+            .angle(function(d,i) {
+                return schema.find(s=>s.text===d.axis).angle; });
 
         trackercreate = d3.line()
             .x(d=> scaleX_small(d[0]))
@@ -491,7 +492,7 @@ d3.Tsneplot = function () {
             forcetsne.alphaTarget(0.1);
             needUpdate = true;
             let newdata = g.selectAll(".linkLineg")
-                .data(arr,d=>d.name);
+                .data(handledata(arr),d=>d.name);
             newdata.select('clipPath').select('path')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d));
@@ -600,9 +601,14 @@ d3.Tsneplot = function () {
     }
 
 
-    function handledata(){
-
-        return arr;
+    function handledata(data){
+        let objectarr = data.map(a=>{
+            let temp = a.map((d,i)=>{return {axis: schema[i].text, value: d};});
+            temp = _.sortBy(temp,d=>schema.find(e=>e.text===d.axis).angle);
+            temp.name = a.name;
+            return temp;
+        });
+        return objectarr;
     }
     function user_sortBY (key,data){
         switch (key) {
@@ -829,7 +835,7 @@ d3.Tsneplot = function () {
     function drawEmbedding(data) {
 
         let datapoint = g.selectAll(".linkLineg")
-            .data(data);
+            .data(handledata(data));
         let datapointN = datapoint
             .enter().append("g")
             .attr("class", d=>"linkLineg "+d.name)

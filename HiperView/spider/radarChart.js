@@ -88,7 +88,9 @@ function RadarChart(id, data, options, name) {
                 return {text: i.axis, angle: angleSlice[j]};
             }));
     }
-
+    data = data.map(ditem=>{
+        let temp = _.sortBy(ditem,d=>allAxis.find(e=>e.text===d.axis).angle);
+        temp.bin = ditem.bin; return temp;});
     //Scale for the radius
     rScale = d3.scaleLinear()
         .range([0, radius])
@@ -317,14 +319,14 @@ function RadarChart(id, data, options, name) {
     //function update
     function drawCluster(paths){
         paths.attr("d", d => {
-
             d.forEach((v,i)=>{
-                let temp = d.bin.val.map(ve=>ve[i]);
+                let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
                 let mean = d3.mean(temp);
                 let std = d3.deviation(temp)||0;
                 v.minval =  mean - std/2;
                 v.maxval =  mean + std/2;
             });
+
             return radialAreaGenerator(d);}).transition()
             .style("stroke", (d, i) => cfg.color(i))
             .style("stroke-width", () => cfg.strokeWidth + "px")
