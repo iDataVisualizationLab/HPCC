@@ -1057,7 +1057,6 @@ function scaleThreshold(i){
 function drawsummary(initIndex){
     var arr = [];
     var xx;
-    console.log(lastIndex)
     if (initIndex===undefined){
         currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
@@ -1066,13 +1065,15 @@ function drawsummary(initIndex){
         // updateTimeText(); //time in end
     }else{
         lastIndex = initIndex;
-        query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
-        var temp = (maxstack-2)-(currentlastIndex-initIndex);
-        if (currentlastIndex > maxstack-2)
-            xx = xTimeSummaryScale(temp);
-        else {
-            temp = lastIndex;
-            xx = xTimeSummaryScale(lastIndex);
+        if (hostResults[hosts[hosts.length-1].name].arr[lastIndex]) {
+            query_time = hostResults[hosts[hosts.length - 1].name].arr[lastIndex].result.query_time;
+            var temp = (maxstack - 2) - (currentlastIndex - initIndex);
+            if (currentlastIndex > maxstack - 2)
+                xx = xTimeSummaryScale(temp);
+            else {
+                temp = lastIndex;
+                xx = xTimeSummaryScale(lastIndex);
+            }
         }
 
     }
