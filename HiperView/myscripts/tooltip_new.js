@@ -72,6 +72,7 @@ function cotenttip (hideLine){
     // str += '<button onclick="saveSVG(this)">Save Image</button>';
     str += '<button onclick="saveSVG_light(this,\'svg\')" class="modal-trigger" href="#savedialog">Save SVG</button>';
     str += '<button onclick="saveSVG_light(this,\'png\')" class="modal-trigger" href="#savedialog">Save PNG</button>';
+    str += '<button onclick="saveSVG_light(this,\'jpeg\')" class="modal-trigger" href="#savedialog">Save JPEG</button>';
     return str;
 }
 // Add radar chart to the end of html page

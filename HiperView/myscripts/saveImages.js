@@ -27,7 +27,7 @@ function saveSVG_light(event,type){
 
 // <editor-fold multi request>
 function saveSVG_batch(type){
-    saveSVG_detail = _.partial(onSaveDummy_radar,_,'png');
+    saveSVG_detail = _.partial(onSaveDummy_radar,_,type);
     const time = new Date(query_time);
     let stringDate = time.toLocaleDateString()+'_'+time.toLocaleTimeString();
     stringDate  =stringDate.replace(/\//gi,'-');
@@ -102,6 +102,8 @@ let saveSVG = function(event,name,type,prefix,zip){
                 save(stringbold);
             break;
         case 'png':
+        case 'jpg':
+        case 'jpeg':
             if (zip)
                 return rasterize(target.querySelector('.radarPlot'), true).then(svgString => {
                     return saveInZip(svgString, zip);
