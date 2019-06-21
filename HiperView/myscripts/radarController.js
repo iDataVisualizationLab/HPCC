@@ -15,7 +15,7 @@ let radarController = function () {
             arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
             arrThresholds: [],
             opacityCircles: 0.1,
-            wrapWidth: 40,
+            wrapWidth: 60,
         };
 
     let svg,div;
