@@ -2016,6 +2016,27 @@ function closeNav() {
 }
 // pause when not use , prevent frozen hiperView
 
+function updateSummaryChartAll() {
+    switch (graphicControl.sumType) {
+        case "Scatterplot":
+            d3.select("#scatterzone").style("visibility", "visible");
+            svg.selectAll(".graphsum").remove();
+            for (var i = currentlastIndex > (maxstack - 2) ? (currentlastIndex - maxstack + 2) : 0; i < (currentlastIndex + 1); i++) {
+                drawsummary(i);
+            }
+            break;
+        case "Boxplot":
+        case "Radar":
+        case "RadarSummary":
+            svg.selectAll(".graphsum").remove();
+            d3.select("#scatterzone").style("visibility", "hidden");
+            for (var i = currentlastIndex > (maxstack - 2) ? (currentlastIndex - maxstack + 2) : 0; i < (currentlastIndex + 1); i++) {
+                drawsummary(i);
+            }
+            break;
+    }
+}
+
 $( document ).ready(function() {
     // $(window).on("blur focus", function(e) {
     //     var prevType = $(this).data("prevType");
@@ -2056,24 +2077,7 @@ $( document ).ready(function() {
         graphicControl.sumType = sect.options[sect.selectedIndex].value;
         svg.select(".graphsum").remove();
         pannelselection(false);
-        switch(graphicControl.sumType){
-            case "Scatterplot":
-                d3.select("#scatterzone").style("visibility","visible");
-                svg.selectAll(".graphsum").remove();
-                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                    drawsummary(i);
-                }
-                break;
-            case "Boxplot":
-            case "Radar":
-            case "RadarSummary":
-                svg.selectAll(".graphsum").remove();
-                d3.select("#scatterzone").style("visibility","hidden");
-                for (var i =currentlastIndex>(maxstack-2)?(currentlastIndex-maxstack+2):0; i<(currentlastIndex+1);i++) {
-                    drawsummary(i);
-                }
-                break;
-        }
+        updateSummaryChartAll();
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
@@ -2186,10 +2190,13 @@ function onSchemaUpdate(schema){
         ser.angle = schema.axis[ser.text].angle();
     });
     radarChartOptions.schema = serviceFullList;
-    if (graphicControl.charType === "T-sne Chart")
+    // if (graphicControl.charType === "T-sne Chart")
         TSneplot.schema(serviceFullList);
-    if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary")
+    // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
         Radarplot.schema(serviceFullList);
+        updateSummaryChartAll();
+    // }
+
     SaveStore();
 }
 function discovery(d){
