@@ -316,9 +316,9 @@ function RadarChart(id, data, options, name) {
         });
 
     if(cfg.roundStrokes) {
-        radarLine.curve(d3.curveCardinalClosed.tension(0.5));
+        radarLine.curve(d3.curveCardinalClosed.tension(0));
         //radialAreaGenerator.curve(d3.curveBasisClosed);
-        radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
+        radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0));
     }
 
     //Create a wrapper for the blobs

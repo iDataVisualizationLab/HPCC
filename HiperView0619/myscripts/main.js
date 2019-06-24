@@ -211,7 +211,6 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
-var MetricController = radarController();
 let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
 
@@ -2154,10 +2153,6 @@ $( document ).ready(function() {
             }
             loadata(data);
         });
-
-        MetricController.graphicopt({width:300,height:300})
-            .div(d3.select('#RadarController'))
-            .axisSchema(serviceFullList).init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
             d3.select(".currentDate")

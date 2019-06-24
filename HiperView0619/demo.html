@@ -140,12 +140,6 @@
                     <!--</div>-->
                 </div>
             </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
-                <div class="collapsible-body">
-                    <div id="RadarController"></div>
-                </div>
-            </li>
             <!--<li>-->
                 <!--<div class="collapsible-header"><i class="material-icons">help</i>Controls</div>-->
                 <!--<div class="collapsible-body"><strong>Zoom</strong>: Scroll mouse button to zoom.<br/></div>-->
@@ -205,55 +199,48 @@
                     <div id="selectionheader">Click & Drag</div>
                 </div>
             </div>
-            <div id = "tsnezone">
-                <div id ="subzone" class="subpanel card-panel floatLeft">
-                    <h6>Ranked by travel distant  </h6>
-                    <div class="top10DIV">
-                        <svg class="top10" >
+            <div id ="subzone" class="subpanel card-panel floatLeft">
+                <h6>Ranked by travel distant  <button value = false class ="menuBtn seperate"><i class="fa fa-arrows-alt"></i></button></h6>
+                <div class="top10DIV">
+                    <svg class="top10" >
 
-                        </svg>
-                    </div>
-                    <div class="details" ></div>
+                    </svg>
                 </div>
-                <div id ="subcontrolzone" class="controlHolderDiv">
-                    <div class="controlDiv">
-                        <div class="controlGroup">
-                            <button value = false class ="menuBtn seperate"></button>
-                        </div>
+                <div class="details" ></div>
+            </div>
+            <!--<div id ="subcontrolzone" class="controlHolder" style="position: absolute">-->
+                <!--<button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>-->
+            <!--</div>-->
+            <div id ="userList" class="subpanel card-panel floatRight">
+                <div class = "row valign-wrapper" style="margin-bottom: 5px;">
+                    <h6 class="valign-wrapper col" style="padding-left: 0;">User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
+                    <div class="search-wrapper focused col empty">
+                        <input type="text" id="search_User" placeholder="Search User...">
+                        <!--<i class="material-icons">search</i>-->
                     </div>
                 </div>
+                <div class="top10DIV">
+                    <table class = "collection empty">
+                        <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th class="alignRight">#Jobs</th>
+                            <th class="alignRight">#Hosts</th>
+                            <th class="alignRight">Job
+                                <p style="color: #ffa328;display: inline-block;margin: 0;">submitted</p> -
+                                <p style="color: #3fc151;display: inline-block;margin: 0;">started</p>
+                                <p id="userList_lastupdate" style="font-weight: normal;font-size: smaller;margin: 0;"></p>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <!--<svg class="top10" >-->
 
-                <div id ="userList" class="subpanel card-panel floatRight">
-                    <div class = "row valign-wrapper" style="margin-bottom: 5px;">
-                        <h6 class="valign-wrapper col" style="padding-left: 0;">User list<a id ="refeshUser" class="btn btn-small waves-effect waves-light white" onclick="getJoblist()"><i class="material-icons">autorenew</i></a></h6>
-                        <div class="search-wrapper focused col empty">
-                            <input type="text" id="search_User" placeholder="Search User...">
-                            <!--<i class="material-icons">search</i>-->
-                        </div>
-                    </div>
-                    <div class="top10DIV">
-                        <table class = "collection empty">
-                            <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th class="alignRight">#Jobs</th>
-                                <th class="alignRight">#Hosts</th>
-                                <th class="alignRight">Job
-                                    <p style="color: #ffa328;display: inline-block;margin: 0;">submitted</p> -
-                                    <p style="color: #3fc151;display: inline-block;margin: 0;">started</p>
-                                    <p id="userList_lastupdate" style="font-weight: normal;font-size: smaller;margin: 0;"></p>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        <!--<svg class="top10" >-->
-
-                        <!--</svg>-->
-                    </div>
-                    <div class="details" ></div>
+                    <!--</svg>-->
                 </div>
+                <div class="details" ></div>
             </div>
             <svg width="2600" height="1000" class="mainsvg" ></svg>
         </div>
@@ -288,7 +275,7 @@
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 <!--<script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>-->
-<script src="js/FileSaver.min.js"></script>
+<script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
 
 
 <script src="js/jszip.min.js"></script>
@@ -310,10 +297,6 @@
 <script src="myscripts/radarSum.js"></script>
 <script src="myscripts/scatterplot.js"></script>
 <script src="myscripts/tsnePlot.js"></script>
-
-<script src="myscripts/store.js"></script>
-
-<script src="myscripts/radarController.js"></script>
 <script src="myscripts/main.js"></script>
 <script src="myscripts/tooltip.js"></script>
 <script src="spider/radarChart.js"></script>
