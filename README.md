@@ -1,7 +1,9 @@
 
 # 2019
 
-HiperView :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+HiperView Current:  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+HiperView release 0619: https://idatavisualizationlab.github.io/HPCC/HiperView0619/demo.html
+
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperView.png)
 
 Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
