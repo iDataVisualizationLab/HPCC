@@ -2,6 +2,7 @@
 # 2019
 
 HiperView Current:  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+
 HiperView release 0619: https://idatavisualizationlab.github.io/HPCC/HiperView0619/demo.html
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperView.png)
