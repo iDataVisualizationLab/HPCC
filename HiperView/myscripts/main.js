@@ -4,7 +4,7 @@
  * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
  * WARRANTY.  IN PARTICULAR, THE AUTHORS MAKE NO REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
  * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
- */db
+ */
 
 
 // Set the dimensions of the canvas / graph
@@ -2109,6 +2109,8 @@ $( document ).ready(function() {
 //                 });
             }
             else {
+                d3.select(".currentDate")
+                    .text("" + (new Date()).toDateString());
                 realTimesetting(true,choice);
                 db = choice;
                 requestService = eval('requestService'+choice);
@@ -2141,29 +2143,39 @@ $( document ).ready(function() {
         graphicControl.charType =  d3.select('#chartType_control').node().value;
         graphicControl.sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;
-        d3.select(".currentDate")
-            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString()) ;
-        if (choiceinit.includes('influxdb')){
-            // processResult = processResult_influxdb;
-            db = "influxdb";
-            realTimesetting(false,"influxdb",true);
-        }else {
-            db = "nagios";
-            // processResult = processResult_old;
-            realTimesetting(false,undefined,true);
-        }
-        d3.json("data/" + d3.select('#datacom').node().value  + ".json", function (error, data) {
-            if (error) {
-                    M.toast({html: 'Local data does not exist, try to query from the internet!'});
-                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
-                    if (error) throw error;
-                    loadata(data)
-                });
-                return;
+        if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
+            d3.select(".currentDate")
+                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
+            if (choiceinit.includes('influxdb')) {
+                // processResult = processResult_influxdb;
+                db = "influxdb";
+                realTimesetting(false, "influxdb", true);
+            } else {
+                db = "nagios";
+                // processResult = processResult_old;
+                realTimesetting(false, undefined, true);
             }
-            loadata(data);
-        });
-
+            d3.json("data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
+                if (error) {
+                    M.toast({html: 'Local data does not exist, try to query from the internet!'});
+                    d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
+                        if (error) throw error;
+                        loadata(data)
+                    });
+                    return;
+                }
+                loadata(data);
+            });
+        }else{ // realtime
+            d3.select(".currentDate")
+                .text("" + (new Date()).toDateString());
+            realTimesetting(true,choiceinit);
+            db = choice;
+            requestService = eval('requestService'+choiceinit);
+            processResult = eval('processResult_'+choiceinit);
+            d3.select('.cover').classed('hidden', true);
+            spinner.stop();
+        }
         MetricController.graphicopt({width:300,height:300})
             .div(d3.select('#RadarController'))
             .axisSchema(serviceFullList)

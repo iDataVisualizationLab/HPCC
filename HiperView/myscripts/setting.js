@@ -173,7 +173,7 @@ function processData_influxdb(result, serviceName) {
                 const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
                 if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
-                        const localVal = subob[serviceAttribute[s].format(d + 1)]||subob[serviceAttribute[s].format2(d + 1)];
+                        const localVal = subob[serviceAttribute[s].format(d + 1)]||(serviceAttribute[s].format2&&subob[serviceAttribute[s].format2(d + 1)]);
                         if (localVal != null && localVal != undefined) {
                             if (serviceAttribute[s].type==='object')
                                 return string2JSON(localVal);
