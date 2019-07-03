@@ -18,7 +18,7 @@ let radarController = function () {
             wrapWidth: 60,
         };
 
-    let svg,div;
+    let svg,div,tablediv;
     let id;
     let radarcomp = { // schema
       axis: {}, // axis objects
@@ -198,15 +198,14 @@ let radarController = function () {
     radarController.init = function ()
     {
         try {
+            // <editor-fold des=radar>
             if (!div) throw 'div not defined';
             /////////////////////////////////////////////////////////
             //////////// Create the container SVG and g /////////////
             /////////////////////////////////////////////////////////
 
-            //Remove whatever chart with the same id/class was present before
-            let first = false;
 
-            // div.select("svg").remove();
+            let first = false;
 
             //Initiate the radar chart SVG or update it
 
@@ -228,8 +227,6 @@ let radarController = function () {
             svg.attrs({
                 width: graphicopt.width,
                 height: graphicopt.height,
-                // overflow: "visible",
-
             });
 
 
@@ -244,7 +241,7 @@ let radarController = function () {
                 /////////////////////////////////////////////////////////
                 //Wrapper for the grid & axes
                 let axisGrid = g.append("g").attr("class", "axisWrapper");
-                let radius = Math.min(graphicopt.widthG() / 2, graphicopt.heightG() / 2)
+                let radius = Math.min(graphicopt.widthG() / 2, graphicopt.heightG() / 2),
                     Format = d3.format('');
                 rScale.range([0,radius]);
                 //Draw the background circles
@@ -265,7 +262,7 @@ let radarController = function () {
                     .style("stroke-opacity", 1)
                     .style("fill-opacity", graphicopt.opacityCircles)
                     .style("filter", "url(#glowc)")
-                    .style("visibility", (d, i) => ((graphicopt.bin||graphicopt.gradient) && i == 0) ? "hidden" : "visible");
+                    .style("visibility", (d, i) => ((graphicopt.bin||graphicopt.gradient) && i === 0) ? "hidden" : "visible");
 
 
                 /////////////////////////////////////////////////////////
@@ -283,8 +280,7 @@ let radarController = function () {
                         return "rotate(" + toDegrees(d.angle()) + "deg)"});
                 //Append the lines
                 function toDegrees(rad) {
-                    let deg = rad * (180/Math.PI)%360;
-                    return deg;
+                    return rad * (180/Math.PI)%360;
                 }
                 function toRadian(deg) {
                     return deg * (Math.PI/180);
@@ -354,23 +350,30 @@ let radarController = function () {
                     // let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
                     let newpos = {x: -(graphicopt.widthG()/2+ graphicopt.margin.left+20) + (d3.event.sourceEvent.screenX ),
                                     y: -(graphicopt.heightG()/2+ graphicopt.margin.top  +graphicopt.height+20) + (d3.event.sourceEvent.screenY) };
-                    console.log(newpos)
                     let dAngle = Math.atan2(-newpos.y,-newpos.x)-Math.PI/2;
-                    console.log(dAngle);
                     // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
-                    d3.select(this.parentElement).transition().style('transform',function (d, i) {
-                        let newAngle = positiveAngle(dAngle);
-                        d.angle = ()=>{return positiveAngle(newAngle);};
-                        return "rotate(" + toDegrees(newAngle) + "deg)"});
-                    d3.select(this.parentElement).select('.angleValue').text(function (d) {
-                        return toDegrees(d.angle()).toFixed(2) + 'o';
-                    });
+                    updateAngle(this.parentElement,dAngle)
+                    // d3.select(this.parentElement).transition().style('transform',function (d, i) {
+                    //     let newAngle = positiveAngle(dAngle);
+                    //     d.angle = ()=>{return positiveAngle(newAngle);};
+                    //     return "rotate(" + toDegrees(newAngle) + "deg)"});
+                    // d3.select(this.parentElement).select('.angleValue').text(function (d) {
+                    //     return toDegrees(d.angle()).toFixed(2) + 'o';
+                    // });
                 }
                 function onDragAxisEnded (d){
                     d3.select(this.parentElement).classed('active',false);
                     d.__origin__= null;
                     onChangeValueFunc(radarcomp);
                 }
+            }
+            function updateAngle(target,value) {
+                d3.select(target).transition().style('transform',function (d, i) {
+                    d.angle = ()=>{return positiveAngle(value);};
+                    return "rotate(" + toDegrees(positiveAngle(value)) + "deg)"});
+                d3.select(target).select('.angleValue').text(function (d) {
+                    return toDegrees(d.angle()).toFixed(2) + 'o';
+                });
             }
             /////////////////////////////////////////////////////////
             ///////////// Draw the radar chart blobs ////////////////
@@ -404,12 +407,46 @@ let radarController = function () {
             // var blobWrapper = blobWrapperg
             //     .enter().append("g")
             //     .attr("class", "radarWrapper");
-            
+            // </editor-fold>
+
+            // <editor-fold des=tablediv>
+            if (tablediv){
+                let table = tablediv.select("table");
+                table.selectAll('*').remove();
+                let header = table.append("thead").append('tr')
+                    .selectAll('th').data(['Name','Angle']).enter()
+                    .append('th').text(d=>d);
+
+                let rows = table.append('tbody').selectAll('tr')
+                    .data(radarcomp.axisList)
+                    .enter().append('tr').datum(d=>d.data);
+                rows.append('td').attr('class','text').text(d=>d.text);
+                rows.append('td').attr('class','angle')
+                    .append('input').attr('type','number')
+                    .attr('value',d=>toDegrees(d.angle).toFixed(2))
+                    .on('input',function(d){
+                        updateAngle(svg.selectAll('.dragpoint').filter(s=>s.data.text===d.text).node().parentElement,toRadian(this.value*1));
+                    });
+                $(table.node()).DataTable( {
+                    // "data": radarcomp.axisList,
+                    // "columns": [
+                    //     { "data": "data.text" },
+                    //     { "data": "data.angle" }
+                    // ],
+                    "order": [[ 1, "asc" ]],
+                    "columnDefs": [{orderable: true,targets: [1]}],
+                    "columns": [
+                        null,
+                        { "orderDataType": "dom-text-numeric" }
+                    ]
+                } );
+            }
+            // </editor-fold>
         }catch (e) {
             return e;
         }
 
-    }
+    };
     /////////////////////////////////////////////////////////
     /////////////////// Helper Function /////////////////////
     /////////////////////////////////////////////////////////
@@ -470,10 +507,47 @@ let radarController = function () {
 
     };
 
+    radarController.tablediv = function (_) {
+        return arguments.length ? (tablediv = _, radarController) : tablediv;
+
+    };
+
     radarController.onChangeValue = function (_) {
         return arguments.length ? (onChangeValueFunc = _, radarController) : onChangeValueFunc;
 
     };
 
+    //ulti
+    /* Create an array with the values of all the input boxes in a column */
+    $.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
+    {
+        return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+            return $('input', td).val();
+        } );
+    }
+
+    /* Create an array with the values of all the input boxes in a column, parsed as numbers */
+    $.fn.dataTable.ext.order['dom-text-numeric'] = function  ( settings, col )
+    {
+        return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+            return $('input', td).val() * 1;
+        } );
+    }
+
+    /* Create an array with the values of all the select options in a column */
+    $.fn.dataTable.ext.order['dom-select'] = function  ( settings, col )
+    {
+        return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+            return $('select', td).val();
+        } );
+    }
+
+    /* Create an array with the values of all the checkboxes in a column */
+    $.fn.dataTable.ext.order['dom-checkbox'] = function  ( settings, col )
+    {
+        return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+            return $('input', td).prop('checked') ? '1' : '0';
+        } );
+    }
     return radarController;
 };

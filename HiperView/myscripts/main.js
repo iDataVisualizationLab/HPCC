@@ -2178,6 +2178,7 @@ $( document ).ready(function() {
         }
         MetricController.graphicopt({width:300,height:300})
             .div(d3.select('#RadarController'))
+            .tablediv(d3.select('#RadarController_Table'))
             .axisSchema(serviceFullList)
             .onChangeValue(onSchemaUpdate)
             .init();

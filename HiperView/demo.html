@@ -8,7 +8,7 @@
 
     <title>HiperView</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <script src="js/jquery-1.9.0.min.js"></script>
+    <script src="js/jquery-3.3.1.js"></script>
     <script src="js/jquery.dd.js"></script>
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
@@ -22,7 +22,7 @@
     <script src="js/underscore-min.js"></script>
     <script src="js/simple-statistics.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
+    <script src="js/jquery.dataTables.min.js"></script>
     <!--<script src="js/select.js"></script>-->
     <script src="js/TimerInterval.js"></script>
     <script src="js/tsne.js"></script>
@@ -145,6 +145,9 @@
                 <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
                 <div class="collapsible-body">
                     <div id="RadarController"></div>
+                    <div id="RadarController_Table">
+                        <table class="display" width="100%"></table>
+                    </div>
                 </div>
             </li>
             <!--<li>-->

@@ -968,3 +968,25 @@ path.outlying {
 	-ms-transform: scale(1, -1);
 	transform: scale(1, -1);
 }
+
+.dataTables_wrapper .dataTables_filter input{
+	width: calc(100% - 60px);
+	margin-left: auto;
+	left: auto;
+	right: auto;
+	padding-left: 10px;
+}
+.dataTables_filter input{
+	height: 2rem;
+}
+.dataTables_paginate {
+	display: flex;
+}
+.dataTable input {
+	color: currentColor;
+}
+.dataTable input[type=number]{
+	height: 2rem;
+	border-radius: 10px;
+	border: 1px solid #666666;
+}
