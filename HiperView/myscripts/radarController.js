@@ -426,6 +426,7 @@ let radarController = function () {
                     .attr('value',d=>toDegrees(d.angle).toFixed(2))
                     .on('input',function(d){
                         updateAngle(svg.selectAll('.dragpoint').filter(s=>s.data.text===d.text).node().parentElement,toRadian(this.value*1));
+                        onChangeValueFunc(radarcomp);
                     });
                 $(table.node()).DataTable( {
                     // "data": radarcomp.axisList,
