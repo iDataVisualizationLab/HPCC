@@ -144,7 +144,7 @@ input[type=text].inputHolder, input[type=search]:not(.browser-default){
     margin-bottom: 0px;
     color: white;
     border-radius: 10px;
-    border: 1px solid #666666;
+    border: 1px solid #ffffff7a;
 }
 input[type=text].inputHolder::placeholder, input[type=search]::placeholder {
     color: #61676d;

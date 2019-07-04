@@ -4,6 +4,8 @@
 	--containBlack: #ffffff;
 	--slider: 0;
 	--sideNavwidth: 350px;
+	--colorMain2: #630016;
+	--colorMain2_light: #d8d8d8;
 }
 
 body { font: 12px Arial;
@@ -916,7 +918,7 @@ p.divider {
 }
 
 path.outlying {
-	stroke: #8a001a !important;
+	stroke: var(--colorMain2) !important;
 }
 #tsnezone {
 	position: absolute;
@@ -976,6 +978,12 @@ path.outlying {
 	right: auto;
 	padding-left: 10px;
 }
+.dataTables_filter {
+	width: 50%;
+}
+.dataTables_length{
+	padding-top: 2px;
+}
 .dataTables_filter input{
 	height: 2rem;
 }
@@ -991,7 +999,8 @@ path.outlying {
 	/*border: 1px solid #666666;*/
 /*}*/
 .dataTables_wrapper .dataTables_filter{
-	padding: 2em 0;
+	padding: 0;
+	padding-bottom: 0.5rem;
 }
 .dataTable input[type=number]{
 	height: 1rem;
@@ -999,6 +1008,7 @@ path.outlying {
 	border-radius: 10px;
 	border: 1px solid #666666;
 	text-align: right;
+	margin: unset;
 }
 .dataTable input:focus{
 	border-bottom: unset;
@@ -1008,6 +1018,10 @@ path.outlying {
 }
 .dataTable a {
 	line-height: inherit;
+	padding: 0.5rem;
+}
+.dataTable a.disable-field {
+	color: #26a69a;
 }
 .dataTable .fieldDisable {
 	opacity: .4;
@@ -1025,4 +1039,21 @@ path.outlying {
 }
 .axis.disable {
 	display: none;
+}
+
+table.dataTable thead {
+	background-color: var(--colorMain2_light);
+	color: black;
+}
+
+.light table.dataTable thead {
+	background-color: var(--colorMain2_light);
+}
+
+table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+	background-color: rgba(var(--colorMain2),0.5);
+}
+
+table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
+	background-color: rgba(var(--colorMain2),0.5);
 }
