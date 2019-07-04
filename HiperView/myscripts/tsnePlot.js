@@ -289,7 +289,7 @@ d3.Tsneplot = function () {
         radarcreate = d3.radialLine()
             .curve(d3.curveCardinalClosed.tension(0))
             .radius(function(d) { return rScale(d.value); })
-            .angle(function(d,i) {
+            .angle(function(d) {
                 return schema.find(s=>s.text===d.axis).angle; });
 
         trackercreate = d3.line()
@@ -495,10 +495,10 @@ d3.Tsneplot = function () {
                 .data(handledata(arr),d=>d.name);
             newdata.select('clipPath').select('path')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d));
+                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
             newdata.select('.tSNEborder')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d));
+                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
 
             currenthost.name = name;
             currenthost.g = g.selectAll(".linkLineg").filter((d,i)=>{
@@ -605,7 +605,7 @@ d3.Tsneplot = function () {
 
     function handledata(data){
         let objectarr = data.map(a=>{
-            let temp = a.map((d,i)=>{return {axis: schema[i].text, value: d};});
+            let temp = a.map((d,i)=>{return {axis: schema[i].text, value: d, enable: schema[i].enable};});
             temp = _.sortBy(temp,d=>schema.find(e=>e.text===d.axis).angle);
             temp.name = a.name;
             return temp;

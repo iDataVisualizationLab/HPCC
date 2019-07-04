@@ -271,10 +271,11 @@ let radarController = function () {
 
                 //Create the straight lines radiating outward from the center
                 var axis = axisGrid.selectAll(".axis")
-                    .data(radarcomp.axisList)
+                    .data(radarcomp.axisList,d=>d.data.text)
                     .enter()
                     .append("g")
                     .attr("class", "axis")
+                    .classed('disable',d=>d.data.enable)
                     .style('transform-origin','0,0')
                     .style('transform',function (d, i) {
                         return "rotate(" + toDegrees(d.angle()) + "deg)"});
@@ -368,6 +369,10 @@ let radarController = function () {
                     onChangeValueFunc(radarcomp);
                 }
             }
+
+            // update
+            g.selectAll('.axis').classed('disable',d=>!d.data.enable);
+
             function updateAngle(target,value) {
                 d3.select(target).transition().style('transform',function (d, i) {
                     d.angle = ()=>{return positiveAngle(value);};
@@ -435,6 +440,7 @@ let radarController = function () {
                     .append('a').attr('class','disable-field').on('click',d=>{
                         d.enable = !d.enable;
                         rows.filter(t=>t.text===d.text ).classed('fieldDisable',t=>!t.enable);
+                        g.selectAll('.axis').filter(t=>t.data.text===d.text ).classed('disable',t=>!t.data.enable);
                         onChangeValueFunc(radarcomp);
                 })
                     .append('i').attr('class','fa fa-check');

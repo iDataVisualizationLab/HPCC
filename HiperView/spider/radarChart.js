@@ -80,7 +80,7 @@ function RadarChart(id, data, options, name) {
 
     if (cfg.schema){
         range = [0,1];
-        allAxis = cfg.schema;
+        allAxis = cfg.schema.filter(d=>d.enable);
     }else{
         //Names of each axis
         angleSlice = cfg.angleSlice;
@@ -89,7 +89,11 @@ function RadarChart(id, data, options, name) {
             }));
     }
     data = data.map(ditem=>{
-        let temp = _.sortBy(ditem,d=>allAxis.find(e=>e.text===d.axis).angle);
+        if (ditem.bin)
+            ditem.bin.val = ditem.bin.val.map(v=>v.filter((d,i)=>allAxis.find(e=>e.text===ditem[i].axis)));
+
+        const ditem_filtered = ditem.filter(d=>allAxis.find(e=>e.text===d.axis));
+        let temp = _.sortBy(ditem_filtered,d=>allAxis.find(e=>e.text===d.axis).angle);
         temp.bin = ditem.bin; return temp;});
     //Scale for the radius
     rScale = d3.scaleLinear()

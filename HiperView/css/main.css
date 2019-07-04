@@ -1012,3 +1012,6 @@ path.outlying {
 	animation:2s linear bounce;
 	animation-iteration-count:infinite
 }
+.axis.disable {
+	display: none;
+}
