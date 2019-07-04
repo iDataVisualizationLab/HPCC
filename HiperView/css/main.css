@@ -971,7 +971,7 @@ path.outlying {
 
 .dataTables_wrapper .dataTables_filter input{
 	width: calc(100% - 60px);
-	margin-left: auto;
+	margin-left: 0.5em;
 	left: auto;
 	right: auto;
 	padding-left: 10px;
@@ -985,12 +985,23 @@ path.outlying {
 .dataTable input {
 	color: currentColor;
 }
+/*input[type=search]:not(.browser-default) {*/
+	/*font-size: unset;*/
+	/*border-radius: 10px;*/
+	/*border: 1px solid #666666;*/
+/*}*/
+.dataTables_wrapper .dataTables_filter{
+	padding: 2em 0;
+}
 .dataTable input[type=number]{
 	height: 1rem;
 	font-size: unset;
 	border-radius: 10px;
 	border: 1px solid #666666;
 	text-align: right;
+}
+.dataTable input:focus{
+	border-bottom: unset;
 }
 .dataTable span {
 	padding: unset;

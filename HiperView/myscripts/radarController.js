@@ -450,7 +450,7 @@ let radarController = function () {
                     //     { "data": "data.text" },
                     //     { "data": "data.angle" }
                     // ],
-                    "order": [[ 1, "asc" ]],
+                    "order": [[ 2, "desc" ],[ 1, "asc" ]],
                     "columnDefs": [{orderable: true,targets: [1]}],
                     "columns": [
                         null,
