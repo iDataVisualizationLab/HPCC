@@ -178,7 +178,7 @@ let radarController = function () {
                 scale: axiselement.range!==undefined?d3.scaleLinear().domain(axiselement.range):d3.scaleLinear(),
                 filter: axiselement.filter!==undefined?axiselement.filter:[], //filter for axis
                 angle: axiselement.angle!==undefined?function () {return axiselement.angle}:getangle,
-                order: axiselement.order!==undefined? axiselement.order: index
+                order: axiselement.order!==undefined? axiselement.order: index,
             };
             radarcomp.axis[axis].data = axiselement;
             radarcomp.axisList.push(radarcomp.axis[axis]);
@@ -415,12 +415,12 @@ let radarController = function () {
                 let table = tablediv.select("table");
                 table.selectAll('*').remove();
                 let header = table.append("thead").append('tr')
-                    .selectAll('th').data(['Name','Angle']).enter()
+                    .selectAll('th').data(['Name','Angle (deg)','']).enter()
                     .append('th').text(d=>d);
 
                 let rows = table.append('tbody').selectAll('tr')
-                    .data(radarcomp.axisList)
-                    .enter().append('tr').datum(d=>d.data);
+                    .data(radarcomp.axisList,d=>d.data.text)
+                    .enter().append('tr').classed('fieldDisable',d=>!d.data.enable).datum(d=>d.data);
                 rows.append('td').attr('class','text').text(d=>d.text);
                 rows.append('td').attr('class','angle')
                     .append('input').attr('type','number')
@@ -429,6 +429,15 @@ let radarController = function () {
                         updateAngle(svg.selectAll('.dragpoint').filter(s=>s.data.text===d.text).node().parentElement,toRadian(this.value*1));
                         onChangeValueFunc(radarcomp);
                     });
+
+                let btngroup = rows.append('td').attr('class','btngroup')
+                btngroup.append('span').attr('class','no-shrink  toggleDisable')
+                    .append('a').attr('class','disable-field').on('click',d=>{
+                        d.enable = !d.enable;
+                        rows.filter(t=>t.text===d.text ).classed('fieldDisable',t=>!t.enable);
+                        onChangeValueFunc(radarcomp);
+                })
+                    .append('i').attr('class','fa fa-check');
                 $(table.node()).DataTable( {
                     // "data": radarcomp.axisList,
                     // "columns": [
@@ -439,7 +448,8 @@ let radarController = function () {
                     "columnDefs": [{orderable: true,targets: [1]}],
                     "columns": [
                         null,
-                        { "orderDataType": "dom-text-numeric" }
+                        { "orderDataType": "dom-text-numeric" },
+                        { "orderDataType": "dom-disablebtn" },
                     ]
                 } );
             }
@@ -543,7 +553,12 @@ let radarController = function () {
             return $('select', td).val();
         } );
     }
-
+    $.fn.dataTable.ext.order['dom-disablebtn'] = function  ( settings, col )
+    {
+        return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+            return d3.select($('a.disable-field',td)[0]).datum().enable;
+        } );
+    }
     /* Create an array with the values of all the checkboxes in a column */
     $.fn.dataTable.ext.order['dom-checkbox'] = function  ( settings, col )
     {

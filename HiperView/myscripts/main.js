@@ -2199,16 +2199,16 @@ $( document ).ready(function() {
 
 });
 function onSchemaUpdate(schema){
-    console.log(schema);
     serviceFullList.forEach(ser=>{
         ser.angle = schema.axis[ser.text].angle();
+        ser.enable = schema.axis[ser.text].data.enable;
     });
     radarChartOptions.schema = serviceFullList;
     // if (graphicControl.charType === "T-sne Chart")
-        TSneplot.schema(serviceFullList);
+    TSneplot.schema(serviceFullList);
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
-        Radarplot.schema(serviceFullList);
-        updateSummaryChartAll();
+    Radarplot.schema(serviceFullList);
+    updateSummaryChartAll();
     // }
 
     SaveStore();

@@ -387,7 +387,7 @@ d3.Tsneplot = function () {
         // panel_user = d3.select("#userList").style('top',(graphicopt.offset.top-4)+'px');
         panel_user = d3.select("#userList");
         panel_user.select(".top10DIV").style('max-height', maxsubheight+"px");
-        list_user = Sortable.create($('tbody')[0], {
+        list_user = Sortable.create($('.top10DIV tbody')[0], {
             animation: 500,
             sort: false,
             dataIdAttr: 'data-id',

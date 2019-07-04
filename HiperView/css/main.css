@@ -986,8 +986,29 @@ path.outlying {
 	color: currentColor;
 }
 .dataTable input[type=number]{
-	height: 2rem;
+	height: 1rem;
+	font-size: unset;
 	border-radius: 10px;
 	border: 1px solid #666666;
 	text-align: right;
+}
+.dataTable span {
+	padding: unset;
+}
+.dataTable a {
+	line-height: inherit;
+}
+.dataTable .fieldDisable {
+	opacity: .4;
+	pointer-events: none;
+}
+.fieldDisable i {
+	color: #b7b7b7;
+}
+.fieldDisable .toggleDisable i {
+	pointer-events: all;
+}
+.fieldDisable :hover .toggleDisable i{
+	animation:2s linear bounce;
+	animation-iteration-count:infinite
 }

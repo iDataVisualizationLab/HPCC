@@ -10,6 +10,7 @@ function serviceLists2serviceFullList (serviceLists){
     let temp = [];
     serviceLists.forEach(s=>s.sub.forEach(sub=>{
         sub.idroot = s.id;
+        sub.enable = s.enable&&(sub.enable===undefined?true:sub.enable);
         temp.push(sub);}));
     return temp;
 }
