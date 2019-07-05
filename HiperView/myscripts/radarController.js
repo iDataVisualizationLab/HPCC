@@ -486,6 +486,7 @@ let radarController = function () {
         rows.select('td.text').text(d=>d.text);
         rows.select('td.angle input')
             .attr('value',d=>toDegrees(d.angle).toFixed(0));
+        rows.select('td a.disable-field').datum(d=>d);
         rows.classed('fieldDisable',t=>!t.enable);
         onChangeValueFunc(radarcomp);
     };
