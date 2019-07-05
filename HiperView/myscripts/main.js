@@ -2176,7 +2176,7 @@ $( document ).ready(function() {
             d3.select('.cover').classed('hidden', true);
             spinner.stop();
         }
-        MetricController.graphicopt({width:300,height:300})
+        MetricController.graphicopt({width:310,height:310})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))
             .axisSchema(serviceFullList)

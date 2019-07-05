@@ -1057,3 +1057,8 @@ table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
 	background-color: rgba(var(--colorMain2),0.5);
 }
+
+.radarController.radarPlot {
+	background-color: white;
+	border-radius: 10px;
+}

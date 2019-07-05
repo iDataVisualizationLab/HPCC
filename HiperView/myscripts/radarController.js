@@ -1,8 +1,8 @@
 let radarController = function () {
     let graphicopt = {
             margin: {top: 40, right: 40, bottom: 40, left: 40},
-            width: 300,
-            height: 300,
+            width: 310,
+            height: 310,
             radius: 150,
             scalezoom: 1,
             widthView: function(){return this.width*this.scalezoom},
@@ -11,11 +11,12 @@ let radarController = function () {
             heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
             roundStrokes: true,
             labelFactor: 1.1,
-            levels: 1,
+            levels: 6,
             arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
             arrThresholds: [],
             opacityCircles: 0.1,
             wrapWidth: 60,
+            bin: true,
         };
 
     let svg,div,tablediv;
@@ -29,6 +30,7 @@ let radarController = function () {
     let colorLength = graphicopt.arrColor.length-1;
     graphicopt.arrThresholds = graphicopt.arrColor.map((d,i)=>i/colorLength);
     let colorTemperature = d3.scaleLinear()
+        .domain(graphicopt.arrThresholds)
         .range(graphicopt.arrColor)
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
 
@@ -290,7 +292,9 @@ let radarController = function () {
                     .attr("x1", 0)
                     .attr("y1", 0)
                     .attr("x2", 0)
-                    .attr("y2", -rScale(1))
+                    .attr("y2", function (d, i) {
+                        return -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) ;
+                    })
                     // .attr("x2", function (d, i) {
                     //     return rScale(graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) * Math.cos(d.angle() - Math.PI / 2);
                     // })
@@ -307,11 +311,11 @@ let radarController = function () {
                     .attr("class", "legend")
                     .style("font-size", "12px")
                     .attr("font-family", "sans-serif")
-                    .attr("fill", "currentColor")
+                    .attr("fill", "black")
                     .attr("text-anchor", "middle")
                     .attr("dy", "-1em")
                     .attr("x", 0)
-                    .attr("y", -rScale(graphicopt.labelFactor))
+                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05)*graphicopt.labelFactor)
                     .text(function (d) {
                         return d.data.text;
                     }).call(wrap, graphicopt.wrapWidth);
@@ -322,7 +326,7 @@ let radarController = function () {
                     .attr("text-anchor", "middle")
                     .attr("dy", "2em")
                     .attr("x", 0)
-                    .attr("y", -rScale(1))
+                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05))
                     .text(function (d) {
                         return toDegrees(d.angle()).toFixed(2) + 'o';
                     });
@@ -335,10 +339,13 @@ let radarController = function () {
                     //     return rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) * Math.sin(d.angle() - Math.PI / 2);
                     // })
                     .attr("cx", 0)
-                    .attr("cy", -rScale(1))
+                    .attr("cy", function (d, i) {
+                        return -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) ;
+                    })
                     .attr('r',4)
                     .attr("class", "dragpoint")
                     .style("fill", graphicopt.gradient?'#eaeaea':"white")
+                    .style("stroke", "var(--colorMain2)")
                     .on('mouseover',function(){d3.select(this).attr('r',8)})
                     .on('mouseleave',function(){d3.select(this).attr('r',4)})
                     .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
@@ -420,7 +427,7 @@ let radarController = function () {
                 let table = tablediv.select("table");
                 table.selectAll('*').remove();
                 let header = table.append("thead").append('tr')
-                    .selectAll('th').data(['Name','Angle (deg)','']).enter()
+                    .selectAll('th').data(['Service name','Angle (deg)','']).enter()
                     .append('th').text(d=>d);
 
                 let rows = table.append('tbody').selectAll('tr')
@@ -507,7 +514,7 @@ let radarController = function () {
         return metrics.width;
     }
     radarController.graphicopt = function (_) {
-        //Put all of the options into a variable called cfg
+        //Put all of the options into a variable called graphicopt
         if (arguments.length) {
             for (let i in _) {
                 if ('undefined' !== typeof _[i]) {
