@@ -146,13 +146,13 @@
                 <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
                 <div class="collapsible-body">
                     <div id="RadarController"></div>
+                    <div id="RadarController_Table">
+                        <table class="display" width="100%"></table>
+                    </div>
                     <div id="RadarController_Table_toolbar">
                         <button value = false class ="menuBtn saveProfile modal-trigger" id="saveProfile" onclick="downloadProfile(this)" href="#savedialog_profile"><i class="fas fa-download"></i> Save</button>
                         <input id="profile_input_file" class="none" type="file" style="display: none;"/>
                         <button value = false class ="menuBtn loadProfile" id="loadProfile" onclick="uploadProfile(this)"><i class="fas fa-upload"></i> Load </button>
-                    </div>
-                    <div id="RadarController_Table">
-                        <table class="display" width="100%"></table>
                     </div>
                 </div>
             </li>
@@ -276,7 +276,7 @@
 
 </div>
 
-<div id="savedialog" class="modal">
+<div id="savedialog" class="modal custom">
     <div class="modal-content">
         <div class="input-field col s6">
             <input placeholder="radar chart" id="savename" type="text" class="validate">
@@ -284,12 +284,12 @@
         </div>
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="onSaveImage()">Save</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveImage()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
     </div>
 </div>
 
-<div id="savedialog_profile" class="modal">
+<div id="savedialog_profile" class="modal custom">
     <div class="modal-content">
         <div class="input-field col s6">
             <input placeholder="radar chart" id="savename_profile" type="text" class="validate">
@@ -297,8 +297,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="onSaveProfile()">Save</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveProfile()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
     </div>
 </div>
 <!-- load the d3.js library -->

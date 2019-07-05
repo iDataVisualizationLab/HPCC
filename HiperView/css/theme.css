@@ -143,7 +143,7 @@ input[type=text].inputHolder, input[type=search]:not(.browser-default){
     font-size: unset;
     margin-bottom: 0px;
     color: white;
-    border-radius: 10px;
+    border-radius: 2px;
     border: 1px solid #ffffff7a;
 }
 input[type=text].inputHolder::placeholder, input[type=search]::placeholder {
@@ -185,4 +185,8 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
         transform:translateY(-2px);
         color: #039be5;
     }
+}
+
+.modal.custom .modal-content{
+    padding-bottom: 0;
 }
