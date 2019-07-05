@@ -165,28 +165,6 @@ function RadarChart(id, data, options, name) {
         const rg = svg.append("defs").append("radialGradient")
             .attr("id", "rGradient2");
         createGradient(rg,1,arrColor)
-        // const limitcolor = 0;
-        // const legntharrColor = arrThresholds.length-1;
-        // rg.append("stop")
-        //     .attr("offset",'0%')
-        //     .attr("stop-color", colorTemperature(arrThresholds[limitcolor]))
-        //     .attr("stop-opacity",opaTemperature(arrThresholds[limitcolor]));
-        //
-        // arrThresholds.forEach((d,i)=> {
-        //     if (i > (limitcolor - 1)) {
-        //         rg.append("stop")
-        //             .attr("offset", i / legntharrColor * 100 + "%")
-        //             .attr("stop-color", colorTemperature(d))
-        //             // .attr("stop-opacity", 1);
-        //             .attr("stop-opacity", opaTemperature(d));
-        //         if (i != legntharrColor)
-        //             rg.append("stop")
-        //                 .attr("offset", (i + 1) / legntharrColor * 100 + "%")
-        //                 .attr("stop-color", colorTemperature(arrThresholds[i+1]))
-        //                 // .attr("stop-opacity", 1);
-        //                 .attr("stop-opacity", opaTemperature(arrThresholds[i+1]));
-        //     }
-        // });
         //Filter for the outside glow
         var filter = g.append('defs').append('filter').attr('id', 'glow'),
             feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),

@@ -867,6 +867,7 @@ function main() {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
             }
+            MetricController.data(data.result.arr).drawSummary(data.result.hindex);
         }
     }, false);
     request();
@@ -1125,9 +1126,9 @@ function drawsummary(initIndex){
                 //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
                 break;
             case "RadarSummary":
-                console.log("-----------------")
-                console.log(temp === undefined ? lastIndex : temp)
-                console.log("-----------------")
+                console.log("-----------------");
+                console.log(temp === undefined ? lastIndex : temp);
+                console.log("-----------------");
                 getData(name, temp === undefined ? lastIndex : temp);
                 if ((temp === undefined ? lastIndex : temp) >= maxstack - 1) Radarplot.shift();
                 break;
@@ -1157,7 +1158,6 @@ function drawsummarypoint(harr){
     var xx;
     lastIndex = hostResults[hosts[harr[0]].name].arrTemperature.length -1;
     query_time = hostResults[hosts[harr[0]].name].arrTemperature[lastIndex].result.query_time;
-    
     //xx = xTimeSummaryScale(query_time);
     //updateTimeText();
 
@@ -1170,23 +1170,6 @@ function drawsummarypoint(harr){
             for (var i in harr) {
                 var h  = harr[i];
                 var name = hosts[h].name;
-                var r = hostResults[name];
-                // lastIndex = initIndex||(r.arr.length - 1);
-                // boxplot
-                // if (lastIndex >= 0) {   // has some data
-                //     var arrServices = [];
-                //     serviceList_selected.forEach((ser, indx) => {
-                //         try {
-                //             var obj = {};
-                //             let dataextract = r[serviceListattr[indx]][lastIndex];
-                //             if (dataextract)
-                //                 dataextract = dataextract.data.service.plugin_output;
-                //             var a = processData(dataextract, ser);
-                //             obj.a = a;
-                //             arrServices.push(obj);
-                //         }catch(e){}
-                //     })
-                // }
                 arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
                 arrServices.name = name;
                 arr.push(arrServices);
@@ -1199,10 +1182,8 @@ function drawsummarypoint(harr){
             getData(name,lastIndex)
             // Radarplot.data(arr).drawSummarypoint(lastIndex);
             break;
-
-
-
     }
+    getData(name,lastIndex)
 }
 function shiftTimeText(){
     if (timelog.length > maxstack-1){ timelog.shift();
