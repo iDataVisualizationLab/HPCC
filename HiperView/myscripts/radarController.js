@@ -241,6 +241,9 @@ let radarController = function () {
 
 
             if (first) {
+                const rg = svg.append("defs").append("radialGradient")
+                    .attr("id", "rGradient3");
+                createGradient(rg,1,graphicopt.arrColor);
                 var filter = g.append('defs').append('filter').attr('id', 'glowc'),
                     feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
                     feMerge = filter.append('feMerge'),
@@ -545,12 +548,12 @@ let radarController = function () {
                 .append("path")
                 .attr("d", d => radialAreaGenerator(d));
             blobWrapper.append("rect")
-                .style('fill', 'url(#rGradient2)')
+                .style('fill', 'url(#rGradient3)')
                 .attr("clip-path",( d,i)=>"url(#sumC)")
-                .attr("x",-radius)
-                .attr("y",-radius)
-                .attr("width",(radius)*2)
-                .attr("height",(radius)*2);
+                .attr("x",-rScale(1.25))
+                .attr("y",-rScale(1.25))
+                .attr("width",rScale(1.25)*2)
+                .attr("height",rScale(1.25)*2);
             blobWrapper.append("path")
                 .attr("class", "radarStroke")
                 .attr("d", d => radialAreaGenerator(d))
