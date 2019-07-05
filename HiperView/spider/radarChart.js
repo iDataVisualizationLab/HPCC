@@ -164,28 +164,29 @@ function RadarChart(id, data, options, name) {
     if (first) {
         const rg = svg.append("defs").append("radialGradient")
             .attr("id", "rGradient2");
-        const limitcolor = 0;
-        const legntharrColor = arrThresholds.length-1;
-        rg.append("stop")
-            .attr("offset",'0%')
-            .attr("stop-color", colorTemperature(arrThresholds[limitcolor]))
-            .attr("stop-opacity",opaTemperature(arrThresholds[limitcolor]));
-
-        arrThresholds.forEach((d,i)=> {
-            if (i > (limitcolor - 1)) {
-                rg.append("stop")
-                    .attr("offset", i / legntharrColor * 100 + "%")
-                    .attr("stop-color", colorTemperature(d))
-                    // .attr("stop-opacity", 1);
-                    .attr("stop-opacity", opaTemperature(d));
-                if (i != legntharrColor)
-                    rg.append("stop")
-                        .attr("offset", (i + 1) / legntharrColor * 100 + "%")
-                        .attr("stop-color", colorTemperature(arrThresholds[i+1]))
-                        // .attr("stop-opacity", 1);
-                        .attr("stop-opacity", opaTemperature(arrThresholds[i+1]));
-            }
-        });
+        createGradient(rg,1,arrColor)
+        // const limitcolor = 0;
+        // const legntharrColor = arrThresholds.length-1;
+        // rg.append("stop")
+        //     .attr("offset",'0%')
+        //     .attr("stop-color", colorTemperature(arrThresholds[limitcolor]))
+        //     .attr("stop-opacity",opaTemperature(arrThresholds[limitcolor]));
+        //
+        // arrThresholds.forEach((d,i)=> {
+        //     if (i > (limitcolor - 1)) {
+        //         rg.append("stop")
+        //             .attr("offset", i / legntharrColor * 100 + "%")
+        //             .attr("stop-color", colorTemperature(d))
+        //             // .attr("stop-opacity", 1);
+        //             .attr("stop-opacity", opaTemperature(d));
+        //         if (i != legntharrColor)
+        //             rg.append("stop")
+        //                 .attr("offset", (i + 1) / legntharrColor * 100 + "%")
+        //                 .attr("stop-color", colorTemperature(arrThresholds[i+1]))
+        //                 // .attr("stop-opacity", 1);
+        //                 .attr("stop-opacity", opaTemperature(arrThresholds[i+1]));
+        //     }
+        // });
         //Filter for the outside glow
         var filter = g.append('defs').append('filter').attr('id', 'glow'),
             feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
@@ -215,10 +216,10 @@ function RadarChart(id, data, options, name) {
             .attr("r", function (d, i) {
                 return radius / cfg.levels * d;
             })
-            .style("fill", cfg.gradient?'white':"#CDCDCD")
+            .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
                 var v = (maxValue - minValue) * d / cfg.levels + minValue;
-                return cfg.gradient? '#d0d0d0': colorTemperature(v);
+                return colorTemperature(v);
             })
             .style("stroke-width", 0.3)
             .style("stroke-opacity", 1)
@@ -255,7 +256,7 @@ function RadarChart(id, data, options, name) {
             return -rScale(maxValue *( cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) ;
         })
         .attr("class", "line")
-        .style("stroke", cfg.gradient?'#eaeaea':"white")
+        .style("stroke", "white")
         .style("stroke-width", "1px");
     //Append the labels at each axis
     if (cfg.showText) {
@@ -306,10 +307,19 @@ function RadarChart(id, data, options, name) {
             return rScale(d.maxval);
         });
 
+    let radialAreaQuantile = d3.radialArea()
+        .angle(function(d,i) {  return getAngle(d,i); })
+        .innerRadius(function(d,i) {
+            return rScale(d.q1);
+        })
+        .outerRadius(function(d,i) {
+            return rScale(d.q3);
+        });
+
     if(cfg.roundStrokes) {
         radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-        //radialAreaGenerator.curve(d3.curveBasisClosed);
         radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
+        radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
     }
 
     //Create a wrapper for the blobs
@@ -337,6 +347,8 @@ function RadarChart(id, data, options, name) {
             .style("fill-opacity", d => densityscale(d.bin.val.length))
             .style("fill", (d, i) => cfg.color(i));
     }
+
+
     function drawOutlying(paths){
         paths.attr("d", d => radarLine(d)).transition()
             .style("stroke", (d, i) => 'black')
@@ -373,8 +385,16 @@ function RadarChart(id, data, options, name) {
                     'stroke-width':0.5,
                     'stroke-dasharray': '1 2'});
         }
+        function drawQuantileArea(paths){
+            return paths
+                .attr("d", d =>radialAreaQuantile(d))
+                .styles({"fill":'none',
+                    'stroke':'black',
+                    'stroke-width':0.2});
+        }
         //update the outlines
         blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+        blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
         blobWrapperpath.style("fill", "none").transition()
             .attr("d", d => radialAreaGenerator(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
@@ -405,6 +425,9 @@ function RadarChart(id, data, options, name) {
             .style("stroke", (d, i) => cfg.color(i));
         blobWrapper
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
+
+        blobWrapper
+            .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))

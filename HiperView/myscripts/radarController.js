@@ -407,10 +407,20 @@ let radarController = function () {
                     return rScale(d.maxval);
                 });
 
+            let radialAreaQuantile = d3.radialArea()
+                .angle(function(d,i) {  return angleSlice[i]; })
+                .innerRadius(function(d,i) {
+                    return rScale(d.q1);
+                })
+                .outerRadius(function(d,i) {
+                    return rScale(d.q3);
+                });
+
             if(graphicopt.roundStrokes) {
                 radarLine.curve(d3.curveCardinalClosed.tension(0.5));
                 //radialAreaGenerator.curve(d3.curveBasisClosed);
                 radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
+                radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
             }
 
             //Create a wrapper for the blobs

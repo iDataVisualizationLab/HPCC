@@ -579,3 +579,28 @@ function rasterize(svg,isLight) {
     image.src = URL.createObjectURL(serialize(svg,isLight));
     return promise;
 }
+
+function createGradient(rg,limitcolor,arrColor) {
+    rg.selectAll('stop').remove();
+    const legntharrColor = arrColor.length - 1;
+    rg.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-opacity", 0);
+    rg.append("stop")
+        .attr("offset", (limitcolor - 1) / legntharrColor * 100 + "%")
+        .attr("stop-color", arrColor[limitcolor])
+        .attr("stop-opacity", 0);
+    arrColor.forEach((d, i) => {
+        if (i > (limitcolor - 1)) {
+            rg.append("stop")
+                .attr("offset", i / legntharrColor * 100 + "%")
+                .attr("stop-color", d)
+                .attr("stop-opacity", i / legntharrColor);
+            if (i != legntharrColor)
+                rg.append("stop")
+                    .attr("offset", (i + 1) / legntharrColor * 100 + "%")
+                    .attr("stop-color", arrColor[i + 1])
+                    .attr("stop-opacity", i / legntharrColor);
+        }
+    });
+}
