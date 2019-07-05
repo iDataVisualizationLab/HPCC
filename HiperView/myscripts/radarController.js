@@ -420,7 +420,7 @@ let radarController = function () {
                 let table = tablediv.select("table");
                 table.selectAll('*').remove();
                 let header = table.append("thead").append('tr')
-                    .selectAll('th').data(['Service name','Angle (deg)','']).enter()
+                    .selectAll('th').data(['Service name','Angle ( '+"\u00B0 "+')','']).enter()
                     .append('th').text(d=>d);
 
                 let rows = table.append('tbody').selectAll('tr')
