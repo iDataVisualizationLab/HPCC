@@ -175,7 +175,12 @@ let radarController = function () {
             return Math.PI*2/radarcomp.axisList.length*index;
     };
     function createSchemaInit (axisArray){ // input {text: 'axis',range:[],filter:[],angle:0}
-        radarcomp.axisList = []; //reset
+        let update= false;
+        if (radarcomp.axisList) {
+            update = true;
+        }else{
+            radarcomp.axisList = [];
+        }
         if (axisArray[0].order)
             axisArray.sort((a,b)=>a.order-b.order);
         axisArray.forEach((axiselement,index)=>{
@@ -191,7 +196,7 @@ let radarController = function () {
                 order: axiselement.order!==undefined? axiselement.order: index,
             };
             radarcomp.axis[axis].data = axiselement;
-            radarcomp.axisList.push(radarcomp.axis[axis]);
+            radarcomp.axisList[index] = radarcomp.axis[axis];
         });
     }
     function positiveAngle(angle){
@@ -360,7 +365,6 @@ let radarController = function () {
                     .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
                 function onDragAxisStarted (d){
                     d3.select(this).style('fill','black');
-                    d.__origin__= d.angle();
                     d3.select(this.parentElement).classed('active',true);
                 }
                 function onDragAxisDragged (d){
@@ -467,15 +471,19 @@ let radarController = function () {
     }
 
     radarController.update = function () {
-        g.selectAll('.axis').classed('disable',d=>!d.data.enable)
+        let axis = g.selectAll('.axis')
             .data(radarcomp.axisList,d=>d.data.text)
+            .classed('disable',d=>!d.data.enable)
             .style('transform',function (d, i) {
                 return "rotate(" + toDegrees(d.angle()) + "deg)"});
         let rows = tablediv.select('tbody').selectAll('tr')
-            .data(radarcomp.axisList,d=>d.data.text);
+            .data(radarcomp.axisList,d=>d.text||d.data.text);
+        rows.each(function(){
+                d3.select(this).datum(d=>d.data)});
         rows.select('td.text').text(d=>d.text);
         rows.select('td.angle input')
             .attr('value',d=>toDegrees(d.angle).toFixed(0));
+        rows.classed('fieldDisable',t=>!t.enable);
         onChangeValueFunc(radarcomp);
     };
     radarController.drawSummary = function(hindex){
