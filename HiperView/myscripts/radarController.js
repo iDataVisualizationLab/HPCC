@@ -462,6 +462,7 @@ let radarController = function () {
         function getAngle(d){
             return radarcomp.axis[d.axis].angle();
         }
+
         /////////////////////////////////////////////////////////
         ///////////// Draw the radar chart blobs ////////////////
         /////////////////////////////////////////////////////////
@@ -502,7 +503,7 @@ let radarController = function () {
         blobWrapperg.exit().remove();
         var blobWrapper = blobWrapperg
             .enter().append("g")
-            .attr("class", "radarWrapper");
+            .attr("class", "radarWrapper").style('pointer-events','none');
 
         //update the outlines
         var blobWrapperpath = blobWrapperg.select(".radarStroke");
