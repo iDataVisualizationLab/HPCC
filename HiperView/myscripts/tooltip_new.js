@@ -30,6 +30,7 @@ var radarChartOptions = {
         {5: Math.floor((thresholds[3][1]-thresholds[3][0])/levelsR*5+thresholds[3][0])},
         {5: Math.floor((thresholds[4][1]-thresholds[4][0])/levelsR*5+thresholds[4][0])}]
 };
+radarChartOptions.schema = serviceFullList;
 var scaleopt;
 //////////////////////////////////////////////////////////////
 ////////////////////////// Data //////////////////////////////

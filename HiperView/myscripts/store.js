@@ -6,6 +6,7 @@ variablesNames.forEach(d=>conf[d] = window[d]);
 
 //***********************
 Loadtostore();
+
 //***********************
 
 function SaveStore() {
