@@ -293,12 +293,6 @@ let radarController = function () {
                     .style('transform',function (d, i) {
                         return "rotate(" + toDegrees(d.angle()) + "deg)"});
                 //Append the lines
-                function toDegrees(rad) {
-                    return rad * (180/Math.PI)%360;
-                }
-                function toRadian(deg) {
-                    return deg * (Math.PI/180);
-                }
                 axis.append("line")
                     .attr("x1", 0)
                     .attr("y1", 0)
@@ -465,7 +459,25 @@ let radarController = function () {
         }
 
     };
-    
+    function toDegrees(rad) {
+        return rad * (180/Math.PI)%360;
+    }
+    function toRadian(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    radarController.update = function () {
+        g.selectAll('.axis').classed('disable',d=>!d.data.enable)
+            .data(radarcomp.axisList,d=>d.data.text)
+            .style('transform',function (d, i) {
+                return "rotate(" + toDegrees(d.angle()) + "deg)"});
+        let rows = tablediv.select('tbody').selectAll('tr')
+            .data(radarcomp.axisList,d=>d.data.text);
+        rows.select('td.text').text(d=>d.text);
+        rows.select('td.angle input')
+            .attr('value',d=>toDegrees(d.angle).toFixed(0));
+        onChangeValueFunc(radarcomp);
+    };
     radarController.drawSummary = function(hindex){
         let data = [handledataRate(hindex)];
         data = data.map(ditem=>{
