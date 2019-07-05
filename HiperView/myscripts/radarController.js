@@ -539,7 +539,7 @@ let radarController = function () {
             }
             //update the outlines
             blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-            blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
+            // blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
             blobWrapperpath.style("fill", "none").transition()
                 .attr("d", d => radialAreaGenerator(d))
                 .style("stroke-width", () => graphicopt.strokeWidth + "px")
@@ -571,8 +571,8 @@ let radarController = function () {
             blobWrapper
                 .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
 
-            blobWrapper
-                .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
+            // blobWrapper
+            //     .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
 
         
         
