@@ -31,7 +31,12 @@ let radarController = function () {
     let radarController ={};
     // color control
     let colorLength = graphicopt.arrColor.length-1;
-    graphicopt.arrThresholds = graphicopt.arrColor.map((d,i)=>i/colorLength);
+    var dif = 1 / (graphicopt.levels-2);
+    var right = 1 + dif;
+    graphicopt.arrThresholds = [-dif];
+    for (var i=0;i<colorLength-1;i++)
+        graphicopt.arrThresholds.push(i/(colorLength-1));
+    graphicopt.arrThresholds.push(right);
     let colorTemperature = d3.scaleLinear()
         .domain(graphicopt.arrThresholds)
         .range(graphicopt.arrColor)
@@ -43,7 +48,7 @@ let radarController = function () {
     // TODO: REPLACE
 
     let rScale = d3.scaleLinear()
-        .domain([0, 1]);
+        .domain([graphicopt.arrThresholds[0], graphicopt.arrThresholds[graphicopt.arrThresholds.length-1]]);
 
     radarController.axisSchema = function (){
         if (arguments.length===1) {
@@ -250,17 +255,17 @@ let radarController = function () {
                     Format = d3.format('');
                 rScale.range([0,radius]);
                 //Draw the background circles
-                axisGrid.selectAll(".levels")
-                    .data(d3.range(1, (graphicopt.levels + 1)).reverse())
+                axisGrid.   selectAll(".levels")
+                    .data(d3.range(0, (graphicopt.levels)).reverse())
                     .enter()
                     .append("circle")
                     .attr("class", "gridCircle")
                     .attr("r", function (d, i) {
-                        return rScale(d/graphicopt.levels);
+                        return rScale(d/(graphicopt.levels-2));
                     })
                     .style("fill", graphicopt.gradient?'white':"#CDCDCD")
                     .style("stroke", function (d) {
-                        var v = d / graphicopt.levels;
+                        var v = (d) / (graphicopt.levels-1);
                         return graphicopt.gradient? '#d0d0d0': colorTemperature(v);
                     })
                     .style("stroke-width", 0.3)
@@ -296,7 +301,7 @@ let radarController = function () {
                     .attr("y1", 0)
                     .attr("x2", 0)
                     .attr("y2", function (d, i) {
-                        return -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) ;
+                        return -rScale( graphicopt.bin||graphicopt.gradient?1:1.05) ;
                     })
                     // .attr("x2", function (d, i) {
                     //     return rScale(graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) * Math.cos(d.angle() - Math.PI / 2);
@@ -318,7 +323,7 @@ let radarController = function () {
                     .attr("text-anchor", "middle")
                     .attr("dy", "-1em")
                     .attr("x", 0)
-                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05)*graphicopt.labelFactor)
+                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?1:1.05)*graphicopt.labelFactor)
                     .text(function (d) {
                         return d.data.text;
                     }).call(wrap, graphicopt.wrapWidth);
@@ -329,7 +334,7 @@ let radarController = function () {
                     .attr("text-anchor", "middle")
                     .attr("dy", "2em")
                     .attr("x", 0)
-                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05))
+                    .attr("y", -rScale( graphicopt.bin||graphicopt.gradient?1:1.05))
                     .text(function (d) {
                         return toDegrees(d.angle()).toFixed(2) + 'o';
                     });
@@ -343,7 +348,7 @@ let radarController = function () {
                     // })
                     .attr("cx", 0)
                     .attr("cy", function (d, i) {
-                        return -rScale( graphicopt.bin||graphicopt.gradient?((graphicopt.levels-1)/graphicopt.levels):1.05) ;
+                        return -rScale( graphicopt.bin||graphicopt.gradient?1:1.05) ;
                     })
                     .attr('r',4)
                     .attr("class", "dragpoint")

@@ -349,6 +349,8 @@ function mouseoverNode(d1){
             var arr1 = getDataByName_withLabel(hostResults, name, i, i);
             arr1.indexSamp = i;
             arr1.time = r.arr[i].result.query_time;
+            console.log(name);
+            console.log(arr1);
             dataSpider.push(arr1);
 
         }
