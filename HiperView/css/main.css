@@ -1005,7 +1005,7 @@ path.outlying {
 .dataTable input[type=number]{
 	height: 1rem;
 	font-size: unset;
-	border-radius: 10px;
+	border-radius: 2px;
 	border: 1px solid #666666;
 	text-align: right;
 	margin: unset;
@@ -1017,8 +1017,8 @@ path.outlying {
 	padding: unset;
 }
 .dataTable a {
-	line-height: inherit;
-	padding: 0.5rem;
+	line-height: 1rem;
+	padding: 2px 0.25rem;
 }
 .dataTable a.disable-field {
 	color: #26a69a;
@@ -1058,6 +1058,10 @@ table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:
 	background-color: rgba(var(--colorMain2),0.5);
 }
 
+table.dataTable td {
+	padding: 2px;
+	line-height: 1rem;
+}
 .radarController.radarPlot {
 	background-color: white;
 	border-radius: 10px;

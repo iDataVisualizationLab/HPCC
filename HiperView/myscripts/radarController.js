@@ -357,10 +357,15 @@ let radarController = function () {
                     .attr("class", "dragpoint")
                     .style("fill", graphicopt.gradient?'#eaeaea':"white")
                     .style("stroke", "var(--colorMain2)")
-                    .on('mouseover',function(){d3.select(this).attr('r',8)})
-                    .on('mouseleave',function(){d3.select(this).attr('r',4)})
+                    .on('mouseover',function(){
+                        d3.select(this).attr('r',8)
+                    })
+                    .on('mouseleave',function(){
+                        d3.select(this).attr('r',4)
+                    })
                     .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
                 function onDragAxisStarted (d){
+                    d3.select(this).style('fill','black');
                     d.__origin__= d.angle();
                     d3.select(this.parentElement).classed('active',true);
                 }
@@ -385,6 +390,7 @@ let radarController = function () {
                     d3.select(this.parentElement).classed('active',false);
                     d.__origin__= null;
                     onChangeValueFunc(radarcomp);
+                    d3.select(this).style('fill','white');
                 }
             }
 
