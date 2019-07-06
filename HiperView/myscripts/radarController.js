@@ -451,10 +451,10 @@ let radarController = function () {
                     //     { "data": "data.angle" }
                     // ],
                     "order": [[ 2, "desc" ],[ 1, "asc" ]],
-                    "columnDefs": [{orderable: true,targets: [1]}],
+                    "columnDefs": [{orderable: true, targets: [1]}],
                     "columns": [
                         null,
-                        { "orderDataType": "dom-text-numeric" },
+                        { "orderDataType": "dom-text-numeric"},
                         { "orderDataType": "dom-disablebtn" },
                     ]
                 } );

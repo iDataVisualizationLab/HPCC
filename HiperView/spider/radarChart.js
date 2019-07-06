@@ -94,6 +94,7 @@ function RadarChart(id, data, options, name) {
 
         const ditem_filtered = ditem.filter(d=>allAxis.find(e=>e.text===d.axis));
         let temp = _.sortBy(ditem_filtered,d=>allAxis.find(e=>e.text===d.axis).angle);
+        temp.type = ditem.type;
         temp.bin = ditem.bin; return temp;});
     //Scale for the radius
     rScale = d3.scaleLinear()
