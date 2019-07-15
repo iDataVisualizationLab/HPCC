@@ -102,8 +102,8 @@ var timesteppixel = 0.1; // for 26
 var isRealtime = false;
 var db = 'nagios';
 if (isRealtime){
-    simDuration = 1000;
-    simDurationinit = 1000;
+    simDuration = 200;
+    simDurationinit = 200;
     numberOfMinutes = 26*60;
 }
 
@@ -1719,8 +1719,8 @@ function realTimesetting (option,db,init){
     getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
     if (option){
         processData = eval('processData_'+db);
-        simDuration = 1000;
-        simDurationinit = 1000;
+        simDuration = 200;
+        simDurationinit = 200;
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
@@ -1733,7 +1733,8 @@ function realTimesetting (option,db,init){
 }
 function playchange(){
     var e = d3.select('.pause').node();
-    interval2.pause();
+    if (interval2)
+        interval2.pause();
     e.value = "true";
     $(e).addClass('active');
     $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
@@ -1745,7 +1746,8 @@ function exit_warp () {
 }
 function pausechange(){
     var e = d3.select('.pause').node();
-    interval2.resume();
+    if (interval2)
+        interval2.resume();
     e.value = "false";
     $(e).removeClass('active');
     $(e.querySelector('i')).removeClass('fa-play pauseicon').addClass('fa-pause pauseicon');
@@ -1756,7 +1758,8 @@ function resetRequest(){
     pausechange();
     tool_tip.hide();
     firstTime = true;
-    interval2.stop();
+    if (interval2)
+        interval2.stop();
     hostResults = {};
     var count =0;
     for (var att in hostList.data.hostlist) {
@@ -2141,21 +2144,24 @@ $( document ).ready(function() {
                     M.toast({html: 'Local data does not exist, try to query from the internet!'});
                     d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
                         if (error) throw error;
+                        d3.select(".currentDate")
+                            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
                         loadata(data)
                     });
                     return;
                 }
+                d3.select(".currentDate")
+                    .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
                 loadata(data);
             });
         }else{ // realtime
             d3.select(".currentDate")
                 .text("" + (new Date()).toDateString());
-            realTimesetting(true,choiceinit);
-            db = choice;
+            realTimesetting(true,choiceinit, true);
+            db = choiceinit;
             requestService = eval('requestService'+choiceinit);
             processResult = eval('processResult_'+choiceinit);
-            d3.select('.cover').classed('hidden', true);
-            spinner.stop();
+            loadata([])
         }
         MetricController.graphicopt({width:315,height:315})
             .div(d3.select('#RadarController'))
@@ -2165,8 +2171,6 @@ $( document ).ready(function() {
             .init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
-            d3.select(".currentDate")
-                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
             drawLegend(initialService, arrThresholds, arrColor, dif);
             sampleS = data;
             main();

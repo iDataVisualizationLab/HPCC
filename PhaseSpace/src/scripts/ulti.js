@@ -1,9 +1,13 @@
-
+// var serviceList = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
+//     arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
+//     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
+//     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
+//     arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
 
 function UnzipData(dataRaw){
     let temp = [];
     dataRaw.forEach(d=>{
-        d.value[serviceAttr[chosenService]].forEach((it, i)=>
+        d.value[serviceListattr[chosenService]].forEach((it, i)=>
             temp.push({f: it[service_part],df: 0, key: d.key, timestep:i, undefined:false}));
     });
     return temp;
