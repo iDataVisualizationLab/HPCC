@@ -218,7 +218,7 @@ function RadarChart(id, data, options, name) {
     var axis_o = axisGrid.selectAll(".axis")
         .data(allAxis,d=>d.text);
 
-    axis_o.exit.remove();
+    axis_o.exit().remove();
 
     var axis_n = axis_o.enter()
         .append("g")
