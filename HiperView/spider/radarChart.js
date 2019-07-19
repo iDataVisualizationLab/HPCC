@@ -218,10 +218,13 @@ function RadarChart(id, data, options, name) {
     var axis_o = axisGrid.selectAll(".axis")
         .data(allAxis,d=>d.text);
 
+    axis_o.exit.remove();
+
     var axis_n = axis_o.enter()
         .append("g")
         .attr("class", "axis")
         .style('transform-origin','0,0');
+
     axis_n.merge(axis_o)
         .style('transform',function (d, i) {
             return "rotate(" + toDegrees(d.angle) + "deg)"});
