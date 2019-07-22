@@ -4,6 +4,7 @@ importScripts("../../js/underscore-min.js");
 importScripts("https://unpkg.com/simple-statistics@2.2.0/dist/simple-statistics.min.js");
 importScripts("../../js/jLouvain.js");
 importScripts("../../js/scagnosticsnd.min.js");
+importScripts("../../js/jDBSCAN.js");
 let tsne,sol,
     stepnumber = 5,
     countstack =0,
@@ -16,6 +17,7 @@ let tsne,sol,
     hostname,
     stopCondition =1e-4,
     community = jLouvain(),
+    dbscan = jDBSCAN(),
     groups,
     groupmethod = "outlier",
     currentMaxIndex =-1,
@@ -108,6 +110,7 @@ addEventListener('message',function ({data}){
                     // community.edges(convertLink(tsne.getProbability(), hostname));
                     // var result = community();
                     var result = findGroups(data.value,'outlier')
+                    postMessage({action: 'clusterCircle', result: getdbscan()});
                     groups = result;
                     // postMessage({action: 'cluster', result: result});
                     //---------------
@@ -161,6 +164,7 @@ addEventListener('message',function ({data}){
                     if (countstack>stack) {
                         countstack =0;
                     }
+                    postMessage({action: 'clusterCircle', result: getdbscan()});
                     stepstable(cost, tsne.getSolution(), groups,"done");
                     // postMessage({action:'stable', status:"done"});
                     // postMessage({action: 'step', result: {cost: cost, solution: sol}, status:"done"});
@@ -292,4 +296,33 @@ function outlier (data) {
 function getComunity (){
     community.nodes(hostname).edges(convertLink(tsne.getProbability(),hostname));
     return community();
+}
+
+function getdbscan () {
+    let solution = tsne.getSolution();
+    dbscan.eps(0.075).minPts(1).distance('EUCLIDEAN').data(convertPosition(tsne.getSolution(),hostname));
+    dbscan();
+    return dbscan_cluster2data(dbscan.getClusters(),solution,hostname);
+
+}
+function convertPosition (array,ids) {
+    const N = ids.length;
+    let points =[];
+    for (let i = 0; i < N; i++)
+        points.push({x: array[i][0], y:array[i][1]});
+    return points;
+}
+function dbscan_cluster2data (clusters,data,ids) {
+    clusters.forEach(d=>{
+        var distances = d.parts.map(function(p){return distance([d.x, d.y], data[p])});
+        d.radius = d3.max(distances);
+        d.members = d.parts.map(e=>ids[e])
+    })
+    return clusters;
+}
+
+function distance(a, b){
+    var dx = a[0] - b[0],
+        dy = a[1] - b[1];
+    return Math.round(Math.sqrt((dx * dx) + (dy * dy))*Math.pow(10, 10))/Math.pow(10, 10);
 }

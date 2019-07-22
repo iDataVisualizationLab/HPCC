@@ -243,6 +243,9 @@ d3.Tsneplot = function () {
                     d3.select("#subzone").select('.community').text(n_community+1);
                     updateCluster (data.result);
                     break;
+                case 'clusterCircle':
+                    updateClusterLabel (data.result);
+                    break;
                 // case 'mean':
                 //     updateSummary(data.val);
                 //     break;
@@ -477,6 +480,19 @@ d3.Tsneplot = function () {
             .attr("y2", Math.max(Math.min(Y[currenthost.index].y+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
 
 
+    }
+    function updateClusterLabel (cluster){
+        let labelGroup = g.selectAll('.labelGroup').data(cluster);
+        labelGroup.exit().remove();
+        labelGroup.enter().append('circle').attr('class','labelGroup')
+            .merge(labelGroup)
+            .transition().duration(runopt.simDuration*1.1)
+            .ease(d3.easeLinear)
+            .attrs({
+                x: d=>d.x+tx,
+                y: d=>d.y+ty,
+                r: d=>d.radius*ss,
+            })
     }
     let calTime = [0,0];
     let currenthost = {};
