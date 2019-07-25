@@ -324,5 +324,5 @@ function dbscan_cluster2data (clusters,data,ids) {
 function distance(a, b){
     var dx = a[0] - b[0],
         dy = a[1] - b[1];
-    return Math.round(Math.sqrt((dx * dx) + (dy * dy))*Math.pow(10, 10))/Math.pow(10, 10);
+    return Math.sqrt((dx * dx) + (dy * dy));
 }

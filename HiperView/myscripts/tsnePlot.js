@@ -482,6 +482,7 @@ d3.Tsneplot = function () {
 
     }
     function updateClusterLabel (cluster){
+        console.log(cluster)
         let labelGroup = g.selectAll('.labelGroup').data(cluster);
         labelGroup.exit().remove();
         labelGroup.enter().append('circle').attr('class','labelGroup')
@@ -491,7 +492,7 @@ d3.Tsneplot = function () {
             .attrs({
                 x: d=>d.x+tx,
                 y: d=>d.y+ty,
-                r: d=>d.radius*ss,
+                r: d=>d.radius,
             })
     }
     let calTime = [0,0];

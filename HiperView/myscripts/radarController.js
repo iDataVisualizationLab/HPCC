@@ -386,7 +386,6 @@ let radarController = function () {
                 rows.append('td').attr('class','text').text(d=>d.text);
                 rows.append('td').attr('class','angle')
                     .append('input').attr('type','number')
-                    .append('input').attr('type','number')
                     .attr('value',d=>toDegrees(d.angle).toFixed(0))
                     .on('input',function(d){
                         updateAngle(svg.selectAll('.dragpoint').filter(s=>s.data.text===d.text).node().parentElement,toRadian(this.value*1));
