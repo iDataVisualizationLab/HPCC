@@ -117,6 +117,49 @@ var serviceQuery ={
         }
     },
 };
+function systemFormat() {
+    jobList=[];
+    serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
+    serviceList_selected = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
+
+    serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
+    serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.834386356666759,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.4487989505128276,"range":[3,98]}]},{"text":"Job_load","id":1,"enable":true,"sub":[{"text":"Job load","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[0,10]}]},{"text":"Memory_usage","id":2,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":2,"angle":1.8849555921538759,"range":[0,99]}]},{"text":"Fans_speed","id":3,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":3,"angle":2.4751942119192307,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":3,"angle":2.9239931624320583,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":3,"angle":3.372792112944886,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":3,"angle":3.8215910634577135,"range":[1050,17850]}]},{"text":"Power_consum","id":4,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":4,"angle":4.71238898038469,"range":[0,200]}]}];
+    serviceFullList = serviceLists2serviceFullList(serviceLists);
+    serviceListattrnest = [
+        {key:"arrTemperature", sub:["CPU1 Temp","CPU2 Temp","Inlet Temp"]},
+        {key:"arrCPU_load", sub:["Job load"]},
+        {key:"arrMemory_usage", sub:["Memory usage"]},
+        {key:"arrFans_health", sub:["Fan1 speed","Fan2 speed","Fan3 speed","Fan4 speed"]},
+        {key:"arrPower_usage", sub:["Power consumption"]}];
+    serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
+        arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
+        arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
+        arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
+        arrPower_usage:{key: "Power_consumption", val: ["arrPower_usage"]}};
+    thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
+}
+function newdatatoFormat (data){
+    serviceList = [];
+    serviceListattr = [];
+    // FIXME detect format
+    const keys = _without(Object.keys(data[0]),'timestamp','time');
+    keys.forEach((k,i)=>{
+        serviceQuery["csv"][k][k]={
+            format : () =>k,
+            numberOfEntries: 1};
+        serviceAttr[k] = {
+            key: k,
+            val:[k]
+        };
+        serviceList.push(k);
+        serviceListattr.push(k);
+        const range = d3.extent(data,d=>d[k]);
+        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*Math.PI/(keys.length-1),"range":range}]};
+        thresholds.push(range);
+        serviceLists.push(temp);
+    });
+    serviceFullList = serviceLists2serviceFullList(serviceLists);
+}
 function getstringQueryAll_influx (ip){
     let count = 0;
     return serviceList.map(s=> {
@@ -163,6 +206,36 @@ function getstringQuery_influx (ip,serviceI,timerange,timestep){
         }).join('%3B');
 }
 
+function processData_csv(result, serviceName) {
+    const serviceAttribute = serviceQuery[db][serviceName];
+    const query_return = d3.keys(serviceAttribute);
+    if (result) {
+        let val = result;
+        return d3.merge(query_return.map((s, i) => {
+            if (val[i]) // no error
+            {
+                const subob = val;
+                if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
+                    return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
+                        const localVal = subob[serviceAttribute[s].format(d + 1)]||(serviceAttribute[s].format2&&subob[serviceAttribute[s].format2(d + 1)]);
+                        if (localVal != null && localVal != undefined) {
+                            if (serviceAttribute[s].type==='object')
+                                return string2JSON(localVal);
+                            return localVal * (serviceAttribute[s].rescale || 1);
+                        }
+                        else return undefined;
+                    });
+                else
+                    return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+            } else {
+                return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+            }
+        }));
+    }
+    return d3.merge(query_return.map((s, i) => {
+            return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
+    }));
+}
 function processData_influxdb(result, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return = d3.keys(serviceAttribute);

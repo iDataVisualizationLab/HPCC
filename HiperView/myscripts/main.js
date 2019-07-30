@@ -2168,6 +2168,7 @@ $( document ).ready(function() {
             .tablediv(d3.select('#RadarController_Table'))
             .axisSchema(serviceFullList)
             .onChangeValue(onSchemaUpdate)
+            .onChangeFilterFunc(onfilterdata)
             .init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
@@ -2183,6 +2184,30 @@ $( document ).ready(function() {
     // Spinner Stop ********************************************************************
 
 });
+function onfilterdata(schema) {
+    //
+    // data_filtered = dataRaw.filter(d=>schema.axisList.map(s=> s.filter!=null?(d[s.data.text]>=s.filter[0])&&(d[s.data.text]<=s.filter[1]):true).reduce((p,c)=>c&&p))
+    // dataBytime = d3.nest()
+    //     .key(function(d) { return d.time; })
+    //     .key(function(d) { return d.location; })
+    //     .entries(data_filtered);
+    //
+    // data = handleDatabyKey(data_filtered,listopt.limitTime,formatTime,['location','time']);
+    // databyTime = handleDatabyKey(data_filtered,listopt.limitTime,formatTime,['time']);
+    // let dataSumAll = handleDatabyKey(data_filtered,listopt.limitTime,formatTime,[]);
+    //
+    // databyLoc = handleDatabyKey(data_filtered,listopt.limitTime,formatTime,['location']);
+    // databyLoc.push({'key':'all',values:dataSumAll});
+    // handleDataIcon (databyLoc);
+    //
+    // MetricController.data(handleDataSumAll(dataSumAll)).drawSummary();
+    //
+    // data.push({'key':'all',values:databyTime})
+    // // Loadtostore();
+    // handleOutlier (data,currentService);
+    // // request();
+    // d3.select('.cover').classed('hidden',true);
+}
 function onSchemaUpdate(schema){
     serviceFullList.forEach(ser=>{
         ser.angle = schema.axis[ser.text].angle();
