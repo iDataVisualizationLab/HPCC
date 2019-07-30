@@ -347,7 +347,7 @@ let radarController = function () {
                     // let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
                     let newpos = {x: -(graphicopt.widthG()/2+ graphicopt.margin.left+20) + (d3.event.sourceEvent.screenX ),
                                     y: -(graphicopt.heightG()/2+ graphicopt.margin.top  +graphicopt.height+20) + (d3.event.sourceEvent.screenY) };
-                    let dAngle = Math.atan2(-newpos.y,-newpos.x)-Math.PI/2;
+                    let dAngle = Math.atan2(d3.event.y - 0, d3.event.x - 0)+Math.PI/2;
                     // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
                     updateAngle(this.parentElement,dAngle);
                     tablediv.selectAll('.angle').filter(e=>e.text===d.data.text).select('input').attr('value',toDegrees(d.angle()).toFixed(0));
