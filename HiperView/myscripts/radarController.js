@@ -347,7 +347,7 @@ let radarController = function () {
           
                     let dAngle = Math.atan2(d3.event.y - 0, d3.event.x - 0)+Math.PI/2;
                     // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
-                    updateAngle(this.parentElement,dAngle);
+                    updateAngle(this,dAngle);
                     tablediv.selectAll('.angle').filter(e=>e.text===d.data.text).select('input').attr('value',toDegrees(d.angle()).toFixed(0));
                 }
                 function onDragAxisEnded (d){
