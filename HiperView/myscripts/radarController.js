@@ -283,7 +283,7 @@ let radarController = function () {
                         .on("end", brushended)(d))
                     .style('transform-origin','0,0')
                     .style('transform',function (d, i) {
-                        return "rotate(" + toDegrees(d.angle()) + "deg)"});
+                        return "rotate(" + toDegrees(d.angle()) + "deg)"}).call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
                 //Append the lines
                 axis.append("line")
                     .attr("x1", 0)
@@ -337,26 +337,24 @@ let radarController = function () {
                     .on('mouseleave',function(){
                         d3.select(this).attr('r',4)
                     })
-                    .call(d3.drag().on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded));
+                 
                 function onDragAxisStarted (d){
-                    d3.select(this).style('fill','black');
-                    d3.select(this.parentElement).classed('active',true);
+                    d3.select(this).select('.dragpoint').style('fill','black');
+                    d3.select(this).classed('active',true);
                 }
                 function onDragAxisDragged (d){
                     // FIXME: rotation not smooth
-                    // let dAngle = -(Math.atan2(-d3.event.y,d3.event.x)-Math.PI/2);
-                    let newpos = {x: -(graphicopt.widthG()/2+ graphicopt.margin.left+20) + (d3.event.sourceEvent.screenX ),
-                                    y: -(graphicopt.heightG()/2+ graphicopt.margin.top  +graphicopt.height+20) + (d3.event.sourceEvent.screenY) };
+          
                     let dAngle = Math.atan2(d3.event.y - 0, d3.event.x - 0)+Math.PI/2;
                     // let dAngle = Math.atan2(d3.event.sourceEvent.y-radius,d3.event.sourceEvent.x-radius);
                     updateAngle(this.parentElement,dAngle);
                     tablediv.selectAll('.angle').filter(e=>e.text===d.data.text).select('input').attr('value',toDegrees(d.angle()).toFixed(0));
                 }
                 function onDragAxisEnded (d){
-                    d3.select(this.parentElement).classed('active',false);
+                    d3.select(this).classed('active',false);
                     d.__origin__= null;
                     onChangeValueFunc(radarcomp);
-                    d3.select(this).style('fill','white');
+                    d3.select(this).select('.dragpoint').style('fill','white');
                 }
             }
 
