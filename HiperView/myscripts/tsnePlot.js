@@ -490,9 +490,9 @@ d3.Tsneplot = function () {
             .transition().duration(runopt.simDuration*1.1)
             .ease(d3.easeLinear)
             .attrs({
-                x: d=>d.x+tx,
-                y: d=>d.y+ty,
-                r: d=>d.radius,
+                x: d=> d.x * runopt.zoom * ss+tx,
+                y: d=> d.y * runopt.zoom * ss+ty,
+                r: d=> d.radius * runopt.zoom *ss,
             })
     }
     let calTime = [0,0];

@@ -1,0 +1,5 @@
+
+Nº of Servers: 1
+Total Time: 69h:30m
+Interval: 30s
+Total Samples: 7816

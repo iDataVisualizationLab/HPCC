@@ -1257,6 +1257,16 @@ function processResult_old(r){
     obj.data.service.plugin_output = r.data.service.plugin_output;
     return obj;
 }
+function processResult_csv(r){
+    var obj = {};
+    obj.result = {};
+    obj.result.query_time = r.timespan;
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = Object.keys(r).find(e=>e!=='timespan').split('-')[0];
+    obj.data.service.plugin_output = r;
+    return obj;
+}
 const processResult_nagios = processResult_old;
 
 
@@ -2121,6 +2131,43 @@ $( document ).ready(function() {
             spinner.stop();
         }
     });
+    $('#data_input_file').on('change', (evt) => {
+        var f = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = (function(theFile) {
+            return function(e) {
+                // Render thumbnail.
+                d3.select('.cover').classed('hidden', false);
+                exit_warp();
+                spinner.spin(target);
+                setTimeout(() => {
+                    d3.csv(e.target.result,function (error, data) {
+                    if (error){
+                    }else{
+                        loadata1(data);
+                        function loadata1(data){
+                            sampleS = data;
+                            processResult = processResult_csv;
+                            db = "csv";
+                            realTimesetting(false,"csv");
+                            d3.select(".currentDate")
+                                .text("" + new Date(data[0].timestamp).toDateString());
+                            resetRequest();
+                            d3.select('.cover').classed('hidden', true);
+                            spinner.stop();
+                        }
+                    }
+                })
+                },0);
+                // span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                //     '" title="', escape(theFile.name), '"/>'].join('');
+                // document.getElementById('list').insertBefore(span, null);
+            };
+        })(f);
+
+        // Read in the image file as a data URL.
+        reader.readAsDataURL(f);
+    })
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data

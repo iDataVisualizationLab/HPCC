@@ -110,7 +110,7 @@ addEventListener('message',function ({data}){
                     // community.edges(convertLink(tsne.getProbability(), hostname));
                     // var result = community();
                     var result = findGroups(data.value,'outlier')
-                    postMessage({action: 'clusterCircle', result: getdbscan()});
+                    // postMessage({action: 'clusterCircle', result: getdbscan()});
                     groups = result;
                     // postMessage({action: 'cluster', result: result});
                     //---------------
@@ -164,7 +164,7 @@ addEventListener('message',function ({data}){
                     if (countstack>stack) {
                         countstack =0;
                     }
-                    postMessage({action: 'clusterCircle', result: getdbscan()});
+                    // postMessage({action: 'clusterCircle', result: getdbscan()});
                     stepstable(cost, tsne.getSolution(), groups,"done");
                     // postMessage({action:'stable', status:"done"});
                     // postMessage({action: 'step', result: {cost: cost, solution: sol}, status:"done"});
@@ -305,15 +305,20 @@ function getdbscan () {
     return dbscan_cluster2data(dbscan.getClusters(),solution,hostname);
 
 }
+let scalev = d3.scaleLinear();
 function convertPosition (array,ids) {
     const N = ids.length;
+    scalev .domain(d3.extent(_.flatten(array)));
     let points =[];
     for (let i = 0; i < N; i++)
-        points.push({x: array[i][0], y:array[i][1]});
+        points.push({x: scalev(array[i][0]), y:scalev(array[i][1])});
     return points;
 }
 function dbscan_cluster2data (clusters,data,ids) {
+    console.log(clusters)
     clusters.forEach(d=>{
+        d.x = scalev.invert(d.x);
+        d.y = scalev.invert(d.y);
         var distances = d.parts.map(function(p){return distance([d.x, d.y], data[p])});
         d.radius = d3.max(distances);
         d.members = d.parts.map(e=>ids[e])
