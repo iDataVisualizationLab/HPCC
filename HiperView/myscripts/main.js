@@ -1206,60 +1206,7 @@ function updateTimeText(index){
         .attr("font-family", "sans-serif")
         .text(new Date(query_time).timeNow());
 }
-// Delete unnecessary files
-let processResult = processResult_old;
-function processResult_influxdb(r,hostname,index){
-    var obj = {};
-    obj.result = {};
-    if (r.results[0].series){
-        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
-    }else
-        obj.result.query_time = new Date();
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
-    if (index !== undefined ) {
-        obj.data.service.plugin_output = {results: r.results.map(d => {
-                let temp = {};
-                temp.statement_id = d.statement_id;
-                temp.series = [];
-                let tempsub = {};
-                const series = d.series[0];
-                tempsub.name = series.name;
-                tempsub.columns = series.columns;
-                tempsub.values = [series.values[index]];
-                temp.series.push(tempsub);
-                return temp;
-            })};
-    } else
-        obj.data.service.plugin_output = r;
-    return obj;
-}
-function processResult_old(r){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = r.result.query_time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = r.data.service.host_name;
-    obj.data.service.plugin_output = r.data.service.plugin_output;
-    return obj;
-}
-function processResult_csv(r,hostname,time){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
-    obj.data.service.plugin_output = r;
-    return obj;
-}
-const processResult_nagios = processResult_old;
 
-
-
-let processData = processData_old;
 
 function decimalColorToHTMLcolor(number) {
     //converts to a integer
@@ -1727,7 +1674,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,host:hostList});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -2133,11 +2080,11 @@ $( document ).ready(function() {
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
-                realTimesetting(false,"influxdb");
+                realTimesetting(false,"influxdb",true);
             }else {
                 db = "nagios";
                 processResult = processResult_old;
-                realTimesetting(false);
+                realTimesetting(false,undefined,true);
             }
             d3.select(".currentDate")
                 .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
@@ -2166,7 +2113,7 @@ $( document ).ready(function() {
                             inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
-                            realTimesetting(false,"csv",undefined,data);
+                            realTimesetting(false,"csv",true,data);
                             d3.select(".currentDate")
                                 .text("" + new Date(data[0].timestamp).toDateString());
                             resetRequest();

@@ -1,8 +1,7 @@
 importScripts("../../js/d3.v4.js","../../js/underscore-min.js","../setting.js");
 let undefinedValue,
 globalTrend=false,
-hosts,processData,db;
-processData = processData_old;
+hosts,db;
 addEventListener('message',function ({data}){
     switch (data.action) {
         case 'init':
@@ -14,17 +13,24 @@ addEventListener('message',function ({data}){
             if (db==='csv')
             {
                 systemFormat();
-            }
-            db = data.db||'old';
-            processData = eval('processData_' + db);
-            if(!data.value) {
-                if (db==='nagios_old'||db===undefined)
-                    processData = processData_old;
-            }
-            if(db==='csv'){
                 hostList = data.hostList;
-                inithostResults();
+                inithostResults(true);
+            }
+            console.log(hosts)
+            db = data.db;
+            console.log(data)
+            if(data.db==='csv'){
+                hostList = data.hostList;
+                inithostResults(true);
                 newdatatoFormat(data.data);
+                processData = eval('processData_' + data.db);
+            }else if(data.value) {
+                processData = eval('processData_' + data.db);
+            }else {
+                if (db ==='influxdb')
+                    processData = eval('processData_' + data.db);
+                else
+                    processData = processData_old;
             }
             break;
         case 'getbatchData':

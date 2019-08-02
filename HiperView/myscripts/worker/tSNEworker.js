@@ -42,6 +42,7 @@ addEventListener('message',function ({data}){
                 maxstack = (data.value);
                 break;
             case "initDataRaw":
+                console.log('initDataRaw')
                 countstack = 0;
                 tsne.initDataRaw(data.value);
                 if (data.index===undefined) {
@@ -315,7 +316,6 @@ function convertPosition (array,ids) {
     return points;
 }
 function dbscan_cluster2data (clusters,data,ids) {
-    console.log(clusters)
     clusters.forEach(d=>{
         d.x = scalev.invert(d.x);
         d.y = scalev.invert(d.y);

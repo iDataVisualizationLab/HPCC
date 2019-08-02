@@ -510,7 +510,7 @@ function predict (arr,ser, notUsepastValue){
     }
 }
 
-function inithostResults () {
+function inithostResults (worker) {
 
     hosts = [];
     const hostdata = hostList.data.hostlist;
@@ -522,10 +522,67 @@ function inithostResults () {
         h.index = hosts.length;
 
         // to contain the historical query results
-        hostResults[h.name] = {};
-        hostResults[h.name].index = h.index;
-        hostResults[h.name].arr = [];
-        serviceListattr.forEach(d => hostResults[att][d] = []);
+        if (!worker) {
+            hostResults[h.name] = {};
+            hostResults[h.name].index = h.index;
+            hostResults[h.name].arr = [];
+            serviceListattr.forEach(d => hostResults[att][d] = []);
+        }
         hosts.push(h);
     }
 }
+
+// Delete unnecessary files
+let processResult = processResult_old;
+function processResult_influxdb(r,hostname,index){
+    var obj = {};
+    obj.result = {};
+    if (r.results[0].series){
+        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+    }else
+        obj.result.query_time = new Date();
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = hostname;
+    if (index !== undefined ) {
+        obj.data.service.plugin_output = {results: r.results.map(d => {
+                let temp = {};
+                temp.statement_id = d.statement_id;
+                temp.series = [];
+                let tempsub = {};
+                const series = d.series[0];
+                tempsub.name = series.name;
+                tempsub.columns = series.columns;
+                tempsub.values = [series.values[index]];
+                temp.series.push(tempsub);
+                return temp;
+            })};
+    } else
+        obj.data.service.plugin_output = r;
+    return obj;
+}
+function processResult_old(r){
+    var obj = {};
+    obj.result = {};
+    obj.result.query_time = r.result.query_time;
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = r.data.service.host_name;
+    obj.data.service.plugin_output = r.data.service.plugin_output;
+    return obj;
+}
+function processResult_csv(r,hostname,time){
+    var obj = {};
+    obj.result = {};
+    obj.result.query_time = time;
+    obj.data = {};
+    obj.data.service={};
+    obj.data.service.host_name = hostname;
+    obj.data.service.plugin_output = r;
+    return obj;
+}
+const processResult_nagios = processResult_old;
+
+
+
+let processData = processData_old;
