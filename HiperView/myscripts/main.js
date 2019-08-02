@@ -135,6 +135,8 @@ var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
 var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
+
+
 setColorsAndThresholds(initialService);
 
 //********tooltip***************
@@ -1415,9 +1417,9 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     newg.exit().remove();
     newg = newg.enter().append('g')
         .merge(newg)
-        .attr('class',name)
+        .attr('class',fixName2Class(name))
         .attr('transform','translate(0,'+y+')').on("mouseover",mouseoverNode);
-    let newrect = newg.selectAll("."+name).data(d=>d.val);
+    let newrect = newg.selectAll("."+fixName2Class(name)).data(d=>d.val);
         newrect.exit().remove();
     newrect.enter()
         .append("rect")
@@ -1426,7 +1428,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
         .attr("stroke", "#000")
         .attr("stroke-width", 0.05)
         .merge(newrect)
-            .attr("class", 'compute '+name)
+            .attr("class", 'compute '+fixName2Class(name))
             .attr("x",(d,i)=> xTimeScale(i))
             .attr("y", -10)
 
@@ -2039,6 +2041,7 @@ $( document ).ready(function() {
                     hostList = data;
                     inithostResults();
                     systemFormat();
+                    MetricController.axisSchema(serviceFullList).update();
                 }
             });
         }
@@ -2113,6 +2116,7 @@ $( document ).ready(function() {
                             inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
+                            MetricController.axisSchema(serviceFullList).update();
                             realTimesetting(false,"csv",true,data);
                             d3.select(".currentDate")
                                 .text("" + new Date(data[0].timestamp).toDateString());
@@ -2238,8 +2242,8 @@ function onSchemaUpdate(schema){
     Radarplot.schema(serviceFullList);
     updateSummaryChartAll();
     // }
-
-    SaveStore();
+    if (db!=='csv')
+        SaveStore();
 }
 function discovery(d){
     d3.select(d).style('left','20px')

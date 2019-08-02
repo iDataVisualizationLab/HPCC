@@ -604,3 +604,7 @@ function createGradient(rg,limitcolor,arrColor) {
         }
     });
 }
+
+function fixName2Class(s) {
+    return 'h'+s.replace(/ |#|\./gi,''); //avoid . and number format
+}

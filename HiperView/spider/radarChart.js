@@ -490,16 +490,19 @@ function RadarChart(id, data, options, name) {
                     });
                 //t.parentNode.appendChild(clonedNode);
             });
-            d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).join(', .'))
-                .classed("displayNone", true);
+            let hiddenClass =  _.difference(hosts.map(d=>d.name),filterhost ).map(d=>fixName2Class(d)).join(', .');
+            if (hiddenClass!='')
+                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).map(d=>fixName2Class(d)).join(', .'))
+                    .classed("displayNone", true);
             // hosts.forEach(l => {
             //         d3.selectAll("." + l.name)
             //             .classed("displayNone", true);
             //             // .style("visibility", 'hidden');
             // });
-
-            d3.selectAll("." + filterhost.join(', .'))
-                .classed("displayNone", false);
+            let showClass = filterhost.map(d=>fixName2Class(d)).join(', .');
+            if (showClass!='')
+                d3.selectAll("." + filterhost.map(d=>fixName2Class(d)).join(', .'))
+                    .classed("displayNone", false);
                 // .style("visibility", 'hidden');
 
             // hosts.forEach(l => {

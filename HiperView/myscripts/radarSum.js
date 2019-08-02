@@ -189,7 +189,7 @@ d3.radar = function () {
     //     .domain([0,1])
     //     .range([thresholds[0][0],thresholds[0][1]]);
     function handledataRate (hindex){
-        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: axes[i], value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
+        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: serviceFullList[i].text, value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
         // return _(arr).unzip().map((d,i)=>{return {axis: axes[i], value: scaleNormal(ss.mean(d)),minval: scaleNormal(ss.quantile(d,0.25)),maxval: scaleNormal(ss.quantile(d, 0.75))}});
     }
     function handledata(index){
@@ -249,7 +249,7 @@ function clearclone (){
             .style("opacity", 1);
         allbold.selectAll(".radarStroke").style('pointer-events','auto');
     hosts.forEach(l=> {
-                d3.selectAll("." + l.name)
+                d3.selectAll("." + fixName2Class(l.name))
                     .classed("displayNone", false);
                     // .style("visibility", 'visible');
         });

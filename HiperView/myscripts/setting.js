@@ -161,8 +161,9 @@ function newdatatoFormat (data){
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
     Object.keys(keys).forEach((k,i)=>{
-        serviceQuery["csv"][k]={}
+        serviceQuery["csv"][k]={};
         serviceQuery["csv"][k][k]={
+            type : 'number',
             format : () =>k,
             numberOfEntries: 1};
         serviceAttr[k] = {
@@ -241,13 +242,15 @@ function getstringQuery_influx (ip,serviceI,timerange,timestep){
 function processData_csv(result, serviceName) {
     const serviceAttribute = serviceQuery[db][serviceName];
     const query_return = d3.keys(serviceAttribute);
-    if (result) {
+    if (result!==undefined) {
         let val = result;
         return d3.merge(query_return.map((s, i) => {
-            if (val[i]) // no error
+            if (val[i]!=undefined) // no error
             {
                 const subob = val;
-                if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
+                if(serviceAttribute[s].type==='number')
+                    return subob;
+                else if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
                         const localVal = subob[serviceAttribute[s].format(d + 1)]||(serviceAttribute[s].format2&&subob[serviceAttribute[s].format2(d + 1)]);
                         if (localVal != null && localVal != undefined) {
@@ -257,7 +260,7 @@ function processData_csv(result, serviceName) {
                         }
                         else return undefined;
                     });
-                else
+               else
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);
             } else {
                 return d3.range(serviceAttribute[s].numberOfEntries).map(d => undefined);

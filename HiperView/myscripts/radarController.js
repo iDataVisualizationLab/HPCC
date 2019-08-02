@@ -554,7 +554,7 @@ let radarController = function () {
     };
 
     function handledataRate (hindex){
-        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: axes[i], value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
+        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: radarcomp.axisList[i].data.text, value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
     }
     /////////////////////////////////////////////////////////
     /////////////////// Helper Function /////////////////////
