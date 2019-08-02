@@ -1459,57 +1459,68 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     svgStore.detailView.items.selectAll("."+name).remove();
     if (isSingle)
         y= y+10;
-    for (var i=0; i<arr.length;i++){
-        var obj = arr[i];
-        var x = xTimeScale(i);
+
+        // var obj = arr[i];
+        // var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
-        svgStore.detailView.items.append("rect")
+    let newg = svgStore.detailView.items.selectAll("g."+name).data([{name:name,val:arr}]);
+    newg.exit().remove();
+    newg = newg.enter().append('g')
+        .merge(newg)
+        .attr('class',name)
+        .attr('transform','translate(0,'+y+')').on("mouseover",mouseoverNode);
+    let newrect = newg.selectAll("."+name).data(d=>d.val);
+        newrect.exit().remove();
+    newrect.enter()
+        .append("rect")
+        .attr("width", node_size)
+        .attr("height", node_size )
+        .attr("stroke", "#000")
+        .attr("stroke-width", 0.05)
+        .merge(newrect)
             .attr("class", 'compute '+name)
-            .attr("x", x)
-            .attr("y", y-10)
-            .attr("width", node_size)
-            .attr("height", node_size )
-            .attr("fill", function (d) {
+            .attr("x",(d,i)=> xTimeScale(i))
+            .attr("y", -10)
+
+            .attr("fill", function (obj) {
                 if (obj.temp1===undefinedValue)
                     return undefinedColor;
                 else
                     return color(obj.temp1);
             })
-            .attr("fill-opacity",function (d) {
+            .attr("fill-opacity",function (obj) {
                 return opa(obj.temp1);
-            })
-            .attr("stroke", "#000")
-            .attr("stroke-width", 0.05)
-            .on("mouseover", function (d) {
-                mouseoverNode (this);
             })
         ;//.on("mouseout", mouseoutNode);
 
         if ((selectedService==="Temperature" || selectedService==="Fans_speed")&&isSingle!=true)    {
-            svgStore.detailView.items.append("rect")
-                .attr("class",  'compute '+name)
-                .attr("x", x)
-                .attr("y", y+node_size-9)
+            let newrect = newg.selectAll(".rct2."+name).data(arr);
+            newrect.exit().remove();
+            newrect.enter()
+                .append("rect")
                 .attr("width", node_size)
                 .attr("height", node_size )
-                .attr("fill", function (d) {
+                .attr("stroke", "#000")
+                .attr("stroke-width", 0.05)
+                .merge(newrect)
+                .attr("class", 'rect2 compute '+name)
+                .attr("x",(d,i)=> xTimeScale(i))
+                .attr("y", node_size-9)
+
+                .attr("fill", function (obj) {
                     if (obj.temp2==undefinedValue)
                         return undefinedColor;
                     else
                         return color(obj.temp2);
                 })
-                .attr("fill-opacity",function (d) {
+                .attr("fill-opacity",function (obj) {
                     return opa(obj.temp2);
                 })
-                .attr("stroke", "#000")
-                .attr("stroke-width", 0.05)
-                .on("mouseover", function (d) {
-                    mouseoverNode (this);
-                })
-            ;//.on("mouseout", mouseoutNode);
+            ;
+                      ;//.on("mouseout", mouseoutNode);
         }
-    }
+
     // *****************************************
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }

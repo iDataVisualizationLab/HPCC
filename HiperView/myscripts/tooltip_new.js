@@ -95,7 +95,7 @@ var svgTip;
 var xScale;
 function mouseoverNode(d1){
     playing = false;
-    var r = hostResults[d1.className.baseVal];
+    var r = hostResults[d1.name];
 
     tool_tip.show(r);
     // 1. create the svgTip
@@ -120,11 +120,7 @@ function mouseoverNode(d1){
         obj.temp2 = a[1];
         obj.temp3 = a[2];
         obj.query_time =r.arr[i].result.query_time;
-        if (obj.temp1==undefinedValue ||  obj.temp2==undefinedValue || obj.temp3==undefinedValue) {
-            console.log(obj)
-            // arr.push(obj);
-        }
-        else
+        if (obj.temp1!==undefinedValue &&  obj.temp2!==undefinedValue && obj.temp3!==undefinedValue)
             arr.push(obj);
     }
 
@@ -305,7 +301,7 @@ function mouseoverNode(d1){
         .style("font-size", "12px")
         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         .attr("font-family", "sans-serif")
-        .text("Host: "+d1.className.baseVal);
+        .text("Host: "+d1.name);
     svgTip.append("text")
         .attr("x", -tipH/2)
         .attr("y", -35)
@@ -342,7 +338,7 @@ function mouseoverNode(d1){
         .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
 
     // Update spider data *************************************************************
-    var name = d1.className.baseVal;
+    var name = d1.name;
     dataSpider = [];
     dataSpider.name = name;
     if (r.arr.length>0){
