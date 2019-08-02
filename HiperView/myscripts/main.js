@@ -1550,7 +1550,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
         .attr('x',arr[0].x)
         .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
         .attr("clip-path","url(#cp"+name+")").on("mouseover", function (d) {
-        mouseoverNode (this);
+        mouseoverNode ({name:name});
     });
 
     svgStore.detailView.items.append("path")
@@ -1564,7 +1564,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
         })
         .style("fill", "none")
         .on("mouseover", function (d) {
-            mouseoverNode (this);
+            mouseoverNode ({name:name});
         })
     ;
 }
