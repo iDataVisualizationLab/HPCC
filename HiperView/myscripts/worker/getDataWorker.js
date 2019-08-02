@@ -11,15 +11,20 @@ addEventListener('message',function ({data}){
             db = data.value.db;
             break;
         case 'isRealtime':
+            if (db==='csv')
+            {
+                systemFormat();
+            }
             db = data.db;
-            if(data.value) {
-
-                processData = eval('processData_' + data.db);
-            }else {
-                if (db ==='influxdb')
-                    processData = eval('processData_' + data.db);
-                else
+            processData = eval('processData_' + data.db);
+            if(!data.value) {
+                if (db==='nagios_old')
                     processData = processData_old;
+            }
+            if(db==='csv'){
+                hostList = data.hostList;
+                inithostResults();
+                newdatatoFormat(data.data);
             }
             break;
         case 'getbatchData':

@@ -1,5 +1,6 @@
 // system variable
 var jobList=[];
+let hostList;
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
 var serviceList_selected = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
 
@@ -389,7 +390,7 @@ function processData_old(str, serviceName) {
     }
     else if (serviceName == serviceList[4]) {
         var a = [];
-        if (str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
+        if (str===undefined||str.indexOf("timed out")>=0 || str.indexOf("(No output on stdout)")>=0 || str.indexOf("UNKNOWN")>=0 ){
             a[0] = undefinedValue;
             a[1] = undefinedValue;
             a[2] = undefinedValue;
@@ -506,5 +507,25 @@ function predict (arr,ser, notUsepastValue){
            return  d3.range(serviceMain.sub.length).map(a=>average);
         }
             return [0,0,0];
+    }
+}
+
+function inithostResults () {
+
+    hosts = [];
+    const hostdata = hostList.data.hostlist;
+    for (var att in hostdata) {
+        var h = {};
+        h.name = att;
+        h.hpcc_rack = hostdata[att].rack?hostdata[att].rack:(+att.split("-")[1]);
+        h.hpcc_node = hostdata[att].node?hostdata[att].node:+att.split("-")[2].split(".")[0];
+        h.index = hosts.length;
+
+        // to contain the historical query results
+        hostResults[h.name] = {};
+        hostResults[h.name].index = h.index;
+        hostResults[h.name].arr = [];
+        serviceListattr.forEach(d => hostResults[att][d] = []);
+        hosts.push(h);
     }
 }

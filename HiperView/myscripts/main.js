@@ -824,25 +824,7 @@ function changeView(v){
         pausechange();
     }
 }
-function inithostResults () {
 
-    hosts = [];
-    const hostdata = hostList.data.hostlist;
-    for (var att in hostdata) {
-        var h = {};
-        h.name = att;
-        h.hpcc_rack = hostdata[att].rack?hostdata[att].rack:(+att.split("-")[1]);
-        h.hpcc_node = hostdata[att].node?hostdata[att].node:+att.split("-")[2].split(".")[0];
-        h.index = hosts.length;
-
-        // to contain the historical query results
-        hostResults[h.name] = {};
-        hostResults[h.name].index = h.index;
-        hostResults[h.name].arr = [];
-        serviceListattr.forEach(d => hostResults[att][d] = []);
-        hosts.push(h);
-    }
-}
 function main() {
 
     inithostResults ();
@@ -1315,12 +1297,13 @@ function simulateResults2(hostname,iter, s){
         if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"]!== undefined)
-            if(sampleS[hostname]["arrPower_usage"][iter]=== undefined  && db!=="influxdb"&& db!=="csv"){
-                var simisval = handlemissingdata(hostname,iter);
+        }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
+            if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
+                var simisval = handlemissingdata(hostname, iter);
                 sampleS[hostname]["arrPower_usage"][iter] = simisval;
             }
-        newService = sampleS[hostname]["arrPower_usage"][iter];
+            newService = sampleS[hostname]["arrPower_usage"][iter];
+        }
     }
     if (newService === undefined){
         newService ={};
@@ -1731,9 +1714,9 @@ function pauseRequest(){
 
 }
 
-function realTimesetting (option,db,init){
+function realTimesetting (option,db,init,data){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,host:hostList});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -2167,7 +2150,7 @@ $( document ).ready(function() {
                             inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
-                            realTimesetting(false,"csv");
+                            realTimesetting(false,"csv",undefined,data);
                             d3.select(".currentDate")
                                 .text("" + new Date(data[0].timestamp).toDateString());
                             resetRequest();
