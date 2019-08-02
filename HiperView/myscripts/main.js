@@ -2041,6 +2041,10 @@ $( document ).ready(function() {
     //     $(this).data("prevType", e.type);
     // });
     console.log('ready');
+    $('.fixed-action-btn').floatingActionButton({
+        direction: 'left',
+        hoverEnabled: false
+    });
     $('.collapsible').collapsible();
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
