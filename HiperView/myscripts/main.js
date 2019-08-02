@@ -824,22 +824,28 @@ function changeView(v){
         pausechange();
     }
 }
-function main() {
+function inithostResults () {
 
-    for (var att in hostList.data.hostlist) {
+    hosts = [];
+    const hostdata = hostList.data.hostlist;
+    for (var att in hostdata) {
         var h = {};
         h.name = att;
-        h.hpcc_rack = +att.split("-")[1];
-        h.hpcc_node = +att.split("-")[2].split(".")[0];
+        h.hpcc_rack = hostdata[att].rack?hostdata[att].rack:(+att.split("-")[1]);
+        h.hpcc_node = hostdata[att].node?hostdata[att].node:+att.split("-")[2].split(".")[0];
         h.index = hosts.length;
 
         // to contain the historical query results
         hostResults[h.name] = {};
         hostResults[h.name].index = h.index;
         hostResults[h.name].arr = [];
-        serviceListattr.forEach(d=>hostResults[att][d]=[]);
+        serviceListattr.forEach(d => hostResults[att][d] = []);
         hosts.push(h);
     }
+}
+function main() {
+
+    inithostResults ();
 
     drawHorizontalView();
 
@@ -1257,13 +1263,13 @@ function processResult_old(r){
     obj.data.service.plugin_output = r.data.service.plugin_output;
     return obj;
 }
-function processResult_csv(r){
+function processResult_csv(r,hostname,time){
     var obj = {};
     obj.result = {};
-    obj.result.query_time = r.timespan;
+    obj.result.query_time = time;
     obj.data = {};
     obj.data.service={};
-    obj.data.service.host_name = Object.keys(r).find(e=>e!=='timespan').split('-')[0];
+    obj.data.service.host_name = hostname;
     obj.data.service.plugin_output = r;
     return obj;
 }
@@ -1306,13 +1312,14 @@ function simulateResults2(hostname,iter, s){
     let serviceIndex =  serviceList.findIndex(d=>d===s);
     newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
     if (serviceIndex === 4) {
-        if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb") {
+        if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]=== undefined  && db!=="influxdb"){
-            var simisval = handlemissingdata(hostname,iter);
-            sampleS[hostname]["arrPower_usage"][iter] = simisval;
-        }
+        }else if (sampleS[hostname]["arrPower_usage"]!== undefined)
+            if(sampleS[hostname]["arrPower_usage"][iter]=== undefined  && db!=="influxdb"&& db!=="csv"){
+                var simisval = handlemissingdata(hostname,iter);
+                sampleS[hostname]["arrPower_usage"][iter] = simisval;
+            }
         newService = sampleS[hostname]["arrPower_usage"][iter];
     }
     if (newService === undefined){
@@ -1385,8 +1392,8 @@ function plotResult(result,name) {
 
     // Process the array data ***************************************
     var r = hostResults[name];
-    var hpcc_rack = +name.split("-")[1];
-    var hpcc_node = +name.split("-")[2].split(".")[0];
+    var hpcc_rack = hostList.data.hostlist[name].rack|| (+name.split("-")[1]);
+    var hpcc_node = hostList.data.hostlist[name].node|| (+name.split("-")[2].split(".")[0]);
 
     var xStart = getRackx(hpcc_rack,hpcc_node,graphicControl.mode)+15;
 
@@ -1475,7 +1482,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
         svgStore.detailView.items.append("rect")
-            .attr("class", name)
+            .attr("class", 'compute '+name)
             .attr("x", x)
             .attr("y", y-10)
             .attr("width", node_size)
@@ -1498,7 +1505,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
 
         if ((selectedService==="Temperature" || selectedService==="Fans_speed")&&isSingle!=true)    {
             svgStore.detailView.items.append("rect")
-                .attr("class", name)
+                .attr("class",  'compute '+name)
                 .attr("x", x)
                 .attr("y", y+node_size-9)
                 .attr("width", node_size)
@@ -1537,13 +1544,13 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
 
     svgStore.detailView.items.selectAll("."+name).remove();
     svgStore.detailView.items
-        .append('clipPath').attr("class", name)
+        .append('clipPath').attr("class",  'compute '+name)
         .attr("id", "cp"+name).append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("d", area);
     svgStore.detailView.items
         .append('rect')
-        .attr("class", name)
+        .attr("class",  'compute '+name)
         .attr('width',xTimeScale(arr[arr.length-1].x)-xTimeScale(arr[0].x))
         .attr('height',yScale.range()[1]*2)
         .attr('x',arr[0].x)
@@ -1779,9 +1786,8 @@ function resetRequest(){
         hostResults[att].arr = [];
         serviceListattr.forEach(d=>hostResults[att][d]=[]);
         count++;
-
-        svg.selectAll("."+att).remove();
     }
+    svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init();
@@ -2080,6 +2086,16 @@ $( document ).ready(function() {
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        if (db==='csv'){ //reload hostlist
+            d3.json('data/hotslist_Quanah.json',function(error,data){
+                if(error) {
+                }else{
+                    hostList = data;
+                    inithostResults();
+                    systemFormat();
+                }
+            });
+        }
         setTimeout(() => {
             if (choice !== "nagios" && choice !== "influxdb") {
 //                 d3.json("data/" + choice + ".json", function (error, data) {
@@ -2146,7 +2162,9 @@ $( document ).ready(function() {
                     }else{
                         loadata1(data);
                         function loadata1(data){
-                            sampleS = data;
+                            newdatatoFormat(data);
+
+                            inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
                             realTimesetting(false,"csv");
@@ -2171,6 +2189,13 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
+        d3.json('data/hotslist_Quanah.json',function(error,data){
+            if(error) {
+            }else{
+                hostList = data;
+                inithostResults();
+            }
+        });
         graphicControl.charType =  d3.select('#chartType_control').node().value;
         graphicControl.sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;

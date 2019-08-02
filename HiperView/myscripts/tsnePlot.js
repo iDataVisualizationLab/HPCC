@@ -857,7 +857,7 @@ d3.Tsneplot = function () {
             .data(handledata(data));
         let datapointN = datapoint
             .enter().append("g")
-            .attr("class", d=>"linkLineg "+d.name)
+            .attr("class", d=>"compute linkLineg "+d.name)
             .on('mouseover',function(d){
                 d3.select(this).select('text').style('opacity',1);
             }).on('mouseout',function(d){

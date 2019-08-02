@@ -140,10 +140,27 @@ function systemFormat() {
 }
 function newdatatoFormat (data){
     serviceList = [];
+    serviceLists = [];
     serviceListattr = [];
+    hostList ={data:{hostlist:{}}};
     // FIXME detect format
-    const keys = _without(Object.keys(data[0]),'timestamp','time');
-    keys.forEach((k,i)=>{
+    const variables = _.without(Object.keys(data[0]),'timestamp','time');
+
+    let keys ={};
+    variables.forEach(k=>{
+        let split_string = k.split('-');
+        const nameh = split_string.shift();
+        hostList.data.hostlist [nameh] = {
+            rack: nameh.split('.')[2],
+            node: nameh.split('.')[3],
+            id : nameh,
+        };
+        keys[split_string.join('-')]=1;
+    });
+
+    serviceQuery["csv"]= serviceQuery["csv"]||{};
+    Object.keys(keys).forEach((k,i)=>{
+        serviceQuery["csv"][k]={}
         serviceQuery["csv"][k][k]={
             format : () =>k,
             numberOfEntries: 1};
@@ -158,7 +175,21 @@ function newdatatoFormat (data){
         thresholds.push(range);
         serviceLists.push(temp);
     });
+    serviceList_selected = serviceList;
     serviceFullList = serviceLists2serviceFullList(serviceLists);
+
+    const host_name = Object.keys(hostList.data.hostlist);
+    sampleS = {};
+    data.forEach(d=>{
+        host_name.forEach(h=> {
+            serviceListattr.forEach(attr => {
+                 if (sampleS[h]===undefined)
+                     sampleS[h] = {};
+                sampleS[h][attr] = sampleS[h][attr]||[];
+                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],h,new Date(d.timestamp)));
+            });
+        })
+    });
 }
 function getstringQueryAll_influx (ip){
     let count = 0;
