@@ -1555,7 +1555,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
 
     svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
-        .attr("class", name)
+        .attr("class",'compute ' + name)
         .attr("stroke","#000")
         .attr("stroke-width",0.2)
         .attr("d", area)
@@ -1781,6 +1781,7 @@ function resetRequest(){
         serviceListattr.forEach(d=>hostResults[att][d]=[]);
         count++;
     }
+    svg.selectAll(".compute").remove();
     svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
