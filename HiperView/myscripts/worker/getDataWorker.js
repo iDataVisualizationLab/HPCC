@@ -15,10 +15,10 @@ addEventListener('message',function ({data}){
             {
                 systemFormat();
             }
-            db = data.db;
-            processData = eval('processData_' + data.db);
+            db = data.db||'old';
+            processData = eval('processData_' + db);
             if(!data.value) {
-                if (db==='nagios_old')
+                if (db==='nagios_old'||db===undefined)
                     processData = processData_old;
             }
             if(db==='csv'){
