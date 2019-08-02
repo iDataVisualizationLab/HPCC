@@ -110,7 +110,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
         barW =8;
     var xScale = d3.scaleLinear()
         .domain([arrThresholds[0], arrThresholds[arrThresholds.length-1]]) // input
-        .range([x, x+250]); // output
+        .range([x, x+200]); // output
     var arr2 = [];
     var xStep = dif/10.;
     for (var i=arrThresholds[0]; i<arrThresholds[arrThresholds.length-1];i=i+xStep){
