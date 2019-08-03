@@ -2038,9 +2038,10 @@ $( document ).ready(function() {
             d3.json('data/hotslist_Quanah.json',function(error,data){
                 if(error) {
                 }else{
+                    firstTime = true;
                     hostList = data;
-                    inithostResults();
                     systemFormat();
+                    inithostResults();
                     MetricController.axisSchema(serviceFullList,true).update();
                     addDatasetsOptions()
                 }
@@ -2239,10 +2240,12 @@ function onSchemaUpdate(schema){
     });
     radarChartOptions.schema = serviceFullList;
     // if (graphicControl.charType === "T-sne Chart")
-    TSneplot.schema(serviceFullList);
+    TSneplot.schema(serviceFullList,firstTime);
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
-    Radarplot.schema(serviceFullList);
-    updateSummaryChartAll();
+    Radarplot.schema(serviceFullList,firstTime);
+    if (!firstTime) {
+        updateSummaryChartAll();
+    }
     // }
     if (db!=='csv')
         SaveStore();
