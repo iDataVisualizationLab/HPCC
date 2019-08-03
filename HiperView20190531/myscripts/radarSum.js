@@ -285,7 +285,7 @@ function clearclone (){
             .style("opacity", 1);
         allbold.selectAll(".radarStroke").style('pointer-events','auto');
     hosts.forEach(l=> {
-                d3.selectAll("." + l.name)
+                d3.selectAll("." + fixName2Class( l.name))
                     .classed("displayNone", false);
                     // .style("visibility", 'visible');
         });

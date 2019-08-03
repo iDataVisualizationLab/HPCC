@@ -67,7 +67,7 @@ d3.Tsneplot = function () {
             .remove();
         // ENTER
         const newdiv = dataTop.enter().append("g")
-            .attr('class',d=> 'top10_item '+fixstr(d.name));
+            .attr('class',d=> 'top10_item '+fixName2Class(fixstr(d.name)));
         newdiv
             .attr('transform', 'translate(0,' + (maxlist + 0.5) * sizebox + ")")
             .style('opacity', 0)

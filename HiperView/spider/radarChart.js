@@ -491,7 +491,7 @@ function RadarChart(id, data, options, name) {
                 //t.parentNode.appendChild(clonedNode);
             });
             let hiddenClass =  _.difference(hosts.map(d=>d.name),filterhost ).map(d=>fixName2Class(d)).join(', .');
-            if (hiddenClass!='')
+            if (hiddenClass!=='')
                 d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhost ).map(d=>fixName2Class(d)).join(', .'))
                     .classed("displayNone", true);
             // hosts.forEach(l => {
@@ -500,7 +500,7 @@ function RadarChart(id, data, options, name) {
             //             // .style("visibility", 'hidden');
             // });
             let showClass = filterhost.map(d=>fixName2Class(d)).join(', .');
-            if (showClass!='')
+            if (showClass!=='')
                 d3.selectAll("." + filterhost.map(d=>fixName2Class(d)).join(', .'))
                     .classed("displayNone", false);
                 // .style("visibility", 'hidden');
