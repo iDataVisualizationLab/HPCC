@@ -700,13 +700,13 @@ d3.Tsneplot = function () {
             .on('mouseover',function(d){
                 const list_node = d.unqinode;
                 let filterhosttemp = _.intersection(filterhost,list_node);
-                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhosttemp ).join(':not(tr), .')+':not(tr)')
+                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhosttemp ).map(d=>fixName2Class(d)).join(':not(tr), .')+':not(tr)')
                     .classed("displayNone", true);
                     d3.selectAll("." + filterhosttemp.join(', .'))
                         .classed("displayNone", false);
             }).on('mouseleave',function(d){
                 $('#search_User')[0].value =""
-                d3.selectAll("." + _.difference(filterhost,d.unqinode ).join(':not(tr), .')+':not(tr)')
+                d3.selectAll("." + _.difference(filterhost,d.unqinode ).map(d=>fixName2Class(d)).join(':not(tr), .')+':not(tr)')
                     .classed("displayNone", true);
                 d3.selectAll("." + filterhost.join(', .'))
                     .classed("displayNone", false);
@@ -857,7 +857,7 @@ d3.Tsneplot = function () {
             .data(handledata(data));
         let datapointN = datapoint
             .enter().append("g")
-            .attr("class", d=>"compute linkLineg "+d.name)
+            .attr("class", d=>"compute linkLineg "+fixName2Class(d.name))
             .on('mouseover',function(d){
                 d3.select(this).select('text').style('opacity',1);
             }).on('mouseout',function(d){
@@ -865,13 +865,13 @@ d3.Tsneplot = function () {
             });
 
         datapointN.append("clipPath")
-            .attr("id",d=>"tSNE"+d.name)
+            .attr("id",d=>"tSNE"+fixName2Class(d.name))
             .append("path")
             .attr("d", d => radarcreate(d));
         datapointN
             .append("rect")
             .style('fill', 'url(#rGradient)')
-            .attr("clip-path", d=>"url(#tSNE"+d.name+")")
+            .attr("clip-path", d=>"url(#tSNE"+fixName2Class(d.name)+")")
             .attr("x",-graphicopt.dotRadius)
             .attr("y",-graphicopt.dotRadius)
             .attr("width",graphicopt.dotRadius*2)

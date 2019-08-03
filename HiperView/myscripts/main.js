@@ -219,8 +219,8 @@ let isbusy = false, imageRequest = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
-        let range = serviceLists[i].sub[0].range;
-        if (s == serviceList[i] && serviceList[i]==='Job_load'){  // CPU_load
+        let range = serviceLists[serviceList_selected[i].index].sub[0].range;
+        if (s == serviceList_selected[i].text && serviceList_selected[i].text==='Job_load'){  // CPU_load
             dif = (range[1]-range[0])/4;
             mid = range[0]+(range[1]-range[0])/2;
             left=0;
@@ -234,7 +234,7 @@ function setColorsAndThresholds(s) {
                 .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
-        else if (s == serviceList[i]  && serviceList[i]==='Memory_usage'){  // Memory_usage
+        else if (s == serviceList_selected[i].text && serviceList_selected[i].text==='Memory_usage'){  // Memory_usage
             dif = (range[1]-range[0])/4;
             mid = range[0]+(range[1]-range[0])/2;
             left=0;
@@ -248,7 +248,7 @@ function setColorsAndThresholds(s) {
                 .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
-        else if (s == serviceList[i]){
+        else if (s == serviceList_selected[i].text){
             dif = (range[1]-range[0])/4;
             mid = range[0]+(range[1]-range[0])/2;
             left = range[0]-dif;
@@ -1398,7 +1398,7 @@ function initTsneView() {
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     svgStore.detailView.g.selectAll(".RackSummary").remove();
-    svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items.selectAll("."+fixName2Class(name)).remove();
     if (isSingle)
         y= y+10;
 
@@ -1406,7 +1406,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
         // var x = xTimeScale(i);
         // if (arr.length>1)
         //     x = xMin+ i*(xMax-xMin)/(arr.length);
-    let newg = svgStore.detailView.items.selectAll("g."+name).data([{name:name,val:arr}]);
+    let newg = svgStore.detailView.items.selectAll("g."+fixName2Class(name)).data([{name:name,val:arr}]);
     newg.exit().remove();
     newg = newg.enter().append('g')
         .merge(newg)
@@ -1753,9 +1753,9 @@ function addDatasetsOptions() {
     nselect.append('h6').attr('class','title');
     nselect.on("click",loadNewData);
 
-    select = nselect.merge(select).attr('value',d=>d);
+    select = nselect.merge(select).attr('value',d=>d.text);
     select.select('img').attr('src',d=>"images/"+d+".png");
-    select.select('h6').text(d=>d);
+    select.select('h6').text(d=>d.text);
 
     document.getElementById('datasetsSelect').value = serviceList.find(d=>d===initialService)||serviceList[0];  //************************************************
     loadNewData(document.getElementById('datasetsSelect').value)
@@ -1897,9 +1897,9 @@ function step (iteration, count){
                 var name = hosts[count].name;
                 hostResults[name].arr.push(result);
                 // console.log(hosts[count].name+" "+hostResults[name]);
-                serviceList_selected.forEach ((s,index)=>{
-                    var result = simulateResults2(hosts[count].name, iteration, serviceList[index]);
-                    hostResults[name][serviceListattr[index]].push(result);
+                serviceList_selected.forEach ((s)=>{
+                    var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                    hostResults[name][serviceListattr[s.index]].push(result);
                 });
 
                 plotResult(result, name);
