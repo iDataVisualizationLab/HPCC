@@ -1754,7 +1754,7 @@ function addDatasetsOptions() {
     nselect.on("click",loadNewData);
 
     select = nselect.merge(select).attr('value',d=>d.text);
-    select.select('img').attr('src',d=>"images/"+d+".png");
+    select.select('img').attr('src',d=>"images/"+d.text+".png");
     select.select('h6').text(d=>d.text);
 
     document.getElementById('datasetsSelect').value = serviceList.find(d=>d===initialService)||serviceList[0];  //************************************************
