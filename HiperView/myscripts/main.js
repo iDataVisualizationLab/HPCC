@@ -1751,7 +1751,7 @@ function addDatasetsOptions() {
     nselect.append('img')
         .attr('class',"circle");
     nselect.append('h6').attr('class','title');
-    nselect.on("click",loadNewData);
+    nselect.on("click",function(d){loadNewData(d.text)});
 
     select = nselect.merge(select).attr('value',d=>d.text);
     select.select('img').attr('src',d=>"images/"+d.text+".png");
