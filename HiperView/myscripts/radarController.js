@@ -264,8 +264,6 @@ let radarController = function () {
                         className:'angle',
                         "render": function ( d, type, row, meta ) {
                             if (type=='display') {
-                                console.log(d)
-                                console.log('<input type="number" value=' + toDegrees(d.angle()).toFixed(0) + '></input>')
                                 return '<input type="number" value=' + toDegrees(d.angle()).toFixed(0) + '></input>';
                             }
                             else
@@ -292,9 +290,17 @@ let radarController = function () {
                 // ]
             });
 
-            dataTable.on( 'draw', function () { // add event when redraw
+            dataTable.on( 'init', function () { // add event when redraw
+                console.log('here')
                 table.selectAll('.angle').on('input', function (d) {
                     updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === d.text).node().parentElement, toRadian(this.value * 1));
+                    onChangeValueFunc(radarcomp);
+                });
+            } );
+            dataTable.on( 'draw', function () { // add event when redraw
+                table.selectAll('.angle').on('input', function (d) {
+                    console.log(this.value)
+                    updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
                     onChangeValueFunc(radarcomp);
                 });
             } );
@@ -491,7 +497,7 @@ let radarController = function () {
             updateAngle(this.parentNode,dAngle);
             // console.log(datat[i].angle())
             // $(tablediv.select("table").node()).dataTable().fnUpdate(datat[i],i,undefined,false);
-            dataTable.row(d.order).invalidate() .draw();
+            dataTable.row(d.order).invalidate().draw(false);
             // tablediv.selectAll('.angle').filter(e=>e.text===d.data.text).select('input').attr('value',toDegrees(d.angle()).toFixed(0));
         }
         function onDragAxisEnded (d){
