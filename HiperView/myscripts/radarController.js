@@ -283,26 +283,32 @@ let radarController = function () {
                         }
                     },
                 ],
+                rowCallback: function (row, data) {
+                    if ( !data.data.enable) {
+                        $(row).addClass('fieldDisable');
+                    }else{
+                        $(row).removeClass('fieldDisable');
+                    }
+                }
                 // "columns": [
                 //     null,
                 //     {"orderDataType": "dom-text-numeric"},
                 //     {"orderDataType": "dom-disablebtn"},
                 // ]
             });
-
-            dataTable.on( 'init', function () { // add event when redraw
-                console.log('here')
-                table.selectAll('.angle').on('input', function (d) {
-                    updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === d.text).node().parentElement, toRadian(this.value * 1));
-                    onChangeValueFunc(radarcomp);
-                });
-            } );
+            dataTable.draw();
             dataTable.on( 'draw', function () { // add event when redraw
                 table.selectAll('.angle').on('input', function (d) {
-                    console.log(this.value)
                     updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
                     onChangeValueFunc(radarcomp);
                 });
+                table.selectAll('.btngroup .disable-field')
+                    .on('click', function() {
+                            d =  dataTable.cell(this.parentNode.parentElement).data();
+                            d.data.enable = !d.data.enable;
+                            g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
+                            onChangeValueFunc(radarcomp);
+                        })
             } );
 
         }
