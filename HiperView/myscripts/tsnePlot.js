@@ -174,7 +174,7 @@ d3.Tsneplot = function () {
             }).on('mouseleave',function(d){
                 const name = this.parentNode.parentNode.__data__.name;
                 svg.selectAll(".linkLineg").attr('opacity',1).style("filter", null);
-                svg.select(".linkLineg."+fixName2Class(fixstr(name))
+                svg.select(".linkLineg."+fixName2Class(fixstr(name)))
                     .dispatch('mouseout');
                 // console.log(this.parentNode.parentNode.__data__.name)
             })
