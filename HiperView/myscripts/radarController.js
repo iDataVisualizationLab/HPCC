@@ -523,15 +523,17 @@ let radarController = function () {
 
 
 
-        let rows = tablediv.select('tbody').selectAll('tr')
-            .data(radarcomp.axisList,d=>d.text||d.data.text);
-        rows.each(function(){
-                d3.select(this).datum(d=>d.data)});
-        rows.select('td.text').text(d=>d.text);
-        rows.select('td.angle input')
-            .attr('value',d=>toDegrees(d.angle).toFixed(0));
-        rows.select('td a.disable-field').datum(d=>d);
-        rows.classed('fieldDisable',t=>!t.enable);
+        // let rows = tablediv.select('tbody').selectAll('tr')
+        //     .data(radarcomp.axisList,d=>d.text||d.data.text);
+        // rows.each(function(){
+        //         d3.select(this).datum(d=>d.data)});
+        // rows.select('td.text').text(d=>d.text);
+        // rows.select('td.angle input')
+        //     .attr('value',d=>toDegrees(d.angle).toFixed(0));
+        // rows.select('td a.disable-field').datum(d=>d);
+        // rows.classed('fieldDisable',t=>!t.enable);
+        dataTable.clear();
+        dataTable.rows.add(radarcomp.axisList).draw();
         onChangeValueFunc(radarcomp);
     };
     radarController.drawSummary = function(hindex){
