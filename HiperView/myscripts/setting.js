@@ -146,7 +146,7 @@ function newdatatoFormat (data){
     hostList ={data:{hostlist:{}}};
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
-
+    data.forEach(d=>variables.forEach(k=>d[k] = +d[k])) // format number
     let keys ={};
     variables.forEach(k=>{
         let split_string = k.split('-');
@@ -172,8 +172,8 @@ function newdatatoFormat (data){
         };
         serviceList.push(k);
         serviceListattr.push(k);
-        const range = d3.extent(data,d=>d[k]);
-        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*Math.PI/(keys.length-1),"range":range}]};
+        const range = d3.extent(data,d=>d[variables[i]]);
+        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(variables.length-1),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);
     });
@@ -249,7 +249,7 @@ function processData_csv(result, serviceName) {
             {
                 const subob = val;
                 if(serviceAttribute[s].type==='number')
-                    return subob;
+                    return [+subob];
                 else if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
                         const localVal = subob[serviceAttribute[s].format(d + 1)]||(serviceAttribute[s].format2&&subob[serviceAttribute[s].format2(d + 1)]);

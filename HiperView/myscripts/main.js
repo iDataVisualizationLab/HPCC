@@ -998,31 +998,34 @@ function request(){
             }
         };
         if (requeststatus) {
-            var oldrack = hosts[countbuffer].hpcc_rack;
-            if (isRealtime) {
-                step(iteration, countbuffer).then((ri) => {
-                    midlehandle(ri);
-                    if (!recordonly)
-                        drawprocess();
-                    else {
-                        countrecord = countrecord +1;
-                        if (countbuffer>= (hosts.length)){
-                            console.log("done");
-                            interval2.stop();
+            try {
+                var oldrack = hosts[countbuffer].hpcc_rack;
+                if (isRealtime) {
+                    step(iteration, countbuffer).then((ri) => {
+                        midlehandle(ri);
+                        if (!recordonly)
+                            drawprocess();
+                        else {
+                            countrecord = countrecord + 1;
+                            if (countbuffer >= (hosts.length)) {
+                                console.log("done");
+                                interval2.stop();
+                            }
                         }
-                    }
-                });
-                countbuffer++;
-            }
-            else
-            {
-                do {
-                    let ri = step(iteration, countbuffer);
-                    midlehandle(ri);
+                    });
                     countbuffer++;
-                }while ((countbuffer < hosts.length) && (speedup===2||(hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
-                speedup = 0;
-                drawprocess();
+                }
+                else {
+                    do {
+                        let ri = step(iteration, countbuffer);
+                        midlehandle(ri);
+                        countbuffer++;
+                    } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
+                    speedup = 0;
+                    drawprocess();
+                }
+            }catch(e){
+
             }
             if (countbuffer>= (hosts.length))
                 requeststatus = false; //stop request
@@ -2041,7 +2044,7 @@ $( document ).ready(function() {
                     hostList = data;
                     inithostResults();
                     systemFormat();
-                    MetricController.axisSchema(serviceFullList).update();
+                    MetricController.axisSchema(serviceFullList,true).update();
                 }
             });
         }
@@ -2116,7 +2119,7 @@ $( document ).ready(function() {
                             inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
-                            MetricController.axisSchema(serviceFullList).update();
+                            MetricController.axisSchema(serviceFullList,true).update();
                             realTimesetting(false,"csv",true,data);
                             d3.select(".currentDate")
                                 .text("" + new Date(data[0].timestamp).toDateString());
