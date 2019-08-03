@@ -304,8 +304,15 @@ let radarController = function () {
                 });
                 table.selectAll('.btngroup .disable-field')
                     .on('click', function() {
-                            d =  dataTable.cell(this.parentNode.parentElement).data();
+                            c =  dataTable.cell(this.parentNode.parentElement);
+                            d = c.data();
+                            r =  dataTable.row(c.index().row).node();
                             d.data.enable = !d.data.enable;
+                            if ( !d.data.enable) {
+                                $(r).addClass('fieldDisable');
+                            }else{
+                                $(r).removeClass('fieldDisable');
+                            }
                             g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
                             onChangeValueFunc(radarcomp);
                         })
