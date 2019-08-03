@@ -296,28 +296,31 @@ let radarController = function () {
                 //     {"orderDataType": "dom-disablebtn"},
                 // ]
             });
-            dataTable.draw();
+            eventTable();
+            dataTable.rows().draw();
             dataTable.on( 'draw', function () { // add event when redraw
+                eventTable();
+            } );
+            function eventTable(){
                 table.selectAll('.angle').on('input', function (d) {
                     updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
                     onChangeValueFunc(radarcomp);
                 });
                 table.selectAll('.btngroup .disable-field')
                     .on('click', function() {
-                            c =  dataTable.cell(this.parentNode.parentElement);
-                            d = c.data();
-                            r =  dataTable.row(c.index().row).node();
-                            d.data.enable = !d.data.enable;
-                            if ( !d.data.enable) {
-                                $(r).addClass('fieldDisable');
-                            }else{
-                                $(r).removeClass('fieldDisable');
-                            }
-                            g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
-                            onChangeValueFunc(radarcomp);
-                        })
-            } );
-
+                        c =  dataTable.cell(this.parentNode.parentElement);
+                        d = c.data();
+                        r =  dataTable.row(c.index().row).node();
+                        d.data.enable = !d.data.enable;
+                        if ( !d.data.enable) {
+                            $(r).addClass('fieldDisable');
+                        }else{
+                            $(r).removeClass('fieldDisable');
+                        }
+                        g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
+                        onChangeValueFunc(radarcomp);
+                    })
+            }
         }
     }
     let dataTable;
