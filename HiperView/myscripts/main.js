@@ -219,48 +219,50 @@ let isbusy = false, imageRequest = false;
 
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
-        if (s == serviceList[i] && i==1){  // CPU_load
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        let range = serviceLists[i].sub[0].range;
+        if (s == serviceList[i] && serviceList[i]==='Job_load'){  // CPU_load
+            dif = (range[1]-range[0])/4;
+            mid = range[0]+(range[1]-range[0])/2;
             left=0;
-            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 10, thresholds[i][1], thresholds[i][1]];
+            arrThresholds = [left,range[0], 0, range[0]+2*dif, 10, range[1], range[1]];
             color = d3.scaleLinear()
                 .domain(arrThresholds)
                 .range(arrColor)
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .domain([left,range[0],range[0]+dif, range[0]+2*dif, range[0]+3*dif, range[1], range[1]+dif])
                 .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
-        else if (s == serviceList[i] && i==2){  // Memory_usage
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
+        else if (s == serviceList[i]  && serviceList[i]==='Memory_usage'){  // Memory_usage
+            dif = (range[1]-range[0])/4;
+            mid = range[0]+(range[1]-range[0])/2;
             left=0;
-            arrThresholds = [left,thresholds[i][0], 0, thresholds[i][0]+2*dif, 98, thresholds[i][1], thresholds[i][1]];
+            arrThresholds = [left,range[0], 0, range[0]+2*dif, 98, range[1], range[1]];
             color = d3.scaleLinear()
                 .domain(arrThresholds)
                 .range(arrColor)
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .domain([left,range[0],range[0]+dif, range[0]+2*dif, range[0]+3*dif, range[1], range[1]+dif])
                 .range([1,1,0.3,0.06,0.3,1,1]);
 
         }
         else if (s == serviceList[i]){
-            dif = (thresholds[i][1]-thresholds[i][0])/4;
-            mid = thresholds[i][0]+(thresholds[i][1]-thresholds[i][0])/2;
-            left = thresholds[i][0]-dif;
+            dif = (range[1]-range[0])/4;
+            mid = range[0]+(range[1]-range[0])/2;
+            left = range[0]-dif;
             if (left<0 && i!=0) // Temperature can be less than 0
                 left=0;
-            arrThresholds = [left,thresholds[i][0], thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif];
+            arrThresholds = [left,range[0], range[0]+dif, range[0]+2*dif, range[0]+3*dif, range[1], range[1]+dif];
             color = d3.scaleLinear()
                 .domain(arrThresholds)
                 .range(arrColor)
                 .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
             opa = d3.scaleLinear()
-                .domain([left,thresholds[i][0],thresholds[i][0]+dif, thresholds[i][0]+2*dif, thresholds[i][0]+3*dif, thresholds[i][1], thresholds[i][1]+dif])
+                .domain([left,range[0],range[0]+dif, range[0]+2*dif, range[0]+3*dif, range[1], range[1]+dif])
                 .range([1,1,0.3,0.06,0.3,1,1]);
+            break;
         }
     }
 }
@@ -883,6 +885,7 @@ function request(){
     currentMiliseconds = new Date().getTime();  // For simulation
     query_time=currentMiliseconds;
     lastIndex = 0;
+    currentlastIndex = 0;
     var countarr = [];
     var requeststatus =true;
     var countrecord = 0;
@@ -909,6 +912,7 @@ function request(){
 
                 // cal to plot
                 bin.data([]);
+                currentlastIndex = iteration+iterationstep-1;
                 drawsummary();
                 if (graphicControl.mode===layout.HORIZONTAL) {
                     if (graphicControl.charType === "T-sne Chart")
@@ -924,6 +928,7 @@ function request(){
                 haveMiddle = false;
                 iteration += iterationstep;
             }
+            currentlastIndex = iteration;
             Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
             xTimeSummaryScaleStep = d3.scaleLinear()
                 .domain([0, hosts.length - 1]) // input
@@ -1052,7 +1057,7 @@ function drawsummary(initIndex){
     var arr = [];
     var xx;
     if (initIndex===undefined){
-        currentlastIndex = hostResults[hosts[0].name].arr.length -1;
+        // currentlastIndex = hostResults[hosts[0].name].arr.length -1;
         lastIndex = currentlastIndex;
         query_time = hostResults[hosts[hosts.length-1].name].arr[lastIndex].result.query_time;
         xx = xTimeSummaryScale(scaleThreshold(lastIndex));
@@ -1095,21 +1100,6 @@ function drawsummary(initIndex){
             case "Radar":
                 for (var h = 0; h < hosts.length; h++) {
                     var name = hosts[h].name;
-                    // var r = hostResults[name];
-
-                    // if (lastIndex >= 0) {   // has some data
-                    //     var arrServices = [];
-                    //     serviceList_selected.forEach((ser, indx) => {
-                    //         var obj = {};
-                    //         let dataextract = r[serviceListattr[indx]][lastIndex];
-                    //         if (dataextract)
-                    //             dataextract = dataextract.data.service.plugin_output;
-                    //         var a = processData(dataextract, ser);
-                    //         obj.a = a;
-                    //         arrServices.push(obj);
-                    //
-                    //     })
-                    // }
                     arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
                     arrServices.name = name;
                     arr.push(arrServices);
@@ -1149,8 +1139,8 @@ function drawsummary(initIndex){
 function drawsummarypoint(harr){
     var arr = [];
     var xx;
-    lastIndex = hostResults[hosts[harr[0]].name].arrTemperature.length -1;
-    query_time = hostResults[hosts[harr[0]].name].arrTemperature[lastIndex].result.query_time;
+    lastIndex = currentlastIndex;
+    query_time = hostResults[hosts[harr[0]].name][serviceListattr.find(k=>hostResults[hosts[harr[0]].name][k][currentlastIndex].result.query_time)][currentlastIndex].result.query_time;
     //xx = xTimeSummaryScale(query_time);
     //updateTimeText();
 
@@ -1477,8 +1467,9 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     /// drawSummaryAreaChart(hpcc_rack, xStart);
 }
 function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
+    let range = serviceLists[serindex].sub[0].range;
     var yScale = d3.scaleLinear()
-        .domain([(thresholds[serindex][1]-thresholds[serindex][0])/2,thresholds[serindex][1]]) //  baseTemperature=60
+        .domain([(range[1]-range[0])/2,range[1]]) //  baseTemperature=60
         .range([0, node_size*2]); // output
 
     var area = d3.area()
@@ -1488,26 +1479,26 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
         .y1(function(d) { return y-yScale(d.temp1); })
         .curve(d3.curveCatmullRom);
 
-    svgStore.detailView.items.selectAll("."+name).remove();
+    svgStore.detailView.items.selectAll("."+fixName2Class(name)).remove();
     svgStore.detailView.items
-        .append('clipPath').attr("class",  'compute '+name)
-        .attr("id", "cp"+name).append("path")
+        .append('clipPath').attr("class",  'compute '+fixName2Class(name))
+        .attr("id", "cp"+fixName2Class(name)).append("path")
         .datum(arr) // 10. Binds data to the line
         .attr("d", area);
     svgStore.detailView.items
         .append('rect')
-        .attr("class",  'compute '+name)
+        .attr("class",  'compute '+fixName2Class(name))
         .attr('width',xTimeScale(arr[arr.length-1].x)-xTimeScale(arr[0].x))
         .attr('height',yScale.range()[1]*2)
         .attr('x',arr[0].x)
         .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
-        .attr("clip-path","url(#cp"+name+")").on("mouseover", function (d) {
+        .attr("clip-path","url(#cp"+fixName2Class(name)+")").on("mouseover", function (d) {
         mouseoverNode ({name:name});
     });
 
     svgStore.detailView.items.append("path")
         .datum(arr) // 10. Binds data to the line
-        .attr("class",'compute ' + name)
+        .attr("class",'compute ' + fixName2Class(name))
         .attr("stroke","#000")
         .attr("stroke-width",0.2)
         .attr("d", area)
@@ -1750,19 +1741,25 @@ function loadData(){
 function addDatasetsOptions() {
     let select= d3.select("#datasetsSelect")
         .selectAll('li')
-        .data(serviceList_selected)
+        .data(serviceList_selected);
+    select.exit().remove();
+    let nselect = select
         .enter()
         .append('li')
-        .attr('class','collection-item avatar valign-wrapper')
-        .attr('value',d=>d);
-    select.append('img')
-        .attr('class',"circle")
-        .attr('src',d=>"images/"+d+".png");
-    select.append('h6').attr('class','title').text(d=>d);
+        .attr('class','collection-item avatar valign-wrapper');
 
-    select.on("click",loadNewData);
-    document.getElementById('datasetsSelect').value = initialService;  //************************************************
-    selectedService = document.getElementById("datasetsSelect").value;
+    nselect.append('img')
+        .attr('class',"circle");
+    nselect.append('h6').attr('class','title');
+    nselect.on("click",loadNewData);
+
+    select = nselect.merge(select).attr('value',d=>d);
+    select.select('img').attr('src',d=>"images/"+d+".png");
+    select.select('h6').text(d=>d);
+
+    document.getElementById('datasetsSelect').value = serviceList.find(d=>d===initialService)||serviceList[0];  //************************************************
+    loadNewData(document.getElementById('datasetsSelect').value)
+    // selectedService = document.getElementById("datasetsSelect").value;
     const trig = d3.select("#datasetsSelectTrigger");
     trig.select('img').attr('src',"images/"+selectedService+".png");
     trig.select('span').text(selectedService);
@@ -2045,6 +2042,7 @@ $( document ).ready(function() {
                     inithostResults();
                     systemFormat();
                     MetricController.axisSchema(serviceFullList,true).update();
+                    addDatasetsOptions()
                 }
             });
         }
@@ -2119,6 +2117,7 @@ $( document ).ready(function() {
                             inithostResults();
                             processResult = processResult_csv;
                             db = "csv";
+                            addDatasetsOptions()
                             MetricController.axisSchema(serviceFullList,true).update();
                             realTimesetting(false,"csv",true,data);
                             d3.select(".currentDate")

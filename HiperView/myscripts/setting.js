@@ -188,7 +188,7 @@ function newdatatoFormat (data){
                  if (sampleS[h]===undefined)
                      sampleS[h] = {};
                 sampleS[h][attr] = sampleS[h][attr]||[];
-                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],h,new Date(d.timestamp)));
+                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],h,(new Date(d.timestamp)).getTime()));
             });
         })
     });
@@ -245,7 +245,7 @@ function processData_csv(result, serviceName) {
     if (result!==undefined) {
         let val = result;
         return d3.merge(query_return.map((s, i) => {
-            if (val[i]!=undefined) // no error
+            if (val[i]!=undefined||(val!=undefined&&i===0)) // no error
             {
                 const subob = val;
                 if(serviceAttribute[s].type==='number')
@@ -480,7 +480,7 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict) {
                 a = predict(r[serviceListattr[indx]], ser, isPredict===undefined?false:isPredict);
             }
             var scale = d3.scaleLinear()
-                .domain([thresholds[indx][0], thresholds[indx][1]])
+                .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
             a = a.map(d => scale(d) || 0.5);
             switch (indx) {

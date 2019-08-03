@@ -57,52 +57,73 @@ d3.radar = function () {
             decrementB:0,
         };
         // scag = scagnosticsnd(handledata(index), scagOptions);
-        scag = scagnosticsnd(dataCalculate.map(d=>{
-            var dd = d.map(k=>k.value);
-            dd.data = d.name;
-            return dd;}), scagOptions);
-        console.log('Outlying detect: bin='+scag.bins.length);
-        console.log(scag.outlyingPoints.map(d=>d.data));
-        console.log(scag.outlyingBins);
+        console.log(dataCalculate)
         let outlyingPoints = [];
-        dataSpider3 = dataSpider3.filter(d=> {
-            let temp2 = scag.outlyingPoints.filter(e=>e.data===d.name);
-            let temp = JSON.parse(JSON.stringify(d));
-            if (temp2.length) {
-                let tempscaleval = [temp2[0]];
-                tempscaleval.val =temp2[0];
-                temp.indexSamp = d.indexSamp;
-                temp.name = d.name;
-                temp.bin ={val: [d.map(k=>k.value)],
-                    name:[temp2[0].data],
-                    scaledval: tempscaleval,
-                    distancefunc: (e)=>0,
-                    distance: 0};
-                outlyingPoints.push(temp);
-                temp.type = "outlying";
-                return 0;
-            }
-            return 1;
-        });
-        //TESTING ZONE
-        bin.data(dataSpider3.map(d=>{
-            var dd = d.map(k=>k.value);
-            dd.data = d.name;
-            return dd;}))
-            .calculate();
-        var keys = dataSpider3[0].map(d=>d.axis);
-        dataSpider3.length = 0;
-        console.log("numBins: "+bin.bins.length);
-        dataSpider3 = bin.bins.map(d=>
-        {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
-            temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
-                name:d.map(f=>f.data),
-                scaledval: d,
-                distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
-                distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
-            return temp;});
-        outlyingPoints.forEach(o=> dataSpider3.push(o));
-        console.log('current group + outlying: '+dataSpider3.length);
+        try {
+            scag = scagnosticsnd(dataCalculate.map(d => {
+                var dd = d.map(k => k.value);
+                dd.data = d.name;
+                return dd;
+            }), scagOptions);
+            console.log('Outlying detect: bin=' + scag.bins.length);
+            console.log(scag.outlyingPoints.map(d => d.data));
+            console.log(scag.outlyingBins);
+            dataSpider3 = dataSpider3.filter(d => {
+                let temp2 = scag.outlyingPoints.filter(e => e.data === d.name);
+                let temp = JSON.parse(JSON.stringify(d));
+                if (temp2.length) {
+                    let tempscaleval = [temp2[0]];
+                    tempscaleval.val = temp2[0];
+                    temp.indexSamp = d.indexSamp;
+                    temp.name = d.name;
+                    temp.bin = {
+                        val: [d.map(k => k.value)],
+                        name: [temp2[0].data],
+                        scaledval: tempscaleval,
+                        distancefunc: (e) => 0,
+                        distance: 0
+                    };
+                    temp.type = "outlying";
+                    outlyingPoints.push(temp);
+                    return 0;
+                }
+                return 1;
+            });
+            bin.minNumOfBins(4);
+        }catch(e){
+            console.log('Not enough data for binning');
+            bin.minNumOfBins(1);
+        }
+            //TESTING ZONE
+            bin.data(dataSpider3.map(d => {
+                var dd = d.map(k => k.value);
+                dd.data = d.name;
+                return dd;
+            }))
+                .calculate();
+            var keys = dataSpider3[0].map(d => d.axis);
+            dataSpider3.length = 0;
+            console.log("numBins: " + bin.bins.length);
+            dataSpider3 = bin.bins.map(d => {
+                var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
+                    return {axis: keys[i], value: e}
+                });
+                temp.bin = {
+                    val: bin.normalizedFun.scaleBackPoints(d),
+                    name: d.map(f => f.data),
+                    scaledval: d,
+                    distancefunc: (e) => d3.max(e.map(function (p) {
+                        return distance(e[0], p)
+                    })),
+                    distance: d3.max(d.map(function (p) {
+                        return distance(d.val, p)
+                    }))
+                };
+                return temp;
+            });
+            outlyingPoints.forEach(o => dataSpider3.push(o));
+            console.log('current group + outlying: ' + dataSpider3.length);
+
         radarChartsumopt.levels = levelsR;
         radarChartsumopt.bin = true;
         radarChartsumopt.gradient = false;

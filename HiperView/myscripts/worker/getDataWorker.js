@@ -16,7 +16,6 @@ addEventListener('message',function ({data}){
                 hostList = data.hostList;
                 inithostResults(true);
             }
-            console.log(hosts)
             db = data.db;
             console.log(data)
             if(data.db==='csv'){
