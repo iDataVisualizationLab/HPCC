@@ -61,7 +61,7 @@ function getsummaryservice(data){
         d=d.filter(e=>e!=undefined).sort((a,b)=>a-b);
         let r;
         if (d.length){
-            h.domain(d3.extent(d));
+
             kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
             let sumstat = kde(d);
             r = {
