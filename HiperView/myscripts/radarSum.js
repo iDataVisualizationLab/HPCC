@@ -57,7 +57,6 @@ d3.radar = function () {
             decrementB:0,
         };
         // scag = scagnosticsnd(handledata(index), scagOptions);
-        console.log(dataCalculate)
         let outlyingPoints = [];
         try {
             scag = scagnosticsnd(dataCalculate.map(d => {

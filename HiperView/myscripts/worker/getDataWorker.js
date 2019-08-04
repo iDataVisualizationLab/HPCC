@@ -3,7 +3,7 @@ let undefinedValue,
 globalTrend=false,
 hosts,db;
 let histodram = {
-    resolution:50,
+    resolution:20,
 };
 let h = d3.scaleLinear();
 addEventListener('message',function ({data}){
@@ -62,13 +62,24 @@ function getsummaryservice(data){
         let r;
         if (d.length){
 
-            kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
-            let sumstat = kde(d);
+            // kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
+            // let sumstat = kde(d);
+            var x = d3.scaleLinear()
+                .domain(d3.extent(d));
+            var histogram = d3.histogram()
+                .domain(x.domain())
+                .thresholds(x.ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                .value(d => d);
+            let hisdata = histogram(d);
+            // let y = d3.scaleLinear()
+            //     .domain([0,d3.max(hisdata,d=>(d||[]).length)]);
+
+            let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
             r = {
                 axis: serviceFull_selected[i],
-                q1: ss.quantile(d,0.25) ,
-                q3: ss.quantile(d,0.75),
-                median: ss.median(d) ,
+                q1: ss.quantileSorted(d,0.25) ,
+                q3: ss.quantileSorted(d,0.75),
+                median: ss.medianSorted(d) ,
                 // outlier: ,
                 arr: sumstat};
             if (d.length>4)
