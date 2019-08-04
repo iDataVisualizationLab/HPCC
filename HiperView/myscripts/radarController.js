@@ -271,7 +271,7 @@ let radarController = function () {
                         className:'summary_chart',
                         "render": function ( d, type, row, meta ) {
                             if (type=='display') {
-                                return '<svg class="s_chart" width="100" height="50"></svg>';
+                                return '<svg class="s_chart" width="100" height="25"></svg>';
                             }
                             return 0;
                         }
@@ -323,6 +323,7 @@ let radarController = function () {
 
         }
     }
+    let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:25,opt:{dataformated:true}});
     function eventTable(){
         tablediv.select("table").selectAll('td.angle').on('input', function (d) {
             updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
@@ -342,14 +343,13 @@ let radarController = function () {
                 g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
                 onChangeValueFunc(radarcomp);
             });
-        let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:50,opt:{dataformated:true}});
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
             sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
 
     }
     function updateSummaryData (dSum){
-        radarcomp.axisList.forEach(d=>d.summary = dSum[d.data.text]);
+        radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
         eventTable()
     }
     let dataTable;

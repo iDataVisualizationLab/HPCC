@@ -240,10 +240,12 @@ d3.viiolinChart = function () {
         xNum.range([0, graphicopt.direction === 'h' ? graphicopt.heightG() : graphicopt.widthG()]);
         let sumstat;
         if (graphicopt.opt.dataformated){
-            if (data[0].arr.length)
-                h.domain(d3.extent(data[0].arr,d=>d[0]));
-            else
-                h.domain([0,1]);
+            // if (data[0].arr.length)
+            //     h.domain(d3.extent(data[0].arr, d => d[0]));
+            // else
+            //     h.domain([0,1]);
+            h.domain([0,1]);
+
             sumstat = data;
         }else {
             h.domain(d3.extent(_.flatten(data)));
