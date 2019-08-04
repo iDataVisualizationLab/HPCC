@@ -184,6 +184,13 @@ let radarController = function () {
                 filter: axiselement.filter!==undefined?axiselement.filter:[], //filter for axis
                 angle: axiselement.angle!==undefined?function () {return axiselement.angle}:getangle,
                 order: axiselement.order!==undefined? axiselement.order: index,
+                summary:{
+                    axis: axis,
+                    q1: undefined ,
+                    q3: undefined,
+                    median: undefined ,
+                    outlier: [],
+                    arr: []}
             };
             radarcomp.axis[axis].data = axiselement;
             radarcomp.axisList[index] = radarcomp.axis[axis];
@@ -243,7 +250,7 @@ let radarController = function () {
 
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
-                "order": [[2, "desc"], [1, "asc"]],
+                "order": [[3, "desc"], [2, "asc"]],
                 "columnDefs": [
                     {   targets: 0,
                         title: "Service name",
@@ -258,6 +265,18 @@ let radarController = function () {
                         }
                     },
                     {   targets: 1,
+                        title: 'Summary',
+                        orderable: false,
+                        "data": null,
+                        className:'summary_chart',
+                        "render": function ( d, type, row, meta ) {
+                            if (type=='display') {
+                                return '<g class="s_chart"></g>';
+                            }
+                            return 0;
+                        }
+                    },
+                    {   targets: 2,
                         title: 'Angle ( ' + "\u00B0 " + ')',
                         orderable: true,
                         "data": null,
@@ -270,7 +289,7 @@ let radarController = function () {
                                 return d.angle();
                         }
                     },
-                    {   targets: 2,
+                    {   targets: 3,
                         title: '',
                         orderable: true,
                         "data": null,
@@ -301,27 +320,38 @@ let radarController = function () {
             dataTable.on( 'draw', function () { // add event when redraw
                 eventTable();
             } );
-            function eventTable(){
-                table.selectAll('.angle').on('input', function (d) {
-                    updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
-                    onChangeValueFunc(radarcomp);
-                });
-                table.selectAll('.btngroup .disable-field')
-                    .on('click', function() {
-                        c =  dataTable.cell(this.parentNode.parentElement);
-                        d = c.data();
-                        r =  dataTable.row(c.index().row).node();
-                        d.data.enable = !d.data.enable;
-                        if ( !d.data.enable) {
-                            $(r).addClass('fieldDisable');
-                        }else{
-                            $(r).removeClass('fieldDisable');
-                        }
-                        g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
-                        onChangeValueFunc(radarcomp);
-                    })
-            }
+
         }
+    }
+    function eventTable(){
+        tablediv.select("table").selectAll('td.angle').on('input', function (d) {
+            updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
+            onChangeValueFunc(radarcomp);
+        });
+        tablediv.select("table").selectAll('td.btngroup .disable-field')
+            .on('click', function() {
+                c =  dataTable.cell(this.parentNode.parentElement);
+                d = c.data();
+                r =  dataTable.row(c.index().row).node();
+                d.data.enable = !d.data.enable;
+                if ( !d.data.enable) {
+                    $(r).addClass('fieldDisable');
+                }else{
+                    $(r).removeClass('fieldDisable');
+                }
+                g.selectAll('.axis').filter(t => t.data.text === d.data.text).classed('disable', t => !t.data.enable);
+                onChangeValueFunc(radarcomp);
+            });
+        let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:50,opt:{dataformated:true}});
+        tablediv.select("table").selectAll('td.summary_chart g.s_chart').each(function(d){
+            let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
+            sg.call(function(selection){
+            console.log(sg.datum().summary); return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
+
+    }
+    function updateSummaryData (dSum){
+        radarcomp.axisList.forEach(d=>d.summary = dSum[d.data.text]);
+        eventTable()
     }
     let dataTable;
     radarController.init = function ()
@@ -747,6 +777,10 @@ let radarController = function () {
 
     radarController.data = function (_) {
         return arguments.length ? (arr = _, radarController) : arr;
+    };
+
+    radarController.datasummary = function (_) {
+        return arguments.length ? (updateSummaryData(_), radarController) : arr;
     };
 
     radarController.schema = function () {

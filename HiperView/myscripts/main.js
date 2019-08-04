@@ -861,6 +861,9 @@ function main() {
             }
             MetricController.data(data.result.arr).drawSummary(data.result.hindex);
         }
+        if (data.action==='DataServices') {
+                MetricController.datasummary(data.result.arr);
+            }
     }, false);
     request();
 }
@@ -1100,7 +1103,7 @@ function drawsummary(initIndex){
             case "Radar":
                 for (var h = 0; h < hosts.length; h++) {
                     var name = hosts[h].name;
-                    arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
+                    arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
                     arrServices.name = name;
                     arr.push(arrServices);
                 }
@@ -1153,7 +1156,7 @@ function drawsummarypoint(harr){
             for (var i in harr) {
                 var h  = harr[i];
                 var name = hosts[h].name;
-                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex);
+                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
                 arrServices.name = name;
                 arr.push(arrServices);
             }

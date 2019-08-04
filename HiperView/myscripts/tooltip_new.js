@@ -343,7 +343,7 @@ function mouseoverNode(d1){
     dataSpider.name = name;
     if (r.arr.length>0){
         for (var i=startRecord;i<r.arr.length;i++){
-            var arr1 = getDataByName_withLabel(hostResults, name, i, i);
+            var arr1 = getDataByName_withLabel(hostResults, name, i, i,0.5);
             arr1.indexSamp = i;
             arr1.time = r.arr[i].result.query_time;
             dataSpider.push(arr1);

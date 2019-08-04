@@ -462,8 +462,8 @@ function handlemissingdata(hostname,iter){
     return simisval;
 }
 
-function getDataByName_withLabel (hostResults, name,startIndex, lastIndex) {
-    let data = getDataByName(hostResults, name,startIndex, lastIndex);
+function getDataByName_withLabel (hostResults, name,startIndex, lastIndex,undefinedValue) {
+    let data = getDataByName(hostResults, name,startIndex, lastIndex,undefined,undefinedValue);
     if (startIndex===lastIndex)
         return serviceFullList.filter(d=>d).map((d,i)=>{return {axis: d.text, value:data[i]}});
     else {
@@ -472,7 +472,7 @@ function getDataByName_withLabel (hostResults, name,startIndex, lastIndex) {
         });
     }
 }
-function getDataByName(hostResults, name,startIndex, lastIndex, isPredict) {
+function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefinedValue) {
     startIndex = startIndex||0;
     var r = hostResults[name];
     var arrServices = [];
@@ -484,36 +484,36 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict) {
                 a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser.text);
             }
             else {
-                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:isPredict);
+                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:isPredict,undefinedValue);
             }
             var scale = d3.scaleLinear()
                 .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
-            a = a.map(d => scale(d) || 0.5);
+            a = a.map(d => scale(d)===0? 0: (scale(d) ||  undefinedValue));
             switch (indx) {
                 case 0:
                 case 3:
                     arrServices = d3.merge([arrServices, a]);
                     break;
                 default:
-                    arrServices.push(a[0] || 0.5)
+                    arrServices.push(a[0] ===0? 0: (a[0]|| undefinedValue))
             }
         })
     }
     arrServices.name = name;
     return arrServices;
 }
-function predict (arr,ser, notUsepastValue){
+function predict (arr,ser, notUsepastValue,undefinedValue){
     try{
         if (notUsepastValue)
             throw 'notusepast';
         return processData(arr[arr.length-1].data.service.plugin_output,ser); // getdata from the past
     } catch(e){
         let average = 0;
-        let serviceMain = serviceLists.find(s=>s.text===ser);predict
+        let serviceMain = serviceLists.find(s=>s.text===ser);
         let service = serviceMain.sub[0];
         if (service) {
-            average = service.undefinedValue ===undefined?((service.range[1]-service.range[0])/2+service.range[0]):service.undefinedValue;
+            average = undefinedValue? (service.undefinedValue ===undefined?((service.range[1]-service.range[0])/2+service.range[0]):service.undefinedValue):undefined;
            return  d3.range(serviceMain.sub.length).map(a=>average);
         }
             return [0,0,0];
@@ -597,3 +597,24 @@ const processResult_nagios = processResult_old;
 
 
 let processData = processData_old;
+
+
+
+
+
+
+
+// // 2 functions needed for kernel density estimate
+    function kernelDensityEstimator(kernel, X) {
+        return function(V) {
+            return X.map(function(x) {
+                return [x, d3.mean(V, function(v) { return kernel(x - v); })];
+            });
+        };
+    }
+
+    function kernelEpanechnikov(k) {
+        return function(v) {
+            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+        };
+    }
