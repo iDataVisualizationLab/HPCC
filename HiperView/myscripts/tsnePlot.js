@@ -313,29 +313,29 @@ d3.Tsneplot = function () {
             .append("rect")
             .attr("width", graphicopt.widthG())
             .attr("height", graphicopt.heightG());
-        const rg = svg.append("defs").append("radialGradient")
-            .attr("id", "rGradient");
-        const legntharrColor = arrColor.length-1;
-        rg.append("stop")
-            .attr("offset","0%")
-            .attr("stop-opacity", 0);
-        rg.append("stop")
-            .attr("offset", 3.5 / legntharrColor * 100 + "%")
-            .attr("stop-color", arrColor[4])
-            .attr("stop-opacity", 0);
-        arrColor.forEach((d,i)=>{
-            if (i>3) {
-                rg.append("stop")
-                    .attr("offset", (i+1) / legntharrColor * 100 + "%")
-                    .attr("stop-color", d)
-                    .attr("stop-opacity", (i+1) / legntharrColor);
-                // if (i != legntharrColor)
-                //     rg.append("stop")
-                //         .attr("offset", (i + 1) / legntharrColor * 100 + "%")
-                //         .attr("stop-color", arrColor[i + 1])
-                //         .attr("stop-opacity", i / legntharrColor);
-            }
-        });
+        // const rg = svg.append("defs").append("radialGradient")
+        //     .attr("id", "rGradient");
+        // const legntharrColor = arrColor.length-1;
+        // rg.append("stop")
+        //     .attr("offset","0%")
+        //     .attr("stop-opacity", 0);
+        // rg.append("stop")
+        //     .attr("offset", 3.5 / legntharrColor * 100 + "%")
+        //     .attr("stop-color", arrColor[4])
+        //     .attr("stop-opacity", 0);
+        // arrColor.forEach((d,i)=>{
+        //     if (i>3) {
+        //         rg.append("stop")
+        //             .attr("offset", (i+1) / legntharrColor * 100 + "%")
+        //             .attr("stop-color", d)
+        //             .attr("stop-opacity", (i+1) / legntharrColor);
+        //         // if (i != legntharrColor)
+        //         //     rg.append("stop")
+        //         //         .attr("offset", (i + 1) / legntharrColor * 100 + "%")
+        //         //         .attr("stop-color", arrColor[i + 1])
+        //         //         .attr("stop-opacity", i / legntharrColor);
+        //     }
+        // });
         glowEffect = svg.append('defs').append('filter').attr('id', 'glowTSne'),
             feGaussianBlur = glowEffect.append('feGaussianBlur').attr('stdDeviation', 2.5).attr('result', 'coloredBlur'),
             feMerge = glowEffect.append('feMerge'),
@@ -898,6 +898,7 @@ d3.Tsneplot = function () {
             .text(function(d,i) {return d.name.replace("compute-","") })
 
     }
+
     function fixstr(s) {
         return s.replace(/ |#/gi,'');
     }
@@ -919,6 +920,9 @@ d3.Tsneplot = function () {
     Tsneplot.linepointer = function (_) {
         return arguments.length ? (linepointer = _, Tsneplot) : linepointer;
 
+    };
+    Tsneplot.RadarColor = function (_) {
+        return arguments.length ? (arrColor = _.arrColor,UpdateGradient(svg), Tsneplot) : arrColor;
     };
     Tsneplot.runopt = function (_) {
         return arguments.length ? (runopt = _, Tsneplot) : runopt;

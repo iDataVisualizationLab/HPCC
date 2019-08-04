@@ -579,32 +579,124 @@ function rasterize(svg,isLight) {
     image.src = URL.createObjectURL(serialize(svg,isLight));
     return promise;
 }
+function creatContain(contain,colorScaleList,colorArr,callback){
+    const  n = colorScaleList.n;
+    const ul = contain.append('ul').style('width','100%');
+    const colorListitems = ul.selectAll('li').data(colorArr)
+        .enter().append('li')
+        .attr('class','colorScale div row s12 valign-wrapper');
+    colorListitems.append('div')
+        .attr('class','col s4 colorscale-label')
+        // .attr('class','colorscale-label')
+        .text(d=>d.label)
+    const colorpalette = colorListitems.append('div')
+        .attr('class','col s7 colorscale-palette-container')
+        // .attr('class','colorscale-palette-container')
+        .append('div')
+        .attr('class','colorscale-block')
+        .on('click',callback)
+        .call(createColorbox);
 
-function createGradient(rg,limitcolor,arrColor) {
-    rg.selectAll('stop').remove();
+}
+function createColorbox(g) {
+    const boxs = g.selectAll('div.colorscale-swatch').data(function(d)
+    {
+        const name = d.val;
+        let colors;
+        if (d.type==='d3') {
+            colors = colorScaleList.d3colorChosefunc(name)
+        }else{
+            colors = colorScaleList[name];
+        }
+
+        if (d.invert)
+            colors = colors.reverse();
+        (this.parentNode.__data__||this.__data__).arrColor = colors;
+        return colors;
+    });
+    boxs.exit().remove();
+    boxs.enter().append('div')
+        .attr('class','colorscale-swatch')
+        .merge(boxs)
+        .styles(function (d,i){
+            const n = (this.parentNode.__data__||this.__data__).arrColor.length;
+            return {
+                'background-color': d,
+                'width': `${(1/n)*100}%`
+            }})
+}
+function createGradient(rg,limitcolor,arrColor,opacitycallback) {
     const legntharrColor = arrColor.length - 1;
+    opacitycallback = opacitycallback||((i)=>i / legntharrColor);
+    rg.selectAll('stop').remove();
     rg.append("stop")
         .attr("offset", "0%")
-        .attr("stop-opacity", 0);
+        .attr("stop-opacity", limitcolor?0:opacitycallback(0));
     rg.append("stop")
         .attr("offset", (limitcolor - 1) / legntharrColor * 100 + "%")
         .attr("stop-color", arrColor[limitcolor])
-        .attr("stop-opacity", 0);
+        .attr("stop-opacity", limitcolor?0:opacitycallback(0));
     arrColor.forEach((d, i) => {
         if (i > (limitcolor - 1)) {
             rg.append("stop")
                 .attr("offset", i / legntharrColor * 100 + "%")
                 .attr("stop-color", d)
-                .attr("stop-opacity", i / legntharrColor);
+                .attr("stop-opacity", opacitycallback(i));
             if (i != legntharrColor)
                 rg.append("stop")
                     .attr("offset", (i + 1) / legntharrColor * 100 + "%")
                     .attr("stop-color", arrColor[i + 1])
-                    .attr("stop-opacity", i / legntharrColor);
+                    .attr("stop-opacity", opacitycallback(i));
         }
     });
 }
 
+function createLinearGradient(rg,limitcolor,arrColor,opacitycallback) {
+    const legntharrColor = arrColor.length - 1;
+    opacitycallback = opacitycallback||((i)=>i / legntharrColor);
+    rg.selectAll('stop').remove();
+    rg.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-opacity", limitcolor?0:opacitycallback(0));
+    arrColor.forEach((d, i) => {
+        if (i > (limitcolor - 1)) {
+            rg.append("stop")
+                .attr("offset", i / legntharrColor * 100 + "%")
+                .attr("stop-color", d)
+                .attr("stop-opacity", opacitycallback(i));
+        }
+    });
+}
+function UpdateGradient(svg) { // using global arrcolor
+    let rdef = svg.select('defs.gradient');
+    let rg,rg2,lg;
+    if (rdef.empty()){
+        rdef = svg.append("defs").attr('class','gradient');
+        rg = rdef
+            .append("radialGradient")
+            .attr("id", "rGradient");
+        rg2 = rdef.append("radialGradient")
+            .attr("id", "rGradient2");
+        lg = rdef.append("linearGradient")
+            .attr("id", "lradient").attr('x1', '0%')
+            .attr('y1', '100%')
+            .attr('x2', '0%')
+            .attr('y2', '0%');
+    }
+    else {
+        rg = rdef.select('#rGradient');
+        rg2 = rdef.select('#rGradient2');
+        rg2 = rdef.select('#lradient');
+    }
+
+    const rangeop = d3.range(0,arrColor.length);
+    const opas = d3.scaleLinear().domain([1,arrColor.length/2-1]).range([1,0.5]);
+    let opacityGradient = d3.scaleLinear().domain(rangeop).range(rangeop.map(d=>opas(d>(arrColor.length/2-1)?(arrColor.length-1-d):d)));
+    createGradient(rg,6,arrColor,opacityGradient);
+    createGradient(rg2,0,arrColor,opacityGradient);
+    createLinearGradient(lg,0,arrColor,opacityGradient);
+
+}
 function fixName2Class(s) {
     return 'h'+s.replace(/ |#|\./gi,''); //avoid . and number format
 }

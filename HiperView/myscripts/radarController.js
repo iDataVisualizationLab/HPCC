@@ -266,14 +266,14 @@ let radarController = function () {
                     },
                     {   targets: 1,
                         title: 'Summary',
-                        orderable: false,
+                        orderable: true,
                         "data": null,
                         className:'summary_chart',
                         "render": function ( d, type, row, meta ) {
                             if (type=='display') {
                                 return '<svg class="s_chart" width="100" height="25"></svg>';
                             }
-                            return 0;
+                            return d.summary.outlier.length;
                         }
                     },
                     {   targets: 2,
@@ -389,9 +389,9 @@ let radarController = function () {
 
 
             if (first) {
-                const rg = svg.append("defs").append("radialGradient")
-                    .attr("id", "rGradient3");
-                createGradient(rg,1,graphicopt.arrColor);
+                // const rg = svg.append("defs").append("radialGradient")
+                //     .attr("id", "rGradient2");
+                // createGradient(rg,1,graphicopt.arrColor);
                 var filter = g.append('defs').append('filter').attr('id', 'glowc'),
                     feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
                     feMerge = filter.append('feMerge'),
@@ -676,7 +676,7 @@ let radarController = function () {
                 .append("path")
                 .attr("d", d => radialAreaGenerator(d));
             blobWrapper.append("rect")
-                .style('fill', 'url(#rGradient3)')
+                .style('fill', 'url(#rGradient2)')
                 .attr("clip-path",( d,i)=>"url(#sumC)")
                 .attr("x",-rScale(1.25))
                 .attr("y",-rScale(1.25))

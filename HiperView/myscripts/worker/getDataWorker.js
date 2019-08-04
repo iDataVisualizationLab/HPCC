@@ -85,7 +85,7 @@ function getsummaryservice(data){
             if (d.length>4)
             {
                 const iqr = r.q3-r.q1;
-                r.outlier = d.filter(e=>e>(r.q3+1.5*iqr)||e<(r.q1-1.5*iqr));
+                r.outlier = d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr));
             }else{
                 r.outlier = d;
             }

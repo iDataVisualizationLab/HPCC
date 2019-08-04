@@ -129,13 +129,38 @@ let globalTrend = false;
 var initialService = "Temperature";
 var selectedService;
 
+let colorScaleList = {
+    n: 10,
+    rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
+    soil: ["#2244AA","#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#F8E571", "#F2B659", "#eb6424", "#D63128", "#660000"],
+    d3colorChosefunc: function(name){
+        const n = this.n;
+        if (d3[`scheme${name}`]) {
+            if (typeof (d3[`scheme${name}`][0]) != 'string')
+                colors=  d3[`scheme${name}`][n].slice();
+            else
+                colors=  d3[`scheme${name}`].slice();
+        } else {
+            const interpolate = d3[`interpolate${name}`];
+            colors = [];
+            for (let i = 0; i < n; ++i) {
+                colors.push(d3.rgb(interpolate(i / (n - 1))).hex());
+            }
+        }
+        return colors;
+    },
+},colorArr = {Radar: [
+        {val: 'rainbow',type:'custom',label: 'Rainbow'},
+        {val: 'RdBu',type:'d3',label: 'Blue2Red',invert:true},
+        {val: 'soil',type:'custom',label: 'RedYelBlu'},],
+    Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 
 var arrThresholds;
 var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
-var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-
+// var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
+let arrColor = colorScaleList.rainbow;
 
 setColorsAndThresholds(initialService);
 
@@ -601,7 +626,7 @@ function drawHorizontalView() {
 
     // Summary Panel ********************************************************************
     var maingradient = svg.append("defs").append("linearGradient")
-        .attr("id", "mainColor")
+        .attr("id", "lradient")
         .attr('x1', '0%')
         .attr('y1', '100%')
         .attr('x2', '0%')
@@ -733,7 +758,7 @@ function drawVerticalView() {
     }
     // Summary Panel ********************************************************************
     var maingradient = svg.append("defs").append("linearGradient")
-        .attr("id", "mainColor")
+        .attr("id", "lradient")
         .attr('x1', '0%')
         .attr('y1', '100%')
         .attr('x2', '0%')
@@ -1494,7 +1519,7 @@ function plotArea(arr,name,hpcc_rack,hpcc_node,xStart,y,serindex){
         .attr('width',xTimeScale(arr[arr.length-1].x)-xTimeScale(arr[0].x))
         .attr('height',yScale.range()[1]*2)
         .attr('x',arr[0].x)
-        .attr('y',y-yScale.range()[1]).attr("fill","url(#mainColor)")
+        .attr('y',y-yScale.range()[1]).attr("fill","url(#lradient)")
         .attr("clip-path","url(#cp"+fixName2Class(name)+")").on("mouseover", function (d) {
         mouseoverNode ({name:name});
     });
@@ -2018,6 +2043,9 @@ $( document ).ready(function() {
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
+    changeRadarColor(colorArr.Radar[0]);
+    // color scale create
+    creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");
@@ -2212,6 +2240,21 @@ $( document ).ready(function() {
     // Spinner Stop ********************************************************************
 
 });
+let profile = {};
+function changeRadarColor(d) {
+    profile.radarcolor = d.val;
+    d3.select('#RadarColor')
+        .select('.collapsible-header .colorscale-block').datum(d)
+        .call(createColorbox);
+    UpdateGradient(svg);
+}
+function onClickRadarColor (d){
+    changeRadarColor(d);
+    arrColor=d;
+    TSneplot.RadarColor(d);
+    MetricController.updatecolor(arrColor);
+}
+
 function onfilterdata(schema) {
     //
     // data_filtered = dataRaw.filter(d=>schema.axisList.map(s=> s.filter!=null?(d[s.data.text]>=s.filter[0])&&(d[s.data.text]<=s.filter[1]):true).reduce((p,c)=>c&&p))

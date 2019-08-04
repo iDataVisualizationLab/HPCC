@@ -28,6 +28,7 @@ function RadarChart(id, data, options, name) {
         showHelperPoint: true,
         arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
         legend: [],
+        mini:false,
         schema: undefined,
         color: function () {
             return 'rgb(167, 167, 167)'
@@ -53,30 +54,38 @@ function RadarChart(id, data, options, name) {
         }))
     }));
 
-    if (cfg.isNormalize) range = [0,1];
+    if (cfg.isNormalize){
+        minValue = 0;
+        maxValue = 1;
+        range = [minValue,maxValue];
+    } else {
+        maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
+            return d3.max(i.map(function (o) {
+                return o.value;
+            }))
+        }));
+        minValue = Math.min(cfg.minValue, d3.min(data, function (i) {
+            return d3.min(i.map(function (o) {
+                return o.value;
+            }))
+        }));
+        range = [minValue,maxValue]
+    }
     if (cfg.markedLegend) scaleMarkedLegend = d3.scaleLinear().domain(range).range(cfg.markedLegend);
-    // *** TOMMY 2018 ************
-    //Compute min max for the temperature
-    var dif = (range[1] - range[0]) / 4;
-    var right = range[1] + dif;
 
-    maxValue = right;
-
-    minValue = range[0] - dif;
-    var colorLength = arrColor.length - 1;
-    arrThresholds = [minValue, range[0], range[0] + dif, range[0] + 2 * dif,
-        range[0] + 3 * dif, range[1], maxValue];
-
-
+    let colorLength = cfg.arrColor.length-1;
+    var dif = 1 / (cfg.levels-2);
+    var right = 1 + dif;
+    cfg.arrThresholds = [-dif];
+    for (var i=0;i<colorLength-1;i++)
+        cfg.arrThresholds.push(i/(colorLength-1));
+    cfg.arrThresholds.push(right);
     colorTemperature = d3.scaleLinear()
-        .domain(arrThresholds)
-        .range(arrColor)
+        .domain(cfg.arrThresholds)
+        .range(cfg.arrColor)
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-    opaTemperature = d3.scaleLinear()
-        .domain([left, range[0], range[0] + 2 * dif, range[1], range[1] + dif])
-        .range([1, 0.7, 0.05, 0.7, 1]);
-    radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
-    Format = d3.format('');               //Percentage formatting
+
+
 
     if (cfg.schema){
         range = [0,1];
@@ -88,6 +97,14 @@ function RadarChart(id, data, options, name) {
                 return {text: i.axis, angle: angleSlice[j]};
             }));
     }
+
+    // Re-adjust angles
+    minValue = range[0]-dif*(range[1]-range[0]);
+    maxValue = range[1]+dif*(range[1]-range[0]);
+
+    let  radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
+    Format = d3.format('');               //Percentage formatting
+
     data = data.map(ditem=>{
         if (ditem.bin)
             ditem.bin.val = ditem.bin.val.map(v=>v.filter((d,i)=>allAxis.find(e=>e.text===ditem[i].axis)));
@@ -162,10 +179,7 @@ function RadarChart(id, data, options, name) {
     function toRadian(deg) {
         return deg * (Math.PI/180);
     }
-    if (first) {
-        const rg = svg.append("defs").append("radialGradient")
-            .attr("id", "rGradient2");
-        createGradient(rg,1,arrColor)
+    if (first&& !cfg.mini) {
         //Filter for the outside glow
         var filter = g.append('defs').append('filter').attr('id', 'glow'),
             feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
@@ -179,9 +193,26 @@ function RadarChart(id, data, options, name) {
             feMerge = filter.append('feMerge'),
             feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
             feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
-    /////////////////////////////////////////////////////////
-    /////////////// Draw the Circular grid //////////////////
-    /////////////////////////////////////////////////////////
+
+    //     const rg = svg.append("defs").append("radialGradient")
+    //         .attr("id", "rGradient2");
+    //     createGradient(rg,1,arrColor)
+    //     //Filter for the outside glow
+    //     var filter = g.append('defs').append('filter').attr('id', 'glow'),
+    //         feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
+    //         feMerge = filter.append('feMerge'),
+    //         feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+    //         feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+    //
+    //     //Filter for the outside glow
+    //     var filter = g.append('defs').append('filter').attr('id', 'glow2'),
+    //         feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '1').attr('result', 'coloredBlur'),
+    //         feMerge = filter.append('feMerge'),
+    //         feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+    //         feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+    // /////////////////////////////////////////////////////////
+    // /////////////// Draw the Circular grid //////////////////
+    // /////////////////////////////////////////////////////////
 
         //Wrapper for the grid & axes
         var axisGrid = g.append("g").attr("class", "axisWrapper");
@@ -210,46 +241,48 @@ function RadarChart(id, data, options, name) {
 
 
     }
-    /////////////////////////////////////////////////////////
-    //////////////////// Draw the axes //////////////////////
-    /////////////////////////////////////////////////////////
-    var axisGrid = g.select(".axisWrapper");
-    //Create the straight lines radiating outward from the center
-    var axis_o = axisGrid.selectAll(".axis")
-        .data(allAxis,d=>d.text);
+    if (!cfg.mini) {
+        /////////////////////////////////////////////////////////
+        //////////////////// Draw the axes //////////////////////
+        /////////////////////////////////////////////////////////
+        var axisGrid = g.select(".axisWrapper");
+        //Create the straight lines radiating outward from the center
+        var axis_o = axisGrid.selectAll(".axis")
+            .data(allAxis, d => d.text);
 
-    axis_o.exit().remove();
+        axis_o.exit().remove();
 
-    var axis_n = axis_o.enter()
-        .append("g")
-        .attr("class", "axis")
-        .style('transform-origin','0,0');
+        var axis_n = axis_o.enter()
+            .append("g")
+            .attr("class", "axis")
+            .style('transform-origin', '0,0');
 
-    axis_n.merge(axis_o)
-        .style('transform',function (d, i) {
-            return "rotate(" + toDegrees(d.angle) + "deg)"});
+        axis_n.merge(axis_o)
+            .style('transform', function (d, i) {
+                return "rotate(" + toDegrees(d.angle) + "deg)"
+            });
 
-    //Append the lines
-    axis_n.append("line")
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", function (d, i) {
-            return -rScale(maxValue *( cfg.bin||cfg.gradient?((cfg.levels-1)/cfg.levels):1.05)) ;
-        })
-        .attr("class", "line")
-        .style("stroke", "white")
-        .style("stroke-width", "1px");
-    //Append the labels at each axis
-    if (cfg.showText) {
-        axis_n.append("text")
-            .attr("class", "legend")
-            .style("font-size", "12px")
-            .attr("font-family", "sans-serif")
-            .attr("text-anchor", "middle")
-            .attr("dy", "0.35em")
-            .attr("x", 0)
-            .merge(axis_o.select('.legend'))
+        //Append the lines
+        axis_n.append("line")
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", 0)
+            .attr("y2", function (d, i) {
+                return -rScale(maxValue * (cfg.bin || cfg.gradient ? ((cfg.levels - 1) / cfg.levels) : 1.05));
+            })
+            .attr("class", "line")
+            .style("stroke", "white")
+            .style("stroke-width", "1px");
+        //Append the labels at each axis
+        if (cfg.showText) {
+            axis_n.append("text")
+                .attr("class", "legend")
+                .style("font-size", "12px")
+                .attr("font-family", "sans-serif")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .attr("x", 0)
+                .merge(axis_o.select('.legend'))
                 // .classed('flip_h',(d,i)=>(d.angle>Math.PI*3/4)&&(d.angle<5*Math.PI/4))
                 .attr("y", function (d, i) {
                     return -rScale(maxValue * cfg.labelFactor);
@@ -258,6 +291,7 @@ function RadarChart(id, data, options, name) {
                     return d.text;
                 })
                 .call(wrap, cfg.wrapWidth);
+        }
     }
     /////////////////////////////////////////////////////////
     ///////////// Draw the radar chart blobs ////////////////

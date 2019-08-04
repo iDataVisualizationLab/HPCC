@@ -351,3 +351,58 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 .nav__menu:last-child {
     border-top-right-radius: 10px;
 }
+
+.settingContain {
+    display: block;
+    padding: 10px;
+}
+.settingContain .list {
+    min-height: 2rem;
+}
+.settingContain .insideSetting {
+    padding: 0px;
+    box-shadow: none;
+}
+.settingContain .insideSetting .collapsible-header {
+    padding: 0px;
+}
+.settingContain .insideSetting :not(.active) .collapsible-header {
+    border-bottom: none;
+}
+.settingContain .insideSetting .collapsible-body {
+    padding: 0px;
+}
+
+.pickercontain {
+    margin: 0px auto;
+}
+.pickercontain .colorscale-label, .pickercontain .colorscale-header {
+    display: inline-block;
+    width: 25%;
+    text-align: start;
+}
+.pickercontain .colorscale-label {
+    font-size: 0.8rem;
+}
+.pickercontain li {
+    padding: 5px 0px;
+    margin: 0;
+}
+.pickercontain .colorscale-palette-container {
+    padding-left: 0;
+    padding-right: 0;
+    display: inline-block;
+    text-align: start;
+    width: 75%;
+}
+.pickercontain .colorscale-palette-container .colorscale-block {
+    font-size: 0px;
+    display: inline-block;
+    width: 100%;
+}
+.pickercontain .colorscale-palette-container .colorscale-block .colorscale-swatch {
+    height: 20px;
+    margin: 0px auto;
+    display: inline-block;
+    cursor: pointer;
+}
