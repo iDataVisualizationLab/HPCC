@@ -686,7 +686,7 @@ function UpdateGradient(svg) { // using global arrcolor
     else {
         rg = rdef.select('#rGradient');
         rg2 = rdef.select('#rGradient2');
-        rg2 = rdef.select('#lradient');
+        lg = rdef.select('#lradient');
     }
 
     const rangeop = d3.range(0,arrColor.length);
