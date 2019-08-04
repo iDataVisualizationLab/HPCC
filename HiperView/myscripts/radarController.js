@@ -271,7 +271,7 @@ let radarController = function () {
                         className:'summary_chart',
                         "render": function ( d, type, row, meta ) {
                             if (type=='display') {
-                                return '<g class="s_chart"></g>';
+                                return '<svg class="s_chart" width="100" height="50"></svg>';
                             }
                             return 0;
                         }
@@ -343,10 +343,9 @@ let radarController = function () {
                 onChangeValueFunc(radarcomp);
             });
         let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:50,opt:{dataformated:true}});
-        tablediv.select("table").selectAll('td.summary_chart g.s_chart').each(function(d){
+        tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
-            sg.call(function(selection){
-            console.log(sg.datum().summary); return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
+            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
 
     }
     function updateSummaryData (dSum){

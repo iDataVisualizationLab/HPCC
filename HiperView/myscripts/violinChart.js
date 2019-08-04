@@ -200,21 +200,22 @@ d3.viiolinChart = function () {
     // };
 
     viiolinplot.draw = function(contain){
-        console.log(arr[0].axis)
         let viol_chart = contain.selectAll('.violin').data(arr);
         viol_chart.exit().remove();
         let viol_n = viol_chart.enter()
             .append('g')
-            .attr('class','violin');
+            .attr('class','violin').attr('transform','translate(0,'+(graphicopt.heightG()/2)+')');
         viol_n.append("path");
         viol_chart = viol_n.merge(viol_chart);
-        // viol_chart.select('path').datum(d=>{console.log(d); return d;}).attr("d",d=> d3.area()
-        //     .x0(function(d){
-        //         return(xNum(-d[1])) } )
-        //     .x1(function(d){ return(xNum(d[1])) } )
-        //     .y(function(d){ return(h(d[0])) } )
-        //     .curve(d3.curveCatmullRom)(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
-        // );
+        viol_chart.select('path').datum(d=>{return d;})
+            .style('fill','black')
+            .attr("d",d=> d3.area()
+            .x0(function(d){
+                return(xNum(-d[1])) } )
+            .x1(function(d){ return(xNum(d[1])) } )
+            .y(function(d){ return(h(d[0])) } )
+            .curve(d3.curveCatmullRom)(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+        );
         return viol_chart;
     };
 
