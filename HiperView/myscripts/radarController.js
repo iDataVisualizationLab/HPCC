@@ -349,8 +349,13 @@ let radarController = function () {
 
     }
     function updateSummaryData (dSum){
+
+        try{
         radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
-        eventTable()
+        eventTable();
+        }catch(e){
+
+        }
     }
     let dataTable;
     radarController.init = function ()
