@@ -108,7 +108,8 @@ function plotTsne(hostResults,lastIndex,isPredict,startIndex_Input,undefinedValu
         startIndex =0;
     else
         startIndex = lastIndex;
-    startIndex = startIndex_Input||startIndex;
+    if (startIndex_Input!=undefined)
+        startIndex = startIndex_Input;
     let arr =[];
     for(var h = 0;h < hosts.length;h++)
     {

@@ -152,8 +152,8 @@ function newdatatoFormat (data){
         let split_string = k.split('-');
         const nameh = split_string.shift();
         hostList.data.hostlist [nameh] = {
-            rack: nameh.split('.')[2],
-            node: nameh.split('.')[3],
+            rack: 1,//nameh.split('.')[2],
+            node: 1,//.split('.')[3],
             id : nameh,
         };
         keys[split_string.join('-')]=1;
@@ -541,6 +541,22 @@ function inithostResults (worker) {
         }
         hosts.push(h);
     }
+    hosts.sort((a, b) => {
+
+        var rackx = a.hpcc_rack;
+        var racky = b.hpcc_rack;
+        var x = a.hpcc_node;
+        var y = b.hpcc_node;
+        if (rackx !== racky) {
+            return rackx - racky;
+        } else {
+            if (x % 2 - y % 2) {
+                return y % 2 - x % 2
+            } else {
+                return x - y
+            }
+        }
+    });
 }
 
 // Delete unnecessary files

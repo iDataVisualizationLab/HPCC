@@ -2204,10 +2204,10 @@ function changeRadarColor(d) {
     d3.select('#RadarColor')
         .select('.collapsible-header .colorscale-block').datum(d)
         .call(createColorbox);
+    arrColor=d.arrColor;
     UpdateGradient(svg);
 }
 function onClickRadarColor (d){
-    arrColor=d;
     changeRadarColor(d);
     TSneplot.RadarColor(d);
     MetricController.updatecolor(arrColor);
