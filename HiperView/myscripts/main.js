@@ -1714,7 +1714,7 @@ function resetRequest(){
     svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
-    Radarplot.init();
+    Radarplot.init().clustercallback(d=>TSneplot.clusterBin(d));
     TSneplot.reset(true);
     timelog = [];
     jobList = undefined;

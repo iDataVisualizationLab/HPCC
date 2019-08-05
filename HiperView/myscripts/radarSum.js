@@ -32,7 +32,9 @@ d3.radar = function () {
         return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
     radarTimeline.init = function(){
         bin.data([]).updateRadius(true);
+        return radarTimeline;
     };
+    let oncallbackCluster =()=>{};
     let schema;
     radarTimeline.draw = function(index){
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
@@ -128,6 +130,7 @@ d3.radar = function () {
         radarChartsumopt.gradient = false;
         //radarChartsumopt.color = color2;
         RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), dataSpider3, radarChartsumopt,"");
+        oncallbackCluster(dataSpider3);
         bin.data([]);
         if (index >= maxstack-1) radarTimeline.shift();
 
@@ -229,6 +232,11 @@ d3.radar = function () {
 
     radarTimeline.data = function (_) {
         return arguments.length ? (arr = _, radarTimeline) : arr;
+
+    };
+
+    radarTimeline.clustercallback = function (_) {
+        return arguments.length ? (oncallbackCluster = _, radarTimeline) : oncallbackCluster;
 
     };
 

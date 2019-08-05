@@ -439,8 +439,9 @@ d3.Tsneplot = function () {
                     updateEmbedding(store.Y, store.cost);
                 }
             }).stop();
-
+        clusterg = g.append('g').attr('class','cluster-path-g');
     };
+    let clusterg;
     let forcetsne;
     let forcetsnemode = true;
     function updateCluster (data) {
@@ -475,6 +476,13 @@ d3.Tsneplot = function () {
                         (Y[i].x+tx) + "," +
                         (Y[i].y+ty) + ")"; });
         }
+        //---draw cluster
+        let c_arr = clusterg.selectAll('.clusterPath').data(clusterlabel.filter(d=>d.type!=="outlying"));
+        c_arr.exit().remove();
+        c_arr.enter().append('path').attr('class','clusterPath')
+        ;
+
+        //---end draw cluster
         //let curentHostpos = currenthost.node().getBoundingClientRect();
         linepointer.attr("x2", Math.max(Math.min(Y[currenthost.index].x+tx,graphicopt.widthG()),0) )
             .attr("y2", Math.max(Math.min(Y[currenthost.index].y+ty,graphicopt.heightG()),0)+ graphicopt.offset.top);
@@ -904,9 +912,13 @@ d3.Tsneplot = function () {
     function fixstr(s) {
         return s.replace(/ |#/gi,'');
     }
+    let clusterlabel=[];
+    Tsneplot.clusterBin = function (_) {
+        return arguments.length ? (clusterlabel = _, Tsneplot) : clusterlabel;
+    };
+
     Tsneplot.data = function (_) {
         return arguments.length ? (arr = _, Tsneplot) : arr;
-
     };
 
     Tsneplot.reset = function (_) {
