@@ -606,7 +606,7 @@ function createColorbox(g) {
         if (d.type==='d3') {
             colors = colorScaleList.d3colorChosefunc(name)
         }else{
-            colors = colorScaleList[name];
+            colors = colorScaleList.customFunc(name);
         }
 
         if (d.invert)
@@ -688,11 +688,11 @@ function UpdateGradient(svg) { // using global arrcolor
         rg2 = rdef.select('#rGradient2');
         lg = rdef.select('#lradient');
     }
-
-    const rangeop = d3.range(0,arrColor.length);
-    const opas = d3.scaleLinear().domain([1,arrColor.length/2-1]).range([1,0.5]);
-    let opacityGradient = d3.scaleLinear().domain(rangeop).range(rangeop.map(d=>opas(d>(arrColor.length/2-1)?(arrColor.length-1-d):d)));
-    createGradient(rg,6,arrColor,opacityGradient);
+    let opacityGradient =undefined
+    // const rangeop = d3.range(0,arrColor.length);
+    // const opas = d3.scaleLinear().domain([1,arrColor.length/2-1]).range([1,0.5]);
+    // let opacityGradient = d3.scaleLinear().domain(rangeop).range(rangeop.map(d=>opas(d>(arrColor.length/2-1)?(arrColor.length-1-d):d)));
+    createGradient(rg,4,arrColor,opacityGradient);
     createGradient(rg2,0,arrColor,opacityGradient);
     createLinearGradient(lg,0,arrColor,opacityGradient);
 

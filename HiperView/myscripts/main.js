@@ -130,9 +130,20 @@ var initialService = "Temperature";
 var selectedService;
 
 let colorScaleList = {
-    n: 10,
+    n: 7,
     rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
     soil: ["#2244AA","#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#F8E571", "#F2B659", "#eb6424", "#D63128", "#660000"],
+    customFunc: function(name){
+        const n= this.n;
+        let colorLength = this[name].length;
+        const arrThresholds=d3.range(0,colorLength).map(e=>e/(colorLength-1));
+        let colorTemperature = d3.scaleLinear()
+            .domain(arrThresholds)
+            .range(this[name])
+            .interpolate(d3.interpolateHcl);
+
+        return d3.range(0,n).map(e=>colorTemperature(e/(n-1)))
+    },
     d3colorChosefunc: function(name){
         const n = this.n;
         if (d3[`scheme${name}`]) {
@@ -160,7 +171,7 @@ var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
 // var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-let arrColor = colorScaleList.rainbow;
+let arrColor = colorScaleList.customFunc('rainbow');
 
 setColorsAndThresholds(initialService);
 
@@ -757,17 +768,7 @@ function drawVerticalView() {
 
     }
     // Summary Panel ********************************************************************
-    var maingradient = svg.append("defs").append("linearGradient")
-        .attr("id", "lradient")
-        .attr('x1', '0%')
-        .attr('y1', '100%')
-        .attr('x2', '0%')
-        .attr('y2', '0%');
-    maingradient.selectAll('stop').data(arrColor)
-        .enter().append('stop')
-        .attr('offset', (d, i) => (i - 1) / 4)
-        .style('stop-color', d => d)
-        .style('stop-opacity', (d, i) => opa.range()[i]);
+
 
     d3.select(".summaryText1")
         .html("Quanah HPC system: <b>" + hosts.length + "</b> hosts distributed in 10 racks");
