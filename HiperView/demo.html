@@ -86,15 +86,15 @@
 <div id="mySidenav" class="sidenavs">
     <div class="row s12">
         <ul class="collapsible">
-            <li>
-                <div class="collapsible-header search-wrapper focused">
-                    <input type="text" id="search" placeholder="Search Racks..." class="inputHolder">
-                    <i class="material-icons">search</i>
-                </div>
-                <div class="collapsible-body"><span>Resevered for hierarchy.</span></div>
-            </li>
-            <li class="active">
-                <div class="collapsible-header"><i class="material-icons">settings</i>  Setting</div>
+            <!--<li>-->
+                <!--<div class="collapsible-header search-wrapper focused">-->
+                    <!--<input type="text" id="search" placeholder="Search Racks..." class="inputHolder">-->
+                    <!--<i class="material-icons">search</i>-->
+                <!--</div>-->
+                <!--<div class="collapsible-body"><span>Resevered for hierarchy.</span></div>-->
+            <!--</li>-->
+            <li class="settingContain active no_padding">
+                <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
                 <div class="collapsible-body">
                     <label for="datacom" class="col s4"> Dataset: </label>
                     <div  class="row s12">
@@ -154,37 +154,19 @@
                         <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
                         <button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>
                         <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
-                            <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Data</button>
                         </div>
                     </div>
                     <div class="row s12">
                         <div id="legendHolder"  class="legendHolder">
                         </div>
                     </div>
-                    <!--<label for="verticalDisplay" class="col s4">Vertical display: </label>-->
-                    <!--<div  class="row s12" id ="verticalDisplay"  >-->
-                        <!--<p class="switch col s7 valign-wrapper" style="margin-top:0;">-->
-                            <!--<label>-->
-                                <!--<span class="true">Off</span>-->
-                                <!--<input type="checkbox" onchange="changeView(this)">-->
-                                <!--<span class="lever"></span>-->
-                                <!--<span class="false">On</span>-->
-                            <!--</label>-->
-
-                        <!--</p>-->
-                    <!--</div>-->
-                </div>
-            </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
-                <div class="collapsible-body">
                     <div class="row s12 no_magrin">
                         <ul class="collapsible insideSetting ">
                             <li id="RadarColor">
                                 <div class="collapsible-header">
                                     <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
                                         <label for="radarColorPicker" class="col s4"> Radar color: </label>
-                                        <div id = "radarColorPicker" class="colorscale-palette-container col s7">
+                                        <div id = "radarColorPicker" class="colorscale-palette-container col s8">
                                             <div class="colorscale-block">
 
                                             </div>
@@ -216,6 +198,23 @@
                             </li>
                         </ul>
                     </div>
+                    <!--<label for="verticalDisplay" class="col s4">Vertical display: </label>-->
+                    <!--<div  class="row s12" id ="verticalDisplay"  >-->
+                        <!--<p class="switch col s7 valign-wrapper" style="margin-top:0;">-->
+                            <!--<label>-->
+                                <!--<span class="true">Off</span>-->
+                                <!--<input type="checkbox" onchange="changeView(this)">-->
+                                <!--<span class="lever"></span>-->
+                                <!--<span class="false">On</span>-->
+                            <!--</label>-->
+
+                        <!--</p>-->
+                    <!--</div>-->
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
+                <div class="collapsible-body">
                     <div id="RadarController"></div>
                     <div id="RadarController_Table">
                         <table class="display" width="100%"></table>
@@ -230,6 +229,7 @@
             <li>
                 <div class="collapsible-header"><i class="material-icons">settings</i> Developer Functions</div>
                 <div class="collapsible-body">
+                    <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download current Data</button>
                     <button onclick="saveSVG_batch()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog">
                         <i class="fas fa-download pauseicon" ></i> Download Images</button>
                 </div>

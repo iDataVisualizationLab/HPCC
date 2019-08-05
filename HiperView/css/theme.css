@@ -406,3 +406,9 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
     display: inline-block;
     cursor: pointer;
 }
+.no_magrin {
+    margin: 0;
+}
+.no_padding {
+    padding :0!important;
+}
