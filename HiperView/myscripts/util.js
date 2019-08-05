@@ -599,6 +599,7 @@ function creatContain(contain,colorScaleList,colorArr,callback){
 
 }
 function createColorbox(g) {
+
     const boxs = g.selectAll('div.colorscale-swatch').data(function(d)
     {
         const name = d.val;
@@ -612,14 +613,25 @@ function createColorbox(g) {
         if (d.invert)
             colors = colors.reverse();
         (this.parentNode.__data__||this.__data__).arrColor = colors;
-        return colors;
+
+        let colors_display;
+        if (d.type==='d3') {
+            colors_display = colorScaleList.d3colorChosefunc(name,100)
+        }else{
+            colors_display = colorScaleList.customFunc(name,undefined,100);
+        }
+
+        if (d.invert)
+            colors_display = colors_display.reverse();
+
+        return colors_display;
     });
     boxs.exit().remove();
     boxs.enter().append('div')
         .attr('class','colorscale-swatch')
         .merge(boxs)
         .styles(function (d,i){
-            const n = (this.parentNode.__data__||this.__data__).arrColor.length;
+            const n = 100;
             return {
                 'background-color': d,
                 'width': `${(1/n)*100}%`
@@ -651,7 +663,12 @@ function createGradient(rg,limitcolor,arrColor,opacitycallback) {
     });
 }
 
-function createLinearGradient(rg,limitcolor,arrColor,opacitycallback) {
+function createLinearGradient(direction,rg,limitcolor,arrColor,opacitycallback) {
+    if (direction=='v')
+        rg.attr('x1', '0%')
+            .attr('y1', '100%')
+            .attr('x2', '0%')
+            .attr('y2', '0%')
     const legntharrColor = arrColor.length - 1;
     opacitycallback = opacitycallback||((i)=>i / legntharrColor);
     rg.selectAll('stop').remove();
@@ -678,10 +695,7 @@ function UpdateGradient(svg) { // using global arrcolor
         rg2 = rdef.append("radialGradient")
             .attr("id", "rGradient2");
         lg = rdef.append("linearGradient")
-            .attr("id", "lradient").attr('x1', '0%')
-            .attr('y1', '100%')
-            .attr('x2', '0%')
-            .attr('y2', '0%');
+            .attr("id", "lradient");
     }
     else {
         rg = rdef.select('#rGradient');
@@ -694,7 +708,7 @@ function UpdateGradient(svg) { // using global arrcolor
     // let opacityGradient = d3.scaleLinear().domain(rangeop).range(rangeop.map(d=>opas(d>(arrColor.length/2-1)?(arrColor.length-1-d):d)));
     createGradient(rg,4,arrColor,opacityGradient);
     createGradient(rg2,0,arrColor,opacityGradient);
-    createLinearGradient(lg,0,arrColor,opacityGradient);
+    createLinearGradient('v',lg,0,arrColor,opacityGradient);
 
 }
 function fixName2Class(s) {

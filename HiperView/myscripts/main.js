@@ -133,22 +133,24 @@ let colorScaleList = {
     n: 7,
     rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
     soil: ["#2244AA","#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#F8E571", "#F2B659", "#eb6424", "#D63128", "#660000"],
-    customFunc: function(name){
-        const n= this.n;
-        let colorLength = this[name].length;
+    customFunc: function(name,arr,num){
+        const n= num||this.n;
+        const arrColor = arr||this[name];
+        let colorLength = arrColor.length;
         const arrThresholds=d3.range(0,colorLength).map(e=>e/(colorLength-1));
         let colorTemperature = d3.scaleLinear()
             .domain(arrThresholds)
-            .range(this[name])
+            .range(arrColor)
             .interpolate(d3.interpolateHcl);
 
         return d3.range(0,n).map(e=>colorTemperature(e/(n-1)))
     },
-    d3colorChosefunc: function(name){
-        const n = this.n;
+    d3colorChosefunc: function(name,num){
+        const n = num|| this.n;
         if (d3[`scheme${name}`]) {
-            if (typeof (d3[`scheme${name}`][0]) != 'string')
-                colors=  d3[`scheme${name}`][n].slice();
+            if (typeof (d3[`scheme${name}`][0]) != 'string') {
+                colors = (d3[`scheme${name}`][n]||d3[`scheme${name}`][d3[`scheme${name}`].length-1]).slice();
+            }
             else
                 colors=  d3[`scheme${name}`].slice();
         } else {
@@ -158,6 +160,7 @@ let colorScaleList = {
                 colors.push(d3.rgb(interpolate(i / (n - 1))).hex());
             }
         }
+        colors = this.customFunc(undefined,colors,n);
         return colors;
     },
 },colorArr = {Radar: [
