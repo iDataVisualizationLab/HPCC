@@ -2253,8 +2253,8 @@ function changeRadarColor(d) {
     UpdateGradient(svg);
 }
 function onClickRadarColor (d){
-    changeRadarColor(d);
     arrColor=d;
+    changeRadarColor(d);
     TSneplot.RadarColor(d);
     MetricController.updatecolor(arrColor);
 }
