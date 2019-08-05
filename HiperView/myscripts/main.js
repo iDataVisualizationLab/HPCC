@@ -8,7 +8,7 @@
 
 
 // Set the dimensions of the canvas / graph
-var margin = {top: 5, right: 0, bottom: 50, left: 0};
+var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
 var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
@@ -22,6 +22,14 @@ svg = svg
     .append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
+// other component setting
+// summaryGroup
+let summaryGroup_op ={
+    margin : {top: 5, right: 0, bottom: 0, left: 0},
+    height: 280,
+}
+
+
 var svgStore={};
 var svgsum;
 //.call(d3.zoom()
@@ -77,8 +85,8 @@ var h_rack = 580;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
-var sHeight=280;  // Summary panel height
-var top_margin = sHeight+46;  // Start rack spiatial layout
+
+var top_margin = summaryGroup_op.height+summaryGroup_op.margin.top+31;  // Start rack spiatial layout
 
 
 var users = [];
@@ -653,13 +661,13 @@ function drawHorizontalView() {
 
     svgsum = svg.append("g")
         .attr("class", "summaryGroup")
-        .attr("transform", "translate(" + 1 + "," + 15 + ")");
+        .attr("transform", "translate(" + summaryGroup_op.margin.left + "," + summaryGroup_op.margin.top + ")");
     svgsum.append("rect")
         .attr("class", "summaryRect")
         .attr("rx", 10)
         .attr("ry", 10)
         .attr("width", width - 2)
-        .attr("height", sHeight)
+        .attr("height", summaryGroup_op.height)
         .attr("fill", "#fff")
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
@@ -667,20 +675,20 @@ function drawHorizontalView() {
     svgsum.append('svg')
         .attr("class", "summarySvg")
         .attr("width", width - 2)
-        .attr("height", sHeight);
+        .attr("height", summaryGroup_op.height);
     d3.select(".summaryText1")
         .html("Quanah HPC system: <b>" + hosts.length + "</b> hosts distributed in 10 racks");
 
 
     var currentTextGroup = svg.append('g')
         .attr("class", "currentTextGroup")
-        .attr('transform', 'translate(' + 10 + ',' + (sHeight - 36) + ')');
+        .attr('transform', 'translate(' + 10 + ',' + (summaryGroup_op.height - 36-10) + ')');
     svgsum.append("line")
         .attr("class", "currentTimeline")
         .attr("x1", 10)
         .attr("y1", 0)
         .attr("x2", 10)
-        .attr("y2", sHeight)
+        .attr("y2", summaryGroup_op.height)
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
         .style("stroke-dasharray", ("2, 2"));
@@ -723,7 +731,7 @@ function drawHorizontalView() {
     let linepointer = svg.append("line")
         .attr("class", "connectTimeline")
         .attr("x1", 10)
-        .attr("y1", sHeight + 15)
+        .attr("y1", summaryGroup_op.height + summaryGroup_op.margin.top)
         .attr("x2", 10)
         .attr("y2", 310)
         .attr("stroke", "#000")
@@ -776,62 +784,8 @@ function drawVerticalView() {
     d3.select(".summaryText1")
         .html("Quanah HPC system: <b>" + hosts.length + "</b> hosts distributed in 10 racks");
 
-    //
-    // var currentTextGroup = svg.append('g')
-    //     .attr("class", "currentTextGroup")
-    //     .attr('transform', 'translate(' + 10 + ',' + (sHeight - 36) + ')');
-    // svgsum.append("line")
-    //     .attr("class", "currentTimeline")
-    //     .attr("x1", 10)
-    //     .attr("y1", 0)
-    //     .attr("x2", 10)
-    //     .attr("y2", sHeight)
-    //     .attr("stroke", "#000")
-    //     .attr("stroke-width", 1)
-    //     .style("stroke-dasharray", ("2, 2"));
-    // currentTextGroup.append("text")
-    //     .attr("class", "currentText")
-    //     .attr("y", 0)
-    //     .attr("fill", "#000")
-    //     .style("text-anchor", "start")
-    //     .style("font-size", "12px")
-    //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-    //     .attr("font-family", "sans-serif")
-    //     .text("Latest REQUEST");
-    // currentTextGroup.append("text")
-    //     .attr("class", "currentHostText")
-    //     .attr("y", 18)
-    //     .attr("fill", "#000")
-    //     .style("text-anchor", "start")
-    //     .style("font-weight", "bold")
-    //     .style("font-size", "12px")
-    //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-    //     .attr("font-family", "sans-serif")
-    //     .text("Host");
-    // currentTextGroup.append("text")
-    //     .attr("class", "currentTimeText")
-    //     .attr("y", 36)
-    //     .attr("fill", "#000")
-    //     .style("text-anchor", "start")
-    //     .style("font-style", "italic")
-    //     .style("font-size", "12px")
-    //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-    //     .attr("font-family", "sans-serif")
-    //     .text("Time");
-
-
     initVerticalView();
 
-    // Draw line to connect current host and timeline in the Summary panel
-    // let linepointer = svg.append("line")
-    //     .attr("class", "connectTimeline")
-    //     .attr("x1", 10)
-    //     .attr("y1", sHeight + 15)
-    //     .attr("x2", 10)
-    //     .attr("y2", 310)
-    //     .attr("stroke", "#000")
-    //     .attr("stroke-width", 1)
-    //     .style("stroke-dasharray", ("2, 2"));
     // ********* REQUEST ******************************************
     xLinearSummaryScale = d3.scaleAdjust().range([0 - radarsize / 24, width + radarsize / 24]).domain([0, maxstack - 1]).itemsize(radarsize);
     //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
@@ -992,7 +946,7 @@ function request(){
                         .attr("y2", currentHostY);
 
                 svg.selectAll(".currentTextGroup")
-                    .attr('transform', 'translate(' + (x2 + 2) + ',' + (sHeight - 36) + ')');
+                    .attr('transform', 'translate(' + (x2 + 2) + ',' + (summaryGroup_op.height - 36 -10) + ')');
                 svg.selectAll(".currentText")
                     .text("Latest update:");
                 svg.selectAll(".currentTimeText")
@@ -1224,7 +1178,7 @@ function updateTimeText(index){
     boxtime.enter().append("text")
         .attr("class", "boxTime")
         .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
-        .attr("y", sHeight)
+        .attr("y", summaryGroup_op.height -10)
         .attr("fill", "#000")
         .style("font-style","italic")
         .style("text-anchor","end")
