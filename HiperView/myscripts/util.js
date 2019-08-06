@@ -861,7 +861,7 @@ function handlemissingimage(node,selectedService){
 
 let basic_service = {"Temperature":['temp'],
     "Job_load":['job'],
-    "Memory_usage":['memory'],
+    "Memory_usage":['memory','cups'],
     "Fans_speed":['fan'],
     "Power_consum":['power','Voltage']};
 
