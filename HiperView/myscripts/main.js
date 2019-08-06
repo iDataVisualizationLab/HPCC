@@ -1724,34 +1724,7 @@ function resetRequest(){
 function loadData(){
 
 }
-function addDatasetsOptions() {
-    let select= d3.select("#datasetsSelect")
-        .selectAll('li')
-        .data(serviceList_selected);
-    select.exit().remove();
-    let nselect = select
-        .enter()
-        .append('li')
-        .attr('class','collection-item avatar valign-wrapper');
 
-    nselect.append('img')
-        .attr('class',"circle");
-    nselect.append('h6').attr('class','title');
-    nselect.on("click",function(d){loadNewData(d.text)});
-
-    select = nselect.merge(select).attr('value',d=>d.text);
-    select.select('img').attr('src',d=>"images/"+d.text+".png");
-    select.select('h6').text(d=>d.text);
-
-    document.getElementById('datasetsSelect').value = serviceList.find(d=>d===initialService)||serviceList[0];  //************************************************
-    loadNewData(document.getElementById('datasetsSelect').value)
-    // selectedService = document.getElementById("datasetsSelect").value;
-    const trig = d3.select("#datasetsSelectTrigger");
-    trig.select('img').attr('src',"images/"+selectedService+".png");
-    trig.select('span').text(selectedService);
-
-    //loadData();
-}
 
 function loadNewData(d) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
@@ -1933,18 +1906,6 @@ d3.select("html").on("keydown", function() {
 
 });
 
-// ui part
-function openNav() {
-    d3.select("#mySidenav").classed("sideIn",true);
-    d3.select("#Maincontent").classed("sideIn",true);
-    // _.delay(resetSize, 500);
-}
-
-function closeNav() {
-    d3.select("#mySidenav").classed("sideIn",false);
-    d3.select("#Maincontent").classed("sideIn",false);
-    // _.delay(resetSize, 500);
-}
 // pause when not use , prevent frozen hiperView
 
 function updateSummaryChartAll() {
@@ -2199,19 +2160,6 @@ $( document ).ready(function() {
 
 });
 let profile = {};
-function changeRadarColor(d) {
-    profile.radarcolor = d.val;
-    d3.select('#RadarColor')
-        .select('.collapsible-header .colorscale-block').datum(d)
-        .call(createColorbox);
-    arrColor=d.arrColor;
-    UpdateGradient(svg);
-}
-function onClickRadarColor (d){
-    changeRadarColor(d);
-    TSneplot.RadarColor(d);
-    MetricController.updatecolor(arrColor);
-}
 
 function onfilterdata(schema) {
     //
@@ -2253,29 +2201,6 @@ function onSchemaUpdate(schema){
     // }
     if (db!=='csv')
         SaveStore();
-}
-function discovery(d){
-    d3.select(d).style('left','20px')
-        .classed("pulse",true)
-        .transition().delay(5000).duration(1000)
-        .style('left',null).on('end',function() {
-            d3.select(d).classed("pulse",false);
-    });
-
-}
-function switchTheme(){
-    if (this.value==="light"){
-        this.value = "dark";
-        this.querySelector('span').textContent = "Light";
-        d3.select('body').classed('light',false);
-        d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png");
-        return;
-    }
-    this.value = "light";
-    this.querySelector('span').textContent = "Dark";
-    d3.select('body').classed('light',true);
-    d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
-    return;
 }
 
 function onFinishInterval(data) {
@@ -2363,58 +2288,4 @@ function onFinishInterval(data) {
         }
     }
 
-}
-
-function downloadProfile(event){
-    $('#savename_profile').val("profile"+d3.timeFormat("%a%d%b_%H%M")(new Date()));
-}
-function onSaveProfile (){
-    var filename = $('#savename_profile').val()+".json";
-    var type = "json";
-    var str = JSON.stringify(conf);
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-            url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
-    }
-}
-function uploadProfile(){
-    $('#profile_input_file').trigger( "click" );
-    $('#profile_input_file').on('change', (evt) => {
-        var f = evt.target.files[0];
-        var reader = new FileReader();
-        reader.onload = (function(theFile) {
-            return function(e) {
-                // Render thumbnail.
-                d3.json(e.target.result,function (error, data) {
-                    if (error){
-                    }else{
-                        if (data.serviceLists[0].sub[0].angle ===undefined)
-                            throw "wrong file";
-                        conf = data;
-                        variablesNames.forEach(d=>{ window[d] = conf[d]});
-                        // relink object
-                        serviceFullList = serviceLists2serviceFullList(serviceLists);
-                        MetricController.axisSchema(serviceFullList).update();
-                    }
-                })
-                // span.innerHTML = ['<img class="thumb" src="', e.target.result,
-                //     '" title="', escape(theFile.name), '"/>'].join('');
-                // document.getElementById('list').insertBefore(span, null);
-            };
-        })(f);
-
-        // Read in the image file as a data URL.
-        reader.readAsDataURL(f);
-    })
 }
