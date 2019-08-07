@@ -282,9 +282,11 @@ function main (){
     });
 
     hadledata(graphicControl.mode);
+    orderSimilarity= similarityCal();
     cluster_map(data);
 }
 let data;
+let orderSimilarity;
 function hadledata(mode){
     data = Object.keys(clusterS).map((d,i)=>{
         let temp = serviceFullList.map(s=> {
@@ -294,7 +296,9 @@ function hadledata(mode){
             };
         });
         temp.name = d;
-        return [temp];
+        let temparr = [temp];
+        temparr.order = i;
+        return temparr;
     });
     switch (mode) {
         case 'label':
@@ -302,6 +306,9 @@ function hadledata(mode){
             break;
         case 'maxValue':
             data.sort((a,b)=>(d3.sum(a[0],e=>e.value)) - (d3.sum(b[0],e=>e.value))).forEach((d,i)=>d.order = i);;
+            break;
+        case 'similarity':
+            data.sort((a,b)=>(orderSimilarity[a.order]-orderSimilarity[b.order])).forEach((d,i)=>d.order = i);;
             break;
         default:
             data.forEach((d,i)=>d.order = i);
@@ -425,4 +432,53 @@ function drop(ev) {
     ev.preventDefault();
     // var data = ev.dataTransfer.getData("text");
     // ev.target.appendChild(document.getElementById(data));
+}
+
+function similarityCal(){
+    const n = data.length;
+    let simMatrix = [];
+    let mapIndex = [];
+    for (let i = 0;i<n; i++){
+        let temp_arr = [];
+        temp_arr.total = 0;
+        for (let j=i+1; j<n; j++){
+            let tempval = similarity(data[i][0],data[j][0]);
+            temp_arr.total += tempval;
+            temp_arr.push(tempval)
+        }
+        for (let j=0;j<i;j++)
+            temp_arr.total += simMatrix[j][i-1-j];
+        temp_arr.name = data[i][0].name;
+        temp_arr.index = i;
+        mapIndex.push(i);
+        simMatrix.push(temp_arr)
+    }
+    mapIndex.sort((a,b)=> {
+        simMatrix[a].total-simMatrix[b].total;
+    });
+    let current_index = mapIndex.pop();
+    let orderIndex = [simMatrix[current_index].index];
+
+    do{
+    let maxL = 0;
+    let maxI = 0;
+    mapIndex.forEach((d)=>{
+        let temp;
+        if (d>simMatrix[current_index].index ){
+            temp = simMatrix[current_index][d-current_index-1];
+        }else{
+            temp = simMatrix[current_index-d-1]
+        }
+        if (maxL<temp){
+            maxL = temp;
+            maxI = d;
+        }
+    });
+    orderIndex.push(simMatrix[maxI].index);
+    current_index = maxI;
+    mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);
+    return orderIndex;
+    function similarity (a,b){
+        return Math.sqrt(d3.mean(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+    }
 }
