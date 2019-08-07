@@ -1,7 +1,8 @@
 let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
-    mode:'seperate',
+    mode:'label',
+    modes:['label','maxValue','similarity'],
 },
     colorScaleList = {
     n: 7,
@@ -108,7 +109,6 @@ $( document ).ready(function() {
     // });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
-        exit_warp();
         spinnerOb.spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
@@ -146,14 +146,13 @@ $( document ).ready(function() {
             spinnerOb.spinner.stop();
         }
     });
-    $('#data_input_file').on('change', (evt) => {
+    $('#data_input_file').on('input', (evt) => {
         var f = evt.target.files[0];
         var reader = new FileReader();
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.
                 d3.select('.cover').classed('hidden', false);
-                exit_warp();
                 spinnerOb.spinner.spin(spinnerOb.target);
                 setTimeout(() => {
                     d3.csv(e.target.result,function (error, data) {
@@ -162,16 +161,14 @@ $( document ).ready(function() {
                             loadata1(data);
                             function loadata1(data){
                                 newdatatoFormat_cluster(data);
-
-                                inithostResults();
                                 processResult = processResult_csv;
                                 db = "csv";
                                 addDatasetsOptions()
                                 MetricController.axisSchema(serviceFullList,true).update();
-                                realTimesetting(false,"csv",true,data);
-                                d3.select(".currentDate")
-                                    .text("" + new Date(data[0].timestamp).toDateString());
-                                resetRequest();
+                                main();
+                                // d3.select(".currentDate")
+                                //     .text("" + new Date(data[0].timestamp).toDateString());
+                                // resetRequest();
                                 d3.select('.cover').classed('hidden', true);
                                 spinnerOb.spinner.stop();
                             }
@@ -241,7 +238,7 @@ function onSchemaUpdate(schema){
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
     // Radarplot.schema(serviceFullList,firstTime);
     if (!firstTime) {
-        cluster_map(data,graphicControl.mode);
+        cluster_map(data);
     }
     // }
     if (db!=='csv')
@@ -265,33 +262,50 @@ function initgraphic () {
 }
 function main (){
     firstTime = false;
+    data = [];
+    dataSum =[];
+    d3.select('.sumdragsvg').selectAll('*').remove();
+    d3.select('#sortorder').on('change',function(){
+        d3.select(this).interrupt();
+        graphicControl.mode = this.value;
+        hadledata(graphicControl.mode);
+        cluster_map(data);
+    });
+    d3.select('#sortorder').transition().duration(3000).on("end", function repeat() {
+        this.options.selectedIndex = (this.options.selectedIndex+1)%this.options.length;
+        graphicControl.mode = this.value;
+        hadledata(graphicControl.mode);
+        cluster_map(data);
+        d3.active(this)
+            .transition()
+            .on("start", repeat);
+    });
+
     hadledata(graphicControl.mode);
-    cluster_map(data,graphicControl.mode);
+    cluster_map(data);
 }
 let data;
 function hadledata(mode){
-    if (mode==='seperate'){
-        data = Object.keys(clusterS).map((d,i)=>{
-            let temp = serviceFullList.map(s=> {
-                return {
-                    axis: s.text,
-                    value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
-                };
-            });
-            temp.name = d;
-            return [temp];
+    data = Object.keys(clusterS).map((d,i)=>{
+        let temp = serviceFullList.map(s=> {
+            return {
+                axis: s.text,
+                value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
+            };
         });
-    }else{
-        data = Object.keys(clusterS).map((d,i)=>{
-            let temp = serviceFullList.map(s=> {
-                return {
-                    axis: s.text,
-                    value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
-                };
-            });
-            temp.name = d;
-            return temp;
-        });
+        temp.name = d;
+        return [temp];
+    });
+    switch (mode) {
+        case 'label':
+            data.sort((a,b)=>(+a[0].name) - (+b[0].name)).forEach((d,i)=>d.order = i);
+            break;
+        case 'maxValue':
+            data.sort((a,b)=>(d3.sum(a[0],e=>e.value)) - (d3.sum(b[0],e=>e.value))).forEach((d,i)=>d.order = i);;
+            break;
+        default:
+            data.forEach((d,i)=>d.order = i);
+            break;
     }
 }
 function loadNewData(d) {
@@ -325,24 +339,23 @@ let clustermap_opt = {
 clustermap_opt.xScale = d3.scaleLinear().range([clustermap_opt.w_t/2,3*clustermap_opt.w_t/2]);
 clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
-function cluster_map (data,mode) {
+function cluster_map (data) {
 
     let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
     let h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
     svg.selectAll('.radarCluster_sum').remove();
-    let r_old = svg.selectAll('.radarCluster').data(data);
+    let r_old = svg.selectAll('.radarCluster').data(data,d=>d[0].name);
     r_old.exit().remove();
     r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
         return d3.select('body').node();
     }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
-    let numg = Math.floor(MainOpt.widthG()/w_t);
+    let numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
     svg.selectAll('.radarCluster')
-        .attr('class',(d,i)=>'radarCluster radarh'+i)
-        .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(i%numg)+','+clustermap_opt.yScale(Math.floor(i/numg))+')')
-        .each((d,i)=>{
+        .attr('class',(d,i)=>'radarCluster radarh'+d.order)
+        .each(function(d,i){
             radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
-            RadarChart(".radarh"+i, d, radarChartclusteropt,"");
-        });
+            RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
+        }).transition().attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
 
     function ondragstart(){
         let node_clone = d3.select(this).node().cloneNode(true);
@@ -359,6 +372,7 @@ function cluster_map (data,mode) {
             });
         d3.select(s.node().appendChild(node_clone))
             .attr('class','clone_radar').datum(d3.select(this).datum());
+        console.log(d3.select(this).data())
         d3.select('.clone_radar').attr('transform','translate(0,0)');
     }
     function ondragged() {

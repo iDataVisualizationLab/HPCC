@@ -6,7 +6,7 @@
 
 <head>
 
-    <title>HiperView</title>
+    <title>ClusterMap</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <script src="../HiperView/js/jquery-3.3.1.js"></script>
     <script src="../HiperView/js/jquery.dd.js"></script>
@@ -337,16 +337,14 @@
                     <div class="details" ></div>
                 </div>
             </div>
-            <div>
-                <label for="sortorder" class="col s4"> SortBy: </label>
-                <div  class="row s12">
-                    <select id="sortorder" class="col s7">
-                        <!--<option value="dataframe_nodes" >26 Sep 2018</option>-->
-                        <option value="Mean_df" >Clusters example</option>
+            <div class="row valign-wrapper">
 
-                        <option value="csv">read files</option>
-                        <!--<option value="nagios">Real-time Nagios</option>-->
-                        <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
+                <label class='col' for="sortorder"> SortBy: </label>
+                <div  class="col">
+                    <select id="sortorder"  style="display: block;height:unset">
+                        <option value="label" >Input order</option>
+                        <option value="maxValue">Max All Dimension</option>
+                        <option value="similarity">Cluster Similarity</option>
                     </select>
                 </div>
             </div>
