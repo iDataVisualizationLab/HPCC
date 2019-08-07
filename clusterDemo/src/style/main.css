@@ -9,7 +9,29 @@ svg.mainmap {
 .sumdrag {
     position: absolute;
     /*transform: translate(-50%, -50%);*/
-    left: calc(50% - 300px);
-    top: calc(50% - 300px);
+    /*left: calc(50% - 300px);*/
+    /*top: calc(50% - 300px);  */
+    left: calc(100% - 600px - 20px);
+    top: calc(100% - 600px - 20px);
+    z-index: 9;
 
 }
+
+.tablesvg {
+    position: absolute;
+    max-height: 400px;
+    overflow-y: auto;
+    transition-duration: 1s;
+    background-color: #dddd;
+    color:black;
+}
+.tablesvg table {
+    width:100%;
+}
+.tablesvg tr td{
+    text-align: right;
+}
+.tablesvg tr td:first-child {
+    text-align: left;
+}
+.tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}

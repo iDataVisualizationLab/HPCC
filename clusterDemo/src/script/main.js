@@ -268,31 +268,33 @@ function main (){
     d3.select('#sortorder').on('change',function(){
         d3.select(this).interrupt();
         graphicControl.mode = this.value;
-        hadledata(graphicControl.mode);
+        handledata(graphicControl.mode);
         cluster_map(data);
+
     });
-    d3.select('#sortorder').transition().duration(3000).on("end", function repeat() {
+    d3.select('#sortorder').transition().duration(5000).on("end", function repeat() {
         this.options.selectedIndex = (this.options.selectedIndex+1)%this.options.length;
         graphicControl.mode = this.value;
-        hadledata(graphicControl.mode);
+        handledata(graphicControl.mode);
         cluster_map(data);
         d3.active(this)
             .transition()
             .on("start", repeat);
     });
 
-    hadledata(graphicControl.mode);
+    handledata(graphicControl.mode);
     orderSimilarity= similarityCal();
     cluster_map(data);
 }
 let data;
 let orderSimilarity;
-function hadledata(mode){
+function handledata(mode){
     data = Object.keys(clusterS).map((d,i)=>{
         let temp = serviceFullList.map(s=> {
             return {
                 axis: s.text,
                 value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
+                value_o: clusterS[d][s.text],
             };
         });
         temp.name = d;
@@ -324,9 +326,9 @@ function loadNewData(d) {
     trig.select('span').text(selectedService);
 }
 let radarChartclusteropt  = {
-    margin: {top: 10, right: 10, bottom: 10, left: 10},
-    w: 200,
-    h: 200,
+    margin: {top: 50, right: 50, bottom: 50, left: 50},
+    w: 300,
+    h: 300,
     radiuschange: false,
     levels:6,
     dotRadius:2,
@@ -346,6 +348,7 @@ let clustermap_opt = {
 clustermap_opt.xScale = d3.scaleLinear().range([clustermap_opt.w_t/2,3*clustermap_opt.w_t/2]);
 clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
+let numg
 function cluster_map (data) {
 
     let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
@@ -356,19 +359,20 @@ function cluster_map (data) {
     r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
         return d3.select('body').node();
     }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
-    let numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
+    numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
     svg.selectAll('.radarCluster')
         .attr('class',(d,i)=>'radarCluster radarh'+d.order)
         .each(function(d,i){
             radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
             RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
-        }).transition().attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
-
+        }).transition().duration(1000).attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
+    tableCreate_svg(data)
     function ondragstart(){
         let node_clone = d3.select(this).node().cloneNode(true);
         const s = d3.select('body') .append('svg')
             .styles({
                 'position':'absolute',
+                'z-index':10,
                 // 'transform': 'translate(-50%, -50%)',
                 'top': d3.event.y,
                 'left': d3.event.x,})
@@ -379,7 +383,7 @@ function cluster_map (data) {
             });
         d3.select(s.node().appendChild(node_clone))
             .attr('class','clone_radar').datum(d3.select(this).datum());
-        console.log(d3.select(this).data())
+
         d3.select('.clone_radar').attr('transform','translate(0,0)');
     }
     function ondragged() {
@@ -481,4 +485,39 @@ function similarityCal(){
     function similarity (a,b){
         return Math.sqrt(d3.mean(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
     }
+}
+
+function tableCreate_svg(data){
+    let divt = d3.select(svg.node().parentNode.parentNode);
+    let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name).data(data);
+    table.exit().remove();
+    let table_n = table.enter().append('div').attr('class','tablesvg').append('table');
+    // table_n.append('thead').append('tr');
+    table_n.append('tbody');
+
+    table = divt.selectAll('.tablesvg table');
+    divt.selectAll('.tablesvg').styles({
+        'width': clustermap_opt.w_t+'px',
+        // 'margin-left': radarChartclusteropt.margin.left+'px',
+        top: d=>(clustermap_opt.yScale(Math.floor(d.order/numg)+1)+50)+'px',
+        left: d=>clustermap_opt.xScale(d.order%numg)+'px',
+    }).on('scroll',function(){
+        $('.tablesvg').scrollTop(this.scrollTop);
+    });
+
+    // let thead = table.select('thead tr').selectAll('th').data(d=>d[0].map(e=>e.axis));
+    // thead.exit().remove();
+    // thead.enter().append('th')
+    //     .merge(thead)
+    //     .text(d=>d);
+    let tr = table.select('tbody').selectAll('tr').data(d=>d[0]);
+    tr.exit().remove();
+    let td = tr.enter().append('tr')
+        .merge(tr)
+        .selectAll('td').data(d=>[d.axis,d.value_o]);
+    td.exit().remove();
+    td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
+}
+function formatnumber(num){
+
 }
