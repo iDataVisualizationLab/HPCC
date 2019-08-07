@@ -35,3 +35,10 @@ svg.mainmap {
     text-align: left;
 }
 .tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}
+
+button.play i:after{
+    content: 'play_arrow'
+}
+button.play.pause i:after{
+    content: 'pause'
+}

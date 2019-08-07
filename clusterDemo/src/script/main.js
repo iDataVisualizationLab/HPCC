@@ -272,15 +272,7 @@ function main (){
         cluster_map(data);
 
     });
-    d3.select('#sortorder').transition().duration(5000).on("end", function repeat() {
-        this.options.selectedIndex = (this.options.selectedIndex+1)%this.options.length;
-        graphicControl.mode = this.value;
-        handledata(graphicControl.mode);
-        cluster_map(data);
-        d3.active(this)
-            .transition()
-            .on("start", repeat);
-    });
+    triggersortPlay();
 
     handledata(graphicControl.mode);
     orderSimilarity= similarityCal();
@@ -517,6 +509,28 @@ function tableCreate_svg(data){
         .selectAll('td').data(d=>[d.axis,d.value_o]);
     td.exit().remove();
     td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
+}
+function triggersortPlay(){
+    d3.select('#sortorder').transition().duration(5000).on("end", function repeat() {
+        this.options.selectedIndex = (this.options.selectedIndex+1)%this.options.length;
+        graphicControl.mode = this.value;
+        handledata(graphicControl.mode);
+        cluster_map(data);
+        d3.active(this)
+            .transition()
+            .on("start", repeat);
+    });
+}
+function sortplay(event){
+    if(event.value=='pause'){
+        d3.select(this).interrupt();
+        event.value='play';
+        event.classList.remove('pause');
+    }else{
+        triggersortPlay();
+        event.value='pause';
+        event.classList.add('pause');
+    }
 }
 function formatnumber(num){
 
