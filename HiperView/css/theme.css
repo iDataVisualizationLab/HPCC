@@ -414,5 +414,5 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 }
 
 table {
-    word-break: break-all
+    word-break: break-all;
 }

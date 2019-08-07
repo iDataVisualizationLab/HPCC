@@ -5,3 +5,11 @@
 svg.mainmap {
     background-color: white;
 }
+
+.sumdrag {
+    position: absolute;
+    /*transform: translate(-50%, -50%);*/
+    left: 50%;
+    top:50%;
+
+}

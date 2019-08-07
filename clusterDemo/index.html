@@ -65,9 +65,10 @@
         </ul>
         <ul class="right">
             <!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
-            <li class="tab active"><a class="active" href="#">HiperView</a></li>
+            <li class="tab active"><a class="active" href="#">ClusterMap</a></li>
             <li class="nav__menu">OTHER LINKS
                 <ul class="nav__menu-lists nav__menu--2-lists">
+                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/index.html">HiperView</a></li>
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
@@ -109,7 +110,7 @@
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
                     </div>
-                    <label for="datacom" class="col s4"> Dataset: </label>
+                    <label for="datacom" class="col s4"> DatasetInput: </label>
                     <div class="row s12">
                         <input id="data_input_file" class="none" type="file" />
                     </div>
@@ -336,12 +337,30 @@
                     <div class="details" ></div>
                 </div>
             </div>
+            <div>
+                <label for="sortorder" class="col s4"> SortBy: </label>
+                <div  class="row s12">
+                    <select id="sortorder" class="col s7">
+                        <!--<option value="dataframe_nodes" >26 Sep 2018</option>-->
+                        <option value="Mean_df" >Clusters example</option>
+
+                        <option value="csv">read files</option>
+                        <!--<option value="nagios">Real-time Nagios</option>-->
+                        <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
+                    </select>
+                </div>
+            </div>
             <svg width="2600" height="1000" class="mainsvg" ></svg>
+
         </div>
     </div>
 
 </div>
-
+<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>
+    <button style="position:absolute;right: 0;margin: 10px;" id = 'deselectChart'>Deselect Charts</button>
+    <svg width="600" height="600" class="sumdragsvg" ></svg>
+</div>
 <div id="savedialog" class="modal custom">
     <div class="modal-content">
         <div class="input-field col s6">

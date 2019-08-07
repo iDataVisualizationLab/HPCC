@@ -82,6 +82,10 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
     $('.sidenav').sidenav();
+    d3.select('#dragChart').call(d3.drag().container(function(){return this.parentNode.parentNode;}).on("drag", function () {
+        d3.select('.sumdrag')
+            .styles({"left": d3.event.x+'px',"top": d3.event.y+'px'});
+    }));
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
@@ -230,7 +234,7 @@ function onSchemaUpdate(schema){
         ser.enable = schema.axis[ser.text].data.enable;
     });
     radarChartclusteropt.schema = serviceFullList;
-
+    radarChartclusterSumopt.schema = serviceFullList;
     // radarChartOptions.schema = serviceFullList;
     // if (graphicControl.charType === "T-sne Chart")
     // TSneplot.schema(serviceFullList,firstTime);
@@ -305,7 +309,7 @@ let radarChartclusteropt  = {
     radiuschange: false,
     levels:6,
     dotRadius:2,
-    strokeWidth:2,
+    strokeWidth:1,
     maxValue: 0.5,
     isNormalize:true,
     showHelperPoint: false,
@@ -314,37 +318,97 @@ let radarChartclusteropt  = {
     ringColor:'black',
     fillin:0.5,
     showText: false};
+let clustermap_opt = {
+    w_t: radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right,
+    h_t: radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom,
+}
+clustermap_opt.xScale = d3.scaleLinear().range([clustermap_opt.w_t/2,3*clustermap_opt.w_t/2]);
+clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
+let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
 function cluster_map (data,mode) {
-    if (mode!=="seperate"){
-        let r_old = svg.selectAll('.radarCluster');
-        r_old.transition()
-            .attr('transform','translate('+(MainOpt.widthG()/2)+','+radarChartclusteropt.h/2+')')
-            .each('end',function(d){d3.select(d).remove()});
-        let svg_sum = svg.select('.radarCluster_sum');
-        if (svg_sum.empty())
-            svg_sum = svg.append('g').attr('class','radarCluster_sum') .attr('transform','translate('+(MainOpt.widthG()/2)+','+radarChartclusteropt.h/2+')');
-        radarChartclusteropt.color = ()=>'black';
-        RadarChart(".radarCluster_sum", data, radarChartclusteropt,"");
-    }else{
-        let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
-        let h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
-        let xScale = d3.scaleLinear().range([w_t/2,3*w_t/2]);
-        let yScale = d3.scaleLinear().range([h_t/2,3*h_t/2]);
-        svg.selectAll('.radarCluster_sum').remove();
-        let r_old = svg.selectAll('.radarCluster').data(data);
-        r_old.exit().remove();
-        r_old.enter().append('g').attr('class','radarCluster');
-        let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
-        let numg = Math.floor(MainOpt.widthG()/w_t);
-        svg.selectAll('.radarCluster')
-            .attr('class',(d,i)=>'radarCluster radarh'+i)
-            .attr('transform',(d,i)=>'translate('+xScale(i%numg)+','+yScale(Math.floor(i/numg))+')')
-            .each((d,i)=>{
-                radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
-                RadarChart(".radarh"+i, d, radarChartclusteropt,"");
+
+    let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
+    let h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
+    svg.selectAll('.radarCluster_sum').remove();
+    let r_old = svg.selectAll('.radarCluster').data(data);
+    r_old.exit().remove();
+    r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
+        return d3.select('body').node();
+    }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
+    let numg = Math.floor(MainOpt.widthG()/w_t);
+    svg.selectAll('.radarCluster')
+        .attr('class',(d,i)=>'radarCluster radarh'+i)
+        .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(i%numg)+','+clustermap_opt.yScale(Math.floor(i/numg))+')')
+        .each((d,i)=>{
+            radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
+            RadarChart(".radarh"+i, d, radarChartclusteropt,"");
         });
 
+    function ondragstart(){
+        let node_clone = d3.select(this).node().cloneNode(true);
+        const s = d3.select('body') .append('svg')
+            .styles({
+                'position':'absolute',
+                // 'transform': 'translate(-50%, -50%)',
+                'top': d3.event.y,
+                'left': d3.event.x,})
+            .attrs({
+                'class': 'clone_svg',
+                'width':clustermap_opt.w_t,
+                'height':clustermap_opt.h_t,
+            });
+        d3.select(s.node().appendChild(node_clone))
+            .attr('class','clone_radar').datum(d3.select(this).datum());
+        d3.select('.clone_radar').attr('transform','translate(0,0)');
+    }
+    function ondragged() {
+        d3.select('.clone_svg').styles({
+            'top': d3.event.y,
+            'left': d3.event.x,})
+    }
+    function ondragend() {
+        // Define boundary
+        const targetsize = $('.sumdrag')[0].getBoundingClientRect();
+        const thissize = $('.clone_svg')[0].getBoundingClientRect();
+        if ((thissize.x>=(targetsize.x)&&thissize.x<=(targetsize.x+targetsize.width))&&(thissize.y>=(targetsize.y)&&thissize.y<=(targetsize.y+targetsize.height))){
+            const newData = d3.select('.clone_radar').datum()[0]
+            if (dataSum.find(d=>d.name===newData.name)===undefined)
+                dataSum.push(d3.select('.clone_radar').datum()[0]);
+            clusterSum ()
+        }
+        d3.select('.clone_svg').remove();
     }
 
+}
+let dataSum=[];
+let radarChartclusterSumopt  = {
+    margin: {top: 50, right: 50, bottom: 50, left: 50},
+    w: 500,
+    h: 500,
+    radiuschange: false,
+    levels:6,
+    dotRadius:2,
+    strokeWidth:2,
+    maxValue: 0.5,
+    isNormalize:true,
+    showHelperPoint: false,
+    roundStrokes: true,
+    ringStroke_width: 0.15,
+    ringColor:'black',
+    showText: false};
 
+function clusterSum (){
+    radarChartclusterSumopt.color = (i,d)=>categoryScale(d.name);
+    RadarChart(".sumdragsvg", dataSum, radarChartclusterSumopt,"");
+    d3.select('#deselectChart').on('click',function(){dataSum=[];d3.select('.sumdragsvg').selectAll('*').remove()})
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+function drop(ev) {
+    console.log('here');
+    ev.preventDefault();
+    // var data = ev.dataTransfer.getData("text");
+    // ev.target.appendChild(document.getElementById(data));
 }

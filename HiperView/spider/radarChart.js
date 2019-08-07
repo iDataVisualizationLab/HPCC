@@ -366,10 +366,10 @@ function RadarChart(id, data, options, name) {
             });
 
             return radialAreaGenerator(d);}).transition()
-            .style("stroke", (d, i) => cfg.color(i))
+            .style("stroke", (d, i) => cfg.color(i,d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("fill-opacity", d => densityscale(d.bin.val.length))
-            .style("fill", (d, i) => cfg.color(i));
+            .style("fill", (d, i) => cfg.color(i,d));
     }
 
 
@@ -422,7 +422,7 @@ function RadarChart(id, data, options, name) {
         blobWrapperpath.style("fill", "none").transition()
             .attr("d", d => radialAreaGenerator(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
-            .style("stroke", (d, i) => cfg.color(i));
+            .style("stroke", (d, i) => cfg.color(i,d));
         blobWrapperg.select('clipPath')
             .select('path')
             .transition('expand').ease(d3.easePolyInOut)
@@ -446,7 +446,7 @@ function RadarChart(id, data, options, name) {
             .transition()
             .style("stroke-width", () => cfg.strokeWidth + "px")
             //.style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
-            .style("stroke", (d, i) => cfg.color(i));
+            .style("stroke", (d, i) => cfg.color(i,d));
         blobWrapper
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
 
@@ -456,19 +456,19 @@ function RadarChart(id, data, options, name) {
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))
             .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
-            .style("fill", (d,i)=>cfg.fillin?cfg.color(i):"none")
+            .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
-            .style("stroke", (d, i) => cfg.color(i));
+            .style("stroke", (d, i) => cfg.color(i,d));
         //Create the outlines
         blobWrapper.append("path")
             .attr("class", "radarStroke")
             .attr("d", d => radarLine(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
-            .style("stroke", (d, i) => cfg.color(i))
+            .style("stroke", (d, i) => cfg.color(i,d))
             .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
-            .style("fill", (d,i)=>cfg.fillin?cfg.color(i):"none");
+            .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none");
     }
         //.style("filter" , "url(#glow2)");
     blobWrapperpath = g.selectAll(".radarWrapper").selectAll(".radarStroke");
@@ -617,7 +617,7 @@ function RadarChart(id, data, options, name) {
     //     .append("path")
     //     .attr("class", "radarArea")
     //     .attr("d", function(d,i) { return radarLine(d); })
-    //     .style("fill", function(d,i) { return cfg.color(i); })
+    //     .style("fill", function(d,i) { return cfg.color(i,d); })
     //     .style("fill-opacity", 0.05)
     //     .on('mouseover', function (d,i){
     //         //Dim all blobs
