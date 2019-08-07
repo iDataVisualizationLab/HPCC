@@ -1,3 +1,7 @@
 :root {
     --sideNavwidth: 400px;
 }
+
+svg.mainmap {
+    background-color: white;
+}

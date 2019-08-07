@@ -29,6 +29,10 @@ function RadarChart(id, data, options, name) {
         arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
         legend: [],
         mini:false,
+        fillin:false,
+        ringColor: undefined,
+        pathColor: undefined,
+        ringStroke_width: 0.5,
         schema: undefined,
         color: function () {
             return 'rgb(167, 167, 167)'
@@ -112,6 +116,7 @@ function RadarChart(id, data, options, name) {
         const ditem_filtered = ditem.filter(d=>allAxis.find(e=>e.text===d.axis));
         let temp = _.sortBy(ditem_filtered,d=>allAxis.find(e=>e.text===d.axis).angle);
         temp.type = ditem.type;
+        temp.name = ditem.name;
         temp.bin = ditem.bin; return temp;});
     //Scale for the radius
     rScale = d3.scaleLinear()
@@ -228,10 +233,13 @@ function RadarChart(id, data, options, name) {
             })
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
-                var v = (maxValue - minValue) * d / cfg.levels + minValue;
-                return colorTemperature(v);
+                if (cfg.ringColor===undefined) {
+                    var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                    return colorTemperature(v);
+                }
+                return cfg.ringColor;
             })
-            .style("stroke-width", 0.3)
+            .style("stroke-width", cfg.ringStroke_width===undefined?0.3:cfg.ringStroke_width)
             .style("stroke-opacity", 1)
             .style("fill-opacity", cfg.opacityCircles)
             .style("filter", "url(#glow)")
@@ -311,8 +319,8 @@ function RadarChart(id, data, options, name) {
     var radarLine = d3.radialLine()
        // .interpolate("linear-closed")
        .curve(d3.curveCatmullRom.alpha(0.5))
-        .radius(function(d) { return rScale(d.value||d); })
-        .angle(function(d,i) {  return getAngle(d,i); });
+        .radius(function(d) {return rScale(d.value===undefined?d:d.value); })
+        .angle(function(d,i) {return getAngle(d,i); });
 
     var radialAreaGenerator = d3.radialArea()
         .angle(function(d,i) {  return getAngle(d,i); })
@@ -447,7 +455,8 @@ function RadarChart(id, data, options, name) {
     }
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))
-            .style("fill", "none")
+            .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
+            .style("fill", (d,i)=>cfg.fillin?cfg.color(i):"none")
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i));
@@ -458,7 +467,8 @@ function RadarChart(id, data, options, name) {
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i))
-            .style("fill", "none");
+            .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
+            .style("fill", (d,i)=>cfg.fillin?cfg.color(i):"none");
     }
         //.style("filter" , "url(#glow2)");
     blobWrapperpath = g.selectAll(".radarWrapper").selectAll(".radarStroke");

@@ -412,3 +412,7 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 .no_padding {
     padding :0!important;
 }
+
+table {
+    word-break: break-all
+}

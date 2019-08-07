@@ -1,6 +1,7 @@
 let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
+    mode:'seperate',
 },
     colorScaleList = {
     n: 7,
@@ -228,13 +229,15 @@ function onSchemaUpdate(schema){
         ser.angle = schema.axis[ser.text].angle();
         ser.enable = schema.axis[ser.text].data.enable;
     });
+    radarChartclusteropt.schema = serviceFullList;
+
     // radarChartOptions.schema = serviceFullList;
     // if (graphicControl.charType === "T-sne Chart")
     // TSneplot.schema(serviceFullList,firstTime);
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
     // Radarplot.schema(serviceFullList,firstTime);
     if (!firstTime) {
-        // updateSummaryChartAll();
+        cluster_map(data,graphicControl.mode);
     }
     // }
     if (db!=='csv')
@@ -243,7 +246,7 @@ function onSchemaUpdate(schema){
 function onfilterdata(schema) {}
 initgraphic ();
 function initgraphic () {
-    svg = d3.select(".mainsvg"),
+    svg = d3.select(".mainsvg").attr('class','mainmap'),
         MainOpt.width = +document.getElementById("mainBody").offsetWidth,
         heightdevice = + document.getElementById("mainBody").offsetHeight,
         MainOpt.height = heightdevice;
@@ -257,7 +260,35 @@ function initgraphic () {
                 "translate(" + MainOpt.margin.left + "," + MainOpt.margin.top + ")");
 }
 function main (){
-
+    firstTime = false;
+    hadledata(graphicControl.mode);
+    cluster_map(data,graphicControl.mode);
+}
+let data;
+function hadledata(mode){
+    if (mode==='seperate'){
+        data = Object.keys(clusterS).map((d,i)=>{
+            let temp = serviceFullList.map(s=> {
+                return {
+                    axis: s.text,
+                    value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
+                };
+            });
+            temp.name = d;
+            return [temp];
+        });
+    }else{
+        data = Object.keys(clusterS).map((d,i)=>{
+            let temp = serviceFullList.map(s=> {
+                return {
+                    axis: s.text,
+                    value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
+                };
+            });
+            temp.name = d;
+            return temp;
+        });
+    }
 }
 function loadNewData(d) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
@@ -266,4 +297,54 @@ function loadNewData(d) {
     const trig = d3.select("#datasetsSelectTrigger");
     trig.select('img').attr('src',srcpath+"images/"+selectedService+".png").on('error',function(){handlemissingimage(this,selectedService)});
     trig.select('span').text(selectedService);
+}
+let radarChartclusteropt  = {
+    margin: {top: 10, right: 10, bottom: 10, left: 10},
+    w: 200,
+    h: 200,
+    radiuschange: false,
+    levels:6,
+    dotRadius:2,
+    strokeWidth:2,
+    maxValue: 0.5,
+    isNormalize:true,
+    showHelperPoint: false,
+    roundStrokes: true,
+    ringStroke_width: 0.15,
+    ringColor:'black',
+    fillin:0.5,
+    showText: false};
+function cluster_map (data,mode) {
+    if (mode!=="seperate"){
+        let r_old = svg.selectAll('.radarCluster');
+        r_old.transition()
+            .attr('transform','translate('+(MainOpt.widthG()/2)+','+radarChartclusteropt.h/2+')')
+            .each('end',function(d){d3.select(d).remove()});
+        let svg_sum = svg.select('.radarCluster_sum');
+        if (svg_sum.empty())
+            svg_sum = svg.append('g').attr('class','radarCluster_sum') .attr('transform','translate('+(MainOpt.widthG()/2)+','+radarChartclusteropt.h/2+')');
+        radarChartclusteropt.color = ()=>'black';
+        RadarChart(".radarCluster_sum", data, radarChartclusteropt,"");
+    }else{
+        let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
+        let h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
+        let xScale = d3.scaleLinear().range([w_t/2,3*w_t/2]);
+        let yScale = d3.scaleLinear().range([h_t/2,3*h_t/2]);
+        svg.selectAll('.radarCluster_sum').remove();
+        let r_old = svg.selectAll('.radarCluster').data(data);
+        r_old.exit().remove();
+        r_old.enter().append('g').attr('class','radarCluster');
+        let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
+        let numg = Math.floor(MainOpt.widthG()/w_t);
+        svg.selectAll('.radarCluster')
+            .attr('class',(d,i)=>'radarCluster radarh'+i)
+            .attr('transform',(d,i)=>'translate('+xScale(i%numg)+','+yScale(Math.floor(i/numg))+')')
+            .each((d,i)=>{
+                radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
+                RadarChart(".radarh"+i, d, radarChartclusteropt,"");
+        });
+
+    }
+
+
 }

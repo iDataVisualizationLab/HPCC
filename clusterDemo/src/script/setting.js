@@ -51,14 +51,13 @@ function newdatatoFormat_cluster (data){
     serviceFullList = serviceLists2serviceFullList(serviceLists);
     label_name = data.map(d=>d.labels);
     clusterS = {};
-    data.forEach(d=>{
-        label_name.forEach(h=> {
+    data.forEach((d,i)=>{
+
             let temp ={};
-            serviceList.forEach((s,i)=>{
+            serviceLists.forEach((s,i)=>{
                 temp[s.text] = d[variables[i]]
             })
-            clusterS[h] = temp;
-        })
+            clusterS[d.labels] = temp;
     });
 }
 let clusterS ={};
