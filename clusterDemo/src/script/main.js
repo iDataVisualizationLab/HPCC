@@ -81,7 +81,8 @@ $( document ).ready(function() {
     });
     var array_of_dom_elements = document.querySelectorAll("input[type=range]");
     M.Range.init(array_of_dom_elements);
-    $('#radarzoom').on('change',function(){updateRdarSize(this)})
+    $('#radarzoom').on('change',function(){updateRdarSize(this)}).on('input',function(){
+        $('#radarzoomdisplay').text(this.value)})
     $('.collapsible').collapsible();
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
@@ -89,6 +90,7 @@ $( document ).ready(function() {
     $('.sidenav').sidenav();
     initgraphic ();
     $('#radarzoom').val(radarChartclusteropt.w);
+    $('#radarzoomdisplay').text(Math.round(radarChartclusteropt.w));
 
     d3.select('#dragChart').call(d3.drag().container(function(){return this.parentNode.parentNode;}).on("drag", function () {
         d3.select('.sumdrag')
