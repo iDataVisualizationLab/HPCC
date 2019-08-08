@@ -156,7 +156,9 @@ function newdatatoFormat (data){
             node: 1,//.split('.')[3],
             id : nameh,
         };
-        keys[split_string.join('-')]=1;
+        let currentkey = split_string.join('-');
+        const keys_replace =Object.keys(basic_service).map(k=>extractWordsCollection(getTermsArrayCollection(k),currentkey,k)).filter(d=>Object.keys(d).length);
+        keys[currentkey]=Object.keys(keys_replace[0])[0]||0;
     });
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
@@ -172,7 +174,9 @@ function newdatatoFormat (data){
         };
         serviceList.push(k);
         serviceListattr.push(k);
-        const range = d3.extent(data,d=>d[variables[i]]);
+        let range = d3.extent(data,d=>d[variables[i]]);
+        if (keys[k])
+            range = serviceLists_or.find(d=>d.text===keys[k]).sub[0].range;
         const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(variables.length-1),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);

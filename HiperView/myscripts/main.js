@@ -1984,52 +1984,56 @@ $( document ).ready(function() {
         spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
-        if (db==='csv'){ //reload hostlist
-            d3.json('data/hotslist_Quanah.json',function(error,data){
-                if(error) {
-                }else{
-                    firstTime = true;
-                    hostList = data;
-                    systemFormat();
-                    inithostResults();
-                    MetricController.axisSchema(serviceFullList,true).update();
-                    addDatasetsOptions()
-                }
-            });
-        }
-        setTimeout(() => {
-            if (choice !== "nagios" && choice !== "influxdb") {
+        if (choice!=='csv') {
+            if (db === 'csv') { //reload hostlist
+                d3.json('data/hotslist_Quanah.json', function (error, data) {
+                    if (error) {
+                    } else {
+                        firstTime = true;
+                        hostList = data;
+                        systemFormat();
+                        inithostResults();
+                        MetricController.axisSchema(serviceFullList, true).update();
+                        addDatasetsOptions()
+                    }
+                });
+            }
+            setTimeout(() => {
+                if (choice !== "nagios" && choice !== "influxdb") {
 //                 d3.json("data/" + choice + ".json", function (error, data) {
 //                     if (error) {
-                d3.json("data/" + choice + ".json", function (error, data) {
-                    if (error){
-                        M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                            if (error){
+                    d3.json("data/" + choice + ".json", function (error, data) {
+                        if (error) {
+                            M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                            d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                                if (error) {
 
-                            }
-                            loadata1(data)
-                        });
-                        return;
-                    }
-                    loadata1(data)
-                });
+                                }
+                                loadata1(data)
+                            });
+                            return;
+                        }
+                        loadata1(data)
+                    });
 //                         return;
 //                     }
 //                     loadata1(data)
 //                 });
-            }
-            else {
-                d3.select(".currentDate")
-                    .text("" + (new Date()).toDateString());
-                realTimesetting(true,choice);
-                db = choice;
-                requestService = eval('requestService'+choice);
-                processResult = eval('processResult_'+choice);
-                d3.select('.cover').classed('hidden', true);
-                spinner.stop();
-            }
-        },0);
+                }
+                else {
+                    d3.select(".currentDate")
+                        .text("" + (new Date()).toDateString());
+                    realTimesetting(true, choice);
+                    db = choice;
+                    requestService = eval('requestService' + choice);
+                    processResult = eval('processResult_' + choice);
+                    d3.select('.cover').classed('hidden', true);
+                    spinner.stop();
+                }
+            }, 0);
+        }else{
+            $('#data_input_file').trigger('click');
+        }
         function loadata1(data){
             sampleS = data;
             if (choice.includes('influxdb')){
@@ -2048,7 +2052,7 @@ $( document ).ready(function() {
             spinner.stop();
         }
     });
-    $('#data_input_file').on('change', (evt) => {
+    $('#data_input_file').on('input', (evt) => {
         var f = evt.target.files[0];
         var reader = new FileReader();
         reader.onload = (function(theFile) {

@@ -89,7 +89,7 @@ function RadarChart(id, data, options, name) {
     var right = 1 + dif;
     cfg.arrThresholds = [-dif];
     for (var i=0;i<colorLength-1;i++)
-        cfg.arrThresholds.push(i/(colorLength-1));
+        cfg.arrThresholds.push(i*dif);
     cfg.arrThresholds.push(right);
     colorTemperature = d3.scaleLinear()
         .domain(cfg.arrThresholds)
@@ -241,7 +241,7 @@ function RadarChart(id, data, options, name) {
         var axisGrid = g.select(".axisWrapper");
 
         //Draw the background circles
-        var levels = axisGrid.selectAll(".levels")
+        var levels = axisGrid.selectAll(".levels.gridCircle")
             .data(d3.range(1, (cfg.levels + 1)).reverse());
         levels.exit().remove();
         levels.enter()

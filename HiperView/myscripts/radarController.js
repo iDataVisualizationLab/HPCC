@@ -35,7 +35,7 @@ let radarController = function () {
     var right = 1 + dif;
     graphicopt.arrThresholds = [-dif];
     for (var i=0;i<colorLength-1;i++)
-        graphicopt.arrThresholds.push(i/(colorLength-1));
+        graphicopt.arrThresholds.push(i*dif);
     graphicopt.arrThresholds.push(right);
     let colorTemperature = d3.scaleLinear()
         .domain(graphicopt.arrThresholds)
@@ -421,7 +421,7 @@ let radarController = function () {
                     })
                     .style("fill", graphicopt.gradient?'white':"#CDCDCD")
                     .style("stroke", function (d) {
-                        var v = (d) / (graphicopt.levels-1);
+                        var v = (d) / (graphicopt.levels-2);
                         return graphicopt.gradient? '#d0d0d0': colorTemperature(v);
                     })
                     .style("stroke-width", 0.3)
