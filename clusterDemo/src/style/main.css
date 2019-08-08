@@ -19,7 +19,7 @@ svg.mainmap {
 
 .tablesvg {
     position: absolute;
-    max-height: 400px;
+    max-height: 250px;
     overflow-y: auto;
     transition-duration: 1s;
     background-color: #dddd;
@@ -46,8 +46,45 @@ svg.mainmap {
 .tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}
 
 button.play i:after{
-    content: 'play_arrow'
+    content: 'play_arrow';
+    animation:  bounceIn 2s ease-in-out 3s 2;
+}
+button.play{
+    animation:  bounceIn 2s ease-in-out 3s 2;
 }
 button.play.pause i:after{
     content: 'pause'
+}
+
+.pulse_custom {
+    box-shadow: 0 0 0 rgba(204,169,44, 0.4);
+    animation: pulse 2s infinite;
+}
+.pulse_custom:hover {
+    animation: none;
+}
+@-webkit-keyframes pulse {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(38, 255, 203, 0.8);
+    }
+    70% {
+        -webkit-box-shadow: 0 0 0 10px rgba(38, 204, 176, 0);
+    }
+    100% {
+        -webkit-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+    }
+}
+@keyframes pulse {
+    0% {
+        -moz-box-shadow: 0 0 0 0 rgba(62, 255, 236, 0.8);
+        box-shadow: 0 0 0 0 rgba(41, 255, 211, 0.4);
+    }
+    70% {
+        -moz-box-shadow: 0 0 0 10px rgba(38, 204, 176, 0);
+        box-shadow: 0 0 0 10px rgba(38, 204, 176, 0.1);
+    }
+    100% {
+        -moz-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+        box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+    }
 }

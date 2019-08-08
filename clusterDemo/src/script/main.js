@@ -374,7 +374,7 @@ function loadNewData(d) {
     trig.select('span').text(selectedService);
 }
 let radarChartclusteropt  = {
-    margin: {top: 50, right: 50, bottom: 50, left: 50},
+    margin: {top: 20, right: 20, bottom: 20, left: 20},
     w: 300,
     h: 300,
     radiuschange: false,
@@ -397,6 +397,14 @@ clustermap_opt.xScale = d3.scaleLinear().range([0,clustermap_opt.w_t]);
 clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
 let numg;
+function updateRdarSize () {
+    radarChartclusteropt.w = this.value;
+    radarChartclusteropt.h = this.value;
+    clustermap_opt.w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
+    clustermap_opt.h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
+    handledata(graphicControl.mode);
+    handledata_sumary();
+}
 function cluster_map (data) {
 
     // loading bar
@@ -595,10 +603,12 @@ function triggersortPlay(){
 function sortplay(event){
     if(event.value=='pause'){
         d3.select('#sortorder').interrupt();
+        $('#sortorder').removeClass('pulse_custom');
         event.value='play';
         event.classList.remove('pause');
     }else{
         triggersortPlay();
+        $('#sortorder').addClass('pulse_custom');
         event.value='pause';
         event.classList.add('pause');
     }
