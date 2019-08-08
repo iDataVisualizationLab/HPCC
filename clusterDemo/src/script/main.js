@@ -79,6 +79,9 @@ $( document ).ready(function() {
         direction: 'left',
         hoverEnabled: false
     });
+    var array_of_dom_elements = document.querySelectorAll("input[type=range]");
+    M.Range.init(array_of_dom_elements);
+    $('#radarzoom').on('change',function(){updateRdarSize(this)})
     $('.collapsible').collapsible();
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
@@ -398,13 +401,15 @@ clustermap_opt.xScale = d3.scaleLinear().range([0,clustermap_opt.w_t]);
 clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
 let numg;
-function updateRdarSize () {
-    radarChartclusteropt.w = this.value;
-    radarChartclusteropt.h = this.value;
+function updateRdarSize (event) {
+    radarChartclusteropt.w = +event.value;
+    radarChartclusteropt.h = +event.value;
     clustermap_opt.w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
     clustermap_opt.h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
-    handledata(graphicControl.mode);
-    handledata_sumary();
+    if (!firstTime) {
+        handledata(graphicControl.mode);
+        handledata_sumary();
+    }
 }
 function cluster_map (data) {
 

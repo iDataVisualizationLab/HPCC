@@ -88,3 +88,10 @@ button.play.pause i:after{
         box-shadow: 0 0 0 0 rgba(204,169,44, 0);
     }
 }
+
+span.thumb {
+    display: none;
+}
+span.thumb.active{
+    display: unset;
+}
