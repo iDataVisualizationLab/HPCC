@@ -106,3 +106,8 @@ span.thumb {
 #radarzoomdisplay:after{
     content: 'px';
 }
+.radarCluster .radarStroke{
+    stroke: black !important;
+    stroke-width: 1px;
+    stroke-dasharray: 4;
+}
