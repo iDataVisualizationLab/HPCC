@@ -2,7 +2,7 @@ let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
     mode:'label',
-    modes:['label','maxValue','similarity'],
+    modes:['label','maxValue','similarity','pca'],
 },
     colorScaleList = {
     n: 7,
@@ -301,6 +301,7 @@ function handledata(mode){
         temparr.order = i;
         return temparr;
     });
+    clustermap_opt.xScale.range([0,clustermap_opt.w_t]);
     switch (mode) {
         case 'label':
             data.sort((a,b)=>(+a[0].name) - (+b[0].name)).forEach((d,i)=>d.order = i);
@@ -309,7 +310,18 @@ function handledata(mode){
             data.sort((a,b)=>(d3.sum(a[0],e=>e.value)) - (d3.sum(b[0],e=>e.value))).forEach((d,i)=>d.order = i);;
             break;
         case 'similarity':
-            data.sort((a,b)=>(orderSimilarity[a.order]-orderSimilarity[b.order])).forEach((d,i)=>d.order = i);;
+            data.sort((a,b)=>(orderSimilarity[a.order]-orderSimilarity[b.order])).forEach((d,i)=>d.order = i);
+            break;
+        case 'pca':
+            const pcadata = data.map(d=>d[0].map(e=>e.value));
+            let vectors = PCA.getEigenVectors(pcadata);
+            let adData = PCA.computeAdjustedData(pcadata,vectors[0]);
+            clustermap_opt.xScale.range([0,MainOpt.widthG()-clustermap_opt.w_t]);
+            let temp_scale = d3.scaleLinear().domain(d3.extent(adData.adjustedData[0]));
+            data.sort((a,b)=>(adData.adjustedData[0][a.order]-adData.adjustedData[0][b.order])).forEach((d,i)=>{
+                d.position = {x:temp_scale(adData.adjustedData[0][d.order]),y:0};
+                d.order = i;
+            });
             break;
         default:
             data.forEach((d,i)=>d.order = i);
@@ -345,10 +357,10 @@ let clustermap_opt = {
     w_t: radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right,
     h_t: radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom,
 }
-clustermap_opt.xScale = d3.scaleLinear().range([clustermap_opt.w_t/2,3*clustermap_opt.w_t/2]);
+clustermap_opt.xScale = d3.scaleLinear().range([0,clustermap_opt.w_t]);
 clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
-let numg
+let numg;
 function cluster_map (data) {
 
     // loading bar
@@ -377,7 +389,7 @@ function cluster_map (data) {
                 radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
                 RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
             }).transition().duration(1000)
-            .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
+            .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+','+clustermap_opt.yScale(d.position&&d.position.y||Math.floor(d.order/numg))+')');
         tableCreate_svg(data)
     }, 0);
     function ondragstart(){
@@ -512,8 +524,8 @@ function tableCreate_svg(data){
     divt.selectAll('.tablesvg').styles({
         'width': clustermap_opt.w_t+'px',
         // 'margin-left': radarChartclusteropt.margin.left+'px',
-        top: d=>(clustermap_opt.yScale(Math.floor(d.order/numg)+1)+50)+'px',
-        left: d=>clustermap_opt.xScale(d.order%numg)+'px',
+        top: d=>(clustermap_opt.yScale((d.position&&d.position.y||Math.floor(d.order/numg))+1)+50)+'px',
+        left: d=>clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+'px',
     }).on('scroll',function(){
         $('.tablesvg').scrollTop(this.scrollTop);
     });
