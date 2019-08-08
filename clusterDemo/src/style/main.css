@@ -19,7 +19,7 @@ svg.mainmap {
 
 .tablesvg {
     position: absolute;
-    max-height: 250px;
+    max-height: 500px;
     overflow-y: auto;
     transition-duration: 1s;
     background-color: #dddd;
