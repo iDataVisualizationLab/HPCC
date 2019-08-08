@@ -329,7 +329,7 @@ function handledata(mode){
         return temparr;
     });
     clustermap_opt.xScale.range([0,clustermap_opt.w_t]);
-    clustermap_opt.yScale.range([0,2*clustermap_opt.h_t/2]);
+    clustermap_opt.yScale.range([0,clustermap_opt.h_t]);
     switch (mode) {
         case 'label':
             data.sort((a,b)=>(+a[0].name) - (+b[0].name)).forEach((d,i)=>d.order = i);
@@ -410,7 +410,7 @@ let clustermap_opt = {
     h_t: radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom,
 }
 clustermap_opt.xScale = d3.scaleLinear().range([0,clustermap_opt.w_t]);
-clustermap_opt.yScale = d3.scaleLinear().range([0,2*clustermap_opt.h_t/2]);
+clustermap_opt.yScale = d3.scaleLinear().range([0,clustermap_opt.h_t]);
 let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
 let numg;
 function updateRdarSize (event) {
@@ -591,7 +591,7 @@ function tableCreate_svg(data){
     divt.selectAll('.tablesvg').styles({
         'width': clustermap_opt.w_t+'px',
         // 'margin-left': radarChartclusteropt.margin.left+'px',
-        top: d=>(clustermap_opt.yScale((d.position&&d.position.y||Math.floor(d.order/numg))+1)+50)+'px',
+        top: d=>(clustermap_opt.yScale((d.position&&d.position.y||Math.floor(d.order/numg))+1))+'px',
         left: d=>clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+'px',
     }).on('scroll',function(){
         $('.tablesvg').scrollTop(this.scrollTop);
