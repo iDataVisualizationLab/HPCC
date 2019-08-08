@@ -280,6 +280,13 @@ function main (){
 }
 let data;
 let orderSimilarity;
+function onload_render(per){
+    if(per&&per<1){
+        d3.select('#load_render').classed('hidden',false).select('.determinate').style('width',per*100+'%');
+    }else {
+        d3.select('#load_render').classed('hidden', true);
+    }
+}
 function handledata(mode){
     data = Object.keys(clusterS).map((d,i)=>{
         let temp = serviceFullList.map(s=> {
@@ -308,6 +315,7 @@ function handledata(mode){
             data.forEach((d,i)=>d.order = i);
             break;
     }
+    onload_render(0.1);
 }
 function loadNewData(d) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
@@ -343,21 +351,36 @@ let categoryScale = d3.scaleOrdinal(d3.schemeCategory10);
 let numg
 function cluster_map (data) {
 
-    let w_t = radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right;
-    let h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
-    svg.selectAll('.radarCluster_sum').remove();
-    let r_old = svg.selectAll('.radarCluster').data(data,d=>d[0].name);
-    r_old.exit().remove();
-    r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
-        return d3.select('body').node();
-    }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
-    numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
-    svg.selectAll('.radarCluster')
-        .attr('class',(d,i)=>'radarCluster radarh'+d.order)
-        .each(function(d,i){
-            radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
-            RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
-        }).transition().duration(1000).attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
+    // loading bar
+    let loaded = 0;
+    var load = function () {
+        loaded += 1;
+        console.log(loaded)
+        onload_render(loaded/100);
+        if (loaded >= 100) {
+            clearInterval(beginLoad);
+        }
+    };
+    var beginLoad = setInterval(function () {
+        load();
+    }, 10);
+    setTimeout(()=>{
+        svg.selectAll('.radarCluster_sum').remove();
+        let r_old = svg.selectAll('.radarCluster').data(data,d=>d[0].name);
+        r_old.exit().remove();
+        r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
+            return d3.select('body').node();
+        }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
+        numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
+        svg.selectAll('.radarCluster')
+            .attr('class',(d,i)=>'radarCluster radarh'+d.order)
+            .each(function(d,i){
+                radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
+                RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
+            }).transition().duration(1000)
+            .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
+    }, 1000);
+
     tableCreate_svg(data)
     function ondragstart(){
         let node_clone = d3.select(this).node().cloneNode(true);
@@ -497,11 +520,10 @@ function tableCreate_svg(data){
         $('.tablesvg').scrollTop(this.scrollTop);
     });
 
-    // let thead = table.select('thead tr').selectAll('th').data(d=>d[0].map(e=>e.axis));
-    // thead.exit().remove();
-    // thead.enter().append('th')
-    //     .merge(thead)
-    //     .text(d=>d);
+    let thead = table.select('thead tr').selectAll('th').data(d=>d[0].map(e=>e.axis));
+    thead.exit().remove();
+    thead.enter().append('th');
+
     let tr = table.select('tbody').selectAll('tr').data(d=>d[0]);
     tr.exit().remove();
     let td = tr.enter().append('tr')
@@ -523,7 +545,7 @@ function triggersortPlay(){
 }
 function sortplay(event){
     if(event.value=='pause'){
-        d3.select(this).interrupt();
+        d3.select('#sortorder').interrupt();
         event.value='play';
         event.classList.remove('pause');
     }else{

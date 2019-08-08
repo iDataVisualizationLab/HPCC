@@ -26,13 +26,22 @@ svg.mainmap {
     color:black;
 }
 .tablesvg table {
+    /*table-layout: fixed;*/
+    border-collapse: collapse;
     width:100%;
+}
+.tablesvg thead {
+    display: none;
 }
 .tablesvg tr td{
     text-align: right;
 }
-.tablesvg tr td:first-child {
+.tablesvg tr td:first-child, .tablesvg th:first-child{
     text-align: left;
+    width: calc(100% - 100px);
+}
+.tablesvg tr td {
+    width: auto;
 }
 .tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}
 
