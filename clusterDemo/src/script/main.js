@@ -354,8 +354,7 @@ function cluster_map (data) {
     // loading bar
     let loaded = 0;
     var load = function () {
-        loaded += 1;
-        console.log(loaded)
+        loaded += 10;
         onload_render(loaded/100);
         if (loaded >= 100) {
             clearInterval(beginLoad);
@@ -363,7 +362,7 @@ function cluster_map (data) {
     };
     var beginLoad = setInterval(function () {
         load();
-    }, 10);
+    }, 100);
     setTimeout(()=>{
         svg.selectAll('.radarCluster_sum').remove();
         let r_old = svg.selectAll('.radarCluster').data(data,d=>d[0].name);
@@ -379,9 +378,8 @@ function cluster_map (data) {
                 RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
             }).transition().duration(1000)
             .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.order%numg)+','+clustermap_opt.yScale(Math.floor(d.order/numg))+')');
-    }, 1000);
-
-    tableCreate_svg(data)
+        tableCreate_svg(data)
+    }, 0);
     function ondragstart(){
         let node_clone = d3.select(this).node().cloneNode(true);
         const s = d3.select('body') .append('svg')
