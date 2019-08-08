@@ -109,25 +109,29 @@ $( document ).ready(function() {
     // });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
-        spinnerOb.spinner.spin(target);
+        spinnerOb.spinner.spin(spinnerOb.target);
         const choice = this.value;
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        d3.select('#sortorder').interrupt();
+        if (choice!=='csv') {
+            setTimeout(() => {
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error) {
+                        M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                            if (error) {
 
-        setTimeout(() => {
-            d3.json("data/" + choice + ".json", function (error, data) {
-                if (error){
-                    M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                    d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                        if (error){
-
-                        }
-                        loadata1(data)
-                    });
-                    return;
-                }
-                loadata1(data)
-            });
-        },0);
+                            }
+                            loadata1(data)
+                        });
+                        return;
+                    }
+                    loadata1(data)
+                });
+            }, 0);
+        }else{
+            $('#data_input_file').trigger('click');
+        }
         function loadata1(data){
             sampleS = data;
             if (choice.includes('influxdb')){
@@ -239,6 +243,7 @@ function onSchemaUpdate(schema){
     // Radarplot.schema(serviceFullList,firstTime);
     if (!firstTime) {
         cluster_map(data);
+        MetricController.drawSummary(data.length);
     }
     // }
     if (db!=='csv')
@@ -272,9 +277,12 @@ function main (){
         cluster_map(data);
 
     });
+    serviceFull_selected =[];
+    serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)));
     triggersortPlay();
-
     handledata(graphicControl.mode);
+    handledata_sumary();
+    MetricController.datasummary(getsummaryservice())
     orderSimilarity= similarityCal();
     cluster_map(data);
 }
@@ -286,6 +294,20 @@ function onload_render(per){
     }else {
         d3.select('#load_render').classed('hidden', true);
     }
+}
+function handledata_sumary(){
+    // let dataSum = d3.nest().key(d=>d.axis).rollup(d=>{
+    //     const data_temp = d.map(e=>e.value);
+    //     return {
+    //         axis:d[0].axis,
+    //         q1: ss.quantile(data_temp,0.25),
+    //         q3: ss.quantile(data_temp,0.75),
+    //         val: ss.median(data_temp),
+    //         minval: ss.min(data_temp),
+    //         maxval: ss.max(data_temp),
+    //     }}).entries(_.flatten(data.map(d=>d[0]))).map(d=>d.value);
+    let dataSum = data.map(d=>d[0].map(e=>e.value))
+    MetricController.data(dataSum).drawSummary(data.length)
 }
 function handledata(mode){
     data = Object.keys(clusterS).map((d,i)=>{
@@ -581,6 +603,56 @@ function sortplay(event){
         event.classList.add('pause');
     }
 }
-function formatnumber(num){
+function getsummaryservice(){
+    let histodram = {
+        resolution:20,
+    };
+    let h = d3.scaleLinear();
+    let dataf = serviceFull_selected.map(s=>Object.keys(clusterS).map(d=>clusterS[d][s]));
+    let ob = {}
+    dataf.forEach((d,i)=>{
+        d=d.filter(e=>e!=undefined).sort((a,b)=>a-b);
+        let r;
+        if (d.length){
 
+            // kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
+            // let sumstat = kde(d);
+            var x = d3.scaleLinear()
+                .domain(d3.extent(d));
+            var histogram = d3.histogram()
+                .domain(x.domain())
+                .thresholds(x.ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                .value(d => d);
+            let hisdata = histogram(d);
+            // let y = d3.scaleLinear()
+            //     .domain([0,d3.max(hisdata,d=>(d||[]).length)]);
+
+            let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
+            r = {
+                axis: serviceFull_selected[i],
+                q1: ss.quantileSorted(d,0.25) ,
+                q3: ss.quantileSorted(d,0.75),
+                median: ss.medianSorted(d) ,
+                // outlier: ,
+                arr: sumstat};
+            if (d.length>4)
+            {
+                const iqr = r.q3-r.q1;
+                r.outlier = d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr));
+            }else{
+                r.outlier = d;
+            }
+        }else{
+            r = {
+                axis: serviceFull_selected[i],
+                q1: undefined ,
+                q3: undefined,
+                median: undefined ,
+                outlier: [],
+                arr: []};
+        }
+        ob[r.axis] = r;
+
+    });
+    return ob;
 }
