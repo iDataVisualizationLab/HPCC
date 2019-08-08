@@ -418,7 +418,7 @@ function updateRdarSize (event) {
     clustermap_opt.h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
     if (!firstTime) {
         handledata(graphicControl.mode);
-        handledata_sumary();
+        cluster_map(data);
     }
 }
 function cluster_map (data) {

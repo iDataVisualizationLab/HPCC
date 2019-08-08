@@ -99,9 +99,6 @@ button.play.pause i:after{
 span.thumb {
     display: none;
 }
-span.thumb.active{
-    display: unset;
-}
 
 .axisWrapper line.highlight {
     stroke: black!important;

@@ -157,15 +157,15 @@ function RadarChart(id, data, options, name) {
     var g = svg.select("#radarGroup");
     if (svg.empty()) {
         first = true;
-        svg = d3.select(id).append("svg")
-            .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
-            .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
-            .attr("class", "radar" + correctId (id)  +" radarPlot");
+        svg = d3.select(id).append("svg");
         //Append a g element
         g = svg.append("g")
-            .attr("id","radarGroup")
-            .attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
+            .attr("id","radarGroup");
     }
+    svg.attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
+        .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+        .attr("class", "radar" + correctId (id)  +" radarPlot");
+    g.attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
 
     if (cfg.showText) {
         var temptest = svg.selectAll(".currentTimeText");
@@ -229,12 +229,25 @@ function RadarChart(id, data, options, name) {
         //Wrapper for the grid & axes
         var axisGrid = g.append("g").attr("class", "axisWrapper");
 
+
+
+
+
+    }
+    if (!cfg.mini) {
+        /////////////////////////////////////////////////////////
+        //////////////////// Draw the axes //////////////////////
+        /////////////////////////////////////////////////////////
+        var axisGrid = g.select(".axisWrapper");
+
         //Draw the background circles
-        axisGrid.selectAll(".levels")
-            .data(d3.range(1, (cfg.levels + 1)).reverse())
-            .enter()
+        var levels = axisGrid.selectAll(".levels")
+            .data(d3.range(1, (cfg.levels + 1)).reverse());
+        levels.exit().remove();
+        levels.enter()
             .append("circle")
-            .attr("class", "gridCircle")
+            .attr("class", "levels gridCircle")
+            .merge(levels)
             .attr("r", function (d, i) {
                 return radius / cfg.levels * d;
             })
@@ -253,14 +266,6 @@ function RadarChart(id, data, options, name) {
             .style("visibility", (d, i) => ((cfg.bin||cfg.gradient) && i == 0) ? "hidden" : "visible");
 
 
-
-
-    }
-    if (!cfg.mini) {
-        /////////////////////////////////////////////////////////
-        //////////////////// Draw the axes //////////////////////
-        /////////////////////////////////////////////////////////
-        var axisGrid = g.select(".axisWrapper");
         //Create the straight lines radiating outward from the center
         var axis_o = axisGrid.selectAll(".axis")
             .data(allAxis, d => d.text);
@@ -281,7 +286,8 @@ function RadarChart(id, data, options, name) {
         axis_n.append("line")
             .attr("x1", 0)
             .attr("y1", 0)
-            .attr("x2", 0)
+            .attr("x2", 0);
+        axis_n.merge(axis_o).select('line')
             .attr("y2", function (d, i) {
                 return -rScale(maxValue * (cfg.bin || cfg.gradient ? ((cfg.levels - 1) / cfg.levels) : 1.05));
             })
