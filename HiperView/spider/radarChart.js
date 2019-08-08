@@ -34,6 +34,13 @@ function RadarChart(id, data, options, name) {
         pathColor: undefined,
         ringStroke_width: 0.5,
         schema: undefined,
+        events:{
+            axis: {
+                mouseover: function(){},
+                mouseleave: function(){},
+                click: function(){},
+                },
+        },
         color: function () {
             return 'rgb(167, 167, 167)'
         }
@@ -278,9 +285,12 @@ function RadarChart(id, data, options, name) {
             .attr("y2", function (d, i) {
                 return -rScale(maxValue * (cfg.bin || cfg.gradient ? ((cfg.levels - 1) / cfg.levels) : 1.05));
             })
-            .attr("class", "line")
+            .attr("class", d=>"line axis"+d.idroot+'_'+d.id)
             .style("stroke", "white")
-            .style("stroke-width", "1px");
+            .style("stroke-width", "1px")
+            .on('mouseover',cfg.events.axis.mouseover)
+            .on('mouseleave',cfg.events.axis.mouseleave);
+
         //Append the labels at each axis
         if (cfg.showText) {
             axis_n.append("text")

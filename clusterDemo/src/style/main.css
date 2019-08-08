@@ -36,15 +36,22 @@ svg.mainmap {
 .tablesvg tr td{
     text-align: right;
 }
-.tablesvg tr td:first-child, .tablesvg th:first-child{
+.tablesvg tr td:first-child
+{
     text-align: left;
-    width: calc(100% - 100px);
+}
+.tablesvg col.num{
+    width: 60px;
 }
 .tablesvg tr td {
     width: auto;
 }
 .tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}
 
+.tablesvg tr.highlight{
+    background-color: #666666;
+    color: white;
+}
 button.play i:after{
     content: 'play_arrow';
     animation:  bounceIn 2s ease-in-out 3s 2;
@@ -94,4 +101,8 @@ span.thumb {
 }
 span.thumb.active{
     display: unset;
+}
+
+.axisWrapper line.highlight {
+    stroke: black!important;
 }

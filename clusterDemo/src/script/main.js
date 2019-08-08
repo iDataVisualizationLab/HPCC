@@ -87,6 +87,9 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
     $('.sidenav').sidenav();
+    initgraphic ();
+    $('#radarzoom').val(radarChartclusteropt.w);
+
     d3.select('#dragChart').call(d3.drag().container(function(){return this.parentNode.parentNode;}).on("drag", function () {
         d3.select('.sumdrag')
             .styles({"left": d3.event.x+'px',"top": d3.event.y+'px'});
@@ -193,6 +196,7 @@ $( document ).ready(function() {
         reader.readAsDataURL(f);
     })
     spinnerOb.spinner = new Spinner(spinnerOb.opts).spin(spinnerOb.target);
+
     setTimeout(() => {
         //load data
         graphicControl.charType =  d3.select('#chartType_control').node().value;
@@ -254,7 +258,7 @@ function onSchemaUpdate(schema){
         SaveStore();
 }
 function onfilterdata(schema) {}
-initgraphic ();
+
 function initgraphic () {
     svg = d3.select(".mainsvg").attr('class','mainmap'),
         MainOpt.width = +document.getElementById("mainBody").offsetWidth,
@@ -268,6 +272,11 @@ function initgraphic () {
             .append("g")
             .attr("transform",
                 "translate(" + MainOpt.margin.left + "," + MainOpt.margin.top + ")");
+    clustermap_opt.w_t = Math.min(Math.max(MainOpt.widthG()/5,50),400);
+    radarChartclusteropt.w = clustermap_opt.w_t - radarChartclusteropt.margin.right-radarChartclusteropt.margin.left;
+    radarChartclusteropt.h = radarChartclusteropt.w;
+    clustermap_opt.h_t = radarChartclusteropt.h+radarChartclusteropt.margin.top+radarChartclusteropt.margin.bottom;
+
 }
 function main (){
     firstTime = false;
@@ -300,16 +309,6 @@ function onload_render(per){
     }
 }
 function handledata_sumary(){
-    // let dataSum = d3.nest().key(d=>d.axis).rollup(d=>{
-    //     const data_temp = d.map(e=>e.value);
-    //     return {
-    //         axis:d[0].axis,
-    //         q1: ss.quantile(data_temp,0.25),
-    //         q3: ss.quantile(data_temp,0.75),
-    //         val: ss.median(data_temp),
-    //         minval: ss.min(data_temp),
-    //         maxval: ss.max(data_temp),
-    //     }}).entries(_.flatten(data.map(d=>d[0]))).map(d=>d.value);
     let dataSum = data.map(d=>d[0].map(e=>e.value))
     MetricController.data(dataSum).drawSummary(data.length)
 }
@@ -370,8 +369,6 @@ function handledata(mode){
     onload_render(0.1);
 }
 function loadNewData(d) {
-    //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
-    //svg.selectAll("*").remove();
     selectedService = d;
     const trig = d3.select("#datasetsSelectTrigger");
     trig.select('img').attr('src',srcpath+"images/"+selectedService+".png").on('error',function(){handlemissingimage(this,selectedService)});
@@ -392,6 +389,19 @@ let radarChartclusteropt  = {
     ringStroke_width: 0.15,
     ringColor:'black',
     fillin:0.5,
+    events:{
+        axis: {
+            mouseover: function(){
+                const d = d3.select(this).datum();
+                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',true);
+                $('.tablesvg').scrollTop($('table .axis'+d.idroot+'_'+d.id)[0].offsetTop);
+            },
+            mouseleave: function(){
+                const d = d3.select(this).datum();
+                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
+            },
+        },
+    },
     showText: false};
 let clustermap_opt = {
     w_t: radarChartclusteropt.w+radarChartclusteropt.margin.left+radarChartclusteropt.margin.right,
@@ -570,7 +580,9 @@ function tableCreate_svg(data){
     let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name).data(data);
     table.exit().remove();
     let table_n = table.enter().append('div').attr('class','tablesvg').append('table');
-    // table_n.append('thead').append('tr');
+    table_n.append('col');
+    table_n.append('col').attr('class','num');
+    table_n.append('thead').append('tr');
     table_n.append('tbody');
 
     table = divt.selectAll('.tablesvg table');
@@ -583,14 +595,15 @@ function tableCreate_svg(data){
         $('.tablesvg').scrollTop(this.scrollTop);
     });
 
-    let thead = table.select('thead tr').selectAll('th').data(d=>d[0].map(e=>e.axis));
+    let thead = table.select('thead tr').selectAll('th').data(['Service name','Value']);
     thead.exit().remove();
-    thead.enter().append('th');
+    thead.enter().append('th').text(d=>d);
 
     let tr = table.select('tbody').selectAll('tr').data(d=>d[0]);
     tr.exit().remove();
     let td = tr.enter().append('tr')
         .merge(tr)
+        .attr('class',dd=>{let d = serviceFullList.find(e=>e.text===dd.axis); return 'axis'+d.idroot+'_'+d.id;})
         .selectAll('td').data(d=>[d.axis,d.value_o]);
     td.exit().remove();
     td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
