@@ -350,6 +350,12 @@
                     </select>
                 </div>
                 <button class="btn-floating play pause" value="pause" onclick="sortplay(this)"><i class="material-icons"></i></button>
+                <div  class="col">
+                    <label>
+                        <input type="checkbox" class="filled-in" checked="checked" id="metricTable_control" onchange="((event)=>{graphicControl.tableEnable(event.checked)})(this)"/>
+                        <span style="font: unset">Show metric tables</span>
+                    </label>
+                </div>
             </div>
             <div class="progress no_magrin hidden" id="load_render">
                 <div class="determinate" style="width: 10%"></div>

@@ -1,6 +1,7 @@
 let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
+    table: true,
     mode:'label',
     modes:['label','maxValue','similarity','pca','pca2D'],
 },
@@ -434,7 +435,7 @@ function cluster_map (data) {
                 RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
             }).transition().duration(1000)
             .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+','+clustermap_opt.yScale(d.position&&d.position.y||Math.floor(d.order/numg))+')');
-        if (data[0].position){
+        if (data[0].position || !graphicControl.table){
             d3.selectAll('.tablesvg').remove();
         }else
             tableCreate_svg(data)
@@ -665,4 +666,9 @@ function getsummaryservice(){
 
     });
     return ob;
+}
+
+graphicControl.tableEnable = (e)=>{
+    graphicControl.table = e;
+    cluster_map(data);
 }
