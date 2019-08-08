@@ -2,7 +2,7 @@ let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
     mode:'label',
-    modes:['label','maxValue','similarity','pca'],
+    modes:['label','maxValue','similarity','pca','pca2D'],
 },
     colorScaleList = {
     n: 7,
@@ -302,6 +302,7 @@ function handledata(mode){
         return temparr;
     });
     clustermap_opt.xScale.range([0,clustermap_opt.w_t]);
+    clustermap_opt.yScale.range([0,2*clustermap_opt.h_t/2]);
     switch (mode) {
         case 'label':
             data.sort((a,b)=>(+a[0].name) - (+b[0].name)).forEach((d,i)=>d.order = i);
@@ -313,13 +314,26 @@ function handledata(mode){
             data.sort((a,b)=>(orderSimilarity[a.order]-orderSimilarity[b.order])).forEach((d,i)=>d.order = i);
             break;
         case 'pca':
-            const pcadata = data.map(d=>d[0].map(e=>e.value));
-            let vectors = PCA.getEigenVectors(pcadata);
-            let adData = PCA.computeAdjustedData(pcadata,vectors[0]);
+            var pcadata = data.map(d=>d[0].map(e=>e.value));
+            var vectors = PCA.getEigenVectors(pcadata);
+            var adData = PCA.computeAdjustedData(pcadata,vectors[0]);
             clustermap_opt.xScale.range([0,MainOpt.widthG()-clustermap_opt.w_t]);
             let temp_scale = d3.scaleLinear().domain(d3.extent(adData.adjustedData[0]));
             data.sort((a,b)=>(adData.adjustedData[0][a.order]-adData.adjustedData[0][b.order])).forEach((d,i)=>{
                 d.position = {x:temp_scale(adData.adjustedData[0][d.order]),y:0};
+                d.order = i;
+            });
+            break;
+        case 'pca2d':
+            var pcadata = data.map(d=>d[0].map(e=>e.value));
+            var vectors = PCA.getEigenVectors(pcadata);
+            var adData = PCA.computeAdjustedData(pcadata,vectors[0],vectors[1]);
+            clustermap_opt.xScale.range([0,MainOpt.widthG()-clustermap_opt.w_t]);
+            clustermap_opt.yScale.range([0,MainOpt.heightG()-clustermap_opt.h_t]);
+            let temp_scalex = d3.scaleLinear().domain(d3.extent(adData.adjustedData[0]));
+            let temp_scaley = d3.scaleLinear().domain(d3.extent(adData.adjustedData[1]));
+            data.sort((a,b)=>(adData.adjustedData[0][a.order]-adData.adjustedData[0][b.order])).forEach((d,i)=>{
+                d.position = {x:temp_scalex(adData.adjustedData[0][d.order]),y:temp_scaley(adData.adjustedData[1][d.order])};
                 d.order = i;
             });
             break;
@@ -390,7 +404,10 @@ function cluster_map (data) {
                 RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
             }).transition().duration(1000)
             .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+','+clustermap_opt.yScale(d.position&&d.position.y||Math.floor(d.order/numg))+')');
-        tableCreate_svg(data)
+        if (data[0].position){
+            d3.selectAll('.tablesvg').remove();
+        }else
+            tableCreate_svg(data)
     }, 0);
     function ondragstart(){
         let node_clone = d3.select(this).node().cloneNode(true);
