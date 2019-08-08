@@ -103,3 +103,6 @@ span.thumb {
 .axisWrapper line.highlight {
     stroke: black!important;
 }
+#radarzoomdisplay:after{
+    content: 'px';
+}
