@@ -102,12 +102,13 @@ span.thumb {
 
 .axisWrapper line.highlight {
     stroke: black!important;
+    stroke-dasharray: 4;
 }
 #radarzoomdisplay:after{
     content: 'px';
 }
-.radarCluster .radarStroke{
-    stroke: black !important;
-    stroke-width: 1px;
-    stroke-dasharray: 4;
-}
+/*.radarCluster .radarStroke{*/
+    /*stroke: black !important;*/
+    /*stroke-width: 1px;*/
+    /*stroke-dasharray: 4;*/
+/*}*/
