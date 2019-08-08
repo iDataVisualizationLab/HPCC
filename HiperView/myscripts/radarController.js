@@ -552,6 +552,7 @@ let radarController = function () {
         }
         function onDragAxisEnded (d){
             d3.select(this.parentNode).classed('active',false);
+            d3.select(this).style("fill", graphicopt.gradient?'#eaeaea':"white");
             d.__origin__= null;
             onChangeValueFunc(radarcomp);
             d3.select(this).select('.dragpoint').style('fill','white');
