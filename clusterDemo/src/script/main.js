@@ -124,10 +124,10 @@ $( document ).ready(function() {
         d3.select('#sortorder').interrupt();
         if (choice!=='csv') {
             setTimeout(() => {
-                d3.json("data/" + choice + ".json", function (error, data) {
+                d3.csv("src/data/" + choice + ".csv", function (error, data) {
                     if (error) {
                         M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                        d3.csv("src/data/" + d3.select('#datacom').node().value + ".csv", function (error, data) {
                             if (error) {
 
                             }
@@ -139,22 +139,20 @@ $( document ).ready(function() {
                 });
             }, 0);
         }else{
+            d3.select('.cover').classed('hidden', true);
+            spinnerOb.spinner.stop();
             $('#data_input_file').trigger('click');
         }
         function loadata1(data){
-            sampleS = data;
-            if (choice.includes('influxdb')){
-                processResult = processResult_influxdb;
-                db = "influxdb";
-                realTimesetting(false,"influxdb",true);
-            }else {
-                db = "nagios";
-                processResult = processResult_old;
-                realTimesetting(false,undefined,true);
-            }
-            d3.select(".currentDate")
-                .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
-            resetRequest();
+            newdatatoFormat_cluster(data);
+            processResult = processResult_csv;
+            db = "csv";
+            addDatasetsOptions()
+            MetricController.axisSchema(serviceFullList,true).update();
+            main();
+            // d3.select(".currentDate")
+            //     .text("" + new Date(data[0].timestamp).toDateString());
+            // resetRequest();
             d3.select('.cover').classed('hidden', true);
             spinnerOb.spinner.stop();
         }
@@ -162,6 +160,13 @@ $( document ).ready(function() {
     $('#data_input_file').on('input', (evt) => {
         var f = evt.target.files[0];
         var reader = new FileReader();
+        reader.onabort = (function(){
+            return function(e) {
+                console.log('abort!!')
+                d3.select('.cover').classed('hidden', true);
+                spinnerOb.spinner.stop();
+            };
+        })();
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.
@@ -170,6 +175,8 @@ $( document ).ready(function() {
                 setTimeout(() => {
                     d3.csv(e.target.result,function (error, data) {
                         if (error){
+                            d3.select('.cover').classed('hidden', true);
+                            spinnerOb.spinner.stop();
                         }else{
                             loadata1(data);
                             function loadata1(data){
