@@ -762,25 +762,25 @@ d3.Tsneplot = function () {
         let userli = panel_user.select('tbody')
             .selectAll('tr').data(userl,d=>d.key)
             .attr('data-id',d=>d.key)
-            .attr('class',d=>'collection-item '+ d.unqinode.join(' '));
+            .attr('class',d=>'collection-item '+ d.unqinode.map(fixName2Class).join(' '));
         //remove
         userli.exit().remove();
         //new
         let contain_n = userli.enter().append('tr')
-            .attr('class',d=>'collection-item '+ d.unqinode.join(' '))
+            .attr('class',d=>'collection-item '+ d.unqinode.map(fixName2Class).join(' '))
             .attr('data-id',d=>d.key)
             .on('mouseover',function(d){
                 const list_node = d.unqinode;
                 let filterhosttemp = _.intersection(filterhost,list_node);
-                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhosttemp ).map(d=>fixName2Class(d)).join(':not(tr), .')+':not(tr)')
+                d3.selectAll("." + _.difference(hosts.map(d=>d.name),filterhosttemp ).map(fixName2Class).join(':not(tr), .')+':not(tr)')
                     .classed("displayNone", true);
-                    d3.selectAll("." + filterhosttemp.join(', .'))
+                    d3.selectAll("." + filterhosttemp.map(fixName2Class).join(', .'))
                         .classed("displayNone", false);
             }).on('mouseleave',function(d){
                 $('#search_User')[0].value =""
-                d3.selectAll("." + _.difference(filterhost,d.unqinode ).map(d=>fixName2Class(d)).join(':not(tr), .')+':not(tr)')
+                d3.selectAll("." + _.difference(filterhost,d.unqinode ).map(fixName2Class).join(':not(tr), .')+':not(tr)')
                     .classed("displayNone", true);
-                d3.selectAll("." + filterhost.join(', .'))
+                d3.selectAll("." + filterhost.map(fixName2Class).join(', .'))
                     .classed("displayNone", false);
             });
         contain_n.append('td')
