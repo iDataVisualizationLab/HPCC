@@ -211,43 +211,6 @@ let radarController = function () {
     function maketableCotrol() {
         if (tablediv) {
             let table = tablediv.select("table");
-            // table.selectAll('*').remove();
-            // let header = table.append("thead").append('tr')
-            //     .selectAll('th').data(['Service name', 'Angle ( ' + "\u00B0 " + ')', '']).enter()
-            //     .append('th').text(d => d);
-            //
-            // let rows = table.append('tbody').selectAll('tr')
-            //     .data(radarcomp.axisList, d => d.data.text)
-            //     .enter().append('tr').classed('fieldDisable', d => !d.data.enable).datum(d => d.data);
-            // rows.append('td').attr('class', 'text').text(d => d.text);
-            // rows.append('td').attr('class', 'angle')
-            //     .append('input').attr('type', 'number')
-            //     .attr('value', d => toDegrees(d.angle).toFixed(0))
-            //     .on('input', function (d) {
-            //         updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === d.text).node().parentElement, toRadian(this.value * 1));
-            //         onChangeValueFunc(radarcomp);
-            //     });
-            //
-            // let btngroup = rows.append('td').attr('class', 'btngroup');
-            // btngroup.append('span').attr('class', 'no-shrink  toggleDisable')
-            //     .append('a').attr('class', 'disable-field').on('click', d => {
-            //     d.enable = !d.enable;
-            //     rows.filter(t => t.text === d.text).classed('fieldDisable', t => !t.enable);
-            //     g.selectAll('.axis').filter(t => t.data.text === d.text).classed('disable', t => !t.data.enable);
-            //     onChangeValueFunc(radarcomp);
-            // })
-            //     .append('i').attr('class', 'fa fa-check');
-            //
-            // dataTable = $(table.node()).DataTable({
-            //     "order": [[2, "desc"], [1, "asc"]],
-            //     "columnDefs": [{orderable: true, targets: [1]}],
-            //     "columns": [
-            //         null,
-            //         {"orderDataType": "dom-text-numeric"},
-            //         {"orderDataType": "dom-disablebtn"},
-            //     ]
-            // });
-
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
                 "order": [[3, "desc"], [2, "asc"]],
@@ -298,7 +261,7 @@ let radarController = function () {
                             if (type=='display')
                                 return '<span class="no-shrink  toggleDisable"> <a class="disable-field"><i class="fa fa-check"></i></a></span>';
                             else
-                                return d.enable||d.data.enable;
+                                return d.data.enable;
                         }
                     },
                 ],

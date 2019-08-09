@@ -639,7 +639,6 @@ d3.Tsneplot = function () {
     Tsneplot.redraw  = function (){
         d3.select('#tsnezone').classed("active",true);
         clusterlabel = [];
-        clusterg.selectAll('*').remove();
         panel.select('.top10').selectAll('*').remove();
         panel_user.select('.top10DIV tbody').selectAll('*').remove();
         panel_user.select('table').classed('empty',true);
@@ -667,8 +666,8 @@ d3.Tsneplot = function () {
             svg.style('visibility','hidden');
             Tsneplot.pause();
             g.selectAll('*').remove();
+            clusterg = g.append('g').attr('class','cluster-path-g');
             clusterlabel = [];
-            clusterg.selectAll('*').remove();
         }
     };
     let colorCategory = groupMethod==='outlier'?function(d){return d?'#8a001a':'black'}:d3.scaleOrdinal(d3.schemeCategory10);
