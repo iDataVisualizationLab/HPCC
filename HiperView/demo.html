@@ -88,13 +88,6 @@
 <div id="mySidenav" class="sidenavs">
     <div class="row s12">
         <ul class="collapsible">
-            <!--<li>-->
-                <!--<div class="collapsible-header search-wrapper focused">-->
-                    <!--<input type="text" id="search" placeholder="Search Racks..." class="inputHolder">-->
-                    <!--<i class="material-icons">search</i>-->
-                <!--</div>-->
-                <!--<div class="collapsible-body"><span>Resevered for hierarchy.</span></div>-->
-            <!--</li>-->
             <li class="settingContain active no_padding">
                 <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
                 <div class="collapsible-body">
@@ -132,15 +125,15 @@
                         <ul id="datasetsSelect" class="col collection dropdown-content">
                         </ul>
                     </div>
-                    <label for="summaryType_control" class="col s4"> Summary type: </label>
-                    <div  class="row s12">
-                        <select id="summaryType_control" class="col s7">
-                            <option value="Boxplot">Boxplot</option>
-                            <option value="Scatterplot" >Scatterplot</option>
-                            <option value="Radar" selected="selected">Radar Groups</option>
-                            <option value="RadarSummary">Radar Summary</option>
-                        </select>
-                    </div>
+                    <!--<label for="summaryType_control" class="col s4"> Summary type: </label>-->
+                    <!--<div  class="row s12">-->
+                        <!--<select id="summaryType_control" class="col s7">-->
+                            <!--<option value="Boxplot">Boxplot</option>-->
+                            <!--<option value="Scatterplot" >Scatterplot</option>-->
+                            <!--<option value="Radar" selected="selected">Radar Groups</option>-->
+                            <!--<option value="RadarSummary">Radar Summary</option>-->
+                        <!--</select>-->
+                    <!--</div>-->
                     <label for="chartType_control" class="col s4"> Chart type: </label>
                     <div  class="row s12">
                         <select id="chartType_control" class="col s7">
@@ -344,6 +337,17 @@
                     </div>
                     <div class="details" ></div>
                 </div>
+            </div>
+            <div class="valign-wrappe" style="top: 10px;position:absolute;margin: 2px;">
+                <label for="summaryType_control" style="color: black;display: inline-block"> Summary type: </label>
+
+                <select id="summaryType_control" style="display: block;height: 1.5rem;padding: 0;top:5px;display: inline-block;width:unset">
+                    <option value="Boxplot">Boxplot</option>
+                    <option value="Scatterplot" >Scatterplot</option>
+                    <option value="Radar" selected="selected">Radar Groups</option>
+                    <option value="RadarSummary">Radar Summary</option>
+                </select>
+
             </div>
             <svg width="2600" height="1000" class="mainsvg" ></svg>
         </div>

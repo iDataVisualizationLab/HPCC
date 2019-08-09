@@ -21,7 +21,7 @@ d3.Tsneplot = function () {
                 maxtries: 50
             }
     },
-        runopt,
+        runopt={},
         arr = [],tsne = undefined,intervalUI= undefined,
         isBusy = false;
         // tsne = new tsnejs.tSNE(graphicopt.opt);
@@ -243,9 +243,9 @@ d3.Tsneplot = function () {
                     d3.select("#subzone").select('.community').text(n_community+1);
                     updateCluster (data.result);
                     break;
-                case 'clusterCircle':
-                    updateClusterLabel (data.result);
-                    break;
+                // case 'clusterCircle':
+                //     updateClusterLabel (data.result);
+                //     break;
                 // case 'mean':
                 //     updateSummary(data.val);
                 //     break;
@@ -477,10 +477,66 @@ d3.Tsneplot = function () {
                         (Y[i].y+ty) + ")"; });
         }
         //---draw cluster
-        let c_arr = clusterg.selectAll('.clusterPath').data(clusterlabel.filter(d=>d.type!=="outlying"));
+
+        // convex
+        let clustpath;
+        switch (runopt.clusterMethod) {
+            case 'convex':
+                clustpath = clusterlabel.map(d => {
+                    let temp = [d3.polygonHull(d.map(a => {
+                        const i = arr.findIndex(e => e.name === a);
+                        return [Y[i].x + tx, Y[i].y + ty];
+                    }))];
+                    if (temp[0]) {
+                        temp.name = d;
+                        return temp;
+                    }
+                }).filter(d => d);
+                break;
+            case 'alpha':
+            default:
+                hull = concaveHull().distance(200 * ss);
+                clustpath = clusterlabel.map(d => {
+                    let temp = hull(d.map(a => {
+                        const i = arr.findIndex(e => e.name === a);
+                        return [Y[i].x + tx, Y[i].y + ty];
+                    }));
+                    if (temp)
+                        temp.name = d;
+                    return temp;
+                }).filter(d => d.length);
+                break;
+        }
+        let c_arr = clusterg.selectAll('.clusterPath').data(clustpath,d=>d.name);
         c_arr.exit().remove();
-        c_arr.enter().append('path').attr('class','clusterPath')
-        ;
+        let c_p_arr = c_arr.enter().append('g').attr('class','clusterPath')
+            .merge(c_arr)
+            .styles({
+                fill: (d,i)=>colorCategory_cluster(i),
+                stroke: (d,i)=>colorCategory_cluster(i),
+                'stroke-width': graphicopt.dotRadius*2,
+                opacity: 0.2
+            })
+            .on('mouseover',function(d){
+                d3.selectAll('.clusterPath').filter(e=>e!=d).style('display','none');
+                d3.selectAll('.radarStroke').filter(e=>e.bin&& (e.bin.name===d.name)).dispatch('mouseenter');
+            }).on('mouseleave',(d)=>{
+                d3.selectAll('.clusterPath').filter(e=>e!=d).style('display','unset');
+                clearclone();})
+            .selectAll('path').data(d=>d);
+        c_p_arr.exit().remove();
+        c_p_arr = c_p_arr.enter()
+            .append('path')
+            .merge(c_p_arr);
+        if (skiptransition === true) {
+            c_p_arr
+                .interrupt()
+                .attr("d", d3.line().curve(d3.curveLinearClosed).x(d => d[0]).y(d => d[1])).style('fill','unset');
+        }else{
+            c_p_arr
+                // .transition().duration(runopt.simDuration * 1.1).ease(d3.easeLinear)
+                .attr("d", d3.line().curve(d3.curveLinearClosed).x(d => d[0]).y(d => d[1])).style('fill','unset');
+        }
 
         //---end draw cluster
         //let curentHostpos = currenthost.node().getBoundingClientRect();
@@ -489,19 +545,21 @@ d3.Tsneplot = function () {
 
 
     }
-    function updateClusterLabel (cluster){
-        console.log(cluster)
-        let labelGroup = g.selectAll('.labelGroup').data(cluster);
-        labelGroup.exit().remove();
-        labelGroup.enter().append('circle').attr('class','labelGroup')
-            .merge(labelGroup)
-            .transition().duration(runopt.simDuration*1.1)
-            .ease(d3.easeLinear)
-            .attrs({
-                x: d=> d.x * runopt.zoom * ss+tx,
-                y: d=> d.y * runopt.zoom * ss+ty,
-                r: d=> d.radius * runopt.zoom *ss,
-            })
+    function updateClusterLabel (){
+        // console.log(cluster)
+        // let labelGroup = g.selectAll('.labelGroup').data(cluster);
+        // labelGroup.exit().remove();
+        // labelGroup.enter().append('circle').attr('class','labelGroup')
+        //     .merge(labelGroup)
+        //     .transition().duration(runopt.simDuration*1.1)
+        //     .ease(d3.easeLinear)
+        //     .attrs({
+        //         x: d=> d.x * runopt.zoom * ss+tx,
+        //         y: d=> d.y * runopt.zoom * ss+ty,
+        //         r: d=> d.radius * runopt.zoom *ss,
+        //     })
+        // clusterlabel
+        // d3.polygonHull
     }
     let calTime = [0,0];
     let currenthost = {};
@@ -578,6 +636,8 @@ d3.Tsneplot = function () {
 
     Tsneplot.redraw  = function (){
         d3.select('#tsnezone').classed("active",true);
+        clusterlabel = [];
+        clusterg.selectAll('*').remove();
         panel.select('.top10').selectAll('*').remove();
         panel_user.select('.top10DIV tbody').selectAll('*').remove();
         panel_user.select('table').classed('empty',true);
@@ -605,9 +665,12 @@ d3.Tsneplot = function () {
             svg.style('visibility','hidden');
             Tsneplot.pause();
             g.selectAll('*').remove();
+            clusterlabel = [];
+            clusterg.selectAll('*').remove();
         }
     };
-    let colorCategory = groupMethod==='outlier'?function(d){return d?'#8a001a':'gray'}:d3.scaleOrdinal(d3.schemeCategory10);
+    let colorCategory = groupMethod==='outlier'?function(d){return d?'#8a001a':'black'}:d3.scaleOrdinal(d3.schemeCategory10);
+    let colorCategory_cluster = d3.scaleOrdinal(d3.schemeCategory10);
     let colorScale =d3.scaleSequential(d3.interpolateSpectral);
     let meanArr=[];
     function distanace(a,b){
@@ -914,7 +977,7 @@ d3.Tsneplot = function () {
     }
     let clusterlabel=[];
     Tsneplot.clusterBin = function (_) {
-        return arguments.length ? (clusterlabel = _, Tsneplot) : clusterlabel;
+        return arguments.length ? (clusterlabel = _,updateClusterLabel(), Tsneplot) : clusterlabel;
     };
 
     Tsneplot.data = function (_) {
@@ -938,10 +1001,39 @@ d3.Tsneplot = function () {
     Tsneplot.RadarColor = function (_) {
         return arguments.length ? (arrColor = _.arrColor,UpdateGradient(svg), Tsneplot) : arrColor;
     };
+
     Tsneplot.runopt = function (_) {
-        return arguments.length ? (runopt = _, Tsneplot) : runopt;
+        //Put all of the options into a variable called graphicopt
+        if (arguments.length) {
+            for (let i in _) {
+                if ('undefined' !== typeof _[i]) {
+                    runopt[i] = _[i];
+                }
+            }
+            return Tsneplot;
+        }else {
+            return runopt;
+        }
+
     };
-    Tsneplot.graphicopt = function (_) {return arguments.length ? (graphicopt = _, Tsneplot) : graphicopt;};
+    Tsneplot.graphicopt = function (_) {
+        //Put all of the options into a variable called graphicopt
+        if (arguments.length) {
+            for (let i in _) {
+                if ('undefined' !== typeof _[i]) {
+                    graphicopt[i] = _[i];
+                }
+            }
+            return Tsneplot;
+        }else {
+            return graphicopt;
+        }
+
+    };
+    radarController.div = function (_) {
+        return arguments.length ? (div = _, radarController) : div;
+
+    };
     Tsneplot.drawUserlist = function (_) {drawUserlist(_)};
     Tsneplot.schema = function (_) {
         return arguments.length ? (schema = _, Tsneplot) : schema;

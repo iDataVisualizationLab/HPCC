@@ -96,9 +96,9 @@ d3.radar = function () {
             bin.minNumOfBins(1);
         }
             //TESTING ZONE
-            bin.data(dataSpider3.map(d => {
+            bin.data(dataSpider3.map((d,i) => {
                 var dd = d.map(k => k.value);
-                dd.data = d.name;
+                dd.data = {name: d.name,id: d.id};
                 return dd;
             }))
                 .calculate();
@@ -111,7 +111,8 @@ d3.radar = function () {
                 });
                 temp.bin = {
                     val: bin.normalizedFun.scaleBackPoints(d),
-                    name: d.map(f => f.data),
+                    name: d.map(f => f.data.name),
+                    id: d.map(f => f.data.id),
                     scaledval: d,
                     distancefunc: (e) => d3.max(e.map(function (p) {
                         return distance(e[0], p)
@@ -130,7 +131,7 @@ d3.radar = function () {
         radarChartsumopt.gradient = false;
         //radarChartsumopt.color = color2;
         RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), dataSpider3, radarChartsumopt,"");
-        oncallbackCluster(dataSpider3);
+        oncallbackCluster(dataSpider3.filter(d=>!d.type).map(d=>d.bin.name));
         bin.data([]);
         if (index >= maxstack-1) radarTimeline.shift();
 
@@ -152,7 +153,7 @@ d3.radar = function () {
         handledata(index);
         bin.updateRadius(false).calculatePoint(dataSpider3.map(d=>{
             var dd = d.map(k=>k.value);
-            dd.data = d.name;
+            dd.data = {name: d.name,id: i};
             return dd;}));
         var keys = dataSpider3[0].map(d=>d.axis);
         dataSpider3.length = 0;
@@ -160,7 +161,8 @@ d3.radar = function () {
         dataSpider3 = bin.bins.map(d=>
         {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
             temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
-                name:d.map(f=>f.data),
+                name:d.map(f=>f.data.name),
+                id:d.map(f=>f.data.id),
                 scaledval: d,
                 distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
                 distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
@@ -169,31 +171,11 @@ d3.radar = function () {
         radarChartsumopt.gradient = false;
         //radarChartsumopt.color = color2;
         RadarChart(".radar"+index, dataSpider3, radarChartsumopt,"");
+        // oncallbackCluster(dataSpider3.filter(d=>!d.type).map(d=>d.bin.name));
         //if (index >= maxstack) radarTimeline.shift();
 
     };
 
-    radarTimeline.drawSummarypoint = function(index,hindex){
-
-        if (index >= (maxstack-1)) index = maxstack-1;
-        let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
-        if (radarchart.empty())
-            radarchart = svg.append("g")
-                .attr("class","radar"+index+" box"+index+" graphsum")
-                .datum(index)
-                .attr("transform", function (d) {
-                    return "translate(" + xscale(index) + "," + margin + ")";
-                });
-
-        const values = [handledataRate(hindex)];
-        radarChartsumopt.gradient = true;
-        radarChartsumopt.bin = false;
-        radarChartsumopt.levels = levelsR;
-        //radarChartsumopt.color = color2;
-        RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), values, radarChartsumopt,"");
-
-
-    };
     radarTimeline.shift = function (){
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {
@@ -223,7 +205,7 @@ d3.radar = function () {
 
         //dataSpider2.name = 'Summary '+d3.timeFormat('%H:%M %d %b %Y')(r.arr[0].result.query_time);
         if (arr.length>0){
-            arr.forEach(d=>d.indexSamp = index);
+            arr.forEach((d,i)=>{d.indexSamp = index; d.id = i;});
             dataSpider3 =  arr;
             dataCalculate = arr;
         }
