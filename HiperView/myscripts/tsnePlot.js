@@ -243,9 +243,10 @@ d3.Tsneplot = function () {
                     d3.select("#subzone").select('.community').text(n_community+1);
                     updateCluster (data.result);
                     break;
-                // case 'clusterCircle':
-                //     updateClusterLabel (data.result);
-                //     break;
+                case 'clusterCircle':
+                    if (runopt.clusterMethod==='dbscan')
+                        clusterlabel = data.result;
+                    break;
                 // case 'mean':
                 //     updateSummary(data.val);
                 //     break;
@@ -480,8 +481,8 @@ d3.Tsneplot = function () {
 
         // convex
         let clustpath;
-        console.log(runopt.clusterMethod)
-        switch (runopt.clusterMethod) {
+
+        switch (runopt.clusterDisplay) {
             case 'convex':
                 clustpath = clusterlabel.map(d => {
                     let temp = [d3.polygonHull(d.map(a => {
@@ -978,7 +979,7 @@ d3.Tsneplot = function () {
     }
     let clusterlabel=[];
     Tsneplot.clusterBin = function (_) {
-        return arguments.length ? (clusterlabel = _,updateClusterLabel(), Tsneplot) : clusterlabel;
+        return arguments.length ? (((runopt.clusterMethod==='bin') ? clusterlabel = _:_),updateClusterLabel(), Tsneplot) : clusterlabel;
     };
 
     Tsneplot.data = function (_) {

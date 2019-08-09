@@ -145,10 +145,16 @@
                     </div>
                     <label for="clusterDisplay" class="col s4"> Cluster Display: </label>
                     <div  class="row s12">
-                    <select id="clusterDisplay" class="col s7">
-                    <option value="convex" selected="selected">Convex Hull</option>
-                    <option value="alpha">Alpha shape</option>
-                    </select>
+                        <select id="clusterDisplay" class="col s7">
+                            <option value="convex" selected="selected">Convex Hull</option>
+                            <option value="alpha">Alpha shape</option>
+                        </select>
+                    </div>
+                    <div  class="row s12">
+                        <select id="clusterMethod" class="col s7">
+                            <option value="bin" selected="selected">Leader Bin</option>
+                            <option value="dbscan">DBScan</option>
+                        </select>
                     </div>
                     <label for="chartType_control" class="col s4"> Simulation: </label>
                     <div  class="row s12">

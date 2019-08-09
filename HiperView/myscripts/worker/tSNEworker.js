@@ -111,7 +111,7 @@ addEventListener('message',function ({data}){
                     // community.edges(convertLink(tsne.getProbability(), hostname));
                     // var result = community();
                     var result = findGroups(data.value,'outlier')
-                    // postMessage({action: 'clusterCircle', result: getdbscan()});
+                    postMessage({action: 'clusterCircle', result: getdbscan()});
                     groups = result;
                     // postMessage({action: 'cluster', result: result});
                     //---------------
@@ -316,14 +316,14 @@ function convertPosition (array,ids) {
     return points;
 }
 function dbscan_cluster2data (clusters,data,ids) {
-    clusters.forEach(d=>{
-        d.x = scalev.invert(d.x);
-        d.y = scalev.invert(d.y);
-        var distances = d.parts.map(function(p){return distance([d.x, d.y], data[p])});
-        d.radius = d3.max(distances);
-        d.members = d.parts.map(e=>ids[e])
-    })
-    return clusters;
+    // clusters.forEach(d=>{
+    //     d.x = scalev.invert(d.x);
+    //     d.y = scalev.invert(d.y);
+    //     var distances = d.parts.map(function(p){return distance([d.x, d.y], data[p])});
+    //     d.radius = d3.max(distances);
+    //     d.members = d.parts.map(e=>ids[e])
+    // })
+    return clusters.map(d=>d.parts.map(e=>ids[e]));
 }
 
 function distance(a, b){
