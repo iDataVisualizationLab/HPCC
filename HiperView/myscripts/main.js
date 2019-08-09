@@ -255,7 +255,7 @@ var TsnePlotopt  = {
     runopt:{
         zoom:30,
         simDuration: 1000,
-        clusterDisplayMethod: 'convex',
+        clusterMethod: 'convex',
     }
 };
 var Scatterplot = d3.Scatterplot();
@@ -1968,7 +1968,7 @@ $( document ).ready(function() {
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
     d3.select('#clusterDisplay').on('change',function(){
-        TsnePlotopt.runopt.clusterDisplayMethod = this.value;
+        TsnePlotopt.runopt.clusterMethod = this.value;
         TSneplot.runopt(TsnePlotopt.runopt);
     })
     d3.select('#chartType_control').on("change", function () {

@@ -480,6 +480,7 @@ d3.Tsneplot = function () {
 
         // convex
         let clustpath;
+        console.log(runopt.clusterMethod)
         switch (runopt.clusterMethod) {
             case 'convex':
                 clustpath = clusterlabel.map(d => {
