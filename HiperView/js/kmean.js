@@ -1695,16 +1695,19 @@
         opt: getterSetter({isNormalized:true}, function (value) {
             return value;
         }),
-
+        inputdata:[],
         data: getterSetter([], function (arrayOfArrays) {
             var n = arrayOfArrays[0].length;
-            commonjsGlobal.kmeanCluster.normalizedPoints =  (arrayOfArrays.map(function (array) {
+            return (arrayOfArrays.map(function (array) {
                 return array.length == n;
             }).reduce(function (boolA, boolB) {
                 return (boolA & boolB)
             }, true));
+        },function(d){
+            commonjsGlobal.kmeanCluster.inputdata = d;
+            commonjsGlobal.kmeanCluster.normalizedPoints = d;
             if(!commonjsGlobal.kmeanCluster.opt().isNormalized) {
-                let normalizer = new Normalizer(arrayOfArrays);
+                let normalizer = new Normalizer(d);
                 commonjsGlobal.kmeanCluster.normalizedPoints = normalizer.normalizedPoints;
                 outputValue("normalizedFun", normalizer);
             }
@@ -1717,17 +1720,41 @@
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
             let bins =  centroids.map(function (centroid) {
-                return {
-                    centroid: centroid.location(),
-                    points: points.filter(function (point) {
-                        return point.label() == centroid.label();
-                    }).map(function (point) {
-                        return point.location()
-                    }),
-                };
+                let temp = points.filter(function (point) {
+                    return point.label() == centroid.label();
+                }).map(function (point) {
+                    return point.location()
+                });
+                temp.val = centroid.location();
+                this.oldCentroid = temp.val.slice();
+                return temp;
             });
             outputValue("bins", bins);
         },
+
+        calculatePoint: function (siginput) {
+            this.inputdata.slice(0).concat(siginput)
+            var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
+            var points = pointsAndCentroids.points;
+            var centroids = pointsAndCentroids.centroids;
+            let bins =  centroids.map(function (centroid) {
+                let temp = points.filter(function (point) {
+                    return point.label() == centroid.label();
+                }).map(function (point) {
+                    return point.location()
+                });
+                temp.val = centroid.location();
+                this.oldCentroid = temp.val.slice();
+                return temp;
+            });
+            outputValue("bins", bins);
+        },
+
+        updateRadius: getterSetter(true, undefined,function(val){
+            if (val){
+                commonjsGlobal.kmeanCluster.oldCentroid = undefined;
+            }
+        }),
         k: getterSetter(undefined, function (value) {
             return ((value % 1 == 0) & (value > 0))
         }),
@@ -1777,7 +1804,7 @@
             return x;
         }
     }
-    function kmeans(data, config) {
+    function kmeans(data, config, initCentroid) {
         // default k
         var k = config.k || Math.round(Math.sqrt(data.length / 2));
         var iterations = config.iterations;
@@ -1788,11 +1815,15 @@
         });
 
         // intialize centroids randomly
-        var centroids = [];
-        for (var i = 0; i < k; i++) {
-            centroids.push(new Centroid(points[i % points.length].location(), i));
+        var centroids;
+        if (!initCentroid) {
+            centroids = [];
+            for (var i = 0; i < k; i++) {
+                centroids.push(new Centroid(points[i % points.length].location(), i));
+            }
+        }else{
+            centroids = initCentroid.map((d,i)=>new Centroid(new Point(d),i));
         }
-        ;
 
         // update labels and centroid locations until convergence
         for (var iter = 0; iter < iterations; iter++) {
@@ -1839,14 +1870,18 @@
     };
 
 // convenience functions
-    function getterSetter(initialValue, validator) {
+    function getterSetter(initialValue, validator,nextFunc) {
         var thingToGetSet = initialValue;
         var isValid = validator || function (val) {
             return true
         };
         return function (newValue) {
             if (typeof newValue === 'undefined') return thingToGetSet;
-            if (isValid(newValue)) thingToGetSet = newValue;
+            if (isValid(newValue)){
+                thingToGetSet = newValue;
+                if (nextFunc)
+                    nextFunc(newValue);
+            }
             return commonjsGlobal.kmeanCluster;
         };
     };

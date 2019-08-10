@@ -16,7 +16,7 @@ var radarChartsumopt  = {
     bin :   true};
 d3.radar = function () {
     let startBinGridSize=30,
-        isNormalized =false,
+        isNormalized =true,
         BinRange = [3,10],
         arr = [],
         maxstack= 4,
@@ -107,11 +107,16 @@ d3.radar = function () {
             dataSpider3.length = 0;
             console.log("numBins: " + bin.bins.length);
             dataSpider3 = bin.bins.map(d => {
-                var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
-                    return {axis: keys[i], value: e}
-                });
+                var temp;
+                if (bin.normalizedFun)
+                    temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
+                        return {axis: keys[i], value: e}
+                    });
+                else
+                    temp = d.val.map((e, i) => {
+                        return {axis: keys[i], value: e}
+                    });
                 temp.bin = {
-                    val: bin.normalizedFun.scaleBackPoints(d),
                     name: d.map(f => f.data.name),
                     id: d.map(f => f.data.id),
                     scaledval: d,
@@ -122,6 +127,10 @@ d3.radar = function () {
                         return distance(d.val, p)
                     }))
                 };
+                if (bin.normalizedFun)
+                    temp.bin.val =  bin.normalizedFun.scaleBackPoints(d);
+                else
+                    temp.bin.val = d.slice();
                 return temp;
             });
             outlyingPoints.forEach(o => dataSpider3.push(o));
@@ -160,13 +169,29 @@ d3.radar = function () {
         dataSpider3.length = 0;
         //console.log(bin.bins.length);
         dataSpider3 = bin.bins.map(d=>
-        {   var temp = bin.normalizedFun.scaleBackPoint(d.val).map((e,i)=>{return {axis:keys[i],value:e}});
-            temp.bin ={val: bin.normalizedFun.scaleBackPoints(d),
-                name:d.map(f=>f.data.name),
-                id:d.map(f=>f.data.id),
+        {   if (bin.normalizedFun)
+            temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
+                return {axis: keys[i], value: e}
+            });
+        else
+            temp = d.val.map((e, i) => {
+                return {axis: keys[i], value: e}
+            });
+            temp.bin = {
+                name: d.map(f => f.data.name),
+                id: d.map(f => f.data.id),
                 scaledval: d,
-                distancefunc: (e)=>d3.max(e.map(function(p){return distance(e[0], p)})),
-                distance: d3.max(d.map(function(p){return distance(d.val, p)}))};
+                distancefunc: (e) => d3.max(e.map(function (p) {
+                    return distance(e[0], p)
+                })),
+                distance: d3.max(d.map(function (p) {
+                    return distance(d.val, p)
+                }))
+            };
+            if (bin.normalizedFun)
+                temp.bin.val =  bin.normalizedFun.scaleBackPoints(d);
+            else
+                temp.bin.val = d.slice();
             return temp;});
         radarChartsumopt.levels = levelsR;
         radarChartsumopt.gradient = false;
