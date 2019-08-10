@@ -229,7 +229,7 @@ d3.radar = function () {
             bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]);
         else {
             bin = kmeanCluster;
-            bin.iterations(750);
+            bin.iterations(100);
         }
     }
     // var scaleNormal = d3.scaleLinear()
