@@ -1725,6 +1725,7 @@
             var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
+            commonjsGlobal.kmeanCluster.oldCentroid = [];
             let bins =  centroids.map(function (centroid) {
                 let temp = points.filter(function (point) {
                     return point.label() == centroid.label();
@@ -1732,7 +1733,7 @@
                     return point.location()
                 });
                 temp.val = centroid.location();
-                commonjsGlobal.kmeanCluster.oldCentroid = temp.val.slice();
+                commonjsGlobal.kmeanCluster.oldCentroid.push(temp.val.slice());
                 return temp;
             });
             outputValue("bins", bins);
@@ -1744,6 +1745,7 @@
             var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
+            commonjsGlobal.kmeanCluster.oldCentroid = [];
             let bins =  centroids.map(function (centroid) {
                 let temp = points.filter(function (point) {
                     return point.label() == centroid.label();
@@ -1751,7 +1753,7 @@
                     return point.location()
                 });
                 temp.val = centroid.location();
-                commonjsGlobal.kmeanCluster.oldCentroid = temp.val.slice();
+                commonjsGlobal.kmeanCluster.oldCentroid.push(temp.val.slice());
                 return temp;
             });
             outputValue("bins", bins);
