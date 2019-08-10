@@ -28,7 +28,9 @@ let summaryGroup_op ={
     margin : {top: 5, right: 0, bottom: 0, left: 0},
     height: 280,
 }
-
+let Radarplot_opt = {
+    clusterMethod: 'leaderbin',
+}
 
 var svgStore={};
 var svgsum;
@@ -256,7 +258,7 @@ var TsnePlotopt  = {
         zoom:30,
         simDuration: 1000,
         clusterDisplay: 'convex',
-        clusterMethod: 'bin',
+        clusterProject: 'bin',
     }
 };
 var Scatterplot = d3.Scatterplot();
@@ -743,7 +745,7 @@ function drawHorizontalView() {
     xLinearSummaryScale = d3.scaleAdjust().range([0 - radarsize / 24, width + radarsize / 24]).domain([0, maxstack - 1]).itemsize(radarsize);
     //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
     xTimeSummaryScale = xLinearSummaryScale;
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4, 10]).scale(xLinearSummaryScale)
+    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4, 10]).scale(xLinearSummaryScale).binopt(Radarplot_opt)
         .maxstack(maxstack).schema(serviceFullList);
     radarChartOptions.angleSlice = serviceFullList.map(d=>d.angle);
     TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).schema(serviceFullList).init();
@@ -1972,9 +1974,13 @@ $( document ).ready(function() {
         TsnePlotopt.runopt.clusterDisplay = this.value;
         TSneplot.runopt(TsnePlotopt.runopt);
     });
-    d3.select('#clusterMethod').on('change',function(){
-        TsnePlotopt.runopt.clusterMethod = this.value;
+    d3.select('#clusterProject').on('change',function(){
+        TsnePlotopt.runopt.clusterProject = this.value;
         TSneplot.runopt(TsnePlotopt.runopt);
+    });
+    d3.select('#clusterMethod').on('change',function(){
+        Radarplot_opt.clusterMethod = this.value;
+        Radarplot.binopt(Radarplot_opt);
     })
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");

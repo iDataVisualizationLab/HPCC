@@ -150,11 +150,18 @@
                             <option value="alpha">Alpha shape</option>
                         </select>
                     </div>
-                    <label for="clusterDisplay" class="col s4"> Cluster Method: </label>
+                    <label for="clusterProject" class="col s4"> Cluster Projection: </label>
+                    <div  class="row s12">
+                        <select id="clusterProject" class="col s7">
+                            <option value="bin" selected="selected">Same as summarychart</option>
+                            <option value="dbscan">DBScan</option>
+                        </select>
+                    </div>
+                    <label for="clusterMethod" class="col s4"> Cluster Method: </label>
                     <div  class="row s12">
                         <select id="clusterMethod" class="col s7">
-                            <option value="bin" selected="selected">Leader Bin</option>
-                            <option value="dbscan">DBScan</option>
+                            <option value="leaderbin" selected="selected">Leader Bin</option>
+                            <option value="kmean">K-mean</option>
                         </select>
                     </div>
                     <label for="chartType_control" class="col s4"> Simulation: </label>

@@ -1697,15 +1697,21 @@
         }),
         inputdata:[],
         data: getterSetter([], function (arrayOfArrays) {
-            var n = arrayOfArrays[0].length;
-            return (arrayOfArrays.map(function (array) {
-                return array.length == n;
-            }).reduce(function (boolA, boolB) {
-                return (boolA & boolB)
-            }, true));
+            if (arrayOfArrays[0]) {
+                var n = arrayOfArrays[0].length;
+                return (arrayOfArrays.map(function (array) {
+                    return array.length == n;
+                }).reduce(function (boolA, boolB) {
+                    return (boolA & boolB)
+                }, true));
+            }else {
+                commonjsGlobal.kmeanCluster.inputdata = [];
+                commonjsGlobal.kmeanCluster.normalizedPoints = [];
+            }
+            return false;
         },function(d){
             commonjsGlobal.kmeanCluster.inputdata = d;
-            commonjsGlobal.kmeanCluster.normalizedPoints = d;
+            commonjsGlobal.kmeanCluster.normalizedPoints = d.slice(0);
             if(!commonjsGlobal.kmeanCluster.opt().isNormalized) {
                 let normalizer = new Normalizer(d);
                 commonjsGlobal.kmeanCluster.normalizedPoints = normalizer.normalizedPoints;
@@ -1726,14 +1732,15 @@
                     return point.location()
                 });
                 temp.val = centroid.location();
-                this.oldCentroid = temp.val.slice();
+                commonjsGlobal.kmeanCluster.oldCentroid = temp.val.slice();
                 return temp;
             });
             outputValue("bins", bins);
         },
 
         calculatePoint: function (siginput) {
-            this.inputdata.slice(0).concat(siginput)
+            this.inputdata = this.inputdata.slice(0).concat(siginput);
+            this.data(this.inputdata);
             var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
@@ -1744,7 +1751,7 @@
                     return point.location()
                 });
                 temp.val = centroid.location();
-                this.oldCentroid = temp.val.slice();
+                commonjsGlobal.kmeanCluster.oldCentroid = temp.val.slice();
                 return temp;
             });
             outputValue("bins", bins);

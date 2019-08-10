@@ -244,7 +244,7 @@ d3.Tsneplot = function () {
                     updateCluster (data.result);
                     break;
                 case 'clusterCircle':
-                    if (runopt.clusterMethod==='dbscan')
+                    if (runopt.clusterProject==='dbscan')
                         clusterlabel = data.result;
                     break;
                 // case 'mean':
@@ -978,7 +978,7 @@ d3.Tsneplot = function () {
     }
     let clusterlabel=[];
     Tsneplot.clusterBin = function (_) {
-        return arguments.length ? (((runopt.clusterMethod==='bin') ? clusterlabel = _:_),updateClusterLabel(), Tsneplot) : clusterlabel;
+        return arguments.length ? (((runopt.clusterProject==='bin') ? clusterlabel = _:_),updateClusterLabel(), Tsneplot) : clusterlabel;
     };
 
     Tsneplot.data = function (_) {

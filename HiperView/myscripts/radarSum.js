@@ -35,6 +35,9 @@ d3.radar = function () {
         return radarTimeline;
     };
     let oncallbackCluster =()=>{};
+    let binopt ={
+        clusterMethod: 'leaderbin'
+    };
     let schema;
     radarTimeline.draw = function(index){
         let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
@@ -94,7 +97,12 @@ d3.radar = function () {
             bin.minNumOfBins(4);
         }catch(e){
             console.log('Not enough data for binning');
-            bin.minNumOfBins(1);
+            if (bin.minNumOfBins)
+                bin.minNumOfBins(1);
+            else if(dataSpider3.length<4)
+                bin.k(undefined)
+            else
+                bin.k(5)
         }
             //TESTING ZONE
             bin.data(dataSpider3.map((d,i) => {
@@ -216,6 +224,14 @@ d3.radar = function () {
                     d3.select(this).remove();
             });
     };
+    function switchBinMode (){
+        if (binopt.clusterMethod ==='leaderbin')
+            bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]);
+        else {
+            bin = kmeanCluster;
+            bin.iterations(750);
+        }
+    }
     // var scaleNormal = d3.scaleLinear()
     //     .domain([0,1])
     //     .range([thresholds[0][0],thresholds[0][1]]);
@@ -259,6 +275,27 @@ d3.radar = function () {
     };
 
     radarTimeline.scale = function (_) {
+        return arguments.length ? (xscale = _, radarTimeline) : xscale;
+
+    };
+
+    radarTimeline.binopt = function (_) {
+        //Put all of the options into a variable called graphicopt
+        if (arguments.length) {
+            for (let i in _) {
+                if ('undefined' !== typeof _[i]) {
+                    binopt[i] = _[i];
+                }
+            }
+            switchBinMode ();
+            return radarTimeline;
+        }else {
+            return binopt;
+        }
+
+    };
+
+    radarTimeline.clusterMethod = function (_) {
         return arguments.length ? (xscale = _, radarTimeline) : xscale;
 
     };
