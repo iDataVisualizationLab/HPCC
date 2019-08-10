@@ -2,7 +2,7 @@
 
 
 var radarsize  = 300;
-var bin = binnerN().startBinGridSize(30).isNormalized(false).minNumOfBins(4).maxNumOfBins(10).data([]);
+var bin = binnerN().startBinGridSize(30).isNormalized(true).minNumOfBins(4).maxNumOfBins(10).data([]);
 var radarChartsumopt  = {
     margin: {top: 5, right: 0, bottom: 0, left: 0},
     w: radarsize -5,
@@ -49,6 +49,7 @@ d3.radar = function () {
         handledata(index);
         // TESTING ZONE
         let scagOptions ={
+            isNormalized: true,
             startBinGridSize: 30,
             minBins: 20,
             maxBins: 100,
