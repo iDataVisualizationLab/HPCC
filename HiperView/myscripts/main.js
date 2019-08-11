@@ -2077,29 +2077,39 @@ $( document ).ready(function() {
             oldchoose =$('#datacom').val();
                 setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
-//                 d3.json("data/" + choice + ".json", function (error, data) {
-//                     if (error) {
-                    d3.queue()
-                        .defer(d3.json, "data/" + choice + ".json")
-                        .defer(d3.json, "data/" + choice + "_job.json")
-                        .await(loadata1);
-                    // d3.json("data/" + choice + ".json", function (error, data) {
-                    //     if (error) {
-                    //         M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                    //         d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                    //             if (error) {
-                    //
-                    //             }
-                    //             loadata1(data)
-                    //         });
-                    //         return;
-                    //     }
-                    //     loadata1(data)
-                    // });
-//                         return;
-//                     }
-//                     loadata1(data)
-//                 });
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error) {
+                        d3.json("data/" + choice + ".json", function (error, data) {
+                            if (error) {
+                                M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                                    if (error) {
+
+                                    }
+                                    d3.json ("data/" + choice + "_job.json", function (error, job) {
+                                        if (error){
+                                            loadata1(data,undefined);
+                                            return;
+                                        }
+                                        loadata1(data,job);
+                                        return;
+                                    });
+                                });
+                                return;
+                            }
+                            return
+                        });
+                            return;
+                    }
+                    d3.json ("data/" + choice + "_job.json", function (error, job) {
+                        if (error){
+                            loadata1(data,undefined);
+                            return;
+                        }
+                        loadata1(data,job);
+                        return;
+                    });
+                });
                 }
                 else {
                     d3.select(".currentDate")
@@ -2118,11 +2128,11 @@ $( document ).ready(function() {
             $('#datacom').val(oldchoose);
             $('#data_input_file').trigger('click');
         }
-        function loadata1(e,data,job){
-            if (e)
-                M.toast({html: 'No job data found!'})
+        function loadata1(data,job){
             data['timespan'] = data['timespan'].map(d=>new Date(d));
             sampleS = data;
+            if(job)
+                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
