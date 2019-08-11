@@ -6,6 +6,7 @@ var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Job_load",
 
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
 var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.834386356666759,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.4487989505128276,"range":[3,98]}]},{"text":"Job_load","id":1,"enable":true,"sub":[{"text":"Job load","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[0,10]}]},{"text":"Memory_usage","id":2,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":2,"angle":1.8849555921538759,"range":[0,99]}]},{"text":"Fans_speed","id":3,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":3,"angle":2.4751942119192307,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":3,"angle":2.9239931624320583,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":3,"angle":3.372792112944886,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":3,"angle":3.8215910634577135,"range":[1050,17850]}]},{"text":"Power_consum","id":4,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":4,"angle":4.71238898038469,"range":[0,200]}]}];
+var serviceLists_or = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.834386356666759,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.4487989505128276,"range":[3,98]}]},{"text":"Job_load","id":1,"enable":true,"sub":[{"text":"Job load","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[0,10]}]},{"text":"Memory_usage","id":2,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":2,"angle":1.8849555921538759,"range":[0,99]}]},{"text":"Fans_speed","id":3,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":3,"angle":2.4751942119192307,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":3,"angle":2.9239931624320583,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":3,"angle":3.372792112944886,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":3,"angle":3.8215910634577135,"range":[1050,17850]}]},{"text":"Power_consum","id":4,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":4,"angle":4.71238898038469,"range":[0,200]}]}];
 var serviceFullList = serviceLists2serviceFullList(serviceLists);
 function serviceLists2serviceFullList (serviceLists){
     let temp = [];
@@ -186,13 +187,14 @@ function newdatatoFormat (data){
 
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
+    sampleS['timespan'] = data.map(d=>new Date(d.time||d.timestamp))
     data.forEach(d=>{
         host_name.forEach(h=> {
             serviceListattr.forEach(attr => {
                  if (sampleS[h]===undefined)
                      sampleS[h] = {};
                 sampleS[h][attr] = sampleS[h][attr]||[];
-                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],h,(new Date(d.timestamp)).getTime()));
+                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],attr));
             });
         })
     });
@@ -219,19 +221,19 @@ function getstringQuery_influx (ip,serviceI,timerange,timestep){
             let str = "SELECT ";
             if (timestep)
                 if(subs.type==="object")
-                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('DISTINCT("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+(subs.format2||subs.format)(i+1)+'"'):('DISTINCT("'+(subs.format2||subs.format)(i+1)+'") as "'+(subs.format2||subs.format)(i+1)+'"')).join(',');
                 else
-                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('MAX("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+(subs.format2||subs.format)(i+1)+'"'):('MAX("'+(subs.format2||subs.format)(i+1)+'") as "'+(subs.format2||subs.format)(i+1)+'"')).join(',');
             else
-                str +=  d3.range(subs.numberOfEntries).map(i=> '"'+subs.format(i+1)+'"').join(',');
+                str +=  d3.range(subs.numberOfEntries).map(i=> '"'+(subs.format2||subs.format)(i+1)+'"').join(',');
             if(subs.type==="object")
                 str +=  ' FROM '+ser+' WHERE host=\''+ip+'\'';
             else
                 str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
             if (timerange){
-                str += 'AND time > \''+timerange[0]+'\'';
+                str += 'AND time >= \''+timerange[0]+'\'';
                 if (timerange[1])
-                    str += ' AND time < \''+timerange[1]+'\'';
+                    str += ' AND time <= \''+timerange[1]+'\'';
                 else
                     str += ' LIMIT 1';
                 if (timestep)
@@ -454,15 +456,12 @@ function simulateResults2(hostname,iter, s){
 
 function handlemissingdata(hostname,iter){
     var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-    var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
-    // simval = (simval[0]+simval[1])/2;
+    var simval = simisval.slice(0);
     simval = (simval[0]+simval[1]+20);
-    var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
     if (simval!==undefinedValue && !isNaN(simval) )
-    //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
+        simisval= [Math.floor(simval)];
     else
-        simisval.data.service.plugin_output = "UNKNOWN";
+        simisval= [];
     return simisval;
 }
 
@@ -484,24 +483,29 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
         serviceList_selected.forEach((ser) => {
             let indx = ser.index;
             var a;
+            let requiredLength=  serviceLists[indx].sub.length;
             if (r[serviceListattr[indx]][stepIndex]) {
-                a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser.text);
+                a = r[serviceListattr[indx]][stepIndex].slice(0,requiredLength);
+                d3.range(0,requiredLength - a.length).forEach(d=> a.push(undefined));
             }
             else {
-                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:isPredict,undefinedValue);
+                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:!isPredict,undefinedValue);
+                a = a.slice(0,requiredLength);
+                d3.range(0,requiredLength - a.length).forEach(d=> a.push(undefined));
             }
             var scale = d3.scaleLinear()
                 .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
-            a = a.map(d => scale(d)===0? 0: (scale(d) ||  undefinedValue));
-            switch (indx) {
-                case 0:
-                case 3:
+
+            a = a.map(d => scale(d)===0? 0: (scale(d==null?undefined:d) ||  undefinedValue));
+            // switch (indx) {
+            //     case 0:
+            //     case 3:
                     arrServices = d3.merge([arrServices, a]);
-                    break;
-                default:
-                    arrServices.push(a[0] ===0? 0: (a[0]|| undefinedValue))
-            }
+                //     break;
+                // default:
+                //     arrServices.push(a[0] ===0? 0: (a[0]|| undefinedValue))
+            // }
         })
     }
     arrServices.name = name;
@@ -509,9 +513,9 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
 }
 function predict (arr,ser, notUsepastValue,undefinedValue){
     try{
-        if (notUsepastValue)
+        if (notUsepastValue || arr[arr.length-1]==undefined)
             throw 'notusepast';
-        return processData(arr[arr.length-1].data.service.plugin_output,ser); // getdata from the past
+        return arr[arr.length-1]; // getdata from the past
     } catch(e){
         let average = 0;
         let serviceMain = serviceLists.find(s=>s.text===ser);
@@ -545,6 +549,7 @@ function inithostResults (worker) {
         }
         hosts.push(h);
     }
+    hostResults.timespan =[]
     hosts.sort((a, b) => {
 
         var rackx = a.hpcc_rack;
@@ -565,52 +570,78 @@ function inithostResults (worker) {
 
 // Delete unnecessary files
 let processResult = processResult_old;
-function processResult_influxdb(r,hostname,index){
-    var obj = {};
-    obj.result = {};
-    if (r.results[0].series){
-        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
-    }else
-        obj.result.query_time = new Date();
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
+// function processResult_influxdb(r,hostname,index){
+//     var obj = {};
+//     obj.result = {};
+//     if (r.results[0].series){
+//         obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+//     }else
+//         obj.result.query_time = new Date();
+//     obj.data = {};
+//     obj.data.service={};
+//     obj.data.service.host_name = hostname;
+//     if (index !== undefined ) {
+//         obj.data.service.plugin_output = {results: r.results.map(d => {
+//                 let temp = {};
+//                 temp.statement_id = d.statement_id;
+//                 temp.series = [];
+//                 let tempsub = {};
+//                 const series = d.series[0];
+//                 tempsub.name = series.name;
+//                 tempsub.columns = series.columns;
+//                 tempsub.values = [series.values[index]];
+//                 temp.series.push(tempsub);
+//                 return temp;
+//             })};
+//     } else
+//         obj.data.service.plugin_output = r;
+//     return obj;
+// }
+// function processResult_old(r){
+//     var obj = {};
+//     obj.result = {};
+//     obj.result.query_time = r.result.query_time;
+//     obj.data = {};
+//     obj.data.service={};
+//     obj.data.service.host_name = r.data.service.host_name;
+//     obj.data.service.plugin_output = r.data.service.plugin_output;
+//     return obj;
+// }
+function processResult_influxdb(r,hostname,index,servicename){
+    let temp={};
+    // if (r.results[0].series){
+    //     obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+    // }else
+    //     obj.result.query_time = new Date();
+    // obj.data = {};
+    // obj.data.service={};
+    // obj.data.service.host_name = hostname;
     if (index !== undefined ) {
-        obj.data.service.plugin_output = {results: r.results.map(d => {
+        temp = {results: r.results.map(d => {
                 let temp = {};
                 temp.statement_id = d.statement_id;
                 temp.series = [];
                 let tempsub = {};
-                const series = d.series[0];
-                tempsub.name = series.name;
-                tempsub.columns = series.columns;
-                tempsub.values = [series.values[index]];
+                if (d.series) {
+                    const series = d.series[0];
+                    tempsub.name = series.name;
+                    tempsub.columns = series.columns;
+                    tempsub.values = [series.values[index]];
+                }
                 temp.series.push(tempsub);
                 return temp;
             })};
     } else
-        obj.data.service.plugin_output = r;
-    return obj;
+        temp = r;
+    return processData_influxdb(temp,servicename);
 }
 function processResult_old(r){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = r.result.query_time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = r.data.service.host_name;
-    obj.data.service.plugin_output = r.data.service.plugin_output;
-    return obj;
+    return processData_nagios(r.data.service.plugin_output);
+    // return obj;
 }
-function processResult_csv(r,hostname,time){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
-    obj.data.service.plugin_output = r;
-    return obj;
+function processResult_csv(r,serviceName){
+
+    return processData_csv(r,serviceName);
 }
 const processResult_nagios = processResult_old;
 
@@ -638,3 +669,35 @@ let processData = processData_old;
             return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
         };
     }
+
+function getformattime (rate,unit){
+    return d3["time"+unit].every(rate);
+}
+
+let basic_service = {"Temperature":['temp'],
+    "Job_load":['job'],
+    "Memory_usage":['memory','cups'],
+    "Fans_speed":['fan'],
+    "Power_consum":['power','Voltage']};
+
+function extractWordsCollection (terms,data,keyk) {
+    let message = data;
+    let collection = {};
+    terms.forEach(t=>{
+        t.value.find(
+            k => {
+                if ((new RegExp(k,'gi')).test(message)) {
+                    collection[t.key] = keyk;
+                    return true;
+                }
+                return false;
+
+            })
+
+    });
+    return collection;
+}
+
+function getTermsArrayCollection(header){
+    return basic_service[header].map(d=>{return {key:header, value: [d]}});
+}

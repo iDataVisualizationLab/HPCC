@@ -210,6 +210,28 @@ d3.radar = function () {
 
     };
 
+    radarTimeline.drawSummarypoint = function(index,hindex){
+
+        if (index >= (maxstack-1)) index = maxstack-1;
+        let radarchart = svg.selectAll(".radar"+index+".box"+index+".graphsum");
+        if (radarchart.empty())
+            radarchart = svg.append("g")
+                .attr("class","radar"+index+" box"+index+" graphsum")
+                .datum(index)
+                .attr("transform", function (d) {
+                    return "translate(" + xscale(index) + "," + margin + ")";
+                });
+
+        const values = [handledataRate(hindex)];
+        radarChartsumopt.gradient = true;
+        radarChartsumopt.bin = false;
+        radarChartsumopt.levels = levelsR;
+        //radarChartsumopt.color = color2;
+        RadarChart(".radar"+((index >= maxstack-1)?(maxstack-1):index), values, radarChartsumopt,"");
+
+
+    };
+
     radarTimeline.shift = function (){
         var radarchart = svg.selectAll(".graphsum").transition().duration(500)
             .attr("transform", function (d) {

@@ -135,15 +135,22 @@ function mouseoverNode(d1){
     startRecord = startRecord <0 ? 0 :startRecord;
     for (var i = startRecord; i<r.arr.length;i++){
         // var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
-        var a = processData(r.arrTemperature[i].data.service.plugin_output, serviceList[0]);
+        var a = r.arrTemperature[i];
         var obj = {};
-        obj.temp1 = a[0];
-        obj.temp2 = a[1];
-        obj.temp3 = a[2];
-        obj.query_time =r.arr[i].result.query_time;
+        if (a){
+            obj.temp1 = a[0];
+            obj.temp2 = a[1];
+            obj.temp3 = a[2];}
+        else{
+        obj.temp1 = undefined;
+        obj.temp2 = undefined;
+        obj.temp3 = undefined;}
+        obj.query_time =hostResults['timespan'][i];
         if (obj.temp1!==undefinedValue &&  obj.temp2!==undefinedValue && obj.temp3!==undefinedValue)
             arr.push(obj);
     }
+    if (!arr.length)
+        arr=[{}]
 
 
 
@@ -151,9 +158,9 @@ function mouseoverNode(d1){
     var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
     var maxTime = 0;
     for (var i=startRecord; i<r.arr.length;i++){
-        var qtime =r.arr[i].result.query_time;
-        minTime = Math.min(minTime,qtime);
-        maxTime = Math.max(maxTime,qtime);
+        var qtime = hostResults['timespan'][i];
+        minTime = Math.min(minTime,qtime.getTime());
+        maxTime = Math.max(maxTime,qtime.getTime());
     }
 
     xScale = d3.scaleTime()
@@ -366,7 +373,7 @@ function mouseoverNode(d1){
         for (var i=startRecord;i<r.arr.length;i++){
             var arr1 = getDataByName_withLabel(hostResults, name, i, i,0.5);
             arr1.indexSamp = i;
-            arr1.time = r.arr[i].result.query_time;
+            arr1.time = hostResults['timespan'][i];
             dataSpider.push(arr1);
 
         }

@@ -247,19 +247,32 @@ function areaChart(){
 }
 
 function saveResults(){
-    var filename = "service"+d3.timeFormat("%a%d%b_%H%M")(new Date())+".json";
+    var filename = "service"+d3.timeFormat("%a%d%b_%H%M")(new Date());
     var type = "json";
-    var str = JSON.stringify(hostResults);
+
+    var clone_hostResults = JSON.parse( JSON.stringify(hostResults));
+    var jobarr = {};
+    var validJobInfo = false;
+    hosts.forEach(h=>{
+        jobarr[h.name] = clone_hostResults[h.name].arrJob_scheduling;
+        jobarr[h.name].reduce((o,n)=>validJobInfo = validJobInfo||n[0]!=undefined);
+        delete clone_hostResults[h.name].arr;
+        delete clone_hostResults[h.name].arrJob_scheduling;
+    });
+
+    clone_hostResults['timespan'] = clone_hostResults['timespan'].map(d=>new Date(d).toISOString())
+
+    var str = JSON.stringify(clone_hostResults);
 
     
     var file = new Blob([str], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
+        window.navigator.msSaveOrOpenBlob(file, filename+'.'+type);
     else { // Others
         var a = document.createElement("a"),
                 url = URL.createObjectURL(file);
         a.href = url;
-        a.download = filename;
+        a.download = filename+'.'+type;
         document.body.appendChild(a);
         a.click();
         setTimeout(function() {
@@ -267,213 +280,25 @@ function saveResults(){
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+    if (validJobInfo){
+        var str = JSON.stringify(jobarr);
 
-    /*
-    // Save results for Project 1
-    var filename = "HPCC_Project1.json";
-    var type = "json";
-    var data = {};
-   for (var att in sampleS){
-        data[att]={};
-        data[att].arrTemperatureCPU1=[];
-        data[att].arrTemperatureCPU2=[];
-        data[att].arrCPU_load=[];
-        data[att].arrFans_speed1=[];
-        data[att].arrFans_speed2=[];
-        data[att].arrMemory_usage=[];
 
-        var item = sampleS[att];
-        for(var i=0;i<item.arr.length;i++){
-            var str = item.arr[i].data.service.plugin_output;
-            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
-                data[att].arrTemperatureCPU1.push(null);
-                data[att].arrTemperatureCPU2.push(null);
-            }
-            else{
-                var a = processData(str, serviceList[0]);
-                data[att].arrTemperatureCPU1.push(a[0]);
-                data[att].arrTemperatureCPU2.push(a[1]);
-            }
-            
-            var str2 = item.arrCPU_load[i].data.service.plugin_output;
-            var b2 =  +str2.split("CPU Load: ")[1];
-            data[att].arrCPU_load.push(b2);
-                       
-            var str3 = item.arrMemory_usage[i].data.service.plugin_output;
-            //console.log(att+" "+str3);
-            if (str3.indexOf("syntax error")>=0 ){
-                data[att].arrMemory_usage.push(null);
-            }
-            else{
-                var b3 =  str3.split("Usage Percentage = ")[1];
-                var c3 =  +b3.split(" :: Total Memory")[0];
-                data[att].arrMemory_usage.push(c3);
-            }
-
-            var str4 = item.arrFans_health[i].data.service.plugin_output;
-            if (str4.indexOf("UNKNOWN")>=0 || str4.indexOf("No output on stdout) stderr")>=0 
-                || str4.indexOf("Service check timed out")>=0){
-                data[att].arrFans_speed1.push(null);
-                data[att].arrFans_speed2.push(null);  
-            }  
-            else{  
-                var arr4 =  str4.split(" RPM ");
-                var fan1 = +arr4[0].split("FAN_1 ")[1];
-                var fan2 = +arr4[1].split("FAN_2 ")[1];
-                data[att].arrFans_speed1.push(fan1);
-                data[att].arrFans_speed2.push(fan2);  
-            }
-        }
-    }
-
-    var str = JSON.stringify(data);
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
+        var file = new Blob([str], {type: type});
+        if (window.navigator.msSaveOrOpenBlob) // IE10+
+            window.navigator.msSaveOrOpenBlob(file, filename+'_job'+'.'+type);
+        else { // Others
+            var a = document.createElement("a"),
                 url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }*/
-
-
-    // Save results for Outliagnostics ***************************
-    var filename = "HPCC_scagnostics.json";
-    var type = "json";
-
-    var numnerOfYear = 100000;
-    for (var att in sampleS){
-        var item = sampleS[att];
-        if (item.arrTemperature.length<numnerOfYear){
-            numnerOfYear = item.arrTemperature.length;
+            a.href = url;
+            a.download = filename+'_job'+'.'+type;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
         }
-    }   
-
-    var dataS = {};
-    dataS.Scagnostics= ["Outlying", "Skewed", "Clumpy", "Sparse", "Striated", "Convex", "Skinny", "Stringy", "Monotonic"];
-    dataS.Variables = ["var1", "var2"];
-    dataS.Countries = [];
-    for (var att in sampleS){
-        dataS.Countries.push(att);
-    }    
-    dataS.CountriesData ={};
-    for (var att in sampleS){
-        dataS.CountriesData[att]=[];
-       
-        var item = sampleS[att];
-        for(var i=0;i<numnerOfYear;i++){
-            var str = item.arrTemperature[i].data.service.plugin_output;
-            var obj = {};
-            if (str=="UNKNOWN-Plugin was unable to determine the status for the host CPU temperatures! HTTP_STATUS Code:000"){
-                obj.v0=null;
-            }
-            else{
-                var a = processData(str,serviceList[0]);
-                if (a[1]<0)
-                    obj.v0 = null;
-                obj.v0 = a[1];
-            }
-                         
-            var str4 = item.arrFans_health[i].data.service.plugin_output;
-            if (str4.indexOf("(No output on stdout)")>=0 
-                || str4.indexOf("UNKNOWN")>=0  
-                || str4.indexOf("syntax error")>=0 ){
-                obj.v1=null;
-            }
-            else{
-                var c3 =  processData(str4,serviceList[3]);
-                if (c3[1]<0)
-                     obj.v1 = null;
-                obj.v1=c3[1];
-            }
-            obj.Outlying = 0;
-            obj.year = i;
-            dataS.CountriesData[att].push(obj);
-        }
-    }
-    // Standardize data ***************************************************************
-    var minV0 = 100000;
-    var minV1 = 100000;
-    var maxV0 = 0;
-    var maxV1 = 0;
-    for (var att in  dataS.CountriesData){
-        var hostArray = dataS.CountriesData[att];
-        for(var i=0;i<hostArray.length;i++){
-            var v0 = hostArray[i].v0;
-            var v1 = hostArray[i].v1;
-            if (v0 != null){
-                if (v0<minV0)
-                    minV0 = v0;
-                if (v0>maxV0)
-                    maxV0 = v0;
-            }
-            if (v1 != null){
-                if (v1<minV1)
-                    minV1 = v1;
-                if (v1>maxV1)
-                    maxV1 = v1;
-            }
-        }    
-    }
-    for (var att in  dataS.CountriesData){
-        var hostArray = dataS.CountriesData[att];
-        for(var i=0;i<hostArray.length;i++){
-            var v0 = hostArray[i].v0;
-            var v1 = hostArray[i].v1;
-            if (v0 != null){
-                hostArray[i].s0 = (hostArray[i].v0-minV0)/(maxV0-minV0)
-            }
-            else{
-                hostArray[i].s0=null;
-            }
-            if (v1 != null){
-                hostArray[i].s1= (hostArray[i].v1-minV1)/(maxV1-minV1);
-            }
-            else{
-                hostArray[i].s1=null;
-            }
-        }    
-    }
-
-    dataS.YearsData = [];
-    for (var y=0; y<numnerOfYear; y++){
-        var obj = {};
-        obj.s0 = [];
-        obj.s1 = [];
-        obj.Scagnostics0 = [0, 0, 0, 0, 0, 0, 0, 0, 0]; 
-        for (var att in  dataS.CountriesData){
-            var hostArray = dataS.CountriesData[att];
-            var v0 = hostArray[y].s0;
-            var v1 = hostArray[y].s1;
-            obj.s0.push(v0);
-            obj.s1.push(v1);
-        }
-        dataS.YearsData.push(obj);
-    }
-    
-
-    var str = JSON.stringify(dataS);
-    var file = new Blob([str], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
     }
 }
 
@@ -857,34 +682,6 @@ function handlemissingimage(node,selectedService){
         node.src = srcpath+"images/TTUlogo.png";
     d3.select(node).attr('src',node.src)
     console.log(node.src)
-}
-
-let basic_service = {"Temperature":['temp'],
-    "Job_load":['job'],
-    "Memory_usage":['memory','cups'],
-    "Fans_speed":['fan'],
-    "Power_consum":['power','Voltage']};
-
-function extractWordsCollection (terms,data,keyk) {
-    let message = data;
-    let collection = {};
-    terms.forEach(t=>{
-        t.value.find(
-            k => {
-                if ((new RegExp(k,'gi')).test(message)) {
-                    collection[t.key] = keyk;
-                    return true;
-                }
-                return false;
-
-            })
-
-    });
-    return collection;
-}
-
-function getTermsArrayCollection(header){
-    return basic_service[header].map(d=>{return {key:header, value: [d]}});
 }
 
 let srcpath ='';
