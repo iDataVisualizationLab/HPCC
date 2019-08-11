@@ -6,6 +6,7 @@ var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Job_load",
 
 var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
 var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.834386356666759,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.4487989505128276,"range":[3,98]}]},{"text":"Job_load","id":1,"enable":true,"sub":[{"text":"Job load","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[0,10]}]},{"text":"Memory_usage","id":2,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":2,"angle":1.8849555921538759,"range":[0,99]}]},{"text":"Fans_speed","id":3,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":3,"angle":2.4751942119192307,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":3,"angle":2.9239931624320583,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":3,"angle":3.372792112944886,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":3,"angle":3.8215910634577135,"range":[1050,17850]}]},{"text":"Power_consum","id":4,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":4,"angle":4.71238898038469,"range":[0,200]}]}];
+var serviceLists_or = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.834386356666759,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.4487989505128276,"range":[3,98]}]},{"text":"Job_load","id":1,"enable":true,"sub":[{"text":"Job load","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[0,10]}]},{"text":"Memory_usage","id":2,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":2,"angle":1.8849555921538759,"range":[0,99]}]},{"text":"Fans_speed","id":3,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":3,"angle":2.4751942119192307,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":3,"angle":2.9239931624320583,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":3,"angle":3.372792112944886,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":3,"angle":3.8215910634577135,"range":[1050,17850]}]},{"text":"Power_consum","id":4,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":4,"angle":4.71238898038469,"range":[0,200]}]}];
 var serviceFullList = serviceLists2serviceFullList(serviceLists);
 function serviceLists2serviceFullList (serviceLists){
     let temp = [];
@@ -186,13 +187,14 @@ function newdatatoFormat (data){
 
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
+    sampleS['timespan'] = data.map(d=>new Date(d.time||d.timestamp))
     data.forEach(d=>{
         host_name.forEach(h=> {
             serviceListattr.forEach(attr => {
                  if (sampleS[h]===undefined)
                      sampleS[h] = {};
                 sampleS[h][attr] = sampleS[h][attr]||[];
-                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],h,(new Date(d.timestamp)).getTime()));
+                sampleS[h][attr].push(processResult_csv(d[h+'-'+attr],attr));
             });
         })
     });
@@ -637,15 +639,9 @@ function processResult_old(r){
     return processData_nagios(r.data.service.plugin_output);
     // return obj;
 }
-function processResult_csv(r,hostname,time){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
-    obj.data.service.plugin_output = r;
-    return processData_nagios(r.data.service.plugin_output);
+function processResult_csv(r,serviceName){
+
+    return processData_csv(r,serviceName);
 }
 const processResult_nagios = processResult_old;
 
@@ -676,4 +672,32 @@ let processData = processData_old;
 
 function getformattime (rate,unit){
     return d3["time"+unit].every(rate);
+}
+
+let basic_service = {"Temperature":['temp'],
+    "Job_load":['job'],
+    "Memory_usage":['memory','cups'],
+    "Fans_speed":['fan'],
+    "Power_consum":['power','Voltage']};
+
+function extractWordsCollection (terms,data,keyk) {
+    let message = data;
+    let collection = {};
+    terms.forEach(t=>{
+        t.value.find(
+            k => {
+                if ((new RegExp(k,'gi')).test(message)) {
+                    collection[t.key] = keyk;
+                    return true;
+                }
+                return false;
+
+            })
+
+    });
+    return collection;
+}
+
+function getTermsArrayCollection(header){
+    return basic_service[header].map(d=>{return {key:header, value: [d]}});
 }

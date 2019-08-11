@@ -838,17 +838,21 @@ function main() {
             onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
         }
         if (data.action==='returnData'){
-            if (data.result.hindex&& data.result.index < lastIndex+1) {
+            if (data.result.hindex!==undefined && data.result.index < lastIndex) {
                 if (graphicControl.sumType === "RadarSummary" ) {
-                    // console.log(data.result.index);
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                    console.log(data.result)
                 }
             }
-            MetricController.data(data.result.arr).drawSummary(data.result.hindex);
-        }else  if (data.action==='returnDataHistory'){
-            if (data.result.hindex&& data.result.index < lastIndex+1) {
+
+        }else if (data.action==='returnDataHistory'){
+            if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
                 if (graphicControl.charType === "T-sne Chart")
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+                if (graphicControl.sumType === "RadarSummary") {
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
+                MetricController.data(data.result.arr).drawSummary(data.result.hindex);
             }
         }
         if (data.action==='DataServices') {
@@ -1363,7 +1367,7 @@ function getRackx(hpcc_rack,hpcc_node,isVertical){
         return racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x;
     return racksnewor[hpcc_rack - 1].x;
 }
-function plotResult(result,name) {
+function plotResult(result,name,index) {
     // Check if we should reset the starting point
     if (firstTime) {
         currentMiliseconds = hostResults['timespan'][0];
@@ -1375,10 +1379,10 @@ function plotResult(result,name) {
     }
     firstTime = false;
 
-    if (hostResults['timespan'][lastIndex])
-        query_time = hostResults['timespan'][lastIndex]||query_time;  // for drawing current timeline in Summary panel
+    if (hostResults['timespan'][index||lastIndex])
+        query_time = hostResults['timespan'][index||lastIndex]||query_time;  // for drawing current timeline in Summary panel
     else
-        hostResults['timespan'][lastIndex] = new Date (query_time.getTime() + (hostResults['timespan'][1].getTime()-hostResults['timespan'][0].getTime()));
+        hostResults['timespan'][index||lastIndex] = new Date (query_time.getTime() + (hostResults['timespan'][1].getTime()-hostResults['timespan'][0].getTime()));
     currentHostname = name;
 
     // Process the array data ***************************************
@@ -1437,7 +1441,7 @@ function plotResult(result,name) {
         case "T-sne Chart":
             initTsneView();
             if (!speedup) {
-                getData(name,lastIndex,true,true);
+                getData(name,index||lastIndex,true,true);
             }
     }
 
@@ -1950,7 +1954,7 @@ function step (iteration, count){
                     hostResults[name][serviceListattr[s.index]].push(result);
                 });
 
-                plotResult(result, name);
+                plotResult(result, name,iteration);
                 iteration++;
             }
             iteration = tmp;
@@ -2169,11 +2173,13 @@ $( document ).ready(function() {
                     }else{
                         loadata1(data);
                         function loadata1(data){
+                            db = "csv";
+
                             newdatatoFormat(data);
 
                             inithostResults();
                             processResult = processResult_csv;
-                            db = "csv";
+
                             addDatasetsOptions()
                             MetricController.axisSchema(serviceFullList,true).update();
                             realTimesetting(false,"csv",true,data);

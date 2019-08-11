@@ -41,6 +41,7 @@ addEventListener('message',function ({data}){
             }
             serviceFull_selected =[];
             serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)));
+            console.log(serviceFull_selected)
             break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex,data.value.usepast);
@@ -57,13 +58,13 @@ addEventListener('message',function ({data}){
                     action: 'returnData',
                     result: {arr: arr, nameh: data.value.host, hindex: hostIndex, index: data.value.lastIndex}
                 });
-                postMessage({action: 'DataServices',
-                    result: {
-                        arr: getsummaryservice(plotTsne(data.value.hostResults, data.value.lastIndex, data.value.usepast, 0, 'undefined')),
-                        index: data.value.lastIndex
-                    }
-                });
             }
+            postMessage({action: 'DataServices',
+                result: {
+                    arr: getsummaryservice(plotTsne(data.value.hostResults, data.value.lastIndex, false, 0, 'undefined')),
+                    index: data.value.lastIndex
+                }
+            });
             postMessage({action: data.action, status:"done" });
             break;
     }

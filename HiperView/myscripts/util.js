@@ -684,34 +684,6 @@ function handlemissingimage(node,selectedService){
     console.log(node.src)
 }
 
-let basic_service = {"Temperature":['temp'],
-    "Job_load":['job'],
-    "Memory_usage":['memory','cups'],
-    "Fans_speed":['fan'],
-    "Power_consum":['power','Voltage']};
-
-function extractWordsCollection (terms,data,keyk) {
-    let message = data;
-    let collection = {};
-    terms.forEach(t=>{
-        t.value.find(
-            k => {
-                if ((new RegExp(k,'gi')).test(message)) {
-                    collection[t.key] = keyk;
-                    return true;
-                }
-                return false;
-
-            })
-
-    });
-    return collection;
-}
-
-function getTermsArrayCollection(header){
-    return basic_service[header].map(d=>{return {key:header, value: [d]}});
-}
-
 let srcpath ='';
 
 function concaveHull() {
