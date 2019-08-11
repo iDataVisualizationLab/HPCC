@@ -2040,7 +2040,8 @@ $( document ).ready(function() {
     d3.select('#clusterMethod').on('change',function(){
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
-    })
+        updateSummaryChartAll();
+    });
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");
         graphicControl.charType = sect.options[sect.selectedIndex].value;
@@ -2078,19 +2079,23 @@ $( document ).ready(function() {
                 if (choice !== "nagios" && choice !== "influxdb") {
 //                 d3.json("data/" + choice + ".json", function (error, data) {
 //                     if (error) {
-                    d3.json("data/" + choice + ".json", function (error, data) {
-                        if (error) {
-                            M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                            d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                                if (error) {
-
-                                }
-                                loadata1(data)
-                            });
-                            return;
-                        }
-                        loadata1(data)
-                    });
+                    d3.queue()
+                        .defer(d3.json, "data/" + choice + ".json")
+                        .defer(d3.json, "data/" + choice + "_job.json")
+                        .await(loadata1);
+                    // d3.json("data/" + choice + ".json", function (error, data) {
+                    //     if (error) {
+                    //         M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                    //         d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                    //             if (error) {
+                    //
+                    //             }
+                    //             loadata1(data)
+                    //         });
+                    //         return;
+                    //     }
+                    //     loadata1(data)
+                    // });
 //                         return;
 //                     }
 //                     loadata1(data)
@@ -2113,7 +2118,9 @@ $( document ).ready(function() {
             $('#datacom').val(oldchoose);
             $('#data_input_file').trigger('click');
         }
-        function loadata1(data){
+        function loadata1(e,data,job){
+            if (e)
+                M.toast({html: 'No job data found!'})
             data['timespan'] = data['timespan'].map(d=>new Date(d));
             sampleS = data;
             if (choice.includes('influxdb')){
