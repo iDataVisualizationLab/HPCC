@@ -149,6 +149,8 @@ function mouseoverNode(d1){
         if (obj.temp1!==undefinedValue &&  obj.temp2!==undefinedValue && obj.temp3!==undefinedValue)
             arr.push(obj);
     }
+    if (!arr.length)
+        arr=[{}]
 
 
 

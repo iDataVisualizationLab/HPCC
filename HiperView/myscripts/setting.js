@@ -495,7 +495,7 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
                 .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
 
-            a = a.map(d => scale(d)===0? 0: (scale(d) ||  undefinedValue));
+            a = a.map(d => scale(d)===0? 0: (scale(d==null?undefined:d) ||  undefinedValue));
             // switch (indx) {
             //     case 0:
             //     case 3:

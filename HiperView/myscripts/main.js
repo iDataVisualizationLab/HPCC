@@ -1289,6 +1289,7 @@ function simulateResults2(hostname,iter, s){
         if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
+            newService = simisval;
         }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
             if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
                 var simisval = handlemissingdata(hostname, iter);
@@ -1299,6 +1300,8 @@ function simulateResults2(hostname,iter, s){
     }
     if (newService===undefined)
         newService = [undefined];
+    else
+        newService = newService.map(d=>d===null?undefined:d);
     // if (newService === undefined){
     //     newService ={};
     //     newService.result = {};
@@ -1332,7 +1335,8 @@ function simulateResults2(hostname,iter, s){
 //     return simisval;
 // }
 function handlemissingdata(hostname,iter){
-    var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+    // var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+    var simisval = sampleS[hostname]["arrTemperature"][iter];
     var simval = simisval.slice(0);
     simval = (simval[0]+simval[1]+20);
     if (simval!==undefinedValue && !isNaN(simval) )

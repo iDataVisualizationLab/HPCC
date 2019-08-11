@@ -1711,7 +1711,7 @@
             return false;
         },function(d){
             commonjsGlobal.kmeanCluster.inputdata = d;
-            commonjsGlobal.kmeanCluster.normalizedPoints = d.slice(0);
+            commonjsGlobal.kmeanCluster.normalizedPoints = d.slice();
             if(!commonjsGlobal.kmeanCluster.opt().isNormalized) {
                 let normalizer = new Normalizer(d);
                 commonjsGlobal.kmeanCluster.normalizedPoints = normalizer.normalizedPoints;
@@ -1740,7 +1740,7 @@
         },
 
         calculatePoint: function (siginput) {
-            this.inputdata = this.inputdata.slice(0).concat(siginput);
+            this.inputdata = this.inputdata.slice().concat(siginput);
             this.data(this.inputdata);
             var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
             var points = pointsAndCentroids.points;
