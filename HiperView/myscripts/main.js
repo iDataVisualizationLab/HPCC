@@ -841,7 +841,6 @@ function main() {
             if (data.result.hindex!==undefined && data.result.index < lastIndex) {
                 if (graphicControl.sumType === "RadarSummary" ) {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                    console.log(data.result)
                 }
             }
 
