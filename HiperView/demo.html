@@ -91,7 +91,7 @@
             <li class="settingContain active no_padding">
                 <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
                 <div class="collapsible-body">
-                    <label for="datacom" class="col s4"> Dataset: </label>
+                    <label for="datacom" class="col s5"> Dataset: </label>
                     <div  class="row s12">
                         <select id="datacom" class="col s7">
                             <option value="serviceWed26Sep" >26 Sep 2018</option>
@@ -111,11 +111,11 @@
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
                     </div>
-                    <!--<label for="datacom" class="col s4"> Dataset: </label>-->
+                    <!--<label for="datacom" class="col s5"> Dataset: </label>-->
                     <div class="row s12 hidden">
                         <input id="data_input_file" class="none" type="file" />
                     </div>
-                    <label for="datasetsSelect" class="col s4"> Visualizing: </label>
+                    <label for="datasetsSelect" class="col s5"> Visualizing: </label>
                     <div  class="row s12">
                         <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
@@ -125,7 +125,7 @@
                         <ul id="datasetsSelect" class="col collection dropdown-content">
                         </ul>
                     </div>
-                    <!--<label for="summaryType_control" class="col s4"> Summary type: </label>-->
+                    <!--<label for="summaryType_control" class="col s5"> Summary type: </label>-->
                     <!--<div  class="row s12">-->
                         <!--<select id="summaryType_control" class="col s7">-->
                             <!--<option value="Boxplot">Boxplot</option>-->
@@ -135,7 +135,7 @@
                         <!--</select>-->
                     <!--</div>-->
 
-                    <label for="chartType_control" class="col s4"> Chart type: </label>
+                    <label for="chartType_control" class="col s5"> Chart type: </label>
                     <div  class="row s12">
                         <select id="chartType_control" class="col s7">
                             <option value="Heatmap">Heatmap</option>
@@ -143,28 +143,28 @@
                             <option value="T-sne Chart" selected="selected">t-SNE Chart</option>
                         </select>
                     </div>
-                    <label for="clusterDisplay" class="col s4"> Cluster Display: </label>
+                    <label for="clusterDisplay" class="col s5"> Cluster Display: </label>
                     <div  class="row s12">
                         <select id="clusterDisplay" class="col s7">
-                            <option value="convex" selected="selected">Convex Hull</option>
-                            <option value="alpha">Alpha shape</option>
+                            <option value="convex" >Convex Hull</option>
+                            <option value="alpha" selected="selected">Alpha shape</option>
                         </select>
                     </div>
-                    <label for="clusterProject" class="col s4"> Cluster Projection: </label>
+                    <label for="clusterProject" class="col s5"> Cluster Projection: </label>
                     <div  class="row s12">
                         <select id="clusterProject" class="col s7">
                             <option value="bin" selected="selected">Same as summarychart</option>
                             <option value="dbscan">DBScan</option>
                         </select>
                     </div>
-                    <label for="clusterMethod" class="col s4"> Cluster Method: </label>
+                    <label for="clusterMethod" class="col s5"> Cluster Method: </label>
                     <div  class="row s12">
                         <select id="clusterMethod" class="col s7">
                             <option value="leaderbin" selected="selected">Leader Bin</option>
                             <option value="kmean">K-mean</option>
                         </select>
                     </div>
-                    <label for="chartType_control" class="col s4"> Simulation: </label>
+                    <label for="chartType_control" class="col s5"> Simulation: </label>
                     <div  class="row s12">
                         <div  class="col s7" style="padding-left: 0px;padding-right: 0px;">
                         <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
@@ -182,7 +182,7 @@
                             <li id="RadarColor">
                                 <div class="collapsible-header">
                                     <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
-                                        <label for="radarColorPicker" class="col s4"> Radar color: </label>
+                                        <label for="radarColorPicker" class="col s5"> Radar color: </label>
                                         <div id = "radarColorPicker" class="colorscale-palette-container col s8">
                                             <div class="colorscale-block">
 
@@ -199,7 +199,7 @@
                             <li id="ClusterColor" style="display: none">
                                 <div class="collapsible-header">
                                     <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
-                                        <label for="radarColorPicker" class="col s4"> Cluster color scheme: </label>
+                                        <label for="radarColorPicker" class="col s5"> Cluster color scheme: </label>
                                         <div id="clusterColorPicker" class="colorscale-palette-container col s7">
                                             <div class="colorscale-block">
 
@@ -215,7 +215,7 @@
                             </li>
                         </ul>
                     </div>
-                    <!--<label for="verticalDisplay" class="col s4">Vertical display: </label>-->
+                    <!--<label for="verticalDisplay" class="col s5">Vertical display: </label>-->
                     <!--<div  class="row s12" id ="verticalDisplay"  >-->
                         <!--<p class="switch col s7 valign-wrapper" style="margin-top:0;">-->
                             <!--<label>-->

@@ -104,18 +104,6 @@ $( document ).ready(function() {
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
-    // d3.select('#chartType_control').on("change", function () {
-    //     var sect = document.getElementById("chartType_control");
-    //     graphicControl.charType = sect.options[sect.selectedIndex].value;
-    // });
-    //
-    // d3.select('#summaryType_control').on("change", function () {
-    //     var sect = document.getElementById("summaryType_control");
-    //     graphicControl.sumType = sect.options[sect.selectedIndex].value;
-    //     svg.select(".graphsum").remove();
-    //     pannelselection(false);
-    //     updateSummaryChartAll();
-    // });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
         spinnerOb.spinner.spin(spinnerOb.target);
@@ -160,13 +148,7 @@ $( document ).ready(function() {
     $('#data_input_file').on('input', (evt) => {
         var f = evt.target.files[0];
         var reader = new FileReader();
-        reader.onabort = (function(){
-            return function(e) {
-                console.log('abort!!')
-                d3.select('.cover').classed('hidden', true);
-                spinnerOb.spinner.stop();
-            };
-        })();
+
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.

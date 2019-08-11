@@ -257,7 +257,7 @@ var TsnePlotopt  = {
     runopt:{
         zoom:30,
         simDuration: 1000,
-        clusterDisplay: 'convex',
+        clusterDisplay: 'alpha',
         clusterProject: 'bin',
     }
 };
@@ -1305,38 +1305,9 @@ function simulateResults2(hostname,iter, s){
         newService = [undefined];
     else
         newService = newService.map(d=>d===null?undefined:d);
-    // if (newService === undefined){
-    //     newService ={};
-    //     newService.result = {};
-    //     newService.result.query_time = query_time;
-    //     newService.data = {};
-    //     newService.data.service={};
-    //     newService.data.service.host_name = hostname;
-    //     newService.data.service.plugin_output = undefined;
-    // }else {
-    //     if (db === "influxdb")
-    //         try {
-    //             newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
-    //         }catch(e){
-    //
-    //         }
-    // }
     return newService;
 }
 
-// function handlemissingdata(hostname,iter){
-//     var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-//     var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
-//     // simval = (simval[0]+simval[1])/2;
-//     simval = (simval[0]+simval[1]+20);
-//     var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
-//     if (simval!==undefinedValue && !isNaN(simval) )
-//         //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-//         simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
-//     else
-//         simisval.data.service.plugin_output = "UNKNOWN";
-//     return simisval;
-// }
 function handlemissingdata(hostname,iter){
     // var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
     var simisval = sampleS[hostname]["arrTemperature"][iter];
@@ -2102,7 +2073,8 @@ $( document ).ready(function() {
                     }
                 });
             }
-            setTimeout(() => {
+            oldchoose =$('#datacom').val();
+                setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
 //                 d3.json("data/" + choice + ".json", function (error, data) {
 //                     if (error) {
@@ -2134,8 +2106,11 @@ $( document ).ready(function() {
                     d3.select('.cover').classed('hidden', true);
                     spinner.stop();
                 }
+
             }, 0);
         }else{
+
+            $('#datacom').val(oldchoose);
             $('#data_input_file').trigger('click');
         }
         function loadata1(data){
@@ -2157,7 +2132,11 @@ $( document ).ready(function() {
             spinner.stop();
         }
     });
+    let oldchoose =$('#datacom').val();
+    $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
+        spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
+        $('#datacom').val('csv')
         var f = evt.target.files[0];
         var reader = new FileReader();
         reader.onload = (function(theFile) {

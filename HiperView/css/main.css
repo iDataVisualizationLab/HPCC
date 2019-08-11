@@ -1069,3 +1069,7 @@ table.dataTable td {
 path {
 	stroke-linejoin: round;
 }
+
+#mySidenav .row {
+	margin-bottom: 10px;
+}
