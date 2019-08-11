@@ -839,14 +839,17 @@ function main() {
         }
         if (data.action==='returnData'){
             if (data.result.hindex&& data.result.index < lastIndex+1) {
-                if (graphicControl.charType === "T-sne Chart")
-                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
                 if (graphicControl.sumType === "RadarSummary" ) {
                     // console.log(data.result.index);
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
             }
             MetricController.data(data.result.arr).drawSummary(data.result.hindex);
+        }else  if (data.action==='returnDataHistory'){
+            if (data.result.hindex&& data.result.index < lastIndex+1) {
+                if (graphicControl.charType === "T-sne Chart")
+                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+            }
         }
         if (data.action==='DataServices') {
                 MetricController.datasummary(data.result.arr);
@@ -867,7 +870,7 @@ function onSavingFile (data){
 var currentlastIndex;
 var speedup= 0;
 
-function updatetimeline() {
+function updatetimeline(index) {
     if (recordonly) {
         const timearr= d3.scaleTime().domain(timerange.map(d => new Date(d))).ticks(formatRealtime);
         if(!hostResults['timespan'])
@@ -881,7 +884,7 @@ function updatetimeline() {
         if (isRealtime)
             hostResults['timespan'].push(new Date());
         else
-            hostResults['timespan'].push(sampleS['timespan'][lastIndex])
+            hostResults['timespan']=sampleS['timespan'].slice(0,index+1)
         expectedLength++;
     }
 }
@@ -901,7 +904,7 @@ function request(){
     var countrecord = 0;
     var missingtimetex = false;
 
-    updatetimeline();
+    updatetimeline(0);
     interval2 = new IntervalTimer(function (simDuration) {
         var midlehandle = function (ri){
             let returniteration = ri[0];
@@ -939,7 +942,7 @@ function request(){
                 requeststatus = true;
                 haveMiddle = false;
                 iteration += iterationstep;
-                updatetimeline();
+                updatetimeline(iteration);
             }
             currentlastIndex = iteration;
             Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
@@ -1125,7 +1128,7 @@ function drawsummary(initIndex){
                 console.log("-----------------");
                 console.log(temp === undefined ? lastIndex : temp);
                 console.log("-----------------");
-                getData(name, temp === undefined ? lastIndex : temp);
+                getData(name, temp === undefined ? lastIndex : temp,true,false);
                 if ((temp === undefined ? lastIndex : temp) >= maxstack - 1) Radarplot.shift();
                 break;
         }
@@ -1294,6 +1297,8 @@ function simulateResults2(hostname,iter, s){
             newService = sampleS[hostname]["arrPower_usage"][iter];
         }
     }
+    if (newService===undefined)
+        newService = [undefined];
     // if (newService === undefined){
     //     newService ={};
     //     newService.result = {};
@@ -1428,7 +1433,7 @@ function plotResult(result,name) {
         case "T-sne Chart":
             initTsneView();
             if (!speedup) {
-                getData(name,lastIndex,true);
+                getData(name,lastIndex,true,true);
             }
     }
 
@@ -2139,7 +2144,7 @@ $( document ).ready(function() {
                 realTimesetting(false,undefined,true);
             }
             d3.select(".currentDate")
-                .text("" + d3.timeParse("%d %b %Y")(data['timespan'][0]).toDateString());
+                .text("" + (data['timespan'][0]).toDateString());
             resetRequest();
             d3.select('.cover').classed('hidden', true);
             spinner.stop();

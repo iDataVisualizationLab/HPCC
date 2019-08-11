@@ -481,25 +481,29 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
         serviceList_selected.forEach((ser) => {
             let indx = ser.index;
             var a;
-            if (r[serviceListattr[indx]][stepIndex]&&r[serviceListattr[indx]][stepIndex].length) {
-                a = r[serviceListattr[indx]][stepIndex];
+            let requiredLength=  serviceLists[indx].sub.length;
+            if (r[serviceListattr[indx]][stepIndex]) {
+                a = r[serviceListattr[indx]][stepIndex].slice(0,requiredLength);
+                d3.range(0,requiredLength - a.length).forEach(d=> a.push(undefined));
             }
             else {
-                a = predict(undefined, ser.text, isPredict===undefined?false:isPredict,undefinedValue);
+                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:!isPredict,undefinedValue);
+                a = a.slice(0,requiredLength);
+                d3.range(0,requiredLength - a.length).forEach(d=> a.push(undefined));
             }
             var scale = d3.scaleLinear()
                 .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
 
             a = a.map(d => scale(d)===0? 0: (scale(d) ||  undefinedValue));
-            switch (indx) {
-                case 0:
-                case 3:
+            // switch (indx) {
+            //     case 0:
+            //     case 3:
                     arrServices = d3.merge([arrServices, a]);
-                    break;
-                default:
-                    arrServices.push(a[0] ===0? 0: (a[0]|| undefinedValue))
-            }
+                //     break;
+                // default:
+                //     arrServices.push(a[0] ===0? 0: (a[0]|| undefinedValue))
+            // }
         })
     }
     arrServices.name = name;
@@ -507,7 +511,7 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
 }
 function predict (arr,ser, notUsepastValue,undefinedValue){
     try{
-        if (notUsepastValue)
+        if (notUsepastValue || arr[arr.length-1]==undefined)
             throw 'notusepast';
         return arr[arr.length-1]; // getdata from the past
     } catch(e){

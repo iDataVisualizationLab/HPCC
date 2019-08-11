@@ -47,8 +47,23 @@ addEventListener('message',function ({data}){
             if (data.value.host===undefined)
                 data.value.host = hosts[hosts.length-1].name;
             const hostIndex = hosts.findIndex(d=>d.name===data.value.host);
-            postMessage({action:'returnData', result: {arr: arr, nameh: data.value.host, hindex: hostIndex, index: data.value.lastIndex}});
-            postMessage({action:'DataServices', result: {arr: getsummaryservice(plotTsne(data.value.hostResults,data.value.lastIndex,data.value.usepast,0,'undefined')), index: data.value.lastIndex}});
+            if (data.value.usepast) {
+                postMessage({
+                    action: 'returnDataHistory',
+                    result: {arr: arr, nameh: data.value.host, hindex: hostIndex, index: data.value.lastIndex}
+                });
+            }else {
+                postMessage({
+                    action: 'returnData',
+                    result: {arr: arr, nameh: data.value.host, hindex: hostIndex, index: data.value.lastIndex}
+                });
+                postMessage({action: 'DataServices',
+                    result: {
+                        arr: getsummaryservice(plotTsne(data.value.hostResults, data.value.lastIndex, data.value.usepast, 0, 'undefined')),
+                        index: data.value.lastIndex
+                    }
+                });
+            }
             postMessage({action: data.action, status:"done" });
             break;
     }
