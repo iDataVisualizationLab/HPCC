@@ -219,19 +219,19 @@ function getstringQuery_influx (ip,serviceI,timerange,timestep){
             let str = "SELECT ";
             if (timestep)
                 if(subs.type==="object")
-                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('DISTINCT("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+(subs.format2||subs.format)(i+1)+'"'):('DISTINCT("'+(subs.format2||subs.format)(i+1)+'") as "'+(subs.format2||subs.format)(i+1)+'"')).join(',');
                 else
-                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+subs.format(i+1)+'"'):('MAX("'+subs.format(i+1)+'") as "'+subs.format(i+1)+'"')).join(',');
+                    str +=  d3.range(subs.numberOfEntries).map(i=> i? ('"'+(subs.format2||subs.format)(i+1)+'"'):('MAX("'+(subs.format2||subs.format)(i+1)+'") as "'+(subs.format2||subs.format)(i+1)+'"')).join(',');
             else
-                str +=  d3.range(subs.numberOfEntries).map(i=> '"'+subs.format(i+1)+'"').join(',');
+                str +=  d3.range(subs.numberOfEntries).map(i=> '"'+(subs.format2||subs.format)(i+1)+'"').join(',');
             if(subs.type==="object")
                 str +=  ' FROM '+ser+' WHERE host=\''+ip+'\'';
             else
                 str +=  ',"host","error" FROM '+ser+' WHERE host=\''+ip+'\'';
             if (timerange){
-                str += 'AND time > \''+timerange[0]+'\'';
+                str += 'AND time >= \''+timerange[0]+'\'';
                 if (timerange[1])
-                    str += ' AND time < \''+timerange[1]+'\'';
+                    str += ' AND time <= \''+timerange[1]+'\'';
                 else
                     str += ' LIMIT 1';
                 if (timestep)
@@ -454,15 +454,12 @@ function simulateResults2(hostname,iter, s){
 
 function handlemissingdata(hostname,iter){
     var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-    var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
-    // simval = (simval[0]+simval[1])/2;
+    var simval = simisval.slice(0);
     simval = (simval[0]+simval[1]+20);
-    var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
     if (simval!==undefinedValue && !isNaN(simval) )
-    //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-        simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
+        simisval= [Math.floor(simval)];
     else
-        simisval.data.service.plugin_output = "UNKNOWN";
+        simisval= [];
     return simisval;
 }
 
@@ -484,15 +481,16 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
         serviceList_selected.forEach((ser) => {
             let indx = ser.index;
             var a;
-            if (r[serviceListattr[indx]][stepIndex]) {
-                a = processData(r[serviceListattr[indx]][stepIndex].data.service.plugin_output, ser.text);
+            if (r[serviceListattr[indx]][stepIndex]&&r[serviceListattr[indx]][stepIndex].length) {
+                a = r[serviceListattr[indx]][stepIndex];
             }
             else {
-                a = predict(r[serviceListattr[indx]], ser.text, isPredict===undefined?false:isPredict,undefinedValue);
+                a = predict(undefined, ser.text, isPredict===undefined?false:isPredict,undefinedValue);
             }
             var scale = d3.scaleLinear()
                 .domain(serviceLists[indx].sub[0].range)
                 .range([0, 1]);
+
             a = a.map(d => scale(d)===0? 0: (scale(d) ||  undefinedValue));
             switch (indx) {
                 case 0:
@@ -511,7 +509,7 @@ function predict (arr,ser, notUsepastValue,undefinedValue){
     try{
         if (notUsepastValue)
             throw 'notusepast';
-        return processData(arr[arr.length-1].data.service.plugin_output,ser); // getdata from the past
+        return arr[arr.length-1]; // getdata from the past
     } catch(e){
         let average = 0;
         let serviceMain = serviceLists.find(s=>s.text===ser);
@@ -545,6 +543,7 @@ function inithostResults (worker) {
         }
         hosts.push(h);
     }
+    hostResults.timespan =[]
     hosts.sort((a, b) => {
 
         var rackx = a.hpcc_rack;
@@ -565,42 +564,74 @@ function inithostResults (worker) {
 
 // Delete unnecessary files
 let processResult = processResult_old;
-function processResult_influxdb(r,hostname,index){
-    var obj = {};
-    obj.result = {};
-    if (r.results[0].series){
-        obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
-    }else
-        obj.result.query_time = new Date();
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = hostname;
+// function processResult_influxdb(r,hostname,index){
+//     var obj = {};
+//     obj.result = {};
+//     if (r.results[0].series){
+//         obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+//     }else
+//         obj.result.query_time = new Date();
+//     obj.data = {};
+//     obj.data.service={};
+//     obj.data.service.host_name = hostname;
+//     if (index !== undefined ) {
+//         obj.data.service.plugin_output = {results: r.results.map(d => {
+//                 let temp = {};
+//                 temp.statement_id = d.statement_id;
+//                 temp.series = [];
+//                 let tempsub = {};
+//                 const series = d.series[0];
+//                 tempsub.name = series.name;
+//                 tempsub.columns = series.columns;
+//                 tempsub.values = [series.values[index]];
+//                 temp.series.push(tempsub);
+//                 return temp;
+//             })};
+//     } else
+//         obj.data.service.plugin_output = r;
+//     return obj;
+// }
+// function processResult_old(r){
+//     var obj = {};
+//     obj.result = {};
+//     obj.result.query_time = r.result.query_time;
+//     obj.data = {};
+//     obj.data.service={};
+//     obj.data.service.host_name = r.data.service.host_name;
+//     obj.data.service.plugin_output = r.data.service.plugin_output;
+//     return obj;
+// }
+function processResult_influxdb(r,hostname,index,servicename){
+    let temp={};
+    // if (r.results[0].series){
+    //     obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
+    // }else
+    //     obj.result.query_time = new Date();
+    // obj.data = {};
+    // obj.data.service={};
+    // obj.data.service.host_name = hostname;
     if (index !== undefined ) {
-        obj.data.service.plugin_output = {results: r.results.map(d => {
+        temp = {results: r.results.map(d => {
                 let temp = {};
                 temp.statement_id = d.statement_id;
                 temp.series = [];
                 let tempsub = {};
-                const series = d.series[0];
-                tempsub.name = series.name;
-                tempsub.columns = series.columns;
-                tempsub.values = [series.values[index]];
+                if (d.series) {
+                    const series = d.series[0];
+                    tempsub.name = series.name;
+                    tempsub.columns = series.columns;
+                    tempsub.values = [series.values[index]];
+                }
                 temp.series.push(tempsub);
                 return temp;
             })};
     } else
-        obj.data.service.plugin_output = r;
-    return obj;
+        temp = r;
+    return processData_influxdb(temp,servicename);
 }
 function processResult_old(r){
-    var obj = {};
-    obj.result = {};
-    obj.result.query_time = r.result.query_time;
-    obj.data = {};
-    obj.data.service={};
-    obj.data.service.host_name = r.data.service.host_name;
-    obj.data.service.plugin_output = r.data.service.plugin_output;
-    return obj;
+    return processData_nagios(r.data.service.plugin_output);
+    // return obj;
 }
 function processResult_csv(r,hostname,time){
     var obj = {};
@@ -610,7 +641,7 @@ function processResult_csv(r,hostname,time){
     obj.data.service={};
     obj.data.service.host_name = hostname;
     obj.data.service.plugin_output = r;
-    return obj;
+    return processData_nagios(r.data.service.plugin_output);
 }
 const processResult_nagios = processResult_old;
 
@@ -638,3 +669,7 @@ let processData = processData_old;
             return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
         };
     }
+
+function getformattime (rate,unit){
+    return d3["time"+unit].every(rate);
+}
