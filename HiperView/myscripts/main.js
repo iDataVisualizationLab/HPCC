@@ -2306,6 +2306,7 @@ function onSchemaUpdate(schema){
     Radarplot.schema(serviceFullList,firstTime);
     if (!firstTime) {
         updateSummaryChartAll();
+        MetricController.drawSummary();
     }
     // }
     if (db!=='csv')
