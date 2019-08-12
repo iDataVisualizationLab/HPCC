@@ -481,7 +481,8 @@ d3.Tsneplot = function () {
 
         // convex
         let clustpath;
-
+        if (runopt.clusterProject==='bin')
+            clusterlabel = clusterlabel_bin
         switch (runopt.clusterDisplay) {
             case 'convex':
                 clustpath = clusterlabel.map(d => {
@@ -547,6 +548,7 @@ d3.Tsneplot = function () {
 
 
     }
+    let clusterlabel_bin=[];
     function updateClusterLabel (){
         // console.log(cluster)
         // let labelGroup = g.selectAll('.labelGroup').data(cluster);
@@ -562,6 +564,8 @@ d3.Tsneplot = function () {
         //     })
         // clusterlabel
         // d3.polygonHull
+        if (runopt.clusterProject=='bin')
+            clusterlabel_bin = clusterlabel;
     }
     let calTime = [0,0];
     let currenthost = {};

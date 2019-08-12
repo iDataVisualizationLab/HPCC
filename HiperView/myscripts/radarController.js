@@ -556,7 +556,10 @@ let radarController = function () {
         dataTable.rows.add(radarcomp.axisList).draw();
         onChangeValueFunc(radarcomp);
     };
-    radarController.drawSummary = function(hindex){
+    let old_hindex = 0;
+    radarController.drawSummary = function(hindex_input){
+       let  hindex = hindex_input|| old_hindex;
+        old_hindex = hindex
         let data = [handledataRate(hindex)];
         if (data[0].length===0)
             data[0] = arr;

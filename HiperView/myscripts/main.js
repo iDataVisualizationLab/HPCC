@@ -257,7 +257,7 @@ var TsnePlotopt  = {
     runopt:{
         zoom:30,
         simDuration: 1000,
-        clusterDisplay: 'convex',
+        clusterDisplay: 'alpha',
         clusterProject: 'bin',
     }
 };
@@ -841,7 +841,6 @@ function main() {
             if (data.result.hindex!==undefined && data.result.index < lastIndex) {
                 if (graphicControl.sumType === "RadarSummary" ) {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                    console.log(data.result)
                 }
             }
 
@@ -1306,38 +1305,9 @@ function simulateResults2(hostname,iter, s){
         newService = [undefined];
     else
         newService = newService.map(d=>d===null?undefined:d);
-    // if (newService === undefined){
-    //     newService ={};
-    //     newService.result = {};
-    //     newService.result.query_time = query_time;
-    //     newService.data = {};
-    //     newService.data.service={};
-    //     newService.data.service.host_name = hostname;
-    //     newService.data.service.plugin_output = undefined;
-    // }else {
-    //     if (db === "influxdb")
-    //         try {
-    //             newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
-    //         }catch(e){
-    //
-    //         }
-    // }
     return newService;
 }
 
-// function handlemissingdata(hostname,iter){
-//     var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
-//     var simval = processData(simisval.data.service.plugin_output, serviceList[0]);
-//     // simval = (simval[0]+simval[1])/2;
-//     simval = (simval[0]+simval[1]+20);
-//     var tempscale = d3.scaleLinear().domain([thresholds[0][0],thresholds[0][1]]).range([thresholds[4][0],thresholds[4][1]]);
-//     if (simval!==undefinedValue && !isNaN(simval) )
-//         //simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.round(tempscale(simval)*3.2)+" W";
-//         simisval.data.service.plugin_output = "OK - The average power consumed in the last one minute = "+Math.floor(simval*3.2)+" W";
-//     else
-//         simisval.data.service.plugin_output = "UNKNOWN";
-//     return simisval;
-// }
 function handlemissingdata(hostname,iter){
     // var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
     var simisval = sampleS[hostname]["arrTemperature"][iter];
@@ -2070,7 +2040,8 @@ $( document ).ready(function() {
     d3.select('#clusterMethod').on('change',function(){
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
-    })
+        updateSummaryChartAll();
+    });
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");
         graphicControl.charType = sect.options[sect.selectedIndex].value;
@@ -2103,27 +2074,42 @@ $( document ).ready(function() {
                     }
                 });
             }
-            setTimeout(() => {
+            oldchoose =$('#datacom').val();
+                setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
-//                 d3.json("data/" + choice + ".json", function (error, data) {
-//                     if (error) {
-                    d3.json("data/" + choice + ".json", function (error, data) {
-                        if (error) {
-                            M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                            d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                                if (error) {
+                d3.json("data/" + choice + ".json", function (error, data) {
+                    if (error) {
+                        d3.json("data/" + choice + ".json", function (error, data) {
+                            if (error) {
+                                M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                                    if (error) {
 
-                                }
-                                loadata1(data)
-                            });
+                                    }
+                                    d3.json ("data/" + choice + "_job.json", function (error, job) {
+                                        if (error){
+                                            loadata1(data,undefined);
+                                            return;
+                                        }
+                                        loadata1(data,job);
+                                        return;
+                                    });
+                                });
+                                return;
+                            }
+                            return
+                        });
+                            return;
+                    }
+                    d3.json ("data/" + choice + "_job.json", function (error, job) {
+                        if (error){
+                            loadata1(data,undefined);
                             return;
                         }
-                        loadata1(data)
+                        loadata1(data,job);
+                        return;
                     });
-//                         return;
-//                     }
-//                     loadata1(data)
-//                 });
+                });
                 }
                 else {
                     d3.select(".currentDate")
@@ -2135,13 +2121,18 @@ $( document ).ready(function() {
                     d3.select('.cover').classed('hidden', true);
                     spinner.stop();
                 }
+
             }, 0);
         }else{
+
+            $('#datacom').val(oldchoose);
             $('#data_input_file').trigger('click');
         }
-        function loadata1(data){
+        function loadata1(data,job){
             data['timespan'] = data['timespan'].map(d=>new Date(d));
             sampleS = data;
+            if(job)
+                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
@@ -2158,7 +2149,11 @@ $( document ).ready(function() {
             spinner.stop();
         }
     });
+    let oldchoose =$('#datacom').val();
+    $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
+        spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
+        $('#datacom').val('csv')
         var f = evt.target.files[0];
         var reader = new FileReader();
         reader.onload = (function(theFile) {
@@ -2291,7 +2286,7 @@ function onfilterdata(schema) {
     // databyLoc.push({'key':'all',values:dataSumAll});
     // handleDataIcon (databyLoc);
     //
-    // MetricController.data(handleDataSumAll(dataSumAll)).drawSummary();
+    // MetricController.data(handleDataSumAll(dataSumdAll)).drawSummary();
     //
     // data.push({'key':'all',values:databyTime})
     // // Loadtostore();
@@ -2311,6 +2306,7 @@ function onSchemaUpdate(schema){
     Radarplot.schema(serviceFullList,firstTime);
     if (!firstTime) {
         updateSummaryChartAll();
+        MetricController.drawSummary();
     }
     // }
     if (db!=='csv')

@@ -131,240 +131,274 @@ function mouseoverNode(d1){
     // 2. Process the array of historical temperatures
     var arr = [];
     // adjust stacks
-    let startRecord = r.arr.length-maxstack;
-    startRecord = startRecord <0 ? 0 :startRecord;
-    for (var i = startRecord; i<r.arr.length;i++){
-        // var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
-        var a = r.arrTemperature[i];
-        var obj = {};
-        if (a){
-            obj.temp1 = a[0];
-            obj.temp2 = a[1];
-            obj.temp3 = a[2];}
-        else{
-        obj.temp1 = undefined;
-        obj.temp2 = undefined;
-        obj.temp3 = undefined;}
-        obj.query_time =hostResults['timespan'][i];
-        if (obj.temp1!==undefinedValue &&  obj.temp2!==undefinedValue && obj.temp3!==undefinedValue)
-            arr.push(obj);
+    let startRecord = r.arr.length - maxstack;
+    startRecord = startRecord < 0 ? 0 : startRecord;
+    try {
+        for (var i = startRecord; i < r.arr.length; i++) {
+            // var a = processData(r.arr[i].data.service.plugin_output, serviceList[0]);
+            var a = r.arrTemperature[i];
+            var obj = {};
+            if (a) {
+                obj.temp1 = a[0];
+                obj.temp2 = a[1];
+                obj.temp3 = a[2];
+            }
+            else {
+                obj.temp1 = undefined;
+                obj.temp2 = undefined;
+                obj.temp3 = undefined;
+            }
+            obj.query_time = hostResults['timespan'][i];
+            if (obj.temp1 !== undefinedValue && obj.temp2 !== undefinedValue && obj.temp3 !== undefinedValue)
+                arr.push(obj);
+        }
+        if (!arr.length)
+            arr = [{}]
+
+
+        // 3. get Time
+        var minTime = 10 * (new Date("1/1/2030").getTime());  // some max number
+        var maxTime = 0;
+        for (var i = startRecord; i < r.arr.length; i++) {
+            var qtime = hostResults['timespan'][i];
+            minTime = Math.min(minTime, qtime.getTime());
+            maxTime = Math.max(maxTime, qtime.getTime());
+        }
+
+        xScale = d3.scaleTime()
+            .domain([new Date(minTime - 1000), new Date(maxTime + 1000)])
+            .range([0, tipW - 60]);
+
+        //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
+
+        // 6. Y scale will use the randomly generate number
+        var yScale = d3.scaleLinear()
+            .domain([0, 100]) // input
+            .range([tipH, 0]); // output
+
+        // White Background
+        svgTip.append("rect")
+            .attr("class", name)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", tipW + margin.right)
+            .attr("height", tipH)
+            .attr("fill", "#fff")
+            .attr("fill-opacity", 1)
+            .attr("stroke", "#000")
+            .attr("stroke-width", 0.05);
+
+
+        // 3. Call the x axis in a group tag
+        // compute number of ticks
+        var numTicks = 1 + Math.round((maxTime - minTime) / (60 * 1000)); // every minutes
+        if (numTicks > 6) numTicks = 6;
+
+        svgTip.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + tipH + ")")
+            .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M")).ticks(numTicks)); //
+
+        // 4. Call the y axis in a group tag
+        svgTip.append("g")
+            .attr("class", "y axis")
+            .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW + 50))
+            .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
+
+        // ****** Append the path ****** CPU1
+        var line1 = d3.line()
+            .x(function (d, i) {
+                return xScale(d.query_time);
+            }) // set the x values for the line generator
+            .y(function (d) {
+                return yScale(d.temp1);
+            }) // set the y values for the line generator
+            .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+        svgTip.append("path")
+            .datum(arr) // 10. Binds data to the line
+            .attr("class", "line1") // Assign a class for styling
+            .attr("d", line1)
+            .attr("stroke", function () {
+                return color2(0);
+            }).attr('fill', 'none')
+            .attr("stroke-width", 1); // 11. Calls the line generator
+        // Appends a circle for each datapoint ****** CPU1
+        svgTip.selectAll(".dot1")
+            .data(arr)
+            .enter().append("circle") // Uses the enter().append() method
+            .attr("class", "dot1") // Assign a class for styling
+            .attr("cx", function (d, i) {
+                return xScale(d.query_time)
+            })
+            .attr("cy", function (d) {
+                return yScale(d.temp1)
+            })
+            .attr("r", 3)
+            .attr("fill", function (d) {
+                return color(d.temp1);
+            })
+            .attr("fill-opacity", function (d) {
+                return 1;
+                //return opa(d.temp1);
+            })
+            .attr("stroke-width", 0.5)
+            .attr("stroke", "#000")
+            .on("mouseover", function (d, i) {
+                mouseoverLine(d, i);
+            })
+            .on('mouseout', function (d, i) {
+                mouseoutLine(d, i);
+            });
+
+        svgTip.append("text")
+            .attr("x", tipW - 4)
+            .attr("y", yScale(arr[arr.length - 1].temp1))
+            .attr("fill", function () {
+                return color2(0);
+            })
+            .style("text-anchor", "end")
+            .style("font-size", "12px")
+            .attr("font-family", "sans-serif")
+            .text("CPU1=" + Math.round(arr[arr.length - 1].temp1));
+
+
+        // ****** Append the path ****** CPU2
+        var line2 = d3.line()
+            .x(function (d, i) {
+                return xScale(d.query_time);
+            }) // set the x values for the line generator
+            .y(function (d) {
+                return yScale(d.temp2);
+            }) // set the y values for the line generator
+            .curve(d3.curveMonotoneX) // apply smoothing to the line
+        svgTip.append("path")
+            .datum(arr) // 10. Binds data to the line
+            .attr("class", "line2") // Assign a class for styling
+            .attr("d", line2).attr('fill', 'none')
+            .attr("stroke", function () {
+                return color2(1);
+            })
+            .attr("stroke-width", 1);
+        // Appends a circle for each datapoint ****** CPU2
+        svgTip.selectAll(".dot2")
+            .data(arr)
+            .enter().append("circle") // Uses the enter().append() method
+            .attr("class", "dot2") // Assign a class for styling
+            .attr("cx", function (d, i) {
+                return xScale(d.query_time)
+            })
+            .attr("cy", function (d) {
+                return yScale(d.temp2)
+            })
+            .attr("r", 3)
+            .attr("fill", function (d) {
+                return color(d.temp2);
+            })
+            .attr("fill-opacity", function (d) {
+                return 1;//opa(d.temp2);
+            })
+            .attr("stroke-width", 0.5)
+            .attr("stroke", "#000")
+            .on("mouseover", function (d, i) {
+                mouseoverLine(d, i);
+            })
+            .on('mouseout', function (d, i) {
+                mouseoutLine(d, i);
+            });
+
+        svgTip.append("text")
+            .attr("x", tipW - 4)
+            .attr("y", yScale(arr[arr.length - 1].temp2))
+            .attr("fill", function () {
+                return color2(1);
+            })
+            .style("text-anchor", "end")
+            .style("font-size", "12x")
+            .attr("font-family", "sans-serif")
+            .text("CPU2=" + Math.round(arr[arr.length - 1].temp2));
+
+        // ****** Append the path ****** CPU3  Inlet
+        var line3 = d3.line()
+            .x(function (d, i) {
+                return xScale(d.query_time);
+            }) // set the x values for the line generator
+            .y(function (d) {
+                return yScale(d.temp3);
+            }) // set the y values for the line generator
+            .curve(d3.curveMonotoneX) // apply smoothing to the line
+        svgTip.append("path")
+            .datum(arr) // 10. Binds data to the line
+            .attr("class", "line3") // Assign a class for styling
+            .attr("d", line3)
+            .attr("stroke", "#000").attr('fill', 'none')
+            .attr("stroke-width", 1)
+            .style("stroke-dasharray", ("3, 3"));
+        svgTip.append("text")
+            .attr("x", tipW - 4)
+            .attr("y", yScale(arr[arr.length - 1].temp3))
+            .attr("fill", function () {
+                return "#444";
+            })
+            .style("text-anchor", "end")
+            .style("font-size", "11px")
+            .attr("font-family", "sans-serif")
+            .text("Inlet=" + Math.round(arr[arr.length - 1].temp3));
+
+
+        //************************************************************* Host name
+        svgTip.append("text")
+            .attr("class", "hostnameInTip")
+            .attr("x", function (d) {
+                return 15;
+            })
+            .attr("y", function (d) {
+                return 12;
+            })
+            .attr("fill", "#000")
+            .style("text-anchor", "left")
+            .style("font-weight", "bold")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("Host: " + d1.name);
+        svgTip.append("text")
+            .attr("x", -tipH / 2)
+            .attr("y", -35)
+            .attr("transform", "rotate(-90)")
+            .attr("fill", "#000")
+            .style("text-anchor", "middle")
+            .style("font-style", "italic")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("Temperature (°C)");
+
+        //************************************************************* Date and Time
+        svgTip.append("text")
+            .attr("x", -margin.left)
+            .attr("y", tipH + 34)
+            .attr("fill", "#000")
+            .style("font-style", "italic")
+            .style("text-anchor", "left")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("" + new Date(minTime).toDateString());
+
+        svgTip.append("text")
+            .attr("x", tipW - 3)
+            .attr("y", tipH + 34)
+            .attr("fill", "#000")
+            .style("font-style", "italic")
+            .style("text-anchor", "end")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text("Current time: " + new Date(maxTime).getHours() + ":" + new Date(maxTime).getMinutes());
+    }catch(e){
+
     }
-    if (!arr.length)
-        arr=[{}]
-
-
-
-    // 3. get Time
-    var minTime = 10*(new Date("1/1/2030").getTime());  // some max number
-    var maxTime = 0;
-    for (var i=startRecord; i<r.arr.length;i++){
-        var qtime = hostResults['timespan'][i];
-        minTime = Math.min(minTime,qtime.getTime());
-        maxTime = Math.max(maxTime,qtime.getTime());
-    }
-
-    xScale = d3.scaleTime()
-        .domain([ new Date(minTime-1000), new Date(maxTime+1000) ])
-        .range([0, tipW-60]);
-
-    //var startTime =  new Date((minTime.getMonth()+1)+"/"+minTime.getDate()+"/"+minTime.getFullYear()+" "+minTime.getHours()+":00:00");
-
-    // 6. Y scale will use the randomly generate number
-    var yScale = d3.scaleLinear()
-        .domain([0, 100]) // input
-        .range([tipH, 0]); // output
-
-    // White Background
-    svgTip.append("rect")
-        .attr("class", name)
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", tipW+ margin.right)
-        .attr("height", tipH )
-        .attr("fill", "#fff")
-        .attr("fill-opacity",1)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 0.05);
-
-
-    // 3. Call the x axis in a group tag
-    // compute number of ticks
-    var numTicks = 1+Math.round((maxTime-minTime)/(60*1000)); // every minutes
-    if (numTicks>6) numTicks=6;
-
-    svgTip.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + tipH + ")")
-        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M")).ticks(numTicks)); //
-
-    // 4. Call the y axis in a group tag
-    svgTip.append("g")
-        .attr("class", "y axis")
-        .call(d3.axisLeft(yScale).ticks(5).tickSize(-tipW+50))
-        .style("stroke-opacity", 0.2); // Create an axis component with d3.axisLeft
-
-    // ****** Append the path ****** CPU1
-    var line1 = d3.line()
-        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
-        .y(function(d) { return yScale(d.temp1); }) // set the y values for the line generator
-        .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-    svgTip.append("path")
-        .datum(arr) // 10. Binds data to the line
-        .attr("class", "line1") // Assign a class for styling
-        .attr("d", line1)
-        .attr("stroke", function () {
-            return color2(0);
-        }).attr('fill','none')
-        .attr("stroke-width",1); // 11. Calls the line generator
-    // Appends a circle for each datapoint ****** CPU1
-    svgTip.selectAll(".dot1")
-        .data(arr)
-        .enter().append("circle") // Uses the enter().append() method
-        .attr("class", "dot1") // Assign a class for styling
-        .attr("cx", function(d, i) { return xScale(d.query_time) })
-        .attr("cy", function(d) { return yScale(d.temp1) })
-        .attr("r", 3)
-        .attr("fill", function (d) {
-            return color(d.temp1);
-        })
-        .attr("fill-opacity",function (d) {
-            return 1;
-            //return opa(d.temp1);
-        })
-        .attr("stroke-width",0.5)
-        .attr("stroke","#000")
-        .on("mouseover", function (d,i) {
-            mouseoverLine (d,i);
-        })
-        .on('mouseout', function(d,i){
-            mouseoutLine (d,i);
-        });
-
-    svgTip.append("text")
-        .attr("x", tipW-4)
-        .attr("y",  yScale(arr[arr.length-1].temp1))
-        .attr("fill", function () { return color2(0); })
-        .style("text-anchor","end")
-        .style("font-size", "12px")
-        .attr("font-family", "sans-serif")
-        .text("CPU1="+Math.round(arr[arr.length-1].temp1));
-
-
-    // ****** Append the path ****** CPU2
-    var line2 = d3.line()
-        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
-        .y(function(d) { return yScale(d.temp2); }) // set the y values for the line generator
-        .curve(d3.curveMonotoneX) // apply smoothing to the line
-    svgTip.append("path")
-        .datum(arr) // 10. Binds data to the line
-        .attr("class", "line2") // Assign a class for styling
-        .attr("d", line2).attr('fill','none')
-        .attr("stroke", function () {
-            return color2(1);
-        })
-        .attr("stroke-width",1);
-    // Appends a circle for each datapoint ****** CPU2
-    svgTip.selectAll(".dot2")
-        .data(arr)
-        .enter().append("circle") // Uses the enter().append() method
-        .attr("class", "dot2") // Assign a class for styling
-        .attr("cx", function(d, i) { return xScale(d.query_time) })
-        .attr("cy", function(d) { return yScale(d.temp2) })
-        .attr("r", 3)
-        .attr("fill", function (d) {
-            return color(d.temp2);
-        })
-        .attr("fill-opacity",function (d) {
-            return 1;//opa(d.temp2);
-        })
-        .attr("stroke-width",0.5)
-        .attr("stroke","#000")
-        .on("mouseover", function (d,i) {
-            mouseoverLine (d,i);
-        })
-        .on('mouseout', function(d,i){
-            mouseoutLine (d,i);
-        });
-
-    svgTip.append("text")
-        .attr("x", tipW-4)
-        .attr("y",  yScale(arr[arr.length-1].temp2))
-        .attr("fill", function () { return color2(1); })
-        .style("text-anchor","end")
-        .style("font-size", "12x")
-        .attr("font-family", "sans-serif")
-        .text("CPU2="+Math.round(arr[arr.length-1].temp2));
-
-    // ****** Append the path ****** CPU3  Inlet
-    var line3 = d3.line()
-        .x(function(d, i) { return xScale(d.query_time); }) // set the x values for the line generator
-        .y(function(d) { return yScale(d.temp3); }) // set the y values for the line generator
-        .curve(d3.curveMonotoneX) // apply smoothing to the line
-    svgTip.append("path")
-        .datum(arr) // 10. Binds data to the line
-        .attr("class", "line3") // Assign a class for styling
-        .attr("d", line3)
-        .attr("stroke","#000").attr('fill','none')
-        .attr("stroke-width",1)
-        .style("stroke-dasharray", ("3, 3"));
-    svgTip.append("text")
-        .attr("x", tipW-4)
-        .attr("y",  yScale(arr[arr.length-1].temp3))
-        .attr("fill", function () { return "#444"; })
-        .style("text-anchor","end")
-        .style("font-size", "11px")
-        .attr("font-family", "sans-serif")
-        .text("Inlet="+Math.round(arr[arr.length-1].temp3));
-
-
-    //************************************************************* Host name
-    svgTip.append("text")
-        .attr("class", "hostnameInTip")
-        .attr("x", function (d) {return 15;})
-        .attr("y", function (d) {return 12;})
-        .attr("fill", "#000")
-        .style("text-anchor","left")
-        .style("font-weight","bold")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Host: "+d1.name);
-    svgTip.append("text")
-        .attr("x", -tipH/2)
-        .attr("y", -35)
-        .attr("transform", "rotate(-90)")
-        .attr("fill", "#000")
-        .style("text-anchor","middle")
-        .style("font-style","italic")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Temperature (°C)");
-
-    //************************************************************* Date and Time
-    svgTip.append("text")
-        .attr("x", -margin.left)
-        .attr("y", tipH+34)
-        .attr("fill", "#000")
-        .style("font-style","italic")
-        .style("text-anchor","left")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text(""+new Date(minTime).toDateString());
-
-    svgTip.append("text")
-        .attr("x", tipW-3)
-        .attr("y", tipH+34)
-        .attr("fill", "#000")
-        .style("font-style","italic")
-        .style("text-anchor","end")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Current time: "+new Date(maxTime).getHours()+":"+new Date(maxTime).getMinutes());
-
     // Update spider data *************************************************************
     var name = d1.name;
     dataSpider = [];
