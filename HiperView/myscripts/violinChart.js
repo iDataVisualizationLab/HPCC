@@ -58,6 +58,29 @@ d3.viiolinChart = function () {
         }
     };
     viiolinplot.draw = function(contain){
+        let axisg = contain.select('.gvisaxis');
+        if (axisg.empty()) {
+            axisg = contain.append('g').attr('class', 'gvisaxis')
+                .attr('transform','translate('+graphicopt.margin.left+','+(graphicopt.margin.top+graphicopt.heightG()/2)+')')
+                .style('stroke','black');
+            axisg.append('line').attr('class','laxis')
+                .attrs({
+                    x2: h(1),
+                })
+
+            axisg.append('line').attr('class','tick')
+                .attrs({
+                    y1: -5,
+                    y2: 5,
+                })
+            axisg.append('line').attr('class','tick')
+                .attrs({
+                    x2: h(1),
+                    x1: h(1),
+                    y1: -5,
+                    y2: 5,
+                })
+        }
         let viol_chart = contain.selectAll('.violin').data(arr);
         viol_chart.exit().remove();
         let viol_n = viol_chart.enter()
@@ -67,13 +90,15 @@ d3.viiolinChart = function () {
         viol_n.append("path");
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
+            // .style('fill','black')
             .style('fill','currentColor')
             .attr("d",d=> crateviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
         );
         let circle_o = viol_chart.selectAll('circle').data(d=>d.outlier);
         circle_o.exit().remove();
         circle_o.enter().append('circle')
-            .styles({opacity:0.5})
+            .styles({opacity:0.5,
+            fill: 'rgb(138, 0, 26)'})
             .merge(circle_o)
             .attrs(circleoption);
         return viol_chart;
