@@ -228,6 +228,16 @@ var TsnePlotopt  = {
             radius: 30,
         }
     },
+    radaropt : {
+        // summary:{quantile:true},
+        mini:true,
+        levels:6,
+        gradient:true,
+        w:30,
+        h:30,
+        showText:false,
+        margin: {top: 0, right: 0, bottom: 0, left: 0},
+    },
     top10:{
         details :{
             circle: {
@@ -2248,7 +2258,7 @@ $( document ).ready(function() {
             }
         }
     });
-        MetricController.graphicopt({width:315,height:315})
+        MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))
             .axisSchema(serviceFullList)

@@ -518,13 +518,12 @@ d3.Tsneplot = function () {
                 fill: (d,i)=>colorCategory_cluster(i),
                 stroke: (d,i)=>colorCategory_cluster(i),
                 'stroke-width': graphicopt.dotRadius*2,
-                opacity: 0.2
             })
             .on('mouseover',function(d){
-                d3.selectAll('.clusterPath').filter(e=>e!=d).style('display','none');
+                d3.selectAll('.clusterPath').filter(e=>e!=d).style('opacity',0.05);
                 d3.selectAll('.radarStroke').filter(e=>e.bin&& (e.bin.name===d.name)).dispatch('mouseenter');
             }).on('mouseleave',(d)=>{
-                d3.selectAll('.clusterPath').filter(e=>e!=d).style('display','unset');
+                d3.selectAll('.clusterPath').filter(e=>e!=d).style('opacity',0.2);
                 clearclone();})
             .selectAll('path').data(d=>d);
         c_p_arr.exit().remove();
@@ -588,7 +587,7 @@ d3.Tsneplot = function () {
             newdata.select('.tSNEborder')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d.filter(e=>e.enable)));
-
+            // drawEmbedding(arr);
             currenthost.name = name;
             currenthost.g = g.selectAll(".linkLineg").filter((d,i)=>{
                 if (d.name===name){
@@ -974,7 +973,45 @@ d3.Tsneplot = function () {
         // TODO: need fix here
         g.selectAll(".linkLineg").selectAll('text')
             .text(function(d,i) {return d.name.replace("compute-","") })
+        // let datapoint = g.selectAll(".linkLineg")
+        //     .data(handledata(data));
+        // datapoint.exit().remove();
+        // let datapointN = datapoint
+        //     .enter().append("g");
+        //
+        // datapointN.append("text")
+        //     .attr("text-anchor", "top")
+        //     .attr("transform", "translate(5, -5)")
+        //     .attr("font-size", 12)
+        //     .style('opacity',0);
+        //
+        // datapointN.merge(datapoint) .selectAll('text')
+        //     .text(function(d,i) {return d.name.replace("compute-","") });
+        //
+        // datapointN.merge(datapoint)
+        //     .attr("class", d=>"compute linkLineg "+fixName2Class(d.name))
+        //     .on('mouseover',function(d){
+        //         d3.select(this).select('text').style('opacity',1);
+        //         mouseoverNode(d);
+        //     }).on('mouseout',function(d){
+        //         d3.select(this).select('text').style('opacity',0);
+        //         mouseoutNode(d);
+        //     })
+        //     .call(c=>
+        //         c.each(function(d){
+        //             return RadarChart(".compute.linkLineg."+fixName2Class(d.name),[d],graphicopt.radaropt)}));
 
+
+    }
+    function updateSingledataEmbedding (){
+        let newdata = g.selectAll(".linkLineg")
+            .data(handledata(arr),d=>d[0].name);
+        newdata.select('clipPath').select('path')
+            .transition('expand').duration(100).ease(d3.easePolyInOut)
+            .attr("d", d => radarcreate(d.filter(e=>e.enable)));
+        newdata.select('.tSNEborder')
+            .transition('expand').duration(100).ease(d3.easePolyInOut)
+            .attr("d", d => radarcreate(d.filter(e=>e.enable)));
     }
 
     function fixstr(s) {
@@ -1029,6 +1066,8 @@ d3.Tsneplot = function () {
                     graphicopt[i] = _[i];
                 }
             }
+            if (graphicopt.radaropt)
+                graphicopt.radaropt.schema = schema
             return Tsneplot;
         }else {
             return graphicopt;
@@ -1041,7 +1080,7 @@ d3.Tsneplot = function () {
     };
     Tsneplot.drawUserlist = function (_) {drawUserlist(_)};
     Tsneplot.schema = function (_) {
-        return arguments.length ? (schema = _, Tsneplot) : schema;
+        return arguments.length ? (graphicopt.radaropt.schema = _,schema = _, Tsneplot) : schema;
     };
     Tsneplot.dispatch = function (_) {
         return arguments.length ? (returnEvent = _, Tsneplot) : returnEvent;

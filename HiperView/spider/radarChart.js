@@ -18,7 +18,7 @@ function RadarChart(id, data, options, name) {
         dotRadius: 3,          //The size of the colored circles of each blog
         opacityCircles: 0.1,   //The opacity of the circles of each blob
         strokeWidth: 0.5,        //The width of the stroke around each blob
-        roundStrokes: false,   //If true the area and stroke will follow a round path (cardinal-closed)
+        roundStrokes: true,   //If true the area and stroke will follow a round path (cardinal-closed)
         radiuschange: true,
         markedLegend:undefined,
         showText: true,
@@ -416,6 +416,47 @@ function RadarChart(id, data, options, name) {
             .append("path")
             .attr("class", "radarStroke outlying")
             .call(drawOutlying);
+    }else if (cfg.gradient && cfg.mini){
+        function drawMeanLine(paths){
+            return paths
+                .attr("d", d =>radarLine(d))
+                .styles({"fill":'none',
+                    'stroke':'black'});
+        }
+
+        //update the outlines
+        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+
+        blobWrapperpath.style("fill", "none").transition()
+            .attr("d", d => radarLine(d))
+            .style("stroke-width", () => cfg.strokeWidth + "px")
+            .style("stroke", (d, i) => cfg.color(i,d));
+        blobWrapperg.select('clipPath')
+            .select('path')
+            .transition('expand').ease(d3.easePolyInOut)
+            .attr("d", d =>radarLine(d));
+        //Create the outlines
+        blobWrapper.append("clipPath")
+            .attr("id",(d,i)=>"sum"+correctId (id))
+            .append("path")
+            .attr("d", d => radarLine(d));
+        blobWrapper.append("rect")
+            .style('fill', 'url(#rGradient2)')
+            .attr("clip-path",( d,i)=>"url(#sum"+correctId (id)+")")
+            .attr("x",-radius)
+            .attr("y",-radius)
+            .attr("width",(radius)*2)
+            .attr("height",(radius)*2);
+        blobWrapper.append("path")
+            .attr("class", "radarStroke")
+            .attr("d", d => radarLine(d))
+            .style("fill", "none")
+            .transition()
+            .style("stroke-width", () => cfg.strokeWidth + "px")
+            //.style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
+            .style("stroke", (d, i) => cfg.color(i,d));
+        blobWrapper
+            .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     }else if (cfg.gradient){
         function drawMeanLine(paths){
             return paths
@@ -832,8 +873,9 @@ function RadarChart(id, data, options, name) {
                 return d.value;
             });
     }
-    return {radarLine: radarLine,
-        rScale: rScale,
-        colorTemperature: colorTemperature};
+    // return {radarLine: radarLine,
+    //     rScale: rScale,
+    //     colorTemperature: colorTemperature};
+    return svg;
     
 }//RadarChart
