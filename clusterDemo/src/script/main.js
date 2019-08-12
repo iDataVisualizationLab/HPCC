@@ -111,6 +111,7 @@ $( document ).ready(function() {
         const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
         d3.select('#sortorder').interrupt();
         if (choice!=='csv') {
+            oldchoose=$('#datacom').val();
             setTimeout(() => {
                 d3.csv("src/data/" + choice + ".csv", function (error, data) {
                     if (error) {
@@ -129,6 +130,7 @@ $( document ).ready(function() {
         }else{
             d3.select('.cover').classed('hidden', true);
             spinnerOb.spinner.stop();
+            $('#datacom').val(oldchoose);
             $('#data_input_file').trigger('click');
         }
         function loadata1(data){
@@ -145,6 +147,8 @@ $( document ).ready(function() {
             spinnerOb.spinner.stop();
         }
     });
+    $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
+        spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
         var f = evt.target.files[0];
         var reader = new FileReader();
@@ -187,13 +191,12 @@ $( document ).ready(function() {
         reader.readAsDataURL(f);
     })
     spinnerOb.spinner = new Spinner(spinnerOb.opts).spin(spinnerOb.target);
-
+    let oldchoose=$('#datacom').val();
     setTimeout(() => {
         //load data
         graphicControl.charType =  d3.select('#chartType_control').node().value;
         graphicControl.sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;
-
 
 
             d3.csv("src/data/" + d3.select('#datacom').node().value + ".csv", function (error, data) {

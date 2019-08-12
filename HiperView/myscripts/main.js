@@ -2286,7 +2286,7 @@ function onfilterdata(schema) {
     // databyLoc.push({'key':'all',values:dataSumAll});
     // handleDataIcon (databyLoc);
     //
-    // MetricController.data(handleDataSumAll(dataSumAll)).drawSummary();
+    // MetricController.data(handleDataSumAll(dataSumdAll)).drawSummary();
     //
     // data.push({'key':'all',values:databyTime})
     // // Loadtostore();
