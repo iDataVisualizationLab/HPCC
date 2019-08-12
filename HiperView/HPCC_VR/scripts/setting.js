@@ -569,7 +569,7 @@ function inithostResults (worker) {
 }
 
 // Delete unnecessary files
-let processResult = processResult_old;
+
 // function processResult_influxdb(r,hostname,index){
 //     var obj = {};
 //     obj.result = {};

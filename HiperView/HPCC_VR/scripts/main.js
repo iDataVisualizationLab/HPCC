@@ -118,7 +118,7 @@ var serviceQuery = ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"po
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService = "arrTemperatureCPU1";
-var processData = processData_old;
+// let processResult = processResult_old;
 
 
 // Controls
