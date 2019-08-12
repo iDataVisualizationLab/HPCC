@@ -289,7 +289,7 @@ d3.Tsneplot = function () {
         // angleSlice[0] = Math.PI * 2 +angleSlice[0];
         var rScale = d3.scaleLinear()
             .range([0, graphicopt.dotRadius])
-            .domain([0, 1]);
+            .domain([-0.25, 1.25]);
         radarcreate = d3.radialLine()
             .curve(d3.curveCardinalClosed.tension(0))
             .radius(function(d) { return rScale(d.value); })
@@ -1008,7 +1008,7 @@ d3.Tsneplot = function () {
     };
 
     Tsneplot.runopt = function (_) {
-        //Put all of the options into a variable called graphicopt
+        //Put all of the options into a variable called runopt
         if (arguments.length) {
             for (let i in _) {
                 if ('undefined' !== typeof _[i]) {

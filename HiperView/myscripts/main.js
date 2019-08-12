@@ -259,6 +259,8 @@ var TsnePlotopt  = {
         simDuration: 1000,
         clusterDisplay: 'alpha',
         clusterProject: 'bin',
+        displayMode: 'tsne',
+
     }
 };
 var Scatterplot = d3.Scatterplot();
