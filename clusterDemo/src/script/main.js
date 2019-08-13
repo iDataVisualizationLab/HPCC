@@ -73,6 +73,8 @@ let spinnerOb = {
 }
 // END: loader spinner settings ****************************
 let initialService;
+
+
 $( document ).ready(function() {
     console.log('ready');
     $('.fixed-action-btn').floatingActionButton({
@@ -386,12 +388,14 @@ let radarChartclusteropt  = {
     events:{
         axis: {
             mouseover: function(){
-                const d = d3.select(this).datum();
-                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',true);
-                $('.tablesvg').scrollTop($('table .axis'+d.idroot+'_'+d.id)[0].offsetTop);
+                try {
+                    const d = d3.select(d3.event.detail || this).datum();
+                    d3.selectAll('.axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                    $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
+                }catch(e){}
             },
             mouseleave: function(){
-                const d = d3.select(this).datum();
+                const d = d3.select(d3.event.detail||this).datum();
                 d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
             },
         },
@@ -435,7 +439,7 @@ function cluster_map (data) {
         r_old.exit().remove();
         r_old.enter().append('g').attr('class','radarCluster').call(d3.drag().container(function () {
             return d3.select('body').node();
-        }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend));
+        }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend))        ;
         numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
         svg.selectAll('.radarCluster')
             .attr('class',(d,i)=>'radarCluster radarh'+d.order)
@@ -487,6 +491,22 @@ function cluster_map (data) {
     }
 
 }
+
+// (function($){
+//     $(window).on("load",function(){
+//
+//         /* call mCustomScrollbar function before jquery ui sortable() */
+//         console.log('he')
+//         $(".tablesvg").mCustomScrollbar({
+//             scrollbarPosition:"outside",
+//             scrollInertia:450,
+//             theme:"light-2"
+//         });
+//
+//
+//     });
+// })(jQuery);
+
 let dataSum=[];
 let radarChartclusterSumopt  = {
     margin: {top: 50, right: 50, bottom: 50, left: 50},
@@ -573,7 +593,7 @@ function tableCreate_svg(data){
     let divt = d3.select(svg.node().parentNode.parentNode);
     let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name).data(data);
     table.exit().remove();
-    let table_n = table.enter().append('div').attr('class','tablesvg').append('table');
+    let table_n = table.enter().append('div').attr('class','tablesvg mCustomScrollbar').append('table');
     table_n.append('col');
     table_n.append('col').attr('class','num');
     table_n.append('thead').append('tr');
@@ -587,6 +607,7 @@ function tableCreate_svg(data){
         left: d=>clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+'px',
     }).on('scroll',function(){
         $('.tablesvg').scrollTop(this.scrollTop);
+        $(".tablesvg").mCustomScrollbar("scrollTo",this.scrollTop);
     });
 
     let thead = table.select('thead tr').selectAll('th').data(['Service name','Value']);
@@ -603,6 +624,24 @@ function tableCreate_svg(data){
         .selectAll('td').data(d=>[d.axis,d.value_o]);
     td.exit().remove();
     td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
+
+    // $(".tablesvg").mCustomScrollbar({
+    //     axis:"y", // horizontal scrollbar,
+    //     callbacks:{
+    //         onScrollStart: function(){
+    //             $(this).addClass('ScrollActive');
+    //         },
+    //         whileScrolling: function(){
+    //             $(".tablesvg").not('.ScrollActive').mCustomScrollbar("disable",true);
+    //             $(".tablesvg").not('.ScrollActive').mCustomScrollbar("scrollTo",
+    //                 this.mcs.draggerTop);
+    //         },
+    //         onScroll: function(){
+    //             $(".tablesvg").not('.ScrollActive').mCustomScrollbar("disable",false);
+    //             $(this).removeClass('ScrollActive');
+    //         }
+    //     }
+    // });
 }
 function triggersortPlay(){
     d3.select('#sortorder').transition().duration(5000).on("end", function repeat() {

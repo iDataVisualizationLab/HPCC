@@ -539,7 +539,9 @@ function UpdateGradient(svg) { // using global arrcolor
 function fixName2Class(s) {
     return 'h'+s.replace(/ |#|\./gi,''); //avoid . and number format
 }
-
+function positiveAngle(angle){
+    return angle>0? angle: (angle+Math.PI*2);
+}
 function downloadProfile(event){
     $('#savename_profile').val("profile"+d3.timeFormat("%a%d%b_%H%M")(new Date()));
 }

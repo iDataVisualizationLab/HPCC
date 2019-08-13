@@ -214,6 +214,7 @@ let radarController = function () {
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
                 "order": [[3, "desc"], [2, "asc"]],
+                "pageLength": 50,
                 "columnDefs": [
                     {   targets: 0,
                         title: "Service name",
