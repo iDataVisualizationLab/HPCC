@@ -94,13 +94,26 @@ d3.viiolinChart = function () {
             .style('fill','currentColor')
             .attr("d",d=> crateviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
         );
-        let circle_o = viol_chart.selectAll('circle').data(d=>d.outlier);
+
+        const circledata =  arr[0].outlier.map(d=>{return d.x?d:{x:d}});
+
+    //     var simulation = d3.forceSimulation(circledata)
+    //         .force("x", d3.forceX(function(d) { return h(d.val); }).strength(1))
+    //         .force("y", d3.forceY(0))
+    //         .force("collide", d3.forceCollide(graphicopt.dotRadius))
+    //         .stop();
+    //     for (var i = 0; i < 120; ++i) simulation.tick();
+    // console.log(circledata);
+        let circle_o = viol_chart.selectAll('circle').data(circledata);
+        console.log(circledata)
         circle_o.exit().remove();
-        circle_o.enter().append('circle')
+        let circlem = circle_o.enter().append('circle')
             .styles({opacity:0.5,
             fill: 'rgb(138, 0, 26)'})
             .merge(circle_o)
-            .attrs(circleoption);
+            .attrs(circleoption)
+            // .attr('cx',d=>h(d.val));
+            .attr('cx',d=>d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:0);
         return viol_chart;
     };
 

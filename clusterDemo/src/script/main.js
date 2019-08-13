@@ -287,7 +287,7 @@ function main (){
 
     });
     serviceFull_selected =[];
-    serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)));
+    serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
     triggersortPlay();
     handledata(graphicControl.mode);
     handledata_sumary();
@@ -672,12 +672,12 @@ function getsummaryservice(){
         resolution:20,
     };
     let h = d3.scaleLinear();
-    let dataf = serviceFull_selected.map(s=>Object.keys(clusterS).map(d=>clusterS[d][s]));
+    let dataf = serviceFull_selected.map(s=>Object.keys(clusterS).map(d=>d3.scaleLinear().domain(s.range)(clusterS[d][s.text])));
     let ob = {}
     dataf.forEach((d,i)=>{
         d=d.filter(e=>e!=undefined).sort((a,b)=>a-b);
         let r;
-        if (d.length){
+        if (d.length>20){
 
             // kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
             // let sumstat = kde(d);
@@ -693,27 +693,36 @@ function getsummaryservice(){
 
             let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
             r = {
-                axis: serviceFull_selected[i],
+                axis: serviceFull_selected[i].text,
                 q1: ss.quantileSorted(d,0.25) ,
                 q3: ss.quantileSorted(d,0.75),
                 median: ss.medianSorted(d) ,
                 // outlier: ,
                 arr: sumstat};
-            if (d.length>4)
-            {
+
                 const iqr = r.q3-r.q1;
                 r.outlier = d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr));
-            }else{
-                r.outlier = d;
-            }
+
         }else{
             r = {
-                axis: serviceFull_selected[i],
+                axis: serviceFull_selected[i].text,
                 q1: undefined ,
                 q3: undefined,
                 median: undefined ,
-                outlier: [],
+                outlier: d,
                 arr: []};
+        }
+        if(r.outlier.length)
+        {
+            let h = d3.scaleLinear().range([0, 80]);
+            const circledata =  r.outlier.map(d=>{return{val:d}});
+            var simulation = d3.forceSimulation(circledata)
+                .force("x", d3.forceX(function(d) { return h(d.val); }).strength(1))
+                .force("y", d3.forceY(0))
+                .force("collide", d3.forceCollide(2))
+                .stop();
+            for (var i = 0; i < 120; ++i) simulation.tick();
+            r.outlier =  circledata;
         }
         ob[r.axis] = r;
 
