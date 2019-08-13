@@ -13,7 +13,7 @@ addEventListener('message',function ({data}){
             hosts = data.value.hosts;
             db = data.value.db;
             serviceFull_selected =[];
-            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)))
+            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
             break;
         case 'isRealtime':
             if (db==='csv')
@@ -22,7 +22,7 @@ addEventListener('message',function ({data}){
                 hostList = data.hostList;
                 inithostResults(true);
                 serviceFull_selected =[];
-                serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)))
+                serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
             }
             db = data.db;
 
@@ -40,7 +40,7 @@ addEventListener('message',function ({data}){
                     processData = processData_old;
             }
             serviceFull_selected =[];
-            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub.text)));
+            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             console.log(serviceFull_selected)
             break;
         case 'getbatchData':
@@ -92,7 +92,7 @@ function getsummaryservice(data){
 
             let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
             r = {
-                axis: serviceFull_selected[i],
+                axis: serviceFull_selected[i].text,
                 q1: ss.quantileSorted(d,0.25) ,
                 q3: ss.quantileSorted(d,0.75),
                 median: ss.medianSorted(d) ,
@@ -101,13 +101,13 @@ function getsummaryservice(data){
             if (d.length>4)
             {
                 const iqr = r.q3-r.q1;
-                r.outlier = d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr));
+                r.outlier = _.unique(d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr)));
             }else{
-                r.outlier = d;
+                r.outlier =  _.unique(d);
             }
         }else{
             r = {
-                axis: serviceFull_selected[i],
+                axis: serviceFull_selected[i].text,
                 q1: undefined ,
                 q3: undefined,
                 median: undefined ,
