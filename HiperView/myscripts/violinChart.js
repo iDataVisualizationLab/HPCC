@@ -54,7 +54,7 @@ d3.viiolinChart = function () {
     let circleoption = function (d){
         return {
             r: graphicopt.dotRadius,
-            cy: h(d),
+            // cy: h(d),
         }
     };
     viiolinplot.draw = function(contain){
@@ -103,17 +103,15 @@ d3.viiolinChart = function () {
     //         .force("collide", d3.forceCollide(graphicopt.dotRadius))
     //         .stop();
     //     for (var i = 0; i < 120; ++i) simulation.tick();
-    // console.log(circledata);
+    // console.log(circledata.map(d=>h(d.x)));
         let circle_o = viol_chart.selectAll('circle').data(circledata);
-        console.log(circledata)
         circle_o.exit().remove();
         let circlem = circle_o.enter().append('circle')
             .styles({opacity:0.5,
             fill: 'rgb(138, 0, 26)'})
             .merge(circle_o)
             .attrs(circleoption)
-            // .attr('cx',d=>h(d.val));
-            .attr('cx',d=>d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:0);
+            .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:0);
         return viol_chart;
     };
 
@@ -221,7 +219,7 @@ d3.viiolinChart = function () {
                 circleoption = function (d){
                     return {
                         r: graphicopt.dotRadius,
-                        cy: h(d),
+                        // cy: h(d),
                     }
                 };
             }
@@ -241,7 +239,7 @@ d3.viiolinChart = function () {
                 circleoption = function (d){
                     return {
                         r: graphicopt.dotRadius,
-                        cx: h(d),
+                        // cx: h(d),
                     }
                 };
             }
