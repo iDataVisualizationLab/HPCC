@@ -436,13 +436,14 @@ function simulateResults2(hostname,iter, s){
         newService = sampleS[hostname]["arrPower_usage"][iter];
     }
     if (newService === undefined){
-        newService ={}
-        newService.result = {};
-        newService.result.query_time = query_time;
-        newService.data = {};
-        newService.data.service={};
-        newService.data.service.host_name = hostname;
-        newService.data.service.plugin_output = undefined;
+        // newService ={}
+        // newService.result = {};
+        // newService.result.query_time = query_time;
+        // newService.data = {};
+        // newService.data.service={};
+        // newService.data.service.host_name = hostname;
+        // newService.data.service.plugin_output = undefined;
+        newService = [undefined];
     }else {
         if (db === "influxdb")
             try {
