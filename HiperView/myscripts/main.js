@@ -2071,7 +2071,7 @@ $( document ).ready(function() {
         exit_warp();
         spinner.spin(target);
         const choice = this.value;
-        const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
+        const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
         if (choice!=='csv') {
             if (db === 'csv') { //reload hostlist
                 d3.json('data/hotslist_Quanah.json', function (error, data) {
