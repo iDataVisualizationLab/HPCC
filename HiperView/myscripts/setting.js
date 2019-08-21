@@ -455,7 +455,7 @@ function simulateResults2(hostname,iter, s){
 }
 
 function handlemissingdata(hostname,iter){
-    var simisval = jQuery.extend(true, {}, sampleS[hostname]["arrTemperature"][iter]);
+    var simisval = sampleS[hostname]["arrTemperature"][iter].slice();
     var simval = simisval.slice(0);
     simval = (simval[0]+simval[1]+20);
     if (simval!==undefinedValue && !isNaN(simval) )

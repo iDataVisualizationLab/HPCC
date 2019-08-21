@@ -1,11 +1,12 @@
 var query_time
 function readData() {
     let hostResults = {}, hosts=[];
-    let hostsList =d3.keys(sampleS);
+    let hostsList = _.without(d3.keys(sampleS),'timespan');
     let count = 0;
     let comphost;
     let lengthData = sampleS[hostsList[hostsList.length-1]].arrTemperature.length;
     let iterationstep =lengthData;
+    sampleS.timespan = sampleS.timespan.map(d=>new Date(d));
     hostsList.forEach(att => {
         var h = {};
         h.name = att;
@@ -27,18 +28,19 @@ function readData() {
         count++;
 
         function readDataList(count,iteration) {
+            var name= hosts[count].name;
             for (i = 0; i < iterationstep; i++) {
                 query_time = undefined;
-                var name= undefined;
+
                 serviceListattr.forEach((sv, si)=> {
                     var result = simulateResults2(hosts[count].name, iteration, serviceList[si]);
-                    query_time = result.result.query_time||query_time;
-                    name = result.data.service.host_name||name;
-                    hostResults[name][sv].push(processData(result.data.service.plugin_output, serviceList[si]));
+                    // query_time = result.result.query_time||query_time;
+                    // name = result.data.service.host_name||name;
+                    hostResults[name][sv].push(result);
                 });
-                hostResults[name]['arrTime'].push(query_time);
                 iteration++;
             }
+            hostResults[name]['arrTime']=sampleS.timespan;
             return iteration;
         }
 

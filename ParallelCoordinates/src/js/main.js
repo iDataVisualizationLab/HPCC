@@ -56,10 +56,10 @@ function Loadtostore() {
     checkConf('serviceListattr');
     checkConf('serviceListattrnest');
 }
-let processData = processData_old;
+// let processData = processData_old;
 
 //***********************
-Loadtostore();
+// Loadtostore();
 //***********************
 // START: loader spinner settings ****************************
 var opts = {
