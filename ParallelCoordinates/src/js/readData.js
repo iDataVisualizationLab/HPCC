@@ -36,6 +36,7 @@ function readData() {
                     var result = simulateResults2(hosts[count].name, iteration, serviceList[si]);
                     // query_time = result.result.query_time||query_time;
                     // name = result.data.service.host_name||name;
+                    result = result.map(d=>d!==null?d:undefined)
                     hostResults[name][sv].push(result);
                 });
                 iteration++;
