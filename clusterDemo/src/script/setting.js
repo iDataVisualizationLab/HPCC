@@ -1,6 +1,12 @@
 let profile = {};
 srcpath = '../HiperView/';
-
+let filename_pattern = [
+    {value:"mean",key:"value"},
+    {value:"quantile_0.25",key:"q1"},
+    {value:"quantile_0.75",key:"q3"},
+    {value:"quantile_1",key:"maxval"},
+    {value:"quantile_0",key:"minval"},
+    ];
 
 //overwrite function
 function onClickRadarColor (d){
@@ -64,11 +70,10 @@ function updateDataType(data,type){
     const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count');
     data.forEach((d,i)=>{
 
-        let temp ={};
+        let temp =clusterS[d.labels||d.re_label];
         serviceLists.forEach((s,i)=>{
-            temp[s.text][type] = d[variables[i]]
+            temp[s.text][type] = +d[variables[i]]
         });
-        clusterS[d.labels||d.re_label] = temp;
     });
 }
 let clusterS ={};

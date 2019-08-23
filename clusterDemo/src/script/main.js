@@ -153,41 +153,104 @@ $( document ).ready(function() {
         spinnerOb.spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
         firstTime = true;
-        console.log(evt.target.files)
-        var f = evt.target.files[0];
-        var reader = new FileReader();
-        reader.onload = (function(theFile) {
-            return function(e) {
-                // Render thumbnail.
-                d3.select('.cover').classed('hidden', false);
-                spinnerOb.spinner.spin(spinnerOb.target);
-                setTimeout(() => {
-                    d3.csv(e.target.result,function (error, data) {
-                        if (error){
-                            d3.select('.cover').classed('hidden', true);
-                            spinnerOb.spinner.stop();
-                        }else{
-                            loadata1(data);
-                            function loadata1(data){
-                                newdatatoFormat_cluster(data);
+        console.log(evt.target.files);
+        let f,fq1,fq3,fmin,fmax;
+        let n = evt.target.files.length;
+        d3.range(0,n).forEach(i=>{
+            let d = evt.target.files[i];
+            if (new RegExp(filename_pattern[0].value).test(d.name))
+                f = d;
+            else if (new RegExp(filename_pattern[1].value).test(d.name))
+                fq1 = d;
+            else if (new RegExp(filename_pattern[2].value).test(d.name))
+                fq3 = d;
+            else if (new RegExp(filename_pattern[3].value).test(d.name))
+                fmax = d;
+            else if (new RegExp(filename_pattern[4].value).test(d.name))
+                fmin = d;
+        });
+        // let f = evt.target.files.find(d=>new RegExp(filename_pattern[0].value).test(d.name));
+        // let fq1 = evt.target.files.find(d=>new RegExp(filename_pattern[1].value).test(d.name));
+        // let fq3 = evt.target.files.find(d=>new RegExp(filename_pattern[2].value).test(d.name));
+        // let fmax = evt.target.files.find(d=>new RegExp(filename_pattern[3].value).test(d.name));
+        // let fmin = evt.target.files.find(d=>new RegExp(filename_pattern[4].value).test(d.name));
+        if(evt.target.files.length===1)
+            f = evt.target.files[0];
+
+
+        readf(f,filreadFunc,'value');
+
+        function readf(f,callback,type,callbacknext) {
+            var reader = new FileReader();
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    // Render thumbnail.
+                    d3.select('.cover').classed('hidden', false);
+                    spinnerOb.spinner.spin(spinnerOb.target);
+                    callback(e,type,callbacknext);
+                };
+            })(f);
+
+            reader.readAsDataURL(f);
+        }
+        function filreadFunc(e,type,callbacknext) {
+            setTimeout(() => {
+                d3.csv(e.target.result, function (error, data) {
+                    if (error) {
+                        d3.select('.cover').classed('hidden', true);
+                        spinnerOb.spinner.stop();
+                    } else {
+                        loadata1(data);
+                        if(callbacknext)
+                            callbacknext(true);
+                        function loadata1(data) {
+                            newdatatoFormat_cluster(data);
+                            let q = d3.queue();
+                            if (n>1) {
+                                if (fmin)
+                                    q.defer(readf,fq1,filreadAlternative,'q1');
+                                if (fmax)
+                                    q.defer(readf,fq3,filreadAlternative,'q3');
+                                if (fq1)
+                                    q.defer(readf,fmin,filreadAlternative,'minval');
+                                if (fq3)
+                                    q.defer(readf,fmax,filreadAlternative,'maxval');
+                            }
+                            q.awaitAll(function (error, data) {
+                                if (error) throw error;
+                                console.log('done read batch file');
                                 processResult = processResult_csv;
                                 db = "csv";
-                                addDatasetsOptions()
-                                MetricController.axisSchema(serviceFullList,true).update();
+                                addDatasetsOptions();
+                                MetricController.axisSchema(serviceFullList, true).update();
                                 main();
                                 // d3.select(".currentDate")
                                 //     .text("" + new Date(data[0].timestamp).toDateString());
                                 // resetRequest();
                                 d3.select('.cover').classed('hidden', true);
                                 spinnerOb.spinner.stop();
-                            }
-                        }
-                    })
-                },0);
-            };
-        })(f);
+                            });
 
-        reader.readAsDataURL(f);
+                        }
+                    }
+                })
+            }, 0);
+        }
+
+        function filreadAlternative(e,type,callbacknext){
+            d3.csv(e.target.result, function (error, data) {
+                if (error) {
+                    d3.select('.cover').classed('hidden', true);
+                    spinnerOb.spinner.stop();
+                } else {
+                    loadata1(data,type);
+                    callbacknext(null)
+                    function loadata1(data,type) {
+                        updateDataType(data,type);
+                    }
+                }
+            })
+        }
     })
     spinnerOb.spinner = new Spinner(spinnerOb.opts).spin(spinnerOb.target);
     let oldchoose=$('#datacom').val();
