@@ -13,7 +13,7 @@ function newdatatoFormat_cluster (data){
     serviceLists = [];
     serviceListattr = [];
     // FIXME detect format
-    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels');
+    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count');
     data.forEach(d=>variables.forEach(k=>d[k] = +d[k])) // format number
     let keys ={};
     let label_name =[];
@@ -49,15 +49,26 @@ function newdatatoFormat_cluster (data){
     });
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
-    label_name = data.map(d=>d.labels);
+    label_name = data.map(d=>d.labels||d.re_label);
     clusterS = {};
     data.forEach((d,i)=>{
 
             let temp ={};
             serviceLists.forEach((s,i)=>{
-                temp[s.text] = d[variables[i]]
-            })
-            clusterS[d.labels] = temp;
+                temp[s.text] = {value: d[variables[i]]};
+            });
+            clusterS[d.labels||d.re_label] = temp;
+    });
+}
+function updateDataType(data,type){
+    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count');
+    data.forEach((d,i)=>{
+
+        let temp ={};
+        serviceLists.forEach((s,i)=>{
+            temp[s.text][type] = d[variables[i]]
+        });
+        clusterS[d.labels||d.re_label] = temp;
     });
 }
 let clusterS ={};

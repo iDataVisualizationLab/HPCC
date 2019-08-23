@@ -519,6 +519,42 @@ function RadarChart(id, data, options, name) {
 
         blobWrapper
             .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
+    }if(cfg.boxplot){
+        function drawMeanLine(paths){
+            return paths
+                .attr("d", d =>radarLine(d))
+                .styles({"fill":'none',
+                    'stroke':'black',
+                    'stroke-width':0.5,
+                    'stroke-dasharray': '1 2'});
+        }
+        function drawQuantileArea(paths){
+            return paths
+                .attr("d", d =>radialAreaQuantile(d))
+                .styles({"fill":(d,i)=>cfg.fillin?cfg.color(i,d):"none",
+                    'stroke':'black',
+                    'stroke-width':0.2});
+        }
+        function drawMinMaxArea(paths){
+            return paths
+                .attr("d", d =>radialAreaGenerator(d))
+                .styles({"fill":'none',
+                    'stroke':(d, i) => cfg.color(i,d),
+                    'stroke-width':() => cfg.strokeWidth + "px"});
+        }
+        //update the outlines
+        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+        blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
+        blobWrapperpath.style("fill", "none").transition().call(drawMinMaxArea);
+
+        blobWrapper.append("path")
+            .attr("class", "radarStroke")
+            .call(drawMinMaxArea);
+        blobWrapper
+            .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
+
+        blobWrapper
+            .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))

@@ -150,11 +150,12 @@ $( document ).ready(function() {
         }
     });
     $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
-        spinner.stop();})
+        spinnerOb.spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
+        firstTime = true;
+        console.log(evt.target.files)
         var f = evt.target.files[0];
         var reader = new FileReader();
-
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.
@@ -183,13 +184,9 @@ $( document ).ready(function() {
                         }
                     })
                 },0);
-                // span.innerHTML = ['<img class="thumb" src="', e.target.result,
-                //     '" title="', escape(theFile.name), '"/>'].join('');
-                // document.getElementById('list').insertBefore(span, null);
             };
         })(f);
 
-        // Read in the image file as a data URL.
         reader.readAsDataURL(f);
     })
     spinnerOb.spinner = new Spinner(spinnerOb.opts).spin(spinnerOb.target);
@@ -223,8 +220,8 @@ $( document ).ready(function() {
             MetricController.axisSchema(serviceFullList,true).update();
 
             main();
-            d3.select(".cover").select('h5').text('loading data...');
-            addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
+            // d3.select(".cover").select('h5').text('loading data...');
+            // addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
             d3.select('.cover').classed('hidden',true);
             spinnerOb.spinner.stop();
         }
@@ -311,11 +308,14 @@ function handledata_sumary(){
 function handledata(mode){
     data = Object.keys(clusterS).map((d,i)=>{
         let temp = serviceFullList.map(s=> {
-            return {
+            let temp_item =  {
                 axis: s.text,
-                value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
+                // value: d3.scaleLinear().domain(s.range) (clusterS[d][s.text]),
                 value_o: clusterS[d][s.text],
             };
+            Object.keys(clusterS[d][s.text])
+                .forEach(k=>temp_item[k] = d3.scaleLinear().domain(s.range) (clusterS[d][s.text][k]));
+            return temp_item;
         });
         temp.name = d;
         let temparr = [temp];
@@ -385,6 +385,7 @@ let radarChartclusteropt  = {
     ringStroke_width: 0.15,
     ringColor:'black',
     fillin:0.5,
+    boxplot:false,
     events:{
         axis: {
             mouseover: function(){
@@ -591,7 +592,7 @@ function similarityCal(){
 
 function tableCreate_svg(data){
     let divt = d3.select(svg.node().parentNode.parentNode);
-    let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name).data(data);
+    let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name);
     table.exit().remove();
     let table_n = table.enter().append('div').attr('class','tablesvg mCustomScrollbar').append('table');
     table_n.append('col');
@@ -621,7 +622,7 @@ function tableCreate_svg(data){
         .attr('class',dd=>{let d = serviceFullList.find(e=>e.text===dd.axis); return 'axis'+d.idroot+'_'+d.id;})
         .on('mouseover',function(dd){ let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',true);})
         .on('mouseleave',function(dd){ let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);})
-        .selectAll('td').data(d=>[d.axis,d.value_o]);
+        .selectAll('td').data(d=>[d.axis,d.value_o.value]);
     td.exit().remove();
     td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
 
@@ -667,12 +668,13 @@ function sortplay(event){
         event.classList.add('pause');
     }
 }
+
 function getsummaryservice(){
     let histodram = {
         resolution:20,
     };
     let h = d3.scaleLinear();
-    let dataf = serviceFull_selected.map(s=>Object.keys(clusterS).map(d=>d3.scaleLinear().domain(s.range)(clusterS[d][s.text])));
+    let dataf = serviceFull_selected.map(s=>Object.keys(clusterS).map(d=>d3.scaleLinear().domain(s.range)(clusterS[d][s.text].value)));
     let ob = {}
     dataf.forEach((d,i)=>{
         d=d.filter(e=>e!=undefined).sort((a,b)=>a-b);
