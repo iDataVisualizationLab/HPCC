@@ -17,7 +17,7 @@ Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordi
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ParrallelCoordinate.png)
 
 ClusterView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.png)
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
 
 # 2018
 
