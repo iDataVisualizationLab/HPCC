@@ -16,6 +16,9 @@ Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ParrallelCoordinate.png)
 
+ClusterView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.png)
+
 # 2018
 
 ### HiperView: Visualizing Multidimensional Health Status of High Performance Systems
