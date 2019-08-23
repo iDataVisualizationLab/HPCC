@@ -207,6 +207,7 @@ $( document ).ready(function() {
                             newdatatoFormat_cluster(data);
                             let q = d3.queue();
                             if (n>1) {
+                                radarChartclusteropt.boxplot = true;
                                 if (fmin)
                                     q.defer(readf,fq1,filreadAlternative,'q1');
                                 if (fmax)
@@ -215,6 +216,8 @@ $( document ).ready(function() {
                                     q.defer(readf,fmin,filreadAlternative,'minval');
                                 if (fq3)
                                     q.defer(readf,fmax,filreadAlternative,'maxval');
+                            }else{
+                                radarChartclusteropt.boxplot = false;
                             }
                             q.awaitAll(function (error, data) {
                                 if (error) throw error;
