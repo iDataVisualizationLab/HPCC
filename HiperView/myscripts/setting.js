@@ -702,3 +702,33 @@ function extractWordsCollection (terms,data,keyk) {
 function getTermsArrayCollection(header){
     return basic_service[header].map(d=>{return {key:header, value: [d]}});
 }
+
+function getJoblist (iteration,reset){
+    try {
+        if (reset===true || reset===undefined)
+            jobList = [];
+        hosts.forEach(h => {
+            var result = simulateResults2(h.name, iteration||lastIndex, "Job_scheduling");
+            const resultObj = result[0];
+            if (resultObj) {
+                resultObj.forEach(d=>{
+                    d.nodes= _.isArray( d.nodes) ? d.nodes:d.nodes.split(',')});
+                jobList = _.union(jobList, resultObj);
+            }
+        });
+        // handle dupliacte jobID
+        jobList = _.chain(jobList)
+            .groupBy(d=>d.jobID).values().map(d=>d.reduce((a,b)=>{a.nodes = _.union(a.nodes,b.nodes); return a;})).value();
+        //draw userlist data
+        TSneplot.drawUserlist(query_time);
+    }catch(e){}
+}
+
+function current_userData () {
+    let jobByuser = d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    jobByuser.forEach(d=>d.unqinode= _.chain(d.values).map(d=>d.nodes).flatten().uniq().value());
+    return jobByuser;
+}
+function fixstr(s) {
+    return s.replace(/ |#/gi,'');
+}

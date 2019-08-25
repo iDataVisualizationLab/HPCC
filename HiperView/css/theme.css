@@ -343,8 +343,9 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 .nav__menu-items {
     display: none;
     width: 200px;
-    height: 50px;
+    height: 30px;
     background-color: var(--colorMain2);
+    line-height: 30px;
 }
 .nav__menu-items:hover {
     /*background-color: #226f8c;*/

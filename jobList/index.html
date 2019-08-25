@@ -6,7 +6,7 @@
 
 <head>
 
-    <title>ClusterView</title>
+    <title>JobNetwork</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <script src="../HiperView/js/jquery-3.3.1.js"></script>
     <script src="../HiperView/js/jquery.dd.js"></script>
@@ -75,7 +75,7 @@
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">2. Parallel Coordinates</a></li>
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">3. Phase Space</a></li>
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">4. Virtual Reality</a></li>
-                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/jobList/index.html">6. JobNetwork</a></li>
+                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html">5. ClusterView</a></li>
                 </ul>
             </li>
             <li><a href="#!" value="dark" id = "DarkTheme" class="btn waves-effect waves-effect waves-yellow">
@@ -106,10 +106,10 @@
                     <label for="datacom" class="col s4"> Dataset: </label>
                     <div  class="row s12">
                         <select id="datacom" class="col s7">
-                            <!--<option value="dataframe_nodes" >26 Sep 2018</option>-->
-                            <option value="Mean_df" multifile="false">Clusters example (mean only)</option>
+                            <option value="influxdbSat27Apr" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
+                            <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
 
-                            <option value="csv">read files</option>
+                            <!--<option value="csv">read files</option>-->
                             <!--<option value="nagios">Real-time Nagios</option>-->
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
@@ -372,17 +372,21 @@
                 <div class="determinate" style="width: 10%"></div>
             </div>
             <div style="position: relative;">
-                <svg width="2600" height="1000" class="mainsvg" ></svg>
+                <svg width="2600" height="1000" class="mainsvg" >
+                    <svg id ="jobmap">
+
+                    </svg>
+                </svg>
             </div>
         </div>
     </div>
 
 </div>
-<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">
-    <button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>
-    <button style="position:absolute;right: 0;margin: 10px;" id = 'deselectChart'>Deselect Charts</button>
-    <svg width="600" height="600" class="sumdragsvg" ></svg>
-</div>
+<!--<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">-->
+    <!--<button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>-->
+    <!--<button style="position:absolute;right: 0;margin: 10px;" id = 'deselectChart'>Deselect Charts</button>-->
+    <!--<svg width="600" height="600" class="sumdragsvg" ></svg>-->
+<!--</div>-->
 <div id="savedialog" class="modal custom">
     <div class="modal-content">
         <div class="input-field col s6">
@@ -446,11 +450,13 @@
 <script src="../HiperView/myscripts/scatterplot.js"></script>
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
 <script src="../HiperView/myscripts/violinChart.js"></script>
+<script src="src/script/jobMap.js"></script>
 
 
 <script src="src/script/setting.js"></script>
 <script src="../HiperView/myscripts/radarController.js"></script>
 <script src="src/script/main.js"></script>
+<script src="../HiperView/myscripts/tooltip_new.js"></script>
 <!--<script src="../HiperView/myscripts/tooltip_new.js"></script>-->
 <script src="../HiperView/spider/radarChart.js"></script>
 

@@ -1,5 +1,5 @@
-/* June-2018
- * Tommy Dang (on the HPCC project, as Assistant professor, iDVL@TTU)
+/* August-2019
+ * Ngan
  *
  * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
  * WARRANTY.  IN PARTICULAR, THE AUTHORS MAKE NO REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
@@ -15,13 +15,17 @@ var svg = d3.select(".mainsvg"),
     height = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
 
-svg = svg
-    .attrs({
-        width: width,
-    })
-    .append("g")
-    .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
+    svg = svg
+        .attrs({
+            width: width,
+        })
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+jobMap_opt.width = width;
+jobMap_opt.height = height;
+
+
 // other component setting
 // summaryGroup
 let summaryGroup_op ={
@@ -256,7 +260,7 @@ var TsnePlotopt  = {
             },
             clulster: {
                 attr: {
-                   }
+                }
                 ,
                 style: {
                     stroke: 'white'
@@ -277,7 +281,7 @@ var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 var MetricController = radarController();
-let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
+// let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
 
 function setColorsAndThresholds(s) {
@@ -331,556 +335,11 @@ function setColorsAndThresholds(s) {
 }
 //***********************
 var gaphost = 7;
-function initVerticalView(){
-    if (svg.select('.detailView').empty()) {
-        svgStore.detailView ={};
-        svgStore.detailView.g = svg.append('g').attr('class', 'detailView').attr('transform','translate(0,20)');
-        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
-        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
-    }
-    if (svg.select('.hostId').empty()) {
-        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
-        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
-        // Draw racks **********************
-        var icount = 0;
-        racks[0].x = 60 ;
-        racks[0].y = 0;
-        racks[0].h = racks[0].hosts.length*gaphost;
-        racks[0].hosts.forEach((h,i)=>{
-            h.y = icount*gaphost;
-            icount++;
-        })
-        for (var i = 1; i < racks.length; i++) {
-            racks[i].x = 60 ;
-            racks[i].y = racks[i-1].y+racks[i-1].hosts.length*gaphost;
-            racks[i].h = racks[i].hosts.length*gaphost;
-            racks[i].hosts.forEach((h,ii)=>{
-                h.y = icount*gaphost
-                icount++;
-            });
-        }
-        d3.select('.mainsvg').attr("height",racks[racks.length-1].y+racks[racks.length-1].h+40);
-        // add main rack and sub rack
-
-        // subrack below
-        racksnewor = [];
-        racks.forEach(d => {
-            var newl = {};
-            newl.id = d.id;
-            newl.x = d.x;
-            newl.y = d.y;
-            newl.h = d.h;
-            newl.hosts = d.hosts;
-            racksnewor.push(newl);
-        });
-        svgStore.detailView.label.append("rect")
-            .attr("class", "background")
-            .attr("x", 0)
-            .attr("y", -10)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("width", width)
-            .attr("height", d3.select('.mainsvg').attr("height"))
-            .attr("fill", "#fff")
-            .attr("stroke", "#000")
-            .attr("stroke-width", 1)
-            .style("box-shadow", "10px 10px 10px #666");
-        // svgStore.detailView.label.selectAll(".rackRect")
-        //     .data(racks)
-        //     .enter().append("rect")
-        //     .attr("class", "rackRect")
-        //     .attr("x", function (d, i) {
-        //         return d.x - 6;
-        //     })
-        //     .attr("y", function (d) {
-        //         return d.y;
-        //     })
-        //     .attr("rx", 10)
-        //     .attr("ry", 10)
-        //     .attr("width", (d, i) => (w_rack))
-        //     .attr("height", d=>d.h)
-        //     .attr("fill", "#fff")
-        //     .attr("stroke", "#000")
-        //     .attr("stroke-width", 1)
-        //     .style("box-shadow", "10px 10px 10px #666");
-        // svgStore.detailView.label.selectAll(".rackRectText1")
-        //     .data(racksnewor)
-        //     .enter().append("text")
-        //     .attr("class", "rackRectText1")
-        //     .attr("x", function (d) {
-        //         return d.x + w_rack / 2 - 20;
-        //     })
-        //     .attr("y", function (d) {
-        //         return d.y - 6;
-        //     })
-        //     .attr("fill", "currentColor")
-        //     .style("text-anchor", "middle")
-        //     .style("font-size", 16)
-        //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        //     .attr("font-family", "sans-serif")
-        //     .text(function (d) {
-        //         return "Rack " + d.id;
-        //         //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
-        //     });
-
-        // Draw host names **********************
-
-        // for (var i = 1; i <= hosts.length; i++) {
-        //     var yy = getHostY(1, i);
-        //     svgStore.detailView.label.append("text")
-        //         .attr("class", "hostText")
-        //         .attr("x", 32)
-        //         .attr("y", yy + 1)
-        //         .attr("fill", "currentColor")
-        //         .style("text-anchor", "end")
-        //         .style("font-size", "12px")
-        //         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        //         .attr("font-family", "sans-serif")
-        //         .text("Host");
-        // }
-        filterhost = hosts.map(d=>d.name);
-        for (var i = 0; i < hosts.length; i++) {
-            var name = hosts[i].name;
-            var hpcc_rack = +name.split("-")[1];
-            var hpcc_node = +name.split("-")[2].split(".")[0];
-            var xStart = getRackx(hpcc_rack,hpcc_node,graphicControl.mode) - 60;
-            var yy = getHostY(hpcc_rack, hpcc_node, hpcc_node % 2);
-            // set opacity for current measurement text
-            hosts[i].mOpacity = 0.1;
-
-
-            svgStore.detailView.label.append("text")
-                .attr("class", "hostID_"+name)
-                .attr("x", xStart)
-                .attr("y", yy)
-                .attr("dy", '4px')
-                .attr("fill", "#000")
-                .style("text-anchor", "start")
-                .style("font-size", "10px")
-                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                .attr("font-family", "sans-serif")
-                .text("" + name);
-
-            svgStore.detailView.label.append("text")
-                .attr("class", "measure_" + hosts[i].name)
-                .attr("x", xStart + w_rack / 2 - 20)
-                .attr("y", yy)
-                .attr("dy", '4px')
-                .attr("fill", "#000")
-                .attr("fill-opacity", hosts[i].mOpacity)
-                .style("text-anchor", "end")
-                .style("font-size", "11px")
-                .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
-                .attr("font-family", "sans-serif")
-                .text("");
-        }
-    }
-}
-function initDetailView() {
-    if (svg.select('.detailView').empty()) {
-        svgStore.detailView ={};
-        svgStore.detailView.g = svg.append('g').attr('class', 'detailView');
-        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
-        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
-    }
-    if (svg.select('.rackRect').empty()) {
-        svgStore.detailView.label = svgStore.detailView.g.append('g').attr('class', 'detailViewLabel');
-        svgStore.detailView.items = svgStore.detailView.g.append('g').attr('class', 'detailViewItems');
-        // Draw racks **********************
-        for (var i = 0; i < racks.length; i++) {
-            racks[i].x = 35 + racks[i].id * (w_rack + w_gap) - w_rack + 10;
-            racks[i].y = top_margin;
-        }
-        // add main rack and sub rack
-
-        //subrack below
-        racksnewor = [];
-        racks.forEach(d => {
-            var newl = {};
-            newl.id = d.id;
-            newl.pos = 0;
-            newl.x = d.x;
-            newl.y = d.y;
-            newl.hosts = d.hosts.filter(e => e.hpcc_node % 2);
-            racksnewor.push(newl);
-            var newr = {};
-            newr.id = d.id;
-            newr.pos = 1;
-            newr.x = d.x + w_rack / 2 - 4;
-            newr.y = d.y;
-            newr.hosts = d.hosts.filter(e => !(e.hpcc_node % 2));
-            racksnewor.push(newr);
-
-        });
-
-        svgStore.detailView.label.selectAll(".rackRect")
-            .data(racksnewor)
-            .enter().append("rect")
-            .attr("class", "rackRect")
-            .attr("x", function (d, i) {
-                return d.x - 6;
-            })
-            .attr("y", function (d) {
-                return d.y;
-            })
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("width", (d, i) => (w_rack / 2 - 4))
-            .attr("height", h_rack)
-            .attr("fill", "#fff")
-            .attr("stroke", "#000")
-            .attr("stroke-width", 1)
-            .style("box-shadow", "10px 10px 10px #666");
-        svgStore.detailView.label.selectAll(".rackRectText1")
-            .data(racks)
-            .enter().append("text")
-            .attr("class", "rackRectText1")
-            .attr("x", function (d) {
-                return d.x + w_rack / 2 - 20;
-            })
-            .attr("y", function (d) {
-                return d.y - 6;
-            })
-            .attr("fill", "currentColor")
-            .style("text-anchor", "middle")
-            .style("font-size", 16)
-            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-            .attr("font-family", "sans-serif")
-            .text(function (d) {
-                return "Rack " + d.id;
-                //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
-            });
-
-        // Draw host names **********************
-
-        for (var i = 1; i <= maxHostinRack; i++) {
-            var yy = getHostY(1, i);
-            svgStore.detailView.label.append("text")
-                .attr("class", "hostText")
-                .attr("x", 32)
-                .attr("y", yy + 1)
-                .attr("fill", "currentColor")
-                .style("text-anchor", "end")
-                .style("font-size", "12px")
-                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                .attr("font-family", "sans-serif")
-                .text("Host");
-        }
-        filterhost = hosts.map(d=>d.name);
-        for (var i = 0; i < hosts.length; i++) {
-            var name = hosts[i].name;
-            var hpcc_rack = +name.split("-")[1];
-            var hpcc_node = +name.split("-")[2].split(".")[0];
-            var xStart = getRackx(hpcc_rack,hpcc_node,graphicControl.mode) - 2;
-            var yy = getHostY(hpcc_rack, hpcc_node, hpcc_node % 2);
-            // set opacity for current measurement text
-            hosts[i].mOpacity = 0.1;
-
-
-            svgStore.detailView.label.append("text")
-                .attr("class", "hostId")
-                .attr("x", xStart)
-                .attr("y", yy + 1)
-                .attr("fill", "#000")
-                .style("text-anchor", "start")
-                .style("font-size", "12px")
-                .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-                .attr("font-family", "sans-serif")
-                .text("" + hpcc_node);
-
-            svgStore.detailView.label.append("text")
-                .attr("class", "measure_" + hosts[i].name)
-                .attr("x", xStart + w_rack / 2 - 20)
-                .attr("y", yy - 4)
-                .attr("fill", "#000")
-                .attr("fill-opacity", hosts[i].mOpacity)
-                .style("text-anchor", "end")
-                .style("font-size", "11px")
-                .style("text-shadow", "1px 1px 0 rgba(0, 0, 0")
-                .attr("font-family", "sans-serif")
-                .text("");
-        }
-    }
-    TSneplot.remove();
-}
-
-
-function cleanUp (){
-    svg.selectAll('*').remove();
-    TSneplot.pause();
-    racks =[];
-}
-function drawHorizontalView() {
-    hosts.forEach ((h) => {
-        // Compute RACK list
-        var rackIndex = isContainRack(racks, h.hpcc_rack);
-        if (rackIndex >= 0) {  // found the user in the users list
-            racks[rackIndex].hosts.push(h);
-        }
-        else {
-            var obj = {};
-            obj.id = h.hpcc_rack;
-            obj.hosts = [];
-            obj.hosts.push(h);
-            racks.push(obj);
-        }
-        // Sort RACK list
-        racks = racks.sort(function (a, b) {
-            if (a.id > b.id) {
-                return 1;
-            }
-            else return -1;
-        })
-    });
-    for (var i = 0; i < racks.length; i++) {
-        racks[i].hosts.sort(function (a, b) {
-            if (a.hpcc_node > b.hpcc_node) {
-                return 1;
-            }
-            else return -1;
-        })
-
-    }
-
-
-    hosts.sort((a, b) => {
-
-        var rackx = a.hpcc_rack;
-        var racky = b.hpcc_rack;
-        var x = a.hpcc_node;
-        var y = b.hpcc_node;
-        if (rackx !== racky) {
-            return rackx - racky;
-        } else {
-            if (x % 2 - y % 2) {
-                return y % 2 - x % 2
-            } else {
-                return x - y
-            }
-        }
-    });
-    radarChartsumopt.scaleDensity = d3.scaleLinear().domain([1, hosts.length]).range([0.3, 0.75]);
-
-
-    // Summary Panel ********************************************************************
-    var maingradient = svg.append("defs").append("linearGradient")
-        .attr("id", "lradient")
-        .attr('x1', '0%')
-        .attr('y1', '100%')
-        .attr('x2', '0%')
-        .attr('y2', '0%');
-    maingradient.selectAll('stop').data(arrColor)
-        .enter().append('stop')
-        .attr('offset', (d, i) => (i - 1) / 4)
-        .style('stop-color', d => d)
-        .style('stop-opacity', (d, i) => opa.range()[i]);
-
-    svgsum = svg.append("g")
-        .attr("class", "summaryGroup")
-        .attr("transform", "translate(" + summaryGroup_op.margin.left + "," + summaryGroup_op.margin.top + ")");
-    svgsum.append("rect")
-        .attr("class", "summaryRect")
-        .attr("rx", 10)
-        .attr("ry", 10)
-        .attr("width", width - 2)
-        .attr("height", summaryGroup_op.height)
-        .attr("fill", "#fff")
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("box-shadow", "10px 10px 10px #666");
-    svgsum.append('svg')
-        .attr("class", "summarySvg")
-        .attr("width", width - 2)
-        .attr("height", summaryGroup_op.height);
-    d3.select(".summaryText1")
-        .html("Quanah HPC system: <b>" + hosts.length + "</b> hosts distributed in 10 racks");
-
-
-    var currentTextGroup = svg.append('g')
-        .attr("class", "currentTextGroup")
-        .attr('transform', 'translate(' + 10 + ',' + (summaryGroup_op.height - 36-10) + ')');
-    svgsum.append("line")
-        .attr("class", "currentTimeline")
-        .attr("x1", 10)
-        .attr("y1", 0)
-        .attr("x2", 10)
-        .attr("y2", summaryGroup_op.height)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));
-    currentTextGroup.append("text")
-        .attr("class", "currentText")
-        .attr("y", 0)
-        .attr("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Latest REQUEST");
-    currentTextGroup.append("text")
-        .attr("class", "currentHostText")
-        .attr("y", 18)
-        .attr("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-weight", "bold")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Host");
-    currentTextGroup.append("text")
-        .attr("class", "currentTimeText")
-        .attr("y", 36)
-        .attr("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-style", "italic")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text("Time");
-
-
-    initDetailView();
-    svgStore.tsnesvg = svg.append('g').attr("class", "largePanel").attr('transform', `translate(0,${top_margin})`)
-        .append("svg").attr("class", "T_sneSvg");
-
-    // Draw line to connect current host and timeline in the Summary panel
-    let linepointer = svg.append("line")
-        .attr("class", "connectTimeline")
-        .attr("x1", 10)
-        .attr("y1", summaryGroup_op.height + summaryGroup_op.margin.top)
-        .attr("x2", 10)
-        .attr("y2", 310)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1)
-        .style("stroke-dasharray", ("2, 2"));
-    // ********* REQUEST ******************************************
-    xLinearSummaryScale = d3.scaleAdjust().range([0 - radarsize / 24, width + radarsize / 24]).domain([0, maxstack - 1]).itemsize(radarsize);
-    //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
-    xTimeSummaryScale = xLinearSummaryScale;
-    Radarplot.svg(svgsum.select(".summarySvg")).BinRange([4, 10]).scale(xLinearSummaryScale).binopt(Radarplot_opt)
-        .maxstack(maxstack).schema(serviceFullList);
-    radarChartOptions.angleSlice = serviceFullList.map(d=>d.angle);
-    TSneplot.svg(svgStore.tsnesvg).linepointer(linepointer).schema(serviceFullList).init();
-}
-function drawVerticalView() {
-
-    hosts.forEach ((h) => {
-        // Compute RACK list
-        var rackIndex = isContainRack(racks, h.hpcc_rack);
-        if (rackIndex >= 0) {  // found the user in the users list
-            racks[rackIndex].hosts.push(h);
-        }
-        else {
-            var obj = {};
-            obj.id = h.hpcc_rack;
-            obj.hosts = [];
-            obj.hosts.push(h);
-            racks.push(obj);
-        }
-        // Sort RACK list
-        racks = racks.sort(function (a, b) {
-            if (a.id > b.id) {
-                return 1;
-            }
-            else return -1;
-        })
-    });
-    for (var i = 0; i < racks.length; i++) {
-        racks[i].hosts.sort(function (a, b) {
-            if (a.hpcc_node > b.hpcc_node) {
-                return 1;
-            }
-            else return -1;
-        })
-
-    }
-    // Summary Panel ********************************************************************
-
-
-    d3.select(".summaryText1")
-        .html("Quanah HPC system: <b>" + hosts.length + "</b> hosts distributed in 10 racks");
-
-    initVerticalView();
-
-    // ********* REQUEST ******************************************
-    xLinearSummaryScale = d3.scaleAdjust().range([0 - radarsize / 24, width + radarsize / 24]).domain([0, maxstack - 1]).itemsize(radarsize);
-    //xLinearSummaryScale = d3.scaleAdjust().range([0,width]).domain([0, maxstack-1]).itemsize(radarsize);
-    xTimeSummaryScale = xLinearSummaryScale;
-}
-function changeView(v){
-    if (v.checked) {
-        graphicControl.mode = layout.VERTICAL;
-        getHostY = getHostY_VERTICAL;
-        w_rack = width;
-        maxstack = Infinity;
-        cleanUp();
-        drawVerticalView();
-    }else{
-        graphicControl.mode = layout.HORIZONTAL;
-        getHostY = getHostY_HORIZONTAL;
-        w_rack = (width-23)/10-1;
-        maxstack = 7;
-        d3.select('.mainsvg').attr("height",1000);
-        cleanUp();
-        playchange();
-        drawHorizontalView();
-        pausechange();
-    }
-}
 
 function main() {
 
     inithostResults ();
-
-    drawHorizontalView();
-
-    getDataWorker.postMessage({action:"init",value:{
-            hosts:hosts,
-            db:db,
-        }});
-    getDataWorker.addEventListener('message',({data})=>{
-        if (data.status==='done') {
-            isbusy = false;
-        }
-        if (imageRequest){
-            playchange();
-            d3.select('.cover').classed('hidden', false);
-            d3.select('.progressDiv').classed('hidden', false);
-            imageRequest = false;
-            onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
-        }
-        if (data.action==='returnData'){
-            if (data.result.hindex!==undefined && data.result.index < lastIndex) {
-                if (graphicControl.sumType === "RadarSummary" ) {
-                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                }
-            }
-
-        }else if (data.action==='returnDataHistory'){
-            if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
-                if (graphicControl.charType === "T-sne Chart")
-                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                if (graphicControl.sumType === "RadarSummary") {
-                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                }
-                MetricController.data(data.result.arr).drawSummary(data.result.hindex);
-            }
-        }
-        if (data.action==='DataServices') {
-                MetricController.datasummary(data.result.arr);
-            }
-    }, false);
     request();
-}
-function onSavingFile (data){
-    d3.select('.cover .status').text('');
-    const determinate =  d3.select('.determinate').style('width',data.process.toFixed(2)+'%');
-    d3.select('.progressText').text(data.message);
-    if (data.message==='finish'){
-        d3.select('.progressDiv').classed('hidden', true);
-        d3.select('.cover').classed('hidden', true);
-        d3.select('.cover .status').text('load data....');
-    }
 }
 var currentlastIndex;
 var speedup= 0;
@@ -928,8 +387,8 @@ function request(){
             count += 1;
         };
         var drawprocess = function ()  {
-            if (graphicControl.mode===layout.HORIZONTAL)
-                drawsummarypoint(countarr);
+            // if (graphicControl.mode===layout.HORIZONTAL)
+            //     drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
@@ -943,15 +402,9 @@ function request(){
                 // cal to plot
                 bin.data([]);
                 currentlastIndex = iteration+iterationstep-1;
-                drawsummary();
-                if (graphicControl.mode===layout.HORIZONTAL) {
-                    if (graphicControl.charType === "T-sne Chart")
-                        TSneplot.getTop10();
-                    if (!haveMiddle) {
-                        updateTimeText(Math.round(hosts.length / 2));
-                    }
-                    shiftTimeText();
-                }
+                // drawsummary();
+                lastIndex = currentlastIndex+1;
+
                 count = 0;
                 countbuffer = 0;
                 requeststatus = true;
@@ -965,73 +418,7 @@ function request(){
                 .domain([0, hosts.length - 1]) // input
                 .range([0, xTimeSummaryScale.step()]);
 
-            if (graphicControl.mode===layout.HORIZONTAL) {
-                var rescaleTime = d3.scaleLinear().range([0, radarsize]).domain(xTimeSummaryScaleStep.domain());
-                // Update the current timeline in Summary panel
-                var x2 = xTimeSummaryScale(lastIndex < maxstack ? lastIndex : (maxstack - 1))
-                    + ((lastIndex < (maxstack - 1)) ? xTimeSummaryScaleStep(count === 0 ? hosts.length : count) : rescaleTime(xTimeSummaryScaleStep(count)));
 
-                // mark time
-                // console.log(count);
-                // console.log((count > hosts.length/2 && !haveMiddle));
-                if (((count > hosts.length / 2) && !haveMiddle)) {
-                    updateTimeText(count);
-                    haveMiddle = true;
-                }
-
-                svg.selectAll(".currentTimeline")
-                    .attr("x1", x2)
-                    .attr("x2", x2);
-
-                svg.selectAll(".connectTimeline")
-                    .attr("x1", x2)
-                if (graphicControl.charType !== "T-sne Chart")
-                    svg.selectAll(".connectTimeline")
-                        .attr("x2", currentHostX)
-                        .attr("y2", currentHostY);
-
-                svg.selectAll(".currentTextGroup")
-                    .attr('transform', 'translate(' + (x2 + 2) + ',' + (summaryGroup_op.height - 36 -10) + ')');
-                svg.selectAll(".currentText")
-                    .text("Latest update:");
-                svg.selectAll(".currentTimeText")
-                    .text(query_time.timeNow2());
-                svg.selectAll(".currentHostText")
-                    .text(currentHostname);
-            }
-            // Update measurement text and opacity
-            for (var i = 0; i < hosts.length; i++) {
-                if (hosts[i].name == currentHostname) {
-                    hosts[i].mOpacity = 1;
-                    hosts[i].xOpacity = currentHostX + 38;
-
-                    if (hosts[i].xOpacity > (getRackx(hosts[i].hpcc_rack,hosts[i].hpcc_node,graphicControl.mode) - 2) + width / 2)
-                        hosts[i].mOpacity = 0;
-
-                    var mea = currentMeasure;
-                    if (selectedService == "Job_load" || selectedService == "Memory_usage") {
-                        mea = currentMeasure.toFixed(2);
-                    }
-                    else if (selectedService == "Power_consumption") {
-                        mea = Math.round(currentMeasure);
-                    }
-                    svg.selectAll(".measure_" + hosts[i].name)
-                        .attr("fill", color(currentMeasure))
-                        .text(mea);
-                }
-                else {
-                    if (hosts[i].mOpacity > 0)
-                        hosts[i].mOpacity -= 0.01;
-                    if (hosts[i].xOpacity == undefined)
-                        hosts[i].xOpacity = currentHostX + 38;
-                }
-
-
-                svg.selectAll(".measure_" + hosts[i].name)
-                    .attr("fill-opacity", hosts[i].mOpacity)
-                    .attr("x", hosts[i].xOpacity - 10);
-
-            }
         };
         if (requeststatus) {
             try {
@@ -1055,6 +442,10 @@ function request(){
                     do {
                         let ri = step(iteration, countbuffer);
                         midlehandle(ri);
+                        if(countbuffer===0) {
+                            getJoblist();
+                            jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
+                        }
                         countbuffer++;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
                     speedup = 0;
@@ -1070,168 +461,12 @@ function request(){
     } , simDuration);
 
     var count3=0;
-
-    var interval3 = setInterval(function(){
-        svg.selectAll(".currentText")
-            .attr("fill", decimalColorToHTMLcolor(count3*7));
-        count3++;
-        if (count3>10000)
-            count3 = 10000;
-    } , 20);
 }
 
 function scaleThreshold(i){
     return i<maxstack?i:(maxstack-2);
 }
 
-function drawsummary(initIndex){
-    var arr = [];
-    var xx;
-    if (initIndex===undefined){
-        // currentlastIndex = hostResults[hosts[0].name].arr.length -1;
-        lastIndex = currentlastIndex;
-        query_time = hostResults['timespan'][lastIndex];
-        xx = xTimeSummaryScale(scaleThreshold(lastIndex));
-        // updateTimeText(); //time in end
-    }else{
-        lastIndex = initIndex;
-        if (hostResults[hosts[hosts.length-1].name].arr[lastIndex]) {
-            query_time = hostResults['timespan'][lastIndex];
-            var temp = (maxstack - 2) - (currentlastIndex - initIndex);
-            if (currentlastIndex > maxstack - 2)
-                xx = xTimeSummaryScale(temp);
-            else {
-                temp = lastIndex;
-                xx = xTimeSummaryScale(lastIndex);
-            }
-        }
-
-    }
-    if (graphicControl.mode===layout.HORIZONTAL) {
-        switch (graphicControl.sumType) {
-            case "Boxplot":
-                for (var h = 0; h < hosts.length; h++) {
-                    var name = hosts[h].name;
-                    var r = hostResults[name];
-                    // lastIndex = initIndex||(r.arr.length - 1);
-                    // boxplot
-                    if (lastIndex >= 0) {   // has some data
-                        var a = r.arr[lastIndex];
-                        arr.push(a[0]);
-                    }
-                }
-                drawBoxplot(svg, arr, temp === undefined ? (lastIndex > (maxstack - 1) ? (maxstack - 1) : lastIndex) : temp, xx + xTimeSummaryScale.step() - ww);
-                break;
-            case "Scatterplot":
-
-
-                Scatterplot.svg(svg).data(hostResults).draw(lastIndex, temp === undefined ? (lastIndex > (maxstack - 1) ? (maxstack - 1) : lastIndex) : temp, xx + 80);
-
-                break;
-            case "Radar":
-                for (var h = 0; h < hosts.length; h++) {
-                    var name = hosts[h].name;
-                    arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-                    arrServices.name = name;
-                    arr.push(arrServices);
-                }
-                Radarplot.data(arr).draw(temp === undefined ? lastIndex : temp);
-                // Radar Time
-                //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
-                break;
-            case "RadarSummary":
-                console.log("-----------------");
-                console.log(temp === undefined ? lastIndex : temp);
-                console.log("-----------------");
-                getData(name, temp === undefined ? lastIndex : temp,true,false);
-                if ((temp === undefined ? lastIndex : temp) >= maxstack - 1) Radarplot.shift();
-                break;
-        }
-    }
-    else{
-        let bigdata = {};
-        for (var h = 0; h < hosts.length; h++) {
-            var name = hosts[h].name;
-            bigdata[name]=[];
-            var r = hostResults[name];
-            for(var i = 0; i<lastIndex+1;i++) {
-                var a = r.arr[i];
-                var temp = {};
-                temp[FIELD_MACHINE_ID] = name;
-                temp[selectedService] = a[0]===undefined?null:a[0];
-                bigdata[name].push(temp);
-            }
-        }
-        console.log(bigdata)
-        onFinishInterval(bigdata);
-    }
-    lastIndex = currentlastIndex;
-}
-function drawsummarypoint(harr){
-    var arr = [];
-    var xx;
-    lastIndex = currentlastIndex;
-    query_time = hostResults['timespan'][currentlastIndex];
-    //xx = xTimeSummaryScale(query_time);
-    //updateTimeText();
-
-    switch (graphicControl.sumType) {
-        case "Boxplot":
-            break;
-        case "Scatterplot":
-            break;
-        case "Radar":
-            for (var i in harr) {
-                var h  = harr[i];
-                var name = hosts[h].name;
-                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-                arrServices.name = name;
-                arr.push(arrServices);
-            }
-            Radarplot.data(arr).drawpoint(lastIndex);
-            // Radar Time
-            //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
-            break;
-        case "RadarSummary":
-            getData(name,lastIndex)
-            // Radarplot.data(arr).drawSummarypoint(lastIndex);
-            break;
-    }
-    getData(name,lastIndex)
-}
-function shiftTimeText(){
-    if (timelog.length > maxstack-1){ timelog.shift();
-    svg.selectAll(".boxTime").filter((d,i)=>i).transition().duration(500)
-        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2);
-    svg.select(".boxTime").transition().duration(500)
-        .attr("x", xTimeSummaryScale(0)+ width/maxstack/2)
-        .transition().remove();
-    }
-}
-function updateTimeText(index){
-    if (index!= undefined)timelog.push (hostResults['timespan'][lastIndex]);
-    if (timelog.length>maxstack) timelog.shift();
-    var boxtime = svg.selectAll(".boxTime")
-        .data(timelog);
-    boxtime.transition().duration(500)
-        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
-        .text(d=> {
-            let temp = new Date(d);
-            return temp.getHours()+":"+temp.getMinutes();
-        });
-    boxtime.exit().remove();
-    boxtime.enter().append("text")
-        .attr("class", "boxTime")
-        .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2)
-        .attr("y", summaryGroup_op.height -10)
-        .attr("fill", "#000")
-        .style("font-style","italic")
-        .style("text-anchor","end")
-        .style("font-size", "12px")
-        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        .attr("font-family", "sans-serif")
-        .text(new Date(query_time).timeNow());
-}
 
 
 function decimalColorToHTMLcolor(number) {
@@ -1379,7 +614,7 @@ function plotResult(result,name,index) {
         xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size-20,node_size*maxstack)]); // output
     else
         xTimeScale.domain([0,1]).range([xStart, xStart+node_size]); // output
-        // .range([xStart, xStart+w_rack/2-2*node_size]); // output
+    // .range([xStart, xStart+w_rack/2-2*node_size]); // output
     var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
 
@@ -1442,10 +677,10 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     if (isSingle)
         y= y+10;
 
-        // var obj = arr[i];
-        // var x = xTimeScale(i);
-        // if (arr.length>1)
-        //     x = xMin+ i*(xMax-xMin)/(arr.length);
+    // var obj = arr[i];
+    // var x = xTimeScale(i);
+    // if (arr.length>1)
+    //     x = xMin+ i*(xMax-xMin)/(arr.length);
     let newg = svgStore.detailView.items.selectAll("g."+fixName2Class(name)).data([{name:name,val:arr}]);
     newg.exit().remove();
     newg = newg.enter().append('g')
@@ -1453,7 +688,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
         .attr('class',fixName2Class(name))
         .attr('transform','translate(0,'+y+')').on("mouseover",mouseoverNode);
     let newrect = newg.selectAll("."+fixName2Class(name)).data(d=>d.val);
-        newrect.exit().remove();
+    newrect.exit().remove();
     newrect.enter()
         .append("rect")
         .attr("width", node_size)
@@ -1461,47 +696,47 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
         .attr("stroke", "#000")
         .attr("stroke-width", 0.05)
         .merge(newrect)
-            .attr("class", 'compute '+fixName2Class(name))
+        .attr("class", 'compute '+fixName2Class(name))
+        .attr("x",(d,i)=> xTimeScale(i))
+        .attr("y", -10)
+
+        .attr("fill", function (obj) {
+            if (obj.temp1===undefinedValue)
+                return undefinedColor;
+            else
+                return color(obj.temp1);
+        })
+        .attr("fill-opacity",function (obj) {
+            return opa(obj.temp1);
+        })
+    ;//.on("mouseout", mouseoutNode);
+
+    if ((selectedService==="Temperature" || selectedService==="Fans_speed")&&isSingle!=true)    {
+        let newrect = newg.selectAll(".rct2."+name).data(arr);
+        newrect.exit().remove();
+        newrect.enter()
+            .append("rect")
+            .attr("width", node_size)
+            .attr("height", node_size )
+            .attr("stroke", "#000")
+            .attr("stroke-width", 0.05)
+            .merge(newrect)
+            .attr("class", 'rect2 compute '+name)
             .attr("x",(d,i)=> xTimeScale(i))
-            .attr("y", -10)
+            .attr("y", node_size-9)
 
             .attr("fill", function (obj) {
-                if (obj.temp1===undefinedValue)
+                if (obj.temp2==undefinedValue)
                     return undefinedColor;
                 else
-                    return color(obj.temp1);
+                    return color(obj.temp2);
             })
             .attr("fill-opacity",function (obj) {
-                return opa(obj.temp1);
+                return opa(obj.temp2);
             })
+        ;
         ;//.on("mouseout", mouseoutNode);
-
-        if ((selectedService==="Temperature" || selectedService==="Fans_speed")&&isSingle!=true)    {
-            let newrect = newg.selectAll(".rct2."+name).data(arr);
-            newrect.exit().remove();
-            newrect.enter()
-                .append("rect")
-                .attr("width", node_size)
-                .attr("height", node_size )
-                .attr("stroke", "#000")
-                .attr("stroke-width", 0.05)
-                .merge(newrect)
-                .attr("class", 'rect2 compute '+name)
-                .attr("x",(d,i)=> xTimeScale(i))
-                .attr("y", node_size-9)
-
-                .attr("fill", function (obj) {
-                    if (obj.temp2==undefinedValue)
-                        return undefinedColor;
-                    else
-                        return color(obj.temp2);
-                })
-                .attr("fill-opacity",function (obj) {
-                    return opa(obj.temp2);
-                })
-            ;
-                      ;//.on("mouseout", mouseoutNode);
-        }
+    }
 
     // *****************************************
     /// drawSummaryAreaChart(hpcc_rack, xStart);
@@ -1692,7 +927,7 @@ let getHostY_HORIZONTAL = function (r,n,pos){
 
 let getHostY_VERTICAL = function (r,n,pos){
     // TODO: change 20 to variable
-        return  racksnewor[r - 1].hosts.find(d=>d.hpcc_node===n).y;
+    return  racksnewor[r - 1].hosts.find(d=>d.hpcc_node===n).y;
     // return  racks[r - 1].y + n * h_rack / (maxHostinRack+0.5);
 };
 let getHostY = getHostY_HORIZONTAL;
@@ -1711,7 +946,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
+    // getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1719,12 +954,12 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =0;
-        simDurationinit = 0;
+        simDuration =100;
+        simDurationinit = 100;
         numberOfMinutes = 26*60;
     }
     if (!init)
-    resetRequest();
+        resetRequest();
 }
 function playchange(){
     var e = d3.select('.pause').node();
@@ -1772,10 +1007,12 @@ function resetRequest(){
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init().clustercallback(d=>TSneplot.clusterBin(d));
+    jobMap.svg(d3.select('#jobmap')).graphicopt(jobMap_opt).hosts(hosts).init();
     TSneplot.reset(true);
+    jobMap.remove(true);
     timelog = [];
     jobList = undefined;
-    updateTimeText();
+    // updateTimeText();
     request();
 }
 function loadData(){
@@ -1920,26 +1157,26 @@ function requestRT(iteration,count) {
 var recordonly = false;
 function step (iteration, count){
     if (isRealtime){
-            return requestRT(iteration,count);
+        return requestRT(iteration,count);
     }
     else{
         // var result = simulateResults(hosts[count].name);
-            var tmp = iteration;
-            for (i = 0; i < iterationstep; i++) {
-                var result = simulateResults2(hosts[count].name, iteration, selectedService);
-                // Process the result
-                var name = hosts[count].name;
-                hostResults[name].arr.push(result);
-                // console.log(hosts[count].name+" "+hostResults[name]);
-                serviceList_selected.forEach ((s)=>{
-                    var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
-                    hostResults[name][serviceListattr[s.index]].push(result);
-                });
+        var tmp = iteration;
+        for (i = 0; i < iterationstep; i++) {
+            var result = simulateResults2(hosts[count].name, iteration, selectedService);
+            // Process the result
+            var name = hosts[count].name;
+            hostResults[name].arr.push(result);
+            // console.log(hosts[count].name+" "+hostResults[name]);
+            serviceList_selected.forEach ((s)=>{
+                var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                hostResults[name][serviceListattr[s.index]].push(result);
+            });
 
-                plotResult(result, name,iteration);
-                iteration++;
-            }
-            iteration = tmp;
+            // plotResult(result, name,iteration);
+            iteration++;
+        }
+        iteration = tmp;
         return [iteration, count];
     }
     //return [iteration, count];
@@ -2033,7 +1270,7 @@ $( document ).ready(function() {
         const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
         if (choice!=='csv') {
             if (db === 'csv') { //reload hostlist
-                d3.json('data/hotslist_Quanah.json', function (error, data) {
+                d3.json(srcpath+'data/hotslist_Quanah.json', function (error, data) {
                     if (error) {
                     } else {
                         firstTime = true;
@@ -2046,41 +1283,41 @@ $( document ).ready(function() {
                 });
             }
             oldchoose =$('#datacom').val();
-                setTimeout(() => {
+            setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
-                d3.json("data/" + choice + ".json", function (error, data) {
-                    if (error) {
-                        d3.json("data/" + choice + ".json", function (error, data) {
-                            if (error) {
-                                M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                                d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                                    if (error) {
+                    d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
+                        if (error) {
+                            d3.json("data/" + choice + ".json", function (error, data) {
+                                if (error) {
+                                    M.toast({html: 'Local data does not exist, try to query from the internet!'})
+                                    d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
+                                        if (error) {
 
-                                    }
-                                    d3.json ("data/" + choice + "_job.json", function (error, job) {
-                                        if (error){
-                                            loadata1(data,undefined);
-                                            return;
                                         }
-                                        loadata1(data,job);
-                                        return;
+                                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                                            if (error){
+                                                loadata1(data,undefined);
+                                                return;
+                                            }
+                                            loadata1(data,job);
+                                            return;
+                                        });
                                     });
-                                });
-                                return;
-                            }
-                            return
-                        });
-                            return;
-                    }
-                    d3.json ("data/" + choice + "_job.json", function (error, job) {
-                        if (error){
-                            loadata1(data,undefined);
+                                    return;
+                                }
+                                return
+                            });
                             return;
                         }
-                        loadata1(data,job);
-                        return;
+                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                            if (error){
+                                loadata1(data,undefined);
+                                return;
+                            }
+                            loadata1(data,job);
+                            return;
+                        });
                     });
-                });
                 }
                 else {
                     d3.select(".currentDate")
@@ -2135,28 +1372,28 @@ $( document ).ready(function() {
                 spinner.spin(target);
                 setTimeout(() => {
                     d3.csv(e.target.result,function (error, data) {
-                    if (error){
-                    }else{
-                        loadata1(data);
-                        function loadata1(data){
-                            db = "csv";
+                        if (error){
+                        }else{
+                            loadata1(data);
+                            function loadata1(data){
+                                db = "csv";
 
-                            newdatatoFormat(data);
+                                newdatatoFormat(data);
 
-                            inithostResults();
-                            processResult = processResult_csv;
+                                inithostResults();
+                                processResult = processResult_csv;
 
-                            addDatasetsOptions()
-                            MetricController.axisSchema(serviceFullList,true).update();
-                            realTimesetting(false,"csv",true,data);
-                            d3.select(".currentDate")
-                                .text("" + new Date(data[0].timestamp).toDateString());
-                            resetRequest();
-                            d3.select('.cover').classed('hidden', true);
-                            spinner.stop();
+                                addDatasetsOptions()
+                                MetricController.axisSchema(serviceFullList,true).update();
+                                realTimesetting(false,"csv",true,data);
+                                d3.select(".currentDate")
+                                    .text("" + new Date(data[0].timestamp).toDateString());
+                                resetRequest();
+                                d3.select('.cover').classed('hidden', true);
+                                spinner.stop();
+                            }
                         }
-                    }
-                })
+                    })
                 },0);
                 // span.innerHTML = ['<img class="thumb" src="', e.target.result,
                 //     '" title="', escape(theFile.name), '"/>'].join('');
@@ -2170,53 +1407,61 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
-        d3.json('data/hotslist_Quanah.json',function(error,data){
+        d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
             }else{
                 hostList = data;
                 inithostResults();
 
-            graphicControl.charType =  d3.select('#chartType_control').node().value;
-            graphicControl.sumType =  d3.select('#summaryType_control').node().value;
-            let choiceinit = d3.select('#datacom').node().value;
-            if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
-                // d3.select(".currentDate")
-                //     .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
-                if (choiceinit.includes('influxdb')) {
-                    // processResult = processResult_influxdb;
-                    db = "influxdb";
-                    realTimesetting(false, "influxdb", true);
-                } else {
-                    db = "nagios";
-                    // processResult = processResult_old;
-                    realTimesetting(false, undefined, true);
-                }
-                d3.json("data/" + d3.select('#datacom').node().value + ".json", function (error, data) {
-                    if (error) {
-                        M.toast({html: 'Local data does not exist, try to query from the internet!'});
-                        d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
-                            if (error) throw error;
-                            d3.select(".currentDate")
-                                .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
-                            loadata(data)
-                        });
-                        return;
+                graphicControl.charType =  d3.select('#chartType_control').node().value;
+                graphicControl.sumType =  d3.select('#summaryType_control').node().value;
+                let choiceinit = d3.select('#datacom').node().value;
+                if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
+                    // d3.select(".currentDate")
+                    //     .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
+                    if (choiceinit.includes('influxdb')) {
+                        // processResult = processResult_influxdb;
+                        db = "influxdb";
+                        realTimesetting(false, "influxdb", true);
+                    } else {
+                        db = "nagios";
+                        // processResult = processResult_old;
+                        realTimesetting(false, undefined, true);
                     }
+                    let choice = d3.select('#datacom').node().value;
+                    d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
+                        if (error) {
+                            M.toast({html: 'Local data does not exist, try to query from the internet!'});
+                            d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
+                                if (error) throw error;
+                                d3.select(".currentDate")
+                                    .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
+                                loadata(data)
+                            });
+                            return;
+                        }
+                        d3.select(".currentDate")
+                            .text("" + (new Date(data['timespan'][0]).toDateString()));
+                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                            if (error){
+                                loadata(data,undefined);
+                                return;
+                            }
+                            loadata(data,job);
+                            return;
+                        });
+                    });
+                }else{ // realtime
                     d3.select(".currentDate")
-                        .text("" + (new Date(data['timespan'][0]).toDateString()));
-                    loadata(data);
-                });
-            }else{ // realtime
-                d3.select(".currentDate")
-                    .text("" + (new Date()).toDateString());
-                realTimesetting(true,choiceinit, true);
-                db = choiceinit;
-                requestService = eval('requestService'+choiceinit);
-                processResult = eval('processResult_'+choiceinit);
-                loadata([])
+                        .text("" + (new Date()).toDateString());
+                    realTimesetting(true,choiceinit, true);
+                    db = choiceinit;
+                    requestService = eval('requestService'+choiceinit);
+                    processResult = eval('processResult_'+choiceinit);
+                    loadata([])
+                }
             }
-        }
-    });
+        });
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))
@@ -2224,11 +1469,13 @@ $( document ).ready(function() {
             .onChangeValue(onSchemaUpdate)
             .onChangeFilterFunc(onfilterdata)
             .init();
-        function loadata(data){
+        function loadata(data,job){
             d3.select(".cover").select('h5').text('drawLegend...');
             drawLegend(initialService, arrThresholds, arrColor, dif);
             data['timespan'] = data['timespan'].map(d=>new Date(d));
             sampleS = data;
+            if(job)
+                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
             main();
             d3.select(".cover").select('h5').text('loading data...');
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
@@ -2338,11 +1585,11 @@ function onFinishInterval(data) {
             let order = orderResults.order;
             console.log(order);
             order.forEach((name,i)=>{
-               const rack = name.split('-')[1];
-               racksnewor[rack-1].hosts.find(h=>h.name===name).y = i*gaphost;
-               d3.selectAll('.hostID_'+name).transition().duration(500).attr('y',i*gaphost);
-               d3.selectAll('.'+name).transition().duration(500).attr('y',i*gaphost);
-               d3.selectAll('.measure_'+name).transition().duration(100).attr('y',i*gaphost);
+                const rack = name.split('-')[1];
+                racksnewor[rack-1].hosts.find(h=>h.name===name).y = i*gaphost;
+                d3.selectAll('.hostID_'+name).transition().duration(500).attr('y',i*gaphost);
+                d3.selectAll('.'+name).transition().duration(500).attr('y',i*gaphost);
+                d3.selectAll('.measure_'+name).transition().duration(100).attr('y',i*gaphost);
             });
         }
     }
