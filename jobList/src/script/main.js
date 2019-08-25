@@ -280,6 +280,7 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
+let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).init();
 var MetricController = radarController();
 // let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
@@ -1007,9 +1008,9 @@ function resetRequest(){
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init().clustercallback(d=>TSneplot.clusterBin(d));
-    jobMap.svg(d3.select('#jobmap')).graphicopt(jobMap_opt).hosts(hosts).init();
+    jobMap.hosts(hosts).remove(true);
     TSneplot.reset(true);
-    jobMap.remove(true);
+
     timelog = [];
     jobList = undefined;
     // updateTimeText();
