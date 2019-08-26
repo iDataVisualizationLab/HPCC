@@ -862,13 +862,13 @@ p.divider {
 	stroke: #3fc151;
 }
 
-.user_timeline line.timeBoxRunning {
+.user_timeline line.timeBoxRunning, path.timeBoxRunning {
 	stroke: #3fc151;
 	stroke-width: 1px;
 	opacity: 0.6;
 }
 
-.user_timeline line.submitTime {
+.user_timeline line.submitTime, path.submitTime {
 	stroke: #ffa328;
 }
 

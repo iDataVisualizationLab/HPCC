@@ -3,10 +3,14 @@ srcpath = '../HiperView/';
 
 
 let jobMap_opt = {
-    margin:{top:10,bottom:10,left:10,right:10},
+    margin:{top:20,bottom:20,left:20,right:20},
     width: 1000,
     height:500,
     node:{
         r: 5,
+    },
+    job: {
+        r: 10,
+        r_inside: 2,
     }
 }
