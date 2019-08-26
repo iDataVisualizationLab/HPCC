@@ -50,23 +50,11 @@ let JobMap = function() {
             .attr('x',graphicopt.margin.left)
             .attr('y',graphicopt.margin.top)
             .style('font-size','16px').attr('dy','1rem');
-        let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
-        let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-        simulation = d3.forceSimulation()
-            .alphaDecay(0.03)
-            .force("link", d3.forceLink().id(function(d) { return d.name; }).strength(0.9))
-            .force("collide",d3.forceCollide(d=>
-                (d.type==='job')?0:graphicopt.node.r).strength(0.8))
-            .force("charge1", attractForce)
-            .force("charge2", repelForce)
-            // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-            // .force("y", d3.forceY(graphicopt.heightG() / 2).strength(function(d){return d.type==="job"?0.5:0.1}))
-            .force("x", d3.forceX(function(d){return (d.type==='job')?graphicopt.widthG() / 2:((d.type==='user')?graphicopt.widthG():0)}).strength(function(d){return d.type==='job'?0.8:1}))
 
         return jobMap;
     };
     jobMap.remove = function (){
-        simulation.stop();
+        if (simulation) simulation.stop();
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         return jobMap;
@@ -81,6 +69,22 @@ let JobMap = function() {
                 return 'black';
         }
     }
+
+    function triggerForce () {
+        let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
+        let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
+        _.pullAll(linkdata,hiddenlink);
+        simulation.force("link")
+            .links(linkdata).strength(1);
+        simulation.force("collide",d3.forceCollide(d=>
+            (d.type==='job')?0:graphicopt.node.r).strength(0.8))
+        .force("charge1", attractForce)
+        .force("charge2", repelForce);
+            // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
+        simulation.fistTime = false;
+        simulation.alphaTarget(0.5).restart();
+    }
+
     jobMap.draw = function (timeStep){
         if (!timeStep)
             timeStep = new Date();
@@ -113,6 +117,19 @@ let JobMap = function() {
             {'class':'computeSig',
                 // 'fill':'white',
             });
+        computers_n.append('text').attrs(
+            {'class':'computeSig_label',
+                'display':'none',
+                'text-anchor':'end',
+                'dx':-graphicopt.node.r,
+                'dy':'0.5rem',
+                'fill':'black',
+                'stroke':'white',
+                'stroke-width':0.2,
+            })
+            .text(d=>d.name)
+        ;
+
         let piePath = computers.merge(computers_n)
             .select('.computeSig')
             .selectAll('.piePath').data(d=>{
@@ -145,8 +162,7 @@ let JobMap = function() {
             .curve(d3.curveCardinal)
             .angle(theta)
             .radius(radius);
-        // let b_spiral = d3.interpolateDate(timerange);
-        // let b_spiral_s = d3.scaleLinear().range([0,(time_daynum-1)*12]);
+
         let backdround_spiral = d3.timeHour.every(1).range(timerange[0],timerange[1]);
         let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
         jobNode.exit().remove();
@@ -193,16 +209,22 @@ let JobMap = function() {
                 'r': graphicopt.node.r,
                 'fill': d=>colorFunc(d.name)
             });
-
+        userNode=userNode_n.merge(userNode);
         let node = nodeg.selectAll('.node');
 
         var ticked = function() {
-            node.attr('transform',d=>{
+            // console.log(this.alpha())
+            if (this.alpha()<0.7 && this.fistTime)
+                triggerForce ();
+            userNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=> d.y = yscale(i));
+
+
+            node.transition().attr('transform',d=>{
                 d.x = Math.max(graphicopt.node.r,Math.min(d.x,graphicopt.widthG()-graphicopt.node.r) );
                 // d.y = Math.max(graphicopt.node.r,Math.min(d.y,graphicopt.heightG()-graphicopt.node.r) );
                 return `translate(${d.x},${d.y})`
             });
-            link
+            link.transition()
                 .attr("x1", function(d) { return d.source.x; })
                 .attr("y1", function(d) { return d.source.y; })
                 .attr("x2", function(d) { return d.target.x; })
@@ -210,6 +232,7 @@ let JobMap = function() {
 
         };
 
+        intiForce();
 
         simulation
             .nodes(node.data())
@@ -217,7 +240,7 @@ let JobMap = function() {
 
         simulation.force("link")
             .links(linkdata);
-        let link = linkg.selectAll('.links').data(linkdata,function(d){return d.source.name+ "-" +d.target.name});
+        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
         // let link = linkg.selectAll('.links').data(linkdata);
         link.exit().remove();
         link = link.enter().append('line')
@@ -227,7 +250,8 @@ let JobMap = function() {
                 colorFunc((_.isString(d.source.user)&&d.source.user)||d.target.user))
 
             .merge(link);
-        simulation.alphaTarget(0.3).restart();
+
+        simulation.alphaTarget(0.8).restart();
         g.selectAll('.userNode')
             .on('mouseover',function(d){
                 d3.select(this).classed('hightlight',true);
@@ -247,10 +271,10 @@ let JobMap = function() {
             })
             .data()
             .forEach(d=>{
-                d.fx=graphicopt.widthG();
-                d.fy=yscale(d.order);
                 // d.fx=graphicopt.widthG();
-                // d.y=yscale(d.order);
+                // d.fy=yscale(d.order);
+                d.fx=graphicopt.widthG();
+                d.y=yscale(d.order);
             });
         g.selectAll('.computeNode')
             .on('mouseover',function(d){
@@ -284,13 +308,31 @@ let JobMap = function() {
 
                 link.classed('hide',false).classed('hightlight',false);
         });
+        function intiForce(){
+            if (simulation) simulation.stop();
+            let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
+            let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
+            simulation = d3.forceSimulation()
+                .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(d=>d.type?1:0.9))
+                // .force("collide",d3.forceCollide(d=>
+                //     (d.type==='job')?0:graphicopt.node.r).strength(0.8))
+                // .force("charge1", attractForce)
+                .force("charge2", repelForce)
+                // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+                .force("y", d3.forceY(d=>
+                    yscale(d.order)||0).strength(function(d){return d.type==='user'?0.1:0}))
+                .force("x", d3.forceX(function(
+                    d){return (d.type==='job')?graphicopt.widthG()/2:((d.type==='user')?graphicopt.widthG():0)}).strength(function(d){return d.type==='job'?0.8:1}))
+            simulation.fistTime = true;
+        }
 
     };
     let linkdata = [];
     let user = [];
     let hostOb={};
+    let hiddenlink = [];
     function handle_links (){
-        linkdata.length = 0;
+        linkdata = [];
         hosts.forEach(h=>h.user=[]);
 
 
@@ -325,6 +367,30 @@ let JobMap = function() {
                 d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
             return d
+        });
+        hiddenlink = [];
+        hosts.forEach(d=>{
+            let n = d.user.length;
+            if (n>1){
+                for (let i = 0; i<n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        let temp = {
+                            source: d.user[i].name,
+                            target: d.user[j].name,
+                            type: 'ranking'
+                        };
+                        hiddenlink.push(temp);
+                        linkdata.push(temp);
+                    }
+                    let temp = {
+                        source: d.name,
+                        target: d.user[i].name,
+                        type: 'ranking'
+                    };
+                    hiddenlink.push(temp);
+                    linkdata.push(temp);
+                }
+            }
         });
         return linkdata
     };
