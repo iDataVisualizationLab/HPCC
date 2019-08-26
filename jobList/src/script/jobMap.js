@@ -324,10 +324,10 @@ let JobMap = function() {
             // _.pullAll(linkdata,hiddenlink); //delete hidden link
 
             //recompute distance
-            let newrange = d3.extent(computers.data(),d=>d.y);
-            const thehalf = (newrange[1]-newrange[0] - graphicopt.heightG())/10;
-            newrange = [0-thehalf,graphicopt.heightG()+thehalf];
-            yscale.range(newrange);
+            // let newrange = d3.extent(computers.data(),d=>d.y);
+            // const thehalf = (newrange[1]-newrange[0] - graphicopt.heightG())/10;
+            // newrange = [0-thehalf,graphicopt.heightG()+thehalf];
+            // yscale.range(newrange);
 
             simulation.force("link")
                 .links(linkdata).strength(1);
