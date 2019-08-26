@@ -322,7 +322,7 @@ let JobMap = function() {
             d.type='user';
             d.unqinode_ob = {};
             d.unqinode.forEach(n=>{
-                d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f)===n);
+                d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
             return d
         });
