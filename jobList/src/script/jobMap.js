@@ -125,7 +125,8 @@ let JobMap = function() {
             });
         piePath.exit().remove();
         piePath.enter().append('path').attr('class','piePath')
-            .attr('d',arc).attr('fill',d=> colorFunc(d.user))
+            .attr('d',arc).style('fill',d=>
+            colorFunc(d.data.user))
         ;
 
         //job node
@@ -224,7 +225,8 @@ let JobMap = function() {
         link = link.enter().append('line')
             .attr("class", "links")
             // .attr("stroke", "#ddd")
-            .attr("stroke", d=>colorFunc(d.source.user||d.target.user))
+            .attr("stroke", d=>
+                colorFunc((d.source.user.length===undefined&&d.source.user)||d.target.user))
 
             .merge(link);
         simulation.alphaTarget(0.3).restart();
