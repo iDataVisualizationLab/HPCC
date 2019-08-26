@@ -89,8 +89,12 @@ let JobMap = function() {
 
 
         // compute pie
+        var arc = d3.arc()
+            .outerRadius(graphicopt.node.r)
+            .innerRadius(0);
         let pie = d3.pie()
-            .value(function(d) {return d.unqinode_ob[cname].length; })
+            .value(function(d) {
+                return d.value; })
             .sort(function(a, b) { console.log(a) ; return d3.ascending(a.order, b.order);} )
 
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
@@ -100,18 +104,29 @@ let JobMap = function() {
                 {
                     'stroke':'black',
                 });
-        computers_n.append('circle').attrs(
-            {'class':'computeSig',
-                'r': graphicopt.node.r,
-                'fill':'white',
-            });
-        // computers_n.append('g').attrs(
+        // computers_n.append('circle').attrs(
         //     {'class':'computeSig',
+        //         'r': graphicopt.node.r,
         //         'fill':'white',
         //     });
-        // computers = computers.merge(computers_n)
-        //     .select('.computeSig')
+        computers_n.append('g').attrs(
+            {'class':'computeSig',
+                // 'fill':'white',
+            });
+        let piePath = computers.merge(computers_n)
+            .select('.computeSig')
+            .selectAll('.piePath').data(d=>{
+                let tempdata = d.user.map(e=>{return{value: e.unqinode_ob[d.name].length,
+                        order: e.order,
+                        user: e.name,
 
+                    }});
+                return pie(tempdata)
+            });
+        piePath.exit().remove();
+        piePath.enter().append('path').attr('class','piePath')
+            .attr('d',arc).attr('fill',d=> colorFunc(d.user))
+        ;
 
         //job node
         let timerange = [d3.min(data,d=>new Date(d.submitTime)),timeStep];
