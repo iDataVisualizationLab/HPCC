@@ -95,7 +95,7 @@ let JobMap = function() {
         let pie = d3.pie()
             .value(function(d) {
                 return d.value; })
-            .sort(function(a, b) { console.log(a) ; return d3.ascending(a.order, b.order);} )
+            .sort(function(a, b) { return d3.ascending(a.order, b.order);} )
 
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
         computers.exit().remove();
@@ -125,9 +125,7 @@ let JobMap = function() {
             });
         piePath.exit().remove();
         piePath.enter().append('path').attr('class','piePath')
-            .attr('d',arc).style('fill',d=>
-            colorFunc(d.data.user))
-        ;
+            .attr('d',arc).style('fill',d=> colorFunc(d.data.user));
 
         //job node
         let timerange = [d3.min(data,d=>new Date(d.submitTime)),timeStep];
@@ -162,7 +160,7 @@ let JobMap = function() {
             {'class':'computeSig_b',
                 // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
                 'd': d=>spiral(backdround_spiral),
-                'stroke':'black',
+                // 'stroke':'#ddd',
             });
         jobNode_n.append('path')
             .attrs(
@@ -226,7 +224,7 @@ let JobMap = function() {
             .attr("class", "links")
             // .attr("stroke", "#ddd")
             .attr("stroke", d=>
-                colorFunc((d.source.user.length===undefined&&d.source.user)||d.target.user))
+                colorFunc((_.isString(d.source.user)&&d.source.user)||d.target.user))
 
             .merge(link);
         simulation.alphaTarget(0.3).restart();
@@ -247,7 +245,13 @@ let JobMap = function() {
                 d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
             })
-            .data().forEach(d=>{d.fx=graphicopt.widthG();d.fy=yscale(d.order);});
+            .data()
+            .forEach(d=>{
+                d.fx=graphicopt.widthG();
+                d.fy=yscale(d.order);
+                // d.fx=graphicopt.widthG();
+                // d.y=yscale(d.order);
+            });
         g.selectAll('.computeNode')
             .on('mouseover',function(d){
                 d3.select(this).classed('hightlight',true);

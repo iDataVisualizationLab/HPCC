@@ -173,3 +173,16 @@ span.thumb {
 #job_zoom.lock {
     background-color: #777777;
 }
+
+.computeSig_sub.submitTime {
+    stroke: black;
+    stroke-dasharray: 1;
+}
+
+.computeSig_start.timeBoxRunning {
+    stroke: black;
+    stroke-width: 1.5;
+}
+.computeSig_b {
+    stroke:white;
+}
