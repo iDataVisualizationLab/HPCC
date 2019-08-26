@@ -29,16 +29,15 @@ let JobMap = function() {
             width: graphicopt.width,
             height: graphicopt.height,
 
-        });
+        }).call(d3.zoom().on("zoom", function () {
+            g.attr("transform", d3.event.transform);
+        }));
         svg.append('rect').attr('class','pantarget')
             .attrs({
                 'opacity':0,
                 width: graphicopt.width,
                 height: graphicopt.height,
-            }).call(d3.zoom().on("zoom", function () {
-            g.attr("transform", d3.event.transform);
-        }))
-
+            });
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -63,6 +62,7 @@ let JobMap = function() {
             // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             // .force("y", d3.forceY(graphicopt.heightG() / 2).strength(function(d){return d.type==="job"?0.5:0.1}))
             .force("x", d3.forceX(function(d){return (d.type==='job')?graphicopt.widthG() / 2:((d.type==='user')?graphicopt.widthG():0)}).strength(function(d){return d.type==='job'?0.8:1}))
+
         return jobMap;
     };
     jobMap.remove = function (){
@@ -71,11 +71,27 @@ let JobMap = function() {
         linkg.selectAll('*').remove();
         return jobMap;
     };
+    let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
+    let colorBy = 'user';
+    function colorFunc (key){
+        switch (colorBy) {
+            case 'user':
+                return colorCategory(key);
+            default:
+                return 'black';
+        }
+    }
     jobMap.draw = function (timeStep){
         if (!timeStep)
             timeStep = new Date();
         timebox.text(timeStep.toLocaleTimeString())
         let yscale = d3.scaleLinear().domain([0,user.length-1]).range([0,graphicopt.heightG()]);
+
+
+        // compute pie
+        let pie = d3.pie()
+            .value(function(d) {return d.unqinode_ob[cname].length; })
+            .sort(function(a, b) { console.log(a) ; return d3.ascending(a.order, b.order);} )
 
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
         computers.exit().remove();
@@ -89,6 +105,12 @@ let JobMap = function() {
                 'r': graphicopt.node.r,
                 'fill':'white',
             });
+        // computers_n.append('g').attrs(
+        //     {'class':'computeSig',
+        //         'fill':'white',
+        //     });
+        // computers = computers.merge(computers_n)
+        //     .select('.computeSig')
 
 
         //job node
@@ -125,7 +147,6 @@ let JobMap = function() {
                 // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
                 'd': d=>spiral(backdround_spiral),
                 'stroke':'black',
-                'stroke-opacity':0.1,
             });
         jobNode_n.append('path')
             .attrs(
@@ -155,7 +176,8 @@ let JobMap = function() {
         let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode '+fixName2Class(fixstr(d.name)));
         userNode_n.append('circle').attrs(
             {'class':'computeSig',
-                'r': graphicopt.node.r
+                'r': graphicopt.node.r,
+                'fill': d=>colorFunc(d.name)
             });
 
         let node = nodeg.selectAll('.node');
@@ -186,67 +208,71 @@ let JobMap = function() {
         link.exit().remove();
         link = link.enter().append('line')
             .attr("class", "links")
-            .attr("stroke", "#ddd")
+            // .attr("stroke", "#ddd")
+            .attr("stroke", d=>colorFunc(d.source.user||d.target.user))
 
             .merge(link);
         simulation.alphaTarget(0.3).restart();
         g.selectAll('.userNode')
-            .on('mouseover',d=> {
-                d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).style('opacity',0);
-                let jobl = d3.selectAll('.jobNode').filter(e=>e.user===d.name).style('opacity',1);
+            .on('mouseover',function(d){
+                d3.select(this).classed('hightlight',true);
+                d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).classed('hide',true);
+                let jobl = d3.selectAll('.jobNode').filter(e=>e.user===d.name).classed('hide',false);
                 const jobd = jobl.data();
-                d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).style('stroke','red');
-                link.filter(d=> jobd.find(e=>e===d.source||e===d.target)).style('stroke','red');
-            }).on('mouseout',d=> {
-                d3.selectAll('.jobNode').style('opacity',undefined);
+                d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',true);
+                link.classed('hide',true);
+                link.filter(f=> jobd.find(e=>e===f.source||e===f.target)).classed('hide',false).classed('hightlight',true);
+            }).on('mouseout',function(d){
+            d3.select(this).classed('hightlight',false);
+                d3.selectAll('.jobNode').classed('hide',false);
                 let jobl = d3.selectAll('.jobNode').filter(e=>e.user===d.name);
                 const jobd = jobl.data();
-                d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).style('stroke',undefined);
-                link.filter(d=> jobd.find(e=>e===d.source||e===d.target)).style('stroke',undefined);
+                d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
+            link.classed('hide',false).classed('hightlight',false);
             })
             .data().forEach(d=>{d.fx=graphicopt.widthG();d.fy=yscale(d.order);});
         g.selectAll('.computeNode')
-            .on('mouseover',d=> {
-                d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).style('opacity',0);
-                let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name)).style('opacity',1);
+            .on('mouseover',function(d){
+                d3.select(this).classed('hightlight',true);
+                d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).classed('hide',true);
+                let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name)).classed('hide',false);
                 const jobd = jobl.data();
-                d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).style('fill','red');
-                link.style('opacity',0);
-                link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).style('opacity',1).style('stroke','red');
-            }).on('mouseout',d=> {
-            d3.selectAll('.jobNode').style('opacity',undefined);
+                d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).classed('hightlight',true);
+                link.classed('hide',true);
+                link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).classed('hide',false).classed('hightlight',true);
+            }).on('mouseout',function(d){
+            d3.select(this).classed('hightlight',false);
+            d3.selectAll('.jobNode').classed('hide',false);
             let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name));
             const jobd = jobl.data();
-            d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).style('fill',undefined);
-            // link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).style('stroke',undefined);
-            link.style('opacity',undefined).style('stroke',undefined);
+            d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).classed('hightlight',false);
+            link.classed('hide',false).classed('hightlight',false);
         });
         g.selectAll('.jobNode')
             .on('mouseover',function(d){
-                g.selectAll('.jobNode').style('opacity',0);
-                d3.select(this).style('opacity',1);
-                d3.selectAll( '.userNode').filter(e=>d.user===e.name).style('fill','red');
-                d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).style('stroke','red');
-                link.style('opacity',0);
-                link.filter(f=> d===f.source||d===f.target).style('opacity',1).style('stroke','red');
+                g.selectAll('.jobNode').classed('hide',true);
+                d3.select(this).classed('hide',false);
+                d3.selectAll( '.userNode').filter(e=>d.user===e.name).classed('hightlight',true);
+                d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',true);
+                link.classed('hide',true);
+                link.filter(f=> d===f.source||d===f.target).classed('hide',false).classed('hightlight',true);
             }).on('mouseout',function(d){
-            g.selectAll('.jobNode').style('opacity',undefined);
-            d3.selectAll( '.userNode').filter(e=>d.user===e.name).style('fill',undefined);
-                d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).style('stroke',undefined);
-                // link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).style('stroke',undefined);
-                link.style('opacity',undefined).style('stroke',undefined);
+            g.selectAll('.jobNode').classed('hide',false);
+            d3.selectAll( '.userNode').filter(e=>d.user===e.name).classed('hightlight',false);
+                d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
+
+                link.classed('hide',false).classed('hightlight',false);
         });
 
     };
     let linkdata = [];
     let user = [];
+    let hostOb={};
     function handle_links (){
         linkdata.length = 0;
-        user = current_userData().sort((a,b)=>b.values.length-a.values.length).map((d,i)=>{
-            d.name = d.key;
-            d.order = i;
-            d.type='user';
-            return d});
+        hosts.forEach(h=>h.user=[]);
+
+
         data.forEach(d=>{
           d.name = d.jobID+'';
           d.type = 'job';
@@ -269,8 +295,27 @@ let JobMap = function() {
           }
         });
 
+        user = current_userData().sort((a,b)=>b.values.length-a.values.length).map((d,i)=>{
+            d.name = d.key;
+            d.order = i;
+            d.type='user';
+            d.unqinode_ob = {};
+            d.unqinode.forEach(n=>{
+                d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f)===n);
+                hostOb[n].user.push(d)});
+            return d
+        });
         return linkdata
     };
+    let zoom_toogle=true;
+    function zoom_func(val){
+        zoom_toogle = val;
+        d3.select('.pantarget').classed('lock',zoom_toogle);
+    };
+    function makeOb (){
+        hostOb={};
+        hosts.forEach(h=>hostOb[h.name]=h);
+    }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
@@ -293,8 +338,13 @@ let JobMap = function() {
     jobMap.data = function (_) {
         return arguments.length ? (data = _, handle_links (), jobMap) : data;
     };
-    jobMap.hosts = function (_) {
-        return arguments.length ? (hosts = _, jobMap) : hosts;
+
+    jobMap.zoomtoogle = function (_) {
+        return arguments.length ? (zoom_func(_), jobMap) : zoom_toogle;
+    };
+
+    jobMap.hosts = function (a) {
+        return arguments.length ? (hosts = _.cloneDeep( a),makeOb(), jobMap) : hosts;
     };
     return jobMap;
 };

@@ -14,3 +14,9 @@ let jobMap_opt = {
         r_inside: 2,
     }
 }
+
+function zoomtoogle(event) {
+    let oldvval = d3.select(event).classed('lock');
+    jobMap.zoomtoogle(!oldvval);
+    d3.select(event).classed('lock',!oldvval);
+}
