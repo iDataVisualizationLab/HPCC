@@ -198,7 +198,16 @@ let JobMap = function() {
                 'fill': d=>colorFunc(d.name)
             });
 
+        userNode_n.append('text').attrs(
+            {'class':'userNodeSig_label',
+
+                'dy': '-1rem'
+            });
+
+
         userNode=userNode_n.merge(userNode);
+        userNode.select('.userNodeSig_label')
+        .text(d=>d.name);
         let node = nodeg.selectAll('.node');
 
         var ticked = function() {
