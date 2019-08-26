@@ -65,7 +65,7 @@
         <entry file="file://$PROJECT_DIR$/src/script/jobMap.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="156">
-              <caret line="213" lean-forward="true" selection-start-line="213" selection-end-line="213" />
+              <caret line="202" lean-forward="true" selection-start-line="202" selection-end-line="202" />
             </state>
           </provider>
         </entry>
@@ -159,8 +159,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1216" />
-    <option name="y" value="300" />
+    <option name="x" value="633" />
+    <option name="y" value="305" />
     <option name="width" value="1934" />
     <option name="height" value="1102" />
   </component>
@@ -249,7 +249,7 @@
     <option name="totallyTimeSpent" value="45941000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1216" y="300" width="1934" height="1102" extended-state="0" />
+    <frame x="633" y="305" width="1934" height="1102" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -331,7 +331,7 @@
     <entry file="file://$PROJECT_DIR$/src/script/jobMap.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="156">
-          <caret line="213" lean-forward="true" selection-start-line="213" selection-end-line="213" />
+          <caret line="202" lean-forward="true" selection-start-line="202" selection-end-line="202" />
         </state>
       </provider>
     </entry>

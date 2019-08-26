@@ -70,20 +70,6 @@ let JobMap = function() {
         }
     }
 
-    function triggerForce () {
-        let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
-        let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-        _.pullAll(linkdata,hiddenlink);
-        simulation.force("link")
-            .links(linkdata).strength(1);
-        simulation.force("collide",d3.forceCollide(d=>
-            (d.type==='job')?0:graphicopt.node.r).strength(0.8))
-        .force("charge1", attractForce)
-        .force("charge2", repelForce);
-            // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
-        simulation.fistTime = false;
-        simulation.alphaTarget(0.5).restart();
-    }
 
     jobMap.draw = function (timeStep){
         if (!timeStep)
@@ -130,7 +116,9 @@ let JobMap = function() {
             .text(d=>d.name)
         ;
 
-        let piePath = computers.merge(computers_n)
+        computers = computers_n.merge(computers);
+
+        let piePath = computers
             .select('.computeSig')
             .selectAll('.piePath').data(d=>{
                 let tempdata = d.user.map(e=>{return{value: e.unqinode_ob[d.name].length,
@@ -205,16 +193,17 @@ let JobMap = function() {
         userNode.exit().remove();
         let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode '+fixName2Class(fixstr(d.name)));
         userNode_n.append('circle').attrs(
-            {'class':'computeSig',
+            {'class':'userNodeSig',
                 'r': graphicopt.node.r,
                 'fill': d=>colorFunc(d.name)
             });
+
         userNode=userNode_n.merge(userNode);
         let node = nodeg.selectAll('.node');
 
         var ticked = function() {
-            // console.log(this.alpha())
-            if (this.alpha()<0.7 && this.fistTime)
+            console.log(this.alpha())
+            if (this.alpha()<0.9 && this.fistTime)
                 triggerForce ();
             userNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=> d.y = yscale(i));
 
@@ -241,6 +230,7 @@ let JobMap = function() {
         simulation.force("link")
             .links(linkdata);
         let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
+        // let link = linkg.selectAll('.links').data(linkdata,function(d){return d.source.name+ "-" +d.target.name});
         // let link = linkg.selectAll('.links').data(linkdata);
         link.exit().remove();
         link = link.enter().append('line')
@@ -319,11 +309,36 @@ let JobMap = function() {
                 // .force("charge1", attractForce)
                 .force("charge2", repelForce)
                 // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-                .force("y", d3.forceY(d=>
-                    yscale(d.order)||0).strength(function(d){return d.type==='user'?0.1:0}))
+                // .force("y", d3.forceY(d=>
+                //     yscale(d.order)||graphicopt.heightG()/2).strength(function(d){return d.type==='user'?0.8:0}))
                 .force("x", d3.forceX(function(
                     d){return (d.type==='job')?graphicopt.widthG()/2:((d.type==='user')?graphicopt.widthG():0)}).strength(function(d){return d.type==='job'?0.8:1}))
             simulation.fistTime = true;
+        }
+
+        function triggerForce () {
+            simulation.stop()
+            let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
+            let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
+
+            // _.pullAll(linkdata,hiddenlink); //delete hidden link
+
+            //recompute distance
+            let newrange = d3.extent(computers.data(),d=>d.y);
+            const thehalf = (newrange[1]-newrange[0] - graphicopt.heightG())/10;
+            newrange = [0-thehalf,graphicopt.heightG()+thehalf];
+            yscale.range(newrange);
+
+            simulation.force("link")
+                .links(linkdata).strength(1);
+            simulation.force("collide",d3.forceCollide(d=>
+                (d.type==='job')?0:graphicopt.node.r).strength(0.8))
+                .force("charge1", attractForce)
+                // .force("charge2", repelForce)
+                // .force("y", undefined);
+            // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
+            simulation.fistTime = false;
+            simulation.alphaTarget(0.5).restart();
         }
 
     };
