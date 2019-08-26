@@ -201,7 +201,7 @@ let JobMap = function() {
         userNode_n.append('text').attrs(
             {'class':'userNodeSig_label',
 
-                'dy': '-1rem'
+                'dy': '0.5rem'
             });
 
 
