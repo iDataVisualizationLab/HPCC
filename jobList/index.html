@@ -69,7 +69,7 @@
         </ul>
         <ul class="right">
             <!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
-            <li class="tab active"><a class="active" href="#">ClusterView</a></li>
+            <li class="tab active"><a class="active" href="#">JobNetwork</a></li>
             <li class="nav__menu">OTHER LINKS
                 <ul class="nav__menu-lists nav__menu--2-lists">
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">1. HiperView</a></li>
@@ -138,17 +138,17 @@
                             <option value="RadarSummary">Radar Summary</option>
                         </select>
                     </div>
-                    <label for="chartType_control" class="col s4"> Chart type: </label>
-                    <div  class="row s12">
-                        <select id="chartType_control" class="col s7">
+                    <label for="chartType_control" class="col s4 hide"> Chart type: </label>
+                    <div  class="row s12 hide">
+                        <select id="chartType_control " class="col s7">
                             <option value="Heatmap">Heatmap</option>
                             <option value="Area Chart">Area Chart</option>
                             <option value="T-sne Chart" selected="selected">t-SNE Chart</option>
                         </select>
                     </div>
-                    <label for="chartType_control" class="col s4"> Simulation: </label>
-                    <div  class="row s12">
-                        <div  class="col s7" style="padding-left: 0px;padding-right: 0px;">
+                    <label for="control" class="col s4 hide"> Simulation: </label>
+                    <div  class="row s12 hide">
+                        <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
                             <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
                             <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
                             <button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>
@@ -342,7 +342,7 @@
                     <div class="details" ></div>
                 </div>
             </div>
-            <div class="row valign-wrapper">
+            <div class="row valign-wrapper hide">
 
                 <label class='col' for="sortorder"> SortBy: </label>
                 <div  class="col">

@@ -1414,8 +1414,8 @@ $( document ).ready(function() {
                 hostList = data;
                 inithostResults();
 
-                graphicControl.charType =  d3.select('#chartType_control').node().value;
-                graphicControl.sumType =  d3.select('#summaryType_control').node().value;
+                // graphicControl.charType =  d3.select('#chartType_control').node().value;
+                // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
                 let choiceinit = d3.select('#datacom').node().value;
                 if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
                     // d3.select(".currentDate")
