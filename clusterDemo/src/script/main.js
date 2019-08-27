@@ -139,7 +139,7 @@ $( document ).ready(function() {
             newdatatoFormat_cluster(data);
             processResult = processResult_csv;
             db = "csv";
-            addDatasetsOptions()
+            // addDatasetsOptions()
             MetricController.axisSchema(serviceFullList,true).update();
             main();
             // d3.select(".currentDate")
@@ -224,7 +224,7 @@ $( document ).ready(function() {
                                 console.log('done read batch file');
                                 processResult = processResult_csv;
                                 db = "csv";
-                                addDatasetsOptions();
+                                // addDatasetsOptions();
                                 MetricController.axisSchema(serviceFullList, true).update();
                                 main();
                                 // d3.select(".currentDate")
@@ -259,8 +259,8 @@ $( document ).ready(function() {
     let oldchoose=$('#datacom').val();
     setTimeout(() => {
         //load data
-        graphicControl.charType =  d3.select('#chartType_control').node().value;
-        graphicControl.sumType =  d3.select('#summaryType_control').node().value;
+        // graphicControl.charType =  d3.select('#chartType_control').node().value;
+        // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;
 
 
@@ -282,7 +282,7 @@ $( document ).ready(function() {
             // inithostResults();
             processResult = processResult_csv;
             db = "csv";
-            addDatasetsOptions();
+            // addDatasetsOptions();
             MetricController.axisSchema(serviceFullList,true).update();
 
             main();
