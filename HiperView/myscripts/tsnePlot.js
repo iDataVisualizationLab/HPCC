@@ -935,11 +935,11 @@ d3.Tsneplot = function () {
             .attr("class", d=>"compute linkLineg "+fixName2Class(d.name))
             .on('mouseover',function(d){
                 d3.select(this).select('text').style('opacity',1);
-                mouseoverNode(d);
+                // mouseoverNode(d);
             }).on('mouseout',function(d){
                 d3.select(this).select('text').style('opacity',0);
-                mouseoutNode(d);
-            });
+                // mouseoutNode(d);
+            }).on('click',function(d){ mouseoverNode(d);});
 
         datapointN.append("clipPath")
             .attr("id",d=>"tSNE"+fixName2Class(d.name))

@@ -250,6 +250,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="633" y="305" width="1934" height="1102" extended-state="1" />
+    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.2497332" />
