@@ -94,7 +94,7 @@ d3.radar = function () {
                 }
                 return 1;
             });
-            bin.minNumOfBins(4);
+            bin.minNumOfBins(4).maxNumOfBins(10);
         }catch(e){
             console.log('Not enough data for binning');
             if (bin.minNumOfBins)

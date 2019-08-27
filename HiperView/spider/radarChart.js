@@ -382,27 +382,28 @@ function RadarChart(id, data, options, name) {
 
     //function update
     function drawCluster(paths){
-        paths.attr("d", d => {
-            d.forEach((v,i)=>{
-                let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
-                let mean = d3.mean(temp);
-                let std = d3.deviation(temp)||0;
-                v.minval =  mean - std/2;
-                v.maxval =  mean + std/2;
-            });
-
-            return radialAreaGenerator(d);}).transition()
-            .style("stroke", (d, i) => cfg.color(i,d))
+        return paths.style("stroke", (d, i) => cfg.color(i,d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("fill-opacity", d => densityscale(d.bin.val.length))
-            .style("fill", (d, i) => cfg.color(i,d));
+            .style("fill", (d, i) =>cfg.color(i,d))
+            .transition().attr("d", d => {
+                d.forEach((v,i)=>{
+                    let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
+                    let mean = d3.mean(temp);
+                    let std = d3.deviation(temp)||0;
+                    v.minval =  mean - std/2;
+                    v.maxval =  mean + std/2;
+                });
+
+            return radialAreaGenerator(d);});
     }
 
 
     function drawOutlying(paths){
-        paths.attr("d", d => radarLine(d)).transition()
+        return paths.attr("d", d => radarLine(d)).transition()
             .style("stroke", (d, i) => 'black')
             .style("stroke-width", () => cfg.strokeWidth + "px")
+            .style("stroke-opacity", undefined)
             //.style("fill-opacity", d => 1)
             .style("fill", 'none');
     }
@@ -519,7 +520,7 @@ function RadarChart(id, data, options, name) {
 
         blobWrapper
             .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
-    }if(cfg.boxplot){
+    }else if(cfg.boxplot){
         function drawMeanLine(paths){
             return paths
                 .attr("d", d =>radarLine(d))

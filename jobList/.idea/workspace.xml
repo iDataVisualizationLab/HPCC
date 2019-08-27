@@ -158,7 +158,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="x" value="633" />
     <option name="y" value="305" />
     <option name="width" value="1934" />
@@ -249,8 +249,7 @@
     <option name="totallyTimeSpent" value="45941000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="633" y="305" width="1934" height="1102" extended-state="0" />
-    <editor active="true" />
+    <frame x="633" y="305" width="1934" height="1102" extended-state="1" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.2497332" />

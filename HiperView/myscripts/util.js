@@ -75,7 +75,8 @@ function hue(hhh) {
             var preTemp1 = 0;
             var preTemp2 = 0;
             for (var i = 0; i < r.arr.length; i++) {
-                var a = processData(r.arr[i].data.service.plugin_output,selectedService);
+                // var a = processData(r.arr[i].data.service.plugin_output,selectedService);
+                var a = r.arr[i];
                 var temp1 = a[0];
                 var temp2 = a[1];
                 if (i>=1){
