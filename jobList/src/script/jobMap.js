@@ -211,7 +211,6 @@ let JobMap = function() {
         let node = nodeg.selectAll('.node');
 
         var ticked = function() {
-            console.log(this.alpha())
             if (this.alpha()<0.9 && this.fistTime)
                 triggerForce ();
             userNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=> d.y = yscale(i));

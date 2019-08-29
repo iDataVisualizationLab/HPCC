@@ -100,7 +100,7 @@ span.thumb {
     display: none;
 }
 
-.axisWrapper line.highlight {
+.axisWrapper line.highlight, .mouseon line{
     stroke: black!important;
     stroke-dasharray: 4;
 }
@@ -130,4 +130,288 @@ span.thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
     background-color: #555;
+}
+
+
+.square_button i{
+    margin: 0;
+}
+
+#edit_radarDescription {
+    position: absolute;
+}
+
+.tablesvg table {
+    /*margin-top: 50px;*/
+}
+.tablesvg .clusterDescription {
+    width: 100%;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    background-color: black;
+}
+.clusterDescription .desciptionText{
+    text-align: center;
+    font-size: 14px;
+    width: 100%;
+    color: white;
+    padding: 5px;
+}
+.clusterDescription .modal-header .nav-wrapper {
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+
+#radar_Des_div.modal{
+    overflow: hidden;
+    max-width: 600px!important;
+    width: 70%!important;
+}
+#radar_Des_div.modal label {
+    color:black;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.nameHolder {
+    max-width: 300px;
+}
+
+.mouseon circle{
+    fill: darkgreen;
+    r:6;
+}
+.mouseon text {
+    fill: white;
+}
+.mouseon.active circle{
+    fill: red;
+}
+.active line{
+    stroke: black !important;
+}
+.active circle {
+    fill: black
+}
+
+.bubble {
+    /*margin: 50px auto;*/
+    background-color: white;
+    border: 1px solid #00bfb6;
+    padding: 5px;
+    text-align: center;
+    font-weight: 900;
+    color: #00bfb6;
+    font-family: arial;
+    position: relative;
+}
+
+.bubble.r {
+    transform: translate(calc(-100% - 20px), -10px);
+}
+.bubble.l {
+    transform: translate(20px, -10px);
+}
+.bubble.lb {
+    transform: translate(-20px ,calc(-100% - 20px));
+}
+.bubble.rb {
+    transform: translate(calc(-100% + 20px) , calc(-100% - 20px));
+}
+.bubble.rt {
+    transform: translate(calc(-100% + 20px) , 20px);
+}
+.bubble.lt {
+    transform: translate(-20px , 20px);
+}
+/* speech bubble 5 */
+
+.r:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #00bfb6;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #00bfb6;
+    border-bottom: 10px solid transparent;
+    right: -20px;
+    top: 6px;
+}
+
+.r:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 9px solid #fff;
+    border-right: 9px solid transparent;
+    border-top: 9px solid #fff;
+    border-bottom: 9px solid transparent;
+    right: -18px;
+    top: 7px;
+}
+
+
+/* speech bubble 6 */
+
+.l:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #00bfb6;
+    border-top: 10px solid #00bfb6;
+    border-bottom: 10px solid transparent;
+    left: -20px;
+    top: 6px;
+}
+
+.l:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 9px solid transparent;
+    border-right: 9px solid #fff;
+    border-top: 9px solid #fff;
+    border-bottom: 9px solid transparent;
+    left: -18px;
+    top: 7px;
+}
+
+
+/* speech bubble 7 */
+
+.lb:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #00bfb6;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #00bfb6;
+    border-bottom: 10px solid transparent;
+    left: 20px;
+    bottom: -20px;
+}
+
+.lb:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #fff;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    left: 21px;
+    bottom: -18px;
+}
+
+
+/* speech bubble 8 */
+
+.rb:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #00bfb6;
+    border-top: 10px solid #00bfb6;
+    border-bottom: 10px solid transparent;
+    right: 20px;
+    bottom: -20px;
+}
+
+.rb:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #fff;
+    border-top: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    right: 21px;
+    bottom: -18px;
+}
+
+/* speech bubble 7 */
+
+.lt:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #00bfb6;
+    border-right: 10px solid transparent;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid #00bfb6;
+    left: 20px;
+    top: -20px;
+}
+
+.lt:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #fff;
+    border-right: 10px solid transparent;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid #fff;
+    left: 21px;
+    top: -18px;
+}
+
+
+/* speech bubble 8 */
+
+.rt:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #00bfb6;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid #00bfb6;
+    right: 20px;
+    top: -20px;
+}
+
+.rt:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #fff;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid #fff;
+    right: 21px;
+    top: -18px;
+}
+
+.dialogScript {
+    position: absolute;
+}
+.dialogScript input {
+    height: unset;
+    line-height: unset;
+    font-size: unset;
+    margin-bottom: 2px;
+}
+.dialogScript:hover{
+    z-index: 1;
+}
+.z-0{
+    z-index: 0;
+}
+.z-1 {
+    z-index: 1;
 }

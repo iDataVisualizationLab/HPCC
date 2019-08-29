@@ -408,6 +408,11 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveProfile()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
     </div>
 </div>
+<div id="radar_Des_div" class="modal custom">
+<!--<div id="radar_Des_div">-->
+</div>
+
+<!--<a class="waves-effect waves-light btn grey lighten-1 square_button btn-small hide" id="edit_radarDescription"><i class="material-icons left">build</i></a>-->
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>
 <script src="../HiperView/js/d3.tip.js"></script>
@@ -421,6 +426,11 @@
 <script src="../HiperView/js/FileSaver.min.js"></script>
 <script src="../HiperView/js/pca.min.js"></script>
 
+<script>
+    $(function(){
+        $('#radar_Des_div').load('src/radarDescription.html');
+    })
+</script>
 
 <script src="../HiperView/js/jszip.min.js"></script>
 <script src="../HiperView/js/jDBSCAN.js"></script>
@@ -437,6 +447,7 @@
 <script src="../HiperView/js/boxplot.js"></script>
 <script src="../HiperView/js/binnerN.min.js"></script>
 <script src="../HiperView/js/fisheye.js"></script>
+<script src="src/script/radar_profile_control.js"></script>
 
 
 <script src="../HiperView/myscripts/setting.js"></script>

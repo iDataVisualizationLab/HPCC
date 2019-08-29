@@ -386,6 +386,7 @@ function handledata(mode){
         temp.name = d;
         let temparr = [temp];
         temparr.order = i;
+        temparr.id = d;
         return temparr;
     });
     clustermap_opt.xScale.range([0,clustermap_opt.w_t]);
@@ -509,10 +510,10 @@ function cluster_map (data) {
         }).on('start',ondragstart).on('drag',ondragged).on('end',ondragend))        ;
         numg = Math.floor(MainOpt.widthG()/clustermap_opt.w_t);
         svg.selectAll('.radarCluster')
-            .attr('class',(d,i)=>'radarCluster radarh'+d.order)
+            .attr('class',(d,i)=>'radarCluster radarh'+d.id)
             .each(function(d,i){
-                radarChartclusteropt.color = function(){return categoryScale(d[0].name)};
-                RadarChart(".radarh"+d.order, d, radarChartclusteropt,"");
+                radarChartclusteropt.color = function(){return categoryScale(d.id)};
+                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"");
             }).transition().duration(1000)
             .attr('transform',(d,i)=>'translate('+clustermap_opt.xScale(d.position&&d.position.x||d.order%numg)+','+clustermap_opt.yScale(d.position&&d.position.y||Math.floor(d.order/numg))+')');
         if (data[0].position || !graphicControl.table){
@@ -660,7 +661,25 @@ function tableCreate_svg(data){
     let divt = d3.select(svg.node().parentNode.parentNode);
     let table = divt.selectAll('.tablesvg').data(data,d=>d[0].name);
     table.exit().remove();
-    let table_n = table.enter().append('div').attr('class','tablesvg mCustomScrollbar').append('table');
+    let div_n = table.enter().append('div').attr('class','tablesvg mCustomScrollbar');
+
+    let descrip_n = div_n.append('div').attr('class','clusterDescription').on('click',function(d){
+        let self = this;
+        radarDes.div(d3.select('.radarHolder')).draw(d3.select(".radarh"+d.id));
+        $('#nameNode').val(clusterDescription[d.id].text);
+        d3.select('#saveNode').on('click',()=>{
+            clusterDescription[d.id].text = $('#nameNode').val();
+            d3.select(self).select('.desciptionText').text(function(e){return clusterDescription[e.id].text})
+        });
+        $('#radar_Des_div').modal('open');
+    });
+    descrip_n.append('span').attrs({
+        type: 'text',
+        class: 'desciptionText'
+    }).text(function(d){return clusterDescription[d.id].text})
+
+
+    let table_n = div_n.append('table');
     table_n.append('col');
     table_n.append('col').attr('class','num');
     table_n.append('thead').append('tr');

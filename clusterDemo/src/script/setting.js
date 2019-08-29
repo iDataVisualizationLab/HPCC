@@ -8,6 +8,7 @@ let filename_pattern = [
     {value:"quantile_0",key:"minval"},
     ];
 
+let radarDes = radarDescription();
 //overwrite function
 function onClickRadarColor (d){
     changeRadarColor(d);
@@ -57,13 +58,15 @@ function newdatatoFormat_cluster (data){
     serviceFullList = serviceLists2serviceFullList(serviceLists);
     label_name = data.map(d=>d.labels||d.re_label);
     clusterS = {};
+    clusterDescription = {};
     data.forEach((d,i)=>{
 
-            let temp ={};
-            serviceLists.forEach((s,i)=>{
-                temp[s.text] = {value: d[variables[i]]};
-            });
-            clusterS[d.labels||d.re_label] = temp;
+        let temp ={};
+        serviceLists.forEach((s,i)=>{
+            temp[s.text] = {value: d[variables[i]]};
+        });
+        clusterS[d.labels||d.re_label] = temp;
+        clusterDescription[d.labels||d.re_label] = {id: d.labels||d.re_label,text: d.labels||d.re_label, axis:{}};
     });
 }
 function updateDataType(data,type){
@@ -77,3 +80,4 @@ function updateDataType(data,type){
     });
 }
 let clusterS ={};
+let clusterDescription ={};
