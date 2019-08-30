@@ -86,7 +86,10 @@ $( document ).ready(function() {
     $('#radarzoom').on('change',function(){updateRdarSize(this)}).on('input',function(){
         $('#radarzoomdisplay').text(this.value)})
     $('.collapsible').collapsible();
-    $('.modal').modal();
+    $('.modal:not("#radar_Des_div")').modal();
+    $("#radar_Des_div").modal({
+        onOpenEnd:  radarDes.update,
+    });
     $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
     $('.sidenav').sidenav();

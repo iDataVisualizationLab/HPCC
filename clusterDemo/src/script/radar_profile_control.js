@@ -106,8 +106,6 @@ let radarDescription = function (){
 
         let ds = div.selectAll('.dialogScript').data(d3.entries(dialogvalue_arr));
         ds.exit().remove();
-
-        updatebubble()
         return master;
     };
     function getpos(id){
@@ -149,7 +147,7 @@ let radarDescription = function (){
             d.description = $(this).val()});
         // dialogvalue_arr.push({id:d.axis,description:''});
     }
-
+    master.update = updatebubble;
     master.div = function(_){
         return arguments.length?(div=_,master):div;
     }
