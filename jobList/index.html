@@ -119,8 +119,8 @@
                     <div class="row s12 hidden">
                         <input id="data_input_file" class="none" type="file" multiple/>
                     </div>
-                    <label for="datasetsSelect" class="col s4"> Visualizing: </label>
-                    <div  class="row s12">
+                    <label for="datasetsSelect" class="col s4 hide"> Visualizing: </label>
+                    <div  class="row s12 hide">
                         <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
                             <span class="title"></span>
@@ -129,8 +129,8 @@
                         <ul id="datasetsSelect" class="col collection dropdown-content">
                         </ul>
                     </div>
-                    <label for="summaryType_control" class="col s4"> Summary type: </label>
-                    <div  class="row s12">
+                    <label for="summaryType_control" class="col s4 hide"> Summary type: </label>
+                    <div  class="row s12 hide">
                         <select id="summaryType_control" class="col s7">
                             <option value="Boxplot">Boxplot</option>
                             <option value="Scatterplot" >Scatterplot</option>
@@ -146,8 +146,8 @@
                             <option value="T-sne Chart" selected="selected">t-SNE Chart</option>
                         </select>
                     </div>
-                    <label for="control" class="col s4 hide"> Simulation: </label>
-                    <div  class="row s12 hide">
+                    <label for="control" class="col s4"> Simulation: </label>
+                    <div  class="row s12">
                         <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
                             <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
                             <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
