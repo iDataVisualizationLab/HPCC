@@ -38,8 +38,14 @@ let radarDescription = function (){
     master.getValue = function(){
 
     }
+    let schema=[],schemaOb={};
+    function getangle (id){
+        return schemaOb[id].angle;
+    }
     master.draw = function(mRadar) {
         let cloneNode = mRadar.node().cloneNode(true);
+
+        //copy node
         svg = d3.select(cloneNode).select('svg');
         svg.attrs({
             width: '100%',
@@ -49,8 +55,11 @@ let radarDescription = function (){
         svg.selectAll('.highlight').classed('highlight',false);
         div.select('.chart').remove();
         div.node().appendChild(svg.node());
+        schema = mRadar.selectAll('.axis').data();
+        schema.forEach(d=>schemaOb[d.text]=d);
+        svg.selectAll('.axis').data(schema); // transfer data
 
-        svg.selectAll('.axis').data(mRadar.selectAll('.axis').data()); // transfer data
+
         let outl = svg.select('.axis').select('line').attr('y2');
         let action_points = svg.selectAll('.axis')
             .append("g")
@@ -84,56 +93,68 @@ let radarDescription = function (){
             let target = d3.select(this.parentNode);
             if (!target.classed('active')) {
                 target.classed('active',true)
-                addbubble(d,{x:d3.event.layerX,y:d3.event.layerY})
+                console.log(div.node().getBoundingClientRect());
+                dialogvalue_arr.push({id:d.text,description:''});
+                updatebubble();
+                // addbubble(d,{x:-$('#radar_Des_div')[0].getBoundingClientRect().x+ this.getBoundingClientRect().x,y:-$('#radar_Des_div')[0].getBoundingClientRect().y+ this.getBoundingClientRect().y})
+            }else{
+                target.classed('active',false);
+                _.pull(dialogvalue_arr,dialogvalue_arr.find(e=>e.id===d.text));
+                updatebubble();
             }
         });
 
         let ds = div.selectAll('.dialogScript').data(d3.entries(dialogvalue_arr));
         ds.exit().remove();
-        // const d = d3.select(d3.event.detail || this).datum();
-        // d3.selectAll('.axis' + d.idroot + '_' + d.id).classed('highlight', true);
+
+        updatebubble()
         return master;
     };
+    function getpos(id){
+        let point = svg.selectAll('.axis .actionpoint').filter(d=>d.text===id);
+        return {
+            x:-$('#radar_Des_div')[0].getBoundingClientRect().x+ point.node().getBoundingClientRect().x,
+            y:-$('#radar_Des_div')[0].getBoundingClientRect().y+ point.node().getBoundingClientRect().y
+        };
+    }
 
     let dialogvalue_arr =[];
-    function addbubble(d,pos){
-        let dbox = div.append('div')
-            .attr('class','dialogScript bubble z-0')
+    function updatebubble(){
+        let dbox = div.selectAll('div.dialogScript')
+            .data(dialogvalue_arr,d=>d.id);
+
+        dbox.exit().remove();
+
+        let dbox_n = dbox.enter().append('div')
+            .attr('class','dialogScript bubble z-0');
+        dbox_n.append('input').attr('class','truncate ');
+
+        dbox = dbox.merge(dbox_n);
+        dbox.attr('class','dialogScript bubble z-0')
+            .each(function (d){
+                let cstr = 'l';
+                if (getangle(d.id)>Math.PI)
+                    cstr='r';
+                if (getangle(d.id)<Math.PI/4||getangle(d.id)>Math.PI*7/4)
+                    cstr+='b';
+                else if (getangle(d.id)<Math.PI*5/4&&getangle(d.id)>Math.PI*3/4)
+                    cstr+='t';
+                d3.select(this).classed(cstr,true);
+            })
             .styles({
-                top:pos.y+'px',
-                left:pos.x+'px'
+                top: d=>getpos(d.id).y+'px',
+                left:d=>getpos(d.id).x+'px'
             });
-        let cstr = 'l';
-        if (d.angle>Math.PI)
-            cstr='r';
-        if (d.angle<Math.PI/4||d.angle>Math.PI*7/4)
-            cstr+='b';
-        else if (d.angle<Math.PI*5/4&&d.angle>Math.PI*3/4)
-            cstr+='t';
-        dbox.classed(cstr,true);
-        dbox.append('input').attr('class','truncate ');
-        dialogvalue_arr.push({id:d.axis,description:''});
+        dbox.select('input').property("value",d=>d.description).on('change',function(d){
+            d.description = $(this).val()});
+        // dialogvalue_arr.push({id:d.axis,description:''});
     }
-    function removebubble(d){
-        let dbox = div.append('div')
-            .attr('class','dialogScript bubble z-0')
-            .styles({
-                top:pos.y+'px',
-                left:pos.x+'px'
-            });
-        let cstr = 'l';
-        if (d.angle>Math.PI)
-            cstr='r';
-        if (d.angle<Math.PI/4||d.angle>Math.PI*7/4)
-            cstr+='b';
-        else if (d.angle<Math.PI*5/4&&d.angle>Math.PI*3/4)
-            cstr+='t';
-        dbox.classed(cstr,true);
-        dbox.append('input').attr('class','truncate ');
-        dialogvalue_arr.push({id:d.axis,description:''});
-    }
+
     master.div = function(_){
-        return arguments.length?(div=_,master):master;
+        return arguments.length?(div=_,master):div;
+    }
+    master.description = function(_){
+        return arguments.length?(dialogvalue_arr=_,master):dialogvalue_arr;
     }
     master.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt

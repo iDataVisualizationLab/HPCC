@@ -66,7 +66,7 @@ function newdatatoFormat_cluster (data){
             temp[s.text] = {value: d[variables[i]]};
         });
         clusterS[d.labels||d.re_label] = temp;
-        clusterDescription[d.labels||d.re_label] = {id: d.labels||d.re_label,text: d.labels||d.re_label, axis:{}};
+        clusterDescription[d.labels||d.re_label] = {id: d.labels||d.re_label,text: d.labels||d.re_label, axis:[]};
     });
 }
 function updateDataType(data,type){

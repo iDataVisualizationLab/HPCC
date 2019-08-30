@@ -197,6 +197,7 @@ span.thumb {
 
 .bubble {
     /*margin: 50px auto;*/
+    pointer-events: none;
     background-color: white;
     border: 1px solid #00bfb6;
     padding: 5px;
@@ -206,7 +207,9 @@ span.thumb {
     font-family: arial;
     position: relative;
 }
-
+.bubble input {
+    pointer-events: all;
+}
 .bubble.r {
     transform: translate(calc(-100% - 20px), -10px);
 }

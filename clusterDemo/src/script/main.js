@@ -665,13 +665,15 @@ function tableCreate_svg(data){
 
     let descrip_n = div_n.append('div').attr('class','clusterDescription').on('click',function(d){
         let self = this;
-        radarDes.div(d3.select('.radarHolder')).draw(d3.select(".radarh"+d.id));
+
         $('#nameNode').val(clusterDescription[d.id].text);
         d3.select('#saveNode').on('click',()=>{
             clusterDescription[d.id].text = $('#nameNode').val();
+            clusterDescription[d.id].axis = radarDes.description();
             d3.select(self).select('.desciptionText').text(function(e){return clusterDescription[e.id].text})
         });
         $('#radar_Des_div').modal('open');
+        radarDes.div(d3.select('.radarHolder')).description(clusterDescription[d.id].axis).draw(d3.select(".radarh"+d.id));
     });
     descrip_n.append('span').attrs({
         type: 'text',
