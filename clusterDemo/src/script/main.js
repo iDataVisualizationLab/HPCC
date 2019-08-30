@@ -152,6 +152,29 @@ $( document ).ready(function() {
             spinnerOb.spinner.stop();
         }
     });
+    $('#description_input_file').on('input',(evt)=>{
+        let f = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = (function (theFile) {
+            return function (e) {
+                // Render thumbnail.
+                // d3.select('.cover').classed('hidden', false);
+                // spinnerOb.spinner.spin(spinnerOb.target);
+                d3.json(e.target.result, function (error, data) {
+                    if (error) {
+                        // d3.select('.cover').classed('hidden', true);
+                        // spinnerOb.spinner.stop();
+                    } else {
+                        clusterDescription = data;
+                        d3.selectAll('.desciptionText').text(function(d){return clusterDescription[d.id].text})
+                    }
+                });
+            };
+        })(f);
+
+        reader.readAsDataURL(f);
+    });
+    $('#saveDescriptionbtn').on('click',()=>$('#description_input_file').trigger('click'));
     $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
         spinnerOb.spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
