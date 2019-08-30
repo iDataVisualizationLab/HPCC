@@ -92,8 +92,7 @@ let radarDescription = function (){
         }).on('click',function(d){
             let target = d3.select(this.parentNode);
             if (!target.classed('active')) {
-                target.classed('active',true)
-                console.log(div.node().getBoundingClientRect());
+                target.classed('active',true);
                 dialogvalue_arr.push({id:d.text,description:''});
                 updatebubble();
                 // addbubble(d,{x:-$('#radar_Des_div')[0].getBoundingClientRect().x+ this.getBoundingClientRect().x,y:-$('#radar_Des_div')[0].getBoundingClientRect().y+ this.getBoundingClientRect().y})
@@ -117,6 +116,11 @@ let radarDescription = function (){
     }
 
     let dialogvalue_arr =[];
+    function updatebubbleInit(){
+        svg.selectAll('.axis').filter(d=>dialogvalue_arr.find(e=>e.id===d.text)).classed('active',true);
+        updatebubble();
+
+    }
     function updatebubble(){
         let dbox = div.selectAll('div.dialogScript')
             .data(dialogvalue_arr,d=>d.id);
@@ -147,7 +151,7 @@ let radarDescription = function (){
             d.description = $(this).val()});
         // dialogvalue_arr.push({id:d.axis,description:''});
     }
-    master.update = updatebubble;
+    master.update = updatebubbleInit;
     master.div = function(_){
         return arguments.length?(div=_,master):div;
     }
