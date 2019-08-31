@@ -284,9 +284,14 @@ let JobMap = function() {
             });
 
         userNode_n.append('text').attrs(
+            // {'class':'userNodeSig_label',
+            //     'y': -graphicopt.user.r,
+            //     'text-anchor':'middle',
+            // });
             {'class':'userNodeSig_label',
-                'y': -graphicopt.user.r,
-                'text-anchor':'middle',
+                'dy': '0.25rem',
+                'x': graphicopt.user.r+4,
+                // 'text-anchor':'middle',
             });
 
 
@@ -477,8 +482,8 @@ let JobMap = function() {
             height: 20//deltey,
         },
         column:{
-            'hosts': {id:'hosts',type:'num',x: 50,y:20},
-            'jobs': {id:'jobss',type:'num',x: 100,y:20},
+            'hosts': {id:'hosts',type:'num',x: 120,y:20},
+            'jobs': {id:'jobss',type:'num',x: 180,y:20},
         }
     };
     let linkdata = [];
