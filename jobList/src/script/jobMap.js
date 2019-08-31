@@ -144,7 +144,7 @@ let JobMap = function() {
     }
 
     function drawPie(computers) {
-        computers.select('.computeSig').select('.radarPath').remove();
+        computers.select('.computeSig').select('.linkLineg').remove();
         var arc = d3.arc()
             .outerRadius(graphicopt.node.r)
             .innerRadius(0);

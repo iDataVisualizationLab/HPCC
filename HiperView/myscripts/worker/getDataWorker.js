@@ -41,7 +41,6 @@ addEventListener('message',function ({data}){
             }
             serviceFull_selected =[];
             serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
-            console.log(serviceFull_selected)
             break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex,data.value.usepast);

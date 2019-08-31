@@ -1348,13 +1348,17 @@ $( document ).ready(function() {
         var sect = document.getElementById("chartType_control");
         graphicControl.charType = sect.options[sect.selectedIndex].value;
     });
-
     d3.select('#summaryType_control').on("change", function () {
         var sect = document.getElementById("summaryType_control");
         graphicControl.sumType = sect.options[sect.selectedIndex].value;
         svg.select(".graphsum").remove();
         pannelselection(false);
         updateSummaryChartAll();
+    });
+    d3.select('#jobType_control').on("change", function () {
+        var sect = document.getElementById("jobType_control");
+        jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+        jobMap.runopt(jobMap_runopt);
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
