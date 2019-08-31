@@ -76,6 +76,9 @@ let JobMap = function() {
         }
     }
 
+    jobMap.dataComp = function (){
+
+    };
 
     jobMap.draw = function (timeStep){
         if (!timeStep)
@@ -391,7 +394,7 @@ let JobMap = function() {
     let tableLayout = {
         row:{
             width: 500,
-            height: deltey,
+            height: 20//deltey,
         }
     };
     let linkdata = [];

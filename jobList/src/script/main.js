@@ -133,7 +133,7 @@ let layout = {
 
 var graphicControl ={
     charType : "Area Chart",
-    sumType : "Radar",
+    sumType : "None",
     mode : layout.HORIZONTAL
 };
 
@@ -282,7 +282,7 @@ var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).init();
 var MetricController = radarController();
-// let getDataWorker = new Worker ('myscripts/worker/getDataWorker.js');
+let getDataWorker = new Worker ('../HiperView/myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
 
 function setColorsAndThresholds(s) {
@@ -340,11 +340,94 @@ var gaphost = 7;
 function main() {
 
     inithostResults ();
+    getDataWorker.postMessage({action:"init",value:{
+            hosts:hosts,
+            db:db,
+        }});
+    getDataWorker.addEventListener('message',({data})=>{
+        console.log(data)
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (imageRequest){
+            playchange();
+            d3.select('.cover').classed('hidden', false);
+            d3.select('.progressDiv').classed('hidden', false);
+            imageRequest = false;
+            onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
+        }
+        if (data.action==='returnData'){
+            if (data.result.hindex!==undefined && data.result.index < lastIndex) {
+                if (graphicControl.sumType === "RadarSummary" ) {
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
+            }
+
+        }else if (data.action==='returnDataHistory'){
+            if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
+                // if (graphicControl.charType === "T-sne Chart")
+                //     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+                console.log(data.result.arr)
+                jobMap.dataComp(data.result.arr);
+                if (graphicControl.sumType === "RadarSummary") {
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
+                MetricController.data(data.result.arr).drawSummary(data.result.hindex);
+            }
+        }
+        if (data.action==='DataServices') {
+            MetricController.datasummary(data.result.arr);
+        }
+    }, false);
     request();
 }
 var currentlastIndex;
 var speedup= 0;
+function drawsummarypoint(harr){
+    var arr = [];
+    var xx;
+    lastIndex = currentlastIndex;
+    query_time = hostResults['timespan'][currentlastIndex];
+    //xx = xTimeSummaryScale(query_time);
+    //updateTimeText();
 
+    switch (graphicControl.sumType) {
+        case "Boxplot":
+            break;
+        case "Scatterplot":
+            break;
+        case "Radar":
+            for (var i in harr) {
+                var h  = harr[i];
+                var name = hosts[h].name;
+                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
+                arrServices.name = name;
+                arr.push(arrServices);
+            }
+            Radarplot.data(arr).drawpoint(lastIndex);
+            // Radar Time
+            //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+            break;
+        case "RadarSummary":
+            getData(name,lastIndex)
+            // Radarplot.data(arr).drawSummarypoint(lastIndex);
+            break;
+        default:
+            var h = harr[harr.length-1];
+            var name = hosts[h].name;
+            break;
+    }
+    getData(name,lastIndex)
+}
+function shiftTimeText(){
+    if (timelog.length > maxstack-1){ timelog.shift();
+        svg.selectAll(".boxTime").filter((d,i)=>i).transition().duration(500)
+            .attr("x", (d,i)=>xTimeSummaryScale(i)+ width/maxstack/2);
+        svg.select(".boxTime").transition().duration(500)
+            .attr("x", xTimeSummaryScale(0)+ width/maxstack/2)
+            .transition().remove();
+    }
+}
 function updatetimeline(index) {
     if (recordonly) {
         const timearr= d3.scaleTime().domain(timerange.map(d => new Date(d))).ticks(formatRealtime);
@@ -388,8 +471,8 @@ function request(){
             count += 1;
         };
         var drawprocess = function ()  {
-            // if (graphicControl.mode===layout.HORIZONTAL)
-            //     drawsummarypoint(countarr);
+            if (graphicControl.mode===layout.HORIZONTAL)
+                drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
