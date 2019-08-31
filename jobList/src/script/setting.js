@@ -12,7 +12,9 @@ let jobMap_opt = {
     job: {
         r: 10,
         r_inside: 2,
-    }
+    },user:{
+        r: 10,
+    },
 }
 
 function zoomtoogle(event) {

@@ -136,10 +136,13 @@ span.thumb {
 }
 
 .computeNode.hightlight,.links.hightlight {
-    stroke:red;
+    opacity: 1;
 }
 .userNode.hightlight {
-    fill:red;
+    opacity: 1;
+}
+.fade {
+    opacity: 0.2;
 }
 
 .pantarget.lock{

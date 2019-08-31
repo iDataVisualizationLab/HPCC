@@ -32,6 +32,12 @@ let JobMap = function() {
         }).call(d3.zoom().on("zoom", function () {
             g.attr("transform", d3.event.transform);
         }));
+        if(svg.select('#userpic').empty())
+            svg.append('defs').append('pattern')
+                .attrs({'id':'userpic',width:'100%',height:'100%','patternContentUnits':'objectBoundingBox'})
+                .append('image')
+                .attrs({'height':1,width:1,preserveAspectRatio:'none',
+                    'xmlns:xlink':'http://www.w3.org/1999/xlink','xlink:href':'src/images/u.png'});
         svg.append('rect').attr('class','pantarget')
             .attrs({
                 'opacity':0,
@@ -76,7 +82,7 @@ let JobMap = function() {
             timeStep = new Date();
         timebox.text(timeStep.toLocaleTimeString())
         let yscale = d3.scaleLinear().domain([0,user.length-1]).range([0,graphicopt.heightG()]);
-
+        let deltey = yscale(1)-yscale(0);
 
         // compute pie
         var arc = d3.arc()
@@ -188,20 +194,25 @@ let JobMap = function() {
                 return spiral(temp);
             })
         ;
-
+        jobNode = jobNode.merge(jobNode_n)
         let userNode = nodeg.selectAll('.userNode').data(user,function(d){return d.name});
         userNode.exit().remove();
         let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode '+fixName2Class(fixstr(d.name)));
         userNode_n.append('circle').attrs(
             {'class':'userNodeSig',
-                'r': graphicopt.node.r,
+                'r': graphicopt.user.r,
                 'fill': d=>colorFunc(d.name)
+            });
+        userNode_n.append('circle').attrs(
+            {'class':'userNodeImg',
+                'r': graphicopt.user.r,
+                'fill': d=>"url(#userpic)"
             });
 
         userNode_n.append('text').attrs(
             {'class':'userNodeSig_label',
-
-                'dy': '0.5rem'
+                'y': -graphicopt.user.r,
+                'text-anchor':'middle',
             });
 
 
@@ -210,22 +221,37 @@ let JobMap = function() {
         .text(d=>d.name);
         let node = nodeg.selectAll('.node');
 
+        let scaleNode = d3.scaleLinear();
         var ticked = function() {
             if (this.alpha()<0.9 && this.fistTime)
                 triggerForce ();
             userNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=> d.y = yscale(i));
 
+            let range_com = d3.extent(computers.data(),d=>d.x);
+            scaleNode.domain(range_com).range([20,120]);
 
-            node.transition().attr('transform',d=>{
+            node.each(d=>{
                 d.x = Math.max(graphicopt.node.r,Math.min(d.x,graphicopt.widthG()-graphicopt.node.r) );
-                // d.y = Math.max(graphicopt.node.r,Math.min(d.y,graphicopt.heightG()-graphicopt.node.r) );
-                return `translate(${d.x},${d.y})`
+            });
+            computers.transition().attr('transform',d=>{
+                d.x2 = scaleNode(d.x);
+                return `translate(${d.x2},${d.y})`
+            });
+            let range_job = d3.extent(computers.data(),d=>d.x);
+            scaleNode.domain(range_com).range([400,450]);
+            jobNode.transition().attr('transform',d=>{
+                d.x2 = scaleNode(d.x);
+                return `translate(${d.x2},${d.y})`
+            });
+            userNode.transition().attr('transform',d=>{
+                d.x2 = 800;
+                return `translate(${d.x2},${d.y})`
             });
             link.transition()
-                .attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
+                .attr("x1", function(d) { return d.source.x2||d.source.x; })
+                .attr("y1", function(d) { return d.source.y2||d.source.y; })
+                .attr("x2", function(d) { return d.target.x2||d.target.x; })
+                .attr("y2", function(d) { return d.target.y2||d.target.y; });
 
         };
 
@@ -256,6 +282,7 @@ let JobMap = function() {
                 d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).classed('hide',true);
                 let jobl = d3.selectAll('.jobNode').filter(e=>e.user===d.name).classed('hide',false);
                 const jobd = jobl.data();
+                d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',true);
                 link.classed('hide',true);
                 link.filter(f=> jobd.find(e=>e===f.source||e===f.target)).classed('hide',false).classed('hightlight',true);
@@ -264,6 +291,7 @@ let JobMap = function() {
                 d3.selectAll('.jobNode').classed('hide',false);
                 let jobl = d3.selectAll('.jobNode').filter(e=>e.user===d.name);
                 const jobd = jobl.data();
+            d3.selectAll( '.computeNode').classed('fade',false);
                 d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
             })
@@ -275,15 +303,17 @@ let JobMap = function() {
                 d.y=yscale(d.order);
             });
         g.selectAll('.computeNode')
-            .on('mouseover',function(d){
-                d3.select(this).classed('hightlight',true);
-                d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).classed('hide',true);
-                let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name)).classed('hide',false);
-                const jobd = jobl.data();
-                d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).classed('hightlight',true);
-                link.classed('hide',true);
-                link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).classed('hide',false).classed('hightlight',true);
-            }).on('mouseout',function(d){
+        .on('mouseover',function(d){
+            d3.selectAll( '.computeNode').classed('fade',true);
+            d3.select(this).classed('hightlight',true);
+            d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f!==d.name)).classed('hide',true);
+            let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name)).classed('hide',false);
+            const jobd = jobl.data();
+            d3.selectAll( '.userNode').filter(e=>jobd.find(f=>f.user===e.name)).classed('hightlight',true);
+            link.classed('hide',true);
+            link.filter(f=> d===f.source||jobd.find(e=>e===f.source)).classed('hide',false).classed('hightlight',true);
+        }).on('mouseout',function(d){
+            d3.selectAll( '.computeNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
             let jobl = d3.selectAll('.jobNode').filter(e=>e.nodes.find(f=>f===d.name));
@@ -296,12 +326,14 @@ let JobMap = function() {
                 g.selectAll('.jobNode').classed('hide',true);
                 d3.select(this).classed('hide',false);
                 d3.selectAll( '.userNode').filter(e=>d.user===e.name).classed('hightlight',true);
+                d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',true);
                 link.classed('hide',true);
                 link.filter(f=> d===f.source||d===f.target).classed('hide',false).classed('hightlight',true);
             }).on('mouseout',function(d){
             g.selectAll('.jobNode').classed('hide',false);
             d3.selectAll( '.userNode').filter(e=>d.user===e.name).classed('hightlight',false);
+            d3.selectAll( '.computeNode').classed('fade',false);
                 d3.selectAll( '.computeNode.'+d.nodes.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
 
                 link.classed('hide',false).classed('hightlight',false);
@@ -349,6 +381,18 @@ let JobMap = function() {
             simulation.alphaTarget(0.5).restart();
         }
 
+        function updaterow(path){
+            let rows = path.selectAll('.row').data(d=>tableData[d.id]);
+            rows.exit().remove();
+            let rows_n = rows.enter().append('g').attr('class','row');
+            rows.append('rect').attrs({'class':'back-row','width':tableLayout.row.height})
+        }
+    };
+    let tableLayout = {
+        row:{
+            width: 500,
+            height: deltey,
+        }
     };
     let linkdata = [];
     let user = [];
