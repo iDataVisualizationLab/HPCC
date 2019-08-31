@@ -16,7 +16,7 @@ let JobMap = function() {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-        },runopt={compute:{setting:'pie'}},radarcreate,
+        },runopt={compute:{setting:'pie'}},radarcreate,tableData={},
         svg, g,
         data = [],arr=[],
         hosts = []
@@ -180,7 +180,7 @@ let JobMap = function() {
         timebox.text(timeStep.toLocaleTimeString())
         let yscale = d3.scaleLinear().domain([0,user.length-1]).range([0,graphicopt.heightG()]);
         let deltey = yscale(1)-yscale(0);
-
+        tableLayout.row.height = deltey;
         // compute pie
 
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
@@ -269,6 +269,9 @@ let JobMap = function() {
         let userNode = nodeg.selectAll('.userNode').data(user,function(d){return d.name});
         userNode.exit().remove();
         let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode '+fixName2Class(fixstr(d.name)));
+
+        updaterow(userNode.merge(userNode_n));
+
         userNode_n.append('circle').attrs(
             {'class':'userNodeSig',
                 'r': graphicopt.user.r,
@@ -290,6 +293,9 @@ let JobMap = function() {
         userNode=userNode_n.merge(userNode);
         userNode.select('.userNodeSig_label')
         .text(d=>d.name);
+
+
+
         let node = nodeg.selectAll('.node');
 
         let scaleNode = d3.scaleLinear();
@@ -453,16 +459,26 @@ let JobMap = function() {
         }
 
         function updaterow(path){
-            let rows = path.selectAll('.row').data(d=>tableData[d.id]);
+            let rows = path.selectAll('.row').data(d=>[tableData[d.name]]);
             rows.exit().remove();
-            let rows_n = rows.enter().append('g').attr('class','row');
-            rows.append('rect').attrs({'class':'back-row','width':tableLayout.row.height})
+            let rows_n = rows.enter().append('g').attr('class', 'row')
+                .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
+            rows_n.append('rect').attrs({'class':'back-row','width':tableLayout.row.width,'height':tableLayout.row.height});
+            let cells = rows_n.merge(rows).selectAll('.cell').data(d=>d);
+            cells.exit().remove();
+            let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},${tableLayout.column[d.key].y})`);
+            cells_n.append('text');
+            cells.merge(cells_n).select('text').text(d=>d.value);
         }
     };
     let tableLayout = {
         row:{
             width: 500,
             height: 20//deltey,
+        },
+        column:{
+            'hosts': {id:'hosts',type:'num',x: 50,y:20},
+            'jobs': {id:'jobss',type:'num',x: 100,y:20},
         }
     };
     let linkdata = [];
@@ -472,7 +488,7 @@ let JobMap = function() {
     function handle_links (){
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
-
+        tableData = {}
 
         data.forEach(d=>{
           d.name = d.jobID+'';
@@ -504,6 +520,9 @@ let JobMap = function() {
             d.unqinode.forEach(n=>{
                 d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
+
+            tableData[d.name] =[{key:'hosts', value:d.unqinode.length},
+                {key:'jobs',value: d.values.length}];
             return d
         });
         hiddenlink = [];

@@ -201,3 +201,12 @@ span.thumb {
 .hightlight .computeSig_label{
     display: block;
 }
+
+.row .back-row{
+    fill: #ededed;
+    stroke: #777777;
+}
+
+.row .cell.num{
+    text-anchor: end;
+}
