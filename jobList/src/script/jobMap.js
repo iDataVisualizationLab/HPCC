@@ -16,15 +16,24 @@ let JobMap = function() {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-        },
+        },runopt={compute:{setting:'pie'}},radarcreate,
         svg, g,
-        data = [],
+        data = [],arr=[],
         hosts = []
     ;
     let jobMap = {};
     let simulation;
-    let timebox,linkg,nodeg;
+    let timebox,linkg,nodeg,schema=[];
     jobMap.init = function () {
+        var rScale = d3.scaleLinear()
+            .range([0, graphicopt.radaropt.w/2])
+            .domain([-0.25, 1.25]);
+        radarcreate = d3.radialLine()
+            .curve(d3.curveCardinalClosed.tension(0))
+            .radius(function(d) { return rScale(d.value); })
+            .angle(function(d) {
+                return schema.find(s=>s.text===d.axis).angle; });
+
         svg.attrs({
             width: graphicopt.width,
             height: graphicopt.height,
@@ -75,10 +84,95 @@ let JobMap = function() {
                 return 'black';
         }
     }
+    function drawEmbedding(data) {
+        let newdata =handledata(data);
+        let bg = svg.selectAll('.computeSig');
+        let datapoint = bg.select(".linkLineg")
+            .datum(d=>newdata.find(n=>n.name === d.name));
+        if(datapoint.empty()){
+            datapoint = bg
+                .append("g")
+                .datum(d=>newdata.find(n=>n.name === d.name))
+                .attr("class", d=>"compute linkLineg "+fixName2Class(d.name));
+            datapoint.append("clipPath")
+                .attr("id",d=>"tSNE"+fixName2Class(d.name))
+                .append("path")
+                .attr("d", d => radarcreate(d));
+            datapoint
+                .append("rect")
+                .style('fill', 'url(#rGradient)')
+                .attr("clip-path", d=>"url(#tSNE"+fixName2Class(d.name)+")")
+                .attr("x",-graphicopt.radaropt.w/2)
+                .attr("y",-graphicopt.radaropt.h/2)
+                .attr("width",graphicopt.radaropt.w)
+                .attr("height",graphicopt.radaropt.h);
+            datapoint
+                .append("path")
+                .attr("class","tSNEborder")
+                .attr("d", d => radarcreate(d))
+                .style("stroke", 'black')
+                .style("stroke-width", 0.5)
+                .style("stroke-opacity", 0.5).style("fill", "none");
+        }else{
+            datapoint.select('clipPath').select('path')
+                .transition('expand').duration(100).ease(d3.easePolyInOut)
+                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
+            datapoint.select('.tSNEborder')
+                .transition('expand').duration(100).ease(d3.easePolyInOut)
+                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
+        }
 
-    jobMap.dataComp = function (){
-
+    }
+    jobMap.drawComp = function (){
+        if(runopt.compute.type==="radar"){
+            svg.selectAll('.computeNode').selectAll('.piePath').remove();
+            if (arr.length)
+            drawEmbedding(arr)
+        }else{
+            drawPie(svg.selectAll('.computeNode'));
+        }
     };
+
+    function handledata(data){
+        let objectarr = data.map(a=>{
+            let temp = a.map((d,i)=>{return {axis: schema[i].text, value: d, enable: schema[i].enable};});
+            temp = _.sortBy(temp,d=>schema.find(e=>e.text===d.axis).angle);
+            temp.name = a.name;
+            return temp;
+        });
+        return objectarr;
+    }
+
+    function drawPie(computers) {
+        computers.select('.computeSig').select('.radarPath').remove();
+        var arc = d3.arc()
+            .outerRadius(graphicopt.node.r)
+            .innerRadius(0);
+        let pie = d3.pie()
+            .value(function (d) {
+                return d.value;
+            })
+            .sort(function (a, b) {
+                return d3.ascending(a.order, b.order);
+            })
+
+        let piePath = computers
+            .select('.computeSig')
+            .selectAll('.piePath').data(d => {
+                let tempdata = d.user.map(e => {
+                    return {
+                        value: e.unqinode_ob[d.name].length,
+                        order: e.order,
+                        user: e.name,
+
+                    }
+                });
+                return pie(tempdata)
+            });
+        piePath.exit().remove();
+        piePath.enter().append('path').attr('class', 'piePath')
+            .attr('d', arc).style('fill', d => colorFunc(d.data.user));
+    }
 
     jobMap.draw = function (timeStep){
         if (!timeStep)
@@ -88,21 +182,10 @@ let JobMap = function() {
         let deltey = yscale(1)-yscale(0);
 
         // compute pie
-        var arc = d3.arc()
-            .outerRadius(graphicopt.node.r)
-            .innerRadius(0);
-        let pie = d3.pie()
-            .value(function(d) {
-                return d.value; })
-            .sort(function(a, b) { return d3.ascending(a.order, b.order);} )
 
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
         computers.exit().remove();
-        let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)))
-            .attrs(
-                {
-                    'stroke':'black',
-                });
+        let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
         // computers_n.append('circle').attrs(
         //     {'class':'computeSig',
         //         'r': graphicopt.node.r,
@@ -110,7 +193,7 @@ let JobMap = function() {
         //     });
         computers_n.append('g').attrs(
             {'class':'computeSig',
-                // 'fill':'white',
+                'stroke':'black',
             });
         computers_n.append('text').attrs(
             {'class':'computeSig_label',
@@ -127,19 +210,7 @@ let JobMap = function() {
 
         computers = computers_n.merge(computers);
 
-        let piePath = computers
-            .select('.computeSig')
-            .selectAll('.piePath').data(d=>{
-                let tempdata = d.user.map(e=>{return{value: e.unqinode_ob[d.name].length,
-                        order: e.order,
-                        user: e.name,
-
-                    }});
-                return pie(tempdata)
-            });
-        piePath.exit().remove();
-        piePath.enter().append('path').attr('class','piePath')
-            .attr('d',arc).style('fill',d=> colorFunc(d.data.user));
+        jobMap.drawComp();
 
         //job node
         let timerange = [d3.min(data,d=>new Date(d.submitTime)),timeStep];
@@ -164,17 +235,14 @@ let JobMap = function() {
         let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
         jobNode.exit().remove();
         let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode '+fixName2Class(fixstr(d.name)));
-        // jobNode_n.append('circle').attrs(
-        //     {'class':'computeSig',
-        //         'r': graphicopt.node.r
+
+        // jobNode_n.append('path')
+        //     .attrs(
+        //     {'class':'computeSig_b',
+        //         // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
+        //         'd': d=>spiral(backdround_spiral),
+        //         // 'stroke':'#ddd',
         //     });
-        jobNode_n.append('path')
-            .attrs(
-            {'class':'computeSig_b',
-                // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
-                'd': d=>spiral(backdround_spiral),
-                // 'stroke':'#ddd',
-            });
         jobNode_n.append('path')
             .attrs(
             {'class':'computeSig_sub submitTime',
@@ -481,9 +549,26 @@ let JobMap = function() {
                     graphicopt[i] = _[i];
                 }
             }
+            if (graphicopt.radaropt)
+                graphicopt.radaropt.schema = schema;
             return jobMap;
         }else {
             return graphicopt;
+        }
+
+    };
+
+    jobMap.runopt = function (_) {
+        //Put all of the options into a variable called graphicopt
+        if (arguments.length) {
+            for (let i in _) {
+                if ('undefined' !== typeof _[i]) {
+                    runopt[i] = _[i];
+                }
+            }
+            return jobMap;
+        }else {
+            return runopt;
         }
 
     };
@@ -502,6 +587,13 @@ let JobMap = function() {
 
     jobMap.hosts = function (a) {
         return arguments.length ? (hosts = _.cloneDeep( a),makeOb(), jobMap) : hosts;
+    };
+
+    jobMap.dataComp = function (_) {
+        return arguments.length ? (arr = _, jobMap) : arr;
+    };
+    jobMap.schema = function (_) {
+        return arguments.length ? (graphicopt.radaropt.schema = _,schema = _, jobMap) : schema;
     };
     return jobMap;
 };

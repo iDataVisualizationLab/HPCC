@@ -132,7 +132,7 @@ let layout = {
     HORIZONTAL : 1};
 
 var graphicControl ={
-    charType : "Area Chart",
+    charType : "None",
     sumType : "None",
     mode : layout.HORIZONTAL
 };
@@ -280,7 +280,7 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
-let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).init();
+let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt);
 var MetricController = radarController();
 let getDataWorker = new Worker ('../HiperView/myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
@@ -340,12 +340,14 @@ var gaphost = 7;
 function main() {
 
     inithostResults ();
+
+    jobMap.schema(serviceFullList).init()
+
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
         }});
     getDataWorker.addEventListener('message',({data})=>{
-        console.log(data)
         if (data.status==='done') {
             isbusy = false;
         }
@@ -365,10 +367,9 @@ function main() {
 
         }else if (data.action==='returnDataHistory'){
             if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
-                // if (graphicControl.charType === "T-sne Chart")
-                //     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                console.log(data.result.arr)
-                jobMap.dataComp(data.result.arr);
+                if (graphicControl.charType === "T-sne Chart")
+                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+                jobMap.dataComp(data.result.arr).drawComp();
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
@@ -691,15 +692,7 @@ function plotResult(result,name,index) {
     var hpcc_rack = hostList.data.hostlist[name].rack|| (+name.split("-")[1]);
     var hpcc_node = hostList.data.hostlist[name].node|| (+name.split("-")[2].split(".")[0]);
 
-    var xStart = getRackx(hpcc_rack,hpcc_node,graphicControl.mode)+15;
 
-    // var xStart = racks[hpcc_rack - 1].x+15;
-    if (graphicControl.mode===layout.HORIZONTAL)
-        xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size-20,node_size*maxstack)]); // output
-    else
-        xTimeScale.domain([0,1]).range([xStart, xStart+node_size]); // output
-    // .range([xStart, xStart+w_rack/2-2*node_size]); // output
-    var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
 
 
     // Process the array of historical temperatures ***************************************
@@ -718,6 +711,17 @@ function plotResult(result,name,index) {
     switch (graphicControl.charType) {
         case "Heatmap":
         case "Area Chart":
+            var xStart = getRackx(hpcc_rack,hpcc_node,graphicControl.mode)+15;
+
+            // var xStart = racks[hpcc_rack - 1].x+15;
+            if (graphicControl.mode===layout.HORIZONTAL)
+                xTimeScale.range([xStart, xStart+Math.min(w_rack/2-2*node_size-20,node_size*maxstack)]); // output
+            else
+                xTimeScale.domain([0,1]).range([xStart, xStart+node_size]); // output
+            // .range([xStart, xStart+w_rack/2-2*node_size]); // output
+            var y = getHostY(hpcc_rack,hpcc_node,hpcc_node%2);
+
+
             for (var i=startinde; i<r.arr.length;i++){
                 let a  = r.arr[i];
                 var obj = {};
@@ -744,6 +748,12 @@ function plotResult(result,name,index) {
             if (!speedup) {
                 getData(name,index||lastIndex,true,true);
             }
+            break;
+        default:
+            if (!speedup) {
+                getData(name,index||lastIndex,true,true);
+            }
+            break;
     }
 
 
@@ -1257,7 +1267,7 @@ function step (iteration, count){
                 hostResults[name][serviceListattr[s.index]].push(result);
             });
 
-            // plotResult(result, name,iteration);
+            plotResult(result, name,iteration);
             iteration++;
         }
         iteration = tmp;
@@ -1584,6 +1594,7 @@ function onSchemaUpdate(schema){
     TSneplot.schema(serviceFullList,firstTime);
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
     Radarplot.schema(serviceFullList,firstTime);
+    jobMap.schema(serviceFullList);
     if (!firstTime) {
         updateSummaryChartAll();
         MetricController.drawSummary();
