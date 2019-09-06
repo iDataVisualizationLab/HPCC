@@ -421,7 +421,7 @@ function drawsummarypoint(harr){
                 arrServices.name = name;
                 arr.push(arrServices);
             }
-            jobMap.dataComp_points(arr);
+            // jobMap.dataComp_points(arr);
             var h = harr[harr.length-1];
             var name = hosts[h].name;
             break;
