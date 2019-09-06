@@ -443,7 +443,7 @@ let JobMap = function() {
             let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
             let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
 
-            // _.pullAll(linkdata,hiddenlink); //delete hidden link
+            _.pullAll(linkdata,hiddenlink); //delete hidden link
 
             //recompute distance
             // let newrange = d3.extent(computers.data(),d=>d.y);
@@ -460,22 +460,23 @@ let JobMap = function() {
                 // .force("y", undefined);
             // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
             simulation.fistTime = false;
-            simulation.alphaTarget(0.5).restart();
+            simulation.alphaTarget(0.7).restart();
         }
 
-        function updaterow(path){
-            let rows = path.selectAll('.row').data(d=>[tableData[d.name]]);
-            rows.exit().remove();
-            let rows_n = rows.enter().append('g').attr('class', 'row')
-                .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
-            rows_n.append('rect').attrs({'class':'back-row','width':tableLayout.row.width,'height':tableLayout.row.height});
-            let cells = rows_n.merge(rows).selectAll('.cell').data(d=>d);
-            cells.exit().remove();
-            let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},${tableLayout.column[d.key].y})`);
-            cells_n.append('text');
-            cells.merge(cells_n).select('text').text(d=>d.value);
-        }
+
     };
+    function updaterow(path){
+        let rows = path.selectAll('.row').data(d=>[tableData[d.name]]);
+        rows.exit().remove();
+        let rows_n = rows.enter().append('g').attr('class', 'row')
+            .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
+        rows_n.append('rect').attrs({'class':'back-row','width':tableLayout.row.width,'height':tableLayout.row.height});
+        let cells = rows_n.merge(rows).selectAll('.cell').data(d=>d);
+        cells.exit().remove();
+        let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},${tableLayout.column[d.key].y})`);
+        cells_n.append('text');
+        cells.merge(cells_n).select('text').text(d=>d.value);
+    }
     let tableLayout = {
         row:{
             width: 500,
@@ -525,7 +526,7 @@ let JobMap = function() {
             d.unqinode.forEach(n=>{
                 d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
-
+            d.dataRaw = (g.selectAll('.userNode').filter(e=>e.name==d.name).data()[0]|| {dataRaw:[]}).dataRaw;
             tableData[d.name] =[{key:'hosts', value:d.unqinode.length},
                 {key:'jobs',value: d.values.length}];
             return d
@@ -556,6 +557,57 @@ let JobMap = function() {
         });
         return linkdata
     };
+    function handle_summary (data){
+        data.forEach(d=>{
+            hostOb[d.name].data.push(d); // add new data
+            if (hostOb[d.name].user)
+                hostOb[d.name].user.forEach(e=>{e.needRender = true; e.dataRaw.push(d)});
+        });
+        let user_update = g.selectAll('.userNode').filter(d=>d.needRender);
+        user_update.each(d=>{
+            let ob={};
+            schema.forEach((s,i)=>{
+                v = d.dataRaw.map(e=>e[i].value).filter(e=>e!==undefined).sort((a,b)=>a-b);
+                let r;
+                if (v.length){
+                    var x = d3.scaleLinear()
+                        .domain(d3.extent(v));
+                    var histogram = d3.histogram()
+                        .domain(x.domain())
+                        .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                        .value(d => d);
+                    let hisdata = histogram(v);
+
+                    let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
+                    r = {
+                        axis: s.text,
+                        q1: ss.quantileSorted(d,0.25) ,
+                        q3: ss.quantileSorted(d,0.75),
+                        median: ss.medianSorted(d) ,
+                        // outlier: ,
+                        arr: sumstat};
+                    if (d.length>4)
+                    {
+                        const iqr = r.q3-r.q1;
+                        r.outlier = _.uniq(d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr)));
+                    }else{
+                        r.outlier =  _.uniq(d);
+                    }
+                }else{
+                    r = {
+                        axis: s.text,
+                        q1: undefined ,
+                        q3: undefined,
+                        median: undefined ,
+                        outlier: [],
+                        arr: []};
+                }
+                tableData[d.name][i+2] = {key:r.axis,value:r};
+            })
+            // tableData[d.name] =[{key:'hosts', value:d.unqinode.length}
+        });
+        updaterow(user_update);
+    }
     let zoom_toogle=true;
     function zoom_func(val){
         zoom_toogle = val;
@@ -563,7 +615,7 @@ let JobMap = function() {
     };
     function makeOb (){
         hostOb={};
-        hosts.forEach(h=>hostOb[h.name]=h);
+        hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
     }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
@@ -615,6 +667,10 @@ let JobMap = function() {
 
     jobMap.dataComp = function (_) {
         return arguments.length ? (arr = _, jobMap) : arr;
+    };
+
+    jobMap.dataComp_points = function (_) {
+        return (handle_summary(_),jobMap);
     };
     jobMap.schema = function (_) {
         return arguments.length ? (graphicopt.radaropt.schema = _,schema = _, jobMap) : schema;

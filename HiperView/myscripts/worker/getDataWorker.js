@@ -71,14 +71,11 @@ addEventListener('message',function ({data}){
 let serviceFull_selected =[];
 function getsummaryservice(data){
     let dataf = _.reduce(_.chunk(_.unzip(data),serviceFull_selected.length),function(memo, num){ return memo.map((d,i)=>{d.push(num[i]); return _.flatten(d); })});
-    let ob = {}
+    let ob = {};
     dataf.forEach((d,i)=>{
-        d=d.filter(e=>e!=undefined).sort((a,b)=>a-b);
+        d=d.filter(e=>e!==undefined).sort((a,b)=>a-b);
         let r;
         if (d.length){
-
-            // kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(histodram.resolution));
-            // let sumstat = kde(d);
             var x = d3.scaleLinear()
                 .domain(d3.extent(d));
             var histogram = d3.histogram()
@@ -86,8 +83,6 @@ function getsummaryservice(data){
                 .thresholds(x.ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
                 .value(d => d);
             let hisdata = histogram(d);
-            // let y = d3.scaleLinear()
-            //     .domain([0,d3.max(hisdata,d=>(d||[]).length)]);
 
             let sumstat = hisdata.map((d,i)=>[d.x0+(d.x1-d.x0)/2,(d||[]).length]);
             r = {

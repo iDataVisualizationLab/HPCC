@@ -122,6 +122,7 @@ let radarDescription = function (){
 
     }
     function updatebubble(){
+        dialogvalue_arr = dialogvalue_arr.filter(d=>schema.find(e=>e.text===d.id));
         let dbox = div.selectAll('div.dialogScript')
             .data(dialogvalue_arr,d=>d.id);
 
@@ -155,8 +156,8 @@ let radarDescription = function (){
     master.div = function(_){
         return arguments.length?(div=_,master):div;
     }
-    master.description = function(_){
-        return arguments.length?(dialogvalue_arr=_,master):dialogvalue_arr;
+    master.description = function(v){
+        return arguments.length?(dialogvalue_arr=_.cloneDeep(v),master):dialogvalue_arr;
     }
     master.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt

@@ -27,7 +27,8 @@ let jobMap_opt = {
     },
 }
 let jobMap_runopt = {
-    compute:{type:'radar'}
+    compute:{type:'radar'},
+    histodram:{resolution:20}
 }
 function zoomtoogle(event) {
     let oldvval = d3.select(event).classed('lock');

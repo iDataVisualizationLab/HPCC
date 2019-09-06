@@ -414,6 +414,14 @@ function drawsummarypoint(harr){
             // Radarplot.data(arr).drawSummarypoint(lastIndex);
             break;
         default:
+            for (var i in harr) {
+                var h  = harr[i];
+                var name = hosts[h].name;
+                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
+                arrServices.name = name;
+                arr.push(arrServices);
+            }
+            jobMap.dataComp_points(arr);
             var h = harr[harr.length-1];
             var name = hosts[h].name;
             break;
