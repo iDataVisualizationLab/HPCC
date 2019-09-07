@@ -421,3 +421,7 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 table {
     word-break: break-all;
 }
+
+.row.s12 {
+    width:100%;
+}
