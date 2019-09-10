@@ -107,7 +107,9 @@ var charType = "Heatmap";
 var undefinedValue = undefined;
 //***********************
 var serviceList = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
-var serviceListattr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
+var serviceList_selected = ["Temperature","CPU_load","Memory_usage","Fans_speed","Power_consumption"];
+var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage","arrJob_scheduling"];
+var serviceAttr = {arrTemperature: {key: "Temperature", val: ["arrTemperatureCPU1","arrTemperatureCPU2"]},
     arrCPU_load: {key: "CPU_load", val: ["arrCPU_load"]},
     arrMemory_usage: {key: "Memory_usage", val: ["arrMemory_usage"]},
     arrFans_health: {key: "Fans_speed", val: ["arrFans_speed1","arrFans_speed2"]},
@@ -116,7 +118,7 @@ var serviceQuery = ["temperature","cpu+load" ,"memory+usage" ,"fans+health" ,"po
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var initialService = "Temperature";
 var selectedService = "arrTemperatureCPU1";
-
+// let processResult = processResult_old;
 
 
 // Controls
@@ -223,11 +225,11 @@ function loadJSON()
     {
         var name = hosts[count].name;
         json[name] = {};
-        d3.keys(serviceListattr).forEach(d=>serviceListattr[d].val.forEach(e=>json[name][e]=[]));
+        d3.keys(serviceAttr).forEach(d=>serviceAttr[d].val.forEach(e=>json[name][e]=[]));
         for (iteration = 0; iteration<sampleS[name].arrTemperature.length; iteration++){
             step(iteration, count);
-            for (key in serviceListattr){
-                var attrkey = serviceListattr[key];
+            for (key in serviceAttr){
+                var attrkey = serviceAttr[key];
                 var result = processData(hostResults[name][key][iteration].data.service.plugin_output, attrkey.key);
                 attrkey.val.forEach((d,i)=>{
                     json[name][d].push(result[i]);

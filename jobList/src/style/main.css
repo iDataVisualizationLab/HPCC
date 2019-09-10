@@ -1,0 +1,226 @@
+:root {
+    --sideNavwidth: 400px;
+}
+
+svg.mainsvg {
+    background-color: white;
+}
+svg#jobmap {
+    background-color: white;
+}
+
+.sumdrag {
+    position: absolute;
+    /*transform: translate(-50%, -50%);*/
+    /*left: calc(50% - 300px);*/
+    /*top: calc(50% - 300px);  */
+    left: calc(100% - 600px - 20px);
+    top: calc(100% - 600px - 20px);
+    z-index: 9;
+
+}
+
+.tablesvg {
+    position: absolute;
+    max-height: 500px;
+    overflow-y: auto;
+    transition-duration: 1s;
+    background-color: #dddd;
+    color:black;
+}
+.tablesvg table {
+    /*table-layout: fixed;*/
+    border-collapse: collapse;
+    width:100%;
+}
+.tablesvg thead {
+    display: none;
+}
+.tablesvg tr td{
+    text-align: right;
+}
+.tablesvg tr td:first-child
+{
+    text-align: left;
+}
+.tablesvg col.num{
+    width: 60px;
+}
+.tablesvg tr td {
+    width: auto;
+}
+.tablesvg  tr:nth-child(even) {background-color: #f2f2f2;}
+
+.tablesvg tr.highlight{
+    background-color: #666666;
+    color: white;
+}
+button.play i:after{
+    content: 'play_arrow';
+    animation:  bounceIn 2s ease-in-out 3s 2;
+}
+button.play{
+    animation:  bounceIn 2s ease-in-out 3s 2;
+}
+button.play.pause i:after{
+    content: 'pause'
+}
+
+.pulse_custom {
+    box-shadow: 0 0 0 rgba(204,169,44, 0.4);
+    animation: pulse 2s infinite;
+}
+.pulse_custom:hover {
+    animation: none;
+}
+@-webkit-keyframes pulse {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(38, 255, 203, 0.8);
+    }
+    70% {
+        -webkit-box-shadow: 0 0 0 10px rgba(38, 204, 176, 0);
+    }
+    100% {
+        -webkit-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+    }
+}
+@keyframes pulse {
+    0% {
+        -moz-box-shadow: 0 0 0 0 rgba(62, 255, 236, 0.8);
+        box-shadow: 0 0 0 0 rgba(41, 255, 211, 0.4);
+    }
+    70% {
+        -moz-box-shadow: 0 0 0 10px rgba(38, 204, 176, 0);
+        box-shadow: 0 0 0 10px rgba(38, 204, 176, 0.1);
+    }
+    100% {
+        -moz-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+        box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+    }
+}
+
+span.thumb {
+    display: none;
+}
+
+.axisWrapper line.highlight {
+    stroke: black!important;
+    stroke-dasharray: 4;
+}
+#radarzoomdisplay:after{
+    content: 'px';
+}
+/*.radarCluster .radarStroke{*/
+    /*stroke: black !important;*/
+    /*stroke-width: 1px;*/
+    /*stroke-dasharray: 4;*/
+/*}*/
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: unset;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar
+{
+    width: 8px;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb
+{
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+}
+
+.computeNode.hightlight,.links.hightlight {
+    opacity: 1;
+}
+.userNode.hightlight {
+    opacity: 1;
+}
+.fade {
+    opacity: 0.2;
+}
+
+.pantarget.lock{
+    pointer-events: none;
+}
+
+.timebox:before {
+    content: "Current time:";
+}
+
+.float_left {
+    position: absolute;
+    left:0;
+    top:0;
+    margin: 10px;
+}
+/*#job_zoom i {*/
+    /*margin: 0;*/
+/*}*/
+/*#job_zoom i:before{*/
+    /*content: 'zoom_out_map';*/
+    /*margin: 0;*/
+/*}*/
+#job_zoom:after {
+    content: 'on';
+}
+#job_zoom.lock:after {
+    content: 'off';
+}
+
+#job_zoom.lock {
+    background-color: #777777;
+}
+
+.computeSig_sub.submitTime {
+    stroke: black;
+    stroke-dasharray: 1;
+}
+
+.computeSig_start.timeBoxRunning {
+    stroke: black;
+    stroke-width: 1.5;
+}
+.computeSig_b {
+    stroke:white;
+}
+
+.computeSig_label {
+    /*stroke:#000000;*/
+    stroke-width:1px;
+    stroke-linecap:butt;
+    stroke-linejoin:miter;
+    stroke-opacity:1;
+    paint-order: stroke;
+}
+.hightlight .computeSig_label{
+    display: block;
+}
+
+.row .back-row{
+    fill: #ededed;
+    stroke: #777777;
+}
+
+.row .cell.num{
+    text-anchor: end;
+}
+
+/*.row .cell.header{*/
+    /*text-anchor: middle;*/
+/*}*/
+
+.hisin rect {
+    stroke: black;
+    stroke-width: 0.5;
+}
+
+.lineMean{
+    stroke: black;
+    stroke-dasharray: 2;
+}

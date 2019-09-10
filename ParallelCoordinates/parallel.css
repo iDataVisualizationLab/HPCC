@@ -42,6 +42,7 @@ canvas, svg {
 }
 #chart {
     position: relative;
+    overflow: auto;
 }
 .light .brush rect.selection {
     fill: rgba(100,100,100,0.15);
@@ -434,8 +435,9 @@ nav ul li.active a{
     border-bottom: 5px solid #505050;
 }
 
-.axisActive .label{
+.axisActive .label, .axisActive td{
     fill: #5ae !important;
+    color: #5ae;
 }
     .page-footer {
         background-color: #ffffff0f;
@@ -605,4 +607,8 @@ nav ul li.active a{
 
 [tooltip]:hover::after,[tooltip]:hover::before {
     opacity:1
+}
+
+table .disable {
+    color: rgba(255, 255, 255, 0.39);
 }

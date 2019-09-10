@@ -1,0 +1,157 @@
+/*
+Template name: Twilight
+Template URI: http://templates.arcsin.se/twilight-website-template/
+Release date: 2006-11-21
+Description: A dark and mysterious single column template.
+Author: Viktor Persson
+Author URI: http://arcsin.se/
+
+This template is licensed under a Creative Commons Attribution 2.5 License:
+http://templates.arcsin.se/license/
+*/
+
+/* standard elements */
+
+body {
+	background: #000 url(./pattern3.jpg) repeat;
+    color: #000;
+	margin: 0;
+    width: 100%; 
+    height: 100%;
+    overflow: visible;
+}
+
+h1 {
+    font-size: 1.5em;
+	margin-top: 3px;
+    margin-bottom: 2px;
+	padding-top: 0px;
+    padding-bottom: 0px;
+    color: #000;
+	text-align: center;
+}
+
+h2 {
+    font-size: 1.0em;
+    margin-top: 3px;
+	margin-bottom: 2px;
+	color: #000;
+	padding-top: 0px;
+    padding-left: 0px;
+    text-align: center;
+    font: normal 100% "sans-serif",sans-serif;
+}
+
+h3 {
+    font-size: 1.2em;
+	margin-bottom: 6px;
+    margin-top: 1px;
+    padding-top: 5px;
+    color: #888;
+	border-bottom: 1px dotted rgba(110, 110, 110, 0.9);
+}
+
+h4 {
+    font-size: 1.1em;
+    margin-bottom: 6px;
+    margin-top: 1px;
+    padding-top: 5px;
+    color: #888;
+}
+
+ol {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    margin-left: 6px;
+    overflow: hidden;
+}
+
+ul {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-left: 5px;
+    overflow: hidden;
+}
+
+
+a {
+    color: #008;
+    text-decoration: none;
+}
+
+a:hover {color: #44F;
+    text-decoration: underline;
+}
+
+
+nav {
+    color: #000;
+    font-size: 16px;  
+    text-align: center;
+}
+
+nav ul {
+    background: #333; 
+    padding: 0 0 0px;
+    list-style: none;
+    position: relative;
+    display: inline-table;
+    border-radius: 4px;
+}
+    
+nav ul li {
+    float: left;
+    border: 1px solid;
+}
+nav ul li:hover {
+    background: #cce2ff;
+}
+
+nav ul li a {
+    display: block; padding: 5px 30px;
+}
+        
+   
+        
+        
+.container {
+	margin: 0 auto;
+	width: 90%;
+}
+
+
+/* holders */
+.holder {
+	padding: 15 15 15 15px;
+	background: #fff;
+	padding-bottom: 0px;
+	padding-left: 20px;
+	padding-right: 20px;
+	 font-weight: normal;
+    
+}
+
+
+.footer {
+	clear: both;
+	height: 0px;
+}
+
+
+/* footer */
+.footer {
+	border-bottom: 1px;
+	background-position: left bottom;
+	color: #776;
+	font-size: 0.8em;
+	padding: 0px 30px 0;
+}
+.footer .right, .footer .right a {color: #443;}
+.footer .right a:hover {color: #665;}
+
+/* floats */
+.left {float: left;}
+.right {float: right;
+	font: normal 100% "Lucida Sans Unicode",sans-serif;
+	}
+.clearer {clear: both;}

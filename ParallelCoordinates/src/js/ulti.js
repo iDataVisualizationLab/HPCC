@@ -1,11 +1,35 @@
-/// drawLegend *****************************************************************
-let legendw= 80;
-let legendh= 20;
-let barw = 300;
-let barScale = d3.scaleLinear();
+//
+
+
+function checkConf(namekey) {
+    var retrievedObject = localStorage.getItem(namekey);
+    if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
+        conf[namekey] = JSON.parse(retrievedObject);
+        console.log('retrievedObject: ', JSON.parse(retrievedObject));
+    } else {
+        saveConf(namekey);
+    }
+}
+
+function saveConf(namekey) {
+    localStorage.setItem(namekey, JSON.stringify(conf[namekey]));
+}
+
+function openNav() {
+    d3.select("#mySidenav").classed("sideIn",true);
+    d3.select("#Maincontent").classed("sideIn",true);
+    // _.delay(resetSize, 500);
+}
+
+function closeNav() {
+    d3.select("#mySidenav").classed("sideIn",false);
+    d3.select("#Maincontent").classed("sideIn",false);
+    // _.delay(resetSize, 500);
+}
+
 function drawLegend(s,arrThresholds, arrColor, dif){
     colorbyValue(orderLegend);
-    legendw =svgLengend.node().parentElement.offsetWidth;
+    legendw =400;
     legendh =arrThresholds.length*20;
     let m = {l:40,r:0,t:10,b:10}; // magrin
     let lh = legendh - m.t -m.b;
@@ -52,16 +76,15 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             .style('fill', 'url(#gradient)');
 
     svgLengend.attr("height", legendh).attr("width", legendw);
-
+    /*
     var legend_data = lg
         .selectAll(".row")
         .data( colors.domain(),d=>d);
-        // .data( arrThresholds.slice(1) );
     let arr = arrThresholds.slice();
     let smallarr = arr[0] - arr[1]+arr[0];
         arr = arr.reverse();
     let revertThreshold = arr.slice(1);
-    revertThreshold.push(smallarr)
+    revertThreshold.push(smallarr);
     var legendAll = legend_data.join(
         enter=>{
             let legend = enter.append("g")
@@ -121,6 +144,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
     });
 
     return lg.selectAll(".row");
+    */
 }
 
 function linspace(start, end, n) {
@@ -150,4 +174,13 @@ function switchTheme(){
     d3.select('body').classed('light',true);
     d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");
     return;
+}
+function discovery(d){
+    d3.select(d).style('left','20px')
+        .classed("pulse",true)
+        .transition().delay(5000).duration(1000)
+        .style('left',null).on('end',function() {
+        d3.select(d).classed("pulse",false);
+    });
+
 }

@@ -1,0 +1,137 @@
+body {
+    font-family: Monospace;
+    background-color: #101010;
+    /*color: #fff;*/
+    color: #000000;
+    margin: 0px;
+    overflow: hidden;
+}
+a {
+    color: #48f;
+}
+#blocker {
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+    /*background-color: rgba(0,0,0,0.5);*/
+}
+#instructions {
+    width: 1024px;
+    height: 1024px;
+    display: -webkit-inline-block;
+    display: -moz-inline-block;
+    display: inline-block;
+    -webkit-box-orient: horizontal;
+    -moz-box-orient: horizontal;
+    box-orient: horizontal;
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    box-pack: center;
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    box-align: center;
+    color: #ffffff;
+    text-align: center;
+    cursor: pointer;
+    z-index: -1;
+}
+#debug {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+#instructions path {
+    fill-opacity: 0 !important;
+    fill: none;
+}
+#instructions button {
+    width: 64px;
+    height: 32px;
+}
+
+
+
+
+
+.slidecontainer {
+    width: 100%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 50%;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+
+.d3-tip {
+    line-height: 1;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #000;
+    border: 1px solid rgba(0,0,0, 1);
+    border-radius: 10px;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+
+.d3-tip .playbtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transform: translate(-10px, 10px);
+    -ms-transform: translate(-10px, 10px);
+    background-color: #66b215;
+    color: #ffffff;
+    font-size: 11px;
+    padding: 11px 11px;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    text-align: center;
+    width: 32px !important;
+}
+.d3-tip .playbtn.playing{
+    background-color: #b20f02;
+}
+.d3-tip .playbar{
+    stroke: black;
+    stroke-dasharray: 2,2;
+}

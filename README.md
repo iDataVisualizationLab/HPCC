@@ -1,7 +1,10 @@
 
 # 2019
 
-HiperView :  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+HiperView Current:  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
+
+HiperView release 0619: https://idatavisualizationlab.github.io/HPCC/HiperView20190531/demo.html
+
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/HiperView.png)
 
 Phase Space: https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html
@@ -12,6 +15,9 @@ Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 
 Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ParrallelCoordinate.png)
+
+ClusterView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
 
 # 2018
 
@@ -35,5 +41,6 @@ September 26, 2018:
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/Picture1.png)
 
 
-
+### job_scheduling: https://idatavisualizationlab.github.io/HPCC/job_scheduling/
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/job_scheduling/images/users.png)
 

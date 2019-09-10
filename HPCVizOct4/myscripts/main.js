@@ -1296,7 +1296,7 @@ function resetRequest(){
 
 function addDatasetsOptions() {
     var select = document.getElementById("datasetsSelect");
-    for(var i = 0; i < serviceList.length; i++) {
+    for(var i = 0; i < serviceList_selected.length; i++) {
         var opt = serviceList[i];
         var el = document.createElement("option");
         el.textContent = opt;

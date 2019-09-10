@@ -189,7 +189,7 @@ function initTimeControlPanel()
 
         cover.translateZ( extrudeSettings.depth * 2 );
         cover.rotateX( Math.PI / 2 );
-        addTimeWire( cover );
+        // addTimeWire( cover );
         time_control_panel.add( cover );
     }
 
@@ -200,7 +200,7 @@ function initTimeControlPanel()
         var button = new THREE.Mesh( geometry, material );
         button.translateZ( extrudeSettings.depth * 5 );
         button.rotateX( Math.PI / 2 );
-        addTimeWire( button );
+        // addTimeWire( button );
 
         var loader = new THREE.FontLoader();
         var text_material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
