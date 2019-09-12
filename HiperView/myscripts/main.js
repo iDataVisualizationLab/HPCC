@@ -2016,12 +2016,14 @@ $( document ).ready(function() {
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");
         graphicControl.charType = sect.options[sect.selectedIndex].value;
+        controlView(graphicControl);
     });
 
     d3.select('#summaryType_control').on("change", function () {
         var sect = document.getElementById("summaryType_control");
         graphicControl.sumType = sect.options[sect.selectedIndex].value;
         svg.select(".graphsum").remove();
+        controlView(graphicControl);
         pannelselection(false);
         updateSummaryChartAll();
     });
@@ -2176,8 +2178,8 @@ $( document ).ready(function() {
                 hostList = data;
                 inithostResults();
 
-            graphicControl.charType =  d3.select('#chartType_control').node().value;
-            graphicControl.sumType =  d3.select('#summaryType_control').node().value;
+            d3.select('#chartType_control').dispatch('change');
+            d3.select('#summaryType_control').dispatch('change');
             let choiceinit = d3.select('#datacom').node().value;
             if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
                 // d3.select(".currentDate")

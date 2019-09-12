@@ -817,3 +817,27 @@ function concaveHull() {
 
     return concaveHull
 };
+function controlView(config){
+    switch(config.charType){
+        case 'T-sne Chart':
+            d3.selectAll('.radarcontroller_layout').classed('hide',false);
+            d3.selectAll('.singleservice_layout').classed('hide',true);
+            break;
+        default:
+            d3.selectAll('.singleservice_layout').classed('hide',false);
+            d3.selectAll('.radarcontroller_layout').classed('hide',true);
+            break;
+    }
+    switch(config.sumType){
+        case 'RadarSummary':
+        case 'Radar':
+            d3.selectAll('.radarcontroller_layout').classed('hide',false);
+            break;
+        case 'Boxplot':
+            d3.selectAll('.singleservice_layout').classed('hide',false);
+            break;
+        default:
+
+            break;
+    }
+}

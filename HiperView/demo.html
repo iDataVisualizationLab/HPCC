@@ -116,8 +116,9 @@
                     <div class="row s12 hidden">
                         <input id="data_input_file" class="none" type="file" />
                     </div>
-                    <label for="datasetsSelect" class="col s5"> Visualizing: </label>
-                    <div  class="row s12">
+
+                    <label for="datasetsSelect" class="col s5 singleservice_layout" > Visualizing: </label>
+                    <div  class="row s12 singleservice_layout">
                         <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
                             <span class="title"></span>
@@ -144,17 +145,17 @@
                             <option value="T-sne Chart" selected="selected">t-SNE Chart</option>
                         </select>
                     </div>
-                    <label for="clusterDisplay" class="col s5"> Cluster Display: </label>
-                    <div  class="row s12">
-                        <!--<select id="clusterMaster" class="col s7">-->
+                    <!--<label for="clusterDisplay" class="col s5"> Cluster Display: </label>-->
+                    <!--<div  class="row s12">-->
+                        <!--&lt;!&ndash;<select id="clusterMaster" class="col s7">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<option value="convex" >Convex Hull</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<option value="alpha" selected="selected">Alpha shape</option>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                        <!--<select id="clusterDisplay" class="col s7">-->
                             <!--<option value="convex" >Convex Hull</option>-->
                             <!--<option value="alpha" selected="selected">Alpha shape</option>-->
                         <!--</select>-->
-                        <select id="clusterDisplay" class="col s7">
-                            <option value="convex" >Convex Hull</option>
-                            <option value="alpha" selected="selected">Alpha shape</option>
-                        </select>
-                    </div>
+                    <!--</div>-->
                     <!--<label for="clusterProject" class="col s5"> Cluster Projection: </label>-->
                     <!--<div  class="row s12">-->
                         <!--<select id="clusterProject" class="col s7">-->
@@ -162,9 +163,9 @@
                             <!--<option value="dbscan">DBScan</option>-->
                         <!--</select>-->
                     <!--</div>-->
-                    <label for="clusterMethod" class="col s5"> Cluster Method: </label>
+                    <label for="clusterMethod" class="col s5 radarcontroller_layout"> Cluster Method: </label>
                     <div  class="row s12">
-                        <select id="clusterMethod" class="col s7">
+                        <select id="clusterMethod" class="col s7 radarcontroller_layout">
                             <option value="leaderbin" selected="selected">Leader Bin</option>
                             <option value="kmean">K-mean</option>
                         </select>
@@ -178,11 +179,11 @@
                         <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
                         </div>
                     </div>
-                    <div class="row s12">
+                    <div class="row s12 singleservice_layout">
                         <div id="legendHolder"  class="legendHolder">
                         </div>
                     </div>
-                    <div class="row s12 no_magrin">
+                    <div class="row s12 no_magrin radarcontroller_layout">
                         <ul class="collapsible insideSetting ">
                             <li id="RadarColor">
                                 <div class="collapsible-header">
@@ -234,7 +235,7 @@
                     <!--</div>-->
                 </div>
             </li>
-            <li>
+            <li class="radarcontroller_layout">
                 <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
                 <div class="collapsible-body">
                     <div id="RadarController"></div>
