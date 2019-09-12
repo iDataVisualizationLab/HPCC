@@ -210,3 +210,17 @@ span.thumb {
 .row .cell.num{
     text-anchor: end;
 }
+
+/*.row .cell.header{*/
+    /*text-anchor: middle;*/
+/*}*/
+
+.hisin rect {
+    stroke: black;
+    stroke-width: 0.5;
+}
+
+.lineMean{
+    stroke: black;
+    stroke-dasharray: 2;
+}

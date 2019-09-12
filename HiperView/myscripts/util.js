@@ -66,7 +66,7 @@ function hue(hhh) {
         handle.attr("cx", 0);
     else
         handle.attr("cx", xx);
-  
+
     if (firstTime==false){
         for (var name in hostResults) {
             var r = hostResults[name];
@@ -156,7 +156,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             else
                 return Math.round(d);
         });
-    
+
     svgLengend.selectAll(".legendText2").remove();
     svgLengend.selectAll(".legendText2")
         .data(arrThresholds)
@@ -179,7 +179,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
                     return "";
                 else if (selectedService==serviceList[2] && i==1)   // No lower bound for Memory usage
                     return "";
-                else 
+                else
                     return "Critical";
             }
             else if (i==3)
@@ -187,7 +187,7 @@ function drawLegend(s,arrThresholds, arrColor, dif){
             else
                 return "";
         });
-    
+
     svgLengend.selectAll(".legendText1").remove();
     svgLengend.append("text")
         .attr("class", "legendText1")
@@ -265,7 +265,7 @@ function saveResults(){
 
     var str = JSON.stringify(clone_hostResults);
 
-    
+
     var file = new Blob([str], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename+'.'+type);
@@ -278,8 +278,8 @@ function saveResults(){
         a.click();
         setTimeout(function() {
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
+            window.URL.revokeObjectURL(url);
+        }, 0);
     }
     if (validJobInfo){
         var str = JSON.stringify(jobarr);
@@ -616,12 +616,29 @@ function changeRadarColor(d) {
         .select('.collapsible-header .colorscale-block').datum(d)
         .call(createColorbox);
     arrColor=d.arrColor;
+    updateColorScale();
     UpdateGradient(svg);
+}
+let colorTemperature;
+function updateColorScale(){
+    let colorLength = arrColor.length-1;
+    var dif = 1 / (TsnePlotopt.radaropt.levels-2);
+    var right = 1 + dif;
+    let arrThresholds = [-dif];
+    for (var i=0;i<colorLength-1;i++)
+        arrThresholds.push(i*dif);
+    arrThresholds.push(right);
+    colorTemperature = d3.scaleLinear()
+        .domain(arrThresholds)
+        .range(arrColor)
+        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
 }
 function onClickRadarColor (d){
     changeRadarColor(d);
-    TSneplot.RadarColor(d);
+    if (jobMap)
+        jobMap.color(colorTemperature);
     MetricController.updatecolor(arrColor);
+    TSneplot.RadarColor(d);
 }
 
 function discovery(d){

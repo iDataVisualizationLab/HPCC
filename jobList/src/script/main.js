@@ -180,7 +180,8 @@ let colorScaleList = {
 },colorArr = {Radar: [
         {val: 'rainbow',type:'custom',label: 'Rainbow'},
         {val: 'RdBu',type:'d3',label: 'Blue2Red',invert:true},
-        {val: 'soil',type:'custom',label: 'RedYelBlu'},],
+        {val: 'soil',type:'custom',label: 'RedYelBlu'},
+        {val: 'Viridis',type:'d3',label: 'Viridis'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 
 var arrThresholds;
@@ -188,7 +189,8 @@ var dif, mid,left;
 var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
 // var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
-let arrColor = colorScaleList.customFunc('rainbow');
+// let arrColor = colorScaleList.customFunc('rainbow');
+let arrColor = colorScaleList.d3colorChosefunc('Viridis');
 
 setColorsAndThresholds(initialService);
 
@@ -341,7 +343,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.schema(serviceFullList).init()
+    jobMap.color(colorTemperature).schema(serviceFullList).init()
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -414,6 +416,7 @@ function drawsummarypoint(harr){
             // Radarplot.data(arr).drawSummarypoint(lastIndex);
             break;
         default:
+            jobMap.getharr(harr);
             for (var i in harr) {
                 var h  = harr[i];
                 var name = hosts[h].name;
@@ -421,7 +424,7 @@ function drawsummarypoint(harr){
                 arrServices.name = name;
                 arr.push(arrServices);
             }
-            // jobMap.dataComp_points(arr);
+            jobMap.dataComp_points(arr);
             var h = harr[harr.length-1];
             var name = hosts[h].name;
             break;
@@ -496,6 +499,7 @@ function request(){
                 bin.data([]);
                 currentlastIndex = iteration+iterationstep-1;
                 // drawsummary();
+                jobMap.setharr([]);
                 lastIndex = currentlastIndex+1;
 
                 count = 0;
@@ -1335,7 +1339,7 @@ $( document ).ready(function() {
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
-    changeRadarColor(colorArr.Radar[0]);
+    changeRadarColor(colorArr.Radar[3]);
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 

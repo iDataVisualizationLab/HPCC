@@ -49,7 +49,7 @@ d3.viiolinChart = function () {
         .x1(function(d){ return(xNum(d[1])) } )
         .y(function(d){ return(h(d[0])) } )
         // .curve(d3.curveLinear)
-        .curve(d3.curveCardinal.tension(0.5))
+        .curve(d3.curveCardinal.tension(0.3))
     ;
     let circleoption = function (d){
         return {
@@ -67,19 +67,23 @@ d3.viiolinChart = function () {
                 .attrs({
                     x2: h(1),
                 })
+                .styles(graphicopt.middleAxis)
+            ;
 
-            axisg.append('line').attr('class','tick')
-                .attrs({
-                    y1: -5,
-                    y2: 5,
-                })
-            axisg.append('line').attr('class','tick')
-                .attrs({
-                    x2: h(1),
-                    x1: h(1),
-                    y1: -5,
-                    y2: 5,
-                })
+            if(graphicopt.tick===undefined || graphicopt.tick.visibile!= false) {
+                axisg.append('line').attr('class', 'tick')
+                    .attrs({
+                        y1: -5,
+                        y2: 5,
+                    })
+                axisg.append('line').attr('class', 'tick')
+                    .attrs({
+                        x2: h(1),
+                        x1: h(1),
+                        y1: -5,
+                        y2: 5,
+                    })
+            }
         }
         let viol_chart = contain.selectAll('.violin').data(arr);
         viol_chart.exit().remove();
@@ -90,8 +94,8 @@ d3.viiolinChart = function () {
         viol_n.append("path");
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
-            // .style('fill','black')
-            .style('fill','currentColor')
+            .style('fill','black')
+            // .style('fill','currentColor')
             .attr("d",d=> crateviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
         );
 
@@ -147,18 +151,22 @@ d3.viiolinChart = function () {
             kde = kernelDensityEstimator(kernelEpanechnikov(.2), h.ticks(graphicopt.opt.resolution));
             let sumstat = data.map(d => kde(d));
         }
-        var maxNum = 0
-        for (i in sumstat) {
-            allBins = sumstat[i].arr;
-            kdeValues = allBins.map(function (a) {
-                return a[1]
-            });
-            biggest = d3.max(kdeValues)
-            if (biggest > maxNum) {
-                maxNum = biggest
+        if (rangeY){
+            xNum.domain(rangeY);
+        }else{
+            var maxNum = 0
+            for (i in sumstat) {
+                allBins = sumstat[i].arr;
+                kdeValues = allBins.map(function (a) {
+                    return a[1]
+                });
+                biggest = d3.max(kdeValues)
+                if (biggest > maxNum) {
+                    maxNum = biggest
+                }
             }
+            xNum.domain([0, maxNum]);
         }
-        xNum.domain([0, maxNum]);
         return sumstat;
     }
 
@@ -188,6 +196,11 @@ d3.viiolinChart = function () {
 
     viiolinplot.svg = function (_) {
         return arguments.length ? (svg = _, viiolinplot) : svg;
+
+    };
+    let rangeY;
+    viiolinplot.rangeY = function (_) {
+        return arguments.length ? (rangeY = _, viiolinplot) : rangeY;
 
     };
 
