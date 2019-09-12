@@ -528,14 +528,20 @@ let JobMap = function() {
         let rows_n = rows.enter().append('g').attr('class', 'row')
             .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
         // rows_n.append('rect').attrs({'class':'back-row','width':tableLayout.row.width,'height':tableLayout.row.height});
-        let cells = rows_n.merge(rows).selectAll('.cell').data(d=>d);
+        let cells = rows_n.merge(rows).selectAll('.cell').data(d=>d,d=>d.key);
         cells.exit().remove();
 
         let cellsText = cells.filter(d=>tableLayout.column[d.key].type!=='graph');
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},${tableLayout.column[d.key].y})`);
         let cellsText_n = cells_n.filter(d=>tableLayout.column[d.key].type!=='graph');
         cellsText_n.append('text');
-        cellsText.merge(cellsText_n).select('text').text(d=>d.value);
+        cellsText=cellsText.merge(cellsText_n).select('text').text(d=>{
+            let custom = tableLayout.column[d.key].format;
+            if (custom)
+                return d3.format(custom)(d.value);
+            else
+                return d.value;
+        });
 
         let cellsGraph = cells.filter(d=>tableLayout.column[d.key].type==='graph');
         let cellsGraph_n = cells_n.filter(d=>tableLayout.column[d.key].type==='graph');
@@ -648,6 +654,7 @@ let JobMap = function() {
     function handle_summary (data){
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
         let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
+        g.selectAll('.userNode').each(d=>d.needRender=false)
         data.forEach(d=>{
             hostOb[d.name].data.push(d); // add new data
             if (hostOb[d.name].user) {
@@ -669,7 +676,7 @@ let JobMap = function() {
             tableFooter[i+3] = {key:r.axis,value:r};
         });
         let user_update = g.selectAll('.userNode').filter(d=>d.needRender);
-
+        let rangechange = false;
         function getViolinData(d, i, s) {
             v = d.dataRaw.map(e => e[i].value).filter(e => e !== undefined).sort((a, b) => a - b);
             let r;
@@ -719,8 +726,11 @@ let JobMap = function() {
                 r.point = [];
                 r.outlier = [];
                 sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
-                if(d.type)
-                    violinRange [1] = Math.max(violinRange [1], d3.max(sumstat, e => e[1]));
+                const localmax = d3.max(sumstat, e => e[1]);
+                if(d.type && localmax>violinRange [1]) {
+                    violinRange [1] = localmax;
+                    rangechange = true;
+                }
                 r.arr = sumstat;
             } else {
                 r = {
@@ -745,7 +755,11 @@ let JobMap = function() {
             tableData[d.name][schema.length+2] = {key:'PowerUsage',value:d.PowerUsage.kwh};
             // tableData[d.name] =[{key:'hosts', value:d.unqinode.length}
         });
-        updaterow(g.selectAll('.userNode'));
+
+        user_update.selectAll('text').interrupt().selectAll("*").interrupt();
+        user_update.selectAll('text').styles({'stroke': 'yellow','stroke-opacity': 1}).transition().duration(2000).styles({'stroke-opacity': 0});
+
+        updaterow(rangechange?g.selectAll('.userNode'):user_update);
         table_footer(nodeg.select('.table.footer'));
     }
     let zoom_toogle=true;
@@ -764,7 +778,7 @@ let JobMap = function() {
             tableLayout.row.width = 150+(i+1)*tableLayout.row["graph-width"];
             tableHeader.push({key:d.text, value:d.text});
         })
-        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num' ,x: tableLayout.row.width+100,y:20};
+        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+100,y:20};
         tableLayout.row.width = tableLayout.row.width+100;
         tableHeader.push({key:'PowerUsage', value:'PowerUsage'});
     }

@@ -86,6 +86,7 @@ d3.histChart = function () {
         let line = g.selectAll('.lineMean').data([arr[0].mean]);
         line.exit().remove();
         line.enter().append('line').attr('class','lineMean')
+            .merge(line)
             .attrs({
                 x2: d=>h(d),
                 x1: d=>h(d),
