@@ -817,6 +817,38 @@ function concaveHull() {
 
     return concaveHull
 };
+function truncate (text) {
+    text.each(function() {
+        var text = d3.select(this);
+        var words = text.text().split(/\s+/);
+
+        var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...');
+        var width = parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
+        var numWords = words.length;
+
+        var tspan = text.insert('tspan', ':first-child').text(words.join(' '));
+
+        // Try the whole line
+        // While it's too long, and we have words left, keep removing words
+        let old_words ='';
+        while (tspan.node().getComputedTextLength() > width && words.length) {
+            old_words = words.pop();
+            tspan.text(words.join(' '));
+        }
+
+        if (words.length === numWords) {
+            ellipsis.remove();
+        }else{
+            if (old_words!=='')
+                old_words = old_words.split('');
+                tspan.text(words.join(' ')+' '+old_words.join(''));
+                while (tspan.node().getComputedTextLength() > width && old_words.length) {
+                    old_words.pop();
+                    tspan.text(words.join(' ')+' '+old_words.join(''));
+                }
+        }
+    });
+}//wrap
 function controlView(config){
     switch(config.charType){
         case 'T-sne Chart':

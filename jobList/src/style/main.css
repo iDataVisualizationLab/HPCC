@@ -7,6 +7,7 @@ svg.mainsvg {
 }
 svg#jobmap {
     background-color: white;
+    paint-order: stroke;
 }
 
 .sumdrag {

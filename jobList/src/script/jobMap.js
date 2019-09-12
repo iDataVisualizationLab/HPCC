@@ -496,8 +496,8 @@ let JobMap = function() {
         cells.exit().remove();
 
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},20)`);
-        cells_n.append('text').styles({'font-weight':'bold'});
-        cells.merge(cells_n).select('text').text(d=>d.value);
+        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']});
+        cells.merge(cells_n).select('text').text(d=>d.value).call(truncate);
 
     }
     function table_footer(path){
@@ -555,7 +555,7 @@ let JobMap = function() {
         row:{
             width: 500,
             height: 20,//deltey,
-            'graph-width': 100,
+            'graph-width': 80,
         },
         column:{
             'userID': {id:'userID',type:'text',x: 10,y:20},
@@ -758,7 +758,7 @@ let JobMap = function() {
         });
 
         user_update.selectAll('text').interrupt().selectAll("*").interrupt();
-        user_update.selectAll('text').styles({'stroke': 'yellow','stroke-opacity': 1}).transition().duration(2000).styles({'stroke-opacity': 0});
+        user_update.selectAll('text').styles({'stroke': 'yellow','stroke-opacity': 1}).transition().duration(3000).styles({'stroke-opacity': 0});
 
         updaterow(rangechange?g.selectAll('.userNode'):user_update);
         table_footer(nodeg.select('.table.footer'));
@@ -780,8 +780,8 @@ let JobMap = function() {
             tableHeader.push({key:d.text, value:d.text});
         })
         tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+100,y:20};
-        tableLayout.row.width = tableLayout.row.width+100;
-        tableHeader.push({key:'PowerUsage', value:'PowerUsage'});
+        tableLayout.row.width = tableLayout.row.width+70;
+        tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
     }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
