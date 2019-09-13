@@ -607,6 +607,7 @@ function openNav() {
 function closeNav() {
     d3.select("#mySidenav").classed("sideIn",false);
     d3.select("#Maincontent").classed("sideIn",false);
+    discovery('#sideNavbtn');
     // _.delay(resetSize, 500);
 }
 

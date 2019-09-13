@@ -1993,6 +1993,7 @@ $( document ).ready(function() {
     $('.tabs').tabs();
     $('.sidenav').sidenav();
     discovery('#sideNavbtn');
+    openNav();
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
