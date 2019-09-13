@@ -1,3 +1,50 @@
+var TsnePlotopt  = {
+
+    radaropt : {
+        // summary:{quantile:true},
+        mini:true,
+        levels:6,
+        gradient:true,
+        w:30,
+        h:30,
+        showText:false,
+        margin: {top: 0, right: 0, bottom: 0, left: 0},
+    },
+    top10:{
+        details :{
+            circle: {
+                attr: {
+                    r : 2,
+                },
+                style: {
+                    opacity: 0.2
+                }
+            },
+            path: {
+                style: {
+                    'stroke': 'black',
+                    'stroke-width': 0.5,
+                }
+            },
+            clulster: {
+                attr: {
+                }
+                ,
+                style: {
+                    stroke: 'white'
+                }
+            }
+        }
+    },
+    runopt:{
+        zoom:30,
+        simDuration: 1000,
+        clusterDisplay: 'alpha',
+        clusterProject: 'bin',
+        displayMode: 'tsne',
+
+    }
+};
 let graphicControl ={
     charType : "Area Chart",
     sumType : "Radar",
