@@ -18,8 +18,11 @@ Vitural Reality: https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/
 Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ParrallelCoordinate.png)
 
-ClusterView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
+ClusteringView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
+
+JobNetwork: https://idatavisualizationlab.github.io/HPCC/jobList/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobNet.PNG)
 
 # 2018
 
