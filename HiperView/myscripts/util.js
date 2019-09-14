@@ -818,12 +818,12 @@ function concaveHull() {
 
     return concaveHull
 };
-function truncate (text) {
+function truncate (text,endsymbol) {
     text.each(function() {
         var text = d3.select(this);
         var words = text.text().split(/\s+/);
 
-        var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...');
+        var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...'+(endsymbol||''));
         var width = parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
         var numWords = words.length;
 
@@ -839,6 +839,7 @@ function truncate (text) {
 
         if (words.length === numWords) {
             ellipsis.remove();
+            tspan.text(tspan.text()+endsymbol||'')
         }else{
             if (old_words!=='')
                 old_words = old_words.split('');

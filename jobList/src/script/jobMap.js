@@ -16,7 +16,7 @@ let JobMap = function() {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-        },runopt={compute:{setting:'pie'}},radarcreate,tableData={},tableHeader,tableFooter = [],colorscale,
+        },runopt={compute:{setting:'pie'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
         svg, g,
         data = [],arr=[],
         hosts = []
@@ -175,12 +175,12 @@ let JobMap = function() {
         piePath.enter().append('path').attr('class', 'piePath')
             .attr('d', arc).style('fill', d => colorFunc(d.data.user));
     }
-
+    let yscale;
     jobMap.draw = function (timeStep){
         if (!timeStep)
             timeStep = new Date();
         timebox.text(timeStep.toLocaleTimeString())
-        let yscale = d3.scaleLinear().domain([-1,user.length]).range([0,graphicopt.heightG()]);
+        yscale = d3.scaleLinear().domain([-1,user.length]).range([0,graphicopt.heightG()]);
         let deltey = yscale(1)-yscale(0);
         tableLayout.row.height = deltey;
         violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
@@ -393,15 +393,9 @@ let JobMap = function() {
                 d3.selectAll( '.computeNode.'+d.unqinode.map(e=>fixName2Class(fixstr(e))).join(', .computeNode.')).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
             })
-            .data()
-            .forEach(d=>{
-                // d.fx=graphicopt.widthG();
-                d.fy=yscale(d.order);
-                d.fx=600;
-                // d.y=yscale(d.order);
-            });
-
-        userNode.transition().attr('transform',d=>{
+            .transition().attr('transform',d=>{
+            d.fy=yscale(d.order);
+            d.fx=600;
             return `translate(${d.fx},${d.fy})`
         });
         g.selectAll('.computeNode')
@@ -496,8 +490,44 @@ let JobMap = function() {
         cells.exit().remove();
 
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},20)`);
-        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']});
-        cells.merge(cells_n).select('text').text(d=>d.value).call(truncate);
+        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']-20});
+        // cells_n.append('image').attrs({
+        //     href:"../HiperView/images/sort_both.png",
+        //     height: 20,
+        //     width: 20,
+        //     y: -15,
+        //     x:d=>tableLayout.column[d.key].type!=='num'?tableLayout.column[d.key].width-20:-20
+        // })
+        cells = cells.merge(cells_n);
+        cells.select('text').text(d=>d.value).call(d=>{
+            const dir = d.datum().direction;
+            if (dir)
+                truncate(d,'▲');
+            else if (dir===undefined)
+                truncate(d,'↕');
+            else
+                truncate(d,'▼');
+        });
+        cells.on('click',function(d){
+            if (d.key!==tableHeader.currentsort)
+                cells.filter(e=>e.key===tableHeader.currentsort)
+                    .each(function(e){
+                        e.direction=undefined;
+                        d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'-'));
+                    });
+            tableHeader.currentsort = d.key;
+            tableHeader.direction = (d.direction=!d.direction);
+            handle_sort(true);
+            d3.select(this).select('text').text(d=>d.value).call(d=>{
+                const dir = d.datum().direction;
+                if (dir)
+                    truncate(d,'▲');
+                else if (dir===undefined)
+                    truncate(d,'\2195');
+                else
+                    truncate(d,'▼');
+            });
+        })
 
     }
     function table_footer(path){
@@ -555,12 +585,12 @@ let JobMap = function() {
         row:{
             width: 500,
             height: 20,//deltey,
-            'graph-width': 80,
+            'graph-width': 100,
         },
         column:{
-            'userID': {id:'userID',type:'text',x: 10,y:20},
-            'hosts': {id:'hosts',type:'num',x: 100,y:20},
-            'jobs': {id:'jobss',type:'num',x: 130,y:20},
+            'userID': {id:'userID',type:'text',x: 10,y:20,width:60},
+            'hosts': {id:'hosts',type:'num',x: 130,y:20,width:60},
+            'jobs': {id:'jobss',type:'num',x: 190,y:20,width:60},
         }
     };
     // let violiin_chart = d3.viiolinChart().graphicopt({width:tableLayout.row["graph-width"],height:20,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
@@ -569,6 +599,65 @@ let JobMap = function() {
     let user = [];
     let hostOb={};
     let hiddenlink = [];
+
+    function handle_sort(disableLinkSort) {
+        if(tableHeader.currentsort===undefined)
+            user.sort((a, b) => b.values.length - a.values.length);
+        else
+            switch (tableHeader.currentsort) {
+                case 'userID':
+                    user.sort((a, b) => a.name.localeCompare(b.name)*(-1+2*tableHeader.direction));
+                    break;
+                case 'hosts':
+                    user.sort((a, b) => (b.unqinode.length - a.unqinode.length)*(-1+2*tableHeader.direction));
+                    break;
+                case 'jobs':
+                    user.sort((a, b) => (b.values.length - a.values.length)*(-1+2*tableHeader.direction));
+                    break;
+                case 'PowerUsage':
+                    var indexf = tableHeader.findIndex(d=>d.key===tableHeader.currentsort)-1;
+                    user.sort((a, b) => ((tableData[b.name][indexf]||{value:-Infinity}).value - (tableData[a.name][indexf]||{value:-Infinity}).value)*(-1+2*tableHeader.direction));
+                    break;
+                default:
+                    var indexf = tableHeader.findIndex(d=>d.key===tableHeader.currentsort)-1;
+                    user.sort((a, b) => ((tableData[b.name][indexf]||{value:{median:-Infinity}}).value.median - (tableData[a.name][indexf]||{value:{median:-Infinity}}).value.median)*(-1+2*tableHeader.direction));
+                    break;
+            }
+        user.forEach((d, i) => {
+            d.order = i;
+            d.orderlink = i;
+        });
+        if (!disableLinkSort) {
+            hosts.forEach(d => {
+                let n = d.user.length;
+                if (n > 1) {
+                    const linkoorder = d3.min(d.user, e => e.order);
+                    for (let i = 0; i < n; i++) {
+                        // for (let j = 0; j < n; j++) {
+
+                        // make hidden link connection
+                        // let temp = {
+                        //     source: d.user[i].name,
+                        //     target: d.user[j].name,
+                        //     type: 'ranking'
+                        // };
+                        // hiddenlink.push(temp);
+                        // linkdata.push(temp);
+                        // }
+                        d.user[i].orderlink = Math.min(linkoorder, d.user[i].orderlink);
+                    }
+                }
+            });
+            // order by links
+            user.sort((a, b) => a.orderlink - b.orderlink).forEach((d, i) => d.order = i);
+        }
+        g.selectAll('.userNode').transition().attr('transform',d=>{
+            d.fy=yscale(d.order);
+            d.fx=600;
+            return `translate(${d.fx},${d.fy})`
+        });
+    }
+
     function handle_links (){
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
@@ -596,7 +685,9 @@ let JobMap = function() {
           }
         });
 
-        user = current_userData().sort((a,b)=>b.values.length-a.values.length).map((d,i)=>{
+
+
+        user = current_userData().map((d,i)=>{
             d.name = d.key;
             d.order = i;
             d.orderlink = i;
@@ -618,31 +709,13 @@ let JobMap = function() {
             if (!tableData[k].keep)
                 delete tableData[k];
         });
-        hiddenlink = [];
-        hosts.forEach(d=>{
-            let n = d.user.length;
-            if (n>1){
-                const linkoorder =d3.min(d.user,e=>e.order);
-                for (let i = 0; i<n; i++) {
-                    // for (let j = 0; j < n; j++) {
 
-                        // make hidden link connection
-                        // let temp = {
-                        //     source: d.user[i].name,
-                        //     target: d.user[j].name,
-                        //     type: 'ranking'
-                        // };
-                        // hiddenlink.push(temp);
-                        // linkdata.push(temp);
-                    // }
-                    d.user[i].orderlink = Math.min(linkoorder,d.user[i].orderlink);
-                }
-            }
-        });
+        handle_sort();
+
         tableFooter[0] = {key:'userID',value:'Summary'}
         tableFooter[1] = {key:'hosts', value:hosts.filter(d=>d.user.length).length}
-        tableFooter[2] = {key:'jobs', value:d3.sum(user,d=>d.values.length)}
-        user.sort((a,b)=>a.orderlink-b.orderlink).forEach((d,i)=>d.order = i);
+        tableFooter[2] = {key:'jobs', value:d3.sum(user,d=>d.values.length)};
+
         return linkdata
     };
     let harr_old=[];
@@ -760,6 +833,8 @@ let JobMap = function() {
         user_update.selectAll('text').interrupt().selectAll("*").interrupt();
         user_update.selectAll('text').styles({'stroke': 'yellow','stroke-opacity': 1}).transition().duration(3000).styles({'stroke-opacity': 0});
 
+        if (tableHeader.currentsort)
+            handle_sort(true);
         updaterow(rangechange?g.selectAll('.userNode'):user_update);
         table_footer(nodeg.select('.table.footer'));
     }
@@ -773,15 +848,19 @@ let JobMap = function() {
         hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
     }
     function updatalayout(data){
+        let currentsort = tableHeader.currentsort;
         tableHeader = [{key:'userID', value:'userID'},{key:'hosts', value:'hosts'}, {key:'jobs',value: 'jobs'}];
+        let offset = tableLayout.column['jobs'].x;
+        let padding = 15;
         data.forEach((d,i)=>{
-            tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: 150+(i)*tableLayout.row["graph-width"],y:0};
-            tableLayout.row.width = 150+(i+1)*tableLayout.row["graph-width"];
+            tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: offset+(i)*tableLayout.row["graph-width"]+padding,y:0,width:tableLayout.row["graph-width"]};
+            tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
             tableHeader.push({key:d.text, value:d.text});
         })
-        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+100,y:20};
+        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+50,y:20,width:90};
         tableLayout.row.width = tableLayout.row.width+70;
         tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
+        tableHeader.currentsort = currentsort;
     }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt

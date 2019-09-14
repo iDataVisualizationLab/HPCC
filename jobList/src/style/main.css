@@ -208,10 +208,10 @@ span.thumb {
     stroke: #777777;
 }
 
-.row .cell.num{
+
+.row .cell.num text{
     text-anchor: end;
 }
-
 /*.row .cell.header{*/
     /*text-anchor: middle;*/
 /*}*/
