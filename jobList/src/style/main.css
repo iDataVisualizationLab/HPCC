@@ -21,6 +21,10 @@ svg#jobmap {
 
 }
 
+.table.header .cell {
+    pointer-events: visible;
+}
+
 .tablesvg {
     position: absolute;
     max-height: 500px;

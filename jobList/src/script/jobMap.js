@@ -17,7 +17,7 @@ let JobMap = function() {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
         },runopt={compute:{setting:'pie'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
-        svg, g,
+        svg, g, table_headerNode,first = true,
         data = [],arr=[],
         hosts = []
     ;
@@ -39,9 +39,8 @@ let JobMap = function() {
             width: graphicopt.width,
             height: graphicopt.height,
 
-        }).call(d3.zoom().on("zoom", function () {
-            g.attr("transform", d3.event.transform);
-        }));
+        })
+
         if(svg.select('#userpic').empty())
             svg.append('defs').append('pattern')
                 .attrs({'id':'userpic',width:'100%',height:'100%','patternContentUnits':'objectBoundingBox'})
@@ -53,7 +52,9 @@ let JobMap = function() {
                 'opacity':0,
                 width: graphicopt.width,
                 height: graphicopt.height,
-            });
+            }).call(d3.zoom().on("zoom", function () {
+            g.attr("transform", d3.event.transform);
+        }));;
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -61,7 +62,7 @@ let JobMap = function() {
             .attr('class','linkg');
         nodeg = g.append("g")
             .attr('class','nodeg');
-
+        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         timebox = svg.append('text').attr('class','timebox')
             .attr('x',graphicopt.margin.left)
             .attr('y',graphicopt.margin.top)
@@ -74,6 +75,7 @@ let JobMap = function() {
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         violinRange = [0,0];
+        first = true;
         return jobMap;
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
@@ -185,7 +187,10 @@ let JobMap = function() {
         tableLayout.row.height = deltey;
         violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
         // compute pie
-
+        if(first) {
+            makeheader();
+            first = false;
+        }
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
@@ -271,11 +276,8 @@ let JobMap = function() {
         jobNode = jobNode.merge(jobNode_n);
 
 
-        // make table header
-        let table_headerNode = nodeg.select('.table.header');
-        if(table_headerNode.empty())
-            table_headerNode = nodeg.append('g').attr('class','table header').attr('transform',`translate(600,${yscale(-1)})`);
-        table_header(table_headerNode);
+
+        // table_header(table_headerNode);
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
         if(table_footerNode.empty())
@@ -847,8 +849,15 @@ let JobMap = function() {
         hostOb={};
         hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
     }
+
+    function makeheader() {
+// make table header
+        table_header(table_headerNode);
+    }
+
     function updatalayout(data){
         let currentsort = tableHeader.currentsort;
+        let currentdirection = tableHeader.direction;
         tableHeader = [{key:'userID', value:'userID'},{key:'hosts', value:'hosts'}, {key:'jobs',value: 'jobs'}];
         let offset = tableLayout.column['jobs'].x;
         let padding = 15;
@@ -861,6 +870,9 @@ let JobMap = function() {
         tableLayout.row.width = tableLayout.row.width+70;
         tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
         tableHeader.currentsort = currentsort;
+        tableHeader.direction = currentdirection;
+
+        makeheader();
     }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt

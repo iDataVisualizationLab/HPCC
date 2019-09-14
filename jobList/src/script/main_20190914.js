@@ -284,10 +284,11 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
-let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
+let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt);
 var MetricController = radarController();
 let getDataWorker = new Worker ('../HiperView/myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
+
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -344,7 +345,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.color(colorTemperature).schema(serviceFullList)
+    jobMap.color(colorTemperature).schema(serviceFullList).init()
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -483,10 +484,6 @@ function request(){
             countarr.push(returnCount);
             count += 1;
         };
-        var midlehandle_full = function (ri){
-            countarr = d3.range(0,hosts.length);
-            count = hosts.length;
-        };
         var drawprocess = function ()  {
             if (graphicControl.mode===layout.HORIZONTAL)
                 drawsummarypoint(countarr);
@@ -542,13 +539,13 @@ function request(){
                 }
                 else {
                     do {
-                        let ri = step_full(iteration);
-                        midlehandle_full(ri);
+                        let ri = step(iteration, countbuffer);
+                        midlehandle(ri);
                         if(countbuffer===0) {
                             getJoblist();
                             jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
                         }
-                        countbuffer+=hosts.length;
+                        countbuffer++;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
                     speedup = 0;
                     drawprocess();
@@ -1065,7 +1062,7 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =5000;
+        simDuration =1000;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
@@ -1292,7 +1289,7 @@ function step (iteration, count){
     }
     //return [iteration, count];
 }
-function step_full (iteration){
+function step_full (iteration, count){
     for (var count =0;count<hosts.length;count++) {
         if (isRealtime) {
             return requestRT(iteration, count);
