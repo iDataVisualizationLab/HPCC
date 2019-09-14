@@ -1,0 +1,54 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
+    <title>A-Frame HTML Shader - Basic</title>
+    <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+    <script src="scripts/lib/aframe-html-shader.min.js"></script>
+</head>
+<body>
+<a-scene>
+
+    <a-plane id="lettersEntity" material="shader: html; target: #planeHTML; ratio: height; transparent: true; side: double;fps:1.5;" position="0 2 -6"></a-plane>
+    <a-sky material="shader: html; target: #skyHTML"></a-sky>
+</a-scene>
+
+<!-- HTML to render as a material. -->
+
+<div style="width: 100%; height: 100%; position: fixed; left: 0; top: 0; z-index: -1; overflow: hidden">
+    <div id="planeHTML" style="background: linear-gradient(red, yellow, green); width: 500px; height: 200px; font-size: 64px; padding-top: 15px; color: #222; font-weight: 600; display: flex; align-items: center; text-align: center; border-radius: 200px">
+        <p style="border: 1px #FFF">ARE YOU HUNGRY?</p>
+    </div>
+</div>
+<div style="width: 100%; height: 100%; position: fixed; left: 0; top: 0; z-index: -1; overflow: hidden">
+    <div id="skyHTML" style="background: linear-gradient(to top, #222, #EEE); width: 500px; height: 800px; font-size: 100px; color: #111">
+        <p>WELCOME</p>
+        <p>HA HA HA</p>
+        <p>DON'T LOOK DOWN</p>
+    </div>
+</div>
+<script>
+    var lettersEntity = document.getElementById('lettersEntity')
+
+    var scene = document.querySelector('a-scene')
+    if (scene.hasLoaded) { ready() }
+    else { scene.addEventListener('loaded', ready) }
+    function ready () {
+        // scene.addEventListener('enter-vr', function () { document.body.setAttribute('data-vr', true) })
+        // scene.addEventListener('exit-vr', function () { document.body.setAttribute('data-vr', false) })
+        // var fps = emojiEntity.getAttribute('material').fps
+        // updateEmoji(0, 1000/fps)
+        var fps2 = lettersEntity.getAttribute('material').fps
+        //updateLetters(0, 1000/fps2)
+    }
+    function updateLetters (cnt, fps) {
+        var indexEnd = ++cnt % (pres.length+1)
+        if (pres.charAt(indexEnd) === ' ') {
+            indexEnd = ++cnt % (pres.length+1)
+        }
+        pre.innerHTML = pres.substring(0, indexEnd)
+        setTimeout(updateLetters, fps, cnt, fps)
+    }
+    </script>
+</body>
+</html>
