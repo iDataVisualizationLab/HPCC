@@ -687,8 +687,9 @@ let JobMap = function() {
           }
         });
 
+        function clusterByTime(data,time){
 
-
+        }
         user = current_userData().map((d,i)=>{
             d.name = d.key;
             d.order = i;
@@ -698,6 +699,16 @@ let JobMap = function() {
             d.unqinode.forEach(n=>{
                 d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
+            if(runopt.compute.clusterJobID){
+                const range_temp_sub = d3.extent(d.values,e=>+new Date(e.submitTime));
+                const range_temp_st = d3.extent(d.values,e=>+new Date(e.startTime));
+                const scale_temp_sub = d3.scaleLinear().domain([range_temp_sub[0],range_temp_sub[0]+runopt.compute.clusterJobID_info.groupBy]);
+                const scale_temp_st = d3.scaleLinear().domain([range_temp_st[0],range_temp_st[0]+runopt.compute.clusterJobID_info.groupBy]);
+                let group_temp_ob =_.groupBy(d.values,function(d){return ''+Math.floor(scale_temp_sub(+new Date(d.submitTime)))+ Math.floor(scale_temp_st(+new Date(d.startTime)))});
+                for (var k in group_temp_ob)
+                    group_temp_ob[k]
+                d3.extent(d.values,e=>+new Date(e.submitTime))
+            }
             d.dataRaw = (g.selectAll('.userNode').filter(e=>e.name==d.name).data()[0]|| {dataRaw:[]}).dataRaw;
             tableData[d.name] = tableData[d.name] || [{key:'hosts', value:0},
                 {key:'jobs',value: 0}];

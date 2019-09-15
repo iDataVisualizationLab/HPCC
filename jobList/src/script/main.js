@@ -430,6 +430,7 @@ function drawsummarypoint(harr){
             var name = hosts[h].name;
             break;
     }
+
     getData(name,lastIndex)
 }
 function shiftTimeText(){
@@ -1400,6 +1401,10 @@ $( document ).ready(function() {
     d3.select('#jobType_control').on("change", function () {
         var sect = document.getElementById("jobType_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+        jobMap.runopt(jobMap_runopt);
+    });
+    d3.select('#jobIDCluster_control').on("change", function () {
+        jobMap_runopt.compute.clusterJobID = this.value==='on';
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#datacom').on("change", function () {
