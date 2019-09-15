@@ -476,7 +476,9 @@ function request(){
     var missingtimetex = false;
 
     updatetimeline(0);
-    interval2 = new IntervalTimer(function (simDuration) {
+    timerequest();
+    interval2 = new IntervalTimer(timerequest , simDuration);
+    function timerequest() {
         var midlehandle = function (ri){
             let returniteration = ri[0];
             let returnCount = ri[1];
@@ -515,10 +517,6 @@ function request(){
                 updatetimeline(iteration);
             }
             currentlastIndex = iteration;
-            Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
-            xTimeSummaryScaleStep = d3.scaleLinear()
-                .domain([0, hosts.length - 1]) // input
-                .range([0, xTimeSummaryScale.step()]);
 
 
         };
@@ -560,8 +558,7 @@ function request(){
                 requeststatus = false; //stop request
 
         }
-    } , simDuration);
-
+    }
     var count3=0;
 }
 
