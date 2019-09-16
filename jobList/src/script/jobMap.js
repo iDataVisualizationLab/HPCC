@@ -17,7 +17,7 @@ let JobMap = function() {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
         },runopt={compute:{setting:'pie'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
-        svg, g,
+        svg, g, table_headerNode,first = true,
         data = [],arr=[],
         hosts = []
     ;
@@ -39,9 +39,8 @@ let JobMap = function() {
             width: graphicopt.width,
             height: graphicopt.height,
 
-        }).call(d3.zoom().on("zoom", function () {
-            g.attr("transform", d3.event.transform);
-        }));
+        })
+
         if(svg.select('#userpic').empty())
             svg.append('defs').append('pattern')
                 .attrs({'id':'userpic',width:'100%',height:'100%','patternContentUnits':'objectBoundingBox'})
@@ -53,7 +52,9 @@ let JobMap = function() {
                 'opacity':0,
                 width: graphicopt.width,
                 height: graphicopt.height,
-            });
+            }).call(d3.zoom().on("zoom", function () {
+            g.attr("transform", d3.event.transform);
+        }));;
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -61,7 +62,7 @@ let JobMap = function() {
             .attr('class','linkg');
         nodeg = g.append("g")
             .attr('class','nodeg');
-
+        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         timebox = svg.append('text').attr('class','timebox')
             .attr('x',graphicopt.margin.left)
             .attr('y',graphicopt.margin.top)
@@ -74,6 +75,7 @@ let JobMap = function() {
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         violinRange = [0,0];
+        first = true;
         return jobMap;
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
@@ -176,6 +178,7 @@ let JobMap = function() {
             .attr('d', arc).style('fill', d => colorFunc(d.data.user));
     }
     let yscale;
+    let scaleNode = d3.scaleLinear();
     jobMap.draw = function (timeStep){
         if (!timeStep)
             timeStep = new Date();
@@ -185,7 +188,10 @@ let JobMap = function() {
         tableLayout.row.height = deltey;
         violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
         // compute pie
-
+        if(first) {
+            makeheader();
+            first = false;
+        }
         let computers = nodeg.selectAll('.computeNode').data(hosts,function(d){return d.name});
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
@@ -271,11 +277,8 @@ let JobMap = function() {
         jobNode = jobNode.merge(jobNode_n);
 
 
-        // make table header
-        let table_headerNode = nodeg.select('.table.header');
-        if(table_headerNode.empty())
-            table_headerNode = nodeg.append('g').attr('class','table header').attr('transform',`translate(600,${yscale(-1)})`);
-        table_header(table_headerNode);
+
+        // table_header(table_headerNode);
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
         if(table_footerNode.empty())
@@ -318,62 +321,41 @@ let JobMap = function() {
 
         let node = nodeg.selectAll('.node');
 
-        let scaleNode = d3.scaleLinear();
         var ticked = function() {
-            if (this.alpha()<0.9 && this.fistTime)
-                triggerForce ();
-
-            // userNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=> d.y = yscale(i));
-
-            let range_com = d3.extent(computers.data(),d=>d.x);
-            scaleNode.domain(range_com).range([20,120]);
-
-            node.each(d=>{
-                d.x = Math.max(graphicopt.node.r,Math.min(d.x,graphicopt.widthG()-graphicopt.node.r) );
+            node.each(d => {
+                d.x = Math.max(graphicopt.node.r, Math.min(d.x, graphicopt.widthG() - graphicopt.node.r));
             });
-            computers.transition().attr('transform',d=>{
-                d.x2 = scaleNode(d.x);
-                return `translate(${d.x2},${d.y})`
-            });
-            let range_job = d3.extent(jobNode.data(),d=>d.x);
-            scaleNode.domain(range_job).range([300,370]);
-            jobNode.transition().attr('transform',d=>{
-                d.x2 = scaleNode(d.x);
-                return `translate(${d.x2},${d.y})`
-            });
-            // userNode.transition().attr('transform',d=>{
-            //     d.x2 = 800;
-            //     return `translate(${d.x2},${d.y})`
-            // });
-            link.transition()
-                .attr("x1", function(d) { return d.source.x2||d.source.x; })
-                .attr("y1", function(d) { return d.source.y2||d.source.y; })
-                .attr("x2", function(d) { return d.target.x2||d.target.x; })
-                .attr("y2", function(d) { return d.target.y2||d.target.y; });
+            if(this.alpha()<0.69) {
+                let range_com = d3.extent(computers.data(), d => d.x);
+                scaleNode.domain(range_com).range([20, 120]);
 
+                computers.transition().attr('transform', d => {
+                    d.x2 = scaleNode(d.x);
+                    return `translate(${d.x2},${d.y})`
+                });
+                let range_job = d3.extent(jobNode.data(), d => d.x);
+                scaleNode.domain(range_job).range([300, 370]);
+                jobNode.transition().attr('transform', d => {
+                    d.x2 = scaleNode(d.x);
+                    return `translate(${d.x2},${d.y})`
+                });
+                link.transition()
+                    .attr("x1", function (d) {
+                        return d.source.x2 || d.source.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.y2 || d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x2 || d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y2 || d.target.y;
+                    });
+            }
         };
 
-        intiForce();
 
-        simulation
-            .nodes(node.data())
-            .on("tick", ticked);
-
-        simulation.force("link")
-            .links(linkdata);
-        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
-        // let link = linkg.selectAll('.links').data(linkdata,function(d){return d.source.name+ "-" +d.target.name});
-        // let link = linkg.selectAll('.links').data(linkdata);
-        link.exit().remove();
-        link = link.enter().append('line')
-            .attr("class", "links")
-            // .attr("stroke", "#ddd")
-            .attr("stroke", d=>
-                colorFunc((_.isString(d.source.user)&&d.source.user)||d.target.user))
-
-            .merge(link);
-
-        simulation.alphaTarget(0.8).restart();
         g.selectAll('.userNode')
             .on('mouseover',function(d){
                 d3.select(this).classed('hightlight',true);
@@ -434,36 +416,66 @@ let JobMap = function() {
 
                 link.classed('hide',false).classed('hightlight',false);
         });
-        function intiForce(){
-            if (simulation) simulation.stop();
-            let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
-            let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-            simulation = d3.forceSimulation()
-                .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(d=>d.type?1:0.9))
-                // .force("collide",d3.forceCollide(d=>
-                //     (d.type==='job')?0:graphicopt.node.r).strength(0.8))
-                // .force("charge1", attractForce)
-                .force("charge2", repelForce)
-                // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-                // .force("y", d3.forceY(d=>
-                //     yscale(d.order)||graphicopt.heightG()/2).strength(function(d){return d.type==='user'?0.8:0}))
-                .force("x", d3.forceX(function(
-                    d){return (d.type==='job')?graphicopt.widthG()/2:((d.type==='user')?graphicopt.widthG():0)}).strength(function(d){return d.type==='job'?0.8:1}))
-            simulation.fistTime = true;
+        initForce();
+
+        simulation
+            .nodes(node.data()).stop();
+        simulation.force("link")
+            .links(linkdata);
+        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
+        // let link = linkg.selectAll('.links').data(linkdata,function(d){return d.source.name+ "-" +d.target.name});
+        // let link = linkg.selectAll('.links').data(linkdata);
+        link.exit().remove();
+        link = link.enter().append('line')
+            .attr("class", "links")
+            // .attr("stroke", "#ddd")
+            .attr("stroke", d=>
+                colorFunc((_.isString(d.source.user)&&d.source.user)||d.target.user))
+            .merge(link).attr("x1", function (d) {
+                return d.source.x2 || d.source.x;
+            })
+            .attr("y1", function (d) {
+                return d.source.y2 || d.source.y;
+            })
+            .attr("x2", function (d) {
+                return d.target.x2 || d.target.x;
+            })
+            .attr("y2", function (d) {
+                return d.target.y2 || d.target.y;
+            });;
+        simulation.alphaTarget(0.3).on("tick", ticked).restart();
+        function initForce(){
+            if (!simulation) {
+                let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
+                let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
+                simulation = d3.forceSimulation()
+                    .force("link", d3.forceLink().id(function (d) {
+                        return d.name;
+                    }).distance(200).strength(d => d.type ? 1 : 0.9))
+                    .force("collide", d3.forceCollide(d =>
+                        (d.type === 'job') ? 0.001 : graphicopt.node.r).strength(0.8))
+                    .force("charge1", attractForce)
+                    .force("charge2", repelForce)
+                    // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+                    // .force("y", d3.forceY(d=>
+                    //     yscale(d.order)||graphicopt.heightG()/2).strength(function(d){return d.type==='user'?0.8:0}))
+                    .force("x", d3.forceX(function (
+                        d) {
+                        return (d.type === 'job') ? 400 : ((d.type === 'user') ? 600 : 0)
+                    }).strength(function (d) {
+                        return d.type === 'job' ? 0.8 : 0.8
+                    })).alphaTarget(1)
+                    .on("tick", ticked);
+                // simulation.alphaTarget(1);
+                simulation.fistTime = true;
+            }else {
+                // simulation.velocityDecay(0.1);
+            }
         }
 
         function triggerForce () {
             simulation.stop()
-            let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
             let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-
-            // _.pullAll(linkdata,hiddenlink); //delete hidden link
-
-            //recompute distance
-            // let newrange = d3.extent(computers.data(),d=>d.y);
-            // const thehalf = (newrange[1]-newrange[0] - graphicopt.heightG())/10;
-            // newrange = [0-thehalf,graphicopt.heightG()+thehalf];
-            // yscale.range(newrange);
 
             simulation.force("link")
                 .links(linkdata).strength(1);
@@ -633,17 +645,6 @@ let JobMap = function() {
                 if (n > 1) {
                     const linkoorder = d3.min(d.user, e => e.order);
                     for (let i = 0; i < n; i++) {
-                        // for (let j = 0; j < n; j++) {
-
-                        // make hidden link connection
-                        // let temp = {
-                        //     source: d.user[i].name,
-                        //     target: d.user[j].name,
-                        //     type: 'ranking'
-                        // };
-                        // hiddenlink.push(temp);
-                        // linkdata.push(temp);
-                        // }
                         d.user[i].orderlink = Math.min(linkoorder, d.user[i].orderlink);
                     }
                 }
@@ -659,6 +660,8 @@ let JobMap = function() {
     }
 
     function handle_links (){
+        if (simulation)
+            simulation.stop();
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
         // tableData = {}
@@ -668,8 +671,8 @@ let JobMap = function() {
           d.name = d.jobID+'';
           d.type = 'job';
           d.nodes.forEach(n=>{
-              let temp  ={source:n,target:d.jobID};
-              let temp2  ={source:d.jobID,target:d.user};
+              let temp  ={source:n,target:d.jobID+''};
+              let temp2  ={source:d.jobID+'',target:d.user};
 
               linkdata.push(temp);
               linkdata.push(temp2);
@@ -677,6 +680,7 @@ let JobMap = function() {
           let oldData = nodeg.select('.node.jobNode.'+fixName2Class(fixstr(d.name))).data();
           if (oldData.length){
               d.x = oldData[0].x;
+              d.x2 = oldData[0].x2;
               d.y = oldData[0].y;
               d.fx = oldData[0].fx;
               d.fy = oldData[0].fy;
@@ -685,8 +689,10 @@ let JobMap = function() {
           }
         });
 
+        function clusterByTime(data,time){
 
-
+        }
+        let newdata = [];
         user = current_userData().map((d,i)=>{
             d.name = d.key;
             d.order = i;
@@ -696,6 +702,48 @@ let JobMap = function() {
             d.unqinode.forEach(n=>{
                 d.unqinode_ob[n] = d.values.filter(e=>e.nodes.find(f=>f===n));
                 hostOb[n].user.push(d)});
+            if(runopt.compute.clusterJobID){
+                const range_temp_sub = d3.extent(d.values,e=>+new Date(e.submitTime));
+                const range_temp_st = d3.extent(d.values,e=>+new Date(e.startTime));
+                const scale_temp_sub = d3.scaleLinear().domain([range_temp_sub[0],range_temp_sub[0]+runopt.compute.clusterJobID_info.groupBy]);
+                const scale_temp_st = d3.scaleLinear().domain([range_temp_st[0],range_temp_st[0]+runopt.compute.clusterJobID_info.groupBy]);
+                let group_temp_ob =_.groupBy(d.values,function(d){return ''+Math.floor(scale_temp_sub(+new Date(d.submitTime)))+ Math.floor(scale_temp_st(+new Date(d.startTime)))});
+                for (var k in group_temp_ob) {
+                    let temp = _.cloneDeep(group_temp_ob[k][0]);
+                    temp.x = d3.mean(group_temp_ob[k],e=>e.x);
+                    temp.x2 = d3.mean(group_temp_ob[k],e=>e.x2);
+                    temp.y = d3.mean(group_temp_ob[k],e=>e.y);
+                    temp.fx = d3.mean(group_temp_ob[k],e=>e.fx);
+                    temp.fy = d3.mean(group_temp_ob[k],e=>e.fy);
+                    temp.vx = d3.mean(group_temp_ob[k],e=>e.vx);
+                    temp.vy = d3.mean(group_temp_ob[k],e=>e.vy);
+                    temp.values = group_temp_ob[k];
+                    let namearr = group_temp_ob[k].map(d=>d.name);
+                    temp.name = namearr.join(' ');
+                    let sameSource = linkdata.filter(e=>namearr.find(f=>f===e.source+''));
+                    sameSource.forEach((e,i)=>{
+                        if (i===0) {
+                            e.source = temp.name;
+                            e.links = sameSource.length;
+                        } else
+                            e.del = true;
+                    });
+                    sameSource = linkdata.filter(e=>namearr.find(f=>f===e.target+''));
+                    let temp_g = _.groupBy(sameSource,function(e){return e.source});
+                    Object.keys(temp_g).forEach(k=>{
+                        temp_g[k].forEach((e,i)=>{
+                            if(i===0) {
+                                e.target = temp.name;
+                                e.links = temp_g[k].length;
+                            }else{
+                                e.del = true;
+                            }
+                        });
+                    });
+                    newdata.push(temp)
+                }
+                d3.extent(d.values,e=>+new Date(e.submitTime))
+            }
             d.dataRaw = (g.selectAll('.userNode').filter(e=>e.name==d.name).data()[0]|| {dataRaw:[]}).dataRaw;
             tableData[d.name] = tableData[d.name] || [{key:'hosts', value:0},
                 {key:'jobs',value: 0}];
@@ -705,6 +753,10 @@ let JobMap = function() {
             tableData[d.name].keep = true;
             return d
         });
+        if (runopt.compute.clusterJobID) {
+            linkdata = linkdata.filter(d => !d.del);
+            data = newdata
+        }
         Object.keys(tableData).forEach(k=>{
             if (!tableData[k].keep)
                 delete tableData[k];
@@ -847,8 +899,15 @@ let JobMap = function() {
         hostOb={};
         hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
     }
+
+    function makeheader() {
+// make table header
+        table_header(table_headerNode);
+    }
+
     function updatalayout(data){
         let currentsort = tableHeader.currentsort;
+        let currentdirection = tableHeader.direction;
         tableHeader = [{key:'userID', value:'userID'},{key:'hosts', value:'hosts'}, {key:'jobs',value: 'jobs'}];
         let offset = tableLayout.column['jobs'].x;
         let padding = 15;
@@ -861,6 +920,9 @@ let JobMap = function() {
         tableLayout.row.width = tableLayout.row.width+70;
         tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
         tableHeader.currentsort = currentsort;
+        tableHeader.direction = currentdirection;
+
+        makeheader();
     }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt

@@ -284,10 +284,11 @@ var TsnePlotopt  = {
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
-let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
+let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt);
 var MetricController = radarController();
 let getDataWorker = new Worker ('../HiperView/myscripts/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
+
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -344,7 +345,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.color(colorTemperature).schema(serviceFullList)
+    jobMap.color(colorTemperature).schema(serviceFullList).init()
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -430,7 +431,6 @@ function drawsummarypoint(harr){
             var name = hosts[h].name;
             break;
     }
-
     getData(name,lastIndex)
 }
 function shiftTimeText(){
@@ -477,18 +477,12 @@ function request(){
     var missingtimetex = false;
 
     updatetimeline(0);
-    timerequest();
-    interval2 = new IntervalTimer(timerequest , simDuration);
-    function timerequest() {
+    interval2 = new IntervalTimer(function (simDuration) {
         var midlehandle = function (ri){
             let returniteration = ri[0];
             let returnCount = ri[1];
             countarr.push(returnCount);
             count += 1;
-        };
-        var midlehandle_full = function (ri){
-            countarr = d3.range(0,hosts.length);
-            count = hosts.length;
         };
         var drawprocess = function ()  {
             if (graphicControl.mode===layout.HORIZONTAL)
@@ -518,6 +512,10 @@ function request(){
                 updatetimeline(iteration);
             }
             currentlastIndex = iteration;
+            Scatterplot.init(xTimeSummaryScale(0) + swidth / 2);
+            xTimeSummaryScaleStep = d3.scaleLinear()
+                .domain([0, hosts.length - 1]) // input
+                .range([0, xTimeSummaryScale.step()]);
 
 
         };
@@ -541,13 +539,13 @@ function request(){
                 }
                 else {
                     do {
-                        let ri = step_full(iteration);
-                        midlehandle_full(ri);
+                        let ri = step(iteration, countbuffer);
+                        midlehandle(ri);
                         if(countbuffer===0) {
                             getJoblist();
                             jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
                         }
-                        countbuffer+=hosts.length;
+                        countbuffer++;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
                     speedup = 0;
                     drawprocess();
@@ -559,7 +557,8 @@ function request(){
                 requeststatus = false; //stop request
 
         }
-    }
+    } , simDuration);
+
     var count3=0;
 }
 
@@ -1063,7 +1062,7 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =5000;
+        simDuration =1000;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
@@ -1290,7 +1289,7 @@ function step (iteration, count){
     }
     //return [iteration, count];
 }
-function step_full (iteration){
+function step_full (iteration, count){
     for (var count =0;count<hosts.length;count++) {
         if (isRealtime) {
             return requestRT(iteration, count);
@@ -1401,10 +1400,6 @@ $( document ).ready(function() {
     d3.select('#jobType_control').on("change", function () {
         var sect = document.getElementById("jobType_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
-        jobMap.runopt(jobMap_runopt);
-    });
-    d3.select('#jobIDCluster_control').on("change", function () {
-        jobMap_runopt.compute.clusterJobID = this.value==='on';
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#datacom').on("change", function () {

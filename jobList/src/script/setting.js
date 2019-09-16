@@ -27,7 +27,7 @@ let jobMap_opt = {
     },
 }
 let jobMap_runopt = {
-    compute:{type:'radar'},
+    compute:{type:'radar',clusterJobID:false,clusterJobID_info:{groupBy:300000},clusterNode:false},
     histodram:{resolution:11}
 }
 function zoomtoogle(event) {

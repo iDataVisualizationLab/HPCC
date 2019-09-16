@@ -153,6 +153,17 @@
                             <option value="pie">Pie chart</option>
                         </select>
                     </div>
+                    <label for="jobType_control" class="col s4"> Cluster Job: </label>
+                    <p class="switch col s7">
+
+                        <label>
+                            <span class="true">Off</span>
+                            <input id="jobIDCluster_control" type="checkbox">
+                            <span class="lever"></span>
+                            <span class="false">On</span>
+                        </label>
+
+                    </p>
                     <label for="control" class="col s4"> Simulation: </label>
                     <div  class="row s12">
                         <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
@@ -379,7 +390,18 @@
             <div class="progress no_magrin hidden" id="load_render">
                 <div class="determinate" style="width: 10%"></div>
             </div>
-            <div style="position: relative;">
+            <!--<div class='row s12' id="timeline" style="position: relative;">-->
+                <!--<svg width="100%" height="50" class="timelinesvg" >-->
+                <!--</svg>-->
+            <!--</div>-->
+            <!--<div class='row s12' id="sumZone" style="position: relative;">-->
+                <!--<svg width="100%" height="500" class="sumsvg" >-->
+
+                <!--</svg>-->
+                <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>&ndash;&gt;-->
+                <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
+            <!--</div>-->
+            <div class='row s12' id="detailZone" style="position: relative;">
                 <svg width="2600" height="1000" class="mainsvg" >
                     <svg id ="jobmap">
 
@@ -424,6 +446,10 @@
 </div>
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>
+<script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v1.min.js"></script>
+<script src="https://d3js.org/d3-timer.v1.min.js"></script>
+<script src="https://d3js.org/d3-force.v2.min.js"></script>
 <script src="../HiperView/js/d3.tip.js"></script>
 <script src="../HiperView/js/d3.scaleAdjust.js"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
