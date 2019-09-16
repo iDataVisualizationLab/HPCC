@@ -49,3 +49,6 @@ September 26, 2018:
 ### job_scheduling: https://idatavisualizationlab.github.io/HPCC/job_scheduling/
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/job_scheduling/images/users.png)
 
+// (c) 2011 Ricket
+// This code is licensed under MIT license (see LICENSE.txt for details)
+
