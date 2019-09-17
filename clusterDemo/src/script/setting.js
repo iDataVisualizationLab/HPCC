@@ -20,7 +20,7 @@ function newdatatoFormat_cluster (data){
     serviceLists = [];
     serviceListattr = [];
     // FIXME detect format
-    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count');
+    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count','radius');
     data.forEach(d=>variables.forEach(k=>d[k] = +d[k])) // format number
     let keys ={};
     let label_name =[];
@@ -70,7 +70,7 @@ function newdatatoFormat_cluster (data){
     });
 }
 function updateDataType(data,type){
-    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count');
+    const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count','radius');
     data.forEach((d,i)=>{
 
         let temp =clusterS[d.labels||d.re_label];
