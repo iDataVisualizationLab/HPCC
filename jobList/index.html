@@ -105,9 +105,9 @@
                 <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
                 <div class="collapsible-body">
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="datacom" class="col s4 hide"> Dataset: </label>
+                        <label for="datacom" class="col s5 hide"> Dataset: </label>
                         <select id="datacom" class="col s7">
-                            <option value="influxdbSat27Apr" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
+                            <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
                             <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
 
                             <!--<option value="csv">read files</option>-->
@@ -116,7 +116,7 @@
                         </select>
                     </div>
                     <div  class="row s12 valign-wrapper">
-                        <label for="control" class="col s4"> Simulation control: </label>
+                        <label for="control" class="col s5"> Simulation control: </label>
                         <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
                             <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
                             <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
@@ -124,12 +124,12 @@
                             <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
                         </div>
                     </div>
-                    <!--<label for="datacom" class="col s4"> DatasetInput: </label>-->
+                    <!--<label for="datacom" class="col s5"> DatasetInput: </label>-->
                     <div class="row s12 valign-wrapper hidden">
                         <input id="data_input_file" class="none" type="file" multiple/>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="datasetsSelect" class="col s4 hide"> Visualizing: </label>
+                        <label for="datasetsSelect" class="col s5 hide"> Visualizing: </label>
                         <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
                             <span class="title"></span>
@@ -139,7 +139,7 @@
                         </ul>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="summaryType_control" class="col s4 hide"> Summary type: </label>
+                        <label for="summaryType_control" class="col s5 hide"> Summary type: </label>
                         <select id="summaryType_control" class="col s7">
                             <option value="Boxplot">Boxplot</option>
                             <option value="Scatterplot" >Scatterplot</option>
@@ -148,7 +148,7 @@
                         </select>
                     </div>
                     <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s4"> Grouping Job: </label>
+                        <label for="groupJobmode" class="col s5"> Grouping similar jobs: </label>
                         <p class="switch col s7 no_magrin" id="groupJobmode">
 
                             <label>
@@ -161,14 +161,14 @@
                         </p>
                     </div>
                     <div  class="row s12 valign-wrapper">
-                        <label for="jobType_control" class="col s4"> Compute display: </label>
+                        <label for="jobType_control" class="col s5"> Node presentation: </label>
                         <select id="jobType_control" class="col s7">
                             <option value="radar" selected="selected">Radar</option>
                             <option value="pie">Pie chart</option>
                         </select>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="chartType_control" class="col s4 hide"> Chart type: </label>
+                        <label for="chartType_control" class="col s5 hide"> Chart type: </label>
                         <select id="chartType_control" class="col s7">
                             <option value="Heatmap">Heatmap</option>
                             <option value="Area Chart">Area Chart</option>
@@ -186,7 +186,7 @@
                             <li id="RadarColor">
                                 <div class="collapsible-header row s12">
                                     <div  class="row s12 valign-wrapper pickercontain list">
-                                        <label for="radarColorPicker" class="col s4"> Metric color: </label>
+                                        <label for="radarColorPicker" class="col s5"> Metric color scale: </label>
                                         <div id = "radarColorPicker" class="colorscale-palette-container col s7">
                                             <div class="colorscale-block">
 
@@ -204,7 +204,7 @@
                             <li id="ClusterColor" style="display: none">
                                 <div class="collapsible-header">
                                     <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
-                                        <label for="radarColorPicker" class="col s4"> Cluster color scheme: </label>
+                                        <label for="radarColorPicker" class="col s5"> Cluster color scheme: </label>
                                         <div id="clusterColorPicker" class="colorscale-palette-container col s7">
                                             <div class="colorscale-block">
 

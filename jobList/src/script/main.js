@@ -301,7 +301,7 @@ var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
 var MetricController = radarController();
-let getDataWorker = new Worker ('../HiperView/myscripts/worker/getDataWorker.js');
+let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
@@ -359,7 +359,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.color(colorTemperature).schema(serviceFullList)
+    jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList)
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -650,7 +650,7 @@ function simulateResults2(hostname,iter, s){
     var newService;
     let serviceIndex =  serviceList.findIndex(d=>d===s);
     newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
-    if (serviceIndex === 4) {
+    if (serviceList[serviceIndex] === 'Power_consum') {
         if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
@@ -1374,7 +1374,7 @@ $( document ).ready(function() {
     console.log('ready');
     $('.fixed-action-btn').floatingActionButton({
         direction: 'left',
-        hoverEnabled: false
+        hoverEnabled: false,
     });
     $('.collapsible').collapsible();
     $('.modal').modal();
@@ -1437,6 +1437,7 @@ $( document ).ready(function() {
                         hostList = data;
                         systemFormat();
                         inithostResults();
+                        jobMap.hosts(hosts);
                         MetricController.axisSchema(serviceFullList, true).update();
                         addDatasetsOptions()
                     }
@@ -1572,7 +1573,7 @@ $( document ).ready(function() {
             }else{
                 hostList = data;
                 inithostResults();
-
+                jobMap.hosts(hosts)
                 // graphicControl.charType =  d3.select('#chartType_control').node().value;
                 // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
                 let choiceinit = d3.select('#datacom').node().value;
@@ -1630,6 +1631,7 @@ $( document ).ready(function() {
             .onChangeFilterFunc(onfilterdata)
             .init();
         function loadata(data,job){
+
             d3.select(".cover").select('h5').text('drawLegend...');
             drawLegend(initialService, arrThresholds, arrColor, dif);
             data['timespan'] = data['timespan'].map(d=>new Date(d));
