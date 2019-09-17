@@ -64,7 +64,7 @@
             <!--<li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>-->
             <!--<div class="col valign-wrapper">-->
             <li class="summaryText1" style="font-family: 'ITC Charter W01',Georgia,Garamond,serif;">  </li>
-            <li class ="currentDate center-align"></li>
+            <li class ="currentDate center-align" style="font-size: 14px"></li>
             <!--</div>-->
         </ul>
         <ul class="right">
@@ -104,8 +104,8 @@
             <li class="settingContain active no_padding">
                 <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
                 <div class="collapsible-body">
-                    <label for="datacom" class="col s4"> Dataset: </label>
-                    <div  class="row s12">
+                    <div  class="row s12 valign-wrapper hide">
+                        <label for="datacom" class="col s4 hide"> Dataset: </label>
                         <select id="datacom" class="col s7">
                             <option value="influxdbSat27Apr" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
                             <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
@@ -115,12 +115,21 @@
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
                     </div>
+                    <div  class="row s12 valign-wrapper">
+                        <label for="control" class="col s4"> Simulation control: </label>
+                        <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
+                            <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
+                            <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
+                            <button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>
+                            <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
+                        </div>
+                    </div>
                     <!--<label for="datacom" class="col s4"> DatasetInput: </label>-->
-                    <div class="row s12 hidden">
+                    <div class="row s12 valign-wrapper hidden">
                         <input id="data_input_file" class="none" type="file" multiple/>
                     </div>
-                    <label for="datasetsSelect" class="col s4 hide"> Visualizing: </label>
-                    <div  class="row s12 hide">
+                    <div  class="row s12 valign-wrapper hide">
+                        <label for="datasetsSelect" class="col s4 hide"> Visualizing: </label>
                         <div class='dropdown-trigger col s7' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
                             <span class="title"></span>
@@ -129,8 +138,8 @@
                         <ul id="datasetsSelect" class="col collection dropdown-content">
                         </ul>
                     </div>
-                    <label for="summaryType_control" class="col s4 hide"> Summary type: </label>
-                    <div  class="row s12 hide">
+                    <div  class="row s12 valign-wrapper hide">
+                        <label for="summaryType_control" class="col s4 hide"> Summary type: </label>
                         <select id="summaryType_control" class="col s7">
                             <option value="Boxplot">Boxplot</option>
                             <option value="Scatterplot" >Scatterplot</option>
@@ -138,56 +147,52 @@
                             <option value="RadarSummary">Radar Summary</option>
                         </select>
                     </div>
-                    <label for="chartType_control" class="col s4 hide"> Chart type: </label>
-                    <div  class="row s12 hide">
+                    <div  class="row s12 valign-wrapper">
+                        <label for="groupJobmode" class="col s4"> Grouping Job: </label>
+                        <p class="switch col s7 no_magrin" id="groupJobmode">
+
+                            <label>
+                                <span class="true">Off</span>
+                                <input id="jobIDCluster_control" type="checkbox">
+                                <span class="lever"></span>
+                                <span class="false">On</span>
+                            </label>
+
+                        </p>
+                    </div>
+                    <div  class="row s12 valign-wrapper">
+                        <label for="jobType_control" class="col s4"> Compute display: </label>
+                        <select id="jobType_control" class="col s7">
+                            <option value="radar" selected="selected">Radar</option>
+                            <option value="pie">Pie chart</option>
+                        </select>
+                    </div>
+                    <div  class="row s12 valign-wrapper hide">
+                        <label for="chartType_control" class="col s4 hide"> Chart type: </label>
                         <select id="chartType_control" class="col s7">
                             <option value="Heatmap">Heatmap</option>
                             <option value="Area Chart">Area Chart</option>
                             <option value="T-sne Chart" selected="selected">t-SNE Chart</option>
                         </select>
                     </div>
-                    <label for="jobType_control" class="col s4"> Chart type: </label>
-                    <div  class="row s12">
-                        <select id="jobType_control" class="col s7">
-                            <option value="radar" selected="selected">Radar</option>
-                            <option value="pie">Pie chart</option>
-                        </select>
-                    </div>
-                    <label for="jobType_control" class="col s4"> Cluster Job: </label>
-                    <p class="switch col s7">
 
-                        <label>
-                            <span class="true">Off</span>
-                            <input id="jobIDCluster_control" type="checkbox">
-                            <span class="lever"></span>
-                            <span class="false">On</span>
-                        </label>
 
-                    </p>
-                    <label for="control" class="col s4"> Simulation: </label>
-                    <div  class="row s12">
-                        <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
-                            <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
-                            <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
-                            <button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>
-                            <button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>
-                        </div>
-                    </div>
-                    <!--<div class="row s12">-->
+                    <!--<div class="row s12 valign-wrapper">-->
                         <!--<div id="legendHolder"  class="legendHolder">-->
                         <!--</div>-->
                     <!--</div>-->
-                    <div class="row s12 no_magrin">
-                        <ul class="collapsible insideSetting ">
+                    <div class="no_magrin">
+                        <ul class="collapsible insideSetting">
                             <li id="RadarColor">
-                                <div class="collapsible-header">
-                                    <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
-                                        <label for="radarColorPicker" class="col s4"> Radar color: </label>
-                                        <div id = "radarColorPicker" class="colorscale-palette-container col s8">
+                                <div class="collapsible-header row s12">
+                                    <div  class="row s12 valign-wrapper pickercontain list">
+                                        <label for="radarColorPicker" class="col s4"> Metric color: </label>
+                                        <div id = "radarColorPicker" class="colorscale-palette-container col s7">
                                             <div class="colorscale-block">
 
                                             </div>
                                         </div>
+                                        <span style="position: absolute;margin: 0;margin-left: calc( 40% + 20px);font-size: 12px;color: #d8d8d8;">Click to change color scale</span>
                                     </div>
                                 </div>
                                 <div class="collapsible-body">
@@ -208,7 +213,7 @@
                                     </div>
                                 </div>
                                 <div class="collapsible-body">
-                                    <div  class="row s12 valign-wrapper pickercontain">
+                                    <div  class="row s12 valign-wrapper valign-wrapper pickercontain">
 
                                     </div>
                                 </div>

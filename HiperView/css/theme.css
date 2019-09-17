@@ -425,3 +425,8 @@ table {
 .row.s12 {
     width:100%;
 }
+
+label {
+    text-align: right;
+    padding: 0 8px;
+}
