@@ -417,15 +417,15 @@ function processData_old(str, serviceName) {
 
 function simulateResults2(hostname,iter, s){
     var newService;
-    if (s == serviceList[0])
+    if (s == 'Temperature')
         newService = sampleS[hostname].arrTemperature[iter];
-    else if (s == serviceList[1])
+    else if (s == "Job_load")
         newService = sampleS[hostname].arrCPU_load[iter];
-    else if (s == serviceList[2])
+    else if (s == "Memory_usage")
         newService = sampleS[hostname].arrMemory_usage[iter];
-    else if (s == serviceList[3])
+    else if (s == "Fans_speed")
         newService = sampleS[hostname].arrFans_health[iter];
-    else if (s == serviceList[4]) {
+    else if (s == "Power_consum") {
         if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
