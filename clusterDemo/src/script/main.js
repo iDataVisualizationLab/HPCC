@@ -164,6 +164,7 @@ $( document ).ready(function() {
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
     d3.select('#datacom').on("change", function () {
+        firstTime = true
         d3.select('.cover').classed('hidden', false);
         spinnerOb.spinner.spin(spinnerOb.target);
         const choice = this.value;
@@ -193,17 +194,20 @@ $( document ).ready(function() {
             $('#data_input_file').trigger('click');
         }
         function loadata1(data){
-            newdatatoFormat_cluster(data);
+              newdatatoFormat_cluster(data);
+            radarChartclusteropt.boxplot = false;
+
             processResult = processResult_csv;
             db = "csv";
-            // addDatasetsOptions()
-            MetricController.axisSchema(serviceFullList,true).update();
+            // addDatasetsOptions();
+            MetricController.axisSchema(serviceFullList, true).update();
             main();
             // d3.select(".currentDate")
             //     .text("" + new Date(data[0].timestamp).toDateString());
             // resetRequest();
             d3.select('.cover').classed('hidden', true);
             spinnerOb.spinner.stop();
+
         }
     });
     $('#description_input_file').on('input',(evt)=>{
@@ -211,13 +215,8 @@ $( document ).ready(function() {
         var reader = new FileReader();
         reader.onload = (function (theFile) {
             return function (e) {
-                // Render thumbnail.
-                // d3.select('.cover').classed('hidden', false);
-                // spinnerOb.spinner.spin(spinnerOb.target);
                 d3.json(e.target.result, function (error, data) {
                     if (error) {
-                        // d3.select('.cover').classed('hidden', true);
-                        // spinnerOb.spinner.stop();
                     } else {
                         clusterDescription = data;
                         d3.selectAll('.desciptionText').text(function(d){return clusterDescription[d.id].text})
@@ -233,7 +232,6 @@ $( document ).ready(function() {
         spinnerOb.spinner.stop();})
     $('#data_input_file').on('input', (evt) => {
         firstTime = true;
-        console.log(evt.target.files);
         let f,fq1,fq3,fmin,fmax;
         let n = evt.target.files.length;
         d3.range(0,n).forEach(i=>{
@@ -392,6 +390,7 @@ function onSchemaUpdate(schema){
         cluster_map(data);
         MetricController.drawSummary(data.length);
     }
+
     // }
     if (db!=='csv')
         SaveStore();
