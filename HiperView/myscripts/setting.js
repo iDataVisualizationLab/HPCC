@@ -1,4 +1,5 @@
 // system variable
+var application_name ='HiperView';
 var jobList=[];
 var hostList;
 var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];

@@ -177,7 +177,7 @@ let JobMap = function() {
         piePath.enter().append('path').attr('class', 'piePath')
             .attr('d', arc).style('fill', d => colorFunc(d.data.user));
     }
-    let yscale;
+    let yscale,linkscale = d3.scaleSqrt().range([0.25,3]);
     let scaleNode = d3.scaleLinear();
     jobMap.draw = function (timeStep){
         if (!timeStep)
@@ -186,7 +186,8 @@ let JobMap = function() {
         yscale = d3.scaleLinear().domain([-1,user.length]).range([0,graphicopt.heightG()]);
         let deltey = yscale(1)-yscale(0);
         tableLayout.row.height = deltey;
-        violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
+        violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>'black'});
+        // violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
         // compute pie
         if(first) {
             makeheader();
@@ -442,7 +443,11 @@ let JobMap = function() {
             })
             .attr("y2", function (d) {
                 return d.target.y2 || d.target.y;
-            });;
+            })
+            .style("stroke-width", function (d) {
+                return d.links===undefined?1:linkscale(d.links);
+            })
+        ;
         simulation.alphaTarget(0.3).on("tick", ticked).restart();
         function initForce(){
             if (!simulation) {
@@ -502,7 +507,7 @@ let JobMap = function() {
         cells.exit().remove();
 
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},20)`);
-        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']-20});
+        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']});
         // cells_n.append('image').attrs({
         //     href:"../HiperView/images/sort_both.png",
         //     height: 20,
@@ -535,7 +540,7 @@ let JobMap = function() {
                 if (dir)
                     truncate(d,'▲');
                 else if (dir===undefined)
-                    truncate(d,'\2195');
+                    truncate(d,'↕');
                 else
                     truncate(d,'▼');
             });
@@ -677,7 +682,7 @@ let JobMap = function() {
               linkdata.push(temp);
               linkdata.push(temp2);
           });
-          let oldData = nodeg.select('.node.jobNode.'+fixName2Class(fixstr(d.name))).data();
+          let oldData = nodeg.selectAll('.node.jobNode').filter(e=>e.name===d.name||(e.values?e.values.findIndex(v=>v.name===d.name)!==-1:false)).data();
           if (oldData.length){
               d.x = oldData[0].x;
               d.x2 = oldData[0].x2;
@@ -689,9 +694,7 @@ let JobMap = function() {
           }
         });
 
-        function clusterByTime(data,time){
 
-        }
         let newdata = [];
         user = current_userData().map((d,i)=>{
             d.name = d.key;
@@ -755,6 +758,7 @@ let JobMap = function() {
         });
         if (runopt.compute.clusterJobID) {
             linkdata = linkdata.filter(d => !d.del);
+            linkscale.domain(d3.extent(linkdata,d=>d.links));
             data = newdata
         }
         Object.keys(tableData).forEach(k=>{
@@ -916,7 +920,7 @@ let JobMap = function() {
             tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
             tableHeader.push({key:d.text, value:d.text});
         })
-        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+50,y:20,width:90};
+        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+70,y:20,width:90};
         tableLayout.row.width = tableLayout.row.width+70;
         tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
         tableHeader.currentsort = currentsort;

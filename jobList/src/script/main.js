@@ -198,7 +198,8 @@ let colorScaleList = {
         {val: 'rainbow',type:'custom',label: 'Rainbow'},
         {val: 'RdBu',type:'d3',label: 'Blue2Red',invert:true},
         {val: 'soil',type:'custom',label: 'RedYelBlu'},
-        {val: 'Viridis',type:'d3',label: 'Viridis'}],
+        {val: 'Viridis',type:'d3',label: 'Viridis'},
+        {val: 'Greys',type:'d3',label: 'Greys'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 
 var arrThresholds;
@@ -207,7 +208,7 @@ var color,opa;
 //var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
 // var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 // let arrColor = colorScaleList.customFunc('rainbow');
-let arrColor = colorScaleList.d3colorChosefunc('Viridis');
+let arrColor = colorScaleList.d3colorChosefunc('Greys');
 
 setColorsAndThresholds(initialService);
 
@@ -364,6 +365,7 @@ function main() {
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
+            cluster_info:cluster_info,
         }});
     getDataWorker.addEventListener('message',({data})=>{
         if (data.status==='done') {
@@ -1078,7 +1080,7 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =100;
+        simDuration =2000;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
@@ -1287,16 +1289,18 @@ function step (iteration, count){
         // var result = simulateResults(hosts[count].name);
         var tmp = iteration;
         for (i = 0; i < iterationstep; i++) {
-            var result = simulateResults2(hosts[count].name, iteration, selectedService);
             // Process the result
             var name = hosts[count].name;
-            hostResults[name].arr.push(result);
-            // console.log(hosts[count].name+" "+hostResults[name]);
-            serviceList_selected.forEach ((s)=>{
-                var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
-                hostResults[name][serviceListattr[s.index]].push(result);
-            });
-
+            if(hostResults[name].arr.length<(iteration+1)) {
+                var result = simulateResults2(hosts[count].name, iteration, selectedService);
+                hostResults[name].arr.push(result);
+                // console.log(hosts[count].name+" "+hostResults[name]);
+                serviceList_selected.forEach((s) => {
+                    var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                    hostResults[name][serviceListattr[s.index]].push(result);
+                });
+                hostResults[name].arrcluster.push(sampleS[name].arrcluster[iteration]);
+            }
             plotResult(undefined, name,iteration);
             iteration++;
         }
@@ -1385,7 +1389,7 @@ $( document ).ready(function() {
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
-    changeRadarColor(colorArr.Radar[3]);
+    changeRadarColor(colorArr.Radar[4]);
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
@@ -1568,6 +1572,15 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
+        d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
+            cluster.forEach(d=>{
+                d.radius = +d.radius;
+                d.__metrics = serviceFullList.map(s=>{return {axis: s.text,value:d3.scaleLinear().domain(s.range)(d[s.text])||0}});
+                d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
+            });
+            cluster_info = cluster;
+
+        });
         d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
             }else{
@@ -1637,7 +1650,12 @@ $( document ).ready(function() {
             data['timespan'] = data['timespan'].map(d=>new Date(d));
             sampleS = data;
             if(job)
-                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
+                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
+            if(cluster_info)
+                hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
+                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v)||0)));
+                    return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<c.radius);
+                }));
             main();
             d3.select(".cover").select('h5').text('loading data...');
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files

@@ -13,7 +13,7 @@ function SaveStore() {
     variablesNames.forEach(d=>{ conf[d] = window[d];saveConf(d);});
 }
 function checkInvalidStore(){
-    var retrievedObject = localStorage.getItem('serviceLists');
+    var retrievedObject = localStorage.getItem(application_name+'_'+'serviceLists');
     if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
         let checkpoint = JSON.parse(retrievedObject);
         return checkpoint[0].sub[0].angle ===undefined;
@@ -32,7 +32,7 @@ function DeleteAllstore() {
     variablesNames.forEach(d=>refeshConf(d));
 }
 function checkConf(namekey) {
-    var retrievedObject = localStorage.getItem(namekey);
+    var retrievedObject = localStorage.getItem(application_name+'_'+namekey);
     if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
         conf[namekey] = JSON.parse(retrievedObject);
         return conf[namekey];
@@ -43,9 +43,9 @@ function checkConf(namekey) {
 }
 
 function saveConf(namekey) {
-    localStorage.setItem(namekey, JSON.stringify(conf[namekey]));
+    localStorage.setItem(application_name+'_'+namekey, JSON.stringify(conf[namekey]));
 }
 
 function refeshConf(namekey) {
-    localStorage.removeItem(namekey);
+    localStorage.removeItem(application_name+'_'+namekey);
 }
