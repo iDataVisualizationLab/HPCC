@@ -182,7 +182,17 @@ let Tooltip_lib = function() {
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
             .text(layout.title);
-
+        g.append("text")
+            .attr("dy", 10)
+            .attr("dx", -10)
+            .attr("x", graphicopt.widthG())
+            .attr("fill", "#000")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .style("text-anchor", "end")
+            .style("font-weight", "bold")
+            .style("font-size", "12px")
+            .attr("font-family", "sans-serif")
+            .text(layout.title2);
         g.append("text")
             .attr("y", graphicopt.heightG() + 34)
             .attr("fill", "#000")

@@ -83,7 +83,8 @@ let JobMap = function() {
     function colorFunc (key){
         switch (colorBy) {
             case 'user':
-                return colorCategory(key);
+                return 'rgba(0, 0, 0, 0.45)';
+                // return colorCategory(key);
             default:
                 return 'black';
         }
@@ -619,6 +620,7 @@ let JobMap = function() {
                 layout.axis.x.domain = rangetime;
                 layout.axis.y.domain = scaleY.range();
                 layout.title = `User: ${username}`;
+                layout.title2 = `#compute: ${data.length}`;
                 if (layout.axis.y.domain[1]>1000)
                     layout.axis.y.tickFormat = d3.format('~s');
                 tooltip_lib.data(data).layout(layout).show()
