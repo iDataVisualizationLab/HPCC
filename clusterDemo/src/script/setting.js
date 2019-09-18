@@ -1,3 +1,4 @@
+var application_name ='ClusteringView';
 let profile = {};
 srcpath = '../HiperView/';
 let filename_pattern = [

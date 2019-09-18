@@ -1,4 +1,6 @@
+var application_name ='Joblist';
 var jobList=[];
+var cluster_info;
 var hostList;
 var serviceList = ["Temperature","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
 var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
@@ -43,4 +45,9 @@ function zoomtoogle(event) {
     let oldvval = d3.select(event).classed('lock');
     jobMap.zoomtoogle(!oldvval);
     d3.select(event).classed('lock',!oldvval);
+}
+function distance(a, b){
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+    return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
 }

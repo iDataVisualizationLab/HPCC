@@ -1,7 +1,4 @@
-let distance = function(a, b){
-    let dsum = 0;
-    a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
-    return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);};
+
 hosts.forEach(h=>serviceListattr.forEach(s=>{if (hostResults[h.name][s].length>60) hostResults[h.name][s].pop();}))
 var arr = [];
 dataSpider3 = [];
