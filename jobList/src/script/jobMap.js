@@ -179,7 +179,7 @@ let JobMap = function() {
     }
     let yscale,linkscale = d3.scaleSqrt().range([0.25,3]);
     let scaleNode = d3.scaleLinear();
-    jobMap.draw = function (timeStep){
+    jobMap.draw = function (timeStep_r){
         timeStep = new Date(timeStep_r.toString());
         if (!timeStep)
             timeStep = new Date();
