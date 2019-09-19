@@ -595,7 +595,33 @@ let JobMap = function() {
         let cellsGraph = cells.filter(d=>tableLayout.column[d.key].type==='graph');
         let cellsGraph_n = cells_n.filter(d=>tableLayout.column[d.key].type==='graph');
         cellsGraph_n.append('g').attr('class','violing');
-        cellsGraph.merge(cellsGraph_n).select('g.violing').each(function(d){
+        cellsGraph.merge(cellsGraph_n).on('click',function(d){
+            let rangetime = [+Infinity,-Infinity];
+            let username = d3.select(this.parentNode).datum().id;
+            let data_temp = user.find(u=>u.key===username).dataRaw;
+            let scaleY = d3.scaleLinear().range(schema.find(s=>s.text===d.key).range);
+            let data = d3.nest().key(e=>e.name).rollup(f=>{
+                let temp = f.map((e,i)=>{
+                    if (rangetime[0]>e.time)
+                        rangetime[0]=e.time;
+                    if (rangetime[1]<e.time)
+                        rangetime[1]=e.time;
+                    return {y:scaleY(e.find(a=>a.axis===d.key).value),
+                        x: e.time,};
+                });
+                temp.label = f[0].name;
+                return temp;
+            }).entries(data_temp).map(e=>e.value);
+            let layout = tooltip_lib.layout();
+            layout.axis.y.label = d.key;
+            layout.axis.x.domain = rangetime;
+            layout.axis.y.domain = scaleY.range();
+            layout.title = `User: ${username}`;
+            layout.title2 = `#compute: ${data.length}`;
+            if (layout.axis.y.domain[1]>1000)
+                layout.axis.y.tickFormat = d3.format('~s');
+            tooltip_lib.data(data).layout(layout).show()
+        }).select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))
         })
     }
