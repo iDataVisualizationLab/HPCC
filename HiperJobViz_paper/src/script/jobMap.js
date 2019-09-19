@@ -78,12 +78,13 @@ let JobMap = function() {
         first = true;
         return jobMap;
     };
-    let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
+    let colorCategory  = d3.scaleOrdinal().range(d3.range(2,13).map(d=>d3.interpolateGreys(d/14)));
     let colorBy = 'user';
     function colorFunc (key){
         switch (colorBy) {
             case 'user':
-                return colorCategory(key);
+                return 'rgba(0, 0, 0, 0.45)';
+                // return colorCategory(key);
             default:
                 return 'black';
         }
@@ -184,7 +185,7 @@ let JobMap = function() {
         if (!timeStep)
             timeStep = new Date();
         timebox.text(timeStep.toLocaleTimeString())
-        yscale = d3.scaleLinear().domain([-1,user.length]).range([0,graphicopt.heightG()]);
+        yscale = d3.scaleLinear().domain([-1,user.length]).range([0,Math.min(graphicopt.heightG(),30*12)]);
         let deltey = yscale(1)-yscale(0);
         tableLayout.row.height = deltey;
         violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>'black'});
@@ -263,7 +264,8 @@ let JobMap = function() {
                 temp.pop();
                 temp.push(new Date(d.startTime));
                 return spiral(temp);
-            })
+            }).style('stroke','#ffa328')
+
         ;
         jobNode_n.append('path')
             .attrs(
@@ -274,7 +276,7 @@ let JobMap = function() {
                 temp.pop();
                 temp.push(timeStep);
                 return spiral(temp);
-            })
+            }).attr('stroke','##3fc151')
         ;
         jobNode = jobNode.merge(jobNode_n);
 
@@ -595,7 +597,35 @@ let JobMap = function() {
         let cellsGraph = cells.filter(d=>tableLayout.column[d.key].type==='graph');
         let cellsGraph_n = cells_n.filter(d=>tableLayout.column[d.key].type==='graph');
         cellsGraph_n.append('g').attr('class','violing');
-        cellsGraph.merge(cellsGraph_n).select('g.violing').each(function(d){
+        cellsGraph.merge(cellsGraph_n)
+            .on('click',function(d){
+                let rangetime = [+Infinity,-Infinity];
+                let username = d3.select(this.parentNode).datum().id;
+                let data_temp = user.find(u=>u.key===username).dataRaw;
+                let scaleY = d3.scaleLinear().range(schema.find(s=>s.text===d.key).range);
+                let data = d3.nest().key(e=>e.name).rollup(f=>{
+                    let temp = f.map((e,i)=>{
+                        if (rangetime[0]>e.time)
+                            rangetime[0]=e.time;
+                        if (rangetime[1]<e.time)
+                            rangetime[1]=e.time;
+                        return {y:scaleY(e.find(a=>a.axis===d.key).value),
+                            x: e.time,};
+                    });
+                    temp.label = f[0].name;
+                    return temp;
+                }).entries(data_temp).map(e=>e.value);
+                let layout = tooltip_lib.layout();
+                layout.axis.y.label = d.key;
+                layout.axis.x.domain = rangetime;
+                layout.axis.y.domain = scaleY.range();
+                layout.title = `User: ${username}`;
+                layout.title2 = `#compute: ${data.length}`;
+                if (layout.axis.y.domain[1]>1000)
+                    layout.axis.y.tickFormat = d3.format('~s');
+                tooltip_lib.data(data).layout(layout).show()
+            })
+            .select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))
         })
     }
@@ -670,9 +700,10 @@ let JobMap = function() {
             simulation.stop();
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
+        user = current_userData().sort((a,b)=>b.unqinode.length-a.unqinode.length).filter((d,i)=>i<10);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
-
+        data=data.filter(d=>user.findIndex(e=>e.key===d.user)!==-1)
         data.forEach(d=>{
           d.name = d.jobID+'';
           d.type = 'job';
@@ -697,7 +728,8 @@ let JobMap = function() {
 
 
         let newdata = [];
-        user = current_userData().map((d,i)=>{
+
+        user = user.map((d,i)=>{
             d.name = d.key;
             d.order = i;
             d.orderlink = i;
@@ -767,7 +799,7 @@ let JobMap = function() {
                 delete tableData[k];
         });
 
-        handle_sort();
+        handle_sort(true);
 
         tableFooter[0] = {key:'userID',value:'Summary'}
         tableFooter[1] = {key:'hosts', value:hosts.filter(d=>d.user.length).length}

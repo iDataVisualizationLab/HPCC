@@ -188,7 +188,7 @@ span.thumb {
 }
 
 .computeSig_start.timeBoxRunning {
-    stroke: black;
+    stroke: #3fc151;
     stroke-width: 1.5;
 }
 .computeSig_b {
@@ -228,4 +228,13 @@ span.thumb {
 .lineMean{
     stroke: black;
     stroke-dasharray: 2;
+}
+.y.axis .tick line {
+    stroke-dasharray: 2;
+    stroke-width: 0.5;
+    stroke: #777777;
+}
+.d3-tip {
+    background-color: #dddddd;
+    padding: 5px;
 }

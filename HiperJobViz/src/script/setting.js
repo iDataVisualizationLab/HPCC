@@ -21,7 +21,7 @@ let jobMap_opt = {
         r: 5,
     },
     job: {
-        r: 20,
+        r: 10,
         r_inside: 2,
     },user:{
         r: 10,
@@ -31,8 +31,8 @@ let jobMap_opt = {
         mini:true,
         levels:6,
         gradient:true,
-        w:40,
-        h:40,
+        w:30,
+        h:30,
         showText:false,
         margin: {top: 0, right: 0, bottom: 0, left: 0},
     },

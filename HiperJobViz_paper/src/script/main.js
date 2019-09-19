@@ -296,11 +296,18 @@ var TsnePlotopt  = {
         displayMode: 'tsne',
 
     }
-};
+},
+    tooltip_opt={
+        width: 650,
+        height: 400,
+        margin:{top:5,bottom:35,left:45,right:85}
+    };
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
+let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
+let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false;
@@ -440,6 +447,7 @@ function drawsummarypoint(harr){
                 var name = hosts[h].name;
                 arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
                 arrServices.name = name;
+                arrServices.time = hostResults.timespan[lastIndex];
                 arr.push(arrServices);
             }
             jobMap.dataComp_points(arr);
@@ -535,7 +543,11 @@ function request(){
                 updatetimeline(iteration);
             }
             currentlastIndex = iteration;
-
+            // stop condition
+            if (currentlastIndex===59) {
+                console.log("done");
+                interval2.stop();
+            }
 
         };
         if (requeststatus) {
@@ -1080,7 +1092,7 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =2000;
+        simDuration =0;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
