@@ -30,7 +30,7 @@ let JobMap = function() {
             .range([0, graphicopt.radaropt.w/2])
             .domain([-0.25, 1.25]);
         radarcreate = d3.radialLine()
-            .curve(d3.curveCardinalClosed.tension(0))
+            .curve(d3.curveCardinalClosed.tension(0.5))
             .radius(function(d) { return rScale(d.value); })
             .angle(function(d) {
                 return schema.find(s=>s.text===d.axis).angle; });
@@ -57,7 +57,7 @@ let JobMap = function() {
                 height: graphicopt.height,
             }).call(d3.zoom().on("zoom", function () {
             g.attr("transform", d3.event.transform);
-        }));;
+        }));
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -192,17 +192,21 @@ let JobMap = function() {
     let jobscale = d3.scaleSqrt().range([0.5,3]);
 
     function renderManual(computers, jobNode, link) {
-        computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
-        computers.attr('transform', d => {
-            d.x = 300;
-            d.x2 = 300;
-            d.y = scaleNode_y(d.order);
-            return `translate(${d.x2},${d.y})`
-        });
+
         jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
         jobNode.attr('transform', d => {
             d.x2 = 430;
             d.y = scaleJob(d.order);
+            return `translate(${d.x2},${d.y})`
+        });
+        let temp_link = link.data().filter(d=>d.target.type==='job')
+        computers.data().forEach(d=>d.y = d3.mean(temp_link.filter(e=>e.source.name===d.name),f=>f.target.y))
+        computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+        // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
+        computers.attr('transform', d => {
+            d.x = 300;
+            d.x2 = 300;
+            d.y = scaleNode_y(d.order);
             return `translate(${d.x2},${d.y})`
         });
 
@@ -711,7 +715,7 @@ let JobMap = function() {
     let hostOb={};
     let hiddenlink = [];
 
-    function handle_sort(disableLinkSort) {
+    function handle_sort(disableLinkSort,skiprender) {
         if(tableHeader.currentsort===undefined)
             user.sort((a, b) => b.values.length - a.values.length);
         else
@@ -756,16 +760,24 @@ let JobMap = function() {
             d.fx=600;
             return `translate(${d.fx},${d.fy})`
         });
-        if (runopt.compute.clusterNode)
+        if (runopt.compute.clusterNode&&!skiprender)
             renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
     }
     let clusterNode_data,clusterdata;
+
+    let clusterlineScale = d3.scaleLinear().range([0,400]);
+    function cluster_line(path){ //timelinescale
+        let clineg = path.selectAll('.cline_g').data(d=>d.cvalues);
+        clineg.exit().remove();
+        let clineg_n = clineg.enter().append(g).attr('class','cline_g');
+        clineg_n.append('path').attr('class')
+    }
     function handle_links (){
         if (simulation)
             simulation.stop();
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
-        user = current_userData().sort((a,b)=>b.unqinode.length-a.unqinode.length).filter((d,i)=>i<10);
+        user = current_userData().sort((a,b)=>b.unqinode.length-a.unqinode.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
         data=data.filter(d=>user.findIndex(e=>e.key===d.user)!==-1)
@@ -895,7 +907,7 @@ let JobMap = function() {
                 delete tableData[k];
         });
 
-        handle_sort(true);
+        handle_sort(true,true);
 
         tableFooter[0] = {key:'userID',value:'Summary'}
         tableFooter[1] = {key:'hosts', value:hosts.filter(d=>d.user.length).length}
