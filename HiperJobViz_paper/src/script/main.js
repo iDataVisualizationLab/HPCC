@@ -372,7 +372,6 @@ function main() {
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
-            cluster_info:cluster_info,
         }});
     getDataWorker.addEventListener('message',({data})=>{
         if (data.status==='done') {
@@ -396,7 +395,8 @@ function main() {
             if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
                 if (graphicControl.charType === "T-sne Chart")
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                jobMap.dataComp(data.result.arr).drawComp();
+                if (!jobMap_runopt.compute.clusterNode)
+                    jobMap.dataComp(data.result.arr).drawComp();
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
@@ -516,12 +516,13 @@ function request(){
             count = hosts.length;
         };
         var drawprocess = function ()  {
+            getJoblist();
+            jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
             if (graphicControl.mode===layout.HORIZONTAL)
                 drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
-
                 // getJoblist(lastIndex,true);
 
                 // Draw date
@@ -572,10 +573,10 @@ function request(){
                     do {
                         let ri = step_full(iteration);
                         midlehandle_full(ri);
-                        if(countbuffer===0) {
-                            getJoblist();
-                            jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
-                        }
+                        // if(countbuffer===0) {
+                        //     getJoblist();
+                        //     jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
+                        // }
                         countbuffer+=hosts.length;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
                     speedup = 0;
@@ -1129,6 +1130,7 @@ function resetRequest(){
     if (interval2)
         interval2.stop();
     hostResults = {};
+    cluster_info.forEach(c=>c.arr.length=0)
     expectedLength = 0;
     formatRealtime = getformattime(+timestep_query.split(/[a-z]/)[0],timeshortconvert(timestep_query.match(/[a-z]/)[0]));
     var count =0;
@@ -1333,13 +1335,22 @@ function step_full (iteration){
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
                 // Process the result
                 var name = hosts[count].name;
-                hostResults[name].arr.push(result);
-                // console.log(hosts[count].name+" "+hostResults[name]);
-                serviceList_selected.forEach((s) => {
-                    var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
-                    hostResults[name][serviceListattr[s.index]].push(result);
-                });
-
+                if(hostResults[name].arr.length<(iteration+1)) {
+                    hostResults[name].arr.push(result);
+                    // console.log(hosts[count].name+" "+hostResults[name]);
+                    serviceList_selected.forEach((s) => {
+                        var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                        hostResults[name][serviceListattr[s.index]].push(result);
+                    });
+                    if (cluster_info) {
+                        var cluster = getClusterName(hosts[count].name, iteration);
+                        if (cluster !== undefined&& cluster !== -1) {
+                            if (!cluster_info[cluster].arr[iteration])
+                                cluster_info[cluster].arr[iteration] = [];
+                            cluster_info[cluster].arr[iteration].push(name);
+                        }
+                    }
+                }
                 // plotResult(result, name, iteration);
                 iteration++;
             }
@@ -1436,6 +1447,10 @@ $( document ).ready(function() {
     });
     d3.select('#jobIDCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterJobID = this.value==='on';
+        jobMap.runopt(jobMap_runopt);
+    });
+    d3.select('#compCluster_control').on("change", function () {
+        jobMap_runopt.compute.clusterNode = this.value==='on';
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#datacom').on("change", function () {
@@ -1584,7 +1599,7 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
-        d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
+        d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
                 d.__metrics = serviceFullList.map(s=>{return {axis: s.text,value:d3.scaleLinear().domain(s.range)(d[s.text])||0}});
@@ -1663,11 +1678,14 @@ $( document ).ready(function() {
             sampleS = data;
             if(job)
                 hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
-            if(cluster_info)
+            if(cluster_info){
+                cluster_info.forEach(d=>d.arr=[]);
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
-                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v)||0)));
-                    return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<c.radius);
+                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
+                    return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
+                jobMap.clusterData(cluster_info)
+            }
             main();
             d3.select(".cover").select('h5').text('loading data...');
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files

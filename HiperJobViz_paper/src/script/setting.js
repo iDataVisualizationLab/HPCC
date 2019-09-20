@@ -21,7 +21,7 @@ let jobMap_opt = {
         r: 5,
     },
     job: {
-        r: 20,
+        r: 10,
         r_inside: 2,
     },user:{
         r: 10,
@@ -31,8 +31,8 @@ let jobMap_opt = {
         mini:true,
         levels:6,
         gradient:true,
-        w:40,
-        h:40,
+        w:50,
+        h:50,
         showText:false,
         margin: {top: 0, right: 0, bottom: 0, left: 0},
     },
@@ -50,4 +50,7 @@ function distance(a, b){
     let dsum = 0;
     a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
     return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function getClusterName (name,index){
+    return (sampleS[name].arrcluster||[])[index];
 }
