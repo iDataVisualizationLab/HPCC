@@ -190,6 +190,37 @@ let JobMap = function() {
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
     let jobscale = d3.scaleSqrt().range([0.5,3]);
+
+    function renderManual(computers, jobNode, link) {
+        computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
+        computers.attr('transform', d => {
+            d.x = 300;
+            d.x2 = 300;
+            d.y = scaleNode_y(d.order);
+            return `translate(${d.x2},${d.y})`
+        });
+        jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
+        jobNode.attr('transform', d => {
+            d.x2 = 430;
+            d.y = scaleJob(d.order);
+            return `translate(${d.x2},${d.y})`
+        });
+
+        link
+            .attr("x1", function (d) {
+                return d.source.x2 || d.source.x;
+            })
+            .attr("y1", function (d) {
+                return d.source.y2 || d.source.y;
+            })
+            .attr("x2", function (d) {
+                return d.target.x2 || d.target.x;
+            })
+            .attr("y2", function (d) {
+                return d.target.y2 || d.target.y;
+            }).style('stroke-dasharray', getstrokearray).style('stroke-dashoffset', getstrokearray_offset);
+    }
+
     jobMap.draw = function (timeStep_r){
         timeStep = new Date(timeStep_r.toString());
         if (!timeStep)
@@ -472,43 +503,11 @@ let JobMap = function() {
             .style("stroke-width", function (d) {
                 return d.links===undefined?1:linkscale(d.links);
             }).style('stroke-dasharray',getstrokearray).style('stroke-dashoffset',getstrokearray_offset);
-        function getstrokearray (){
-            return this.getTotalLength()-graphicopt.job.r-5
-        }
-        function getstrokearray_offset (d){
-            return d.source.type==='job'?-graphicopt.job.r-5:0;
-        }
         link = link.merge(link_n);
         if (!runopt.compute.clusterNode)
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
         else {
-            computers.data().sort((a,b)=>b.arr?b.arr[b.arr.length-1].length:-1-a.arr?a.arr[a.arr.length-1].length:-1).forEach((d,i)=>d.order = i);
-            computers.attr('transform', d => {
-                    d.x = 300;
-                    d.x2 = 300;
-                    d.y = scaleNode_y(d.order);
-                return `translate(${d.x2},${d.y})`
-            });
-            jobNode.data().sort((a,b)=>user.find(e=>e.key===a.user).order-user.find(e=>e.key===b.user).order).forEach((d,i)=>d.order = i);
-            jobNode.attr('transform', d => {
-                d.x2 = 430+Math.random()*50;
-                d.y = scaleJob(d.order);
-                return `translate(${d.x2},${d.y})`
-            });
-
-            link
-                .attr("x1", function (d) {
-                    return d.source.x2 || d.source.x;
-                })
-                .attr("y1", function (d) {
-                    return d.source.y2 || d.source.y;
-                })
-                .attr("x2", function (d) {
-                    return d.target.x2 || d.target.x;
-                })
-                .attr("y2", function (d) {
-                    return d.target.y2 || d.target.y;
-                }).style('stroke-dasharray',getstrokearray).style('stroke-dashoffset',getstrokearray_offset);
+            renderManual(computers, jobNode, link);
         }
 
         function initForce(){
@@ -558,7 +557,12 @@ let JobMap = function() {
 
 
     };
-
+    function getstrokearray (){
+        return this.getTotalLength()-graphicopt.job.r-5
+    }
+    function getstrokearray_offset (d){
+        return d.source.type==='job'?-graphicopt.job.r-5:0;
+    }
     function table_header(path){
         let rows = path.selectAll('.row').data([tableHeader]);
         rows.exit().remove();
@@ -752,6 +756,8 @@ let JobMap = function() {
             d.fx=600;
             return `translate(${d.fx},${d.fy})`
         });
+        if (runopt.compute.clusterNode)
+            renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
     }
     let clusterNode_data,clusterdata;
     function handle_links (){
