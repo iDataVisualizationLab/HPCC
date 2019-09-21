@@ -1532,7 +1532,7 @@ $( document ).ready(function() {
             $('#data_input_file').trigger('click');
         }
         function loadata1(data,job){
-            data['timespan'] = data['timespan'].map(d=>new Date(d));
+            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             sampleS = data;
             if(job)
                 hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
@@ -1677,7 +1677,7 @@ $( document ).ready(function() {
 
             d3.select(".cover").select('h5').text('drawLegend...');
             drawLegend(initialService, arrThresholds, arrColor, dif);
-            data['timespan'] = data['timespan'].map(d=>new Date(d));
+            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             sampleS = data;
             if(job)
                 hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);

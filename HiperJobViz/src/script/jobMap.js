@@ -332,9 +332,9 @@ let JobMap = function() {
                 {'class':'computeSig_start timeBoxRunning',
                 })
             .attr('d',function(d){
-                let temp = d3.timeHour.every(1).range(new Date(d.startTime),timeStep);
+                let temp = d3.timeHour.every(1).range(new Date(d.startTime),new Date(timeStep_r.toString()));
                 temp.pop();
-                temp.push(timeStep);
+                temp.push(new Date(timeStep_r.toString()));
                 return spiral(temp);
             })
         ;

@@ -38,7 +38,7 @@ let jobMap_opt = {
     },
 }
 let jobMap_runopt = {
-    compute:{type:'radar',clusterJobID:false,clusterJobID_info:{groupBy:300000},clusterNode:false},
+    compute:{type:'radar',clusterJobID:false,clusterJobID_info:{groupBy:1800000},clusterNode:false},
     graphic:{colorBy:'user'},
     histodram:{resolution:11}
 }
