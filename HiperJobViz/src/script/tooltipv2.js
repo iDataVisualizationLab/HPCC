@@ -141,14 +141,18 @@ let Tooltip_lib = function() {
             .data(data)
             .enter()
             .append('g')
-                .attr("class", "gline_path");
+                .attr("class", "gline_path")
+            .on('click',function(d){
+                d.clicked = !d.clicked;
+                d3.select(this).classed('highlight',d.clicked);
+            });
         gpath.append('path')
             .attr('d',line_create)
             .attr('fill', 'none')
             .attr('stroke', d=>d.color?d.color:'black')
             .attr("stroke-width", 1);
 
-        gpath.filter((d,i)=>i===0||i===data.length-1).append("text")
+        gpath.append("text")
             .attr("x", graphicopt.widthG())
             .attr('dx',4)
             .attr("y", d=>yScale(d[d.length-1].y))
@@ -156,7 +160,8 @@ let Tooltip_lib = function() {
             .style("text-anchor", "start")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
-            .text(d=> `${d.label}`);
+            .text(d=> `${d.label}`)
+            .classed('statics',(d,i)=>i===0||i===data.length-1);
                 // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
         g.append("text")
             .attr("x", -graphicopt.heightG() / 2)

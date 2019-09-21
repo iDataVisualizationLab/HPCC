@@ -488,7 +488,6 @@ let JobMap = function() {
         link.exit().remove();
         let link_n = link.enter()
             .append('line').attr("class", "links")
-            // .attr("stroke", "#ddd")
             .attr("stroke", d=>
                 colorFunc((_.isString(d.source.user)&&d.source.user)||d.target.user))
             .merge(link)
@@ -578,13 +577,6 @@ let JobMap = function() {
 
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},20)`);
         cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']});
-        // cells_n.append('image').attrs({
-        //     href:"../HiperView/images/sort_both.png",
-        //     height: 20,
-        //     width: 20,
-        //     y: -15,
-        //     x:d=>tableLayout.column[d.key].type!=='num'?tableLayout.column[d.key].width-20:-20
-        // })
         cells = cells.merge(cells_n);
         cells.select('text').text(d=>d.value).call(d=>{
             const dir = d.datum().direction;
@@ -764,7 +756,6 @@ let JobMap = function() {
             renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
     }
     let clusterNode_data,clusterdata;
-
     let clusterlineScale = d3.scaleLinear().range([0,400]);
     function cluster_line(path){ //timelinescale
         let clineg = path.selectAll('.cline_g').data(d=>d.cvalues);
@@ -777,7 +768,7 @@ let JobMap = function() {
             simulation.stop();
         linkdata = [];
         hosts.forEach(h=>h.user=[]);
-        user = current_userData().sort((a,b)=>b.unqinode.length-a.unqinode.length).filter((d,i)=>i<12);
+        user = current_userData().sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
         data=data.filter(d=>user.findIndex(e=>e.key===d.user)!==-1)
@@ -960,29 +951,6 @@ let JobMap = function() {
                     median: ss.medianSorted(v),
                     mean: ss.mean(v),
                 };
-                // if (v.length > 20) {
-                //     var x = d3.scaleLinear()
-                //         .domain([0, 1]);
-                //     let x_change = d3.scaleLinear()
-                //         .domain([0, runopt.histodram.resolution - 1]).range(x.domain());
-                //
-                //     var histogram = d3.histogram()
-                //         .domain(x.domain())
-                //         .thresholds(d3.range(0, runopt.histodram.resolution).map(e => x_change(e)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                //         // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                //         .value(d => d);
-                //     let hisdata = histogram(v);
-                //
-                //     const iqr = r.q3 - r.q1;
-                //     r.outlier = _.uniq(v.filter(e => e > (r.q3 + 2.5 * iqr) || e < (r.q1 - 2.5 * iqr)));
-                //     r.point = [];
-                //     sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
-                //     if(d.type)
-                //         violinRange [1] = Math.max(violinRange [1], d3.max(sumstat, e => e[1]));
-                // } else {
-                //     r.point = _.uniq(v);
-                //     r.outlier = [];
-                // }
                 var x = d3.scaleLinear()
                     .domain([0, 1]);
                 let x_change = d3.scaleLinear()

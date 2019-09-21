@@ -31,14 +31,15 @@ let jobMap_opt = {
         mini:true,
         levels:6,
         gradient:true,
-        w:30,
-        h:30,
+        w:80,
+        h:80,
         showText:false,
         margin: {top: 0, right: 0, bottom: 0, left: 0},
     },
 }
 let jobMap_runopt = {
     compute:{type:'radar',clusterJobID:false,clusterJobID_info:{groupBy:300000},clusterNode:false},
+    graphic:{colorBy:'user'},
     histodram:{resolution:11}
 }
 function zoomtoogle(event) {
@@ -50,4 +51,7 @@ function distance(a, b){
     let dsum = 0;
     a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
     return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function getClusterName (name,index){
+    return (sampleS[name].arrcluster||[])[index];
 }
