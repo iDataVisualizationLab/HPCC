@@ -866,13 +866,14 @@ d3.Tsneplot = function () {
             .attr('y2',(d,i)=>d.values[0].y);
 
         let timeBoxRunning = mini_timeline.selectAll('line.timeBoxRunning')
-            .data(d=>{
-                let temp =  d3.nest().key(k=>k.startTime)
-                    .rollup((t,i)=>
-                    { return t[0];})
-                    .entries(d.values);
-                return temp;
-            },e=>e.key);
+            // .data(d=>{
+            //     let temp =  d3.nest().key(k=>k.startTime)
+            //         .rollup((t,i)=>
+            //         { return t[0];})
+            //         .entries(d.values);
+            //     return temp;
+            // },e=>e.key);
+            .data(d=>d3.nest().key(k=>k.startTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key)
         timeBoxRunning.exit().remove();
         timeBoxRunning
             .enter()
@@ -880,14 +881,16 @@ d3.Tsneplot = function () {
             .attr('class','timeBoxRunning')
             .attr('x1',d=>xscale(new Date (d.key)))
             .attr('x2',d=>xscale(currentTime))
-            .attr('y1',(d,i)=>d.value.y)
-            .attr('y2',(d,i)=>d.value.y);
+            .attr('y1',(d,i)=>d.value)
+            .attr('y2',(d,i)=>d.value);
+            // .attr('y1',(d,i)=>d.value.y)
+            // .attr('y2',(d,i)=>d.value.y);
 
         timeBoxRunning.transition().duration(500)
             .attr('x1',d=>xscale(new Date (d.key)))
             .attr('x2',d=>xscale(currentTime))
-            .attr('y1',(d,i)=>d.value.y)
-            .attr('y2',(d,i)=>d.value.y);
+            .attr('y1',(d,i)=>d.value)
+            .attr('y2',(d,i)=>d.value);
         //draw tick
 
         let linesubmitTime = mini_timeline.selectAll('line.submitTime')
