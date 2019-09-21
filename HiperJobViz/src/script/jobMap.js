@@ -916,6 +916,7 @@ let JobMap = function() {
             });
             clusterNode_data = clusterdata;
             colorCluster.domain(clusterNode_data.map(d=>d.name));
+            console.log(colorCluster.domain())
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else
