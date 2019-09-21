@@ -740,8 +740,7 @@ d3.Tsneplot = function () {
         panel_user.select('table').classed('empty',!userl.length);
         panel_user.select('.search-wrapper').classed('empty',!userl.length);
 
-        // userl.sort((a,b)=>b.values.length-a.values.length);
-        user_sortBY ('nodes',userl);
+        user_sortBY ('jobs',userl);
 
         const totalUser = userl.length;
 
@@ -790,11 +789,11 @@ d3.Tsneplot = function () {
             .attr('class','title')
             .text(d=>d.key);
         contain_n.append('td')
-            .attr('class','jobs alignRight')
-            .text(d=>d.values.length);
-        contain_n.append('td')
             .attr('class','nodes alignRight')
             .text(d=>d.unqinode.length);
+        contain_n.append('td')
+            .attr('class','jobs alignRight')
+            .text(d=>d.values.length);
 
         contain_n.append('td')
             .attr('class','user_timeline')
@@ -815,118 +814,83 @@ d3.Tsneplot = function () {
             .style('background-color',null);
         userli.select('.nodes') .text(d=>d.unqinode.length);
 
-        let mini_timeline = panel_user.selectAll('.user_timeline').select('g');
+        minitimeline();
+        function minitimeline() {
+            let mini_timeline = panel_user.selectAll('.user_timeline').select('g');
 
-        let timeBox = mini_timeline.selectAll('line.timeBox')
-            .data(d=>{
-                let temp =  d3.nest().key(k=>k.submitTime).entries(d.values);
-                // hard way handle all data
-                temp.sort((a,b)=>new Date(a.key)-new Date(b.key));
-                // yscaleItem[temp[0].user] = temp.length-1; //add length of data item
-                temp.forEach((t,i)=>
-                {   t.max_startTime =new Date(0);
-                    t.values.forEach(it=>{
-                        if (new Date(it.startTime)>t.max_startTime)
-                            t.max_startTime = new Date(it.startTime);
-                        it.y= yscale(i,(temp.length))});
-                });
-                return temp;
+            let timeBox = mini_timeline.selectAll('line.timeBox')
+                .data(d => {
+                    let temp = d3.nest().key(k => k.submitTime).entries(d.values);
+                    // hard way handle all data
+                    temp.sort((a, b) => new Date(a.key) - new Date(b.key));
+                    // yscaleItem[temp[0].user] = temp.length-1; //add length of data item
+                    temp.forEach((t, i) => {
+                        t.max_startTime = new Date(0);
+                        t.values.forEach(it => {
+                            if (new Date(it.startTime) > t.max_startTime)
+                                t.max_startTime = new Date(it.startTime);
+                            it.y = yscale(i, (temp.length))
+                        });
+                    });
+                    return temp;
+                }, e => e.key);
+            timeBox.exit().remove();
+            timeBox
+                .enter()
+                .append('line')
+                .attr('class', 'timeBox')
+                .merge(timeBox)
+                .transition().duration(500)
+                .attr('x1', d => xscale(new Date(d.key)))
+                .attr('x2', d => xscale(d.max_startTime))
+                .attr('y1', (d, i) => d.values[0].y)
+                .attr('y2', (d, i) => d.values[0].y);
 
-                // easy way
-                // let temp = _(d.values).uniq(e=>e.submitTime);
-                // temp.sort((a,b)=>new Date(a.submitTime)-new Date(b.submitTime));
-                // // yscaleItem[temp[0].user] = temp.length-1; //add length of data item
-                // temp.forEach((t,i)=> t.y= yscale(i/(temp.length-1)));
-                // return temp;
-            },e=>e.key);
-        timeBox.exit().remove();
-        timeBox
-            .enter()
-            .append('line')
-            .attr('class','timeBox')
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(d.max_startTime))
-            .attr('y1',(d,i)=>d.values[0].y)
-            .attr('y2',(d,i)=>d.values[0].y);
-        // .attr('y1',(d,i)=>yscale(i/yscaleItem[d.user]))
-        //     .attr('y2',(d,i)=>yscale(i/yscaleItem[d.user]));
-        // .on('mousemove',function(d){
-        //     xFisheye.focus(d3.event.x);
-        //     panel_user.selectAll('line.startTime').attr('x',d=>xFisheye(new Date (d.submitTime)))
-        //         .attr('width',d=>xFisheye(new Date (d.startTime))-xFisheye(new Date (d.submitTime)));
-        //     panel_user.selectAll('line.startTime').attr('x1',d=>xFisheye(new Date (d.startTime)))
-        //         .attr('x2',d=>xFisheye(new Date (d.startTime)));
-        //     panel_user.selectAll('line.submitTime').attr('x1',d=>xFisheye(new Date (d.submitTime)))
-        //         .attr('x2',d=>xFisheye(new Date (d.submitTime)));
-        // });
-        timeBox.transition().duration(500)
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(d.max_startTime))
-            .attr('y1',(d,i)=>d.values[0].y)
-            .attr('y2',(d,i)=>d.values[0].y);
+            let timeBoxRunning = mini_timeline.selectAll('line.timeBoxRunning')
+                .data(d => d3.nest().key(k => k.startTime).rollup(e => d3.mean(e, ie => ie.y)).entries(d.values), d => d.key)
+            timeBoxRunning.exit().remove();
+            timeBoxRunning
+                .enter()
+                .append('line')
+                .attr('class', 'timeBoxRunning')
+                .merge(timeBoxRunning)
+                .transition().duration(500)
+                .attr('x1', d => xscale(new Date(d.key)))
+                .attr('x2', d => xscale(currentTime))
+                .attr('y1', (d, i) => d.value)
+                .attr('y2', (d, i) => d.value);
+            //draw tick
 
-        let timeBoxRunning = mini_timeline.selectAll('line.timeBoxRunning')
-            // .data(d=>{
-            //     let temp =  d3.nest().key(k=>k.startTime)
-            //         .rollup((t,i)=>
-            //         { return t[0];})
-            //         .entries(d.values);
-            //     return temp;
-            // },e=>e.key);
-            .data(d=>d3.nest().key(k=>k.startTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key)
-        timeBoxRunning.exit().remove();
-        timeBoxRunning
-            .enter()
-            .append('line')
-            .attr('class','timeBoxRunning')
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(currentTime))
-            .attr('y1',(d,i)=>d.value)
-            .attr('y2',(d,i)=>d.value);
-            // .attr('y1',(d,i)=>d.value.y)
-            // .attr('y2',(d,i)=>d.value.y);
+            let linesubmitTime = mini_timeline.selectAll('line.submitTime')
+                .data(d => d3.nest().key(k => k.submitTime).rollup(e => d3.mean(e, ie => ie.y)).entries(d.values), d => d.key);
+            linesubmitTime.exit().remove();
+            linesubmitTime.enter()
+                .append('line')
+                .attr('class', 'submitTime')
+                .merge(linesubmitTime)
+                .transition().duration(500)
+                .attr('x1', d => xscale(new Date(d.key)))
+                .attr('x2', d => xscale(new Date(d.key)))
+                .attr('y1', -tickh / 2)
+                .attr('y2', tickh / 2)
+                .attr("transform", d => "translate(" + 0 + ", " + d.value + ")");
 
-        timeBoxRunning.transition().duration(500)
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(currentTime))
-            .attr('y1',(d,i)=>d.value)
-            .attr('y2',(d,i)=>d.value);
-        //draw tick
+            let linestartTime = mini_timeline.selectAll('line.startTime')
+                .data(d => d3.nest().key(k => k.startTime).rollup(e => d3.mean(e, ie => ie.y)).entries(d.values), d => d.key);
+            linestartTime.exit().remove();
+            linestartTime
+                .enter()
+                .append('line')
+                .attr('class', 'startTime')
+                .merge(linestartTime)
+                .transition().duration(500)
+                .attr('x1', d => xscale(new Date(d.key)))
+                .attr('x2', d => xscale(new Date(d.key)))
+                .attr('y1', -tickh / 2)
+                .attr('y2', tickh / 2)
+                .attr("transform", d => "translate(" + 0 + ", " + d.value + ")");
+        }
 
-        let linesubmitTime = mini_timeline.selectAll('line.submitTime')
-        // .data(d=>_(d.values).uniq(e=>e.submitTime))
-            .data(d=> d3.nest().key(k=>k.submitTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key);
-        linesubmitTime.exit().remove();
-        linesubmitTime.enter()
-            .append('line')
-            .attr('class','submitTime')
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(new Date (d.key)))
-            .attr('y1',-tickh/2)
-            .attr('y2',tickh/2)
-            .attr("transform",d=>"translate("+0+", "+d.value+")");
-        linesubmitTime.transition().duration(500)
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(new Date (d.key)))
-            .attr("transform",d=>"translate("+0+", "+d.value+")");
-
-        let linestartTime = mini_timeline.selectAll('line.startTime')
-        // .data(d=>_(d.values).uniq(e=>e.startTime))
-            .data(d=>d3.nest().key(k=>k.startTime).rollup(e=>d3.mean(e,ie=>ie.y)).entries(d.values),d=>d.key);
-        linestartTime.exit().remove();
-        linestartTime
-            .enter()
-            .append('line')
-            .attr('class','startTime')
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(new Date (d.key)))
-            .attr('y1',-tickh/2)
-            .attr('y2',tickh/2)
-            .attr("transform",d=>"translate("+0+", "+d.value+")");
-        linestartTime.transition().duration(500)
-            .attr('x1',d=>xscale(new Date (d.key)))
-            .attr('x2',d=>xscale(new Date (d.key)))
-            .attr("transform",d=>"translate("+0+", "+d.value+")");
     }
 
     function drawEmbedding(data) {
