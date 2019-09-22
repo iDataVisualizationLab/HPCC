@@ -150,7 +150,7 @@ let JobMap = function() {
     function drawEmbedding_timeline(data,colorfill,maintimeline) {
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
-        let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=newdata.find(n=>n.name === e.cluster); temp.timestep = e.timestep; return temp;}));
+        let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
         datapoint.exit().remove();
         datapoint = datapoint.enter().append('g')
             .attr('class','linkLinegg')
@@ -166,13 +166,14 @@ let JobMap = function() {
             .attr('class','linegg')
             .merge(dataline)
             .attrs({
-                x1: d=>timelineScale(d.start),
-                x2: d=>timelineScale(d.end),
+                x1: d=>timelineScale(d.end),
+                x2: d=>timelineScale(d.start),
             }).styles({
                 stroke: d=>colorFunc(d.cluster),
                 'stroke-width': 0.5,
             })
         ;
+        console.log(hosts.filter(h=>h.timeline.line.length>1))
 
     }
     jobMap.drawComp = function (){
@@ -442,7 +443,10 @@ let JobMap = function() {
 
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
             computers.attr('transform', d => {
-                if (runopt.compute.clusterNode||runopt.compute.type==='timeline') {
+                if (runopt.compute.type==='timeline') {
+                    d.x2 = 200;
+                }else
+                if (runopt.compute.clusterNode) {
                     d.x = 200;
                     d.x2 = 200;
                 }else
@@ -839,26 +843,27 @@ let JobMap = function() {
             h.user=[];
             h.timeline = {clusterarr:[],line:[]};
         });
-        let maxstep = 0;
-        clusterdata.forEach(c=>{
-            c.arr.forEach((ct,ts)=>{
-                maxstep = Math.max(maxstep,ts);
-                ct.forEach(h=>{
-                    let currentarr = hostOb[h].timeline.clusterarr;
-                    if (currentarr.length&&c.name === hostOb[h].timeline.clusterarr[currentarr.length-1].cluster){
-                        hostOb[h].timeline.clusterarr.stack ++;
-                        let lineitem  =hostOb[h].timeline.line[hostOb[h].timeline.line.length-1];
-                        if (hostOb[h].timeline.clusterarr.stack===2)
-                            hostOb[h].timeline.line.push({cluster:c.name,start:ts-2,end:ts});
-                        else if (hostOb[h].timeline.clusterarr.stack>2)
-                            hostOb[h].timeline.line[hostOb[h].timeline.line.length-1].end = ts;
-                    }else{
-                        hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
-                        hostOb[h].timeline.clusterarr.stack = 0;
-                    }
-                });
+        let maxstep = d3.max(clusterdata,c=>c.arr.length)-1;
+        for (let ts = 0;ts<maxstep+1;ts++) {
+            clusterdata.forEach(c => {
+                ct = c.arr[ts];
+                if (ct)
+                    ct.forEach(h => {
+                        let currentarr = hostOb[h].timeline.clusterarr;
+                        if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
+                            hostOb[h].timeline.clusterarr.stack++;
+                            if (hostOb[h].timeline.clusterarr.stack === 1)
+                                hostOb[h].timeline.line.push({cluster: c.name, start: ts - 1, end: ts});
+                            else if (hostOb[h].timeline.clusterarr.stack > 1)
+                                hostOb[h].timeline.line[hostOb[h].timeline.line.length - 1].end = ts;
+                        } else {
+                            hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
+                            hostOb[h].timeline.clusterarr.stack = 0;
+                        }
+                    });
+
             });
-        });
+        }
         timelineScale.domain([maxstep-1,maxstep]);
         user = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);

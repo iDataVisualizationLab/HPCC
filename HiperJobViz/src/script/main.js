@@ -1092,7 +1092,7 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =2000;
+        simDuration =0;
         simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
