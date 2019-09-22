@@ -94,57 +94,70 @@ let JobMap = function() {
                 return 'black';
         }
     }
-    function drawEmbedding(data,colorfill) {
-        let newdata =handledata(data);
-        let bg = svg.selectAll('.computeSig');
-        let datapoint = bg.select(".linkLineg")
-            .datum(d=>newdata.find(n=>n.name === d.name));
-        if(datapoint.empty()){
+
+    function createRadar(datapoint, bg, newdata, colorfill) {
+        if (datapoint.empty()) {
             datapoint = bg
                 .append("g")
-                .datum(d=>newdata.find(n=>n.name === d.name))
-                .attr("class", d=>"compute linkLineg "+fixName2Class(d.name));
+                .datum(d => newdata.find(n => n.name === d.name))
+                .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
             datapoint.append("clipPath")
-                .attr("id",d=>"tSNE"+fixName2Class(d.name))
+                .attr("id", d => "tSNE" + fixName2Class(d.name))
                 .append("path")
                 .attr("d", d => radarcreate(d));
             datapoint
                 .append("rect")
                 .style('fill', 'url(#rGradient)')
-                .attr("clip-path", d=>"url(#tSNE"+fixName2Class(d.name)+")")
-                .attr("x",-graphicopt.radaropt.w/2)
-                .attr("y",-graphicopt.radaropt.h/2)
-                .attr("width",graphicopt.radaropt.w)
-                .attr("height",graphicopt.radaropt.h);
+                .attr("clip-path", d => "url(#tSNE" + fixName2Class(d.name) + ")")
+                .attr("x", -graphicopt.radaropt.w / 2)
+                .attr("y", -graphicopt.radaropt.h / 2)
+                .attr("width", graphicopt.radaropt.w)
+                .attr("height", graphicopt.radaropt.h);
             datapoint
                 .append("path")
-                .attr("class","tSNEborder")
+                .attr("class", "tSNEborder")
                 .attr("d", d => radarcreate(d))
                 .style("stroke", 'black')
                 .style("stroke-width", 0.5)
                 .style("stroke-opacity", 0.5).style("fill", "none");
-        }else{
+        } else {
             datapoint.select('clipPath').select('path')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
+                .attr("d", d => radarcreate(d.filter(e => e.enable)));
             datapoint.select('.tSNEborder')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d.filter(e=>e.enable)));
-            if (colorfill){
-                datapoint.select("rect").style('display','none');
-                datapoint.select('.tSNEborder').style('fill',d=>colorFunc(d.name)).style('fill-opacity',0.5);
-            }else{
-                datapoint.select("rect").style('display','unset')
-                datapoint.select('.tSNEborder').style('fill','none')
+                .attr("d", d => radarcreate(d.filter(e => e.enable)));
+            if (colorfill) {
+                datapoint.select("rect").style('display', 'none');
+                datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
+            } else {
+                datapoint.select("rect").style('display', 'unset')
+                datapoint.select('.tSNEborder').style('fill', 'none')
             }
         }
+    }
+
+    function drawEmbedding(data,colorfill) {
+        let newdata =handledata(data);
+        let bg = svg.selectAll('.computeSig');
+        let datapoint = bg.select(".linkLineg")
+            .datum(d=>newdata.find(n=>n.name === d.name));
+        createRadar(datapoint, bg, newdata, colorfill);
+
+    }
+    function drawEmbedding_timeline(data,colorfill) {
+        let newdata =handledata(data);
+        let bg = svg.selectAll('.computeSig');
+        let datapoint = bg.select(".linkLineg")
+            .datum(d=>newdata.find(n=>n.name === d.name));
+        createRadar(datapoint, bg, newdata, colorfill);
 
     }
     jobMap.drawComp = function (){
         if(runopt.compute.type==="radar"){
             svg.selectAll('.computeNode').selectAll('.piePath').remove();
             if (clusterNode_data){
-                drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true)
+                drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group')
             }else {
                 if (arr.length)
                     drawEmbedding(arr)
@@ -250,7 +263,6 @@ let JobMap = function() {
 
         tableLayout.row.height = deltey;
         violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>'black'});
-        // violiin_chart.graphicopt({height:tableLayout.row.height,color:(i)=>colorscale(i)});
         // compute pie
         if(first) {
             makeheader();
@@ -259,11 +271,7 @@ let JobMap = function() {
         let computers = nodeg.selectAll('.computeNode').data(clusterNode_data||hosts,function(d){return d.name});
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
-        // computers_n.append('circle').attrs(
-        //     {'class':'computeSig',
-        //         'r': graphicopt.node.r,
-        //         'fill':'white',
-        //     });
+        
         computers_n.append('g').attrs(
             {'class':'computeSig',
                 'stroke':'black',

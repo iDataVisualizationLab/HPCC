@@ -1445,16 +1445,17 @@ $( document ).ready(function() {
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#jobIDCluster_control').on("change", function () {
-        jobMap_runopt.compute.clusterJobID = this.value==='on';
+        jobMap_runopt.compute.clusterJobID = $(this).prop('checked');
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#compCluster_control').on("change", function () {
-        jobMap_runopt.compute.clusterNode = this.value==='on';
+        jobMap_runopt.compute.clusterNode = $(this).prop('checked');
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#colorConnection_control').on("change", function () {
-        jobMap_runopt.graphic.colorBy = this.value==='on'?'group':'user';
+        jobMap_runopt.graphic.colorBy = $(this).prop('checked')?'group':'user';
         jobMap.runopt(jobMap_runopt);
+        console.log(jobMap_runopt)
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);
