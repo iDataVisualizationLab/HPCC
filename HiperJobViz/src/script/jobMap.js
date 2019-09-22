@@ -31,7 +31,8 @@ let JobMap = function() {
             .domain([-0.25, 1.25]);
         radarcreate = d3.radialLine()
             .curve(d3.curveCardinalClosed.tension(0.5))
-            .radius(function(d) { return rScale(d.value); })
+            .radius(function(d) {
+                return rScale(d.value); })
             .angle(function(d) {
                 return schema.find(s=>s.text===d.axis).angle; });
 
@@ -127,13 +128,13 @@ let JobMap = function() {
             datapoint.select('.tSNEborder')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d.filter(e => e.enable)));
-            if (colorfill) {
-                datapoint.select("rect").style('display', 'none');
-                datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
-            } else {
-                datapoint.select("rect").style('display', 'unset')
-                datapoint.select('.tSNEborder').style('fill', 'none')
-            }
+        }
+        if (colorfill) {
+            datapoint.select("rect").style('display', 'none');
+            datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
+        } else {
+            datapoint.select("rect").style('display', 'unset')
+            datapoint.select('.tSNEborder').style('fill', 'none')
         }
     }
 
@@ -145,12 +146,33 @@ let JobMap = function() {
         createRadar(datapoint, bg, newdata, colorfill);
 
     }
-    function drawEmbedding_timeline(data,colorfill) {
-        let newdata =handledata(data);
+    let timelineScale = d3.scaleLinear().range([-10,0]);
+    function drawEmbedding_timeline(data,colorfill,maintimeline) {
+        let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
-        let datapoint = bg.select(".linkLineg")
-            .datum(d=>newdata.find(n=>n.name === d.name));
-        createRadar(datapoint, bg, newdata, colorfill);
+        let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=newdata.find(n=>n.name === e.cluster); temp.timestep = e.timestep; return temp;}));
+        datapoint.exit().remove();
+        datapoint = datapoint.enter().append('g')
+            .attr('class','linkLinegg')
+        .merge(datapoint);
+        datapoint.each(function(d){
+            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, colorfill);
+        });
+        datapoint.attr('transform',d=>`translate(${timelineScale(d.timestep)},0)`);
+
+        let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
+        dataline.exit().remove();
+        dataline = dataline.enter().append('line')
+            .attr('class','linegg')
+            .merge(dataline)
+            .attrs({
+                x1: d=>timelineScale(d.start),
+                x2: d=>timelineScale(d.end),
+            }).styles({
+                stroke: d=>colorFunc(d.cluster),
+                'stroke-width': 0.5,
+            })
+        ;
 
     }
     jobMap.drawComp = function (){
@@ -166,9 +188,9 @@ let JobMap = function() {
                 break;
             case "timeline":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
-
+                drawEmbedding_timeline(clusterdata.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true,hosts);
+                break;
             case "pie":
-                drawEmbedding_timeline()
             default:
                 drawPie(svg.selectAll('.computeNode'));
                 break;
@@ -420,7 +442,7 @@ let JobMap = function() {
 
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
             computers.attr('transform', d => {
-                if (runopt.compute.clusterNode) {
+                if (runopt.compute.clusterNode||runopt.compute.type==='timeline') {
                     d.x = 200;
                     d.x2 = 200;
                 }else
@@ -813,8 +835,32 @@ let JobMap = function() {
         if (simulation)
             simulation.stop();
         linkdata = [];
-        hosts.forEach(h=>h.user=[]);
-        user = current_userData()
+        hosts.forEach(h=>{
+            h.user=[];
+            h.timeline = {clusterarr:[],line:[]};
+        });
+        let maxstep = 0;
+        clusterdata.forEach(c=>{
+            c.arr.forEach((ct,ts)=>{
+                maxstep = Math.max(maxstep,ts);
+                ct.forEach(h=>{
+                    let currentarr = hostOb[h].timeline.clusterarr;
+                    if (currentarr.length&&c.name === hostOb[h].timeline.clusterarr[currentarr.length-1].cluster){
+                        hostOb[h].timeline.clusterarr.stack ++;
+                        let lineitem  =hostOb[h].timeline.line[hostOb[h].timeline.line.length-1];
+                        if (hostOb[h].timeline.clusterarr.stack===2)
+                            hostOb[h].timeline.line.push({cluster:c.name,start:ts-2,end:ts});
+                        else if (hostOb[h].timeline.clusterarr.stack>2)
+                            hostOb[h].timeline.line[hostOb[h].timeline.line.length-1].end = ts;
+                    }else{
+                        hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
+                        hostOb[h].timeline.clusterarr.stack = 0;
+                    }
+                });
+            });
+        });
+        timelineScale.domain([maxstep-1,maxstep]);
+        user = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
@@ -941,6 +987,8 @@ let JobMap = function() {
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else
             clusterNode_data = undefined;
+
+
         Object.keys(tableData).forEach(k=>{
             if (!tableData[k].keep)
                 delete tableData[k];

@@ -1442,6 +1442,10 @@ $( document ).ready(function() {
     d3.select('#jobType_control').on("change", function () {
         var sect = document.getElementById("jobType_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+        if (jobMap_runopt.compute.type ==='timeline')
+        {   jobMap_runopt.compute.clusterNode = false;
+            d3.select('#compCluster_control').attr('checked',undefined)
+        }
         jobMap.runopt(jobMap_runopt);
     });
     d3.select('#jobIDCluster_control').on("change", function () {
