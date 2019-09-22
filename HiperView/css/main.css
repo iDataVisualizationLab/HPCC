@@ -788,6 +788,10 @@ p.divider {
 	padding-right: 10px;
 	margin-top: 0;
 }
+.top10DIV .collection td {
+	padding-left: 5px;
+	padding-right: 5px;
+}
 .alignRight {
 	text-align: right;
 }

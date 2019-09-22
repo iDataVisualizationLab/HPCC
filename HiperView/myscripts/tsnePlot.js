@@ -762,7 +762,7 @@ d3.Tsneplot = function () {
 
         const totalUser = userl.length;
 
-        const sh = 30;
+        const sh = 20;
         const sw = 200;
         const tickh = 6;
         const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
