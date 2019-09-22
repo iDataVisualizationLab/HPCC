@@ -769,8 +769,8 @@ d3.Tsneplot = function () {
         const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
         // let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
         let rangesubmitTime = d3.min(jobList,d=>new Date (d.submitTime));
-        let timelineMark = d3.select('#timelineLabel').attrs({'height':10, 'width': sw+margin.left+margin.right})
-            .select('g').attr("transform", "translate("+margin.left+", 0)");
+        let timelineMark = d3.select('#timelineLabel').style('padding-left','10px').style('overflow','visible').attrs({'height':14, 'width': sw+margin.left+margin.right})
+            .select('g').attr("transform", "translate("+margin.left+", 20)");
 
         let xscale = d3.scaleTime().range([0,sw]).domain([rangesubmitTime,currentTime]);
         const minstep = 7;
@@ -826,6 +826,9 @@ d3.Tsneplot = function () {
             .attr("transform", "translate("+margin.left+", "+margin.top+")");
 
         newg.append('g').attr('class','gaxis').attr("transform", "translate(0, "+(-margin.top)+")");
+        timelineMark.call(d3.axisTop(xscale)
+            .ticks(d3.timeDay.every(1))
+            .tickFormat(d3.timeFormat("%d %b"))).selectAll('line, path').remove();
 
         //update
 

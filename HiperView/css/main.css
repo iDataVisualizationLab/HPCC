@@ -806,6 +806,11 @@ p.divider {
 	border-radius: 0;
 	padding: 0px 10px
 }
+
+table thead th {
+	cursor: default ;
+}
+
 .displayNone {
 	display: none;
 }
