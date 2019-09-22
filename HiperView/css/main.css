@@ -873,8 +873,12 @@ p.divider {
 	stroke-width: 1px;
 	opacity: 0.6;
 }
-
-
+.user_timeline .gaxis .tick {
+	stroke-dasharray: 2;
+}
+.user_timeline .gaxis .tick:last-child {
+	opacity: 0.5;
+}
 #search_User {
 	border: #7b7b7b solid 0.5px;
 	font-size: 12px;

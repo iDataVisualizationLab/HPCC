@@ -41,6 +41,7 @@ d3.Tsneplot = function () {
     let first = true;
     let returnEvent;
     let schema;
+    let userl=[];
     function updateRenderRanking(data) {
         var max = d3.max(d3.extent(d3.merge(d3.extent(data,d=>d3.extent(d3.merge(d))))).map(d=>Math.abs(d)));
         scaleX_small.domain([-max,max]);
@@ -397,6 +398,22 @@ d3.Tsneplot = function () {
             dataIdAttr: 'data-id',
             filter: ".disable",
         });
+        list_user.sortVar = 'jobs';
+        list_user.direction = true;
+        let headerList = ['user','hosts','jobs'];
+        d3.selectAll('.top10DIV thead .sortHeader').each(function(d,i){
+           d3.select(this).on('click',()=>{
+               d3.selectAll('.top10DIV thead .sortHeader .dir').text('↕');
+               if (list_user.sortVar===headerList[i]){
+                   list_user.direction = !list_user.direction;
+               }else{
+                   list_user.sortVar = headerList[i];
+                   list_user.direction = true;
+               }
+               d3.select(this).select('.dir').text(list_user.direction?'▲':'▼');
+               user_sortBY()
+           });
+        });
         // search box event
         $('#search_User').on('input', searchHandler); // register for oninput
         $('#search_User').on('propertychange', searchHandler); // for IE8
@@ -704,25 +721,25 @@ d3.Tsneplot = function () {
         });
         return objectarr;
     }
-    function user_sortBY (key,data){
-        switch (key) {
+    function user_sortBY (){
+        switch (list_user.sortVar) {
             case 'user':
-                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
-                data.sort((a,b)=>b.values.length-a.values.length);
-                data.sort((a,b)=>b.key-a.key);
+                userl.sort((a,b)=>(b.unqinode.length-a.unqinode.length)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>(b.values.length-a.values.length)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>a.key.localeCompare(b.key)*(-1+2*list_user.direction));
                 break;
             case 'jobs':
-                data.sort((a,b)=>b.key-a.key);
-                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
-                data.sort((a,b)=>b.values.length-a.values.length);
+                userl.sort((a,b)=>a.key.localeCompare(b.key)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>(b.unqinode.length-a.unqinode.length)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>(b.values.length-a.values.length)*(-1+2*list_user.direction));
                 break;
-            case 'nodes':
-                data.sort((a,b)=>b.key-a.key);
-                data.sort((a,b)=>b.values.length-a.values.length);
-                data.sort((a,b)=>b.unqinode.length-a.unqinode.length);
+            case 'hosts':
+                userl.sort((a,b)=>a.key.localeCompare(b.key)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>(b.values.length-a.values.length)*(-1+2*list_user.direction));
+                userl.sort((a,b)=>(b.unqinode.length-a.unqinode.length)*(-1+2*list_user.direction));
                 break;
         }
-        list_user.sort(data.map(d=>d.key));
+        list_user.sort(userl.map(d=>d.key));
     }
     function searchHandler (e){
         if (e.target.value!=="") {
@@ -732,20 +749,21 @@ d3.Tsneplot = function () {
             panel_user.selectAll('tr.collection-item').classed('displayNone', false);
         }
     }
+
     function drawUserlist(currentTime) {
         currentTime =new Date(currentTime);
         $(userList_lastupdate).text('Last update: '+currentTime.timeNow2());
-        let userl = current_userData();
+        userl = current_userData();
         //ranking----
         panel_user.select('table').classed('empty',!userl.length);
         panel_user.select('.search-wrapper').classed('empty',!userl.length);
 
-        user_sortBY ('jobs',userl);
+        user_sortBY ();
 
         const totalUser = userl.length;
 
-        const sh = 20;
-        const sw = 150;
+        const sh = 30;
+        const sw = 200;
         const tickh = 6;
         const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
         // let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
@@ -795,7 +813,7 @@ d3.Tsneplot = function () {
             .attr('class','jobs alignRight')
             .text(d=>d.values.length);
 
-        contain_n.append('td')
+        let newg = contain_n.append('td')
             .attr('class','user_timeline')
             .append('svg')
             .attrs({'height':sh+margin.top+margin.bottom,
@@ -803,6 +821,7 @@ d3.Tsneplot = function () {
             .append('g')
             .attr("transform", "translate("+margin.left+", "+margin.top+")");
 
+        newg.append('g').attr('class','gaxis').attr("transform", "translate(0, "+(-margin.top)+")");
 
         //update
 
@@ -814,10 +833,98 @@ d3.Tsneplot = function () {
             .style('background-color',null);
         userli.select('.nodes') .text(d=>d.unqinode.length);
 
-        minitimeline();
+        minitimelinev2(300000);
+        function minitimelinev2(timelimit) {
+            let thickscale = d3.scaleSqrt().range([1,3]);
+            let thickdomain = [Infinity,1];
+            let mini_timeline = panel_user.selectAll('.user_timeline').select('g');
+            mini_timeline.select('.gaxis').call(d3.axisTop(xscale)
+                .ticks(d3.timeDay.every(1)).tickSize(-sh-margin.top-margin.bottom)
+                .tickFormat("")).select('.domain').remove();
+            mini_timeline.each(d=>{
+                const range_temp_sub = d3.extent(d.values,e=>+new Date(e.submitTime));
+                const range_temp_st = d3.extent(d.values,e=>+new Date(e.startTime));
+                const scale_temp_sub = d3.scaleLinear().domain([range_temp_sub[0],range_temp_sub[0]+timelimit]);
+                const scale_temp_st = d3.scaleLinear().domain([range_temp_st[0],range_temp_st[0]+timelimit]);
+                let temp = d3.nest().key(d =>''+Math.floor(scale_temp_sub(+new Date(d.submitTime)))+ Math.floor(scale_temp_st(+new Date(d.startTime)))).entries(d.values);
+                temp.forEach((t, i) => {
+                    t.startTime = d3.min(t.values,e=>new Date(e.startTime))
+                    t.submitTime = d3.min(t.values,e=>new Date(e.submitTime))
+                    t.y = yscale(i, (temp.length));
+                    t.num = t.values.length;
+                    if(t.num>thickdomain[1])
+                        thickdomain[1] = t.num;
+                    if(t.num<thickdomain[1])
+                        thickdomain[0] = t.num;
+                });
+                d.group = temp;
+            })
+            thickscale.domain(thickdomain);
+            let timeBox = mini_timeline.selectAll('line.timeBox')
+                .data(d => d.group, e => e.submitTime);
+            timeBox.exit().remove();
+            timeBox
+                .enter()
+                .append('line')
+                .attr('class', 'timeBox')
+                .merge(timeBox)
+                .style('stroke-width',d=>thickscale(d.num))
+                .transition().duration(500)
+                .attr('x1', d => xscale(d.submitTime))
+                .attr('x2', d => xscale(d.startTime))
+                .attr('y1', (d, i) => d.y)
+                .attr('y2', (d, i) => d.y);
+
+            let timeBoxRunning = mini_timeline.selectAll('line.timeBoxRunning')
+                .data(d => d.group, d => d.startTime)
+            timeBoxRunning.exit().remove();
+            timeBoxRunning
+                .enter()
+                .append('line')
+                .attr('class', 'timeBoxRunning')
+                .merge(timeBoxRunning)
+                .style('stroke-width',d=>thickscale(d.num))
+                .transition().duration(500)
+                .attr('x1', d => xscale(d.startTime))
+                .attr('x2', d => xscale(currentTime))
+                .attr('y1', (d, i) => d.y)
+                .attr('y2', (d, i) => d.y);
+            //draw tick
+
+            let linesubmitTime = mini_timeline.selectAll('line.submitTime')
+                .data(d => d.group, d => d.submitTime);
+            linesubmitTime.exit().remove();
+            linesubmitTime.enter()
+                .append('line')
+                .attr('class', 'submitTime')
+                .merge(linesubmitTime)
+                .transition().duration(500)
+                .attr('x1', d => xscale(d.submitTime))
+                .attr('x2', d => xscale(d.submitTime))
+                .attr('y1', -tickh / 2)
+                .attr('y2', tickh / 2)
+                .attr("transform", d => "translate(" + 0 + ", " + d.y + ")");
+
+            let linestartTime = mini_timeline.selectAll('line.startTime')
+                .data(d => d.group, d => d.startTime);
+            linestartTime.exit().remove();
+            linestartTime
+                .enter()
+                .append('line')
+                .attr('class', 'startTime')
+                .merge(linestartTime)
+                .transition().duration(500)
+                .attr('x1', d => xscale(d.startTime))
+                .attr('x2', d => xscale(d.startTime))
+                .attr('y1', -tickh / 2)
+                .attr('y2', tickh / 2)
+                .attr("transform", d => "translate(" + 0 + ", " + d.y + ")");
+        }
         function minitimeline() {
             let mini_timeline = panel_user.selectAll('.user_timeline').select('g');
-
+            mini_timeline.select('.gaxis').call(d3.axisTop(xscale)
+                .ticks(d3.timeDay.every(1)).tickSize(-sh-margin.top-margin.bottom)
+                .tickFormat("")).select('.domain').remove();
             let timeBox = mini_timeline.selectAll('line.timeBox')
                 .data(d => {
                     let temp = d3.nest().key(k => k.submitTime).entries(d.values);
