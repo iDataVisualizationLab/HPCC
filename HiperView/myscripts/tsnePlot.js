@@ -414,6 +414,7 @@ d3.Tsneplot = function () {
                user_sortBY()
            });
         });
+        d3.select('#timelineLabel').append('g');
         // search box event
         $('#search_User').on('input', searchHandler); // register for oninput
         $('#search_User').on('propertychange', searchHandler); // for IE8
@@ -768,6 +769,9 @@ d3.Tsneplot = function () {
         const margin = {top:tickh/2,bottom:tickh/2,left:1,right:1};
         // let rangestartTime = d3.extent(jobList,d=>new Date (d.startTime));
         let rangesubmitTime = d3.min(jobList,d=>new Date (d.submitTime));
+        let timelineMark = d3.select('#timelineLabel').attrs({'height':10, 'width': sw+margin.left+margin.right})
+            .select('g').attr("transform", "translate("+margin.left+", 0)");
+
         let xscale = d3.scaleTime().range([0,sw]).domain([rangesubmitTime,currentTime]);
         const minstep = 7;
         let yscale = function (d,l) {
