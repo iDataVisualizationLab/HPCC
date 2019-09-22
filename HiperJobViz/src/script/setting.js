@@ -38,8 +38,8 @@ let jobMap_opt = {
     },
 }
 let jobMap_runopt = {
-    compute:{type:'radar',clusterJobID:false,clusterJobID_info:{groupBy:1800000},clusterNode:false},
-    graphic:{colorBy:'user'},
+    compute:{type:'radar',clusterJobID:true,clusterJobID_info:{groupBy:1800000},clusterNode:true,},
+    graphic:{colorBy:'group'},
     histodram:{resolution:11}
 }
 function zoomtoogle(event) {

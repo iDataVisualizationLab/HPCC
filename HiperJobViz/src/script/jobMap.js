@@ -154,17 +154,26 @@ let JobMap = function() {
 
     }
     jobMap.drawComp = function (){
-        if(runopt.compute.type==="radar"){
-            svg.selectAll('.computeNode').selectAll('.piePath').remove();
-            if (clusterNode_data){
-                drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group')
-            }else {
-                if (arr.length)
-                    drawEmbedding(arr)
-            }
-        }else{
-            drawPie(svg.selectAll('.computeNode'));
+        switch(runopt.compute.type){
+            case "radar":
+                svg.selectAll('.computeNode').selectAll('.piePath').remove();
+                if (clusterNode_data){
+                    drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group')
+                }else {
+                    if (arr.length)
+                        drawEmbedding(arr)
+                }
+                break;
+            case "timeline":
+                svg.selectAll('.computeNode').selectAll('.piePath').remove();
+
+            case "pie":
+                drawEmbedding_timeline()
+            default:
+                drawPie(svg.selectAll('.computeNode'));
+                break;
         }
+
     };
 
     function handledata(data){
@@ -249,11 +258,15 @@ let JobMap = function() {
                 return d.target.y2 || d.target.y;
             }).style('stroke-dasharray', getstrokearray).style('stroke-dashoffset', getstrokearray_offset);
     }
-
+    let last_timestep = new Date();
     jobMap.draw = function (timeStep_r){
-        timeStep = new Date(timeStep_r.toString());
-        if (!timeStep)
-            timeStep = new Date();
+        let timeStep;
+        if (!timeStep_r)
+            timeStep = new Date(last_timestep.toString());
+        else {
+            timeStep = new Date(timeStep_r.toString());
+            last_timestep = new Date(timeStep_r.toString());
+        }
         timebox.text(timeStep.toLocaleTimeString())
         yscale = d3.scaleLinear().domain([-1,user.length]).range([0,Math.min(graphicopt.heightG(),30*(user.length))]);
         let deltey = yscale(1)-yscale(0);
@@ -271,7 +284,7 @@ let JobMap = function() {
         let computers = nodeg.selectAll('.computeNode').data(clusterNode_data||hosts,function(d){return d.name});
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
-        
+
         computers_n.append('g').attrs(
             {'class':'computeSig',
                 'stroke':'black',
@@ -924,7 +937,6 @@ let JobMap = function() {
             });
             clusterNode_data = clusterdata;
             colorCluster.domain(clusterNode_data.map(d=>d.name));
-            console.log(colorCluster.domain())
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else
