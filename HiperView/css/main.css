@@ -869,7 +869,7 @@ p.divider {
 }
 
 .user_timeline line.timeBox {
-	stroke: black;
+	stroke: #d68924;
 	stroke-width: 1px;
 	opacity: 0.6;
 }
