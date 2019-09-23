@@ -160,6 +160,7 @@ let JobMap = function() {
         });
         datapoint.attr('transform',d=>`translate(${timelineScale(d.timestep)},0)`);
 
+        bg.style('stroke-width', d=>linkscale(d.values_name.length));
         let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
         dataline.exit().remove();
         dataline = dataline.enter().append('line')
@@ -170,7 +171,6 @@ let JobMap = function() {
                 x2: d=>timelineScale(d.start),
             }).styles({
                 stroke: d=>colorFunc(d.cluster),
-                'stroke-width': 0.5,
             })
         ;
 
