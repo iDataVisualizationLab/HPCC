@@ -238,3 +238,19 @@ span.thumb {
     background-color: #dddddd;
     padding: 5px;
 }
+
+.gline_path text {
+    display: none;
+}
+
+.gline_path text.statics{
+    display: block;
+}
+
+.gline_path.highlight text{
+    display: block;
+    fill: red;
+}
+.gline_path.highlight path{
+    stroke: red;
+}

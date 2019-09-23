@@ -84,10 +84,10 @@ let Tooltip_lib = function() {
         svg = d3.select(".lineSum")
             .append('svg')
             .attrs({
-            width: graphicopt.width,
-            height: graphicopt.height,
+                width: graphicopt.width,
+                height: graphicopt.height,
 
-        });
+            });
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -141,7 +141,7 @@ let Tooltip_lib = function() {
             .data(data)
             .enter()
             .append('g')
-                .attr("class", "gline_path")
+            .attr("class", "gline_path")
             .on('click',function(d){
                 d.clicked = !d.clicked;
                 d3.select(this).classed('highlight',d.clicked);
@@ -162,7 +162,7 @@ let Tooltip_lib = function() {
             .attr("font-family", "sans-serif")
             .text(d=> `${d.label}`)
             .classed('statics',(d,i)=>i===0||i===data.length-1);
-                // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
+        // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
         g.append("text")
             .attr("x", -graphicopt.heightG() / 2)
             .attr("y", -35)
@@ -255,7 +255,7 @@ let Tooltip_lib = function() {
         }
 
     };
-    
+
     master.svg = function (_) {
         return arguments.length ? (svg = _, master) : svg;
     };
@@ -271,7 +271,7 @@ let Tooltip_lib = function() {
     master.tooltip = function (_) {
         return arguments.length ? (tooltip = _, master) : tooltip;
     };
-    
+
     master.schema = function (_) {
         return arguments.length ? (graphicopt.radaropt.schema = _,schema = _,updatalayout(_), master) : schema;
     };
