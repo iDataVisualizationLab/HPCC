@@ -147,7 +147,7 @@ let JobMap = function() {
 
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
-    function drawEmbedding_timeline(data,colorfill,maintimeline) {
+    function drawEmbedding_timeline(data,colorfill) {
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
         let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
@@ -173,7 +173,6 @@ let JobMap = function() {
                 'stroke-width': 0.5,
             })
         ;
-        console.log(hosts.filter(h=>h.timeline.line.length>1))
 
     }
     jobMap.drawComp = function (){
@@ -304,7 +303,8 @@ let JobMap = function() {
             makeheader();
             first = false;
         }
-        let computers = nodeg.selectAll('.computeNode').data(clusterNode_data||hosts,function(d){return d.name});
+        let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||hosts,function(d){return d.name});
+        computers.select('.computeSig').datum(d=>d);
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
 
@@ -827,7 +827,7 @@ let JobMap = function() {
         if (runopt.compute.clusterNode&&!skiprender)
             renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
     }
-    let clusterNode_data,clusterdata;
+    let clusterNode_data,clusterdata,clusterdata_timeline;
     let clusterlineScale = d3.scaleLinear().range([0,400]);
     function cluster_line(path){ //timelinescale
         let clineg = path.selectAll('.cline_g').data(d=>d.cvalues);
@@ -835,16 +835,10 @@ let JobMap = function() {
         let clineg_n = clineg.enter().append(g).attr('class','cline_g');
         clineg_n.append('path').attr('class')
     }
-    function handle_links (){
-        if (simulation)
-            simulation.stop();
-        linkdata = [];
-        hosts.forEach(h=>{
-            h.user=[];
-            h.timeline = {clusterarr:[],line:[]};
-        });
-        let maxstep = d3.max(clusterdata,c=>c.arr.length)-1;
-        for (let ts = 0;ts<maxstep+1;ts++) {
+
+    function updateClusterTimeline() {
+        let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
+        for (let ts = 0; ts < maxstep + 1; ts++) {
             clusterdata.forEach(c => {
                 ct = c.arr[ts];
                 if (ct)
@@ -864,7 +858,21 @@ let JobMap = function() {
 
             });
         }
-        timelineScale.domain([maxstep-1,maxstep]);
+        timelineScale.domain([maxstep - 1, maxstep]);
+    }
+
+    function handle_links (){
+        if (simulation)
+            simulation.stop();
+        linkdata = [];
+        hosts.forEach(h=>{
+            h.user=[];
+            h.timeline = {clusterarr:[],line:[]};
+        });
+
+
+        updateClusterTimeline();
+
         user = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
@@ -920,6 +928,7 @@ let JobMap = function() {
                     temp.vx = d3.mean(group_temp_ob[k],e=>e.vx);
                     temp.vy = d3.mean(group_temp_ob[k],e=>e.vy);
                     temp.values = group_temp_ob[k];
+                    temp.nodes = _.uniq(_.flatten(group_temp_ob[k].map(g=>g.nodes)));
                     let namearr = group_temp_ob[k].map(d=>d.name);
                     temp.name = namearr.join(' ');
                     let sameSource = linkdata.filter(e=>namearr.find(f=>f===e.source+''));
@@ -992,7 +1001,50 @@ let JobMap = function() {
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else
             clusterNode_data = undefined;
+        if (runopt.compute.type==='timeline') {
+            clusterdata_timeline = [];
+            data.forEach(d=>{
+               let listcomp = d.nodes.filter(e=>{
+                   let temp = linkdata.filter(f=>f.source===e);
+                   if (temp.length===1)
+                       return true;
+                   else if(temp.length>1){
+                       if (!clusterdata_timeline.find(c=>c.name===e)) {
+                           clusterdata_timeline.push({
+                               name: e,
+                               values_name: [e],
+                               timeline: hostOb[e].timeline
+                           });
+                           temp.forEach(d=>d.links=1);
+                       }
+                   }
+                   return false;
+               });
+                let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline)});
+                Object.keys(temp_g).forEach(k=>{
+                    let temp_h = {};
+                    temp_h.values_name = temp_g[k].map(e=>e.name);
+                    temp_h.name = temp_h.values_name.join(' ');
+                    temp_g[k].forEach((n)=>{
+                        linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
+                            if(i===0) {
+                                e.source =  temp_h.name;
+                                e.links = temp_g[k].length;
+                            }else{
+                                e.del = true;
+                            }
+                        });
+                    });
 
+                    temp_h.timeline = temp_g[k][0].timeline;
+                    clusterdata_timeline.push(temp_h);
+                });
+            });
+            linkdata = linkdata.filter(d => !d.del);
+            linkscale.domain(d3.extent(linkdata,d=>d.links));
+            console.log(clusterdata_timeline)
+        }else
+            clusterdata_timeline = undefined;
 
         Object.keys(tableData).forEach(k=>{
             if (!tableData[k].keep)

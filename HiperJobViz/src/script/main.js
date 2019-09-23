@@ -1092,8 +1092,8 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =0;
-        simDurationinit = 0;
+        simDuration =1;
+        simDurationinit = 1;
         numberOfMinutes = 26*60;
     }
     if (!init)
@@ -1443,8 +1443,11 @@ $( document ).ready(function() {
         var sect = document.getElementById("jobType_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
         if (jobMap_runopt.compute.type ==='timeline')
-        {   jobMap_runopt.compute.clusterNode = false;
-            d3.select('#compCluster_control').attr('checked',undefined)
+        {
+            jobMap_runopt.compute.clusterNode = false;
+            d3.select('#compCluster_control').attr('checked',undefined);
+            jobMap_runopt.compute.clusterJobID = true;
+            d3.select('#jobIDCluster_control').attr('checked','');
         }
         jobMap.runopt(jobMap_runopt);
     });
