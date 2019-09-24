@@ -509,6 +509,10 @@ function request(){
     timerequest();
     interval2 = new IntervalTimer(timerequest , simDuration);
     function timerequest() {
+        if (!isanimation)
+            preloader(true,lastIndex/59*100);
+        else
+            preloader(false);
         var midlehandle = function (ri){
             let returniteration = ri[0];
             let returnCount = ri[1];
@@ -551,6 +555,7 @@ function request(){
             if (currentlastIndex===59) {
                 jobMap.draw();
                 console.log("done");
+                preloader(false);
                 interval2.stop();
             }
 
@@ -1099,8 +1104,8 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =0;
-        simDurationinit = 0;
+        simDuration =1;
+        simDurationinit = 1;
         numberOfMinutes = 26*60;
     }
     if (!init)
@@ -1463,6 +1468,9 @@ $( document ).ready(function() {
             document.getElementById("colorConnection_control").options.selectedIndex = 0;
             jobMap_runopt.graphic.colorBy = 'user';
             document.getElementById("colorConnection_control").setAttribute('disabled','')
+        }else if(jobMap_runopt.compute.type ==='radar_cluster'){
+            jobMap_runopt.compute.type = 'radar';
+            jobMap_runopt.compute.clusterNode = true;
         }else{
             document.getElementById("colorConnection_control").removeAttribute('disabled')
         }
@@ -1482,9 +1490,8 @@ $( document ).ready(function() {
         jobMap.runopt(jobMap_runopt).draw();
     });
     d3.select('#datacom').on("change", function () {
-        d3.select('.cover').classed('hidden', false);
+        preloader(true);
         exit_warp();
-        spinner.spin(target);
         const choice = this.value;
         const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
         if (choice!=='csv') {
@@ -1546,8 +1553,7 @@ $( document ).ready(function() {
                     db = choice;
                     requestService = eval('requestService' + choice);
                     processResult = eval('processResult_' + choice);
-                    d3.select('.cover').classed('hidden', true);
-                    spinner.stop();
+                    preloader(false)
                 }
 
             }, 0);
@@ -1573,13 +1579,11 @@ $( document ).ready(function() {
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
             resetRequest();
-            d3.select('.cover').classed('hidden', true);
-            spinner.stop();
+            preloader(false)
         }
     });
     let oldchoose =$('#datacom').val();
-    $('#data_input_file').on('click',()=>{d3.select('.cover').classed('hidden', true);
-        spinner.stop();})
+    $('#data_input_file').on('click',()=>{preloader(false)})
     $('#data_input_file').on('input', (evt) => {
         $('#datacom').val('csv')
         var f = evt.target.files[0];
@@ -1587,9 +1591,8 @@ $( document ).ready(function() {
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.
-                d3.select('.cover').classed('hidden', false);
                 exit_warp();
-                spinner.spin(target);
+                preloader(true)
                 setTimeout(() => {
                     d3.csv(e.target.result,function (error, data) {
                         if (error){
@@ -1609,8 +1612,7 @@ $( document ).ready(function() {
                                 d3.select(".currentDate")
                                     .text("" + new Date(data[0].timestamp).toDateString());
                                 resetRequest();
-                                d3.select('.cover').classed('hidden', true);
-                                spinner.stop();
+                                preloader(false);
                             }
                         }
                     })
@@ -1717,8 +1719,7 @@ $( document ).ready(function() {
             main();
             d3.select(".cover").select('h5').text('loading data...');
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
-            d3.select('.cover').classed('hidden',true);
-            spinner.stop();
+            preloader(false)
         }
     },0);
     // Spinner Stop ********************************************************************

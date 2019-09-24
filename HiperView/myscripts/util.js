@@ -875,3 +875,28 @@ function controlView(config){
             break;
     }
 }
+function onloaddetermire (data){
+    d3.select('.cover .status').text('');
+    const determinate =  d3.select('.determinate').style('width',data.process.toFixed(2)+'%');
+    d3.select('.progressText').text(data.message);
+    if (data.message==='finish'){
+        d3.select('.progressDiv').classed('hidden', true);
+        d3.select('.cover').classed('hidden', true);
+        d3.select('.cover .status').text('load data....');
+    }else{
+        d3.select('.progressDiv').classed('hidden', false);
+    }
+}
+function preloader(on,percentage){
+    if (on){
+        d3.select('.cover').classed('hidden', false);
+        if(percentage)
+            onloaddetermire({message:'collecting data....',process:percentage})
+        else
+            spinner.spin(target);
+    }else {
+        onloaddetermire({message:'finish',process:100});
+        d3.select('.cover').classed('hidden', true);
+        spinner.stop();
+    }
+}
