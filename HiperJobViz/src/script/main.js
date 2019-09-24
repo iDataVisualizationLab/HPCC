@@ -1468,6 +1468,10 @@ $( document ).ready(function() {
             document.getElementById("colorConnection_control").options.selectedIndex = 0;
             jobMap_runopt.graphic.colorBy = 'user';
             document.getElementById("colorConnection_control").setAttribute('disabled','')
+        }else if (jobMap_runopt.compute.type ==='radar')
+        {
+            jobMap_runopt.compute.clusterNode = false;
+            document.getElementById("colorConnection_control").removeAttribute('disabled')
         }else if(jobMap_runopt.compute.type ==='radar_cluster'){
             jobMap_runopt.compute.type = 'radar';
             jobMap_runopt.compute.clusterNode = true;
