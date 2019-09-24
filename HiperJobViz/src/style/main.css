@@ -254,3 +254,7 @@ span.thumb {
 .gline_path.highlight path{
     stroke: red;
 }
+
+.gNodeaxis .tick {
+    stroke-dasharray: 2;
+}

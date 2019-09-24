@@ -19,7 +19,7 @@ let JobMap = function() {
         },runopt={compute:{setting:'pie'},graphic:{colorBy:'user'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
         svg, g, table_headerNode,first = true,
         dataRaw=[],data = [],arr=[],
-        hosts = []
+        Hosts = []
     ;
     tableFooter.dataRaw =[];
     let jobMap = {};
@@ -62,6 +62,7 @@ let JobMap = function() {
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
         linkg = g.append("g")
             .attr('class','linkg');
         nodeg = g.append("g")
@@ -151,6 +152,7 @@ let JobMap = function() {
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
     function drawEmbedding_timeline(data,colorfill) {
+        // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
         let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
@@ -174,15 +176,26 @@ let JobMap = function() {
                 x2: d=>timelineScale(d.start),
             }).styles({
                 stroke: d=>colorFunc(d.cluster),
-            })
-        ;
+            });
 
+        updateaxis();
     }
+
+    function updateaxis() {
+        let bg = svg.selectAll('.computeSig');
+        let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
+        svg.select('.gNodeaxis')
+            .classed('hide',false)
+            .attr('transform',`translate(${bg.datum().x2||bg.datum().x},${rangey[0]})`)
+            .call(d3.axisTop(d3.scaleTime().range([-10*timelineScale.domain()[1],0]).domain([first__timestep,last_timestep])).tickSize(rangey[0]-rangey[1])).select('.domain').remove();
+    }
+
     jobMap.drawComp = function (){
         switch(runopt.compute.type){
             case "radar":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
                 svg.selectAll('.computeNode').selectAll('.timeline').remove();
+                svg.select('.gNodeaxis').classed('hide',true);
                 if (clusterNode_data){
                     drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group')
                 }else {
@@ -193,10 +206,11 @@ let JobMap = function() {
             case "timeline":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
                 svg.selectAll('.computeNode').selectAll('.radar').remove();
-                drawEmbedding_timeline(clusterdata.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true,hosts);
+                drawEmbedding_timeline(clusterdata.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true,Hosts);
                 break;
             case "pie":
             default:
+                svg.select('.gNodeaxis').classed('hide',true);
                 svg.selectAll('.computeNode').selectAll('.timeline').remove();
                 svg.selectAll('.computeNode').selectAll('.radar').remove();
                 drawPie(svg.selectAll('.computeNode'));
@@ -252,7 +266,7 @@ let JobMap = function() {
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
-    let jobscale = d3.scaleSqrt().range([0.5,3]);
+    let Jobscale = d3.scaleSqrt().range([0.5,3]);
 
     function renderManual(computers, jobNode, link) {
 
@@ -305,7 +319,7 @@ let JobMap = function() {
             makeheader();
             first = false;
         }
-        let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||hosts,function(d){return d.name});
+        let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,function(d){return d.name});
         computers.select('.computeSig').datum(d=>d);
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
@@ -329,7 +343,7 @@ let JobMap = function() {
 
         computers = computers_n.merge(computers);
 
-        jobMap.drawComp();
+
 
         //job node
         let timerange = [d3.min(data,d=>new Date(d.submitTime)),timeStep];
@@ -386,7 +400,7 @@ let JobMap = function() {
         ;
         jobNode = jobNode_n.merge(jobNode);
 
-        jobNode.selectAll('path').style('stroke-width',d=>d.values?jobscale(d.values.length):1.5);
+        jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 
         // table_header(table_headerNode);
         // make table footer
@@ -480,7 +494,8 @@ let JobMap = function() {
                 .attr("y2", function (d) {
                     return d.target.y2 || d.target.y;
                 }).style('stroke-dasharray',getstrokearray).style('stroke-dashoffset',getstrokearray_offset);
-            // }
+            if (runopt.compute.type==='timeline')
+                updateaxis();
         };
 
 
@@ -575,6 +590,9 @@ let JobMap = function() {
         else {
             renderManual(computers, jobNode, link);
         }
+
+        jobMap.drawComp();
+
         function initForce(){
             if (!simulation) {
                 let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
@@ -769,9 +787,9 @@ let JobMap = function() {
             'graph-width': 100,
         },
         column:{
-            'userID': {id:'userID',type:'text',x: 10,y:20,width:60},
-            'hosts': {id:'hosts',type:'num',x: 130,y:20,width:60},
-            'jobs': {id:'jobss',type:'num',x: 190,y:20,width:60},
+            'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
+            'Hosts': {id:'Hosts',type:'num',x: 130,y:20,width:60},
+            'Jobs': {id:'Jobs',type:'num',x: 190,y:20,width:60},
         }
     };
     // let violiin_chart = d3.viiolinChart().graphicopt({width:tableLayout.row["graph-width"],height:20,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
@@ -786,13 +804,13 @@ let JobMap = function() {
             user.sort((a, b) => b.values.length - a.values.length);
         else
             switch (tableHeader.currentsort) {
-                case 'userID':
+                case 'UserID':
                     user.sort((a, b) => a.name.localeCompare(b.name)*(-1+2*tableHeader.direction));
                     break;
-                case 'hosts':
+                case 'Hosts':
                     user.sort((a, b) => (b.unqinode.length - a.unqinode.length)*(-1+2*tableHeader.direction));
                     break;
-                case 'jobs':
+                case 'Jobs':
                     user.sort((a, b) => (b.values.length - a.values.length)*(-1+2*tableHeader.direction));
                     break;
                 case 'PowerUsage':
@@ -809,7 +827,7 @@ let JobMap = function() {
             d.orderlink = i;
         });
         if (!disableLinkSort) {
-            hosts.forEach(d => {
+            Hosts.forEach(d => {
                 let n = d.user.length;
                 if (n > 1) {
                     const linkoorder = d3.min(d.user, e => e.order);
@@ -863,14 +881,18 @@ let JobMap = function() {
         timelineScale.domain([maxstep - 1, maxstep]);
     }
 
+    let first__timestep = new Date();
     function handle_links (timeStep_r){
-        if (timeStep_r)
+        if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
+            if (first__timestep>last_timestep)
+                first__timestep = last_timestep;
+        }
         harr_old = [];
         if (simulation)
             simulation.stop();
         linkdata = [];
-        hosts.forEach(h=>{
+        Hosts.forEach(h=>{
             h.user=[];
             h.timeline = {clusterarr:[],line:[]};
         });
@@ -967,8 +989,8 @@ let JobMap = function() {
                 d3.extent(d.values,e=>+new Date(e.submitTime))
             }
             d.dataRaw = (user.filter(e=>e.name===d.name)[0]|| {dataRaw:[]}).dataRaw||[];
-            tableData[d.name] = tableData[d.name] || [{key:'hosts', value:0},
-                {key:'jobs',value: 0}];
+            tableData[d.name] = tableData[d.name] || [{key:'Hosts', value:0},
+                {key:'Jobs',value: 0}];
             tableData[d.name][0].value = d.unqinode.length;
             tableData[d.name][1].value = d.values.length;
             tableData[d.name].id = d.name;
@@ -979,7 +1001,7 @@ let JobMap = function() {
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
             data = newdata;
-            jobscale.domain(d3.extent(data,d=>d.values.length));
+            Jobscale.domain(d3.extent(data,d=>d.values.length));
         }
         if (runopt.compute.clusterNode) {
             clusterdata.forEach(c =>{
@@ -1057,9 +1079,9 @@ let JobMap = function() {
 
         handle_sort(true,true);
 
-        tableFooter[0] = {key:'userID',value:'Summary'}
-        tableFooter[1] = {key:'hosts', value:hosts.filter(d=>d.user.length).length}
-        tableFooter[2] = {key:'jobs', value:d3.sum(user,d=>d.values.length)};
+        tableFooter[0] = {key:'UserID',value:'Summary'}
+        tableFooter[1] = {key:'Hosts', value:Hosts.filter(d=>d.user.length).length}
+        tableFooter[2] = {key:'Jobs', value:d3.sum(user,d=>d.values.length)};
 
         return linkdata
     };
@@ -1149,7 +1171,7 @@ let JobMap = function() {
                 tableData[d.name][i+2] = {key:r.axis,value:r};
             })
             tableData[d.name][schema.length+2] = {key:'PowerUsage',value:d.PowerUsage.kwh};
-            // tableData[d.name] =[{key:'hosts', value:d.unqinode.length}
+            // tableData[d.name] =[{key:'Hosts', value:d.unqinode.length}
         });
         user_update = g.selectAll('.userNode').filter(d=>d.needRender);
         user_update.selectAll('text').interrupt().selectAll("*").interrupt();
@@ -1167,7 +1189,7 @@ let JobMap = function() {
     };
     function makeOb (){
         hostOb={};
-        hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
+        Hosts.forEach(h=>{h.data=[]; hostOb[h.name]=h;});
     }
 
     function makeheader() {
@@ -1178,8 +1200,8 @@ let JobMap = function() {
     function updatalayout(data){
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
-        tableHeader = [{key:'userID', value:'userID'},{key:'hosts', value:'hosts'}, {key:'jobs',value: 'jobs'}];
-        let offset = tableLayout.column['jobs'].x;
+        tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'Hosts'}, {key:'Jobs',value: 'Jobs'}];
+        let offset = tableLayout.column['Jobs'].x;
         let padding = 15;
         data.forEach((d,i)=>{
             tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: offset+(i)*tableLayout.row["graph-width"]+padding,y:0,width:tableLayout.row["graph-width"]};
@@ -1243,7 +1265,7 @@ let JobMap = function() {
     };
 
     jobMap.hosts = function (a) {
-        return arguments.length ? (hosts = _.cloneDeep( a),makeOb(), jobMap) : hosts;
+        return arguments.length ? (Hosts = _.cloneDeep( a),makeOb(), jobMap) : Hosts;
     };
 
     jobMap.dataComp = function (_) {
