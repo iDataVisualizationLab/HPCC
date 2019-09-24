@@ -1,4 +1,4 @@
-
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
 # 2019
 
 HiperView Current:  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
