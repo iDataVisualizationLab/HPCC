@@ -27,12 +27,14 @@ var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
 var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
-    height = +svg.attr("height")-margin.top-margin.bottom,
+    height = +document.getElementById("mainBody").offsetHeight,
+    // height = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
 
     svg = svg
         .attrs({
             width: width,
+            height: height,
         })
         .append("g")
         .attr("transform",
@@ -310,7 +312,7 @@ let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
 let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
-let isbusy = false, imageRequest = false;
+let isbusy = false, imageRequest = false, isanimation=false;
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -396,7 +398,9 @@ function main() {
             if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
                 if (graphicControl.charType === "T-sne Chart")
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                jobMap.dataComp(data.result.arr).drawComp();
+                jobMap.dataComp(data.result.arr);
+                if(isanimation)
+                    jobMap.drawComp();
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
@@ -545,6 +549,7 @@ function request(){
             currentlastIndex = iteration;
             // stop condition
             if (currentlastIndex===59) {
+                jobMap.draw();
                 console.log("done");
                 interval2.stop();
             }
@@ -574,7 +579,9 @@ function request(){
                         midlehandle_full(ri);
                         if(countbuffer===0) {
                             getJoblist();
-                            jobMap.data(jobList).draw(hostResults.timespan[lastIndex]);
+                            jobMap.data(jobList,hostResults.timespan[lastIndex]);
+                            if(isanimation)
+                                jobMap.draw();
                         }
                         countbuffer+=hosts.length;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
@@ -1092,8 +1099,8 @@ function realTimesetting (option,db,init,data){
         numberOfMinutes = 26*60;
     }else{
         processData = db?eval('processData_'+db):processData_old;
-        simDuration =1;
-        simDurationinit = 1;
+        simDuration =0;
+        simDurationinit = 0;
         numberOfMinutes = 26*60;
     }
     if (!init)
@@ -1439,30 +1446,40 @@ $( document ).ready(function() {
         pannelselection(false);
         updateSummaryChartAll();
     });
-    d3.select('#jobType_control').on("change", function () {
-        var sect = document.getElementById("jobType_control");
+    d3.select('#compDisplay_control').on("change", function () {
+        var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
         if (jobMap_runopt.compute.type ==='timeline')
         {
             jobMap_runopt.compute.clusterNode = false;
-            d3.select('#compCluster_control').attr('checked',undefined);
             jobMap_runopt.compute.clusterJobID = true;
             d3.select('#jobIDCluster_control').attr('checked','');
+            document.getElementById("colorConnection_control").options.selectedIndex = 0;
+            jobMap_runopt.graphic.colorBy = 'group';
+            document.getElementById("colorConnection_control").setAttribute('disabled','')
+        }else if (jobMap_runopt.compute.type ==='pie')
+        {
+            jobMap_runopt.compute.clusterNode = false;
+            document.getElementById("colorConnection_control").options.selectedIndex = 0;
+            jobMap_runopt.graphic.colorBy = 'user';
+            document.getElementById("colorConnection_control").setAttribute('disabled','')
+        }else{
+            document.getElementById("colorConnection_control").removeAttribute('disabled')
         }
-        jobMap.runopt(jobMap_runopt);
+        jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
     d3.select('#jobIDCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterJobID = $(this).prop('checked');
-        jobMap.runopt(jobMap_runopt);
+        jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
     d3.select('#compCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterNode = $(this).prop('checked');
-        jobMap.runopt(jobMap_runopt);
+        jobMap.runopt(jobMap_runopt).draw();
     });
     d3.select('#colorConnection_control').on("change", function () {
-        jobMap_runopt.graphic.colorBy = $(this).prop('checked')?'group':'user';
-        jobMap.runopt(jobMap_runopt);
-        console.log(jobMap_runopt)
+        var sect = document.getElementById("colorConnection_control");
+        jobMap_runopt.graphic.colorBy = sect.options[sect.selectedIndex].value;
+        jobMap.runopt(jobMap_runopt).draw();
     });
     d3.select('#datacom').on("change", function () {
         d3.select('.cover').classed('hidden', false);

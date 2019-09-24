@@ -341,12 +341,11 @@ $( document ).ready(function() {
         // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
         let choiceinit = d3.select('#datacom').node().value;
 
-
-            d3.csv("src/data/" + d3.select('#datacom').node().value + ".csv", function (error, data) {
-                if (error) {
-                }
-                loadata(data);
-            });
+        d3.csv("src/data/" + d3.select('#datacom').node().value + ".csv", function (error, data) {
+            if (error) {
+            }
+            loadata(data);
+        });
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))
@@ -417,6 +416,7 @@ function initgraphic () {
 
 }
 function main (){
+    reset ();
     firstTime = false;
     data = [];
     dataSum =[];
@@ -430,7 +430,7 @@ function main (){
     });
     serviceFull_selected =[];
     serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
-    triggersortPlay();
+    // triggersortPlay();
     handledata(graphicControl.mode);
     handledata_sumary();
     MetricController.datasummary(getsummaryservice())
@@ -639,21 +639,6 @@ function cluster_map (data) {
 
 }
 
-// (function($){
-//     $(window).on("load",function(){
-//
-//         /* call mCustomScrollbar function before jquery ui sortable() */
-//         console.log('he')
-//         $(".tablesvg").mCustomScrollbar({
-//             scrollbarPosition:"outside",
-//             scrollInertia:450,
-//             theme:"light-2"
-//         });
-//
-//
-//     });
-// })(jQuery);
-
 let dataSum=[];
 let radarChartclusterSumopt  = {
     margin: {top: 50, right: 50, bottom: 50, left: 50},
@@ -758,7 +743,9 @@ function tableCreate_svg(data){
         type: 'text',
         class: 'desciptionText'
     }).text(function(d){return clusterDescription[d.id].text})
-
+    descrip_n.append('i').attrs({
+        class: 'material-icons tiny'
+    }).style('color','white').text('edit')
 
     let table_n = div_n.append('table');
     table_n.append('col');
@@ -897,7 +884,9 @@ function getsummaryservice(){
     });
     return ob;
 }
-
+function reset () {
+    d3.selectAll('.tablesvg').remove();
+}
 graphicControl.tableEnable = (e)=>{
     graphicControl.table = e;
     cluster_map(data);

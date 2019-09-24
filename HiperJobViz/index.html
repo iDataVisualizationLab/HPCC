@@ -115,7 +115,7 @@
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
                     </div>
-                    <div  class="row s12 valign-wrapper">
+                    <div  class="row s12 valign-wrapper hide">
                         <label for="control" class="col s5"> Simulation control: </label>
                         <div  class="col s7"  id="control" style="padding-left: 0px;padding-right: 0px;">
                             <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
@@ -160,41 +160,26 @@
 
                         </p>
                     </div>
-                    <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s5"> Grouping similar node: </label>
-                        <p class="switch col s7 no_magrin" id="groupCompmode">
 
-                            <label>
-                                <span class="true">Off</span>
-                                <input checked id="compCluster_control" type="checkbox">
-                                <span class="lever"></span>
-                                <span class="false">On</span>
-                            </label>
-
-                        </p>
-                    </div>
-                    <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s5"> Color connection by: </label>
-                        <p class="switch col s7 no_magrin" id="colorConnection">
-
-                            <label>
-                                <span class="true">user</span>
-                                <input checked id="colorConnection_control" type="checkbox">
-                                <span class="lever"></span>
-                                <span class="false">group</span>
-                            </label>
-
-                        </p>
-                    </div>
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="jobType_control" class="col s5"> Node presentation: </label>
-                        <select id="jobType_control" class="col s7">
-                            <option value="radar" selected="selected">Radar</option>
-                            <option value="timeline">grouping timeline</option>
+                        <label for="compDisplay_control" class="col s5"> Host presentation: </label>
+                        <select id="compDisplay_control" class="col s7">
+                            <option value="radar" selected="selected">Individual host </option>
+                            <option value="radar_cluster" selected="selected">Group snapshot</option>
+                            <option value="timeline">Group timeline</option>
                             <option value="pie">Pie chart</option>
                         </select>
                     </div>
+
+                    <div  class="row s12 valign-wrapper">
+                        <label for="colorConnection_control" class="col s5"> Color link by: </label>
+                        <select id="colorConnection_control" class="col s7">
+                            <option value="group" selected="selected">group</option>
+                            <option value="user" >userID</option>
+                        </select>
+                    </div>
+
                     <div  class="row s12 valign-wrapper hide">
                         <label for="chartType_control" class="col s5 hide"> Chart type: </label>
                         <select id="chartType_control" class="col s7">
@@ -211,7 +196,7 @@
                     <!--</div>-->
                     <div class="no_magrin">
                         <ul class="collapsible insideSetting">
-                            <li id="RadarColor">
+                            <li id="RadarColor" class="hide">
                                 <div class="collapsible-header row s12">
                                     <div  class="row s12 valign-wrapper pickercontain list">
                                         <label for="radarColorPicker" class="col s5"> Metric color scale: </label>
