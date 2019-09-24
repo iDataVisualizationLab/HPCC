@@ -1459,9 +1459,9 @@ $( document ).ready(function() {
             jobMap_runopt.compute.clusterNode = false;
             jobMap_runopt.compute.clusterJobID = true;
             d3.select('#jobIDCluster_control').attr('checked','');
-            document.getElementById("colorConnection_control").options.selectedIndex = 0;
-            jobMap_runopt.graphic.colorBy = 'group';
-            document.getElementById("colorConnection_control").setAttribute('disabled','')
+            // document.getElementById("colorConnection_control").options.selectedIndex = 0;
+            // jobMap_runopt.graphic.colorBy = 'group';
+            // document.getElementById("colorConnection_control").setAttribute('disabled','')
         }else if (jobMap_runopt.compute.type ==='pie')
         {
             jobMap_runopt.compute.clusterNode = false;

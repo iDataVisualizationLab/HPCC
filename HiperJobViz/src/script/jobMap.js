@@ -751,16 +751,11 @@ let JobMap = function() {
         let cellsGraph_n = cells_n.filter(d=>tableLayout.column[d.key].type==='graph');
         cellsGraph_n.append('g').attr('class','violing');
         cellsGraph_n.merge(cellsGraph).on('click',function(d){
-            let rangetime = [+Infinity,-Infinity];
             let username = d3.select(this.parentNode).datum().id;
             let data_temp = user.find(u=>u.key===username).dataRaw;
             let scaleY = d3.scaleLinear().range(schema.find(s=>s.text===d.key).range);
             let data = d3.nest().key(e=>e.name).rollup(f=>{
                 let temp = f.map((e,i)=>{
-                    if (rangetime[0]>e.time)
-                        rangetime[0]=e.time;
-                    if (rangetime[1]<e.time)
-                        rangetime[1]=e.time;
                     return {y:scaleY(e.find(a=>a.axis===d.key).value),
                         x: e.time,};
                 });
@@ -769,7 +764,7 @@ let JobMap = function() {
             }).entries(data_temp).map(e=>e.value);
             let layout = tooltip_lib.layout();
             layout.axis.y.label = d.key;
-            layout.axis.x.domain = rangetime;
+            layout.axis.x.domain = [first__timestep,last_timestep];
             layout.axis.y.domain = scaleY.range();
             layout.title = `User: ${username}`;
             layout.title2 = `#compute: ${data.length}`;
@@ -900,7 +895,7 @@ let JobMap = function() {
 
         updateClusterTimeline();
 
-        user = current_userData();
+        let user_n = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
@@ -930,7 +925,7 @@ let JobMap = function() {
 
         let newdata = [];
 
-        user = user.map((d,i)=>{
+        user = user_n.map((d,i)=>{
             d.name = d.key;
             d.order = i;
             d.orderlink = i;

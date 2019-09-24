@@ -229,7 +229,7 @@ span.thumb {
     stroke: black;
     stroke-dasharray: 2;
 }
-.y.axis .tick line {
+.y.axis .tick line, .gNodeaxis .tick {
     stroke-dasharray: 2;
     stroke-width: 0.5;
     stroke: #777777;
@@ -253,8 +253,4 @@ span.thumb {
 }
 .gline_path.highlight path{
     stroke: red;
-}
-
-.gNodeaxis .tick {
-    stroke-dasharray: 2;
 }
