@@ -21,7 +21,7 @@ if (binopt.clusterMethod ==='leaderbin')
     bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]).data([]);
 else {
     bin = kmeanCluster;
-    bin.iterations(100).k(9);
+    bin.iterations(100).k(11);
 }
 // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
 bin.data(dataSpider3.map((d,i) => {

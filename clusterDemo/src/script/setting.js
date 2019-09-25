@@ -69,6 +69,7 @@ function newdatatoFormat_cluster (data){
         clusterS[d.labels||d.re_label] = temp;
         clusterDescription[d.labels||d.re_label] = {id: d.labels||d.re_label,text: d.labels||d.re_label, axis:[]};
     });
+    categoryScale.domain(data.map(d=>d.labels))
 }
 function updateDataType(data,type){
     const variables = _.without(Object.keys(data[0]),'timestamp','time','labels','re_label','count','radius');
