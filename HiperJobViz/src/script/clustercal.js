@@ -1,4 +1,4 @@
-
+binopt = {clusterMethod:'kmean'}
 hosts.forEach(h=>serviceListattr.forEach(s=>{if (hostResults[h.name][s].length>60) hostResults[h.name][s].pop();}))
 var arr = [];
 dataSpider3 = [];
@@ -17,10 +17,16 @@ for (var lastIndex = 0; lastIndex < 60; lastIndex++) {
 dataSpider3= arr;
 dataCalculate = arr;
 
-bin.data([]).minNumOfBins(8).maxNumOfBins(11);
+if (binopt.clusterMethod ==='leaderbin')
+    bin = binnerN().startBinGridSize(startBinGridSize).isNormalized(isNormalized).minNumOfBins(BinRange[0]).maxNumOfBins(BinRange[1]).data([]);
+else {
+    bin = kmeanCluster;
+    bin.iterations(100).k(9);
+}
+// bin.data([]).minNumOfBins(8).maxNumOfBins(11);
 bin.data(dataSpider3.map((d,i) => {
     var dd = d.map(k => k.value);
-    dd.data = {name: d.name,id: d.id};
+    dd.data = {name: d.name,id: d.id,indexSamp:d.indexSamp};
     return dd;
 }))
     .calculate();
@@ -40,6 +46,7 @@ dataSpider3 = bin.bins.map(d => {
     temp.bin = {
         name: d.map(f => f.data.name),
         id: d.map(f => f.data.id),
+        nameob: d.map(f => {return {name: f.data.name,timestep: f.data.indexSamp}}),
         scaledval: d,
         distancefunc: (e) => d3.max(e.map(function (p) {
             return distance(e[0], p)
@@ -59,13 +66,16 @@ serviceFullList.forEach(d=>
 {d.scale = d3.scaleLinear().range(d.range);
     csv_header.push('10.10.1.1-'+d.text);
 })
-csv_header.push('radius');
+if (binopt.clusterMethod ==='leaderbin')
+    csv_header.push('radius');
+
 dataout = []
 
 dataSpider3.forEach((d,i)=>{
     let temp = [i];
     d.forEach((s,i)=>temp.push(serviceFullList[i].scale(s.value)));
-    temp.push(d.bin.distance);
+    if (binopt.clusterMethod ==='leaderbin')
+        temp.push(d.bin.distance);
     dataout.push(temp);
 })
 download_csv();
@@ -83,3 +93,26 @@ function download_csv() {
     hiddenElement.download = 'cluster_27sep2018.csv';
     hiddenElement.click();
 }
+
+Object.keys(sampleS).forEach(h=>{
+    delete sampleS[h].arrJob_scheduling;
+    sampleS[h].arrcluster = [];
+});
+sampleS_cluster = {};
+dataSpider3.forEach((d,i)=>{
+    d.bin.nameob.forEach(o=>{
+        if(!sampleS_cluster[o.name])
+            sampleS_cluster[o.name] = [];
+        sampleS_cluster[o.name].push({cluster:i,timestep:o.timestep});
+    });
+});
+Object.keys(sampleS_cluster).forEach(h=>{
+    sampleS_cluster[h].sort((a,b)=>a.timestep-b.timestep);
+    sampleS_cluster[h] = sampleS_cluster[h].map(d=>d.cluster);
+});
+
+sampleS_cluster = {};
+hosts.forEach(h=>{
+    sampleS_cluster[h.name] = sampleS[h.name].arrcluster;
+});
+

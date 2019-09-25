@@ -722,7 +722,7 @@ let JobMap = function() {
         let cellsGraph = cells.filter(d=>d&&tableLayout.column[d.key].type==='graph');
         let cellsGraph_n = cells_n.filter(d=>d&&tableLayout.column[d.key].type==='graph');
         cellsGraph_n.append('g').attr('class','violing');
-        cellsGraph_n.merge(cellsGraph).select('g.violing').each(function(d){
+        path.selectAll('.row .graph').select('g.violing').each(function(d){
             violiin_chart.rangeY(customrange).data([d.value]).draw(d3.select(this))
         })
     }
@@ -771,9 +771,11 @@ let JobMap = function() {
             if (layout.axis.y.domain[1]>1000)
                 layout.axis.y.tickFormat = d3.format('~s');
             tooltip_lib.data(data).layout(layout).show()
-        }).select('g.violing').each(function(d){
+        });
+        path.selectAll('.row .graph').select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))
         })
+        console.log(violinRange)
     }
     let tableLayout = {
         row:{

@@ -312,7 +312,7 @@ let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
 let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
-let isbusy = false, imageRequest = false, isanimation=false;
+let isbusy = false, imageRequest = false, isanimation=true;
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -1633,6 +1633,7 @@ $( document ).ready(function() {
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
+        // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
         d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
@@ -1716,7 +1717,17 @@ $( document ).ready(function() {
                 cluster_info.forEach(d=>d.arr=[]);
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                     let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
-                    return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+                    let index = 0;
+                    let minval = Infinity;
+                    cluster_info.forEach((c,i)=>{
+                        const val = distance(c.__metrics.normalize,axis_arr);
+                        if(minval>val){
+                            index = i;
+                            minval = val;
+                        }
+                    });
+                    return index;
+                    // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
                 jobMap.clusterData(cluster_info)
             }
