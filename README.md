@@ -21,7 +21,7 @@ Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordi
 ClusteringView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
 
-JobNetwork: https://idatavisualizationlab.github.io/HPCC/label/index.html
+JobNetwork: https://idatavisualizationlab.github.io/HPCC/HiperJobViz/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobNet.PNG)
 
 # 2018
