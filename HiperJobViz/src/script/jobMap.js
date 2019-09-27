@@ -185,7 +185,7 @@ let JobMap = function() {
             layout.axis.y.label = [];
             layout.axis.y.domain = [];
             layout.axis.y.tickFormat = [];
-            schema.map(s=>{
+            const data_in = schema.map(s=>{
                 let scaleY = d3.scaleLinear().range(s.range);
                 let data_temp = d.values_name.map(h=>{
                     let temp = hostOb[h].data.map(e=>{
@@ -207,7 +207,7 @@ let JobMap = function() {
             // layout.title = `User: ${username}`;
             layout.title2 = `#compute: ${d.values_name.length}`;
 
-            tooltip_lib.data([data]).layout(layout).show();
+            tooltip_lib.data(data_in).layout(layout).show();
         });
 
         updateaxis();
