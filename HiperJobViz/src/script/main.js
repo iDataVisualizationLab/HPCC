@@ -22,6 +22,15 @@
  */
 
 
+// NEW: data obj
+
+let data_info = {
+    filename: '',
+    timesteps: 0,
+    totalStep: 0,
+    totalHost: 0
+}
+
 // Set the dimensions of the canvas / graph
 var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
@@ -552,7 +561,7 @@ function request(){
             }
             currentlastIndex = iteration;
             // stop condition
-            if (currentlastIndex===59) {
+            if (islastimestep(currentlastIndex)) {
                 jobMap.draw();
                 console.log("done");
                 preloader(false);
@@ -1514,6 +1523,7 @@ $( document ).ready(function() {
                 });
             }
             oldchoose =$('#datacom').val();
+            data_info.filename = choice;
             setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
                     d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
@@ -1569,6 +1579,8 @@ $( document ).ready(function() {
         function loadata1(data,job){
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             sampleS = data;
+            data_info.totalStep = data.timespan.length;
+            data_info.timesteps = (data.timespan[ data_info.totalStep -1 ]- data_info.timespan[0])/data_info.totalStep;
             if(job)
                 hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
             if (choice.includes('influxdb')){

@@ -137,6 +137,7 @@ let JobMap = function() {
             datapoint.select("rect").style('display', 'unset')
             datapoint.select('.tSNEborder').style('fill', 'none')
         }
+        return datapoint;
     }
 
     function drawEmbedding(data,colorfill) {
@@ -160,8 +161,8 @@ let JobMap = function() {
         datapoint = datapoint.enter().append('g')
             .attr('class','linkLinegg timeline')
         .merge(datapoint);
-        datapoint.each(function(d){
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, colorfill);
+        datapoint.each(function(d,i){
+            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, colorfill).classed('hide',i?false:true);// hide 1st radar
         });
         datapoint.attr('transform',d=>`translate(${timelineScale(d.timestep)},0)`);
 
@@ -177,6 +178,37 @@ let JobMap = function() {
             }).styles({
                 stroke: d=>colorFunc(d.cluster),
             });
+
+        bg.on('click',function(d){
+            let layout = tooltip_lib.layout();
+            layout.axis.x.domain = [[first__timestep,last_timestep]];
+            layout.axis.y.label = [];
+            layout.axis.y.domain = [];
+            layout.axis.y.tickFormat = [];
+            schema.map(s=>{
+                let scaleY = d3.scaleLinear().range(s.range);
+                let data_temp = d.values_name.map(h=>{
+                    let temp = hostOb[h].data.map(e=>{
+                        return {y:scaleY(e.find(a=>a.axis===s.text).value),
+                            x: e.time,}
+                    });
+                    temp.label = h;
+                    return temp;
+                });
+                layout.axis.y.label.push(s.text);
+                layout.axis.y.domain.push(s.range);
+                if (s.range[1]>1000)
+                    layout.axis.y.tickFormat.push(d3.format('~s'));
+                else
+                    layout.axis.y.tickFormat.push(null);
+                return data_temp;
+            });
+
+            // layout.title = `User: ${username}`;
+            layout.title2 = `#compute: ${d.values_name.length}`;
+
+            tooltip_lib.data([data]).layout(layout).show();
+        });
 
         updateaxis();
     }
@@ -299,7 +331,11 @@ let JobMap = function() {
             })
             .attr("y2", function (d) {
                 return d.target.y2 || d.target.y;
-            }).style('stroke-dasharray', getstrokearray).style('stroke-dashoffset', getstrokearray_offset);
+            }).styleTween("stroke-dasharray", function() {
+                return (t) =>{
+                    return getstrokearray(this);
+                };
+            }).style('stroke-dashoffset', getstrokearray_offset);
     }
     let last_timestep = new Date();
     function trimNameArray(text){
@@ -503,7 +539,11 @@ let JobMap = function() {
                 })
                 .attr("y2", function (d) {
                     return d.target.y2 || d.target.y;
-                }).style('stroke-dasharray',getstrokearray).style('stroke-dashoffset',getstrokearray_offset);
+                }).styleTween("stroke-dasharray", function() {
+                    return (t) =>{
+                        return getstrokearray(this);
+                    };
+                }).style('stroke-dashoffset',getstrokearray_offset);
             if (runopt.compute.type==='timeline')
                 updateaxis();
         };
@@ -593,7 +633,7 @@ let JobMap = function() {
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
                 return d.links===undefined?1:linkscale(d.links);
-            }).style('stroke-dasharray',getstrokearray).style('stroke-dashoffset',getstrokearray_offset);
+            }).style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
         link = link_n.merge(link);
         if (!runopt.compute.clusterNode)
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
@@ -664,11 +704,11 @@ let JobMap = function() {
                 return (_.isString(d.source.user)&&d.source.user)||d.target.user;
         }
     }
-    function getstrokearray (){
-        return this.getTotalLength()-graphicopt.job.r-5
+    function getstrokearray (self){
+        return (self||this).getTotalLength()-graphicopt.job.r
     }
     function getstrokearray_offset (d){
-        return d.source.type==='job'?-graphicopt.job.r-5:0;
+        return d.source.type==='job'?-graphicopt.job.r:0;
     }
     function table_header(path){
         let rows = path.selectAll('.row').data([tableHeader]);
@@ -773,19 +813,18 @@ let JobMap = function() {
                 return temp;
             }).entries(data_temp).map(e=>e.value);
             let layout = tooltip_lib.layout();
-            layout.axis.y.label = d.key;
-            layout.axis.x.domain = [first__timestep,last_timestep];
-            layout.axis.y.domain = scaleY.range();
+            layout.axis.y.label = [d.key];
+            layout.axis.x.domain = [[first__timestep,last_timestep]];
+            layout.axis.y.domain = [scaleY.range()];
             layout.title = `User: ${username}`;
             layout.title2 = `#compute: ${data.length}`;
-            if (layout.axis.y.domain[1]>1000)
-                layout.axis.y.tickFormat = d3.format('~s');
-            tooltip_lib.data(data).layout(layout).show()
+            if (layout.axis.y.domain[0][1]>1000)
+                layout.axis.y.tickFormat = [d3.format('~s')];
+            tooltip_lib.data([data]).layout(layout).show();
         });
         path.selectAll('.row .graph').select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))
         })
-        console.log(violinRange)
     }
     let tableLayout = {
         row:{
@@ -1119,75 +1158,83 @@ let JobMap = function() {
             if (hostOb[d.name].user.length)
                 tableFooter.dataRaw.push(d);
         });
-        schema.forEach((s,i)=>{
-            let r = getViolinData(tableFooter, i, s);
-            tableFooter[i+3] = {key:r.axis,value:r};
-        });
-        let user_update = user.filter(d=>d.needRender);
-        let rangechange = false;
-        function getViolinData(d, i, s) {
-            v = d.dataRaw.map(e => e[i].value).filter(e => e !== undefined).sort((a, b) => a - b);
-            let r;
-            if (v.length) {
-                let sumstat = [];
-                r = {
-                    axis: s.text,
-                    q1: ss.quantileSorted(v, 0.25),
-                    q3: ss.quantileSorted(v, 0.75),
-                    median: ss.medianSorted(v),
-                    mean: ss.mean(v),
-                };
-                var x = d3.scaleLinear()
-                    .domain([0, 1]);
-                let x_change = d3.scaleLinear()
-                    .domain([0, runopt.histodram.resolution - 1]).range(x.domain());
+        let user_update,rangechange;
+        if (isanimation) {
+            schema.forEach((s, i) => {
+                let r = getViolinData(tableFooter, i, s);
+                tableFooter[i + 3] = {key: r.axis, value: r};
+            });
+            user_update = user.filter(d => d.needRender);
+            rangechange = false;
 
-                var histogram = d3.histogram()
-                    .domain(x.domain())
-                    .thresholds(d3.range(0, runopt.histodram.resolution).map(e => x_change(e)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                    // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                    .value(d => d);
-                let hisdata = histogram(v);
-                r.point = [];
-                r.outlier = [];
-                sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
-                const localmax = d3.max(sumstat, e => e[1]);
-                if(d.type && localmax>violinRange [1]) {
-                    violinRange [1] = localmax;
-                    rangechange = true;
+            function getViolinData(d, i, s) {
+                v = d.dataRaw.map(e => e[i].value).filter(e => e !== undefined).sort((a, b) => a - b);
+                let r;
+                if (v.length) {
+                    let sumstat = [];
+                    r = {
+                        axis: s.text,
+                        q1: ss.quantileSorted(v, 0.25),
+                        q3: ss.quantileSorted(v, 0.75),
+                        median: ss.medianSorted(v),
+                        mean: ss.mean(v),
+                    };
+                    var x = d3.scaleLinear()
+                        .domain([0, 1]);
+                    let x_change = d3.scaleLinear()
+                        .domain([0, runopt.histodram.resolution - 1]).range(x.domain());
+
+                    var histogram = d3.histogram()
+                        .domain(x.domain())
+                        .thresholds(d3.range(0, runopt.histodram.resolution).map(e => x_change(e)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                        // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                        .value(d => d);
+                    let hisdata = histogram(v);
+                    r.point = [];
+                    r.outlier = [];
+                    sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
+                    const localmax = d3.max(sumstat, e => e[1]);
+                    if (d.type && localmax > violinRange [1]) {
+                        violinRange [1] = localmax;
+                        rangechange = true;
+                    }
+                    r.arr = sumstat;
+                } else {
+                    r = {
+                        axis: s.text,
+                        q1: undefined,
+                        q3: undefined,
+                        median: undefined,
+                        mean: undefined,
+                        outlier: [],
+                        point: [],
+                        arr: []
+                    };
                 }
-                r.arr = sumstat;
-            } else {
-                r = {
-                    axis: s.text,
-                    q1: undefined,
-                    q3: undefined,
-                    median: undefined,
-                    mean: undefined,
-                    outlier: [],
-                    point : [],
-                    arr: []
-                };
+                return r;
             }
-            return r;
+
+            user_update.forEach(d => {
+                schema.forEach((s, i) => {
+                    let r = getViolinData(d, i, s);
+                    tableData[d.name][i + 2] = {key: r.axis, value: r};
+                })
+                tableData[d.name][schema.length + 2] = {key: 'PowerUsage', value: d.PowerUsage.kwh};
+                // tableData[d.name] =[{key:'Hosts', value:d.unqinode.length}
+            });
+            user_update = g.selectAll('.userNode').filter(d => d.needRender);
+            user_update.selectAll('text').interrupt().selectAll("*").interrupt();
+            user_update.selectAll('text').styles({
+                'stroke': 'yellow',
+                'stroke-opacity': 1
+            }).transition().duration(3000).styles({'stroke-opacity': 0});
         }
-
-        user_update.forEach(d=>{
-            schema.forEach((s,i)=>{
-                let r = getViolinData(d, i, s);
-                tableData[d.name][i+2] = {key:r.axis,value:r};
-            })
-            tableData[d.name][schema.length+2] = {key:'PowerUsage',value:d.PowerUsage.kwh};
-            // tableData[d.name] =[{key:'Hosts', value:d.unqinode.length}
-        });
-        user_update = g.selectAll('.userNode').filter(d=>d.needRender);
-        user_update.selectAll('text').interrupt().selectAll("*").interrupt();
-        user_update.selectAll('text').styles({'stroke': 'yellow','stroke-opacity': 1}).transition().duration(3000).styles({'stroke-opacity': 0});
-
         if (tableHeader.currentsort)
             handle_sort(true);
-        updaterow(rangechange?g.selectAll('.userNode'):user_update);
-        table_footer(nodeg.select('.table.footer'));
+        if (isanimation) {
+            updaterow(rangechange ? g.selectAll('.userNode') : user_update);
+            table_footer(nodeg.select('.table.footer'));
+        }
     }
     let zoom_toogle=true;
     function zoom_func(val){

@@ -114,6 +114,7 @@ var serviceQuery ={
         "Job_scheduling":{
             "Job_Info" : {
                 "format": () => "job_data",
+                'mainkey': 'jobID',
                 "numberOfEntries": 1,
                 "type": 'object',
             }
@@ -289,10 +290,21 @@ function processData_influxdb(result, serviceName) {
                 const subob = _.object(val[i].series[0].columns, val[i].series[0].values[0]);
                 if (subob.error === "None" || subob.error === null || serviceAttribute[s].type==='object')
                     return d3.range(serviceAttribute[s].numberOfEntries).map(d => {
-                        const localVal = subob[serviceAttribute[s].format(d + 1)]||(serviceAttribute[s].format2&&subob[serviceAttribute[s].format2(d + 1)]);
-                        if (localVal != null && localVal != undefined) {
-                            if (serviceAttribute[s].type==='object')
-                                return string2JSON(localVal);
+                        let localVal,key;
+                        try {
+                            localVal = subob[serviceAttribute[s].format2(d + 1)];
+                            key = serviceAttribute[s].format2(d + 1);
+                        }catch(e){
+                            localVal = subob[serviceAttribute[s].format(d + 1)];
+                            key = serviceAttribute[s].format(d + 1);
+                        }
+                        if (localVal != null && localVal !== undefined) {
+                            if (serviceAttribute[s].type==='object') {
+                                let result_temp = string2JSON(localVal);
+                                if (result_temp.length)
+                                    result_temp = d3.nest().key(function(uD){return uD[serviceAttribute[s].mainkey]}).entries( result_temp).map(u=>u.values[0]);
+                                return result_temp
+                            }
                             return localVal * (serviceAttribute[s].rescale || 1);
                         }
                         else return undefined;
@@ -611,13 +623,6 @@ let processResult = processResult_old;
 // }
 function processResult_influxdb(r,hostname,index,servicename){
     let temp={};
-    // if (r.results[0].series){
-    //     obj.result.query_time = new Date(r.results[0].series[0].values[index||0][0]);
-    // }else
-    //     obj.result.query_time = new Date();
-    // obj.data = {};
-    // obj.data.service={};
-    // obj.data.service.host_name = hostname;
     if (index !== undefined ) {
         temp = {results: r.results.map(d => {
                 let temp = {};
@@ -628,14 +633,23 @@ function processResult_influxdb(r,hostname,index,servicename){
                     const series = d.series[0];
                     tempsub.name = series.name;
                     tempsub.columns = series.columns;
-                    tempsub.values = [series.values[index]];
+                    if (servicename==="Job_scheduling") {
+                        tempsub.values = [[hostResults.timespan[index].toISOString (),series.values.filter(f=>new Date(f[0]).toISOString()===hostResults.timespan[index].toISOString ()&& f[1]!== 'idle').map(e=>e[1]).join(';')]]
+                    }else
+                        tempsub.values = [series.values[index]];
                 }
                 temp.series.push(tempsub);
                 return temp;
             })};
     } else
         temp = r;
-    return processData_influxdb(temp,servicename);
+    let results_ob = processData_influxdb(temp, servicename);
+    if (servicename!=="Job_scheduling") {
+        return results_ob;
+    }else{
+        let newestdata = hostResults[hostname].arrJob_scheduling[hostResults[hostname].arrJob_scheduling.length-1];
+
+    }
 }
 function processResult_old(r){
     return processData_nagios(r.data.service.plugin_output);

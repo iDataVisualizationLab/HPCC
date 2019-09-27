@@ -55,3 +55,9 @@ function distance(a, b){
 function getClusterName (name,index){
     return (sampleS[name].arrcluster||[])[index];
 }
+function islastimestep(index){
+    if(isRealtime)
+        return false;
+    else
+        return index>=sampleS.timespan.length-1;
+}

@@ -76,12 +76,17 @@ let Tooltip_lib = function() {
     };
 
     function handle_data (dataRaw) {
-        dataRaw.sort((a,b)=>a[a.length-1].y-b[b.length-1].y)
+        dataRaw.forEach(d=>d.sort((a,b)=>{
+            a.total = d.length;
+            b.total = d.length;
+            return a[a.length-1].y-b[b.length-1].y;
+        }));
         return dataRaw;
     }
     master.show = function (){
         tool_tip.show(undefined,undefined,'lineSum');
-        svg = d3.select(".lineSum")
+        svg = d3.select(".lineSum").selectAll('svg')
+            .data(data).enter()
             .append('svg')
             .attrs({
                 width: graphicopt.width,
@@ -99,38 +104,45 @@ let Tooltip_lib = function() {
                 fill: 'white'
             });
         // 1. set scale
-
-        var xScale = d3[`scale${layout.axis.x.linear}`]()
-            .domain(layout.axis.x.domain)
-            .range([0, graphicopt.widthG()]);
-
-        var yScale = d3[`scale${layout.axis.y.linear}`]()
-            .domain(layout.axis.y.domain) // input
-            .range([graphicopt.heightG(), 0]); // output
+        var xScale = [];
+        var yScale = [];
+        data.forEach((d,i)=>{
+            d.xScale = d3[`scale${layout.axis.x.linear}`]()
+                .domain(layout.axis.x.domain[i]||layout.axis.x.domain[0])
+                .range([0, graphicopt.widthG()]);
+            var numTicks = 1 + Math.round((d.xScale.domain()[1] - d.xScale.domain()[0]) / (60 * 1000)); // every minutes
+            if (numTicks > 6) numTicks = 6;
+            d.numTicks = numTicks;
+            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0];
+            d.y_tickFormat = layout.axis.y?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]):null;
+            xScale.push(d.xScale);
+            d.yScale = d3[`scale${layout.axis.y.linear}`]()
+                .domain(layout.axis.y.domain[i]||layout.axis.y.domain[0]) // input
+                .range([graphicopt.heightG(), 0]);
+            yScale.push(d.yScale);
+        });
 
         // 2. axis create
-        var numTicks = 1 + Math.round((xScale.domain()[1] - xScale.domain()[0]) / (60 * 1000)); // every minutes
-        if (numTicks > 6) numTicks = 6;
-        console.log(numTicks)
+
         g.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + graphicopt.heightG() + ")")
-            .call(d3.axisBottom(xScale).tickFormat(layout.axis.x.tickFormat).ticks(numTicks)); //
+            .call(d=>d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)); //
 
         g.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate(0,0)")
-            .call(d3.axisLeft(yScale).tickFormat(layout.axis.y.tickFormat).ticks(5).tickSize(-graphicopt.widthG()))
+            .call(d=>d3.axisLeft(d.yScale).tickFormat(d.datum().y_tickFormat).ticks(5).tickSize(-graphicopt.widthG()))
             .select('.domain').remove(); //
 
         // 3. draw
         // ****** Append the path ******
         var line_create = d3.line()
-            .x(function (d, i) {
-                return xScale(d.x);
+            .x((d) =>{
+                return d3.select(this.parentNode).datum().xScale(d.x);
             }) // set the x values for the line generator
-            .y(function (d) {
-                return yScale(d.y);
+            .y((d) =>{
+                return d3.select(this.parentNode).datum().yScale(d.y);
             }) // set the y values for the line generator
             .curve(d3.curveMonotoneX);
 
@@ -138,7 +150,7 @@ let Tooltip_lib = function() {
             .attr("class", "graph");
 
         let gpath = gc.selectAll('gline_path')
-            .data(data)
+            .data(d=>d)
             .enter()
             .append('g')
             .attr("class", "gline_path")
@@ -155,13 +167,13 @@ let Tooltip_lib = function() {
         gpath.append("text")
             .attr("x", graphicopt.widthG())
             .attr('dx',4)
-            .attr("y", d=>yScale(d[d.length-1].y))
+            .attr("y", d=>d3.select(this.parentNode).datum().yScale(d[d.length-1].y))
             .attr("fill", d=>d.color?d.color:'black')
             .style("text-anchor", "start")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
             .text(d=> `${d.label}`)
-            .classed('statics',(d,i)=>i===0||i===data.length-1);
+            .classed('statics',(d,i)=>i===0||i===d.total-1);
         // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
         g.append("text")
             .attr("x", -graphicopt.heightG() / 2)
@@ -206,7 +218,7 @@ let Tooltip_lib = function() {
             .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
-            .text("" + xScale.domain()[0].toDateString());
+            .text(d=>"" + d.xScale.domain()[0].toDateString());
 
         // g.append("text")
         //     .attr("x", graphicopt.widthG() - 3)
