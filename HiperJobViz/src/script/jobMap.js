@@ -308,17 +308,26 @@ let JobMap = function() {
             d.y = scaleJob(d.order);
             return `translate(${d.x2},${d.y})`
         });
-        let temp_link = link.data().filter(d=>d.target.type==='job')
-        computers.data().forEach(d=>d.y = d3.mean(temp_link.filter(e=>e.source.name===d.name),f=>f.target.y))
+        let temp_link = link.data().filter(d => d.target.type === 'job');
+        computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
-        // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
-        computers.transition().attr('transform', d => {
-            d.x = 300;
-            d.x2 = 300;
-            d.y = scaleNode_y(d.order);
-            return `translate(${d.x2},${d.y})`
-        });
-
+        if (runopt.compute.type==='timeline') {
+            scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
+            computers.transition().attr('transform', d => {
+                    d.x2 = 300;
+                    d.y2 = scaleNode_y_midle(d.order);
+                return `translate(${d.x2},${d.y2 || d.y})`
+            });
+            updateaxis();
+        }else {
+            // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
+            computers.transition().attr('transform', d => {
+                d.x = 300;
+                d.x2 = 300;
+                d.y = scaleNode_y(d.order);
+                return `translate(${d.x2},${d.y})`
+            });
+        }
         link.transition()
             .attr("x1", function (d) {
                 return d.source.x2 || d.source.x;
@@ -504,9 +513,13 @@ let JobMap = function() {
             scaleNode.domain(range_com).range([50, 120]);
 
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
+            if (runopt.compute.type==='timeline') {
+                scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
+            }
             computers.transition().attr('transform', d => {
                 if (runopt.compute.type==='timeline') {
                     d.x2 = 200;
+                    d.y2 = scaleNode_y_midle(d.order);
                 }else
                 if (runopt.compute.clusterNode) {
                     d.x = 200;
@@ -515,7 +528,7 @@ let JobMap = function() {
                     d.x2 = scaleNode(d.x);
                 if (runopt.compute.clusterNode&&this.alpha()<0.6)
                     d.y = scaleNode_y(d.order);
-                return `translate(${d.x2},${d.y})`
+                return `translate(${d.x2},${d.y2||d.y})`
             });
             let range_job = d3.extent(jobNode.data(), d => d.x);
             scaleNode.domain(range_job).range([370, 450]);
@@ -635,7 +648,7 @@ let JobMap = function() {
                 return d.links===undefined?1:linkscale(d.links);
             }).style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
         link = link_n.merge(link);
-        if (!runopt.compute.clusterNode)
+        if (!runopt.compute.clusterNode&&runopt.compute.type!=='timeline')
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
         else {
             renderManual(computers, jobNode, link);
@@ -890,7 +903,7 @@ let JobMap = function() {
             d.fx=600;
             return `translate(${d.fx},${d.fy})`
         });
-        if (runopt.compute.clusterNode&&!skiprender)
+        if ((runopt.compute.type==='timeline' || runopt.compute.clusterNode)&&!skiprender)
             renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
     }
     let clusterNode_data,clusterdata,clusterdata_timeline;

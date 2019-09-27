@@ -85,6 +85,31 @@ let Tooltip_lib = function() {
     }
     master.show = function (){
         tool_tip.show(undefined,undefined,'lineSum');
+        // 1. set scale
+        var xScale = [];
+        var yScale = [];
+        data.forEach((d,i)=>{
+            d.xScale = d3[`scale${layout.axis.x.linear}`]()
+                .domain(layout.axis.x.domain[i]||layout.axis.x.domain[0])
+                .range([0, graphicopt.widthG()]);
+            var numTicks = 1 + Math.round((d.xScale.domain()[1] - d.xScale.domain()[0]) / (60 * 1000)); // every minutes
+            if (numTicks > 6) numTicks = 6;
+            d.numTicks = numTicks;
+            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0];
+            d.y_tickFormat = layout.axis.y&&layout.axis.y.tickFormat?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]):null;
+            xScale.push(d.xScale);
+            d.yScale = d3[`scale${layout.axis.y.linear}`]()
+                .domain(layout.axis.y.domain[i]||layout.axis.y.domain[0]) // input
+                .range([graphicopt.heightG(), 0]);
+            yScale.push(d.yScale);
+            d.forEach(f=>
+                f.forEach(e=>{
+                    e.xs = d.xScale(e.x);
+                    e.ys = d.yScale(e.y);
+                })
+            )
+        });
+
         svg = d3.select(".lineSum").selectAll('svg')
             .data(data).enter()
             .append('svg')
@@ -103,24 +128,7 @@ let Tooltip_lib = function() {
                 height: graphicopt.heightG(),
                 fill: 'white'
             });
-        // 1. set scale
-        var xScale = [];
-        var yScale = [];
-        data.forEach((d,i)=>{
-            d.xScale = d3[`scale${layout.axis.x.linear}`]()
-                .domain(layout.axis.x.domain[i]||layout.axis.x.domain[0])
-                .range([0, graphicopt.widthG()]);
-            var numTicks = 1 + Math.round((d.xScale.domain()[1] - d.xScale.domain()[0]) / (60 * 1000)); // every minutes
-            if (numTicks > 6) numTicks = 6;
-            d.numTicks = numTicks;
-            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0];
-            d.y_tickFormat = layout.axis.y?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]):null;
-            xScale.push(d.xScale);
-            d.yScale = d3[`scale${layout.axis.y.linear}`]()
-                .domain(layout.axis.y.domain[i]||layout.axis.y.domain[0]) // input
-                .range([graphicopt.heightG(), 0]);
-            yScale.push(d.yScale);
-        });
+
 
         // 2. axis create
 
@@ -139,10 +147,10 @@ let Tooltip_lib = function() {
         // ****** Append the path ******
         var line_create = d3.line()
             .x((d) =>{
-                return d3.select(this.parentNode).datum().xScale(d.x);
+                return d.xs;
             }) // set the x values for the line generator
             .y((d) =>{
-                return d3.select(this.parentNode).datum().yScale(d.y);
+                return d.ys;
             }) // set the y values for the line generator
             .curve(d3.curveMonotoneX);
 
@@ -167,7 +175,7 @@ let Tooltip_lib = function() {
         gpath.append("text")
             .attr("x", graphicopt.widthG())
             .attr('dx',4)
-            .attr("y", d=>d3.select(this.parentNode).datum().yScale(d[d.length-1].y))
+            .attr("y", d=>d[d.length-1].ys)
             .attr("fill", d=>d.color?d.color:'black')
             .style("text-anchor", "start")
             .style("font-size", "12px")
