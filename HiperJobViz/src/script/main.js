@@ -1646,8 +1646,8 @@ $( document ).ready(function() {
     setTimeout(() => {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
-        d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-        // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
+        // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
+        d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
                 d.__metrics = serviceFullList.map(s=>{return {axis: s.text,value:d3.scaleLinear().domain(s.range)(d[s.text])||0}});
