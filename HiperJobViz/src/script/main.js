@@ -1869,9 +1869,9 @@ function onFinishInterval(data) {
 }
 
 let radarChartclusteropt  = {
-    margin: {top: 0, right: 0, bottom: 0, left: 0},
-    w: 170,
-    h: 170,
+    margin: {top: 20, right: 20, bottom: 20, left: 20},
+    w: 130,
+    h: 130,
     radiuschange: false,
     levels:6,
     dotRadius:2,
@@ -1919,7 +1919,7 @@ function cluster_map (dataRaw) {
             .attr('class',(d,i)=>'flex_col radarCluster radarh'+d.id)
             .each(function(d,i){
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
-                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"");
             });
     }, 0);
 }
