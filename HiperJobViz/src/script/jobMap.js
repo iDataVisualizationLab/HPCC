@@ -890,6 +890,8 @@ let JobMap = function() {
         g.selectAll('.userNode').transition().attr('transform',d=>{
             d.fy=yscale(d.order);
             d.fx=600;
+            d.y=d.fy;
+            d.x=d.fx;
             return `translate(${d.fx},${d.fy})`
         });
         if ((runopt.compute.type==='timeline' || runopt.compute.clusterNode)&&!skiprender)

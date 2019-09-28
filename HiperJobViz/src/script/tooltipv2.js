@@ -61,6 +61,7 @@ let Tooltip_lib = function() {
         }else {
             if (classtype==='lineSum'){
                 str += '<div class="' + classtype + ' flex_contain flex_col"></div>'; // Spider chart holder
+                str += '<button onclick="' + 'function close (){master.hide()}()' + '">Close</button>';
             }else {
                 str+='<span>Notsupport</span>'
             }
