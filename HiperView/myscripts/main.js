@@ -2248,9 +2248,11 @@ $( document ).ready(function() {
             .init();
         function loadata(data){
             d3.select(".cover").select('h5').text('drawLegend...');
-            drawLegend(initialService, arrThresholds, arrColor, dif);
-            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
-            sampleS = data;
+            if(data.length) {
+                drawLegend(initialService, arrThresholds, arrColor, dif);
+                data['timespan'] = data.timespan.map(d => new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z', '')))));
+                sampleS = data;
+            }
             main();
             d3.select(".cover").select('h5').text('loading data...');
             addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
