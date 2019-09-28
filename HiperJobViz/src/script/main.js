@@ -220,7 +220,7 @@ var color,opa;
 // var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 // let arrColor = colorScaleList.customFunc('rainbow');
 let arrColor = colorScaleList.d3colorChosefunc('Greys');
-
+let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
 setColorsAndThresholds(initialService);
 
 //********tooltip***************
@@ -1653,7 +1653,6 @@ $( document ).ready(function() {
                 d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
             });
             cluster_info = cluster;
-
         });
         d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
@@ -1741,7 +1740,9 @@ $( document ).ready(function() {
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
-                jobMap.clusterData(cluster_info)
+                jobMap.clusterData(cluster_info);
+                radarChartclusteropt.schema = serviceFullList;
+                cluster_map(cluster_info)
             }
             main();
             d3.select(".cover").select('h5').text('loading data...');
@@ -1766,10 +1767,14 @@ function onSchemaUpdate(schema){
     TSneplot.schema(serviceFullList,firstTime);
     // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
     Radarplot.schema(serviceFullList,firstTime);
-    jobMap.schema(serviceFullList);
+    if (cluster_info){
+        jobMap.schema(serviceFullList);
+        radarChartclusteropt.schema = serviceFullList;}
     if (!firstTime) {
         updateSummaryChartAll();
         MetricController.drawSummary();
+        if (cluster_info)
+            cluster_map(cluster_info);
     }
     // }
     if (db!=='csv')
@@ -1861,4 +1866,60 @@ function onFinishInterval(data) {
         }
     }
 
+}
+
+let radarChartclusteropt  = {
+    margin: {top: 20, right: 20, bottom: 20, left: 20},
+    w: 130,
+    h: 130,
+    radiuschange: false,
+    levels:6,
+    dotRadius:2,
+    strokeWidth:1,
+    maxValue: 0.5,
+    isNormalize:true,
+    showHelperPoint: false,
+    roundStrokes: true,
+    ringStroke_width: 0.15,
+    ringColor:'black',
+    fillin:0.5,
+    boxplot:false,
+    events:{
+        axis: {
+            mouseover: function(){
+                try {
+                    const d = d3.select(d3.event.detail || this).datum();
+                    d3.selectAll('.axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                    $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
+                }catch(e){}
+            },
+            mouseleave: function(){
+                const d = d3.select(d3.event.detail||this).datum();
+                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
+            },
+        },
+    },
+    showText: false};
+function cluster_map (dataRaw) {
+    let data = dataRaw.map((c,i)=>{
+        let temp = c.__metrics.slice();
+        temp.name = c.labels;
+        let temp_b = [temp];
+        temp_b.id = c.labels;
+        temp_b.order = i;
+        return temp_b;
+    })
+
+    let dir = d3.select('#clusterDisplay');
+    setTimeout(()=>{
+        let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
+        r_old.exit().remove();
+        r_old.enter().append('div').attr('class','radarCluster');
+        dir.selectAll('.radarCluster')
+            .attr('class',(d,i)=>'flex_col radarCluster radarh'+d.id)
+            .each(function(d,i){
+                radarChartclusteropt.color = function(){return colorCluster(d.id)};
+                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"");
+            });
+    }, 0);
 }

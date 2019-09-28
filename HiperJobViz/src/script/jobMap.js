@@ -1346,5 +1346,8 @@ let JobMap = function() {
     jobMap.schema = function (_) {
         return arguments.length ? (graphicopt.radaropt.schema = _,schema = _,updatalayout(_), jobMap) : schema;
     };
+    jobMap.colorCluster = function (_) {
+        return arguments.length ? (colorCluster = _,jobMap) : colorCluster;
+    };
     return jobMap;
 };
