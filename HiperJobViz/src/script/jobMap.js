@@ -180,11 +180,19 @@ let JobMap = function() {
             });
 
         bg.on('click',function(d){
+            let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
             let layout = tooltip_lib.layout();
             layout.axis.x.domain = [[first__timestep,last_timestep]];
+            const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0,maxstep]);
             layout.axis.y.label = [];
             layout.axis.y.domain = [];
             layout.axis.y.tickFormat = [];
+            layout.background ={
+                type: 'discrete',
+                value: d.timeline.clusterarr.map((v,i)=>
+                {return {x0:scaletime.invert(v.timestep),x1: d.timeline.clusterarr[i+1]?scaletime.invert(d.timeline.clusterarr[i+1].timestep):undefined,color:colorFunc(v.cluster)}})
+            };
+            layout.background.value[layout.background.value.length-1].x1= last_timestep;
             const data_in = schema.map(s=>{
                 let scaleY = d3.scaleLinear().range(s.range);
                 let data_temp = d.values_name.map(h=>{
@@ -207,7 +215,7 @@ let JobMap = function() {
             // layout.title = `User: ${username}`;
             layout.title2 = `#compute: ${d.values_name.length}`;
 
-            tooltip_lib.data(data_in).layout(layout).show();
+            tooltip_lib.graphicopt({width:tooltip_opt.width,height:100}).data(data_in).layout(layout).show();
         });
 
         updateaxis();
@@ -329,22 +337,7 @@ let JobMap = function() {
             });
         }
         link.transition()
-            .attr("x1", function (d) {
-                return d.source.x2 || d.source.x;
-            })
-            .attr("y1", function (d) {
-                return d.source.y2 || d.source.y;
-            })
-            .attr("x2", function (d) {
-                return d.target.x2 || d.target.x;
-            })
-            .attr("y2", function (d) {
-                return d.target.y2 || d.target.y;
-            }).styleTween("stroke-dasharray", function() {
-                return (t) =>{
-                    return getstrokearray(this);
-                };
-            }).style('stroke-dashoffset', getstrokearray_offset);
+            .call(updatelink);
     }
     let last_timestep = new Date();
     function trimNameArray(text){
@@ -356,6 +349,26 @@ let JobMap = function() {
             nametr += `, +${namearr.length-2} more`;
             return nametr;
         }
+    }
+    function updatelink (path){
+        return path.attr("x1", function (d) {
+                return (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0);
+            })
+            .attr("y1", function (d) {
+                return d.source.y2 || d.source.y;
+            })
+            .attr("x2", function (d) {
+                return (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0);
+            })
+            .attr("y2", function (d) {
+                return d.target.y2 || d.target.y;
+            })
+        // .styleTween("stroke-dasharray", function() {
+        //     return (t) =>{
+        //         return getstrokearray(this);
+        //     };
+        // })
+        // .style('stroke-dashoffset', getstrokearray_offset);
     }
     jobMap.draw = function (){
         let timeStep = new Date(last_timestep.toString());
@@ -541,22 +554,7 @@ let JobMap = function() {
             });
 
             link.transition()
-                .attr("x1", function (d) {
-                    return d.source.x2 || d.source.x;
-                })
-                .attr("y1", function (d) {
-                    return d.source.y2 || d.source.y;
-                })
-                .attr("x2", function (d) {
-                    return d.target.x2 || d.target.x;
-                })
-                .attr("y2", function (d) {
-                    return d.target.y2 || d.target.y;
-                }).styleTween("stroke-dasharray", function() {
-                    return (t) =>{
-                        return getstrokearray(this);
-                    };
-                }).style('stroke-dashoffset',getstrokearray_offset);
+                .call(updatelink)
             if (runopt.compute.type==='timeline')
                 updateaxis();
         };
@@ -631,23 +629,13 @@ let JobMap = function() {
         let link_n = link.enter()
             .append('line').attr("class", "links")
             .merge(link)
-            .attr("x1", function (d) {
-                return d.source.x2 || d.source.x;
-            })
-            .attr("y1", function (d) {
-                return d.source.y2 || d.source.y;
-            })
-            .attr("x2", function (d) {
-                return d.target.x2 || d.target.x;
-            })
-            .attr("y2", function (d) {
-                return d.target.y2 || d.target.y;
-            })
+            .call(updatelink)
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
                 return d.links===undefined?1:linkscale(d.links);
-            }).style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
-        link = link_n.merge(link);
+            })
+            // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
+        link = linkg.selectAll('.links');
         if (!runopt.compute.clusterNode&&runopt.compute.type!=='timeline')
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
         else {
@@ -826,6 +814,7 @@ let JobMap = function() {
                 return temp;
             }).entries(data_temp).map(e=>e.value);
             let layout = tooltip_lib.layout();
+            layout.background = undefined;
             layout.axis.y.label = [d.key];
             layout.axis.x.domain = [[first__timestep,last_timestep]];
             layout.axis.y.domain = [scaleY.range()];
@@ -833,7 +822,7 @@ let JobMap = function() {
             layout.title2 = `#compute: ${data.length}`;
             if (layout.axis.y.domain[0][1]>1000)
                 layout.axis.y.tickFormat = [d3.format('~s')];
-            tooltip_lib.data([data]).layout(layout).show();
+            tooltip_lib.graphicopt(tooltip_opt).data([data]).layout(layout).show();
         });
         path.selectAll('.row .graph').select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))

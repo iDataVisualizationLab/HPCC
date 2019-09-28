@@ -60,7 +60,7 @@ let Tooltip_lib = function() {
             str += '<button onclick="saveSVG_light(this,\'jpg\')" class="modal-trigger" href="#savedialog">Save JPG</button>';
         }else {
             if (classtype==='lineSum'){
-                str += '<div class="' + classtype + '"></div>'; // Spider chart holder
+                str += '<div class="' + classtype + ' flex_contain flex_col"></div>'; // Spider chart holder
             }else {
                 str+='<span>Notsupport</span>'
             }
@@ -85,6 +85,7 @@ let Tooltip_lib = function() {
     }
     master.show = function (){
         tool_tip.show(undefined,undefined,'lineSum');
+
         // 1. set scale
         var xScale = [];
         var yScale = [];
@@ -95,13 +96,14 @@ let Tooltip_lib = function() {
             var numTicks = 1 + Math.round((d.xScale.domain()[1] - d.xScale.domain()[0]) / (60 * 1000)); // every minutes
             if (numTicks > 6) numTicks = 6;
             d.numTicks = numTicks;
-            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0];
-            d.y_tickFormat = layout.axis.y&&layout.axis.y.tickFormat?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]):null;
+            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0]||null;
+            d.y_tickFormat = layout.axis.y&&layout.axis.y.tickFormat?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]||null):null;
             xScale.push(d.xScale);
             d.yScale = d3[`scale${layout.axis.y.linear}`]()
                 .domain(layout.axis.y.domain[i]||layout.axis.y.domain[0]) // input
                 .range([graphicopt.heightG(), 0]);
             yScale.push(d.yScale);
+            d.yLabel = layout.axis.y.label[i]||layout.axis.y.label[0]
             d.forEach(f=>
                 f.forEach(e=>{
                     e.xs = d.xScale(e.x);
@@ -118,16 +120,53 @@ let Tooltip_lib = function() {
                 height: graphicopt.height,
 
             });
+
+        // 1.1. set background
+        if (layout.background) {
+            let defs = svg.append('defs');
+            if (layout.background.type === "gradient") {
+                defs
+                    .append('linearGradient')
+                    .attrs({id: 'backcolor'})
+                    .selectAll('stop').data(layout.background.value)
+                    .enter().append('stop')
+                    .attrs({
+                        offset: d => d.start,
+                        'stop-color': d => d.color,
+                    });
+            }else{
+                defs
+                    .append('g')
+                    .attrs({id: 'backcolor'})
+                    .selectAll('rect').data(layout.background.value)
+                    .enter().append('rect')
+                    .attrs({
+                        x: d => xScale[0](d.x0),
+                        width: d => xScale[0](d.x1)-xScale[0](d.x0),
+                        height: graphicopt.heightG(),
+                        'fill': d => d.color,
+                        'opacity': 0.5
+                    });
+            }
+        }
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
 
-        g.append("rect")
-            .attrs({
-                width: graphicopt.widthG(),
-                height: graphicopt.heightG(),
-                fill: 'white'
+        if (layout.background && layout.background.type !== "gradient") {
+            g.append("use")
+                .attrs({
+                    'xlink:href': '#backcolor',
+                });
+        }else {
+            g.append("rect")
+                .attrs({
+                    width: graphicopt.widthG(),
+                    height: graphicopt.heightG()
+                }).styles({
+                fill: layout.background ? 'url("#backcolor")' : 'white'
             });
+        }
 
 
         // 2. axis create
@@ -135,13 +174,13 @@ let Tooltip_lib = function() {
         g.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + graphicopt.heightG() + ")")
-            .call(d=>d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)); //
+            .call(d=> d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)(d)); //
 
         g.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate(0,0)")
-            .call(d=>d3.axisLeft(d.yScale).tickFormat(d.datum().y_tickFormat).ticks(5).tickSize(-graphicopt.widthG()))
-            .select('.domain').remove(); //
+            .each(function(d)
+            {d3.select(this).call(d3.axisLeft(d.yScale).tickFormat(d.y_tickFormat).ticks(5).tickSize(-graphicopt.widthG())).select('.domain').remove();})//
 
         // 3. draw
         // ****** Append the path ******
@@ -180,7 +219,8 @@ let Tooltip_lib = function() {
             .style("text-anchor", "start")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
-            .text(d=> `${d.label}`)
+            .text(d=>
+                `${d.label}`)
             .classed('statics',(d,i)=>i===0||i===d.total-1);
         // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
         g.append("text")
@@ -193,7 +233,7 @@ let Tooltip_lib = function() {
             .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
-            .text(layout.axis.y.label);
+            .text(d=>d.yLabel);
 
         //************************************************************* Date and Time
 

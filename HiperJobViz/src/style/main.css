@@ -237,6 +237,8 @@ span.thumb {
 .d3-tip {
     background-color: #dddddd;
     padding: 5px;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 .gline_path text {
@@ -253,4 +255,14 @@ span.thumb {
 }
 .gline_path.highlight path{
     stroke: red;
+}
+
+.flex_contain{
+    display: flex;
+}
+.flex_col {
+    flex-direction: column;
+}
+.lineSum {
+    max-height: 50%;
 }
