@@ -64,7 +64,7 @@ let Radarplot_opt = {
 let group_opt = {
     clusterMethod: 'leaderbin',
     bin:{
-        startBinGridSize: 10,
+        startBinGridSize: 5,
         range: [9,11]
     }
 };
