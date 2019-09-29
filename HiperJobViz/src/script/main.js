@@ -1992,7 +1992,7 @@ function recomendName (clusterarr){
             c.axis = zero_el.map(z=>{return{id:z.axis,description:'not responding'}});
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = 'not responding';
+            c.text = `group ${c.index}: not responding`;
             return;
         }
         name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
@@ -2001,9 +2001,9 @@ function recomendName (clusterarr){
         }).join(', ');
         name = name.trim();
         if (name==='')
-            c.text = 'group_'+c.index;
+            c.text = `group ${c.index}`;
         else
-            c.text = name;
+            c.text = `group ${c.index}: ${name}`;
     });
 }
 
