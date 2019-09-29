@@ -263,10 +263,42 @@
                 </div>
             </li>
             <li>
-                <div class="collapsible-header"><i class="material-icons">settings</i> Major groups (clustered by the 9 metrics)</div>
+                <div class="collapsible-header"><i class="material-icons">settings</i> Major groups clustered by the 9 metrics</div>
                 <div class="collapsible-body">
-                    <div class="flex_contain flex_warp white" id="clusterDisplay">
+                    <div>
+                            <label for="clusterMethod" class="col s5 radarcontroller_layout"> Grouping Method: </label>
+                            <div  class="row s12">
+                                <select id="clusterMethod" class="col s7 radarcontroller_layout">
+                                    <option value="leaderbin" selected="selected">Leader Bin</option>
+                                    <option value="kmean">K-mean</option>
+                                </select>
+                            </div>
+                        <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
+                            <label for="startBinGridSize" class="col s5 radarcontroller_layout"> Start Bin Grid Size: </label>
+                            <div  class="row s12">
+                                <input type="number" id="startBinGridSize" class="col s7 radarcontroller_layout browser-default">
+                            </div>
+                            <label for="lowrange" class="col s5 radarcontroller_layout"> Range of group: </label>
+                            <div  class="row s12">
+                                <span class="col s2">from</span><input type="number" id="lowrange" class="col s2 radarcontroller_layout browser-default">
+                                <span class="col s1">to</span><input type="number" id="highrange" class="col s2 radarcontroller_layout browser-default">
+                            </div>
+                            <input type="submit" value="Submit">
+                        </form>
+                        <form action="#" class='clusterProfile hide' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
+                            <label for="knum" class="col s5 radarcontroller_layout"> Number of group: </label>
+                            <div  class="row s12">
+                                <input type="number" id="knum" class="col s7 radarcontroller_layout browser-default">
+                            </div>
+                            <label for="kinteration" class="col s5 radarcontroller_layout"> Max interation: </label>
+                            <div  class="row s12">
+                                <input type="number" id="kinteration" class="col s7 radarcontroller_layout browser-default">
+                            </div>
+                            <input type="submit" value="Submit">
+                        </form>
+                        <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
 
+                        </div>
                     </div>
                 </div>
             </li>
@@ -501,6 +533,7 @@
 <script src="../HiperView/myscripts/saveImages.js"></script>
 <script src="../HiperView/js/outliagnostics.min.js"></script>
 <script src="../HiperView/js/scagnosticsnd.min.js"></script>
+<script src="../HiperView/js/kmean.js"></script>
 <script src="../HiperView/js/box.js"></script>
 <script src="../HiperView/js/boxplot.js"></script>
 <script src="../HiperView/js/binnerN.min.js"></script>
@@ -515,6 +548,7 @@
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
 <script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/myscripts/histChart.js"></script>
+<script src="src/script/clustercal.js"></script>
 <script src="src/script/jobMap.js"></script>
 
 

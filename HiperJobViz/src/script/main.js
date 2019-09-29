@@ -61,7 +61,13 @@ let summaryGroup_op ={
 let Radarplot_opt = {
     clusterMethod: 'leaderbin',
 }
-
+let group_opt = {
+    clusterMethod: 'leaderbin',
+    bin:{
+        startBinGridSize: 10,
+        range: [9,11]
+    }
+};
 var svgStore={};
 var svgsum;
 //.call(d3.zoom()
@@ -1448,6 +1454,8 @@ $( document ).ready(function() {
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
         updateSummaryChartAll();
+        d3.selectAll('.clusterProfile').classed('hide',true);
+        d3.select(`#${this.value}profile`).classed('hide',false);
     });
     d3.select('#chartType_control').on("change", function () {
         var sect = document.getElementById("chartType_control");
@@ -1642,7 +1650,28 @@ $( document ).ready(function() {
 
         // Read in the image file as a data URL.
         reader.readAsDataURL(f);
-    })
+    });
+
+    // cluster init
+    $('#clusterMethod').val(group_opt.clusterMethod);
+    $('#startBinGridSize').val(group_opt.bin.startBinGridSize||10);
+    $('#lowrange').val(group_opt.bin.range[0]||9);
+    $('#highrange').val(group_opt.bin.range[1]||11);
+    $('#knum').val(group_opt.bin.k||5);
+    $('#kinteration').val(group_opt.bin.iterations||100);
+    // switch (group_opt.clusterMethod){
+    //     case 'leaderbin':
+    //         $('#startBinGridSize').val(group_opt.bin.startBinGridSize);
+    //         $('#lowrange').val(group_opt.bin.range[0]);
+    //         $('#highrange').val(group_opt.bin.range[1]);
+    //         break;
+    //     case 'kmean':
+    //     default:
+    //         $('#knum').val(group_opt.bin.k);
+    //         $('#kinteration').val(group_opt.bin.iterations);
+    //         break;
+    // }
+
     spinner = new Spinner(opts).spin(target);
     setTimeout(() => {
         //load data
@@ -1655,6 +1684,7 @@ $( document ).ready(function() {
                 d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
             });
             cluster_info = cluster;
+            recomendName (cluster_info)
         });
         d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
@@ -1906,6 +1936,7 @@ function cluster_map (dataRaw) {
     let data = dataRaw.map((c,i)=>{
         let temp = c.__metrics.slice();
         temp.name = c.labels;
+        temp.text = c.text;
         let temp_b = [temp];
         temp_b.id = c.labels;
         temp_b.order = i;
@@ -1916,12 +1947,58 @@ function cluster_map (dataRaw) {
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
         r_old.exit().remove();
-        r_old.enter().append('div').attr('class','radarCluster');
+        r_old.enter().append('div').attr('class','radarCluster').append('span')
+            .attr('class','truncate center-align')
+            .styles({'position':'absolute',
+                'color':'black',
+                'width': radarChartclusteropt.w+'px'
+            });
         dir.selectAll('.radarCluster')
-            .attr('class',(d,i)=>'flex_col radarCluster radarh'+d.id)
+            .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .each(function(d,i){
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
+        d3.selectAll('.radarCluster').select('span').text(d=>d[0].text);
     }, 0);
+}
+
+function recalculateCluster (option) {
+    preloader(true);
+    group_opt = option;
+    setTimeout(()=>{
+        clustercal(group_opt,lastIndex,(d)=>{
+            cluster_info = d;
+            recomendName (cluster_info);
+            jobMap.clusterData(cluster_info).draw().drawComp();
+            cluster_map(cluster_info);
+            preloader(false);
+        });
+    },0);
+}
+
+function recomendName (clusterarr){
+    clusterarr.forEach((c,i)=>{
+        c.index = i;
+        c.axis = [];
+        c.labels = ''+i;
+        let zero_el = c.__metrics.filter(f=>!f.value);
+        let name='';
+        if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
+            c.axis = zero_el.map(z=>{return{id:z.axis,description:'not responding'}});
+            name += `${zero_el.length} metric(s) empty `;
+        }else if(zero_el.length===c.__metrics.normalize.length){
+            c.text = 'not responding';
+            return;
+        }
+        name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
+            c.axis.push({id:f.axis,description:'high'});
+            return 'High '+f.axis;
+        }).join(', ');
+        name = name.trim();
+        if (name==='')
+            c.text = 'group_'+c.index;
+        else
+            c.text = name;
+    });
 }

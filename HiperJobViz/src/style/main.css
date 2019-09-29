@@ -269,3 +269,11 @@ span.thumb {
 .lineSum {
     max-height: 50%;
 }
+input[type=number] {
+    height: 1.5rem;
+    font-size: unset;
+    border-radius: 2px;
+    border: 1px solid #666666;
+    text-align: right;
+    margin: unset;
+}

@@ -424,8 +424,7 @@ let JobMap = function() {
                 'fill':'black',
                 'stroke':'white',
                 'stroke-width':0.2,
-            })
-            .text(d=>trimNameArray(d.name))
+            }).merge(computers.select('.computeSig_label')).text(d=>d.text?d.text:trimNameArray(d.name))
         ;
 
         computers = computers_n.merge(computers);
@@ -528,7 +527,7 @@ let JobMap = function() {
         userNode.select('.userNodeSig').styles(
             {
                 'fill-opacity':0.5,
-                'fill': d=>colorFunc(d.name,getsubfixcolormode())
+                'fill': d=>{const color = colorFunc(d.name,getsubfixcolormode()); return color==='black'?'white':color;}
             });
         userNode.select('.userNodeSig_label')
         .text(d=>d.name);
@@ -1164,6 +1163,7 @@ let JobMap = function() {
         harr_old = harr.slice();
         return harr;
     }
+
     let violinRange = [0,0];
     function handle_summary (data){
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
@@ -1338,7 +1338,7 @@ let JobMap = function() {
     };
 
     jobMap.clusterData = function (v) {
-        return arguments.length ? (clusterdata = v, jobMap) : clusterdata;
+        return arguments.length ? (clusterdata = v,updateClusterTimeline(), jobMap) : clusterdata;
     };
 
     jobMap.zoomtoogle = function (_) {
