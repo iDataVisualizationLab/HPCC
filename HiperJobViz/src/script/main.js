@@ -181,6 +181,7 @@ let colorScaleList = {
     n: 7,
     rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
     soil: ["#2244AA","#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#F8E571", "#F2B659", "#eb6424", "#D63128", "#660000"],
+    customschemeCategory:  ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"],
     customFunc: function(name,arr,num){
         const n= num||this.n;
         const arrColor = arr||this[name];
@@ -1684,7 +1685,8 @@ $( document ).ready(function() {
                 d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
             });
             cluster_info = cluster;
-            recomendName (cluster_info)
+            recomendName (cluster_info);
+            recomendColor (cluster_info);
         });
         d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
@@ -1772,7 +1774,7 @@ $( document ).ready(function() {
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
-                jobMap.clusterData(cluster_info);
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
                 cluster_map(cluster_info)
             }
@@ -1938,7 +1940,7 @@ function cluster_map (dataRaw) {
         temp.name = c.labels;
         temp.text = c.text;
         let temp_b = [temp];
-        temp_b.id = c.labels;
+        temp_b.id = c.name;
         temp_b.order = i;
         return temp_b;
     })
@@ -1970,7 +1972,8 @@ function recalculateCluster (option) {
         clustercal(group_opt,lastIndex,(d)=>{
             cluster_info = d;
             recomendName (cluster_info);
-            jobMap.clusterData(cluster_info).data().draw().drawComp();
+            recomendColor (cluster_info);
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
             cluster_map(cluster_info);
             preloader(false);
         });
@@ -2002,4 +2005,25 @@ function recomendName (clusterarr){
         else
             c.text = name;
     });
+}
+
+function recomendColor (clusterarr) {
+    const colorCa = colorScaleList['customschemeCategory'].slice();
+    let colorcs = d3.scaleOrdinal().range(colorCa);
+    let colorarray = [];
+    let orderarray = [];
+    clusterarr.filter(c=>c.text!=='not responding'&&!c.text.match('undefined'))
+        .forEach(c=>{
+            colorarray.push(colorcs(c.name));
+            orderarray.push(c.name);
+        });
+    clusterarr.filter(c=>c.text==='not responding').forEach(c=>{
+        colorarray.push('black');
+        orderarray.push(c.name);
+    });
+    clusterarr.filter(c=>c.text.match('undefined')).forEach(c=>{
+        colorarray.push('#7f7f7f');
+        orderarray.push(c.name);
+    });
+    colorCluster.range(colorarray).domain(orderarray)
 }
