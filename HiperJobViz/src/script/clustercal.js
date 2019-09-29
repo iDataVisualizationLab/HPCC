@@ -1,3 +1,4 @@
+
 binopt = {clusterMethod:'kmean'}
 hosts.forEach(h=>serviceListattr.forEach(s=>{if (hostResults[h.name][s].length>60) hostResults[h.name][s].pop();}))
 var arr = [];
@@ -77,42 +78,43 @@ dataSpider3.forEach((d,i)=>{
     if (binopt.clusterMethod ==='leaderbin')
         temp.push(d.bin.distance);
     dataout.push(temp);
-})
-download_csv();
-function download_csv() {
-    var csv = csv_header.join(',')+'\n';
-    dataout.forEach(function(row) {
-        csv += row.join(',');
-        csv += "\n";
-    });
-
-    console.log(csv);
-    var hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = 'cluster_27sep2018.csv';
-    hiddenElement.click();
-}
-
-Object.keys(sampleS).forEach(h=>{
-    delete sampleS[h].arrJob_scheduling;
-    sampleS[h].arrcluster = [];
-});
-sampleS_cluster = {};
-dataSpider3.forEach((d,i)=>{
-    d.bin.nameob.forEach(o=>{
-        if(!sampleS_cluster[o.name])
-            sampleS_cluster[o.name] = [];
-        sampleS_cluster[o.name].push({cluster:i,timestep:o.timestep});
-    });
-});
-Object.keys(sampleS_cluster).forEach(h=>{
-    sampleS_cluster[h].sort((a,b)=>a.timestep-b.timestep);
-    sampleS_cluster[h] = sampleS_cluster[h].map(d=>d.cluster);
 });
 
-sampleS_cluster = {};
-hosts.forEach(h=>{
-    sampleS_cluster[h.name] = sampleS[h.name].arrcluster;
-});
+// download_csv();
+// function download_csv() {
+//     var csv = csv_header.join(',')+'\n';
+//     dataout.forEach(function(row) {
+//         csv += row.join(',');
+//         csv += "\n";
+//     });
+//
+//     console.log(csv);
+//     var hiddenElement = document.createElement('a');
+//     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+//     hiddenElement.target = '_blank';
+//     hiddenElement.download = 'cluster_27sep2018.csv';
+//     hiddenElement.click();
+// }
+
+// Object.keys(sampleS).forEach(h=>{
+//     delete sampleS[h].arrJob_scheduling;
+//     sampleS[h].arrcluster = [];
+// });
+// sampleS_cluster = {};
+// dataSpider3.forEach((d,i)=>{
+//     d.bin.nameob.forEach(o=>{
+//         if(!sampleS_cluster[o.name])
+//             sampleS_cluster[o.name] = [];
+//         sampleS_cluster[o.name].push({cluster:i,timestep:o.timestep});
+//     });
+// });
+// Object.keys(sampleS_cluster).forEach(h=>{
+//     sampleS_cluster[h].sort((a,b)=>a.timestep-b.timestep);
+//     sampleS_cluster[h] = sampleS_cluster[h].map(d=>d.cluster);
+// });
+//
+// sampleS_cluster = {};
+// hosts.forEach(h=>{
+//     sampleS_cluster[h.name] = sampleS[h.name].arrcluster;
+// });
 

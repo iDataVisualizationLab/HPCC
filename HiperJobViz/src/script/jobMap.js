@@ -699,6 +699,8 @@ let JobMap = function() {
                 if (d.target.type==='job') {
                     if (d.source.__metrics)// cluster group
                         return d.source.name;
+                    else
+                        return _.last(d.source.timeline.clusterarr).cluster
                 }
                 return undefined;
             default:
