@@ -61,7 +61,7 @@ let Tooltip_lib = function() {
         }else {
             if (classtype==='lineSum'){
                 str += '<div class="' + classtype + ' flex_contain flex_col"></div>'; // Spider chart holder
-                str += '<button onclick="' + 'function close (){master.hide()}()' + '">Close</button>';
+                str += '<button onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">Close</button>';
             }else {
                 str+='<span>Notsupport</span>'
             }
@@ -86,7 +86,7 @@ let Tooltip_lib = function() {
     }
     master.show = function (){
         tool_tip.show(undefined,undefined,'lineSum');
-
+        d3.select('#d3-tip').on('hide',master.hide);
         // 1. set scale
         var xScale = [];
         var yScale = [];
