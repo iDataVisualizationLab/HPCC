@@ -1970,7 +1970,7 @@ function recalculateCluster (option) {
         clustercal(group_opt,lastIndex,(d)=>{
             cluster_info = d;
             recomendName (cluster_info);
-            jobMap.clusterData(cluster_info).draw().drawComp();
+            jobMap.clusterData(cluster_info).data().draw().drawComp();
             cluster_map(cluster_info);
             preloader(false);
         });
@@ -1982,11 +1982,12 @@ function recomendName (clusterarr){
         c.index = i;
         c.axis = [];
         c.labels = ''+i;
+        c.name = `group_${i}`;
         let zero_el = c.__metrics.filter(f=>!f.value);
         let name='';
         if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
             c.axis = zero_el.map(z=>{return{id:z.axis,description:'not responding'}});
-            name += `${zero_el.length} metric(s) empty `;
+            name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
             c.text = 'not responding';
             return;

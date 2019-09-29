@@ -1077,7 +1077,6 @@ let JobMap = function() {
         }
         if (runopt.compute.clusterNode) {
             clusterdata.forEach(c =>{
-                c.name = 'group_'+c.labels;
                 let namearr = c.arr[c.arr.length-1];
                 if (namearr) {
                     let sameSource = linkdata.filter(e => namearr.find(f => f === e.source + ''));
@@ -1334,7 +1333,7 @@ let JobMap = function() {
     };
 
     jobMap.data = function (_) {
-        return arguments.length ? (dataRaw = _?_:dataRaw, handle_links (arguments[1]), jobMap) : data;
+        return dataRaw = _?_:dataRaw, handle_links (arguments[1]), jobMap;
     };
 
     jobMap.clusterData = function (v) {
