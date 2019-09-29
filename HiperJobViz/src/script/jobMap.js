@@ -350,19 +350,38 @@ let JobMap = function() {
             return nametr;
         }
     }
+    let linkHorizontal = d3.linkHorizontal()
+        .x(function(d) {
+            return d.y;
+        })
+        .y(function(d) {
+            return d.x;
+        });
     function updatelink (path){
-        return path.attr("x1", function (d) {
-                return (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0);
-            })
-            .attr("y1", function (d) {
-                return d.source.y2 || d.source.y;
-            })
-            .attr("x2", function (d) {
-                return (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0);
-            })
-            .attr("y2", function (d) {
-                return d.target.y2 || d.target.y;
-            })
+        return path
+            .attr("d", d=>{
+                return linkHorizontal({
+                    source: {
+                        x: d.source.y2 || d.source.y,
+                        y: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0)
+                    },
+                    target: {
+                        x: d.target.y2 || d.target.y,
+                        y: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0)
+                    }});
+            });
+            // .attr("x1", function (d) {
+            //     return (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0);
+            // })
+            // .attr("y1", function (d) {
+            //     return d.source.y2 || d.source.y;
+            // })
+            // .attr("x2", function (d) {
+            //     return (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0);
+            // })
+            // .attr("y2", function (d) {
+            //     return d.target.y2 || d.target.y;
+            // })
         // .styleTween("stroke-dasharray", function() {
         //     return (t) =>{
         //         return getstrokearray(this);
@@ -627,7 +646,9 @@ let JobMap = function() {
         let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
         link.exit().remove();
         let link_n = link.enter()
-            .append('line').attr("class", "links")
+            .append('path')
+            // .append('line')
+            .attr("class", "links")
             .merge(link)
             .call(updatelink)
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
