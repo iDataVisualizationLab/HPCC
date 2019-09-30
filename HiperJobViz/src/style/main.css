@@ -277,3 +277,10 @@ input[type=number] {
     text-align: right;
     margin: unset;
 }
+.table.header .cell {
+    cursor: default;
+}
+.label span:hover {
+    white-space: normal;
+    overflow: visible;
+}

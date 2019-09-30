@@ -1949,12 +1949,17 @@ function cluster_map (dataRaw) {
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
         r_old.exit().remove();
-        r_old.enter().append('div').attr('class','radarCluster').append('span')
-            .attr('class','truncate center-align')
+        r_old.enter().append('div').attr('class','radarCluster')
+            .append('div')
+            .attr('class','label')
             .styles({'position':'absolute',
                 'color':'black',
-                'width': radarChartclusteropt.w+'px'
-            });
+                'width': radarChartclusteropt.w+'px',
+                height: '1rem',
+                // overflow: 'hidden',
+            })
+            .append('span').attr('class','truncate center-align')
+           ;
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .each(function(d,i){
