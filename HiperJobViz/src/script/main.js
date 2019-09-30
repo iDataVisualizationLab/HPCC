@@ -1965,11 +1965,11 @@ function cluster_map (dataRaw) {
                 height: '1rem',
                 // overflow: 'hidden',
             });
-
-        r_new.append('span').attr('class','truncate center-align col s11')
-           ;
-        r_new.append('i').attr('class','material-icons tiny col s1').text('edit')
-           ;
+        r_new.append('span').attr('class','truncate center-align col s12')
+        // r_new.append('span').attr('class','truncate center-align col s11')
+        //    ;
+        // r_new.append('i').attr('class','material-icons tiny col s1').text('edit')
+        //    ;
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .each(function(d,i){
