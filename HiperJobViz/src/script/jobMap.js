@@ -464,13 +464,16 @@ let JobMap = function() {
         jobNode.exit().remove();
         let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode '+fixName2Class(fixstr(d.name)));
 
-        // jobNode_n.append('path')
-        //     .attrs(
-        //     {'class':'computeSig_b',
-        //         // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
-        //         'd': d=>spiral(backdround_spiral),
-        //         // 'stroke':'#ddd',
-        //     });
+        jobNode_n.append('circle')
+            .attrs(
+            {'class':'computeSig_b',
+                // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
+                // 'd': d=>spiral(backdround_spiral),
+                'r': graphicopt.job.r,
+                'fill': '#dddddd',
+                'opacity': 0.2,
+                'stroke-width':0,
+            });
         jobNode_n.append('path')
             .attrs(
             {'class':'computeSig_sub submitTime',
