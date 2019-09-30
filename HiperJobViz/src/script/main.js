@@ -1776,7 +1776,9 @@ $( document ).ready(function() {
                 }));
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
-                cluster_map(cluster_info)
+                cluster_map(cluster_info);
+                handle_clusterinfo ();
+
             }
             main();
             d3.select(".cover").select('h5').text('loading data...');
@@ -1980,6 +1982,7 @@ function recalculateCluster (option) {
             recomendColor (cluster_info);
             jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
             cluster_map(cluster_info);
+            handle_clusterinfo ()
             preloader(false);
         });
     },0);
@@ -2031,4 +2034,22 @@ function recomendColor (clusterarr) {
         orderarray.push(c.name);
     });
     colorCluster.range(colorarray).domain(orderarray)
+}
+function handle_clusterinfo () {
+    let data_info = [['Grouping Method:',group_opt.clusterMethod]];
+    d3.select(`#${group_opt.clusterMethod}profile`).selectAll('label').each(function(d,i) {
+        data_info.push([d3.select(this).text(), group_opt.bin[Object.keys(group_opt.bin)[i]]])
+    });
+    data_info.push(['#group calculated:',cluster_info.length]);
+    let table = d3.select('#clusterinformation').select('table tbody');
+    let tr=table
+        .selectAll('tr')
+        .data(data_info);
+    tr.exit().remove();
+    let tr_new = tr.enter().append('tr');
+    let td = table.selectAll('tr').selectAll('td').data(d=>d);
+    td.exit().remove();
+    td.enter().append('td')
+        .merge(td)
+        .text(d=>d);
 }

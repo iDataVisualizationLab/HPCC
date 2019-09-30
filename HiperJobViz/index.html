@@ -266,6 +266,7 @@
                 <div class="collapsible-header"><i class="material-icons">settings</i> Major groups clustered by the 9 metrics</div>
                 <div class="collapsible-body">
                     <div>
+                        <div>
                             <label for="clusterMethod" class="col s5 radarcontroller_layout"> Grouping Method: </label>
                             <div  class="row s12">
                                 <select id="clusterMethod" class="col s7 radarcontroller_layout">
@@ -273,31 +274,37 @@
                                     <option value="kmean">K-mean</option>
                                 </select>
                             </div>
-                        <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
-                            <label for="startBinGridSize" class="col s5 radarcontroller_layout"> Start Bin Grid Size: </label>
-                            <div  class="row s12">
-                                <input type="number" id="startBinGridSize" class="col s7 radarcontroller_layout browser-default">
+                            <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
+                                <label for="startBinGridSize" class="col s5 radarcontroller_layout"> Start Bin Grid Size: </label>
+                                <div  class="row s12">
+                                    <input type="number" id="startBinGridSize" class="col s7 radarcontroller_layout browser-default">
+                                </div>
+                                <label for="lowrange" class="col s5 radarcontroller_layout"> Range of group: </label>
+                                <div  class="row s12">
+                                    <span class="col s2">from</span><input type="number" id="lowrange" class="col s2 radarcontroller_layout browser-default">
+                                    <span class="col s1">to</span><input type="number" id="highrange" class="col s2 radarcontroller_layout browser-default">
+                                </div>
+                                <input type="submit" value="Generate groups">
+                            </form>
+                            <form action="#" class='clusterProfile hide' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
+                                <label for="knum" class="col s5 radarcontroller_layout"> Number of group: </label>
+                                <div  class="row s12">
+                                    <input type="number" id="knum" class="col s7 radarcontroller_layout browser-default">
+                                </div>
+                                <label for="kinteration" class="col s5 radarcontroller_layout"> Max interation: </label>
+                                <div  class="row s12">
+                                    <input type="number" id="kinteration" class="col s7 radarcontroller_layout browser-default">
+                                </div>
+                                <input type="submit" value="Generate groups">
+                            </form>
+                        </div>
+                        <div class="row s12 flex_contain flex_warp white" id="clusterDisplay" style="margin-top: 20px">
+                            <button class="information waves-effect waves-light grey darken-3"><i class="material-icons">priority_high</i></button>
+                            <div id='clusterinformation'>
+                                <table>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                            <label for="lowrange" class="col s5 radarcontroller_layout"> Range of group: </label>
-                            <div  class="row s12">
-                                <span class="col s2">from</span><input type="number" id="lowrange" class="col s2 radarcontroller_layout browser-default">
-                                <span class="col s1">to</span><input type="number" id="highrange" class="col s2 radarcontroller_layout browser-default">
-                            </div>
-                            <input type="submit" value="Submit">
-                        </form>
-                        <form action="#" class='clusterProfile hide' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
-                            <label for="knum" class="col s5 radarcontroller_layout"> Number of group: </label>
-                            <div  class="row s12">
-                                <input type="number" id="knum" class="col s7 radarcontroller_layout browser-default">
-                            </div>
-                            <label for="kinteration" class="col s5 radarcontroller_layout"> Max interation: </label>
-                            <div  class="row s12">
-                                <input type="number" id="kinteration" class="col s7 radarcontroller_layout browser-default">
-                            </div>
-                            <input type="submit" value="Submit">
-                        </form>
-                        <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
-
                         </div>
                     </div>
                 </div>

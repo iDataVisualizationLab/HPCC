@@ -278,9 +278,37 @@ input[type=number] {
     margin: unset;
 }
 .table.header .cell {
-    cursor: default;
+    cursor: Pointer;
 }
 .label span:hover {
     white-space: normal;
     overflow: visible;
+}
+.clusterProfile input[type='submit'] {
+    width: 100%;
+}
+.information {
+    width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    position: absolute;
+    right: 17px;
+    color: white;
+    padding: 0;
+}
+.information i {
+    font-size: 14px;
+    right: 17px;
+}
+.information:hover + #clusterinformation{
+    visibility: unset;
+}
+#clusterinformation{
+    background-color: #a2a2a2;
+    position: absolute;
+    right: 20px;
+    padding: 5px;
+    width: 200px;
+    margin: 10px;
+    visibility: hidden;
 }
