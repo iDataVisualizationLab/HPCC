@@ -65,7 +65,7 @@ let group_opt = {
     clusterMethod: 'leaderbin',
     bin:{
         startBinGridSize: 5,
-        range: [9,11]
+        range: [9,10]
     }
 };
 var svgStore={};
@@ -1431,6 +1431,9 @@ $( document ).ready(function() {
         hoverEnabled: false,
     });
     $('.collapsible').collapsible();
+    $('.collapsible.expandable').collapsible({
+        accordion: false
+    });
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
     $('.tabs').tabs();
@@ -1678,7 +1681,8 @@ $( document ).ready(function() {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-        d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
+        d3.csv(srcpath+'data/cluster_27sep2018 _10.csv',function(cluster){
+        // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
                 d.__metrics = serviceFullList.map(s=>{return {axis: s.text,value:d3.scaleLinear().domain(s.range)(d[s.text])||0}});
@@ -1951,7 +1955,7 @@ function cluster_map (dataRaw) {
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
         r_old.exit().remove();
-        r_old.enter().append('div').attr('class','radarCluster')
+        let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .append('div')
             .attr('class','label')
             .styles({'position':'absolute',
@@ -1959,8 +1963,11 @@ function cluster_map (dataRaw) {
                 'width': radarChartclusteropt.w+'px',
                 height: '1rem',
                 // overflow: 'hidden',
-            })
-            .append('span').attr('class','truncate center-align')
+            });
+
+        r_new.append('span').attr('class','truncate center-align col s11')
+           ;
+        r_new.append('i').attr('class','material-icons tiny col s1').text('edit')
            ;
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
@@ -1993,14 +2000,14 @@ function recomendName (clusterarr){
         c.index = i;
         c.axis = [];
         c.labels = ''+i;
-        c.name = `group_${i}`;
+        c.name = `group_${i+1}`;
         let zero_el = c.__metrics.filter(f=>!f.value);
         let name='';
         if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
-            c.axis = zero_el.map(z=>{return{id:z.axis,description:'not responding'}});
+            c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = `group ${c.index}: not responding`;
+            c.text = `group ${c.index}: undefined`;
             return;
         }
         name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
@@ -2009,9 +2016,9 @@ function recomendName (clusterarr){
         }).join(', ');
         name = name.trim();
         if (name==='')
-            c.text = `group ${c.index}`;
+            c.text = `group ${c.index+1}`;
         else
-            c.text = `group ${c.index}: ${name}`;
+            c.text = `group ${c.index+1}: ${name}`;
     });
 }
 
@@ -2020,12 +2027,12 @@ function recomendColor (clusterarr) {
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
-    clusterarr.filter(c=>!c.text.match('not responding')&&!c.text.match('undefined'))
+    clusterarr.filter(c=>!c.text.match(':undefined')&&!c.text.match('undefined'))
         .forEach(c=>{
             colorarray.push(colorcs(c.name));
             orderarray.push(c.name);
         });
-    clusterarr.filter(c=>c.text.match('not responding')).forEach(c=>{
+    clusterarr.filter(c=>c.text.match(':undefined')).forEach(c=>{
         colorarray.push('black');
         orderarray.push(c.name);
     });

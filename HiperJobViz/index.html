@@ -93,7 +93,7 @@
 </ul>
 <div id="mySidenav" class="sidenavs">
     <div class="row s12">
-        <ul class="collapsible">
+        <ul class="collapsible expandable">
             <!--<li>-->
             <!--<div class="collapsible-header search-wrapper focused">-->
             <!--<input type="text" id="search" placeholder="Search Racks..." class="inputHolder">-->
@@ -262,11 +262,14 @@
                     </div>
                 </div>
             </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">settings</i> Major groups clustered by the 9 metrics</div>
+            <li class="active">
+                <div class="collapsible-header"><i class="material-icons">settings</i> Major node groups</div>
                 <div class="collapsible-body">
                     <div>
                         <div>
+                            <div  class="row s12">
+                                <span class="col s12 right-align">Grouped by the 9 metrics</span>
+                            </div>
                             <label for="clusterMethod" class="col s5 radarcontroller_layout"> Grouping Method: </label>
                             <div  class="row s12">
                                 <select id="clusterMethod" class="col s7 radarcontroller_layout">
@@ -275,11 +278,11 @@
                                 </select>
                             </div>
                             <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
-                                <label for="startBinGridSize" class="col s5 radarcontroller_layout"> Start Bin Grid Size: </label>
-                                <div  class="row s12">
+                                <label for="startBinGridSize" class="col s5 radarcontroller_layout hide">Initial diameter: </label>
+                                <div  class="row s12 hide">
                                     <input type="number" id="startBinGridSize" class="col s7 radarcontroller_layout browser-default">
                                 </div>
-                                <label for="lowrange" class="col s5 radarcontroller_layout"> Range of group: </label>
+                                <label for="lowrange" class="col s5 radarcontroller_layout"># groups </label>
                                 <div  class="row s12">
                                     <span class="col s2">from</span><input type="number" id="lowrange" class="col s2 radarcontroller_layout browser-default">
                                     <span class="col s1">to</span><input type="number" id="highrange" class="col s2 radarcontroller_layout browser-default">

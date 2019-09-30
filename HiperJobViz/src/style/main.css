@@ -284,6 +284,12 @@ input[type=number] {
     white-space: normal;
     overflow: visible;
 }
+.label span {
+    padding-right: 0!important;
+}
+.label i {
+    padding-left: 0!important;
+}
 .clusterProfile input[type='submit'] {
     width: 100%;
 }
