@@ -2008,7 +2008,7 @@ function recomendName (clusterarr){
             c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = `group ${c.index}: undefined`;
+            c.text = `group ${c.index+1}: undefined`;
             return;
         }
         name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
@@ -2083,9 +2083,9 @@ function similarityCal(data){
     }
     mapIndex.sort((a,b)=> simMatrix[b].total-simMatrix[a].total);
     // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
-    // mapIndex.sort((a,b)=> {
-    //     b===undefinedposition?1:(a===undefinedposition?-1:0);
-    // });
+    // mapIndex.sort((a,b)=>
+    //     b===undefinedposition?1:(a===undefinedposition?-1:0)
+    // )
     let current_index = mapIndex.pop();
     let orderIndex = [simMatrix[current_index].index];
 
