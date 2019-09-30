@@ -203,7 +203,7 @@ span.thumb {
     stroke-opacity:1;
     paint-order: stroke;
 }
-.hightlight .computeSig_label{
+.hightlight .computeSig_label,.statics .computeSig_label{
     display: block;
 }
 

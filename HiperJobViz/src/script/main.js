@@ -2012,12 +2012,12 @@ function recomendColor (clusterarr) {
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
-    clusterarr.filter(c=>c.text!=='not responding'&&!c.text.match('undefined'))
+    clusterarr.filter(c=>!c.text.match('not responding')&&!c.text.match('undefined'))
         .forEach(c=>{
             colorarray.push(colorcs(c.name));
             orderarray.push(c.name);
         });
-    clusterarr.filter(c=>c.text==='not responding').forEach(c=>{
+    clusterarr.filter(c=>c.text.match('not responding')).forEach(c=>{
         colorarray.push('black');
         orderarray.push(c.name);
     });

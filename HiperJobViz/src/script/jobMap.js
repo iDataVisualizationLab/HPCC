@@ -427,8 +427,8 @@ let JobMap = function() {
             }).merge(computers.select('.computeSig_label')).text(d=>d.text?d.text:trimNameArray(d.name))
         ;
 
-        computers = computers_n.merge(computers);
-
+        computers = nodeg.selectAll('.computeNode');
+        computers.classed('statics',!!clusterNode_data)
 
 
         //job node
