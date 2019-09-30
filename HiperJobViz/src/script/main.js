@@ -1778,9 +1778,9 @@ $( document ).ready(function() {
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
+                cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
-                cluster_map(cluster_info);
                 handle_clusterinfo ();
 
             }
@@ -1952,6 +1952,14 @@ function cluster_map (dataRaw) {
     });
     let orderSimilarity = similarityCal(data)
     data.sort((a,b)=>(orderSimilarity[b.order]-orderSimilarity[a.order])).forEach((d,i)=>d.order = i);
+    //--shoudn't here
+    dataRaw.forEach(c=>{
+        let matchitem = data.find(d=>d.id===c.name);
+        c.text = c.text.replace(`group ${c.index+1}`,`group ${matchitem.order+1}`);
+        matchitem[0].text =  c.text;
+    });
+    data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
+    //--end
     let dir = d3.select('#clusterDisplay');
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
@@ -1988,8 +1996,8 @@ function recalculateCluster (option) {
             cluster_info = d;
             recomendName (cluster_info);
             recomendColor (cluster_info);
-            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
             cluster_map(cluster_info);
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
             handle_clusterinfo ()
             preloader(false);
         });
