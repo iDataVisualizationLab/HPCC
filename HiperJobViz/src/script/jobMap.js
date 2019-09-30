@@ -167,6 +167,15 @@ let JobMap = function() {
         datapoint.attr('transform',d=>`translate(${timelineScale(d.timestep)},0)`);
 
         bg.style('stroke-width', d=>linkscale(d.values_name.length));
+        bg.select(".invisibleline").remove();
+        bg.append('line').attr('class',"invisibleline").attrs(d=>{
+            return {
+                'x1':timelineScale(timelineScale.domain()[1]),
+                'x2':timelineScale(0),
+                'stroke-width': 5,
+                'opacity':0
+            };
+        });
         let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
         dataline.exit().remove();
         dataline = dataline.enter().append('line')
