@@ -1949,8 +1949,9 @@ function cluster_map (dataRaw) {
         temp_b.id = c.name;
         temp_b.order = i;
         return temp_b;
-    })
-
+    });
+    let orderSimilarity = similarityCal(data)
+    data.sort((a,b)=>(orderSimilarity[b.order]-orderSimilarity[a.order])).forEach((d,i)=>d.order = i);
     let dir = d3.select('#clusterDisplay');
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
@@ -2027,12 +2028,12 @@ function recomendColor (clusterarr) {
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
-    clusterarr.filter(c=>!c.text.match(':undefined')&&!c.text.match('undefined'))
+    clusterarr.filter(c=>!c.text.match(': undefined')&&!c.text.match('undefined'))
         .forEach(c=>{
             colorarray.push(colorcs(c.name));
             orderarray.push(c.name);
         });
-    clusterarr.filter(c=>c.text.match(':undefined')).forEach(c=>{
+    clusterarr.filter(c=>c.text.match(': undefined')).forEach(c=>{
         colorarray.push('black');
         orderarray.push(c.name);
     });
@@ -2059,4 +2060,55 @@ function handle_clusterinfo () {
     td.enter().append('td')
         .merge(td)
         .text(d=>d);
+}
+
+function similarityCal(data){
+    const n = data.length;
+    let simMatrix = [];
+    let mapIndex = [];
+    for (let i = 0;i<n; i++){
+        let temp_arr = [];
+        temp_arr.total = 0;
+        for (let j=i+1; j<n; j++){
+            let tempval = similarity(data[i][0],data[j][0]);
+            temp_arr.total += tempval;
+            temp_arr.push(tempval)
+        }
+        for (let j=0;j<i;j++)
+            temp_arr.total += simMatrix[j][i-1-j];
+        temp_arr.name = data[i][0].name;
+        temp_arr.index = i;
+        mapIndex.push(i);
+        simMatrix.push(temp_arr)
+    }
+    mapIndex.sort((a,b)=> simMatrix[b].total-simMatrix[a].total);
+    // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
+    // mapIndex.sort((a,b)=> {
+    //     b===undefinedposition?1:(a===undefinedposition?-1:0);
+    // });
+    let current_index = mapIndex.pop();
+    let orderIndex = [simMatrix[current_index].index];
+
+    do{
+        let maxL = 0;
+        let maxI = 0;
+        mapIndex.forEach((d)=>{
+            let temp;
+            if (d>simMatrix[current_index].index ){
+                temp = simMatrix[current_index][d-current_index-1];
+            }else{
+                temp = simMatrix[current_index-d-1]
+            }
+            if (maxL<temp){
+                maxL = temp;
+                maxI = d;
+            }
+        });
+        orderIndex.push(simMatrix[maxI].index);
+        current_index = maxI;
+        mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);
+    return orderIndex;
+    function similarity (a,b){
+        return Math.sqrt(d3.mean(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+    }
 }

@@ -691,9 +691,9 @@ function similarityCal(){
         mapIndex.push(i);
         simMatrix.push(temp_arr)
     }
-    mapIndex.sort((a,b)=> {
-        simMatrix[a].total-simMatrix[b].total;
-    });
+    mapIndex.sort((a,b)=>
+        simMatrix[b].total-simMatrix[a].total
+    );
     let current_index = mapIndex.pop();
     let orderIndex = [simMatrix[current_index].index];
 
