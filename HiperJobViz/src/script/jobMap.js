@@ -367,7 +367,7 @@ let JobMap = function() {
             return d.x;
         });
     function updatelink (path){
-        return path
+        path.select('path')
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
@@ -379,24 +379,12 @@ let JobMap = function() {
                         y: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0)
                     }});
             });
-            // .attr("x1", function (d) {
-            //     return (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0);
-            // })
-            // .attr("y1", function (d) {
-            //     return d.source.y2 || d.source.y;
-            // })
-            // .attr("x2", function (d) {
-            //     return (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0);
-            // })
-            // .attr("y2", function (d) {
-            //     return d.target.y2 || d.target.y;
-            // })
-        // .styleTween("stroke-dasharray", function() {
-        //     return (t) =>{
-        //         return getstrokearray(this);
-        //     };
-        // })
-        // .style('stroke-dashoffset', getstrokearray_offset);
+        path.select('text').attr("transform", function(d) {
+            return "translate(" +
+                (((d.source.x2 || d.source.x) + (d.target.x2 || d.target.x))/2) + "," +
+                (((d.source.y2 || d.source.y) + (d.target.y2 || d.target.y))/2) + ")";
+        })
+        return path;
     }
     jobMap.draw = function (){
         let timeStep = new Date(last_timestep.toString());
@@ -606,12 +594,14 @@ let JobMap = function() {
                 d3.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false);
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('hightlight',true);
+                table_footerNode.classed('fade',true);
             }).on('mouseout',function(d){
             d3.selectAll('.userNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
+            table_footerNode.classed('fade',false);
         })
             .transition().attr('transform',d=>{
             d.fy=yscale(d.order);
@@ -629,12 +619,14 @@ let JobMap = function() {
                 d3.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false);
                 d3.selectAll('.userNode').classed('fade',true);
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('hightlight',true);
+                table_footerNode.classed('fade',true);
             }).on('mouseout',function(d){
             d3.selectAll( '.computeNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
             d3.selectAll( '.userNode').classed('hide',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
+            table_footerNode.classed('fade',false);
         });
         g.selectAll('.jobNode')
             .on('mouseover',function(d){
@@ -648,12 +640,14 @@ let JobMap = function() {
                 d3.selectAll( '.userNode').filter(f=>samesource.find(e=>e.target===f)).classed('hightlight',true);
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hightlight',true);
+                table_footerNode.classed('fade',true);
             }).on('mouseout',function(d){
             g.selectAll('.jobNode').classed('hide',false);
             d3.select(this).selectAll('text').classed('hide',true);
             d3.selectAll( '.userNode').classed('fade',false).classed('hightlight',false);
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
+            table_footerNode.classed('fade',false);
         });
         initForce();
         function getGradID(d){
@@ -666,17 +660,24 @@ let JobMap = function() {
         let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
         link.exit().remove();
         let link_n = link.enter()
-            .append('path')
-            // .append('line')
-            .attr("class", "links")
-            .merge(link)
-            .call(updatelink)
+            .append('g')
+            .attr("class", "links");
+        link_n
+            .append('path');
+        link_n
+            .append('text').attr("text-anchor", "middle");
+
+        link = linkg.selectAll('.links');
+        link.select('text').text(function(d){return d.links?d.links:''}).styles({'stroke':'white',
+            'stroke-width':0.2});
+        link.call(updatelink);
+        link.select('path')
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
                 return d.links===undefined?1:linkscale(d.links);
-            })
+            });
             // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
-        link = linkg.selectAll('.links');
+
         if (!runopt.compute.clusterNode&&runopt.compute.type!=='timeline')
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
         else {

@@ -146,8 +146,15 @@ span.thumb {
 .userNode.hightlight {
     opacity: 1;
 }
+.links.hightlight text{
+    display: unset;
+}
+.links text{
+    display: none;
+}
+
 .fade {
-    opacity: 0.2;
+    opacity: 0.1;
 }
 
 .pantarget.lock{
