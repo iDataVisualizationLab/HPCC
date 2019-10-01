@@ -154,7 +154,7 @@ span.thumb {
 }
 #jobmap text {
     stroke: white;
-    stroke-width:0.5;
+    stroke-width:1;
 }
 .fade {
     opacity: 0.1;
