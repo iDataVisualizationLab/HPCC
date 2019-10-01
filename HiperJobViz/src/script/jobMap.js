@@ -25,7 +25,10 @@ let JobMap = function() {
     let jobMap = {};
     let simulation;
     let timebox,linkg,nodeg,schema=[];
+    var fisheye_scale = {x:fisheye.scale(d3.scaleLinear),y:fisheye.scale(d3.scaleLinear)};
     jobMap.init = function () {
+        fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.widthG()]).focus(graphicopt.widthG()/2);
+        fisheye_scale.y= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.heightG()]).focus(graphicopt.heightG()/2);
         var rScale = d3.scaleLinear()
             .range([0, graphicopt.radaropt.w/2])
             .domain([-0.25, 1.25]);
@@ -57,8 +60,11 @@ let JobMap = function() {
                 width: graphicopt.width,
                 height: graphicopt.height,
             }).call(d3.zoom().on("zoom", function () {
+                // fisheye_scale.x.domain([0,graphicopt.widthG()*d3.event.transform.k]);
+                // fisheye_scale.y.domain([0,graphicopt.heightG()*d3.event.transform.k]);
             g.attr("transform", d3.event.transform);
         }));
+
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
@@ -153,9 +159,24 @@ let JobMap = function() {
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
     function drawEmbedding_timeline(data,colorfill) {
+
         // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
+        if (!bg.on("mousemove"))
+            bg.on("mousemove", function() {
+                let mouse = d3.mouse(this);
+                if(runopt.compute.type==="timeline"){
+                    fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]);
+                    drawEmbedding_timeline(data,colorfill,fisheye_scale.x);
+                }
+            }).on("mouseout",function () {
+                if(runopt.compute.type==="timeline"){
+                    fisheye_scale.x = d=>d
+                    drawEmbedding_timeline(data,colorfill,d=>d);
+                }
+            });
+
         let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
         datapoint.exit().remove();
         datapoint = datapoint.enter().append('g')
@@ -164,14 +185,16 @@ let JobMap = function() {
         datapoint.each(function(d,i){
             createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, colorfill).classed('hide',i?false:true);// hide 1st radar
         });
-        datapoint.attr('transform',d=>`translate(${timelineScale(d.timestep)},0)`);
+        datapoint.attr('transform',function(d){
+            return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
 
         bg.style('stroke-width', d=>linkscale(d.values_name.length));
         bg.select(".invisibleline").remove();
-        bg.append('line').attr('class',"invisibleline").attrs(d=>{
+        bg.append('line').attr('class',"invisibleline").attrs(function(d){
+            let parentndata = d3.select(this.parentNode.parentNode).datum();
             return {
-                'x1':timelineScale(timelineScale.domain()[1]),
-                'x2':timelineScale(0),
+                'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
+                'x2':fisheye_scale.x(timelineScale(timelineScale(0))),
                 'stroke-width': 5,
                 'opacity':0
             };
@@ -181,10 +204,12 @@ let JobMap = function() {
         dataline = dataline.enter().append('line')
             .attr('class','linegg timeline')
             .merge(dataline)
-            .attrs({
-                x1: d=>timelineScale(d.end),
-                x2: d=>timelineScale(d.start),
-            }).styles({
+            .attrs(function(d){
+                let parentndata = d3.select(this.parentNode.parentNode).datum();
+                return{
+                x1: d=>fisheye_scale.x(timelineScale(d.end)),
+                x2: d=>fisheye_scale.x(timelineScale(d.start)),
+            }}).styles({
                 stroke: d=>colorFunc(d.cluster),
             });
 
@@ -233,10 +258,13 @@ let JobMap = function() {
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
         let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
-        svg.select('.gNodeaxis')
+        let scale = d3.scaleTime().range([-10*timelineScale.domain()[1],0]).domain([first__timestep,last_timestep]);
+        let axis = svg.select('.gNodeaxis')
             .classed('hide',false)
             .attr('transform',`translate(${bg.datum().x2||bg.datum().x},${rangey[0]})`)
-            .call(d3.axisTop(d3.scaleTime().range([-10*timelineScale.domain()[1],0]).domain([first__timestep,last_timestep])).tickSize(rangey[0]-rangey[1])).select('.domain').remove();
+            .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]));
+        axis.select('.domain').remove();
+        axis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`)
     }
 
     jobMap.drawComp = function (){
@@ -255,7 +283,7 @@ let JobMap = function() {
             case "timeline":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
                 svg.selectAll('.computeNode').selectAll('.radar').remove();
-                drawEmbedding_timeline(clusterdata.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true,Hosts);
+                drawEmbedding_timeline(clusterdata.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),true);
                 break;
             case "pie":
             default:
@@ -526,7 +554,7 @@ let JobMap = function() {
             });
 
 
-        userNode=userNode_n.merge(userNode);
+        userNode=nodeg.selectAll('.userNode');
         userNode.select('.userNodeSig').styles(
             {
                 'fill-opacity':0.5,
@@ -619,10 +647,9 @@ let JobMap = function() {
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('hightlight',true);
                 table_footerNode.classed('fade',true);
             }).on('mouseout',function(d){
-            d3.selectAll( '.computeNode').classed('fade',false);
-            d3.select(this).classed('hightlight',false);
+            d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
-            d3.selectAll( '.userNode').classed('hide',false).classed('hightlight',false);
+            d3.selectAll( '.userNode').classed('fade',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
             table_footerNode.classed('fade',false);
         });
@@ -682,7 +709,6 @@ let JobMap = function() {
         }
 
         jobMap.drawComp();
-
         function initForce(){
             if (!simulation) {
                 let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
@@ -970,6 +996,7 @@ let JobMap = function() {
             });
         }
         timelineScale.domain([maxstep - 1, maxstep]);
+        // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
 
     let first__timestep = new Date();
