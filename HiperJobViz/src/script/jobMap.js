@@ -488,8 +488,8 @@ let JobMap = function() {
             temp.push(new Date(timeStep_r.toString()));
             return spiral(temp);
         });
-        jobNode.select('.lelftext').text(d=>`Host(s): ${d.nodes.length}`).styles({stroke:"white","stroke-width":0.2});
-        jobNode.select('.righttext').text(d=>`Job(s): ${d.values.length}`).styles({stroke:"white","stroke-width":0.2});
+        jobNode.select('.lelftext').text(d=>`# hosts: ${d.nodes.length}`).styles({stroke:"white","stroke-width":0.2});
+        jobNode.select('.righttext').text(d=>`# jobs: ${d.values.length}`).styles({stroke:"white","stroke-width":0.2});
 
         jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 

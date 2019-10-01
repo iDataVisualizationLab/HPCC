@@ -1955,7 +1955,7 @@ function cluster_map (dataRaw) {
     //--shoudn't here
     dataRaw.forEach(c=>{
         let matchitem = data.find(d=>d.id===c.name);
-        c.text = c.text.replace(`group ${c.index+1}`,`group ${matchitem.order+1}`);
+        c.text = c.text.replace(`Group ${c.index+1}`,`Group ${matchitem.order+1}`);
         matchitem[0].text =  c.text;
     });
     data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
@@ -2016,7 +2016,7 @@ function recomendName (clusterarr){
             c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = `group ${c.index+1}: undefined`;
+            c.text = `Group ${c.index+1}: undefined`;
             return;
         }
         name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
@@ -2025,9 +2025,9 @@ function recomendName (clusterarr){
         }).join(', ');
         name = name.trim();
         if (name==='')
-            c.text = `group ${c.index+1}`;
+            c.text = `Group ${c.index+1}`;
         else
-            c.text = `group ${c.index+1}: ${name}`;
+            c.text = `Group ${c.index+1}: ${name}`;
     });
 }
 
