@@ -477,26 +477,31 @@ let JobMap = function() {
         jobNode_n.append('path')
             .attrs(
             {'class':'computeSig_sub submitTime',
-            })
-            .attr('d',function(d){
-                let temp = d3.timeHour.every(1).range(new Date(d.submitTime),new Date(d.startTime));
-                temp.pop();
-                temp.push(new Date(d.startTime));
-                return spiral(temp);
-            })
-        ;
+            });
         jobNode_n.append('path')
             .attrs(
                 {'class':'computeSig_start timeBoxRunning',
                 })
-            .attr('d',function(d){
-                let temp = d3.timeHour.every(1).range(new Date(d.startTime),new Date(timeStep_r.toString()));
-                temp.pop();
-                temp.push(new Date(timeStep_r.toString()));
-                return spiral(temp);
-            })
         ;
-        jobNode = jobNode_n.merge(jobNode);
+        jobNode_n.append('text').attr('class','lelftext hide').attrs({'x':-graphicopt.job.r}).style('text-anchor','end');
+        jobNode_n.append('text').attr('class','righttext hide').attrs({'x':graphicopt.job.r});
+        jobNode = nodeg.selectAll('.jobNode');
+        jobNode.select('.computeSig_b').attr('r',graphicopt.job.r);
+        jobNode.select('.computeSig_sub.submitTime').attr('d',function(d){
+            let temp = d3.timeHour.every(1).range(new Date(d.submitTime),new Date(d.startTime));
+            temp.pop();
+            temp.push(new Date(d.startTime));
+            return spiral(temp);
+        })
+        ;
+        jobNode.select('.computeSig_start.timeBoxRunning') .attr('d',function(d){
+            let temp = d3.timeHour.every(1).range(new Date(d.startTime),new Date(timeStep_r.toString()));
+            temp.pop();
+            temp.push(new Date(timeStep_r.toString()));
+            return spiral(temp);
+        });
+        jobNode.select('.lelftext').text(d=>`Host(s): ${d.nodes.length}`).styles({stroke:"white","stroke-width":0.2});
+        jobNode.select('.righttext').text(d=>`Job(s): ${d.values.length}`).styles({stroke:"white","stroke-width":0.2});
 
         jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 
@@ -633,6 +638,7 @@ let JobMap = function() {
             .on('mouseover',function(d){
                 g.selectAll('.jobNode').classed('hide',true);
                 d3.select(this).classed('hide',false);
+                d3.select(this).selectAll('text').classed('hide',false);
                 link.classed('hide',true);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('hightlight',true).data();
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('hightlight',true).data();
@@ -642,6 +648,7 @@ let JobMap = function() {
                 d3.selectAll( '.computeNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hightlight',true);
             }).on('mouseout',function(d){
             g.selectAll('.jobNode').classed('hide',false);
+            d3.select(this).selectAll('text').classed('hide',true);
             d3.selectAll( '.userNode').classed('hightlight',false);
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
