@@ -152,7 +152,10 @@ span.thumb {
 .links text{
     display: none;
 }
-
+#jobmap text {
+    stroke: white;
+    stroke-width:0.5;
+}
 .fade {
     opacity: 0.1;
 }

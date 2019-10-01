@@ -419,8 +419,6 @@ let JobMap = function() {
                 'dx':-graphicopt.node.r,
                 'dy':'0.5rem',
                 'fill':'black',
-                'stroke':'white',
-                'stroke-width':0.2,
             }).merge(computers.select('.computeSig_label')).text(d=>d.text?d.text:trimNameArray(d.name))
         ;
 
@@ -488,8 +486,8 @@ let JobMap = function() {
             temp.push(new Date(timeStep_r.toString()));
             return spiral(temp);
         });
-        jobNode.select('.lelftext').text(d=>`# hosts: ${d.nodes.length}`).styles({stroke:"white","stroke-width":0.2});
-        jobNode.select('.righttext').text(d=>`# jobs: ${d.values.length}`).styles({stroke:"white","stroke-width":0.2});
+        jobNode.select('.lelftext').text(d=>`#Hosts: ${d.nodes.length}`)
+        jobNode.select('.righttext').text(d=>`#Jobs: ${d.values.length}`)
 
         jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 
@@ -668,8 +666,7 @@ let JobMap = function() {
             .append('text').attr("text-anchor", "middle");
 
         link = linkg.selectAll('.links');
-        link.select('text').text(function(d){return d.links?d.links:''}).styles({'stroke':'white',
-            'stroke-width':0.2});
+        link.select('text').text(function(d){return d.links?d.links:''});
         link.call(updatelink);
         link.select('path')
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
