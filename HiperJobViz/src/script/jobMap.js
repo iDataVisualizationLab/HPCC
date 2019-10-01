@@ -597,16 +597,17 @@ let JobMap = function() {
 
         g.selectAll('.userNode')
             .on('mouseover',function(d){
+                d3.selectAll('.userNode').classed('fade',true);
                 d3.select(this).classed('hightlight',true);
                 link.classed('hide',true);
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('hightlight',true).data();
                 const samesource = link.filter(f=> sametarget.find(e=>e.source===f.target)).classed('hide',false).classed('hightlight',true).data();
-
                 d3.selectAll('.jobNode').classed('hide',true);
                 d3.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false);
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('hightlight',true);
             }).on('mouseout',function(d){
+            d3.selectAll('.userNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
@@ -626,12 +627,13 @@ let JobMap = function() {
                 const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',false).classed('hightlight',true).data();
                 d3.selectAll('.jobNode').classed('hide',true);
                 d3.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false);
+                d3.selectAll('.userNode').classed('fade',true);
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('hightlight',true);
             }).on('mouseout',function(d){
             d3.selectAll( '.computeNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
-            d3.selectAll( '.userNode').classed('hightlight',false);
+            d3.selectAll( '.userNode').classed('hide',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
         });
         g.selectAll('.jobNode')
@@ -642,14 +644,14 @@ let JobMap = function() {
                 link.classed('hide',true);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('hightlight',true).data();
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('hightlight',true).data();
-
+                d3.selectAll('.userNode').classed('fade',true);
                 d3.selectAll( '.userNode').filter(f=>samesource.find(e=>e.target===f)).classed('hightlight',true);
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hightlight',true);
             }).on('mouseout',function(d){
             g.selectAll('.jobNode').classed('hide',false);
             d3.select(this).selectAll('text').classed('hide',true);
-            d3.selectAll( '.userNode').classed('hightlight',false);
+            d3.selectAll( '.userNode').classed('fade',false).classed('hightlight',false);
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             link.classed('hide',false).classed('hightlight',false);
         });
