@@ -170,7 +170,7 @@ let JobMap = function() {
                     fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]);
                     drawEmbedding_timeline(data,colorfill,fisheye_scale.x);
                 }
-            }).on("mouseout",function () {
+            }).on("mouseleave",function () {
                 if(runopt.compute.type==="timeline"){
                     fisheye_scale.x = d=>d
                     drawEmbedding_timeline(data,colorfill,d=>d);
@@ -621,7 +621,7 @@ let JobMap = function() {
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('hightlight',true);
                 table_footerNode.classed('fade',true);
-            }).on('mouseout',function(d){
+            }).on('mouseleave',function(d){
             d3.selectAll('.userNode').classed('fade',false);
             d3.select(this).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
@@ -646,7 +646,7 @@ let JobMap = function() {
                 d3.selectAll('.userNode').classed('fade',true);
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('hightlight',true);
                 table_footerNode.classed('fade',true);
-            }).on('mouseout',function(d){
+            }).on('mouseleave',function(d){
             d3.selectAll( '.computeNode').classed('fade',false).classed('hightlight',false);
             d3.selectAll('.jobNode').classed('hide',false);
             d3.selectAll( '.userNode').classed('fade',false).classed('hightlight',false);
@@ -666,7 +666,7 @@ let JobMap = function() {
                 d3.selectAll( '.computeNode').classed('fade',true);
                 d3.selectAll( '.computeNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hightlight',true);
                 table_footerNode.classed('fade',true);
-            }).on('mouseout',function(d){
+            }).on('mouseleave',function(d){
             g.selectAll('.jobNode').classed('hide',false);
             d3.select(this).selectAll('text').classed('hide',true);
             d3.selectAll( '.userNode').classed('fade',false).classed('hightlight',false);
