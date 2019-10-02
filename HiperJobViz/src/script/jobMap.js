@@ -515,7 +515,7 @@ let JobMap = function() {
             return spiral(temp);
         });
         jobNode.select('.lelftext').text(d=>`#Hosts: ${d.nodes.length}`)
-        jobNode.select('.righttext').text(d=>`#Jobs: ${d.values.length}`)
+        jobNode.select('.righttext').text(d=>d.values?`#Jobs: ${d.values.length}`:'')
 
         jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 
