@@ -104,6 +104,9 @@ let JobMap = function() {
             .attr('class','linkg');
         nodeg = g.append("g")
             .attr('class','nodeg');
+        g.append("rect")
+            .attr('class','fisheyeLayer')
+            .style('pointer-events', runopt.lensing?'auto':'none');
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         timebox = svg.append('text').attr('class','timebox')
             .attr('x',graphicopt.margin.left)
@@ -194,8 +197,9 @@ let JobMap = function() {
         // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
-        if (!bg.on("mousemove"))
-            bg.on("mousemove", function() {
+        let lensingLayer=  g.select('.fisheyeLayer');
+        if (!lensingLayer.on("mousemove"))
+            lensingLayer.on("mousemove", function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
                     fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]);
@@ -244,43 +248,52 @@ let JobMap = function() {
                 stroke: d=>colorFunc(d.cluster),
             });
 
-        bg.on('click',function(d){
-            let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
-            let layout = tooltip_lib.layout();
-            layout.axis.x.domain = [[first__timestep,last_timestep]];
-            const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0,maxstep]);
-            layout.axis.y.label = [];
-            layout.axis.y.domain = [];
-            layout.axis.y.tickFormat = [];
-            layout.background ={
-                type: 'discrete',
-                value: d.timeline.clusterarr.map((v,i)=>
-                {return {x0:scaletime.invert(v.timestep),x1: d.timeline.clusterarr[i+1]?scaletime.invert(d.timeline.clusterarr[i+1].timestep):undefined,color:colorFunc(v.cluster)}})
-            };
-            layout.background.value[layout.background.value.length-1].x1= last_timestep;
-            const data_in = schema.map(s=>{
-                let scaleY = d3.scaleLinear().range(s.range);
-                let data_temp = d.values_name.map(h=>{
-                    let temp = hostOb[h].data.map(e=>{
-                        return {y:scaleY(e.find(a=>a.axis===s.text).value),
-                            x: e.time,}
+        bg.on('mouseover',function(d){
+            if (freezing) {
+                let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
+                let layout = tooltip_lib.layout();
+                layout.axis.x.domain = [[first__timestep, last_timestep]];
+                const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+                layout.axis.y.label = [];
+                layout.axis.y.domain = [];
+                layout.axis.y.tickFormat = [];
+                layout.background = {
+                    type: 'discrete',
+                    value: d.timeline.clusterarr.map((v, i) => {
+                        return {
+                            x0: scaletime.invert(v.timestep),
+                            x1: d.timeline.clusterarr[i + 1] ? scaletime.invert(d.timeline.clusterarr[i + 1].timestep) : undefined,
+                            color: colorFunc(v.cluster)
+                        }
+                    })
+                };
+                layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
+                const data_in = schema.map(s => {
+                    let scaleY = d3.scaleLinear().range(s.range);
+                    let data_temp = d.values_name.map(h => {
+                        let temp = hostOb[h].data.map(e => {
+                            return {
+                                y: scaleY(e.find(a => a.axis === s.text).value),
+                                x: e.time,
+                            }
+                        });
+                        temp.label = h;
+                        return temp;
                     });
-                    temp.label = h;
-                    return temp;
+                    layout.axis.y.label.push(s.text);
+                    layout.axis.y.domain.push(s.range);
+                    if (s.range[1] > 1000)
+                        layout.axis.y.tickFormat.push(d3.format('~s'));
+                    else
+                        layout.axis.y.tickFormat.push(null);
+                    return data_temp;
                 });
-                layout.axis.y.label.push(s.text);
-                layout.axis.y.domain.push(s.range);
-                if (s.range[1]>1000)
-                    layout.axis.y.tickFormat.push(d3.format('~s'));
-                else
-                    layout.axis.y.tickFormat.push(null);
-                return data_temp;
-            });
 
-            // layout.title = `User: ${username}`;
-            layout.title2 = `#compute: ${d.values_name.length}`;
+                // layout.title = `User: ${username}`;
+                layout.title2 = `#compute: ${d.values_name.length}`;
 
-            tooltip_lib.graphicopt({width:tooltip_opt.width,height:100}).data(data_in).layout(layout).show();
+                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100}).data(data_in).layout(layout).show();
+            }
         });
 
         updateaxis();
@@ -900,28 +913,32 @@ let JobMap = function() {
         let cellsGraph = cells.filter(d=>tableLayout.column[d.key].type==='graph');
         let cellsGraph_n = cells_n.filter(d=>tableLayout.column[d.key].type==='graph');
         cellsGraph_n.append('g').attr('class','violing');
-        cellsGraph_n.merge(cellsGraph).on('click',function(d){
-            let username = d3.select(this.parentNode).datum().id;
-            let data_temp = user.find(u=>u.key===username).dataRaw;
-            let scaleY = d3.scaleLinear().range(schema.find(s=>s.text===d.key).range);
-            let data = d3.nest().key(e=>e.name).rollup(f=>{
-                let temp = f.map((e,i)=>{
-                    return {y:scaleY(e.find(a=>a.axis===d.key).value),
-                        x: e.time,};
-                });
-                temp.label = f[0].name;
-                return temp;
-            }).entries(data_temp).map(e=>e.value);
-            let layout = tooltip_lib.layout();
-            layout.background = undefined;
-            layout.axis.y.label = [d.key];
-            layout.axis.x.domain = [[first__timestep,last_timestep]];
-            layout.axis.y.domain = [scaleY.range()];
-            layout.title = `User: ${username}`;
-            layout.title2 = `#compute: ${data.length}`;
-            if (layout.axis.y.domain[0][1]>1000)
-                layout.axis.y.tickFormat = [d3.format('~s')];
-            tooltip_lib.graphicopt(tooltip_opt).data([data]).layout(layout).show();
+        cellsGraph_n.merge(cellsGraph).on('mouseover',function(d){
+            if (freezing) {
+                let username = d3.select(this.parentNode).datum().id;
+                let data_temp = user.find(u => u.key === username).dataRaw;
+                let scaleY = d3.scaleLinear().range(schema.find(s => s.text === d.key).range);
+                let data = d3.nest().key(e => e.name).rollup(f => {
+                    let temp = f.map((e, i) => {
+                        return {
+                            y: scaleY(e.find(a => a.axis === d.key).value),
+                            x: e.time,
+                        };
+                    });
+                    temp.label = f[0].name;
+                    return temp;
+                }).entries(data_temp).map(e => e.value);
+                let layout = tooltip_lib.layout();
+                layout.background = undefined;
+                layout.axis.y.label = [d.key];
+                layout.axis.x.domain = [[first__timestep, last_timestep]];
+                layout.axis.y.domain = [scaleY.range()];
+                layout.title = `User: ${username}`;
+                layout.title2 = `#compute: ${data.length}`;
+                if (layout.axis.y.domain[0][1] > 1000)
+                    layout.axis.y.tickFormat = [d3.format('~s')];
+                tooltip_lib.graphicopt(tooltip_opt).data([data]).layout(layout).show();
+            }
         });
         path.selectAll('.row .graph').select('g.violing').each(function(d){
             violiin_chart.rangeY(violinRange).data([d.value]).draw(d3.select(this))
@@ -1397,6 +1414,13 @@ let JobMap = function() {
             for (let i in _) {
                 if ('undefined' !== typeof _[i]) {
                     runopt[i] = _[i];
+                }
+            }
+            if (g) {
+                if (runopt.lensing) {
+                    g.select('.fisheyeLayer').style('pointer-events', 'auto');
+                } else {
+                    g.select('.fisheyeLayer').style('pointer-events', 'none');
                 }
             }
             return jobMap;

@@ -1475,11 +1475,13 @@ $( document ).ready(function() {
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+        d3.select('#lensingMode').classed('hide',true);
         if (jobMap_runopt.compute.type ==='timeline')
         {
             jobMap_runopt.compute.clusterNode = false;
             jobMap_runopt.compute.clusterJobID = true;
             jobMap_runopt.graphic.colorBy = 'group';
+            d3.select('#lensingMode').classed('hide',false);
             d3.select('#jobIDCluster_control').attr('checked','');
             // document.getElementById("colorConnection_control").options.selectedIndex = 0;
             // jobMap_runopt.graphic.colorBy = 'group';
@@ -1514,6 +1516,10 @@ $( document ).ready(function() {
         var sect = document.getElementById("colorConnection_control");
         jobMap_runopt.graphic.colorBy = sect.options[sect.selectedIndex].value;
         jobMap.runopt(jobMap_runopt).draw();
+    });
+    d3.select('#lensing_control').on("change", function () {
+        jobMap_runopt.lensing = $(this).prop('checked');
+        jobMap.runopt(jobMap_runopt);
     });
     d3.select('#datacom').on("change", function () {
         preloader(true);
