@@ -60,5 +60,5 @@ function islastimestep(index){
     if(isRealtime)
         return false;
     else
-        return index>=sampleS.timespan.length-1;
+        return index>sampleS.timespan.length-1;
 }

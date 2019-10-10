@@ -685,7 +685,7 @@ function addDatasetsOptions() {
     select.select('h6').text(d=>d.text);
 
     document.getElementById('datasetsSelect').value = serviceList.find(d=>d===initialService)||serviceList[0];  //************************************************
-    loadNewData(document.getElementById('datasetsSelect').value)
+    loadNewData(document.getElementById('datasetsSelect').value,true)
     // selectedService = document.getElementById("datasetsSelect").value;
     const trig = d3.select("#datasetsSelectTrigger");
     trig.select('img').attr('src',srcpath+"images/"+selectedService+".png").on('error',function(){handlemissingimage(this,selectedService)});

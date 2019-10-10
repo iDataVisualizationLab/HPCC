@@ -568,7 +568,7 @@ function request(){
             }
             currentlastIndex = iteration;
             // stop condition
-            if (islastimestep(currentlastIndex)) {
+            if (islastimestep(lastIndex)) {
                 jobMap.draw();
                 console.log("done");
                 preloader(false);
@@ -1187,7 +1187,7 @@ function loadData(){
 }
 
 
-function loadNewData(d) {
+function loadNewData(d,init) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
     //svg.selectAll("*").remove();
     selectedService = d;
@@ -1196,7 +1196,8 @@ function loadNewData(d) {
     trig.select('span').text(selectedService);
     setColorsAndThresholds(selectedService);
     drawLegend(selectedService,arrThresholds, arrColor,dif);
-    resetRequest();
+    if (!init)
+        resetRequest();
     tool_tip.hide();
 }
 
@@ -1362,7 +1363,7 @@ function step_full (iteration){
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
                 // Process the result
                 var name = hosts[count].name;
-                if(hostResults[name].arr.length<(iteration+1)) {
+                if(hostResults[name].arr.length<(iteration)) {
                     hostResults[name].arr.push(result);
                     // console.log(hosts[count].name+" "+hostResults[name]);
                     serviceList_selected.forEach((s) => {
@@ -1613,7 +1614,8 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
-            resetRequest();
+            if (!init)
+                resetRequest();
             preloader(false)
         }
     });
@@ -1646,7 +1648,8 @@ $( document ).ready(function() {
                                 realTimesetting(false,"csv",true,data);
                                 d3.select(".currentDate")
                                     .text("" + new Date(data[0].timestamp).toDateString());
-                                resetRequest();
+                                if (!init)
+                                    resetRequest();
                                 preloader(false);
                             }
                         }
