@@ -458,10 +458,12 @@ let JobMap = function() {
         })
         return path;
     }
+    let maxTimestep;
     jobMap.draw = function (){
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
-        timebox.text(timeStep.toLocaleTimeString())
+        timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
+                        <tspan x="10" dy="1.2em">Timestep: ${lastIndex}/${(maxTimestep===undefined?'_':maxTimestep)}</tspan>`)
         yscale = d3.scaleLinear().domain([-1,user.length]).range([0,Math.min(graphicopt.heightG(),30*(user.length))]);
         let deltey = yscale(1)-yscale(0);
         if (runopt.compute.clusterNode&&clusterNode_data)
@@ -1049,9 +1051,11 @@ let JobMap = function() {
     }
 
     let first__timestep = new Date();
-    function handle_links (timeStep_r){
+    let lastIndex = 0;
+    function handle_links (timeStep_r,lastIndex_r){
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
+            lastIndex = lastIndex_r
             if (first__timestep>last_timestep)
                 first__timestep = last_timestep;
         }
@@ -1436,7 +1440,7 @@ let JobMap = function() {
     };
 
     jobMap.data = function (_) {
-        return dataRaw = _?_:dataRaw, handle_links (arguments[1]), jobMap;
+        return dataRaw = _?_:dataRaw, handle_links (arguments[1],arguments[2]), jobMap;
     };
 
     jobMap.clusterData = function (v) {
@@ -1449,6 +1453,10 @@ let JobMap = function() {
 
     jobMap.hosts = function (a) {
         return arguments.length ? (Hosts = _.cloneDeep( a),makeOb(), jobMap) : Hosts;
+    };
+
+    jobMap.maxTimestep = function (_) {
+        return arguments.length ? (maxTimestep=_,jobMap):maxTimestep;
     };
 
     jobMap.dataComp = function (_) {

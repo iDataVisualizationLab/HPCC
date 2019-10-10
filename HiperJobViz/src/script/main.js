@@ -385,7 +385,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList)
+    jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList).maxTimestep(isRealtime? undefined: sampleS.timespan.length);
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -600,7 +600,7 @@ function request(){
                         midlehandle_full(ri);
                         if(countbuffer===0) {
                             getJoblist();
-                            jobMap.data(jobList,hostResults.timespan[lastIndex]);
+                            jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
                             if(isanimation)
                                 jobMap.draw();
                         }
