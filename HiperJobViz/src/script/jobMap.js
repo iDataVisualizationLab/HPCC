@@ -58,7 +58,7 @@ let JobMap = function() {
         return path;
     }
     jobMap.init = function () {
-        fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.widthG()]).focus(graphicopt.widthG()/2);
+        // fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.widthG()]).focus(graphicopt.widthG()/2);
         fisheye_scale.y= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.heightG()]).focus(graphicopt.heightG()/2);
         var rScale = d3.scaleLinear()
             .range([0, graphicopt.radaropt.w/2])
@@ -203,12 +203,12 @@ let JobMap = function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
                     fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]);
-                    drawEmbedding_timeline(data,colorfill,fisheye_scale.x);
+                    drawEmbedding_timeline(data,colorfill);
                 }
             }).on("mouseleave",function () {
                 if(runopt.compute.type==="timeline"){
-                    fisheye_scale.x = d=>d
-                    drawEmbedding_timeline(data,colorfill,d=>d);
+                    fisheye_scale.x = d=>d;
+                    drawEmbedding_timeline(data,colorfill);
                 }
             });
 
@@ -1421,6 +1421,7 @@ let JobMap = function() {
                     g.select('.fisheyeLayer').style('pointer-events', 'auto');
                 } else {
                     g.select('.fisheyeLayer').style('pointer-events', 'none');
+                    fisheye_scale.x = d=>d;
                 }
             }
             return jobMap;
