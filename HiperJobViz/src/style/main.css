@@ -140,13 +140,13 @@ span.thumb {
     background-color: #555;
 }
 
-.computeNode.hightlight,.links.hightlight {
+.computeNode.highlight,.links.highlight {
     opacity: 1;
 }
-.userNode.hightlight {
+.userNode.highlight {
     opacity: 1;
 }
-.links.hightlight text{
+.links.highlight text{
     display: unset;
 }
 .links text{
@@ -213,7 +213,7 @@ span.thumb {
     stroke-opacity:1;
     paint-order: stroke;
 }
-.hightlight .computeSig_label,.statics .computeSig_label{
+.highlight .computeSig_label,.statics .computeSig_label{
     display: block;
 }
 
