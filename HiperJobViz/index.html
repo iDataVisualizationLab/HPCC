@@ -65,14 +65,22 @@
             <!--<div class="col valign-wrapper">-->
             <li class="summaryText1" style="font-family: 'ITC Charter W01',Georgia,Garamond,serif;">  </li>
             <li class ="currentDate center-align" style="font-size: 14px"></li>
-            <!--<li><button class="information waves-effect waves-light grey darken-3"><i class="material-icons">priority_high</i></button>-->
-                <!--<div id='datainformation'>-->
-                    <!--<table>-->
-                        <!--<tbody></tbody>-->
-                    <!--</table>-->
-                <!--</div>-->
-            <!--</li>-->
-            <!--</div>-->
+            <li class ="center-align">
+                <div class="informationHolder valign-wrapper" style="margin-left: 5px ">
+                    <button class="information waves-effect waves-light grey darken-3" ><i class="material-icons">priority_high</i></button>
+                    <div id='datainformation' class="informationDetail">
+                        <table>
+                            <tbody>
+                            <tr><td>Filename:</td><td class="filename"></td></tr>
+                            <tr><td>Time range:</td><td class="timerange"></td></tr>
+                            <tr><td>Time interval:</td><td class="interval"></td></tr>
+                            <tr><td>Total time step:</td><td class="totalstep"></td></tr>
+                            <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </li>
         </ul>
         <ul class="right">
             <!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
@@ -311,10 +319,11 @@
                             </form>
                         </div>
                         <div class="row s12 flex_contain flex_warp white" id="clusterDisplay" style="margin-top: 20px">
-                            <button class="information waves-effect waves-light grey darken-3"><i class="material-icons">priority_high</i></button>
-                            <div id='clusterinformation'>
+                            <button class="information waves-effect waves-light grey darken-3" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
+                            <div id='clusterinformation' class="informationDetail">
                                 <table>
-                                    <tbody></tbody>
+                                    <tbody>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>

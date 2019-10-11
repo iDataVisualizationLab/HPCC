@@ -329,6 +329,7 @@ let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 let isbusy = false, imageRequest = false, isanimation=true;
+let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0};
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -1725,6 +1726,7 @@ $( document ).ready(function() {
                         realTimesetting(false, undefined, true);
                     }
                     let choice = d3.select('#datacom').node().value;
+                    dataInformation.filename = choice+".json";
                     d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
                         if (error) {
                             M.toast({html: 'Local data does not exist, try to query from the internet!'});
@@ -1766,11 +1768,11 @@ $( document ).ready(function() {
             .onChangeFilterFunc(onfilterdata)
             .init();
         function loadata(data,job){
-
             d3.select(".cover").select('h5').text('drawLegend...');
             drawLegend(initialService, arrThresholds, arrColor, dif);
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             sampleS = data;
+            updateDatainformation(data['timespan']);
             if(job)
                 hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
             if(cluster_info){

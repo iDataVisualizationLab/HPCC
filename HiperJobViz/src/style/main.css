@@ -307,24 +307,47 @@ input[type=number] {
     width: 26px;
     height: 26px;
     border-radius: 13px;
-    position: absolute;
-    right: 17px;
     color: white;
     padding: 0;
+    overflow: visible;
+}
+.informationHolder {
+    position: relative;
 }
 .information i {
-    font-size: 14px;
+    font-size: 14px !important;
     right: 17px;
+    line-height: 1px !important;
+    height: auto!important;
 }
 .information:hover + #clusterinformation{
     visibility: unset;
 }
-#clusterinformation{
+.information:hover + .informationDetail{
+    visibility: unset;
+}
+.informationDetail table {
+    height: initial;
+    line-height: normal;
+    word-break: unset;
+    table-layout: auto;
+    width: 300px;
+}
+.informationDetail table, .informationDetail td, .informationDetail th{
+    border-collapse: collapse;
+}
+.informationDetail{
     background-color: #a2a2a2;
     position: absolute;
-    right: 20px;
     padding: 5px;
-    width: 200px;
-    margin: 10px;
+    margin: 13px;
     visibility: hidden;
+    top: 0px;
+    left: 0px;
+}
+#clusterinformation{
+    top: unset;
+    left: unset;
+    right: 20px;
+    width: 200px;
 }
