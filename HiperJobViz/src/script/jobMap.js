@@ -467,10 +467,6 @@ let JobMap = function() {
     }
     let maxTimestep;
     jobMap.draw = function (){
-        // reset freezing action
-        freezing = false;
-        g.selectAll('.node').style('pointer-events','auto');
-        
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
         timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
@@ -666,8 +662,40 @@ let JobMap = function() {
             if (runopt.compute.type==='timeline')
                 updateaxis();
         };
+        g.selectAll('.userNode').transition().attr('transform',d=>{
+            d.fy=yscale(d.order);
+            d.fx=600;
+            return `translate(${d.fx},${d.fy})`
+        });
+        initForce();
+        function getGradID(d){
+            return 'links'+d.index;
+        }
+        simulation
+            .nodes(node.data()).stop();
+        simulation.force("link")
+            .links(linkdata);
+        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
+        link.exit().remove();
+        let link_n = link.enter()
+            .append('g')
+            .attr("class", "links");
+        link_n
+            .append('path');
+        link_n
+            .append('text').attr("text-anchor", "middle");
 
-
+        link = linkg.selectAll('.links');
+        link.select('text').text(function(d){return d.links?d.links:''});
+        link.call(updatelink);
+        link.select('path')
+            .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
+            .style("stroke-width", function (d) {
+                return d.links===undefined?1:linkscale(d.links);
+            });
+            // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
+        // reset freezing action
+        releasehighlight();
         g.selectAll('.userNode')
             .call(path=>freezinghandle(path,[function(d){
                 d3.selectAll('.userNode').classed('fade',true);
@@ -689,12 +717,7 @@ let JobMap = function() {
                 link.classed('hide',false).classed('highlight',false);
                 table_footerNode.classed('fade',false);
             },null
-            ]))
-            .transition().attr('transform',d=>{
-            d.fy=yscale(d.order);
-            d.fx=600;
-            return `translate(${d.fx},${d.fy})`
-        });
+            ]));
         g.selectAll('.computeNode')
             .call(path=>freezinghandle(path,[function(d){
                 d3.selectAll( '.computeNode').classed('fade',true);
@@ -735,33 +758,6 @@ let JobMap = function() {
                 link.classed('hide',false).classed('highlight',false);
                 table_footerNode.classed('fade',false);
             },null]));
-        initForce();
-        function getGradID(d){
-            return 'links'+d.index;
-        }
-        simulation
-            .nodes(node.data()).stop();
-        simulation.force("link")
-            .links(linkdata);
-        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
-        link.exit().remove();
-        let link_n = link.enter()
-            .append('g')
-            .attr("class", "links");
-        link_n
-            .append('path');
-        link_n
-            .append('text').attr("text-anchor", "middle");
-
-        link = linkg.selectAll('.links');
-        link.select('text').text(function(d){return d.links?d.links:''});
-        link.call(updatelink);
-        link.select('path')
-            .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
-            .style("stroke-width", function (d) {
-                return d.links===undefined?1:linkscale(d.links);
-            });
-            // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
 
         if (!runopt.compute.clusterNode&&runopt.compute.type!=='timeline')
             simulation.alphaTarget(0.3).on("tick", ticked).restart();
@@ -813,6 +809,15 @@ let JobMap = function() {
             // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
             simulation.fistTime = false;
             simulation.alphaTarget(0.7).restart();
+        }
+        function releasehighlight(){
+            freezing = false;
+            g.selectAll('.node').style('pointer-events','auto');
+            g.selectAll('.jobNode').classed('hide',false).classed('highlight',false).selectAll('text').classed('hide',true);
+            g.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
+            g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false).selectAll('text').classed('hide',true);
+            link.classed('hide',false).classed('highlight',false);
+            table_footerNode.classed('fade',false);
         }
         return jobMap;
     };
