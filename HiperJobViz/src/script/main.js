@@ -1477,6 +1477,8 @@ $( document ).ready(function() {
         var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
         d3.select('#lensingMode').classed('hide',true);
+        jobMap_runopt.lensing = false;
+        $('#lensing_control').prop('checked',false);
         if (jobMap_runopt.compute.type ==='timeline')
         {
             jobMap_runopt.compute.clusterNode = false;
