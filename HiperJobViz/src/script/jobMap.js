@@ -467,7 +467,10 @@ let JobMap = function() {
     }
     let maxTimestep;
     jobMap.draw = function (){
+        // reset freezing action
         freezing = false;
+        g.selectAll('.node').style('pointer-events','auto');
+        
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
         timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
