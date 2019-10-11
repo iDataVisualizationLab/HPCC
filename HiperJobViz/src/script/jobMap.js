@@ -60,15 +60,6 @@ let JobMap = function() {
     jobMap.init = function () {
         // fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.widthG()]).focus(graphicopt.widthG()/2);
         fisheye_scale.y= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.heightG()]).focus(graphicopt.heightG()/2);
-        var rScale = d3.scaleLinear()
-            .range([0, graphicopt.radaropt.w/2])
-            .domain([-0.25, 1.25]);
-        radarcreate = d3.radialLine()
-            .curve(d3.curveCardinalClosed.tension(0.5))
-            .radius(function(d) {
-                return rScale(d.value); })
-            .angle(function(d) {
-                return schema.find(s=>s.text===d.axis).angle; });
 
         svg.attrs({
             width: graphicopt.width,
@@ -138,7 +129,19 @@ let JobMap = function() {
         }
     }
 
-    function createRadar(datapoint, bg, newdata, colorfill) {
+    function createRadar(datapoint, bg, newdata, customopt) {
+        let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
+        let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
+        var rScale = d3.scaleLinear()
+            .range([0, size_w/2])
+            .domain([-0.25, 1.25]);
+        radarcreate = d3.radialLine()
+            .curve(d3.curveCardinalClosed.tension(0.5))
+            .radius(function(d) {
+                return rScale(d.value); })
+            .angle(function(d) {
+                return schema.find(s=>s.text===d.axis).angle; });
+
         if (datapoint.empty()) {
             datapoint = bg
                 .append("g")
@@ -152,10 +155,10 @@ let JobMap = function() {
                 .append("rect")
                 .style('fill', 'url(#rGradient)')
                 .attr("clip-path", d => "url(#tSNE" + fixName2Class(d.name) + ")")
-                .attr("x", -graphicopt.radaropt.w / 2)
-                .attr("y", -graphicopt.radaropt.h / 2)
-                .attr("width", graphicopt.radaropt.w)
-                .attr("height", graphicopt.radaropt.h);
+                .attr("x", -size_w / 2)
+                .attr("y", -size_h / 2)
+                .attr("width", size_w)
+                .attr("height", size_h);
             datapoint
                 .append("path")
                 .attr("class", "tSNEborder")
@@ -172,7 +175,7 @@ let JobMap = function() {
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d.filter(e => e.enable)));
         }
-        if (colorfill) {
+        if (customopt&&customopt.colorfill) {
             datapoint.select("rect").style('display', 'none');
             datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
         } else {
@@ -190,7 +193,7 @@ let JobMap = function() {
         if (datapointg.empty())
             datapointg = bg.append('g').attr('class','radar').datum(d=>newdata.find(n=>n.name === d.name));
 
-        createRadar(datapointg.select('.linkLineg'), datapointg, newdata, colorfill);
+        createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
@@ -213,14 +216,14 @@ let JobMap = function() {
                     drawEmbedding_timeline(data,colorfill);
                 }
             });
-
+        const radaropt = {colorfill:colorfill,size:(scaleNode_y_midle(1)-scaleNode_y_midle(0))*2};
         let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
         datapoint.exit().remove();
         datapoint = datapoint.enter().append('g')
             .attr('class','linkLinegg timeline')
         .merge(datapoint);
         datapoint.each(function(d,i){
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, colorfill).classed('hide',i?false:true);// hide 1st radar
+            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide',i?false:true);// hide 1st radar
         });
         datapoint.attr('transform',function(d){
             return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
