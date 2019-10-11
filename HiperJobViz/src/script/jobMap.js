@@ -109,10 +109,10 @@ let JobMap = function() {
             .style('opacity',0)
             .style('pointer-events', runopt.lensing?'auto':'none');
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
-        timebox = svg.append('text').attr('class','timebox')
-            .attr('x',graphicopt.margin.left)
-            .attr('y',graphicopt.margin.top)
+        timebox = svg.append('g').attr('class','timebox')
+            .attr('transform','translate(60,20)')
             .style('font-size','16px').attr('dy','1rem');
+        initTimebox()
 
         return jobMap;
     };
@@ -465,12 +465,30 @@ let JobMap = function() {
         })
         return path;
     }
+    function initTimebox(){
+        timebox.append('rect').attrs({width:200,height:10,fill:'#ddd'});
+        timebox.append('rect').attrs({class:'timebox_range',width:0,height:10,fill:'#0d8e4b'});
+        timebox.append('g').attrs({class:'timebox_axis'});
+        const handle = timebox.append('g').attrs({class:'timebox_handle'}).attr('transform',`translate(0,10)`);
+        handle.append('polygon').attr("points","0,0 -6,10 6,10");
+        handle.append('text').attrs({y:20,dy:'.1rem','font-size':'14','fill':'#0d8e4b','text-anchor':"middle","font-weight":"bold"});
+    }
+    function updateTimebox(index,limit){
+        limit = limit||index;
+        let scale = d3.scaleLinear().domain([0,limit-1]).range([0,200]);
+        let scaleT = d3.scaleTime().range([0,scale(index)]).domain([first__timestep,last_timestep]);
+        timebox.select('.timebox_range').transition().attr('width',scale(index));
+        timebox.select('.timebox_axis')
+            .call(d3.axisTop(d3.scaleTime().range(scale.range()).domain([first__timestep,scaleT.invert(200)])).tickSize(-10).ticks(5));
+        timebox.select('.timebox_handle').attr('transform',`translate(${scale(index)},10)`).select('text').text(last_timestep.toLocaleTimeString());
+    }
     let maxTimestep;
     jobMap.draw = function (){
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
-        timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
-                        <tspan x="10" dy="1.2em">Timestep: ${lastIndex+1}/${(maxTimestep===undefined?'_':maxTimestep)}</tspan>`);
+        // timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
+        //                 <tspan x="10" dy="1.2em">Timestep: ${lastIndex+1}/${(maxTimestep===undefined?'_':maxTimestep)}</tspan>`);
+        updateTimebox(lastIndex,maxTimestep)
         timebox.classed('hide',runopt.compute.type==='timeline')
         yscale = d3.scaleLinear().domain([-1,user.length]).range([0,Math.min(graphicopt.heightG(),30*(user.length))]);
         let deltey = yscale(1)-yscale(0);

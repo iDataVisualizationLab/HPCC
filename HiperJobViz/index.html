@@ -149,19 +149,6 @@
                         </select>
                     </div>
 
-                    <div  class="row s12 valign-wrapper hide" id="lensingMode">
-                        <label for="lensingMode" class="col s5"> Lensing: </label>
-                        <p class="switch col s7 no_magrin">
-
-                            <label>
-                                <span class="true">Off</span>
-                                <input id="lensing_control" type="checkbox">
-                                <span class="lever"></span>
-                                <span class="false">On</span>
-                            </label>
-
-                        </p>
-                    </div>
 
                     <div  class="row s12 valign-wrapper">
                         <label for="groupJobmode" class="col s5"> Grouping similar jobs: </label>
@@ -486,6 +473,12 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
             <div class='row s12' id="detailZone" style="position: relative;">
+                <div  class="valign-wrapper hide" id="lensingMode" style="position: absolute;top:0px;left:0px;padding:10px;background-color: rgba(0,0,0,0.09)">
+                    <label>
+                        <input id="lensing_control" type="checkbox" class="filled-in">
+                        <span style="font: unset;color: rgba(168,168,168,0.67)">Lensing</span>
+                    </label>
+                </div>
                 <svg width="2600" height="1000" class="mainsvg" >
                     <svg id ="jobmap">
 
