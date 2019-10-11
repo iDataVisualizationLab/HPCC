@@ -106,6 +106,7 @@ let JobMap = function() {
             .attr('class','nodeg');
         g.append("rect")
             .attr('class','fisheyeLayer')
+            .style('opacity',0)
             .style('pointer-events', runopt.lensing?'auto':'none');
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         timebox = svg.append('text').attr('class','timebox')
@@ -198,6 +199,10 @@ let JobMap = function() {
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
         let lensingLayer=  g.select('.fisheyeLayer');
+        // lensingLayer.attrs({
+        //     'width':timelineScale(timelineScale.domain()[1])-timelineScale(timelineScale(0)),
+        // });
+        // lensingLayer.attr(d=>'transform',`translate(${d.offset_x-lensingLayer.attr('width')},${d.offset_y})`)
         if (!lensingLayer.on("mousemove"))
             lensingLayer.on("mousemove", function() {
                 let mouse = d3.mouse(this);
@@ -408,6 +413,11 @@ let JobMap = function() {
                 return `translate(${d.x2},${d.y2 || d.y})`
             });
             updateaxis();
+            let lensingLayer=  g.select('.fisheyeLayer').datum({offset_x:300,offset_y:scaleNode_y_midle(0)});
+            lensingLayer.attrs({
+                'width':timelineScale(timelineScale.domain()[1])-timelineScale(timelineScale(0)),
+            }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
+            lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
