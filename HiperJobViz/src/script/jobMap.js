@@ -160,6 +160,7 @@ let JobMap = function() {
                 .append("path")
                 .attr("class", "tSNEborder")
                 .attr("d", d => radarcreate(d))
+                .style("vector-effect", 'non-scaling-stroke')
                 .style("stroke", 'black')
                 .style("stroke-width", 0.5)
                 .style("stroke-opacity", 0.5).style("fill", "none");
@@ -403,7 +404,7 @@ let JobMap = function() {
         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
         if (runopt.compute.type==='timeline') {
             // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
-            scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1])
+            scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
             computers.transition().attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_midle(d.order);
