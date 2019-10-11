@@ -290,7 +290,7 @@ let JobMap = function() {
                     return data_temp;
                 });
 
-                // layout.title = `User: ${username}`;
+                layout.title = '';
                 layout.title2 = `#compute: ${d.values_name.length}`;
 
                 tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100}).data(data_in).layout(layout).show();
