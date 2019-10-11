@@ -33,17 +33,17 @@ let JobMap = function() {
             freezing = !freezing;
             if (freezing){
                 g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
-                hightlight_item.on('mouseover',mouseOver[1]);
-                hightlight_item.on('mouseleave',mouseLeave[1]);
+                // hightlight_item.on('mouseover',mouseOver[1]);
+                // hightlight_item.on('mouseleave',mouseLeave[1]);
             }else{
                 g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
-                hightlight_item.on('mouseover', function(d){
-                    if(!freezing)
-                        _.bind(mouseOver[0],this)(d);
-                }).on('mouseleave',function(d){
-                    if(!freezing)
-                        _.bind(mouseLeave[0],this)(d);
-                });
+                // hightlight_item.on('mouseover', function(d){
+                //     if(!freezing)
+                //         _.bind(mouseOver[0],this)(d);
+                // }).on('mouseleave',function(d){
+                //     if(!freezing)
+                //         _.bind(mouseLeave[0],this)(d);
+                // });
             }
         });
         if (!freezing) {
@@ -203,7 +203,7 @@ let JobMap = function() {
             lensingLayer.on("mousemove", function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
-                    fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]);
+                    fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]-(+lensingLayer.attr('width')));
                     drawEmbedding_timeline(data,colorfill);
                 }
             }).on("mouseleave",function () {
@@ -230,7 +230,7 @@ let JobMap = function() {
             let parentndata = d3.select(this.parentNode.parentNode).datum();
             return {
                 'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-                'x2':fisheye_scale.x(timelineScale(timelineScale(0))),
+                'x2':fisheye_scale.x(timelineScale(0)),
                 'stroke-width': 5,
                 'opacity':0
             };
@@ -303,7 +303,7 @@ let JobMap = function() {
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
         let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
-        let scale = d3.scaleTime().range([-10*timelineScale.domain()[1],0]).domain([first__timestep,last_timestep]);
+        let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
         let axis = svg.select('.gNodeaxis')
             .classed('hide',false)
             .attr('transform',`translate(${bg.datum().x2||bg.datum().x},${rangey[0]})`)
@@ -402,7 +402,8 @@ let JobMap = function() {
         computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
         if (runopt.compute.type==='timeline') {
-            scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
+            // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
+            scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1])
             computers.transition().attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_midle(d.order);
@@ -411,9 +412,9 @@ let JobMap = function() {
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
             lensingLayer.attrs({
-                'width':-timelineScale(timelineScale.domain()[1])-timelineScale(timelineScale(0)),
+                'width':timelineScale(timelineScale.domain()[1])-timelineScale(0),
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
-            lensingLayer.attr('transform',`translate(${300},${scaleNode_y_midle(0)})`)
+            lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
@@ -466,10 +467,12 @@ let JobMap = function() {
     }
     let maxTimestep;
     jobMap.draw = function (){
+        freezing = false;
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
         timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
-                        <tspan x="10" dy="1.2em">Timestep: ${lastIndex+1}/${(maxTimestep===undefined?'_':maxTimestep)}</tspan>`)
+                        <tspan x="10" dy="1.2em">Timestep: ${lastIndex+1}/${(maxTimestep===undefined?'_':maxTimestep)}</tspan>`);
+        timebox.classed('hide',runopt.compute.type==='timeline')
         yscale = d3.scaleLinear().domain([-1,user.length]).range([0,Math.min(graphicopt.heightG(),30*(user.length))]);
         let deltey = yscale(1)-yscale(0);
         if (runopt.compute.clusterNode&&clusterNode_data)
@@ -628,7 +631,8 @@ let JobMap = function() {
 
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
             if (runopt.compute.type==='timeline') {
-                scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
+                // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
+                scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1])
             }
             computers.transition().attr('transform', d => {
                 if (runopt.compute.type==='timeline') {
