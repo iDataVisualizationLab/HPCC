@@ -645,9 +645,10 @@ let JobMap = function() {
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
         if(table_footerNode.empty()) {
-            table_footerNode = nodeg.append('g').attr('class', 'table footer').attr('transform', `translate(600,${yscale(user.length)})`);
+            table_footerNode = nodeg.append('g').attr('class', 'table footer');
             table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
         }
+        table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
         table_footer(table_footerNode);
 
         let userNode = nodeg.selectAll('.userNode').data(user,d=> d.name);
@@ -925,7 +926,7 @@ let JobMap = function() {
         cells.exit().remove();
 
         let cells_n = cells.enter().append('g').attr('class',d=>'cell '+tableLayout.column[d.key].type).attr('transform',d=>`translate(${tableLayout.column[d.key].x},20)`);
-        cells_n.append('text').styles({'font-weight':'bold'}).attrs({width:tableLayout.row['graph-width']});
+        cells_n.append('text').styles({'font-weight':'bold'}).attrs(d=>{return {width:tableLayout.column[d.key].width}});
         cells = cells_n.merge(cells);
         cells.select('text').text(d=>d.value).call(d=>{
             const dir = d.datum().direction;
