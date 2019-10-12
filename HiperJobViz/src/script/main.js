@@ -1674,7 +1674,7 @@ $( document ).ready(function() {
     $('#lowrange').val(group_opt.bin.range[0]||9);
     $('#highrange').val(group_opt.bin.range[1]||11);
     $('#knum').val(group_opt.bin.k||5);
-    $('#kinteration').val(group_opt.bin.iterations||100);
+    $('#kinteration').val(group_opt.bin.iterations||50);
     // switch (group_opt.clusterMethod){
     //     case 'leaderbin':
     //         $('#startBinGridSize').val(group_opt.bin.startBinGridSize);

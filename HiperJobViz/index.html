@@ -311,28 +311,29 @@
                                     <option value="kmean">K-mean</option>
                                 </select>
                             </div>
-                            <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
+                            <form action="#" class='clusterProfile row' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
                                 <label for="startBinGridSize" class="col s5 radarcontroller_layout hide">Initial diameter: </label>
                                 <div  class="col s5 hide">
                                     <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
                                 </div>
-                                <label for="lowrange" class="col s5 radarcontroller_layout"># Groups from </label>
-                                <div  class="col s5 no-pad-left" >
-                                    <input type="number" id="lowrange" class="col s3 radarcontroller_layout browser-default">
-                                    <span class="col s2">to</span><input type="number" id="highrange" class="col s3 radarcontroller_layout browser-default">
+                                <label for="lowrange" class="col s5 radarcontroller_layout">#Groups from </label>
+                                <div  class="col s4 no-pad-left" >
+                                    <input type="number" id="lowrange" class="col s4 radarcontroller_layout browser-default">
+                                    <span class="col s2">to</span>
+                                    <input type="number" id="highrange" class="col s4 radarcontroller_layout browser-default">
                                 </div>
-                                <div  class="col s2 no_padding valign-wrapper center-align" >
+                                <div  class="col s3 no_padding valign-wrapper center-align" >
                                     <input type="submit">
                                 </div>
                             </form>
-                            <form action="#" class='clusterProfile hide' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
-                                <label for="knum" class="col s5 radarcontroller_layout"># Groups: </label>
-                                <div  class="col s5 no-pad-left">
+                            <form action="#" class='clusterProfile hide row' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
+                                <label for="knum" class="col s5 radarcontroller_layout">#Groups: </label>
+                                <div  class="col s4 no-pad-left">
                                     <input type="number" id="knum" class="col s3 radarcontroller_layout browser-default">
-                                    <label for="kinteration" class="col s6 radarcontroller_layout"> Iterations: </label>
+                                    <label for="kinteration" class="col s6 radarcontroller_layout"> #Iters: </label>
                                     <input type="number" id="kinteration" class="col s3 radarcontroller_layout browser-default">
                                 </div>
-                                <div  class="col s2 no_padding valign-wrapper center-align" >
+                                <div  class="col s3 no_padding valign-wrapper center-align" >
                                     <input type="submit">
                                 </div>
                             </form>

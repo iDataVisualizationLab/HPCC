@@ -1042,7 +1042,7 @@ let JobMap = function() {
         row:{
             width: 500,
             height: 20,//deltey,
-            'graph-width': 100,
+            'graph-width': 70,
         },
         column:{
             'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
@@ -1479,8 +1479,8 @@ let JobMap = function() {
             tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
             tableHeader.push({key:d.text, value:d.text});
         })
-        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width+70,y:20,width:90};
-        tableLayout.row.width = tableLayout.row.width+70;
+        tableLayout.row.width +=70;
+        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:90};
         tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
         tableHeader.currentsort = currentsort;
         tableHeader.direction = currentdirection;
