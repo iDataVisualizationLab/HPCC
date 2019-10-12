@@ -65,22 +65,22 @@
             <!--<div class="col valign-wrapper">-->
             <li class="summaryText1" style="font-family: 'ITC Charter W01',Georgia,Garamond,serif;">  </li>
             <li class ="currentDate center-align" style="font-size: 14px"></li>
-            <li class ="center-align">
-                <div class="informationHolder valign-wrapper" style="margin-left: 5px ">
-                    <button class="information waves-effect waves-light grey darken-3" ><i class="material-icons">priority_high</i></button>
-                    <div id='datainformation' class="informationDetail card">
-                        <table>
-                            <tbody>
-                            <tr><td>Filename:</td><td class="filename"></td></tr>
-                            <tr><td>Time range:</td><td class="timerange"></td></tr>
-                            <tr><td>Time interval:</td><td class="interval"></td></tr>
-                            <tr><td>Total time step:</td><td class="totalstep"></td></tr>
-                            <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </li>
+            <!--<li class ="center-align">-->
+                <!--<div class="informationHolder valign-wrapper" style="margin-left: 5px ">-->
+                    <!--<button class="information waves-effect waves-light grey darken-3" ><i class="material-icons">priority_high</i></button>-->
+                    <!--<div id='datainformation' class="informationDetail card">-->
+                        <!--<table>-->
+                            <!--<tbody>-->
+                            <!--<tr><td>Filename:</td><td class="filename"></td></tr>-->
+                            <!--<tr><td>Time range:</td><td class="timerange"></td></tr>-->
+                            <!--<tr><td>Time interval:</td><td class="interval"></td></tr>-->
+                            <!--<tr><td>Total time step:</td><td class="totalstep"></td></tr>-->
+                            <!--<tr><td>#Hosts:</td><td class="hostsnum"></td></tr>-->
+                            <!--</tbody>-->
+                        <!--</table>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</li>-->
         </ul>
         <ul class="right">
             <!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
@@ -106,6 +106,7 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
+
 <div id="mySidenav" class="sidenavs">
     <div class="row s12">
         <ul class="collapsible expandable">
@@ -117,10 +118,25 @@
             <!--<div class="collapsible-body"><span>Resevered for hierarchy.</span></div>-->
             <!--</li>-->
             <li class="settingContain active no_padding">
-                <div class="collapsible-header" ><i class="material-icons">settings</i>  Setting</div>
+                <div class="collapsible-header" > <i class="material-icons">settings</i>  Setting
+                    <div class="informationHolder valign-wrapper" style="margin-left: 5px ">
+                        <button class="information waves-effect waves-light grey darken-3" data-target='datainformation' >i</button>
+                        <div id='datainformation' class="informationDetail card">
+                            <table>
+                                <tbody>
+                                <tr><td>Filename:</td><td class="filename"></td></tr>
+                                <tr><td>Time range:</td><td class="timerange"></td></tr>
+                                <tr><td>Time interval:</td><td class="interval"></td></tr>
+                                <tr><td>Total time step:</td><td class="totalstep"></td></tr>
+                                <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <div class="collapsible-body">
-                    <div  class="row s12 valign-wrapper hide">
-                        <label for="datacom" class="col s5 hide"> Dataset: </label>
+                    <div  class="row s12 valign-wrapper">
+                        <label for="datacom" class="col s5"> Dataset: </label>
                         <select id="datacom" class="col s7">
                             <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
                             <!--<option value="influxdbWed24Apr_removemetric" selected data-date="24 Apr 2019">24 Apr 2019 (Job list)</option>-->
@@ -166,6 +182,25 @@
 
 
                     <div  class="row s12 valign-wrapper">
+                        <label for="compDisplay_control" class="col s5"> Host presentation: </label>
+                        <select id="compDisplay_control" class="col s7">
+                            <option value="pie">Individual host: Pie chart</option>
+                            <option value="radar" >Individual host: Radar chart </option>
+                            <option value="radar_cluster" selected="selected">Grouping: System snapshot</option>
+                            <option value="timeline">Grouping: Entire timeline</option>
+                        </select>
+                    </div>
+
+                    <div  class="row s12 valign-wrapper">
+                        <label for="colorConnection_control" class="col s5"> Color link by: </label>
+                        <select id="colorConnection_control" class="col s7">
+                            <option value="group" selected="selected">Host group</option>
+                            <option value="user" >UserID</option>
+                        </select>
+                    </div>
+
+
+                    <div  class="row s12 valign-wrapper">
                         <label for="groupJobmode" class="col s5"> Grouping similar jobs: </label>
                         <p class="switch col s7 no_magrin" id="groupJobmode">
 
@@ -179,24 +214,6 @@
                         </p>
                     </div>
 
-
-                    <div  class="row s12 valign-wrapper">
-                        <label for="compDisplay_control" class="col s5"> Host presentation: </label>
-                        <select id="compDisplay_control" class="col s7">
-                            <option value="pie">Individual host: Pie chart</option>
-                            <option value="radar" >Individual host: Radar chart </option>
-                            <option value="radar_cluster" selected="selected">Group: System snapshot</option>
-                            <option value="timeline">Group: Entire timeline</option>
-                        </select>
-                    </div>
-
-                    <div  class="row s12 valign-wrapper">
-                        <label for="colorConnection_control" class="col s5"> Color link by: </label>
-                        <select id="colorConnection_control" class="col s7">
-                            <option value="group" selected="selected">Host group</option>
-                            <option value="user" >UserID</option>
-                        </select>
-                    </div>
 
                     <div  class="row s12 valign-wrapper hide">
                         <label for="chartType_control" class="col s5 hide"> Chart type: </label>
@@ -280,7 +297,7 @@
                 </div>
             </li>
             <li class="active">
-                <div class="collapsible-header"><i class="material-icons">settings</i> Major node groups</div>
+                <div class="collapsible-header"><i class="material-icons">settings</i> Major host groups</div>
                 <div class="collapsible-body">
                     <div>
                         <div>
@@ -296,30 +313,32 @@
                             </div>
                             <form action="#" class='clusterProfile' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
                                 <label for="startBinGridSize" class="col s5 radarcontroller_layout hide">Initial diameter: </label>
-                                <div  class="row s12 hide">
-                                    <input type="number" id="startBinGridSize" class="col s7 radarcontroller_layout browser-default">
+                                <div  class="col s5 hide">
+                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
                                 </div>
-                                <label for="lowrange" class="col s5 radarcontroller_layout"># Groups </label>
-                                <div  class="row s12">
-                                    <span class="col s2">from</span><input type="number" id="lowrange" class="col s2 radarcontroller_layout browser-default">
-                                    <span class="col s1">to</span><input type="number" id="highrange" class="col s2 radarcontroller_layout browser-default">
+                                <label for="lowrange" class="col s5 radarcontroller_layout"># Groups from </label>
+                                <div  class="col s5 no-pad-left" >
+                                    <input type="number" id="lowrange" class="col s3 radarcontroller_layout browser-default">
+                                    <span class="col s2">to</span><input type="number" id="highrange" class="col s3 radarcontroller_layout browser-default">
                                 </div>
-                                <input type="submit" value="Generate groups">
+                                <div  class="col s2 no_padding valign-wrapper center-align" >
+                                    <input type="submit">
+                                </div>
                             </form>
                             <form action="#" class='clusterProfile hide' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kinteration').val()}});return false;">
-                                <label for="knum" class="col s5 radarcontroller_layout"> Number of group: </label>
-                                <div  class="row s12">
-                                    <input type="number" id="knum" class="col s7 radarcontroller_layout browser-default">
+                                <label for="knum" class="col s5 radarcontroller_layout"># Groups: </label>
+                                <div  class="col s5 no-pad-left">
+                                    <input type="number" id="knum" class="col s3 radarcontroller_layout browser-default">
+                                    <label for="kinteration" class="col s6 radarcontroller_layout"> Iterations: </label>
+                                    <input type="number" id="kinteration" class="col s3 radarcontroller_layout browser-default">
                                 </div>
-                                <label for="kinteration" class="col s5 radarcontroller_layout"> Max interation: </label>
-                                <div  class="row s12">
-                                    <input type="number" id="kinteration" class="col s7 radarcontroller_layout browser-default">
+                                <div  class="col s2 no_padding valign-wrapper center-align" >
+                                    <input type="submit">
                                 </div>
-                                <input type="submit" value="Generate groups">
                             </form>
                         </div>
                         <div class="row s12 flex_contain flex_warp white" id="clusterDisplay" style="margin-top: 20px">
-                            <button class="information waves-effect waves-light grey darken-3" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
+                            <button class="information waves-effect waves-light grey darken-3 hide" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
                             <div id='clusterinformation' class="informationDetail card">
                                 <table>
                                     <tbody>

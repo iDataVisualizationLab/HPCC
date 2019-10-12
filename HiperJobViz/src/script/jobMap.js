@@ -90,7 +90,10 @@ let JobMap = function() {
         g = svg.append("g")
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
-        g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
+
+        const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
+        gNodeaxis.append('g').attr('class','gMainaxis');
+        gNodeaxis.append('g').attr('class','gSubaxis');
         linkg = g.append("g")
             .attr('class','linkg');
         nodeg = g.append("g")
@@ -99,7 +102,10 @@ let JobMap = function() {
             .attr('class','fisheyeLayer')
             .style('opacity',0)
             .style('pointer-events', runopt.lensing?'auto':'none');
+
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
+        table_headerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
+
         timebox = svg.append('g').attr('class','timebox')
             .attr('transform','translate(60,20)')
             .style('font-size','16px').attr('dy','1rem');
@@ -117,7 +123,29 @@ let JobMap = function() {
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
     let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
+    function pathRound(path,opt){
+        opt.ctl = opt.ctl||0;
+        opt.ctr = opt.ctr||0;
+        opt.cbl = opt.cbl||0;
+        opt.cbr = opt.cbr||0;
+        let bpath ='';
+        if(opt.ctl)
+            bpath+=`M0,-${opt.ctl} q0,-${opt.ctl} ${opt.ctl},-${opt.ctl}`;
+        else
+            bpath+=`M0,0`;
+        bpath+=` h${opt.width-opt.ctr-opt.ctl}`;
+        if(opt.ctr)
+            bpath+=`q${opt.ctr},0 ${opt.ctr},${opt.ctr}`;
+        bpath+=`v${opt.height-opt.ctr-opt.cbr}`;
+        if(opt.cbr)
+            bpath+=`q0,${opt.ctr} -${opt.cbr},${opt.cbr}`;
+        bpath+=`h-${opt.width-opt.cbr-opt.cbl}`;
+        if(opt.cbl)
+            bpath+=`q-${opt.cbl},0 -${opt.cbl},-${opt.cbl}`;
+        bpath+=`z`;
 
+        path.attr('d',bpath)
+    }
     function colorFunc (key,other){
         switch (runopt.graphic.colorBy+(other||'')) {
             case 'user':
@@ -308,12 +336,30 @@ let JobMap = function() {
         let bg = svg.selectAll('.computeSig');
         let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
         let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
+
         let axis = svg.select('.gNodeaxis')
             .classed('hide',false)
-            .attr('transform',`translate(${bg.datum().x2||bg.datum().x},${rangey[0]})`)
-            .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]));
-        axis.select('.domain').remove();
-        axis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`)
+            .attr('transform',`translate(${bg.datum().x2||bg.datum().x},${rangey[0]})`);
+        let Maxis = axis.select('.gMainaxis')
+            .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
+        Maxis.select('.domain').remove();
+        let mticks =Maxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
+        mticks.select('text').attr('dy','-0.5rem');
+
+        let Saxis = axis.select('.gSubaxis').classed('hide',true);
+        if (fisheye_scale.x.focus) {
+            const timearray = scale.ticks();
+            Saxis.classed('hide',false);
+            let pos2time = scale.invert(fisheye_scale.x.focus());
+            let timesubarray = [new Date(+pos2time - (timearray[1] - timearray[0])), new Date(+pos2time + (timearray[1] - timearray[0]))];
+
+            let subaxis = d3.scaleTime().range(timesubarray.map(t=>scale(t))).domain(timesubarray);
+            Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
+            Saxis.select('.domain').remove();
+            let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
+            sticks.select('line').style('stroke-width',0.1).style('stroke-dasharray','1 3')
+            sticks.select('text').style('font-size',8)
+        }
     }
 
     jobMap.drawComp = function (){
@@ -598,8 +644,10 @@ let JobMap = function() {
         // table_header(table_headerNode);
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
-        if(table_footerNode.empty())
-            table_footerNode = nodeg.append('g').attr('class','table footer').attr('transform',`translate(600,${yscale(user.length)})`);
+        if(table_footerNode.empty()) {
+            table_footerNode = nodeg.append('g').attr('class', 'table footer').attr('transform', `translate(600,${yscale(user.length)})`);
+            table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
+        }
         table_footer(table_footerNode);
 
         let userNode = nodeg.selectAll('.userNode').data(user,d=> d.name);
@@ -866,6 +914,8 @@ let JobMap = function() {
         return d.source.type==='job'?-graphicopt.job.r:0;
     }
     function table_header(path){
+        path.select('.back').attr('transform',`translate(0,${10})`);
+        pathRound(path.select('.back').select('path'),{width:tableLayout.row.width,height:25,ctl:10,ctr:10});
         let rows = path.selectAll('.row').data([tableHeader]);
         rows.exit().remove();
         let rows_n = rows.enter().append('g').attr('class', 'row')
@@ -909,6 +959,8 @@ let JobMap = function() {
 
     }
     function table_footer(path){
+        path.select('.back').attr('transform',`translate(0,${-tableLayout.row.height/2})`);
+        pathRound(path.select('.back').select('path'),{width:tableLayout.row.width,height:tableLayout.row.height,cbl:10,cbr:10});
         let customrange = [0,d3.max(tableFooter.filter(d=>tableLayout.column[d.key].type==='graph'),e=>d3.max(e.value.arr,d=>d[1]))]
         let rows = path.selectAll('.row').data([tableFooter]);
         rows.exit().remove();
@@ -1435,6 +1487,28 @@ let JobMap = function() {
 
         makeheader();
     }
+    // Establish the desired formatting options using locale.format():
+// https://github.com/d3/d3-time-format/blob/master/README.md#locale_format
+    var formatMillisecond = d3.timeFormat(".%L"),
+        formatSecond = d3.timeFormat(":%S"),
+        formatMinute = function(d){return d3.timeFormat("%I:%M")(d).replace(/^0/,'')}
+    formatHour = function(d){return d3.timeFormat("%I %p")(d).toLowerCase().replace(/^0/,'')},
+        formatDay = d3.timeFormat("%a %d"),
+        formatWeek = d3.timeFormat("%b %d"),
+        formatMonth = d3.timeFormat("%B"),
+        formatYear = d3.timeFormat("%Y");
+
+// Define filter conditions
+    function multiFormat(date) {
+        return (d3.timeSecond(date) < date ? formatMillisecond
+            : d3.timeMinute(date) < date ? formatSecond
+                : d3.timeHour(date) < date ? formatMinute
+                    : d3.timeDay(date) < date ? formatHour
+                        : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+                            : d3.timeYear(date) < date ? formatMonth
+                                : formatYear)(date);
+    }
+
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {

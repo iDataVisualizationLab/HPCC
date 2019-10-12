@@ -304,12 +304,13 @@ input[type=number] {
     width: 100%;
 }
 .information {
-    width: 26px;
-    height: 26px;
-    border-radius: 13px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
     color: white;
     padding: 0;
     overflow: visible;
+    font-size: 10px;
 }
 .informationHolder {
     position: relative;
@@ -327,6 +328,7 @@ input[type=number] {
     visibility: unset;
 }
 .informationDetail table {
+    font-size: 12px!important;
     height: initial;
     line-height: normal;
     word-break: unset;
@@ -346,12 +348,29 @@ input[type=number] {
     left: 0px;
     color: black;
 }
+
+.information.right {
+
+}
+
 #clusterinformation{
     top: unset;
     left: unset;
     right: 20px;
-    width: 200px;
 }
 #clusterinformation table {
     width: 200px;
+}
+.sidenavs.sideIn {
+    overflow-x: visible;
+    overflow-y: auto;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+form input, .sidenavs select{
+    padding-right: 3px!important;
+    padding-left: 3px!important;
 }
