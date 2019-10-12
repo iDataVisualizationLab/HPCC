@@ -374,3 +374,7 @@ form input, .sidenavs select{
     padding-right: 3px!important;
     padding-left: 3px!important;
 }
+input[type=submit] {
+    height: 23px;
+    line-height: 23px;
+}
