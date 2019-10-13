@@ -437,3 +437,51 @@ label {
     font-size: 12px;
     color: currentColor;
 }
+.expand {
+    transform: rotate(0deg);
+
+
+    /* Legacy vendor prefixes that you probably don't need... */
+
+    /* Safari */
+    -webkit-transform: rotate(0deg);
+
+    /* Firefox */
+    -moz-transform: rotate(0deg);
+
+    /* IE */
+    -ms-transform: rotate(0deg);
+
+    /* Opera */
+    -o-transform: rotate(0deg);
+
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0);
+    -webkit-transition: all 1s; /* Safari prior 6.1 */
+    transition: all 1s;
+    position: absolute;
+    right: 0;
+}
+.active .expand {
+    transform: rotate(90deg);
+
+
+    /* Legacy vendor prefixes that you probably don't need... */
+
+    /* Safari */
+    -webkit-transform: rotate(90deg);
+
+    /* Firefox */
+    -moz-transform: rotate(90deg);
+
+    /* IE */
+    -ms-transform: rotate(90deg);
+
+    /* Opera */
+    -o-transform: rotate(90deg);
+
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    -webkit-transition: all 1s; /* Safari prior 6.1 */
+    transition: all 1s;
+}

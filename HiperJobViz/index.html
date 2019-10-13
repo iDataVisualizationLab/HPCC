@@ -133,6 +133,7 @@
                             </table>
                         </div>
                     </div>
+                    <i class="material-icons expand">chevron_right</i>
                 </div>
                 <div class="collapsible-body">
                     <div  class="row s12 valign-wrapper">
@@ -283,7 +284,7 @@
                 </div>
             </li>
             <li>
-                <div class="collapsible-header"><i class="material-icons">settings</i> Radar Controller</div>
+                <div class="collapsible-header"><i class="material-icons">track_changes</i> Radar Controller <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
                     <div id="RadarController"></div>
                     <div id="RadarController_Table">
@@ -297,13 +298,10 @@
                 </div>
             </li>
             <li class="active">
-                <div class="collapsible-header"><i class="material-icons">settings</i> Major host groups</div>
+                <div class="collapsible-header"><i class="material-icons">group_work</i> Major host groups <span class="col right-align valign-wrapper" style="font-size: 8px">Grouped by the 9 metrics</span><i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
                     <div>
                         <div>
-                            <div  class="row s12">
-                                <span class="col s12 right-align">Grouped by the 9 metrics</span>
-                            </div>
                             <label for="clusterMethod" class="col s4 radarcontroller_layout"> Grouping Method: </label>
                             <div  class="row s12">
                                 <select id="clusterMethod" class="col s8 radarcontroller_layout">
@@ -351,7 +349,7 @@
                 </div>
             </li>
             <li class="hide">
-                <div class="collapsible-header"><i class="material-icons">settings</i> Developer Functions</div>
+                <div class="collapsible-header"><i class="material-icons expand">chevron_right</i> Developer Functions</div>
                 <div class="collapsible-body">
                     <button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download current Data</button>
                     <button onclick="saveSVG_batch()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog">
@@ -366,7 +364,7 @@
     </div>
 </div>
 <div id="instructions"></div>
-<div id="Maincontent" class="row s12">
+<div id="Maincontent" class="row s12 no_magrin">
     <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
     <div class="overlaySide">
         <a class="openbtn btn-floating btn waves-effect waves-light pulse" id="sideNavbtn" onclick="openNav()">
@@ -409,7 +407,7 @@
 
     <!--<svg width="2600" height="1800" ></svg>-->
     <div style="position: relative;">
-        <div class="row s12" style="overflow-x: auto">
+        <div class="row s12 no_magrin" style="overflow-x: auto">
             <div id ="scatterzone">
                 <div class="scatter_y activeY" id="data_onYaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>Fan 1 Speed</span></div>
                 <div class="scatter_x activeX" id="data_onXaxis" ondrop="Scatterplot.drop(event)" ondragover="Scatterplot.allowDrop(event)"><span>CPU 1 Temp</span></div>
@@ -508,14 +506,14 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>&ndash;&gt;-->
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
-            <div class='row s12 no_padding' id="detailZone" style="position: relative;">
+            <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
                 <div  class="valign-wrapper hide" id="lensingMode" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
                     <label>
                         <input id="lensing_control" type="checkbox" class="filled-in">
                         <span style="font: unset;color: black">Lensing</span>
                     </label>
                 </div>
-                <svg width="2600" height="1000" class="mainsvg" >
+                <svg class="mainsvg" >
                     <svg id ="jobmap">
 
                     </svg>

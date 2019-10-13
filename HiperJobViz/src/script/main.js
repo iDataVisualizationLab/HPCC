@@ -36,9 +36,9 @@ var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
 var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
-    height = +document.getElementById("mainBody").offsetHeight,
+    height = window.innerHeight-(+$('.pushpin-demo-nav')[0].offsetHeight)-10,
     // height = +svg.attr("height")-margin.top-margin.bottom,
-    heightdevice = + document.getElementById("mainBody").offsetHeight,
+    heightdevice = window.innerHeight,
 
     svg = svg
         .attrs({
