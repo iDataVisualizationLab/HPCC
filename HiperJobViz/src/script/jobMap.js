@@ -524,7 +524,7 @@ let JobMap = function() {
         timebox.append('g').attrs({class:'timebox_axis'});
         const handle = timebox.append('g').attrs({class:'timebox_handle'}).attr('transform',`translate(0,10)`);
         handle.append('polygon').attr("points","0,0 -6,10 6,10");
-        handle.append('text').attrs({y:20,dy:'.1rem','font-size':'14','fill':'#26a69a','text-anchor':"middle","font-weight":"bold"});
+        handle.append('text').attrs({y:20,dy:'.1rem','font-size':'12','fill':'#26a69a','text-anchor':"middle","font-weight":"bold"});
     }
     function updateTimebox(index,limit){
         limit = limit||index;
@@ -533,7 +533,7 @@ let JobMap = function() {
         timebox.select('.timebox_range').transition().attr('width',scale(index));
         timebox.select('.timebox_axis')
             .call(d3.axisTop(d3.scaleTime().range(scale.range()).domain([first__timestep,scaleT.invert(200)])).tickSize(-10).ticks(5).tickFormat(multiFormat));
-        timebox.select('.timebox_handle').attr('transform',`translate(${scale(index)},10)`).select('text').text(last_timestep.toLocaleTimeString().toLowerCase());
+        timebox.select('.timebox_handle').attr('transform',`translate(${scale(index)},10)`).select('text').text(multiFormat(last_timestep));
     }
     let maxTimestep;
     jobMap.draw = function (){
