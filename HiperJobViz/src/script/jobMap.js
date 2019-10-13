@@ -70,17 +70,15 @@ let JobMap = function() {
                 'opacity':0,
                 width: graphicopt.width,
                 height: graphicopt.height,
-            }).call(d3.zoom().on("zoom", function () {
-                // fisheye_scale.x.domain([0,graphicopt.widthG()*d3.event.transform.k]);
-                // fisheye_scale.y.domain([0,graphicopt.heightG()*d3.event.transform.k]);
+            }).on('click',function(d){
+            if (freezing) {
+                g.selectAll('.node').style('pointer-events', 'auto').classed('fade',false).classed('hide',false).classed('highlight',false);
+                linkg.selectAll('.links').classed('hide',false).classed('highlight',false);
+                freezing = !freezing;
+            }
+        }).call(d3.zoom().on("zoom", function () {
             g.attr("transform", d3.event.transform);
-        })).on('click',function(d){
-            freezing = !freezing;
-            if (freezing)
-                g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
-            else
-                g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
-        });
+        }));
 
         g = svg.append("g")
             .attr('class','pannel')
@@ -624,8 +622,8 @@ let JobMap = function() {
                 {'class':'computeSig_start timeBoxRunning',
                 })
         ;
-        jobNode_n.append('text').attr('class','lelftext hide').attrs({'x':-graphicopt.job.r}).style('text-anchor','end');
-        jobNode_n.append('text').attr('class','righttext hide').attrs({'x':graphicopt.job.r});
+        jobNode_n.append('text').attr('class','lelftext label').attrs({'x':-graphicopt.job.r}).style('text-anchor','end');
+        jobNode_n.append('text').attr('class','righttext label').attrs({'x':graphicopt.job.r});
         jobNode = nodeg.selectAll('.jobNode');
         jobNode.select('.computeSig_b').attr('r',graphicopt.job.r);
         jobNode.select('.computeSig_sub.submitTime').attr('d',function(d){
@@ -817,7 +815,6 @@ let JobMap = function() {
             .call(path=>freezinghandle(path,[function(d){
                 g.selectAll('.jobNode').classed('hide',true);
                 d3.select(this).classed('hide',false).classed('highlight',true);
-                d3.select(this).selectAll('text').classed('hide',false);
                 link.classed('hide',true);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('highlight',true).data();
@@ -828,7 +825,6 @@ let JobMap = function() {
                 table_footerNode.classed('fade',true);
             },null],[function(d){
                 g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-                d3.select(this).selectAll('text').classed('hide',true);
                 d3.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
                 d3.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
                 link.classed('hide',false).classed('highlight',false);
@@ -889,9 +885,9 @@ let JobMap = function() {
         function releasehighlight(){
             freezing = false;
             g.selectAll('.node').style('pointer-events','auto');
-            g.selectAll('.jobNode').classed('hide',false).classed('highlight',false).selectAll('text').classed('hide',true);
+            g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
             g.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-            g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false).selectAll('text').classed('hide',true);
+            g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
             link.classed('hide',false).classed('highlight',false);
             table_footerNode.classed('fade',false);
         }

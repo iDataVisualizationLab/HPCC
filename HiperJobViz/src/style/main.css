@@ -146,6 +146,13 @@ span.thumb {
 .userNode.highlight {
     opacity: 1;
 }
+.node .label {
+    display: none;
+}
+.node.highlight .label {
+    display: unset;
+}
+
 .links.highlight text{
     display: unset;
 }
