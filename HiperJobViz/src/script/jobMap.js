@@ -29,22 +29,11 @@ let JobMap = function() {
     let freezing=false;
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
-            let hightlight_item = path.filter(function(){return d3.select(this).classed('highlight')});
             freezing = !freezing;
-            if (freezing){
+            if (freezing)
                 g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
-                // hightlight_item.on('mouseover',mouseOver[1]);
-                // hightlight_item.on('mouseleave',mouseLeave[1]);
-            }else{
+            else
                 g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
-                // hightlight_item.on('mouseover', function(d){
-                //     if(!freezing)
-                //         _.bind(mouseOver[0],this)(d);
-                // }).on('mouseleave',function(d){
-                //     if(!freezing)
-                //         _.bind(mouseLeave[0],this)(d);
-                // });
-            }
         });
         if (!freezing) {
             path.on('mouseover', function(d){
@@ -85,7 +74,13 @@ let JobMap = function() {
                 // fisheye_scale.x.domain([0,graphicopt.widthG()*d3.event.transform.k]);
                 // fisheye_scale.y.domain([0,graphicopt.heightG()*d3.event.transform.k]);
             g.attr("transform", d3.event.transform);
-        }));
+        })).on('click',function(d){
+            freezing = !freezing;
+            if (freezing)
+                g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
+            else
+                g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
+        });
 
         g = svg.append("g")
             .attr('class','pannel')
@@ -526,7 +521,7 @@ let JobMap = function() {
         return path;
     }
     function initTimebox(){
-        timebox.append('rect').attrs({width:200,height:10,fill:'#26a69a'});
+        timebox.append('rect').attrs({width:200,height:10,fill:'#e1e0e2'});
         timebox.append('rect').attrs({class:'timebox_range',width:0,height:10,fill:'#26a69a'});
         timebox.append('g').attrs({class:'timebox_axis'});
         const handle = timebox.append('g').attrs({class:'timebox_handle'}).attr('transform',`translate(0,10)`);
