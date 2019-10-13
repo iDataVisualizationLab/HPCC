@@ -352,7 +352,7 @@ input[type=number] {
     margin: 13px;
     visibility: hidden;
     top: 0px;
-    left: 0px;
+    left: -60px;
     color: black;
 }
 
