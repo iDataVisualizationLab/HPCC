@@ -131,7 +131,7 @@ let JobMap = function() {
             bpath+=`q${opt.ctr},0 ${opt.ctr},${opt.ctr}`;
         bpath+=`v${opt.height-opt.ctr-opt.cbr}`;
         if(opt.cbr)
-            bpath+=`q0,${opt.ctr} -${opt.cbr},${opt.cbr}`;
+            bpath+=`q0,${opt.cbr} -${opt.cbr},${opt.cbr}`;
         bpath+=`h-${opt.width-opt.cbr-opt.cbl}`;
         if(opt.cbl)
             bpath+=`q-${opt.cbl},0 -${opt.cbl},-${opt.cbl}`;
