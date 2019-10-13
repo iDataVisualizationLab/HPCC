@@ -381,7 +381,7 @@ form input, .sidenavs select{
     padding-right: 3px!important;
     padding-left: 3px!important;
 }
-input[type=submit] {
+button[type=submit] {
     height: 22px;
     line-height: 22px;
     text-transform: capitalize;
