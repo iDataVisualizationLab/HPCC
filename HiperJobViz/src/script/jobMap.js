@@ -100,7 +100,7 @@ let JobMap = function() {
         table_headerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
 
         timebox = svg.append('g').attr('class','timebox')
-            .attr('transform','translate(60,20)')
+            .attr('transform','translate(40,20)')
             .style('font-size','16px').attr('dy','1rem');
         initTimebox()
 
