@@ -1048,8 +1048,8 @@ let JobMap = function() {
         },
         column:{
             'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
-            'Hosts': {id:'Hosts',type:'num',x: 130,y:20,width:60},
-            'Jobs': {id:'Jobs',type:'num',x: 190,y:20,width:60},
+            'Hosts': {id:'Hosts',text:'#Hosts',type:'num',x: 130,y:20,width:60},
+            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 190,y:20,width:60},
         }
     };
     // let violiin_chart = d3.viiolinChart().graphicopt({width:tableLayout.row["graph-width"],height:20,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
@@ -1473,7 +1473,7 @@ let JobMap = function() {
     function updatalayout(data){
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
-        tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'Hosts'}, {key:'Jobs',value: 'Jobs'}];
+        tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'#Hosts'}, {key:'Jobs',value: '#Jobs'}];
         let offset = tableLayout.column['Jobs'].x;
         let padding = 15;
         data.forEach((d,i)=>{

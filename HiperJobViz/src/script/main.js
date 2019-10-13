@@ -528,8 +528,6 @@ function request(){
     function timerequest() {
         if (!isanimation)
             preloader(true,lastIndex/59*100);
-        else
-            preloader(false);
         var midlehandle = function (ri){
             let returniteration = ri[0];
             let returnCount = ri[1];
