@@ -1481,9 +1481,9 @@ let JobMap = function() {
             tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
             tableHeader.push({key:d.text, value:d.text});
         })
-        tableLayout.row.width +=70;
-        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:90};
-        tableHeader.push({key:'PowerUsage', value:'Usage(kWh)'});
+        // tableLayout.row.width +=70;
+        tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:70};
+        tableHeader.push({key:'PowerUsage', value:'kWh'});
         tableHeader.currentsort = currentsort;
         tableHeader.direction = currentdirection;
 
