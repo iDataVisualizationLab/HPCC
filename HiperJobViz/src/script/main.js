@@ -1364,7 +1364,7 @@ function step_full (iteration){
                 var result = simulateResults2(hosts[count].name, iteration, selectedService);
                 // Process the result
                 var name = hosts[count].name;
-                if(hostResults[name].arr.length<(iteration)) {
+                if(hostResults[name].arr.length<(iteration+1)) {
                     hostResults[name].arr.push(result);
                     // console.log(hosts[count].name+" "+hostResults[name]);
                     serviceList_selected.forEach((s) => {

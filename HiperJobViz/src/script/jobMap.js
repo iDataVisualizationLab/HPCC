@@ -345,6 +345,7 @@ let JobMap = function() {
         Maxis.select('.domain').remove();
         let mticks =Maxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
         mticks.select('text').attr('dy','-0.5rem');
+        mticks.select('line').style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
 
         let Saxis = axis.select('.gSubaxis').classed('hide',true);
         if (fisheye_scale.x.focus) {
@@ -352,9 +353,18 @@ let JobMap = function() {
             Saxis.classed('hide',false);
             let pos2time = scale.invert(fisheye_scale.x.focus());
             let timesubarray = [new Date(+pos2time - (timearray[1] - timearray[0])), new Date(+pos2time + (timearray[1] - timearray[0]))];
-
+            if (timesubarray[0]<first__timestep){
+                timesubarray[0] = first__timestep;
+                timesubarray[1] = new Date(+timesubarray[0] + (timearray[1] - timearray[0])*2)
+            }else if(timesubarray[1]>last_timestep) {
+                timesubarray[1] = last_timestep;
+                timesubarray[0] = new Date(+timesubarray[1] - (timearray[1] - timearray[0])*2)
+            }
             let subaxis = d3.scaleTime().range(timesubarray.map(t=>scale(t))).domain(timesubarray);
-            Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
+
+            let timearray_sub = _.differenceBy(subaxis.ticks(),timearray,multiFormat)
+
+            Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat).tickValues(timearray_sub));
             Saxis.select('.domain').remove();
             let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
             sticks.select('line').style('stroke-width',0.1).style('stroke-dasharray','1 3')

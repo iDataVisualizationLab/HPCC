@@ -646,9 +646,10 @@ function discovery(d){
     d3.select(d).style('left','20px')
         .classed("pulse",true)
         .transition().delay(5000).duration(1000)
-        .style('left',null).on('end',function() {
-        d3.select(d).classed("pulse",false);
-    });
+        .style('left',null)
+    //     .on('end',function() {
+    //     // d3.select(d).classed("pulse",false);
+    // });
 
 }
 function switchTheme(){
