@@ -148,6 +148,7 @@ span.thumb {
 }
 .node .label {
     display: none;
+    pointer-events: none;
 }
 .node.highlight .label {
     display: unset;

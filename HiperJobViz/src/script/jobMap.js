@@ -84,6 +84,9 @@ let JobMap = function() {
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
 
+        g.append('text').attr('class','job_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).text('JOBS');
+        g.append('text').attr('class','host_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text('HOSTS');
+
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
         gNodeaxis.append('g').attr('class','gMainaxis');
         gNodeaxis.append('g').attr('class','gSubaxis');
@@ -262,7 +265,7 @@ let JobMap = function() {
         });
         let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
         dataline.exit().remove();
-        dataline = dataline.enter().append('line')
+        dataline.enter().append('line')
             .attr('class','linegg timeline')
             .merge(dataline)
             .attrs(function(d){
@@ -273,6 +276,25 @@ let JobMap = function() {
             }}).styles({
                 stroke: d=>colorFunc(d.cluster),
             });
+
+        if (runopt.compute.jobOverlay) {
+            let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
+            dataline.exit().remove();
+            dataline.enter().append('line')
+                .attr('class', 'linegg timeline')
+                .merge(dataline)
+                .attrs(function (d) {
+                    let parentndata = d3.select(this.parentNode.parentNode).datum();
+                    return {
+                        x1: d => fisheye_scale.x(timelineScale(d.end)),
+                        x2: d => fisheye_scale.x(timelineScale(d.start)),
+                    }
+                }).styles({
+                stroke: d => colorFunc(d.cluster),
+            });
+        }else{
+            bg.selectAll(".jobtickg").remove();
+        }
 
         bg.on('mouseover',function(d){
             if (freezing) {
@@ -455,6 +477,7 @@ let JobMap = function() {
         computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
         if (runopt.compute.type==='timeline') {
+            g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-40}).text("HOSTS's TIMELINE");
             // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
             scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
             computers.transition().attr('transform', d => {
@@ -469,6 +492,7 @@ let JobMap = function() {
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
             lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
+            g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("HOSTS");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
                 d.x = 300;
@@ -566,7 +590,7 @@ let JobMap = function() {
                 'stroke':'black',
             });
         computers_n.append('text').attrs(
-            {'class':'computeSig_label',
+            {'class':'computeSig_label label',
                 'display':'none',
                 'text-anchor':'end',
                 'dx':-graphicopt.node.r,
@@ -701,7 +725,7 @@ let JobMap = function() {
             // if(this.alpha()<0.69) {
             let range_com = d3.extent(computers.data(), d => d.x);
             scaleNode.domain(range_com).range([50, 120]);
-
+            g.select('.host_title').attrs({'text-anchor':"start",'x':100,'dy':scaleNode_y(0)-20}).text("HOSTS");
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
             if (runopt.compute.type==='timeline') {
                 // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
