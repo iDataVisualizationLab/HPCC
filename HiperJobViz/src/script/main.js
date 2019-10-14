@@ -1437,8 +1437,9 @@ $( document ).ready(function() {
             y: 'center'
         },outside: 'x',adjustPosition: true,
         adjustTracker: true,
+        theme: 'TooltipBorderThick',
         addClass:'informationDetail',
-        pointer:'top',
+        pointer:'top:20',
         getTitle:'data-title'
     };
     d3.selectAll('.information').each(function() {

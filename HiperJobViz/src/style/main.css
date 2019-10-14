@@ -319,6 +319,7 @@ input[type=number] {
     overflow: visible;
     font-size: 10px;
 }
+
 .informationHolder {
     position: relative;
 }
@@ -334,6 +335,18 @@ input[type=number] {
 .information:hover + .informationDetail{
     visibility: unset;
 }
+.informationDetail .jBox-container,.informationDetail .jBox-pointer:after {
+    border-width: 1px;
+    border-color: black;
+    background-color:  #ccc;
+    -webkit-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
+    -moz-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
+    box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
+}
+.light .informationDetail .jBox-container,.light .informationDetail .jBox-pointer:after {
+    background-color:  #ccc;
+}
+
 .informationDetail table {
     font-size: 12px!important;
     height: initial;
