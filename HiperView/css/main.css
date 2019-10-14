@@ -981,7 +981,7 @@ path.outlying {
 }
 
 .dataTables_wrapper .dataTables_filter input{
-	width: calc(100% - 60px);
+	width: calc(100% - 80px);
 	margin-left: 0.5em;
 	left: auto;
 	right: auto;

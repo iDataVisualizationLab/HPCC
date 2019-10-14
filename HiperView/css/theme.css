@@ -485,3 +485,6 @@ label {
     -webkit-transition: all 1s; /* Safari prior 6.1 */
     transition: all 1s;
 }
+.switch label .lever {
+    margin: 2px;
+}

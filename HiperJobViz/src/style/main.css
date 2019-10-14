@@ -384,3 +384,23 @@ button[type=submit] {
     text-transform: capitalize;
 }
 
+.animatIcon:hover{cursor: pointer}
+.animatIcon{
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.animatIcon:hover i{opacity: 1; transform: translate(0,0);}
+.animatIcon i {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translate(-100%,0);
+    transition: all .3s ease-in-out;
+}
+.animatIcon:hover div{opacity: 0; transform: translate(100%,0)}
+.animatIcon div{
+    transition: all .3s ease-in-out;
+}
