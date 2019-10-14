@@ -12,6 +12,8 @@
     <script src="../HiperView/js/jquery.dd.js"></script>
     <!-- Compiled and minified CSS -->
 
+    <script src="../HiperView/js/jBox.all.min.js"></script>
+    <link href="../HiperView/css/jBox.all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="../HiperView/css/customicon.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -107,7 +109,17 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
-
+<div id='datainformation'>
+    <table>
+        <tbody>
+        <tr><td>Filename:</td><td class="filename"></td></tr>
+        <tr><td>Time range:</td><td class="timerange"></td></tr>
+        <tr><td>Time interval:</td><td class="interval"></td></tr>
+        <tr><td>Total time step:</td><td class="totalstep"></td></tr>
+        <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+        </tbody>
+    </table>
+</div>
 <div id="mySidenav" class="sidenavs">
     <div class="row s12">
         <ul class="collapsible expandable">
@@ -121,25 +133,24 @@
             <li class="settingContain active no_padding">
                 <div class="collapsible-header" > <i class="material-icons">settings</i>  Setting
                     <div class="informationHolder valign-wrapper" style="margin-left: 5px ">
-                        <button class="information waves-effect waves-light grey darken-3" data-target='datainformation' >i</button>
-                        <div id='datainformation' class="informationDetail card">
-                            <table>
-                                <tbody>
-                                <tr><td>Filename:</td><td class="filename"></td></tr>
-                                <tr><td>Time range:</td><td class="timerange"></td></tr>
-                                <tr><td>Time interval:</td><td class="interval"></td></tr>
-                                <tr><td>Total time step:</td><td class="totalstep"></td></tr>
-                                <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <!--<div id='datainformation' class="informationDetail card">-->
+                            <!--<table>-->
+                                <!--<tbody>-->
+                                <!--<tr><td>Filename:</td><td class="filename"></td></tr>-->
+                                <!--<tr><td>Time range:</td><td class="timerange"></td></tr>-->
+                                <!--<tr><td>Time interval:</td><td class="interval"></td></tr>-->
+                                <!--<tr><td>Total time step:</td><td class="totalstep"></td></tr>-->
+                                <!--<tr><td>#Hosts:</td><td class="hostsnum"></td></tr>-->
+                                <!--</tbody>-->
+                            <!--</table>-->
+                        <!--</div>-->
                     </div>
                     <i class="material-icons expand">chevron_right</i>
                 </div>
                 <div class="collapsible-body">
-                    <div  class="row s12 valign-wrapper">
+                    <div  class="row valign-wrapper">
                         <label for="datacom" class="col s4"> Dataset: </label>
-                        <select id="datacom" class="col s8">
+                        <select id="datacom" class="col s7">
                             <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
                             <!--<option value="influxdbWed24Apr_removemetric" selected data-date="24 Apr 2019">24 Apr 2019 (Job list)</option>-->
                             <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
@@ -148,6 +159,9 @@
                             <!--<option value="nagios">Real-time Nagios</option>-->
                             <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
                         </select>
+                        <div class="col s1">
+                            <button class="information waves-effect waves-light grey darken-3" data-target='datainformation' >i</button>
+                        </div>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
                         <label for="control" class="col s4"> Simulation control: </label>
@@ -185,26 +199,32 @@
 
                     <div  class="row s12 valign-wrapper">
                         <label for="compDisplay_control" class="col s4"> Host presentation: </label>
-                        <select id="compDisplay_control" class="col s8">
+                        <select id="compDisplay_control" class="col s7">
                             <option value="pie">Individual host: Pie chart</option>
                             <option value="radar" >Individual host: Radar chart </option>
                             <option value="radar_cluster" selected="selected">Grouping: System snapshot</option>
                             <option value="timeline">Grouping: Entire timeline</option>
                         </select>
+                        <div class="col s1">
+                            <button class="information waves-effect waves-light grey darken-3" data-image="hostpresent.gif" data-title="Select the shape of hosts/computes. Recommend stay with Grouping options to reduce the complexity.">i</button>
+                        </div>
                     </div>
 
                     <div  class="row s12 valign-wrapper">
                         <label for="colorConnection_control" class="col s4"> Color links by: </label>
-                        <select id="colorConnection_control" class="col s8">
+                        <select id="colorConnection_control" class="col s7">
                             <option value="group" selected="selected">Host group</option>
                             <option value="user" >UserID</option>
                         </select>
+                        <div class="col s1">
+                            <button class="information waves-effect waves-light grey darken-3" data-image="colorlinks.gif" data-title="Color links by user or by major group.">i</button>
+                        </div>
                     </div>
 
 
                     <div  class="row s12 valign-wrapper">
                         <label for="groupJobmode" class="col s4"> Group jobs: </label>
-                        <p class="switch col s8 no_magrin no_padding" id="groupJobmode">
+                        <p class="switch col s7 no_magrin no_padding" id="groupJobmode">
 
                             <label>
                                 <span class="true">Off</span>
@@ -214,6 +234,9 @@
                             </label>
 
                         </p>
+                        <div class="col s1">
+                            <button class="information waves-effect waves-light grey darken-3" data-image="groupjob.gif" data-title="Enable/ disable grouping job by similarity.">i</button>
+                        </div>
                     </div>
 
 

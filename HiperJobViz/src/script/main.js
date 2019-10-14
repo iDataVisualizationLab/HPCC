@@ -1426,6 +1426,30 @@ function updateSummaryChartAll() {
 
 $( document ).ready(function() {
     console.log('ready');
+    // new jBox('Tooltip', {
+    //     attach: '.information',
+    //     adjustPosition: true,
+    //     adjustTracker: true,
+    //     content: function(){console.log(this); return $('#datainformation')},
+    // });
+    let tipopt= {position: {
+            x: 'right',
+            y: 'center'
+        },outside: 'x',adjustPosition: true,
+        adjustTracker: true,
+        addClass:'informationDetail',
+        pointer:'top',
+        getTitle:'data-title'
+    };
+    d3.selectAll('.information').each(function() {
+        let tip = $(this).jBox('Tooltip',tipopt)
+        if (d3.select(this).attr('data-target'))
+            tip.setContent($('#datainformation'));
+        else if(d3.select(this).attr('data-image'))
+            tip.setContent(`<img src="src/images/${d3.select(this).attr('data-image')}" width="100%"></img>`);
+    });
+
+
     $('.fixed-action-btn').floatingActionButton({
         direction: 'left',
         hoverEnabled: false,

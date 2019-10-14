@@ -344,20 +344,16 @@ input[type=number] {
 }
 
 .informationDetail{
-    border-radius: 5px;
-    border: #777777;
-    background-color: #ffffff;
-    position: absolute;
-    padding: 5px;
-    margin: 13px;
-    visibility: hidden;
-    top: 0px;
-    left: -60px;
+    /*border-radius: 5px;*/
+    /*border: #777777;*/
+    /*background-color: #ffffff;*/
+    /*position: absolute;*/
+    /*padding: 5px;*/
+    /*margin: 13px;*/
+    /*visibility: hidden;*/
+    /*top: 0px;*/
+    /*left: -60px;*/
     color: black;
-}
-
-.information.right {
-
 }
 
 #clusterinformation{
@@ -367,6 +363,7 @@ input[type=number] {
 }
 #clusterinformation table {
     width: 200px;
+    display: none;
 }
 .sidenavs.sideIn {
     overflow-x: visible;
