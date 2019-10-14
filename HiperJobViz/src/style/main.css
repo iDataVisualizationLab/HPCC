@@ -389,6 +389,7 @@ button[type=submit] {
     outline: none;
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .animatIcon:hover i{opacity: 1; transform: translate(0,0);}
