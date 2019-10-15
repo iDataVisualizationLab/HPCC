@@ -105,10 +105,28 @@ let JobMap = function() {
         timebox = svg.append('g').attr('class','timebox')
             .attr('transform','translate(40,20)')
             .style('font-size','16px').attr('dy','1rem');
-        initTimebox()
-
+        initTimebox();
+        tippannel = d3.tip()
+            .attr("class", "tippannel d3-tip")
+            .attr("id", "tippannel")
+            .direction('e')
+            .offset([0, 10])
+            .html('<div><button class="closeBTN" onclick="d3.select(\'#tippannel\').dispatch(\'hide\')">&times;</button>' +
+                '<button class="btn-small radarFullTime">Show full time series</button>' +
+                '<button class="btn-small metricFullTime">Show metrics time series</button>' +
+                '<button class="btn-small freezing">freeze</button></div>');
+        svg.append('circle').attr('id', 'tipfollowscursor');
+        svg.call(tippannel);
+        d3.select('#tippannel').on('hide',tippannel.hide);
+        d3.select('.tippannel').on('mouseover',function(){d3.select(this).classed('hover',true);  clearTimeout(tiptimer)})
+            .on('mouseleave',function(){
+                d3.select(this).classed('hover',false);
+                if(!freezing)
+                    setTimeout( ()=> {releasehighlight(); tippannel.hide();},500)
+            });
         return jobMap;
     };
+    let tippannel, tiptimer;
     jobMap.remove = function (){
         if (simulation) simulation.stop();
         nodeg.selectAll('*').remove();
@@ -297,7 +315,17 @@ let JobMap = function() {
         }
 
         bg.on('mouseover',function(d){
-            if (freezing) {
+            if (!freezing)
+                releasehighlight()
+            clearTimeout(tiptimer)
+            var target = d3.select('#tipfollowscursor')
+                .attr('cx', d3.event.offsetX)
+                .attr('cy', d3.event.offsetY - 5) // 5 pixels above the cursor
+                .node();
+            tippannel.show(d,target);
+            let tipdiv = d3.select('.tippannel');
+            tipdiv.select('.radarFullTime').on('click');
+            tipdiv.select('.metricFullTime').on('click',()=>{
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
@@ -340,8 +368,12 @@ let JobMap = function() {
                 layout.title = '';
                 layout.title2 = `#compute: ${d.values_name.length}`;
 
-                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100}).data(data_in).layout(layout).show();
-            }
+                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100}).data(data_in).layout(layout).show(target);
+            });
+            tipdiv.select('.freezing').text(freezing?'Unfreeze':'freeze').on('click',()=>{d3.select(this.parentNode).dispatch('click');tipdiv.select('.freezing').text('Unfreeze')})
+        }).on('mouseleave',function(d){
+            if(!freezing)
+                tiptimer = setTimeout( ()=> {releasehighlight(); tippannel.hide();},500);
         });
 
         updateaxis();
@@ -793,6 +825,7 @@ let JobMap = function() {
             });
             // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
         // reset freezing action
+        freezing = false;
         releasehighlight();
         g.selectAll('.userNode')
             .call(path=>freezinghandle(path,[function(d){
@@ -829,11 +862,13 @@ let JobMap = function() {
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
                 table_footerNode.classed('fade',true);
             },null],[function(d){
-                d3.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
-                d3.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-                d3.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-                link.classed('hide',false).classed('highlight',false);
-                table_footerNode.classed('fade',false);
+                if (runopt.compute.type!=='timeline') {
+                    d3.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                    d3.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
+                    d3.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                    link.classed('hide', false).classed('highlight', false);
+                    table_footerNode.classed('fade', false);
+                }
             },null]));
         g.selectAll('.jobNode')
             .call(path=>freezinghandle(path,[function(d){
@@ -906,17 +941,13 @@ let JobMap = function() {
             simulation.fistTime = false;
             simulation.alphaTarget(0.7).restart();
         }
-        function releasehighlight(){
-            freezing = false;
-            g.selectAll('.node').style('pointer-events','auto');
-            g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-            g.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-            g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
-            link.classed('hide',false).classed('highlight',false);
-            table_footerNode.classed('fade',false);
-        }
         return jobMap;
     };
+    function releasehighlight(){
+        g.selectAll('.node').style('pointer-events','auto').classed('fade',false).classed('hide',false).classed('highlight',false);
+        g.selectAll( '.links').classed('hide',false).classed('highlight',false);
+        g.select('.table.footer').classed('fade',false);
+    }
     function getLinkKeyColor(d){
         switch (runopt.graphic.colorBy) {
             case 'user':

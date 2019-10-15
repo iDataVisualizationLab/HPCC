@@ -416,3 +416,34 @@ button[type=submit] {
 .animatIcon div{
     transition: all .3s ease-in-out;
 }
+
+.tippannel button{
+    display: block;
+    width: 100%;
+    text-transform: capitalize;
+    font-size: 10px;
+    line-height: 10px;
+    background-color: #f9f9f9;
+    height: 12px;
+    color: black;
+    margin-bottom: 4px;
+}
+.d3-tip {
+    padding-top: 15px;
+}
+.d3-tip .closeBTN {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #eb4034;
+    color: #8d1a10;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: none;
+    line-height: 0px;
+    text-decoration: none;
+    padding: 0px;
+    font-size: 8px;
+}

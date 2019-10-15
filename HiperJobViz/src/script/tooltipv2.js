@@ -52,7 +52,7 @@ let Tooltip_lib = function() {
                 classtype = "radarChart";
             }
             str += '<div class="' + classtype + '"></div>'; // Spider chart holder
-            str += '<button onclick="' + (hideLine ? 'pannelsummary(false)' : 'tool_tip.hide()') + '">Close</button>';
+            str += '<button  onclick="' + (hideLine ? 'pannelsummary(false)' : 'tool_tip.hide()') + '">x</button>';
             str += '<button onclick="addSVG(' + hideLine + ')">Add</button>';
             // str += '<button onclick="saveSVG(this)">Save Image</button>';
             str += '<button onclick="saveSVG_light(this,\'svg\')" class="modal-trigger" href="#savedialog">Save SVG</button>';
@@ -60,7 +60,7 @@ let Tooltip_lib = function() {
             str += '<button onclick="saveSVG_light(this,\'jpg\')" class="modal-trigger" href="#savedialog">Save JPG</button>';
         }else {
             if (classtype==='lineSum'){
-                str += '<button onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">Close</button>';
+                str += '<button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">&times;</button>';
                 str += '<div class="' + classtype + ' flex_contain flex_col"></div>'; // Spider chart holder
             }else {
                 str += '<span>Notsupport</span>'
@@ -84,7 +84,9 @@ let Tooltip_lib = function() {
         }));
         return dataRaw;
     }
-    master.show = function (){
+    master.show = function (target){
+        if (target)
+            tool_tip.show(undefined,undefined,'lineSum',target);
         tool_tip.show(undefined,undefined,'lineSum');
         d3.select('#d3-tip').on('hide',master.hide);
         // 1. set scale
