@@ -90,6 +90,7 @@ function clustercal(binopt,currentindex,callback){
             temp.__metrics.normalize = temp.__metrics.map((e,i)=>e.value) ;
             const temp_arr = _.groupBy(d.bin.nameob,e=>e.timestep);
             temp.arr = d3.range(0,sampleS.timespan.length).map(e=>temp_arr[e]?temp_arr[e].map(f=>f.name):undefined);
+            temp.total = d.bin.id.length;
             return temp;
         });
 
