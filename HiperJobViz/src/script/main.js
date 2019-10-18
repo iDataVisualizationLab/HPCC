@@ -2020,6 +2020,7 @@ function cluster_map (dataRaw) {
             const parent = d3.select(this.parentNode);
             parent.select('.editbtn').classed('clicked',false);
             parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+            updateclusterDescription(d.id,clusterDescription[d.id].text);
         });
         r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
             let active = d3.select(this).classed('clicked');
@@ -2041,7 +2042,10 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total);
     }, 0);
 }
-
+function updateclusterDescription (name,text){
+    cluster_info.find(c=>c.name===name).text = text;
+    jobMap.clusterDataLable(cluster_info)
+}
 function recalculateCluster (option) {
     preloader(true);
     group_opt = option;

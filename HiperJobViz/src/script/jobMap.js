@@ -241,6 +241,10 @@ let JobMap = function() {
 
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
+    function updateClusterLabel(){
+        if (clusterNode_data)
+            nodeg.selectAll('.computeNode').select('text').text(d=>clusterdata.find(c=>c.name===d.name).text);
+    }
     function drawEmbedding_timeline(data,colorfill) {
 
         // xscale
@@ -287,6 +291,7 @@ let JobMap = function() {
         dataline.exit().remove();
         dataline.enter().append('line')
             .attr('class','linegg timeline')
+            .attr("vector-effect","non-scaling-stroke")
             .merge(dataline)
             .attrs(function(d){
                 let parentndata = d3.select(this.parentNode.parentNode).datum();
@@ -295,6 +300,7 @@ let JobMap = function() {
                 x2: d=>fisheye_scale.x(timelineScale(d.start)),
             }}).styles({
                 stroke: d=>colorFunc(d.cluster),
+                'stroke-width':function(d){return linkscale(d3.select(this.parentNode).datum().values_name.length)}
             });
 
         if (runopt.compute.jobOverlay) {
@@ -430,7 +436,7 @@ let JobMap = function() {
         Maxis.select('.domain').remove();
         let mticks =Maxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
         mticks.select('text').attr('dy','-0.5rem');
-        mticks.select('line').style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
+        mticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
 
         let Saxis = axis.select('.gSubaxis').classed('hide',true);
         if (fisheye_scale.x.focus) {
@@ -452,7 +458,7 @@ let JobMap = function() {
             Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat).tickValues(timearray_sub));
             Saxis.select('.domain').remove();
             let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
-            sticks.select('line').style('stroke-width',0.1).style('stroke-dasharray','1 3')
+            sticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).style('stroke-dasharray','1 3')
             sticks.select('text').style('font-size',8)
         }
     }
@@ -850,7 +856,7 @@ let JobMap = function() {
             .append('g')
             .attr("class", "links");
         link_n
-            .append('path');
+            .append('path').attr("vector-effect","non-scaling-stroke");
         link_n
             .append('text').attr("text-anchor", "middle");
 
@@ -1657,6 +1663,10 @@ let JobMap = function() {
 
     jobMap.clusterData = function (v) {
         return arguments.length ? (clusterdata = v,updateClusterTimeline(), jobMap) : clusterdata;
+    };
+
+    jobMap.clusterDataLable = function (v) {
+        return arguments.length ? (clusterdata = v,updateClusterLabel(), jobMap) : clusterdata;
     };
 
     jobMap.zoomtoogle = function (_) {
