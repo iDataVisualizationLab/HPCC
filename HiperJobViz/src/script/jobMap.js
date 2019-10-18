@@ -372,6 +372,7 @@ let JobMap = function() {
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
+                layout.axis.x.tickFormat = [multiFormat];
                 const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
                 layout.axis.y.label = [];
                 layout.axis.y.domain = [];
@@ -1128,6 +1129,7 @@ let JobMap = function() {
                 layout.background = undefined;
                 layout.axis.y.label = [d.key];
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
+                layout.axis.x.tickFormat = [multiFormat];
                 layout.axis.y.domain = [scaleY.range()];
                 layout.title = `User: ${username}`;
                 layout.title2 = `#compute: ${data.length}`;
