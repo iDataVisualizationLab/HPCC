@@ -473,9 +473,12 @@ span.clusternum {
     font-weight: bold;
 }
 
-span.clusternum:first-of-type::after {
+.first span.clusternum::after {
     content: ' temperal instances';
 }
+/*#clusterDisplay > span.clusternum ~ span.clusternum ::after {*/
+    /*content: ' s';*/
+/*}*/
 
 input.clusterlabel {
     border: #7b7b7b solid 0.5px;

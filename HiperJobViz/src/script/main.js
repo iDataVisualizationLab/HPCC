@@ -2010,18 +2010,10 @@ function cluster_map (dataRaw) {
                 'color':'black',
                 'width': radarChartclusteropt.w+'px',
                 height: '1rem',
+                padding: '10px'
                 // overflow: 'hidden',
             });
         // r_new.append('span').attr('class','clusterlabel truncate center-align col s12');
-        r_new.append('span').attrs({'class':'clusterlabel truncate center-align col s11','type':'text'});
-        r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
-            clusterDescription[d.id].text = $(this).val();
-            d3.select(this).classed('hide',true);
-            const parent = d3.select(this.parentNode);
-            parent.select('.editbtn').classed('clicked',false);
-            parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
-            updateclusterDescription(d.id,clusterDescription[d.id].text);
-        });
         r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
             let active = d3.select(this).classed('clicked');
             active = !active;
@@ -2030,6 +2022,15 @@ function cluster_map (dataRaw) {
             parent.select('span.clusterlabel').classed('hide',active);
             parent.select('input.clusterlabel').classed('hide',!active);
         });
+        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col s11','type':'text'});
+        r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
+            clusterDescription[d.id].text = $(this).val();
+            d3.select(this).classed('hide',true);
+            const parent = d3.select(this.parentNode);
+            parent.select('.editbtn').classed('clicked',false);
+            parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+            updateclusterDescription(d.id,clusterDescription[d.id].text);
+        });
         r_new.append('span').attr('class','clusternum center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
@@ -2037,6 +2038,7 @@ function cluster_map (dataRaw) {
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
+        d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total);
