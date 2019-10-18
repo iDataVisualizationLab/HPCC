@@ -1724,6 +1724,7 @@ $( document ).ready(function() {
                 d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
             });
             cluster_info = cluster;
+            clusterDescription= {};
             recomendName (cluster_info);
             recomendColor (cluster_info);
         });
@@ -1811,6 +1812,7 @@ $( document ).ready(function() {
                             minval = val;
                         }
                     });
+                    cluster_info[index].total = 1 + cluster_info[index].total||0;
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
@@ -1981,6 +1983,7 @@ function cluster_map (dataRaw) {
         let temp = c.__metrics.slice();
         temp.name = c.labels;
         temp.text = c.text;
+        temp.total = c.total;
         let temp_b = [temp];
         temp_b.id = c.name;
         temp_b.order = i;
@@ -2009,18 +2012,33 @@ function cluster_map (dataRaw) {
                 height: '1rem',
                 // overflow: 'hidden',
             });
-        r_new.append('span').attr('class','truncate center-align col s12')
-        // r_new.append('span').attr('class','truncate center-align col s11')
-        //    ;
-        // r_new.append('i').attr('class','material-icons tiny col s1').text('edit')
-        //    ;
+        // r_new.append('span').attr('class','clusterlabel truncate center-align col s12');
+        r_new.append('span').attrs({'class':'clusterlabel truncate center-align col s11','type':'text'});
+        r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
+            clusterDescription[d.id].text = $(this).val();
+            d3.select(this).classed('hide',true);
+            const parent = d3.select(this.parentNode);
+            parent.select('.editbtn').classed('clicked',false);
+            parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+        });
+        r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+            let active = d3.select(this).classed('clicked');
+            active = !active;
+            d3.select(this).classed('clicked',active)
+            const parent = d3.select(this.parentNode);
+            parent.select('span.clusterlabel').classed('hide',active);
+            parent.select('input.clusterlabel').classed('hide',!active);
+        });
+        r_new.append('span').attr('class','clusternum center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .each(function(d,i){
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
-        d3.selectAll('.radarCluster').select('span').text(d=>d[0].text);
+        d3.selectAll('.radarCluster').select('span.clusterlabel').text(d=>d[0].text);
+        d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total);
     }, 0);
 }
 
@@ -2030,6 +2048,7 @@ function recalculateCluster (option) {
     setTimeout(()=>{
         clustercal(group_opt,lastIndex,(d)=>{
             cluster_info = d;
+            clusterDescription = {};
             recomendName (cluster_info);
             recomendColor (cluster_info);
             cluster_map(cluster_info);
@@ -2053,6 +2072,10 @@ function recomendName (clusterarr){
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
             c.text = `Group ${c.index+1}: undefined`;
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
             return;
         }
         name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
@@ -2064,6 +2087,10 @@ function recomendName (clusterarr){
             c.text = `Group ${c.index+1}`;
         else
             c.text = `Group ${c.index+1}: ${name}`;
+        if(!clusterDescription[c.name])
+            clusterDescription[c.name] = {};
+        clusterDescription[c.name].id = c.name;
+        clusterDescription[c.name].text = c.text;
     });
 }
 

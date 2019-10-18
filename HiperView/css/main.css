@@ -124,6 +124,9 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 	color: #000;
 	border: 1px solid rgba(0,0,0, 1);
 	border-radius: 10px;
+	-webkit-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
+	-moz-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
+	box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
 }
 
 /* Style northward tooltips differently */
