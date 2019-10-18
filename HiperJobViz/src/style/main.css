@@ -256,9 +256,8 @@ span.thumb {
     background-color: #dddddd;
     padding: 5px;
     max-height: 80%;
-    overflow-y: auto;
+    overflow: hidden;
 }
-
 .gline_path text {
     display: none;
 }
@@ -284,8 +283,10 @@ span.thumb {
 .flex_warp {
     flex-wrap: wrap;
 }
-.lineSum {
+.d3-tip .lineSum {
     max-height: 50%;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 input[type=number] {
     height: 1.5rem;
@@ -415,4 +416,73 @@ button[type=submit] {
 .animatIcon:hover div{opacity: 0; transform: translate(100%,0)}
 .animatIcon div{
     transition: all .3s ease-in-out;
+}
+.tippannel {
+    border-radius: 5px;
+}
+.tippannel,.tippannel button {
+    font-size: 10px;
+}
+
+.tippannel button{
+    display: block;
+    width: 100%;
+    text-transform: capitalize;
+    line-height: 10px;
+    background-color: #f9f9f9;
+    height: 12px;
+    color: black;
+    margin-bottom: 4px;
+}
+.tippannel p.title{
+    max-width: 150px;
+    margin-top: 0px;
+    font-weight: bold;
+}
+.d3-tip {
+    padding-top: 15px;
+}
+.d3-tip .closeBTN {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #eb4034;
+    color: #8d1a10;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: none;
+    line-height: 10px;
+    text-decoration: none;
+    padding: 0px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.d3-tip .closeBTN:hover{
+    background-color: #fe7c7c;
+}
+
+.tick {
+    font-size: unset;
+    font-family: sans-serif;
+}
+span.clusternum {
+    padding-top: 20px;
+    font-weight: bold;
+}
+input.clusterlabel {
+    border: #7b7b7b solid 0.5px;
+    font-size: 12px;
+    height: 1.5rem;
+    margin-bottom: 1px;
+    border-radius: 10px;
+    background-color: white;
+    padding: 0 5px;
+    outline: none;
+}
+
+input.clusterlabel:hover, input.clusterlabel:focus{
+    box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+    -webkit-box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
 }

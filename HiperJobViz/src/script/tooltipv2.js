@@ -28,16 +28,19 @@ let Tooltip_lib = function() {
                 label: '',
             }}
     };
-    let data=[],svg,svg_master,g,tooltip;
+    let data=[],svg,svg_master,g,tooltip,radarplot;
     let master ={};
     var tool_tip = d3.tip()
         .attr("class", "d3-tip")
         .attr("id", "d3-tip")
+        .direction('e')
         .offset(()=> {
-            if (niceOffset){
-                let heightTip =+ $('#d3-tip')[0].offsetHeight;
-                return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
-            } return [0,0];})
+            // if (niceOffset){
+            //     let heightTip =+ $('#d3-tip')[0].offsetHeight;
+            //     return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
+            // }
+            return [0,0];
+        })
         .html(function(d1,hideLine,type) {
             return cotenttip(hideLine,type); });
 
@@ -52,7 +55,7 @@ let Tooltip_lib = function() {
                 classtype = "radarChart";
             }
             str += '<div class="' + classtype + '"></div>'; // Spider chart holder
-            str += '<button onclick="' + (hideLine ? 'pannelsummary(false)' : 'tool_tip.hide()') + '">Close</button>';
+            str += '<button  onclick="' + (hideLine ? 'pannelsummary(false)' : 'tool_tip.hide()') + '">x</button>';
             str += '<button onclick="addSVG(' + hideLine + ')">Add</button>';
             // str += '<button onclick="saveSVG(this)">Save Image</button>';
             str += '<button onclick="saveSVG_light(this,\'svg\')" class="modal-trigger" href="#savedialog">Save SVG</button>';
@@ -60,8 +63,8 @@ let Tooltip_lib = function() {
             str += '<button onclick="saveSVG_light(this,\'jpg\')" class="modal-trigger" href="#savedialog">Save JPG</button>';
         }else {
             if (classtype==='lineSum'){
-                str += '<button onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">Close</button>';
-                str += '<div class="' + classtype + ' flex_contain flex_col"></div>'; // Spider chart holder
+                str += '<button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">&times;</button>';
+                str += '<div class="' + classtype + ' flex_contain"></div>'; // Spider chart holder
             }else {
                 str += '<span>Notsupport</span>'
             }
@@ -75,45 +78,46 @@ let Tooltip_lib = function() {
 
         return master;
     };
-
-    function handle_data (dataRaw) {
-        dataRaw.forEach(d=>d.sort((a,b)=>{
-            a.total = d.length;
-            b.total = d.length;
-            return a[a.length-1].y-b[b.length-1].y;
-        }));
+    function handle_data (dataRaw,radarin) {
+        radarplot = radarin||false;
+        if (!radarplot)
+            dataRaw.forEach(d=>d.sort((a,b)=>{
+                a.total = d.length;
+                b.total = d.length;
+                return a[a.length-1].y-b[b.length-1].y;
+            }));
         return dataRaw;
     }
-    master.show = function (){
-        tool_tip.show(undefined,undefined,'lineSum');
-        d3.select('#d3-tip').on('hide',master.hide);
-        // 1. set scale
+
+    function linegraph (){
+    // 1. set scale
         var xScale = [];
         var yScale = [];
-        data.forEach((d,i)=>{
+        data.forEach((d, i) => {
             d.xScale = d3[`scale${layout.axis.x.linear}`]()
-                .domain(layout.axis.x.domain[i]||layout.axis.x.domain[0])
+                .domain(layout.axis.x.domain[i] || layout.axis.x.domain[0])
                 .range([0, graphicopt.widthG()]);
             var numTicks = 1 + Math.round((d.xScale.domain()[1] - d.xScale.domain()[0]) / (60 * 1000)); // every minutes
             if (numTicks > 6) numTicks = 6;
             d.numTicks = numTicks;
-            d.x_tickFormat = layout.axis.x.tickFormat[i]||layout.axis.x.tickFormat[0]||null;
-            d.y_tickFormat = layout.axis.y&&layout.axis.y.tickFormat?(layout.axis.y.tickFormat[i]||layout.axis.y.tickFormat[0]||null):null;
+            d.x_tickFormat = layout.axis.x.tickFormat[i] || layout.axis.x.tickFormat[0] || null;
+            d.y_tickFormat = layout.axis.y && layout.axis.y.tickFormat ? (layout.axis.y.tickFormat[i] || layout.axis.y.tickFormat[0] || null) : null;
             xScale.push(d.xScale);
             d.yScale = d3[`scale${layout.axis.y.linear}`]()
-                .domain(layout.axis.y.domain[i]||layout.axis.y.domain[0]) // input
+                .domain(layout.axis.y.domain[i] || layout.axis.y.domain[0]) // input
                 .range([graphicopt.heightG(), 0]);
             yScale.push(d.yScale);
-            d.yLabel = layout.axis.y.label[i]||layout.axis.y.label[0]
-            d.forEach(f=>
-                f.forEach(e=>{
+            d.yLabel = layout.axis.y.label[i] || ''
+            d.forEach(f =>
+                f.forEach(e => {
                     e.xs = d.xScale(e.x);
                     e.ys = d.yScale(e.y);
                 })
             )
+            d.index = i;
         });
 
-        svg = d3.select(".lineSum").selectAll('svg')
+        let svgm = d3.select(".lineSum").classed('flex_col',true).selectAll('svg')
             .data(data).enter()
             .append('svg')
             .attrs({
@@ -124,7 +128,7 @@ let Tooltip_lib = function() {
 
         // 1.1. set background
         if (layout.background) {
-            let defs = svg.append('defs');
+            let defs = svgm.append('defs');
             if (layout.background.type === "gradient") {
                 defs
                     .append('linearGradient')
@@ -135,7 +139,7 @@ let Tooltip_lib = function() {
                         offset: d => d.start,
                         'stop-color': d => d.color,
                     });
-            }else{
+            } else {
                 defs
                     .append('g')
                     .attrs({id: 'backcolor'})
@@ -143,23 +147,23 @@ let Tooltip_lib = function() {
                     .enter().append('rect')
                     .attrs({
                         x: d => xScale[0](d.x0),
-                        width: d => xScale[0](d.x1)-xScale[0](d.x0),
+                        width: d => xScale[0](d.x1) - xScale[0](d.x0),
                         height: graphicopt.heightG(),
                         'fill': d => d.color,
                         'opacity': 0.5
                     });
             }
         }
-        g = svg.append("g")
-            .attr('class','pannel')
-            .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        g = svgm.append("g")
+            .attr('class', 'pannel')
+            .attr('transform', `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
 
         if (layout.background && layout.background.type !== "gradient") {
             g.append("use")
                 .attrs({
                     'xlink:href': '#backcolor',
                 });
-        }else {
+        } else {
             g.append("rect")
                 .attrs({
                     width: graphicopt.widthG(),
@@ -175,21 +179,22 @@ let Tooltip_lib = function() {
         g.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + graphicopt.heightG() + ")")
-            .call(d=> d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)(d)); //
+            .call(d => d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)(d)); //
 
         g.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate(0,0)")
-            .each(function(d)
-            {d3.select(this).call(d3.axisLeft(d.yScale).tickFormat(d.y_tickFormat).ticks(5).tickSize(-graphicopt.widthG())).select('.domain').remove();})//
+            .each(function (d) {
+                d3.select(this).call(d3.axisLeft(d.yScale).tickFormat(d.y_tickFormat).ticks(5).tickSize(-graphicopt.widthG())).select('.domain').remove();
+            })//
 
         // 3. draw
         // ****** Append the path ******
         var line_create = d3.line()
-            .x((d) =>{
+            .x((d) => {
                 return d.xs;
             }) // set the x values for the line generator
-            .y((d) =>{
+            .y((d) => {
                 return d.ys;
             }) // set the y values for the line generator
             .curve(d3.curveMonotoneX);
@@ -198,31 +203,31 @@ let Tooltip_lib = function() {
             .attr("class", "graph");
 
         let gpath = gc.selectAll('gline_path')
-            .data(d=>d)
+            .data(d => d)
             .enter()
             .append('g')
             .attr("class", "gline_path")
-            .on('click',function(d){
+            .on('click', function (d) {
                 d.clicked = !d.clicked;
-                d3.select(this).classed('highlight',d.clicked);
+                d3.select(this).classed('highlight', d.clicked);
             });
         gpath.append('path')
-            .attr('d',line_create)
+            .attr('d', line_create)
             .attr('fill', 'none')
-            .attr('stroke', d=>d.color?d.color:'black')
+            .attr('stroke', d => d.color ? d.color : 'black')
             .attr("stroke-width", 1);
 
         gpath.append("text")
             .attr("x", graphicopt.widthG())
-            .attr('dx',4)
-            .attr("y", d=>d[d.length-1].ys)
-            .attr("fill", d=>d.color?d.color:'black')
+            .attr('dx', 4)
+            .attr("y", d => d[d.length - 1].ys)
+            .attr("fill", d => d.color ? d.color : 'black')
             .style("text-anchor", "start")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
-            .text(d=>
+            .text(d =>
                 `${d.label}`)
-            .classed('statics',(d,i)=>i===0||i===d.total-1);
+            .classed('statics', (d, i) => i === 0 || i === d.total - 1);
         // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
         g.append("text")
             .attr("x", -graphicopt.heightG() / 2)
@@ -234,7 +239,7 @@ let Tooltip_lib = function() {
             .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
-            .text(d=>d.yLabel);
+            .text(d => d.yLabel);
 
         //************************************************************* Date and Time
 
@@ -247,6 +252,7 @@ let Tooltip_lib = function() {
             .style("font-weight", "bold")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
+            .classed('hide', d => d.index)
             .text(layout.title);
         g.append("text")
             .attr("dy", 10)
@@ -258,6 +264,7 @@ let Tooltip_lib = function() {
             .style("font-weight", "bold")
             .style("font-size", "12px")
             .attr("font-family", "sans-serif")
+            .classed('hide', d => d.index)
             .text(layout.title2);
         g.append("text")
             .attr("y", graphicopt.heightG() + 34)
@@ -267,7 +274,8 @@ let Tooltip_lib = function() {
             .style("font-size", "12px")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
             .attr("font-family", "sans-serif")
-            .text(d=>"" + d.xScale.domain()[0].toDateString());
+            .classed('hide', d => d.index)
+            .text(d => d.xScale.domain()[0].toDateString());
 
         // g.append("text")
         //     .attr("x", graphicopt.widthG() - 3)
@@ -279,6 +287,191 @@ let Tooltip_lib = function() {
         //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
         //     .attr("font-family", "sans-serif")
         //     .text("Current time: " + layout.axis.x.tickFormat(xScale.domain()[1]));
+    }
+    function customgraph (){
+        // 1. set scale
+        graphicopt.margin.left = graphicopt.margin.right = layout.drawopt.size/2;
+        var xScale = [];
+        data.forEach((d, i) => {
+            d.xScale = d3[`scale${layout.axis.x.linear}`]()
+                .domain(layout.axis.x.domain[i] || layout.axis.x.domain[0])
+                .range([0, Math.max(d.length* (layout.drawopt.size) || graphicopt.widthG(),graphicopt.widthG())]);
+            d.x_tickFormat = layout.axis.x.tickFormat[i] || layout.axis.x.tickFormat[0] || null;
+            xScale.push(d.xScale);
+            d.yLabel = layout.axis.y.label[i] || '';
+            d.index = i;
+            d.forEach(e=>e.x=d.xScale(e.timestep));
+        });
+        d3.select(".lineSum")
+            // .classed('flex_contain',false)
+            .styles({
+                'max-height':(Math.min(data.length,4)*graphicopt.height+25)+'px',
+                'max-width':(graphicopt.width+20)+'px',
+                'overflow-y':'auto',
+                'overflow-x':'hidden'
+            });
+        // let yscalediv = d3.select(".lineSum").append('div').attr('class','yaxis')
+        //     .selectAll('svg')
+        //     .data(data).enter()
+        //     .append('svg')
+        //     .attrs({
+        //         width: 20,
+        //         height: graphicopt.height,
+        //
+        //     });
+
+        let svgm = d3.select(".lineSum").append('div').attr('class','graph')
+            .on('scroll',function(){
+                g.select('.stricklabel').attr('transform',`translate(${this.scrollLeft},0)`);
+                d3.select(".lineSum")
+                    .select('.xaxis').attr('transform',`translate(${-this.scrollLeft},0)`)
+            })
+            .styles({
+                'max-width':graphicopt.width,
+                'overflow-x': 'auto',
+                'overflow-y':'hidden',
+                'height':'100%',
+                'margin-bottom':'25px',
+            })
+            .selectAll('svg')
+            .data(data).enter()
+            .append('svg')
+            .style('overflow','visible')
+            .attrs({
+                width: graphicopt.margin.left + graphicopt.margin.right + data[0].xScale.range()[1],
+                // width: graphicopt.widthG(),
+                height: graphicopt.height,
+            });
+
+        // 1.1. set background
+        if (layout.background) {
+            let defs = svgm.append('defs');
+            if (layout.background.type === "gradient") {
+                defs
+                    .append('linearGradient')
+                    .attrs({id: 'backcolor'})
+                    .selectAll('stop').data(layout.background.value)
+                    .enter().append('stop')
+                    .attrs({
+                        offset: d => d.start,
+                        'stop-color': d => d.color,
+                    });
+            } else {
+                defs
+                    .append('g')
+                    .attrs({id: 'backcolor'})
+                    .selectAll('rect').data(layout.background.value)
+                    .enter().append('rect')
+                    .attrs({
+                        x: d => xScale[0](d.x0),
+                        width: d => xScale[0](d.x1) - xScale[0](d.x0),
+                        height: graphicopt.heightG(),
+                        'fill': d => d.color,
+                        'opacity': 0.5
+                    });
+            }
+        }
+        g = svgm.append("g")
+            .attr('class', 'pannel')
+            .attr('transform', `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+
+        if (layout.background && layout.background.type !== "gradient") {
+            g.append("use")
+                .attrs({
+                    'xlink:href': '#backcolor',
+                });
+        } else {
+            g.append("rect")
+                .attrs({
+                    width: d=>d.xScale.range()[1],
+                    height: graphicopt.heightG()
+                }).styles({
+                fill: layout.background ? 'url("#backcolor")' : 'white'
+            });
+            if (!layout.background ){
+                svgm.style('background-color','white')
+            }
+        }
+
+
+        // 2. axis create
+
+        let mticks = g.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + graphicopt.heightG() + ")")
+            .call(d => d3.axisBottom(d.datum().xScale).tickSize(-graphicopt.heightG()).tickFormat('')(d)).style('stroke-width',0.1);
+        mticks.select('.domain').remove(); //
+        mticks.selectAll('line').styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'}); //
+
+        let xscalediv = d3.select(".lineSum")
+            .append('svg')
+            .attr('class','xaxis')
+            .styles({position:'absolute',
+                    'bottom':0, 'pointer-events': 'none', 'background-color':'#dddddd'
+            })
+            .attrs({
+                width: graphicopt.margin.left + graphicopt.margin.right + data[0].xScale.range()[1],
+                height: 25,
+
+            }).append("g") .attr("class", "x axis")
+            .attr('transform', `translate(${graphicopt.margin.left},0)`)
+            .call(d3.axisBottom(data[0].xScale).tickFormat(data[0].x_tickFormat));
+        // 3. draw
+        // ****** Append the path ******
+
+        let gc = g.append("g")
+            .attr("class", "graph");
+
+        let gpath = gc.selectAll(".linkLinegg")
+            .data(d => d)
+            .enter()
+            .append('g')
+            .attr("class", "linkLinegg dummy")
+            .attr('transform',d=>`translate(${d.x},${graphicopt.heightG()/2})`)
+            .each(function(d,i){
+                layout.drawFunc(d3.select(this).select('.dummy'), d3.select(this), [d], layout.drawopt);// hide 1st radar
+            });
+
+        // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
+        // yscalediv.append("g")
+        //     .attr('transform', `translate(${graphicopt.margin.left},${graphicopt.margin.top})`)
+        //         .append("text")
+        //         .attr("x", -graphicopt.heightG() / 2)
+        //         .attr("dy", '-1rem')
+        //         .attr("transform", "rotate(-90)")
+        //         .attr("fill", "#000")
+        //         .style("text-anchor", "middle")
+        //         .style("font-style", "italic")
+        //         .style("font-size", "12px")
+        //         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+        //         .attr("font-family", "sans-serif")
+        //         .text(d => d.yLabel);
+
+        //************************************************************* Date and Time
+
+        g.append("text")
+            .attr('class','stricklabel')
+            .attr("dy", 10)
+            .attr("dx", 10)
+            .attr("fill", "#000")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .style("text-anchor", "start")
+            .style("font-weight", "bold")
+            .style("font-size", "12px")
+            .attr("font-family", "sans-serif")
+            .text(d=>d.yLabel);
+
+    }
+    master.show = function (target){
+        if (target)
+            tool_tip.show(undefined,undefined,'lineSum',target);
+        tool_tip.show(undefined,undefined,'lineSum');
+        d3.select('#d3-tip').on('hide',master.hide);
+        if(!radarplot){
+            linegraph();
+        }else{
+            customgraph();
+        }
 
     };
     master.hide = function (){
@@ -325,8 +518,8 @@ let Tooltip_lib = function() {
         return arguments.length ? (svg_master = _, master) : svg_master;
     };
 
-    master.data = function (_) {
-        return arguments.length ? (data = handle_data(_), master) : data;
+    master.data = function (dataRaw,radaro) {
+        return arguments.length ? (data = handle_data(dataRaw,radaro), master) : data;
     };
 
     master.tooltip = function (_) {

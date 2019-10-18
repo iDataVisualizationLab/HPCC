@@ -34,6 +34,7 @@ let JobMap = function() {
                 g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
             else
                 g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
+            d3.select('.tippannel').select('.freezing').text(freezing?'unfreeze':'freeze')
         });
         if (!freezing) {
             path.on('mouseover', function(d){
@@ -105,10 +106,29 @@ let JobMap = function() {
         timebox = svg.append('g').attr('class','timebox')
             .attr('transform','translate(40,20)')
             .style('font-size','16px').attr('dy','1rem');
-        initTimebox()
-
+        initTimebox();
+        tippannel = d3.tip()
+            .attr("class", "tippannel d3-tip")
+            .attr("id", "tippannel")
+            .direction('e')
+            .offset([0, 10])
+            .html('<button class="closeBTN" onclick="d3.select(\'#tippannel\').dispatch(\'hide\')">&times;</button><div>' +
+                '<p class="title"></p>' +
+                '<button class="btn-small radarFullTime">Show full time series</button>' +
+                '<button class="btn-small metricFullTime">Show metrics time series</button>' +
+                '<button class="btn-small freezing">freeze</button></div>');
+        svg.append('circle').attr('id', 'tipfollowscursor');
+        svg.call(tippannel);
+        d3.select('#tippannel').on('hide',tippannel.hide);
+        d3.select('.tippannel').on('mouseover',function(){d3.select(this).classed('hover',true);  clearTimeout(tiptimer)})
+            .on('mouseleave',function(){
+                d3.select(this).classed('hover',false);
+                if(!freezing)
+                    setTimeout( ()=> {releasehighlight(); tippannel.hide();},500)
+            });
         return jobMap;
     };
+    let tippannel, tiptimer;
     jobMap.remove = function (){
         if (simulation) simulation.stop();
         nodeg.selectAll('*').remove();
@@ -240,7 +260,7 @@ let JobMap = function() {
                     drawEmbedding_timeline(data,colorfill);
                 }
             });
-        const radaropt = {colorfill:colorfill,size:(scaleNode_y_midle(1)-scaleNode_y_midle(0))*2};
+        const radaropt = {colorfill:colorfill,size:(scaleNode_y_midle(1)-scaleNode_y_midle(0))*4};
         let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
         datapoint.exit().remove();
         datapoint = datapoint.enter().append('g')
@@ -297,7 +317,52 @@ let JobMap = function() {
         }
 
         bg.on('mouseover',function(d){
-            if (freezing) {
+            if (!freezing)
+                releasehighlight();
+            clearTimeout(tiptimer);
+            d3.selectAll('.d3-tip').styles({'pointer-events':'none','opacity':0})
+            var target = d3.select('#tipfollowscursor')
+                .attr('cx', d3.event.offsetX)
+                .attr('cy', d3.event.offsetY - 5) // 5 pixels above the cursor
+                .node();
+            tippannel.show(d,target);
+            let tipdiv = d3.select('.tippannel');
+            tipdiv.select('.title').html(d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+'))
+            tipdiv.select('.radarFullTime').on('click',()=>{
+                let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
+                let layout = tooltip_lib.layout();
+                layout.axis.x.domain = [[first__timestep, last_timestep]];
+                const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+                layout.axis.y.label = [];
+                layout.axis.y.domain = [];
+                layout.axis.y.tickFormat = [];
+                layout.background = undefined;
+                // layout.background = {
+                //     type: 'discrete',
+                //     value: d.timeline.clusterarr.map((v, i) => {
+                //         return {
+                //             x0: scaletime.invert(v.timestep),
+                //             x1: d.timeline.clusterarr[i + 1] ? scaletime.invert(d.timeline.clusterarr[i + 1].timestep) : undefined,
+                //             color: colorFunc(v.cluster)
+                //         }
+                //     })
+                // };
+                layout.drawFunc = createRadar;
+                layout.drawopt =  {colorfill:true,size:50};
+                // layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
+                const data_in = d.values_name.map( name=>{
+                    let data_temp =hostOb[name].data.map((o,i)=>{temp=_.cloneDeep(o);temp.name = hostOb[name].arrcluster[i];temp.timestep = scaletime.invert(i); return temp;});
+                    layout.axis.y.label.push(name);
+                    return data_temp;
+                });
+
+                layout.title = '';
+                layout.title2 = ``;
+
+                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 50,margin: {top:0,bottom:0,left:0,right:0}}).data(data_in,true).layout(layout).show(target);
+                tippannel.hide();
+            });
+            tipdiv.select('.metricFullTime').on('click',()=>{
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
@@ -340,8 +405,13 @@ let JobMap = function() {
                 layout.title = '';
                 layout.title2 = `#compute: ${d.values_name.length}`;
 
-                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100}).data(data_in).layout(layout).show();
-            }
+                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100,margin:tooltip_opt.margin}).data(data_in).layout(layout).show(target);
+                tippannel.hide();
+            });
+            tipdiv.select('.freezing').text(freezing?'Unfreeze':'freeze').on('click',()=>{d3.select(this.parentNode).dispatch('click');})
+        }).on('mouseleave',function(d){
+            if(!freezing)
+                tiptimer = setTimeout( ()=> {releasehighlight(); tippannel.hide();},500);
         });
 
         updateaxis();
@@ -600,7 +670,8 @@ let JobMap = function() {
         ;
 
         computers = nodeg.selectAll('.computeNode');
-        computers.classed('statics',!!clusterNode_data)
+        computers.select('.label').classed('hide',runopt.compute.type==='timeline');
+        computers.classed('statics',!!clusterNode_data);
 
 
         //job node
@@ -793,6 +864,7 @@ let JobMap = function() {
             });
             // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
         // reset freezing action
+        freezing = false;
         releasehighlight();
         g.selectAll('.userNode')
             .call(path=>freezinghandle(path,[function(d){
@@ -829,11 +901,13 @@ let JobMap = function() {
                 d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
                 table_footerNode.classed('fade',true);
             },null],[function(d){
-                d3.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
-                d3.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-                d3.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-                link.classed('hide',false).classed('highlight',false);
-                table_footerNode.classed('fade',false);
+                if (runopt.compute.type!=='timeline') {
+                    d3.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                    d3.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
+                    d3.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                    link.classed('hide', false).classed('highlight', false);
+                    table_footerNode.classed('fade', false);
+                }
             },null]));
         g.selectAll('.jobNode')
             .call(path=>freezinghandle(path,[function(d){
@@ -906,17 +980,13 @@ let JobMap = function() {
             simulation.fistTime = false;
             simulation.alphaTarget(0.7).restart();
         }
-        function releasehighlight(){
-            freezing = false;
-            g.selectAll('.node').style('pointer-events','auto');
-            g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-            g.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-            g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
-            link.classed('hide',false).classed('highlight',false);
-            table_footerNode.classed('fade',false);
-        }
         return jobMap;
     };
+    function releasehighlight(){
+        g.selectAll('.node').style('pointer-events','auto').classed('fade',false).classed('hide',false).classed('highlight',false);
+        g.selectAll( '.links').classed('hide',false).classed('highlight',false);
+        g.select('.table.footer').classed('fade',false);
+    }
     function getLinkKeyColor(d){
         switch (runopt.graphic.colorBy) {
             case 'user':
@@ -1149,6 +1219,7 @@ let JobMap = function() {
                 ct = c.arr[ts];
                 if (ct)
                     ct.forEach(h => {
+                        hostOb[h].arrcluster[ts] = c.name;
                         let currentarr = hostOb[h].timeline.clusterarr;
                         if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
                             hostOb[h].timeline.clusterarr.stack++;
@@ -1183,6 +1254,7 @@ let JobMap = function() {
         linkdata = [];
         Hosts.forEach(h=>{
             h.user=[];
+            h.arrcluster = [];
             h.timeline = {clusterarr:[],line:[]};
         });
 

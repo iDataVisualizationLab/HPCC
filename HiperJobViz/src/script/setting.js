@@ -1,6 +1,6 @@
 var application_name ='Joblist';
 var jobList=[];
-var cluster_info;
+var cluster_info,clusterDescription;
 var hostList;
 var serviceList = ["Temperature","Memory_usage","Fans_speed","Power_consum","Job_scheduling"];
 var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
