@@ -803,7 +803,7 @@ let JobMap = function() {
             // if(this.alpha()<0.69) {
             let range_com = d3.extent(computers.data(), d => d.x);
             scaleNode.domain(range_com).range([50, 120]);
-            g.select('.host_title').attrs({'text-anchor':"start",'x':100,'dy':scaleNode_y(0)-20}).text("HOSTS");
+            g.select('.host_title').attrs({'text-anchor':"start",'x':100,'dy':scaleNode_y(0)-20}).text("Hosts");
             computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
             if (runopt.compute.type==='timeline') {
                 // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
