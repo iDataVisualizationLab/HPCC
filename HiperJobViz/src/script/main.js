@@ -1990,7 +1990,7 @@ function cluster_map (dataRaw) {
         return temp_b;
     });
     let orderSimilarity = similarityCal(data)
-    data.sort((a,b)=>(orderSimilarity[b.order]-orderSimilarity[a.order])).forEach((d,i)=>d.order = i);
+    data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>d.order = i);
     //--shoudn't here
     dataRaw.forEach(c=>{
         let matchitem = data.find(d=>d.id===c.name);
@@ -2158,7 +2158,7 @@ function similarityCal(data){
         mapIndex.push(i);
         simMatrix.push(temp_arr)
     }
-    mapIndex.sort((a,b)=> simMatrix[b].total-simMatrix[a].total);
+    mapIndex.sort((a,b)=> simMatrix[a].total-simMatrix[b].total);
     // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
     // mapIndex.sort((a,b)=>
     //     b===undefinedposition?1:(a===undefinedposition?-1:0)
@@ -2167,16 +2167,16 @@ function similarityCal(data){
     let orderIndex = [simMatrix[current_index].index];
 
     do{
-        let maxL = 0;
+        let maxL = Infinity;
         let maxI = 0;
         mapIndex.forEach((d)=>{
             let temp;
             if (d>simMatrix[current_index].index ){
                 temp = simMatrix[current_index][d-current_index-1];
             }else{
-                temp = simMatrix[current_index-d-1]
+                temp = simMatrix[d][current_index-d-1]
             }
-            if (maxL<temp){
+            if (maxL>temp){
                 maxL = temp;
                 maxI = d;
             }
@@ -2186,6 +2186,6 @@ function similarityCal(data){
         mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);
     return orderIndex;
     function similarity (a,b){
-        return Math.sqrt(d3.mean(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+        return Math.sqrt(d3.sum(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
     }
 }
