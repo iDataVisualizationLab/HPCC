@@ -333,7 +333,7 @@ let JobMap = function() {
                 .node();
             tippannel.show(d,target);
             let tipdiv = d3.select('.tippannel');
-            tipdiv.select('.title').html(d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+'))
+            tipdiv.select('.title').html('Selected host(s): '+d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+'))
             tipdiv.select('.radarFullTime').on('click',()=>{
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
@@ -410,7 +410,7 @@ let JobMap = function() {
                 });
 
                 layout.title = '';
-                layout.title2 = `#compute: ${d.values_name.length}`;
+                layout.title2 = `#host: ${d.values_name.length}`;
 
                 tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100,margin:tooltip_opt.margin}).data(data_in).layout(layout).show(target);
                 tippannel.hide();
@@ -569,7 +569,7 @@ let JobMap = function() {
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
             lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
-            g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Hosts");
+            g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
                 d.x = 300;
@@ -1132,7 +1132,7 @@ let JobMap = function() {
                 layout.axis.x.tickFormat = [multiFormat];
                 layout.axis.y.domain = [scaleY.range()];
                 layout.title = `User: ${username}`;
-                layout.title2 = `#compute: ${data.length}`;
+                layout.title2 = `#host(s): ${data.length}`;
                 if (layout.axis.y.domain[0][1] > 1000)
                     layout.axis.y.tickFormat = [d3.format('~s')];
                 tooltip_lib.graphicopt(tooltip_opt).data([data]).layout(layout).show();

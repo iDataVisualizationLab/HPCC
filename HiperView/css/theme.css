@@ -35,11 +35,14 @@
 }
 #mySidenav .collapsible .collapsible-header{
     background-color: transparent;
+    background: transparent;
+    background: -webkit-linear-gradient(to bottom, transparent 70%, #ffffff21);
+    background: linear-gradient(to bottom, transparent 70%, #ffffff21);
     font-size: large
 }
 
 #mySidenav .collapsible .collapsible-body{
-    /*background-color: #ffffff3d;*/
+    background-color: #ffffff21;
     padding: 1rem;
 }
 
@@ -417,6 +420,9 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 }
 .no_magrin {
     margin: 0;
+}
+.no_leftmagrin {
+    margin-left: 0!important;
 }
 .no_padding {
     padding :0!important;
