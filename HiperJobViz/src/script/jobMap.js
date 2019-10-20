@@ -243,7 +243,7 @@ let JobMap = function() {
     let timelineScale = d3.scaleLinear().range([-10,0]);
     function updateClusterLabel(){
         if (clusterNode_data)
-            nodeg.selectAll('.computeNode').select('text').text(d=>clusterdata.find(c=>c.name===d.name).text);
+            nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text);
     }
     function drawEmbedding_timeline(data,colorfill) {
 
@@ -673,7 +673,7 @@ let JobMap = function() {
                 'dx':-graphicopt.node.r,
                 'dy':'0.5rem',
                 'fill':'black',
-            }).merge(computers.select('.computeSig_label')).text(d=>d.text?d.text:trimNameArray(d.name))
+            }).merge(computers.select('.computeSig_label')).text(d=>d.orderG!==undefined?`Group ${d.orderG+1}: ${d.text}`:trimNameArray(d.name))
         ;
 
         computers = nodeg.selectAll('.computeNode');
@@ -1667,7 +1667,7 @@ let JobMap = function() {
         return arguments.length ? (clusterdata = v,updateClusterTimeline(), jobMap) : clusterdata;
     };
 
-    jobMap.clusterDataLable = function (v) {
+    jobMap.clusterDataLabel = function (v) {
         return arguments.length ? (clusterdata = v,updateClusterLabel(), jobMap) : clusterdata;
     };
 

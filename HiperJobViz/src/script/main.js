@@ -1990,11 +1990,14 @@ function cluster_map (dataRaw) {
         return temp_b;
     });
     let orderSimilarity = similarityCal(data)
-    data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>d.order = i);
+    data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>{
+        d.order = i;
+        dataRaw.find(c=>c.name===d.id).orderG = i;
+    });
     //--shoudn't here
     dataRaw.forEach(c=>{
         let matchitem = data.find(d=>d.id===c.name);
-        c.text = c.text.replace(`Group ${c.index+1}`,`Group ${matchitem.order+1}`);
+        // c.text = c.text.replace(`Group ${c.index+1}`,`Group ${matchitem.order+1}`);
         matchitem[0].text =  c.text;
     });
     data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
@@ -2039,14 +2042,14 @@ function cluster_map (dataRaw) {
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
-        d3.selectAll('.radarCluster').select('span.clusterlabel').text(d=>d[0].text);
+        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total.toLocaleString());
     }, 0);
 }
 function updateclusterDescription (name,text){
     cluster_info.find(c=>c.name===name).text = text;
-    jobMap.clusterDataLable(cluster_info)
+    jobMap.clusterDataLabel(cluster_info)
 }
 function recalculateCluster (option) {
     preloader(true);
@@ -2077,7 +2080,7 @@ function recomendName (clusterarr){
             c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
             name += `${zero_el.length} metric(s) undefined `;
         }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = `Group ${c.index+1}: undefined`;
+            c.text = `undefined`;
             if(!clusterDescription[c.name])
                 clusterDescription[c.name] = {};
             clusterDescription[c.name].id = c.name;
@@ -2090,9 +2093,9 @@ function recomendName (clusterarr){
         }).join(', ');
         name = name.trim();
         if (name==='')
-            c.text = `Group ${c.index+1}`;
+            c.text = ``;
         else
-            c.text = `Group ${c.index+1}: ${name}`;
+            c.text = `${name}`;
         if(!clusterDescription[c.name])
             clusterDescription[c.name] = {};
         clusterDescription[c.name].id = c.name;
@@ -2105,16 +2108,16 @@ function recomendColor (clusterarr) {
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
-    clusterarr.filter(c=>!c.text.match(': undefined')&&!c.text.match('undefined'))
+    clusterarr.filter(c=>!c.text.match('undefined'))
         .forEach(c=>{
             colorarray.push(colorcs(c.name));
             orderarray.push(c.name);
         });
-    clusterarr.filter(c=>c.text.match(': undefined')).forEach(c=>{
+    clusterarr.filter(c=>c.text==='undefined').forEach(c=>{
         colorarray.push('black');
         orderarray.push(c.name);
     });
-    clusterarr.filter(c=>c.text.match('undefined')).forEach(c=>{
+    clusterarr.filter(c=>c.text!=='undefined' && c.text.match('undefined')).forEach(c=>{
         colorarray.push('#7f7f7f');
         orderarray.push(c.name);
     });
