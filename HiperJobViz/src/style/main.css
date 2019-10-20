@@ -499,3 +499,26 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
     -webkit-box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
 }
+
+[type="checkbox"].filled-in:not(:checked)+span:not(.lever):before {
+    top: 7px;
+    left: 3px;
+}
+[type="checkbox"].filled-in:not(:checked)+span:not(.lever):after {
+    height: 14px;
+    width: 14px;
+}
+
+[type="checkbox"].filled-in:checked+span:not(.lever):before {
+    top: -2px;
+    left: 1px;
+    width: 6px;
+    height: 10px;
+}
+[type="checkbox"].filled-in:checked+span:not(.lever):after {
+    height: 14px;
+    width: 14px;
+}
+[type="checkbox"] + span:not(.lever) {
+    height: 15px;
+}

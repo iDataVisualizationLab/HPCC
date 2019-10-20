@@ -532,10 +532,24 @@
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
                 <div  class="valign-wrapper hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
-                    <label>
-                        <input id="lensing_control" type="checkbox" class="filled-in">
-                        <span style="font: unset;color: black">Lensing</span>
-                    </label>
+                    <div class="col s12">
+                        <label>
+                            <input id="lensing_control" type="checkbox" class="filled-in">
+                            <span style="font: unset;color: black;padding-left:20px;">Lensing</span>
+                        </label>
+                        <label>
+                            <input id="jobOverlay" type="checkbox" class="filled-in">
+                            <span style="font: unset;color: black;padding-left:20px;">Overlay Job info on timeline</span>
+                        </label>
+                    </div>
+                    <div class="col s12">
+                        <label for="timelineGroupMode" style="font: unset;color: black;padding-left:20px;"> Group timeline by: </label>
+                        <select id="timelineGroupMode" class="browser-default" style="height:auto;padding: 0;">
+                            <option value = "single">Individual host</option>
+                            <option value = "groupWithJob" selected>group by similarity w.r.t. jobs</option>
+                            <option value = "group" selected>group by similarity</option>
+                        </select>
+                     </div>
                 </div>
                 <svg class="mainsvg" >
                     <svg id ="jobmap">

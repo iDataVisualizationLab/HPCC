@@ -822,7 +822,7 @@ function concaveHull() {
 function truncate (text,endsymbol) {
     text.each(function() {
         var text = d3.select(this);
-        var words = text.text().split(/\s+/);
+        var words = text.text().trim().split(/\s+/);
 
         var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...'+(endsymbol||''));
         var width = parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
@@ -852,6 +852,35 @@ function truncate (text,endsymbol) {
         }
     });
 }//wrap
+function wrap(text, istruncate,width) {
+    if (istruncate){
+        truncate(text,'');
+    }else {
+        text.each(function () {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // ems
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+            width = width || parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }
+    return text;
+}
 function controlView(config){
     switch(config.charType){
         case 'T-sne Chart':

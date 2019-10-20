@@ -26,7 +26,7 @@ let JobMap = function() {
     let simulation;
     let timebox,linkg,nodeg,schema=[];
     let fisheye_scale = {x:fisheye.scale(d3.scaleLinear),y:fisheye.scale(d3.scaleLinear)};
-    let freezing=false;
+    let freezing=false,textWarp=200;
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             freezing = !freezing;
@@ -243,7 +243,7 @@ let JobMap = function() {
     let timelineScale = d3.scaleLinear().range([-10,0]);
     function updateClusterLabel(){
         if (clusterNode_data)
-            nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text);
+            nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text).call(wrap,true);
     }
     function drawEmbedding_timeline(data,colorfill) {
 
@@ -554,7 +554,7 @@ let JobMap = function() {
         computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
         if (runopt.compute.type==='timeline') {
-            g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-40}).text("Hosts's timeline");
+            g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-20}).text("Hosts's timeline");
             // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
             scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
             computers.transition().attr('transform', d => {
@@ -673,7 +673,8 @@ let JobMap = function() {
                 'dx':-graphicopt.node.r,
                 'dy':'0.5rem',
                 'fill':'black',
-            }).merge(computers.select('.computeSig_label')).text(d=>d.orderG!==undefined?`Group ${d.orderG+1}: ${d.text}`:trimNameArray(d.name))
+                'width': textWarp
+            }).merge(computers.select('.computeSig_label')).text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true)
         ;
 
         computers = nodeg.selectAll('.computeNode');
