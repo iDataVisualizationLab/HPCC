@@ -1500,7 +1500,7 @@ $( document ).ready(function() {
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
-        d3.select('#lensingMode').classed('hide',true);
+        d3.select('#timelineTool').classed('hide',true);
         jobMap_runopt.lensing = false;
         $('#lensing_control').prop('checked',false);
         if (jobMap_runopt.compute.type ==='timeline')
@@ -1508,7 +1508,7 @@ $( document ).ready(function() {
             jobMap_runopt.compute.clusterNode = false;
             jobMap_runopt.compute.clusterJobID = true;
             jobMap_runopt.graphic.colorBy = 'group';
-            d3.select('#lensingMode').classed('hide',false);
+            d3.select('#timelineTool').classed('hide',false);
             d3.select('#jobIDCluster_control').attr('checked','');
             // document.getElementById("colorConnection_control").options.selectedIndex = 0;
             // jobMap_runopt.graphic.colorBy = 'group';
@@ -2041,7 +2041,7 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
-        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total);
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total.toLocaleString());
     }, 0);
 }
 function updateclusterDescription (name,text){
