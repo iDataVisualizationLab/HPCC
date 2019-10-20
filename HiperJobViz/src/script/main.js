@@ -1544,10 +1544,6 @@ $( document ).ready(function() {
         jobMap_runopt.graphic.colorBy = sect.options[sect.selectedIndex].value;
         jobMap.runopt(jobMap_runopt).draw();
     });
-    d3.select('#lensing_control').on("change", function () {
-        jobMap_runopt.lensing = $(this).prop('checked');
-        jobMap.runopt(jobMap_runopt);
-    });
     d3.select('#datacom').on("change", function () {
         preloader(true);
         exit_warp();

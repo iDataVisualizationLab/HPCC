@@ -18,7 +18,7 @@ let JobMap = function() {
             },
         },runopt={compute:{setting:'pie'},graphic:{colorBy:'user'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
         svg, g, table_headerNode,first = true,
-        dataRaw=[],data = [],arr=[],
+        dataRaw=[],listallJobs=[],data = [],arr=[],
         Hosts = []
     ;
     tableFooter.dataRaw =[];
@@ -126,6 +126,23 @@ let JobMap = function() {
                 if(!freezing)
                     setTimeout( ()=> {releasehighlight(); tippannel.hide();},500)
             });
+
+        d3.select('#lensing_control').on("change", function () {
+            runopt.lensing = $(this).prop('checked');
+            if (runopt.lensing) {
+                g.select('.fisheyeLayer').style('pointer-events', 'auto');
+            } else {
+                g.select('.fisheyeLayer').style('pointer-events', 'none');
+                fisheye_scale.x = d=>d;
+            }
+        });
+        d3.select('#jobOverlay').on("change", function () {
+            runopt.overlayjob = $(this).prop('checked');
+            if (runopt.compute.type==='timeline'){
+                drawOverlayJob (runopt.overlayjob);
+            }
+        });
+
         return jobMap;
     };
     let tippannel, tiptimer;
@@ -245,8 +262,32 @@ let JobMap = function() {
         if (clusterNode_data)
             nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text).call(wrap,true);
     }
+    function drawOverlayJob(isoverlay){
+        if(isoverlay){
+            let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
+            let bg = svg.selectAll('.computeSig');
+            let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
+            jobover.exit().remove();
+            jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>[
+                {key:'submit',value:d.submitTime},
+                {key:'start',value:d.startTime},
+                {key:'end',value:d.endTime}])
+                .enter().append('path').attr('class',d=>`timemark ${d.key}`);
+            bg.selectAll('.timemark').datum(d=>d.key?d:{key:'end',value:d.endTime}).attr('d',d=>{
+                let size = 3;
+                switch (d.key) {
+                    case 'submit':
+                        return `M 0 -${size} L 0 0 L 0 ${size}`;
+                    case 'start':
+                        return `M -${size} -${size} L 0 0 L -${size} ${size}`;
+                    default:
+                        return `M ${size} -${size} L 0 0 L ${size} ${size}`;
+                }
+            }).attr('transform',d=>`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},0)`)
+        }else
+            svg.selectAll('.computeSig').selectAll('.joboverg').remove();
+    }
     function drawEmbedding_timeline(data,colorfill) {
-
         // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
@@ -271,7 +312,7 @@ let JobMap = function() {
             .attr('class','linkLinegg timeline')
         .merge(datapoint);
         datapoint.each(function(d,i){
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide',i?false:true);// hide 1st radar
+            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide',!i);// hide 1st radar
         });
         datapoint.attr('transform',function(d){
             return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
@@ -321,7 +362,7 @@ let JobMap = function() {
         }else{
             bg.selectAll(".jobtickg").remove();
         }
-
+        drawOverlayJob(runopt.overlayjob)
         bg.on('mouseover',function(d){
             if (!freezing)
                 releasehighlight();
@@ -1274,7 +1315,9 @@ let JobMap = function() {
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
-        data=dataRaw.filter(d=>user.findIndex(e=>e.key===d.user)!==-1)
+        data=dataRaw.filter(d=>user.findIndex(e=>e.key===d.user)!==-1);
+        _.differenceBy(listallJobs.filter(l=>!l.endTime),dataRaw,'jobID').forEach(f=>f.endTime=last_timestep.toString()); //job has been ended
+        listallJobs = _.unionBy(listallJobs,dataRaw,'jobID');
         data.forEach(d=>{
             d.name = d.jobID+'';
             d.type = 'job';
