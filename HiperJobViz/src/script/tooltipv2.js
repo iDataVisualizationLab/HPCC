@@ -116,8 +116,21 @@ let Tooltip_lib = function() {
             )
             d.index = i;
         });
-
-        let svgm = d3.select(".lineSum").classed('flex_col',true).selectAll('svg')
+        d3.select(".lineSum")
+        .styles({
+            'max-height':Math.min(data.length*graphicopt.height+25,heightdevice*0.5)+'px',
+            'max-width':(graphicopt.width+20)+'px',
+            'overflow-y':'auto',
+            'overflow-x':'hidden'
+        });
+        let svgm = d3.select(".lineSum").append('div').attr('class','graph')
+            .styles({
+                'max-width':graphicopt.width,
+                'overflow-x': 'auto',
+                'overflow-y':'hidden',
+                'height':'100%',
+                'margin-bottom':'25px',
+            }).selectAll('svg')
             .data(data).enter()
             .append('svg')
             .attrs({
@@ -470,7 +483,7 @@ let Tooltip_lib = function() {
         if(!radarplot){
             linegraph();
             let heightTip =+ $('#d3-tip')[0].offsetHeight;
-            d3.select('#d3-tip').style('transform',`translate(0px,${(d3.event.y+heightTip-heightdevice)>0?-(d3.event.y+heightTip-heightdevice):0}px)`).select('.lineSum').style('overflow','auto');
+            d3.select('#d3-tip').style('transform',`translate(0px,${(d3.event.y+heightTip-heightdevice)>0?-(d3.event.y+heightTip-heightdevice):0}px)`);
         }else{
             // if (niceOffset){
             //     let heightTip =+ $('#d3-tip')[0].offsetHeight;
