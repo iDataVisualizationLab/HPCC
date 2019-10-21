@@ -63,7 +63,7 @@ let Tooltip_lib = function() {
             str += '<button onclick="saveSVG_light(this,\'jpg\')" class="modal-trigger" href="#savedialog">Save JPG</button>';
         }else {
             if (classtype==='lineSum'){
-                str += '<button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">&times;</button>';
+                str += '<div style="width:100%" class="header"><button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">&times;</button></div>';
                 str += '<div class="' + classtype + ' flex_contain"></div>'; // Spider chart holder
             }else {
                 str += '<span>Notsupport</span>'
@@ -447,15 +447,31 @@ let Tooltip_lib = function() {
             .append('svg')
             .attr('class','xaxis')
             .styles({position:'absolute',
-                    'bottom':0, 'pointer-events': 'none', 'background-color':'#dddddd'
+                'overflow':'visible',
+                'bottom':0, 'pointer-events': 'none'
             })
             .attrs({
                 width: graphicopt.margin.left + graphicopt.margin.right + data[0].xScale.range()[1],
                 height: 25,
-
-            }).append("g") .attr("class", "x axis")
+            });
+        xscalediv.append('rect')
+            .attrs({width:graphicopt.width,height:25})
+            .styles({
+                fill: '#dddddd',
+            });
+        xscalediv = xscalediv.append("g") .attr("class", "x axis")
             .attr('transform', `translate(${graphicopt.margin.left},0)`)
             .call(d3.axisBottom(data[0].xScale).tickFormat(data[0].x_tickFormat));
+
+        xscalediv.append("text")
+        // .attr("y", graphicopt.heightG() + 34)
+            .attr("fill", "#000")
+            .style("font-style", "italic")
+            .style("text-anchor", "start")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text(data[0].xScale.domain()[0].toDateString());
         // 3. draw
         // ****** Append the path ******
 
