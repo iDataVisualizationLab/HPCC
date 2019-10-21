@@ -328,7 +328,7 @@ let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
 let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
-let isbusy = false, imageRequest = false, isanimation=true;
+let isbusy = false, imageRequest = false, isanimation=false;
 let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0};
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
@@ -416,7 +416,7 @@ function main() {
                 if (graphicControl.charType === "T-sne Chart")
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
                 jobMap.dataComp(data.result.arr);
-                if(isanimation)
+                if(isanimation||islastimestep(lastIndex))
                     jobMap.drawComp();
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
@@ -526,8 +526,6 @@ function request(){
     timerequest();
     interval2 = new IntervalTimer(timerequest , simDuration);
     function timerequest() {
-        if (!isanimation)
-            preloader(true,lastIndex/59*100);
         var midlehandle = function (ri){
             let returniteration = ri[0];
             let returnCount = ri[1];
@@ -600,7 +598,7 @@ function request(){
                         if(countbuffer===0) {
                             getJoblist();
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
-                            if(isanimation)
+                            // if(isanimation)
                                 jobMap.draw();
                         }
                         countbuffer+=hosts.length;

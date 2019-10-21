@@ -142,6 +142,13 @@ let JobMap = function() {
                 drawOverlayJob (runopt.overlayjob);
             }
         });
+        d3.select('#timelineGroupMode').on("change", function () {
+            var sect = document.getElementById("timelineGroupMode");
+            runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
+            if (runopt.compute.type==='timeline'){
+                drawOverlayJob (runopt.overlayjob);
+            }
+        });
 
         return jobMap;
     };
