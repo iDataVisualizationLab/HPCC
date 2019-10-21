@@ -318,7 +318,7 @@ var TsnePlotopt  = {
     tooltip_opt={
         width: 650,
         height: 400,
-        margin:{top:5,bottom:35,left:45,right:85}
+        margin:{top:5,bottom:5,left:45,right:85}
     };
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();

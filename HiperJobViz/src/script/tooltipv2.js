@@ -216,7 +216,7 @@ let Tooltip_lib = function() {
             .styles({
                 fill: '#dddddd',
         });
-        xscalediv.append("g") .attr("class", "x axis")
+        xscalediv = xscalediv.append("g") .attr("class", "x axis")
             .attr('transform', `translate(${graphicopt.margin.left},0)`)
             .call(d3.axisBottom(data[0].xScale).tickFormat(data[0].x_tickFormat));
 
