@@ -416,7 +416,7 @@ function main() {
                 if (graphicControl.charType === "T-sne Chart")
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
                 jobMap.dataComp(data.result.arr);
-                if(isanimation||islastimestep(lastIndex))
+                if(isanimation)
                     jobMap.drawComp();
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
@@ -537,6 +537,8 @@ function request(){
             count = hosts.length;
         };
         var drawprocess = function ()  {
+            if (islastimestep(lastIndex+1))
+                isanimation  = true;
             if (graphicControl.mode===layout.HORIZONTAL)
                 drawsummarypoint(countarr);
             countarr.length = 0;
@@ -566,7 +568,7 @@ function request(){
             currentlastIndex = iteration;
             // stop condition
             if (islastimestep(lastIndex)) {
-                jobMap.draw();
+                jobMap.draw().drawComp();
                 console.log("done");
                 preloader(false);
                 interval2.stop();
