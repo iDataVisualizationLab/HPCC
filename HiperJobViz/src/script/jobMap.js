@@ -146,7 +146,7 @@ let JobMap = function() {
             var sect = document.getElementById("timelineGroupMode");
             runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
             if (runopt.compute.type==='timeline'){
-                drawOverlayJob (runopt.overlayjob);
+                jobMap.data().draw();
             }
         });
 
@@ -331,7 +331,7 @@ let JobMap = function() {
             return {
                 'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
                 'x2':fisheye_scale.x(timelineScale(0)),
-                'stroke-width': 5,
+                'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
                 'opacity':0
             };
         });
@@ -1449,43 +1449,89 @@ let JobMap = function() {
             clusterNode_data = undefined;
         if (runopt.compute.type==='timeline') {
             clusterdata_timeline = [];
-            data.forEach(d=>{
-               let listcomp = d.nodes.filter(e=>{
-                   let temp = linkdata.filter(f=>f.source===e);
-                   if (temp.length===1)
-                       return true;
-                   else if(temp.length>1){
-                       if (!clusterdata_timeline.find(c=>c.name===e)) {
-                           clusterdata_timeline.push({
-                               name: e,
-                               values_name: [e],
-                               timeline: hostOb[e].timeline
-                           });
-                           temp.forEach(d=>d.links=1);
-                       }
-                   }
-                   return false;
-               });
-                let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline)});
-                Object.keys(temp_g).forEach(k=>{
-                    let temp_h = {};
-                    temp_h.values_name = temp_g[k].map(e=>e.name);
-                    temp_h.name = temp_h.values_name.join(' ');
-                    temp_g[k].forEach((n)=>{
-                        linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
-                            if(i===0) {
-                                e.source =  temp_h.name;
-                                e.links = temp_g[k].length;
-                            }else{
-                                e.del = true;
+            switch (runopt.timelineGroupMode) {
+                case 'group':
+                    let listcomp = hosts.map(h=>{
+                        let e = h.name;
+                        return hostOb[e];
+                    });
+                    let temp_g = _.groupBy(listcomp,function(e){return JSON.stringify(e.timeline)});
+                    Object.keys(temp_g).forEach(k=>{
+                        let temp_h = {};
+                        temp_h.values_name = temp_g[k].map(e=>e.name);
+                        temp_h.name = temp_h.values_name.join(' ');
+                        temp_g[k].forEach((n)=>{
+                            linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
+                                    e.source =  temp_h.name;
+                            });
+                        });
+
+                        temp_h.timeline = temp_g[k][0].timeline;
+                        clusterdata_timeline.push(temp_h);
+                    });
+                    temp_g = _.groupBy(linkdata,function(e){return e.source+'_'+e.target});
+                    Object.keys(temp_g).forEach(k=> {
+                        temp_g[k].forEach((t,i)=>{
+                            if (!i)
+                                t.links = temp_g[k].length;
+                            else
+                                t.del = true;
+                        })
+                    })
+
+                    break;
+                case 'single':
+                    clusterdata_timeline = hosts.map(h=>{
+                        let e = h.name;
+                        let temp = linkdata.filter(f=>f.source===e);
+                        temp.forEach(d=>d.links=1);
+                        return {
+                            name: e,
+                            values_name: [e],
+                            timeline: hostOb[e].timeline
+                        }});
+                    break;
+                case 'groupWithJob':
+                default:
+                    data.forEach(d=>{
+                        let listcomp = d.nodes.filter(e=>{
+                            let temp = linkdata.filter(f=>f.source===e);
+                            if (temp.length===1)
+                                return true;
+                            else if(temp.length>1){
+                                if (!clusterdata_timeline.find(c=>c.name===e)) {
+                                    clusterdata_timeline.push({
+                                        name: e,
+                                        values_name: [e],
+                                        timeline: hostOb[e].timeline
+                                    });
+                                    temp.forEach(d=>d.links=1);
+                                }
                             }
+                            return false;
+                        });
+                        let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline)});
+                        Object.keys(temp_g).forEach(k=>{
+                            let temp_h = {};
+                            temp_h.values_name = temp_g[k].map(e=>e.name);
+                            temp_h.name = temp_h.values_name.join(' ');
+                            temp_g[k].forEach((n)=>{
+                                linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
+                                    if(i===0) {
+                                        e.source =  temp_h.name;
+                                        e.links = temp_g[k].length;
+                                    }else{
+                                        e.del = true;
+                                    }
+                                });
+                            });
+
+                            temp_h.timeline = temp_g[k][0].timeline;
+                            clusterdata_timeline.push(temp_h);
                         });
                     });
-
-                    temp_h.timeline = temp_g[k][0].timeline;
-                    clusterdata_timeline.push(temp_h);
-                });
-            });
+                    break;
+            }
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else
