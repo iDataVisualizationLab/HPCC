@@ -189,10 +189,46 @@ let Tooltip_lib = function() {
 
         // 2. axis create
 
-        g.append("g")
+        // g.append("g")
+        //     .attr("class", "x axis")
+        //     .attr("transform", "translate(0," + graphicopt.heightG() + ")")
+        //     .call(d => d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)(d)); //
+        let mticks = g.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + graphicopt.heightG() + ")")
-            .call(d => d3.axisBottom(d.datum().xScale).tickFormat(d.datum().x_tickFormat).ticks(d.datum().numTicks)(d)); //
+            .call(d => d3.axisBottom(d.datum().xScale).tickSize(-graphicopt.heightG()).tickFormat('')(d)).style('stroke-width',0.1);
+        mticks.select('.domain').remove(); //
+        mticks.selectAll('line').styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'}); //
+
+        let xscalediv = d3.select(".lineSum")
+            .append('svg')
+            .attr('class','xaxis')
+            .styles({position:'absolute',
+                'overflow':'visible',
+                'bottom':0, 'pointer-events': 'none'
+            })
+            .attrs({
+                width: graphicopt.margin.left + graphicopt.margin.right + data[0].xScale.range()[1],
+                height: 25,
+            });
+        xscalediv.append('rect')
+            .attrs({width:'100%',height:25})
+            .styles({
+                fill: '#dddddd',
+        });
+        xscalediv.append("g") .attr("class", "x axis")
+            .attr('transform', `translate(${graphicopt.margin.left},0)`)
+            .call(d3.axisBottom(data[0].xScale).tickFormat(data[0].x_tickFormat));
+
+        xscalediv.append("text")
+            // .attr("y", graphicopt.heightG() + 34)
+            .attr("fill", "#000")
+            .style("font-style", "italic")
+            .style("text-anchor", "start")
+            .style("font-size", "12px")
+            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
+            .attr("font-family", "sans-serif")
+            .text(data[0].xScale.domain()[0].toDateString());
 
         g.append("g")
             .attr("class", "y axis")
@@ -279,16 +315,7 @@ let Tooltip_lib = function() {
             .attr("font-family", "sans-serif")
             .classed('hide', d => d.index)
             .text(layout.title2);
-        g.append("text")
-            .attr("y", graphicopt.heightG() + 34)
-            .attr("fill", "#000")
-            .style("font-style", "italic")
-            .style("text-anchor", "middle")
-            .style("font-size", "12px")
-            .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-            .attr("font-family", "sans-serif")
-            .classed('hide', d => d.index)
-            .text(d => d.xScale.domain()[0].toDateString());
+
 
         // g.append("text")
         //     .attr("x", graphicopt.widthG() - 3)
