@@ -116,6 +116,46 @@ let Tooltip_lib = function() {
             )
             d.index = i;
         });
+        let selectbox = d3.select("#d3-tip .header").append('label');
+        selectbox.append('input').attrs({type:"checkbox", class:"filled-in"}).on("change", function () {
+            if ($(this).prop('checked')){
+                data.forEach((d, i) => {
+                    d.yScale
+                        .domain([d3.min(d,e=>d3.min(e,f=>f.y)),d3.max(d,e=>d3.max(e,f=>f.y))]);
+                    yScale[i]=d.yScale;
+                    d.forEach(f =>
+                        f.forEach(e => {
+                            e.ys = d.yScale(e.y);
+                        })
+                    )
+                });
+            }else{
+                data.forEach((d, i) => {
+                    d.yScale.domain(layout.axis.y.domain[i] || layout.axis.y.domain[0]) // input;
+                    yScale[i]=d.yScale;
+                    d.forEach(f =>
+                        f.forEach(e => {
+                            e.ys = d.yScale(e.y);
+                        })
+                    )
+                });
+            }
+            g = d3.select(".lineSum div.graph").selectAll('svg')
+                .data(data).select('g.pannel');
+            gpath = g.select('g.graph')
+                .selectAll('.gline_path')
+                .data(d => d);
+            gpath
+                .select('path')
+                .attr('d', line_create);
+            gpath.select("text")
+                .attr("y", d => d[d.length - 1].ys);
+            g.select(".y.axis")
+                .each(function (d) {
+                    d3.select(this).call(d3.axisLeft(d.yScale).tickFormat(d.y_tickFormat).ticks(5).tickSize(-graphicopt.widthG())).select('.domain').remove();
+                })//
+        });
+        selectbox.append('span').styles({font: 'unset',color: 'black','padding-left':'20px'}).text('auto scale y-axis');
         d3.select(".lineSum")
         .styles({
             'max-height':Math.min(data.length*graphicopt.height+25,heightdevice*0.5)+'px',
@@ -342,6 +382,7 @@ let Tooltip_lib = function() {
             d.index = i;
             d.forEach(e=>e.x=d.xScale(e.timestep));
         });
+
         d3.select(".lineSum")
             // .classed('flex_contain',false)
             .styles({
@@ -350,15 +391,6 @@ let Tooltip_lib = function() {
                 'overflow-y':'auto',
                 'overflow-x':'hidden'
             });
-        // let yscalediv = d3.select(".lineSum").append('div').attr('class','yaxis')
-        //     .selectAll('svg')
-        //     .data(data).enter()
-        //     .append('svg')
-        //     .attrs({
-        //         width: 20,
-        //         height: graphicopt.height,
-        //
-        //     });
 
         let svgm = d3.select(".lineSum").append('div').attr('class','graph')
             .on('scroll',function(){
