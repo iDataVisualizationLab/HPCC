@@ -469,7 +469,14 @@ let Tooltip_lib = function() {
         d3.select('#d3-tip').on('hide',master.hide);
         if(!radarplot){
             linegraph();
+            let heightTip =+ $('#d3-tip')[0].offsetHeight;
+            d3.select('#d3-tip').style('transform',`translate(0px,${(d3.event.y+heightTip-heightdevice)>0?-(d3.event.y+heightTip-heightdevice):0}px)`).select('.lineSum').style('overflow','auto');
         }else{
+            // if (niceOffset){
+            //     let heightTip =+ $('#d3-tip')[0].offsetHeight;
+            //     return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
+            // }
+            d3.select('#d3-tip').style('transform',`translate(0,0)`);
             customgraph();
         }
 
