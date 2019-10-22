@@ -823,7 +823,6 @@ function truncate (text,endsymbol) {
     text.each(function() {
         var text = d3.select(this);
         var words = text.text().trim().split(/\s+/);
-
         var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...'+(endsymbol||''));
         var width = parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
         var numWords = words.length;
@@ -833,6 +832,8 @@ function truncate (text,endsymbol) {
         // Try the whole line
         // While it's too long, and we have words left, keep removing words
         let old_words ='';
+        if (tspan.node().getComputedTextLength()===0)
+            debugger
         while (tspan.node().getComputedTextLength() > width && words.length) {
             old_words = words.pop();
             tspan.text(words.join(' '));
@@ -862,11 +863,11 @@ function wrap(text, istruncate,width) {
                 word,
                 line = [],
                 lineNumber = 0,
-                lineHeight = 1.1, // ems
+                lineHeight = 1, // ems
                 y = text.attr("y"),
                 dy = parseFloat(text.attr("dy")),
                 tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-            width = width || parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
+            width = width || parseFloat(text.attr('width'));
             while (word = words.pop()) {
                 line.push(word);
                 tspan.text(line.join(" "));
@@ -874,7 +875,7 @@ function wrap(text, istruncate,width) {
                     line.pop();
                     tspan.text(line.join(" "));
                     line = [word];
-                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineHeight + dy + "em").text(word);
                 }
             }
         });

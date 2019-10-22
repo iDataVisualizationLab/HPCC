@@ -716,7 +716,7 @@ let JobMap = function() {
             });
         computers_n.append('text').attrs(
             {'class':'computeSig_label label',
-                'display':'none',
+                'opacity':0,
                 'text-anchor':'end',
                 'dx':-graphicopt.node.r,
                 'dy':'0.5rem',
@@ -727,7 +727,8 @@ let JobMap = function() {
 
         computers = nodeg.selectAll('.computeNode');
         computers.select('.label').classed('hide',runopt.compute.type==='timeline');
-        computers.classed('statics',!!clusterNode_data);
+
+        computers.classed('statics', true);
 
 
         //job node
@@ -947,7 +948,7 @@ let JobMap = function() {
         g.selectAll('.computeNode')
             .call(path=>freezinghandle(path,[function(d){
                 d3.selectAll( '.computeNode').classed('fade',true);
-                d3.select(this).classed('highlight',true);
+                d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
                 link.classed('hide',true);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
                 const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',false).classed('highlight',true).data();
@@ -958,11 +959,13 @@ let JobMap = function() {
                 table_footerNode.classed('fade',true);
             },null],[function(d){
                 if (runopt.compute.type!=='timeline') {
+                    d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
                     d3.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
                     d3.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
                     d3.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
+
                 }
             },null]));
         g.selectAll('.jobNode')

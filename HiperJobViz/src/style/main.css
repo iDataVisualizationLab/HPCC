@@ -147,11 +147,12 @@ span.thumb {
     opacity: 1;
 }
 .node .label {
-    display: none;
+    opacity: 0;
     pointer-events: none;
 }
 .node.highlight .label {
     display: unset;
+    opacity: 1;
 }
 
 .links.highlight text{
@@ -223,6 +224,7 @@ span.thumb {
 }
 .highlight .computeSig_label,.statics .computeSig_label{
     display: block;
+    opacity: 1;
 }
 
 .row .back-row{
