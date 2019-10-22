@@ -598,10 +598,10 @@ let JobMap = function() {
             d.y = scaleJob(d.order);
             return `translate(${d.x2},${d.y})`
         });
-        let temp_link = link.data().filter(d => d.target.type === 'job');
-        computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
-        computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
         if (runopt.compute.type==='timeline') {
+            let temp_link = link.data().filter(d => d.target.type === 'job');
+            computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
+            computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
             g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-20}).text("Hosts's timeline");
             // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
             scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
@@ -617,6 +617,7 @@ let JobMap = function() {
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
             lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
+            computers.data().sort((a, b) => b.arr[lastIndex].length - a.arr[lastIndex].length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
