@@ -91,8 +91,12 @@ let JobMap = function() {
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
         gNodeaxis.append('g').attr('class','gMainaxis');
         gNodeaxis.append('g').attr('class','gSubaxis');
-        g.append("g")
+        let annotation = g.append("g")
             .attr('class','annotation');
+        annotation
+            .append("g")
+            .attr('class','majorbar');
+        annotation.append('text').attrs({x:400,y:0,class:'tablemessage hide'}).text('LOADING TABLE DATA')
         linkg = g.append("g")
             .attr('class','linkg');
         nodeg = g.append("g")
@@ -113,7 +117,7 @@ let JobMap = function() {
             .attr("class", "tippannel d3-tip")
             .attr("id", "tippannel")
             .direction('e')
-            .offset([0, 10])
+            .offset([0, 5])
             .html('<button class="closeBTN" onclick="d3.select(\'#tippannel\').dispatch(\'hide\')">&times;</button><div>' +
                 '<p class="title"></p>' +
                 '<button class="btn-small radarFullTime">Show full time series</button>' +
@@ -285,7 +289,7 @@ let JobMap = function() {
         let heightbar = graphicopt.radaropt.h/2;
         nodeg.selectAll('.computeNode').each(function(d){
             let value = d.arr[lastIndex].length;
-            let parentn = g.select('.annotation').select(`g.${d.name}`);
+            let parentn = g.select('.majorbar').select(`g.${d.name}`);
             
             let vi = parentn.select('g.his');
             if(vi.empty()) {
@@ -565,7 +569,7 @@ let JobMap = function() {
     }
 
     jobMap.drawComp = function (){
-        g.select('.annotation').classed('hide',true);
+        g.select('.majorbar').classed('hide',true);
         switch(runopt.compute.type){
             case "radar":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
@@ -573,7 +577,7 @@ let JobMap = function() {
                 svg.select('.gNodeaxis').classed('hide',true);
                 if (clusterNode_data){
                     drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group');
-                    g.select('.annotation').classed('hide',false);
+                    g.select('.majorbar').classed('hide',false);
                     drawHistogramMHosts(clusterNode_data);
                 }else {
                     if (arr.length)
@@ -682,9 +686,9 @@ let JobMap = function() {
                 return `translate(${d.x2},${d.y})`
             });
             computers.each(function(d){
-                let parentn = g.select('.annotation').select(`g.${d.name}`);
+                let parentn = g.select('.majorbar').select(`g.${d.name}`);
                 if (parentn.empty()){
-                    parentn =  g.select('.annotation').append('g').attr('class',`${d.name}`);
+                    parentn =  g.select('.majorbar').append('g').attr('class',`${d.name}`);
                 }
                 parentn.transition().attr('transform',`translate(${d.x2},${d.y})`);
             })
