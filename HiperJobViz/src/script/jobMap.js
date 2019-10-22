@@ -91,6 +91,8 @@ let JobMap = function() {
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
         gNodeaxis.append('g').attr('class','gMainaxis');
         gNodeaxis.append('g').attr('class','gSubaxis');
+        g.append("g")
+            .attr('class','annotation');
         linkg = g.append("g")
             .attr('class','linkg');
         nodeg = g.append("g")
@@ -251,6 +253,56 @@ let JobMap = function() {
             datapoint.select('.tSNEborder').style('fill', 'none')
         }
         return datapoint;
+    }
+
+    function drawHistogramMHosts (dataR) {
+        // let scale = d3.scaleLinear().domain([d3.min(dataR,d=>d3.min(d.arr,e=>e.length)),d3.max(dataR,d=>d3.max(d.arr,e=>e.length))]);
+        // let customrange = [0,0];
+        // let localdata = dataR.map((d, i) => {
+        //     let r = getViolinData(d.arr.map(e=>scale(e.length)), undefined, {text:d.name});
+        //     let localmaxy = d3.max(r.arr,e=>e[1]);
+        //     if (customrange[1]<localmaxy)
+        //         customrange[1] = localmaxy;
+        //     return r
+        // });
+        // nodeg.selectAll('.computeNode').each(function(d){
+        //     let parentn = d3.select(this);
+        //     let vi = parentn.select('g.his');
+        //     if(vi.empty())
+        //         vi = parentn.append('g').attrs({class:'his','transform':`translate(${-textWarp},0)`});
+        //     vi.datum(d=>localdata.find(e=>e.axis===d.name));
+        //     violiin_chart.rangeY(customrange).data([vi.datum()]).draw(vi)
+        // });
+        // nodeg.selectAll('.computeNode').each(function(d){
+        //     let parentn = d3.select(this);
+        //     let vi = parentn.select('g.his');
+        //     if(vi.empty())
+        //         vi = parentn.append('g').attrs({class:'his','transform':`translate(${-textWarp},0)`});
+        //     vi.datum(d=>localdata.find(e=>e.axis===d.name));
+        //     violiin_chart.rangeY(customrange).data([vi.datum()]).draw(vi)
+        // });
+        let scale = d3.scaleLinear().domain(d3.extent(dataR,d=>d.arr[lastIndex].length)).range([0,100]);
+        let heightbar = graphicopt.radaropt.h/2;
+        nodeg.selectAll('.computeNode').each(function(d){
+            let value = d.arr[lastIndex].length;
+            let parentn = g.select('.annotation').select(`g.${d.name}`);
+            
+            let vi = parentn.select('g.his');
+            if(vi.empty()) {
+                vi = parentn.append('g').attr('class', 'his statics').attrs({
+                    'transform': `translate(${graphicopt.radaropt.w / 2*0.75},0)`
+                });
+                vi.append('rect').attrs({
+                    height: heightbar,
+                    'transform': `translate(0,${-heightbar / 2})`
+                });
+                vi.append('text').attrs({'class':'label',dy:'0.5em'});
+            }
+            vi.select('rect').attrs({
+                width: scale(value),})
+                .styles({'fill':d3.hsl(colorFunc(d.name)).brighter(1)});
+            vi.select('text').text(value)
+        });
     }
 
     function drawEmbedding(data,colorfill) {
@@ -513,13 +565,16 @@ let JobMap = function() {
     }
 
     jobMap.drawComp = function (){
+        g.select('.annotation').classed('hide',true);
         switch(runopt.compute.type){
             case "radar":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
                 svg.selectAll('.computeNode').selectAll('.timeline').remove();
                 svg.select('.gNodeaxis').classed('hide',true);
                 if (clusterNode_data){
-                    drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group')
+                    drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group');
+                    g.select('.annotation').classed('hide',false);
+                    drawHistogramMHosts(clusterNode_data);
                 }else {
                     if (arr.length)
                         drawEmbedding(arr)
@@ -626,6 +681,13 @@ let JobMap = function() {
                 d.y = scaleNode_y(d.order);
                 return `translate(${d.x2},${d.y})`
             });
+            computers.each(function(d){
+                let parentn = g.select('.annotation').select(`g.${d.name}`);
+                if (parentn.empty()){
+                    parentn =  g.select('.annotation').append('g').attr('class',`${d.name}`);
+                }
+                parentn.transition().attr('transform',`translate(${d.x2},${d.y})`);
+            })
         }
         link.transition()
             .call(updatelink);
@@ -654,7 +716,7 @@ let JobMap = function() {
                 return linkHorizontal({
                     source: {
                         x: d.source.y2 || d.source.y,
-                        y: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:0)
+                        y: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0))
                     },
                     target: {
                         x: d.target.y2 || d.target.y,
@@ -1203,8 +1265,8 @@ let JobMap = function() {
         },
         column:{
             'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
-            'Hosts': {id:'Hosts',text:'#Hosts',type:'num',x: 130,y:20,width:60},
-            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 190,y:20,width:60},
+            'Hosts': {id:'Hosts',text:'#Hosts',type:'num',x: 120,y:20,width:60},
+            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 170,y:20,width:52},
         }
     };
     // let violiin_chart = d3.viiolinChart().graphicopt({width:tableLayout.row["graph-width"],height:20,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
@@ -1591,53 +1653,6 @@ let JobMap = function() {
             user_update = user.filter(d => d.needRender);
             rangechange = false;
 
-            function getViolinData(d, i, s) {
-                v = d.dataRaw.map(e => e[i].value).filter(e => e !== undefined).sort((a, b) => a - b);
-                let r;
-                if (v.length) {
-                    let sumstat = [];
-                    r = {
-                        axis: s.text,
-                        q1: ss.quantileSorted(v, 0.25),
-                        q3: ss.quantileSorted(v, 0.75),
-                        median: ss.medianSorted(v),
-                        mean: ss.mean(v),
-                    };
-                    var x = d3.scaleLinear()
-                        .domain([0, 1]);
-                    let x_change = d3.scaleLinear()
-                        .domain([0, runopt.histodram.resolution - 1]).range(x.domain());
-
-                    var histogram = d3.histogram()
-                        .domain(x.domain())
-                        .thresholds(d3.range(0, runopt.histodram.resolution).map(e => x_change(e)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                        // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-                        .value(d => d);
-                    let hisdata = histogram(v);
-                    r.point = [];
-                    r.outlier = [];
-                    sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
-                    const localmax = d3.max(sumstat, e => e[1]);
-                    if (d.type && localmax > violinRange [1]) {
-                        violinRange [1] = localmax;
-                        rangechange = true;
-                    }
-                    r.arr = sumstat;
-                } else {
-                    r = {
-                        axis: s.text,
-                        q1: undefined,
-                        q3: undefined,
-                        median: undefined,
-                        mean: undefined,
-                        outlier: [],
-                        point: [],
-                        arr: []
-                    };
-                }
-                return r;
-            }
-
             user_update.forEach(d => {
                 schema.forEach((s, i) => {
                     let r = getViolinData(d, i, s);
@@ -1659,6 +1674,52 @@ let JobMap = function() {
             updaterow(rangechange ? g.selectAll('.userNode') : user_update);
             table_footer(nodeg.select('.table.footer'));
         }
+    }
+    function getViolinData(d, i, s) {
+        let v = (d.dataRaw?d.dataRaw.map(e => e[i].value):d).filter(e => e !== undefined).sort((a, b) => a - b);
+        let r;
+        if (v.length) {
+            let sumstat = [];
+            r = {
+                axis: s.text,
+                q1: ss.quantileSorted(v, 0.25),
+                q3: ss.quantileSorted(v, 0.75),
+                median: ss.medianSorted(v),
+                mean: ss.mean(v),
+            };
+            var x = d3.scaleLinear()
+                .domain([0, 1]);
+            let x_change = d3.scaleLinear()
+                .domain([0, runopt.histodram.resolution - 1]).range(x.domain());
+
+            var histogram = d3.histogram()
+                .domain(x.domain())
+                .thresholds(d3.range(0, runopt.histodram.resolution).map(e => x_change(e)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+                .value(d => d);
+            let hisdata = histogram(v);
+            r.point = [];
+            r.outlier = [];
+            sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
+            const localmax = d3.max(sumstat, e => e[1]);
+            if (d.type && localmax > violinRange [1]) {
+                violinRange [1] = localmax;
+                rangechange = true;
+            }
+            r.arr = sumstat;
+        } else {
+            r = {
+                axis: s.text,
+                q1: undefined,
+                q3: undefined,
+                median: undefined,
+                mean: undefined,
+                outlier: [],
+                point: [],
+                arr: []
+            };
+        }
+        return r;
     }
     let zoom_toogle=true;
     function zoom_func(val){

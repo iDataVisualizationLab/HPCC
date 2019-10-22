@@ -832,8 +832,6 @@ function truncate (text,endsymbol) {
         // Try the whole line
         // While it's too long, and we have words left, keep removing words
         let old_words ='';
-        if (tspan.node().getComputedTextLength()===0)
-            debugger
         while (tspan.node().getComputedTextLength() > width && words.length) {
             old_words = words.pop();
             tspan.text(words.join(' '));

@@ -222,7 +222,7 @@ span.thumb {
     stroke-opacity:1;
     paint-order: stroke;
 }
-.highlight .computeSig_label,.statics .computeSig_label{
+.highlight .label,.statics .label{
     display: block;
     opacity: 1;
 }
