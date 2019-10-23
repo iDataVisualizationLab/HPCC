@@ -369,6 +369,11 @@
                                 </table>
                             </div>
                         </div>
+                        <button onclick="saveClusterDescription()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog_description">
+                            <i class="fas fa-download pauseicon" ></i> Download group labels</button>
+                        <button  class ="menuBtn" style="background-color: #fff;" id="saveDescriptionbtn">
+                            <i class="fas fa-upload pauseicon" ></i> Load group labels</button>
+                        <input id="description_input_file" class="none" type="file" style="display: none;"/>
                     </div>
                 </div>
             </li>
@@ -592,6 +597,22 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveProfile()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
     </div>
+</div>
+
+<div id="savedialog_description" class="modal custom">
+    <div class="modal-content">
+        <div class="input-field col s6">
+            <input placeholder="label_cluster" id="savename_description" type="text" class="validate">
+            <label for="savename_profile">File name</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveDescription()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
+    </div>
+</div>
+<div id="radar_Des_div" class="modal custom">
+    <!--<div id="radar_Des_div">-->
 </div>
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>

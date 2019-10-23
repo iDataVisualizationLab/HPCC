@@ -1641,6 +1641,24 @@ $( document ).ready(function() {
             preloader(false)
         }
     });
+    $('#description_input_file').on('input',(evt)=>{
+        let f = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = (function (theFile) {
+            return function (e) {
+                d3.json(e.target.result, function (error, data) {
+                    if (error) {
+                    } else {
+                        clusterDescription = data;
+                        updateclusterDescription();
+                    }
+                });
+            };
+        })(f);
+
+        reader.readAsDataURL(f);
+    });
+    $('#saveDescriptionbtn').on('click',()=>$('#description_input_file').trigger('click'));
     let oldchoose =$('#datacom').val();
     $('#data_input_file').on('click',()=>{preloader(false)})
     $('#data_input_file').on('input', (evt) => {
@@ -2044,7 +2062,12 @@ function cluster_map (dataRaw) {
     }, 0);
 }
 function updateclusterDescription (name,text){
-    cluster_info.find(c=>c.name===name).text = text;
+    if (name)
+        cluster_info.find(c=>c.name===name).text = text;
+    else {
+        cluster_info.forEach(c => c.text = clusterDescription[c.name].text);
+        cluster_map(cluster_info)
+    }
     jobMap.clusterDataLabel(cluster_info)
 }
 function recalculateCluster (option) {

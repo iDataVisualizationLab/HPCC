@@ -976,3 +976,24 @@ function updateDatainformation(timearray){
     for (key in dataInformation)
         dataholder.select(`.${key}`).text(dataInformation[key]);
 }
+
+function onSaveDescription (){
+    var filename = $('#savename_description').val()+".json";
+    var type = "json";
+    var str = JSON.stringify(clusterDescription);
+    var file = new Blob([str], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
+}
