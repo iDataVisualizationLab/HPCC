@@ -335,7 +335,7 @@ let JobMap = function() {
                 {key:'submit',value:d.submitTime},
                 {key:'start',value:d.startTime},
                 {key:'end',value:d.endTime}])
-                .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2);
+                .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2).attr("vector-effect","non-scaling-stroke");
             bg.selectAll('.timemark').datum(d=>d.key?d:{key:'end',value:d.endTime}).attr('d',d=>{
                 let size = 3;
                 switch (d.key) {
@@ -349,7 +349,7 @@ let JobMap = function() {
             }).attr('transform',d=>`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},0)`)
         }else
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
-        d3.select('#legend').attr("vector-effect","non-scaling-stroke").classed('hide',!isoverlay)
+        d3.select('#legend').classed('hide',!isoverlay)
     }
     function drawEmbedding_timeline(data,colorfill) {
         // xscale
