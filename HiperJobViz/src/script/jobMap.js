@@ -395,7 +395,7 @@ let JobMap = function() {
         let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
         dataline.exit().remove();
         dataline.enter().append('line')
-            .attr('class','linegg timeline')
+            .attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`)
             .attr("vector-effect","non-scaling-stroke")
             .merge(dataline)
             .attrs(function(d){
@@ -686,13 +686,10 @@ let JobMap = function() {
                 d.y = scaleNode_y(d.order);
                 return `translate(${d.x2},${d.y})`
             });
-            computers.each(function(d){
-                let parentn = g.select('.majorbar').select(`g.${d.name}`);
-                if (parentn.empty()){
-                    parentn =  g.select('.majorbar').append('g').attr('class',`${d.name}`);
-                }
-                parentn.transition().attr('transform',`translate(${d.x2},${d.y})`);
-            })
+            let barhis = g.select('.majorbar').selectAll('g.m').data(computers.data());
+            barhis.exit().remove();
+            barhis.enter().append('g').attr('class',d=>`${d.name} m`);
+            g.select('.majorbar').selectAll('g.m').transition().attr('transform',d=>`translate(${d.x2},${d.y})`);
         }
         link.transition()
             .call(updatelink);
@@ -993,44 +990,44 @@ let JobMap = function() {
         releasehighlight();
         g.selectAll('.userNode')
             .call(path=>freezinghandle(path,[function(d){
-                d3.selectAll('.userNode').classed('fade',true);
+                g.selectAll('.userNode').classed('fade',true);
                 d3.select(this).classed('highlight',true);
                 link.classed('hide',true);
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('highlight',true).data();
                 const samesource = link.filter(f=> sametarget.find(e=>e.source===f.target)).classed('hide',false).classed('highlight',true).data();
-                d3.selectAll('.jobNode').classed('hide',true);
-                d3.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false).classed('highlight',true);
-                d3.selectAll( '.computeNode').classed('fade',true);
-                d3.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('highlight',true);
+                g.selectAll('.jobNode').classed('hide',true);
+                g.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false).classed('highlight',true);
+                g.selectAll( '.computeNode').classed('fade',true);
+                g.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('highlight',true);
                 table_footerNode.classed('fade',true);
             },null
             ],[function(d){
-                d3.selectAll('.userNode').classed('fade',false);
+                g.selectAll('.userNode').classed('fade',false);
                 d3.select(this).classed('highlight',false);
-                d3.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-                d3.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
+                g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
+                g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
                 link.classed('hide',false).classed('highlight',false);
                 table_footerNode.classed('fade',false);
             },null
             ]));
         g.selectAll('.computeNode')
             .call(path=>freezinghandle(path,[function(d){
-                d3.selectAll( '.computeNode').classed('fade',true);
+                g.selectAll( '.computeNode').classed('fade',true);
                 d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
                 link.classed('hide',true);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
                 const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',false).classed('highlight',true).data();
-                d3.selectAll('.jobNode').classed('hide',true);
-                d3.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false).classed('highlight',true);
-                d3.selectAll('.userNode').classed('fade',true);
-                d3.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
+                g.selectAll('.jobNode').classed('hide',true);
+                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false).classed('highlight',true);
+                g.selectAll('.userNode').classed('fade',true);
+                g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
                 table_footerNode.classed('fade',true);
             },null],[function(d){
                 if (runopt.compute.type!=='timeline') {
                     d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
-                    d3.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                    d3.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
-                    d3.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                    g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                    g.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
+                    g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
 
@@ -1050,8 +1047,8 @@ let JobMap = function() {
                 table_footerNode.classed('fade',true);
             },null],[function(d){
                 g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
-                d3.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
-                d3.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
+                g.selectAll( '.userNode').classed('fade',false).classed('highlight',false);
+                g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
                 link.classed('hide',false).classed('highlight',false);
                 table_footerNode.classed('fade',false);
             },null]));
@@ -1781,7 +1778,27 @@ let JobMap = function() {
                             : d3.timeYear(date) < date ? formatMonth
                                 : formatYear)(date);
     }
-
+    let filter = []
+    jobMap.highlight = function (name) {
+        filter.push(name);
+        if (runopt.compute.type==='timeline')
+            g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
+        else
+            g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
+        g.selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false);
+    }
+    jobMap.unhighlight = function (name) {
+        _.pull(filter,name);
+        if (filter.length) {
+            if (runopt.compute.type==='timeline')
+                g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'}  .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
+            else
+                g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
+            g.selectAll(`${filter.map(d => '.' + fixName2Class(d))}`).classed('fade2', false);
+        }else{
+            g.selectAll(`.fade2`).classed('fade2', false);
+        }
+    }
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {

@@ -1981,13 +1981,13 @@ let radarChartclusteropt  = {
             mouseover: function(){
                 try {
                     const d = d3.select(d3.event.detail || this).datum();
-                    d3.selectAll('.axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                    d3.selectAll('#clusterDisplay .axis' + d.idroot + '_' + d.id).classed('highlight', true);
                     $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
                 }catch(e){}
             },
             mouseleave: function(){
                 const d = d3.select(d3.event.detail||this).datum();
-                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
+                d3.selectAll('#clusterDisplay .axis'+d.idroot+'_'+d.id).classed('highlight',false);
             },
         },
     },
@@ -2021,6 +2021,11 @@ function cluster_map (dataRaw) {
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
+            .on('mouseover',function(d){
+                jobMap.highlight(d.id);
+            }).on('mouseleave',function(d){
+                jobMap.unhighlight(d.id);
+            })
             .append('div')
             .attr('class','label')
             .styles({'position':'absolute',

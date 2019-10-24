@@ -245,7 +245,7 @@ function RadarChart(id, data, options, name) {
             const dd = angle_scale( positiveAngle(Math.atan2(d3.mouse(this)[1] - 0, d3.mouse(this)[0] - 0)+Math.PI/2));
             const val = allAxis[Math.round(dd)];
             if (val) {
-                d3.selectAll('.highlight').classed('highlight',false);
+                d3.selectAll('.axisWrapper .highlight').classed('highlight',false);
                 const target = d3.select(this).select("line.axis" + val.idroot + '_' + val.id);
                 target.dispatch('mouseover', {detail: target.node().parentNode});
             }
