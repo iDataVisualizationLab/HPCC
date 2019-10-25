@@ -1874,8 +1874,10 @@ function requestServiceinfluxdb(count,serin) {
                         if (responseJSON.results[0].series) {
                             // responseJSON.results[0].series[0].values = _(responseJSON.results[0].series[0].values).uniq(d=>d[0]);
                             // const returnLength = responseJSON.results[0].series[0].values.length;
-                            for (let i = 0; i <returnLength; i++)
-                                hostResults[name][serviceListattr[serin]].push(processResult(responseJSON, name, i,serviceList[serin]));
+                            for (let i = 0; i <returnLength; i++){
+                                let rr = processResult(responseJSON, name, i,serviceList[serin]);
+                                hostResults[name][serviceListattr[serin]].push(rr);
+                            }
                         }else
                             for (let i = 0; i < returnLength; i++)
                                 hostResults[name][serviceListattr[serin]].push(processResult(undefined, name,undefined,serviceList[serin]));
