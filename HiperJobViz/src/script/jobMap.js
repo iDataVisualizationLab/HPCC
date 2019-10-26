@@ -438,7 +438,8 @@ let JobMap = function() {
                 .node();
             tippannel.show(d,target);
             let tipdiv = d3.select('.tippannel');
-            tipdiv.select('.title').html('Selected host(s): '+d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+'))
+            tipdiv.select('.title').html('<b>Selected host(s): </b><small>'+d3.select(this.parentNode).select('.label').text()+'</small>')
+            // tipdiv.select('.title').html('<b>Selected host(s): </b><small>'+d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+')+'</small>')
             tipdiv.select('.radarFullTime').on('click',()=>{
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();

@@ -293,7 +293,7 @@ span.thumb {
 input[type=number] {
     height: 1.5rem;
     font-size: unset;
-    border-radius: 2px;
+    border-radius: 3px;
     border: 1px solid #666666;
     text-align: right;
     margin: unset;
@@ -439,7 +439,6 @@ button[type=submit] {
 .tippannel p.title{
     max-width: 150px;
     margin-top: 0px;
-    font-weight: bold;
 }
 .d3-tip {
     padding-top: 15px;
