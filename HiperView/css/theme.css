@@ -47,7 +47,7 @@
 }
 
 #mySidenav .collapsible .active .collapsible-header{
-    border-bottom-color: #00000080;
+    border: transparent;
 }
 
 input[type=text].inputHolder {

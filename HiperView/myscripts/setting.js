@@ -648,7 +648,7 @@ function processResult_influxdb(r,hostname,index,servicename){
         return results_ob;
     }else{
         let newestdata = hostResults[hostname].arrJob_scheduling[hostResults[hostname].arrJob_scheduling.length-1];
-
+        return results_ob;
     }
 }
 function processResult_old(r){

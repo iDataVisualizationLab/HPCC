@@ -321,7 +321,7 @@ input[type=number] {
     color: white;
     padding: 0;
     overflow: visible;
-    font-size: 10px;
+    /*font-size: 10px;*/
 }
 
 .informationHolder {
@@ -422,9 +422,9 @@ button[type=submit] {
 .tippannel {
     border-radius: 5px;
 }
-.tippannel,.tippannel button {
-    font-size: 10px;
-}
+/*.tippannel,.tippannel button {*/
+    /*font-size: 10px;*/
+/*}*/
 
 .tippannel button{
     display: block;
@@ -467,8 +467,8 @@ button[type=submit] {
 }
 
 .tick {
-    font-size: unset;
-    font-family: sans-serif;
+    font-size: 12px;
+    font-family: Arial;
 }
 span.clusternum {
     padding-top: 20px;
