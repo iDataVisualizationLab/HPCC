@@ -242,7 +242,7 @@ let JobMap = function() {
                 .style("stroke-width", 0.5)
                 .style("stroke-opacity", 0.5).style("fill", "none");
         } else {
-            datapoint.select('clipPath').select('path')
+            datapoint.attr("class", d => "compute linkLineg " + fixName2Class(d.name)).select('clipPath').select('path')
                 .transition('expand').duration(100).ease(d3.easePolyInOut)
                 .attr("d", d => radarcreate(d.filter(e => e.enable)));
             datapoint.select('.tSNEborder')
@@ -392,7 +392,7 @@ let JobMap = function() {
                 'opacity':0
             };
         });
-        let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line);
+        let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line).attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`);
         dataline.exit().remove();
         dataline.enter().append('line')
             .attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`)
