@@ -19,7 +19,12 @@ function clustercal(binopt,currentindex,callback){
     dataCalculate = arr;
 
     if (binopt.clusterMethod ==='leaderbin')
-        bin = binnerN().startBinGridSize(binopt.bin.startBinGridSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).data([]);
+        bin = binnerN().startBinGridSize(binopt.bin.startBinGridSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
+            reduce_coefficient : 0.5,
+            reduce_offset : 0,
+            increase_coefficient : 2,
+            increase_offset : 0
+        }).data([]);
     else {
         bin = kmeanCluster;
         bin.iterations(binopt.bin.interation);
