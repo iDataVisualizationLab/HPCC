@@ -20,15 +20,15 @@ function clustercal(binopt,currentindex,callback){
 
     if (binopt.clusterMethod ==='leaderbin')
         bin = binnerN().startBinGridSize(binopt.bin.startBinGridSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
-            reduce_coefficient : 0.5,
+            reduce_coefficient : 0.3,
             reduce_offset : 0,
             increase_coefficient : 2,
             increase_offset : 0
         }).data([]);
     else {
         bin = kmeanCluster;
-        bin.iterations(binopt.bin.interation);
         bin.k(binopt.bin.k);
+        bin.iterations(binopt.bin.interation);
     }
     // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
     bin.data(dataSpider3.map((d,i) => {
@@ -37,6 +37,7 @@ function clustercal(binopt,currentindex,callback){
         return dd;
     }))
         .calculate();
+    console.log('Iterations: '+bin.loopcount)
     var keys = dataSpider3[0].map(d => d.axis);
     dataSpider3.length = 0;
     console.log("numBins: " + bin.bins.length);

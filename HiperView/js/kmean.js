@@ -1696,6 +1696,7 @@
             return value;
         }),
         inputdata:[],
+        loopcount:0,
         data: getterSetter([], function (arrayOfArrays) {
             if (arrayOfArrays[0]) {
                 var n = arrayOfArrays[0].length;
@@ -1722,6 +1723,7 @@
         }),
 
         calculate: function () {
+            commonjsGlobal.kmeanCluster.loopcount = 0;
             var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
@@ -1737,6 +1739,7 @@
                 return temp;
             });
             outputValue("bins", bins);
+            outputValue("loopcount", commonjsGlobal.kmeanCluster.loopcount);
         },
 
         calculatePoint: function (siginput) {
@@ -1769,6 +1772,7 @@
         }),
 
         iterations: getterSetter(Math.pow(10, 3), function (value) {
+            console.log(value)
             return ((value % 1 == 0) & (value > 0))
         }),
 
@@ -1842,6 +1846,7 @@
             centroids.forEach(function (centroid) {
                 centroid.updateLocation(points)
             });
+            commonjsGlobal.kmeanCluster.loopcount++;
         }
         ;
 
