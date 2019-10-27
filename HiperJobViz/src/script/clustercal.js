@@ -30,7 +30,7 @@ function clustercal(binopt,currentindex,callback){
     }else {
         bin = kmeanCluster;
         bin.k(binopt.bin.k);
-        bin.iterations(binopt.bin.interation);
+        bin.iterations(binopt.bin.iterations);
     }
     // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
     bin.data(dataSpider3.map((d,i) => {
