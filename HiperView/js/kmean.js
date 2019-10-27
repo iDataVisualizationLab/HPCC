@@ -1840,13 +1840,16 @@
 
         // update labels and centroid locations until convergence
         for (var iter = 0; iter < iterations; iter++) {
-            points.forEach(function (point) {
-                point.updateLabel(centroids)
+
+            const mp = points.map(function (point) {
+                return point.updateLabel(centroids)
             });
-            centroids.forEach(function (centroid) {
-                centroid.updateLocation(points)
+            const mc = centroids.map(function (centroid) {
+                return centroid.updateLocation(points)
             });
             commonjsGlobal.kmeanCluster.loopcount++;
+            if((mp.indexOf(false)+mc.indexOf(false)) ===-2)
+                break;
         }
         ;
 
@@ -1867,7 +1870,10 @@
             var distancesSquared = centroids.map(function (centroid) {
                 return sumOfSquareDiffs(self.location(), centroid.location());
             });
-            self.label(mindex(distancesSquared));
+            const newl = mindex(distancesSquared);
+            const valid = (self.label()===newl);
+            self.label(newl);
+            return valid;
         };
     };
 
@@ -1879,7 +1885,12 @@
             var pointsWithThisCentroid = points.filter(function (point) {
                 return point.label() == self.label()
             });
-            if (pointsWithThisCentroid.length > 0) self.location(averageLocation(pointsWithThisCentroid));
+            let valid = false;
+            if (pointsWithThisCentroid.length > 0) {
+                const newl = averageLocation(pointsWithThisCentroid);
+                valid = _.isEqual(self.location(),newl);
+                self.location(newl)};
+            return valid;
         };
     };
 
