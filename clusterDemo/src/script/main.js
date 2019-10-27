@@ -536,6 +536,7 @@ let radarChartclusteropt  = {
         axis: {
             mouseover: function(){
                 try {
+                    d3.selectAll('.highlight').classed('highlight',false);
                     const d = d3.select(d3.event.detail || this).datum();
                     d3.selectAll('.axis' + d.idroot + '_' + d.id).classed('highlight', true);
                     $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
@@ -543,7 +544,7 @@ let radarChartclusteropt  = {
             },
             mouseleave: function(){
                 const d = d3.select(d3.event.detail||this).datum();
-                d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
+                d3.selectAll('.highlight').classed('highlight',false);
             },
         },
     },
