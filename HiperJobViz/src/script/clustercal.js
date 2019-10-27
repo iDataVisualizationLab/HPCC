@@ -18,14 +18,16 @@ function clustercal(binopt,currentindex,callback){
     dataSpider3= arr;
     dataCalculate = arr;
 
-    if (binopt.clusterMethod ==='leaderbin')
-        bin = binnerN().startBinGridSize(binopt.bin.startBinGridSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
-            reduce_coefficient : 0.3,
-            reduce_offset : 0,
-            increase_coefficient : 2,
-            increase_offset : 0
+    if (binopt.clusterMethod ==='leaderbin') {
+        let estimateSize = Math.pow(binopt.bin.range[1] , 1/dataSpider3[0].length);
+        // bin = binnerN().startBinGridSize(binopt.bin.startBinGridSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
+        bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
+            reduce_coefficient: 0.3,
+            reduce_offset: 0,
+            increase_coefficient: 2,
+            increase_offset: 0
         }).data([]);
-    else {
+    }else {
         bin = kmeanCluster;
         bin.k(binopt.bin.k);
         bin.iterations(binopt.bin.interation);
