@@ -337,10 +337,12 @@ function RadarChart(id, data, options, name) {
             .domain([0,1])
             .range([0,5]);
         data.forEach(d=> d.forEach((v,i)=> {
-            v.minval = d3.min(d.bin.val,v=>v[i]);
-            v.maxval = d3.max(d.bin.val,v=>v[i]);}));
+            v.minval = d3.min(d.bin.val,e=>e[getindex(v)]);
+            v.maxval = d3.max(d.bin.val,e=>e[getindex(v)]);}));
     }
-
+    function getindex (v){
+        return allAxis.findIndex(e=>e.text===v.axis);
+    }
     //The radial line function
     var radarLine = d3.radialLine()
        // .interpolate("linear-closed")
@@ -405,7 +407,8 @@ function RadarChart(id, data, options, name) {
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", undefined)
             //.style("fill-opacity", d => 1)
-            .style("fill", 'none');
+            .style("fill", 'none')
+            .attr("d", d =>radarLine(d));
     }
 
     //update the outlines

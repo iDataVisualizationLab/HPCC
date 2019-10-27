@@ -326,8 +326,9 @@ function dbscan_cluster2data (clusters,data,ids) {
     return clusters.map(d=>d.parts.map(e=>ids[e]));
 }
 
-function distance(a, b){
-    var dx = a[0] - b[0],
-        dy = a[1] - b[1];
-    return Math.sqrt((dx * dx) + (dy * dy));
-}
+// function distance(a, b){
+//     console.log(a,b)
+//     var dx = a[0] - b[0],
+//         dy = a[1] - b[1];
+//     return Math.sqrt((dx * dx) + (dy * dy));
+// }

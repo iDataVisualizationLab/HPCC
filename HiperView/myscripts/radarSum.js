@@ -2,7 +2,7 @@
 
 
 var radarsize  = 300;
-var bin = binnerN().startBinGridSize(30).isNormalized(true).minNumOfBins(4).maxNumOfBins(10).data([]);
+var bin = binnerN().startBinGridSize(5).isNormalized(true).minNumOfBins(4).maxNumOfBins(7).data([]);
 var radarChartsumopt  = {
     margin: {top: 5, right: 0, bottom: 0, left: 0},
     w: radarsize -5,
@@ -15,9 +15,9 @@ var radarChartsumopt  = {
     showText: false,
     bin :   true};
 d3.radar = function () {
-    let startBinGridSize=30,
+    let startBinGridSize=5,
         isNormalized =true,
-        BinRange = [3,10],
+        BinRange = [4,7],
         arr = [],
         maxstack= 4,
         margin=-30;
@@ -59,7 +59,7 @@ d3.radar = function () {
             outlyingCoefficient: 1.5,
             incrementA:2,
             incrementB:0,
-            decrementA:0.5,
+            decrementA:0.3,
             decrementB:0,
         };
         // scag = scagnosticsnd(handledata(index), scagOptions);
@@ -72,7 +72,6 @@ d3.radar = function () {
             }), scagOptions);
             console.log('Outlying detect: bin=' + scag.bins.length);
             console.log(scag.outlyingPoints.map(d => d.data));
-            console.log(scag.outlyingBins);
             dataSpider3 = dataSpider3.filter(d => {
                 let temp2 = scag.outlyingPoints.filter(e => e.data === d.name);
                 let temp = JSON.parse(JSON.stringify(d));
@@ -94,7 +93,7 @@ d3.radar = function () {
                 }
                 return 1;
             });
-            bin.minNumOfBins(4).maxNumOfBins(10);
+            bin.minNumOfBins(4).maxNumOfBins(7);
         }catch(e){
             console.log('Not enough data for binning');
             if (bin.minNumOfBins)
