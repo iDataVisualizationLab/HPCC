@@ -774,8 +774,13 @@ function tableCreate_svg(data){
     let td = tr.enter().append('tr')
         .merge(tr)
         .attr('class',dd=>{let d = serviceFullList.find(e=>e.text===dd.axis); return 'axis'+d.idroot+'_'+d.id;})
-        .on('mouseover',function(dd){ let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',true);})
-        .on('mouseleave',function(dd){ let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);})
+        .on('mouseover',function(dd){
+            d3.selectAll('.highlight').classed('highlight',false);
+            let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',true);
+        })
+        .on('mouseleave',function(dd){
+            let d = serviceFullList.find(e=>e.text===dd.axis); d3.selectAll('.axis'+d.idroot+'_'+d.id).classed('highlight',false);
+        })
         .selectAll('td').data(d=>[d.axis,d.value_o.value]);
     td.exit().remove();
     td.enter().append('td').text(d=>typeof(d)==='string'?d:d.toFixed(2));
