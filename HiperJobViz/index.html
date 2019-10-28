@@ -324,7 +324,15 @@
             <li class="active">
                 <div class="collapsible-header"><i class="material-icons">group_work</i> Major host groups <span class="col right-align valign-wrapper" style="font-size: 12px">(by the 9 metrics)</span><i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
-                    <div>
+                    <div style="position: relative;">
+                        <div id="clusterLoading" class="loading hidden">
+                            <div class="progressDiv hidden">
+                                <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
+                                <div class="progress spinnerC center" style="width: 70%;">
+                                    <div class="determinate" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
                         <div>
                             <div  class="row valign-wrapper">
                                 <label for="clusterMethod" class="col s4 radarcontroller_layout"> Grouping Method: </label>
@@ -676,7 +684,7 @@
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
 <script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/myscripts/histChart.js"></script>
-<script src="src/script/clustercal.js"></script>
+<!--<script src="src/script/clustercal.js"></script>-->
 <script src="src/script/jobMap.js"></script>
 
 

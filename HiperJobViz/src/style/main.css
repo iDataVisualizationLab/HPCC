@@ -523,3 +523,21 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 [type="checkbox"] + span:not(.lever) {
     height: 15px;
 }
+.loading {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #485563;
+    background: -webkit-linear-gradient(to top, #29323cc4, #485563);
+    background: linear-gradient(to top, #29323cc4, #485563);
+    z-index: 10;
+}
+.loading .progressDiv{
+    height: 100%;
+    transform: translateY(50%);
+}
+.loading .progress {
+    margin: auto;
+}

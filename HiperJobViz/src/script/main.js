@@ -2075,21 +2075,50 @@ function updateclusterDescription (name,text){
     }
     jobMap.clusterDataLabel(cluster_info)
 }
+
+let clustercalWorker;
 function recalculateCluster (option) {
-    preloader(true);
+    preloader(true,10,'Process grouping...','#clusterLoading');
     group_opt = option;
-    setTimeout(()=>{
-        clustercal(group_opt,lastIndex,(d)=>{
-            cluster_info = d;
+    if (clustercalWorker)
+        clustercalWorker.terminate();
+    clustercalWorker = new Worker ('src/script/worker/clustercal.js');
+    clustercalWorker.postMessage({
+        binopt:group_opt,
+        sampleS:sampleS,
+        hosts:hosts,
+        serviceFullList: serviceFullList,
+    });
+    clustercalWorker.addEventListener('message',({data})=>{
+        if (data.action==='done') {
+            data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
+            cluster_info = data.result;
             clusterDescription = {};
             recomendName (cluster_info);
             recomendColor (cluster_info);
             cluster_map(cluster_info);
             jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
-            handle_clusterinfo ()
-            preloader(false);
-        });
-    },0);
+            handle_clusterinfo ();
+            preloader(false,undefined,undefined,'#clusterLoading');
+            clustercalWorker.terminate();
+        }
+        if (data.action==='returnData'){
+            onloaddetermire({process:data.result.process,message:`# iterations: ${data.result.iteration}`},'#clusterLoading');
+        }
+    }, false);
+
+    // setTimeout(()=>{
+    //     clustercal(group_opt,lastIndex,(d)=>{
+    //         cluster_info = d;
+    //         clusterDescription = {};
+    //         recomendName (cluster_info);
+    //         recomendColor (cluster_info);
+    //         cluster_map(cluster_info);
+    //         jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
+    //         handle_clusterinfo ()
+    //         preloader(false);
+    //     });
+    // },0);
 }
 
 function recomendName (clusterarr){

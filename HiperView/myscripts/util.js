@@ -904,28 +904,30 @@ function controlView(config){
             break;
     }
 }
-function onloaddetermire (data){
-    d3.select('.cover .status').text('');
-    const determinate =  d3.select('.determinate').style('width',data.process.toFixed(2)+'%');
-    d3.select('.progressText').text(data.message);
+function onloaddetermire (data,divid){
+    divid = divid|| '.cover';
+    d3.select(divid+' .status').text('');
+    const determinate =  d3.select(divid+' .determinate').style('width',data.process.toFixed(2)+'%');
+    d3.select(divid+' .progressText').text(data.message);
     if (data.message==='finish'){
-        d3.select('.progressDiv').classed('hidden', true);
-        d3.select('.cover').classed('hidden', true);
-        d3.select('.cover .status').text('load data....');
+        d3.select(divid+' .progressDiv').classed('hidden', true);
+        d3.select(divid).classed('hidden', true);
+        d3.select(divid+' .status').text('load data....');
     }else{
-        d3.select('.progressDiv').classed('hidden', false);
+        d3.select(divid+' .progressDiv').classed('hidden', false);
     }
 }
-function preloader(on,percentage){
+function preloader(on,percentage,message,divid){
+    divid = divid|| '.cover';
     if (on){
-        d3.select('.cover').classed('hidden', false);
+        d3.select(divid).classed('hidden', false);
         if(percentage)
-            onloaddetermire({message:'collecting data....',process:percentage})
+            onloaddetermire({message:message||'collecting data....',process:percentage},divid)
         else
             spinner.spin(target);
     }else {
-        onloaddetermire({message:'finish',process:100});
-        d3.select('.cover').classed('hidden', true);
+        onloaddetermire({message:'finish',process:100},divid);
+        d3.select(divid).classed('hidden', true);
         spinner.stop();
     }
 }
