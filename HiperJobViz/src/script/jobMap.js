@@ -206,56 +206,78 @@ let JobMap = function() {
     function createRadar(datapoint, bg, newdata, customopt) {
         let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
         let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
-        var rScale = d3.scaleLinear()
-            .range([0, size_w/2])
-            .domain([-0.25, 1.25]);
-        radarcreate = d3.radialLine()
-            .curve(d3.curveCardinalClosed.tension(0.5))
-            .radius(function(d) {
-                return rScale(d.value); })
-            .angle(function(d) {
-                return schema.find(s=>s.text===d.axis).angle; });
+        let colorfill = (customopt&&customopt.colorfill)?0.5:false;
+        let radar_opt = {
+            w: size_w,
+            h: size_h,
+            schema: schema,
+            margin: {left:0,right:0,top:0,bottom:0},
+            levels: 6,
+            mini:true,
+            radiuschange: false,
+            isNormalize: true,
+            maxValue: 0.5,
+            fillin: colorfill,
+        }
+        // var rScale = d3.scaleLinear()
+        //     .range([0, size_w/2])
+        //     .domain([-0.25, 1.25]);
+        // radarcreate = d3.radialLine()
+        //     .curve(d3.curveCardinalClosed.tension(0.5))
+        //     .radius(function(d) {
+        //         return rScale(d.value); })
+        //     .angle(function(d) {
+        //         return schema.find(s=>s.text===d.axis).angle; });
 
         if (datapoint.empty()) {
             datapoint = bg
                 .append("g")
                 .datum(d => newdata.find(n => n.name === d.name))
                 .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
-            datapoint.append("clipPath")
-                .attr("id", d => "tSNE" + fixName2Class(d.name))
-                .append("path")
-                .attr("d", d => radarcreate(d));
-            datapoint
-                .append("rect")
-                .style('fill', 'url(#rGradient)')
-                .attr("clip-path", d => "url(#tSNE" + fixName2Class(d.name) + ")")
-                .attr("x", -size_w / 2)
-                .attr("y", -size_h / 2)
-                .attr("width", size_w)
-                .attr("height", size_h);
-            datapoint
-                .append("path")
-                .attr("class", "tSNEborder")
-                .attr("d", d => radarcreate(d))
-                .style("vector-effect", 'non-scaling-stroke')
-                .style("stroke", 'black')
-                .style("stroke-width", 0.5)
-                .style("stroke-opacity", 0.5).style("fill", "none");
-        } else {
-            datapoint.attr("class", d => "compute linkLineg " + fixName2Class(d.name)).select('clipPath').select('path')
-                .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d.filter(e => e.enable)));
-            datapoint.select('.tSNEborder')
-                .transition('expand').duration(100).ease(d3.easePolyInOut)
-                .attr("d", d => radarcreate(d.filter(e => e.enable)));
+            // datapoint.append("clipPath")
+            //     .attr("id", d => "tSNE" + fixName2Class(d.name))
+            //     .append("path")
+            //     .attr("d", d => radarcreate(d));
+            // datapoint
+            //     .append("rect")
+            //     .style('fill', 'url(#rGradient)')
+            //     .attr("clip-path", d => "url(#tSNE" + fixName2Class(d.name) + ")")
+            //     .attr("x", -size_w / 2)
+            //     .attr("y", -size_h / 2)
+            //     .attr("width", size_w)
+            //     .attr("height", size_h);
+            // datapoint
+            //     .append("path")
+            //     .attr("class", "tSNEborder")
+            //     .attr("d", d => radarcreate(d))
+            //     .style("vector-effect", 'non-scaling-stroke')
+            //     .style("stroke", 'black')
+            //     .style("stroke-width", 0.5)
+            //     .style("stroke-opacity", 0.5).style("fill", "none");
         }
-        if (customopt&&customopt.colorfill) {
-            datapoint.select("rect").style('display', 'none');
-            datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
-        } else {
-            datapoint.select("rect").style('display', 'unset')
-            datapoint.select('.tSNEborder').style('fill', 'none')
-        }
+        // else {
+        //     datapoint.attr("class", d => "compute linkLineg " + fixName2Class(d.name)).select('clipPath').select('path')
+        //         .transition('expand').duration(100).ease(d3.easePolyInOut)
+        //         .attr("d", d => radarcreate(d.filter(e => e.enable)));
+        //     datapoint.select('.tSNEborder')
+        //         .transition('expand').duration(100).ease(d3.easePolyInOut)
+        //         .attr("d", d => radarcreate(d.filter(e => e.enable)));
+        // }
+        // if (customopt&&customopt.colorfill) {
+        //     datapoint.select("rect").style('display', 'none');
+        //     datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
+        // } else {
+        //     datapoint.select("rect").style('display', 'unset')
+        //     datapoint.select('.tSNEborder').style('fill', 'none')
+        // }
+
+        // replace thumnail with radar mini
+        datapoint.each(function(d){
+            d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
+            if (colorfill)
+                radar_opt.color = function(){return colorFunc(d.name)};
+            RadarChart(this, [d], radar_opt,"");
+        });
         return datapoint;
     }
 

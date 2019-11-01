@@ -108,7 +108,7 @@ function RadarChart(id, data, options, name) {
                 return {text: i.axis, angle: angleSlice[j]};
             }));
     }
-
+    let deltaAng = Math.PI/10;
     // Re-adjust angles
     minValue = range[0]-dif*(range[1]-range[0]);
     maxValue = range[1]+dif*(range[1]-range[0]);
@@ -344,35 +344,43 @@ function RadarChart(id, data, options, name) {
         return allAxis.findIndex(e=>e.text===v.axis);
     }
     //The radial line function
-    var radarLine = d3.radialLine()
-       // .interpolate("linear-closed")
-       .curve(d3.curveCatmullRom.alpha(0.5))
-        .radius(function(d) {return rScale(d.value===undefined?d:d.value); })
-        .angle(function(d,i) {return getAngle(d,i); });
+    let radarLine, radialAreaGenerator, radialAreaQuantile;
+        radarLine  = d3.radialLine()
+        // .interpolate("linear-closed")
+            .curve(d3.curveCatmullRom.alpha(0.5))
+            .radius(function (d) {
+                return rScale(d.value === undefined ? d : d.value);
+            })
+            .angle(function (d, i) {
+                return getAngle(d, i);
+            });
 
-    var radialAreaGenerator = d3.radialArea()
-        .angle(function(d,i) {  return getAngle(d,i); })
-        .innerRadius(function(d,i) {
-            return rScale(d.minval);
-        })
-        .outerRadius(function(d,i) {
-            return rScale(d.maxval);
-        });
+        radialAreaGenerator = d3.radialArea()
+            .angle(function (d, i) {
+                return getAngle(d, i);
+            })
+            .innerRadius(function (d, i) {
+                return rScale(d.minval);
+            })
+            .outerRadius(function (d, i) {
+                return rScale(d.maxval);
+            });
 
-    let radialAreaQuantile = d3.radialArea()
-        .angle(function(d,i) {  return getAngle(d,i); })
-        .innerRadius(function(d,i) {
-            return rScale(d.q1);
-        })
-        .outerRadius(function(d,i) {
-            return rScale(d.q3);
-        });
-
-    if(cfg.roundStrokes) {
-        radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-        radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
-        radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
-    }
+        radialAreaQuantile = d3.radialArea()
+            .angle(function (d, i) {
+                return getAngle(d, i);
+            })
+            .innerRadius(function (d, i) {
+                return rScale(d.q1);
+            })
+            .outerRadius(function (d, i) {
+                return rScale(d.q3);
+            });
+        if(cfg.roundStrokes) {
+            radarLine.curve(d3.curveCardinalClosed.tension(0.5));
+            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
+            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
+        }
 
     //Create a wrapper for the blobs
     var blobWrapperg = g.selectAll(".radarWrapper")
@@ -388,16 +396,7 @@ function RadarChart(id, data, options, name) {
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("fill-opacity", d => densityscale(d.bin.val.length))
             .style("fill", (d, i) =>cfg.color(i,d))
-            .transition().attr("d", d => {
-                d.forEach((v,i)=>{
-                    let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
-                    let mean = d3.mean(temp);
-                    let std = d3.deviation(temp)||0;
-                    v.minval =  mean - std/2;
-                    v.maxval =  mean + std/2;
-                });
-
-            return radialAreaGenerator(d);});
+            .transition().attr("d",radialAreaGenerator);
     }
 
 
@@ -414,6 +413,15 @@ function RadarChart(id, data, options, name) {
     //update the outlines
     var blobWrapperpath = blobWrapperg.select(".radarStroke");
     if (cfg.bin) { // bin type
+        blobWrapperpath.data().forEach(d => {
+            d.forEach((v,i)=>{
+                let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
+                let mean = d3.mean(temp);
+                let std = d3.deviation(temp)||0;
+                v.minval =  mean - std/2;
+                v.maxval =  mean + std/2;
+            })
+        });
         // area radar shape
         blobWrapperpath.filter(d=>d.type!=="outlying")
             .classed("outlying",false)
@@ -666,7 +674,7 @@ function RadarChart(id, data, options, name) {
     //Update the circles
     blobWrapper = g.selectAll(".radarWrapper");
     //Append the circles
-    if (!cfg.bin&&!cfg.gradient&&cfg.showHelperPoint) {
+    if (!cfg.bin&&!cfg.gradient&&!cfg.mini&&cfg.showHelperPoint) {
         var circleWrapper = blobWrapper.selectAll(".radarCircle")
             .data(function (d, i) {
                 d.forEach(function (d2) {
@@ -748,7 +756,7 @@ function RadarChart(id, data, options, name) {
     /////////////////////////////////////////////////////////
     
     //Wrapper for the invisible circles on top
-    if (!cfg.bin&&!cfg.gradient&&cfg.showHelperPoint) {
+    if (!cfg.bin&&!cfg.gradient&&!cfg.mini&&cfg.showHelperPoint) {
         var blobCircleWrapperg = g.selectAll(".radarCircleWrapper")
             .data(data);
         blobCircleWrapperg.exit().remove();
@@ -823,6 +831,12 @@ function RadarChart(id, data, options, name) {
     function getAngle(d,i){
         return (allAxis.find(a=>a.text===d.axis)||allAxis[i]).angle;
     }
+    function getAngleStart(d,i){
+        return (allAxis.find(a=>a.text===d.axis)||allAxis[i]).angle - deltaAng;
+    }
+    function getAngleEnd(d,i){
+        return (allAxis.find(a=>a.text===d.axis)||allAxis[i]).angle + deltaAng;
+    }
     /////////////////////////////////////////////////////////
     /////////////////// Helper Function /////////////////////
     /////////////////////////////////////////////////////////
@@ -855,7 +869,7 @@ function RadarChart(id, data, options, name) {
       });
     }//wrap
     //Text indicating at what % each level is
-    if (cfg.showText) {
+    if (!cfg.mini&&cfg.showText) {
         var axisLabel = axisGrid.selectAll(".axisLabel")
             .data(d3.range(1, (cfg.levels)).reverse())
             .attr("x", 4)

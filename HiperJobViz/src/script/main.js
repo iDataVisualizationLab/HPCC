@@ -877,7 +877,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     ;//.on("mouseout", mouseoutNode);
 
     if ((selectedService==="Temperature" || selectedService==="Fans_speed")&&isSingle!=true)    {
-        let newrect = newg.selectAll(".rct2."+name).data(arr);
+        let newrect = newg.selectAll(".rct2."+fixName2Class(name)).data(arr);
         newrect.exit().remove();
         newrect.enter()
             .append("rect")
@@ -886,7 +886,7 @@ function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
             .attr("stroke", "#000")
             .attr("stroke-width", 0.05)
             .merge(newrect)
-            .attr("class", 'rect2 compute '+name)
+            .attr("class", 'rct2 compute '+fixName2Class(name))
             .attr("x",(d,i)=> xTimeScale(i))
             .attr("y", node_size-9)
 
@@ -1865,8 +1865,10 @@ function onSchemaUpdate(schema){
     if (!firstTime) {
         updateSummaryChartAll();
         MetricController.drawSummary();
-        if (cluster_info)
+        if (cluster_info) {
             cluster_map(cluster_info);
+            jobMap.draw();
+        }
     }
     // }
     if (db!=='csv')

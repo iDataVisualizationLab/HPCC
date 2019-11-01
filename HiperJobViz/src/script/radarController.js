@@ -23,7 +23,7 @@ let radarController = function () {
         };
 
     let svg,g,div,tablediv;
-    let arr;
+    let arr, deltaAng = Math.PI/10;
     let radarcomp = { // schema
       axis: {}, // axis objects
       axisList : [],  // axis array
@@ -195,6 +195,19 @@ let radarController = function () {
             radarcomp.axis[axis].data = axiselement;
             radarcomp.axisList[index] = radarcomp.axis[axis];
         });
+
+        // deltaAng = updateDeltaAng ();
+        // radarcomp.axisList.forEach(d=>d.angle())
+    }
+    function updateDeltaAng (){
+        let listang = radarcomp.axisList.map(d=> positiveAngle(d.angle())).sort((a,b)=>a-b);
+        let mindis = Math.PI/4;
+        for (let i = 1;i<listang.length;i++){
+            const a = listang[i] - listang[i-1];
+            if (mindis>a)
+                mindis = a;
+        }
+        return mindis;
     }
     function positiveAngle(angle){
         return angle>0? angle: (angle+Math.PI*2);

@@ -7,8 +7,11 @@
 	--colorMain2: #630016;
 	--colorMain2_light: #d8d8d8;
 }
-
-body { font: 12px Arial;
+html {
+	font-family: Arial, sans-serif;
+}
+body {
+	font: 12px Arial!important;
 	background-color: #353535;
 	color: white;
 }

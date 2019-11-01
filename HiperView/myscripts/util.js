@@ -71,30 +71,32 @@ function hue(hhh) {
         for (var name in hostResults) {
             var r = hostResults[name];
             // Process the array of historical temperatures
-            var maxIncrease = 0;
-            var preTemp1 = 0;
-            var preTemp2 = 0;
-            for (var i = 0; i < r.arr.length; i++) {
-                // var a = processData(r.arr[i].data.service.plugin_output,selectedService);
-                var a = r.arr[i];
-                var temp1 = a[0];
-                var temp2 = a[1];
-                if (i>=1){
-                    var dif1 = Math.abs(temp1-preTemp1);
-                    var dif2 = Math.abs(temp2-preTemp2);
-                    var max = Math.max(dif1,dif2);
-                    if (max>maxIncrease)
-                        maxIncrease=max;
+            if (r.arr){
+                var maxIncrease = 0;
+                var preTemp1 = 0;
+                var preTemp2 = 0;
+                for (var i = 0; i < r.arr.length; i++) {
+                    // var a = processData(r.arr[i].data.service.plugin_output,selectedService);
+                    var a = r.arr[i];
+                    var temp1 = a[0];
+                    var temp2 = a[1];
+                    if (i>=1){
+                        var dif1 = Math.abs(temp1-preTemp1);
+                        var dif2 = Math.abs(temp2-preTemp2);
+                        var max = Math.max(dif1,dif2);
+                        if (max>maxIncrease)
+                            maxIncrease=max;
+                    }
+                    preTemp1 = temp1;
+                    preTemp2 = temp2;
                 }
-                preTemp1 = temp1;
-                preTemp2 = temp2;
-            }
-            var sliderValue = xx/3;  // based on the range above
-            if (maxIncrease>sliderValue){
-                //console.log(name+" "+maxIncrease +" "+xx/3);
-            }
-            else{
-                svg.selectAll("."+name).attr("fill-opacity",0);
+                var sliderValue = xx/3;  // based on the range above
+                if (maxIncrease>sliderValue){
+                    //console.log(name+" "+maxIncrease +" "+xx/3);
+                }
+                else{
+                    svg.selectAll('.'+fixName2Class(name)).attr("fill-opacity",0);
+                }
             }
         }
     }
