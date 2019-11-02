@@ -163,6 +163,31 @@
                             <button class="information waves-effect waves-light grey darken-3" data-target='datainformation' data-title='Dataset information' >i</button>
                         </div>
                     </div>
+                    <div  class="row valign-wrapper">
+                        <label for="viztype_holder" class="col s4">Circular layout: </label>
+                        <div id="viztype_holder" class="radio-toolbar col s8">
+                            <label class="toolTip" data-title="Star chart">
+                                <input name="viztype" type="radio" value="star"/>
+                                <i class="icon-starShape material-icons"></i>
+                            </label>
+
+                            <label class="toolTip" data-title="Radar chart" >
+                                <input name="viztype" type="radio" checked value="radar"/>
+                                <i class="icon-radarShape material-icons"></i>
+                            </label>
+
+                            <label class="toolTip" data-title="Nightingale Rose Chart" >
+                                <input name="viztype" type="radio" value="rose" />
+                                <i class="icon-roseShape material-icons"></i>
+                            </label>
+
+                            <label class="toolTip" data-title="Flower chart" >
+                                <input name="viztype" type="radio" value="flower"/>
+                                <i class="icon-flowerShape material-icons"></i>
+                            </label>
+
+                        </div >
+                    </div>
                     <div  class="row s12 valign-wrapper hide">
                         <label for="control" class="col s4"> Simulation control: </label>
                         <div  class="col s8"  id="control" style="padding-left: 0px;padding-right: 0px;">
@@ -198,7 +223,7 @@
 
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="compDisplay_control" class="col s4"> Host presentation: </label>
+                        <label for="compDisplay_control" class="col s4"> Visualizing: </label>
                         <select id="compDisplay_control" class="col s7">
                             <option value="pie">Individual host: Pie chart</option>
                             <option value="radar" >Individual host: Radar chart </option>
@@ -308,33 +333,8 @@
                 </div>
             </li>
             <li>
-                <div class="collapsible-header"><i class="icon-radar material-icons"></i> Radar Controller <i class="material-icons expand">chevron_right</i></div>
+                <div class="collapsible-header capitalize" id="vizController"><i class="icon-radarShape material-icons icon"></i><span>Radar Controller</span>  <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
-                    <div  class="row valign-wrapper">
-                        <label for="viztype_holder" class="col s4"> Host visualization type: </label>
-                        <div id="viztype_holder" class="radio-toolbar col s8">
-                            <label>
-                                <input name="viztype" type="radio" checked />
-                                <i class="icon-starShape material-icons"></i>
-                            </label>
-
-                            <label>
-                                <input name="viztype" type="radio" />
-                                <i class="icon-radarShape material-icons"></i>
-                            </label>
-
-                            <label>
-                                <input name="viztype" type="radio"  />
-                                <i class="icon-roseShape material-icons"></i>
-                            </label>
-
-                            <label>
-                                <input name="viztype" type="radio"/>
-                                <i class="icon-flowerShape material-icons"></i>
-                            </label>
-
-                        </div >
-                    </div>
                     <div id="RadarController"></div>
                     <div id="RadarController_Table">
                         <table class="display" width="100%"></table>
@@ -685,6 +685,8 @@
 
 <script src="../HiperView/js/jszip.min.js"></script>
 <script src="../HiperView/js/jDBSCAN.js"></script>
+<script src="../HiperView/spider/radarChart.js"></script>
+<script src="../HiperView/spider/roseChart.js"></script>
 <script src="../HiperView/myscripts/util.js"></script>
 <!--<script src="myscripts/hostlist.js"></script>-->
 <!--<script src="myscripts/service.js"></script>-->
@@ -720,8 +722,7 @@
 <script src="src/script/main.js"></script>
 <script src="../HiperView/myscripts/tooltip_new.js"></script>
 <!--<script src="../HiperView/myscripts/tooltip_new.js"></script>-->
-<script src="../HiperView/spider/radarChart.js"></script>
-<script src="../HiperView/spider/roseChart.js"></script>
+
 
 
 

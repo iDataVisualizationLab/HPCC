@@ -6,6 +6,7 @@
 /////////////////////////////////////////////////////////
     
 function RadarChart(id, data, options, name) {
+    this.smooth = this.smooth===undefined?0.5:this.smooth;
     var cfg = {
         w: 600,                //Width of the circle
         h: 600,                //Height of the circle
@@ -347,7 +348,7 @@ function RadarChart(id, data, options, name) {
     let radarLine, radialAreaGenerator, radialAreaQuantile;
         radarLine  = d3.radialLine()
         // .interpolate("linear-closed")
-            .curve(d3.curveCatmullRom.alpha(0.5))
+            .curve(d3.curveCatmullRom.alpha(this.smooth))
             .radius(function (d) {
                 return rScale(d.value === undefined ? d : d.value);
             })
@@ -377,9 +378,9 @@ function RadarChart(id, data, options, name) {
                 return rScale(d.q3);
             });
         if(cfg.roundStrokes) {
-            radarLine.curve(d3.curveCardinalClosed.tension(1));
-            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(1));
-            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(1));
+            radarLine.curve(d3.curveCardinalClosed.tension(this.smooth));
+            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(this.smooth));
+            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(this.smooth));
         }
 
     //Create a wrapper for the blobs

@@ -1426,28 +1426,33 @@ function updateSummaryChartAll() {
 
 $( document ).ready(function() {
     console.log('ready');
-    // new jBox('Tooltip', {
-    //     attach: '.information',
-    //     adjustPosition: true,
-    //     adjustTracker: true,
-    //     content: function(){console.log(this); return $('#datainformation')},
-    // });
+    // set tooltip
     let tipopt= {position: {
             x: 'right',
             y: 'center'
-        },outside: 'x',adjustPosition: true,
+        },
+        outside: 'x',
+        adjustPosition: true,
         adjustTracker: true,
         theme: 'TooltipBorderThick',
         addClass:'informationDetail',
-        pointer:'top:20',
         getTitle:'data-title'
     };
-    d3.selectAll('.information').each(function() {
-        let tip = $(this).jBox('Tooltip',tipopt)
-        if (d3.select(this).attr('data-target'))
+    d3.selectAll('.information, .toolTip').each(function() {
+        const hasTarget = d3.select(this).attr('data-target');
+        const hasImage = d3.select(this).attr('data-image');
+        let tip = $(this).jBox('Tooltip',_.defaults({
+            pointer: (hasTarget||hasImage)?"top:20":false
+        }, tipopt));
+        if (hasTarget)
             tip.setContent($('#datainformation'));
-        else if(d3.select(this).attr('data-image'))
-            tip.setContent(`<img src="src/images/${d3.select(this).attr('data-image')}" width="100%"></img>`);
+        else if(hasImage)
+            tip.setContent(`<img src="src/images/${hasImage}" width="100%"></img>`);
+
+    });
+    // set event for viz type
+    $('input[type=radio][name=viztype]').change(function() {
+        updateViztype(this.value);
     });
 
 
@@ -2078,6 +2083,23 @@ function updateclusterDescription (name,text){
     jobMap.clusterDataLabel(cluster_info)
 }
 
+function updateViztype (viztype){
+    $('#vizController span').text(`${viztype} Controller`);
+    $('#vizController .icon').removeClass (function (index, className) {
+        return (className.match (/(^|\s)icon-\S+/g) || []).join(' ');
+    }).addClass(`icon-${viztype}Shape`);
+    RadarChart = eval(`${viztype}Chart_func`);
+    d3.selectAll('.radarPlot .radarWrapper').remove();
+    if (!firstTime) {
+        // updateSummaryChartAll();
+        MetricController.drawSummary();
+        if (cluster_info) {
+            cluster_map(cluster_info);
+            jobMap.draw();
+        }
+    }
+}
+
 let clustercalWorker;
 function recalculateCluster (option) {
     preloader(true,10,'Process grouping...','#clusterLoading');
@@ -2109,18 +2131,6 @@ function recalculateCluster (option) {
         }
     }, false);
 
-    // setTimeout(()=>{
-    //     clustercal(group_opt,lastIndex,(d)=>{
-    //         cluster_info = d;
-    //         clusterDescription = {};
-    //         recomendName (cluster_info);
-    //         recomendColor (cluster_info);
-    //         cluster_map(cluster_info);
-    //         jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
-    //         handle_clusterinfo ()
-    //         preloader(false);
-    //     });
-    // },0);
 }
 
 function recomendName (clusterarr){

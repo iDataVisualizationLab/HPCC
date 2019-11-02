@@ -1,6 +1,6 @@
 // Nightingale's Rose Chart
-function roseChart(id, data, options, name) {
-    this.shape = 'flower';
+function RoseChart(id, data, options, name) {
+    this.shape = this.shape===undefined?'rose':this.shape;
 // function RoseChart(id, data, options, name) {
     var cfg = {
         w: 600,                //Width of the circle
@@ -344,7 +344,7 @@ function roseChart(id, data, options, name) {
     let radarLine, radialAreaGenerator, radialAreaQuantile;
 
 //rose chart
-    if (!this.shape) { //default is rose chart
+    if (this.shape==='rose') { //default is rose chart
         radarLine = d3.arc()
             .outerRadius(function (d) {
                 return rScale(d.value === undefined ? d : d.value);

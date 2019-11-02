@@ -1,10 +1,10 @@
 @font-face {
     font-family: 'icomoon';
-    src:  url('../fonts/icomoon.eot?ear2hi');
-    src:  url('../fonts/icomoon.eot?ear2hi#iefix') format('embedded-opentype'),
-    url('../fonts/icomoon.ttf?ear2hi') format('truetype'),
-    url('../fonts/icomoon.woff?ear2hi') format('woff'),
-    url('../fonts/icomoon.svg?ear2hi#icomoon') format('svg');
+    src:  url('../fonts/icomoon.eot?e08i5n');
+    src:  url('../fonts/icomoon.eot?e08i5n#iefix') format('embedded-opentype'),
+    url('../fonts/icomoon.ttf?e08i5n') format('truetype'),
+    url('../fonts/icomoon.woff?e08i5n') format('woff'),
+    url('../fonts/icomoon.svg?e08i5n#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
     font-display: block;
@@ -31,12 +31,9 @@
 .icon-flowerShape:before {
     content: "\e901";
 }
-.icon-radarShape:before {
+.icon-starShape:before {
     content: "\e902";
 }
-.icon-starShape:before {
+.icon-radarShape:before {
     content: "\e903";
-}
-.icon-radar:before {
-    content: "\e904";
 }

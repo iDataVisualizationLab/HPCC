@@ -494,6 +494,12 @@ label {
 .switch label .lever {
     margin: 2px;
 }
+.radio-toolbar label {
+    padding: unset!important;
+}
+.radio-toolbar label:first-child {
+    padding-left: 0 !important;
+}
 .radio-toolbar input[type="radio"] + i {
     background-color: rgba(0, 0, 0, 0.68);
     padding: 5px;
@@ -504,4 +510,11 @@ label {
 .radio-toolbar input[type="radio"]:checked + i {
     background-color:#26a69a;
     color: #ffffff;
+}
+.radio-toolbar input[type="radio"]:hover + i {
+    background-color: #84c7c1;
+    color: #ffffff;
+}
+.capitalize {
+    text-transform: capitalize;
 }
