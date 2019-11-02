@@ -310,28 +310,31 @@
             <li>
                 <div class="collapsible-header"><i class="icon-radar material-icons"></i> Radar Controller <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
-                    <div class="radio-toolbar">
+                    <div  class="row valign-wrapper">
+                        <label for="viztype_holder" class="col s4"> Host visualization type: </label>
+                        <div id="viztype_holder" class="radio-toolbar col s8">
                             <label>
-                                <input name="group1" type="radio" checked />
+                                <input name="viztype" type="radio" checked />
                                 <i class="icon-starShape material-icons"></i>
                             </label>
 
                             <label>
-                                <input name="group1" type="radio" />
+                                <input name="viztype" type="radio" />
                                 <i class="icon-radarShape material-icons"></i>
                             </label>
 
                             <label>
-                                <input name="group1" type="radio"  />
+                                <input name="viztype" type="radio"  />
                                 <i class="icon-roseShape material-icons"></i>
                             </label>
 
                             <label>
-                                <input name="group1" type="radio"/>
+                                <input name="viztype" type="radio"/>
                                 <i class="icon-flowerShape material-icons"></i>
                             </label>
 
-                    </div >
+                        </div >
+                    </div>
                     <div id="RadarController"></div>
                     <div id="RadarController_Table">
                         <table class="display" width="100%"></table>
