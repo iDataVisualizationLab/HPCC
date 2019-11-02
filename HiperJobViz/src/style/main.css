@@ -431,9 +431,9 @@ button[type=submit] {
     display: block;
     width: 100%;
     text-transform: capitalize;
-    line-height: 1rem;
+    line-height: 0;
     background-color: #f9f9f9;
-    height: 1.5rem;
+    height: 1.2rem;
     color: black;
     margin-bottom: 4px;
     padding: 5px;
@@ -454,11 +454,11 @@ button[type=submit] {
     width: 12px;
     height: 12px;
     border-radius: 6px;
+    line-height: 0;
     text-align: center;
     border: none;
     text-decoration: none;
-    padding: 2px;
-    padding-bottom: 4px;
+    padding: 2px 0;
     font-size: 12px;
     margin: auto;
 }
