@@ -1,4 +1,6 @@
-function RadarChart(id, data, options, name) {
+// Nightingale's Rose Chart
+function roseChart(id, data, options, name) {
+    this.shape = 'flower';
 // function RoseChart(id, data, options, name) {
     var cfg = {
         w: 600,                //Width of the circle
@@ -339,47 +341,78 @@ function RadarChart(id, data, options, name) {
         return allAxis.findIndex(e=>e.text===v.axis);
     }
     //The radial line function
+    let radarLine, radialAreaGenerator, radialAreaQuantile;
 
-    //rose chart
-    let radarLine = d3.arc()
-        .outerRadius(function (d) {
-            return rScale(d.value === undefined ? d : d.value);
-        })
-        .innerRadius(0)
-        .startAngle(function (d, i) {
-            return getAngleStart(d, i);
-        })
-        .endAngle(function (d, i) {
-            return getAngleEnd(d, i);
-        });
-    let radialAreaGenerator = d3.arc()
-        .innerRadius(function (d, i) {
-            return rScale(d.minval);
-        })
-        .outerRadius(function (d, i) {
-            return rScale(d.maxval);
-        })
-        .startAngle(function (d, i) {
-            return getAngleStart(d, i);
-        })
-        .endAngle(function (d, i) {
-            return getAngleEnd(d, i);
-        });
-    let radialAreaQuantile = d3.arc()
-        .innerRadius(function (d, i) {
-            return rScale(d.q1);
-        })
-        .outerRadius(function (d, i) {
-            return rScale(d.q3);
-        })
-        .startAngle(function (d, i) {
-            return getAngleStart(d, i);
-        })
-        .endAngle(function (d, i) {
-            return getAngleEnd(d, i);
-        });
+//rose chart
+    if (!this.shape) { //default is rose chart
+        radarLine = d3.arc()
+            .outerRadius(function (d) {
+                return rScale(d.value === undefined ? d : d.value);
+            })
+            .innerRadius(0)
+            .startAngle(function (d, i) {
+                return -deltaAng;
+            })
+            .endAngle(function (d, i) {
+                return deltaAng;
+            });
+        radialAreaGenerator = d3.arc()
+            .innerRadius(function (d, i) {
+                return rScale(d.minval);
+            })
+            .outerRadius(function (d, i) {
+                return rScale(d.maxval);
+            })
+            .startAngle(function (d, i) {
+                return -deltaAng;
+            })
+            .endAngle(function (d, i) {
+                return deltaAng;
+            });
+        radialAreaQuantile = d3.arc()
+            .innerRadius(function (d, i) {
+                return rScale(d.q1);
+            })
+            .outerRadius(function (d, i) {
+                return rScale(d.q3);
+            })
+            .startAngle(function (d, i) {
+                return -deltaAng;
+            })
+            .endAngle(function (d, i) {
+                return deltaAng;
+            });
 
+    }else{
+        const path = d3.line()
+            .curve(d3.curveBasis);
+        function flowerpath(value) {
+            let dx = value * deltaAng;
+            return [[0, 0],
+                [0.2 * dx, -value * (10 / 19)],
+                [dx, -value * 0.89],
+                [0, -value * 1.03],
+                [-dx, -value * 0.89],
+                [-0.2 * dx, -value * (10 / 19)],
+                [0, 0]];
+        }
+        radarLine = function(d){
+            let value = rScale(d.value === undefined ? d : d.value);
+            return path(flowerpath(value));
+        };
+        radialAreaGenerator =
+            function(d){
+                let value = rScale(d.maxval)-rScale(d.minval);
+                return path(flowerpath(value).map(p=>p[1]+rScale(d.minval)));
+            };
 
+        radialAreaQuantile =
+            function(d){
+                let value = rScale(d.q3)-rScale(d.q1);
+                return path(flowerpath(value).map(p=>p[1]+rScale(d.q1)));
+            };
+
+    }
     //Create a wrapper for the blobs
     var blobWrapperg = g.selectAll(".radarWrapper")
         .data(data);
@@ -390,7 +423,9 @@ function RadarChart(id, data, options, name) {
 
     //function update
     function drawCluster(paths){
-        return paths.style("stroke", (d, i) => cfg.color(i,d))
+        return paths
+                                    .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+            .style("stroke", (d, i) => cfg.color(i,d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("fill-opacity", d => densityscale(d.bin.val.length))
             .style("fill", (d, i) =>cfg.color(i,d))
@@ -399,7 +434,9 @@ function RadarChart(id, data, options, name) {
 
 
     function drawOutlying(paths){
-        return paths.attr("d", d => radarLine(d)).transition()
+        return paths
+                                    .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+            .attr("d", d => radarLine(d)).transition()
             .style("stroke", (d, i) => 'black')
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", undefined)
@@ -443,16 +480,24 @@ function RadarChart(id, data, options, name) {
     }else if (cfg.gradient && cfg.mini){
         function drawMeanLine(paths){
             return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
                 .attr("d", d =>radarLine(d))
                 .styles({"fill":'none',
                     'stroke':'black'});
+        }
+        function drawPath(paths){
+            return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
+                .attr("d", d =>radarLine(d));
         }
 
         //update the outlines
         blobWrapperg.selectAll('.radarLine').transition().call(drawMeanLine);
 
         blobWrapperpath.style("fill", "none").transition()
-            .attr("d", d => radarLine(d))
+            .call(drawPath)
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke", (d, i) => cfg.color(i,d));
 
@@ -462,13 +507,13 @@ function RadarChart(id, data, options, name) {
         blobWrapperg.selectAll('clipPath')
             .select('path')
             .transition('expand').ease(d3.easePolyInOut)
-            .attr("d", d =>radarLine(d));
+            .call(drawPath);
         //Create the outlines
         blobWrapper.selectAll('clipPath').data(d=>d).enter()
             .append("clipPath")
             .attr("id",(d,i)=>"sum"+correctId (id)+i)
             .append("path")
-            .attr("d", d => radarLine(d));
+            .call(drawPath);
         blobWrapper.selectAll('rect').data(d=>d).enter().append("rect")
             .style('fill', 'url(#rGradient2)')
             .attr("clip-path",( d,i)=>"url(#sum"+correctId (id)+i+")")
@@ -490,6 +535,8 @@ function RadarChart(id, data, options, name) {
     }else if (cfg.gradient){
         function drawMeanLine(paths){
             return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
                 .attr("d", d =>radarLine(d))
                 .styles({"fill":'none',
                     'stroke':'black',
@@ -498,6 +545,8 @@ function RadarChart(id, data, options, name) {
         }
         function drawQuantileArea(paths){
             return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
                 .attr("d", d =>radialAreaQuantile(d))
                 .styles({"fill":'none',
                     'stroke':'black',
@@ -542,6 +591,8 @@ function RadarChart(id, data, options, name) {
     }else if(cfg.boxplot){
         function drawMeanLine(paths){
             return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
                 .attr("d", d =>radarLine(d))
                 .styles({"fill":'none',
                     'stroke':'black',
@@ -550,6 +601,8 @@ function RadarChart(id, data, options, name) {
         }
         function drawQuantileArea(paths){
             return paths
+                .attr('transform-origin','0,0')
+                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
                 .attr("d", d =>radialAreaQuantile(d))
                 .styles({"fill":(d,i)=>cfg.fillin?cfg.color(i,d):"none",
                     'stroke':'black',
@@ -557,6 +610,7 @@ function RadarChart(id, data, options, name) {
         }
         function drawMinMaxArea(paths){
             return paths
+                .attr('transform',(d,i)=>`transform-origin(0,0) rotate(${getAngle(d,i)})`)
                 .attr("d", d =>radialAreaGenerator(d))
                 .styles({"fill":'none',
                     'stroke':(d, i) => cfg.color(i,d),
@@ -577,7 +631,8 @@ function RadarChart(id, data, options, name) {
             .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }
     else {
-        blobWrapperpath.transition().attr("d", d => radarLine(d))
+        blobWrapperpath.transition()                        .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+            .attr("d", d => radarLine(d))
             .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
             .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
             .style("stroke-width", () => cfg.strokeWidth + "px")
@@ -587,6 +642,7 @@ function RadarChart(id, data, options, name) {
         blobWrapper.selectAll('.radarStroke').data(d=>d).enter()
             .append("path")
             .attr("class", "radarStroke")
+                                    .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
             .attr("d", d => radarLine(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)

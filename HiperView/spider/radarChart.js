@@ -377,9 +377,9 @@ function RadarChart(id, data, options, name) {
                 return rScale(d.q3);
             });
         if(cfg.roundStrokes) {
-            radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
+            radarLine.curve(d3.curveCardinalClosed.tension(1));
+            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(1));
+            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(1));
         }
 
     //Create a wrapper for the blobs

@@ -1,32 +1,32 @@
 let radarController = function () {
     let graphicopt = {
-            margin: {top: 5, right: 5, bottom: 5, left: 5},
-            width: 310,
-            height: 310,
-            radius: 150,
-            scalezoom: 1,
-            widthView: function(){return this.width*this.scalezoom},
-            heightView: function(){return this.height*this.scalezoom},
-            widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
-            heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
-            roundStrokes: true,
-            labelFactor: 1.05,
-            levels: 6,
-            arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
-            arrThresholds: [],
-            opacityCircles: 0.1,
-            wrapWidth: 60,
-            bin: true,
+        margin: {top: 5, right: 5, bottom: 5, left: 5},
+        width: 310,
+        height: 310,
+        radius: 150,
+        scalezoom: 1,
+        widthView: function(){return this.width*this.scalezoom},
+        heightView: function(){return this.height*this.scalezoom},
+        widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
+        heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
+        roundStrokes: true,
+        labelFactor: 1.05,
+        levels: 6,
+        arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
+        arrThresholds: [],
+        opacityCircles: 0.1,
+        wrapWidth: 60,
+        bin: true,
         color: function () {
             return 'rgb(167, 167, 167)'
         }
-        };
+    };
 
     let svg,g,div,tablediv;
     let arr, deltaAng = Math.PI/10;
     let radarcomp = { // schema
-      axis: {}, // axis objects
-      axisList : [],  // axis array
+        axis: {}, // axis objects
+        axisList : [],  // axis array
     };
     let radarController ={};
     // color control
@@ -195,6 +195,19 @@ let radarController = function () {
             radarcomp.axis[axis].data = axiselement;
             radarcomp.axisList[index] = radarcomp.axis[axis];
         });
+
+        // deltaAng = updateDeltaAng ();
+        // radarcomp.axisList.forEach(d=>d.angle())
+    }
+    function updateDeltaAng (){
+        let listang = radarcomp.axisList.map(d=> positiveAngle(d.angle())).sort((a,b)=>a-b);
+        let mindis = Math.PI/4;
+        for (let i = 1;i<listang.length;i++){
+            const a = listang[i] - listang[i-1];
+            if (mindis>a)
+                mindis = a;
+        }
+        return mindis;
     }
     function positiveAngle(angle){
         return angle>0? angle: (angle+Math.PI*2);
@@ -315,8 +328,8 @@ let radarController = function () {
     function updateSummaryData (dSum){
 
         try{
-        radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
-        eventTable();
+            radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
+            eventTable();
         }catch(e){
 
         }
@@ -559,7 +572,7 @@ let radarController = function () {
     };
     let old_hindex = 0;
     radarController.drawSummary = function(hindex_input){
-       let  hindex = hindex_input|| old_hindex;
+        let  hindex = hindex_input|| old_hindex;
         old_hindex = hindex
         let data = [handledataRate(hindex)];
         if (data[0].length===0)
@@ -617,57 +630,57 @@ let radarController = function () {
         //update the outlines
         var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d=>d);
 
-            function drawMeanLine(paths){
-                return paths
-                    .attr("d", function(d) {return radarLine(d)})
-                    .styles({"fill":'none',
-                        'stroke':'black',
-                        'stroke-width':0.5,
-                        'stroke-dasharray': '1 2'});
-            }
-            function drawQuantileArea(paths){
-                return paths
-                    .attr("d", d =>radialAreaQuantile(d))
-                    .styles({"fill":'none',
-                        'stroke':'black',
-                        'stroke-width':0.2});
-            }
-            //update the outlines
-            blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+        function drawMeanLine(paths){
+            return paths
+                .attr("d", function(d) {return radarLine(d)})
+                .styles({"fill":'none',
+                    'stroke':'black',
+                    'stroke-width':0.5,
+                    'stroke-dasharray': '1 2'});
+        }
+        function drawQuantileArea(paths){
+            return paths
+                .attr("d", d =>radialAreaQuantile(d))
+                .styles({"fill":'none',
+                    'stroke':'black',
+                    'stroke-width':0.2});
+        }
+        //update the outlines
+        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
 
-            blobWrapperpath.style("fill", "none").transition()
-                .attr("d", d => radialAreaGenerator(d))
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapperg.select('clipPath')
-                .select('path')
-                .transition('expand').ease(d3.easePolyInOut)
-                .attr("d", d =>radialAreaGenerator(d));
-            //Create the outlines
-            blobWrapper.append("clipPath")
-                .attr("id",(d,i)=>"sumC")
-                .append("path")
-                .attr("d", d => radialAreaGenerator(d));
-            blobWrapper.append("rect")
-                .style('fill', 'url(#rGradient2)')
-                .attr("clip-path",( d,i)=>"url(#sumC)")
-                .attr("x",-rScale(1.25))
-                .attr("y",-rScale(1.25))
-                .attr("width",rScale(1.25)*2)
-                .attr("height",rScale(1.25)*2);
-            blobWrapper.append("path")
-                .attr("class", "radarStroke")
-                .attr("d", d => radialAreaGenerator(d))
-                .style("fill", "none")
-                .transition()
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapper
-                .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
+        blobWrapperpath.style("fill", "none").transition()
+            .attr("d", d => radialAreaGenerator(d))
+            .style("stroke-width", () => graphicopt.strokeWidth + "px")
+            .style("stroke", (d, i) => graphicopt.color(i));
+        blobWrapperg.select('clipPath')
+            .select('path')
+            .transition('expand').ease(d3.easePolyInOut)
+            .attr("d", d =>radialAreaGenerator(d));
+        //Create the outlines
+        blobWrapper.append("clipPath")
+            .attr("id",(d,i)=>"sumC")
+            .append("path")
+            .attr("d", d => radialAreaGenerator(d));
+        blobWrapper.append("rect")
+            .style('fill', 'url(#rGradient2)')
+            .attr("clip-path",( d,i)=>"url(#sumC)")
+            .attr("x",-rScale(1.25))
+            .attr("y",-rScale(1.25))
+            .attr("width",rScale(1.25)*2)
+            .attr("height",rScale(1.25)*2);
+        blobWrapper.append("path")
+            .attr("class", "radarStroke")
+            .attr("d", d => radialAreaGenerator(d))
+            .style("fill", "none")
+            .transition()
+            .style("stroke-width", () => graphicopt.strokeWidth + "px")
+            .style("stroke", (d, i) => graphicopt.color(i));
+        blobWrapper
+            .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     };
 
     function handledataRate (hindex){
-        return _(arr.slice(0,hindex+1)).unzip().map((d,i)=>{return {axis: radarcomp.axisList[i].data.text, value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
+        return _.unzip(arr.slice(0,hindex+1)).map((d,i)=>{return {axis: radarcomp.axisList[i].data.text, value: ss.mean(d),minval: ss.min(d),maxval: ss.max(d), q1: ss.quantile(d,0.25),q3: ss.quantile(d, 0.75)}});
     }
     /////////////////////////////////////////////////////////
     /////////////////// Helper Function /////////////////////
