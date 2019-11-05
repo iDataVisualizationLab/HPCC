@@ -435,7 +435,7 @@ button[type=submit] {
     background-color: #f9f9f9;
     height: 1.2rem;
     color: black;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     padding: 5px;
 }
 .tippannel p.title{
@@ -461,6 +461,9 @@ button[type=submit] {
     padding: 2px 0;
     font-size: 12px;
     margin: auto;
+}
+.closeBTN:before
+{   content: '×'
 }
 .d3-tip .closeBTN:hover{
     background-color: #fe7c7c;

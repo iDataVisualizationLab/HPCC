@@ -2083,7 +2083,8 @@ function updateclusterDescription (name,text){
     jobMap.clusterDataLabel(cluster_info)
 }
 
-function updateViztype (viztype){
+function updateViztype (viztype_in){
+    viztype = viztype_in;
     $('#vizController span').text(`${viztype} Controller`);
     $('#vizController .icon').removeClass (function (index, className) {
         return (className.match (/(^|\s)icon-\S+/g) || []).join(' ');

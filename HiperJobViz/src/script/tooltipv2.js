@@ -63,7 +63,7 @@ let Tooltip_lib = function() {
             str += '<button onclick="saveSVG_light(this,\'jpg\')" class="modal-trigger" href="#savedialog">Save JPG</button>';
         }else {
             if (classtype==='lineSum'){
-                str += '<div style="width:100%" class="header"><button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')">&times;</button></div>';
+                str += '<div style="width:100%" class="header"><button class="closeBTN" onclick="d3.select(\'#d3-tip\').dispatch(\'hide\')"></button></div>';
                 str += '<div class="' + classtype + ' flex_contain"></div>'; // Spider chart holder
             }else {
                 str += '<span>Notsupport</span>'
