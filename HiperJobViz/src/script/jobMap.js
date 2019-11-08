@@ -163,8 +163,13 @@ let JobMap = function() {
         if (simulation) simulation.stop();
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
+        timebox.selectAll('*').remove();
+        initTimebox()
+        g.selectAll('.annotation .majorbar').selectAll('*').remove();
         violinRange = [0,0];
         first = true;
+        lastIndex = 0;
+        first__timestep = new Date();
         return jobMap;
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
@@ -404,16 +409,16 @@ let JobMap = function() {
             return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
 
         bg.style('stroke-width', d=>linkscale(d.values_name.length));
-        bg.select(".invisibleline").remove();
-        bg.append('line').attr('class',"invisibleline").attrs(function(d){
-            let parentndata = d3.select(this.parentNode.parentNode).datum();
-            return {
-                'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-                'x2':fisheye_scale.x(timelineScale(0)),
-                'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
-                'opacity':0
-            };
-        });
+        // bg.select(".invisibleline").remove();
+        // bg.append('line').attr('class',"invisibleline").attrs(function(d){
+        //     let parentndata = d3.select(this.parentNode.parentNode).datum();
+        //     return {
+        //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
+        //         'x2':fisheye_scale.x(timelineScale(0)),
+        //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
+        //         'opacity':0
+        //     };
+        // });
         let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line).attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`);
         dataline.exit().remove();
         dataline.enter().append('line')
@@ -700,7 +705,7 @@ let JobMap = function() {
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
             lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
         }else {
-            computers.data().sort((a, b) => b.arr[lastIndex].length - a.arr[lastIndex].length).forEach((d, i) => d.order = i);// sort by temperal instance
+            computers.data().sort((a, b) => (b.arr[lastIndex]||[]).length - (a.arr[lastIndex]||[]).length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
             computers.transition().attr('transform', d => {
@@ -829,25 +834,27 @@ let JobMap = function() {
 
 
         //job node
-        let timerange = [d3.min(data,d=>new Date(d.submitTime)),timeStep];
-        timerange[0] = new Date(timerange[0].toDateString());
-        timerange[1].setDate(timerange[1].getDate()+1);
-        timerange[1] = new Date(timerange[1].toDateString());
-        let time_daynum = d3.timeDay.every(1).range(timerange[0],timerange[1]).length;
-        var radius = d3.scaleTime()
-            .domain(timerange)
-            .range([graphicopt.job.r_inside, graphicopt.job.r]);
+        if (data.length) {
+            let timerange = [d3.min(data, d => new Date(d.submitTime)), timeStep];
+            timerange[0] = new Date(timerange[0].toDateString());
+            timerange[1].setDate(timerange[1].getDate() + 1);
+            timerange[1] = new Date(timerange[1].toDateString());
+            let time_daynum = d3.timeDay.every(1).range(timerange[0], timerange[1]).length;
+            var radius = d3.scaleTime()
+                .domain(timerange)
+                .range([graphicopt.job.r_inside, graphicopt.job.r]);
 
-        var theta = d3.scaleTime()
-            .domain(timerange)
-            .range([0, Math.PI*2*(time_daynum-1)]);
+            var theta = d3.scaleTime()
+                .domain(timerange)
+                .range([0, Math.PI * 2 * (time_daynum - 1)]);
 
-        var spiral = d3.radialLine()
-            .curve(d3.curveCardinal)
-            .angle(theta)
-            .radius(radius);
+            var spiral = d3.radialLine()
+                .curve(d3.curveCardinal)
+                .angle(theta)
+                .radius(radius);
 
-        let backdround_spiral = d3.timeHour.every(1).range(timerange[0],timerange[1]);
+            let backdround_spiral = d3.timeHour.every(1).range(timerange[0], timerange[1]);
+        }
         let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
         jobNode.exit().remove();
         let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode '+fixName2Class(fixstr(d.name)));
@@ -1413,13 +1420,14 @@ let JobMap = function() {
 
 
         updateClusterTimeline();
-
+    // if (isanimation){
         let user_n = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
         Object.keys(tableData).forEach(k=>tableData[k].keep =false);
         data=dataRaw.filter(d=>user.findIndex(e=>e.key===d.user)!==-1);
-        _.differenceBy(listallJobs.filter(l=>!l.endTime),dataRaw,'jobID').forEach(f=>f.endTime=last_timestep.toString()); //job has been ended
+        // data=dataRaw;
+        // _.differenceBy(listallJobs.filter(l=>!l.endTime),dataRaw,'jobID').forEach(f=>f.endTime=last_timestep.toString()); //job has been ended
         listallJobs = _.unionBy(listallJobs,dataRaw,'jobID');
         data.forEach(d=>{
             d.name = d.jobID+'';
@@ -1432,15 +1440,15 @@ let JobMap = function() {
                 if (linkdata.indexOf(temp2)===-1)
                     linkdata.push(temp2);
             });
-            let oldData = nodeg.selectAll('.node.jobNode').filter(e=>e.name===d.name||(e.values?e.values.findIndex(v=>v.name===d.name)!==-1:false)).data();
-            if (oldData.length){
-                d.x = oldData[0].x;
-                d.x2 = oldData[0].x2;
-                d.y = oldData[0].y;
-                d.fx = oldData[0].fx;
-                d.fy = oldData[0].fy;
-                d.vx = oldData[0].vx;
-                d.vy = oldData[0].vy;
+            let oldData = nodeg.selectAll('.node.jobNode').data().find(e=>e.name===d.name||(e.values?e.values.findIndex(v=>v.name===d.name)!==-1:false));
+            if (oldData){
+                d.x = oldData.x;
+                d.x2 = oldData.x2;
+                d.y = oldData.y;
+                d.fx = oldData.fx;
+                d.fy = oldData.fy;
+                d.vx = oldData.vx;
+                d.vy = oldData.vy;
             }
         });
 
@@ -1521,7 +1529,7 @@ let JobMap = function() {
         }
         if (runopt.compute.clusterNode) {
             clusterdata.forEach(c =>{
-                let namearr = c.arr[c.arr.length-1];
+                let namearr = c.arr[lastIndex];
                 if (namearr) {
                     let sameSource = linkdata.filter(e => namearr.find(f => f === e.source + ''));
                     let temp_g = _.groupBy(sameSource,function(e){return e.target});
@@ -1537,7 +1545,7 @@ let JobMap = function() {
                     });
                 }
             });
-            clusterNode_data = clusterdata;
+            clusterNode_data = clusterdata.filter(d=>d.arr.length&&d.arr[lastIndex]);
             // colorCluster.domain(clusterNode_data.map(d=>d.name));
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
@@ -1643,7 +1651,7 @@ let JobMap = function() {
         tableFooter[0] = {key:'UserID',value:'Summary'}
         tableFooter[1] = {key:'Hosts', value:Hosts.filter(d=>d.user.length).length}
         tableFooter[2] = {key:'Jobs', value:d3.sum(user,d=>d.values.length)};
-
+        // }
         return linkdata
     };
     let harr_old=[];

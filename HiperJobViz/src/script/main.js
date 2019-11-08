@@ -29,8 +29,11 @@ let data_info = {
     timesteps: 0,
     totalStep: 0,
     totalHost: 0
-}
+};
 
+// job parameter
+let sampleJobdata =[];
+let init = true;
 // Set the dimensions of the canvas / graph
 var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
@@ -508,6 +511,7 @@ function updatetimeline(index) {
 }
 
 function request(){
+    init=false;
     bin.data([]);
     var count = 0;
     var countbuffer = 0;
@@ -691,18 +695,20 @@ function simulateResults2(hostname,iter, s){
     var newService;
     let serviceIndex =  serviceList.findIndex(d=>d===s);
     newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
-    if (serviceList[serviceIndex] === 'Power_consum') {
-        if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
-            var simisval = handlemissingdata(hostname,iter);
-            sampleS[hostname]["arrPower_usage"] = [simisval];
-            newService = simisval;
-        }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
-            if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
-                var simisval = handlemissingdata(hostname, iter);
-                sampleS[hostname]["arrPower_usage"][iter] = simisval;
-            }
-            newService = sampleS[hostname]["arrPower_usage"][iter];
-        }
+    if (serviceList[serviceIndex] === 'Job_scheduling') {
+        // if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
+        //     var simisval = handlemissingdata(hostname,iter);
+        //     sampleS[hostname]["arrPower_usage"] = [simisval];
+        //     newService = simisval;
+        // }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
+        //     if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
+        //         var simisval = handlemissingdata(hostname, iter);
+        //         sampleS[hostname]["arrPower_usage"][iter] = simisval;
+        //     }
+        //     newService = sampleS[hostname]["arrPower_usage"][iter];
+        // }
+        if (sampleJobdata.length)
+            return sampleJobdata.filter(s=>s.nodes.find(e=>e===hostname)&&new Date(s.startTime)<sampleS.timespan[iter]&&(s.endTime?new Date(s.endTime)>sampleS.timespan[iter]:true))
     }
     if (newService===undefined)
         newService = [undefined];
@@ -1181,10 +1187,6 @@ function resetRequest(){
     // updateTimeText();
     request();
 }
-function loadData(){
-
-}
-
 
 function loadNewData(d,init) {
     //alert(this.options[this.selectedIndex].text + " this.selectedIndex="+this.selectedIndex);
@@ -1582,7 +1584,7 @@ $( document ).ready(function() {
                                         if (error) {
 
                                         }
-                                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
                                             if (error){
                                                 loadata1(data,undefined);
                                                 return;
@@ -1597,7 +1599,7 @@ $( document ).ready(function() {
                             });
                             return;
                         }
-                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
                             if (error){
                                 loadata1(data,undefined);
                                 return;
@@ -1624,12 +1626,12 @@ $( document ).ready(function() {
             $('#data_input_file').trigger('click');
         }
         function loadata1(data,job){
+
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
-            sampleS = data;
-            data_info.totalStep = data.timespan.length;
-            data_info.timesteps = (data.timespan[ data_info.totalStep -1 ]- data_info.timespan[0])/data_info.totalStep;
+            updateDatainformation(data['timespan']);
             if(job)
-                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name])
+                sampleJobdata = job
+            sampleS = data;
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
@@ -1641,6 +1643,28 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
+            if(cluster_info) {
+                cluster_info.forEach(d => d.arr = []);
+                hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
+                    let axis_arr = _.flatten(serviceLists.map(a => sampleS[h.name][serviceListattr[a.id]][i].map(v => d3.scaleLinear().domain(a.sub[0].range)(v === null ? undefined : v) || 0)));
+                    let index = 0;
+                    let minval = Infinity;
+                    cluster_info.forEach((c, i) => {
+                        const val = distance(c.__metrics.normalize, axis_arr);
+                        if (minval > val) {
+                            index = i;
+                            minval = val;
+                        }
+                    });
+                    cluster_info[index].total = 1 + cluster_info[index].total || 0;
+                    return index;
+                    // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+                }));
+                cluster_map(cluster_info);
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster);
+                radarChartclusteropt.schema = serviceFullList;
+                handle_clusterinfo();
+            }
             if (!init)
                 resetRequest();
             preloader(false)
@@ -1783,7 +1807,7 @@ $( document ).ready(function() {
                         }
                         d3.select(".currentDate")
                             .text("" + (new Date(data['timespan'][0]).toDateString()));
-                        d3.json (srcpath+"data/" + choice + "_job.json", function (error, job) {
+                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
                             if (error){
                                 loadata(data,undefined);
                                 return;
@@ -1816,8 +1840,9 @@ $( document ).ready(function() {
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             sampleS = data;
             updateDatainformation(data['timespan']);
-            if(job)
-                hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
+            // if(job)
+            //     hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
+            sampleJobdata = job || [];
             if(cluster_info){
                 cluster_info.forEach(d=>d.arr=[]);
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
@@ -2070,7 +2095,7 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
-        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>d[0].total.toLocaleString());
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
     }, 0);
 }
 function updateclusterDescription (name,text){

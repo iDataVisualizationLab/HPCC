@@ -62,3 +62,20 @@ function islastimestep(index){
     else
         return index>sampleS.timespan.length-1;
 }
+
+// overide getjoblist
+function getJoblist (iteration,reset){
+    try {
+        iteration = iteration||lastIndex
+        if (reset===true || reset===undefined)
+            jobList = [];
+        jobList = sampleJobdata.filter(s=>new Date(s.startTime)<sampleS.timespan[iteration]&&(s.endTime?new Date(s.endTime)>sampleS.timespan[iteration]:true));
+        //draw userlist data
+        TSneplot.drawUserlist(query_time);
+    }catch(e){}
+}
+function current_userData () {
+    let jobByuser = d3.nest().key(function(uD){return uD.user}).entries( jobList);
+    jobByuser.forEach(d=>d.unqinode= _.chain(d.values).map(d=>d.nodes).flatten().uniq().value());
+    return jobByuser;
+}
