@@ -170,6 +170,7 @@ let JobMap = function() {
         first = true;
         lastIndex = 0;
         first__timestep = new Date();
+        last_timestep = new Date();
         return jobMap;
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
@@ -223,58 +224,16 @@ let JobMap = function() {
             isNormalize: true,
             maxValue: 0.5,
             fillin: colorfill,
-        }
-        // var rScale = d3.scaleLinear()
-        //     .range([0, size_w/2])
-        //     .domain([-0.25, 1.25]);
-        // radarcreate = d3.radialLine()
-        //     .curve(d3.curveCardinalClosed.tension(0.5))
-        //     .radius(function(d) {
-        //         return rScale(d.value); })
-        //     .angle(function(d) {
-        //         return schema.find(s=>s.text===d.axis).angle; });
+        };
+
 
         if (datapoint.empty()) {
             datapoint = bg
                 .append("g")
                 .datum(d => newdata.find(n => n.name === d.name))
                 .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
-            // datapoint.append("clipPath")
-            //     .attr("id", d => "tSNE" + fixName2Class(d.name))
-            //     .append("path")
-            //     .attr("d", d => radarcreate(d));
-            // datapoint
-            //     .append("rect")
-            //     .style('fill', 'url(#rGradient)')
-            //     .attr("clip-path", d => "url(#tSNE" + fixName2Class(d.name) + ")")
-            //     .attr("x", -size_w / 2)
-            //     .attr("y", -size_h / 2)
-            //     .attr("width", size_w)
-            //     .attr("height", size_h);
-            // datapoint
-            //     .append("path")
-            //     .attr("class", "tSNEborder")
-            //     .attr("d", d => radarcreate(d))
-            //     .style("vector-effect", 'non-scaling-stroke')
-            //     .style("stroke", 'black')
-            //     .style("stroke-width", 0.5)
-            //     .style("stroke-opacity", 0.5).style("fill", "none");
+
         }
-        // else {
-        //     datapoint.attr("class", d => "compute linkLineg " + fixName2Class(d.name)).select('clipPath').select('path')
-        //         .transition('expand').duration(100).ease(d3.easePolyInOut)
-        //         .attr("d", d => radarcreate(d.filter(e => e.enable)));
-        //     datapoint.select('.tSNEborder')
-        //         .transition('expand').duration(100).ease(d3.easePolyInOut)
-        //         .attr("d", d => radarcreate(d.filter(e => e.enable)));
-        // }
-        // if (customopt&&customopt.colorfill) {
-        //     datapoint.select("rect").style('display', 'none');
-        //     datapoint.select('.tSNEborder').style('fill', d => colorFunc(d.name)).style('fill-opacity', 0.5);
-        // } else {
-        //     datapoint.select("rect").style('display', 'unset')
-        //     datapoint.select('.tSNEborder').style('fill', 'none')
-        // }
 
         // replace thumnail with radar mini
         datapoint.each(function(d){
@@ -287,31 +246,6 @@ let JobMap = function() {
     }
 
     function drawHistogramMHosts (dataR) {
-        // let scale = d3.scaleLinear().domain([d3.min(dataR,d=>d3.min(d.arr,e=>e.length)),d3.max(dataR,d=>d3.max(d.arr,e=>e.length))]);
-        // let customrange = [0,0];
-        // let localdata = dataR.map((d, i) => {
-        //     let r = getViolinData(d.arr.map(e=>scale(e.length)), undefined, {text:d.name});
-        //     let localmaxy = d3.max(r.arr,e=>e[1]);
-        //     if (customrange[1]<localmaxy)
-        //         customrange[1] = localmaxy;
-        //     return r
-        // });
-        // nodeg.selectAll('.computeNode').each(function(d){
-        //     let parentn = d3.select(this);
-        //     let vi = parentn.select('g.his');
-        //     if(vi.empty())
-        //         vi = parentn.append('g').attrs({class:'his','transform':`translate(${-textWarp},0)`});
-        //     vi.datum(d=>localdata.find(e=>e.axis===d.name));
-        //     violiin_chart.rangeY(customrange).data([vi.datum()]).draw(vi)
-        // });
-        // nodeg.selectAll('.computeNode').each(function(d){
-        //     let parentn = d3.select(this);
-        //     let vi = parentn.select('g.his');
-        //     if(vi.empty())
-        //         vi = parentn.append('g').attrs({class:'his','transform':`translate(${-textWarp},0)`});
-        //     vi.datum(d=>localdata.find(e=>e.axis===d.name));
-        //     violiin_chart.rangeY(customrange).data([vi.datum()]).draw(vi)
-        // });
         let scale = d3.scaleLinear().domain(d3.extent(dataR,d=>d.arr[lastIndex].length)).range([0,100]);
         let heightbar = graphicopt.radaropt.h/2;
         nodeg.selectAll('.computeNode').each(function(d){
@@ -339,12 +273,19 @@ let JobMap = function() {
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
         let bg = svg.selectAll('.computeSig');
+        bg.each(function (){
+            let path = d3.select(this);
+            if (path.select(".radar").empty()) {
+                path.append('g').attr('class', 'radar');
+            }
+        });
         let datapointg = bg.select(".radar")
-            .datum(d=>newdata.find(n=>n.name === d.name));
-        if (datapointg.empty())
-            datapointg = bg.append('g').attr('class','radar').datum(d=>newdata.find(n=>n.name === d.name));
+            .datum(d=>newdata.find(n=>n.name === d.name))
+            .each(function(){
 
-        createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, {colorfill:colorfill});
+            });
+        // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
     let timelineScale = d3.scaleLinear().range([-10,0]);
@@ -714,9 +655,10 @@ let JobMap = function() {
                 d.y = scaleNode_y(d.order);
                 return `translate(${d.x2},${d.y})`
             });
-            let barhis = g.select('.majorbar').selectAll('g.m').data(computers.data());
+            let barhis = g.select('.majorbar').selectAll('g.m').data(computers.data(),d=>d.name);
             barhis.exit().remove();
             barhis.enter().append('g').attr('class',d=>`${d.name} m`);
+            barhis.attr('class',d=>`${d.name} m`);
             g.select('.majorbar').selectAll('g.m').transition().attr('transform',d=>`translate(${d.x2},${d.y})`);
         }
         link.transition()
@@ -807,7 +749,7 @@ let JobMap = function() {
             makeheader();
             first = false;
         }
-        let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,function(d){return d.name});
+        let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,d=> d.name);
         computers.select('.computeSig').datum(d=>d);
         computers.exit().remove();
         let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
