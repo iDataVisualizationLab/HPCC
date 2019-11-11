@@ -389,7 +389,7 @@ function main() {
 
     inithostResults ();
 
-    jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList).maxTimestep(isRealtime? undefined: sampleS.timespan.length);
+    jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList);
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -526,6 +526,7 @@ function request(){
     var countrecord = 0;
     var missingtimetex = false;
 
+    jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length)
     updatetimeline(0);
     timerequest();
     interval2 = new IntervalTimer(timerequest , simDuration);
