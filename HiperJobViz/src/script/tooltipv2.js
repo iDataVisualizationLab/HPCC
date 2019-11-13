@@ -155,7 +155,7 @@ let Tooltip_lib = function() {
                     d3.select(this).call(d3.axisLeft(d.yScale).tickFormat(d.y_tickFormat).ticks(5).tickSize(-graphicopt.widthG())).select('.domain').remove();
                 })//
         });
-        selectbox.append('span').styles({font: 'unset',color: 'black','padding-left':'20px'}).text('auto scale y-axis');
+        selectbox.append('span').styles({font: 'unset',color: 'black','padding-left':'20px'}).text('scale value within range');
         d3.select(".lineSum")
         .styles({
             'max-height':Math.min(data.length*graphicopt.height+25,heightdevice*0.5)+'px',

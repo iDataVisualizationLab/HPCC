@@ -526,7 +526,8 @@ function request(){
     var countrecord = 0;
     var missingtimetex = false;
 
-    jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length)
+    jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length);
+    isanimation = false
     updatetimeline(0);
     timerequest();
     interval2 = new IntervalTimer(timerequest , simDuration);
@@ -1387,7 +1388,7 @@ function step_full (iteration){
             iteration = tmp;
         }
     }
-    plotResult(undefined, hosts[hosts.length-1].name, iteration);
+    // plotResult(undefined, hosts[hosts.length-1].name, iteration);
     return [iteration];
     //return [iteration, count];
 }
@@ -1511,7 +1512,7 @@ $( document ).ready(function() {
         d3.select('#timelineTool').classed('hide',true);
         jobMap_runopt.lensing = false;
         $('#lensing_control').prop('checked',false);
-        if (jobMap_runopt.compute.type ==='timeline')
+        if (jobMap_runopt.compute.type ==='timeline' )
         {
             jobMap_runopt.compute.clusterNode = false;
             jobMap_runopt.compute.clusterJobID = true;
