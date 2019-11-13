@@ -682,6 +682,9 @@ let JobMap = function() {
                     d.y2 = scaleNode_y_midle(d.order);
                     return `translate(${d.x2},${d.y2 || d.y})`
                 });
+            }else{
+                clusterdata_timeline
+                scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
             }
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
