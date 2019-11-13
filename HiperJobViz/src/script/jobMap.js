@@ -341,64 +341,102 @@ let JobMap = function() {
                     drawEmbedding_timeline(data,colorfill);
                 }
             });
-        const radaropt = {colorfill:colorfill,size:(scaleNode_y_midle(1)-scaleNode_y_midle(0))*4};
-        let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
-        datapoint.exit().remove();
-        datapoint = datapoint.enter().append('g')
-            .attr('class','linkLinegg timeline')
-        .merge(datapoint);
-        datapoint.each(function(d,i){
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide',!i);// hide 1st radar
-        });
-        datapoint.attr('transform',function(d){
-            return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
 
-        bg.style('stroke-width', d=>linkscale(d.values_name.length));
-        // bg.select(".invisibleline").remove();
-        // bg.append('line').attr('class',"invisibleline").attrs(function(d){
-        //     let parentndata = d3.select(this.parentNode.parentNode).datum();
-        //     return {
-        //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-        //         'x2':fisheye_scale.x(timelineScale(0)),
-        //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
-        //         'opacity':0
-        //     };
-        // });
-        let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line).attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`);
-        dataline.exit().remove();
-        dataline.enter().append('line')
-            .attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`)
-            .attr("vector-effect","non-scaling-stroke")
-            .merge(dataline)
-            .attrs(function(d){
-                let parentndata = d3.select(this.parentNode.parentNode).datum();
-                return{
-                x1: d=>fisheye_scale.x(timelineScale(d.end)),
-                x2: d=>fisheye_scale.x(timelineScale(d.start)),
-            }}).styles({
-                stroke: d=>colorFunc(d.cluster),
-                'stroke-width':function(d){return linkscale(d3.select(this.parentNode).datum().values_name.length)}
+
+        if (!runopt.compute.orderBy) {
+            const radaropt = {colorfill: colorfill, size: (scaleNode_y_midle(1) - scaleNode_y_midle(0)) * 4};
+            let datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map(e => {
+                temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                temp.name = e.cluster;
+                temp.timestep = e.timestep;
+                return temp;
+            }));
+            datapoint.exit().remove();
+            datapoint = datapoint.enter().append('g')
+                .attr('class', 'linkLinegg timeline')
+                .merge(datapoint);
+            datapoint.each(function (d, i) {
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', !i);// hide 1st radar
+            });
+            datapoint.attr('transform', function (d) {
+                return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`
             });
 
-        if (runopt.compute.jobOverlay) {
-            let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
+            bg.style('stroke-width', d => linkscale(d.values_name.length));
+            // bg.select(".invisibleline").remove();
+            // bg.append('line').attr('class',"invisibleline").attrs(function(d){
+            //     let parentndata = d3.select(this.parentNode.parentNode).datum();
+            //     return {
+            //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
+            //         'x2':fisheye_scale.x(timelineScale(0)),
+            //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
+            //         'opacity':0
+            //     };
+            // });
+            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
             dataline.enter().append('line')
-                .attr('class', 'linegg timeline')
+                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
+                .attr("vector-effect", "non-scaling-stroke")
                 .merge(dataline)
-                .attrs(function (d) {
-                    let parentndata = d3.select(this.parentNode.parentNode).datum();
-                    return {
+                .attrs({
                         x1: d => fisheye_scale.x(timelineScale(d.end)),
                         x2: d => fisheye_scale.x(timelineScale(d.start)),
-                    }
+                    }).styles({
+                stroke: d => colorFunc(d.cluster),
+                'stroke-width': function (d) {
+                    return linkscale(d3.select(this.parentNode).datum().values_name.length)
+                }
+            });
+
+            if (runopt.compute.jobOverlay) {
+                let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
+                dataline.exit().remove();
+                dataline.enter().append('line')
+                    .attr('class', 'linegg timeline')
+                    .merge(dataline)
+                    .attrs(function (d) {
+                        let parentndata = d3.select(this.parentNode.parentNode).datum();
+                        return {
+                            x1: d => fisheye_scale.x(timelineScale(d.end)),
+                            x2: d => fisheye_scale.x(timelineScale(d.start)),
+                        }
+                    }).styles({
+                    stroke: d => colorFunc(d.cluster),
+                });
+            } else {
+                bg.selectAll(".jobtickg").remove();
+            }
+            drawOverlayJob(runopt.overlayjob);
+        }
+        else {
+            bg.selectAll(".linkLinegg").remove();
+            bg.selectAll(".linegg").remove();
+            let datacurve = bg.selectAll(".curveg").data(d => d.timeline.line).attr('class', d => `curveg timeline ${fixName2Class(d.cluster)}`);
+            datacurve.exit().remove();
+            datacurve.enter()
+                .select('path')
+                .attr('class', d => `curveg timeline ${fixName2Class(d.cluster)}`)
+                .attr("vector-effect", "non-scaling-stroke")
+                .merge(datacurve)
+                .attr("d", function(d,i){
+                    const datap = d3.select(d3.select(this).node().parentNode).datum().timeline.line;
+                    return linkHorizontal({
+                        source: {
+                            x: fisheye_scale.x(timelineScale(d.end)),
+                            y: d.cluster,
+                        },
+                        target: {
+                            x: fisheye_scale.x(timelineScale(d.start)),
+                            y: (datap[i+1]||d).cluster,
+                        }});
                 }).styles({
                 stroke: d => colorFunc(d.cluster),
+                'stroke-width': function (d) {
+                    return linkscale(d3.select(this.parentNode).datum().values_name.length)
+                }
             });
-        }else{
-            bg.selectAll(".jobtickg").remove();
         }
-        drawOverlayJob(runopt.overlayjob)
         bg.on('mouseover',function(d){
             if (!freezing)
                 releasehighlight();
@@ -632,24 +670,26 @@ let JobMap = function() {
             return `translate(${d.x2},${d.y})`
         });
         if (runopt.compute.type==='timeline') {
-            let temp_link = link.data().filter(d => d.target.type === 'job');
-            computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
-            computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
-            g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-20}).text("Hosts's timeline");
-            // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
-            scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
-            computers.transition().attr('transform', d => {
+            if (!runopt.compute.orderBy) {
+                let temp_link = link.data().filter(d => d.target.type === 'job');
+                computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
+                computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
+                // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
+                scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
+                computers.transition().attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_midle(d.order);
-                return `translate(${d.x2},${d.y2 || d.y})`
-            });
+                    return `translate(${d.x2},${d.y2 || d.y})`
+                });
+            }
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
             lensingLayer.attrs({
                 'width':timelineScale(timelineScale.domain()[1])-timelineScale(0),
             }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
             lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
-        }else {
+        }else{
             computers.data().sort((a, b) => (b.arr[lastIndex]||[]).length - (a.arr[lastIndex]||[]).length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
@@ -664,6 +704,7 @@ let JobMap = function() {
             barhis. enter().append('g').attr('class',d=>`${d.name} m`);
             barhis.attr('class',d=>`${d.name} m`);
             g.select('.majorbar').selectAll('g.m').transition().attr('transform',d=>`translate(${d.x2},${d.y})`);
+
         }
         link.transition()
             .call(updatelink);
@@ -681,22 +722,23 @@ let JobMap = function() {
     }
     let linkHorizontal = d3.linkHorizontal()
         .x(function(d) {
-            return d.y;
+            return d.x;
         })
         .y(function(d) {
-            return d.x;
+            return d.y;
         });
+
     function updatelink (path){
         path.select('path')
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
-                        x: d.source.y2 || d.source.y,
-                        y: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0))
+                        x: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
+                        y: d.source.y2 || d.source.y,
                     },
                     target: {
-                        x: d.target.y2 || d.target.y,
-                        y: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0)
+                        x: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
+                        y: d.target.y2 || d.target.y,
                     }});
             });
         path.select('text').attr("transform", function(d) {
