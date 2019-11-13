@@ -850,10 +850,10 @@ let JobMap = function() {
         // table_header(table_headerNode);
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
-        if(table_footerNode.empty()) {
+
             table_footerNode = nodeg.append('g').attr('class', 'table footer');
             table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
-        }
+
         table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
         table_footer(table_footerNode);
 

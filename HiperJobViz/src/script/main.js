@@ -390,6 +390,10 @@ function main() {
     inithostResults ();
 
     jobMap.hosts(hosts).color(colorTemperature).schema(serviceFullList);
+    // disabled graph option
+    let control_jobdisplay = d3.select('#compDisplay_control');
+        control_jobdisplay.node().options.selectedIndex = 2;
+        control_jobdisplay.attr('disabled', '').dispatch('change');
 
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -543,8 +547,10 @@ function request(){
             count = hosts.length;
         };
         var drawprocess = function ()  {
-            if (islastimestep(lastIndex+1))
-                isanimation  = true;
+            if (islastimestep(lastIndex+1)) {
+                isanimation = true;
+                d3.select('#compDisplay_control').attr('disabled',null)
+            }
             if (graphicControl.mode===layout.HORIZONTAL)
                 drawsummarypoint(countarr);
             countarr.length = 0;
@@ -1159,6 +1165,7 @@ function pausechange(){
 
 function resetRequest(){
     pausechange();
+
     tool_tip.hide();
     firstTime = true;
     if (interval2)
@@ -1182,6 +1189,9 @@ function resetRequest(){
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
     Radarplot.init().clustercallback(d=>TSneplot.clusterBin(d));
     jobMap.hosts(hosts).remove(true);
+    let control_jobdisplay = d3.select('#compDisplay_control');
+    control_jobdisplay.node().options.selectedIndex = 2;
+    control_jobdisplay.attr('disabled', '').dispatch('change');
     TSneplot.reset(true);
 
     timelog = [];
