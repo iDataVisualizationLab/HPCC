@@ -157,12 +157,7 @@ let JobMap = function() {
         });
         d3.select('#hideUnchange_control').on("change", function () {
             runopt.hideUnchange = $(this).prop('checked');
-            if (runopt.hideUnchange) {
-                // g.select('.fisheyeLayer').style('pointer-events', 'auto');
-            } else {
-                // g.select('.fisheyeLayer').style('pointer-events', 'none');
-                // fisheye_scale.x = d=>d;
-            }
+            jobMap.data().draw();
         });
 
         return jobMap;
