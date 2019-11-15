@@ -155,6 +155,15 @@ let JobMap = function() {
                 jobMap.data().draw();
             }
         });
+        d3.select('#hideUnchange_control').on("change", function () {
+            runopt.hideUnchange = $(this).prop('checked');
+            if (runopt.hideUnchange) {
+                // g.select('.fisheyeLayer').style('pointer-events', 'auto');
+            } else {
+                // g.select('.fisheyeLayer').style('pointer-events', 'none');
+                // fisheye_scale.x = d=>d;
+            }
+        });
 
         return jobMap;
     };
@@ -1707,15 +1716,21 @@ let JobMap = function() {
                             let temp_h = {};
                             temp_h.values_name = temp_g[k].map(e=>e.name);
                             temp_h.name = temp_h.values_name.join(' ');
-                            temp_g[k].forEach((n)=>{
-                                linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
-                                        e.source =  temp_h.name;
+                            if ((temp_g[k][0].timeline.lineFull.length>1 || !runopt.hideUnchange)) {
+                                temp_g[k].forEach((n) => {
+                                    linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                        e.source = temp_h.name;
+                                    });
                                 });
-                            });
 
-                            temp_h.timeline = temp_g[k][0].timeline;
-                            temp_h.arr = temp_g[k][0].arrcluster;
-                            clusterdata_timeline.push(temp_h);
+                                temp_h.timeline = temp_g[k][0].timeline;
+                                temp_h.arr = temp_g[k][0].arrcluster;
+                                clusterdata_timeline.push(temp_h);
+                            }else{
+                                temp_g[k].forEach((n) => {
+                                    _.pullAll(linkdata, linkdata.filter(f => f.source === n.name));
+                                });
+                            }
                         });
                         temp_g = _.groupBy(linkdata,function(e){return e.source+'_'+e.target});
                         Object.keys(temp_g).forEach(k=> {
@@ -1725,11 +1740,18 @@ let JobMap = function() {
                                 else
                                     t.del = true;
                             })
-                        })
+                        });
 
                         break;
                     case 'single':
-                        clusterdata_timeline = hosts.map(h=>{
+                        clusterdata_timeline = hosts.filter(f=>{
+                            if ((hostOb[f.name].timeline.lineFull.length>1 || !runopt.hideUnchange))
+                                return true;
+                            else{
+                                _.pullAllBy(linkdata, [linkdata.find(l => l.source === f.name )], 'source');
+                                return false;
+                            }
+                        }).map(h=>{
                             let e = h.name;
                             let temp = linkdata.filter(f=>f.source===e);
                             temp.forEach(d=>d.links=1);
@@ -1765,16 +1787,24 @@ let JobMap = function() {
                                 let temp_h = {};
                                 temp_h.values_name = temp_g[k].map(e=>e.name);
                                 temp_h.name = temp_h.values_name.join(' ');
-                                temp_g[k].forEach((n)=>{
-                                    linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
-                                            e.source =  temp_h.name;
+                                if (temp_g[k][0].timeline.lineFull.length>1 || !runopt.hideUnchange) {
+                                    temp_g[k].forEach((n) => {
+                                        linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                            e.source = temp_h.name;
                                             e.links = temp_g[k].length;
+                                        });
                                     });
-                                });
 
-                                temp_h.timeline = temp_g[k][0].timeline;
-                                temp_h.arr = temp_g[k][0].arrcluster;
-                                clusterdata_timeline.push(temp_h);
+                                    temp_h.timeline = temp_g[k][0].timeline;
+                                    temp_h.arr = temp_g[k][0].arrcluster;
+                                    clusterdata_timeline.push(temp_h);
+                                }else{
+                                    temp_g[k].forEach((n) => {
+                                        linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                            e.del = true;
+                                        });
+                                    });
+                                }
                             });
                         });
                         reducelink();
