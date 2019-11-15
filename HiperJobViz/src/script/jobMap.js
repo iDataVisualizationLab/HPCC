@@ -373,6 +373,7 @@ let JobMap = function() {
             //         'opacity':0
             //     };
             // });
+            bg.selectAll("path.linegg").remove();
             let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
             dataline.enter().append('line')
@@ -416,8 +417,8 @@ let JobMap = function() {
                 .y(function(d) { return d[1]; });
 
             bg.selectAll(".linkLinegg.timeline").remove();
-            bg.selectAll(".linegg").remove();
-            let datacurve = bg.selectAll(".curveg").data(d => d.timeline.lineFull).attr('class', d => `curveg timeline ${fixName2Class(d.cluster)}`);
+            bg.selectAll("line.linegg").remove();
+            let datacurve = bg.selectAll(".curveg").data(d => d.timeline.lineFull).attr('class', d => `linkLinegg timeline ${fixName2Class(d.cluster)}`);
             datacurve.exit().remove();
             datacurve.enter()
                 .append('path')
@@ -700,7 +701,7 @@ let JobMap = function() {
                 bundle_cluster.forEach((b,i)=>(b.bid=i,bundle_cluster_ob[b.cluster] = b));
                 //
 
-
+                /*
                 // arrange group for avoid crossing
                 computers.data().forEach(c=> {
                     for (let i = 0;i<c.timeline.clusterarr.length-1;i++) {
@@ -732,10 +733,10 @@ let JobMap = function() {
                     count++;
                 }
                 bundle_cluster.sort((a,b)=>a.orderbycross-b.orderbycross).forEach((b,i)=>b.bid = i);
-
+                */
 
                 // max instance stay top
-               // bundle_cluster.sort((a,b)=>b.maxinstance-a.maxinstance).forEach((b,i)=>b.bid = i);
+               bundle_cluster.sort((a,b)=>b.maxinstance-a.maxinstance).forEach((b,i)=>b.bid = i);
 
                 computers.data().forEach(c=>{
                     c.order=0;
