@@ -230,7 +230,7 @@
                             <option value="radar" >Individual host: Radar chart </option>
                             <option value="radar_cluster" selected="selected">Grouping: System snapshot</option>
                             <option value="timeline">Grouping: Entire timeline</option>
-                            <!--<option value="bundle">Grouping: bundle timelines by clusters</option>-->
+                            <option value="bundle">Grouping: bundle timelines by clusters</option>
                         </select>
                         <div class="col s1">
                             <button class="information waves-effect waves-light grey darken-3" data-image="hostpresent.gif" data-title="Grouping options are recommended for a large number of hosts.">i</button>
@@ -573,11 +573,11 @@
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
                 <div  class="valign-wrapper hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
                     <div class="col s12">
-                        <label>
+                        <label class="col s12">
                             <input id="lensing_control" type="checkbox" class="filled-in">
                             <span style="font: unset;color: black;padding-left:20px;">Lensing</span>
                         </label>
-                        <label>
+                        <label class="col s12">
                             <input id="jobOverlay" type="checkbox" class="filled-in">
                             <span style="font: unset;color: black;padding-left:20px;">Overlay Job info on timeline</span>
                             <div  class="hide" id="legend" style="color:black;">
@@ -596,6 +596,10 @@
                                     </div>
                                 </div>
                             </div>
+                        </label>
+                        <label class="col s12">
+                            <input id="hideUnchange_control" type="checkbox" class="filled-in">
+                            <span style="font: unset;color: black;padding-left:20px;">Hide stable timeline </span>
                         </label>
                     </div>
                     <div class="col s12">

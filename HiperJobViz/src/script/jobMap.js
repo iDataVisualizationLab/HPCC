@@ -155,6 +155,10 @@ let JobMap = function() {
                 jobMap.data().draw();
             }
         });
+        d3.select('#hideUnchange_control').on("change", function () {
+            runopt.hideUnchange = $(this).prop('checked');
+            jobMap.data().draw();
+        });
 
         return jobMap;
     };
@@ -174,7 +178,7 @@ let JobMap = function() {
         user =[];
         data=[];
         tableFooter=[];
-        tableFooter.dataRaw =[]
+        tableFooter.dataRaw =[];
         return jobMap;
     };
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
@@ -292,7 +296,7 @@ let JobMap = function() {
         // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
-    let timelineScale = d3.scaleLinear().range([-10,0]);
+    let timelineScale = d3.scaleLinear().range([-40,0]);
     function updateClusterLabel(){
         if (clusterNode_data)
             nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text).call(wrap,true);
@@ -341,64 +345,115 @@ let JobMap = function() {
                     drawEmbedding_timeline(data,colorfill);
                 }
             });
-        const radaropt = {colorfill:colorfill,size:(scaleNode_y_midle(1)-scaleNode_y_midle(0))*4};
-        let datapoint = bg.selectAll(".linkLinegg").data(d=>d.timeline.clusterarr.map(e=>{temp=_.cloneDeep(newdata.find(n=>n.name === e.cluster)); temp.name= e.cluster;temp.timestep = e.timestep; return temp;}));
-        datapoint.exit().remove();
-        datapoint = datapoint.enter().append('g')
-            .attr('class','linkLinegg timeline')
-        .merge(datapoint);
-        datapoint.each(function(d,i){
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide',!i);// hide 1st radar
-        });
-        datapoint.attr('transform',function(d){
-            return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`});
 
-        bg.style('stroke-width', d=>linkscale(d.values_name.length));
-        // bg.select(".invisibleline").remove();
-        // bg.append('line').attr('class',"invisibleline").attrs(function(d){
-        //     let parentndata = d3.select(this.parentNode.parentNode).datum();
-        //     return {
-        //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-        //         'x2':fisheye_scale.x(timelineScale(0)),
-        //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
-        //         'opacity':0
-        //     };
-        // });
-        let dataline = bg.selectAll(".linegg").data(d=>d.timeline.line).attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`);
-        dataline.exit().remove();
-        dataline.enter().append('line')
-            .attr('class',d=>`linegg timeline ${fixName2Class(d.cluster)}`)
-            .attr("vector-effect","non-scaling-stroke")
-            .merge(dataline)
-            .attrs(function(d){
-                let parentndata = d3.select(this.parentNode.parentNode).datum();
-                return{
-                x1: d=>fisheye_scale.x(timelineScale(d.end)),
-                x2: d=>fisheye_scale.x(timelineScale(d.start)),
-            }}).styles({
-                stroke: d=>colorFunc(d.cluster),
-                'stroke-width':function(d){return linkscale(d3.select(this.parentNode).datum().values_name.length)}
+
+        if (!runopt.compute.bundle) {
+            const radaropt = {colorfill: colorfill, size: (scaleNode_y_midle(1) - scaleNode_y_midle(0)) * 4};
+            let datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map(e => {
+                temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                temp.name = e.cluster;
+                temp.timestep = e.timestep;
+                return temp;
+            }));
+            datapoint.exit().remove();
+            datapoint = datapoint.enter().append('g')
+                .attr('class', 'linkLinegg timeline')
+                .merge(datapoint);
+            datapoint.each(function (d, i) {
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', !i);// hide 1st radar
+            });
+            datapoint.attr('transform', function (d) {
+                return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`
             });
 
-        if (runopt.compute.jobOverlay) {
-            let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
+            bg.style('stroke-width', d => linkscale(d.values_name.length));
+            // bg.select(".invisibleline").remove();
+            // bg.append('line').attr('class',"invisibleline").attrs(function(d){
+            //     let parentndata = d3.select(this.parentNode.parentNode).datum();
+            //     return {
+            //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
+            //         'x2':fisheye_scale.x(timelineScale(0)),
+            //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
+            //         'opacity':0
+            //     };
+            // });
+            bg.selectAll("path.linegg").remove();
+            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
             dataline.enter().append('line')
-                .attr('class', 'linegg timeline')
+                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
+                .attr("vector-effect", "non-scaling-stroke")
                 .merge(dataline)
-                .attrs(function (d) {
-                    let parentndata = d3.select(this.parentNode.parentNode).datum();
-                    return {
+                .attrs({
                         x1: d => fisheye_scale.x(timelineScale(d.end)),
                         x2: d => fisheye_scale.x(timelineScale(d.start)),
-                    }
+                    }).styles({
+                stroke: d => colorFunc(d.cluster),
+                'stroke-width': function (d) {
+                    return linkscale(d3.select(this.parentNode).datum().values_name.length)
+                }
+            });
+
+            if (runopt.compute.jobOverlay) {
+                let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
+                dataline.exit().remove();
+                dataline.enter().append('line')
+                    .attr('class', 'linegg timeline')
+                    .merge(dataline)
+                    .attrs(function (d) {
+                        let parentndata = d3.select(this.parentNode.parentNode).datum();
+                        return {
+                            x1: d => fisheye_scale.x(timelineScale(d.end)),
+                            x2: d => fisheye_scale.x(timelineScale(d.start)),
+                        }
+                    }).styles({
+                    stroke: d => colorFunc(d.cluster),
+                });
+            } else {
+                bg.selectAll(".jobtickg").remove();
+            }
+            drawOverlayJob(runopt.overlayjob);
+        }
+        else {
+            let curveBundle = d3.line()
+                .curve(d3.curveMonotoneX)
+                .x(function(d) { return d[0]; })
+                .y(function(d) { return d[1]; });
+
+            bg.selectAll(".linkLinegg.timeline").remove();
+            bg.selectAll("line.linegg").remove();
+            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            datacurve.exit().remove();
+            datacurve.enter()
+                .append('path')
+                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
+                .attr("vector-effect", "non-scaling-stroke")
+                .merge(datacurve)
+                .attr("d", function(d,i){
+                    const datap = d3.select(d3.select(this).node().parentNode).datum();
+                    let supportp=false;
+                    let data_path = d3.range(d.start,(d.end+1)===maxTimestep?(d.end+1):(d.end+2)).map(e=>
+                        e>d.end?(supportp=true,[fisheye_scale.x(timelineScale(e)-20),scaleNode_y_midle(d.cluster,e,datap.name)]):[fisheye_scale.x(timelineScale(e)),scaleNode_y_midle(d.cluster,e,datap.name)]
+                    );
+                    if (supportp)
+                        data_path.push([fisheye_scale.x(timelineScale(d.end+1)),scaleNode_y_midle(datap.timeline.lineFull[i+1].cluster,d.end+1,datap.name)]);
+                    return curveBundle(data_path);
+                    // linkHorizontal({
+                    //     source: {
+                    //         x: fisheye_scale.x(timelineScale(d.end)),
+                    //         y: scaleNode_y_midle(d.cluster,d.end,datap.values_name[0]),
+                    //     },
+                    //     target: {
+                    //         x: fisheye_scale.x(timelineScale(d.start)),
+                    //         y: scaleNode_y_midle(datap[i+1].cluster,datap[i+1].end,datap.values_name[0]),
+                    //     }});
                 }).styles({
                 stroke: d => colorFunc(d.cluster),
+                'stroke-width': function (d) {
+                    return linkscale(d3.select(this.parentNode).datum().values_name.length)
+                }
             });
-        }else{
-            bg.selectAll(".jobtickg").remove();
         }
-        drawOverlayJob(runopt.overlayjob)
         bg.on('mouseover',function(d){
             if (!freezing)
                 releasehighlight();
@@ -632,24 +687,130 @@ let JobMap = function() {
             return `translate(${d.x2},${d.y})`
         });
         if (runopt.compute.type==='timeline') {
-            let temp_link = link.data().filter(d => d.target.type === 'job');
-            computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
-            computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
-            g.select('.host_title').attrs({'text-anchor':"end",'x':300,'dy':-20}).text("Hosts's timeline");
-            // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
-            scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1]);
-            computers.transition().attr('transform', d => {
+            if (!runopt.compute.bundle) {
+                let temp_link = link.data().filter(d => d.target.type === 'job');
+                computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
+                computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
+                // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
+                scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
+                computers.transition().attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_midle(d.order);
-                return `translate(${d.x2},${d.y2 || d.y})`
-            });
+                    return `translate(${d.x2},${d.y2 || d.y})`
+                });
+            }else{
+                let bundle_cluster = clusterdata.map(c=>{return {cluster:c.name,maxinstance:d3.max(c.arr,e=>e?e.length:0),arr:d3.range(0,maxTimestep).map(()=>[]),orderscale:{_last:0},crossing:{},totalcrossing:0}});
+                let bundle_cluster_ob = {};
+                bundle_cluster.forEach((b,i)=>(b.bid=i,bundle_cluster_ob[b.cluster] = b));
+                //
+
+
+                // arrange group for avoid crossing
+                computers.data().forEach(c=> {
+                    for (let i = 0;i<c.timeline.clusterarr.length-1;i++) {
+                        bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster] = (bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster]||0) +1;
+                        bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].crossing[c.timeline.clusterarr[i].cluster] = (bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].crossing[c.timeline.clusterarr[i].cluster]||0) +1;
+                        bundle_cluster_ob[c.timeline.clusterarr[i].cluster].totalcrossing++;
+                        bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].totalcrossing++;
+                    }
+                });
+
+                bundle_cluster.sort((a,b)=>b.totalcrossing-a.totalcrossing);
+
+                let list = bundle_cluster.map(b=>b.cluster);
+                let headB = list.pop();
+                bundle_cluster_ob[headB].orderbycross = 0;
+                count = 1;
+                while(count<bundle_cluster.length){
+                    let max_n=0;
+                    let headB_temp =undefined;
+                    list.forEach(l=>{if(bundle_cluster_ob[headB].crossing[l]>max_n){
+                        max_n = bundle_cluster_ob[headB].crossing[l];
+                        headB_temp = l;
+                    }});
+                    if (!headB_temp)
+                        headB_temp = list.pop();
+                    bundle_cluster_ob[headB_temp].orderbycross = count;
+                    _.pull(list,headB_temp);
+                    headB = headB_temp;
+                    count++;
+                }
+                bundle_cluster.sort((a,b)=>a.orderbycross-b.orderbycross).forEach((b,i)=>b.bid = i);
+
+
+                // max instance stay top
+               // bundle_cluster.sort((a,b)=>b.maxinstance-a.maxinstance).forEach((b,i)=>b.bid = i);
+
+                computers.data().forEach(c=>{
+                    c.order=0;
+                    c.bundle={};
+                    c.arr.forEach((t,i)=>{
+                        const bi = bundle_cluster_ob[t].bid;
+                        c.order+=bi;
+                        const old = c.bundle[bundle_cluster[bi].cluster];
+                        c.bundle[bundle_cluster[bi].cluster] = Math.min(old===undefined?Infinity:old,i);
+                    });
+                });
+                computers.data().sort((a,b)=>a.order-b.order)
+                    .forEach(c=>{
+                    c.arr.forEach((t,i)=>{
+                        const bi = bundle_cluster.findIndex(b=>b.cluster===t);
+                        if (!bundle_cluster[bi].orderscale[c.name]){
+                            bundle_cluster[bi].orderscale[c.name] = bundle_cluster[bi].orderscale._last;
+                            bundle_cluster[bi].orderscale._last++;
+                        }
+                        // bundle_cluster[bi].arr[i][c.name] = bundle_cluster[bi].orderscale(i);
+
+                    });
+                });
+                const maxBundle = bundle_cluster.map((d,i)=>(d.totalc = d.orderscale._last||1,d.offset= i?(bundle_cluster[i-1].offset+bundle_cluster[i-1].totalc):0,d.totalc));
+                // const maxBundle = bundle_cluster.map((d,i)=>(d.totalc = d3.max(d.lastindex_arr),d.offset= i?(bundle_cluster[i-1].offset+bundle_cluster[i-1].totalc):0,d.totalc));
+                const fullScaleB =  d3.scaleLinear().range(yscale.range()).domain([0, d3.sum(maxBundle)-1]);
+                scaleNode_y_midle = function(clustername,ti,computeID){
+                    const masteb = bundle_cluster_ob[clustername];
+                    return fullScaleB(masteb.orderscale[computeID]+masteb.offset);
+                    // return fullScaleB(masteb.arr[ti][computeID]+masteb.offset);
+                };
+                computers.transition().attr('transform', d => {
+                    d.x2 = 300;
+                    const lastItem = _.last(d.timeline.lineFull);
+                    d.y2 = scaleNode_y_midle(lastItem.cluster,lastItem.end,d.name);
+                    d.y = 0;
+                    return `translate(${d.x2},0)`
+                });
+
+                // calculate intersection
+                let totalintersect = 0;
+                setTimeout(function(){
+                    for (let t=0;t<maxTimestep-1;t++){
+                        for (let i=0; i<clusterdata_timeline.length-1;i++){
+                            for (let j=i+1; j<clusterdata_timeline.length;j++){
+                                if (path_line_intersections({
+                                    x1: 0,
+                                    x2: 100,
+                                    y1: scaleNode_y_midle(clusterdata_timeline[i].arr[t],t,clusterdata_timeline[i].name),
+                                    y2: scaleNode_y_midle(clusterdata_timeline[i].arr[t+1],t,clusterdata_timeline[i].name),
+                                },{
+                                    x1: 0,
+                                    x2: 100,
+                                    y1: scaleNode_y_midle(clusterdata_timeline[j].arr[t],t,clusterdata_timeline[j].name),
+                                    y2: scaleNode_y_midle(clusterdata_timeline[j].arr[t+1],t,clusterdata_timeline[j].name),
+                                }))
+                                    totalintersect++;
+                            }
+                        }
+                    }
+                    console.log(`Intersect#: ${totalintersect}`)
+                },0);
+            }
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
             lensingLayer.attrs({
                 'width':timelineScale(timelineScale.domain()[1])-timelineScale(0),
-            }).attr('height',scaleNode_y_midle(computers.data().length-1)-scaleNode_y_midle(0));
-            lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${scaleNode_y_midle(0)})`)
-        }else {
+            }).attr('height',yscale.range()[1]-yscale.range()[0]);
+            lensingLayer.attr('transform',`translate(${300-(+lensingLayer.attr('width'))},${yscale.range()[0]})`)
+        }else{
             computers.data().sort((a, b) => (b.arr[lastIndex]||[]).length - (a.arr[lastIndex]||[]).length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
@@ -664,6 +825,7 @@ let JobMap = function() {
             barhis. enter().append('g').attr('class',d=>`${d.name} m`);
             barhis.attr('class',d=>`${d.name} m`);
             g.select('.majorbar').selectAll('g.m').transition().attr('transform',d=>`translate(${d.x2},${d.y})`);
+
         }
         link.transition()
             .call(updatelink);
@@ -679,24 +841,50 @@ let JobMap = function() {
             return nametr;
         }
     }
+    function btwn(a, b1, b2) {
+        if ((a >= b1) && (a <= b2)) { return true; }
+        if ((a >= b2) && (a <= b1)) { return true; }
+        return false;
+    }
+    function line_line_intersect(line1, line2) {
+        var x1 = line1.x1, x2 = line1.x2, x3 = line2.x1, x4 = line2.x2;
+        var y1 = line1.y1, y2 = line1.y2, y3 = line2.y1, y4 = line2.y2;
+        var pt_denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        var pt_x_num = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
+        var pt_y_num = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
+        if (pt_denom == 0) { return "parallel"; }
+        else {
+            var pt = {'x': pt_x_num / pt_denom, 'y': pt_y_num / pt_denom};
+            if (btwn(pt.x, x1, x2) && btwn(pt.y, y1, y2) && btwn(pt.x, x3, x4) && btwn(pt.y, y3, y4)) { return pt; }
+            else { return "not in range"; }
+        }
+    }
+    function path_line_intersections(line1, line2) {
+        var pt = line_line_intersect(line1, line2);
+        if (typeof(pt) != "string") {
+            return pt;
+        }
+        return undefined;
+    }
     let linkHorizontal = d3.linkHorizontal()
         .x(function(d) {
-            return d.y;
+            return d.x;
         })
         .y(function(d) {
-            return d.x;
+            return d.y;
         });
+
     function updatelink (path){
         path.select('path')
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
-                        x: d.source.y2 || d.source.y,
-                        y: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0))
+                        x: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
+                        y: d.source.y2 || d.source.y,
                     },
                     target: {
-                        x: d.target.y2 || d.target.y,
-                        y: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0)
+                        x: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
+                        y: d.target.y2 || d.target.y,
                     }});
             });
         path.select('text').attr("transform", function(d) {
@@ -1330,12 +1518,14 @@ let JobMap = function() {
                         let currentarr = hostOb[h].timeline.clusterarr;
                         if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
                             hostOb[h].timeline.clusterarr.stack++;
+                            hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
                             if (hostOb[h].timeline.clusterarr.stack === 1)
                                 hostOb[h].timeline.line.push({cluster: c.name, start: ts - 1, end: ts});
                             else if (hostOb[h].timeline.clusterarr.stack > 1)
                                 hostOb[h].timeline.line[hostOb[h].timeline.line.length - 1].end = ts;
                         } else {
                             hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
+                            hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
                             hostOb[h].timeline.clusterarr.stack = 0;
                         }
                     });
@@ -1362,7 +1552,7 @@ let JobMap = function() {
         Hosts.forEach(h=>{
             h.user=[];
             h.arrcluster = [];
-            h.timeline = {clusterarr:[],line:[]};
+            h.timeline = {clusterarr:[],line:[],lineFull:[]};
         });
 
 
@@ -1521,14 +1711,21 @@ let JobMap = function() {
                             let temp_h = {};
                             temp_h.values_name = temp_g[k].map(e=>e.name);
                             temp_h.name = temp_h.values_name.join(' ');
-                            temp_g[k].forEach((n)=>{
-                                linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
-                                        e.source =  temp_h.name;
+                            if ((temp_g[k][0].timeline.lineFull.length>1 || !runopt.hideUnchange)) {
+                                temp_g[k].forEach((n) => {
+                                    linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                        e.source = temp_h.name;
+                                    });
                                 });
-                            });
 
-                            temp_h.timeline = temp_g[k][0].timeline;
-                            clusterdata_timeline.push(temp_h);
+                                temp_h.timeline = temp_g[k][0].timeline;
+                                temp_h.arr = temp_g[k][0].arrcluster;
+                                clusterdata_timeline.push(temp_h);
+                            }else{
+                                temp_g[k].forEach((n) => {
+                                    _.pullAll(linkdata, linkdata.filter(f => f.source === n.name));
+                                });
+                            }
                         });
                         temp_g = _.groupBy(linkdata,function(e){return e.source+'_'+e.target});
                         Object.keys(temp_g).forEach(k=> {
@@ -1538,18 +1735,26 @@ let JobMap = function() {
                                 else
                                     t.del = true;
                             })
-                        })
+                        });
 
                         break;
                     case 'single':
-                        clusterdata_timeline = hosts.map(h=>{
+                        clusterdata_timeline = hosts.filter(f=>{
+                            if ((hostOb[f.name].timeline.lineFull.length>1 || !runopt.hideUnchange))
+                                return true;
+                            else{
+                                _.pullAllBy(linkdata, [linkdata.find(l => l.source === f.name )], 'source');
+                                return false;
+                            }
+                        }).map(h=>{
                             let e = h.name;
                             let temp = linkdata.filter(f=>f.source===e);
                             temp.forEach(d=>d.links=1);
                             return {
                                 name: e,
                                 values_name: [e],
-                                timeline: hostOb[e].timeline
+                                timeline: hostOb[e].timeline,
+                                arr: hostOb[e].arrcluster,
                             }});
                         break;
                     case 'groupWithJob':
@@ -1564,7 +1769,8 @@ let JobMap = function() {
                                         clusterdata_timeline.push({
                                             name: e,
                                             values_name: [e],
-                                            timeline: hostOb[e].timeline
+                                            timeline: hostOb[e].timeline,
+                                            arr: hostOb[e].arrcluster
                                         });
                                         temp.forEach(d=>d.links=1);
                                     }
@@ -1576,21 +1782,40 @@ let JobMap = function() {
                                 let temp_h = {};
                                 temp_h.values_name = temp_g[k].map(e=>e.name);
                                 temp_h.name = temp_h.values_name.join(' ');
-                                temp_g[k].forEach((n)=>{
-                                    linkdata.filter(f=>f.source ===n.name).forEach((e,i)=>{
-                                        if(i===0) {
-                                            e.source =  temp_h.name;
+                                if (temp_g[k][0].timeline.lineFull.length>1 || !runopt.hideUnchange) {
+                                    temp_g[k].forEach((n) => {
+                                        linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                            e.source = temp_h.name;
                                             e.links = temp_g[k].length;
-                                        }else{
-                                            e.del = true;
-                                        }
+                                        });
                                     });
-                                });
 
-                                temp_h.timeline = temp_g[k][0].timeline;
-                                clusterdata_timeline.push(temp_h);
+                                    temp_h.timeline = temp_g[k][0].timeline;
+                                    temp_h.arr = temp_g[k][0].arrcluster;
+                                    clusterdata_timeline.push(temp_h);
+                                }else{
+                                    temp_g[k].forEach((n) => {
+                                        linkdata.filter(f => f.source === n.name).forEach((e, i) => {
+                                            e.del = true;
+                                        });
+                                    });
+                                }
                             });
                         });
+                        reducelink();
+                        function reducelink() {
+                            let temp_g = _.groupBy(linkdata, function (e) {
+                                return e.source + '_' + e.target
+                            });
+                            Object.keys(temp_g).forEach(k => {
+                                temp_g[k].forEach((t, i) => {
+                                    if (!i)
+                                        t.links = temp_g[k].length;
+                                    else
+                                        t.del = true;
+                                })
+                            });
+                        }
                         break;
                 }
                 linkdata = linkdata.filter(d => !d.del);
@@ -1608,7 +1833,8 @@ let JobMap = function() {
             tableFooter[0] = {key:'UserID',value:'Summary'}
             tableFooter[1] = {key:'Hosts', value:Hosts.filter(d=>d.user.length).length}
             tableFooter[2] = {key:'Jobs', value:d3.sum(user,d=>d.values.length)};
-        }
+        } else
+            clusterdata_timeline = undefined;
         return linkdata
     };
     let harr_old=[];

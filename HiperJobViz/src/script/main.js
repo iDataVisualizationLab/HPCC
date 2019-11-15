@@ -1522,8 +1522,10 @@ $( document ).ready(function() {
         d3.select('#timelineTool').classed('hide',true);
         jobMap_runopt.lensing = false;
         $('#lensing_control').prop('checked',false);
-        if (jobMap_runopt.compute.type ==='timeline' )
+        if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
         {
+            jobMap_runopt.compute.bundle = jobMap_runopt.compute.type ==='bundle';
+            jobMap_runopt.compute.type ='timeline'
             jobMap_runopt.compute.clusterNode = false;
             jobMap_runopt.compute.clusterJobID = true;
             jobMap_runopt.graphic.colorBy = 'group';

@@ -548,3 +548,8 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 #viztype_holder {
     padding-left: 0 ;
 }
+#timelineTool div label{
+    text-align: left;
+    text-align: -moz-left;
+    text-align: -webkit-left;
+}
