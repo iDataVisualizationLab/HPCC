@@ -418,11 +418,11 @@ let JobMap = function() {
 
             bg.selectAll(".linkLinegg.timeline").remove();
             bg.selectAll("line.linegg").remove();
-            let datacurve = bg.selectAll(".curveg").data(d => d.timeline.lineFull).attr('class', d => `linkLinegg timeline ${fixName2Class(d.cluster)}`);
+            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             datacurve.exit().remove();
             datacurve.enter()
                 .append('path')
-                .attr('class', d => `curveg timeline ${fixName2Class(d.cluster)}`)
+                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
                 .attr("vector-effect", "non-scaling-stroke")
                 .merge(datacurve)
                 .attr("d", function(d,i){
@@ -701,7 +701,7 @@ let JobMap = function() {
                 bundle_cluster.forEach((b,i)=>(b.bid=i,bundle_cluster_ob[b.cluster] = b));
                 //
 
-                /*
+
                 // arrange group for avoid crossing
                 computers.data().forEach(c=> {
                     for (let i = 0;i<c.timeline.clusterarr.length-1;i++) {
@@ -733,10 +733,10 @@ let JobMap = function() {
                     count++;
                 }
                 bundle_cluster.sort((a,b)=>a.orderbycross-b.orderbycross).forEach((b,i)=>b.bid = i);
-                */
+
 
                 // max instance stay top
-               bundle_cluster.sort((a,b)=>b.maxinstance-a.maxinstance).forEach((b,i)=>b.bid = i);
+               // bundle_cluster.sort((a,b)=>b.maxinstance-a.maxinstance).forEach((b,i)=>b.bid = i);
 
                 computers.data().forEach(c=>{
                     c.order=0;
