@@ -8,6 +8,7 @@
 
     <title>HiperJobViz</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/6ed220eb7a.js" crossorigin="anonymous"></script>
     <script src="../HiperView/js/jquery-3.3.1.js"></script>
     <script src="../HiperView/js/jquery.dd.js"></script>
     <!-- Compiled and minified CSS -->
@@ -335,6 +336,38 @@
                 </div>
             </li>
             <li>
+                <div class="collapsible-header capitalize" id=""><i class="fas fa-mouse"></i><span>Mouse  Interaction</span>  <i class="material-icons expand">chevron_right</i></div>
+                <div class="collapsible-body">
+                    <div  class="row valign-wrapper">
+                        <div clas="col s12">
+                            <form id="mouseAction">
+                                <label class="col s7 offset-s3 left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio"  value="lensing"/>
+                                    <span>Lensing</span>
+                                </label>
+                                <label class="col s7 offset-s3 left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio"  value="showseries"/>
+                                    <span>Show series </span>
+                                </label>
+                                <label class="col s7 offset-s3 left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio" value="showmetric"/>
+                                    <span>Show Metric series </span>
+                                </label>
+                                <label class="col s7 offset-s3 left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio" value="auto" checked />
+                                    <span>Auto</span>
+                                </label>
+                            </form>
+                        </div>
+                    </div>
+                    <div  class="row valign-wrapper">
+                        <div clas="col s12">
+                            <label class="col s7 offset-s3 left-align">Click to freeze current selection.</label>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li>
                 <div class="collapsible-header capitalize" id="vizController"><i class="icon-radarShape material-icons icon"></i><span>Radar Controller</span>  <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
                     <div id="RadarController"></div>
@@ -573,10 +606,10 @@
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
                 <div  class="valign-wrapper hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
                     <div class="col s12">
-                        <label class="col s12">
-                            <input id="lensing_control" type="checkbox" class="filled-in">
-                            <span style="font: unset;color: black;padding-left:20px;">Lensing</span>
-                        </label>
+                        <!--<label class="col s12">-->
+                            <!--<input id="lensing_control" type="checkbox" class="filled-in">-->
+                            <!--<span style="font: unset;color: black;padding-left:20px;">Lensing</span>-->
+                        <!--</label>-->
                         <label class="col s12">
                             <input id="jobOverlay" type="checkbox" class="filled-in">
                             <span style="font: unset;color: black;padding-left:20px;">Overlay Job info on timeline</span>

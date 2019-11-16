@@ -16,7 +16,7 @@ let JobMap = function() {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-        },runopt={compute:{setting:'pie'},graphic:{colorBy:'user'}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
+        },runopt={compute:{setting:'pie'},graphic:{colorBy:'user'},mouse:{auto:true}},radarcreate,tableData={},tableHeader=[],tableFooter = [],colorscale,
         svg, g, table_headerNode,first = true,
         dataRaw=[],listallJobs=[],data = [],arr=[],
         Hosts = []
@@ -104,7 +104,7 @@ let JobMap = function() {
         g.append("rect")
             .attr('class','fisheyeLayer')
             .style('opacity',0)
-            .style('pointer-events', runopt.lensing?'auto':'none');
+            .style('pointer-events', runopt.mouse.lensing?'auto':'none');
 
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         table_headerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
@@ -133,9 +133,18 @@ let JobMap = function() {
                     setTimeout( ()=> {releasehighlight(); tippannel.hide();},500)
             });
 
-        d3.select('#lensing_control').on("change", function () {
-            runopt.lensing = $(this).prop('checked');
-            if (runopt.lensing) {
+        d3.select('#mouseAction').on("change", function () {
+            const selected_value = $("input[name='mouseAction']:checked").val();
+            if (selected_value==="auto"){
+                runopt.mouse.auto = true;
+                runopt.mouse.lensing = false;
+            }else {
+                runopt.mouse.auto = false;
+                runopt.mouse.lensing = selected_value === "lensing";
+                runopt.mouse.showseries = selected_value === "showseries";
+                runopt.mouse.showmetric = selected_value === "showmetric";
+            }
+            if (runopt.mouse.lensing) {
                 g.select('.fisheyeLayer').style('pointer-events', 'auto');
             } else {
                 g.select('.fisheyeLayer').style('pointer-events', 'none');
@@ -296,7 +305,8 @@ let JobMap = function() {
         // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
-    let timelineScale = d3.scaleLinear().range([-40,0]);
+    let timelineStep = 40;
+    let timelineScale = d3.scaleLinear().range([-timelineStep,0]);
     function updateClusterLabel(){
         if (clusterNode_data)
             nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text).call(wrap,true);
@@ -336,7 +346,7 @@ let JobMap = function() {
             lensingLayer.on("mousemove", function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
-                    fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-10*timelineScale.domain()[1],0]).focus(mouse[0]-(+lensingLayer.attr('width')));
+                    fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-timelineStep*timelineScale.domain()[1],0]).focus(mouse[0]-(+lensingLayer.attr('width')));
                     drawEmbedding_timeline(data,colorfill);
                 }
             }).on("mouseleave",function () {
@@ -459,15 +469,8 @@ let JobMap = function() {
                 releasehighlight();
             clearTimeout(tiptimer);
             d3.selectAll('.d3-tip').styles({'pointer-events':'none','opacity':0})
-            var target = d3.select('#tipfollowscursor')
-                .attr('cx', d3.event.offsetX)
-                .attr('cy', d3.event.offsetY - 5) // 5 pixels above the cursor
-                .node();
-            tippannel.show(d,target);
-            let tipdiv = d3.select('.tippannel');
-            tipdiv.select('.title').html(`<b>Selected ${d.values_name.length} host${(d.values_name.length>1?'s':'')}</b>`)
-            // tipdiv.select('.title').html('<b>Selected host(s): </b><small>'+d3.select(this.parentNode).select('.label').text().replace(', +',', <br>+')+'</small>')
-            tipdiv.select('.radarFullTime').text(`Show ${viztype} series`).on('click',()=>{
+
+            function showSymbolSeries() {
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
@@ -476,21 +479,16 @@ let JobMap = function() {
                 layout.axis.y.domain = [];
                 layout.axis.y.tickFormat = [];
                 layout.background = undefined;
-                // layout.background = {
-                //     type: 'discrete',
-                //     value: d.timeline.clusterarr.map((v, i) => {
-                //         return {
-                //             x0: scaletime.invert(v.timestep),
-                //             x1: d.timeline.clusterarr[i + 1] ? scaletime.invert(d.timeline.clusterarr[i + 1].timestep) : undefined,
-                //             color: colorFunc(v.cluster)
-                //         }
-                //     })
-                // };
                 layout.drawFunc = createRadar;
-                layout.drawopt =  {colorfill:true,size:50};
+                layout.drawopt = {colorfill: true, size: 50};
                 // layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
-                const data_in = d.values_name.map( name=>{
-                    let data_temp =hostOb[name].data.map((o,i)=>{temp=_.cloneDeep(o);temp.name = hostOb[name].arrcluster[i];temp.timestep = scaletime.invert(i); return temp;});
+                const data_in = d.values_name.map(name => {
+                    let data_temp = hostOb[name].data.map((o, i) => {
+                        temp = _.cloneDeep(o);
+                        temp.name = hostOb[name].arrcluster[i];
+                        temp.timestep = scaletime.invert(i);
+                        return temp;
+                    });
                     layout.axis.y.label.push(name);
                     return data_temp;
                 });
@@ -498,10 +496,14 @@ let JobMap = function() {
                 layout.title = '';
                 layout.title2 = ``;
 
-                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 50,margin: {top:0,bottom:0,left:0,right:0}}).data(data_in,true).layout(layout).show(target);
-                tippannel.hide();
-            });
-            tipdiv.select('.metricFullTime').on('click',()=>{
+                tooltip_lib.graphicopt({
+                    width: tooltip_opt.width,
+                    height: 50,
+                    margin: {top: 0, bottom: 0, left: 0, right: 0}
+                }).data(data_in, true).layout(layout).show(target);
+            }
+
+            function showMetrics() {
                 let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
                 let layout = tooltip_lib.layout();
                 layout.axis.x.domain = [[first__timestep, last_timestep]];
@@ -545,10 +547,38 @@ let JobMap = function() {
                 layout.title = '';
                 layout.title2 = `#host: ${d.values_name.length}`;
 
-                tooltip_lib.graphicopt({width: tooltip_opt.width, height: 100,margin:tooltip_opt.margin}).data(data_in).layout(layout).show(target);
-                tippannel.hide();
-            });
-            tipdiv.select('.freezing').text(freezing?'Unfreeze':'freeze').on('click',()=>{d3.select(this.parentNode).dispatch('click');})
+                tooltip_lib.graphicopt({
+                    width: tooltip_opt.width,
+                    height: 100,
+                    margin: tooltip_opt.margin
+                }).data(data_in).layout(layout).show(target);
+            }
+
+            if(runopt.mouse.auto) {
+                var target = d3.select('#tipfollowscursor')
+                    .attr('cx', d3.event.offsetX)
+                    .attr('cy', d3.event.offsetY - 5) // 5 pixels above the cursor
+                    .node();
+                tippannel.show(d, target);
+                let tipdiv = d3.select('.tippannel');
+                tipdiv.select('.title').html(`<b>Selected ${d.values_name.length} host${(d.values_name.length > 1 ? 's' : '')}</b>`)
+                tipdiv.select('.radarFullTime').text(`Show ${viztype} series`).on('click', () => {
+                    showSymbolSeries();
+                    tippannel.hide();
+                });
+                tipdiv.select('.metricFullTime').on('click', () => {
+                    showMetrics();
+                    tippannel.hide();
+                });
+                tipdiv.select('.freezing').text(freezing ? 'Unfreeze' : 'freeze').on('click', () => {
+                    d3.select(this.parentNode).dispatch('click');
+                })
+            }else{
+                if(runopt.mouse.showseries)
+                    showSymbolSeries();
+                else if(runopt.mouse.showmetric)
+                    showMetrics();
+            }
         }).on('mouseleave',function(d){
             if(!freezing)
                 tiptimer = setTimeout( ()=> {releasehighlight(); tippannel.hide();},500);
@@ -705,8 +735,8 @@ let JobMap = function() {
                 bundle_cluster.forEach((b,i)=>(b.bid=i,bundle_cluster_ob[b.cluster] = b));
                 //
 
-
                 // arrange group for avoid crossing
+                //<editor-fold desc="Arrange group">
                 computers.data().forEach(c=> {
                     for (let i = 0;i<c.timeline.clusterarr.length-1;i++) {
                         bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster] = (bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster]||0) +1;
@@ -722,6 +752,8 @@ let JobMap = function() {
                 let headB = list.pop();
                 bundle_cluster_ob[headB].orderbycross = 0;
                 count = 1;
+
+                //<editor-fold desc="Arrange group base on newest element">
                 while(count<bundle_cluster.length){
                     let max_n=0;
                     let headB_temp =undefined;
@@ -736,7 +768,27 @@ let JobMap = function() {
                     headB = headB_temp;
                     count++;
                 }
+                //</editor-fold>
+
+                //<editor-fold desc="Arrange group base on maximum connection">
+                while(count<bundle_cluster.length){
+                    let max_n=0;
+                    let headB_temp =undefined;
+                    list.forEach(l=>{if(bundle_cluster_ob[headB].crossing[l]>max_n){
+                        max_n = bundle_cluster_ob[headB].crossing[l];
+                        headB_temp = l;
+                    }});
+                    if (!headB_temp)
+                        headB_temp = list.pop();
+                    bundle_cluster_ob[headB_temp].orderbycross = count;
+                    _.pull(list,headB_temp);
+                    headB = headB_temp;
+                    count++;
+                }
+                //</editor-fold>
+
                 bundle_cluster.sort((a,b)=>a.orderbycross-b.orderbycross).forEach((b,i)=>b.bid = i);
+                //</editor-fold>
 
 
                 // max instance stay top
@@ -781,8 +833,8 @@ let JobMap = function() {
                 });
 
                 // calculate intersection
-                let totalintersect = 0;
                 setTimeout(function(){
+                    let totalintersect = 0;
                     for (let t=0;t<maxTimestep-1;t++){
                         for (let i=0; i<clusterdata_timeline.length-1;i++){
                             for (let j=i+1; j<clusterdata_timeline.length;j++){
@@ -801,7 +853,7 @@ let JobMap = function() {
                             }
                         }
                     }
-                    console.log(`Intersect#: ${totalintersect}`)
+                    console.log(`#Intersection: ${totalintersect}`)
                 },0);
             }
             updateaxis();
@@ -860,11 +912,12 @@ let JobMap = function() {
         }
     }
     function path_line_intersections(line1, line2) {
-        var pt = line_line_intersect(line1, line2);
-        if (typeof(pt) != "string") {
-            return pt;
-        }
-        return undefined;
+        // var pt = line_line_intersect(line1, line2);
+        // if (typeof(pt) != "string") {
+        //     return pt;
+        // }
+        // return undefined;
+        return (((line1.y1>line2.y1)&&(line1.y2<line2.y2))||((line1.y1<line2.y1)&&(line1.y2>line2.y2)));
     }
     let linkHorizontal = d3.linkHorizontal()
         .x(function(d) {
@@ -2049,7 +2102,7 @@ let JobMap = function() {
                 }
             }
             if (g) {
-                if (runopt.lensing) {
+                if (runopt.mouse.lensing) {
                     g.select('.fisheyeLayer').style('pointer-events', 'auto');
                 } else {
                     g.select('.fisheyeLayer').style('pointer-events', 'none');

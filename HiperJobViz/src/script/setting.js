@@ -41,7 +41,7 @@ let jobMap_runopt = {
     compute:{type:'radar',clusterJobID:true,clusterJobID_info:{groupBy:1800000},clusterNode:true,},
     graphic:{colorBy:'group'},
     histodram:{resolution:11},
-    lensing: false
+    mouse:{auto:true, lensing: false}
 }
 function zoomtoogle(event) {
     let oldvval = d3.select(event).classed('lock');

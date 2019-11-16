@@ -36,13 +36,13 @@
 #mySidenav .collapsible .collapsible-header{
     background-color: transparent;
     background: transparent;
-    background: -webkit-linear-gradient(to bottom, transparent 70%, #ffffff21);
-    background: linear-gradient(to bottom, transparent 70%, #ffffff21);
+    background: -webkit-linear-gradient(to bottom, transparent 60%,#7c767657 80%, #ffffff3d);
+    background: linear-gradient(to bottom, transparent 60%,#7c767657 80%, #ffffff3d);
     font-size: large
 }
 
 #mySidenav .collapsible .collapsible-body{
-    background-color: #ffffff21;
+    background-color: #ffffff3d;
     padding: 1rem;
 }
 
