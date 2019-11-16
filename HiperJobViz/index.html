@@ -132,7 +132,7 @@
             <!--<div class="collapsible-body"><span>Resevered for hierarchy.</span></div>-->
             <!--</li>-->
             <li class="settingContain active no_padding">
-                <div class="collapsible-header" > <i class="material-icons">settings</i>  Setting
+                <div class="collapsible-header" > <i class="material-icons">settings</i>  <span>Setting</span>
                     <div class="informationHolder valign-wrapper" style="margin-left: 5px ">
                         <!--<div id='datainformation' class="informationDetail card">-->
                             <!--<table>-->
@@ -336,7 +336,7 @@
                 </div>
             </li>
             <li>
-                <div class="collapsible-header capitalize" id=""><i class="fas fa-mouse"></i><span>Mouse  Interaction</span>  <i class="material-icons expand">chevron_right</i></div>
+                <div class="collapsible-header capitalize" id=""><i class="fas fa-mouse" style="font-size: 1.4rem;"></i><span>Mouse  Interaction</span>  <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
                     <div  class="row valign-wrapper">
                         <div clas="col s12">
@@ -347,15 +347,19 @@
                                 </label>
                                 <label class="col s7 offset-s3 left-align">
                                     <input class="with-gap" name="mouseAction" type="radio"  value="showseries"/>
-                                    <span>Show series </span>
+                                    <span>Show radar series </span>
                                 </label>
                                 <label class="col s7 offset-s3 left-align">
                                     <input class="with-gap" name="mouseAction" type="radio" value="showmetric"/>
-                                    <span>Show Metric series </span>
+                                    <span>Show time series </span>
                                 </label>
                                 <label class="col s7 offset-s3 left-align">
                                     <input class="with-gap" name="mouseAction" type="radio" value="auto" checked />
-                                    <span>Auto</span>
+                                    <span>Compile mode</span>
+                                </label>
+                                <label class="col s7 offset-s3 left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio" value="disable" checked />
+                                    <span>Disable mouseover</span>
                                 </label>
                             </form>
                         </div>
@@ -382,7 +386,7 @@
                 </div>
             </li>
             <li class="active">
-                <div class="collapsible-header"><i class="material-icons">group_work</i> Major host groups <span class="col right-align valign-wrapper" style="font-size: 12px">(by the 9 metrics)</span><i class="material-icons expand">chevron_right</i></div>
+                <div class="collapsible-header"><i class="material-icons">group_work</i> <span> Major host groups </span><span class="col right-align valign-wrapper" style="font-size: 12px">(by the 9 metrics)</span><i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
                     <div style="position: relative;">
                         <div id="clusterLoading" class="loading hidden">

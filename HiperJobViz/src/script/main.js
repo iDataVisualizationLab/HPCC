@@ -754,17 +754,21 @@ function getRackx(hpcc_rack,hpcc_node,isVertical){
         return racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x;
     return racksnewor[hpcc_rack - 1].x;
 }
-function plotResult(result,name,index) {
-    // Check if we should reset the starting point
+
+function initTime() {
+// Check if we should reset the starting point
     if (firstTime) {
         currentMiliseconds = hostResults['timespan'][0];
-        hostfirst = name;
+        hostfirst = hosts[0].name;
         xTimeScale = d3.scaleLinear()
-            .domain([0, maxstack-1]);
+            .domain([0, maxstack - 1]);
         // get Time
         minTime = currentMiliseconds;  // some max number
     }
     firstTime = false;
+}
+
+function plotResult(result,name,index) {
 
     if (hostResults['timespan'][index||lastIndex])
         query_time = hostResults['timespan'][index||lastIndex]||query_time;  // for drawing current timeline in Summary panel
@@ -1398,6 +1402,7 @@ function step_full (iteration){
             iteration = tmp;
         }
     }
+    initTime();
     // plotResult(undefined, hosts[hosts.length-1].name, iteration);
     return [iteration];
     //return [iteration, count];
@@ -2125,6 +2130,7 @@ function updateclusterDescription (name,text){
 function updateViztype (viztype_in){
     viztype = viztype_in;
     $('#vizController span').text(`${viztype} Controller`);
+    $('#mouseAction input[value="showseries"]+span').text(`Show ${viztype} series`)
     $('#vizController .icon').removeClass (function (index, className) {
         return (className.match (/(^|\s)icon-\S+/g) || []).join(' ');
     }).addClass(`icon-${viztype}Shape`);
@@ -2132,7 +2138,7 @@ function updateViztype (viztype_in){
     d3.selectAll('.radarPlot .radarWrapper').remove();
     if (!firstTime) {
         // updateSummaryChartAll();
-        MetricController.drawSummary();
+        // MetricController.drawSummary();
         if (cluster_info) {
             cluster_map(cluster_info);
             jobMap.draw();
