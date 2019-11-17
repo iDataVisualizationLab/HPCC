@@ -32,18 +32,22 @@
 
 #mySidenav .collapsible {
     border: none;
+    margin-top: 0;
 }
 #mySidenav .collapsible .collapsible-header{
     background-color: transparent;
     background: transparent;
-    background: -webkit-linear-gradient(to bottom, transparent 70%, #ffffff21);
-    background: linear-gradient(to bottom, transparent 70%, #ffffff21);
-    font-size: large
+    background: -webkit-linear-gradient(to bottom, transparent 60%,#7c767657 80%, #ffffff3d);
+    background: linear-gradient(to bottom, transparent 60%,#7c767657 80%, #ffffff3d);
+    font-size: 14px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+
 }
 
 #mySidenav .collapsible .collapsible-body{
-    background-color: #ffffff21;
-    padding: 1rem;
+    background-color: #ffffff3d;
+    padding: 6px 1rem;
 }
 
 #mySidenav .collapsible .active .collapsible-header{

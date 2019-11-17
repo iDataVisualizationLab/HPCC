@@ -549,6 +549,7 @@ function request(){
         var drawprocess = function ()  {
             if (islastimestep(lastIndex+1)) {
                 isanimation = true;
+                getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null)
             }
             if (graphicControl.mode===layout.HORIZONTAL)
@@ -754,17 +755,21 @@ function getRackx(hpcc_rack,hpcc_node,isVertical){
         return racksnewor[(hpcc_rack - 1)*2 + (hpcc_node%2?0:1)].x;
     return racksnewor[hpcc_rack - 1].x;
 }
-function plotResult(result,name,index) {
-    // Check if we should reset the starting point
+
+function initTime() {
+// Check if we should reset the starting point
     if (firstTime) {
         currentMiliseconds = hostResults['timespan'][0];
-        hostfirst = name;
+        hostfirst = hosts[0].name;
         xTimeScale = d3.scaleLinear()
-            .domain([0, maxstack-1]);
+            .domain([0, maxstack - 1]);
         // get Time
         minTime = currentMiliseconds;  // some max number
     }
     firstTime = false;
+}
+
+function plotResult(result,name,index) {
 
     if (hostResults['timespan'][index||lastIndex])
         query_time = hostResults['timespan'][index||lastIndex]||query_time;  // for drawing current timeline in Summary panel
@@ -1398,6 +1403,7 @@ function step_full (iteration){
             iteration = tmp;
         }
     }
+    initTime();
     // plotResult(undefined, hosts[hosts.length-1].name, iteration);
     return [iteration];
     //return [iteration, count];
@@ -1520,10 +1526,13 @@ $( document ).ready(function() {
         var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
         d3.select('#timelineTool').classed('hide',true);
-        jobMap_runopt.lensing = false;
+        jobMap_runopt.mouse.lensing = false;
         $('#lensing_control').prop('checked',false);
         if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
         {
+            d3.select('input[value="lensing"]').attr('disabled',null);
+            d3.select('input[value="showseries"]').attr('disabled',null);
+            d3.select('input[value="showmetric"]').attr('disabled',null);
             jobMap_runopt.compute.bundle = jobMap_runopt.compute.type ==='bundle';
             jobMap_runopt.compute.type ='timeline'
             jobMap_runopt.compute.clusterNode = false;
@@ -1534,21 +1543,30 @@ $( document ).ready(function() {
             // document.getElementById("colorConnection_control").options.selectedIndex = 0;
             // jobMap_runopt.graphic.colorBy = 'group';
             // document.getElementById("colorConnection_control").setAttribute('disabled','')
-        }else if (jobMap_runopt.compute.type ==='pie')
-        {
-            jobMap_runopt.compute.clusterNode = false;
-            document.getElementById("colorConnection_control").options.selectedIndex = 0;
-            jobMap_runopt.graphic.colorBy = 'user';
-            document.getElementById("colorConnection_control").setAttribute('disabled','')
-        }else if (jobMap_runopt.compute.type ==='radar')
-        {
-            jobMap_runopt.compute.clusterNode = false;
-            document.getElementById("colorConnection_control").removeAttribute('disabled')
-        }else if(jobMap_runopt.compute.type ==='radar_cluster'){
-            jobMap_runopt.compute.type = 'radar';
-            jobMap_runopt.compute.clusterNode = true;
-        }else{
-            document.getElementById("colorConnection_control").removeAttribute('disabled')
+        }else {
+            d3.select('input[value="lensing"]').attr('disabled',"disabled");
+            d3.select('input[value="showseries"]').attr('disabled',"disabled");
+            d3.select('input[value="showmetric"]').attr('disabled',"disabled");
+            const currentMouse = jobMap.runopt().mouse;
+            if(!(currentMouse.disable||currentMouse.auto)) {
+                $('input[value="auto"]')[0].checked = true;
+                d3.select('#mouseAction').dispatch('change');
+            }
+
+            if (jobMap_runopt.compute.type === 'pie') {
+                jobMap_runopt.compute.clusterNode = false;
+                document.getElementById("colorConnection_control").options.selectedIndex = 0;
+                jobMap_runopt.graphic.colorBy = 'user';
+                document.getElementById("colorConnection_control").setAttribute('disabled', '')
+            } else if (jobMap_runopt.compute.type === 'radar') {
+                jobMap_runopt.compute.clusterNode = false;
+                document.getElementById("colorConnection_control").removeAttribute('disabled')
+            } else if (jobMap_runopt.compute.type === 'radar_cluster') {
+                jobMap_runopt.compute.type = 'radar';
+                jobMap_runopt.compute.clusterNode = true;
+            } else {
+                document.getElementById("colorConnection_control").removeAttribute('disabled')
+            }
         }
         jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
@@ -1658,7 +1676,7 @@ $( document ).ready(function() {
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
             if(cluster_info) {
-                cluster_info.forEach(d => d.arr = []);
+                cluster_info.forEach(d => (d.arr = [],d.total=0));
                 hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
                     let axis_arr = _.flatten(serviceLists.map(a => sampleS[h.name][serviceListattr[a.id]][i].map(v => d3.scaleLinear().domain(a.sub[0].range)(v === null ? undefined : v) || 0)));
                     let index = 0;
@@ -2068,9 +2086,11 @@ function cluster_map (dataRaw) {
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
-                jobMap.highlight(d.id);
+                if (!jobMap.runopt().mouse.disable)
+                    jobMap.highlight(d.id);
             }).on('mouseleave',function(d){
-                jobMap.unhighlight(d.id);
+                if (!jobMap.runopt().mouse.disable)
+                    jobMap.unhighlight(d.id);
             })
             .append('div')
             .attr('class','label')
@@ -2125,6 +2145,7 @@ function updateclusterDescription (name,text){
 function updateViztype (viztype_in){
     viztype = viztype_in;
     $('#vizController span').text(`${viztype} Controller`);
+    $('#mouseAction input[value="showseries"]+span').text(`Show ${viztype} series`)
     $('#vizController .icon').removeClass (function (index, className) {
         return (className.match (/(^|\s)icon-\S+/g) || []).join(' ');
     }).addClass(`icon-${viztype}Shape`);
@@ -2132,7 +2153,7 @@ function updateViztype (viztype_in){
     d3.selectAll('.radarPlot .radarWrapper').remove();
     if (!firstTime) {
         // updateSummaryChartAll();
-        MetricController.drawSummary();
+        // MetricController.drawSummary();
         if (cluster_info) {
             cluster_map(cluster_info);
             jobMap.draw();
