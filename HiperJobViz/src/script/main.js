@@ -549,6 +549,7 @@ function request(){
         var drawprocess = function ()  {
             if (islastimestep(lastIndex+1)) {
                 isanimation = true;
+                getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null)
             }
             if (graphicControl.mode===layout.HORIZONTAL)
@@ -1529,6 +1530,9 @@ $( document ).ready(function() {
         $('#lensing_control').prop('checked',false);
         if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
         {
+            d3.select('input[value="lensing"]').attr('disabled',null);
+            d3.select('input[value="showseries"]').attr('disabled',null);
+            d3.select('input[value="showmetric"]').attr('disabled',null);
             jobMap_runopt.compute.bundle = jobMap_runopt.compute.type ==='bundle';
             jobMap_runopt.compute.type ='timeline'
             jobMap_runopt.compute.clusterNode = false;
@@ -1539,21 +1543,30 @@ $( document ).ready(function() {
             // document.getElementById("colorConnection_control").options.selectedIndex = 0;
             // jobMap_runopt.graphic.colorBy = 'group';
             // document.getElementById("colorConnection_control").setAttribute('disabled','')
-        }else if (jobMap_runopt.compute.type ==='pie')
-        {
-            jobMap_runopt.compute.clusterNode = false;
-            document.getElementById("colorConnection_control").options.selectedIndex = 0;
-            jobMap_runopt.graphic.colorBy = 'user';
-            document.getElementById("colorConnection_control").setAttribute('disabled','')
-        }else if (jobMap_runopt.compute.type ==='radar')
-        {
-            jobMap_runopt.compute.clusterNode = false;
-            document.getElementById("colorConnection_control").removeAttribute('disabled')
-        }else if(jobMap_runopt.compute.type ==='radar_cluster'){
-            jobMap_runopt.compute.type = 'radar';
-            jobMap_runopt.compute.clusterNode = true;
-        }else{
-            document.getElementById("colorConnection_control").removeAttribute('disabled')
+        }else {
+            d3.select('input[value="lensing"]').attr('disabled',"disabled");
+            d3.select('input[value="showseries"]').attr('disabled',"disabled");
+            d3.select('input[value="showmetric"]').attr('disabled',"disabled");
+            const currentMouse = jobMap.runopt().mouse;
+            if(!(currentMouse.disable||currentMouse.auto)) {
+                $('input[value="auto"]')[0].checked = true;
+                d3.select('#mouseAction').dispatch('change');
+            }
+
+            if (jobMap_runopt.compute.type === 'pie') {
+                jobMap_runopt.compute.clusterNode = false;
+                document.getElementById("colorConnection_control").options.selectedIndex = 0;
+                jobMap_runopt.graphic.colorBy = 'user';
+                document.getElementById("colorConnection_control").setAttribute('disabled', '')
+            } else if (jobMap_runopt.compute.type === 'radar') {
+                jobMap_runopt.compute.clusterNode = false;
+                document.getElementById("colorConnection_control").removeAttribute('disabled')
+            } else if (jobMap_runopt.compute.type === 'radar_cluster') {
+                jobMap_runopt.compute.type = 'radar';
+                jobMap_runopt.compute.clusterNode = true;
+            } else {
+                document.getElementById("colorConnection_control").removeAttribute('disabled')
+            }
         }
         jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
@@ -1663,7 +1676,7 @@ $( document ).ready(function() {
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
             if(cluster_info) {
-                cluster_info.forEach(d => d.arr = []);
+                cluster_info.forEach(d => (d.arr = [],d.total=0));
                 hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
                     let axis_arr = _.flatten(serviceLists.map(a => sampleS[h.name][serviceListattr[a.id]][i].map(v => d3.scaleLinear().domain(a.sub[0].range)(v === null ? undefined : v) || 0)));
                     let index = 0;
@@ -2073,9 +2086,11 @@ function cluster_map (dataRaw) {
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
-                jobMap.highlight(d.id);
+                if (!jobMap.runopt().mouse.disable)
+                    jobMap.highlight(d.id);
             }).on('mouseleave',function(d){
-                jobMap.unhighlight(d.id);
+                if (!jobMap.runopt().mouse.disable)
+                    jobMap.unhighlight(d.id);
             })
             .append('div')
             .attr('class','label')

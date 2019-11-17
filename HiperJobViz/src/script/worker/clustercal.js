@@ -1,5 +1,5 @@
 window =self;
-importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/myscripts/setting.js","../../../../HiperView/js/lodash.min.js","../setting.js","../../../../HiperView/js/kmean.js","../../../../HiperView/js/binnerN.min.js");
+importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/myscripts/setting.js","../../../../HiperView/js/lodash.min.js","../setting.js","../../../../HiperView/js/kmean.js","../../../../HiperView/js/binnerN.min.js","../../../../HiperView/js/simple-statistics.min.js");
 
 addEventListener('message',function ({data}) {
     let binopt = data.binopt, sampleS = data.sampleS,hosts = data.hosts,serviceFullList = data.serviceFullList;
@@ -67,6 +67,9 @@ addEventListener('message',function ({data}) {
             temp = d.val.map((e, i) => {
                 return {axis: keys[i], value: e}
             });
+        let distanceArr = d.map(function (p) {
+            return distance(d.val, p)
+        });
         temp.bin = {
             name: d.map(f => f.data.name),
             id: d.map(f => f.data.id),
@@ -77,9 +80,8 @@ addEventListener('message',function ({data}) {
             distancefunc: (e) => d3.max(e.map(function (p) {
                 return distance(e[0], p)
             })),
-            distance: d3.max(d.map(function (p) {
-                return distance(d.val, p)
-            }))
+            distance: d3.max(distanceArr),
+            std: ss.standardDeviation(distanceArr)
         };
         if (bin.normalizedFun)
             temp.bin.val = bin.normalizedFun.scaleBackPoints(d);
@@ -91,7 +93,7 @@ addEventListener('message',function ({data}) {
     serviceFullList.forEach(d => {
         d.scale = d3.scaleLinear().range(d.range);
         // csv_header.push('10.10.1.1-' + d.text);
-    })
+    });
     // if (binopt.clusterMethod === 'leaderbin')
     //     csv_header.push('radius');
 
@@ -100,6 +102,7 @@ addEventListener('message',function ({data}) {
         let temp = {labels: i};
         d.forEach((s, i) => temp[serviceFullList[i].text] = serviceFullList[i].scale(s.value));
         temp.radius = d.bin.distance;
+        temp.std = d.bin.std;
         temp.index = i;
         temp.__metrics = d.slice();
         temp.__metrics.normalize = temp.__metrics.map((e, i) => e.value);

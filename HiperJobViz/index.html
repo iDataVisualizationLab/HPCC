@@ -338,35 +338,37 @@
             <li>
                 <div class="collapsible-header capitalize" id=""><i class="fas fa-mouse" style="font-size: 1.4rem;"></i><span>Mouse  Interaction</span>  <i class="material-icons expand">chevron_right</i></div>
                 <div class="collapsible-body">
-                    <div  class="row valign-wrapper">
-                        <div clas="col s12">
-                            <form id="mouseAction">
-                                <label class="col s7 offset-s3 left-align">
-                                    <input class="with-gap" name="mouseAction" type="radio"  value="lensing"/>
+                    <div  class="row s12 valign-wrapper">
+                        <div class="col s12">
+                            <label for="mouseAction" class="col s4">Mouse over:</label>
+                            <form id="mouseAction" class="col s7" style="padding-left: 0">
+                                <label class="col left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio"  value="lensing" disabled="disabled"/>
                                     <span>Lensing</span>
                                 </label>
-                                <label class="col s7 offset-s3 left-align">
-                                    <input class="with-gap" name="mouseAction" type="radio"  value="showseries"/>
+                                <label class="col left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio"  value="showseries" disabled="disabled"/>
                                     <span>Show radar series </span>
                                 </label>
-                                <label class="col s7 offset-s3 left-align">
-                                    <input class="with-gap" name="mouseAction" type="radio" value="showmetric"/>
+                                <label class="col left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio" value="showmetric" disabled="disabled"/>
                                     <span>Show time series </span>
                                 </label>
-                                <label class="col s7 offset-s3 left-align">
+                                <label class="col left-align">
                                     <input class="with-gap" name="mouseAction" type="radio" value="auto" checked />
                                     <span>Compile mode</span>
                                 </label>
-                                <label class="col s7 offset-s3 left-align">
-                                    <input class="with-gap" name="mouseAction" type="radio" value="disable" checked />
+                                <label class="col left-align">
+                                    <input class="with-gap" name="mouseAction" type="radio" value="disable" />
                                     <span>Disable mouseover</span>
                                 </label>
                             </form>
                         </div>
                     </div>
-                    <div  class="row valign-wrapper">
-                        <div clas="col s12">
-                            <label class="col s7 offset-s3 left-align">Click to freeze current selection.</label>
+                    <div  class="row s12 valign-wrapper">
+                        <div class="col s12">
+                            <label for="mouseClickAction" class="col s4">Mouse click:</label>
+                            <div id="mouseClickAction" class="col s7 left-align" style="padding-left: 0;"><p style="margin: 0;color: #ffffff7d;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ">* Click to freeze current selection.</p></div>
                         </div>
                     </div>
                 </div>

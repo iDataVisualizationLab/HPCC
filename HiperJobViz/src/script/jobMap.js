@@ -29,6 +29,12 @@ let JobMap = function() {
     let freezing=false,textWarp=200;
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
+            if(runopt.mouse.disable){
+                if(!freezing)
+                    _.bind(mouseOver[0],this)(d);
+                else
+                    _.bind(mouseLeave[0],this)(d);
+            }
             freezing = !freezing;
             if (freezing)
                 g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
@@ -38,10 +44,10 @@ let JobMap = function() {
         });
         if (!freezing) {
             path.on('mouseover', function(d){
-                if(!freezing)
+                if(!freezing && !runopt.mouse.disable)
                     _.bind(mouseOver[0],this)(d);
             }).on('mouseleave',function(d){
-                if(!freezing)
+                if(!freezing && !runopt.mouse.disable)
                     _.bind(mouseLeave[0],this)(d);
             });
         }
@@ -135,11 +141,13 @@ let JobMap = function() {
 
         d3.select('#mouseAction').on("change", function () {
             const selected_value = $("input[name='mouseAction']:checked").val();
-            if (selected_value==="auto"){
-                runopt.mouse.auto = true;
+            if (selected_value==="auto"||selected_value==="disable"){
+                runopt.mouse.auto = selected_value==="auto";
+                runopt.mouse.disable = selected_value==="disable";
                 runopt.mouse.lensing = false;
             }else {
                 runopt.mouse.auto = false;
+                runopt.mouse.disable = false;
                 runopt.mouse.lensing = selected_value === "lensing";
                 runopt.mouse.showseries = selected_value === "showseries";
                 runopt.mouse.showmetric = selected_value === "showmetric";
@@ -1091,9 +1099,9 @@ let JobMap = function() {
         // table_header(table_headerNode);
         // make table footer
         let table_footerNode = nodeg.select('.table.footer');
-
+        if (table_footerNode.empty())
             table_footerNode = nodeg.append('g').attr('class', 'table footer');
-            table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
+        table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
 
         table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
         table_footer(table_footerNode);

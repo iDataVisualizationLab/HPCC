@@ -527,16 +527,21 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 [type="checkbox"] + span:not(.lever) {
     height: 15px;
 }
+[type="radio"] + span:before, [type="radio"] + span:after{
+    width: 12px;
+    height: 12px;
+}
 
 [type="radio"]:not(:checked) + span, [type="radio"]:checked + span{
     font-size: unset;
-    height: 15px;
+    height: 17px;
+    line-height: 1rem;
 }
 [type="radio"]:not(:checked) + span:before, [type="radio"]:not(:checked) + span:after {
-    border: 2px solid #ffffff;
+    border: 1px solid #ffffff;
 }
 .light [type="radio"]:not(:checked) + span:before,.light [type="radio"]:not(:checked) + span:after {
-    border: 2px solid #5a5a5a;
+    border: 1px solid #5a5a5a;
 }
 
 .loading {
