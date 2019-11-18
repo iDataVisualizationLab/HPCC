@@ -345,12 +345,12 @@ function RadarChart(id, data, options, name) {
         return allAxis.findIndex(e=>e.text===v.axis);
     }
     //The radial line function
-    let radarLine, radialAreaGenerator, radialAreaQuantile;
+    let radarLine, radialAreaGenerator, radialAreaQuantile,keyLine='value';
         radarLine  = d3.radialLine()
         // .interpolate("linear-closed")
             .curve(d3.curveCatmullRom.alpha(this.smooth))
             .radius(function (d) {
-                return rScale(d.value === undefined ? d : d.value);
+                return rScale(d[keyLine] === undefined ? d : d[keyLine]);
             })
             .angle(function (d, i) {
                 return getAngle(d, i);
@@ -533,6 +533,8 @@ function RadarChart(id, data, options, name) {
         blobWrapper
             .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }else if(cfg.boxplot){
+        keyLine = data[0][0].mean===undefined?'value':'mean';
+        let quantile_exist = data[0][0].q1!==undefined;
         function drawMeanLine(paths){
             return paths
                 .attr("d", d =>radarLine(d))
@@ -551,23 +553,36 @@ function RadarChart(id, data, options, name) {
         function drawMinMaxArea(paths){
             return paths
                 .attr("d", d =>radialAreaGenerator(d))
-                .styles({"fill":'none',
+                .styles({
                     'stroke':(d, i) => cfg.color(i,d),
                     'stroke-width':() => cfg.strokeWidth + "px"});
         }
         //update the outlines
         blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-        blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
-        blobWrapperpath.style("fill", "none").transition().call(drawMinMaxArea);
+        if(quantile_exist) {
+            blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
+            blobWrapperpath.style("fill", "none").transition().call(drawMinMaxArea);
+            blobWrapper.append("path")
+                .attr("class", "radarStroke")
+                .style("fill", "none")
+                .call(drawMinMaxArea);
+        }else{
+            blobWrapperpath
+                .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
+                .style("fill-opacity", cfg.fillin)
+                .transition().call(drawMinMaxArea);
+            blobWrapper.append("path")
+                .attr("class", "radarStroke")
+                .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
+                .style("fill-opacity", cfg.fillin)
+                .call(drawMinMaxArea);
+        }
 
-        blobWrapper.append("path")
-            .attr("class", "radarStroke")
-            .call(drawMinMaxArea);
         blobWrapper
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
 
-        blobWrapper
-            .append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
+        if(quantile_exist)
+            blobWrapper.append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }
     else {
         blobWrapperpath.transition().attr("d", d => radarLine(d))

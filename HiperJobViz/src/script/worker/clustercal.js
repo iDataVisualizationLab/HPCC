@@ -61,11 +61,21 @@ addEventListener('message',function ({data}) {
         var temp;
         if (bin.normalizedFun)
             temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
-                return {axis: keys[i], value: e}
+                let temparr = d.map(e=>e[i]);
+                return {axis: keys[i], value: e,
+                    minval: ss.min(temparr),
+                    maxval: ss.max(temparr),
+                    // mean: ss.mean(temparr),
+                }
             });
         else
             temp = d.val.map((e, i) => {
-                return {axis: keys[i], value: e}
+                let temparr = d.map(e=>e[i]);
+                return {axis: keys[i], value: e,
+                    minval: ss.min(temparr),
+                    maxval: ss.max(temparr),
+                    mean: ss.mean(temparr),
+                }
             });
         let distanceArr = d.map(function (p) {
             return distance(d.val, p)
@@ -81,8 +91,9 @@ addEventListener('message',function ({data}) {
                 return distance(e[0], p)
             })),
             distance: d3.max(distanceArr),
-            std: ss.standardDeviation(distanceArr)
+            // meand: ss.mean(distanceArr)
         };
+        temp.bin.mse = ss.mean(temp.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval)));
         if (bin.normalizedFun)
             temp.bin.val = bin.normalizedFun.scaleBackPoints(d);
         else
@@ -102,7 +113,7 @@ addEventListener('message',function ({data}) {
         let temp = {labels: i};
         d.forEach((s, i) => temp[serviceFullList[i].text] = serviceFullList[i].scale(s.value));
         temp.radius = d.bin.distance;
-        temp.std = d.bin.std;
+        temp.mse = d.bin.mse;
         temp.index = i;
         temp.__metrics = d.slice();
         temp.__metrics.normalize = temp.__metrics.map((e, i) => e.value);

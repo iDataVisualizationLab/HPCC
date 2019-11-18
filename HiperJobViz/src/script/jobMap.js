@@ -715,7 +715,7 @@ let JobMap = function() {
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
     let Jobscale = d3.scaleSqrt().range([0.5,3]);
-
+    let intersectionWorker;
     function renderManual(computers, jobNode, link) {
 
         jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
@@ -841,28 +841,26 @@ let JobMap = function() {
                 });
 
                 // calculate intersection
-                setTimeout(function(){
-                    let totalintersect = 0;
-                    for (let t=0;t<maxTimestep-1;t++){
-                        for (let i=0; i<clusterdata_timeline.length-1;i++){
-                            for (let j=i+1; j<clusterdata_timeline.length;j++){
-                                if (path_line_intersections({
-                                    x1: 0,
-                                    x2: 100,
-                                    y1: scaleNode_y_midle(clusterdata_timeline[i].arr[t],t,clusterdata_timeline[i].name),
-                                    y2: scaleNode_y_midle(clusterdata_timeline[i].arr[t+1],t,clusterdata_timeline[i].name),
-                                },{
-                                    x1: 0,
-                                    x2: 100,
-                                    y1: scaleNode_y_midle(clusterdata_timeline[j].arr[t],t,clusterdata_timeline[j].name),
-                                    y2: scaleNode_y_midle(clusterdata_timeline[j].arr[t+1],t,clusterdata_timeline[j].name),
-                                }))
-                                    totalintersect++;
-                            }
-                        }
+                if (intersectionWorker)
+                    intersectionWorker.terminate();
+                intersectionWorker = new Worker ('src/script/worker/intersetion_worker.js');
+                intersectionWorker.postMessage({
+                    maxTimestep:maxTimestep,
+                    clusterdata_timeline:clusterdata_timeline,
+                    bundle_cluster_ob:bundle_cluster_ob,
+                    range: yscale.range(),
+                    domain: [0, d3.sum(maxBundle)-1],
+                });
+                intersectionWorker.addEventListener('message',({data})=>{
+                    if (data.action==='done') {
+                        console.log(`#Intersection: ${data.result}`)
+                        // preloader(false,undefined,undefined,'#clusterLoading');
+                        intersectionWorker.terminate();
                     }
-                    console.log(`#Intersection: ${totalintersect}`)
-                },0);
+                    if (data.action==='returnData'){
+                        // onloaddetermire({process:data.result.process,message:`# iterations: ${data.result.iteration}`},'#clusterLoading');
+                    }
+                }, false);
             }
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
@@ -1616,9 +1614,8 @@ let JobMap = function() {
             h.timeline = {clusterarr:[],line:[],lineFull:[]};
         });
 
-
-        updateClusterTimeline();
     if (lastIndex===(maxTimestep-1)) {
+        updateClusterTimeline();
         let user_n = current_userData();
         // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
@@ -2066,10 +2063,9 @@ let JobMap = function() {
             g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
         else
             g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
-        // g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)._parents.forEach(p=>d3.select(p).dispatch('mouseover'));
         g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)
             .each(function(){
-                d3.select(this.parentNode.parentNode.parentNode).dispatch('mouseover')});
+                (d3.select(this.parentNode.parentNode).classed('computeNode')?d3.select(this.parentNode.parentNode):d3.select(this.parentNode.parentNode.parentNode)).dispatch('mouseover')});
     }
     jobMap.unhighlight = function (name) {
         _.pull(filter,name);
