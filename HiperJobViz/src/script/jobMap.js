@@ -177,6 +177,11 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
+        d3.select('#suddenGroup_control').on("change", function () {
+            runopt.suddenGroup = $(this).prop('checked');
+            jobMap.data().drawComp();
+        });
+
         return jobMap;
     };
     let tippannel, tiptimer;
@@ -367,34 +372,37 @@ let JobMap = function() {
 
         if (!runopt.compute.bundle) {
             const radaropt = {colorfill: colorfill, size: (scaleNode_y_midle(1) - scaleNode_y_midle(0)) * 4};
-            let datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map(e => {
-                temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
-                temp.name = e.cluster;
-                temp.timestep = e.timestep;
-                return temp;
-            }));
+            let datapoint;
+            if (!runopt.suddenGroup) {
+                datapoint= bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map((e,i) => {
+                    temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                    temp.name = e.cluster;
+                    temp.timestep = e.timestep;
+                    if(!i)
+                        temp.hide = true;
+                    return temp;
+                }));
+            }else{
+                datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr_sudden.map(e => {
+                    temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                    temp.name = e.cluster;
+                    temp.timestep = e.timestep;
+                    return temp;
+                }));
+            }
             datapoint.exit().remove();
             datapoint = datapoint.enter().append('g')
                 .attr('class', 'linkLinegg timeline')
                 .merge(datapoint);
             datapoint.each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', !i);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
             });
             datapoint.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`
             });
 
             bg.style('stroke-width', d => linkscale(d.values_name.length));
-            // bg.select(".invisibleline").remove();
-            // bg.append('line').attr('class',"invisibleline").attrs(function(d){
-            //     let parentndata = d3.select(this.parentNode.parentNode).datum();
-            //     return {
-            //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-            //         'x2':fisheye_scale.x(timelineScale(0)),
-            //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
-            //         'opacity':0
-            //     };
-            // });
+
             bg.selectAll("path.linegg").remove();
             let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
@@ -1575,6 +1583,7 @@ let JobMap = function() {
                     ct.forEach(h => {
                         hostOb[h].arrcluster[ts] = c.name;
                         let currentarr = hostOb[h].timeline.clusterarr;
+
                         if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
                             hostOb[h].timeline.clusterarr.stack++;
                             hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
@@ -1586,6 +1595,9 @@ let JobMap = function() {
                             hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
                             hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
                             hostOb[h].timeline.clusterarr.stack = 0;
+                            if(ts>0 && ts<maxstep && calculateMSE(hostOb[h].data[ts-1],hostOb[h].data[ts])>clusterdata.find(c=>c.name===hostOb[h].arrcluster[ts-1]).mse*0.25){
+                                hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
+                            }
                         }
                     });
 
@@ -1594,7 +1606,9 @@ let JobMap = function() {
         timelineScale.domain([maxstep - 1, maxstep]);
         // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
-
+    function calculateMSE(a,b){
+        return ss.mean(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+    }
     let first__timestep = new Date();
     let lastIndex = 0;
     function handle_links (timeStep_r,lastIndex_r){
@@ -1611,7 +1625,7 @@ let JobMap = function() {
         Hosts.forEach(h=>{
             h.user=[];
             h.arrcluster = [];
-            h.timeline = {clusterarr:[],line:[],lineFull:[]};
+            h.timeline = {clusterarr:[],line:[],lineFull:[],clusterarr_sudden:[]};
         });
 
     if (lastIndex===(maxTimestep-1)) {
