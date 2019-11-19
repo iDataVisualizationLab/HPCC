@@ -23,7 +23,7 @@ ClusteringView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.h
 
 HiperJobViz: https://idatavisualizationlab.github.io/HPCC/HiperJobViz/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobNet.PNG)
-[Presentation SC19 - DAAC 2019](https://texastechuniversity-my.sharepoint.com/personal/tommy_dang_ttu_edu/_layouts/15/Doc.aspx?sourcedoc={8d6e0eec-338b-463e-b75b-4b053835c056}&amp;action=embedview&amp;wdAr=1.7777777777777777)
+[Presentation SC19 - DAAC 2019](https://texastechuniversity-my.sharepoint.com/:p:/g/personal/tommy_dang_ttu_edu/EewObo2LMz5Gt1tLBTg1wFYBoMGrvVZ3wLZIRqVGY_50EA?e=z4wmyn)
 
 # 2018
 
