@@ -148,3 +148,45 @@ function clustercal(binopt,currentindex,callback){
 // });
 }
 
+
+function download_cluster(){
+    csv_header=['labels'];
+    serviceFullList.forEach(d => {
+        csv_header.push(d.text);
+        csv_header.push(d.text+'_min');
+        csv_header.push(d.text+'_max');
+    });
+    csv_header.push('mse');
+
+    dataout = [];
+    serviceFullList.forEach(d=> {d.scale = d3.scaleLinear().range(d.range);})
+    cluster_info.forEach((d,i)=>{
+        let temp = [i];
+        d.__metrics.forEach((s,i)=>{
+            temp.push(serviceFullList[i].scale(s.value));
+            temp.push(serviceFullList[i].scale(s.minval));
+            temp.push(serviceFullList[i].scale(s.maxval));
+        });
+        // if (binopt.clusterMethod ==='leaderbin')
+        //     temp.push(d.bin.distance);
+        temp.push(d.mse);
+        dataout.push(temp);
+    });
+
+    download_csv();
+    function download_csv() {
+        var csv = csv_header.join(',')+'\n';
+        dataout.forEach(function(row) {
+            csv += row.join(',');
+            csv += "\n";
+        });
+
+        console.log(csv);
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'cluster_27sep2018.csv';
+        hiddenElement.click();
+    }
+
+}

@@ -1475,6 +1475,10 @@ $( document ).ready(function() {
         updateViztype(this.value);
     });
 
+    d3.select('#majorGroupDisplay_control').on('change',function() {
+        radarChartclusteropt.boxplot = $(this).prop('checked');
+        cluster_map(cluster_info)
+    });
 
     $('.fixed-action-btn').floatingActionButton({
         direction: 'left',
@@ -1675,23 +1679,30 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
-            if(cluster_info) {
-                cluster_info.forEach(d => (d.arr = [],d.total=0));
-                hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
-                    let axis_arr = _.flatten(serviceLists.map(a => sampleS[h.name][serviceListattr[a.id]][i].map(v => d3.scaleLinear().domain(a.sub[0].range)(v === null ? undefined : v) || 0)));
+            if(cluster_info){
+                cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
+                hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
+                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
                     let index = 0;
                     let minval = Infinity;
-                    cluster_info.forEach((c, i) => {
-                        const val = distance(c.__metrics.normalize, axis_arr);
-                        if (minval > val) {
+                    cluster_info.forEach((c,i)=>{
+                        const val = distance(c.__metrics.normalize,axis_arr);
+                        if(minval>val){
                             index = i;
                             minval = val;
                         }
                     });
-                    cluster_info[index].total = 1 + cluster_info[index].total || 0;
+                    cluster_info[index].total = 1 + cluster_info[index].total||0;
+                    cluster_info[index].__metrics.forEach((m,i)=>{
+                        if (m.minval===undefined|| m.minval>axis_arr[i])
+                            m.minval = axis_arr[i];
+                        if (m.maxval===undefined|| m.maxval<axis_arr[i])
+                            m.maxval = axis_arr[i];
+                    });
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
+                cluster_info.forEach(c=>c.mse = ss.mean(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
@@ -1791,11 +1802,16 @@ $( document ).ready(function() {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-        d3.csv(srcpath+'data/cluster_27sep2018 _10.csv',function(cluster){
+        d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
-                d.__metrics = serviceFullList.map(s=>{return {axis: s.text,value:d3.scaleLinear().domain(s.range)(d[s.text])||0}});
+                d.mse = +d.mse;
+                d.__metrics = serviceFullList.map(s=>{return {axis: s.text,
+                    value:d3.scaleLinear().domain(s.range)(d[s.text])||0,
+                    // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
+                    // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
+                }});
                 d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
             });
             cluster_info = cluster;
@@ -1876,7 +1892,7 @@ $( document ).ready(function() {
             //     hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
             sampleJobdata = job || [];
             if(cluster_info){
-                cluster_info.forEach(d=>d.arr=[]);
+                cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                     let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
                     let index = 0;
@@ -1889,9 +1905,16 @@ $( document ).ready(function() {
                         }
                     });
                     cluster_info[index].total = 1 + cluster_info[index].total||0;
+                    cluster_info[index].__metrics.forEach((m,i)=>{
+                        if (m.minval===undefined|| m.minval>axis_arr[i])
+                            m.minval = axis_arr[i];
+                        if (m.maxval===undefined|| m.maxval<axis_arr[i])
+                            m.maxval = axis_arr[i];
+                    });
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
+                cluster_info.forEach(c=>c.mse = ss.mean(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
@@ -2062,6 +2085,7 @@ function cluster_map (dataRaw) {
         temp.name = c.labels;
         temp.text = c.text;
         temp.total = c.total;
+        temp.mse = c.mse;
         let temp_b = [temp];
         temp_b.id = c.name;
         temp_b.order = i;
@@ -2120,6 +2144,7 @@ function cluster_map (dataRaw) {
             updateclusterDescription(d.id,clusterDescription[d.id].text);
         });
         r_new.append('span').attr('class','clusternum center-align col s12');
+        r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .each(function(d,i){
@@ -2130,6 +2155,7 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
+        d3.selectAll('.radarCluster').select('span.clusterMSE').text(d=>(d[0].mse||0).toFixed(3));
     }, 0);
 }
 function updateclusterDescription (name,text){

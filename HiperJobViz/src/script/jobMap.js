@@ -177,6 +177,23 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
+        var slider = document.getElementById('suddenGroup_control');
+        noUiSlider.create(slider, {
+            start: 0,
+            connect: 'lower',
+            step: 0.05,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': 0,
+                'max': 1
+            },
+        });
+
+        slider.noUiSlider.on("change", function () {
+            runopt.suddenGroup = +this.get();
+            jobMap.data().draw();
+        });
+
         return jobMap;
     };
     let tippannel, tiptimer;
@@ -367,34 +384,37 @@ let JobMap = function() {
 
         if (!runopt.compute.bundle) {
             const radaropt = {colorfill: colorfill, size: (scaleNode_y_midle(1) - scaleNode_y_midle(0)) * 4};
-            let datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map(e => {
-                temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
-                temp.name = e.cluster;
-                temp.timestep = e.timestep;
-                return temp;
-            }));
+            let datapoint;
+            if (!runopt.suddenGroup) {
+                datapoint= bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map((e,i) => {
+                    temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                    temp.name = e.cluster;
+                    temp.timestep = e.timestep;
+                    if(!i)
+                        temp.hide = true;
+                    return temp;
+                }));
+            }else{
+                datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr_sudden.map(e => {
+                    temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+                    temp.name = e.cluster;
+                    temp.timestep = e.timestep;
+                    return temp;
+                }));
+            }
             datapoint.exit().remove();
             datapoint = datapoint.enter().append('g')
                 .attr('class', 'linkLinegg timeline')
                 .merge(datapoint);
             datapoint.each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', !i);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
             });
             datapoint.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},0)`
             });
 
             bg.style('stroke-width', d => linkscale(d.values_name.length));
-            // bg.select(".invisibleline").remove();
-            // bg.append('line').attr('class',"invisibleline").attrs(function(d){
-            //     let parentndata = d3.select(this.parentNode.parentNode).datum();
-            //     return {
-            //         'x1':fisheye_scale.x(timelineScale(timelineScale.domain()[1])),
-            //         'x2':fisheye_scale.x(timelineScale(0)),
-            //         'stroke-width': (scaleNode_y_midle(1)-scaleNode_y_midle(0))/2,
-            //         'opacity':0
-            //     };
-            // });
+
             bg.selectAll("path.linegg").remove();
             let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
@@ -715,7 +735,7 @@ let JobMap = function() {
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
     let Jobscale = d3.scaleSqrt().range([0.5,3]);
-
+    let intersectionWorker;
     function renderManual(computers, jobNode, link) {
 
         jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
@@ -841,28 +861,26 @@ let JobMap = function() {
                 });
 
                 // calculate intersection
-                setTimeout(function(){
-                    let totalintersect = 0;
-                    for (let t=0;t<maxTimestep-1;t++){
-                        for (let i=0; i<clusterdata_timeline.length-1;i++){
-                            for (let j=i+1; j<clusterdata_timeline.length;j++){
-                                if (path_line_intersections({
-                                    x1: 0,
-                                    x2: 100,
-                                    y1: scaleNode_y_midle(clusterdata_timeline[i].arr[t],t,clusterdata_timeline[i].name),
-                                    y2: scaleNode_y_midle(clusterdata_timeline[i].arr[t+1],t,clusterdata_timeline[i].name),
-                                },{
-                                    x1: 0,
-                                    x2: 100,
-                                    y1: scaleNode_y_midle(clusterdata_timeline[j].arr[t],t,clusterdata_timeline[j].name),
-                                    y2: scaleNode_y_midle(clusterdata_timeline[j].arr[t+1],t,clusterdata_timeline[j].name),
-                                }))
-                                    totalintersect++;
-                            }
-                        }
+                if (intersectionWorker)
+                    intersectionWorker.terminate();
+                intersectionWorker = new Worker ('src/script/worker/intersetion_worker.js');
+                intersectionWorker.postMessage({
+                    maxTimestep:maxTimestep,
+                    clusterdata_timeline:clusterdata_timeline,
+                    bundle_cluster_ob:bundle_cluster_ob,
+                    range: yscale.range(),
+                    domain: [0, d3.sum(maxBundle)-1],
+                });
+                intersectionWorker.addEventListener('message',({data})=>{
+                    if (data.action==='done') {
+                        console.log(`#Intersection: ${data.result}`)
+                        // preloader(false,undefined,undefined,'#clusterLoading');
+                        intersectionWorker.terminate();
                     }
-                    console.log(`#Intersection: ${totalintersect}`)
-                },0);
+                    if (data.action==='returnData'){
+                        // onloaddetermire({process:data.result.process,message:`# iterations: ${data.result.iteration}`},'#clusterLoading');
+                    }
+                }, false);
             }
             updateaxis();
             let lensingLayer=  g.select('.fisheyeLayer');
@@ -1577,6 +1595,9 @@ let JobMap = function() {
                     ct.forEach(h => {
                         hostOb[h].arrcluster[ts] = c.name;
                         let currentarr = hostOb[h].timeline.clusterarr;
+                        if(runopt.suddenGroup && ts>0 && ts<maxstep && calculateMSE(hostOb[h].data[ts-1],hostOb[h].data[ts])>clusterdata.find(c=>c.name===hostOb[h].arrcluster[ts-1]).mse*runopt.suddenGroup ){
+                            hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
+                        }
                         if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
                             hostOb[h].timeline.clusterarr.stack++;
                             hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
@@ -1596,7 +1617,9 @@ let JobMap = function() {
         timelineScale.domain([maxstep - 1, maxstep]);
         // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
-
+    function calculateMSE(a,b){
+        return ss.mean(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+    }
     let first__timestep = new Date();
     let lastIndex = 0;
     function handle_links (timeStep_r,lastIndex_r){
@@ -1613,12 +1636,11 @@ let JobMap = function() {
         Hosts.forEach(h=>{
             h.user=[];
             h.arrcluster = [];
-            h.timeline = {clusterarr:[],line:[],lineFull:[]};
+            h.timeline = {clusterarr:[],line:[],lineFull:[],clusterarr_sudden:[]};
         });
 
-
-        updateClusterTimeline();
     if (lastIndex===(maxTimestep-1)) {
+        updateClusterTimeline();
         let user_n = current_userData();
         // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
         // tableData = {}
@@ -1767,7 +1789,7 @@ let JobMap = function() {
                             let e = h.name;
                             return hostOb[e];
                         });
-                        let temp_g = _.groupBy(listcomp,function(e){return JSON.stringify(e.timeline)});
+                        let temp_g = _.groupBy(listcomp,function(e){return JSON.stringify(e.timeline.lineFull)});
                         Object.keys(temp_g).forEach(k=>{
                             let temp_h = {};
                             temp_h.values_name = temp_g[k].map(e=>e.name);
@@ -1779,7 +1801,12 @@ let JobMap = function() {
                                     });
                                 });
 
-                                temp_h.timeline = temp_g[k][0].timeline;
+                                temp_h.timeline = JSON.parse(JSON.stringify(temp_g[k][0].timeline)); // clone timeline
+                                if (runopt.suddenGroup){
+                                    temp_h.timeline.clusterarr_sudden = [];
+                                    temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
+                                }
+
                                 temp_h.arr = temp_g[k][0].arrcluster;
                                 clusterdata_timeline.push(temp_h);
                             }else{
@@ -1838,7 +1865,7 @@ let JobMap = function() {
                                 }
                                 return false;
                             });
-                            let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline)});
+                            let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline.lineFull)});
                             Object.keys(temp_g).forEach(k=>{
                                 let temp_h = {};
                                 temp_h.values_name = temp_g[k].map(e=>e.name);
@@ -1851,7 +1878,11 @@ let JobMap = function() {
                                         });
                                     });
 
-                                    temp_h.timeline = temp_g[k][0].timeline;
+                                    temp_h.timeline = JSON.parse(JSON.stringify(temp_g[k][0].timeline)); // clone timeline
+                                    if (runopt.suddenGroup){
+                                        temp_h.timeline.clusterarr_sudden = [];
+                                        temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
+                                    }
                                     temp_h.arr = temp_g[k][0].arrcluster;
                                     clusterdata_timeline.push(temp_h);
                                 }else{
@@ -2066,10 +2097,9 @@ let JobMap = function() {
             g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
         else
             g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
-        // g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)._parents.forEach(p=>d3.select(p).dispatch('mouseover'));
         g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)
             .each(function(){
-                d3.select(this.parentNode.parentNode.parentNode).dispatch('mouseover')});
+                (d3.select(this.parentNode.parentNode).classed('computeNode')?d3.select(this.parentNode.parentNode):d3.select(this.parentNode.parentNode.parentNode)).dispatch('mouseover')});
     }
     jobMap.unhighlight = function (name) {
         _.pull(filter,name);

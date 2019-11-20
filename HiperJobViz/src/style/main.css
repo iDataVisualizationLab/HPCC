@@ -307,6 +307,7 @@ input[type=number] {
 }
 .label span {
     padding-right: 0!important;
+    padding-left: 0.25rem!important;
 }
 .label i {
     padding-left: 0!important;
@@ -480,6 +481,9 @@ span.clusternum {
 
 .first span.clusternum::after {
     content: ' temperal instances';
+}
+.first span.clusterMSE::before {
+    content: 'Deviation area: ';
 }
 /*#clusterDisplay > span.clusternum ~ span.clusternum ::after {*/
     /*content: ' s';*/
