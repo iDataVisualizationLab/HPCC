@@ -430,16 +430,19 @@ let JobMap = function() {
                     if(!i)
                         temp.hide = true;
                     return temp;
-                }));
+                }),d=>d.name);
             }else{
                 datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr_sudden.map(e => {
                     temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
                     temp.name = e.cluster;
                     temp.timestep = e.timestep;
                     return temp;
-                }));
+                }),d=>d.name);
             }
-            datapoint.exit().remove();
+            // datapoint.exit().remove();
+            datapoint.exit().transition().duration(500).style('opacity', 0).on('end', function() {
+                d3.select(this).remove();
+            });
             datapoint = datapoint.enter().append('g')
                 .attr('class', 'linkLinegg timeline')
                 .merge(datapoint);
