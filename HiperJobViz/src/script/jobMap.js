@@ -177,8 +177,8 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        var slider = document.getElementById('suddenGroup_control');
-        noUiSlider.create(slider, {
+        var suddenGroupslider = document.getElementById('suddenGroup_control');
+        noUiSlider.create(suddenGroupslider, {
             start: 0,
             connect: 'lower',
             step: 0.05,
@@ -189,13 +189,32 @@ let JobMap = function() {
             },
         });
 
-        slider.noUiSlider.on("change", function () {
+        suddenGroupslider.noUiSlider.on("change", function () {
             runopt.suddenGroup = +this.get();
             jobMap.data().draw();
         });
 
+        var stepSizeslider = document.getElementById('stepSize_control');
+        noUiSlider.create(stepSizeslider, {
+            start: 40,
+            connect: 'lower',
+            step: 1,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': 1,
+                'max': 40,
+            },
+        });
+
+        stepSizeslider.noUiSlider.on("change", function () {
+            timelineStep = +this.get();
+            timelineScale.range([-timelineStep,0]);
+            jobMap.drawComp();
+        });
+
         return jobMap;
     };
+
     let tippannel, tiptimer;
     jobMap.remove = function (){
         if (simulation) simulation.stop();
