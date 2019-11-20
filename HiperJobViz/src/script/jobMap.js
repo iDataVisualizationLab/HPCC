@@ -27,6 +27,9 @@ let JobMap = function() {
     let timebox,linkg,nodeg,schema=[];
     let fisheye_scale = {x:fisheye.scale(d3.scaleLinear),y:fisheye.scale(d3.scaleLinear)};
     let freezing=false,textWarp=200;
+    //slider control
+    let suddenGroupslider,stepSizeslider;
+
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             if(runopt.mouse.disable){
@@ -177,7 +180,7 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        var suddenGroupslider = document.getElementById('suddenGroup_control');
+        suddenGroupslider = document.getElementById('suddenGroup_control');
         noUiSlider.create(suddenGroupslider, {
             start: 0,
             connect: 'lower',
@@ -194,26 +197,33 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        var stepSizeslider = document.getElementById('stepSize_control');
+        stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
-            start: 10,
+            start: 1,
             connect: 'lower',
-            step: 1,
+            step: 0.5,
             orientation: 'horizontal', // 'horizontal' or 'vertical'
             range: {
                 'min': 1,
-                'max': 40,
+                'max': 5,
             },
         });
 
         stepSizeslider.noUiSlider.on("change", function () {
-            timelineStep = +this.get();
+            timelineStep = +this.get() * (yscale.range()[1]/maxTimestep);
             timelineScale.range([-timelineStep,0]);
             jobMap.drawComp();
         });
 
         return jobMap;
     };
+
+    function updateMaxTimestep(){
+        stepSizeslider.noUiSlider.set(1);
+        timelineStep = (yscale.range()[1]/maxTimestep);
+        timelineScale.range([-timelineStep,0]);
+        jobMap.drawComp();
+    }
 
     let tippannel, tiptimer;
     jobMap.remove = function (){
@@ -2198,7 +2208,7 @@ let JobMap = function() {
     };
 
     jobMap.maxTimestep = function (_) {
-        return arguments.length ? (maxTimestep=_,jobMap):maxTimestep;
+        return arguments.length ? (maxTimestep=_,updateMaxTimestep(),jobMap):maxTimestep;
     };
 
     jobMap.dataComp = function (_) {
