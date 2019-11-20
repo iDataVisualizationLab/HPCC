@@ -414,6 +414,8 @@ function RadarChart(id, data, options, name) {
     //update the outlines
     var blobWrapperpath = blobWrapperg.select(".radarStroke");
     if (cfg.bin) { // bin type
+        blobWrapperpath.select('.radarLine').remove();
+        blobWrapperpath.select('.radarQuantile').remove();
         blobWrapperpath.data().forEach(d => {
             d.forEach((v,i)=>{
                 let temp = d.bin.val.map(ve=>ve[allAxis.findIndex(e=>e.text===v.axis)]);
@@ -446,7 +448,7 @@ function RadarChart(id, data, options, name) {
                 .styles({"fill":'none',
                     'stroke':'black'});
         }
-
+        blobWrapperpath.select('.radarQuantile').remove();
         //update the outlines
         blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
 
@@ -588,6 +590,8 @@ function RadarChart(id, data, options, name) {
             blobWrapper.append("path").classed('radarQuantile',true).style("fill", "none").call(drawQuantileArea);
     }
     else {
+        g.selectAll(".radarWrapper").selectAll('.radarLine').remove();
+        g.selectAll(".radarWrapper").selectAll('.radarQuantile').remove();
         blobWrapperpath.transition().attr("d", d => radarLine(d))
             .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
             .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
