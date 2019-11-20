@@ -177,9 +177,21 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        d3.select('#suddenGroup_control').on("change", function () {
-            runopt.suddenGroup = $(this).prop('checked');
-            jobMap.data().drawComp();
+        var slider = document.getElementById('suddenGroup_control');
+        noUiSlider.create(slider, {
+            start: 0,
+            connect: 'lower',
+            step: 0.05,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': 0,
+                'max': 1
+            },
+        });
+
+        slider.noUiSlider.on("change", function () {
+            runopt.suddenGroup = +this.get();
+            jobMap.data().draw();
         });
 
         return jobMap;
@@ -1583,7 +1595,9 @@ let JobMap = function() {
                     ct.forEach(h => {
                         hostOb[h].arrcluster[ts] = c.name;
                         let currentarr = hostOb[h].timeline.clusterarr;
-
+                        if(runopt.suddenGroup && ts>0 && ts<maxstep && calculateMSE(hostOb[h].data[ts-1],hostOb[h].data[ts])>clusterdata.find(c=>c.name===hostOb[h].arrcluster[ts-1]).mse*runopt.suddenGroup ){
+                            hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
+                        }
                         if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
                             hostOb[h].timeline.clusterarr.stack++;
                             hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
@@ -1595,9 +1609,6 @@ let JobMap = function() {
                             hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
                             hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
                             hostOb[h].timeline.clusterarr.stack = 0;
-                            if(ts>0 && ts<maxstep && calculateMSE(hostOb[h].data[ts-1],hostOb[h].data[ts])>clusterdata.find(c=>c.name===hostOb[h].arrcluster[ts-1]).mse*0.25){
-                                hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
-                            }
                         }
                     });
 
@@ -1778,7 +1789,7 @@ let JobMap = function() {
                             let e = h.name;
                             return hostOb[e];
                         });
-                        let temp_g = _.groupBy(listcomp,function(e){return JSON.stringify(e.timeline)});
+                        let temp_g = _.groupBy(listcomp,function(e){return JSON.stringify(e.timeline.lineFull)});
                         Object.keys(temp_g).forEach(k=>{
                             let temp_h = {};
                             temp_h.values_name = temp_g[k].map(e=>e.name);
@@ -1790,7 +1801,12 @@ let JobMap = function() {
                                     });
                                 });
 
-                                temp_h.timeline = temp_g[k][0].timeline;
+                                temp_h.timeline = JSON.parse(JSON.stringify(temp_g[k][0].timeline)); // clone timeline
+                                if (runopt.suddenGroup){
+                                    temp_h.timeline.clusterarr_sudden = [];
+                                    temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
+                                }
+
                                 temp_h.arr = temp_g[k][0].arrcluster;
                                 clusterdata_timeline.push(temp_h);
                             }else{
@@ -1849,7 +1865,7 @@ let JobMap = function() {
                                 }
                                 return false;
                             });
-                            let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline)});
+                            let temp_g = _.groupBy(listcomp.map(e=>hostOb[e]),function(e){return JSON.stringify(e.timeline.lineFull)});
                             Object.keys(temp_g).forEach(k=>{
                                 let temp_h = {};
                                 temp_h.values_name = temp_g[k].map(e=>e.name);
@@ -1862,7 +1878,11 @@ let JobMap = function() {
                                         });
                                     });
 
-                                    temp_h.timeline = temp_g[k][0].timeline;
+                                    temp_h.timeline = JSON.parse(JSON.stringify(temp_g[k][0].timeline)); // clone timeline
+                                    if (runopt.suddenGroup){
+                                        temp_h.timeline.clusterarr_sudden = [];
+                                        temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
+                                    }
                                     temp_h.arr = temp_g[k][0].arrcluster;
                                     clusterdata_timeline.push(temp_h);
                                 }else{

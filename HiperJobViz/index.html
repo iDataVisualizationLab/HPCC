@@ -26,8 +26,10 @@
     <link href="../HiperView/css/main.css" rel="stylesheet" type="text/css" />
     <link href="src/style/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="src/style/mCustomSCrollbar/jquery.mCustomScrollbar.css" />
+    <link rel="stylesheet" href="../HiperView/css/nouislider.css" />
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
     <script src="src/lib/mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="../HiperView/js/nouislider.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="css/dd.css" />-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <!--<script src="../HiperView/js/underscore-min.js"></script>-->
@@ -629,10 +631,15 @@
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
                 <div  class="valign-wrapper hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
                     <div class="col s12">
+                        <!--<label class="col s12">-->
+                            <!--<input id="suddenGroup_control" type="checkbox" class="filled-in">-->
+                            <!--<span style="font: unset;color: black;padding-left:20px;">Display significant change charts</span>-->
+                        <!--</label>-->
                         <label class="col s12">
-                            <input id="suddenGroup_control" type="checkbox" class="filled-in">
-                            <span style="font: unset;color: black;padding-left:20px;">Display chart significant change</span>
+                            <span style="font: unset;color: black;padding-left:20px;" for="suddenGroup_control">Display significant change charts</span>
+                            <div id="suddenGroup_control" class="col s12"></div>
                         </label>
+
                         <label class="col s12">
                             <input id="jobOverlay" type="checkbox" class="filled-in">
                             <span style="font: unset;color: black;padding-left:20px;">Overlay Job info on timeline</span>
