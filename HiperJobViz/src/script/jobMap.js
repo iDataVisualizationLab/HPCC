@@ -196,7 +196,7 @@ let JobMap = function() {
 
         var stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
-            start: 40,
+            start: 10,
             connect: 'lower',
             step: 1,
             orientation: 'horizontal', // 'horizontal' or 'vertical'
@@ -349,7 +349,7 @@ let JobMap = function() {
         // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
-    let timelineStep = 40;
+    let timelineStep = 10;
     let timelineScale = d3.scaleLinear().range([-timelineStep,0]);
     function updateClusterLabel(){
         if (clusterNode_data)
