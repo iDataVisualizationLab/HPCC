@@ -21,6 +21,10 @@ svg#jobmap {
 
 }
 
+#timelineTool .row {
+    margin-bottom: 7px;
+}
+
 .table.header .cell {
     pointer-events: visible;
 }
