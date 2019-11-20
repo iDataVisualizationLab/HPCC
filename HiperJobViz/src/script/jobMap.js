@@ -94,7 +94,7 @@ let JobMap = function() {
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
 
-        g.append('text').attr('class','job_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).text('Running jobs');
+        g.append('text').attr('class','job_title hide').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).text('Running jobs');
         g.append('text').attr('class','host_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text('Hosts');
 
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
@@ -1086,6 +1086,7 @@ let JobMap = function() {
 
         //job node
         if (data.length) {
+            g.select('.job_title').classed('hide',false);
             let timerange = [d3.min(data, d => new Date(d.submitTime)), timeStep];
             timerange[0] = new Date(timerange[0].toDateString());
             timerange[1].setDate(timerange[1].getDate() + 1);
@@ -1105,6 +1106,8 @@ let JobMap = function() {
                 .radius(radius);
 
             let backdround_spiral = d3.timeHour.every(1).range(timerange[0], timerange[1]);
+        }else{
+            g.select('.job_title').classed('hide',true);
         }
         let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
         jobNode.exit().remove();
