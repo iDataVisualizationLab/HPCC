@@ -27,6 +27,9 @@ let JobMap = function() {
     let timebox,linkg,nodeg,schema=[];
     let fisheye_scale = {x:fisheye.scale(d3.scaleLinear),y:fisheye.scale(d3.scaleLinear)};
     let freezing=false,textWarp=200;
+    //slider control
+    let suddenGroupslider,stepSizeslider;
+
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             if(runopt.mouse.disable){
@@ -139,6 +142,13 @@ let JobMap = function() {
                     setTimeout( ()=> {releasehighlight(); tippannel.hide();},500)
             });
 
+        d3.select('#jobTable_control').on("change", function () {
+            showtable = $(this).prop('checked');
+            updateLayout(schema);
+            makeheader();
+            handle_summary([],true);
+        });
+
         d3.select('#mouseAction').on("change", function () {
             const selected_value = $("input[name='mouseAction']:checked").val();
             if (selected_value==="auto"||selected_value==="disable"){
@@ -177,7 +187,7 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        var suddenGroupslider = document.getElementById('suddenGroup_control');
+        suddenGroupslider = document.getElementById('suddenGroup_control');
         noUiSlider.create(suddenGroupslider, {
             start: 0,
             connect: 'lower',
@@ -194,26 +204,34 @@ let JobMap = function() {
             jobMap.data().draw();
         });
 
-        var stepSizeslider = document.getElementById('stepSize_control');
+        stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
-            start: 10,
+            start: 1,
             connect: 'lower',
-            step: 1,
+            tooltips: {to: function(value){return 'x'+value.toFixed(1)}, from:function(value){return Number(value.replace('x', ''));}},
+            step: 0.5,
             orientation: 'horizontal', // 'horizontal' or 'vertical'
             range: {
                 'min': 1,
-                'max': 40,
+                'max': 5,
             },
         });
 
         stepSizeslider.noUiSlider.on("change", function () {
-            timelineStep = +this.get();
+            timelineStep = +this.get() * (yscale.range()[1]/maxTimestep);
             timelineScale.range([-timelineStep,0]);
             jobMap.drawComp();
         });
 
         return jobMap;
     };
+
+    function updateMaxTimestep(){
+        stepSizeslider.noUiSlider.set(1);
+        timelineStep = (yscale.range()[1]/maxTimestep);
+        timelineScale.range([-timelineStep,0]);
+        jobMap.drawComp();
+    }
 
     let tippannel, tiptimer;
     jobMap.remove = function (){
@@ -365,7 +383,7 @@ let JobMap = function() {
                 {key:'submit',value:d.submitTime},
                 {key:'start',value:d.startTime},
                 {key:'end',value:d.endTime}])
-                .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2).attr("vector-effect","non-scaling-stroke");
+                .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2);
             bg.selectAll('.timemark').datum(d=>d.key?d:{key:'end',value:d.endTime}).attr('d',d=>{
                 let size = 3;
                 switch (d.key) {
@@ -1244,7 +1262,7 @@ let JobMap = function() {
             .append('g')
             .attr("class", "links");
         link_n
-            .append('path').attr("vector-effect","non-scaling-stroke");
+            .append('path');
         link_n
             .append('text').attr("text-anchor", "middle");
 
@@ -1401,10 +1419,11 @@ let JobMap = function() {
     function getstrokearray_offset (d){
         return d.source.type==='job'?-graphicopt.job.r:0;
     }
-    function table_header(path){
+    function table_header(path,isFull){
+        let headerData = isFull?tableHeader:tableHeader.filter(d=>tableLayout.column[d.key].type!=='graph');
         path.select('.back').attr('transform',`translate(0,${10})`);
         pathRound(path.select('.back').select('path'),{width:tableLayout.row.width,height:25,ctl:10,ctr:10});
-        let rows = path.selectAll('.row').data([tableHeader]);
+        let rows = path.selectAll('.row').data([headerData]);
         rows.exit().remove();
         let rows_n = rows.enter().append('g').attr('class', 'row')
             .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
@@ -1449,8 +1468,8 @@ let JobMap = function() {
     function table_footer(path){
         path.select('.back').attr('transform',`translate(0,${-tableLayout.row.height/2})`);
         pathRound(path.select('.back').select('path'),{width:tableLayout.row.width,height:tableLayout.row.height,cbl:10,cbr:10});
-        let customrange = [0,d3.max(tableFooter.filter(d=>tableLayout.column[d.key].type==='graph'),e=>d3.max(e.value.arr,d=>d[1]))]
-        let rows = path.selectAll('.row').data([tableFooter]);
+        let customrange = showtable?[0,d3.max(tableFooter.filter(d=>tableLayout.column[d.key].type==='graph'),e=>d3.max(e.value.arr,d=>d[1]))]:[0,0];
+        let rows = path.selectAll('.row').data([showtable?tableFooter:tableFooter.filter(e=>tableLayout.column[e.key])]);
         rows.exit().remove();
         let rows_n = rows.enter().append('g').attr('class', 'row')
             .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
@@ -1472,7 +1491,7 @@ let JobMap = function() {
         })
     }
     function updaterow(path){
-        let rows = path.selectAll('.row').data(d=>[tableData[d.name]],e=>e.id);
+        let rows = path.selectAll('.row').data(d=>[showtable?tableData[d.name]:tableData[d.name].filter(e=>tableLayout.column[e.key])],e=>e.id);
         rows.exit().remove();
         let rows_n = rows.enter().append('g').attr('class', 'row')
             .attr('transform',`translate(0,${-tableLayout.row.height/2})`);
@@ -1903,6 +1922,14 @@ let JobMap = function() {
                                         temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
                                     }
                                     temp_h.arr = temp_g[k][0].arrcluster;
+
+                                    // Conflict sudden timepoint
+                                    // if(temp_h.timeline.clusterarr_sudden.length!==temp_g[k][0].timeline.clusterarr_sudden.length){
+                                    //     console.log(`sudden value=${runopt.suddenGroup} -------${temp_h.name}--------`);
+                                    //     console.log(temp_g[k][0].timeline.clusterarr_sudden);
+                                    //     console.log(temp_h.timeline.clusterarr_sudden);
+                                    // }
+
                                     clusterdata_timeline.push(temp_h);
                                 }else{
                                     temp_g[k].forEach((n) => {
@@ -1956,10 +1983,10 @@ let JobMap = function() {
     }
 
     let violinRange = [0,0];
-    function handle_summary (data){
+    function handle_summary (data,render){
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
         let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
-        user.forEach(d=>d.needRender=false)
+        user.forEach(d=>d.needRender=(false||render))
         data.forEach(d=>{
             hostOb[d.name].data.push(d); // add new data
             if (hostOb[d.name].user) {
@@ -2053,7 +2080,7 @@ let JobMap = function() {
         }
         return r;
     }
-    let zoom_toogle=true;
+    let zoom_toogle=true,showtable =false;
     function zoom_func(val){
         zoom_toogle = val;
         d3.select('.pantarget').classed('lock',zoom_toogle);
@@ -2065,20 +2092,28 @@ let JobMap = function() {
 
     function makeheader() {
 // make table header
-        table_header(table_headerNode);
+        table_header(table_headerNode,showtable);
     }
 
-    function updatalayout(data){
+    function updateLayout(data){
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
         tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'#Hosts'}, {key:'Jobs',value: '#Jobs'}];
+        tableLayout.column={
+            'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
+            'Hosts': {id:'Hosts',text:'#Hosts',type:'num',x: 120,y:20,width:60},
+            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 170,y:20,width:52},
+        }
         let offset = tableLayout.column['Jobs'].x;
         let padding = 15;
-        data.forEach((d,i)=>{
-            tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: offset+(i)*tableLayout.row["graph-width"]+padding,y:0,width:tableLayout.row["graph-width"]};
-            tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
-            tableHeader.push({key:d.text, value:d.text});
-        })
+        if (showtable)
+            data.forEach((d,i)=>{
+                tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: offset+(i)*tableLayout.row["graph-width"]+padding,y:0,width:tableLayout.row["graph-width"]};
+                tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
+                tableHeader.push({key:d.text, value:d.text});
+            })
+        else
+            tableLayout.row.width = offset+tableLayout.row["graph-width"]+padding;
         // tableLayout.row.width +=70;
         tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:70};
         tableHeader.push({key:'PowerUsage', value:'kWh'});
@@ -2198,7 +2233,7 @@ let JobMap = function() {
     };
 
     jobMap.maxTimestep = function (_) {
-        return arguments.length ? (maxTimestep=_,jobMap):maxTimestep;
+        return arguments.length ? (maxTimestep=_,updateMaxTimestep(),jobMap):maxTimestep;
     };
 
     jobMap.dataComp = function (_) {
@@ -2221,7 +2256,7 @@ let JobMap = function() {
         return (handle_summary(_),jobMap);
     };
     jobMap.schema = function (_) {
-        return arguments.length ? (graphicopt.radaropt.schema = _,schema = _,updatalayout(_), jobMap) : schema;
+        return arguments.length ? (graphicopt.radaropt.schema = _,schema = _,updateLayout(_), jobMap) : schema;
     };
     jobMap.colorCluster = function (_) {
         return arguments.length ? (colorCluster = _,jobMap) : colorCluster;

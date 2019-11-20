@@ -577,7 +577,10 @@ function RadarChart(id, data, options, name) {
                 .style("fill-opacity", cfg.fillin)
                 .call(drawMinMaxArea);
         }
-
+        if (blobWrapperg.each(function(){
+            if (d3.select(this).select('.radarLine').empty())
+                d3.select(this).append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
+        }))
         blobWrapper
             .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
 
