@@ -335,19 +335,20 @@
     position: absolute;
     height: 30px;
     width: 30px;
-    top: -17px;
-    left: -2px;
+    top: -7.5px;
+    left: -7.5px;
     background-color: #26A69A;
     border-radius: 50%;
     transition: border-radius .25s cubic-bezier(0.215, 0.610, 0.355, 1.000),
     transform .25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    transform: scale(.5) rotate(-45deg);
-    transform-origin: 50% 100%;
+    transform: scale(.5);
+    transform-origin:50% 50%;
 }
 .noUi-target.noUi-horizontal .noUi-active .noUi-tooltip {
-    border-radius: 15px 15px 15px 0;
+    border-radius: 15px;
+    transform: scale(1) translate(-7.5px,-7.5px)
     /*transform: rotate(-45deg) translate(23px, -25px);*/
-    transform: rotate(-45deg) translate(23px, -25px);
+
 }
 
 .noUi-tooltip span {
@@ -363,7 +364,7 @@
 }
 
 .noUi-horizontal .noUi-tooltip span {
-    transform: rotate(45deg);
+    /*transform: rotate(45deg);*/
 }
 
 .noUi-vertical .noUi-tooltip span {
