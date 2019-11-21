@@ -2106,7 +2106,7 @@ function cluster_map (dataRaw) {
     //--end
     let dir = d3.select('#clusterDisplay');
     setTimeout(()=>{
-        let r_old = dir.selectAll('.radarCluster').data(data,d=>d[0].name);
+        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id);
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
