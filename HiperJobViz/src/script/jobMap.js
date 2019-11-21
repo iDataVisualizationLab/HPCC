@@ -455,38 +455,37 @@ let JobMap = function() {
 
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
-            bg.selectAll("path.linegg").remove();
-            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            // bg.selectAll("path.linegg").remove();
+            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line,d=>d.cluster).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             dataline.exit().remove();
-            dataline.enter().append('line')
+            dataline.enter().append('path')
                 .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
                 .attr("vector-effect", "non-scaling-stroke")
                 .merge(dataline)
-                .attrs({
-                        x1: d => fisheye_scale.x(timelineScale(d.end)),
-                        x2: d => fisheye_scale.x(timelineScale(d.start)),
-                    }).styles({
-                stroke: d => colorFunc(d.cluster),
-                'stroke-width': function (d) {
-                    return linkscale(d3.select(this.parentNode).datum().values_name.length)
-                }
-            });
+                .styles({
+                    stroke: d => colorFunc(d.cluster),
+                    'stroke-width': function (d) {
+                        return linkscale(d3.select(this.parentNode).datum().values_name.length)
+                    }
+                })
+                .transition().duration(500)
+                .attr('d',d=>d3.line().x(function(d){return fisheye_scale.x(timelineScale(d))}).y(function(){return 0})([d.start,d.end]));
 
             if (runopt.compute.jobOverlay) {
                 let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
-                dataline.exit().remove();
-                dataline.enter().append('line')
-                    .attr('class', 'linegg timeline')
-                    .merge(dataline)
-                    .attrs(function (d) {
-                        let parentndata = d3.select(this.parentNode.parentNode).datum();
-                        return {
-                            x1: d => fisheye_scale.x(timelineScale(d.end)),
-                            x2: d => fisheye_scale.x(timelineScale(d.start)),
-                        }
-                    }).styles({
-                    stroke: d => colorFunc(d.cluster),
-                });
+                // dataline.exit().remove();
+                // dataline.enter().append('line')
+                //     .attr('class', 'linegg timeline')
+                //     .merge(dataline)
+                //     .attrs(function (d) {
+                //         let parentndata = d3.select(this.parentNode.parentNode).datum();
+                //         return {
+                //             x1: d => fisheye_scale.x(timelineScale(d.end)),
+                //             x2: d => fisheye_scale.x(timelineScale(d.start)),
+                //         }
+                //     }).styles({
+                //     stroke: d => colorFunc(d.cluster),
+                // });
             } else {
                 bg.selectAll(".jobtickg").remove();
             }
@@ -499,7 +498,6 @@ let JobMap = function() {
                 .y(function(d) { return d[1]; });
 
             bg.selectAll(".linkLinegg.timeline").remove();
-            bg.selectAll("line.linegg").remove();
             let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             datacurve.exit().remove();
             datacurve.enter()
@@ -507,11 +505,12 @@ let JobMap = function() {
                 .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
                 .attr("vector-effect", "non-scaling-stroke")
                 .merge(datacurve)
+                .transition().duration(500)
                 .attr("d", function(d,i){
                     const datap = d3.select(d3.select(this).node().parentNode).datum();
                     let supportp=false;
                     let data_path = d3.range(d.start,(d.end+1)===maxTimestep?(d.end+1):(d.end+2)).map(e=>
-                        e>d.end?(supportp=true,[fisheye_scale.x(timelineScale(e)-20),scaleNode_y_midle(d.cluster,e,datap.name)]):[fisheye_scale.x(timelineScale(e)),scaleNode_y_midle(d.cluster,e,datap.name)]
+                        e>d.end?(supportp=true,[fisheye_scale.x(timelineScale(e)-timelineStep*0.5),scaleNode_y_midle(d.cluster,e,datap.name)]):[fisheye_scale.x(timelineScale(e)),scaleNode_y_midle(d.cluster,e,datap.name)]
                     );
                     if (supportp)
                         data_path.push([fisheye_scale.x(timelineScale(d.end+1)),scaleNode_y_midle(datap.timeline.lineFull[i+1].cluster,d.end+1,datap.name)]);
