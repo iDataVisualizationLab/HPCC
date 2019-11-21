@@ -440,7 +440,7 @@ let JobMap = function() {
                 }),d=>d.name);
             }
             // datapoint.exit().remove();
-            datapoint.exit().transition().duration(500).style('opacity', 0).on('end', function() {
+            datapoint.exit().transition().duration(1000).style('opacity', 0).on('end', function() {
                 d3.select(this).remove();
             });
             datapoint = datapoint.enter().append('g')
