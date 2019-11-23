@@ -460,7 +460,7 @@ let JobMap = function() {
             dataline.exit().remove();
             dataline.enter().append('path')
                 .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
-                .attr("vector-effect", "non-scaling-stroke")
+                // .attr("vector-effect", "non-scaling-stroke")
                 .merge(dataline)
                 .styles({
                     stroke: d => colorFunc(d.cluster),
