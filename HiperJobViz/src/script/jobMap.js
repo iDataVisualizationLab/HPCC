@@ -1014,11 +1014,11 @@ let JobMap = function() {
     }
     function initTimebox(){
         timebox.append('rect').attrs({width:200,height:10,fill:'#e1e0e2'});
-        timebox.append('rect').attrs({class:'timebox_range',width:0,height:10,fill:'#26a69a'});
+        timebox.append('rect').attrs({class:'timebox_range',width:0,height:10,fill:'#6f0000'});
         timebox.append('g').attrs({class:'timebox_axis'});
         const handle = timebox.append('g').attrs({class:'timebox_handle'}).attr('transform',`translate(0,10)`);
         handle.append('polygon').attr("points","0,0 -6,10 6,10");
-        handle.append('text').attrs({y:20,dy:'.1rem','font-size':'12','fill':'#26a69a','text-anchor':"middle","font-weight":"bold"});
+        handle.append('text').attrs({y:20,dy:'.1rem','font-size':'12','fill':'#6f0000','text-anchor':"middle","font-weight":"bold"});
     }
     function updateTimebox(index,limit){
         limit = limit||index;

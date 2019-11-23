@@ -6,6 +6,9 @@
 	--sideNavwidth: 400px;
 	--colorMain2: #630016;
 	--colorMain2_light: #d8d8d8;
+	--buttonColor: #8a001a;
+	--buttonColor_sub: #ee6e73;
+	/*--buttonColor: #26a69a;*/
 }
 html {
 	font-family: Arial, sans-serif;
