@@ -49,7 +49,7 @@
 }
 #mySidenav .collapsible .collapsible-body{
     background-color: #ffffff3d;
-    padding: 6px 1rem;
+    padding: 6px 10px;
 }
 
 #mySidenav .collapsible .active .collapsible-header{
