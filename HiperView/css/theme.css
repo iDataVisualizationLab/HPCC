@@ -210,11 +210,16 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
 .nav__menu {
     float: left;
     width: 140px;
-    height: 65px;
-    line-height: 65px;
+    height: 50px;
+    line-height: 50px;
+    padding-left: 15px;
+    padding-right: 15px;
     /*text-transform: uppercase;*/
     cursor: pointer;
 
+}
+.nav__menu-lists{
+    margin-left: -15px!important;
 }
 .nav__menu:hover > .nav__menu-lists li {
     display: block;
@@ -357,6 +362,9 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
     height: 30px;
     background-color: var(--colorMain2);
     line-height: 30px;
+}
+.light .nav__menu-items {
+    background-color: var(--colorMain2_light);
 }
 .nav__menu-items:hover {
     /*background-color: #226f8c;*/
