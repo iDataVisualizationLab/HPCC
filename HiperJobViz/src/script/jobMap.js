@@ -344,7 +344,7 @@ let JobMap = function() {
             }
             vi.select('rect').attrs({
                 width: scale(value),})
-                .styles({'fill':d3.hsl(colorFunc(d.name)).brighter(1)});
+                .styles({'fill':d3.hsl(colorFunc(d.name)).brighter(1),'stroke':'none'});
             vi.select('text').text(value)
         });
     }

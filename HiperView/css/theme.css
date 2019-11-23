@@ -218,11 +218,13 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
     }
     40% {
         transform:translateY(-5px);
-        color: #039be5;
+        /*color: #039be5;*/
+        color: var(--buttonColor);
     }
     60% {
         transform:translateY(-2px);
-        color: #039be5;
+        /*color: #039be5;*/
+        color: var(--buttonColor);
     }
 }
 

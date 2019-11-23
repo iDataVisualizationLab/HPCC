@@ -1046,7 +1046,8 @@ path.outlying {
 	padding: 2px 0.25rem;
 }
 .dataTable a.disable-field {
-	color: #26a69a;
+	/*color: #26a69a;*/
+	color: var(--buttonColor);
 }
 .dataTable .fieldDisable {
 	opacity: .4;
@@ -1072,15 +1073,18 @@ table.dataTable thead {
 }
 
 .light table.dataTable thead {
-	background-color: var(--colorMain2_light);
+	background-color: #ccc9c9;
+	/*background-color: var(--colorMain2_light);*/
 }
 
 table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-	background-color: rgba(var(--colorMain2),0.5);
+	/*background-color: rgba(var(--colorMain2),0.5);*/
+	background-color: rgba(212, 41, 0, 0.2);
 }
 
 table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
-	background-color: rgba(var(--colorMain2),0.5);
+	/*background-color: rgba(var(--colorMain2),0.5);*/
+	background-color: rgba(212, 41, 0, 0.2);
 }
 
 table.dataTable td {
