@@ -44,6 +44,13 @@
     padding-bottom: 6px;
 
 }
+.light #mySidenav .collapsible .collapsible-header{
+    background-color: rgba(0, 0, 0, 0.09);
+    background: rgba(0, 0, 0, 0.09);
+    background: -webkit-linear-gradient(to bottom, rgba(0, 0, 0, 0.09) 60%, rgba(224, 218, 218, 0.04) 80%, #ffffff3d);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.09) 60%,rgba(224, 218, 218, 0.04) 80%, #ffffff3d);
+
+}
 #mySidenav .collapsible .collapsible-header span {
     padding-left: 0;
 }
