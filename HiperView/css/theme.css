@@ -44,6 +44,9 @@
     padding-bottom: 6px;
 
 }
+.light .collapsible-header {
+    border-bottom: 1px solid #7b7878;
+}
 .light #mySidenav .collapsible .collapsible-header{
     background-color: rgba(0, 0, 0, 0.09);
     background: rgba(0, 0, 0, 0.09);
@@ -63,7 +66,9 @@
     padding: 6px 10px;
     padding-right: 1rem;
 }
-
+.light .collapsible-body{
+    border-bottom: 1px solid #7b7878;
+}
 #mySidenav .collapsible .active .collapsible-header{
     border: transparent;
 }
@@ -166,7 +171,12 @@ input[type=text].inputHolder {
 .hidden {
     display: none;
 }
-
+.subText {
+    color: #9b9b9b;
+}
+.light .subText {
+    color: #4a4a4a;
+}
 input[type=text].inputHolder, input[type=search]:not(.browser-default){
     height: 1.5rem;
     font-size: unset;

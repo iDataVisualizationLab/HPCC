@@ -1023,11 +1023,15 @@ path.outlying {
 	padding: 0;
 	padding-bottom: 0.5rem;
 }
+.dataTable {
+	color: black;
+}
 .dataTable input[type=number]{
 	height: 1rem;
 	font-size: unset;
 	border-radius: 2px;
-	border: 1px solid #666666;
+	border: 1px solid #f2f2f2;
+	background-color: white;
 	text-align: right;
 	margin: unset;
 }
