@@ -5856,7 +5856,7 @@ body.keyboard-focused .dropdown-content li:focus {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   line-height: 1.5;
-  padding: 1rem;
+  padding: 1rem 10px;
   background-color: #fff;
   border-bottom: 1px solid rgba(221, 221, 221, 0);
 }
@@ -5870,7 +5870,7 @@ body.keyboard-focused .dropdown-content li:focus {
   font-size: 1.6rem;
   display: inline-block;
   text-align: center;
-  margin-right: 1rem;
+  margin-right: 10px;
 }
 
 .keyboard-focused .collapsible-header:focus {

@@ -597,7 +597,7 @@ nav ul li.active a{
 	background: rgba(0, 0, 0, 0.21);
 	overflow-x: hidden;
 	transition: 0.5s;
-	padding-top: 64px;
+	padding-top: 50px;
 }
 
 .sideIn.sidenavs {
