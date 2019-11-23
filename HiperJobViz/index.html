@@ -43,7 +43,7 @@
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
 </head>
 
-<body text="black" id="mainBody" style="overflow: hidden">
+<body text="black" id="mainBody" style="overflow: hidden" class="light">
 <div class="cover">
     <div class="progressDiv hidden">
         <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
@@ -63,7 +63,7 @@
         <!--Parallel Coordinates-->
         <!--</div>-->
         <ul id="nav-mobile" class="left hide-on-med-and-down">
-            <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
+            <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="TTU"></a></li>
             <!--<li class="tab active"><a class="active" href="#">HiperView</a></li>-->
             <!--<li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>-->
             <!--<li class="tab"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>-->
@@ -100,8 +100,8 @@
                     <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html">5. ClusteringView</a></li>
                 </ul>
             </li>
-            <li><a href="#!" value="dark" id = "DarkTheme" class="btn waves-effect waves-effect waves-yellow">
-                <i class="material-icons left">brightness_6</i><span>Light</span></a></li>
+            <li><a href="#!" value="light" id = "DarkTheme" class="btn waves-effect waves-effect waves-yellow">
+                <i class="material-icons left">brightness_6</i><span>Dark</span></a></li>
         </ul>
     </div>
 </nav>
@@ -257,7 +257,7 @@
                         <p class="switch col s7 no_magrin no_padding" id="groupJobmode">
 
                             <label>
-                                <span class="true">Off</span>
+                                <span class="true"></span>
                                 <input checked id="jobIDCluster_control" type="checkbox">
                                 <span class="lever"></span>
                                 <span class="false">by similar schedules</span>
@@ -274,10 +274,10 @@
                         <p class="switch col s7 no_magrin no_padding" id="jobTablemode">
 
                             <label>
-                                <span class="true">Off</span>
+                                <span class="true"></span>
                                 <input id="jobTable_control" type="checkbox">
                                 <span class="lever"></span>
-                                <span class="false">On</span>
+                                <span class="false"></span>
                             </label>
 
                         </p>
@@ -458,10 +458,10 @@
                             <p class="switch col s7 no_magrin no_padding" id="majorGroupDisplay">
 
                                 <label>
-                                    <span class="true">Off</span>
+                                    <span class="true"></span>
                                     <input  id="majorGroupDisplay_control" type="checkbox">
                                     <span class="lever"></span>
-                                    <span class="false">On</span>
+                                    <span class="false"></span>
                                 </label>
 
                             </p>

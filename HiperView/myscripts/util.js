@@ -655,14 +655,14 @@ function discovery(d){
 
 }
 function switchTheme(){
-    if (this.value==="light"){
-        this.value = "dark";
+    if (this.getAttribute('value')==="light"){
+        this.setAttribute('value', "dark");
         this.querySelector('span').textContent = "Light";
         d3.select('body').classed('light',false);
         d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png");
         return;
     }
-    this.value = "light";
+    this.setAttribute('value', "light");
     this.querySelector('span').textContent = "Dark";
     d3.select('body').classed('light',true);
     d3.select('.logoLink').select('img').attr('src',"https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png");

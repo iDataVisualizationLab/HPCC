@@ -1024,7 +1024,7 @@ let JobMap = function() {
         limit = limit||index;
         let scale = d3.scaleLinear().domain([0,limit-1]).range([0,200]);
         let scaleT = d3.scaleTime().range([0,scale(index)]).domain([first__timestep,last_timestep]);
-        timebox.select('.timebox_range').transition().attr('width',scale(index));
+        timebox.select('.timebox_range').attr('width',scale(index));
         timebox.select('.timebox_axis')
             .call(d3.axisTop(d3.scaleTime().range(scale.range()).domain([first__timestep,scaleT.invert(200)])).tickSize(-10).ticks(5).tickFormat(multiFormat));
         timebox.select('.timebox_handle').attr('transform',`translate(${scale(index)},10)`).select('text').text(multiFormat(last_timestep));
