@@ -93,7 +93,7 @@ addEventListener('message',function ({data}) {
             distance: d3.max(distanceArr),
             // meand: ss.mean(distanceArr)
         };
-        temp.bin.mse = ss.mean(temp.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval)));
+        temp.bin.mse = ss.sum(temp.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval)));
         if (bin.normalizedFun)
             temp.bin.val = bin.normalizedFun.scaleBackPoints(d);
         else

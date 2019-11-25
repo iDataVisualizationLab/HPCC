@@ -1661,7 +1661,7 @@ let JobMap = function() {
         // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
     function calculateMSE(a,b){
-        return ss.mean(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+        return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
     }
     let first__timestep = new Date();
     let lastIndex = 0;
