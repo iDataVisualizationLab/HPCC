@@ -241,7 +241,7 @@ let radarController = function () {
                         }
                     },
                     {   targets: 2,
-                        title: 'Angle ( ' + "\u00B0 " + ')',
+                        title: "\u00B0 ",
                         orderable: true,
                         "data": null,
                         className:'angle',

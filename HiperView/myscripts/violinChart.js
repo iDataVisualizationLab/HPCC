@@ -89,13 +89,15 @@ d3.viiolinChart = function () {
             if(ticksDisplay.length){
                 axisg.append('text').attr('class', 'tickDisplay')
                     .attrs({
-                        dy: '0.5rem',
-                    }).style('text-anchor','end').text(ticksDisplay[0]);
+                        dx: -1,
+                        dy: 4,
+                    }).styles({'text-anchor':'end','stroke-width':0}).text(ticksDisplay[0]<1000?ticksDisplay[0]:d3.format(".2s")(ticksDisplay[0]));
                 axisg.append('text').attr('class', 'tickDisplay')
                     .attrs({
+                        dx: 1,
                         x: h(1),
-                        dy: '0.5rem',
-                    }).style('text-anchor','start').text(ticksDisplay[1]);
+                        dy: 4,
+                    }).styles({'text-anchor':'start','stroke-width':0}).text(ticksDisplay[0]<1000?ticksDisplay[0]:d3.format(".2s")(ticksDisplay[1]));
             }
         }
         let viol_chart = contain.selectAll('.violin').data(arr);
