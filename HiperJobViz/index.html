@@ -399,9 +399,9 @@
                         <table class="display" width="100%"></table>
                     </div>
                     <div id="RadarController_Table_toolbar">
-                        <button value = false class ="menuBtn saveProfile modal-trigger" id="saveProfile" onclick="downloadProfile(this)" href="#savedialog_profile"><i class="fas fa-download"></i> Save</button>
+                        <button type="submit" value = false class ="menuBtn saveProfile modal-trigger btn-small" id="saveProfile" onclick="downloadProfile(this)" href="#savedialog_profile"><i class="fas fa-download"></i> Save</button>
                         <input id="profile_input_file" class="none" type="file" style="display: none;"/>
-                        <button value = false class ="menuBtn loadProfile" id="loadProfile" onclick="uploadProfile(this)"><i class="fas fa-upload"></i> Load </button>
+                        <button type="submit" value = false class ="menuBtn loadProfile btn-small" id="loadProfile" onclick="uploadProfile(this)"><i class="fas fa-upload"></i> Load </button>
                     </div>
                 </div>
             </li>
@@ -478,10 +478,11 @@
                                 </table>
                             </div>
                         </div>
-                        <button onclick="saveClusterDescription()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog_description">
-                            <i class="fas fa-download pauseicon" ></i> Download group labels</button>
-                        <button  class ="menuBtn" style="background-color: #fff;" id="saveDescriptionbtn">
-                            <i class="fas fa-upload pauseicon" ></i> Load group labels</button>
+                        <label>Group labels:</label>
+                        <button type="submit" onclick="saveClusterDescription()"  class ="menuBtn modal-trigger btn-small" href="#savedialog_description">
+                            <i class="fas fa-download pauseicon" ></i> Save</button>
+                        <button  type="submit" class ="menuBtn btn-small" id="saveDescriptionbtn">
+                            <i class="fas fa-upload pauseicon" ></i> Load</button>
                         <input id="description_input_file" class="none" type="file" style="display: none;"/>
                     </div>
                 </div>
