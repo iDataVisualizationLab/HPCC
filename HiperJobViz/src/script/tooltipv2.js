@@ -222,6 +222,7 @@ let Tooltip_lib = function() {
                     width: graphicopt.widthG(),
                     height: graphicopt.heightG()
                 }).styles({
+                'stroke-width':0,
                 fill: layout.background ? 'url("#backcolor")' : 'white'
             });
         }
@@ -458,6 +459,7 @@ let Tooltip_lib = function() {
                     width: d=>d.xScale.range()[1],
                     height: graphicopt.heightG()
                 }).styles({
+                'stroke-width': 0,
                 fill: layout.background ? 'url("#backcolor")' : 'white'
             });
             if (!layout.background ){
