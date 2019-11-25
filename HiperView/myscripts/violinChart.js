@@ -41,6 +41,7 @@ d3.viiolinChart = function () {
     let first = true;
     let returnEvent;
     let schema;
+    let ticksDisplay = [];
 
 
     let crateviolin = d3.area()
@@ -75,14 +76,26 @@ d3.viiolinChart = function () {
                     .attrs({
                         y1: -5,
                         y2: 5,
-                    })
+                    }).styles(graphicopt.ticks)
                 axisg.append('line').attr('class', 'tick')
                     .attrs({
                         x2: h(1),
                         x1: h(1),
                         y1: -5,
                         y2: 5,
-                    })
+                    }).styles(graphicopt.ticks)
+            }
+
+            if(ticksDisplay.length){
+                axisg.append('text').attr('class', 'tickDisplay')
+                    .attrs({
+                        dy: '0.5rem',
+                    }).style('text-anchor','end').text(ticksDisplay[0]);
+                axisg.append('text').attr('class', 'tickDisplay')
+                    .attrs({
+                        x: h(1),
+                        dy: '0.5rem',
+                    }).style('text-anchor','start').text(ticksDisplay[1]);
             }
         }
         let viol_chart = contain.selectAll('.violin').data(arr);
@@ -206,6 +219,10 @@ d3.viiolinChart = function () {
 
     viiolinplot.linepointer = function (_) {
         return arguments.length ? (linepointer = _, viiolinplot) : linepointer;
+
+    };
+    viiolinplot.setTicksDisplay = function (_) {
+        return arguments.length ? (ticksDisplay = _, viiolinplot) : ticksDisplay;
 
     };
 
