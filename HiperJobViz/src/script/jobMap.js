@@ -468,8 +468,9 @@ let JobMap = function() {
                         return linkscale(d3.select(this.parentNode).datum().values_name.length)
                     }
                 })
-                .transition().duration(500)
-                .attr('d',d=>d3.line().x(function(d){return fisheye_scale.x(timelineScale(d))}).y(function(){return 0})([d.start,d.end]));
+                .transition().duration(2000)
+                .attr('d',function(d){
+                    return d3.line().x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_midle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))});
 
             if (runopt.compute.jobOverlay) {
                 let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
@@ -498,14 +499,14 @@ let JobMap = function() {
                 .y(function(d) { return d[1]; });
 
             bg.selectAll(".linkLinegg.timeline").remove();
-            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>d.cluster).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            // let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>JSON.stringify(d.cluster)).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
             datacurve.exit().remove();
             datacurve.enter()
                 .append('path')
                 .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
-                .attr("vector-effect", "non-scaling-stroke")
                 .merge(datacurve)
-                .transition().duration(500)
+                .transition().duration(2000)
                 .attr("d", function(d,i){
                     const datap = d3.select(d3.select(this).node().parentNode).datum();
                     let supportp=false;
@@ -789,12 +790,13 @@ let JobMap = function() {
                 computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
                 computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
                 g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
-                // scaleNode_y_midle = d3.scaleLinear().range([yscale.range()[1] / 2, yscale.range()[1] / 2 + 10]).domain([computers.data().length / 2, computers.data().length / 2 + 1])
                 scaleNode_y_midle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
-                computers.transition().attr('transform', d => {
+
+                computers.transition().duration(1000).attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_midle(d.order);
-                    return `translate(${d.x2},${d.y2 || d.y})`
+                    // return `translate(${d.x2},${d.y2 || d.y})`
+                    return `translate(${d.x2},0)`
                 });
             }else{
                 let bundle_cluster = clusterdata.map(c=>{return {cluster:c.name,maxinstance:d3.max(c.arr,e=>e?e.length:0),arr:d3.range(0,maxTimestep).map(()=>[]),orderscale:{_last:0},crossing:{},totalcrossing:0}});
@@ -818,7 +820,7 @@ let JobMap = function() {
                 let list = bundle_cluster.map(b=>b.cluster);
                 let headB = list.pop();
                 bundle_cluster_ob[headB].orderbycross = 0;
-                count = 1;
+                let count = 1;
 
                 //<editor-fold desc="Arrange group base on newest element">
                 while(count<bundle_cluster.length){
@@ -891,7 +893,7 @@ let JobMap = function() {
                     return fullScaleB(masteb.orderscale[computeID]+masteb.offset);
                     // return fullScaleB(masteb.arr[ti][computeID]+masteb.offset);
                 };
-                computers.transition().attr('transform', d => {
+                computers.transition().duration(1000).attr('transform', d => {
                     d.x2 = 300;
                     const lastItem = _.last(d.timeline.lineFull);
                     d.y2 = scaleNode_y_midle(lastItem.cluster,lastItem.end,d.name);

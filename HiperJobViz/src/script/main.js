@@ -1702,7 +1702,7 @@ $( document ).ready(function() {
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
-                cluster_info.forEach(c=>c.mse = ss.mean(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
+                cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
@@ -1914,7 +1914,7 @@ $( document ).ready(function() {
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
-                cluster_info.forEach(c=>c.mse = ss.mean(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
+                cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
