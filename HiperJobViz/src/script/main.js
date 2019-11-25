@@ -2155,7 +2155,7 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
-        d3.selectAll('.radarCluster').select('span.clusterMSE').text(d=>(d[0].mse||0).toFixed(3));
+        d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>(d[0].mse||0).toFixed(3));
     }, 0);
 }
 function updateclusterDescription (name,text){
