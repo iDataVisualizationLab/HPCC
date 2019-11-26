@@ -152,7 +152,7 @@
                 </div>
                 <div class="collapsible-body">
                     <div  class="row valign-wrapper">
-                        <label for="datacom" class="col s4"> Dataset: </label>
+                        <label for="datacom" class="col s4"> Dataset</label>
                         <select id="datacom" class="col s7">
                             <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
                             <option value="influxdb20Apr_withoutJobLoad" data-date="20 Apr 2019">20 Apr 2019 (Job list)</option>
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     <div  class="row valign-wrapper">
-                        <label for="viztype_holder" class="col s4">Circular layout: </label>
+                        <label for="viztype_holder" class="col s4">Circular layout</label>
                         <div id="viztype_holder" class="radio-toolbar col s8">
                             <label class="toolTip" data-title="Star chart">
                                 <input name="viztype" type="radio" value="star"/>
@@ -193,7 +193,7 @@
                         </div >
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="control" class="col s4"> Simulation control: </label>
+                        <label for="control" class="col s4"> Simulation control</label>
                         <div  class="col s8"  id="control" style="padding-left: 0px;padding-right: 0px;">
                             <button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>
                             <button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>
@@ -206,7 +206,7 @@
                         <input id="data_input_file" class="none" type="file" multiple/>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="datasetsSelect" class="col s4 hide"> Visualizing: </label>
+                        <label for="datasetsSelect" class="col s4 hide"> Visualizing</label>
                         <div class='dropdown-trigger col s8' href='#' data-target='datasetsSelect' id="datasetsSelectTrigger">
                             <img src="" class="circle">
                             <span class="title"></span>
@@ -216,7 +216,7 @@
                         </ul>
                     </div>
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="summaryType_control" class="col s4 hide"> Summary type: </label>
+                        <label for="summaryType_control" class="col s4 hide"> Summary type</label>
                         <select id="summaryType_control" class="col s8">
                             <option value="Boxplot">Boxplot</option>
                             <option value="Scatterplot" >Scatterplot</option>
@@ -227,7 +227,7 @@
 
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="compDisplay_control" class="col s4"> Visualizing: </label>
+                        <label for="compDisplay_control" class="col s4"> Visualizing</label>
                         <select id="compDisplay_control" class="col s7">
                             <option value="pie">Individual host: Pie chart</option>
                             <option value="radar" >Individual host: Radar chart </option>
@@ -241,7 +241,7 @@
                     </div>
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="colorConnection_control" class="col s4"> Color links by: </label>
+                        <label for="colorConnection_control" class="col s4"> Color links by</label>
                         <select id="colorConnection_control" class="col s7">
                             <option value="group" selected="selected">Host group</option>
                             <option value="user" >UserID</option>
@@ -253,7 +253,7 @@
 
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s4"> Group jobs: </label>
+                        <label for="groupJobmode" class="col s4"> Group jobs</label>
                         <p class="switch col s7 no_magrin no_padding" id="groupJobmode">
 
                             <label>
@@ -270,7 +270,7 @@
                     </div>
 
                     <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s4"> Metric Table: </label>
+                        <label for="groupJobmode" class="col s4"> Metric Table</label>
                         <p class="switch col s7 no_magrin no_padding" id="jobTablemode">
 
                             <label>
@@ -287,7 +287,7 @@
                     </div>
 
                     <div  class="row s12 valign-wrapper hide">
-                        <label for="chartType_control" class="col s4 hide"> Chart type: </label>
+                        <label for="chartType_control" class="col s4 hide"> Chart type</label>
                         <select id="chartType_control" class="col s8">
                             <option value="Heatmap">Heatmap</option>
                             <option value="Area Chart">Area Chart</option>
@@ -305,7 +305,7 @@
                             <li id="RadarColor" class="hide">
                                 <div class="collapsible-header row s12">
                                     <div  class="row s12 valign-wrapper pickercontain list">
-                                        <label for="radarColorPicker" class="col s4"> Metric color scale: </label>
+                                        <label for="radarColorPicker" class="col s4"> Metric color scale</label>
                                         <div id = "radarColorPicker" class="colorscale-palette-container col s8">
                                             <div class="colorscale-block">
 
@@ -323,7 +323,7 @@
                             <li id="ClusterColor" style="display: none">
                                 <div class="collapsible-header">
                                     <div  class="row s12 valign-wrapper pickercontain list" style="width: 100%;">
-                                        <label for="radarColorPicker" class="col s4"> Cluster color scheme: </label>
+                                        <label for="radarColorPicker" class="col s4"> Cluster color scheme</label>
                                         <div id="clusterColorPicker" class="colorscale-palette-container col s8">
                                             <div class="colorscale-block">
 
@@ -419,14 +419,14 @@
                         </div>
                         <div>
                             <div  class="row valign-wrapper">
-                                <label for="clusterMethod" class="col s4 radarcontroller_layout"> Grouping Method: </label>
+                                <label for="clusterMethod" class="col s4 radarcontroller_layout"> Grouping Method</label>
                                 <select id="clusterMethod" class="col s8 radarcontroller_layout">
                                     <option value="leaderbin" selected="selected">Leader Bin</option>
                                     <option value="kmean">K-means</option>
                                 </select>
                             </div>
                             <form action="#" class='clusterProfile row valign-wrapper' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
-                                <label for="startBinGridSize" class="col s4 radarcontroller_layout hide">Initial diameter: </label>
+                                <label for="startBinGridSize" class="col s4 radarcontroller_layout hide">Initial diameter</label>
                                 <div  class="col s5 hide">
                                     <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
                                 </div>
@@ -441,10 +441,10 @@
                                 </div>
                             </form>
                             <form action="#" class='clusterProfile hide row valign-wrapper' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}});return false;">
-                                <label for="knum" class="col s4 radarcontroller_layout">#Groups: </label>
+                                <label for="knum" class="col s4 radarcontroller_layout">#Groups</label>
                                 <div  class="col s5 no-pad-left valign-wrapper">
                                     <input type="number" id="knum" class="col s3 radarcontroller_layout browser-default no_leftmagrin">
-                                    <span class="col s6 no_leftmagrin"> #Iterations: </span>
+                                    <span class="col s6 no_leftmagrin"> #Iterations</span>
                                     <input type="number" id="kiteration" class="col s3 radarcontroller_layout browser-default no_leftmagrin" >
                                 </div>
                                 <div  class="col s3 no_padding valign-wrapper center-align" >
@@ -453,7 +453,7 @@
                             </form>
                         </div>
                         <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
-                            <label for="groupJobmode" class="col s4"> Display min-max: </label>
+                            <label for="groupJobmode" class="col s4"> Display min-max</label>
                             <p class="switch col s7 no_magrin no_padding" id="majorGroupDisplay">
 
                                 <label>

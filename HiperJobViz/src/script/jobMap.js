@@ -424,7 +424,7 @@ let JobMap = function() {
 
 
         if (!runopt.compute.bundle) {
-            const radaropt = {colorfill: colorfill, size: (scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 4};
+            const radaropt = {colorfill: colorfill, size: (scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 2};
             let datapoint;
             if (!runopt.suddenGroup) {
                 datapoint= bg.selectAll(".linkLinegg").interrupt().data(d => d.timeline.clusterarr.map((e,i) => {
@@ -806,7 +806,7 @@ let JobMap = function() {
     function getsubfixcolormode(){
         return runopt.graphic.colorBy==='group'?'_no':undefined;
     }
-    let yscale,linkscale = d3.scaleSqrt().range([0.3,1.5]);
+    let yscale,linkscale = d3.scaleSqrt().range([0.3,2]);
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
