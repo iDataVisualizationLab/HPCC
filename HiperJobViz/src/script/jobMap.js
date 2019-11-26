@@ -669,10 +669,12 @@ let JobMap = function() {
                     d3.select(this.parentNode).dispatch('click');
                 })
             }else{
-                if(runopt.mouse.showseries)
-                    showSymbolSeries();
-                else if(runopt.mouse.showmetric)
-                    showMetrics();
+                if (!runopt.mouse.disable) {
+                    if (runopt.mouse.showseries)
+                        showSymbolSeries();
+                    else if (runopt.mouse.showmetric)
+                        showMetrics();
+                }
             }
         }).on('mouseleave',function(d){
             if(!freezing)
@@ -693,7 +695,9 @@ let JobMap = function() {
         let Maxis = axis.select('.gMainaxis')
             .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
         Maxis.select('.domain').remove();
-        let mticks =Maxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
+        let mticks =Maxis.selectAll('.tick');
+        mticks
+            .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
         mticks.select('text').attr('dy','-0.5rem');
         mticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
 
