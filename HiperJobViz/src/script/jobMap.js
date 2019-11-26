@@ -434,14 +434,14 @@ let JobMap = function() {
                     if(!i)
                         temp.hide = true;
                     return temp;
-                }),d=>d.name);
+                }),d=>d.name+d.timestep);
             }else{
                 datapoint = bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr_sudden.map(e => {
                     temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
                     temp.name = e.cluster;
                     temp.timestep = e.timestep;
                     return temp;
-                }),d=>d.name);
+                }),d=>d.name+d.timestep);
             }
             // datapoint.exit().remove();
             if (animation_time) {
@@ -450,16 +450,21 @@ let JobMap = function() {
                 });
             }else
                 datapoint.exit().remove();
-            datapoint = datapoint.enter().append('g')
-                .attr('class', 'linkLinegg timeline')
-                .merge(datapoint);
-            datapoint.each(function (d, i) {
+            let datapoint_n = datapoint.enter().append('g')
+                .attr('class', 'linkLinegg timeline');
+            datapoint_n.style('opacity',0)
+                .transition().duration(animation_time).style('opacity',1);
+            datapoint
+                .merge(datapoint_n).each(function (d, i) {
                 createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
             });
-            datapoint.attr('transform', function (d) {
+            datapoint_n.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
             });
-
+            datapoint.transition().duration(animation_time)
+                .attr('transform', function (d) {
+                    return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
+                });
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
             // bg.selectAll("path.linegg").remove();
@@ -801,7 +806,7 @@ let JobMap = function() {
     function getsubfixcolormode(){
         return runopt.graphic.colorBy==='group'?'_no':undefined;
     }
-    let yscale,linkscale = d3.scaleSqrt().range([0.25,3]);
+    let yscale,linkscale = d3.scaleSqrt().range([0.3,1.5]);
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
@@ -1715,122 +1720,122 @@ let JobMap = function() {
             h.timeline = {clusterarr:[],line:[],lineFull:[],clusterarr_sudden:[]};
         });
 
-    if (lastIndex===(maxTimestep-1)) {
-        updateClusterTimeline();
-        let user_n = current_userData();
-        // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
-        // tableData = {}
-        Object.keys(tableData).forEach(k => tableData[k].keep = false);
-        data = dataRaw.filter(d => user_n.findIndex(e => e.key === d.user) !== -1);
-        // data=dataRaw;
-        // _.differenceBy(listallJobs.filter(l=>!l.endTime),dataRaw,'jobID').forEach(f=>f.endTime=last_timestep.toString()); //job has been ended
-        listallJobs = _.unionBy(listallJobs, dataRaw, 'jobID');
-        data.forEach(d => {
-            d.name = d.jobID + '';
-            d.type = 'job';
-            d.nodes.forEach(n => {
-                let temp = {source: n, target: d.jobID + ''};
-                let temp2 = {source: d.jobID + '', target: d.user};
+        if (lastIndex===(maxTimestep-1)) {
+            updateClusterTimeline();
+            let user_n = current_userData();
+            // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
+            // tableData = {}
+            Object.keys(tableData).forEach(k => tableData[k].keep = false);
+            data = dataRaw.filter(d => user_n.findIndex(e => e.key === d.user) !== -1);
+            // data=dataRaw;
+            // _.differenceBy(listallJobs.filter(l=>!l.endTime),dataRaw,'jobID').forEach(f=>f.endTime=last_timestep.toString()); //job has been ended
+            listallJobs = _.unionBy(listallJobs, dataRaw, 'jobID');
+            data.forEach(d => {
+                d.name = d.jobID + '';
+                d.type = 'job';
+                d.nodes.forEach(n => {
+                    let temp = {source: n, target: d.jobID + ''};
+                    let temp2 = {source: d.jobID + '', target: d.user};
 
-                linkdata.push(temp);
-                if (linkdata.indexOf(temp2) === -1)
-                    linkdata.push(temp2);
+                    linkdata.push(temp);
+                    if (linkdata.indexOf(temp2) === -1)
+                        linkdata.push(temp2);
+                });
+                let oldData = nodeg.selectAll('.node.jobNode').data().find(e => e.name === d.name || (e.values ? e.values.findIndex(v => v.name === d.name) !== -1 : false));
+                if (oldData) {
+                    d.x = oldData.x;
+                    d.x2 = oldData.x2;
+                    d.y = oldData.y;
+                    d.fx = oldData.fx;
+                    d.fy = oldData.fy;
+                    d.vx = oldData.vx;
+                    d.vy = oldData.vy;
+                }
             });
-            let oldData = nodeg.selectAll('.node.jobNode').data().find(e => e.name === d.name || (e.values ? e.values.findIndex(v => v.name === d.name) !== -1 : false));
-            if (oldData) {
-                d.x = oldData.x;
-                d.x2 = oldData.x2;
-                d.y = oldData.y;
-                d.fx = oldData.fx;
-                d.fy = oldData.fy;
-                d.vx = oldData.vx;
-                d.vy = oldData.vy;
-            }
-        });
 
-        let newdata = [];
+            let newdata = [];
 
-        user = user_n.map((d, i) => {
-            d.name = d.key;
-            d.order = i;
-            d.orderlink = i;
-            d.type = 'user';
-            d.unqinode_ob = {};
-            d.unqinode.forEach(n => {
-                d.unqinode_ob[n] = d.values.filter(e => e.nodes.find(f => f === n));
-                hostOb[n].user.push(d)
+            user = user_n.map((d, i) => {
+                d.name = d.key;
+                d.order = i;
+                d.orderlink = i;
+                d.type = 'user';
+                d.unqinode_ob = {};
+                d.unqinode.forEach(n => {
+                    d.unqinode_ob[n] = d.values.filter(e => e.nodes.find(f => f === n));
+                    hostOb[n].user.push(d)
+                });
+                if (runopt.compute.clusterJobID) {
+                    const range_temp_sub = d3.extent(d.values, e => +new Date(e.submitTime));
+                    const range_temp_st = d3.extent(d.values, e => +new Date(e.startTime));
+                    const scale_temp_sub = d3.scaleLinear().domain([range_temp_sub[0], range_temp_sub[0] + runopt.compute.clusterJobID_info.groupBy]);
+                    const scale_temp_st = d3.scaleLinear().domain([range_temp_st[0], range_temp_st[0] + runopt.compute.clusterJobID_info.groupBy]);
+                    let group_temp_ob = _.groupBy(d.values, function (d) {
+                        return '' + Math.floor(scale_temp_sub(+new Date(d.submitTime))) + Math.floor(scale_temp_st(+new Date(d.startTime)))
+                    });
+                    for (var k in group_temp_ob) {
+                        let temp = _.cloneDeep(group_temp_ob[k][0]);
+                        temp.x = d3.mean(group_temp_ob[k], e => e.x);
+                        temp.x2 = d3.mean(group_temp_ob[k], e => e.x2);
+                        temp.y = d3.mean(group_temp_ob[k], e => e.y);
+                        temp.fx = d3.mean(group_temp_ob[k], e => e.fx);
+                        temp.fy = d3.mean(group_temp_ob[k], e => e.fy);
+                        temp.vx = d3.mean(group_temp_ob[k], e => e.vx);
+                        temp.vy = d3.mean(group_temp_ob[k], e => e.vy);
+                        temp.values = group_temp_ob[k];
+                        temp.nodes = _.uniq(_.flatten(group_temp_ob[k].map(g => g.nodes)));
+                        let namearr = group_temp_ob[k].map(d => d.name);
+                        temp.name = namearr.join(' ');
+                        let sameSource = linkdata.filter(e => namearr.find(f => f === e.source + ''));
+
+                        let temp_g = _.groupBy(sameSource, function (e) {
+                            return e.target
+                        });
+                        Object.keys(temp_g).forEach(k => {
+                            temp_g[k].forEach((e, i) => {
+                                if (i === 0) {
+                                    e.source = temp.name;
+                                    e.links = temp_g[k].length;
+                                } else {
+                                    e.del = true;
+                                }
+                            });
+                        });
+
+                        sameSource = linkdata.filter(e => namearr.find(f => f === e.target + ''));
+                        temp_g = _.groupBy(sameSource, function (e) {
+                            return e.source
+                        });
+                        Object.keys(temp_g).forEach(k => {
+                            temp_g[k].forEach((e, i) => {
+                                if (i === 0) {
+                                    e.target = temp.name;
+                                    e.links = temp_g[k].length;
+                                } else {
+                                    e.del = true;
+                                }
+                            });
+                        });
+                        newdata.push(temp)
+                    }
+                    d3.extent(d.values, e => +new Date(e.submitTime))
+                }
+                d.dataRaw = (user.filter(e => e.name === d.name)[0] || {dataRaw: []}).dataRaw || [];
+                tableData[d.name] = tableData[d.name] || [{key: 'Hosts', value: 0},
+                    {key: 'Jobs', value: 0}];
+                tableData[d.name][0].value = d.unqinode.length;
+                tableData[d.name][1].value = d.values.length;
+                tableData[d.name].id = d.name;
+                tableData[d.name].keep = true;
+                return d
             });
             if (runopt.compute.clusterJobID) {
-                const range_temp_sub = d3.extent(d.values, e => +new Date(e.submitTime));
-                const range_temp_st = d3.extent(d.values, e => +new Date(e.startTime));
-                const scale_temp_sub = d3.scaleLinear().domain([range_temp_sub[0], range_temp_sub[0] + runopt.compute.clusterJobID_info.groupBy]);
-                const scale_temp_st = d3.scaleLinear().domain([range_temp_st[0], range_temp_st[0] + runopt.compute.clusterJobID_info.groupBy]);
-                let group_temp_ob = _.groupBy(d.values, function (d) {
-                    return '' + Math.floor(scale_temp_sub(+new Date(d.submitTime))) + Math.floor(scale_temp_st(+new Date(d.startTime)))
-                });
-                for (var k in group_temp_ob) {
-                    let temp = _.cloneDeep(group_temp_ob[k][0]);
-                    temp.x = d3.mean(group_temp_ob[k], e => e.x);
-                    temp.x2 = d3.mean(group_temp_ob[k], e => e.x2);
-                    temp.y = d3.mean(group_temp_ob[k], e => e.y);
-                    temp.fx = d3.mean(group_temp_ob[k], e => e.fx);
-                    temp.fy = d3.mean(group_temp_ob[k], e => e.fy);
-                    temp.vx = d3.mean(group_temp_ob[k], e => e.vx);
-                    temp.vy = d3.mean(group_temp_ob[k], e => e.vy);
-                    temp.values = group_temp_ob[k];
-                    temp.nodes = _.uniq(_.flatten(group_temp_ob[k].map(g => g.nodes)));
-                    let namearr = group_temp_ob[k].map(d => d.name);
-                    temp.name = namearr.join(' ');
-                    let sameSource = linkdata.filter(e => namearr.find(f => f === e.source + ''));
-
-                    let temp_g = _.groupBy(sameSource, function (e) {
-                        return e.target
-                    });
-                    Object.keys(temp_g).forEach(k => {
-                        temp_g[k].forEach((e, i) => {
-                            if (i === 0) {
-                                e.source = temp.name;
-                                e.links = temp_g[k].length;
-                            } else {
-                                e.del = true;
-                            }
-                        });
-                    });
-
-                    sameSource = linkdata.filter(e => namearr.find(f => f === e.target + ''));
-                    temp_g = _.groupBy(sameSource, function (e) {
-                        return e.source
-                    });
-                    Object.keys(temp_g).forEach(k => {
-                        temp_g[k].forEach((e, i) => {
-                            if (i === 0) {
-                                e.target = temp.name;
-                                e.links = temp_g[k].length;
-                            } else {
-                                e.del = true;
-                            }
-                        });
-                    });
-                    newdata.push(temp)
-                }
-                d3.extent(d.values, e => +new Date(e.submitTime))
+                linkdata = linkdata.filter(d => !d.del);
+                linkscale.domain(d3.extent(linkdata, d => d.links));
+                data = newdata;
+                Jobscale.domain(d3.extent(data, d => d.values.length));
             }
-            d.dataRaw = (user.filter(e => e.name === d.name)[0] || {dataRaw: []}).dataRaw || [];
-            tableData[d.name] = tableData[d.name] || [{key: 'Hosts', value: 0},
-                {key: 'Jobs', value: 0}];
-            tableData[d.name][0].value = d.unqinode.length;
-            tableData[d.name][1].value = d.values.length;
-            tableData[d.name].id = d.name;
-            tableData[d.name].keep = true;
-            return d
-        });
-        if (runopt.compute.clusterJobID) {
-            linkdata = linkdata.filter(d => !d.del);
-            linkscale.domain(d3.extent(linkdata, d => d.links));
-            data = newdata;
-            Jobscale.domain(d3.extent(data, d => d.values.length));
         }
-    }
 
         if (runopt.compute.clusterNode) {
             clusterdata.forEach(c =>{
@@ -1895,7 +1900,7 @@ let JobMap = function() {
                         Object.keys(temp_g).forEach(k=> {
                             temp_g[k].forEach((t,i)=>{
                                 if (!i)
-                                    t.links = temp_g[k].length;
+                                    t.links = temp_g[k][0].links;
                                 else
                                     t.del = true;
                             })
@@ -1986,7 +1991,7 @@ let JobMap = function() {
                             Object.keys(temp_g).forEach(k => {
                                 temp_g[k].forEach((t, i) => {
                                     if (!i)
-                                        t.links = temp_g[k].length;
+                                        t.links = temp_g[k][0].links;
                                     else
                                         t.del = true;
                                 })
