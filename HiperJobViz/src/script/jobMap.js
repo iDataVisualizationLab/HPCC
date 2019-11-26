@@ -399,6 +399,7 @@ let JobMap = function() {
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
         d3.select('#legend').classed('hide',!isoverlay)
     }
+    let animation_time = 2000;
     function drawEmbedding_timeline(data,colorfill) {
         // xscale
         let newdata = handledata(data);
@@ -408,10 +409,13 @@ let JobMap = function() {
             lensingLayer.on("mousemove", function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
+                    animation_time = 0;
+                    bg.interrupt().selectAll("*").interrupt();
                     fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-timelineStep*timelineScale.domain()[1],0]).focus(mouse[0]-(+lensingLayer.attr('width')));
                     drawEmbedding_timeline(data,colorfill);
                 }
             }).on("mouseleave",function () {
+                animation_time = 2000;
                 if(runopt.compute.type==="timeline"){
                     fisheye_scale.x = d=>d;
                     drawEmbedding_timeline(data,colorfill);
@@ -423,7 +427,7 @@ let JobMap = function() {
             const radaropt = {colorfill: colorfill, size: (scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 4};
             let datapoint;
             if (!runopt.suddenGroup) {
-                datapoint= bg.selectAll(".linkLinegg").data(d => d.timeline.clusterarr.map((e,i) => {
+                datapoint= bg.selectAll(".linkLinegg").interrupt().data(d => d.timeline.clusterarr.map((e,i) => {
                     temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
                     temp.name = e.cluster;
                     temp.timestep = e.timestep;
@@ -440,9 +444,12 @@ let JobMap = function() {
                 }),d=>d.name);
             }
             // datapoint.exit().remove();
-            datapoint.exit().transition().duration(1000).style('opacity', 0).on('end', function() {
-                d3.select(this).remove();
-            });
+            if (animation_time) {
+                datapoint.exit().transition().duration(animation_time).style('opacity', 0).on('end', function () {
+                    d3.select(this).remove();
+                });
+            }else
+                datapoint.exit().remove();
             datapoint = datapoint.enter().append('g')
                 .attr('class', 'linkLinegg timeline')
                 .merge(datapoint);
@@ -456,8 +463,8 @@ let JobMap = function() {
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
             // bg.selectAll("path.linegg").remove();
-            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
-            dataline.transition().duration(2000)
+            let dataline = bg.selectAll(".linegg").interrupt().data(d => d.timeline.line,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            dataline.interrupt().transition().duration(animation_time)
                 .attr('d',function(d){
                     return d3.line().curve(d3.curveMonotoneX).x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_middle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))});;
             dataline.exit().remove();
@@ -499,9 +506,9 @@ let JobMap = function() {
                 .x(function(d) { return d[0]; })
                 .y(function(d) { return d[1]; });
 
-            bg.selectAll(".linkLinegg.timeline").remove();
-            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`) ;
-            datacurve.transition().duration(2000)
+            bg.selectAll(".linkLinegg.timeline").interrupt().remove();
+            let datacurve = bg.selectAll(".linegg").interrupt().data(d => d.timeline.lineFull,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`) ;
+            datacurve.interrupt().transition().duration(animation_time)
                 .attr("d", function(d,i){
                     const datap = d3.select(d3.select(this).node().parentNode).datum();
                     let supportp=false;
