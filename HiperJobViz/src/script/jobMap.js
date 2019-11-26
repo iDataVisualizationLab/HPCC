@@ -456,21 +456,22 @@ let JobMap = function() {
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
             // bg.selectAll("path.linegg").remove();
-            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line,d=>d.cluster).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            let dataline = bg.selectAll(".linegg").data(d => d.timeline.line,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
+            dataline.transition().duration(2000)
+                .attr('d',function(d){
+                    return d3.line().curve(d3.curveMonotoneX).x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_middle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))});;
             dataline.exit().remove();
             dataline.enter().append('path')
                 .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
-                // .attr("vector-effect", "non-scaling-stroke")
+                .attr('d',function(d){
+                    return d3.line().curve(d3.curveMonotoneX).x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_middle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))})
                 .merge(dataline)
                 .styles({
                     stroke: d => colorFunc(d.cluster),
                     'stroke-width': function (d) {
                         return linkscale(d3.select(this.parentNode).datum().values_name.length)
                     }
-                })
-                .transition().duration(2000)
-                .attr('d',function(d){
-                    return d3.line().x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_middle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))});
+                });
 
             if (runopt.compute.jobOverlay) {
                 let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
@@ -499,14 +500,8 @@ let JobMap = function() {
                 .y(function(d) { return d[1]; });
 
             bg.selectAll(".linkLinegg.timeline").remove();
-            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>d.cluster).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
-            // let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>JSON.stringify(d.cluster)).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
-            datacurve.exit().remove();
-            datacurve.enter()
-                .append('path')
-                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
-                .merge(datacurve)
-                .transition().duration(2000)
+            let datacurve = bg.selectAll(".linegg").data(d => d.timeline.lineFull,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`) ;
+            datacurve.transition().duration(2000)
                 .attr("d", function(d,i){
                     const datap = d3.select(d3.select(this).node().parentNode).datum();
                     let supportp=false;
@@ -525,7 +520,32 @@ let JobMap = function() {
                     //         x: fisheye_scale.x(timelineScale(d.start)),
                     //         y: scaleNode_y_middle(datap[i+1].cluster,datap[i+1].end,datap.values_name[0]),
                     //     }});
-                }).styles({
+                })
+            datacurve.exit().remove();
+            datacurve.enter()
+                .append('path')
+                .attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`)
+                .attr("d", function(d,i){
+                    const datap = d3.select(d3.select(this).node().parentNode).datum();
+                    let supportp=false;
+                    let data_path = d3.range(d.start,(d.end+1)===maxTimestep?(d.end+1):(d.end+2)).map(e=>
+                        e>d.end?(supportp=true,[fisheye_scale.x(timelineScale(e)-timelineStep*0.5),scaleNode_y_middle(d.cluster,e,datap.name)]):[fisheye_scale.x(timelineScale(e)),scaleNode_y_middle(d.cluster,e,datap.name)]
+                    );
+                    if (supportp)
+                        data_path.push([fisheye_scale.x(timelineScale(d.end+1)),scaleNode_y_middle(datap.timeline.lineFull[i+1].cluster,d.end+1,datap.name)]);
+                    return curveBundle(data_path);
+                    // linkHorizontal({
+                    //     source: {
+                    //         x: fisheye_scale.x(timelineScale(d.end)),
+                    //         y: scaleNode_y_middle(d.cluster,d.end,datap.values_name[0]),
+                    //     },
+                    //     target: {
+                    //         x: fisheye_scale.x(timelineScale(d.start)),
+                    //         y: scaleNode_y_middle(datap[i+1].cluster,datap[i+1].end,datap.values_name[0]),
+                    //     }});
+                })
+                .merge(datacurve)
+                .styles({
                 stroke: d => colorFunc(d.cluster),
                 'stroke-width': function (d) {
                     return linkscale(d3.select(this.parentNode).datum().values_name.length)
