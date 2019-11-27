@@ -320,15 +320,18 @@ input[type=number] {
     width: 100%;
 }
 .information {
-    width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
     border-radius: 10px;
+    border: 1px solid;
     color: white;
     padding: 0;
     overflow: visible;
     /*font-size: 10px;*/
 }
-
+.help {
+    color: currentColor;
+}
 .informationHolder {
     position: relative;
 }
