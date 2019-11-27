@@ -175,13 +175,13 @@ let JobMap = function() {
                 drawOverlayJob (runopt.overlayjob);
             }
         });
-        d3.select('#timelineGroupMode').on("change", function () {
-            var sect = document.getElementById("timelineGroupMode");
-            runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
-            if (runopt.compute.type==='timeline'){
-                jobMap.data().draw();
-            }
-        });
+        // d3.select('#timelineGroupMode').on("change", function () {
+        //     var sect = document.getElementById("timelineGroupMode");
+        //     runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
+        //     if (runopt.compute.type==='timeline'){
+        //         jobMap.data().draw();
+        //     }
+        // });
         d3.select('#hideUnchange_control').on("change", function () {
             runopt.hideUnchange = $(this).prop('checked');
             jobMap.data().draw();

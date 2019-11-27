@@ -229,11 +229,21 @@
                     <div  class="row s12 valign-wrapper">
                         <label for="compDisplay_control" class="col s4"> Visualizing</label>
                         <select id="compDisplay_control" class="col s7">
-                            <option value="pie">Individual host: Pie chart</option>
-                            <option value="radar" >Individual host: Radar chart </option>
-                            <option value="radar_cluster" selected="selected">Grouping: System snapshot</option>
-                            <option value="timeline">Grouping: Entire timeline</option>
-                            <option value="bundle">Grouping: bundle timelines by clusters</option>
+                            <optgroup label="Snapshot">
+                                <option value="pie">Individual Pie chart</option>
+                                <option value="radar" >Individual Radar chart </option>
+                                <option value="radar_cluster" selected="selected">Major group</option>
+                            </optgroup>
+                            <optgroup label="Timeline">
+                                <option value="timeline"  value2 = "single">Individual host</option>
+                                <option value="timeline" value2 = "groupWithJob">Group by similarity w.r.t. jobs</option>
+                                <option value="timeline" value2 = "group">Group by similarity</option>
+                            </optgroup>
+                            <optgroup label="Bundle">
+                                <option value="bundle" value2 = "single">Individual host</option>
+                                <option value="bundle" value2 = "groupWithJob">Group by similarity w.r.t. jobs</option>
+                                <option value="bundle" value2 = "group">Group by similarity</option>
+                            </optgroup>
                         </select>
                         <div class="col s1">
                             <button class="information waves-effect waves-light grey darken-3" data-image="hostpresent.gif" data-title="Grouping options are recommended for a large number of hosts.">i</button>
@@ -509,41 +519,6 @@
             <i class="material-icons">chevron_right</i></a>
     </div>
     <div style="clear:both;"></div>
-    <!--<div id="header2" class="row s12 marginBottom0">-->
-    <!--&lt;!&ndash;<h1>HPCC Explorer</h1>&ndash;&gt;-->
-    <!--<div class="col valign-wrapper">-->
-    <!--<h6 class="summaryText1">  </h6>-->
-    <!--<h5 class ="currentDate center-align"></h5>-->
-    <!--</div>-->
-    <!--&lt;!&ndash;<div class="controls">&ndash;&gt;-->
-    <!--&lt;!&ndash;<div id="controlHolder"  class="controlHolder">&ndash;&gt;-->
-
-    <!--&lt;!&ndash;&lt;!&ndash;<button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="saveSVG_batch()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog">&ndash;&gt;-->
-    <!--&lt;!&ndash;<i class="fas fa-download pauseicon" ></i> Download Images</button>&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-
-    <!--<div style="clear:both;"></div>-->
-    <!--</div>-->
-    <!--<header class="ttu-main-header" id="nav">-->
-    <!--<div class="logo__lockup">-->
-    <!--&lt;!&ndash;<a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/">&ndash;&gt;-->
-    <!--&lt;!&ndash;<img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>&ndash;&gt;-->
-    <!--<h1 class="summaryText1">  </h1>-->
-    <!--</div>-->
-    <!--</header>-->
-
-
-    <!--<svg width="2600" height="1800" ></svg>-->
     <div style="position: relative;">
         <div class="row s12 no_magrin" style="overflow-x: auto">
             <div id ="scatterzone">
@@ -696,14 +671,6 @@
                                 <div id="suddenGroup_control"></div>
                             </div>
                         </div>
-                        <div class="valign-wrapper row no-pad-left">
-                            <label for="timelineGroupMode" style="font: unset;color: black;padding-left:20px;" class="col s8"> Group timeline by: </label>
-                            <select id="timelineGroupMode" class="browser-default s4" style="height:auto;padding: 0;">
-                                <option value = "single">Individual host</option>
-                                <option value = "groupWithJob" selected>group by similarity w.r.t. jobs</option>
-                                <option value = "group">group by similarity</option>
-                            </select>
-                         </div>
                      </div>
                      </div>
                 </div>
