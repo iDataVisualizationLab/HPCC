@@ -1309,8 +1309,7 @@ let JobMap = function() {
         link_n
             .append('text').attr("text-anchor", "middle");
 
-        link_n.call(updatelink);
-        link.call(updatelink,true);
+
         link = linkg.selectAll('.links');
         link.select('text').text(function(d){return d.links?d.links:''});
         link.select('path')
@@ -1318,7 +1317,7 @@ let JobMap = function() {
             .style("stroke-width", function (d) {
                 return d.links===undefined?1:linkscale(d.links);
             });
-            // .style('stroke-dasharray',function(){return getstrokearray(this);}).style('stroke-dashoffset',getstrokearray_offset);
+
         // reset freezing action
         freezing = false;
         releasehighlight();
@@ -1388,6 +1387,7 @@ let JobMap = function() {
         else {
             renderManual(computers, jobNode, link);
         }
+        link.call(updatelink,true);
 
         jobMap.drawComp();
         function initForce(){
