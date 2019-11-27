@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>HiperVR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="2018-09-11" content="AqhFUYKxq/d+E8CDT0fuYRCg8TvlTP52x0Jv7I9t27sLhR30LmcahBRfSwzP89ukjs2+ia99VrrLoRyaFAwJVA0AAABQeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJWUjEuMU02MiIsImV4cGlyeSI6MTUzNjYyNDAwMH0=">
+    <meta http-equiv="origin-trial" data-feature="WebXR Device API (For Chrome M69+)" data-expires="2018-10-27" content="An4ZYOGvf6kVHNxqZxS02TPAvpZESkmBhcVCM/byViDDuEB2XKvCF43aCJjrAU/R8H3WDlv+1bDGTL/XxstHGgoAAABTeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkRldmljZU02OSIsImV4cGlyeSI6MTU0MDY1NTAyMn0=">
+    <meta http-equiv="origin-trial" data-feature="WebXR Gamepad Support" data-expires="2018-10-24" content="Agrr6lZhlwzv5jmv/mpLZA37DIiVcg3HvX8bH8EWB+OBruV3sUJuzDfYz6qs/je+LcH41DkrmPn4k9RaUaqpQAAAAABYeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkdhbWVwYWRTdXBwb3J0IiwiZXhwaXJ5IjoxNTQwMzg4NjI0fQ==">
+
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheer" type="text/css" href="scripts/lib/d3.parsets.css"/>
+
+    <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+    <!--&lt;!&ndash; Required to convert named colors to RGB &ndash;&gt;-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/rgbcolor@^1/index.js"></script>-->
+    <!--&lt;!&ndash; Optional if you want blur &ndash;&gt;-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/stackblur-canvas@^1/dist/stackblur.min.js"></script>-->
+    <!--&lt;!&ndash; Main canvg code &ndash;&gt;-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>-->
+    <script src="scripts/lib/aframe-html-shader.js"></script>
+    <script src="scripts/lib/html2canvas.min.js"></script>
+    <script src="scripts/lib/jquery-3.3.1.min.js"></script>
+    <script src="scripts/lib/jquery.csv.min.js"></script>
+    <script src="scripts/lib/d3.min.js"></script>
+    <script src="scripts/lib/three.min.js"></script>
+    <script src="scripts/lib/BoxLineGeometry.js"></script>
+    <script src="scripts/lib/QuickHull.js"></script>
+    <script src="scripts/lib/d3.tip.js"></script>
+    <script src="scripts/lib/SceneUtils.js"></script>
+    <!-- <script src="scripts/worker/scag_worker.js"></script> -->
+
+
+</head>
+<body>
+
+<div id="blocker">
+    <!--<div id="htmlElement" style="background: #F8F8F8; color: #333; font-size: 48px">HiperVR loading...</div>-->
+    <div id="svgplace"></div>
+    <div id="instructions"></div>
+
+</div>
+<!--<div id="debug"></div>-->
+<a-scene data-html2canvas-ignore="true">
+
+    <div id="holder"></div>
+
+    <a-entity id ="tipgroup">
+        <a-plane id ="tip" scale = "0.5 0.5 0.5" material="shader: html; ratio:null;height:1024;target: #instructions ; transparent: true; side: double;" position="0 0 0"></a-plane>
+    </a-entity>
+
+    <a-entity position="2 -1.40 0">
+        <a-camera look-controls>
+            <a-cursor></a-cursor>
+        </a-camera>
+    </a-entity>
+
+    <a-entity id="light1" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
+    <a-entity id="light2" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
+    <a-entity id="light3" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
+    <!-- <a-entity id="light4" light="type: point; color: #EEE; intensity: 0.5"></a-entity> -->
+
+    <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']" line="color: #118A7E"></a-entity>
+    <!-- <a-sky color="#ECECEC"></a-sky> -->
+
+
+    <!--<script src="scripts/lib/tooltip.js"></script>-->
+
+
+
+</a-scene>
+<script src="data/serviceWed26Sep.js"></script>
+<!--<script src="data/service04Oct.js"></script>-->
+<!--<script src="data/serviceWed27Sep.js"></script>-->
+<script src="scripts/lib/d3.parsets.js"></script>
+<script src="scripts/lib/ParallelSet.js"></script>
+<script src="scripts/lib/scagnostics3d.min.js"></script>
+<script src="scripts/lib/scagnosticsnd.min.js"></script>
+<script src="scripts/ScatterPlot.js"></script>
+<script src="scripts/Infrastructure.js"></script>
+<script src="scripts/ControlPanel.js"></script>
+<script src="scripts/hostlist.js"></script>
+<script src="../myscripts/util.js"></script>
+<script src="../myscripts/hostlist.js"></script>
+<script src="../myscripts/service.js"></script>
+<!-- <script src="data/service17Oct.js"></script> -->
+<script src="scripts/request.js"></script>
+<script src="scripts/UpdateFunctions.js"></script>
+<script src="scripts/events.js"></script>
+<script src="scripts/setting.js"></script>
+<script src="scripts/main.js"></script>
+<script src="../myscripts/tooltip.js"></script>
+<script src="../spider/radarChart_stable.js"></script>
+<script src="scripts/subconfig.js"></script>
+
+</body>
+</html>

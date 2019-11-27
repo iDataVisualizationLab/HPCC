@@ -1,98 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<title>HiperVR</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-		<meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="2018-09-11" content="AqhFUYKxq/d+E8CDT0fuYRCg8TvlTP52x0Jv7I9t27sLhR30LmcahBRfSwzP89ukjs2+ia99VrrLoRyaFAwJVA0AAABQeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJWUjEuMU02MiIsImV4cGlyeSI6MTUzNjYyNDAwMH0=">
-		<meta http-equiv="origin-trial" data-feature="WebXR Device API (For Chrome M69+)" data-expires="2018-10-27" content="An4ZYOGvf6kVHNxqZxS02TPAvpZESkmBhcVCM/byViDDuEB2XKvCF43aCJjrAU/R8H3WDlv+1bDGTL/XxstHGgoAAABTeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkRldmljZU02OSIsImV4cGlyeSI6MTU0MDY1NTAyMn0=">
-		<meta http-equiv="origin-trial" data-feature="WebXR Gamepad Support" data-expires="2018-10-24" content="Agrr6lZhlwzv5jmv/mpLZA37DIiVcg3HvX8bH8EWB+OBruV3sUJuzDfYz6qs/je+LcH41DkrmPn4k9RaUaqpQAAAAABYeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkdhbWVwYWRTdXBwb3J0IiwiZXhwaXJ5IjoxNTQwMzg4NjI0fQ==">
+<meta charset="utf-8">
 
-		<link rel="stylesheet" type="text/css" href="css/main.css"/>
+<link rel="icon"
+	  href="src/images/fav.ico" />
 
-		<link rel="stylesheer" type="text/css" href="scripts/lib/d3.parsets.css"/>
+<head>
 
-		<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
-		<!--&lt;!&ndash; Required to convert named colors to RGB &ndash;&gt;-->
-		<!--<script src="https://cdn.jsdelivr.net/npm/rgbcolor@^1/index.js"></script>-->
-		<!--&lt;!&ndash; Optional if you want blur &ndash;&gt;-->
-		<!--<script src="https://cdn.jsdelivr.net/npm/stackblur-canvas@^1/dist/stackblur.min.js"></script>-->
-		<!--&lt;!&ndash; Main canvg code &ndash;&gt;-->
-		<!--<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>-->
-		<script src="scripts/lib/aframe-html-shader.js"></script>
-		<script src="scripts/lib/html2canvas.min.js"></script>
-		<script src="scripts/lib/jquery-3.3.1.min.js"></script>
-		<script src="scripts/lib/jquery.csv.min.js"></script>
-		<script src="scripts/lib/d3.min.js"></script>
-		<script src="scripts/lib/three.min.js"></script>
-		<script src="scripts/lib/BoxLineGeometry.js"></script>
-		<script src="scripts/lib/QuickHull.js"></script>
-		<script src="scripts/lib/d3.tip.js"></script>
-		<script src="scripts/lib/SceneUtils.js"></script>
-		<!-- <script src="scripts/worker/scag_worker.js"></script> -->
+	<title>HiperVR</title>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+	<script src="https://kit.fontawesome.com/6ed220eb7a.js" crossorigin="anonymous"></script>
+	<script src="scripts/lib/jquery-3.3.1.min.js"></script>
+	<script src="scripts/lib/jquery.csv.min.js"></script>
+	<script src="scripts/lib/d3.min.js"></script>
 
+	<link rel="stylesheet" href="../css/materialize.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+		  rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=EB+Garamond&display=swap" rel="stylesheet">
+	<link href="../css/theme.css" rel="stylesheet" type="text/css" />
+	<link href="../css/main.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+	<style>
+		.parallax-container{
+			height: 250px;
+		}
+	</style>
+</head>
 
-	</head>
-	<body>
+<body text="black" id="mainBody" >
+<nav class="pushpin-demo-nav" data-target="blue">
 
-        <div id="blocker">
-			<!--<div id="htmlElement" style="background: #F8F8F8; color: #333; font-size: 48px">HiperVR loading...</div>-->
-            <div id="svgplace"></div>
-			<div id="instructions"></div>
-
+	<div class="nav-wrapper" id="header">
+		<a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+		<!--<div class="brand-logo center col s12 inline" >-->
+		<!--Parallel Coordinates-->
+		<!--</div>-->
+		<ul id="nav-mobile" class="left hide-on-med-and-down">
+			<li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="https://idatavisualizationlab.github.io/HPCC/HiperView/images/TTUlogoWhite.png" alt="TTU"></a></li>
+			<li class="summaryText1" style="font-family: 'ITC Charter W01',Georgia,Garamond,serif;">  </li>
+			<li class ="currentDate center-align"></li>
+			<!--</div>-->
+		</ul>
+		<ul class="right">
+			<!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
+			<li class="tab active"><a class="active" href="#">HiperVR</a></li>
+			<li class="nav__menu">Other Links
+				<ul class="nav__menu-lists nav__menu--2-lists">
+					<li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">1. HiperView</a></li>
+					<li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">2. Parallel Coordinates</a></li>
+					<li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">3. Phase Space</a></li>
+					<li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html">5. ClusteringView</a></li>
+					<li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/TimeRadar">6. TimeRadar</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</nav>
+<div id="Maincontent" class="row s12 no_magrin">
+	<div style="clear:both;"></div>
+	<div class="parallax-container">
+		<div class="parallax"><img src="../Images_cases/HiperVR.png"></div>
+	</div>
+	<div class="section white">
+		<div class="row container">
+			<div class="col s12 m10 offset-m1">
+				<h4 style="color: #b71c1c;">HiperVR</h4>
+				<a class="waves-effect waves-light btn" href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/demo.html">DEMO</a>
+				<div class="video-container">
+					<iframe width="560" height="315" src="https://www.youtube.com/embed/iKmpS74G6xM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				</div>
+			</div>
 		</div>
-		<!--<div id="debug"></div>-->
-		<a-scene data-html2canvas-ignore="true">
+	</div>
+	<div class="parallax-container">
+		<div class="parallax"><img src="../Images_cases/HiperVR_2.png"></div>
+	</div>
+</div>
 
-			<div id="holder"></div>
-
-			<a-entity id ="tipgroup">
-            	<a-plane id ="tip" scale = "0.5 0.5 0.5" material="shader: html; ratio:null;height:1024;target: #instructions ; transparent: true; side: double;" position="0 0 0"></a-plane>
-			</a-entity>
-
-            <a-entity position="2 -1.40 0">
-				<a-camera look-controls>
-					<a-cursor></a-cursor>
-				</a-camera>
-			</a-entity>
-
-			<a-entity id="light1" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
-			<a-entity id="light2" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
-			<a-entity id="light3" light="type: point; color: #EEE; intensity: 1; distance: 10"></a-entity>
-			<!-- <a-entity id="light4" light="type: point; color: #EEE; intensity: 0.5"></a-entity> -->
-
-			<a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']" line="color: #118A7E"></a-entity>
-			<!-- <a-sky color="#ECECEC"></a-sky> -->
+<script>
+    $(document).ready(function(){
+        $('.parallax').parallax();
+    });
+</script>
 
 
-			<!--<script src="scripts/lib/tooltip.js"></script>-->
-
-
-
-		</a-scene>
-		<script src="data/serviceWed26Sep.js"></script>
-		<!--<script src="data/service04Oct.js"></script>-->
-		<!--<script src="data/serviceWed27Sep.js"></script>-->
-		<script src="scripts/lib/d3.parsets.js"></script>
-		<script src="scripts/lib/ParallelSet.js"></script>
-		<script src="scripts/lib/scagnostics3d.min.js"></script>
-		<script src="scripts/lib/scagnosticsnd.min.js"></script>
-		<script src="scripts/ScatterPlot.js"></script>
-		<script src="scripts/Infrastructure.js"></script>
-		<script src="scripts/ControlPanel.js"></script>
-		<script src="scripts/hostlist.js"></script>
-		<script src="../myscripts/util.js"></script>
-		<script src="../myscripts/hostlist.js"></script>
-		<script src="../myscripts/service.js"></script>
-		<!-- <script src="data/service17Oct.js"></script> -->
-		<script src="scripts/request.js"></script>
-		<script src="scripts/UpdateFunctions.js"></script>
-		<script src="scripts/events.js"></script>
-		<script src="scripts/setting.js"></script>
-		<script src="scripts/main.js"></script>
-		<script src="../myscripts/tooltip.js"></script>
-		<script src="../spider/radarChart_stable.js"></script>
-		<script src="scripts/subconfig.js"></script>
-
-	</body>
-</html>
+</body>

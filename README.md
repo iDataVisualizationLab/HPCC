@@ -1,7 +1,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
 # 2020
 
-TimeRadar: https://idatavisualizationlab.github.io/HPCC/TimeRadar/index.html
+TimeRadar: https://idatavisualizationlab.github.io/HPCC/TimeRadar
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/TimeRadar.PNG)
 
 # 2019
