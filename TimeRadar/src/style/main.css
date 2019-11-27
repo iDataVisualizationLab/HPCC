@@ -539,6 +539,8 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 }
 [type="checkbox"] + span, [type="radio"]:not(:checked) + span, [type="radio"]:checked + span {
     padding-left: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 [type="radio"] + span:before, [type="radio"] + span:after{
     width: 12px;
