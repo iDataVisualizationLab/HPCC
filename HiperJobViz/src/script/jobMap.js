@@ -394,7 +394,7 @@ let JobMap = function() {
                     default:
                         return `M ${size} -${size} L 0 0 L ${size} ${size}`;
                 }
-            }).attr('transform',d=>`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},0)`)
+            }).attr('transform',function(d){return`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},${scaleNode_y_middle(d3.select(this.parentNode.parentNode).datum().order)})`})
         }else
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
         d3.select('#legend').classed('hide',!isoverlay)
@@ -1030,8 +1030,8 @@ let JobMap = function() {
             return d.y;
         });
 
-    function updatelink (path){
-        path.select('path')
+    function updatelink (path,transition){
+        (transition?path.select('path').transition().duration(animation_time):path.select('path'))
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
@@ -1299,7 +1299,8 @@ let JobMap = function() {
             .nodes(node.data()).stop();
         simulation.force("link")
             .links(linkdata);
-        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),function(d){return d.source.name+ "-" +d.target.name});
+        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),d=> d.source.name+ "-" +d.target.name);
+        console.log(link.exit().data().length)
         link.exit().remove();
         let link_n = link.enter()
             .append('g')
@@ -1309,9 +1310,10 @@ let JobMap = function() {
         link_n
             .append('text').attr("text-anchor", "middle");
 
+        link_n.call(updatelink);
+        link.call(updatelink,true);
         link = linkg.selectAll('.links');
         link.select('text').text(function(d){return d.links?d.links:''});
-        link.call(updatelink);
         link.select('path')
             .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
