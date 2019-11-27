@@ -235,14 +235,14 @@
                                 <option value="radar_cluster" selected="selected">Major group</option>
                             </optgroup>
                             <optgroup label="Timeline">
-                                <option value="timeline"  value2 = "single">[Timeline] Individual host</option>
-                                <option value="timeline" value2 = "groupWithJob">[Timeline] Group by similarity wrt jobs</option>
-                                <option value="timeline" value2 = "group">[Timeline] Group by similarity</option>
+                                <option value="timeline"  value2 = "single">Timeline - Individual host</option>
+                                <option value="timeline" value2 = "groupWithJob">Timeline - Group by similarity wrt jobs</option>
+                                <option value="timeline" value2 = "group">Timeline - Group by similarity</option>
                             </optgroup>
                             <optgroup label="Bundle">
-                                <option value="bundle" value2 = "single">[Bundle] Individual host</option>
-                                <option value="bundle" value2 = "groupWithJob">[Bundle] Group by similarity wrt jobs</option>
-                                <option value="bundle" value2 = "group">[Bundle] Group by similarity</option>
+                                <option value="bundle" value2 = "single">Bundle - Individual host</option>
+                                <option value="bundle" value2 = "groupWithJob">Bundle - Group by similarity wrt jobs</option>
+                                <option value="bundle" value2 = "group">Bundle - Group by similarity</option>
                             </optgroup>
                         </select>
                         <div class="col s1">
@@ -250,16 +250,6 @@
                         </div>
                     </div>
 
-                    <div  class="row s12 valign-wrapper">
-                        <label for="colorConnection_control" class="col s4"> Color links by</label>
-                        <select id="colorConnection_control" class="col s7">
-                            <option value="group" selected="selected">Host group</option>
-                            <option value="user" >UserID</option>
-                        </select>
-                        <div class="col s1">
-                            <button class="information help waves-effect waves-light transparent" data-image="colorlinks.gif" data-title="Color links by user or by major groups.">?</button>
-                        </div>
-                    </div>
 
 
                     <div  class="row s12">
@@ -272,6 +262,10 @@
                             <label class="col s12 left-align">
                                 <input id="jobTable_control" type="checkbox" class="filled-in">
                                 <span style="font: unset;color: black;padding-left:20px;">Metrics Table</span>
+                            </label>
+                            <label class="col s12 left-align">
+                                <input id="colorConnection_control" type="checkbox" class="filled-in">
+                                <span style="font: unset;color: black;padding-left:20px;">Color links by user</span>
                             </label>
                             <label class="col s12 left-align">
                                     <input id="hideUnchange_control" type="checkbox" class="filled-in timelineTool" disabled="disabled">

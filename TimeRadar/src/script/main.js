@@ -1531,8 +1531,10 @@ $( document ).ready(function() {
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
         jobMap_runopt.mouse.lensing = false;
         $('#lensing_control').prop('checked',false);
+        document.getElementById("colorConnection_control").removeAttribute('disabled')
         if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
         {
+            document.getElementById("colorConnection_control").checked = false;
             d3.select('input[value="lensing"]').attr('disabled',null);
             d3.select('input[value="showseries"]').attr('disabled',null);
             d3.select('input[value="showmetric"]').attr('disabled',null);
@@ -1557,9 +1559,9 @@ $( document ).ready(function() {
 
             if (jobMap_runopt.compute.type === 'pie') {
                 jobMap_runopt.compute.clusterNode = false;
-                document.getElementById("colorConnection_control").options.selectedIndex = 0;
+                document.getElementById("colorConnection_control").checked = true;
                 jobMap_runopt.graphic.colorBy = 'user';
-                document.getElementById("colorConnection_control").setAttribute('disabled', '')
+                document.getElementById("colorConnection_control").setAttribute('disabled', 'disabled')
             } else if (jobMap_runopt.compute.type === 'radar') {
                 jobMap_runopt.compute.clusterNode = false;
                 document.getElementById("colorConnection_control").removeAttribute('disabled')
@@ -1581,8 +1583,8 @@ $( document ).ready(function() {
         jobMap.runopt(jobMap_runopt).draw();
     });
     d3.select('#colorConnection_control').on("change", function () {
-        var sect = document.getElementById("colorConnection_control");
-        jobMap_runopt.graphic.colorBy = sect.options[sect.selectedIndex].value;
+        var sect = this.checked;
+        jobMap_runopt.graphic.colorBy = sect?'user':'group';
         jobMap.runopt(jobMap_runopt).draw();
     });
     d3.select('#datacom').on("change", function () {
