@@ -1529,7 +1529,6 @@ $( document ).ready(function() {
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
         jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
-        d3.select('#timelineTool').classed('hide',true);
         jobMap_runopt.mouse.lensing = false;
         $('#lensing_control').prop('checked',false);
         if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
@@ -1543,12 +1542,10 @@ $( document ).ready(function() {
             jobMap_runopt.compute.clusterJobID = true;
             jobMap_runopt.graphic.colorBy = 'group';
             jobMap_runopt.timelineGroupMode = sect.options[sect.selectedIndex].getAttribute('value2')
-            d3.select('#timelineTool').classed('hide',false);
+            d3.selectAll('.timelineTool').attr('disabled',null);
             d3.select('#jobIDCluster_control').attr('checked','');
-            // document.getElementById("colorConnection_control").options.selectedIndex = 0;
-            // jobMap_runopt.graphic.colorBy = 'group';
-            // document.getElementById("colorConnection_control").setAttribute('disabled','')
         }else {
+            d3.selectAll('.timelineTool').attr('disabled','disabled');
             d3.select('input[value="lensing"]').attr('disabled',"disabled");
             d3.select('input[value="showseries"]').attr('disabled',"disabled");
             d3.select('input[value="showmetric"]').attr('disabled',"disabled");

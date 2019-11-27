@@ -518,8 +518,9 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     left: 3px;
 }
 [type="checkbox"].filled-in:not(:checked)+span:not(.lever):after {
-    height: 14px;
-    width: 14px;
+    height: 12px;
+    width: 12px;
+    border: 1px solid #5a5a5a;
 }
 
 [type="checkbox"].filled-in:checked+span:not(.lever):before {
@@ -529,18 +530,18 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     height: 10px;
 }
 [type="checkbox"].filled-in:checked+span:not(.lever):after {
-    height: 14px;
-    width: 14px;
+    height: 12px;
+    width: 12px;
 }
-[type="checkbox"] + span:not(.lever) {
-    height: 15px;
+[type="checkbox"] + span, [type="radio"]:not(:checked) + span, [type="radio"]:checked + span {
+    padding-left: 20px;
 }
 [type="radio"] + span:before, [type="radio"] + span:after{
     width: 12px;
     height: 12px;
 }
 
-[type="radio"]:not(:checked) + span, [type="radio"]:checked + span{
+[type="radio"]:not(:checked) + span, [type="radio"]:checked + span,[type="checkbox"] + span:not(.lever){
     font-size: unset;
     height: 17px;
     line-height: 1rem;
