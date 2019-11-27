@@ -21,7 +21,10 @@ Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordi
 ClusteringView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
 
-HiperJobViz: https://idatavisualizationlab.github.io/HPCC/HiperJobViz/index.html
+TimeRadar: https://idatavisualizationlab.github.io/HPCC/TimeRadar/index.html
+
+HiperJobViz release 1119: https://idatavisualizationlab.github.io/HPCC/HiperJobViz20191126/index.html
+
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobNet.PNG)
 [Presentation SC19 - DAAC 2019](https://texastechuniversity-my.sharepoint.com/:p:/g/personal/tommy_dang_ttu_edu/EewObo2LMz5Gt1tLBTg1wFYBoMGrvVZ3wLZIRqVGY_50EA?e=z4wmyn)
 
