@@ -1,4 +1,9 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
+# 2020
+
+TimeRadar: https://idatavisualizationlab.github.io/HPCC/TimeRadar/index.html
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/TimeRadar.PNG)
+
 # 2019
 
 HiperView Current:  https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html
@@ -21,7 +26,6 @@ Parallel Coordinate: https://idatavisualizationlab.github.io/HPCC/ParallelCoordi
 ClusteringView: https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/ClusterView.PNG)
 
-TimeRadar: https://idatavisualizationlab.github.io/HPCC/TimeRadar/index.html
 
 HiperJobViz release 1119: https://idatavisualizationlab.github.io/HPCC/HiperJobViz20191126/index.html
 
