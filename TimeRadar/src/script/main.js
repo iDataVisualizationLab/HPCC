@@ -200,7 +200,7 @@ let colorScaleList = {
     d3colorChosefunc: function(name,num){
         const n = num|| this.n;
         if (d3[`scheme${name}`]) {
-            if (typeof (d3[`scheme${name}`][0]) != 'string') {
+            if (typeof (d3[`scheme${name}`][0]) !== 'string') {
                 colors = (d3[`scheme${name}`][n]||d3[`scheme${name}`][d3[`scheme${name}`].length-1]).slice();
             }
             else
