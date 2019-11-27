@@ -1300,7 +1300,6 @@ let JobMap = function() {
         simulation.force("link")
             .links(linkdata);
         let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),d=> d.source.name+ "-" +d.target.name);
-        console.log(link.exit().data().length)
         link.exit().remove();
         let link_n = link.enter()
             .append('g')
