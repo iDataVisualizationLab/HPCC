@@ -1461,6 +1461,11 @@ $( document ).ready(function() {
     d3.selectAll('.information, .toolTip').each(function() {
         const hasTarget = d3.select(this).attr('data-target');
         const hasImage = d3.select(this).attr('data-image');
+        if (hasTarget||hasImage){
+            tipopt.addClass ='informationDetail';
+        }else{
+            tipopt.addClass = 'informationDetail mini';
+        }
         let tip = $(this).jBox('Tooltip',_.defaults({
             pointer: (hasTarget||hasImage)?"top:20":false
         }, tipopt));
