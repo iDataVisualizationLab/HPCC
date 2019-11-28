@@ -608,3 +608,6 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 [disabled]{
     opacity: 0.42;
 }
+[disabled]+span{
+    color: rgba(0, 0, 0, 0.42);
+}
