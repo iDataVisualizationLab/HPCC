@@ -154,8 +154,8 @@
                     <div  class="row valign-wrapper">
                         <label for="datacom" class="col s4"> Dataset</label>
                         <select id="datacom" class="col s7">
-                            <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (Job list)</option>
-                            <option value="influxdb20Apr_withoutJobLoad" data-date="20 Apr 2019">20 Apr 2019 (Job list)</option>
+                            <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">26 Apr 2019 (with job data)</option>
+                            <option value="influxdb20Apr_withoutJobLoad" data-date="20 Apr 2019">20 Apr 2019 (with job data)</option>
                             <!--<option value="influxdbWed24Apr_removemetric" selected data-date="24 Apr 2019">24 Apr 2019 (Job list)</option>-->
                             <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
 
@@ -229,63 +229,87 @@
                     <div  class="row s12 valign-wrapper">
                         <label for="compDisplay_control" class="col s4"> Visualizing</label>
                         <select id="compDisplay_control" class="col s7">
-                            <option value="pie">Individual host: Pie chart</option>
-                            <option value="radar" >Individual host: Radar chart </option>
-                            <option value="radar_cluster" selected="selected">Grouping: System snapshot</option>
-                            <option value="timeline">Grouping: Entire timeline</option>
-                            <option value="bundle">Grouping: bundle timelines by clusters</option>
+                            <optgroup label="Snapshot">
+                                <option value="pie">Individual Pie chart</option>
+                                <option value="radar" >Individual Radar chart </option>
+                                <option value="radar_cluster" selected="selected">Major group</option>
+                            </optgroup>
+                            <optgroup label="Timeline">
+                                <option value="timeline"  value2 = "single">Timeline - Individual host</option>
+                                <option value="timeline" value2 = "groupWithJob">Timeline - Group by similarity wrt jobs</option>
+                                <option value="timeline" value2 = "group">Timeline - Group by similarity</option>
+                            </optgroup>
+                            <optgroup label="Bundle">
+                                <option value="bundle" value2 = "single">Bundle - Individual host</option>
+                                <option value="bundle" value2 = "groupWithJob">Bundle - Group by similarity wrt jobs</option>
+                                <option value="bundle" value2 = "group">Bundle - Group by similarity</option>
+                            </optgroup>
                         </select>
                         <div class="col s1">
-                            <button class="information waves-effect waves-light grey darken-3" data-image="hostpresent.gif" data-title="Grouping options are recommended for a large number of hosts.">i</button>
-                        </div>
-                    </div>
-
-                    <div  class="row s12 valign-wrapper">
-                        <label for="colorConnection_control" class="col s4"> Color links by</label>
-                        <select id="colorConnection_control" class="col s7">
-                            <option value="group" selected="selected">Host group</option>
-                            <option value="user" >UserID</option>
-                        </select>
-                        <div class="col s1">
-                            <button class="information waves-effect waves-light grey darken-3" data-image="colorlinks.gif" data-title="Color links by user or by major groups.">i</button>
+                            <button class="information waves-effect waves-light grey darken-3" data-image="hostpresent.gif" data-title="Grouping options are recommended for a large number of hosts.">?</button>
                         </div>
                     </div>
 
 
-                    <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s4"> Group jobs</label>
-                        <p class="switch col s7 no_magrin no_padding" id="groupJobmode">
 
-                            <label>
-                                <span class="true"></span>
-                                <input checked id="jobIDCluster_control" type="checkbox">
-                                <span class="lever"></span>
-                                <span class="false">by similar schedules</span>
+                    <div  class="row s12">
+                        <label for="jobControl" class="col s4"> </label>
+                        <div class="switch col s8 no_magrin no_padding" id="jobControl">
+                            <label class="col s12 left-align">
+                                <input id="jobIDCluster_control" type="checkbox" class="filled-in" checked="checked">
+                                <span >Group jobs by similar schedules</span>
                             </label>
-
-                        </p>
-                        <div class="col s1">
-                            <button class="information waves-effect waves-light grey darken-3" data-image="groupjob.gif" data-title="Enable/ disable grouping jobs by similarity.">i</button>
-                        </div>
-                    </div>
-
-                    <div  class="row s12 valign-wrapper">
-                        <label for="groupJobmode" class="col s4"> Metric Table</label>
-                        <p class="switch col s7 no_magrin no_padding" id="jobTablemode">
-
-                            <label>
-                                <span class="true"></span>
-                                <input id="jobTable_control" type="checkbox">
-                                <span class="lever"></span>
-                                <span class="false"></span>
+                            <label class="col s12 left-align">
+                                <input id="jobTable_control" type="checkbox" class="filled-in">
+                                <span >Metrics Table</span>
                             </label>
+                            <label class="col s12 left-align">
+                                <input id="colorConnection_control" type="checkbox" class="filled-in">
+                                <span >Color links by user</span>
+                            </label>
+                            <label class="col s12 left-align">
+                                    <input id="hideUnchange_control" type="checkbox" class="filled-in timelineTool" disabled="disabled">
+                                    <span >Hide stable hosts </span>
+                            </label>
+                            <label class="col s12 left-align">
+                                <label>
+                                    <input id="jobOverlay" type="checkbox" class="filled-in timelineTool" disabled="disabled">
+                                    <span >Overlay jobs info on timeline</span>
+                                </label>
+                                <div  class="hide" id="legend" style="color:black;">
+                                    <div class="col s12" style="background-color: #e4e4e4;border-radius: 7px;padding: 0">
+                                        <div class="col s4">
+                                            <span class="col s3" style="padding-right: 0;font-weight: bold">|</span>
+                                            <span class="col s9">submit</span>
+                                        </div>
+                                        <div class="col s4">
+                                            <span class="col s3" style="padding-right: 0;font-weight: bold">></span>
+                                            <span class="col s9">start</span>
+                                        </div>
+                                        <div class="col s4">
+                                            <span class="col s3" style="padding-right: 0;font-weight: bold"><</span>
+                                            <span class="col s9">end</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        </p>
-                        <div class="col s1">
-                            <!--<button class="information waves-effect waves-light grey darken-3" data-image="groupjob.gif" data-title="Enable/ disable grouping jobs by similarity.">i</button>-->
+                            </label>
                         </div>
                     </div>
-
+                    <div class="valign-wrapper row no-pad-left timelineTool">
+                        <label class="col s4">Horizontal zoom</label>
+                        <div class=" col s5" style="padding-left: 4px;">
+                            <div id="stepSize_control" class="timelineTool"></div>
+                        </div>
+                        <div class=" col s3"></div>
+                    </div>
+                    <div class="valign-wrapper row no-pad-left timelineTool">
+                        <label class="col s4">Significant change threshold</label>
+                        <div class=" col s5" style="padding-left: 4px;">
+                            <div id="suddenGroup_control" class="timelineTool"></div>
+                        </div>
+                        <div class=" col s3"></div>
+                    </div>
                     <div  class="row s12 valign-wrapper hide">
                         <label for="chartType_control" class="col s4 hide"> Chart type</label>
                         <select id="chartType_control" class="col s8">
@@ -453,20 +477,10 @@
                             </form>
                         </div>
                         <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
-                            <label for="groupJobmode" class="col s4"> Display min-max</label>
-                            <p class="switch col s7 no_magrin no_padding" id="majorGroupDisplay">
-
-                                <label>
-                                    <span class="true"></span>
-                                    <input  id="majorGroupDisplay_control" type="checkbox">
-                                    <span class="lever"></span>
-                                    <span class="false"></span>
-                                </label>
-
-                            </p>
-                            <div class="col s1">
-                                <!--<button class="information waves-effect waves-light grey darken-3" data-image="groupjob.gif" data-title="Enable/ disable grouping jobs by similarity.">i</button>-->
-                            </div>
+                            <label class="col s8 offset-s4 left-align">
+                                <input id="majorGroupDisplay_control" type="checkbox" class="filled-in">
+                                <span >Display min-max</span>
+                            </label>
                         </div>
                         <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
                             <button class="information waves-effect waves-light grey darken-3 hide" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
@@ -509,41 +523,6 @@
             <i class="material-icons">chevron_right</i></a>
     </div>
     <div style="clear:both;"></div>
-    <!--<div id="header2" class="row s12 marginBottom0">-->
-    <!--&lt;!&ndash;<h1>HPCC Explorer</h1>&ndash;&gt;-->
-    <!--<div class="col valign-wrapper">-->
-    <!--<h6 class="summaryText1">  </h6>-->
-    <!--<h5 class ="currentDate center-align"></h5>-->
-    <!--</div>-->
-    <!--&lt;!&ndash;<div class="controls">&ndash;&gt;-->
-    <!--&lt;!&ndash;<div id="controlHolder"  class="controlHolder">&ndash;&gt;-->
-
-    <!--&lt;!&ndash;&lt;!&ndash;<button onclick="realTimeRequest()" value = false class ="menuBtn record"><i class="fas fa-record pauseicon"></i>Offline</button>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="pauseRequest()" value = false class ="menuBtn pause"><i class="fas fa-pause pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="fastForwardRequest()" class ="menuBtn" style="background-color: #ffd;"><i class="fas fa-forward pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="extremefastForwardRequest()" class ="menuBtn" style="background-color: #ffd700;"><i class="fas fa-fast-forward"></i></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="resetRequest()" class ="menuBtn rotatehover" style="background-color: #ddf;"><i class="fas fa-sync-alt pauseicon"></i></button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="saveResults()"  class ="menuBtn" style="background-color: #fff;"><i class="fas fa-download pauseicon"></i> Download</button>&ndash;&gt;-->
-    <!--&lt;!&ndash;<button onclick="saveSVG_batch()"  class ="menuBtn modal-trigger" style="background-color: #fff;" href="#savedialog">&ndash;&gt;-->
-    <!--&lt;!&ndash;<i class="fas fa-download pauseicon" ></i> Download Images</button>&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-
-    <!--<div style="clear:both;"></div>-->
-    <!--</div>-->
-    <!--<header class="ttu-main-header" id="nav">-->
-    <!--<div class="logo__lockup">-->
-    <!--&lt;!&ndash;<a class="ttu-logo" href="http://www.depts.ttu.edu/hpcc/">&ndash;&gt;-->
-    <!--&lt;!&ndash;<img src="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" alt="Texas Tech University"  height="16%"></a>&ndash;&gt;-->
-    <!--<h1 class="summaryText1">  </h1>-->
-    <!--</div>-->
-    <!--</header>-->
-
-
-    <!--<svg width="2600" height="1800" ></svg>-->
     <div style="position: relative;">
         <div class="row s12 no_magrin" style="overflow-x: auto">
             <div id ="scatterzone">
@@ -645,68 +624,6 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
-                <div  class="hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
-                    <div  style="position: relative">
-                    <div class="col s5">
-                        <!--<label class="col s12">-->
-                            <!--<input id="suddenGroup_control" type="checkbox" class="filled-in">-->
-                            <!--<span style="font: unset;color: black;padding-left:20px;">Display significant change charts</span>-->
-                        <!--</label>-->
-
-                        <div class="row">
-                            <label>
-                            <input id="jobOverlay" type="checkbox" class="filled-in">
-                            <span style="font: unset;color: black;padding-left:20px;">Overlay Job info on timeline</span>
-                            </label>
-                            <div  class="hide" id="legend" style="color:black;">
-                                <div class="col s12" style="background-color: #e4e4e4;border-radius: 7px;padding: 0">
-                                    <div class="col s4">
-                                        <span class="col s3" style="padding-right: 0;font-weight: bold">|</span>
-                                        <span class="col s9">submit</span>
-                                    </div>
-                                    <div class="col s4">
-                                        <span class="col s3" style="padding-right: 0;font-weight: bold">></span>
-                                        <span class="col s9">start</span>
-                                    </div>
-                                    <div class="col s4">
-                                        <span class="col s3" style="padding-right: 0;font-weight: bold"><</span>
-                                        <span class="col s9">end</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <label>
-                            <input id="hideUnchange_control" type="checkbox" class="filled-in">
-                            <span style="font: unset;color: black;padding-left:20px;">Hide stable hosts </span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col s7">
-                        <div class="valign-wrapper row no-pad-left">
-                            <label style="font: unset;color: black;padding-left:20px;" class="col s8">Timeline step size:</label>
-                            <div class=" col s4">
-                                <div id="stepSize_control"></div>
-                            </div>
-                        </div>
-                        <div class="valign-wrapper row no-pad-left">
-                            <label style="font: unset;color: black;padding-left:20px;" class="col s8">Significant change threshold:</label>
-                            <div class=" col s4">
-                                <div id="suddenGroup_control"></div>
-                            </div>
-                        </div>
-                        <div class="valign-wrapper row no-pad-left">
-                            <label for="timelineGroupMode" style="font: unset;color: black;padding-left:20px;" class="col s8"> Group timeline by: </label>
-                            <select id="timelineGroupMode" class="browser-default s4" style="height:auto;padding: 0;">
-                                <option value = "single">Individual host</option>
-                                <option value = "groupWithJob" selected>group by similarity w.r.t. jobs</option>
-                                <option value = "group">group by similarity</option>
-                            </select>
-                         </div>
-                     </div>
-                     </div>
-                </div>
 
                 <svg class="mainsvg" >
                     <svg id ="jobmap">
@@ -719,6 +636,26 @@
         </div>
     </div>
 
+
+</div>
+<div  id="timelineTool" style="position: absolute;right:0px;top:50%;padding:10px;transform: translateY(-50%)">
+    <div  style="position: relative">
+        <div>
+            <a class="toolTip btn" data-title="Zoom in" id="zoomIn">
+                <i class="material-icons">add</i>
+            </a>
+        </div>
+        <div class="row">
+            <a class="toolTip btn" data-title="Zoom out" id="zoomOut">
+                <i class="material-icons">remove</i>
+            </a>
+        </div>
+        <div class="row">
+            <a class="toolTip btn" data-title="Reset Screen" id="resetScreen">
+                <i class="material-icons">home</i>
+            </a>
+        </div>
+    </div>
 </div>
 <!--<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">-->
     <!--<button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>-->

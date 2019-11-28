@@ -21,9 +21,28 @@ svg#jobmap {
 
 }
 
-#timelineTool .row {
-    margin-bottom: 7px;
+/*#timelineTool .row {*/
+    /*margin-bottom: 7px;*/
+/*}*/
+#timelineTool a.btn {
+    background-color: rgb(243, 243, 243);
+    padding: 1px;
+    border-width:1px solid #ddd;
+    color:black;
+    border-radius: 3px;
+    margin: 0px;
+    color: rgb(70, 70, 70);
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
 }
+
+
+#timelineToo input:checked + i {
+    background-color: var(--buttonColor);
+    color: #ffffff;
+}
+
 
 .table.header .cell {
     pointer-events: visible;
@@ -295,9 +314,9 @@ span.thumb {
     overflow-x: hidden;
 }
 input[type=number] {
-    height: 1.5rem;
+    height: 1.15rem;
     font-size: unset;
-    border-radius: 3px;
+    border-radius: 2px;
     border: 1px solid #f2f2f2;
     text-align: right;
     margin: unset;
@@ -320,15 +339,15 @@ input[type=number] {
     width: 100%;
 }
 .information {
-    width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
     border-radius: 10px;
+    border: 1px solid;
     color: white;
     padding: 0;
     overflow: visible;
     /*font-size: 10px;*/
 }
-
 .informationHolder {
     position: relative;
 }
@@ -518,29 +537,35 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     left: 3px;
 }
 [type="checkbox"].filled-in:not(:checked)+span:not(.lever):after {
-    height: 14px;
-    width: 14px;
+    height: 12px;
+    width: 12px;
+    border: 1px solid #5a5a5a;
 }
 
 [type="checkbox"].filled-in:checked+span:not(.lever):before {
     top: -2px;
-    left: 1px;
-    width: 6px;
-    height: 10px;
+    left: 0.5px;
+    width: 5px;
+    height: 9px;
+    border-right: 1.5px solid #ddd;
+    border-bottom-color: #ddd;
 }
 [type="checkbox"].filled-in:checked+span:not(.lever):after {
-    height: 14px;
-    width: 14px;
+    height: 12px;
+    width: 12px;
 }
-[type="checkbox"] + span:not(.lever) {
-    height: 15px;
+[type="checkbox"]:checked  + span, [type="checkbox"]:not(:checked) + span,[type="radio"]:not(:checked) + span, [type="radio"]:checked + span {
+    padding-left: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 [type="radio"] + span:before, [type="radio"] + span:after{
     width: 12px;
     height: 12px;
+    margin: 0;
 }
 
-[type="radio"]:not(:checked) + span, [type="radio"]:checked + span{
+[type="radio"]:not(:checked) + span, [type="radio"]:checked + span,[type="checkbox"] + span:not(.lever){
     font-size: unset;
     height: 17px;
     line-height: 1rem;
@@ -577,4 +602,8 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     text-align: left;
     text-align: -moz-left;
     text-align: -webkit-left;
+}
+
+[disabled]{
+    opacity: 0.42;
 }

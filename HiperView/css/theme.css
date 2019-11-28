@@ -64,7 +64,7 @@
     color: #bbbb;
     background-color: #ffffff3d;
     padding: 6px 10px;
-    padding-right: 1rem;
+    /*padding-right: 1rem;*/
 }
 .light .collapsible-body{
     border-bottom: 1px solid #7b7878;
@@ -543,7 +543,7 @@ label {
     background-color: rgba(0, 0, 0, 0.68);
     padding: 5px;
     border-radius: 3px;
-    margin: 2px;
+    margin: 0px;
     color: rgba(255, 255, 255, 0.45);
 }
 .radio-toolbar input[type="radio"]:checked + i {

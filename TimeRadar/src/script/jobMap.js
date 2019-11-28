@@ -169,19 +169,34 @@ let JobMap = function() {
                 fisheye_scale.x = d=>d;
             }
         });
+        d3.select('#resetScreen').on('click',function(){
+            g.attr("transform", `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        });
+        d3.select('#zoomOut').on('click',function(){
+            let oldtrans = g.attr("transform").split(' scale(');
+            if (oldtrans.length<2)
+                oldtrans=['','1)'];
+            g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))-0.5})`);
+        });
+        d3.select('#zoomIn').on('click',function(){
+            let oldtrans = g.attr("transform").split(' scale(');
+            if (oldtrans.length<2)
+                oldtrans=['','1)'];
+            g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))+0.5})`);
+        });
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
                 drawOverlayJob (runopt.overlayjob);
             }
         });
-        d3.select('#timelineGroupMode').on("change", function () {
-            var sect = document.getElementById("timelineGroupMode");
-            runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
-            if (runopt.compute.type==='timeline'){
-                jobMap.data().draw();
-            }
-        });
+        // d3.select('#timelineGroupMode').on("change", function () {
+        //     var sect = document.getElementById("timelineGroupMode");
+        //     runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
+        //     if (runopt.compute.type==='timeline'){
+        //         jobMap.data().draw();
+        //     }
+        // });
         d3.select('#hideUnchange_control').on("change", function () {
             runopt.hideUnchange = $(this).prop('checked');
             jobMap.data().draw();
