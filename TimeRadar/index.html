@@ -257,24 +257,24 @@
                         <div class="switch col s8 no_magrin no_padding" id="jobControl">
                             <label class="col s12 left-align">
                                 <input id="jobIDCluster_control" type="checkbox" class="filled-in" checked="checked">
-                                <span style="font: unset;color: black;padding-left:20px;">Group jobs by similar schedules</span>
+                                <span >Group jobs by similar schedules</span>
                             </label>
                             <label class="col s12 left-align">
                                 <input id="jobTable_control" type="checkbox" class="filled-in">
-                                <span style="font: unset;color: black;padding-left:20px;">Metrics Table</span>
+                                <span >Metrics Table</span>
                             </label>
                             <label class="col s12 left-align">
                                 <input id="colorConnection_control" type="checkbox" class="filled-in">
-                                <span style="font: unset;color: black;padding-left:20px;">Color links by user</span>
+                                <span >Color links by user</span>
                             </label>
                             <label class="col s12 left-align">
                                     <input id="hideUnchange_control" type="checkbox" class="filled-in timelineTool" disabled="disabled">
-                                    <span style="font: unset;color: black;padding-left:20px;">Hide stable hosts </span>
+                                    <span >Hide stable hosts </span>
                             </label>
                             <label class="col s12 left-align">
                                 <label>
                                     <input id="jobOverlay" type="checkbox" class="filled-in timelineTool" disabled="disabled">
-                                    <span style="font: unset;color: black;padding-left:20px;">Overlay jobs info on timeline</span>
+                                    <span >Overlay jobs info on timeline</span>
                                 </label>
                                 <div  class="hide" id="legend" style="color:black;">
                                     <div class="col s12" style="background-color: #e4e4e4;border-radius: 7px;padding: 0">
@@ -296,8 +296,20 @@
                             </label>
                         </div>
                     </div>
-
-
+                    <div class="valign-wrapper row no-pad-left timelineTool">
+                        <label class="col s4">Horizontal zoom</label>
+                        <div class=" col s5" style="padding-left: 4px;">
+                            <div id="stepSize_control" class="timelineTool"></div>
+                        </div>
+                        <div class=" col s3"></div>
+                    </div>
+                    <div class="valign-wrapper row no-pad-left timelineTool">
+                        <label class="col s4">Significant change threshold</label>
+                        <div class=" col s5" style="padding-left: 4px;">
+                            <div id="suddenGroup_control" class="timelineTool"></div>
+                        </div>
+                        <div class=" col s3"></div>
+                    </div>
                     <div  class="row s12 valign-wrapper hide">
                         <label for="chartType_control" class="col s4 hide"> Chart type</label>
                         <select id="chartType_control" class="col s8">
@@ -467,7 +479,7 @@
                         <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
                             <label class="col s8 offset-s4 left-align">
                                 <input id="majorGroupDisplay_control" type="checkbox" class="filled-in">
-                                <span style="font: unset;color: black;padding-left:20px;">Display min-max</span>
+                                <span >Display min-max</span>
                             </label>
                         </div>
                         <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
@@ -615,18 +627,7 @@
                 <div  class="hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
                     <div  style="position: relative">
                     <div class="col s7">
-                        <div class="valign-wrapper row no-pad-left">
-                            <label style="font: unset;color: black;padding-left:20px;" class="col s8">Timeline step size:</label>
-                            <div class=" col s4">
-                                <div id="stepSize_control"></div>
-                            </div>
-                        </div>
-                        <div class="valign-wrapper row no-pad-left">
-                            <label style="font: unset;color: black;padding-left:20px;" class="col s8">Significant change threshold:</label>
-                            <div class=" col s4">
-                                <div id="suddenGroup_control"></div>
-                            </div>
-                        </div>
+
                      </div>
                      </div>
                 </div>

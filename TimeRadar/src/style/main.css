@@ -531,7 +531,8 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     left: 0.5px;
     width: 5px;
     height: 9px;
-    border-right: 1.5px solid #fff
+    border-right: 1.5px solid #ddd;
+    border-bottom-color: #ddd;
 }
 [type="checkbox"].filled-in:checked+span:not(.lever):after {
     height: 12px;
@@ -585,4 +586,8 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     text-align: left;
     text-align: -moz-left;
     text-align: -webkit-left;
+}
+
+[disabled]{
+    opacity: 0.42;
 }
