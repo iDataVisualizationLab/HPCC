@@ -253,7 +253,7 @@
 
 
                     <div  class="row s12">
-                        <label for="jobControl" class="col s4"> Rendering</label>
+                        <label for="jobControl" class="col s4"> </label>
                         <div class="switch col s8 no_magrin no_padding" id="jobControl">
                             <label class="col s12 left-align">
                                 <input id="jobIDCluster_control" type="checkbox" class="filled-in" checked="checked">
@@ -624,11 +624,14 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
-                <div  class="hide" id="timelineTool" style="position: absolute;top:0px;left:0px;padding:10px;margin-left:20px;background-color: rgba(168,168,168,0.67)">
+                <div  id="timelineTool" style="position: absolute;top:0px;left:50%;padding:10px;transform: translateX(-50%)">
                     <div  style="position: relative">
-                    <div class="col s7">
-
-                     </div>
+                        <div class="col">
+                            <label class="toolTip" data-title="Reset Screen">
+                                <input type="checkbox" id="'resetScreen">
+                                <i class="icon-starShape material-icons"></i>
+                            </label>
+                         </div>
                      </div>
                 </div>
 

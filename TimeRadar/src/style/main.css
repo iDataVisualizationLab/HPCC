@@ -21,9 +21,22 @@ svg#jobmap {
 
 }
 
-#timelineTool .row {
-    margin-bottom: 7px;
+/*#timelineTool .row {*/
+    /*margin-bottom: 7px;*/
+/*}*/
+#timelineTool input + i {
+    background-color: rgba(0, 0, 0, 0.68);
+    padding: 5px;
+    border-radius: 3px;
+    margin: 0px;
+    color: rgba(255, 255, 255, 0.45);
 }
+
+#timelineToo input:checked + i {
+    background-color: var(--buttonColor);
+    color: #ffffff;
+}
+
 
 .table.header .cell {
     pointer-events: visible;
@@ -538,7 +551,7 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     height: 12px;
     width: 12px;
 }
-[type="checkbox"] + span, [type="radio"]:not(:checked) + span, [type="radio"]:checked + span {
+[type="checkbox"]:checked  + span, [type="checkbox"]:not(:checked) + span,[type="radio"]:not(:checked) + span, [type="radio"]:checked + span {
     padding-left: 20px;
     padding-top: 0;
     padding-bottom: 0;
