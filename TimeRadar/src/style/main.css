@@ -24,13 +24,19 @@ svg#jobmap {
 /*#timelineTool .row {*/
     /*margin-bottom: 7px;*/
 /*}*/
-#timelineTool input + i {
-    background-color: rgba(0, 0, 0, 0.68);
-    padding: 5px;
+#timelineTool a.btn {
+    background-color: rgb(243, 243, 243);
+    padding: 1px;
+    border-width:1px solid #ddd;
+    color:black;
     border-radius: 3px;
     margin: 0px;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgb(70, 70, 70);
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
 }
+
 
 #timelineToo input:checked + i {
     background-color: var(--buttonColor);
@@ -341,9 +347,6 @@ input[type=number] {
     padding: 0;
     overflow: visible;
     /*font-size: 10px;*/
-}
-.help {
-    color: currentColor;
 }
 .informationHolder {
     position: relative;

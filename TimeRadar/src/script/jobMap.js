@@ -169,6 +169,9 @@ let JobMap = function() {
                 fisheye_scale.x = d=>d;
             }
         });
+        d3.select('#resetScreen').on('click',function(){
+            g.attr("transform", `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        });
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
