@@ -2049,8 +2049,8 @@ function onFinishInterval(data) {
 
 let radarChartclusteropt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
-    w: 170,
-    h: 170,
+    w: 180,
+    h: 180,
     radiuschange: false,
     levels:6,
     dotRadius:2,
