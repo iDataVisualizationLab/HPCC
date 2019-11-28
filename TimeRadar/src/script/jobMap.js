@@ -175,13 +175,13 @@ let JobMap = function() {
         d3.select('#zoomOut').on('click',function(){
             let oldtrans = g.attr("transform").split(' scale(');
             if (oldtrans.length<2)
-                oldtrans=['','1)'];
+                oldtrans=[oldtrans[0],'1)'];
             g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))-0.5})`);
         });
         d3.select('#zoomIn').on('click',function(){
             let oldtrans = g.attr("transform").split(' scale(');
             if (oldtrans.length<2)
-                oldtrans=['','1)'];
+                oldtrans=[oldtrans[0],'1)'];
             g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))+0.5})`);
         });
         d3.select('#jobOverlay').on("change", function () {
