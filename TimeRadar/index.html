@@ -624,16 +624,6 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
-                <div  id="timelineTool" style="position: absolute;top:0px;left:50%;padding:10px;transform: translateX(-50%)">
-                    <div  style="position: relative">
-                        <div class="col">
-                            <label class="toolTip" data-title="Reset Screen">
-                                <input type="checkbox" id="'resetScreen">
-                                <i class="icon-starShape material-icons"></i>
-                            </label>
-                         </div>
-                     </div>
-                </div>
 
                 <svg class="mainsvg" >
                     <svg id ="jobmap">
@@ -646,6 +636,29 @@
         </div>
     </div>
 
+
+</div>
+<div  id="timelineTool" style="position: absolute;right:0px;top:50%;padding:10px;transform: translateY(-50%)">
+    <div  style="position: relative">
+        <div>
+            <label class="toolTip" data-title="Zoom in">
+                <input type="checkbox" id="resetScreen">
+                <i class="material-icons">add</i>
+            </label>
+        </div>
+        <div class="row">
+            <label class="toolTip" data-title="Zoom out">
+                <input type="checkbox" id="resetScreen">
+                <i class="material-icons">remove</i>
+            </label>
+        </div>
+        <div class="row">
+            <label class="toolTip" data-title="Reset Screen">
+                <input type="checkbox" id="resetScreen">
+                <i class="material-icons">home</i>
+            </label>
+        </div>
+    </div>
 </div>
 <!--<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">-->
     <!--<button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>-->
