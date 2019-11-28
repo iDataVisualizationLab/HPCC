@@ -343,9 +343,10 @@ input[type=number] {
     height: 17px;
     border-radius: 10px;
     border: 1px solid;
-    color: white;
+    color: black;
     padding: 0;
     overflow: visible;
+    background-color: transparent;
     /*font-size: 10px;*/
 }
 .informationHolder {

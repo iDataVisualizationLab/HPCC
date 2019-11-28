@@ -146,6 +146,8 @@ let JobMap = function() {
             showtable = $(this).prop('checked');
             updateLayout(schema);
             makeheader();
+            if (showtable&&!triggerUsermetric)
+                computeUsermetric();
             handle_summary([],true);
         });
 
@@ -258,6 +260,7 @@ let JobMap = function() {
         g.selectAll('.annotation .majorbar').selectAll('*').remove();
         violinRange = [0,0];
         first = true;
+        triggerUsermetric = false;
         lastIndex = 0;
         first__timestep = new Date();
         last_timestep = new Date();
@@ -1836,7 +1839,8 @@ let JobMap = function() {
                     }
                     d3.extent(d.values, e => +new Date(e.submitTime))
                 }
-                d.dataRaw = (user.filter(e => e.name === d.name)[0] || {dataRaw: []}).dataRaw || [];
+                d.dataRaw = (user.find(e => e.name === d.name) || {dataRaw: []}).dataRaw || [];
+                d.PowerUsage = (user.find(e => e.name === d.name) || {PowerUsage: 0}).PowerUsage || 0;
                 tableData[d.name] = tableData[d.name] || [{key: 'Hosts', value: 0},
                     {key: 'Jobs', value: 0}];
                 tableData[d.name][0].value = d.unqinode.length;
@@ -2040,27 +2044,43 @@ let JobMap = function() {
         harr_old = harr.slice();
         return harr;
     }
-
+    let triggerUsermetric=false;
+    function computeUsermetric(){
+        let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
+        let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
+        let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
+        user.forEach(u=>{
+            u.dataRaw = [];
+            u.unqinode.forEach(c=>{
+                let timerange=[];
+                timerange[0] = d3.min(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.startTime))))));
+                if (u.unqinode_ob[c].find(e=>!e.endTime))
+                    timerange[1] = maxTimestep-1;
+                else
+                    timerange[1] = d3.max(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.endTime))))));
+                for (let t =timerange[0];t<=timerange[1];t++) {
+                    u.dataRaw.push(hostOb[c].data[t]);
+                    if (!u.PowerUsage)
+                        u.PowerUsage = {};
+                    u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(hostOb[c].data[t][index_power].value || 0));
+                    u.PowerUsage.time = 1 * 60;
+                    u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600 * 10) / 10;
+                    tableFooter.dataRaw.push(hostOb[c].data[t])
+                }
+            })
+        });
+        triggerUsermetric=true
+    }
     let violinRange = [0,0];
     function handle_summary (data,render){
+        if(data.length){
+            triggerUsermetric=false;
+        }
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
         let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
         user.forEach(d=>d.needRender=(false||render))
         data.forEach(d=>{
             hostOb[d.name].data.push(d); // add new data
-            if (hostOb[d.name].user) {
-                hostOb[d.name].user.forEach(e => {
-                    e.needRender = true;
-                    e.dataRaw.push(d);
-                    if (!e.PowerUsage)
-                        e.PowerUsage = {};
-                    e.PowerUsage.sum = (e.PowerUsage.sum||0) + Math.round(scaleBack(d[index_power].value||0));
-                    e.PowerUsage.time = 1*60;
-                    e.PowerUsage.kwh = Math.round(e.PowerUsage.sum/1000/e.PowerUsage.time*3600*10)/10;
-                });
-            }
-            if (hostOb[d.name].user.length)
-                tableFooter.dataRaw.push(d);
         });
         let user_update,rangechange;
         if (isanimation) {
