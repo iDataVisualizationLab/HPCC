@@ -64,7 +64,7 @@
     color: #bbbb;
     background-color: #ffffff3d;
     padding: 6px 10px;
-    padding-right: 1rem;
+    /*padding-right: 1rem;*/
 }
 .light .collapsible-body{
     border-bottom: 1px solid #7b7878;

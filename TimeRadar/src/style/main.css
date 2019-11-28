@@ -295,9 +295,9 @@ span.thumb {
     overflow-x: hidden;
 }
 input[type=number] {
-    height: 1.5rem;
+    height: 1.15rem;
     font-size: unset;
-    border-radius: 3px;
+    border-radius: 2px;
     border: 1px solid #f2f2f2;
     text-align: right;
     margin: unset;
