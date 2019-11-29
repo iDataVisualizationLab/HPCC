@@ -146,7 +146,7 @@ let JobMap = function() {
             showtable = $(this).prop('checked');
             updateLayout(schema);
             makeheader();
-            if (showtable&&!triggerUsermetric)
+            if (showtable&&triggerCal_Usermetric)
                 computeUsermetric();
             handle_summary([],true);
         });
@@ -189,7 +189,8 @@ let JobMap = function() {
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
-                drawOverlayJob (runopt.overlayjob);
+                // drawOverlayJob (runopt.overlayjob);
+                jobMap.draw();
             }
         });
         // d3.select('#timelineGroupMode').on("change", function () {
@@ -262,7 +263,8 @@ let JobMap = function() {
         g.selectAll('.annotation .majorbar').selectAll('*').remove();
         violinRange = [0,0];
         first = true;
-        triggerUsermetric = false;
+        triggerCal_Usermetric = true;
+        triggerCal_Cluster = true;
         lastIndex = 0;
         first__timestep = new Date();
         last_timestep = new Date();
@@ -413,15 +415,18 @@ let JobMap = function() {
     function drawOverlayJob(isoverlay){
         if(isoverlay){
             let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
-            let bg = svg.selectAll('.computeSig');
+            let bg = svg.selectAll('.computeNode').select('.computeSig');
             let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
             jobover.exit().remove();
-            jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>[
-                {key:'submit',value:d.submitTime},
-                {key:'start',value:d.startTime},
-                {key:'end',value:d.endTime}])
+            jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>{
+                let temp = [
+                    {key:'submit',value:d.submitTime},
+                    {key:'start',value:d.startTime}];
+                if(d.endTime)
+                    temp.push({key:'end',value:d.endTime});
+                return temp})
                 .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2);
-            bg.selectAll('.timemark').datum(d=>d.key?d:{key:'end',value:d.endTime}).attr('d',d=>{
+            bg.selectAll('.timemark').datum(d=>d).attr('d',d=>{
                 let size = 3;
                 switch (d.key) {
                     case 'submit':
@@ -728,7 +733,7 @@ let JobMap = function() {
 
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
-        let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
+        let rangey = d3.extent(bg.data(),d=>d.y2===undefined?d.y:d.y2);
         let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
 
         let axis = svg.select('.gNodeaxis')
@@ -850,8 +855,10 @@ let JobMap = function() {
     let Jobscale = d3.scaleSqrt().range([0.5,3]);
     let intersectionWorker;
     function renderManual(computers, jobNode, link) {
-
-        jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
+        if (runopt.compute.type==='timeline' &&  !runopt.compute.bundle && runopt.overlayjob)
+            jobNode.data().sort((a, b) => new Date(a.startTime) - new Date(b.startTime)).forEach((d, i) => d.order = i);
+        else
+            jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
         jobNode.transition().attr('transform', d => {
             d.x2 = 430;
             d.y = scaleJob(d.order);
@@ -860,8 +867,13 @@ let JobMap = function() {
         if (runopt.compute.type==='timeline') {
             if (!runopt.compute.bundle) {
                 let temp_link = link.data().filter(d => d.target.type === 'job');
-                computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
-                computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                if (runopt.overlayjob){
+                    computers.data().forEach(d => d.order = d3.max(temp_link.filter(e => e.source.name === d.name),e=>+new Date(e.target.startTime)||0));
+                    computers.data().sort((a, b) => a.order - b.order).forEach((d, i) => d.order = i);
+                }else{
+                    computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y));
+                    computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                }
                 g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
                 scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
 
@@ -1033,32 +1045,8 @@ let JobMap = function() {
             return nametr;
         }
     }
-    function btwn(a, b1, b2) {
-        if ((a >= b1) && (a <= b2)) { return true; }
-        if ((a >= b2) && (a <= b1)) { return true; }
-        return false;
-    }
-    function line_line_intersect(line1, line2) {
-        var x1 = line1.x1, x2 = line1.x2, x3 = line2.x1, x4 = line2.x2;
-        var y1 = line1.y1, y2 = line1.y2, y3 = line2.y1, y4 = line2.y2;
-        var pt_denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        var pt_x_num = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
-        var pt_y_num = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
-        if (pt_denom == 0) { return "parallel"; }
-        else {
-            var pt = {'x': pt_x_num / pt_denom, 'y': pt_y_num / pt_denom};
-            if (btwn(pt.x, x1, x2) && btwn(pt.y, y1, y2) && btwn(pt.x, x3, x4) && btwn(pt.y, y3, y4)) { return pt; }
-            else { return "not in range"; }
-        }
-    }
-    function path_line_intersections(line1, line2) {
-        // var pt = line_line_intersect(line1, line2);
-        // if (typeof(pt) != "string") {
-        //     return pt;
-        // }
-        // return undefined;
-        return (((line1.y1>line2.y1)&&(line1.y2<line2.y2))||((line1.y1<line2.y1)&&(line1.y2>line2.y2)));
-    }
+
+
     let linkHorizontal = d3.linkHorizontal()
         .x(function(d) {
             return d.x;
@@ -1072,18 +1060,18 @@ let JobMap = function() {
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
-                        x: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
-                        y: d.source.y2 || d.source.y,
+                        x: (d.source.x2===undefined?d.source.y: d.source.x2)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
+                        y: d.source.y2===undefined?d.source.y: d.source.y2,
                     },
                     target: {
-                        x: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
-                        y: d.target.y2 || d.target.y,
+                        x: (d.target.x2===undefined?d.target.x: d.target.x2) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
+                        y: d.target.y2===undefined?d.target.y: d.target.y2,
                     }});
             });
         path.select('text').attr("transform", function(d) {
             return "translate(" +
                 (((d.source.x2 || d.source.x) + (d.target.x2 || d.target.x))/2) + "," +
-                (((d.source.y2 || d.source.y) + (d.target.y2 || d.target.y))/2) + ")";
+                (((d.source.y2===undefined?d.source.y: d.source.y2) + (d.target.y2===undefined?d.target.y: d.target.y2))/2) + ")";
         })
         return path;
     }
@@ -1726,6 +1714,7 @@ let JobMap = function() {
     let first__timestep = new Date();
     let lastIndex = 0;
     let deltaTime = 0;
+    let triggerCal_Cluster = true;
     function handle_links (timeStep_r,lastIndex_r){
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
@@ -1741,11 +1730,16 @@ let JobMap = function() {
         Hosts.forEach(h=>{
             h.user=[];
             h.arrcluster = [];
-            h.timeline = {clusterarr:[],line:[],lineFull:[],clusterarr_sudden:[]};
+            if (triggerCal_Cluster) {
+                h.timeline = {clusterarr: [], line: [], lineFull: [], clusterarr_sudden: []};
+            }
         });
 
         if (lastIndex===(maxTimestep-1)) {
-            updateClusterTimeline();
+            if (triggerCal_Cluster) {
+                updateClusterTimeline();
+                // triggerCal_Cluster = false; // optimise speed here TODO
+            }
             let user_n = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
             // tableData = {}
@@ -1860,6 +1854,8 @@ let JobMap = function() {
                 data = newdata;
                 Jobscale.domain(d3.extent(data, d => d.values.length));
             }
+        }else{
+            triggerCal_Cluster=true;
         }
 
         if (runopt.compute.clusterNode) {
@@ -2077,7 +2073,7 @@ let JobMap = function() {
         harr_old = harr.slice();
         return harr;
     }
-    let triggerUsermetric=false;
+    let triggerCal_Usermetric=true;
     function computeUsermetric(){
         let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
@@ -2102,12 +2098,12 @@ let JobMap = function() {
                 }
             })
         });
-        triggerUsermetric=true
+        triggerCal_Usermetric=false
     }
     let violinRange = [0,0];
     function handle_summary (data,render){
         if(data.length){
-            triggerUsermetric=false;
+            triggerCal_Usermetric=true;
         }
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
         let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);

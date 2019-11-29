@@ -550,7 +550,7 @@ function request(){
             if (islastimestep(lastIndex+1)) {
                 isanimation = true;
                 getData(_.last(hosts).name,lastIndex,true,true);
-                d3.select('#compDisplay_control').attr('disabled',null)
+                d3.select('#compDisplay_control').attr('disabled',null);
             }
             if (graphicControl.mode===layout.HORIZONTAL)
                 drawsummarypoint(countarr);
@@ -612,6 +612,8 @@ function request(){
                         midlehandle_full(ri);
                         if(countbuffer===0) {
                             getJoblist();
+                            // document.getElementById("compDisplay_control").selectedIndex = 4;
+                            // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
                             // if(isanimation)
                                 jobMap.draw();
