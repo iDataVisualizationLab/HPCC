@@ -614,6 +614,11 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 [disabled]{
     opacity: 0.42;
 }
-[disabled]+span{
+[disabled]+span, [disabled] label{
+    opacity: 1;
     color: rgba(0, 0, 0, 0.42);
+}
+[type="checkbox"].filled-in:disabled:not(:checked) + span:not(.lever):after {
+    background-color: transparent;
+    border: 1px solid #5a5a5a;
 }
