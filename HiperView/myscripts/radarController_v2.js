@@ -300,7 +300,7 @@ let radarController = function () {
 
         }
     }
-    let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},margin: {top: 0, right: 30, bottom: 0, left: 30},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5}});
+    let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},margin: {top: 0, right: 30, bottom: 0, left: 30},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
     function eventTable(){
         tablediv.select("table").selectAll('td.angle').on('input', function (d) {
             updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
@@ -322,7 +322,9 @@ let radarController = function () {
             });
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
-            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).setTicksDisplay(sg.datum().data.range).draw(selection)})})
+            sg.call(function(selection){
+                violiin_chart.graphicopt({customrange:[-sg.datum().data.range[0]/(sg.datum().data.range[1]-sg.datum().data.range[0]),1]});//fix range from 0
+                return violiin_chart.data([ sg.datum().summary]).setTicksDisplay([0,sg.datum().data.range[1]]).draw(selection)})})
 
     }
     function updateSummaryData (dSum){

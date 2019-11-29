@@ -1,5 +1,6 @@
 importScripts("../../js/d3.v4.js","../../js/underscore-min.js","../setting.js","../../js/simple-statistics.min.js");
 let undefinedValue,
+outlierMultiply = 2.5,
 globalTrend=false,
 hosts,db;
 let histodram = {
@@ -95,7 +96,7 @@ function getsummaryservice(data){
             if (d.length>4)
             {
                 const iqr = r.q3-r.q1;
-                r.outlier = _.unique(d.filter(e=>e>(r.q3+2.5*iqr)||e<(r.q1-2.5*iqr)));
+                r.outlier = _.unique(d.filter(e=>e>(r.q3+outlierMultiply*iqr)||e<(r.q1-outlierMultiply*iqr)));
             }else{
                 r.outlier =  _.unique(d);
             }

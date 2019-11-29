@@ -300,7 +300,7 @@ let radarController = function () {
 
         }
     }
-    let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:25,opt:{dataformated:true}});
+    let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:25,opt:{dataformated:true},tick:{visibile:false}});
     function eventTable(){
         tablediv.select("table").selectAll('td.angle').on('input', function (d) {
             updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));

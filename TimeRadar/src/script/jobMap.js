@@ -253,6 +253,8 @@ let JobMap = function() {
     let tippannel, tiptimer;
     jobMap.remove = function (){
         if (simulation) simulation.stop();
+        $('#jobTable_control').prop('checked',false)
+        d3.select('#jobTable_control').dispatch('change');
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         timebox.selectAll('*').remove();
@@ -1347,7 +1349,7 @@ let JobMap = function() {
                 const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('highlight',true).data();
                 const samesource = link.filter(f=> sametarget.find(e=>e.source===f.target)).classed('hide',false).classed('highlight',true).data();
                 g.selectAll('.jobNode').classed('hide',true);
-                g.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false).classed('highlight',true);
+                g.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false).classed('highlight',true).selectAll('.label').classed('hide',true);
                 g.selectAll( '.computeNode').classed('fade',true);
                 g.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('highlight',true);
                 table_footerNode.classed('fade',true);
@@ -1355,7 +1357,7 @@ let JobMap = function() {
             ],[function(d){
                 g.selectAll('.userNode').classed('fade',false);
                 d3.select(this).classed('highlight',false);
-                g.selectAll('.jobNode').classed('hide',false).classed('highlight',false);
+                g.selectAll('.jobNode').classed('hide',false).classed('highlight',false).selectAll('.label').classed('hide',false);
                 g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
                 link.classed('hide',false).classed('highlight',false);
                 table_footerNode.classed('fade',false);
@@ -1366,7 +1368,7 @@ let JobMap = function() {
                 d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
                 const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
                 const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',false).classed('highlight',true).data();
-                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false).classed('highlight',true);
+                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false).classed('highlight',true).selectAll('.label').classed('hide',true);
                 g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
 
                 g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
@@ -1378,7 +1380,7 @@ let JobMap = function() {
                 if (runopt.compute.type!=='timeline') {
                     d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
                     g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                    g.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
+                    g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide',false);
                     g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
@@ -1722,12 +1724,14 @@ let JobMap = function() {
     }
     let first__timestep = new Date();
     let lastIndex = 0;
+    let deltaTime = 0;
     function handle_links (timeStep_r,lastIndex_r){
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
             lastIndex = lastIndex_r
             if (first__timestep>last_timestep)
                 first__timestep = last_timestep;
+            deltaTime = (last_timestep - first__timestep)/maxTimestep;
         }
         harr_old = [];
         if (simulation)
@@ -2063,8 +2067,8 @@ let JobMap = function() {
                     if (!u.PowerUsage)
                         u.PowerUsage = {};
                     u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(hostOb[c].data[t][index_power].value || 0));
-                    u.PowerUsage.time = 1 * 60;
-                    u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600 * 10) / 10;
+                    u.PowerUsage.time = Math.max(u.PowerUsage.time||0,(timerange[1]-timerange[0])*deltaTime/1000);
+                    u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600);
                     tableFooter.dataRaw.push(hostOb[c].data[t])
                 }
             })
