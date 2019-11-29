@@ -1,6 +1,6 @@
 importScripts("../../js/d3.v4.js","../../js/underscore-min.js","../setting.js","../../js/simple-statistics.min.js");
 let undefinedValue,
-let outlierMultiply = 3;
+outlierMultiply = 2.5,
 globalTrend=false,
 hosts,db;
 let histodram = {

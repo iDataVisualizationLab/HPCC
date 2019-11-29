@@ -1106,6 +1106,8 @@ path {
 
 .angle {
 	width: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
 }.btngroup {
 	width: 5px;
 }

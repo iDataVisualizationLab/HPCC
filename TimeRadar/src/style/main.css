@@ -27,7 +27,7 @@ svg#jobmap {
 #timelineTool a.btn {
     background-color: rgb(243, 243, 243);
     padding: 1px;
-    border-width:1px solid #ddd;
+    border:1px solid #ddd;
     color:black;
     border-radius: 3px;
     margin: 0px;

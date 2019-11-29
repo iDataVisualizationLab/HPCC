@@ -71,7 +71,7 @@ d3.viiolinChart = function () {
                 .styles(graphicopt.middleAxis)
             ;
 
-            if(graphicopt.tick===undefined || graphicopt.tick.visibile!= false) {
+            if(graphicopt.tick===undefined && graphicopt.tick.visibile!= false) {
                 axisg.append('line').attr('class', 'tick')
                     .attrs({
                         y1: -5,
@@ -170,7 +170,7 @@ d3.viiolinChart = function () {
             //     h.domain(d3.extent(data[0].arr, d => d[0]));
             // else
             //     h.domain([0,1]);
-            h.domain([0,1]);
+            h.domain(graphicopt.customrange||[0,1]);
 
             sumstat = data;
         }else {

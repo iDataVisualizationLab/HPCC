@@ -557,3 +557,6 @@ label {
 .capitalize {
     text-transform: capitalize;
 }
+.sidenavs select {
+    height: 1.15rem;
+}
