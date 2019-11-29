@@ -309,7 +309,7 @@ let JobMap = function() {
                     else
                         return _.last(d.source.timeline.clusterarr).cluster
                 }
-                return undefined;
+                return d.source.cluster;
             default:
                 return (_.isString(d.source.user)&&d.source.user)||d.target.user;
         }
@@ -1273,7 +1273,7 @@ let JobMap = function() {
         userNode.select('.userNodeSig').styles(
             {
                 'fill-opacity':0.5,
-                'fill': d=>{const color = colorFunc(d.name,getsubfixcolormode()); return color==='black'?'white':color;}
+                'fill': d=>{const color = colorFunc(runopt.graphic.colorBy==='group'?d.cluster:d.name); return color==='black'?'white':color;}
             });
         userNode.select('.userNodeSig_label')
         .text(d=>d.name);
@@ -1787,7 +1787,7 @@ let JobMap = function() {
                 d.unqinode_ob = {};
                 d.unqinode.forEach(n => {
                     d.unqinode_ob[n] = d.values.filter(e => e.nodes.find(f => f === n));
-                    hostOb[n].user.push(d)
+                    hostOb[n].user.push(d);
                 });
                 if (runopt.compute.clusterJobID) {
                     const range_temp_sub = d3.extent(d.values, e => +new Date(e.submitTime));
@@ -2029,6 +2029,34 @@ let JobMap = function() {
             }else
                 clusterdata_timeline = undefined;
 
+            data.forEach(d=>{
+                let clust=_.last(hostOb[d.nodes[0]].timeline.clusterarr).cluster;
+                let key = true;
+                for (let i=1;i<d.nodes.length;i++) {
+                     if (clust!=_.last(hostOb[d.nodes[i]].timeline.clusterarr).cluster) {
+                         key = false;
+                         break;
+                     }
+                }
+                if (key)
+                    d.cluster = clust;
+                else
+                    d.cluster = undefined;
+            });
+            user.forEach(d=>{
+                let clust=_.last(hostOb[d.unqinode[0]].timeline.clusterarr).cluster;
+                let key = true;
+                for (let i=1;i<d.unqinode.length;i++) {
+                    if (clust!=_.last(hostOb[d.unqinode[i]].timeline.clusterarr).cluster) {
+                        key = false;
+                        break;
+                    }
+                }
+                if (key)
+                    d.cluster = clust;
+                else
+                    d.cluster = undefined;
+            });
             Object.keys(tableData).forEach(k=>{
                 if (!tableData[k].keep)
                     delete tableData[k];
