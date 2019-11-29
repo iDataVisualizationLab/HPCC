@@ -44,7 +44,7 @@ d3.viiolinChart = function () {
     let ticksDisplay = [];
 
 
-    let crateviolin = d3.area()
+    let createviolin = d3.area()
         .x0(function(d){
             return(xNum(-d[1])) } )
         .x1(function(d){ return(xNum(d[1])) } )
@@ -109,10 +109,22 @@ d3.viiolinChart = function () {
         viol_n.append("path");
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
-            .style('fill','black')
+            .style('stroke','black')
+            .style('stroke-width','0.2')
+            .style('fill','#00000029')
             // .style('fill','currentColor')
-            .attr("d",d=> crateviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+            .attr("d",d=> createviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
         );
+
+        let median_rect = viol_chart.selectAll('rect.median').data(d=>d.median!=undefined?[d.median]:[]);
+        median_rect.exit().remove();
+        median_rect.enter().append('rect').attrs({
+            class: 'median',
+            width:2,
+            height: 8,
+            x: d=>h(d),
+            y: -4,
+        }).style('fill','black')
 
         const circledata =  arr[0].outlier.map(d=>{return d.x?d:{x:d}});
 
@@ -123,9 +135,9 @@ d3.viiolinChart = function () {
     //         .stop();
     //     for (var i = 0; i < 120; ++i) simulation.tick();
     // console.log(circledata.map(d=>h(d.x)));
-        let circle_o = viol_chart.selectAll('circle').data(circledata);
+        let circle_o = viol_chart.selectAll('circle.outlier').data(circledata);
         circle_o.exit().remove();
-        let circlem = circle_o.enter().append('circle')
+        let circlem = circle_o.enter().append('circle').attr('class','outlier')
             .styles({opacity:0.5,
             fill: 'rgb(138, 0, 26)'})
             .merge(circle_o)
@@ -236,7 +248,7 @@ d3.viiolinChart = function () {
                 }
             }
             if (graphicopt.direction=="v") {
-                crateviolin
+                createviolin
                     // = d3.area()
                     .x0(function (d) {
                         return (xNum(-d[1]))
@@ -256,7 +268,7 @@ d3.viiolinChart = function () {
                 };
             }
             else {
-                crateviolin
+                createviolin
                     // = d3.area()
                     .y0(function (d) {
                         return (xNum(-d[1]))

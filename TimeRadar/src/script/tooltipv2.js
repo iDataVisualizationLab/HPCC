@@ -39,7 +39,7 @@ let Tooltip_lib = function() {
             //     let heightTip =+ $('#d3-tip')[0].offsetHeight;
             //     return [(d3.event.y-200)< 0 ? -d3.event.y:(d3.event.y-200+heightTip>heightdevice? heightdevice-d3.event.y-heightTip :-200), (d3.event.x+tipW+100)> width ? -50-tipW:50];
             // }
-            return [0,0];
+            return [20,20];
         })
         .html(function(d1,hideLine,type) {
             return cotenttip(hideLine,type); });
