@@ -1,6 +1,6 @@
 importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/js/underscore-min.js","../../../../HiperView/myscripts/setting.js","../setting.js","../../../../HiperView/js/simple-statistics.min.js");
 let undefinedValue,
-    outlierMultiply = 10,
+    outlierMultiply = 5,
 globalTrend=false,
 hosts,db;
 let histodram = {
