@@ -272,6 +272,7 @@ let JobMap = function() {
         tableFooter.dataRaw =[];
         return jobMap;
     };
+    //----------------------color----------------------
     let colorCategory  = d3.scaleOrdinal().range(d3.schemeCategory20);
     let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
     function pathRound(path,opt){
@@ -296,6 +297,22 @@ let JobMap = function() {
         bpath+=`z`;
 
         path.attr('d',bpath)
+    }
+    function getLinkKeyColor(d){
+        switch (runopt.graphic.colorBy) {
+            case 'user':
+                return (_.isString(d.source.user)&&d.source.user)||d.target.user;
+            case 'group':
+                if (d.target.type==='job') {
+                    if (d.source.__metrics)// cluster group
+                        return d.source.name;
+                    else
+                        return _.last(d.source.timeline.clusterarr).cluster
+                }
+                return undefined;
+            default:
+                return (_.isString(d.source.user)&&d.source.user)||d.target.user;
+        }
     }
     function colorFunc (key,other){
         switch (runopt.graphic.colorBy+(other||'')) {
@@ -1460,22 +1477,6 @@ let JobMap = function() {
         g.selectAll('.node').style('pointer-events','auto').classed('fade',false).classed('hide',false).classed('highlight',false);
         g.selectAll( '.links').classed('hide',false).classed('highlight',false);
         g.select('.table.footer').classed('fade',false);
-    }
-    function getLinkKeyColor(d){
-        switch (runopt.graphic.colorBy) {
-            case 'user':
-                return (_.isString(d.source.user)&&d.source.user)||d.target.user;
-            case 'group':
-                if (d.target.type==='job') {
-                    if (d.source.__metrics)// cluster group
-                        return d.source.name;
-                    else
-                        return _.last(d.source.timeline.clusterarr).cluster
-                }
-                return undefined;
-            default:
-                return (_.isString(d.source.user)&&d.source.user)||d.target.user;
-        }
     }
     function getstrokearray (self){
         return (self||this).getTotalLength()-graphicopt.job.r
