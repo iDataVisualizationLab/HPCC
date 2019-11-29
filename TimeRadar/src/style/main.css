@@ -612,13 +612,23 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 }
 
 [disabled]{
-    opacity: 0.42;
+    color: rgba(0, 0, 0, 0.42);
+}
+[disabled] .noUi-target.noUi-horizontal .noUi-tooltip{
+    background-color:#9b9b9b;
+}
+[disabled] .noUi-horizontal .noUi-handle,[disabled] .noUi-vertical .noUi-handle{
+    background-color:#9b9b9b;
 }
 [disabled]+span, [disabled] label{
-    opacity: 1;
     color: rgba(0, 0, 0, 0.42);
 }
 [type="checkbox"].filled-in:disabled:not(:checked) + span:not(.lever):after {
     background-color: transparent;
-    border: 1px solid #5a5a5a;
+    border: 1px solid rgba(0, 0, 0, 0.13);
+}
+
+[disabled][type="radio"]:not(:checked) + span:before, [disabled][type="radio"]:not(:checked) + span:after {
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.13);
 }
