@@ -414,11 +414,25 @@ let JobMap = function() {
     }
     function drawOverlayJob(isoverlay){
         if(isoverlay){
+            // let listCurrentJob = g.selectAll('.jobNode').data();
+            let temp_link = g.selectAll('.links').data().filter(d => d.target.type === 'job');
+
             let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
             let bg = svg.selectAll('.computeNode').select('.computeSig');
-            let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
+            let jobpatharr_sub = [];
+            let jobpatharr_sta = [];
+            let jobover = bg.selectAll('.joboverg').data(d=>{
+                let temp = temp_link.filter(e => e.source.name === d.name);
+                let recentjob = _.max(temp,t=>new Date(t.startTime)).target;
+                jobpatharr_sub.push({x:fisheye_scale.x(scale(new Date(recentjob.submitTime))),y:scaleNode_y_middle(d.order)});
+                jobpatharr_sta.push({x:fisheye_scale.x(scale(new Date(recentjob.startTime))),y:scaleNode_y_middle(d.order)});
+                return temp;
+            },d=>d);
+            // let jobover = bg.selectAll('.joboverg').data(d=>listCurrentJob.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
+            // let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
             jobover.exit().remove();
             jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>{
+                d = d.target;
                 let temp = [
                     {key:'submit',value:d.submitTime},
                     {key:'start',value:d.startTime}];
@@ -436,9 +450,21 @@ let JobMap = function() {
                     default:
                         return `M ${size} -${size} L 0 0 L ${size} ${size}`;
                 }
-            }).attr('transform',function(d){return`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},${scaleNode_y_middle(d3.select(this.parentNode.parentNode).datum().order)})`})
-        }else
+            }).attr('transform',function(d){return`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},${scaleNode_y_middle(d3.select(this.parentNode.parentNode).datum().order)})`});
+            // job path
+            jobpatharr_sub.sort((a,b)=>a.y-b.y);
+            jobpatharr_sta.sort((a,b)=>b.y-a.y);
+            let jobpath = g.select('.annotation').select('path.jobCover');
+            if (jobpath.empty())
+                jobpath = g.select('.annotation').append('path').attr('class','jobCover');
+            jobpath.attr('transform',`translate(${g.select('.computeNode').datum().x2},0)`).datum(_.concat(jobpatharr_sub,jobpatharr_sta)).attr('d',d3.line()
+                .curve(d3.curveLinear)
+                .x(d=>d.x)
+                .y(d=>d.y)).style('fill','#ccc')
+        }else {
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
+            g.select('.annotation').select('path.jobCover').remove();
+        }
         d3.select('#legend').classed('hide',!isoverlay)
     }
     let animation_time = 2000;
