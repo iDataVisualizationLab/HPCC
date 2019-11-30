@@ -423,9 +423,19 @@ let JobMap = function() {
             let jobpatharr_sta = [];
             let jobover = bg.selectAll('.joboverg').data(d=>{
                 let temp = temp_link.filter(e => e.source.name === d.name);
-                let recentjob = _.max(temp,t=>new Date(t.startTime)).target;
-                jobpatharr_sub.push({x:fisheye_scale.x(scale(new Date(recentjob.submitTime))),y:scaleNode_y_middle(d.order)});
-                jobpatharr_sta.push({x:fisheye_scale.x(scale(new Date(recentjob.startTime))),y:scaleNode_y_middle(d.order)});
+                console.log(temp);
+                if (temp.length) {
+                    let recentjob = _.max(temp, t => +new Date(t.target.startTime)).target;
+                    console.log(recentjob)
+                    jobpatharr_sub.push({
+                        x: fisheye_scale.x(scale(new Date(recentjob.submitTime))),
+                        y: scaleNode_y_middle(d.order)
+                    });
+                    jobpatharr_sta.push({
+                        x: fisheye_scale.x(scale(new Date(recentjob.startTime))),
+                        y: scaleNode_y_middle(d.order)
+                    });
+                }
                 return temp;
             },d=>d);
             // let jobover = bg.selectAll('.joboverg').data(d=>listCurrentJob.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
