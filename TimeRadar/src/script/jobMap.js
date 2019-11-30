@@ -423,10 +423,8 @@ let JobMap = function() {
             let jobpatharr_sta = [];
             let jobover = bg.selectAll('.joboverg').data(d=>{
                 let temp = temp_link.filter(e => e.source.name === d.name);
-                console.log(temp);
                 if (temp.length) {
-                    let recentjob = _.max(temp, t => +new Date(t.target.startTime)).target;
-                    console.log(recentjob)
+                    let recentjob = _.maxBy(temp, t => +new Date(t.target.startTime)).target;
                     jobpatharr_sub.push({
                         x: fisheye_scale.x(scale(new Date(recentjob.submitTime))),
                         y: scaleNode_y_middle(d.order)
@@ -438,8 +436,6 @@ let JobMap = function() {
                 }
                 return temp;
             },d=>d);
-            // let jobover = bg.selectAll('.joboverg').data(d=>listCurrentJob.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
-            // let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
             jobover.exit().remove();
             jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>{
                 d = d.target;
@@ -468,7 +464,7 @@ let JobMap = function() {
             if (jobpath.empty())
                 jobpath = g.select('.annotation').append('path').attr('class','jobCover');
             jobpath.attr('transform',`translate(${g.select('.computeNode').datum().x2},0)`).datum(_.concat(jobpatharr_sub,jobpatharr_sta)).attr('d',d3.line()
-                .curve(d3.curveLinear)
+                .curve(d3.curveStepAfter)
                 .x(d=>d.x)
                 .y(d=>d.y)).style('fill','#ccc')
         }else {
@@ -904,7 +900,8 @@ let JobMap = function() {
             if (!runopt.compute.bundle) {
                 let temp_link = link.data().filter(d => d.target.type === 'job');
                 if (runopt.overlayjob){
-                    computers.data().forEach(d => d.order = d3.max(temp_link.filter(e => e.source.name === d.name),e=>+new Date(e.target.startTime)||0));
+                    computers.data().forEach(d => {
+                        d.order = d3.max(temp_link.filter(e => e.source.name === d.name),e=>+new Date(e.target.startTime))||0});
                     computers.data().sort((a, b) => a.order - b.order).forEach((d, i) => d.order = i);
                 }else{
                     computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y));
@@ -2022,14 +2019,6 @@ let JobMap = function() {
                                         temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
                                     }
                                     temp_h.arr = temp_g[k][0].arrcluster;
-
-                                    // Conflict sudden timepoint
-                                    // if(temp_h.timeline.clusterarr_sudden.length!==temp_g[k][0].timeline.clusterarr_sudden.length){
-                                    //     console.log(`sudden value=${runopt.suddenGroup} -------${temp_h.name}--------`);
-                                    //     console.log(temp_g[k][0].timeline.clusterarr_sudden);
-                                    //     console.log(temp_h.timeline.clusterarr_sudden);
-                                    // }
-
                                     clusterdata_timeline.push(temp_h);
                                 }else{
                                     temp_g[k].forEach((n) => {
