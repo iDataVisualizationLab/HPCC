@@ -190,9 +190,13 @@ let JobMap = function() {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
                 // drawOverlayJob (runopt.overlayjob);
-                if (runopt.overlayjob )
+                if (runopt.overlayjob ) {
                     tableHeader.currentsort = "Job_startTime";
-                else
+                    d3.select(tableHeader.el).each(function(e){
+                        e.direction=undefined;
+                        d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'↕'));
+                    });
+                }else
                     tableHeader.currentsort = undefined;
                 handle_sort(true);
                 jobMap.draw();
@@ -1553,6 +1557,7 @@ let JobMap = function() {
                 truncate(d,'▼');
         });
         cells.on('click',function(d){
+            tableHeader.el = this;
             if (d.key!==tableHeader.currentsort)
                 cells.filter(e=>e.key===tableHeader.currentsort)
                     .each(function(e){
