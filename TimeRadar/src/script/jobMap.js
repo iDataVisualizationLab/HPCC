@@ -94,7 +94,7 @@ let JobMap = function() {
             .attr('class','pannel')
             .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
 
-        g.append('text').attr('class','job_title hide').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).text('Running jobs');
+        g.append('text').attr('class','job_title hide').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).datum('Running jobs').text(d=>d);
         g.append('text').attr('class','host_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text('Hosts');
 
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
@@ -146,7 +146,7 @@ let JobMap = function() {
             showtable = $(this).prop('checked');
             updateLayout(schema);
             makeheader();
-            if (showtable&&!triggerUsermetric)
+            if (showtable&&triggerCal_Usermetric)
                 computeUsermetric();
             handle_summary([],true);
         });
@@ -189,7 +189,17 @@ let JobMap = function() {
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
-                drawOverlayJob (runopt.overlayjob);
+                // drawOverlayJob (runopt.overlayjob);
+                if (runopt.overlayjob ) {
+                    tableHeader.currentsort = "Job_startTime";
+                    d3.select(tableHeader.el).each(function(e){
+                        e.direction=undefined;
+                        d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'↕'));
+                    });
+                }else
+                    tableHeader.currentsort = undefined;
+                handle_sort(true);
+                jobMap.draw();
             }
         });
         // d3.select('#timelineGroupMode').on("change", function () {
@@ -253,16 +263,21 @@ let JobMap = function() {
     let tippannel, tiptimer;
     jobMap.remove = function (){
         if (simulation) simulation.stop();
-        $('#jobTable_control').prop('checked',false)
+        // UI reset
+        $('#jobTable_control').prop('checked',false);
+        $('#jobOverlay').prop('checked',false);
         d3.select('#jobTable_control').dispatch('change');
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         timebox.selectAll('*').remove();
         initTimebox()
         g.selectAll('.annotation .majorbar').selectAll('*').remove();
+        g.selectAll('.annotation path.jobCover').remove();
         violinRange = [0,0];
         first = true;
-        triggerUsermetric = false;
+        runopt.overlayjob = false;
+        triggerCal_Usermetric = true;
+        triggerCal_Cluster = true;
         lastIndex = 0;
         first__timestep = new Date();
         last_timestep = new Date();
@@ -270,6 +285,7 @@ let JobMap = function() {
         data=[];
         tableFooter=[];
         tableFooter.dataRaw =[];
+        tableHeader.currentsort = undefined;
         return jobMap;
     };
     //----------------------color----------------------
@@ -412,16 +428,39 @@ let JobMap = function() {
     }
     function drawOverlayJob(isoverlay){
         if(isoverlay){
+            // let listCurrentJob = g.selectAll('.jobNode').data();
+            let temp_link = g.selectAll('.links').data().filter(d => d.target.type === 'job');
+
             let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
-            let bg = svg.selectAll('.computeSig');
-            let jobover = bg.selectAll('.joboverg').data(d=>listallJobs.filter(j=>_.intersection(j.nodes,d.values_name).length),d=>d);
+            let bg = svg.selectAll('.computeNode').select('.computeSig');
+            let jobpatharr_sub = [];
+            let jobpatharr_sta = [];
+            let jobover = bg.selectAll('.joboverg').data(d=>{
+                let temp = temp_link.filter(e => e.source.name === d.name);
+                if (temp.length) {
+                    let recentjob = _.maxBy(temp, t => +new Date(t.target.startTime)).target;
+                    jobpatharr_sub.push({
+                        x: fisheye_scale.x(scale(new Date(recentjob.submitTime))),
+                        y: scaleNode_y_middle(d.order)
+                    });
+                    jobpatharr_sta.push({
+                        x: fisheye_scale.x(scale(new Date(recentjob.startTime))),
+                        y: scaleNode_y_middle(d.order)
+                    });
+                }
+                return temp;
+            },d=>d);
             jobover.exit().remove();
-            jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>[
-                {key:'submit',value:d.submitTime},
-                {key:'start',value:d.startTime},
-                {key:'end',value:d.endTime}])
+            jobover.enter().append('g').attr('class','joboverg').selectAll('.timemark').data(d=>{
+                d = d.target;
+                let temp = [
+                    {key:'submit',value:d.submitTime},
+                    {key:'start',value:d.startTime}];
+                if(d.endTime)
+                    temp.push({key:'end',value:d.endTime});
+                return temp})
                 .enter().append('path').attr('class',d=>`timemark ${d.key}`).style('stroke-width',2);
-            bg.selectAll('.timemark').datum(d=>d.key?d:{key:'end',value:d.endTime}).attr('d',d=>{
+            bg.selectAll('.timemark').datum(d=>d).attr('d',d=>{
                 let size = 3;
                 switch (d.key) {
                     case 'submit':
@@ -431,10 +470,22 @@ let JobMap = function() {
                     default:
                         return `M ${size} -${size} L 0 0 L ${size} ${size}`;
                 }
-            }).attr('transform',function(d){return`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},${scaleNode_y_middle(d3.select(this.parentNode.parentNode).datum().order)})`})
-        }else
+            }).attr('transform',function(d){return`translate(${d.value!==undefined?fisheye_scale.x(scale(new Date(d.value))):0},${scaleNode_y_middle(d3.select(this.parentNode.parentNode).datum().order)})`});
+            // job path
+            jobpatharr_sub.sort((a,b)=>a.y-b.y);
+            jobpatharr_sta.sort((a,b)=>b.y-a.y);
+            let jobpath = g.select('.annotation').select('path.jobCover');
+            if (jobpath.empty())
+                jobpath = g.select('.annotation').append('path').attr('class','jobCover');
+            jobpath.attr('transform',`translate(${g.select('.computeNode').datum().x2},0)`).datum(_.concat(jobpatharr_sub,jobpatharr_sta)).attr('d',d3.line()
+                .curve(d3.curveStepAfter)
+                .x(d=>d.x)
+                .y(d=>d.y)).style('fill','#ccc')
+        }else {
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
-        d3.select('#legend').classed('hide',!isoverlay)
+            g.select('.annotation').select('path.jobCover').remove();
+        }
+        // d3.select('#legend').classed('hide',!isoverlay)
     }
     let animation_time = 2000;
     function drawEmbedding_timeline(data,colorfill) {
@@ -728,7 +779,7 @@ let JobMap = function() {
 
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
-        let rangey = d3.extent(bg.data(),d=>d.y2||d.y);
+        let rangey = d3.extent(bg.data(),d=>d.y2===undefined?d.y:d.y2);
         let scale = d3.scaleTime().range([timelineScale(0),timelineScale(timelineScale.domain()[1])]).domain([first__timestep,last_timestep]);
 
         let axis = svg.select('.gNodeaxis')
@@ -850,27 +901,47 @@ let JobMap = function() {
     let Jobscale = d3.scaleSqrt().range([0.5,3]);
     let intersectionWorker;
     function renderManual(computers, jobNode, link) {
-
-        jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
-        jobNode.transition().attr('transform', d => {
+        if (runopt.compute.type==='timeline' &&  !runopt.compute.bundle && runopt.overlayjob)
+            jobNode.data().sort((a, b) => new Date(a.startTime) - new Date(b.startTime)).forEach((d, i) => d.order = i);
+        else
+            jobNode.data().sort((a, b) => user.find(e => e.key === a.user).order - user.find(e => e.key === b.user).order).forEach((d, i) => d.order = i);
+        g.selectAll('.jobNode.new').classed('new',false).attr('transform', d => {
             d.x2 = 430;
             d.y = scaleJob(d.order);
             return `translate(${d.x2},${d.y})`
-        });
+        }).style('opacity',0);
+        jobNode.transition().duration(animation_time).attr('transform', d => {
+            d.x2 = 430;
+            d.y = scaleJob(d.order);
+            return `translate(${d.x2},${d.y})`
+        }).style('opacity',undefined);
+
         if (runopt.compute.type==='timeline') {
             if (!runopt.compute.bundle) {
                 let temp_link = link.data().filter(d => d.target.type === 'job');
-                computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y))
-                computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                if (!runopt.overlayjob){
+                //     computers.data().forEach(d => {
+                //         d.order = d3.max(temp_link.filter(e => e.source.name === d.name),e=>+new Date(e.target.startTime))||0});
+                //     computers.data().sort((a, b) => a.order - b.order).forEach((d, i) => d.order = i);
+                // }else{
+                    computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y));
+                    computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                }
                 g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
                 scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
 
-                computers.transition().duration(1000).attr('transform', d => {
+                g.selectAll('.computeNode.new').classed('new',false).attr('transform', d => {
                     d.x2 = 300;
                     d.y2 = scaleNode_y_middle(d.order);
                     // return `translate(${d.x2},${d.y2 || d.y})`
                     return `translate(${d.x2},0)`
-                });
+                }).style('opacity',0);
+                computers.transition().duration(animation_time).attr('transform', d => {
+                    d.x2 = 300;
+                    d.y2 = scaleNode_y_middle(d.order);
+                    // return `translate(${d.x2},${d.y2 || d.y})`
+                    return `translate(${d.x2},0)`
+                }).style('opacity',undefined);
             }else{
                 let bundle_cluster = clusterdata.map(c=>{return {cluster:c.name,maxinstance:d3.max(c.arr,e=>e?e.length:0),arr:d3.range(0,maxTimestep).map(()=>[]),orderscale:{_last:0},crossing:{},totalcrossing:0}});
                 let bundle_cluster_ob = {};
@@ -966,7 +1037,7 @@ let JobMap = function() {
                     return fullScaleB(masteb.orderscale[computeID]+masteb.offset);
                     // return fullScaleB(masteb.arr[ti][computeID]+masteb.offset);
                 };
-                computers.transition().duration(1000).attr('transform', d => {
+                computers.transition().duration(animation_time).attr('transform', d => {
                     d.x2 = 300;
                     const lastItem = _.last(d.timeline.lineFull);
                     d.y2 = scaleNode_y_middle(lastItem.cluster,lastItem.end,d.name);
@@ -1006,7 +1077,8 @@ let JobMap = function() {
             computers.data().sort((a, b) => (b.arr[lastIndex]||[]).length - (a.arr[lastIndex]||[]).length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
-            computers.transition().attr('transform', d => {
+            g.selectAll('.computeNode.new')
+            computers.transition().duration(animation_time).attr('transform', d => {
                 d.x = 300;
                 d.x2 = 300;
                 d.y = scaleNode_y(d.order);
@@ -1016,10 +1088,10 @@ let JobMap = function() {
             barhis.exit().remove();
             barhis. enter().append('g').attr('class',d=>`${d.name} m`);
             barhis.attr('class',d=>`${d.name} m`);
-            g.select('.majorbar').selectAll('g.m').transition().attr('transform',d=>`translate(${d.x2},${d.y})`);
+            g.select('.majorbar').selectAll('g.m').transition().duration(animation_time).attr('transform',d=>`translate(${d.x2},${d.y})`);
 
         }
-        link.transition()
+        link.transition().duration(animation_time)
             .call(updatelink);
     }
     let last_timestep = new Date();
@@ -1033,32 +1105,8 @@ let JobMap = function() {
             return nametr;
         }
     }
-    function btwn(a, b1, b2) {
-        if ((a >= b1) && (a <= b2)) { return true; }
-        if ((a >= b2) && (a <= b1)) { return true; }
-        return false;
-    }
-    function line_line_intersect(line1, line2) {
-        var x1 = line1.x1, x2 = line1.x2, x3 = line2.x1, x4 = line2.x2;
-        var y1 = line1.y1, y2 = line1.y2, y3 = line2.y1, y4 = line2.y2;
-        var pt_denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        var pt_x_num = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
-        var pt_y_num = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
-        if (pt_denom == 0) { return "parallel"; }
-        else {
-            var pt = {'x': pt_x_num / pt_denom, 'y': pt_y_num / pt_denom};
-            if (btwn(pt.x, x1, x2) && btwn(pt.y, y1, y2) && btwn(pt.x, x3, x4) && btwn(pt.y, y3, y4)) { return pt; }
-            else { return "not in range"; }
-        }
-    }
-    function path_line_intersections(line1, line2) {
-        // var pt = line_line_intersect(line1, line2);
-        // if (typeof(pt) != "string") {
-        //     return pt;
-        // }
-        // return undefined;
-        return (((line1.y1>line2.y1)&&(line1.y2<line2.y2))||((line1.y1<line2.y1)&&(line1.y2>line2.y2)));
-    }
+
+
     let linkHorizontal = d3.linkHorizontal()
         .x(function(d) {
             return d.x;
@@ -1072,18 +1120,18 @@ let JobMap = function() {
             .attr("d", d=>{
                 return linkHorizontal({
                     source: {
-                        x: (d.source.x2 || d.source.x)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
-                        y: d.source.y2 || d.source.y,
+                        x: (d.source.x2===undefined?d.source.y: d.source.x2)+ (d.source.type==='job'?graphicopt.job.r:(clusterNode_data&&d.source.type===undefined?graphicopt.radaropt.w/2:0)),
+                        y: d.source.y2===undefined?d.source.y: d.source.y2,
                     },
                     target: {
-                        x: (d.target.x2 || d.target.x) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
-                        y: d.target.y2 || d.target.y,
+                        x: (d.target.x2===undefined?d.target.x: d.target.x2) - ((d.source.type==='job')||(d.target.type==='job')?graphicopt.user.r:0),
+                        y: d.target.y2===undefined?d.target.y: d.target.y2,
                     }});
             });
         path.select('text').attr("transform", function(d) {
             return "translate(" +
                 (((d.source.x2 || d.source.x) + (d.target.x2 || d.target.x))/2) + "," +
-                (((d.source.y2 || d.source.y) + (d.target.y2 || d.target.y))/2) + ")";
+                (((d.source.y2===undefined?d.source.y: d.source.y2) + (d.target.y2===undefined?d.target.y: d.target.y2))/2) + ")";
         })
         return path;
     }
@@ -1138,7 +1186,7 @@ let JobMap = function() {
         let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,d=> d.name);
         computers.select('.computeSig').datum(d=>d);
         computers.exit().remove();
-        let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode '+fixName2Class(fixstr(d.name)));
+        let computers_n = computers.enter().append('g').attr('class',d=>'node computeNode new '+fixName2Class(fixstr(d.name)));
 
         computers_n.append('g').attrs(
             {'class':'computeSig',
@@ -1188,7 +1236,7 @@ let JobMap = function() {
         }
         let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
         jobNode.exit().remove();
-        let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode '+fixName2Class(fixstr(d.name)));
+        let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode new '+fixName2Class(fixstr(d.name)));
 
         jobNode_n.append('circle')
             .attrs(
@@ -1243,7 +1291,7 @@ let JobMap = function() {
 
         let userNode = nodeg.selectAll('.userNode').data(user,d=> d.name);
         userNode.exit().remove();
-        let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode '+fixName2Class(fixstr(d.name)));
+        let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode new '+fixName2Class(fixstr(d.name)));
 
         updaterow(userNode_n.merge(userNode));
 
@@ -1509,12 +1557,17 @@ let JobMap = function() {
                 truncate(d,'▼');
         });
         cells.on('click',function(d){
+            tableHeader.el = this;
             if (d.key!==tableHeader.currentsort)
                 cells.filter(e=>e.key===tableHeader.currentsort)
                     .each(function(e){
                         e.direction=undefined;
                         d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'↕'));
                     });
+            if(tableHeader.currentsort==='Job_startTime'){
+                runopt.overlayjob = false;
+                $('#jobOverlay').prop('checked',false);
+            }
             tableHeader.currentsort = d.key;
             tableHeader.direction = (d.direction=!d.direction);
             handle_sort(true);
@@ -1635,6 +1688,21 @@ let JobMap = function() {
             user.sort((a, b) => b.values.length - a.values.length);
         else
             switch (tableHeader.currentsort) {
+                case 'Job_startTime':
+                    user.forEach(u=>u.jobStart_order=[]);
+                    let temp_link = linkdata.filter(d => d.target.type === 'job');
+                    g.selectAll('.computeNode').data().forEach(d => {
+                        let temp = temp_link.filter(e => e.source.name === d.name);
+                        d.order = d3.max(temp,e=>+new Date(e.target.startTime))||0;
+                        if (temp.length){
+                            temp.forEach(t=>user.find(u=>u.name===t.target.user).jobStart_order.push(d.order));
+                        }
+                    });
+                    g.selectAll('.computeNode').data().sort((a, b) => a.order - b.order).forEach((d, i) => (d.order = i,d.values_name.forEach(h=>hostOb[h].order=i)));
+                    // user.sort((a, b) => );
+                    user.forEach(u=>u.jobStart_order=_.mean(u.jobStart_order));
+                    user.sort((a,b)=>a.jobStart_order-b.jobStart_order);
+                    break;
                 case 'UserID':
                     user.sort((a, b) => a.name.localeCompare(b.name)*(-1+2*tableHeader.direction));
                     break;
@@ -1654,6 +1722,7 @@ let JobMap = function() {
                     break;
             }
         user.forEach((d, i) => {
+            delete d.jobStart_order;
             d.order = i;
             d.orderlink = i;
         });
@@ -1670,15 +1739,25 @@ let JobMap = function() {
             // order by links
             user.sort((a, b) => a.orderlink - b.orderlink).forEach((d, i) => d.order = i);
         }
-        g.selectAll('.userNode').transition().attr('transform',d=>{
+        g.selectAll('.userNode.new').classed('new',false).attr('transform',d=>{
             d.fy=yscale(d.order);
             d.fx=600;
             d.y=d.fy;
             d.x=d.fx;
             return `translate(${d.fx},${d.fy})`
         });
-        if ((runopt.compute.type==='timeline' || runopt.compute.clusterNode)&&!skiprender)
-            renderManual(d3.selectAll('.node.computeNode'),d3.selectAll('.node.jobNode'),d3.selectAll('.links'))
+        g.selectAll('.userNode').transition().duration(animation_time)
+            .attr('transform',d=>{
+                d.fy=yscale(d.order);
+                d.fx=600;
+                d.y=d.fy;
+                d.x=d.fx;
+                return `translate(${d.fx},${d.fy})`
+            });
+        if ((runopt.compute.type==='timeline' || runopt.compute.clusterNode)&&!skiprender) {
+            renderManual(d3.selectAll('.node.computeNode'), d3.selectAll('.node.jobNode'), d3.selectAll('.links'))
+            jobMap.drawComp();
+        }
     }
     let clusterNode_data,clusterdata,clusterdata_timeline;
     let clusterlineScale = d3.scaleLinear().range([0,400]);
@@ -1726,6 +1805,7 @@ let JobMap = function() {
     let first__timestep = new Date();
     let lastIndex = 0;
     let deltaTime = 0;
+    let triggerCal_Cluster = true;
     function handle_links (timeStep_r,lastIndex_r){
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
@@ -1741,11 +1821,17 @@ let JobMap = function() {
         Hosts.forEach(h=>{
             h.user=[];
             h.arrcluster = [];
-            h.timeline = {clusterarr:[],line:[],lineFull:[],clusterarr_sudden:[]};
+            if (triggerCal_Cluster) {
+                h.timeline = {clusterarr: [], line: [], lineFull: [], clusterarr_sudden: []};
+            }
         });
 
         if (lastIndex===(maxTimestep-1)) {
-            updateClusterTimeline();
+            animation_time = 2000;
+            if (triggerCal_Cluster) {
+                updateClusterTimeline();
+                // triggerCal_Cluster = false; // optimise speed here TODO
+            }
             let user_n = current_userData();
             // .sort((a,b)=>b.values.length-a.values.length).filter((d,i)=>i<12);
             // tableData = {}
@@ -1860,6 +1946,9 @@ let JobMap = function() {
                 data = newdata;
                 Jobscale.domain(d3.extent(data, d => d.values.length));
             }
+        }else{
+            triggerCal_Cluster=true;
+            animation_time = 500;
         }
 
         if (runopt.compute.clusterNode) {
@@ -1990,14 +2079,6 @@ let JobMap = function() {
                                         temp_g[k].forEach(e=>temp_h.timeline.clusterarr_sudden=_.unionWith(e.timeline.clusterarr_sudden,temp_h.timeline.clusterarr_sudden, _.isEqual));
                                     }
                                     temp_h.arr = temp_g[k][0].arrcluster;
-
-                                    // Conflict sudden timepoint
-                                    // if(temp_h.timeline.clusterarr_sudden.length!==temp_g[k][0].timeline.clusterarr_sudden.length){
-                                    //     console.log(`sudden value=${runopt.suddenGroup} -------${temp_h.name}--------`);
-                                    //     console.log(temp_g[k][0].timeline.clusterarr_sudden);
-                                    //     console.log(temp_h.timeline.clusterarr_sudden);
-                                    // }
-
                                     clusterdata_timeline.push(temp_h);
                                 }else{
                                     temp_g[k].forEach((n) => {
@@ -2077,7 +2158,7 @@ let JobMap = function() {
         harr_old = harr.slice();
         return harr;
     }
-    let triggerUsermetric=false;
+    let triggerCal_Usermetric=true;
     function computeUsermetric(){
         let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
@@ -2102,12 +2183,12 @@ let JobMap = function() {
                 }
             })
         });
-        triggerUsermetric=true
+        triggerCal_Usermetric=false
     }
     let violinRange = [0,0];
     function handle_summary (data,render){
         if(data.length){
-            triggerUsermetric=false;
+            triggerCal_Usermetric=true;
         }
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
         let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);

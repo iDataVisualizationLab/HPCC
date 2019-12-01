@@ -1852,10 +1852,10 @@ function ip2hostname (address) {
 }
 let expectedLength = 0;
 function requestServiceinfluxdb(count,serin) {
-    // if(recordonly) {
-    //     timearr = d3.scaleTime().domain(timerange.map(d => new Date(d))).ticks(formatRealtime);
-    //     hostResults.timespan = timearr;
-    // }
+    if(recordonly) {
+        timearr = d3.scaleTime().domain(timerange.map(d => new Date(d))).ticks(formatRealtime);
+        hostResults.timespan = timearr;
+    }
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
         const ip = "10.101."+ hosts[count].hpcc_rack +"." + hosts[count].hpcc_node;
