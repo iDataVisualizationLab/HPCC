@@ -13,10 +13,10 @@ d3.csv("../HiperView/data/data_with_job_csv/JobDetail_2019-09-20_2019-09_5m.csv"
     })
     console.log(JSON.stringify(jobd))
 })
-alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
+var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
 
 var sampleh = {};
-let ser = serviceListattr.slice();
+var ser = serviceListattr.slice();
 ser.pop();
 d3.csv("../HiperView/data/data_with_job_csv/HostDetail_2019-09-20_2019-09_5m.csv", function (error, data){
     sampleh.timespan = data.map(d=>d['TimeStamp']);
@@ -26,12 +26,16 @@ d3.csv("../HiperView/data/data_with_job_csv/HostDetail_2019-09-20_2019-09_5m.csv
        alternative_service.forEach((sa,si)=>{
            var s =  serviceFullList[si];
            var arrID = serviceListattr[s.idroot];
+           var scale = 1;
+           if (s.text==="Memory usage"||s.text==="Power consumption")
+               scale = 0.5;
            data.forEach((dt,ti)=>{
                let value = dt[`${h.ip}-${sa}`];
                if (value=="")
                    value=null;
                 else
-                    value = +value;
+                    value = (+value)*scale;
+
                if(!sampleh[h.name][arrID][ti])
                    sampleh[h.name][arrID][ti]=[];
                sampleh[h.name][arrID][ti][s.id] = value;
