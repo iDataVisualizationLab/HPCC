@@ -1446,6 +1446,37 @@ function updateSummaryChartAll() {
     }
 }
 
+function readFilecsv(file) {
+    exit_warp();
+    preloader(true);
+    setTimeout(() => {
+        d3.csv(file, function (error, data) {
+            if (error) {
+            } else {
+                loadata1(data);
+
+                function loadata1(data) {
+                    db = "csv";
+
+                    newdatatoFormat(data);
+
+                    inithostResults();
+                    processResult = processResult_csv;
+
+                    addDatasetsOptions()
+                    MetricController.axisSchema(serviceFullList, true).update();
+                    realTimesetting(false, "csv", true, data);
+                    d3.select(".currentDate")
+                        .text("" + new Date(data[0].timestamp).toDateString());
+                    if (!init)
+                        resetRequest();
+                    preloader(false);
+                }
+            }
+        })
+    }, 0);
+}
+
 $( document ).ready(function() {
     console.log('ready');
     // set tooltip
@@ -1747,33 +1778,8 @@ $( document ).ready(function() {
         reader.onload = (function(theFile) {
             return function(e) {
                 // Render thumbnail.
-                exit_warp();
-                preloader(true)
-                setTimeout(() => {
-                    d3.csv(e.target.result,function (error, data) {
-                        if (error){
-                        }else{
-                            loadata1(data);
-                            function loadata1(data){
-                                db = "csv";
-
-                                newdatatoFormat(data);
-
-                                inithostResults();
-                                processResult = processResult_csv;
-
-                                addDatasetsOptions()
-                                MetricController.axisSchema(serviceFullList,true).update();
-                                realTimesetting(false,"csv",true,data);
-                                d3.select(".currentDate")
-                                    .text("" + new Date(data[0].timestamp).toDateString());
-                                if (!init)
-                                    resetRequest();
-                                preloader(false);
-                            }
-                        }
-                    })
-                },0);
+                let file = e.target.result;
+                readFilecsv(file);
                 // span.innerHTML = ['<img class="thumb" src="', e.target.result,
                 //     '" title="', escape(theFile.name), '"/>'].join('');
                 // document.getElementById('list').insertBefore(span, null);
