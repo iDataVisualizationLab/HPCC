@@ -1,0 +1,35 @@
+code	name
+00000000	Total Nonfarm
+05000000	Total Private
+06000000	Goods Producing
+07000000	Service-Providing
+08000000	Private Service Providing
+10000000	Mining, Logging
+15000000	Mining, Logging, Construction
+20000000	Construction
+30000000	Manufacturing
+31000000	Durable Goods
+32000000	Non-Durable Goods
+40000000	Trade, Transportation, Utilities
+41000000	Wholesale Trade
+42000000	Retail Trade
+43000000	Transportation, Warehousing, Utilities
+50000000	Information
+55000000	Financial Activities
+55520000	Finance and Insurance
+55530000	Real Estate, Rental, Leasing
+60000000	Professional and Business Services
+60540000	Professional, Scientific, Technical Services
+60550000	Management if Companies and Enterprises
+60560000	Ad-Sp-WM-R Services
+65000000	Education, Health Services
+65610000	Educational Services
+65620000	Health Care, Social Assistance
+70000000	Leisure and Hospitality
+70710000	Arts, Entertainment, Recreation
+70720000	Accommodation and Food Services
+80000000	Other Services
+90000000	Government
+90910000	Federal Government
+90920000	State Government
+90930000	Local Government

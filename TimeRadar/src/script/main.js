@@ -330,9 +330,54 @@ let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jo
 let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
 let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
-let getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
+let getDataWorker;
 let isbusy = false, imageRequest = false, isanimation=false;
 let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0};
+function initDataWorker(){
+    if (getDataWorker)
+        getDataWorker.terminate();
+    getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
+    getDataWorker.postMessage({action:"init",value:{
+            hosts:hosts,
+            db:db,
+            cluster_info:cluster_info,
+        }});
+    getDataWorker.addEventListener('message',({data})=>{
+        if (data.status==='done') {
+            isbusy = false;
+        }
+        if (imageRequest){
+            playchange();
+            d3.select('.cover').classed('hidden', false);
+            d3.select('.progressDiv').classed('hidden', false);
+            imageRequest = false;
+            onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
+        }
+        if (data.action==='returnData'){
+            if (data.result.hindex!==undefined && data.result.index < lastIndex) {
+                if (graphicControl.sumType === "RadarSummary" ) {
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
+            }
+
+        }else if (data.action==='returnDataHistory'){
+            if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
+                if (graphicControl.charType === "T-sne Chart")
+                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
+                jobMap.dataComp(data.result.arr);
+                if(isanimation)
+                    jobMap.drawComp();
+                if (graphicControl.sumType === "RadarSummary") {
+                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
+                }
+                MetricController.data(data.result.arr).drawSummary(data.result.hindex);
+            }
+        }
+        if (data.action==='DataServices') {
+            MetricController.datasummary(data.result.arr);
+        }
+    }, false);
+}
 function setColorsAndThresholds(s) {
     for (var i=0; i<serviceList_selected.length;i++){
         let range = serviceLists[serviceList_selected[i].index].sub[0].range;
@@ -395,46 +440,7 @@ function main() {
         control_jobdisplay.node().options.selectedIndex = 2;
         control_jobdisplay.attr('disabled', '').dispatch('change');
 
-    getDataWorker.postMessage({action:"init",value:{
-            hosts:hosts,
-            db:db,
-            cluster_info:cluster_info,
-        }});
-    getDataWorker.addEventListener('message',({data})=>{
-        if (data.status==='done') {
-            isbusy = false;
-        }
-        if (imageRequest){
-            playchange();
-            d3.select('.cover').classed('hidden', false);
-            d3.select('.progressDiv').classed('hidden', false);
-            imageRequest = false;
-            onSavingbatchfiles(data.result.arr,onSavingFile); // saveImages.js
-        }
-        if (data.action==='returnData'){
-            if (data.result.hindex!==undefined && data.result.index < lastIndex) {
-                if (graphicControl.sumType === "RadarSummary" ) {
-                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                }
-            }
-
-        }else if (data.action==='returnDataHistory'){
-            if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
-                if (graphicControl.charType === "T-sne Chart")
-                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                jobMap.dataComp(data.result.arr);
-                if(isanimation)
-                    jobMap.drawComp();
-                if (graphicControl.sumType === "RadarSummary") {
-                    Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
-                }
-                MetricController.data(data.result.arr).drawSummary(data.result.hindex);
-            }
-        }
-        if (data.action==='DataServices') {
-            MetricController.datasummary(data.result.arr);
-        }
-    }, false);
+    initDataWorker();
     request();
 }
 var currentlastIndex;
@@ -1462,15 +1468,56 @@ function readFilecsv(file) {
 
                     inithostResults();
                     processResult = processResult_csv;
-
-                    addDatasetsOptions()
+                    initDataWorker();
+                    // addDatasetsOptions()
                     MetricController.axisSchema(serviceFullList, true).update();
                     realTimesetting(false, "csv", true, data);
+                    updateDatainformation(sampleS['timespan']);
+
+                        sampleJobdata = [{
+                            jobID: "1",
+                            name: "1",
+                            nodes: hosts.map(h=>h.name),
+                            startTime: sampleS.timespan[0].toString(),
+                            submitTime: _.last(sampleS.timespan).toString(),
+                            user: "dummyJob"
+                        }];
+
                     d3.select(".currentDate")
-                        .text("" + new Date(data[0].timestamp).toDateString());
-                    if (!init)
-                        resetRequest();
-                    preloader(false);
+                        .text("" + (sampleS['timespan'][0]).toDateString());
+                    recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},function(){
+                            cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
+                            hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
+                                let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
+                                let index = 0;
+                                let minval = Infinity;
+                                cluster_info.forEach((c,i)=>{
+                                    const val = distance(c.__metrics.normalize,axis_arr);
+                                    if(minval>val){
+                                        index = i;
+                                        minval = val;
+                                    }
+                                });
+                                cluster_info[index].total = 1 + cluster_info[index].total||0;
+                                cluster_info[index].__metrics.forEach((m,i)=>{
+                                    if (m.minval===undefined|| m.minval>axis_arr[i])
+                                        m.minval = axis_arr[i];
+                                    if (m.maxval===undefined|| m.maxval<axis_arr[i])
+                                        m.maxval = axis_arr[i];
+                                });
+                                return index;
+                                // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+                            }));
+                            cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
+                            cluster_map(cluster_info);
+                            jobMap.clusterData(cluster_info).colorCluster(colorCluster);
+                            radarChartclusteropt.schema = serviceFullList;
+                            handle_clusterinfo();
+
+                        if (!init)
+                            resetRequest();
+                        preloader(false);
+                    });
                 }
             }
         })
@@ -1630,8 +1677,10 @@ $( document ).ready(function() {
         exit_warp();
         const choice = this.value;
         const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
+
+
         if (choice!=='csv') {
-            if (db === 'csv') { //reload hostlist
+            if (db === 'csv'&& !choice.match('csv')) { //reload hostlist
                 d3.json(srcpath+'data/hotslist_Quanah.json', function (error, data) {
                     if (error) {
                     } else {
@@ -1647,7 +1696,8 @@ $( document ).ready(function() {
             }
             oldchoose =$('#datacom').val();
             data_info.filename = choice;
-            setTimeout(() => {
+            if(!choice.match('csv'))
+                setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
                     d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
                         if (error) {
@@ -1694,6 +1744,8 @@ $( document ).ready(function() {
                 }
 
             }, 0);
+            else
+                readFilecsv(srcpath+'data/'+choice+'.csv')
         }else{
 
             $('#datacom').val(oldchoose);
@@ -2201,7 +2253,7 @@ function updateViztype (viztype_in){
 }
 
 let clustercalWorker;
-function recalculateCluster (option) {
+function recalculateCluster (option,calback) {
     preloader(true,10,'Process grouping...','#clusterLoading');
     group_opt = option;
     if (clustercalWorker)
@@ -2212,6 +2264,9 @@ function recalculateCluster (option) {
         sampleS:sampleS,
         hosts:hosts,
         serviceFullList: serviceFullList,
+        serviceLists:serviceLists,
+        serviceList_selected:serviceList_selected,
+        serviceListattr:serviceListattr
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
@@ -2220,10 +2275,12 @@ function recalculateCluster (option) {
             clusterDescription = {};
             recomendName (cluster_info);
             recomendColor (cluster_info);
-            cluster_map(cluster_info);
-            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
-            handle_clusterinfo ();
-            preloader(false,undefined,undefined,'#clusterLoading');
+            if (!calback) {
+                cluster_map(cluster_info);
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
+                handle_clusterinfo();
+                preloader(false, undefined, undefined, '#clusterLoading');
+            }
             clustercalWorker.terminate();
         }
         if (data.action==='returnData'){

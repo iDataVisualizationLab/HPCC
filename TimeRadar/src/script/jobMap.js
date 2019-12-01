@@ -2162,7 +2162,9 @@ let JobMap = function() {
     function computeUsermetric(){
         let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
-        let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
+        let scaleBack
+        if (index_power!==-1)
+         scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
         user.forEach(u=>{
             u.dataRaw = [];
             u.unqinode.forEach(c=>{
@@ -2172,15 +2174,16 @@ let JobMap = function() {
                     timerange[1] = maxTimestep-1;
                 else
                     timerange[1] = d3.max(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.endTime))))));
-                for (let t =timerange[0];t<=timerange[1];t++) {
-                    u.dataRaw.push(hostOb[c].data[t]);
-                    if (!u.PowerUsage)
-                        u.PowerUsage = {};
-                    u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(hostOb[c].data[t][index_power].value || 0));
-                    u.PowerUsage.time = Math.max(u.PowerUsage.time||0,(timerange[1]-timerange[0])*deltaTime/1000);
-                    u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600);
-                    tableFooter.dataRaw.push(hostOb[c].data[t])
-                }
+                if (index_power!==-1)
+                    for (let t =timerange[0];t<=timerange[1];t++) {
+                        u.dataRaw.push(hostOb[c].data[t]);
+                        if (!u.PowerUsage)
+                            u.PowerUsage = {};
+                        u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(hostOb[c].data[t][index_power].value || 0));
+                        u.PowerUsage.time = Math.max(u.PowerUsage.time||0,(timerange[1]-timerange[0])*deltaTime/1000);
+                        u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600);
+                        tableFooter.dataRaw.push(hostOb[c].data[t])
+                    }
             })
         });
         triggerCal_Usermetric=false
@@ -2191,7 +2194,9 @@ let JobMap = function() {
             triggerCal_Usermetric=true;
         }
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
-        let scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
+        let scaleBack
+        if (index_power!==-1)
+            scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
         user.forEach(d=>d.needRender=(false||render))
         data.forEach(d=>{
             hostOb[d.name].data.push(d); // add new data

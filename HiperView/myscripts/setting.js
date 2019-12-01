@@ -149,7 +149,7 @@ function newdatatoFormat (data){
     hostList ={data:{hostlist:{}}};
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
-    data.forEach(d=>variables.forEach(k=>d[k] = +d[k])) // format number
+    data.forEach(d=>variables.forEach(k=>d[k] = d[k]===""?null:(+d[k]))) // format number
     let keys ={};
     variables.forEach(k=>{
         let split_string = k.split('-');
@@ -161,7 +161,10 @@ function newdatatoFormat (data){
         };
         let currentkey = split_string.join('-');
         const keys_replace =Object.keys(basic_service).map(k=>extractWordsCollection(getTermsArrayCollection(k),currentkey,k)).filter(d=>Object.keys(d).length);
-        keys[currentkey]=Object.keys(keys_replace[0])[0]||0;
+        if (keys_replace.length)
+            keys[currentkey]=Object.keys(keys_replace[0])[0]||0;
+        else
+            keys[currentkey] = undefined;
     });
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
@@ -253,7 +256,7 @@ function processData_csv(result, serviceName) {
     if (result!==undefined) {
         let val = result;
         return d3.merge(query_return.map((s, i) => {
-            if (val[i]!=undefined||(val!=undefined&&i===0)) // no error
+            if ((val!=null&&val[i]!=undefined)||(val!=undefined&&i===0)) // no error
             {
                 const subob = val;
                 if(serviceAttribute[s].type==='number')
