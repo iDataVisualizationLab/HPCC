@@ -149,9 +149,9 @@ function newdatatoFormat (data){
     hostList ={data:{hostlist:{}}};
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
-    data.forEach(d=>variables.forEach(k=>d[k] = +d[k])) // format number
+    data.forEach(d=>variables.forEach(k=>d[k] = d[k]===""?null:(+d[k]))) // format number
     let keys ={};
-    variables.forEach(k=>{
+    variables.forEach((k,ki)=>{
         let split_string = k.split('-');
         const nameh = split_string.shift();
         hostList.data.hostlist [nameh] = {
@@ -161,7 +161,11 @@ function newdatatoFormat (data){
         };
         let currentkey = split_string.join('-');
         const keys_replace =Object.keys(basic_service).map(k=>extractWordsCollection(getTermsArrayCollection(k),currentkey,k)).filter(d=>Object.keys(d).length);
-        keys[currentkey]=Object.keys(keys_replace[0])[0]||0;
+        if(!keys[currentkey])
+            keys[currentkey] = {r:undefined,vi:[]};
+        if (keys_replace.length)
+            keys[currentkey].r = Object.keys(keys_replace[0])[0]||0;
+        keys[currentkey].vi.push(ki)
     });
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
@@ -177,10 +181,18 @@ function newdatatoFormat (data){
         };
         serviceList.push(k);
         serviceListattr.push(k);
-        let range = d3.extent(data,d=>d[variables[i]]);
-        if (keys[k])
-            range = serviceLists_or.find(d=>d.text===keys[k]).sub[0].range;
-        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(variables.length-1),"range":range}]};
+        let range =[+Infinity,-Infinity];
+        keys[k].vi.forEach(vi=>{
+            let temprange = d3.extent(data,d=>d[variables[vi]]);
+            if (temprange[0]<range[0])
+                range[0] = temprange[0];
+            if (temprange[1]>range[1])
+                range[1] = temprange[1];
+        });
+        // let range = d3.extent(data,d=>d[variables[i]]);
+        if (keys[k].r)
+            range = serviceLists_or.find(d=>d.text===keys[k].r).sub[0].range;
+        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(Object.keys(keys).length-1),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);
     });
@@ -253,7 +265,7 @@ function processData_csv(result, serviceName) {
     if (result!==undefined) {
         let val = result;
         return d3.merge(query_return.map((s, i) => {
-            if (val[i]!=undefined||(val!=undefined&&i===0)) // no error
+            if ((val!=null&&val[i]!=undefined)||(val!=undefined&&i===0)) // no error
             {
                 const subob = val;
                 if(serviceAttribute[s].type==='number')
@@ -498,6 +510,14 @@ function getDataByName(hostResults, name,startIndex, lastIndex, isPredict,undefi
             let indx = ser.index;
             var a;
             let requiredLength=  serviceLists[indx].sub.length;
+            try{
+                r[serviceListattr[indx]][stepIndex]
+            }catch(err){
+                console.log(serviceListattr)
+                console.log(indx)
+                console.log(serviceListattr[indx])
+                console.log(r[serviceListattr[indx]])
+            }
             if (r[serviceListattr[indx]][stepIndex]) {
                 a = r[serviceListattr[indx]][stepIndex].slice(0,requiredLength);
                 d3.range(0,requiredLength - a.length).forEach(d=> a.push(undefined));

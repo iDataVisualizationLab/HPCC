@@ -2,12 +2,15 @@ window =self;
 importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/myscripts/setting.js","../../../../HiperView/js/lodash.min.js","../setting.js","../../../../HiperView/js/kmean.js","../../../../HiperView/js/binnerN.min.js","../../../../HiperView/js/simple-statistics.min.js");
 
 addEventListener('message',function ({data}) {
-    let binopt = data.binopt, sampleS = data.sampleS,hosts = data.hosts,serviceFullList = data.serviceFullList;
+    let binopt = data.binopt, sampleS = data.sampleS,hosts = data.hosts;
+    serviceFullList = data.serviceFullList;
+    serviceLists=data.serviceLists;
+    serviceList_selected = data.serviceList_selected;
+    serviceListattr= data.serviceListattr;
     let bin;
     var arr = [];
     dataSpider3 = [];
     dataCalculate = [];
-
     for (var i = 0; i < sampleS.timespan.length; i++) {
         for (var h = 0; h < hosts.length; h++) {
             var name = hosts[h].name;
@@ -20,9 +23,9 @@ addEventListener('message',function ({data}) {
     }
     dataSpider3 = arr;
     dataCalculate = arr;
-
     if (binopt.clusterMethod === 'leaderbin') {
-        let estimateSize = Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length);
+        let estimateSize = Math.max(2,Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
+        console.log('estimateSize: '+estimateSize);
         bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
             reduce_coefficient: 0.3,
             reduce_offset: 0,

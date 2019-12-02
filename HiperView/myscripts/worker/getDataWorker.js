@@ -13,6 +13,10 @@ addEventListener('message',function ({data}){
             undefinedValue = thresholds.map(d=>(d[1]-d[0])/2);
             hosts = data.value.hosts;
             db = data.value.db;
+            serviceFullList = data.value.serviceFullList;
+            serviceLists=data.value.serviceLists;
+            serviceList_selected = data.value.serviceList_selected;
+            serviceListattr= data.value.serviceListattr;
             serviceFull_selected =[];
             serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
             break;

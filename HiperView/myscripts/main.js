@@ -852,6 +852,10 @@ function main() {
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
+            serviceFullList:serviceFullList,
+            serviceLists:serviceLists,
+            serviceList_selected :serviceList_selected,
+            serviceListattr:serviceListattr
         }});
     getDataWorker.addEventListener('message',({data})=>{
         if (data.status==='done') {
