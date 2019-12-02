@@ -1485,8 +1485,8 @@ function readFilecsv(file) {
                             jobID: "1",
                             name: "1",
                             nodes: hosts.map(h=>h.name),
-                            startTime: sampleS.timespan[0].toString(),
-                            submitTime: _.last(sampleS.timespan).toString(),
+                            startTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                            submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
                             user: "dummyJob"
                         }];
 
@@ -2341,7 +2341,8 @@ function recomendColor (clusterarr) {
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
-    clusterarr.filter(c=>!c.text.match('undefined'))
+    // clusterarr.filter(c=>!c.text.match('undefined'))
+    clusterarr.filter(c=>c.text!=='undefined')
         .forEach(c=>{
             colorarray.push(colorcs(c.name));
             orderarray.push(c.name);
@@ -2350,10 +2351,10 @@ function recomendColor (clusterarr) {
         colorarray.push('black');
         orderarray.push(c.name);
     });
-    clusterarr.filter(c=>c.text!=='undefined' && c.text.match('undefined')).forEach(c=>{
-        colorarray.push('#7f7f7f');
-        orderarray.push(c.name);
-    });
+    // clusterarr.filter(c=>c.text!=='undefined' && c.text.match('undefined')).forEach(c=>{
+    //     colorarray.push('#7f7f7f');
+    //     orderarray.push(c.name);
+    // });
     colorCluster.range(colorarray).domain(orderarray)
 }
 function handle_clusterinfo () {
