@@ -23,9 +23,9 @@ addEventListener('message',function ({data}) {
     }
     dataSpider3 = arr;
     dataCalculate = arr;
-
     if (binopt.clusterMethod === 'leaderbin') {
-        let estimateSize = Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length);
+        let estimateSize = Math.max(2,Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
+        console.log('estimateSize: '+estimateSize);
         bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
             reduce_coefficient: 0.3,
             reduce_offset: 0,

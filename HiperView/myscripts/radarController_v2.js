@@ -574,111 +574,133 @@ let radarController = function () {
     };
     let old_hindex = 0;
     radarController.drawSummary = function(hindex_input){
-        let  hindex = hindex_input|| old_hindex;
-        old_hindex = hindex
-        let data = [handledataRate(hindex)];
-        if (data[0].length===0)
-            data[0] = arr;
-        data = data.map(ditem=>{
-            const ditem_filtered = ditem.filter(d=>radarcomp.axis[d.axis].data.enable);
-            let temp = _.sortBy(ditem_filtered,d=>getAngle(d));
-            temp.bin = ditem.bin; return temp;});
-        function getAngle(d){
-            return radarcomp.axis[d.axis].angle();
-        }
-
-        /////////////////////////////////////////////////////////
-        ///////////// Draw the radar chart blobs ////////////////
-        /////////////////////////////////////////////////////////
-        //The radial line function
-        var radarLine = d3.radialLine()
-            .curve(d3.curveCatmullRom.alpha(0.5))
-            .radius(function(d) {
-                return rScale(d.value||d); })
-            .angle(function(d,i) {  return getAngle(d); });
-
-        var radialAreaGenerator = d3.radialArea()
-            .angle(function(d,i) {  return getAngle(d); })
-            .innerRadius(function(d,i) {
-                return rScale(d.minval);
-            })
-            .outerRadius(function(d,i) {
-                return rScale(d.maxval);
+        try {
+            let hindex = hindex_input || old_hindex;
+            old_hindex = hindex
+            let data = [handledataRate(hindex)];
+            if (data[0].length === 0)
+                data[0] = arr;
+            data = data.map(ditem => {
+                const ditem_filtered = ditem.filter(d => radarcomp.axis[d.axis].data.enable);
+                let temp = _.sortBy(ditem_filtered, d => getAngle(d));
+                temp.bin = ditem.bin;
+                return temp;
             });
 
-        let radialAreaQuantile = d3.radialArea()
-            .angle(function(d,i) {  return getAngle(d); })
-            .innerRadius(function(d,i) {
-                return rScale(d.q1);
-            })
-            .outerRadius(function(d,i) {
-                return rScale(d.q3);
-            });
+            function getAngle(d) {
+                return radarcomp.axis[d.axis].angle();
+            }
 
-        if(graphicopt.roundStrokes) {
-            radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
+            /////////////////////////////////////////////////////////
+            ///////////// Draw the radar chart blobs ////////////////
+            /////////////////////////////////////////////////////////
+            //The radial line function
+            var radarLine = d3.radialLine()
+                .curve(d3.curveCatmullRom.alpha(0.5))
+                .radius(function (d) {
+                    return rScale(d.value || d);
+                })
+                .angle(function (d, i) {
+                    return getAngle(d);
+                });
+
+            var radialAreaGenerator = d3.radialArea()
+                .angle(function (d, i) {
+                    return getAngle(d);
+                })
+                .innerRadius(function (d, i) {
+                    return rScale(d.minval);
+                })
+                .outerRadius(function (d, i) {
+                    return rScale(d.maxval);
+                });
+
+            let radialAreaQuantile = d3.radialArea()
+                .angle(function (d, i) {
+                    return getAngle(d);
+                })
+                .innerRadius(function (d, i) {
+                    return rScale(d.q1);
+                })
+                .outerRadius(function (d, i) {
+                    return rScale(d.q3);
+                });
+
+            if (graphicopt.roundStrokes) {
+                radarLine.curve(d3.curveCardinalClosed.tension(0.5));
+                radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
+                radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
+            }
+
+            //Create a wrapper for the blobs
+            var blobWrapperg = g.selectAll(".radarWrapper")
+                .data(data);
+            blobWrapperg.exit().remove();
+            var blobWrapper = blobWrapperg
+                .enter().append("g")
+                .attr("class", "radarWrapper").style('pointer-events', 'none');
+
+            //update the outlines
+            var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d => d);
+
+            function drawMeanLine(paths) {
+                return paths
+                    .attr("d", function (d) {
+                        return radarLine(d)
+                    })
+                    .styles({
+                        "fill": 'none',
+                        'stroke': 'black',
+                        'stroke-width': 0.5,
+                        'stroke-dasharray': '1 2'
+                    });
+            }
+
+            function drawQuantileArea(paths) {
+                return paths
+                    .attr("d", d => radialAreaQuantile(d))
+                    .styles({
+                        "fill": 'none',
+                        'stroke': 'black',
+                        'stroke-width': 0.2
+                    });
+            }
+
+            //update the outlines
+            blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+
+            blobWrapperpath.style("fill", "none").transition()
+                .attr("d", d => radialAreaGenerator(d))
+                .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                .style("stroke", (d, i) => graphicopt.color(i));
+            blobWrapperg.select('clipPath')
+                .select('path')
+                .transition('expand').ease(d3.easePolyInOut)
+                .attr("d", d => radialAreaGenerator(d));
+            //Create the outlines
+            blobWrapper.append("clipPath")
+                .attr("id", (d, i) => "sumC")
+                .append("path")
+                .attr("d", d => radialAreaGenerator(d));
+            blobWrapper.append("rect")
+                .style('fill', 'url(#rGradient2)')
+                .attr("clip-path", (d, i) => "url(#sumC)")
+                .attr("x", -rScale(1.25))
+                .attr("y", -rScale(1.25))
+                .attr("width", rScale(1.25) * 2)
+                .attr("height", rScale(1.25) * 2);
+            blobWrapper.append("path")
+                .attr("class", "radarStroke")
+                .attr("d", d => radialAreaGenerator(d))
+                .style("fill", "none")
+                .transition()
+                .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                .style("stroke", (d, i) => graphicopt.color(i));
+            blobWrapper
+                .append("path").classed('radarLine', true).style("fill", "none").call(drawMeanLine);
+        }catch(err){
+
         }
-
-        //Create a wrapper for the blobs
-        var blobWrapperg = g.selectAll(".radarWrapper")
-            .data(data);
-        blobWrapperg.exit().remove();
-        var blobWrapper = blobWrapperg
-            .enter().append("g")
-            .attr("class", "radarWrapper").style('pointer-events','none');
-
-        //update the outlines
-        var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d=>d);
-
-        function drawMeanLine(paths){
-            return paths
-                .attr("d", function(d) {return radarLine(d)})
-                .styles({"fill":'none',
-                    'stroke':'black',
-                    'stroke-width':0.5,
-                    'stroke-dasharray': '1 2'});
-        }
-        function drawQuantileArea(paths){
-            return paths
-                .attr("d", d =>radialAreaQuantile(d))
-                .styles({"fill":'none',
-                    'stroke':'black',
-                    'stroke-width':0.2});
-        }
-        //update the outlines
-        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-
-        blobWrapperpath.style("fill", "none").transition()
-            .attr("d", d => radialAreaGenerator(d))
-            .style("stroke-width", () => graphicopt.strokeWidth + "px")
-            .style("stroke", (d, i) => graphicopt.color(i));
-        blobWrapperg.select('clipPath')
-            .select('path')
-            .transition('expand').ease(d3.easePolyInOut)
-            .attr("d", d =>radialAreaGenerator(d));
-        //Create the outlines
-        blobWrapper.append("clipPath")
-            .attr("id",(d,i)=>"sumC")
-            .append("path")
-            .attr("d", d => radialAreaGenerator(d));
-        blobWrapper.append("rect")
-            .style('fill', 'url(#rGradient2)')
-            .attr("clip-path",( d,i)=>"url(#sumC)")
-            .attr("x",-rScale(1.25))
-            .attr("y",-rScale(1.25))
-            .attr("width",rScale(1.25)*2)
-            .attr("height",rScale(1.25)*2);
-        blobWrapper.append("path")
-            .attr("class", "radarStroke")
-            .attr("d", d => radialAreaGenerator(d))
-            .style("fill", "none")
-            .transition()
-            .style("stroke-width", () => graphicopt.strokeWidth + "px")
-            .style("stroke", (d, i) => graphicopt.color(i));
-        blobWrapper
-            .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
     };
 
     function handledataRate (hindex){

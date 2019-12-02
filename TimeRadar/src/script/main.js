@@ -333,14 +333,20 @@ var MetricController = radarController();
 let getDataWorker;
 let isbusy = false, imageRequest = false, isanimation=false;
 let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0};
-function initDataWorker(){
+function makedataworker(){
     if (getDataWorker)
         getDataWorker.terminate();
     getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
+}
+function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
             cluster_info:cluster_info,
+            serviceFullList:serviceFullList,
+            serviceLists:serviceLists,
+            serviceList_selected :serviceList_selected,
+            serviceListattr:serviceListattr
         }});
     getDataWorker.addEventListener('message',({data})=>{
         if (data.status==='done') {
@@ -1138,7 +1144,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data){
     isRealtime = option;
-    // getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1468,6 +1474,7 @@ function readFilecsv(file) {
 
                     inithostResults();
                     processResult = processResult_csv;
+                    makedataworker();
                     initDataWorker();
                     // addDatasetsOptions()
                     MetricController.axisSchema(serviceFullList, true).update();
@@ -1485,7 +1492,7 @@ function readFilecsv(file) {
 
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
-                    recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},function(){
+                    recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: 4,range: [5,10]}},function(){
                             cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
                             hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                                 let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
@@ -1526,6 +1533,7 @@ function readFilecsv(file) {
 
 $( document ).ready(function() {
     console.log('ready');
+    makedataworker();
     // set tooltip
     let tipopt= {position: {
             x: 'right',
@@ -1752,7 +1760,7 @@ $( document ).ready(function() {
             $('#data_input_file').trigger('click');
         }
         function loadata1(data,job){
-
+            makedataworker();
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             updateDatainformation(data['timespan']);
             if(job)
@@ -1797,6 +1805,7 @@ $( document ).ready(function() {
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
                 handle_clusterinfo();
+                initDataWorker();
             }
             if (!init)
                 resetRequest();
@@ -2279,9 +2288,11 @@ function recalculateCluster (option,calback) {
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
                 handle_clusterinfo();
-                preloader(false, undefined, undefined, '#clusterLoading');
             }
+            preloader(false, undefined, undefined, '#clusterLoading');
             clustercalWorker.terminate();
+            if (calback)
+                calback();
         }
         if (data.action==='returnData'){
             onloaddetermire({process:data.result.process,message:`# iterations: ${data.result.iteration}`},'#clusterLoading');

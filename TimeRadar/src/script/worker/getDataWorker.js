@@ -13,18 +13,21 @@ addEventListener('message',function ({data}){
             undefinedValue = thresholds.map(d=>(d[1]-d[0])/2);
             hosts = data.value.hosts;
             db = data.value.db;
-            cluster_info = data.value.cluster_info;
+            serviceFullList = data.value.serviceFullList;
+            serviceLists=data.value.serviceLists;
+            serviceList_selected = data.value.serviceList_selected;
+            serviceListattr= data.value.serviceListattr;
             serviceFull_selected =[];
             serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
             break;
         case 'isRealtime':
             if (db==='csv')
             {
-                systemFormat();
+                // systemFormat();
                 hostList = data.hostList;
                 inithostResults(true);
-                serviceFull_selected =[];
-                serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
+                // serviceFull_selected =[];
+                // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
             }
             db = data.db;
 
@@ -41,8 +44,8 @@ addEventListener('message',function ({data}){
                 else
                     processData = processData_old;
             }
-            serviceFull_selected =[];
-            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
+            // serviceFull_selected =[];
+            // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             break;
         case 'getbatchData':
             const arr = plotTsne(data.value.hostResults,data.value.lastIndex,data.value.usepast);
