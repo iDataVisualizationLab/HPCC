@@ -1486,7 +1486,7 @@ function readFilecsv(file) {
                             name: "1",
                             nodes: hosts.map(h=>h.name),
                             startTime: sampleS.timespan[0].toString(),
-                            submitTime: _.last(sampleS.timespan).toString(),
+                            submitTime: sampleS.timespan[0].toString(),
                             user: "dummyJob"
                         }];
 
