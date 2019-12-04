@@ -2286,7 +2286,7 @@ function recalculateCluster (option,calback) {
             recomendColor (cluster_info);
             if (!calback) {
                 cluster_map(cluster_info);
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data().draw().drawComp();
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,true).draw().drawComp();
                 handle_clusterinfo();
             }
             preloader(false, undefined, undefined, '#clusterLoading');

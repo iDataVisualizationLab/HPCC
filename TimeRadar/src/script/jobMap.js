@@ -542,17 +542,18 @@ let JobMap = function() {
                 .attr('class', 'linkLinegg timeline');
             datapoint_n.style('opacity',0)
                 .transition().duration(animation_time).style('opacity',1);
-            datapoint
-                .merge(datapoint_n).each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
-            });
+
             datapoint_n.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
+            }).each(function (d, i) {
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
             });
-            datapoint.transition().duration(animation_time)
+            datapoint.style('opacity',1).transition().duration(animation_time)
                 .attr('transform', function (d) {
                     return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
-                });
+                }).each(function (d, i) {
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
+            });
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
             // bg.selectAll("path.linegg").remove();
@@ -1806,7 +1807,8 @@ let JobMap = function() {
     let lastIndex = 0;
     let deltaTime = 0;
     let triggerCal_Cluster = true;
-    function handle_links (timeStep_r,lastIndex_r){
+    function handle_links (timeStep_r,lastIndex_r,triggerCluster){
+        triggerCal_Cluster = triggerCluster||triggerCal_Cluster;
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
             lastIndex = lastIndex_r
@@ -2411,7 +2413,7 @@ let JobMap = function() {
     };
 
     jobMap.data = function (_) {
-        return dataRaw = _?_:dataRaw, handle_links (arguments[1],arguments[2]), jobMap;
+        return dataRaw = _?_:dataRaw, handle_links (arguments[1],arguments[2],arguments[3]), jobMap;
     };
 
     jobMap.clusterData = function (v) {
