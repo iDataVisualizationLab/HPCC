@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script src="../HiperView/js/d3.v4.js"></script>
+<script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v1.min.js"></script>
+<script src="https://d3js.org/d3-timer.v1.min.js"></script>
+<script src="https://d3js.org/d3-force.v2.min.js"></script>
+<script src="../HiperView/js/d3.tip.js"></script>
+<script src="../HiperView/js/d3.scaleAdjust.js"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-format.v1.min.js"></script>
+<script>
+    let data=[];
+    let set = [10,30,50]
+    d3.range(0,2).forEach(task=>{
+        set.forEach(ins=>{
+            set.forEach(tims=>{
+                data.push(
+                d3.range(0,2).map(vis=> {
+                    return (`${ins}_${tims}_${task ? 'b' : 'a'}_${vis?'l':'b'}`);
+                }))
+            })
+        })
+    })
+    d3.select('body').selectAll('div').data(data)
+        .enter()
+        .append('div')
+            .selectAll('img').data(d=>d)
+            .enter()
+            .append('img')
+            .attr('src',d=>`svg/${d}.svg`)
+</script>
+</body>
+</html>
