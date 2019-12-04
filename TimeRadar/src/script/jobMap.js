@@ -498,7 +498,7 @@ let JobMap = function() {
                 let mouse = d3.mouse(this);
                 if(runopt.compute.type==="timeline"){
                     animation_time = 0;
-                    bg.interrupt().selectAll("*").interrupt();
+                    bg.transition().selectAll("*").transition();
                     fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([-timelineStep*timelineScale.domain()[1],0]).focus(mouse[0]-(+lensingLayer.attr('width')));
                     drawEmbedding_timeline(data,colorfill);
                 }
