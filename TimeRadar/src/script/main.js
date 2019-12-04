@@ -1777,7 +1777,7 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
-            if(cluster_info){
+            recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: 4,range: [5,10]}},function(){
                 cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                     let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
@@ -1806,10 +1806,10 @@ $( document ).ready(function() {
                 radarChartclusteropt.schema = serviceFullList;
                 handle_clusterinfo();
                 initDataWorker();
-            }
-            if (!init)
-                resetRequest();
-            preloader(false)
+                if (!init)
+                    resetRequest();
+                preloader(false)
+            });
         }
     });
     $('#description_input_file').on('input',(evt)=>{
