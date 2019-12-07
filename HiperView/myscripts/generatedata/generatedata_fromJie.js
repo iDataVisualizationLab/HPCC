@@ -1,6 +1,8 @@
 hosts.forEach(d=>d.ip = `10.101.${d.hpcc_rack}.${d.hpcc_node}`);
 //jobdata
-d3.csv("../HiperView/data/data_with_job_csv/JobDetail_2019-09-20_2019-09_5m.csv", function (error, data){
+// let filename = "2019-09-20_2019-09_5m";
+let filename = "2019-04-20_5m";
+d3.csv(`../HiperView/data/data_with_job_csv/JobDetail_${filename}.csv`, function (error, data){
     let jobd = data.map(d=>{
         let temp = {"nodes":JSON.parse(d.nodesAddr.replace(/'|'/g,'"')).map(c=>hosts.find(h=>h.ip==c).name),
             "jobID":d.JobID,
@@ -18,7 +20,7 @@ var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage
 var sampleh = {};
 var ser = serviceListattr.slice();
 ser.pop();
-d3.csv("../HiperView/data/data_with_job_csv/HostDetail_2019-09-20_2019-09_5m.csv", function (error, data){
+d3.csv(`../HiperView/data/data_with_job_csv/HostDetail_${filename}.csv`, function (error, data){
     sampleh.timespan = data.map(d=>d['TimeStamp']);
     hosts.forEach(h=>{
        sampleh[h.name]={};

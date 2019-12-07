@@ -35,6 +35,7 @@ function RadarChart(id, data, options, name) {
         pathColor: undefined,
         ringStroke_width: 0.5,
         schema: undefined,
+        animationDuration:100,
         events:{
             axis: {
                 mouseover: function(){},
@@ -397,12 +398,12 @@ function RadarChart(id, data, options, name) {
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("fill-opacity", d => densityscale(d.bin.val.length))
             .style("fill", (d, i) =>cfg.color(i,d))
-            .transition().attr("d",radialAreaGenerator);
+            .transition().duration(cfg.animationDuration).attr("d",radialAreaGenerator);
     }
 
 
     function drawOutlying(paths){
-        return paths.attr("d", d => radarLine(d)).transition()
+        return paths.attr("d", d => radarLine(d)).transition().duration(cfg.animationDuration)
             .style("stroke", (d, i) => 'black')
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke-opacity", undefined)
@@ -450,9 +451,9 @@ function RadarChart(id, data, options, name) {
         }
         blobWrapperpath.select('.radarQuantile').remove();
         //update the outlines
-        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+        blobWrapperg.select('.radarLine').transition().duration(cfg.animationDuration).call(drawMeanLine);
 
-        blobWrapperpath.style("fill", "none").transition()
+        blobWrapperpath.style("fill", "none").transition().duration(cfg.animationDuration)
             .attr("d", d => radarLine(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke", (d, i) => cfg.color(i,d));
@@ -476,7 +477,7 @@ function RadarChart(id, data, options, name) {
             .attr("class", "radarStroke")
             .attr("d", d => radarLine(d))
             .style("fill", "none")
-            .transition()
+            .transition().duration(cfg.animationDuration)
             .style("stroke-width", () => cfg.strokeWidth + "px")
             //.style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i,d));
@@ -499,9 +500,9 @@ function RadarChart(id, data, options, name) {
                     'stroke-width':0.2});
         }
         //update the outlines
-        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-        blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
-        blobWrapperpath.style("fill", "none").transition()
+        blobWrapperg.select('.radarLine').transition().duration(cfg.animationDuration).call(drawMeanLine);
+        blobWrapperg.select('.radarQuantile').transition().duration(cfg.animationDuration).call(drawQuantileArea);
+        blobWrapperpath.style("fill", "none").transition().duration(cfg.animationDuration)
             .attr("d", d => radialAreaGenerator(d))
             .style("stroke-width", () => cfg.strokeWidth + "px")
             .style("stroke", (d, i) => cfg.color(i,d));
@@ -525,7 +526,7 @@ function RadarChart(id, data, options, name) {
             .attr("class", "radarStroke")
             .attr("d", d => radialAreaGenerator(d))
             .style("fill", "none")
-            .transition()
+            .transition().duration(cfg.animationDuration)
             .style("stroke-width", () => cfg.strokeWidth + "px")
             //.style("stroke-opacity", d => cfg.bin ? densityscale(d.bin.val.length) : 0.5)
             .style("stroke", (d, i) => cfg.color(i,d));
@@ -560,10 +561,10 @@ function RadarChart(id, data, options, name) {
                     'stroke-width':() => cfg.strokeWidth + "px"});
         }
         //update the outlines
-        blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+        blobWrapperg.select('.radarLine').transition().duration(cfg.animationDuration).call(drawMeanLine);
         if(quantile_exist) {
-            blobWrapperg.select('.radarQuantile').transition().call(drawQuantileArea);
-            blobWrapperpath.style("fill", "none").transition().call(drawMinMaxArea);
+            blobWrapperg.select('.radarQuantile').transition().duration(cfg.animationDuration).call(drawQuantileArea);
+            blobWrapperpath.style("fill", "none").transition().duration(cfg.animationDuration).call(drawMinMaxArea);
             blobWrapper.append("path")
                 .attr("class", "radarStroke")
                 .style("fill", "none")
@@ -572,7 +573,7 @@ function RadarChart(id, data, options, name) {
             blobWrapperpath
                 .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
                 .style("fill-opacity", cfg.fillin)
-                .transition().call(drawMinMaxArea);
+                .transition().duration(cfg.animationDuration).call(drawMinMaxArea);
             blobWrapper.append("path")
                 .attr("class", "radarStroke")
                 .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
@@ -592,7 +593,7 @@ function RadarChart(id, data, options, name) {
     else {
         g.selectAll(".radarWrapper").selectAll('.radarLine').remove();
         g.selectAll(".radarWrapper").selectAll('.radarQuantile').remove();
-        blobWrapperpath.transition().attr("d", d => radarLine(d))
+        blobWrapperpath.transition().duration(cfg.animationDuration).attr("d", d => radarLine(d))
             .style("fill-opacity", (d,i)=>cfg.fillin?cfg.fillin:null)
             .style("fill", (d,i)=>cfg.fillin?cfg.color(i,d):"none")
             .style("stroke-width", () => cfg.strokeWidth + "px")
@@ -760,17 +761,17 @@ function RadarChart(id, data, options, name) {
     //     .on('mouseover', function (d,i){
     //         //Dim all blobs
     //         d3.selectAll(".radarArea")
-    //             .transition().duration(200)
+    //             .transition().duration(cfg.animationDuration).duration(200)
     //             .style("fill-opacity", 0.0);
     //         //Bring back the hovered over blob
     //         d3.select(this)
-    //             .transition().duration(200)
+    //             .transition().duration(cfg.animationDuration).duration(200)
     //             .style("fill-opacity", 0.3);
     //     })
     //     .on('mouseout', function(){
     //         //Bring back all blobs
     //         d3.selectAll(".radarArea")
-    //             .transition().duration(200)
+    //             .transition().duration(cfg.animationDuration).duration(200)
     //             .style("fill-opacity",  0.05);
     //     });
 
@@ -808,11 +809,11 @@ function RadarChart(id, data, options, name) {
                     .attr('x', newX)
                     .attr('y', newY)
                     .text(Format(d.value))
-                    .transition().duration(200)
+                    .transition().duration(cfg.animationDuration).duration(200)
                     .style('opacity', 1);
             })
             .on("mouseleave", function () {
-                tooltip.transition().duration(200)
+                tooltip.transition().duration(cfg.animationDuration).duration(200)
                     .style("opacity", 0);
             });
         blobCircleWrappergg.exit().remove();
@@ -836,11 +837,11 @@ function RadarChart(id, data, options, name) {
                     .attr('x', newX)
                     .attr('y', newY)
                     .text(Format(d.value))
-                    .transition().duration(200)
+                    .transition().duration(cfg.animationDuration).duration(200)
                     .style('opacity', 1);
             })
             .on("mouseleave", function () {
-                tooltip.transition().duration(200)
+                tooltip.transition().duration(cfg.animationDuration).duration(200)
                     .style("opacity", 0);
             });
     }

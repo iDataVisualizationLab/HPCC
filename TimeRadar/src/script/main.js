@@ -1578,9 +1578,14 @@ $( document ).ready(function() {
         direction: 'left',
         hoverEnabled: false,
     });
-    $('.collapsible').collapsible();
+    $('.collapsible').collapsible({
+        inDuration:1000,
+        outDuration:1000
+    });
     $('.collapsible.expandable').collapsible({
-        accordion: false
+        accordion: false,
+        inDuration:1000,
+        outDuration:1000,
     });
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
@@ -2138,6 +2143,7 @@ let radarChartclusteropt  = {
     ringColor:'black',
     fillin:0.5,
     boxplot:false,
+    animationDuration:1000,
     events:{
         axis: {
             mouseover: function(){
