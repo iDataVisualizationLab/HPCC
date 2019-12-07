@@ -7,6 +7,7 @@ addEventListener('message',function ({data}) {
     serviceLists=data.serviceLists;
     serviceList_selected = data.serviceList_selected;
     serviceListattr= data.serviceListattr;
+    distance = binopt.normMethod==='l1'?distanceL1:distanceL2;
     let bin;
     var arr = [];
     dataSpider3 = [];
@@ -26,7 +27,7 @@ addEventListener('message',function ({data}) {
     if (binopt.clusterMethod === 'leaderbin') {
         let estimateSize = Math.max(2,Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
         console.log('estimateSize: '+estimateSize);
-        bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).coefficient({
+        bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).distanceMethod(binopt.normMethod).coefficient({
             reduce_coefficient: 0.3,
             reduce_offset: 0,
             increase_coefficient: 2,
@@ -35,6 +36,7 @@ addEventListener('message',function ({data}) {
     } else {
         bin = kmeanCluster;
         bin.k(binopt.bin.k);
+        bin.distanceMethod(binopt.normMethod);
         bin.iterations(binopt.bin.iterations);
     }
     let process = 50;

@@ -48,10 +48,15 @@ function zoomtoogle(event) {
     jobMap.zoomtoogle(!oldvval);
     d3.select(event).classed('lock',!oldvval);
 }
-function distance(a, b){
+function distanceL2(a, b){
     let dsum = 0;
     a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
     return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function distanceL1(a,b) {
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=Math.abs(d-b[i])}); //modified
+    return Math.round(dsum*Math.pow(10, 10))/Math.pow(10, 10);
 }
 function getClusterName (name,index){
     return (sampleS[name].arrcluster||[])[index];

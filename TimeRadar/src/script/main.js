@@ -327,6 +327,7 @@ var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
+var distance = distanceL2;
 let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
 let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
@@ -1492,7 +1493,7 @@ function readFilecsv(file) {
 
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
-                    recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: 4,range: [5,10]}},function(){
+                    recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [5,10]}},function(){
                             cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
                             hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                                 let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
@@ -1777,7 +1778,7 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
-            recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: 4,range: [5,10]}},function(){
+            recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [8,10]}},function(){
                 cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
                     let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
@@ -2265,6 +2266,7 @@ let clustercalWorker;
 function recalculateCluster (option,calback) {
     preloader(true,10,'Process grouping...','#clusterLoading');
     group_opt = option;
+    distance = group_opt.normMethod==='l1'?distanceL1:distanceL2
     if (clustercalWorker)
         clustercalWorker.terminate();
     clustercalWorker = new Worker ('src/script/worker/clustercal.js');

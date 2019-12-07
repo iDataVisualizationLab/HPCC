@@ -1724,7 +1724,7 @@
         }),
 
         calculate: function () {
-            var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
+            var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()},undefined,this.distanceMethod());
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
             commonjsGlobal.kmeanCluster.oldCentroid = [];
@@ -1745,7 +1745,7 @@
         calculatePoint: function (siginput) {
             this.inputdata = this.inputdata.slice().concat(siginput);
             this.data(this.inputdata);
-            var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()});
+            var pointsAndCentroids = kmeans(this.normalizedPoints, {k: this.k(), iterations: this.iterations()},undefined,this.distanceMethod());
             var points = pointsAndCentroids.points;
             var centroids = pointsAndCentroids.centroids;
             commonjsGlobal.kmeanCluster.oldCentroid = [];
@@ -1773,6 +1773,10 @@
 
         iterations: getterSetter(Math.pow(10, 3), function (value) {
             return ((value % 1 == 0) & (value > 0))
+        }),
+
+        distanceMethod: getterSetter('l2', function (value) {
+            return value||'l2';
         }),
 
     };
@@ -1816,8 +1820,11 @@
             return x;
         }
     }
-    function kmeans(data, config, initCentroid) {
+    function kmeans(data, config, initCentroid,distancemethodName) {
         // default k
+        distancemethodName = distancemethodName||'l2';
+        var distancemethod  = distancemethodName==='l2'?distanceL2:distanceL1;
+        console.log(distancemethodName)
         var k = config.k || Math.round(Math.sqrt(data.length / 2));
         var iterations = config.iterations;
 
@@ -1859,42 +1866,88 @@
             centroids: centroids
         };
 
-    };
-
-// objects
-    function Point(location) {
-        var self = this;
-        this.location = getterSetter(location);
-        this.label = getterSetter();
-        this.updateLabel = function (centroids) {
-            var distancesSquared = centroids.map(function (centroid) {
-                return sumOfSquareDiffs(self.location(), centroid.location());
-            });
-            const newl = mindex(distancesSquared);
-            const valid = (self.label()===newl);
-            self.label(newl);
-            return valid;
+        // objects
+        function Point(location) {
+            var self = this;
+            this.location = getterSetter(location);
+            this.label = getterSetter();
+            this.updateLabel = function (centroids) {
+                var distancesSquared = centroids.map(function (centroid) {
+                    return distancemethod(self.location(), centroid.location());
+                });
+                const newl = mindex(distancesSquared);
+                const valid = (self.label()===newl);
+                self.label(newl);
+                return valid;
+            };
         };
-    };
 
-    function Centroid(initialLocation, label) {
-        var self = this;
-        this.location = getterSetter(initialLocation);
-        this.label = getterSetter(label);
-        this.updateLocation = function (points) {
-            var pointsWithThisCentroid = points.filter(function (point) {
-                return point.label() == self.label()
-            });
-            let valid = false;
-            if (pointsWithThisCentroid.length > 0) {
-                const newl = averageLocation(pointsWithThisCentroid);
-                valid = _.isEqual(self.location(),newl);
-                self.location(newl)};
-            return valid;
+        function Centroid(initialLocation, label) {
+            var self = this;
+            this.location = getterSetter(initialLocation);
+            this.label = getterSetter(label);
+            this.updateLocation = function (points) {
+                var pointsWithThisCentroid = points.filter(function (point) {
+                    return point.label() == self.label()
+                });
+                let valid = false;
+                if (pointsWithThisCentroid.length > 0) {
+                    const newl = averageLocation(pointsWithThisCentroid);
+                    valid = _.isEqual(self.location(),newl);
+                    self.location(newl)};
+                return valid;
+            };
         };
-    };
 
 // convenience functions
+
+        function distanceL2(oneVector, anotherVector) {
+            var squareDiffs = oneVector.map(function (component, i) {
+                return Math.pow(component - anotherVector[i], 2);
+            });
+            return squareDiffs.reduce(function (a, b) {
+                return a + b
+            }, 0);
+        };
+
+        function distanceL1(oneVector, anotherVector) {
+            var squareDiffs = oneVector.map(function (component, i) {
+                return Math.abs(component - anotherVector[i]);
+            });
+            return squareDiffs.reduce(function (a, b) {
+                return a + b
+            }, 0);
+        };
+
+        function mindex(array) {
+            var min = array.reduce(function (a, b) {
+                return Math.min(a, b);
+            });
+            return array.indexOf(min);
+        };
+
+        function sumVectors(a, b) {
+            return a.map(function (val, i) {
+                return val + b[i]
+            });
+        };
+
+        function averageLocation(points) {
+            var zeroVector = points[0].location().map(function () {
+                return 0
+            });
+            var locations = points.map(function (point) {
+                return point.location()
+            });
+            var vectorSum = locations.reduce(function (a, b) {
+                return sumVectors(a, b)
+            }, zeroVector);
+            return vectorSum.map(function (val) {
+                return val / points.length
+            });
+        };
+
+    };
     function getterSetter(initialValue, validator,nextFunc) {
         var thingToGetSet = initialValue;
         var isValid = validator || function (val) {
@@ -1909,43 +1962,6 @@
             }
             return commonjsGlobal.kmeanCluster;
         };
-    };
-
-    function sumOfSquareDiffs(oneVector, anotherVector) {
-        var squareDiffs = oneVector.map(function (component, i) {
-            return Math.pow(component - anotherVector[i], 2);
-        });
-        return squareDiffs.reduce(function (a, b) {
-            return a + b
-        }, 0);
-    };
-
-    function mindex(array) {
-        var min = array.reduce(function (a, b) {
-            return Math.min(a, b);
-        });
-        return array.indexOf(min);
-    };
-
-    function sumVectors(a, b) {
-        return a.map(function (val, i) {
-            return val + b[i]
-        });
-    };
-
-    function averageLocation(points) {
-        var zeroVector = points[0].location().map(function () {
-            return 0
-        });
-        var locations = points.map(function (point) {
-            return point.location()
-        });
-        var vectorSum = locations.reduce(function (a, b) {
-            return sumVectors(a, b)
-        }, zeroVector);
-        return vectorSum.map(function (val) {
-            return val / points.length
-        });
     };
     return commonjsGlobal.kmeanCluster;
 }())

@@ -454,7 +454,14 @@
                                     <option value="kmean">K-means</option>
                                 </select>
                             </div>
-                            <form action="#" class='clusterProfile row valign-wrapper' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
+                            <div  class="row valign-wrapper">
+                                <label for="normMethod" class="col s4 radarcontroller_layout"> Distance Function</label>
+                                <select id="normMethod" class="col s8 radarcontroller_layout">
+                                    <option value="l1">L1 norm - Manhattan Distance</option>
+                                    <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+                                </select>
+                            </div>
+                            <form action="#" class='clusterProfile row valign-wrapper' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}});return false;">
                                 <label for="startBinGridSize" class="col s4 radarcontroller_layout hide">Initial diameter</label>
                                 <div  class="col s5 hide">
                                     <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
@@ -469,7 +476,7 @@
                                     <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
                                 </div>
                             </form>
-                            <form action="#" class='clusterProfile hide row valign-wrapper' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}});return false;">
+                            <form action="#" class='clusterProfile hide row valign-wrapper' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}});return false;">
                                 <label for="knum" class="col s4 radarcontroller_layout">#Groups</label>
                                 <div  class="col s5 no-pad-left valign-wrapper">
                                     <input type="number" id="knum" class="col s3 radarcontroller_layout browser-default no_leftmagrin">
