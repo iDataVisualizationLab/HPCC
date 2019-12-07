@@ -349,6 +349,14 @@ input[type=number] {
     background-color: transparent;
     /*font-size: 10px;*/
 }
+.information:focus {
+    outline: none;
+    background-color: unset;
+}
+.information:hover {
+    outline: none;
+    background-color: var(--colorMain2_light);
+}
 .informationHolder {
     position: relative;
 }
