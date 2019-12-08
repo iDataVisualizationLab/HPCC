@@ -74,7 +74,9 @@ let JobMap = function() {
                 .append('image')
                 .attrs({'height':1,width:1,preserveAspectRatio:'none',
                     'xmlns:xlink':'http://www.w3.org/1999/xlink','xlink:href':'src/images/u.png'});
-
+        let zoomFunc = d3.zoom().on("zoom",  () =>{
+            g.attr("transform", d3.event.transform);
+        });
         svg.append('rect').attr('class','pantarget')
             .attrs({
                 'opacity':0,
@@ -86,14 +88,12 @@ let JobMap = function() {
                 linkg.selectAll('.links').classed('hide',false).classed('highlight',false);
                 freezing = !freezing;
             }
-        }).call(d3.zoom().on("zoom", function () {
-            g.attr("transform", d3.event.transform);
-        }));
+        }).call(zoomFunc);
 
         g = svg.append("g")
             .attr('class','pannel')
-            .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
-
+            // .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        svg.select('.pantarget').call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left,graphicopt.margin.top));
         g.append('text').attr('class','job_title hide').style('font-weight','bold').attrs({'text-anchor':"middle",'x':430,'dy':-20}).datum('Running jobs').text(d=>d);
         g.append('text').attr('class','host_title').style('font-weight','bold').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text('Hosts');
 
@@ -171,21 +171,15 @@ let JobMap = function() {
                 fisheye_scale.x = d=>d;
             }
         });
-        d3.select('#resetScreen').on('click',function(){
-            console.log(d3.event.transform)
-            g.attr("transform", `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+        d3.select('#resetScreen').on('click',()=>{
+            svg.select('.pantarget').transition().duration(750)
+                .call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left,graphicopt.margin.top).scale(1) ); // updated for d3 v4
         });
-        d3.select('#zoomOut').on('click',function(){
-            let oldtrans = g.attr("transform").split(' scale(');
-            if (oldtrans.length<2)
-                oldtrans=[oldtrans[0],'1)'];
-            g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))-0.5})`);
+        d3.select('#zoomOut').on('click',()=>{
+            zoomFunc.scaleBy(svg.select('.pantarget'),0.5); // updated for d3 v4
         });
-        d3.select('#zoomIn').on('click',function(){
-            let oldtrans = g.attr("transform").split(' scale(');
-            if (oldtrans.length<2)
-                oldtrans=[oldtrans[0],'1)'];
-            g.attr("transform", oldtrans[0]+` scale(${(+oldtrans[1].replace(')',''))+0.5})`);
+        d3.select('#zoomIn').on('click',()=>{
+            zoomFunc.scaleBy(svg.select('.pantarget'),2); // updated for d3 v4
         });
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
