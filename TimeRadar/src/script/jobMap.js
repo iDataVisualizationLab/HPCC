@@ -198,7 +198,7 @@ let JobMap = function() {
                     });
                 }else
                     tableHeader.currentsort = undefined;
-                handle_sort(true);
+                // handle_sort(true);
                 jobMap.draw();
             }
         });
@@ -1280,21 +1280,10 @@ let JobMap = function() {
 
         jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
 
-        // table_header(table_headerNode);
-        // make table footer
-        let table_footerNode = nodeg.select('.table.footer');
-        if (table_footerNode.empty())
-            table_footerNode = nodeg.append('g').attr('class', 'table footer');
-        table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
-
-        table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
-        table_footer(table_footerNode);
 
         let userNode = nodeg.selectAll('.userNode').data(user,d=> d.name);
         userNode.exit().remove();
         let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode new '+fixName2Class(fixstr(d.name)));
-
-        updaterow(userNode_n.merge(userNode));
 
         userNode_n.append('circle').attrs(
             {'class':'userNodeSig',
@@ -1326,6 +1315,18 @@ let JobMap = function() {
             });
         userNode.select('.userNodeSig_label')
         .text(d=>d.name);
+
+        handle_sort(true,true);
+        updaterow(userNode);
+        // table_header(table_headerNode);
+        // make table footer
+        let table_footerNode = nodeg.select('.table.footer');
+        if (table_footerNode.empty())
+            table_footerNode = nodeg.append('g').attr('class', 'table footer');
+        table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
+
+        table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
+        table_footer(table_footerNode);
 
 
         let node = nodeg.selectAll('.node');
@@ -1372,11 +1373,11 @@ let JobMap = function() {
             if (runopt.compute.type==='timeline')
                 updateaxis();
         };
-        g.selectAll('.userNode').transition().attr('transform',d=>{
-            d.fy=yscale(d.order);
-            d.fx=600;
-            return `translate(${d.fx},${d.fy})`
-        });
+        // g.selectAll('.userNode').transition().attr('transform',d=>{
+        //     d.fy=yscale(d.order);
+        //     d.fx=600;
+        //     return `translate(${d.fx},${d.fy})`
+        // });
         initForce();
         function getGradID(d){
             return 'links'+d.index;
@@ -1747,6 +1748,7 @@ let JobMap = function() {
             d.x=d.fx;
             return `translate(${d.fx},${d.fy})`
         });
+        console.log(animation_time)
         g.selectAll('.userNode').transition().duration(animation_time)
             .attr('transform',d=>{
                 d.fy=yscale(d.order);
@@ -2144,8 +2146,6 @@ let JobMap = function() {
                 if (!tableData[k].keep)
                     delete tableData[k];
             });
-
-            handle_sort(true,true);
 
             tableFooter[0] = {key:'UserID',value:'Summary'}
             tableFooter[1] = {key:'Hosts', value:Hosts.filter(d=>d.user.length).length}
