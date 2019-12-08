@@ -1670,6 +1670,9 @@ $( document ).ready(function() {
             } else {
                 document.getElementById("colorConnection_control").removeAttribute('disabled')
             }
+
+            $('#jobOverlay').prop('checked',false);
+            d3.select('#jobOverlay').dispatch("change");
         }
         jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });

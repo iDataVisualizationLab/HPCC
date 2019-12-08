@@ -172,6 +172,7 @@ let JobMap = function() {
             }
         });
         d3.select('#resetScreen').on('click',function(){
+            console.log(d3.event.transform)
             g.attr("transform", `translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
         });
         d3.select('#zoomOut').on('click',function(){
@@ -200,7 +201,8 @@ let JobMap = function() {
                     tableHeader.currentsort = undefined;
                 // handle_sort(true);
                 jobMap.draw();
-            }
+            }else if (tableHeader.currentsort==="Job_startTime")
+                tableHeader.currentsort = undefined;
         });
         // d3.select('#timelineGroupMode').on("change", function () {
         //     var sect = document.getElementById("timelineGroupMode");
@@ -1748,7 +1750,6 @@ let JobMap = function() {
             d.x=d.fx;
             return `translate(${d.fx},${d.fy})`
         });
-        console.log(animation_time)
         g.selectAll('.userNode').transition().duration(animation_time)
             .attr('transform',d=>{
                 d.fy=yscale(d.order);
