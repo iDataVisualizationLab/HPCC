@@ -28,6 +28,7 @@ let radarController = function () {
         axis: {}, // axis objects
         axisList : [],  // axis array
     };
+    let charType = "radar";
     let radarController ={};
     // color control
     let colorLength = graphicopt.arrColor.length-1;
@@ -595,43 +596,6 @@ let radarController = function () {
             ///////////// Draw the radar chart blobs ////////////////
             /////////////////////////////////////////////////////////
             //The radial line function
-            var radarLine = d3.radialLine()
-                .curve(d3.curveCatmullRom.alpha(0.5))
-                .radius(function (d) {
-                    return rScale(d.value || d);
-                })
-                .angle(function (d, i) {
-                    return getAngle(d);
-                });
-
-            var radialAreaGenerator = d3.radialArea()
-                .angle(function (d, i) {
-                    return getAngle(d);
-                })
-                .innerRadius(function (d, i) {
-                    return rScale(d.minval);
-                })
-                .outerRadius(function (d, i) {
-                    return rScale(d.maxval);
-                });
-
-            let radialAreaQuantile = d3.radialArea()
-                .angle(function (d, i) {
-                    return getAngle(d);
-                })
-                .innerRadius(function (d, i) {
-                    return rScale(d.q1);
-                })
-                .outerRadius(function (d, i) {
-                    return rScale(d.q3);
-                });
-
-            if (graphicopt.roundStrokes) {
-                radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-                radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
-                radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
-            }
-
             //Create a wrapper for the blobs
             var blobWrapperg = g.selectAll(".radarWrapper")
                 .data(data);
@@ -643,61 +607,192 @@ let radarController = function () {
             //update the outlines
             var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d => d);
 
-            function drawMeanLine(paths) {
-                return paths
-                    .attr("d", function (d) {
-                        return radarLine(d)
-                    })
-                    .styles({
-                        "fill": 'none',
-                        'stroke': 'black',
-                        'stroke-width': 0.5,
-                        'stroke-dasharray': '1 2'
-                    });
+            let radarLine, radialAreaGenerator, radialAreaQuantile;
+            switch (charType){
+                case "rose":
+                    radarLine = d3.arc()
+                        .outerRadius(function (d) {
+                            return rScale(d.value === undefined ? d : d.value);
+                        })
+                        .innerRadius(0)
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    radialAreaGenerator = d3.arc()
+                        .innerRadius(function (d, i) {
+                            return rScale(d.minval);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.maxval);
+                        })
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    radialAreaQuantile = d3.arc()
+                        .innerRadius(function (d, i) {
+                            return rScale(d.q1);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.q3);
+                        })
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    break;
+                case "flower":
+                    const path = d3.line()
+                        .curve(d3.curveBasis);
+                function flowerpath(value) {
+                    let dx = value * deltaAng;
+                    return [[0, 0],
+                        [0.2 * dx, -value * (10 / 19)],
+                        [dx, -value * 0.89],
+                        [0, -value * 1.03],
+                        [-dx, -value * 0.89],
+                        [-0.2 * dx, -value * (10 / 19)],
+                        [0, 0]];
+                }
+                    radarLine = function(d){
+                        let value = rScale(d.value === undefined ? d : d.value);
+                        return path(flowerpath(value));
+                    };
+                    radialAreaGenerator =
+                        function(d){
+                            let value = rScale(d.maxval)-rScale(d.minval);
+                            return path(flowerpath(value).map(p=>p[1]+rScale(d.minval)));
+                        };
+
+                    radialAreaQuantile =
+                        function(d){
+                            let value = rScale(d.q3)-rScale(d.q1);
+                            return path(flowerpath(value).map(p=>p[1]+rScale(d.q1)));
+                        };
+                    break;
+                default:
+                    deltaAng = Math.PI/10
+                    radarLine = d3.radialLine()
+                    // .curve(d3.curveCatmullRom.alpha(0.5))
+                        .radius(function (d) {
+                            return rScale(d.value || d);
+                        })
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        });
+
+                    radialAreaGenerator = d3.radialArea()
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        })
+                        .innerRadius(function (d, i) {
+                            return rScale(d.minval);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.maxval);
+                        });
+
+                    radialAreaQuantile = d3.radialArea()
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        })
+                        .innerRadius(function (d, i) {
+                            return rScale(d.q1);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.q3);
+                        });
+
+                    if (graphicopt.roundStrokes) {
+                        radarLine.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                        radialAreaGenerator.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                        radialAreaQuantile.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                    }
+                function drawMeanLine(paths) {
+                    return paths
+                        .attr("d", function (d) {
+                            return radarLine(d)
+                        })
+                        .styles({
+                            "fill": 'none',
+                            'stroke': 'black',
+                            'stroke-width': 0.5,
+                            'stroke-dasharray': '1 2'
+                        });
+                }
+
+                function drawQuantileArea(paths) {
+                    return paths
+                        .attr("d", d => radialAreaQuantile(d))
+                        .styles({
+                            "fill": 'none',
+                            'stroke': 'black',
+                            'stroke-width': 0.2
+                        });
+                }
+
+                    //update the outlines
+                    blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+
+                    blobWrapperpath.style("fill", "none").transition()
+                        .attr("d", d => radialAreaGenerator(d))
+                        .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                        .style("stroke", (d, i) => graphicopt.color(i));
+                    blobWrapperg.select('clipPath')
+                        .select('path')
+                        .transition('expand').ease(d3.easePolyInOut)
+                        .attr("d", d => radialAreaGenerator(d));
+                    //Create the outlines
+                    blobWrapper.append("clipPath")
+                        .attr("id", (d, i) => "sumC")
+                        .append("path")
+                        .attr("d", d => radialAreaGenerator(d));
+                    blobWrapper.append("rect")
+                        .style('fill', 'url(#rGradient2)')
+                        .attr("clip-path", (d, i) => "url(#sumC)")
+                        .attr("x", -rScale(1.25))
+                        .attr("y", -rScale(1.25))
+                        .attr("width", rScale(1.25) * 2)
+                        .attr("height", rScale(1.25) * 2);
+                    blobWrapper.append("path")
+                        .attr("class", "radarStroke")
+                        .attr("d", d => radialAreaGenerator(d))
+                        .style("fill", "none")
+                        .transition()
+                        .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                        .style("stroke", (d, i) => graphicopt.color(i));
+                    blobWrapper
+                        .append("path").classed('radarLine', true).style("fill", "none").call(drawMeanLine);
             }
 
-            function drawQuantileArea(paths) {
-                return paths
-                    .attr("d", d => radialAreaQuantile(d))
-                    .styles({
-                        "fill": 'none',
-                        'stroke': 'black',
-                        'stroke-width': 0.2
-                    });
+            if (charType==="rose"||charType==="flower"){
+                deltaAng = Math.PI/9/2;
+                blobWrapperpath.transition()                        .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+                    .attr("d", d => radarLine(d))
+                    .style("fill-opacity", 0.5)
+                    .style("fill", '#8c8c8c')
+                    .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                    .style("stroke-opacity", d => 0.5)
+                    .style("stroke", (d, i) => graphicopt.color(i,d));
+                //Create the outlines
+                blobWrapper.selectAll('.radarStroke').data(d=>d).enter()
+                    .append("path")
+                    .attr("class", "radarStroke")
+                    .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+                    .attr("d", d => radarLine(d))
+                    .style("fill", '#8c8c8c')
+                    .style("fill-opacity", 0.5)
+                    .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                    .style("stroke-opacity", d =>  0.5)
+                    .style("stroke", (d, i) => graphicopt.color(i,d));
             }
-
-            //update the outlines
-            blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
-
-            blobWrapperpath.style("fill", "none").transition()
-                .attr("d", d => radialAreaGenerator(d))
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapperg.select('clipPath')
-                .select('path')
-                .transition('expand').ease(d3.easePolyInOut)
-                .attr("d", d => radialAreaGenerator(d));
-            //Create the outlines
-            blobWrapper.append("clipPath")
-                .attr("id", (d, i) => "sumC")
-                .append("path")
-                .attr("d", d => radialAreaGenerator(d));
-            blobWrapper.append("rect")
-                .style('fill', 'url(#rGradient2)')
-                .attr("clip-path", (d, i) => "url(#sumC)")
-                .attr("x", -rScale(1.25))
-                .attr("y", -rScale(1.25))
-                .attr("width", rScale(1.25) * 2)
-                .attr("height", rScale(1.25) * 2);
-            blobWrapper.append("path")
-                .attr("class", "radarStroke")
-                .attr("d", d => radialAreaGenerator(d))
-                .style("fill", "none")
-                .transition()
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapper
-                .append("path").classed('radarLine', true).style("fill", "none").call(drawMeanLine);
         }catch(err){
 
         }
@@ -774,6 +869,10 @@ let radarController = function () {
 
     radarController.tablediv = function (_) {
         return arguments.length ? (tablediv = _, radarController) : tablediv;
+    };
+
+    radarController.charType = function (_) {
+        return arguments.length ? (charType = _, radarController) : charType;
     };
 
     radarController.onChangeValue = function (_) {

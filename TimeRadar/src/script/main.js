@@ -2283,7 +2283,7 @@ function updateViztype (viztype_in){
     d3.selectAll('.radarPlot .radarWrapper').remove();
     if (!firstTime) {
         // updateSummaryChartAll();
-        // MetricController.drawSummary();
+        MetricController.charType(viztype).drawSummary();
         if (cluster_info) {
             cluster_map(cluster_info);
             jobMap.draw();
