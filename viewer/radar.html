@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/ >
+    <title>Smoothed D3.js Radar Chart</title>
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300" rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <script src="../HiperView/js/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 300;
+            fill: #242424;
+            text-align: center;
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+            cursor: default;
+        }
+
+        .legend {
+            font-family: 'Raleway', sans-serif;
+            fill: #333333;
+        }
+
+        .tooltip {
+            fill: #333333;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<script src="js/radarChart.js"></script>
+<script>
+
+    /* Radar chart design created by Nadieh Bremer - VisualCinnamon.com */
+
+    //////////////////////////////////////////////////////////////
+    //////////////////////// Set-Up //////////////////////////////
+    //////////////////////////////////////////////////////////////
+
+    var margin = {top: 100, right: 100, bottom: 100, left: 100},
+        width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
+        height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
+
+    //////////////////////////////////////////////////////////////
+    ////////////////////////// Data //////////////////////////////
+    //////////////////////////////////////////////////////////////
+
+    var data = [
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ],
+        [//Samsung
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()},
+            {axis:"",value:Math.random()}
+        ]
+    ];
+    //////////////////////////////////////////////////////////////
+    //////////////////// Draw the Chart //////////////////////////
+    //////////////////////////////////////////////////////////////
+
+    var color = d3.scale.ordinal()
+        .range(["#717171"]);
+    // var color = d3.scale.ordinal()
+    //     .range(["#EDC951","#CC333F","#00A0B0"]);
+
+    var radarChartOptions = {
+        w: width,
+        h: height,
+        margin: margin,
+        maxValue: 0.5,
+        levels: 5,
+        roundStrokes: true,
+        color: color
+    };
+    //Call function to draw the Radar chart
+    setTimeout(function(){
+        d3.selectAll('div').data(data).enter().append('div').attr('id',(d,i)=>`radar${i}`).each(function(d,i){
+            RadarChart(`#radar${i}`, [d], radarChartOptions);
+            d3.selectAll('.axisWrapper').remove();
+            writeDownloadLink(d3.select(this).select('svg'),'radar'+i);
+        })
+    },3000)
+    setTimeout(function(){
+    d3.selectAll('div.color').data(data).enter().append('div').attr('id',(d,i)=>`radar${i}_color`).each(function(d,i){
+        var rangecolor = ["#EDC951","#CC333F","#00A0B0"];
+        var color = d3.scale.ordinal()
+            .range([rangecolor[Math.round(Math.random()*2)]]);
+        radarChartOptions.color = color
+        RadarChart(`#radar${i}_color`, [d], radarChartOptions);
+        d3.selectAll('.axisWrapper').remove();
+        writeDownloadLink(d3.select(this).select('svg'),'radar'+i+'colors');
+    })
+    },6000)
+    function writeDownloadLink(selection,name){
+        try {
+            var isFileSaverSupported = !!new Blob();
+        } catch (e) {
+            alert("blob not supported");
+        }
+
+        var html = selection
+            .attr("version", 1.1)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .node().parentNode.innerHTML;
+
+        var blob = new Blob([html], {type: "image/svg+xml"});
+        saveAs(blob, name+".svg");
+    };
+</script>
+</body>
+</html>
