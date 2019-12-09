@@ -1550,21 +1550,32 @@ $( document ).ready(function() {
     d3.selectAll('.information, .toolTip').each(function() {
         const hasTarget = d3.select(this).attr('data-target');
         const hasImage = d3.select(this).attr('data-image');
+        let positiont = d3.select(this).attr('tooltip-pos');
         if (hasTarget||hasImage){
             tipopt.addClass ='informationDetail';
             tipopt.position = {
                 x: 'right',
                 y: 'center'
             }
+            tipopt.outside= 'x';
+            delete tipopt.offset;
         }else{
             tipopt.addClass = 'informationDetail mini';
-            tipopt.position = {
-                x: 'center',
-                    y: 'top'
+            if (!positiont) {
+                tipopt.offset = {y: -15};
+                delete tipopt.position;
+                tipopt.outside = "y";
+            }else{
+                tipopt.position = {
+                    x: 'right',
+                    y: 'center'
+                }
+                tipopt.outside= 'x';
+                delete tipopt.offset;
             }
         }
         let tip = $(this).jBox('Tooltip',_.defaults({
-            pointer: (hasTarget||hasImage)?"top:20":false
+            pointer: (hasTarget||hasImage)?"top:20":(positiont?false:"center")
         }, tipopt));
         if (hasTarget)
             tip.setContent($('#datainformation'));
