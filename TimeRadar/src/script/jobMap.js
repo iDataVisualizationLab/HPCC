@@ -944,15 +944,15 @@ let JobMap = function() {
                 let bundle_cluster_ob = {};
                 bundle_cluster.forEach((b,i)=>(b.bid=i,bundle_cluster_ob[b.cluster] = b));
                 //
-
+                let clusterkey = runopt.suddenGroup?"clusterarr_sudden":"clusterarr";
                 // arrange group for avoid crossing
                 //<editor-fold desc="Arrange group">
                 computers.data().forEach(c=> {
-                    for (let i = 0;i<c.timeline.clusterarr.length-1;i++) {
-                        bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster] = (bundle_cluster_ob[c.timeline.clusterarr[i].cluster].crossing[c.timeline.clusterarr[i+1].cluster]||0) +1;
-                        bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].crossing[c.timeline.clusterarr[i].cluster] = (bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].crossing[c.timeline.clusterarr[i].cluster]||0) +1;
-                        bundle_cluster_ob[c.timeline.clusterarr[i].cluster].totalcrossing++;
-                        bundle_cluster_ob[c.timeline.clusterarr[i+1].cluster].totalcrossing++;
+                    for (let i = 0;i<c.timeline[clusterkey].length-1;i++) {
+                        bundle_cluster_ob[c.timeline[clusterkey][i].cluster].crossing[c.timeline[clusterkey][i+1].cluster] = (bundle_cluster_ob[c.timeline[clusterkey][i].cluster].crossing[c.timeline[clusterkey][i+1].cluster]||0) +1;
+                        bundle_cluster_ob[c.timeline[clusterkey][i+1].cluster].crossing[c.timeline[clusterkey][i].cluster] = (bundle_cluster_ob[c.timeline[clusterkey][i+1].cluster].crossing[c.timeline[clusterkey][i].cluster]||0) +1;
+                        bundle_cluster_ob[c.timeline[clusterkey][i].cluster].totalcrossing++;
+                        bundle_cluster_ob[c.timeline[clusterkey][i+1].cluster].totalcrossing++;
                     }
                 });
 

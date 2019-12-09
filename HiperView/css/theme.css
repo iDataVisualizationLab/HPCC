@@ -560,3 +560,12 @@ label {
 .sidenavs select {
     height: 1.15rem;
 }
+
+.tabs {
+     position: unset;
+     overflow-x: auto;
+     overflow-y: hidden;
+     height: unset;
+     width: unset;
+     background-color: unset;
+}

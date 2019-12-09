@@ -1552,8 +1552,16 @@ $( document ).ready(function() {
         const hasImage = d3.select(this).attr('data-image');
         if (hasTarget||hasImage){
             tipopt.addClass ='informationDetail';
+            tipopt.position = {
+                x: 'right',
+                y: 'center'
+            }
         }else{
             tipopt.addClass = 'informationDetail mini';
+            tipopt.position = {
+                x: 'center',
+                    y: 'top'
+            }
         }
         let tip = $(this).jBox('Tooltip',_.defaults({
             pointer: (hasTarget||hasImage)?"top:20":false
@@ -1589,7 +1597,19 @@ $( document ).ready(function() {
     });
     $('.modal').modal();
     $('.dropdown-trigger').dropdown();
-    $('.tabs').tabs();
+    $('.tabs').tabs({'onShow':function(){
+
+            if (this.$activeTabLink.text()==='Video') {
+                $('#videoIn')[0].play();
+                d3.select('#timelineTool').classed('hide',true);
+                d3.select('.overlaySide').classed('hide',true);
+                closeNav();
+            }else{
+                $('#videoIn')[0].pause();
+                d3.select('#timelineTool').classed('hide',false);
+                d3.select('.overlaySide').classed('hide',false);
+            }
+        }});
     $('.sidenav').sidenav();
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});

@@ -374,14 +374,16 @@ input[type=number] {
 }
 .informationDetail .jBox-container,.informationDetail .jBox-pointer:after {
     border-width: 1px;
-    border-color: black;
-    background-color:  #ccc;
+    border-color: #797979;
+    background-color:  white;
+    /*background-color:  #ccc;*/
     -webkit-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
     -moz-box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
     box-shadow: 11px 10px 21px -7px rgba(0,0,0,0.66);
 }
 .informationDetail.mini .jBox-container .jBox-title{
     padding: 3px;
+    font-weight: unset;
 }
 .informationDetail.mini .jBox-container .jBox-content{
     padding: 0px;
@@ -639,4 +641,20 @@ input.clusterlabel:hover, input.clusterlabel:focus{
 [disabled][type="radio"]:not(:checked) + span:before, [disabled][type="radio"]:not(:checked) + span:after {
     background-color: transparent;
     border: 1px solid rgba(0, 0, 0, 0.13);
+}
+
+.light .tabs a.active {
+    background-color: rgba(0,0,0,0.1);
+    border-bottom: 5px solid #505050;
+}
+#header .tabs .tab a{
+    opacity: 1;
+}
+.indicator {
+    display: none;
+}
+
+.tabs a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom: 5px solid #ffffff;
 }
