@@ -70,7 +70,7 @@ addEventListener('message',function ({data}){
                 let B = pc[1];  // this is the dV matrix from SVD
                 let chosenPC = pc[2];   // this is the most value of PCA
                 const presetSolution = dataIn.map(d=>{
-                    const i = d.cluster
+                    const i = d.cluster;
                     let pc1 = A[i][chosenPC[0]];
                     let pc2 = A[i][chosenPC[1]];
                     return [pc1,pc2];
@@ -79,18 +79,18 @@ addEventListener('message',function ({data}){
 
                 // tsne - init datta
                 t0 = performance.now();
-                console.log('initDataRaw')
+                console.log('initDataRaw');
                 countstack = 0;
                 tsne.initDataRaw_withsolution(dataIn,presetSolution);
                 // tsne.initDataRaw(dataIn);
-                let t1 = performance.now();
-                console.log('finish init Data in ', performance.now()-t0)
+
+                console.log('finish init Data in ', performance.now()-t0);
 
                 // first step
                 stop = false;
                 t0 = performance.now();
                 cost = tsne.step();
-                console.log('cost: '+ cost+' time: ',performance.now()-t0)
+                console.log('cost: '+cost+' time: ',performance.now()-t0);
                 render (tsne.getSolution());
 
                 stepstable(cost,tsne.getSolution());
@@ -103,11 +103,11 @@ addEventListener('message',function ({data}){
                         t0 = performance.now();
                         const cost_old = tsne.step();
                         const epsilon = (cost - cost_old);
-                        stop = (epsilon <stopCondition)&&epsilon >0;
+                        stop = (epsilon <stopCondition)&&epsilon >0 || count===20;
                         cost = cost_old;
                         countstack++;
                         sol =tsne.getSolution();
-                        console.log(`iteration: ${count} epsilon: `+ epsilon+' time: ',performance.now()-t0)
+                        console.log(`iteration: ${count} cost: ${cost} epsilon: `+ epsilon+' time: ',performance.now()-t0)
                         render (sol);
                         count++;
                         // console.log(sol)

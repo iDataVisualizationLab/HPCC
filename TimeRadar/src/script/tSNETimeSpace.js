@@ -31,14 +31,14 @@ d3.tsneTimeSpace = function () {
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
     master.init = function(arr,cluster) {
         datain = arr;
-        // background_canvas = document.getElementById("tsneScreen");
-        // background_canvas.width  =  graphicopt.widthG();
-        // background_canvas.height = graphicopt.heightG();
-        // background_ctx = background_canvas.getContext('2d');
-        // front_canvas = document.getElementById("tsneScreen_fornt");
-        // front_canvas.width  =  graphicopt.widthG();
-        // front_canvas.height = graphicopt.heightG();
-        // front_ctx = front_canvas.getContext('2d');
+        background_canvas = document.getElementById("tsneScreen");
+        background_canvas.width  = graphicopt.widthG();
+        background_canvas.height = graphicopt.heightG();
+        background_ctx = background_canvas.getContext('2d');
+        front_canvas = document.getElementById("tsneScreen_fornt");
+        front_canvas.width  =  graphicopt.widthG();
+        front_canvas.height = graphicopt.heightG();
+        front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()}).style('opacity',0);
         xscale.range([0,background_canvas.width]);
         yscale.range([0,background_canvas.height]);
