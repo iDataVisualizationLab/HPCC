@@ -339,6 +339,7 @@ function makedataworker(){
         getDataWorker.terminate();
     getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 }
+let tsnedTS;
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -2007,8 +2008,14 @@ $( document ).ready(function() {
             sampleJobdata = job || [];
             if(cluster_info){
                 cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
+                tsnedata = [];
                 hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
-                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
+                    let nullkey = false;
+                    let axis_arr = _.flatten(serviceLists.map(a=> d3.range(0,a.sub.length).map(vi=>(v =sampleS[h.name][serviceListattr[a.id]][i][vi],d3.scaleLinear().domain(a.sub[0].range)(v===null?(nullkey=true,undefined):v)||0))));
+                    axis_arr.name = h.name;
+                    axis_arr.timestep = i;
+                    // reduce time step
+
                     let index = 0;
                     let minval = Infinity;
                     cluster_info.forEach((c,i)=>{
@@ -2025,15 +2032,30 @@ $( document ).ready(function() {
                         if (m.maxval===undefined|| m.maxval<axis_arr[i])
                             m.maxval = axis_arr[i];
                     });
+                    axis_arr.cluster = index;
+                    // if (i<10&&!nullkey)
+                    if (i<30)
+                        tsnedata.push(axis_arr)
                     return index;
                     // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
                 }));
                 cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
                 cluster_map(cluster_info);
+                console.log(cluster_info)
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster);
                 radarChartclusteropt.schema = serviceFullList;
                 handle_clusterinfo ();
 
+                //tsne
+                tsnedTS = d3.tsneTimeSpace().graphicopt({opt: {
+                        epsilon: 20, // epsilon is learning rate (10 = default)
+                        perplexity: tsnedata.length/cluster_info.length, // roughly how many neighbors each point influences (30 = default)
+                        dim: 2, // dimensionality of the embedding (2 = default)
+                    }}).color(colorCluster).init(tsnedata,cluster_info.map(c=>c.__metrics.normalize));
+                jobMap.callback({
+                    mouseover:tsnedTS.hightlight,
+                    mouseleave:tsnedTS.unhightlight,
+                });
             }
             main();
             d3.select(".cover").select('h5').text('loading data...');

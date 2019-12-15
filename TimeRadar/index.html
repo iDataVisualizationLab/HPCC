@@ -653,11 +653,16 @@
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
 
-                <svg class="mainsvg" >
+                <svg class="mainsvg" style="display: none">
                     <svg id ="jobmap">
 
                     </svg>
                 </svg>
+                <div style="position:relative">
+                    <!--<canvas id="tsneScreen"></canvas>-->
+                    <!--<canvas id="tsneScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
+                    <svg id="tsneScreen_svg" style="position:absolute;top:0;left:0"></svg>
+                </div>
                 <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
                 <!--<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>-->
             </div>
@@ -776,6 +781,7 @@
 <script src="../HiperView/myscripts/radarSum.js"></script>
 <script src="../HiperView/myscripts/scatterplot.js"></script>
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
+<script src="src/script/tSNETimeSpace.js"></script>
 <script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/myscripts/histChart.js"></script>
 <!--<script src="src/script/clustercal.js"></script>-->
