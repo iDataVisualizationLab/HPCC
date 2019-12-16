@@ -1554,7 +1554,7 @@ function handle_dataRaw() {
     handle_clusterinfo();
 
     //tsne
-    handle_data_tsne(tsnedata);
+    // handle_data_tsne(tsnedata);
     jobMap.callback({
         mouseover: tsnedTS.hightlight,
         mouseleave: tsnedTS.unhightlight,
@@ -1687,54 +1687,66 @@ $( document ).ready(function() {
     });
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
-        jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
-        jobMap_runopt.mouse.lensing = false;
-        $('#lensing_control').prop('checked',false);
-        document.getElementById("colorConnection_control").removeAttribute('disabled')
-        if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
-        {
-            document.getElementById("colorConnection_control").checked = false;
-            d3.select('input[value="lensing"]').attr('disabled',null);
-            d3.select('input[value="showseries"]').attr('disabled',null);
-            d3.select('input[value="showmetric"]').attr('disabled',null);
-            jobMap_runopt.compute.bundle = jobMap_runopt.compute.type ==='bundle';
-            jobMap_runopt.compute.type ='timeline'
-            jobMap_runopt.compute.clusterNode = false;
-            jobMap_runopt.compute.clusterJobID = true;
-            jobMap_runopt.graphic.colorBy = 'group';
-            jobMap_runopt.timelineGroupMode = sect.options[sect.selectedIndex].getAttribute('value2')
-            d3.selectAll('.timelineTool').attr('disabled',null);
-            d3.select('#jobIDCluster_control').attr('checked','');
-        }else {
-            d3.selectAll('.timelineTool').attr('disabled','disabled');
-            d3.select('input[value="lensing"]').attr('disabled',"disabled");
-            d3.select('input[value="showseries"]').attr('disabled',"disabled");
-            d3.select('input[value="showmetric"]').attr('disabled',"disabled");
-            const currentMouse = jobMap.runopt().mouse;
-            if(!(currentMouse.disable||currentMouse.auto)) {
-                $('input[value="auto"]')[0].checked = true;
-                d3.select('#mouseAction').dispatch('change');
-            }
+        if(sect.options[sect.selectedIndex].value!=='tsne') {
+            d3.select('#tsneContent').classed('hide',true);
+            d3.select('.mainsvg').classed('hide',false);
+            d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
 
-            if (jobMap_runopt.compute.type === 'pie') {
+            jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+            jobMap_runopt.mouse.lensing = false;
+            $('#lensing_control').prop('checked', false);
+            document.getElementById("colorConnection_control").removeAttribute('disabled')
+            if (jobMap_runopt.compute.type === 'timeline' || jobMap_runopt.compute.type === 'bundle') {
+                document.getElementById("colorConnection_control").checked = false;
+                d3.select('input[value="lensing"]').attr('disabled', null);
+                d3.select('input[value="showseries"]').attr('disabled', null);
+                d3.select('input[value="showmetric"]').attr('disabled', null);
+                jobMap_runopt.compute.bundle = jobMap_runopt.compute.type === 'bundle';
+                jobMap_runopt.compute.type = 'timeline'
                 jobMap_runopt.compute.clusterNode = false;
-                document.getElementById("colorConnection_control").checked = true;
-                jobMap_runopt.graphic.colorBy = 'user';
-                document.getElementById("colorConnection_control").setAttribute('disabled', 'disabled')
-            } else if (jobMap_runopt.compute.type === 'radar') {
-                jobMap_runopt.compute.clusterNode = false;
-                document.getElementById("colorConnection_control").removeAttribute('disabled')
-            } else if (jobMap_runopt.compute.type === 'radar_cluster') {
-                jobMap_runopt.compute.type = 'radar';
-                jobMap_runopt.compute.clusterNode = true;
+                jobMap_runopt.compute.clusterJobID = true;
+                jobMap_runopt.graphic.colorBy = 'group';
+                jobMap_runopt.timelineGroupMode = sect.options[sect.selectedIndex].getAttribute('value2')
+                d3.selectAll('.timelineTool').attr('disabled', null);
+                d3.select('#jobIDCluster_control').attr('checked', '');
             } else {
-                document.getElementById("colorConnection_control").removeAttribute('disabled')
-            }
+                d3.selectAll('.timelineTool').attr('disabled', 'disabled');
+                d3.select('input[value="lensing"]').attr('disabled', "disabled");
+                d3.select('input[value="showseries"]').attr('disabled', "disabled");
+                d3.select('input[value="showmetric"]').attr('disabled', "disabled");
+                const currentMouse = jobMap.runopt().mouse;
+                if (!(currentMouse.disable || currentMouse.auto)) {
+                    $('input[value="auto"]')[0].checked = true;
+                    d3.select('#mouseAction').dispatch('change');
+                }
 
-            $('#jobOverlay').prop('checked',false);
-            d3.select('#jobOverlay').dispatch("change");
+                if (jobMap_runopt.compute.type === 'pie') {
+                    jobMap_runopt.compute.clusterNode = false;
+                    document.getElementById("colorConnection_control").checked = true;
+                    jobMap_runopt.graphic.colorBy = 'user';
+                    document.getElementById("colorConnection_control").setAttribute('disabled', 'disabled')
+                } else if (jobMap_runopt.compute.type === 'radar') {
+                    jobMap_runopt.compute.clusterNode = false;
+                    document.getElementById("colorConnection_control").removeAttribute('disabled')
+                } else if (jobMap_runopt.compute.type === 'radar_cluster') {
+                    jobMap_runopt.compute.type = 'radar';
+                    jobMap_runopt.compute.clusterNode = true;
+                } else {
+                    document.getElementById("colorConnection_control").removeAttribute('disabled')
+                }
+
+                $('#jobOverlay').prop('checked', false);
+                d3.select('#jobOverlay').dispatch("change");
+            }
+            jobMap.runopt(jobMap_runopt).data(undefined, undefined).draw();
+        }else{
+            d3.select('#tsneContent').classed('hide',false);
+            d3.select('.mainsvg').classed('hide',true);
+            d3.select("#jobControl").attr('disabled','disabled').selectAll('input').attr('disabled','disabled');
+            d3.select(suddenGroup_control.parentNode.parentNode).attr('disabled',null);
+            d3.select(suddenGroup_control).attr('disabled',null);
+            handle_data_tsne(tsnedata);
         }
-        jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
     d3.select('#jobIDCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterJobID = $(this).prop('checked');

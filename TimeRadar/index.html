@@ -230,6 +230,9 @@
                                 <option value="bundle" value2 = "groupWithJob">Bundle - Group by similarity wrt jobs</option>
                                 <option value="bundle" value2 = "group">Bundle - Group by similarity</option>
                             </optgroup>
+                            <optgroup label="tSNE">
+                                <option value="tsne" value2 = "single">tSNE - Individual host</option>
+                            </optgroup>
                         </select>
                         <div class="col s1">
                             <button class="information waves-effect waves-light" data-image="hostpresent.gif" data-title="Grouping options are recommended for a large number of hosts.">?</button>
@@ -653,12 +656,12 @@
             <!--</div>-->
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
 
-                <svg class="mainsvg" style="display: none">
+                <svg class="mainsvg">
                     <svg id ="jobmap">
 
                     </svg>
                 </svg>
-                <div style="position:relative">
+                <div id="tsneContent" class="hide" style="position:relative">
                     <canvas id="tsneScreen"></canvas>
                     <canvas id="tsneScreen_fornt" style="position:absolute;top:0;left:0"></canvas>
                     <svg id="tsneScreen_svg" style="position:absolute;top:0;left:0"></svg>

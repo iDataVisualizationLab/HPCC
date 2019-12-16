@@ -3,9 +3,9 @@ importScripts("../tsne.js");
 importScripts("../../../../HiperView/js/PCA.js");
 importScripts("../../../../HiperView/js/underscore-min.js");
 importScripts("https://unpkg.com/simple-statistics@2.2.0/dist/simple-statistics.min.js");
-importScripts("../../../../HiperView/js/jLouvain.js");
-importScripts("../../../../HiperView/js/scagnosticsnd.min.js");
-importScripts("../../../../HiperView/js/jDBSCAN.js");
+// importScripts("../../../../HiperView/js/jLouvain.js");
+// importScripts("../../../../HiperView/js/scagnosticsnd.min.js");
+// importScripts("../../../../HiperView/js/jDBSCAN.js");
 let tsne,sol,
     stepnumber = 5,
     countstack =0,
@@ -18,8 +18,6 @@ let tsne,sol,
     store_step_temp,
     hostname,
     stopCondition =1e-4,
-    community = jLouvain(),
-    dbscan = jDBSCAN(),
     groups,
     groupmethod = "outlier",
     currentMaxIndex =-1,
