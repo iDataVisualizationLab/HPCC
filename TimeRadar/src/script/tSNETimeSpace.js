@@ -25,10 +25,12 @@ d3.tsneTimeSpace = function () {
         runopt = {},
         isBusy = false;
     let tsne,colorscale;
-    let master={},solution,datain,maptimestep,filter_by_name=[];
+    let master={},solution,datain,maptimestep,filter_by_name=[],table_info;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    //----------------------color----------------------
+    let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
     master.init = function(arr,cluster) {
         datain = arr;
         background_canvas = document.getElementById("tsneScreen");
@@ -39,11 +41,10 @@ d3.tsneTimeSpace = function () {
         front_canvas.width  =  graphicopt.widthG();
         front_canvas.height = graphicopt.heightG();
         front_ctx = front_canvas.getContext('2d');
-        svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()}).style('opacity',0);
+        svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()});
+        table_info = d3.select('#tsneInformation').styles({'width':'150px'});
         xscale.range([0,background_canvas.width]);
         yscale.range([0,background_canvas.height]);
-
-        // var offscreen = background_canvas.transferControlToOffscreen();
         if (tsne)
             tsne.terminate();
         tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
@@ -54,7 +55,16 @@ d3.tsneTimeSpace = function () {
         colorarr.sort((a,b)=>a.order-b.order);
 
         maptimestep = {};
-
+        //
+        // arr.forEach(function(d, i) {
+        //     if (!maptimestep[d.name])
+        //         maptimestep[d.name] = [];
+        //     maptimestep[d.name].push({name:d.name,key:d.timestep,value:d});
+        // })
+        // for (let h in maptimestep)
+        //     maptimestep[h].sort((a,b)=>a.t-b.t);
+        //
+        updateTableInformation({});
         arr.forEach((d,i)=>{
             if (!maptimestep[d.name])
                 maptimestep[d.name]={};
@@ -72,6 +82,7 @@ d3.tsneTimeSpace = function () {
                     xscale.domain(data.xscale.domain)
                     yscale.domain(data.yscale.domain)
                     solution = data.sol;
+                    updateTableInformation(data);
                     render(solution);
                     break;
                 case "stable":
@@ -88,12 +99,14 @@ d3.tsneTimeSpace = function () {
             if(filter_by_name&&filter_by_name.length)
                 front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
             let path = {};
-            solution.forEach((d, i) => {
+            solution.forEach(function(d, i) {
                 const target = arr[i];
                 if (!path[target.name])
                     path[target.name] = [];
                 path[target.name].push({name:target.name,key:target.timestep,value:d});
-                background_ctx.fillStyle = colorarr[target.cluster].value;
+                let fillColor = d3.color(colorarr[target.cluster].value);
+                fillColor.opacity = 0.8
+                background_ctx.fillStyle = fillColor+'';
                 background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
                 // draw connection
                 if (maptimestep[target.name][target.timestep]!==undefined) {
@@ -105,7 +118,7 @@ d3.tsneTimeSpace = function () {
             linepath
                 .enter().append('path')
                 .merge(linepath)
-                .styles({'stroke-width':4,'stroke':'black'})
+                .styles({'stroke-width':4,'stroke':'black','opacity':0  })
                 .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
                     .y(function(d) { return yscale(d.value[1]); }))
                 .on('mouseover',d=>{
@@ -114,7 +127,14 @@ d3.tsneTimeSpace = function () {
                 }).on('mouseleave',d=>{
                     d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
                 })
-
+            // datapoint= bg.selectAll(".linkLinegg").interrupt().data(d => d.timeline.clusterarr.map((e,i) => {
+            //     temp = _.cloneDeep(newdata.find(n => n.name === e.cluster));
+            //     temp.name = e.cluster;
+            //     temp.timestep = e.timestep;
+            //     if(!i)
+            //         temp.hide = true;
+            //     return temp;
+            // }),d=>d.name+d.timestep);
         }
     };
 
@@ -135,21 +155,94 @@ d3.tsneTimeSpace = function () {
     }
 
     master.hightlight = function(namearr){
-        filter_by_name = namearr;
-        front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
-        solution.forEach((d, i) => {
-            const target = datain[i];
-            hightlight_render_single(target, d);
+        filter_by_name = namearr||[];
+        if (filter_by_name.length) {
+            front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
+            solution.forEach((d, i) => {
+                const target = datain[i];
+                hightlight_render_single(target, d);
 
-        });
-        d3.select(background_canvas).style('opacity',0.1);
-        d3.select(front_canvas).style('opacity',1);
+            });
+            d3.select(background_canvas).style('opacity', 0.1);
+            d3.select(front_canvas).style('opacity', 1);
+        }
     };
     master.unhightlight = function() {
         filter_by_name = [];
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
+    function updateTableInformation(output){
+        let tableData = [
+            [
+                {text:"Setting",type:"title"},
+            ],
+            [
+                {text:"Output",type:"title"},
+                {id:"#iteration",text:output.iteration?d3.format('.4')(output.iteration):'_'},
+                {id:"cost",text:output.cost?d3.format('.2')(output.cost):'_'},
+                {id:"epsilon",text:output.epsilon?d3.format('.2')(output.epsilon):'_'},
+                {id:"time",text:output.time?(millisecondsToStr(output.time)):'_'},
+            ]
+        ];
+        d3.entries(graphicopt.opt).forEach(d=>{
+            tableData[0].push({id:d.key,text:d.value})
+        });
+        tableData[0].push({id:'#radar',text:datain.length});
+
+
+        let tbodys = table_info.selectAll('tbody').data(tableData);
+        tbodys.selectAll('tr').data(d=>d) .selectAll('td').data(d=>d.type?[d]:[{text:d.id},{text:d.text}]);
+        tbodys
+            .enter().append('tbody')
+                .selectAll('tr').data(d=>d)
+                .enter().append('tr')
+                    .selectAll('td').data(d=>d.type?[d]:[{text:d.id},{text:d.text}])
+                    .enter().append('td')
+                    .attr('colspan',d=>d.type?"2":null)
+                    .style('text-align',(d,i)=>d.type?"center":(i?"right":"left"));
+        table_info.selectAll('tbody').selectAll('tr').selectAll('td')
+            .text(d=>d.text);
+
+
+    }
+    
+    function createRadar(datapoint, bg, data, customopt) {
+        let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
+        let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
+        let colorfill = (customopt&&customopt.colorfill)?0.5:false;
+        let radar_opt = {
+            w: size_w,
+            h: size_h,
+            schema: schema,
+            margin: {left:0,right:0,top:0,bottom:0},
+            levels: 6,
+            mini:true,
+            radiuschange: false,
+            isNormalize: true,
+            maxValue: 0.5,
+            fillin: colorfill,
+        };
+
+
+        if (datapoint.empty()) {
+            datapoint = bg
+                .append("g")
+                .datum(data)
+                .attr("class", d => "tsneradar " + fixName2Class(d.name));
+
+        }
+
+        // replace thumnail with radar mini
+        datapoint.each(function(d){
+            d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
+            if (colorfill)
+                radar_opt.color = function(){return colorscale(d.name)};
+            RadarChart(this, [d], radar_opt,"");
+        });
+        return datapoint;
+    }
+
     master.runopt = function (_) {
         //Put all of the options into a variable called runopt
         if (arguments.length) {
@@ -184,7 +277,11 @@ d3.tsneTimeSpace = function () {
     master.solution = function (_) {
         return solution;
     };
-
+    
+    master.data = function (_) {
+        return arguments.length ? (dataraw = _, handle_data(),master) : dataRaw;
+    };
+    
     master.color = function (_) {
         return arguments.length ? (colorscale = _, master) : colorscale;
     };
@@ -197,4 +294,38 @@ d3.tsneTimeSpace = function () {
     };
 
     return master;
+}
+
+function handle_data_tsne(tsnedata) {
+    let dataIn = [];
+
+    d3.values(tsnedata).forEach(axis_arr => {
+        let lastcluster;
+        let lastdataarr;
+        let count = 0;
+        sampleS.timespan.forEach((t, i) => {
+            let index = axis_arr[i].cluster;
+            // timeline precalculate
+            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
+                lastcluster = index;
+                lastdataarr = axis_arr[i];
+                axis_arr[i].timestep = count; // TODO temperal timestep
+                count++;
+                dataIn.push(axis_arr[i])
+            }
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+        })
+    });
+
+    tsnedTS.graphicopt({
+        opt: {
+            epsilon: 20, // epsilon is learning rate (10 = default)
+            perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
+            dim: 2, // dimensionality of the embedding (2 = default)
+        }
+    }).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+}
+function calculateMSE_num(a,b){
+    return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
 }

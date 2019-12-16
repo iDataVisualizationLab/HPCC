@@ -215,21 +215,7 @@ let JobMap = function() {
         });
 
         suddenGroupslider = document.getElementById('suddenGroup_control');
-        noUiSlider.create(suddenGroupslider, {
-            start: 0,
-            connect: 'lower',
-            step: 0.05,
-            orientation: 'horizontal', // 'horizontal' or 'vertical'
-            range: {
-                'min': 0,
-                'max': 1
-            },
-        });
 
-        suddenGroupslider.noUiSlider.on("change", function () {
-            runopt.suddenGroup = +this.get();
-            jobMap.data().draw();
-        });
 
         stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
@@ -1779,9 +1765,6 @@ let JobMap = function() {
         timelineScale.domain([maxstep - 1, maxstep]);
         // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
-    function calculateMSE(a,b){
-        return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
-    }
     let first__timestep = new Date();
     let lastIndex = 0;
     let deltaTime = 0;
@@ -2454,3 +2437,7 @@ let JobMap = function() {
     };
     return jobMap;
 };
+
+function calculateMSE(a,b){
+    return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+}

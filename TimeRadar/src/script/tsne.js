@@ -368,6 +368,8 @@
 
             var pmul = this.iter < 100 ? 4 : 1; // trick that helps with local optima // origin
             // var pmul = this.iter < 100 ? 1 : 4; // trick that helps with local optima - update (12/14/2019)
+            // var pmul = this.iter < 100 ? 8 : 2; // trick that helps with local optima - update (12/15/2019)
+            // var pmul = this.iter < 100 ? 10 : 2; // trick that helps with local optima - update (12/15/2019)
 
             // compute current Q distribution, unnormalized first
             var Qu = zeros(N * N);
@@ -411,3 +413,6 @@
 
     exports.tSNE = tSNE; // export tSNE class
 }));
+function calculateMSE_num(a,b){
+    return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
+}

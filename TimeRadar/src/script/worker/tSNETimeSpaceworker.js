@@ -34,6 +34,8 @@ let canvasopt ;
 let dataIn;
 let solution;
 let initpos;
+let epsilon;
+let timeCalculation=0;
 function stepstable (cost , solution,status){
     render (solution);
     // postMessage({action: 'cluster', result: community});
@@ -58,31 +60,31 @@ addEventListener('message',function ({data}){
             case "initDataRaw":
                 dataIn = data.value;
 
-                // pca - compute cluster position
-                let t0 = performance.now();
-                let pca = new PCA();
-                // console.log(brand_names);
-                let matrix = pca.scale(data.clusterarr, true, true);
-
-                let pc = pca.pca(matrix, 2);
-
-                let A = pc[0];  // this is the U matrix from SVD
-                let B = pc[1];  // this is the dV matrix from SVD
-                let chosenPC = pc[2];   // this is the most value of PCA
-                const presetSolution = dataIn.map(d=>{
-                    const i = d.cluster;
-                    let pc1 = A[i][chosenPC[0]];
-                    let pc2 = A[i][chosenPC[1]];
-                    return [pc1,pc2];
-                });
-                console.log('finish init solution with PCA: ', performance.now()-t0)
+                // // pca - compute cluster position
+                // let t0 = performance.now();
+                // let pca = new PCA();
+                // // console.log(brand_names);
+                // let matrix = pca.scale(data.clusterarr, true, true);
+                //
+                // let pc = pca.pca(matrix, 2);
+                //
+                // let A = pc[0];  // this is the U matrix from SVD
+                // let B = pc[1];  // this is the dV matrix from SVD
+                // let chosenPC = pc[2];   // this is the most value of PCA
+                // const presetSolution = dataIn.map(d=>{
+                //     const i = d.cluster;
+                //     let pc1 = A[i][chosenPC[0]];
+                //     let pc2 = A[i][chosenPC[1]];
+                //     return [pc1,pc2];
+                // });
+                // console.log('finish init solution with PCA: ', performance.now()-t0)
 
                 // tsne - init datta
                 t0 = performance.now();
                 console.log('initDataRaw');
                 countstack = 0;
-                tsne.initDataRaw_withsolution(dataIn,presetSolution);
-                // tsne.initDataRaw(dataIn);
+                // tsne.initDataRaw_withsolution(dataIn,presetSolution);
+                tsne.initDataRaw(dataIn);
 
                 console.log('finish init Data in ', performance.now()-t0);
 
@@ -90,7 +92,8 @@ addEventListener('message',function ({data}){
                 stop = false;
                 t0 = performance.now();
                 cost = tsne.step();
-                console.log('cost: '+cost+' time: ',performance.now()-t0);
+                // console.log('cost: '+cost+' time: ',performance.now()-t0);
+                timeCalculation = performance.now()-t0;
                 render (tsne.getSolution());
 
                 stepstable(cost,tsne.getSolution());
@@ -102,12 +105,13 @@ addEventListener('message',function ({data}){
                     while (!stop) {
                         t0 = performance.now();
                         const cost_old = tsne.step();
-                        const epsilon = (cost - cost_old);
-                        stop = (epsilon <stopCondition)&&epsilon >0 || count===20;
+                        epsilon = (cost - cost_old);
+                        stop = (epsilon <stopCondition)&&epsilon >0;
                         cost = cost_old;
                         countstack++;
                         sol =tsne.getSolution();
-                        console.log(`iteration: ${count} cost: ${cost} epsilon: `+ epsilon+' time: ',performance.now()-t0)
+                        timeCalculation = performance.now()-t0;
+                        // console.log(`iteration: ${count} cost: ${cost} epsilon: `+ epsilon+' time: ',performance.now()-t0)
                         render (sol);
                         count++;
                         // console.log(sol)
@@ -149,7 +153,7 @@ function render(sol){
         let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
         yscale.domain([yrange[0] - delta, yrange[1] + delta])
     }
-    postMessage({action:'render',count:count,cost:cost, xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
+    postMessage({action:'render',iteration: count,cost: cost,epsilon: epsilon,time: timeCalculation,xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
     solution = sol;
 }
 
