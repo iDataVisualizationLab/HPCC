@@ -877,9 +877,10 @@ function main() {
 
         }else if (data.action==='returnDataHistory'){
             if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
-                if (graphicControl.charType === "T-sne Chart")
+                if (graphicControl.charType === "T-sne Chart") {
+                    console.log(data.result.arr)
                     TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
-                if (graphicControl.sumType === "RadarSummary") {
+                }if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
                 MetricController.data(data.result.arr).drawSummary(data.result.hindex);

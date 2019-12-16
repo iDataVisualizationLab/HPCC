@@ -29,7 +29,11 @@ let JobMap = function() {
     let freezing=false,textWarp=200;
     //slider control
     let suddenGroupslider,stepSizeslider;
-
+    //event
+    let callback ={
+        mouseover:function(){},
+        mouseleave:function(){},
+    }
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             if(runopt.mouse.disable){
@@ -211,21 +215,7 @@ let JobMap = function() {
         });
 
         suddenGroupslider = document.getElementById('suddenGroup_control');
-        noUiSlider.create(suddenGroupslider, {
-            start: 0,
-            connect: 'lower',
-            step: 0.05,
-            orientation: 'horizontal', // 'horizontal' or 'vertical'
-            range: {
-                'min': 0,
-                'max': 1
-            },
-        });
 
-        suddenGroupslider.noUiSlider.on("change", function () {
-            runopt.suddenGroup = +this.get();
-            jobMap.data().draw();
-        });
 
         stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
@@ -1369,11 +1359,7 @@ let JobMap = function() {
             if (runopt.compute.type==='timeline')
                 updateaxis();
         };
-        // g.selectAll('.userNode').transition().attr('transform',d=>{
-        //     d.fy=yscale(d.order);
-        //     d.fx=600;
-        //     return `translate(${d.fx},${d.fy})`
-        // });
+
         initForce();
         function getGradID(d){
             return 'links'+d.index;
@@ -1439,6 +1425,7 @@ let JobMap = function() {
                 g.selectAll('.jobNode:not(.highlight)').classed('hide',true);
                 g.selectAll('.userNode:not(.highlight)').classed('fade',true);
                 table_footerNode.classed('fade',true);
+                callback.mouseover(d.values_name)
             },null],[function(d){
                 if (runopt.compute.type!=='timeline') {
                     d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
@@ -1448,6 +1435,7 @@ let JobMap = function() {
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
                 }
+                callback.mouseleave()
             },null]));
         g.selectAll('.jobNode')
             .call(path=>freezinghandle(path,[function(d){
@@ -1485,9 +1473,6 @@ let JobMap = function() {
                         (d.type === 'job') ? 0.001 : graphicopt.node.r).strength(0.8))
                     .force("charge1", attractForce)
                     .force("charge2", repelForce)
-                    // .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-                    // .force("y", d3.forceY(d=>
-                    //     yscale(d.order)||graphicopt.heightG()/2).strength(function(d){return d.type==='user'?0.8:0}))
                     .force("x", d3.forceX(function (
                         d) {
                         return (d.type === 'job') ? 400 : ((d.type === 'user') ? 600 : 0)
@@ -1495,28 +1480,11 @@ let JobMap = function() {
                         return d.type === 'job' ? 0.8 : 0.8
                     })).alphaTarget(1)
                     .on("tick", ticked);
-                // simulation.alphaTarget(1);
                 simulation.fistTime = true;
             }else {
-                // simulation.velocityDecay(0.1);
             }
         }
 
-        function triggerForce () {
-            simulation.stop()
-            let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-
-            simulation.force("link")
-                .links(linkdata).strength(1);
-            simulation.force("collide",d3.forceCollide(d=>
-                (d.type==='job')?0:graphicopt.node.r).strength(0.8))
-                .force("charge1", attractForce)
-                // .force("charge2", repelForce)
-                // .force("y", undefined);
-            // .force("link", d3.forceLink().id(function(d) { return d.name; }).distance(1).strength(1))
-            simulation.fistTime = false;
-            simulation.alphaTarget(0.7).restart();
-        }
         return jobMap;
     };
     function releasehighlight(){
@@ -1796,9 +1764,6 @@ let JobMap = function() {
         }
         timelineScale.domain([maxstep - 1, maxstep]);
         // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
-    }
-    function calculateMSE(a,b){
-        return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
     }
     let first__timestep = new Date();
     let lastIndex = 0;
@@ -2363,6 +2328,20 @@ let JobMap = function() {
         }
         releaseSelection();
     }
+    jobMap.callback = function (_) {
+        if (arguments.length) {
+            for (let i in _) {
+                if ('undefined' !== typeof _[i]) {
+                    callback[i] = _[i];
+                }
+            }
+            return jobMap;
+        }else {
+            return callback;
+        }
+
+    };
+
     jobMap.graphicopt = function (_) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
@@ -2458,3 +2437,7 @@ let JobMap = function() {
     };
     return jobMap;
 };
+
+function calculateMSE(a,b){
+    return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+}

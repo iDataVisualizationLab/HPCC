@@ -323,6 +323,9 @@ var TsnePlotopt  = {
         height: 400,
         margin:{top:5,bottom:5,left:45,right:85}
     };
+var runopt ={
+    suddenGroup:0
+}
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
@@ -339,6 +342,7 @@ function makedataworker(){
         getDataWorker.terminate();
     getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 }
+let tsnedTS = d3.tsneTimeSpace();
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -1494,33 +1498,7 @@ function readFilecsv(file) {
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
                     recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [5,10]}},function(){
-                            cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
-                            hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
-                                let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
-                                let index = 0;
-                                let minval = Infinity;
-                                cluster_info.forEach((c,i)=>{
-                                    const val = distance(c.__metrics.normalize,axis_arr);
-                                    if(minval>val){
-                                        index = i;
-                                        minval = val;
-                                    }
-                                });
-                                cluster_info[index].total = 1 + cluster_info[index].total||0;
-                                cluster_info[index].__metrics.forEach((m,i)=>{
-                                    if (m.minval===undefined|| m.minval>axis_arr[i])
-                                        m.minval = axis_arr[i];
-                                    if (m.maxval===undefined|| m.maxval<axis_arr[i])
-                                        m.maxval = axis_arr[i];
-                                });
-                                return index;
-                                // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-                            }));
-                            cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
-                            cluster_map(cluster_info);
-                            jobMap.clusterData(cluster_info).colorCluster(colorCluster);
-                            radarChartclusteropt.schema = serviceFullList;
-                            handle_clusterinfo();
+                        handle_dataRaw();
 
                         if (!init)
                             resetRequest();
@@ -1530,6 +1508,57 @@ function readFilecsv(file) {
             }
         })
     }, 0);
+}
+
+function handle_dataRaw() {
+    cluster_info.forEach(d => (d.arr = [], d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    tsnedata = {};
+    hosts.forEach(h => {
+        tsnedata[h.name] = [];
+        sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
+            let nullkey = false;
+            let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
+            axis_arr.name = h.name;
+            axis_arr.timestep = i;
+            // reduce time step
+
+            let index = 0;
+            let minval = Infinity;
+            cluster_info.forEach((c, i) => {
+                const val = distance(c.__metrics.normalize, axis_arr);
+                if (minval > val) {
+                    index = i;
+                    minval = val;
+                }
+            });
+            cluster_info[index].total = 1 + cluster_info[index].total || 0;
+            cluster_info[index].__metrics.forEach((m, i) => {
+                if (m.minval === undefined || m.minval > axis_arr[i])
+                    m.minval = axis_arr[i];
+                if (m.maxval === undefined || m.maxval < axis_arr[i])
+                    m.maxval = axis_arr[i];
+            });
+            axis_arr.cluster = index;
+
+            // timeline precalculate
+            tsnedata[h.name].push(axis_arr);
+
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+        })
+    });
+    cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
+    cluster_map(cluster_info);
+    jobMap.clusterData(cluster_info).colorCluster(colorCluster);
+    radarChartclusteropt.schema = serviceFullList;
+    handle_clusterinfo();
+
+    //tsne
+    // handle_data_tsne(tsnedata);
+    jobMap.callback({
+        mouseover: tsnedTS.hightlight,
+        mouseleave: tsnedTS.unhightlight,
+    });
 }
 
 $( document ).ready(function() {
@@ -1658,54 +1687,66 @@ $( document ).ready(function() {
     });
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
-        jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
-        jobMap_runopt.mouse.lensing = false;
-        $('#lensing_control').prop('checked',false);
-        document.getElementById("colorConnection_control").removeAttribute('disabled')
-        if (jobMap_runopt.compute.type ==='timeline' || jobMap_runopt.compute.type ==='bundle')
-        {
-            document.getElementById("colorConnection_control").checked = false;
-            d3.select('input[value="lensing"]').attr('disabled',null);
-            d3.select('input[value="showseries"]').attr('disabled',null);
-            d3.select('input[value="showmetric"]').attr('disabled',null);
-            jobMap_runopt.compute.bundle = jobMap_runopt.compute.type ==='bundle';
-            jobMap_runopt.compute.type ='timeline'
-            jobMap_runopt.compute.clusterNode = false;
-            jobMap_runopt.compute.clusterJobID = true;
-            jobMap_runopt.graphic.colorBy = 'group';
-            jobMap_runopt.timelineGroupMode = sect.options[sect.selectedIndex].getAttribute('value2')
-            d3.selectAll('.timelineTool').attr('disabled',null);
-            d3.select('#jobIDCluster_control').attr('checked','');
-        }else {
-            d3.selectAll('.timelineTool').attr('disabled','disabled');
-            d3.select('input[value="lensing"]').attr('disabled',"disabled");
-            d3.select('input[value="showseries"]').attr('disabled',"disabled");
-            d3.select('input[value="showmetric"]').attr('disabled',"disabled");
-            const currentMouse = jobMap.runopt().mouse;
-            if(!(currentMouse.disable||currentMouse.auto)) {
-                $('input[value="auto"]')[0].checked = true;
-                d3.select('#mouseAction').dispatch('change');
-            }
+        if(sect.options[sect.selectedIndex].value!=='tsne') {
+            d3.select('#tsneContent').classed('hide',true);
+            d3.select('.mainsvg').classed('hide',false);
+            d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
 
-            if (jobMap_runopt.compute.type === 'pie') {
+            jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
+            jobMap_runopt.mouse.lensing = false;
+            $('#lensing_control').prop('checked', false);
+            document.getElementById("colorConnection_control").removeAttribute('disabled')
+            if (jobMap_runopt.compute.type === 'timeline' || jobMap_runopt.compute.type === 'bundle') {
+                document.getElementById("colorConnection_control").checked = false;
+                d3.select('input[value="lensing"]').attr('disabled', null);
+                d3.select('input[value="showseries"]').attr('disabled', null);
+                d3.select('input[value="showmetric"]').attr('disabled', null);
+                jobMap_runopt.compute.bundle = jobMap_runopt.compute.type === 'bundle';
+                jobMap_runopt.compute.type = 'timeline'
                 jobMap_runopt.compute.clusterNode = false;
-                document.getElementById("colorConnection_control").checked = true;
-                jobMap_runopt.graphic.colorBy = 'user';
-                document.getElementById("colorConnection_control").setAttribute('disabled', 'disabled')
-            } else if (jobMap_runopt.compute.type === 'radar') {
-                jobMap_runopt.compute.clusterNode = false;
-                document.getElementById("colorConnection_control").removeAttribute('disabled')
-            } else if (jobMap_runopt.compute.type === 'radar_cluster') {
-                jobMap_runopt.compute.type = 'radar';
-                jobMap_runopt.compute.clusterNode = true;
+                jobMap_runopt.compute.clusterJobID = true;
+                jobMap_runopt.graphic.colorBy = 'group';
+                jobMap_runopt.timelineGroupMode = sect.options[sect.selectedIndex].getAttribute('value2')
+                d3.selectAll('.timelineTool').attr('disabled', null);
+                d3.select('#jobIDCluster_control').attr('checked', '');
             } else {
-                document.getElementById("colorConnection_control").removeAttribute('disabled')
-            }
+                d3.selectAll('.timelineTool').attr('disabled', 'disabled');
+                d3.select('input[value="lensing"]').attr('disabled', "disabled");
+                d3.select('input[value="showseries"]').attr('disabled', "disabled");
+                d3.select('input[value="showmetric"]').attr('disabled', "disabled");
+                const currentMouse = jobMap.runopt().mouse;
+                if (!(currentMouse.disable || currentMouse.auto)) {
+                    $('input[value="auto"]')[0].checked = true;
+                    d3.select('#mouseAction').dispatch('change');
+                }
 
-            $('#jobOverlay').prop('checked',false);
-            d3.select('#jobOverlay').dispatch("change");
+                if (jobMap_runopt.compute.type === 'pie') {
+                    jobMap_runopt.compute.clusterNode = false;
+                    document.getElementById("colorConnection_control").checked = true;
+                    jobMap_runopt.graphic.colorBy = 'user';
+                    document.getElementById("colorConnection_control").setAttribute('disabled', 'disabled')
+                } else if (jobMap_runopt.compute.type === 'radar') {
+                    jobMap_runopt.compute.clusterNode = false;
+                    document.getElementById("colorConnection_control").removeAttribute('disabled')
+                } else if (jobMap_runopt.compute.type === 'radar_cluster') {
+                    jobMap_runopt.compute.type = 'radar';
+                    jobMap_runopt.compute.clusterNode = true;
+                } else {
+                    document.getElementById("colorConnection_control").removeAttribute('disabled')
+                }
+
+                $('#jobOverlay').prop('checked', false);
+                d3.select('#jobOverlay').dispatch("change");
+            }
+            jobMap.runopt(jobMap_runopt).data(undefined, undefined).draw();
+        }else{
+            d3.select('#tsneContent').classed('hide',false);
+            d3.select('.mainsvg').classed('hide',true);
+            d3.select("#jobControl").attr('disabled','disabled').selectAll('input').attr('disabled','disabled');
+            d3.select(suddenGroup_control.parentNode.parentNode).attr('disabled',null);
+            d3.select(suddenGroup_control).attr('disabled',null);
+            handle_data_tsne(tsnedata);
         }
-        jobMap.runopt(jobMap_runopt).data(undefined,undefined).draw();
     });
     d3.select('#jobIDCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterJobID = $(this).prop('checked');
@@ -1714,6 +1755,22 @@ $( document ).ready(function() {
     d3.select('#compCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterNode = $(this).prop('checked');
         jobMap.runopt(jobMap_runopt).draw();
+    });
+    let suddenGroupslider = document.getElementById('suddenGroup_control');
+    noUiSlider.create(suddenGroupslider, {
+        start: 0,
+        connect: 'lower',
+        step: 0.005,
+        orientation: 'horizontal', // 'horizontal' or 'vertical'
+        range: {
+            'min': 0,
+            'max': 1
+        },
+    });
+    suddenGroupslider.noUiSlider.on("change", function () {
+        runopt.suddenGroup = +this.get();
+        jobMap.data().draw();
+        handle_data_tsne(tsnedata)
     });
     d3.select('#colorConnection_control').on("change", function () {
         var sect = this.checked;
@@ -1818,33 +1875,7 @@ $( document ).ready(function() {
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
             recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [8,10]}},function(){
-                cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
-                hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
-                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
-                    let index = 0;
-                    let minval = Infinity;
-                    cluster_info.forEach((c,i)=>{
-                        const val = distance(c.__metrics.normalize,axis_arr);
-                        if(minval>val){
-                            index = i;
-                            minval = val;
-                        }
-                    });
-                    cluster_info[index].total = 1 + cluster_info[index].total||0;
-                    cluster_info[index].__metrics.forEach((m,i)=>{
-                        if (m.minval===undefined|| m.minval>axis_arr[i])
-                            m.minval = axis_arr[i];
-                        if (m.maxval===undefined|| m.maxval<axis_arr[i])
-                            m.maxval = axis_arr[i];
-                    });
-                    return index;
-                    // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-                }));
-                cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
-                cluster_map(cluster_info);
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster);
-                radarChartclusteropt.schema = serviceFullList;
-                handle_clusterinfo();
+                handle_dataRaw();
                 initDataWorker();
                 if (!init)
                     resetRequest();
@@ -2006,34 +2037,7 @@ $( document ).ready(function() {
             //     hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
             sampleJobdata = job || [];
             if(cluster_info){
-                cluster_info.forEach(d=>(d.arr=[],d.__metrics.forEach(e=>(e.minval=undefined,e.maxval=undefined))));
-                hosts.forEach(h=>sampleS[h.name].arrcluster = sampleS.timespan.map((t,i)=>{
-                    let axis_arr = _.flatten(serviceLists.map(a=> sampleS[h.name][serviceListattr[a.id]][i].map(v=> d3.scaleLinear().domain(a.sub[0].range)(v===null?undefined:v)||0)));
-                    let index = 0;
-                    let minval = Infinity;
-                    cluster_info.forEach((c,i)=>{
-                        const val = distance(c.__metrics.normalize,axis_arr);
-                        if(minval>val){
-                            index = i;
-                            minval = val;
-                        }
-                    });
-                    cluster_info[index].total = 1 + cluster_info[index].total||0;
-                    cluster_info[index].__metrics.forEach((m,i)=>{
-                        if (m.minval===undefined|| m.minval>axis_arr[i])
-                            m.minval = axis_arr[i];
-                        if (m.maxval===undefined|| m.maxval<axis_arr[i])
-                            m.maxval = axis_arr[i];
-                    });
-                    return index;
-                    // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-                }));
-                cluster_info.forEach(c=>c.mse = ss.sum(c.__metrics.map(e=>(e.maxval-e.minval)*(e.maxval-e.minval))));
-                cluster_map(cluster_info);
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster);
-                radarChartclusteropt.schema = serviceFullList;
-                handle_clusterinfo ();
-
+                handle_dataRaw();
             }
             main();
             d3.select(".cover").select('h5').text('loading data...');

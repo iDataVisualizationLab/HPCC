@@ -966,7 +966,7 @@ function millisecondsToStr (milliseconds) {
         str+= seconds + ' second' + numberEnding(seconds)+' ';
     }
     if(str==='')
-        return 'less than a second'; //'just now' //or other string you like;
+        return Math.round(milliseconds)+' ms' ; //'just now' //or other string you like;
     else
         return str;
 }

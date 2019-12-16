@@ -22,7 +22,6 @@
     // return 0 mean unit standard deviation random number
     let return_v = false;
     let v_val = 0.0;
-    let maxtries = 50;
     const gaussRandom = function() {
         if(return_v) {
             return_v = false;
@@ -104,7 +103,7 @@
     const xtodupdate = function(X_new,index_array) {
         index_array.forEach(i=>{
             X_new.forEach((xj,j)=>{
-                var d = L2update(X[i], xj); // fast update dimantion , add only
+                var d = L2update(X[i], xj); // fast update dimention , add only
                 this.dist[i*this.N+j] = d;
                 this.dist[j*this.N+i] = d;
             });
@@ -172,8 +171,8 @@
 
 
                 // stopping conditions: too many tries or got a good precision - Ngan
-                num++;
-                if(num >= maxtries) { done = true; }
+                // num++;
+                // if(num >= 200) { done = true; }
             }
 
             // console.log('data point ' + i + ' gets precision ' + beta + ' after ' + num + ' binary search steps.');
@@ -202,15 +201,32 @@
         this.perplexity = getopt(opt, "perplexity", 30); // effective number of nearest neighbors
         this.dim = getopt(opt, "dim", 2); // by default 2-D tSNE
         this.epsilon = getopt(opt, "epsilon", 10); // learning rate
-        this.maxtries = getopt(opt, "maxtries", 50); //
         this.iter = 0;
     }
 
     tSNE.prototype = {
 
-        setmaxtries: function(maxtri) {
-            this.maxtries = maxtri;
+        // this function takes a set of high-dimensional points and init solution - Ngan
+        // and creates matrix P from them using gaussian kernel
+        initDataRaw_withsolution: function(X,Y) {
+            var N = X.length;
+            var D = X[0].length;
+            assert(N > 0, " X is empty? You must have some data!");
+            assert(D > 0, " X[0] is empty? Where is the data?");
+            this.dists  = xtod(X); // convert X to distances using gaussian kernel
+            this.P = d2p(this.dists, this.perplexity, 1e-4, this.maxtries); // attach to object
+            this.N = N; // back up the size of the dataset
+            this.init_withpresetsolution(Y); // refresh this
         },
+        // (re)initializes the solution to random
+        init_withpresetsolution: function(Y) {
+            // generate random solution to t-SNE
+            this.Y = Y;
+            this.gains = randn2d(this.N, this.dim, 1.0); // step gains to accelerate progress in unchanging directions
+            this.ystep = randn2d(this.N, this.dim, 0.0); // momentum accumulator
+            this.iter = 0;
+        },
+
         // this function takes a set of high-dimensional points
         // and creates matrix P from them using gaussian kernel
         initDataRaw: function(X) {
@@ -350,7 +366,10 @@
             var dim = this.dim; // dim of output space
             var P = this.P;
 
-            var pmul = this.iter < 100 ? 4 : 1; // trick that helps with local optima
+            var pmul = this.iter < 100 ? 4 : 1; // trick that helps with local optima // origin
+            // var pmul = this.iter < 100 ? 1 : 4; // trick that helps with local optima - update (12/14/2019)
+            // var pmul = this.iter < 100 ? 8 : 2; // trick that helps with local optima - update (12/15/2019)
+            // var pmul = this.iter < 100 ? 10 : 2; // trick that helps with local optima - update (12/15/2019)
 
             // compute current Q distribution, unnormalized first
             var Qu = zeros(N * N);
@@ -394,3 +413,6 @@
 
     exports.tSNE = tSNE; // export tSNE class
 }));
+function calculateMSE_num(a,b){
+    return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
+}
