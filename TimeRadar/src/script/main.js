@@ -1775,8 +1775,11 @@ $( document ).ready(function() {
     });
     suddenGroupslider.noUiSlider.on("change", function () {
         runopt.suddenGroup = +this.get();
-        jobMap.data().draw();
-        handle_data_tsne(tsnedata)
+        if (d3.select('#tsneContent').attr('disabled')) {
+            jobMap_runopt.suddenGroup = runopt.suddenGroup;
+            jobMap.runopt(jobMap_runopt).data().draw();
+        }else
+            handle_data_tsne(tsnedata)
     });
     d3.select('#colorConnection_control').on("change", function () {
         var sect = this.checked;

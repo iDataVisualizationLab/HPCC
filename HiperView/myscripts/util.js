@@ -1012,3 +1012,40 @@ if (typeof RadarChart!== 'undefined') {
     flowerChart_func = _.bind(RoseChart, {shape: 'flower'});
     RadarChart = radarChart_func;
 }
+
+// radar draw
+function createRadar_func(datapoint, bg, data, customopt,radaropt,colorscale) {
+    let size_w = customopt?(customopt.size?customopt.size:radaropt.w):radaropt.w;
+    let size_h = customopt?(customopt.size?customopt.size:radaropt.h):radaropt.h;
+    let colorfill = (customopt&&customopt.colorfill)?0.5:false;
+    let radar_opt = {
+        w: size_w,
+        h: size_h,
+        schema: serviceFullList,
+        margin: {left:0,right:0,top:0,bottom:0},
+        levels: 6,
+        mini:true,
+        radiuschange: false,
+        isNormalize: true,
+        maxValue: 0.5,
+        fillin: colorfill,
+    };
+
+
+    if (datapoint.empty()) {
+        datapoint = bg
+            .append("g")
+            .datum(data)
+            .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
+
+    }
+
+    // replace thumnail with radar mini
+    datapoint.each(function(d){
+        d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
+        if (colorfill)
+            radar_opt.color = function(){return colorscale(d.name)};
+        RadarChart(this, [d], radar_opt,"");
+    });
+    return datapoint;
+}

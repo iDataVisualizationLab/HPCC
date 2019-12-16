@@ -326,42 +326,42 @@ let JobMap = function() {
                 return 'black';
         }
     }
-
-    function createRadar(datapoint, bg, newdata, customopt) {
-        let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
-        let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
-        let colorfill = (customopt&&customopt.colorfill)?0.5:false;
-        let radar_opt = {
-            w: size_w,
-            h: size_h,
-            schema: schema,
-            margin: {left:0,right:0,top:0,bottom:0},
-            levels: 6,
-            mini:true,
-            radiuschange: false,
-            isNormalize: true,
-            maxValue: 0.5,
-            fillin: colorfill,
-        };
-
-
-        if (datapoint.empty()) {
-            datapoint = bg
-                .append("g")
-                .datum(d => newdata.find(n => n.name === d.name))
-                .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
-
-        }
-
-        // replace thumnail with radar mini
-        datapoint.each(function(d){
-            d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
-            if (colorfill)
-                radar_opt.color = function(){return colorFunc(d.name)};
-            RadarChart(this, [d], radar_opt,"");
-        });
-        return datapoint;
-    }
+    let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorFunc)
+    // function createRadar(datapoint, bg, newdata, customopt) {
+    //     let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
+    //     let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
+    //     let colorfill = (customopt&&customopt.colorfill)?0.5:false;
+    //     let radar_opt = {
+    //         w: size_w,
+    //         h: size_h,
+    //         schema: schema,
+    //         margin: {left:0,right:0,top:0,bottom:0},
+    //         levels: 6,
+    //         mini:true,
+    //         radiuschange: false,
+    //         isNormalize: true,
+    //         maxValue: 0.5,
+    //         fillin: colorfill,
+    //     };
+    //
+    //
+    //     if (datapoint.empty()) {
+    //         datapoint = bg
+    //             .append("g")
+    //             .datum(d => newdata.find(n => n.name === d.name))
+    //             .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
+    //
+    //     }
+    //
+    //     // replace thumnail with radar mini
+    //     datapoint.each(function(d){
+    //         d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
+    //         if (colorfill)
+    //             radar_opt.color = function(){return colorFunc(d.name)};
+    //         RadarChart(this, [d], radar_opt,"");
+    //     });
+    //     return datapoint;
+    // }
 
     function drawHistogramMHosts (dataR) {
         let scale = d3.scaleLinear().domain(d3.extent(dataR,d=>d.arr[lastIndex].length)).range([0,100]);
@@ -399,9 +399,9 @@ let JobMap = function() {
         });
         let datapointg = bg.select(".radar")
             .datum(d=>newdata.find(n=>n.name === d.name))
-            .each(function(){
+            .each(function(d){
 
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, {colorfill:colorfill});
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), {colorfill:colorfill});
             });
         // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
@@ -532,13 +532,13 @@ let JobMap = function() {
             datapoint_n.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
             }).each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt).classed('hide', d.hide);// hide 1st radar
             });
             datapoint.style('opacity',1).transition().duration(animation_time)
                 .attr('transform', function (d) {
                     return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
                 }).each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata, radaropt).classed('hide', d.hide);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt).classed('hide', d.hide);// hide 1st radar
             });
             bg.style('stroke-width', d => linkscale(d.values_name.length));
 
@@ -2342,16 +2342,17 @@ let JobMap = function() {
 
     };
 
-    jobMap.graphicopt = function (_) {
+    jobMap.graphicopt = function (__) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
-            for (let i in _) {
-                if ('undefined' !== typeof _[i]) {
-                    graphicopt[i] = _[i];
+            for (let i in __) {
+                if ('undefined' !== typeof __[i]) {
+                    graphicopt[i] = __[i];
                 }
             }
             if (graphicopt.radaropt)
                 graphicopt.radaropt.schema = schema;
+            createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorFunc)
             return jobMap;
         }else {
             return graphicopt;

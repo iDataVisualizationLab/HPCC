@@ -207,41 +207,7 @@ d3.tsneTimeSpace = function () {
 
     }
     
-    function createRadar(datapoint, bg, data, customopt) {
-        let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
-        let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
-        let colorfill = (customopt&&customopt.colorfill)?0.5:false;
-        let radar_opt = {
-            w: size_w,
-            h: size_h,
-            schema: schema,
-            margin: {left:0,right:0,top:0,bottom:0},
-            levels: 6,
-            mini:true,
-            radiuschange: false,
-            isNormalize: true,
-            maxValue: 0.5,
-            fillin: colorfill,
-        };
 
-
-        if (datapoint.empty()) {
-            datapoint = bg
-                .append("g")
-                .datum(data)
-                .attr("class", d => "tsneradar " + fixName2Class(d.name));
-
-        }
-
-        // replace thumnail with radar mini
-        datapoint.each(function(d){
-            d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
-            if (colorfill)
-                radar_opt.color = function(){return colorscale(d.name)};
-            RadarChart(this, [d], radar_opt,"");
-        });
-        return datapoint;
-    }
 
     master.runopt = function (_) {
         //Put all of the options into a variable called runopt
