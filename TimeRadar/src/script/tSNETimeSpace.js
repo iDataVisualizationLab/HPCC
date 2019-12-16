@@ -234,7 +234,7 @@ d3.tsneTimeSpace = function () {
                     let b = path[i].value;
                     let c = path[i+1].value;
                     let d = (path[i+2]||path[i+1]).value;
-                    drawline(background_ctx,[a,b,c,d],path[i].cluster);
+                    drawline(front_ctx,[a,b,c,d],path[i].cluster);
                 }
             })
 
