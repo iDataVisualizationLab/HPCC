@@ -52,6 +52,7 @@ d3.tsneTimeSpace = function () {
         front_canvas.height = graphicopt.heightG();
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()});
+        svg.selectAll('*').remove();
         table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
         xscale.range([0,background_canvas.width]);
         yscale.range([0,background_canvas.height]);
@@ -129,18 +130,22 @@ d3.tsneTimeSpace = function () {
             });
 
 
-            let linepath = svg.selectAll('path').data(d3.values(path).map(d=>d.sort((a,b)=>a.t-b.t)));
+            let linepath = svg.selectAll('path').data(d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false));
             linepath
                 .enter().append('path')
                 .merge(linepath)
                 .styles({'stroke-width':4,'stroke':'black','opacity':0  })
-                .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
-                    .y(function(d) { return yscale(d.value[1]); }))
+                // .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
+                // .y(function(d) { return yscale(d.value[1]); }))
+                .attr('d',d=>
+                    d.map((e,i)=>i?positionLink (d[i-1].value,e.value):"").join("")) //curve link
                 .on('mouseover',d=>{
                     console.log(d[0].name);
-                    d3.selectAll('.h'+d[0].name).dispatch('mouseover');
+                    master.hightlight([d[0].name])
+                    // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
                 }).on('mouseleave',d=>{
-                    d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
+                    master.unhightlight(d[0].name)
+                    // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
                 })
             if(isradar) {
                 let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
