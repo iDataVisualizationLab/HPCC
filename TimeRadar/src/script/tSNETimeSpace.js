@@ -131,10 +131,10 @@ d3.tsneTimeSpace = function () {
             d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
                 // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
                 for (let i=0;i<path.length-1;i++){
-                    let a =( path[i-1]||{value:path[i]}).value;
+                    let a =( path[i-1]||{value:path[i].value}).value;
                     let b = path[i].value;
                     let c = path[i+1].value;
-                    let d = (path[i+2]||{value:path[i+1]}).value;
+                    let d = (path[i+2]||{value:path[i+1].value}).value;
                     drawline(background_ctx,[a,b,c,d],path[i].cluster);
                 }
             })
