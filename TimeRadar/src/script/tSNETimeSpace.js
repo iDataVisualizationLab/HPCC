@@ -169,10 +169,10 @@ d3.tsneTimeSpace = function () {
                     return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
                 })
                 .on('mouseover',d=>{
-                    master.hightlight([d.name])
+                    master.hightlight([d.name_or])
                     // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
                 }).on('mouseleave',d=>{
-                    master.unhightlight(d.name)
+                    master.unhightlight(d.name_or)
                     // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
                 })
             }
@@ -185,7 +185,7 @@ d3.tsneTimeSpace = function () {
                 return {axis: serviceFullList[i].text, value: m}
             });
             d.__metrics.name = d.clusterName;
-            d.__metrics.orname = d.name;
+            d.__metrics.name_or = d.name;
             d.__metrics.timestep = d.timestep;
         })
     }
@@ -232,7 +232,7 @@ d3.tsneTimeSpace = function () {
                     let b = path[i].value;
                     let c = path[i+1].value;
                     let d = (path[i+2]||{value:path[i+1]}).value;
-                    drawline(background_ctx,[a,b,c,d],path[i].cluster);
+                    drawline(front_ctx,[a,b,c,d],path[i].cluster);
                 }
             })
 
