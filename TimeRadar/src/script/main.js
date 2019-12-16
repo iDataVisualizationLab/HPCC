@@ -1556,10 +1556,10 @@ function handle_dataRaw() {
 
     //tsne
     // handle_data_tsne(tsnedata);
-    jobMap.callback({
-        mouseover: tsnedTS.hightlight,
-        mouseleave: tsnedTS.unhightlight,
-    });
+    // jobMap.callback({
+    //     mouseover: tsnedTS.hightlight,
+    //     mouseleave: tsnedTS.unhightlight,
+    // });
 }
 
 $( document ).ready(function() {

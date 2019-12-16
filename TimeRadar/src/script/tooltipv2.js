@@ -519,7 +519,7 @@ let Tooltip_lib = function() {
             .attr("class", "linkLinegg dummy")
             .attr('transform',d=>`translate(${d.x},${graphicopt.heightG()/2})`)
             .each(function(d,i){
-                layout.drawFunc(d3.select(this).select('.dummy'), d3.select(this), [d], layout.drawopt);// hide 1st radar
+                layout.drawFunc(d3.select(this).select('.dummy'), d3.select(this), d, layout.drawopt);// hide 1st radar
             });
 
         // `${d.label}=${yScale.tickFormat()(d[d.length-1].y)}`);
