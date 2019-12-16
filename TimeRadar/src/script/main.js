@@ -1775,7 +1775,7 @@ $( document ).ready(function() {
     });
     suddenGroupslider.noUiSlider.on("change", function () {
         runopt.suddenGroup = +this.get();
-        if (d3.select('#tsneContent').attr('disabled')) {
+        if (d3.select('#tsneContent').classed('hide')) {
             jobMap_runopt.suddenGroup = runopt.suddenGroup;
             jobMap.runopt(jobMap_runopt).data().draw();
         }else
