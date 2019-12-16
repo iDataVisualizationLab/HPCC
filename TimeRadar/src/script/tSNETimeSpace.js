@@ -170,9 +170,11 @@ d3.tsneTimeSpace = function () {
                 })
                 .on('mouseover',d=>{
                     master.hightlight([d.name_or])
+                    svg.selectAll('.linkLinegg').filter(e=>d.name_or!==e.name_or).classed('hide',true)
                     // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
                 }).on('mouseleave',d=>{
                     master.unhightlight(d.name_or)
+                    svg.selectAll('.linkLinegg.hide').classed('hide',false)
                     // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
                 })
             }
@@ -243,6 +245,8 @@ d3.tsneTimeSpace = function () {
             // });
             d3.select(background_canvas).style('opacity', 0.1);
             d3.select(front_canvas).style('opacity', 1);
+
+
         }
     };
     master.unhightlight = function() {
