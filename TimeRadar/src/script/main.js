@@ -1691,12 +1691,17 @@ $( document ).ready(function() {
             d3.select('#tsneContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
-
+            let oldChoice = jobMap_runopt.compute.type;
+            let isSwitchtimeline = false;
             jobMap_runopt.compute.type = sect.options[sect.selectedIndex].value;
             jobMap_runopt.mouse.lensing = false;
             $('#lensing_control').prop('checked', false);
             document.getElementById("colorConnection_control").removeAttribute('disabled')
             if (jobMap_runopt.compute.type === 'timeline' || jobMap_runopt.compute.type === 'bundle') {
+                if(oldChoice!=="tsne"&&oldChoice!=="timeline"&&oldChoice!=="bundle"){
+                    $('input[value="showmetric"]')[0].checked = true;
+                    d3.select('#mouseAction').dispatch('change');
+                }
                 document.getElementById("colorConnection_control").checked = false;
                 d3.select('input[value="lensing"]').attr('disabled', null);
                 d3.select('input[value="showseries"]').attr('disabled', null);
