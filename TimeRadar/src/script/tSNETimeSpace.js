@@ -1,6 +1,6 @@
 d3.tsneTimeSpace = function () {
     let graphicopt = {
-            margin: {top: 0, right: 0, bottom: 0, left: 0},
+            margin: {top: 40, right: 40, bottom: 40, left: 40},
             width: 1500,
             height: 1000,
             scalezoom: 1,
@@ -34,7 +34,7 @@ d3.tsneTimeSpace = function () {
         runopt = {},
         isBusy = false;
     let tsne,colorscale;
-    let master={},solution,datain,maptimestep,filter_by_name=[],table_info;
+    let master={},solution,datain,maptimestep,filter_by_name=[],table_info,path;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
@@ -111,42 +111,51 @@ d3.tsneTimeSpace = function () {
             background_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
             if(filter_by_name&&filter_by_name.length)
                 front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
-            let path = {};
+            path = {};
             solution.forEach(function(d, i) {
                 const target = datain[i];
                 target.__metrics.position = d;
                 if (!path[target.name])
                     path[target.name] = [];
-                path[target.name].push({name:target.name,key:target.timestep,value:d});
+                path[target.name].push({name:target.name,key:target.timestep,value:d,cluster:target.cluster});
                 let fillColor = d3.color(colorarr[target.cluster].value);
                 fillColor.opacity = 0.8
                 background_ctx.fillStyle = fillColor+'';
                 background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
                 // draw connection
-                if (maptimestep[target.name][target.timestep]!==undefined) {
-                    drawline(background_ctx,target, d);
-                }
-                hightlight_render_single(target, d);
+                // if (maptimestep[target.name][target.timestep]!==undefined) {
+                //     drawline(background_ctx,target, d);
+                // }
+                // hightlight_render_single(target, d);
             });
-
-
-            let linepath = svg.selectAll('path').data(d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false));
-            linepath
-                .enter().append('path')
-                .merge(linepath)
-                .styles({'stroke-width':4,'stroke':'black','opacity':0  })
-                // .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
-                // .y(function(d) { return yscale(d.value[1]); }))
-                .attr('d',d=>
-                    d.map((e,i)=>i?positionLink (d[i-1].value,e.value):"").join("")) //curve link
-                .on('mouseover',d=>{
-                    console.log(d[0].name);
-                    master.hightlight([d[0].name])
-                    // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
-                }).on('mouseleave',d=>{
-                    master.unhightlight(d[0].name)
-                    // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
-                })
+            d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
+                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                for (let i=0;i<path.length-1;i++){
+                    let a =( path[i-1]||{value:path[i]}).value;
+                    let b = path[i].value;
+                    let c = path[i+1].value;
+                    let d = (path[i+2]||{value:path[i+1]}).value;
+                    drawline(background_ctx,[a,b,c,d],path[i].cluster);
+                }
+            })
+            //
+            // let linepath = svg.selectAll('path').data(d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false));
+            // linepath
+            //     .enter().append('path')
+            //     .merge(linepath)
+            //     .styles({'stroke-width':4,'stroke':'black','opacity':0  })
+            //     // .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
+            //     // .y(function(d) { return yscale(d.value[1]); }))
+            //     .attr('d',d=>
+            //         d.map((e,i)=>i?positionLink (d[i-1].value,e.value):"").join("")) //curve link
+            //     .on('mouseover',d=>{
+            //         console.log(d[0].name);
+            //         master.hightlight([d[0].name])
+            //         // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
+            //     }).on('mouseleave',d=>{
+            //         master.unhightlight(d[0].name)
+            //         // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
+            //     })
             if(isradar) {
                 let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
                 datapoint.exit().remove();
@@ -158,6 +167,13 @@ d3.tsneTimeSpace = function () {
 
                 datapoint_n.merge(datapoint).attr('transform', function (d) {
                     return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
+                })
+                .on('mouseover',d=>{
+                    master.hightlight([d.name])
+                    // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
+                }).on('mouseleave',d=>{
+                    master.unhightlight(d.name)
+                    // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
                 })
             }
         }
@@ -174,29 +190,28 @@ d3.tsneTimeSpace = function () {
         })
     }
 
-    function positionLink(a,b) {
-        var dx = xscale(b[0]) - xscale(a[0]),
-            dy = yscale(b[1]) - yscale(a[1]),
-            dr = Math.sqrt(dx * dx + dy * dy);
-        return "M" +
-            xscale(a[0]) + "," +
-            yscale(a[1]) + "A" +
-            dr + "," + dr + " 0 0,1 " +
-            xscale(b[0]) + "," +
-            yscale(b[1]);
-    }
-    function positionLink_canvas(a,b) {
-        return p = new Path2D(positionLink(a,b));
+
+
+
+
+    function positionLink_canvas(path,ctx) { //path 4 element
+        // return p = new Path2D(positionLink(a,b));
+        ctx.beginPath();
+        return d3.line()
+            .x(function(d) { return xscale(d[0]); })
+            .y(function(d) { return yscale(d[1]); })
+            .curve(d3.curveCardinalOpen)
+            .context(ctx)(path);
     }
 
-    function drawline(ctx,target, d) {
-        let nexttime = solution[maptimestep[target.name][target.timestep]];
-        ctx.strokeStyle = colorarr[target.cluster].value;
-        const p = positionLink_canvas(d,nexttime);
+    function drawline(ctx,path,cluster) {
+        positionLink_canvas(path,ctx);
+
         // ctx.beginPath();
         // ctx.moveTo(xscale(d[0]), yscale(d[1]));
         // ctx.lineTo(xscale(nexttime[0]), yscale(nexttime[1]));
-        ctx.stroke(p);
+        ctx.strokeStyle = colorarr[cluster].value;
+        ctx.stroke();
     }
 
     function hightlight_render_single(target, d) {
@@ -210,11 +225,22 @@ d3.tsneTimeSpace = function () {
         filter_by_name = namearr||[];
         if (filter_by_name.length) {
             front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
-            solution.forEach((d, i) => {
-                const target = datain[i];
-                hightlight_render_single(target, d);
+            d3.values(path).filter(d=>(filter_by_name.find(n => n === d[0].name)&& d.length)>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
+                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                for (let i=0;i<path.length-1;i++){
+                    let a =( path[i-1]||{value:path[i]}).value;
+                    let b = path[i].value;
+                    let c = path[i+1].value;
+                    let d = (path[i+2]||{value:path[i+1]}).value;
+                    drawline(background_ctx,[a,b,c,d],path[i].cluster);
+                }
+            })
 
-            });
+            // solution.forEach((d, i) => {
+            //     const target = datain[i];
+            //     hightlight_render_single(target, d);
+            //
+            // });
             d3.select(background_canvas).style('opacity', 0.1);
             d3.select(front_canvas).style('opacity', 1);
         }
