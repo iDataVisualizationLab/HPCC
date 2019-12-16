@@ -169,15 +169,29 @@ d3.tsneTimeSpace = function () {
         })
     }
 
-
+    function positionLink(a,b) {
+        var dx = xscale(b[0]) - xscale(a[0]),
+            dy = yscale(b[1]) - yscale(a[1]),
+            dr = Math.sqrt(dx * dx + dy * dy);
+        return "M" +
+            xscale(a[0]) + "," +
+            yscale(a[1]) + "A" +
+            dr + "," + dr + " 0 0,1 " +
+            xscale(b[0]) + "," +
+            yscale(b[1]);
+    }
+    function positionLink_canvas(a,b) {
+        return p = new Path2D(positionLink(a,b));
+    }
 
     function drawline(ctx,target, d) {
         let nexttime = solution[maptimestep[target.name][target.timestep]];
-        ctx.beginPath();
-        ctx.moveTo(xscale(d[0]), yscale(d[1]));
-        ctx.lineTo(xscale(nexttime[0]), yscale(nexttime[1]));
         ctx.strokeStyle = colorarr[target.cluster].value;
-        ctx.stroke();
+        const p = positionLink_canvas(d,nexttime);
+        // ctx.beginPath();
+        // ctx.moveTo(xscale(d[0]), yscale(d[1]));
+        // ctx.lineTo(xscale(nexttime[0]), yscale(nexttime[1]));
+        ctx.stroke(p);
     }
 
     function hightlight_render_single(target, d) {
