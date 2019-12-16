@@ -323,6 +323,7 @@ var TsnePlotopt  = {
         height: 400,
         margin:{top:5,bottom:5,left:45,right:85}
     };
+var TsneTSopt = {width:width,height:height}
 var runopt ={
     suddenGroup:0
 }

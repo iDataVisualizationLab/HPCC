@@ -318,13 +318,12 @@ function handle_data_tsne(tsnedata) {
         })
     });
 
-    tsnedTS.graphicopt({
-        opt: {
+    TsneTSopt.opt = {
             epsilon: 20, // epsilon is learning rate (10 = default)
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
             dim: 2, // dimensionality of the embedding (2 = default)
-        }
-    }).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    }
+    tsnedTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
