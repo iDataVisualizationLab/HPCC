@@ -376,7 +376,7 @@ let Tooltip_lib = function() {
         data.forEach((d, i) => {
             d.xScale = d3[`scale${layout.axis.x.linear}`]()
                 .domain(layout.axis.x.domain[i] || layout.axis.x.domain[0])
-                .range([0, Math.max(d.length* (layout.drawopt.size) || graphicopt.widthG(),graphicopt.widthG())]);
+                .range([0, Math.max(d.length* (layout.drawopt.size*3/4) || graphicopt.widthG(),graphicopt.widthG())]);
             d.x_tickFormat = layout.axis.x.tickFormat[i] || layout.axis.x.tickFormat[0] || null;
             xScale.push(d.xScale);
             d.yLabel = layout.axis.y.label[i] || '';
