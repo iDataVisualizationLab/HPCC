@@ -17,7 +17,7 @@ let tsne,sol,
     store_step,
     store_step_temp,
     hostname,
-    stopCondition =1e-14,
+    stopCondition =1e-4,
     community = jLouvain(),
     dbscan = jDBSCAN(),
     groups,
@@ -106,7 +106,7 @@ addEventListener('message',function ({data}){
                         t0 = performance.now();
                         const cost_old = tsne.step();
                         epsilon = (cost - cost_old);
-                        stop = (epsilon <stopCondition)&&epsilon >0;
+                        stop = (epsilon <stopCondition)&&epsilon >0&&count>100;
                         cost = cost_old;
                         countstack++;
                         sol =tsne.getSolution();

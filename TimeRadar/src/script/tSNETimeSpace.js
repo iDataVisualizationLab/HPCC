@@ -42,7 +42,7 @@ d3.tsneTimeSpace = function () {
         front_canvas.height = graphicopt.heightG();
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()});
-        table_info = d3.select('#tsneInformation').styles({'width':'150px'});
+        table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
         xscale.range([0,background_canvas.width]);
         yscale.range([0,background_canvas.height]);
         if (tsne)
@@ -179,16 +179,16 @@ d3.tsneTimeSpace = function () {
             ],
             [
                 {text:"Output",type:"title"},
-                {id:"#iteration",text:output.iteration?d3.format('.4')(output.iteration):'_'},
+                {id:"#Iterations",text:output.iteration?d3.format('.4')(output.iteration):'_'},
                 {id:"cost",text:output.cost?d3.format('.2')(output.cost):'_'},
-                {id:"epsilon",text:output.epsilon?d3.format('.2')(output.epsilon):'_'},
+                {id:"delta cost",text:output.epsilon?d3.format('.2')(output.epsilon):'_'},
                 {id:"time",text:output.time?(millisecondsToStr(output.time)):'_'},
             ]
         ];
         d3.entries(graphicopt.opt).forEach(d=>{
             tableData[0].push({id:d.key,text:d.value})
         });
-        tableData[0].push({id:'#radar',text:datain.length});
+        tableData[0].push({id:'#Radars',text:datain.length});
 
 
         let tbodys = table_info.selectAll('tbody').data(tableData);
