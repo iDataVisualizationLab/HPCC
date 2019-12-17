@@ -36,7 +36,7 @@ d3.tsneTimeSpace = function () {
         controlPanel = {
             epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'80px'},
             perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'80px'},
-            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'80px'},
+            stopCondition:{text:"Limit \u0394 cost", range:[1e-12,1e-3], type:"slider", variable: 'stopCondition',width:'80px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -276,11 +276,11 @@ d3.tsneTimeSpace = function () {
                 else{ // other component display
                     let formatvalue = formatTable[d.content.variable]||(e=>e);
                     if (d.content.type==="slider"){
-                        let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper')
+                        let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
                         noUiSlider.create(div.node(), {
-                            start: graphicopt.opt[d.content.variable],
+                            start: (graphicopt.opt[d.content.variable]),
                             connect: 'lower',
-                            tooltips: {to: function(value){console.log(value);return formatvalue(value)}, from:function(value){return +formatvalue(+value);}},
+                            // tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +formatvalue(+value);}},
                             step: d.content.step||1,
                             orientation: 'horizontal', // 'horizontal' or 'vertical'
                             range: {
