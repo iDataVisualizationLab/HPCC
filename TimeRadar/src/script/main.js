@@ -1481,7 +1481,7 @@ function readFilecsv(file) {
                     newdatatoFormat(data);
 
                     inithostResults();
-                    formatService();
+                    formatService(true);
                     processResult = processResult_csv;
                     makedataworker();
                     initDataWorker();
@@ -1537,11 +1537,13 @@ function onChangeMinMaxFunc(choice){
         preloader(false)
     });
 }
-function formatService(){
+function formatService(init){
     if (runopt.minMax)
         calculateServiceRange();
-    else
+    else if(!init)
         serviceFullList.forEach((s,si)=>s.range = serviceFullList_Fullrange[si].range.slice());
+    if (init)
+        serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
 }
 function handle_dataRaw() {
 
@@ -1601,8 +1603,8 @@ function calculateServiceRange() {
         const sa = serviceListattr[s.index]
         let min = +Infinity;
         let max = -Infinity;
-        hosts.map(h => {
-            let temp_range = d3.extent(_.flatten(sampleS[h.name][sa]));
+        _.without(Object.keys(sampleS),'timespan').map(h => {
+            let temp_range = d3.extent(_.flatten(sampleS[h][sa]));
             if (temp_range[0] < min)
                 min = temp_range[0];
             if (temp_range[1] > max)
@@ -1854,7 +1856,7 @@ $( document ).ready(function() {
                         systemFormat();
                         inithostResults();
                         jobMap.hosts(hosts);
-                        formatService();
+                        formatService(true);
                         MetricController.axisSchema(serviceFullList, true).update();
                         addDatasetsOptions()
                     }
@@ -2081,7 +2083,7 @@ $( document ).ready(function() {
                 }
             }
         });
-        formatService();
+        formatService(true);
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))

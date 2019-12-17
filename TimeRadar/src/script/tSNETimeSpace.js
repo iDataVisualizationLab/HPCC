@@ -16,10 +16,12 @@ d3.tsneTimeSpace = function () {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
+
             opt: {
                 epsilon: 20, // epsilon is learning rate (10 = default)
                 perplexity: 1000, // roughly how many neighbors each point influences (30 = default)
                 dim: 2, // dimensionality of the embedding (2 = default)
+                stopCondition: 1e-4, // parameter for tsne worker - Ngan 12/17/2019
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -29,12 +31,23 @@ d3.tsneTimeSpace = function () {
                 h:40,
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
-            }
+            },
         },
+        controlPanel = {
+            epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'80px'},
+            perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'80px'},
+            stopCondition:{text:"Delta cost", range:[1e-12,1e-3], type:"slider", variable: 'stopCondition',width:'80px'},
+        },
+        formatTable = {
+            'time': function(d){return millisecondsToStr(d)},
+            'totalTime': function(d){return millisecondsToStr(d)},
+            'iteration': function(d){return d}
+        }
+        ,
         runopt = {},
         isBusy = false;
     let tsne,colorscale;
-    let master={},solution,datain,filter_by_name=[],table_info,path;
+    let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
@@ -64,9 +77,48 @@ d3.tsneTimeSpace = function () {
         })
     }
 
-    master.init = function(arr,cluster) {
+    function start() {
+        svg.selectAll('*').remove();
+        if (tsne)
+            tsne.terminate();
+        tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
+        // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
+        tsne.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
+        console.log(`----inint tsne with: `, graphicopt.opt)
+        colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
+        colorarr.sort((a, b) => a.order - b.order);
+
+        tsne.postMessage({action: "colorscale", value: colorarr});
+        tsne.postMessage({action: "inittsne", value: graphicopt.opt});
+        tsne.postMessage({action: "initDataRaw", value: datain, clusterarr: cluster});
+        tsne.addEventListener('message', ({data}) => {
+            switch (data.action) {
+                case "render":
+                    isBusy = true;
+                    xscale.domain(data.xscale.domain)
+                    yscale.domain(data.yscale.domain)
+                    solution = data.sol;
+                    updateTableOutput(data.value);
+                    render();
+                    break;
+                case "stable":
+                    isBusy = false;
+                    render(true);
+                    tsne.terminate();
+                default:
+                    break;
+            }
+        })
+    }
+
+    master.init = function(arr,clusterin) {
         datain = arr;
+        cluster = clusterin
         handle_data(datain);
+        updateTableInput();
+        xscale.range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
+        yscale.range([graphicopt.margin.top,graphicopt.height-graphicopt.margin.bottom]);
+
         background_canvas = document.getElementById("tsneScreen");
         background_canvas.width  = graphicopt.width;
         background_canvas.height = graphicopt.height;
@@ -76,75 +128,44 @@ d3.tsneTimeSpace = function () {
         front_canvas.height = graphicopt.height;
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
-        svg.selectAll('*').remove();
-        table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
-        xscale.range([graphicopt.margin.left,background_canvas.width-graphicopt.margin.right]);
-        yscale.range([graphicopt.margin.top,background_canvas.height-graphicopt.margin.bottom]);
-        if (tsne)
-            tsne.terminate();
-        tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
-        // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
-        tsne.postMessage({action:"initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
-        console.log(`----inint tsne with: `,graphicopt.opt)
-        colorarr = colorscale.domain().map((d,i)=>({name:d, order: +d.split('_')[1], value: colorscale.range()[i]}))
-        colorarr.sort((a,b)=>a.order-b.order);
 
-        tsne.postMessage({action:"colorscale",value:colorarr});
-        tsne.postMessage({action:"inittsne",value:graphicopt.opt});
-        tsne.postMessage({action:"initDataRaw",value:arr,clusterarr:cluster});
-        tsne.addEventListener('message',({data})=>{
-            switch (data.action) {
-                case "render":
-                    isBusy = true;
-                    xscale.domain(data.xscale.domain)
-                    yscale.domain(data.yscale.domain)
-                    solution = data.sol;
-                    updateTableInformation(data);
-                    render(solution);
-                    break;
-                case "stable":
-                    isBusy = false;
-                    render(solution,true);
-                    tsne.terminate();
-                default:
-                    break;
+        start();
+
+        return master;
+    };
+
+    function render (isradar){
+        createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale)
+        background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+        if(filter_by_name&&filter_by_name.length)
+            front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+        path = {};
+        solution.forEach(function(d, i) {
+            const target = datain[i];
+            target.__metrics.position = d;
+            if (!path[target.name])
+                path[target.name] = [];
+            path[target.name].push({name:target.name,key:target.timestep,value:d,cluster:target.cluster});
+            let fillColor = d3.color(colorarr[target.cluster].value);
+            fillColor.opacity = 0.8
+            background_ctx.fillStyle = fillColor+'';
+            background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
+        });
+        d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
+            // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+            for (let i=0;i<path.length-1;i++){
+                let a =( path[i-1]||path[i]).value;
+                let b = path[i].value;
+                let c = path[i+1].value;
+                let d = (path[i+2]||path[i+1]).value;
+                drawline(background_ctx,[a,b,c,d],path[i].cluster);
             }
         })
 
-        return master;
-        function render (solution,isradar){
-            createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale)
-            background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-            if(filter_by_name&&filter_by_name.length)
-                front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-            path = {};
-            solution.forEach(function(d, i) {
-                const target = datain[i];
-                target.__metrics.position = d;
-                if (!path[target.name])
-                    path[target.name] = [];
-                path[target.name].push({name:target.name,key:target.timestep,value:d,cluster:target.cluster});
-                let fillColor = d3.color(colorarr[target.cluster].value);
-                fillColor.opacity = 0.8
-                background_ctx.fillStyle = fillColor+'';
-                background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
-            });
-            d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
-                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
-                for (let i=0;i<path.length-1;i++){
-                    let a =( path[i-1]||path[i]).value;
-                    let b = path[i].value;
-                    let c = path[i+1].value;
-                    let d = (path[i+2]||path[i+1]).value;
-                    drawline(background_ctx,[a,b,c,d],path[i].cluster);
-                }
-            })
-
-            if(isradar) {
-                renderSvgRadar();
-            }
+        if(isradar) {
+            renderSvgRadar();
         }
-    };
+    }
 
     function handle_data(data){
         data.forEach(d=>{
@@ -214,38 +235,73 @@ d3.tsneTimeSpace = function () {
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
-    function updateTableInformation(output){
+    generateTable()
+    function generateTable(){
+        table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
         let tableData = [
+            [
+                {text:"Input",type:"title"},
+                {label:'#Radars',content:datain.length,variable: 'datain'}
+            ],
             [
                 {text:"Setting",type:"title"},
             ],
             [
                 {text:"Output",type:"title"},
-                {id:"#Iterations",text:output.iteration?d3.format('.4')(output.iteration):'_'},
-                {id:"cost",text:output.cost?d3.format('.2')(output.cost):'_'},
-                {id:"delta cost",text:output.epsilon?d3.format('.2')(output.epsilon):'_'},
-                {id:"time",text:output.time?(millisecondsToStr(output.time)):'_'},
+                {label:"#Iterations",content:'_',variable: 'iteration'},
+                {label:"Cost",content:'_',variable: 'cost'},
+                {label:"Delta cost",content:'_',variable: 'deltacost'},
+                {label:"Time per step",content:'_',variable:'time'},
+                {label:"Total time",content:'_',variable:'totalTime'},
             ]
         ];
-        d3.entries(graphicopt.opt).forEach(d=>{
-            tableData[0].push({id:d.key,text:d.value})
+        d3.values(controlPanel).forEach(d=>{
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
         });
-        tableData[0].push({id:'#Radars',text:datain.length});
-
 
         let tbodys = table_info.selectAll('tbody').data(tableData);
-        tbodys.selectAll('tr').data(d=>d) .selectAll('td').data(d=>d.type?[d]:[{text:d.id},{text:d.text}]);
         tbodys
             .enter().append('tbody')
-                .selectAll('tr').data(d=>d)
-                .enter().append('tr')
-                    .selectAll('td').data(d=>d.type?[d]:[{text:d.id},{text:d.text}])
-                    .enter().append('td')
-                    .attr('colspan',d=>d.type?"2":null)
-                    .style('text-align',(d,i)=>d.type?"center":(i?"right":"left"));
-        table_info.selectAll('tbody').selectAll('tr').selectAll('td')
-            .text(d=>d.text);
+            .selectAll('tr').data(d=>d)
+            .enter().append('tr')
+            .selectAll('td').data(d=>d.type==="title"?[d]:[{text:d.label},d.type?{content:d.content,variable:d.variable}:{text:d.content,variable:d.variable}])
+            .enter().append('td')
+            .attr('colspan',d=>d.type?"2":null)
+            .style('text-align',(d,i)=>d.type==="title"?"center":(i?"right":"left"))
+            .attr('class',d=>d.variable)
+            .each(function(d){
+                if (d.text!==undefined) // value display only
+                    d3.select(this).text(d.text);
+                else{ // other component display
+                    if (d.content.type==="slider"){
+                        let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper')
+                        noUiSlider.create(div.node(), {
+                            start: graphicopt.opt[d.content.variable],
+                            connect: 'lower',
+                            // tooltips: {to: function(value){return 'x'+value.toFixed(1)}, from:function(value){return Number(value.replace('x', ''));}},
+                            // step: 0.5,
+                            orientation: 'horizontal', // 'horizontal' or 'vertical'
+                            range: {
+                                'min': d.content.range[0],
+                                'max': d.content.range[1],
+                            },
+                        });
+                        div.node().noUiSlider.on("change", function () { // control panel update method
+                            graphicopt.opt[d.content.variable] = +this.get();
+                            start();
+                        });
+                    }
+                }
+            });
+    }
+    function updateTableInput(){
+        table_info.select(`.datain`).text(e=>datain.length);
 
+    }
+    function updateTableOutput(output){
+        d3.entries(output).forEach(d=>{
+            table_info.select(`.${d.key}`).text(e=>d.value? formatTable[e.variable]? formatTable[e.variable](d.value):d3.format('.4s')(d.value) :'_');
+        });
 
     }
     
