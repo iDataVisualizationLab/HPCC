@@ -174,7 +174,8 @@ var graphicControl ={
     mode : layout.HORIZONTAL
 };
 
-let globalTrend = false;
+let globalTrend = false; // get data from index 0 current work with worker
+
 //***********************
 
 var initialService = "Temperature";
@@ -324,8 +325,9 @@ var TsnePlotopt  = {
         margin:{top:5,bottom:5,left:45,right:85}
     };
 var TsneTSopt = {width:width,height:height}
-var runopt ={
-    suddenGroup:0
+var runopt ={ // run opt global
+    suddenGroup:0,
+    minMax: 0,
 }
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
@@ -1479,6 +1481,7 @@ function readFilecsv(file) {
                     newdatatoFormat(data);
 
                     inithostResults();
+                    formatService();
                     processResult = processResult_csv;
                     makedataworker();
                     initDataWorker();
@@ -1510,8 +1513,14 @@ function readFilecsv(file) {
         })
     }, 0);
 }
-
+function formatService(){
+    if (runopt.minMax)
+        calculateServiceRange();
+    else
+        serviceFullList.forEach((s,si)=>s.range = serviceFullList_Fullrange[si].range.slice());
+}
 function handle_dataRaw() {
+
     cluster_info.forEach(d => (d.arr = [], d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
     hosts.forEach(h => {
@@ -1560,6 +1569,23 @@ function handle_dataRaw() {
     //     mouseover: tsnedTS.hightlight,
     //     mouseleave: tsnedTS.unhightlight,
     // });
+}
+
+function calculateServiceRange() {
+    serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
+    serviceList_selected.forEach((s, si) => {
+        const sa = serviceListattr[s.index]
+        let min = +Infinity;
+        let max = -Infinity;
+        hosts.map(h => {
+            let temp_range = d3.extent(_.flatten(sampleS[h.name][sa]));
+            if (temp_range[0] < min)
+                min = temp_range[0];
+            if (temp_range[1] > max)
+                max = temp_range[1];
+        });
+        serviceLists[si].sub.forEach(sub => sub.range = [min, max]);
+    })
 }
 
 $( document ).ready(function() {
@@ -1803,6 +1829,7 @@ $( document ).ready(function() {
                         systemFormat();
                         inithostResults();
                         jobMap.hosts(hosts);
+                        formatService();
                         MetricController.axisSchema(serviceFullList, true).update();
                         addDatasetsOptions()
                     }
@@ -1899,21 +1926,11 @@ $( document ).ready(function() {
 
         // change the range of service here
         if (choice=="minMax") {
-            serviceList_selected.forEach((s,si) => {
-                const sa = serviceListattr[s.index]
-                let min = +Infinity;
-                let max = -Infinity;
-                hosts.map(h=>{
-                    let temp_range = d3.extent(_.flatten(sampleS[h.name][sa]));
-                    if (temp_range[0]<min)
-                        min = temp_range[0];
-                    if (temp_range[1]>max)
-                        max = temp_range[1];
-                });
-                serviceLists[si].sub.forEach(sub=>sub.range=[min,max]);
-            })
+            runopt.minMax = true;
+            calculateServiceRange();
         }else{
-
+            runopt.minMax = false;
+            serviceFullList.forEach((s,si)=>s.range = serviceFullList_Fullrange[si].range.slice());
         }
 
         MetricController.axisSchema(serviceFullList, true).update();
@@ -2064,6 +2081,7 @@ $( document ).ready(function() {
                 }
             }
         });
+        formatService();
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
             .tablediv(d3.select('#RadarController_Table'))

@@ -146,6 +146,7 @@ function newdatatoFormat (data){
     serviceList = [];
     serviceLists = [];
     serviceListattr = [];
+    serviceAttr={}
     hostList ={data:{hostlist:{}}};
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
