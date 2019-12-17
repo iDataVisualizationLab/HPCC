@@ -158,8 +158,10 @@ d3.tsneTimeSpace = function () {
     }
 
     master.stop = function(){
-        tsne.terminate();
-        renderSvgRadar()
+        if (tsne) {
+            tsne.terminate();
+            renderSvgRadar()
+        }
     };
 
 
