@@ -19,7 +19,8 @@ let radarController = function () {
         bin: true,
         color: function () {
             return 'rgb(167, 167, 167)'
-        }
+        },
+        violinMode:1 // 0: default: 0->max, 1: min-max range, 2: min-max indivitual
     };
 
     let svg,g,div,tablediv;
@@ -324,8 +325,32 @@ let radarController = function () {
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
             sg.call(function(selection){
-                violiin_chart.graphicopt({customrange:[-sg.datum().data.range[0]/(sg.datum().data.range[1]-sg.datum().data.range[0]),1]});//fix range from 0
-                return violiin_chart.data([ sg.datum().summary]).setTicksDisplay([0,sg.datum().data.range[1]]).draw(selection)})})
+                let customrange,displaytick;
+                switch (graphicopt.violinMode) {
+                    case 1:
+                        if (sg.datum().summary.arr.length) {
+                            customrange = [0,1];
+                            displaytick = sg.datum().data.range;
+                        }else{
+                            customrange = [0,0];
+                            displaytick = [0, 0];
+                        }
+                        break;
+                    case 2:
+                        if (sg.datum().summary.arr.length) {
+                            customrange = [sg.datum().summary.arr[0][0], _.last(sg.datum().summary.arr)[0]];
+                            displaytick = [sg.datum().scale.invert(customrange[0]), sg.datum().scale.invert(customrange[1])];
+                        }else{
+                            customrange = [0,0];
+                            displaytick = [0, 0];
+                        }
+                        break;
+                    default:
+                        customrange = [sg.datum().scale(0),1];
+                        displaytick = [0,sg.datum().data.range[1]];
+                }
+                violiin_chart.graphicopt({customrange:customrange});//fix range from 0
+                return violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)})})
 
     }
     function updateSummaryData (dSum){
