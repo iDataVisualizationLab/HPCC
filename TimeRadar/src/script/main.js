@@ -1917,14 +1917,13 @@ $( document ).ready(function() {
         }
 
         MetricController.axisSchema(serviceFullList, true).update();
-        MetricController.drawSummary();
         makedataworker();
         initDataWorker();
         recalculateCluster(group_opt,function(){
             handle_dataRaw();
             // initDataWorker();
-            // if (!init)
-            //     resetRequest();
+            if (!init)
+                resetRequest();
             preloader(false)
         });
     });
