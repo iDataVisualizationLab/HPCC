@@ -32,7 +32,7 @@ let canvasopt ;
 let dataIn;
 let solution;
 let initpos;
-let epsilon;
+let epsilon,totalTime_marker;
 let timeCalculation=0;
 function stepstable (cost , solution,status){
     render (solution);
@@ -48,6 +48,7 @@ addEventListener('message',function ({data}){
                 break;
             case "inittsne":
                 tsne = new tsnejs.tSNE(data.value);
+                stopCondition = data.value.stopCondition||stopCondition;
                 // currentMaxIndex = -1;
                 // currentLastIndex = -1;
                 stop = false;
@@ -56,6 +57,7 @@ addEventListener('message',function ({data}){
                 maxstack = (data.value);
                 break;
             case "initDataRaw":
+                totalTime_marker = performance.now();
                 dataIn = data.value;
 
                 // // pca - compute cluster position
@@ -151,7 +153,7 @@ function render(sol){
         let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
         yscale.domain([yrange[0] - delta, yrange[1] + delta])
     }
-    postMessage({action:'render',iteration: count,cost: cost,epsilon: epsilon,time: timeCalculation,xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
+    postMessage({action:'render',value:{iteration: count,cost: cost,deltacost: epsilon,time: timeCalculation, totalTime:performance.now()-totalTime_marker},xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
     solution = sol;
 }
 
