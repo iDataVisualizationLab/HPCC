@@ -1513,6 +1513,30 @@ function readFilecsv(file) {
         })
     }, 0);
 }
+function onChangeMinMaxFunc(choice){
+    preloader(true);
+    exit_warp();
+
+    // change the range of service here
+    if (choice) {
+        runopt.minMax = true;
+        calculateServiceRange();
+    }else{
+        runopt.minMax = false;
+        serviceFullList.forEach((s,si)=>s.range = serviceFullList_Fullrange[si].range.slice());
+    }
+
+    MetricController.axisSchema(serviceFullList, true).update();
+    makedataworker();
+    initDataWorker();
+    recalculateCluster(group_opt,function(){
+        handle_dataRaw();
+        // initDataWorker();
+        if (!init)
+            resetRequest();
+        preloader(false)
+    });
+}
 function formatService(){
     if (runopt.minMax)
         calculateServiceRange();
@@ -1919,31 +1943,6 @@ $( document ).ready(function() {
             });
         }
     });
-    d3.select('#dataRange_control').on('change',function(){
-        preloader(true);
-        exit_warp();
-        const choice = this.value;
-
-        // change the range of service here
-        if (choice=="minMax") {
-            runopt.minMax = true;
-            calculateServiceRange();
-        }else{
-            runopt.minMax = false;
-            serviceFullList.forEach((s,si)=>s.range = serviceFullList_Fullrange[si].range.slice());
-        }
-
-        MetricController.axisSchema(serviceFullList, true).update();
-        makedataworker();
-        initDataWorker();
-        recalculateCluster(group_opt,function(){
-            handle_dataRaw();
-            // initDataWorker();
-            if (!init)
-                resetRequest();
-            preloader(false)
-        });
-    });
     $('#description_input_file').on('input',(evt)=>{
         let f = evt.target.files[0];
         var reader = new FileReader();
@@ -2088,6 +2087,7 @@ $( document ).ready(function() {
             .axisSchema(serviceFullList)
             .onChangeValue(onSchemaUpdate)
             .onChangeFilterFunc(onfilterdata)
+            .onChangeMinMaxFunc(onChangeMinMaxFunc)
             .init();
         function loadata(data,job){
             d3.select(".cover").select('h5').text('drawLegend...');

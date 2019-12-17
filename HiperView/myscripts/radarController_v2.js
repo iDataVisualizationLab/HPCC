@@ -71,6 +71,7 @@ let radarController = function () {
     // FUNCTION ZONE
     let onChangeValueFunc = function(){};
     let onChangeFilterFunc = function(){};
+    let onChangeMinMaxFunc = function(){};
 
     // TODO: REPLACE
 
@@ -287,12 +288,19 @@ let radarController = function () {
                     }else{
                         $(row).removeClass('fieldDisable');
                     }
-                }
+                },
                 // "columns": [
                 //     null,
                 //     {"orderDataType": "dom-text-numeric"},
                 //     {"orderDataType": "dom-disablebtn"},
                 // ]
+                    "dom":'<"toolbar">frtip',
+                fnInitComplete: function(){
+                    $("#RadarController_Table .toolbar").html(' <label class="col left-align" style="margin-top:6px"> <input id="dataRange_control" type="checkbox" class="filled-in"> <span>Min-max scale</span> </label>');
+                    d3.select('#dataRange_control').on('change',function(){
+                            onChangeMinMaxFunc(this.value);
+                    });
+                }
             });
             eventTable();
             dataTable.rows().draw();
@@ -906,6 +914,10 @@ let radarController = function () {
 
     radarController.onChangeFilterFunc = function (_) {
         return arguments.length ? (onChangeFilterFunc = _, radarController) : onChangeFilterFunc;
+    };
+
+    radarController.onChangeMinMaxFunc = function (_) {
+        return arguments.length ? (onChangeMinMaxFunc = _, radarController) : onChangeMinMaxFunc;
     };
 
     radarController.data = function (_) {
