@@ -298,6 +298,7 @@ let radarController = function () {
                 fnInitComplete: function(){
                     $("#RadarController_Table .toolbar").html(' <label class="col left-align" style="margin-top:6px"> <input id="dataRange_control" type="checkbox" class="filled-in"> <span>Min-max scale</span> </label>');
                     d3.select('#dataRange_control').on('change',function(){
+                        console.log(this.checked)
                             onChangeMinMaxFunc(this.checked);
                     });
                 }
