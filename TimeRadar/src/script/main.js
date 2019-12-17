@@ -345,7 +345,7 @@ function makedataworker(){
         getDataWorker.terminate();
     getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 }
-let tsnedTS = d3.tsneTimeSpace();
+let tsneTS = d3.tsneTimeSpace();
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -1590,8 +1590,8 @@ function handle_dataRaw() {
     //tsne
     // handle_data_tsne(tsnedata);
     // jobMap.callback({
-    //     mouseover: tsnedTS.hightlight,
-    //     mouseleave: tsnedTS.unhightlight,
+    //     mouseover: tsneTS.hightlight,
+    //     mouseleave: tsneTS.unhightlight,
     // });
 }
 
@@ -1739,6 +1739,7 @@ $( document ).ready(function() {
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
         if(sect.options[sect.selectedIndex].value!=='tsne') {
+            tsneTS.stop()
             d3.select('#tsneContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);

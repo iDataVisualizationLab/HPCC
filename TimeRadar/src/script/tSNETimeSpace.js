@@ -34,28 +34,52 @@ d3.tsneTimeSpace = function () {
         runopt = {},
         isBusy = false;
     let tsne,colorscale;
-    let master={},solution,datain,maptimestep,filter_by_name=[],table_info,path;
+    let master={},solution,datain,filter_by_name=[],table_info,path;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
+
+    function renderSvgRadar() {
+        let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
+        datapoint.exit().remove();
+        let datapoint_n = datapoint.enter().append('g')
+            .attr('class', 'linkLinegg timeline');
+        datapoint_n.each(function (d, i) {
+            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d, {colorfill: true}).classed('hide', d.hide);// hide 1st radar
+        });
+
+        datapoint_n.merge(datapoint).attr('transform', function (d) {
+            return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
+        })
+            .on('mouseover', d => {
+                master.hightlight([d.name_or])
+                svg.selectAll('.linkLinegg').filter(e => d.name_or !== e.name_or).classed('hide', true)
+                // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
+            }).on('mouseleave', d => {
+            master.unhightlight(d.name_or)
+            svg.selectAll('.linkLinegg.hide').classed('hide', false)
+            // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
+        })
+    }
+
     master.init = function(arr,cluster) {
         datain = arr;
         handle_data(datain);
         background_canvas = document.getElementById("tsneScreen");
-        background_canvas.width  = graphicopt.widthG();
-        background_canvas.height = graphicopt.heightG();
+        background_canvas.width  = graphicopt.width;
+        background_canvas.height = graphicopt.height;
         background_ctx = background_canvas.getContext('2d');
         front_canvas = document.getElementById("tsneScreen_fornt");
-        front_canvas.width  =  graphicopt.widthG();
-        front_canvas.height = graphicopt.heightG();
+        front_canvas.width  =  graphicopt.width;
+        front_canvas.height = graphicopt.height;
         front_ctx = front_canvas.getContext('2d');
-        svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()});
+        svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
         svg.selectAll('*').remove();
         table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
-        xscale.range([0,background_canvas.width]);
-        yscale.range([0,background_canvas.height]);
+        xscale.range([graphicopt.margin.left,background_canvas.width-graphicopt.margin.right]);
+        yscale.range([graphicopt.margin.top,background_canvas.height-graphicopt.margin.bottom]);
         if (tsne)
             tsne.terminate();
         tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
@@ -64,24 +88,6 @@ d3.tsneTimeSpace = function () {
         console.log(`----inint tsne with: `,graphicopt.opt)
         colorarr = colorscale.domain().map((d,i)=>({name:d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a,b)=>a.order-b.order);
-
-        maptimestep = {};
-        //
-        // arr.forEach(function(d, i) {
-        //     if (!maptimestep[d.name])
-        //         maptimestep[d.name] = [];
-        //     maptimestep[d.name].push({name:d.name,key:d.timestep,value:d});
-        // })
-        // for (let h in maptimestep)
-        //     maptimestep[h].sort((a,b)=>a.t-b.t);
-        //
-        updateTableInformation({});
-        arr.forEach((d,i)=>{
-            if (!maptimestep[d.name])
-                maptimestep[d.name]={};
-            if (d.timestep>0)
-                maptimestep[d.name][d.timestep-1] = i;
-        });
 
         tsne.postMessage({action:"colorscale",value:colorarr});
         tsne.postMessage({action:"inittsne",value:graphicopt.opt});
@@ -108,9 +114,9 @@ d3.tsneTimeSpace = function () {
         return master;
         function render (solution,isradar){
             createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale)
-            background_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
+            background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
             if(filter_by_name&&filter_by_name.length)
-                front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
+                front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
             path = {};
             solution.forEach(function(d, i) {
                 const target = datain[i];
@@ -122,11 +128,6 @@ d3.tsneTimeSpace = function () {
                 fillColor.opacity = 0.8
                 background_ctx.fillStyle = fillColor+'';
                 background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
-                // draw connection
-                // if (maptimestep[target.name][target.timestep]!==undefined) {
-                //     drawline(background_ctx,target, d);
-                // }
-                // hightlight_render_single(target, d);
             });
             d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
                 // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
@@ -138,45 +139,9 @@ d3.tsneTimeSpace = function () {
                     drawline(background_ctx,[a,b,c,d],path[i].cluster);
                 }
             })
-            //
-            // let linepath = svg.selectAll('path').data(d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false));
-            // linepath
-            //     .enter().append('path')
-            //     .merge(linepath)
-            //     .styles({'stroke-width':4,'stroke':'black','opacity':0  })
-            //     // .attr('d',d3.line().x(function(d) { return xscale(d.value[0]); })
-            //     // .y(function(d) { return yscale(d.value[1]); }))
-            //     .attr('d',d=>
-            //         d.map((e,i)=>i?positionLink (d[i-1].value,e.value):"").join("")) //curve link
-            //     .on('mouseover',d=>{
-            //         console.log(d[0].name);
-            //         master.hightlight([d[0].name])
-            //         // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
-            //     }).on('mouseleave',d=>{
-            //         master.unhightlight(d[0].name)
-            //         // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
-            //     })
-            if(isradar) {
-                let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
-                datapoint.exit().remove();
-                let datapoint_n = datapoint.enter().append('g')
-                    .attr('class', 'linkLinegg timeline');
-                datapoint_n.each(function (d, i) {
-                    createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d, {colorfill: true}).classed('hide', d.hide);// hide 1st radar
-                });
 
-                datapoint_n.merge(datapoint).attr('transform', function (d) {
-                    return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
-                })
-                .on('mouseover',d=>{
-                    master.hightlight([d.name_or])
-                    svg.selectAll('.linkLinegg').filter(e=>d.name_or!==e.name_or).classed('hide',true)
-                    // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
-                }).on('mouseleave',d=>{
-                    master.unhightlight(d.name_or)
-                    svg.selectAll('.linkLinegg.hide').classed('hide',false)
-                    // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
-                })
+            if(isradar) {
+                renderSvgRadar();
             }
         }
     };
@@ -192,7 +157,12 @@ d3.tsneTimeSpace = function () {
         })
     }
 
-
+    master.stop = function(){
+        if (tsne) {
+            tsne.terminate();
+            renderSvgRadar()
+        }
+    };
 
 
 
@@ -216,17 +186,12 @@ d3.tsneTimeSpace = function () {
         ctx.stroke();
     }
 
-    function hightlight_render_single(target, d) {
-        if (filter_by_name.find(n => n === target.name))
-            if (maptimestep[target.name][target.timestep] !== undefined) {
-                drawline(front_ctx, target, d);
-            }
-    }
+
 
     master.hightlight = function(namearr){
         filter_by_name = namearr||[];
         if (filter_by_name.length) {
-            front_ctx.clearRect(0, 0, graphicopt.widthG(), graphicopt.heightG());
+            front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
             d3.values(path).filter(d=>(filter_by_name.find(n => n === d[0].name)&& d.length)>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
                 // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
                 for (let i=0;i<path.length-1;i++){
@@ -238,11 +203,6 @@ d3.tsneTimeSpace = function () {
                 }
             })
 
-            // solution.forEach((d, i) => {
-            //     const target = datain[i];
-            //     hightlight_render_single(target, d);
-            //
-            // });
             d3.select(background_canvas).style('opacity', 0.1);
             d3.select(front_canvas).style('opacity', 1);
 
@@ -369,7 +329,7 @@ function handle_data_tsne(tsnedata) {
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
             dim: 2, // dimensionality of the embedding (2 = default)
     }
-    tsnedTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
