@@ -36,13 +36,14 @@ d3.tsneTimeSpace = function () {
         controlPanel = {
             epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'80px'},
             perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'80px'},
-            stopCondition:{text:"Delta cost", range:[1e-12,1e-3], type:"slider", variable: 'stopCondition',width:'80px'},
+            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'80px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
             'totalTime': function(d){return millisecondsToStr(d)},
-            'iteration': function(d){return d}
-        }
+            'iteration': function(d){return d},
+            'stopCondition': function(d) {return '1e'+d}
+        },tableWidth = 200
         ,
         runopt = {},
         isBusy = false;
@@ -237,7 +238,7 @@ d3.tsneTimeSpace = function () {
     };
     generateTable()
     function generateTable(){
-        table_info = d3.select('#tsneInformation table').styles({'width':'150px'});
+        table_info = d3.select('#tsneInformation table').styles({'width':tableWidth+'px'});
         let tableData = [
             [
                 {text:"Input",type:"title"},
@@ -250,7 +251,7 @@ d3.tsneTimeSpace = function () {
                 {text:"Output",type:"title"},
                 {label:"#Iterations",content:'_',variable: 'iteration'},
                 {label:"Cost",content:'_',variable: 'cost'},
-                {label:"Delta cost",content:'_',variable: 'deltacost'},
+                {label:"\u0394 cost",content:'_',variable: 'deltacost'},
                 {label:"Time per step",content:'_',variable:'time'},
                 {label:"Total time",content:'_',variable:'totalTime'},
             ]
@@ -273,13 +274,14 @@ d3.tsneTimeSpace = function () {
                 if (d.text!==undefined) // value display only
                     d3.select(this).text(d.text);
                 else{ // other component display
+                    let formatvalue = formatTable[d.content.variable]||(e=>e);
                     if (d.content.type==="slider"){
                         let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper')
                         noUiSlider.create(div.node(), {
                             start: graphicopt.opt[d.content.variable],
                             connect: 'lower',
-                            // tooltips: {to: function(value){return 'x'+value.toFixed(1)}, from:function(value){return Number(value.replace('x', ''));}},
-                            // step: 0.5,
+                            tooltips: {to: function(value){console.log(value);return formatvalue(value)}, from:function(value){return +formatvalue(+value);}},
+                            step: d.content.step||1,
                             orientation: 'horizontal', // 'horizontal' or 'vertical'
                             range: {
                                 'min': d.content.range[0],
@@ -287,7 +289,7 @@ d3.tsneTimeSpace = function () {
                             },
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
-                            graphicopt.opt[d.content.variable] = +this.get();
+                                graphicopt.opt[d.content.variable] = + formatvalue(+this.get());
                             start();
                         });
                     }
