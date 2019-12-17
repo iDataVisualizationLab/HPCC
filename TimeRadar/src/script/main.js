@@ -1892,6 +1892,42 @@ $( document ).ready(function() {
             });
         }
     });
+    d3.select('#dataRange_control').on('change',function(){
+        preloader(true);
+        exit_warp();
+        const choice = this.value;
+
+        // change the range of service here
+        if (choice=="minMax") {
+            serviceList_selected.forEach((s,si) => {
+                const sa = serviceListattr[s.index]
+                let min = +Infinity;
+                let max = -Infinity;
+                hosts.map(h=>{
+                    let temp_range = d3.extent(_.flatten(sampleS[h.name][sa]));
+                    if (temp_range[0]<min)
+                        min = temp_range[0];
+                    if (temp_range[1]>max)
+                        max = temp_range[1];
+                });
+                serviceLists[si].sub.forEach(sub=>sub.range=[min,max]);
+            })
+        }else{
+
+        }
+
+        MetricController.axisSchema(serviceFullList, true).update();
+        MetricController.drawSummary();
+        makedataworker();
+        initDataWorker();
+        recalculateCluster(group_opt,function(){
+            handle_dataRaw();
+            // initDataWorker();
+            // if (!init)
+            //     resetRequest();
+            preloader(false)
+        });
+    });
     $('#description_input_file').on('input',(evt)=>{
         let f = evt.target.files[0];
         var reader = new FileReader();
