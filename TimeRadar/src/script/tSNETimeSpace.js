@@ -154,6 +154,7 @@ d3.tsneTimeSpace = function () {
             background_ctx.fillStyle = fillColor+'';
             background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
         });
+        if (graphicopt.linkConnect){
         d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
             // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
             for (let i=0;i<path.length-1;i++){
@@ -164,6 +165,7 @@ d3.tsneTimeSpace = function () {
                 drawline(background_ctx,[a,b,c,d],path[i].cluster);
             }
         })
+
 
         if(isradar) {
             renderSvgRadar();
