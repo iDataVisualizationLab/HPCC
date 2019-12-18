@@ -1,4 +1,4 @@
-d3.tsneTimeSpace = function () {
+d3.pcaTimeSpace = function () {
     let graphicopt = {
             margin: {top: 40, right: 40, bottom: 40, left: 40},
             width: 1500,
@@ -18,10 +18,7 @@ d3.tsneTimeSpace = function () {
             },
 
             opt: {
-                epsilon: 20, // epsilon is learning rate (10 = default)
-                perplexity: 1000, // roughly how many neighbors each point influences (30 = default)
                 dim: 2, // dimensionality of the embedding (2 = default)
-                stopCondition: -4, // parameter for tsne worker - Ngan 12/17/2019
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -32,17 +29,13 @@ d3.tsneTimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+        };
+    this.controlPanel = {
+
         },
-        controlPanel = {
-            epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'100px'},
-            perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'100px'},
-            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'100px'},
-        },
-        formatTable = {
+    this.formatTable = {
             'time': function(d){return millisecondsToStr(d)},
             'totalTime': function(d){return millisecondsToStr(d)},
-            'iteration': function(d){return d},
-            'stopCondition': function(d) {return '1e'+Math.round(d)}
         },tableWidth = 200
         ,
         runopt = {},
@@ -50,7 +43,7 @@ d3.tsneTimeSpace = function () {
     let tsne,colorscale;
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
-    // grahic 
+    // grahic
     let background_canvas,background_ctx,front_canvas,front_ctx,svg;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
@@ -82,7 +75,7 @@ d3.tsneTimeSpace = function () {
         svg.selectAll('*').remove();
         if (tsne)
             tsne.terminate();
-        tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
+        tsne = new Worker('src/script/worker/PCAworker.js');
         // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         tsne.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
         console.log(`----inint tsne with: `, graphicopt.opt)
@@ -90,7 +83,7 @@ d3.tsneTimeSpace = function () {
         colorarr.sort((a, b) => a.order - b.order);
 
         tsne.postMessage({action: "colorscale", value: colorarr});
-        tsne.postMessage({action: "inittsne", value: graphicopt.opt});
+        // tsne.postMessage({action: "inittsne", value: graphicopt.opt});
         tsne.postMessage({action: "initDataRaw", value: datain, clusterarr: cluster});
         tsne.addEventListener('message', ({data}) => {
             switch (data.action) {
@@ -100,12 +93,13 @@ d3.tsneTimeSpace = function () {
                     yscale.domain(data.yscale.domain)
                     solution = data.sol;
                     updateTableOutput(data.value);
-                    render();
-                    break;
-                case "stable":
-                    isBusy = false;
                     render(true);
                     tsne.terminate();
+                    isBusy = false;
+                    break;
+                // case "stable":
+                //     render(true);
+
                 default:
                     break;
             }
@@ -236,8 +230,8 @@ d3.tsneTimeSpace = function () {
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
-    master.generateTable = function(){
-        d3.select('#tsneInformation table').selectAll('*').remove();
+    generateTable()
+    function generateTable(){
         table_info = d3.select('#tsneInformation table').styles({'width':tableWidth+'px'});
         let tableData = [
             [
@@ -249,14 +243,10 @@ d3.tsneTimeSpace = function () {
             ],
             [
                 {text:"Output",type:"title"},
-                {label:"#Iterations",content:'_',variable: 'iteration'},
-                {label:"Cost",content:'_',variable: 'cost'},
-                {label:"\u0394 cost",content:'_',variable: 'deltacost'},
-                {label:"Time per step",content:'_',variable:'time'},
                 {label:"Total time",content:'_',variable:'totalTime'},
             ]
         ];
-        d3.values(controlPanel).forEach(d=>{
+        d3.values(this.controlPanel).forEach(d=>{
             tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
         });
 
@@ -274,7 +264,7 @@ d3.tsneTimeSpace = function () {
                 if (d.text!==undefined) // value display only
                     d3.select(this).text(d.text);
                 else{ // other component display
-                    let formatvalue = formatTable[d.content.variable]||(e=>Math.round(e));
+                    let formatvalue = this.controlPanel[d.content.variable]||(e=>Math.round(e));
                     if (d.content.type==="slider"){
                         let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
                         noUiSlider.create(div.node(), {
@@ -289,7 +279,7 @@ d3.tsneTimeSpace = function () {
                             },
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
-                                graphicopt.opt[d.content.variable] = + this.get();
+                            graphicopt.opt[d.content.variable] = + this.get();
                             start();
                         });
                     }
@@ -308,11 +298,11 @@ d3.tsneTimeSpace = function () {
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
-            table_info.select(`.${d.key}`).text(e=>d.value? formatTable[e.variable]? formatTable[e.variable](d.value):d3.format('.4s')(d.value) :'_');
+            table_info.select(`.${d.key}`).text(e=>d.value? this.controlPanel[e.variable]? this.controlPanel[e.variable](d.value):d3.format('.4s')(d.value) :'_');
         });
 
     }
-    
+
 
 
     master.runopt = function (_) {
@@ -350,7 +340,7 @@ d3.tsneTimeSpace = function () {
     master.solution = function (_) {
         return solution;
     };
-    
+
     master.color = function (_) {
         return arguments.length ? (colorscale = _, master) : colorscale;
     };
@@ -365,36 +355,6 @@ d3.tsneTimeSpace = function () {
     return master;
 }
 
-function handle_data_tsne(tsnedata) {
-    let dataIn = [];
-
-    d3.values(tsnedata).forEach(axis_arr => {
-        let lastcluster;
-        let lastdataarr;
-        let count = 0;
-        sampleS.timespan.forEach((t, i) => {
-            let index = axis_arr[i].cluster;
-            axis_arr[i].clusterName = cluster_info[index].name
-            // timeline precalculate
-            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
-                lastcluster = index;
-                lastdataarr = axis_arr[i];
-                axis_arr[i].timestep = count; // TODO temperal timestep
-                count++;
-                dataIn.push(axis_arr[i])
-            }
-            return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-        })
-    });
-
-    TsneTSopt.opt = {
-            epsilon: 20, // epsilon is learning rate (10 = default)
-            perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-            dim: 2, // dimensionality of the embedding (2 = default)
-    }
-    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
-}
 function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
 }

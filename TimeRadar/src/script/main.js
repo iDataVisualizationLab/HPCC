@@ -326,7 +326,7 @@ var TsnePlotopt  = {
     };
 var TsneTSopt = {width:width,height:height};
 var PCAopt = {width:width,height:height};
-var istSNE = false;
+var vizMode = 0; // 0 timeradar, 1 tsne, 2 pca, 3 umap
 var runopt ={ // run opt global
     suddenGroup:0,
     minMax: 0,
@@ -1642,13 +1642,34 @@ function onchangeCluster(){
 
     //tsne
     if (!init)
-        if (istSNE)
-            handle_data_tsne(tsnedata);
-        else {
-            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
-        }
+        if (!onchangeVizdata())
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
 }
-
+function onchangeVizType(){
+    console.log(vizMode)
+    switch (vizMode) {
+        case 'tsne':
+            tsneTS.generateTable();
+            return true
+        case 'pca':
+            pcaTS.generateTable();
+            return true
+        default:
+            return false;
+    }
+}
+function onchangeVizdata(){
+    switch (vizMode) {
+        case 'tsne':
+            handle_data_tsne(tsnedata);
+            return true
+        case 'pca':
+            handle_data_pca(tsnedata);
+            return true
+        default:
+            return false;
+    }
+}
 function calculateServiceRange() {
     serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
     serviceList_selected.forEach((s, si) => {
@@ -1792,8 +1813,8 @@ $( document ).ready(function() {
     });
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
-        if(sect.options[sect.selectedIndex].value!=='tsne') {
-            istSNE = false;
+        if(sect.options[sect.selectedIndex].value!=='reduceDim') {
+            vizMode = false;
             tsneTS.stop()
             d3.select('#tsneContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
@@ -1852,13 +1873,14 @@ $( document ).ready(function() {
             }
             jobMap.runopt(jobMap_runopt).data(undefined, undefined).draw();
         }else{
-            istSNE = true;
+            vizMode = sect.options[sect.selectedIndex].getAttribute('value2');
             d3.select('#tsneContent').classed('hide',false);
             d3.select('.mainsvg').classed('hide',true);
             d3.select("#jobControl").attr('disabled','disabled').selectAll('input').attr('disabled','disabled');
             d3.select(suddenGroup_control.parentNode.parentNode).attr('disabled',null);
             d3.select(suddenGroup_control).attr('disabled',null);
-            handle_data_tsne(tsnedata);
+            onchangeVizType();
+            onchangeVizdata();
         }
     });
     d3.select('#jobIDCluster_control').on("change", function () {
@@ -1882,11 +1904,10 @@ $( document ).ready(function() {
     });
     suddenGroupslider.noUiSlider.on("change", function () {
         runopt.suddenGroup = +this.get();
-        if (d3.select('#tsneContent').classed('hide')) {
+        if (!onchangeVizdata()){
             jobMap_runopt.suddenGroup = runopt.suddenGroup;
             jobMap.runopt(jobMap_runopt).data().draw();
-        }else
-            handle_data_tsne(tsnedata)
+        }
     });
     d3.select('#colorConnection_control').on("change", function () {
         var sect = this.checked;

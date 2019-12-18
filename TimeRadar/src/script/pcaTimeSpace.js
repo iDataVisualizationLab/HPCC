@@ -230,8 +230,8 @@ d3.pcaTimeSpace = function () {
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
-    generateTable()
-    function generateTable(){
+    master.generateTable = function(){
+        d3.select('#tsneInformation table').selectAll('*').remove();
         table_info = d3.select('#tsneInformation table').styles({'width':tableWidth+'px'});
         let tableData = [
             [
@@ -288,13 +288,6 @@ d3.pcaTimeSpace = function () {
     }
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
-        d3.select('.perplexity div').node().noUiSlider.updateOptions({
-            range: {
-                'min': 1,
-                'max': Math.round(datain.length/2),
-            }
-        });
-        d3.select('.perplexity div').node().noUiSlider.set(20);
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
