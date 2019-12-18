@@ -1635,6 +1635,7 @@ function onchangeCluster(){
         })
     });
     cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
+    cluster_map(cluster_info);
     handle_clusterinfo();
 
     //tsne

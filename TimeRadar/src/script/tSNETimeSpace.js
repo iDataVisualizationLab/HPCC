@@ -34,9 +34,9 @@ d3.tsneTimeSpace = function () {
             },
         },
         controlPanel = {
-            epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'80px'},
-            perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'80px'},
-            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'80px'},
+            epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'100px'},
+            perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'100px'},
+            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'100px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
