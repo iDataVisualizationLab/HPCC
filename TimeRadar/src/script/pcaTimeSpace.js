@@ -29,9 +29,10 @@ d3.pcaTimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+            linkConnect: true,
         },
         controlPanel = {
-
+            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -146,16 +147,18 @@ d3.pcaTimeSpace = function () {
             background_ctx.fillStyle = fillColor+'';
             background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
         });
-        d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
-            // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
-            for (let i=0;i<path.length-1;i++){
-                let a =( path[i-1]||path[i]).value;
-                let b = path[i].value;
-                let c = path[i+1].value;
-                let d = (path[i+2]||path[i+1]).value;
-                drawline(background_ctx,[a,b,c,d],path[i].cluster);
-            }
-        })
+        if (graphicopt.linkConnect) {
+            d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
+                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                for (let i = 0; i < path.length - 1; i++) {
+                    let a = (path[i - 1] || path[i]).value;
+                    let b = path[i].value;
+                    let c = path[i + 1].value;
+                    let d = (path[i + 2] || path[i + 1]).value;
+                    drawline(background_ctx, [a, b, c, d], path[i].cluster);
+                }
+            })
+        }
 
         if(isradar) {
             renderSvgRadar();
@@ -282,6 +285,18 @@ d3.pcaTimeSpace = function () {
                                 graphicopt.opt[d.content.variable] = + this.get();
                             start();
                         });
+                    }else if (d.content.type === "checkbox") {
+                        let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
+                        div.append('input')
+                            .attrs({
+                                type: "checkbox",
+                                class: "filled-in"
+                            }).on('change',function(){
+                            graphicopt[d.content.variable]  =  this.checked;
+                            if (d.content.callback)
+                                d.content.callback();
+                        }).node().checked = graphicopt[d.content.variable];
+                        div.append('span')
                     }
                 }
             });

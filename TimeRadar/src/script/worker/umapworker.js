@@ -4,7 +4,7 @@ importScripts("../../../../HiperView/js/umap-js.js");
 importScripts("../../../../HiperView/js/underscore-min.js");
 importScripts("https://unpkg.com/simple-statistics@2.2.0/dist/simple-statistics.min.js");
 
-let canvasopt,totalTime_marker,dataIn;
+let canvasopt,totalTime_marker,dataIn,count,timeCalculation;
 addEventListener('message',function ({data}){
     switch (data.action) {
         case "initcanvas":
@@ -16,13 +16,19 @@ addEventListener('message',function ({data}){
         case "initDataRaw":
             totalTime_marker = performance.now();
             dataIn = data.value;
-
-            const umap = new UMAP();
-            const embedding = umap.fitAsync(dataIn, (epochNumber,dd) => {
-                console.log(epochNumber);
-                console.log(dd);
-            });
-            embedding.then(d=> render(d))
+            count = 0;
+            const umap = new UMAP(data.opt);
+            console.log('---init data UMAP-----')
+            const nEpochs = umap.initializeFit(dataIn);
+            console.log(nEpochs)
+            for (let i = 0; i < nEpochs; i++) {
+                count++;
+                let t0 = performance.now();
+                umap.step();
+                timeCalculation = performance.now()-t0;
+                if (i % 5 === 0)render(umap.getEmbedding());
+            }
+            render(umap.getEmbedding());
             postMessage({action:'stable', status:"done"});
             break;
     }
@@ -43,6 +49,6 @@ function render(sol){
         let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
         yscale.domain([yrange[0] - delta, yrange[1] + delta])
     }
-    postMessage({action:'render',value:{totalTime:performance.now()-totalTime_marker},xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
+    postMessage({action:'render',value:{iteration: count,time: timeCalculation,totalTime:performance.now()-totalTime_marker},xscale:{domain:xscale.domain()}, yscale:{domain:yscale.domain()}, sol:sol});
     solution = sol;
 }

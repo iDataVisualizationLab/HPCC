@@ -233,6 +233,7 @@
                             <optgroup label="reduceDim">
                                 <option value="reduceDim" value2 = "tsne">t-SNE</option>
                                 <option value="reduceDim" value2 = "pca">PCA</option>
+                                <option value="reduceDim" value2 = "umap">UMAP</option>
                             </optgroup>
                         </select>
                         <div class="col s1">
@@ -782,6 +783,9 @@
 <script src="../HiperView/js/binnerN.min.js"></script>
 <script src="../HiperView/js/fisheye.js"></script>
 
+<!--tsne tf-->
+<script src="../HiperView/js/tfjs.js"></script>
+<script src="../HiperView/js/tfjs-tsne.js"></script>
 
 <script src="../HiperView/myscripts/setting.js"></script>
 <script src="../HiperView/myscripts/store.js"></script>
@@ -789,9 +793,13 @@
 <script src="../HiperView/myscripts/radarSum.js"></script>
 <script src="../HiperView/myscripts/scatterplot.js"></script>
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
-<script src="src/script/tSNETimeSpace.js"></script>
+<!--<script src="src/script/tSNETimeSpace.js"></script>-->
+<script src="src/script/tftSNETimeSpace.js"></script>
 <script src="src/script/pcaTimeSpace.js"></script>
 <script src="src/script/umapTimeSpace.js"></script>
+
+
+
 <script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/myscripts/histChart.js"></script>
 <!--<script src="src/script/clustercal.js"></script>-->

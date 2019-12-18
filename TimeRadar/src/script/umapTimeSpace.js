@@ -18,11 +18,10 @@ d3.umapTimeSpace = function () {
             },
 
             opt: {
-                nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
-                nNeighbors: 1000, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+                // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
+                nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
                 nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
                 minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
-                stopCondition: -4, // parameter for tsne worker - Ngan 12/17/2019
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -35,9 +34,8 @@ d3.umapTimeSpace = function () {
             },
         },
         controlPanel = {
-            epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'100px'},
-            perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'100px'},
-            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'100px'},
+            minDist:{text:"Minimum distance", range:[0.1,2], type:"slider", variable: 'minDist',width:'100px',step:0.1},
+            nNeighbors:{text:"#Neighbors", range:[1,1000], type:"slider", variable: 'nNeighbors',width:'100px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -91,16 +89,15 @@ d3.umapTimeSpace = function () {
         colorarr.sort((a, b) => a.order - b.order);
 
         tsne.postMessage({action: "colorscale", value: colorarr});
-        tsne.postMessage({action: "inittsne", value: graphicopt.opt});
-        tsne.postMessage({action: "initDataRaw", value: datain, clusterarr: cluster});
+        tsne.postMessage({action: "initDataRaw", value: datain, opt:graphicopt.opt, clusterarr: cluster});
         tsne.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
                     isBusy = true;
-                    xscale.domain(data.xscale.domain)
-                    yscale.domain(data.yscale.domain)
+                    xscale.domain(data.xscale.domain);
+                    yscale.domain(data.yscale.domain);
                     solution = data.sol;
-                    // updateTableOutput(data.value);
+                    updateTableOutput(data.value);
                     render();
                     break;
                 case "stable":
@@ -117,7 +114,7 @@ d3.umapTimeSpace = function () {
         datain = arr;
         cluster = clusterin
         handle_data(datain);
-        // updateTableInput();
+        updateTableInput();
         xscale.range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
         yscale.range([graphicopt.margin.top,graphicopt.height-graphicopt.margin.bottom]);
 
@@ -237,8 +234,8 @@ d3.umapTimeSpace = function () {
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
-    generateTable()
-    function generateTable(){
+    master.generateTable = function () {
+        d3.select('#tsneInformation table').selectAll('*').remove();
         table_info = d3.select('#tsneInformation table').styles({'width':tableWidth+'px'});
         let tableData = [
             [
@@ -251,8 +248,6 @@ d3.umapTimeSpace = function () {
             [
                 {text:"Output",type:"title"},
                 {label:"#Iterations",content:'_',variable: 'iteration'},
-                {label:"Cost",content:'_',variable: 'cost'},
-                {label:"\u0394 cost",content:'_',variable: 'deltacost'},
                 {label:"Time per step",content:'_',variable:'time'},
                 {label:"Total time",content:'_',variable:'totalTime'},
             ]
@@ -299,13 +294,17 @@ d3.umapTimeSpace = function () {
     }
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
-        d3.select('.perplexity div').node().noUiSlider.updateOptions({
-            range: {
-                'min': 1,
-                'max': Math.round(datain.length/2),
-            }
-        });
-        d3.select('.perplexity div').node().noUiSlider.set(20);
+        try {
+            d3.select('.perplexity div').node().noUiSlider.updateOptions({
+                range: {
+                    'min': 1,
+                    'max': Math.round(datain.length/2),
+                }
+            });
+            d3.select('.perplexity div').node().noUiSlider.set(20);
+        }catch(e){
+
+        }
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
@@ -365,8 +364,6 @@ d3.umapTimeSpace = function () {
 
     return master;
 }
-let umapTS = d3.umapTimeSpace();
-umapTSopt={}
 function handle_data_umap(tsnedata) {
     let dataIn = [];
 
@@ -386,16 +383,19 @@ function handle_data_umap(tsnedata) {
                 dataIn.push(axis_arr[i])
             }
             return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+            return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+
+            // dataIn.push(axis_arr[i]) // testing with full data
         })
     });
 
-    umapTSopt.opt = {
-            epsilon: 20, // epsilon is learning rate (10 = default)
-            perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-            dim: 2, // dimensionality of the embedding (2 = default)
+    umapopt.opt = {
+        // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
+        nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+        nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
+        minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
     }
-    umapTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));

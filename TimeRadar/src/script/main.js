@@ -326,6 +326,7 @@ var TsnePlotopt  = {
     };
 var TsneTSopt = {width:width,height:height};
 var PCAopt = {width:width,height:height};
+var umapopt = {width:width,height:height};
 var vizMode = 0; // 0 timeradar, 1 tsne, 2 pca, 3 umap
 var runopt ={ // run opt global
     suddenGroup:0,
@@ -349,6 +350,7 @@ function makedataworker(){
 }
 let tsneTS = d3.tsneTimeSpace();
 let pcaTS = d3.pcaTimeSpace();
+let umapTS = d3.umapTimeSpace();
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -1648,12 +1650,16 @@ function onchangeCluster(){
 function onchangeVizType(){
     tsneTS.stop();
     pcaTS.stop();
+    umapTS.stop();
     switch (vizMode) {
         case 'tsne':
             tsneTS.generateTable();
-            return true
+            return true;
         case 'pca':
             pcaTS.generateTable();
+            return true;
+        case 'umap':
+            umapTS.generateTable();
             return true
         default:
             return false;
@@ -1666,7 +1672,10 @@ function onchangeVizdata(){
             return true
         case 'pca':
             handle_data_pca(tsnedata);
-            return true
+            return true;
+        case 'umap':
+            handle_data_umap(tsnedata);
+            return true;
         default:
             return false;
     }
@@ -1816,7 +1825,7 @@ $( document ).ready(function() {
         var sect = document.getElementById("compDisplay_control");
         if(sect.options[sect.selectedIndex].value!=='reduceDim') {
             vizMode = false;
-            tsneTS.stop()
+            onchangeVizType();
             d3.select('#tsneContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
