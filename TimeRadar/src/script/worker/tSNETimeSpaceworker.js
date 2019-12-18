@@ -48,7 +48,7 @@ addEventListener('message',function ({data}){
                 break;
             case "inittsne":
                 tsne = new tsnejs.tSNE(data.value);
-                stopCondition = data.value.stopCondition||stopCondition;
+                stopCondition = +('1e'+data.value.stopCondition )||stopCondition;
                 // currentMaxIndex = -1;
                 // currentLastIndex = -1;
                 stop = false;

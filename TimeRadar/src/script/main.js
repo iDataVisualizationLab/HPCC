@@ -324,7 +324,8 @@ var TsnePlotopt  = {
         height: 400,
         margin:{top:5,bottom:5,left:45,right:85}
     };
-var TsneTSopt = {width:width,height:height}
+var TsneTSopt = {width:width,height:height};
+var istSNE = false;
 var runopt ={ // run opt global
     suddenGroup:0,
     minMax: 0,
@@ -1589,12 +1590,60 @@ function handle_dataRaw() {
     radarChartclusteropt.schema = serviceFullList;
     handle_clusterinfo();
 
-    //tsne
+
     // handle_data_tsne(tsnedata);
     // jobMap.callback({
     //     mouseover: tsneTS.hightlight,
     //     mouseleave: tsneTS.unhightlight,
     // });
+}
+function onchangeCluster(){
+    cluster_info.forEach(d => (d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    tsnedata = {};
+    hosts.forEach(h => {
+        tsnedata[h.name] = [];
+        sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
+            let nullkey = false;
+            let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
+            axis_arr.name = h.name;
+            axis_arr.timestep = i;
+            // reduce time step
+
+            let index = 0;
+            let minval = Infinity;
+            cluster_info.forEach((c, i) => {
+                const val = distance(c.__metrics.normalize, axis_arr);
+                if (minval > val) {
+                    index = i;
+                    minval = val;
+                }
+            });
+            cluster_info[index].total = 1 + cluster_info[index].total || 0;
+            cluster_info[index].__metrics.forEach((m, i) => {
+                if (m.minval === undefined || m.minval > axis_arr[i])
+                    m.minval = axis_arr[i];
+                if (m.maxval === undefined || m.maxval < axis_arr[i])
+                    m.maxval = axis_arr[i];
+            });
+            axis_arr.cluster = index;
+
+            // timeline precalculate
+            tsnedata[h.name].push(axis_arr);
+
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+        })
+    });
+    cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
+    handle_clusterinfo();
+
+    //tsne
+    if (!init)
+        if (istSNE)
+            handle_data_tsne(tsnedata);
+        else {
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
+        }
 }
 
 function calculateServiceRange() {
@@ -1741,6 +1790,7 @@ $( document ).ready(function() {
     d3.select('#compDisplay_control').on("change", function () {
         var sect = document.getElementById("compDisplay_control");
         if(sect.options[sect.selectedIndex].value!=='tsne') {
+            istSNE = false;
             tsneTS.stop()
             d3.select('#tsneContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
@@ -1799,6 +1849,7 @@ $( document ).ready(function() {
             }
             jobMap.runopt(jobMap_runopt).data(undefined, undefined).draw();
         }else{
+            istSNE = true;
             d3.select('#tsneContent').classed('hide',false);
             d3.select('.mainsvg').classed('hide',true);
             d3.select("#jobControl").attr('disabled','disabled').selectAll('input').attr('disabled','disabled');

@@ -21,7 +21,7 @@ d3.tsneTimeSpace = function () {
                 epsilon: 20, // epsilon is learning rate (10 = default)
                 perplexity: 1000, // roughly how many neighbors each point influences (30 = default)
                 dim: 2, // dimensionality of the embedding (2 = default)
-                stopCondition: 1e-4, // parameter for tsne worker - Ngan 12/17/2019
+                stopCondition: -4, // parameter for tsne worker - Ngan 12/17/2019
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -36,13 +36,13 @@ d3.tsneTimeSpace = function () {
         controlPanel = {
             epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'80px'},
             perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'80px'},
-            stopCondition:{text:"Limit \u0394 cost", range:[1e-12,1e-3], type:"slider", variable: 'stopCondition',width:'80px'},
+            stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'80px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
             'totalTime': function(d){return millisecondsToStr(d)},
             'iteration': function(d){return d},
-            'stopCondition': function(d) {return '1e'+d}
+            'stopCondition': function(d) {return '1e'+Math.round(d)}
         },tableWidth = 200
         ,
         runopt = {},
@@ -274,13 +274,13 @@ d3.tsneTimeSpace = function () {
                 if (d.text!==undefined) // value display only
                     d3.select(this).text(d.text);
                 else{ // other component display
-                    let formatvalue = formatTable[d.content.variable]||(e=>e);
+                    let formatvalue = formatTable[d.content.variable]||(e=>Math.round(e));
                     if (d.content.type==="slider"){
                         let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
                         noUiSlider.create(div.node(), {
                             start: (graphicopt.opt[d.content.variable]),
                             connect: 'lower',
-                            // tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +formatvalue(+value);}},
+                            tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +value.split('1e')[1];}},
                             step: d.content.step||1,
                             orientation: 'horizontal', // 'horizontal' or 'vertical'
                             range: {
@@ -289,7 +289,7 @@ d3.tsneTimeSpace = function () {
                             },
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
-                                graphicopt.opt[d.content.variable] = + formatvalue(+this.get());
+                                graphicopt.opt[d.content.variable] = + this.get();
                             start();
                         });
                     }
@@ -298,7 +298,13 @@ d3.tsneTimeSpace = function () {
     }
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
-
+        d3.select('.perplexity div').node().noUiSlider.updateOptions({
+            range: {
+                'min': 1,
+                'max': Math.round(datain.length/2),
+            }
+        });
+        d3.select('.perplexity div').node().noUiSlider.set(20);
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
