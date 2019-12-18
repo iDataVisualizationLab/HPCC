@@ -325,11 +325,12 @@ var TsnePlotopt  = {
         margin:{top:5,bottom:5,left:45,right:85}
     };
 var TsneTSopt = {width:width,height:height};
+var PCAopt = {width:width,height:height};
 var istSNE = false;
 var runopt ={ // run opt global
     suddenGroup:0,
     minMax: 0,
-}
+};
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
 var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
@@ -347,6 +348,7 @@ function makedataworker(){
     getDataWorker = new Worker ('src/script/worker/getDataWorker.js');
 }
 let tsneTS = d3.tsneTimeSpace();
+let pcaTS = d3.pcaTimeSpace();
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
