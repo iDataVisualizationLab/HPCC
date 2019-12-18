@@ -18,9 +18,10 @@ d3.umapTimeSpace = function () {
             },
 
             opt: {
-                epsilon: 20, // epsilon is learning rate (10 = default)
-                perplexity: 1000, // roughly how many neighbors each point influences (30 = default)
+                nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
+                nNeighbors: 1000, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
                 nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
+                minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
                 stopCondition: -4, // parameter for tsne worker - Ngan 12/17/2019
             },radaropt : {
                 // summary:{quantile:true},
@@ -82,7 +83,7 @@ d3.umapTimeSpace = function () {
         svg.selectAll('*').remove();
         if (tsne)
             tsne.terminate();
-        tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
+        tsne = new Worker('src/script/worker/umapworker.js');
         // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         tsne.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
         console.log(`----inint tsne with: `, graphicopt.opt)
@@ -99,7 +100,7 @@ d3.umapTimeSpace = function () {
                     xscale.domain(data.xscale.domain)
                     yscale.domain(data.yscale.domain)
                     solution = data.sol;
-                    updateTableOutput(data.value);
+                    // updateTableOutput(data.value);
                     render();
                     break;
                 case "stable":
@@ -116,7 +117,7 @@ d3.umapTimeSpace = function () {
         datain = arr;
         cluster = clusterin
         handle_data(datain);
-        updateTableInput();
+        // updateTableInput();
         xscale.range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
         yscale.range([graphicopt.margin.top,graphicopt.height-graphicopt.margin.bottom]);
 
@@ -364,8 +365,9 @@ d3.umapTimeSpace = function () {
 
     return master;
 }
-
-function handle_data_tsne(tsnedata) {
+let umapTS = d3.umapTimeSpace();
+umapTSopt={}
+function handle_data_umap(tsnedata) {
     let dataIn = [];
 
     d3.values(tsnedata).forEach(axis_arr => {
@@ -388,12 +390,12 @@ function handle_data_tsne(tsnedata) {
         })
     });
 
-    TsneTSopt.opt = {
+    umapTSopt.opt = {
             epsilon: 20, // epsilon is learning rate (10 = default)
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
             dim: 2, // dimensionality of the embedding (2 = default)
     }
-    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    umapTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
