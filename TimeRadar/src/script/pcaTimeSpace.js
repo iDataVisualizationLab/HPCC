@@ -373,7 +373,7 @@ function handle_data_pca(tsnedata) {
 
     PCAopt.opt = {
             dim: 2, // dimensionality of the embedding (2 = default)
-    }
+    };
     pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function calculateMSE_num(a,b){

@@ -1646,7 +1646,8 @@ function onchangeCluster(){
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
 }
 function onchangeVizType(){
-    console.log(vizMode)
+    tsneTS.stop();
+    pcaTS.stop();
     switch (vizMode) {
         case 'tsne':
             tsneTS.generateTable();

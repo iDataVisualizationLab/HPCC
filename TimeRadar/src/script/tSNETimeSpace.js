@@ -32,11 +32,13 @@ d3.tsneTimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+            linkConnect:true,
         },
         controlPanel = {
             epsilon:{text:"Epsilon", range:[1,40], type:"slider", variable: 'epsilon',width:'100px'},
             perplexity:{text:"Perplexity", range:[1,1000], type:"slider", variable: 'perplexity',width:'100px'},
             stopCondition:{text:"Limit \u0394 cost", range:[-12,-3], type:"slider", variable: 'stopCondition',width:'100px'},
+            linkConnect:{text:"Draw link", type:"checkbox", variable: 'linkConnect',width:'100px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -334,7 +336,14 @@ d3.tsneTimeSpace = function () {
         if (arguments.length) {
             for (let i in __) {
                 if ('undefined' !== typeof __[i]) {
-                    graphicopt[i] = __[i];
+                    if (i==="opt"){
+                        for (let j in __[i]) {
+                            if ('undefined' !== typeof __[i][j]) {
+                                graphicopt[i][j] = __[i][j];
+                            }
+                        }
+                    }else
+                        graphicopt[i] = __[i];
                 }
             }
             if (graphicopt.radaropt)
