@@ -18,7 +18,7 @@ d3.umapTimeSpace = function () {
             },
 
             opt: {
-                // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
+                nEpochs: 1000, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
                 nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
                 nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
                 minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
@@ -32,10 +32,12 @@ d3.umapTimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+            linkConnect: true,
         },
         controlPanel = {
-            minDist:{text:"Minimum distance", range:[0.1,2], type:"slider", variable: 'minDist',width:'100px',step:0.1},
-            nNeighbors:{text:"#Neighbors", range:[1,1000], type:"slider", variable: 'nNeighbors',width:'100px'},
+            minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
+            nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
+            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -134,35 +136,39 @@ d3.umapTimeSpace = function () {
     };
 
     function render (isradar){
-        createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale)
-        background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-        if(filter_by_name&&filter_by_name.length)
-            front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-        path = {};
-        solution.forEach(function(d, i) {
-            const target = datain[i];
-            target.__metrics.position = d;
-            if (!path[target.name])
-                path[target.name] = [];
-            path[target.name].push({name:target.name,key:target.timestep,value:d,cluster:target.cluster});
-            let fillColor = d3.color(colorarr[target.cluster].value);
-            fillColor.opacity = 0.8
-            background_ctx.fillStyle = fillColor+'';
-            background_ctx.fillRect(xscale(d[0])-2, yscale(d[1])-2, 4, 4);
-        });
-        d3.values(path).filter(d=>d.length>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
-            // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
-            for (let i=0;i<path.length-1;i++){
-                let a =( path[i-1]||path[i]).value;
-                let b = path[i].value;
-                let c = path[i+1].value;
-                let d = (path[i+2]||path[i+1]).value;
-                drawline(background_ctx,[a,b,c,d],path[i].cluster);
+        if(solution) {
+            createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale)
+            background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+            if (filter_by_name && filter_by_name.length)
+                front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+            path = {};
+            solution.forEach(function (d, i) {
+                const target = datain[i];
+                target.__metrics.position = d;
+                if (!path[target.name])
+                    path[target.name] = [];
+                path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
+                let fillColor = d3.color(colorarr[target.cluster].value);
+                fillColor.opacity = 0.8
+                background_ctx.fillStyle = fillColor + '';
+                background_ctx.fillRect(xscale(d[0]) - 2, yscale(d[1]) - 2, 4, 4);
+            });
+            if (graphicopt.linkConnect) {
+                d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
+                    // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                    for (let i = 0; i < path.length - 1; i++) {
+                        let a = (path[i - 1] || path[i]).value;
+                        let b = path[i].value;
+                        let c = path[i + 1].value;
+                        let d = (path[i + 2] || path[i + 1]).value;
+                        drawline(background_ctx, [a, b, c, d], path[i].cluster);
+                    }
+                })
             }
-        })
 
-        if(isradar) {
-            renderSvgRadar();
+            if (isradar) {
+                renderSvgRadar();
+            }
         }
     }
 
@@ -288,6 +294,18 @@ d3.umapTimeSpace = function () {
                                 graphicopt.opt[d.content.variable] = + this.get();
                             start();
                         });
+                    }else if (d.content.type === "checkbox") {
+                        let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
+                        div.append('input')
+                            .attrs({
+                                type: "checkbox",
+                                class: "filled-in"
+                            }).on('change',function(){
+                            graphicopt[d.content.variable]  =  this.checked;
+                            if (d.content.callback)
+                                d.content.callback();
+                        }).node().checked = graphicopt[d.content.variable];
+                        div.append('span')
                     }
                 }
             });
@@ -382,8 +400,8 @@ function handle_data_umap(tsnedata) {
                 count++;
                 dataIn.push(axis_arr[i])
             }
-            return index;
-            return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+            // return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
 
             // dataIn.push(axis_arr[i]) // testing with full data
         })

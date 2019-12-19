@@ -453,22 +453,25 @@ function handle_data_tsne(tsnedata) {
         sampleS.timespan.forEach((t, i) => {
             let index = axis_arr[i].cluster;
             axis_arr[i].clusterName = cluster_info[index].name
-            // timeline precalculate
-            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
-                lastcluster = index;
-                lastdataarr = axis_arr[i];
-                axis_arr[i].timestep = count; // TODO temperal timestep
-                count++;
-                dataIn.push(axis_arr[i])
-            }
-            return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+            // // timeline precalculate
+            // if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
+            //     lastcluster = index;
+            //     lastdataarr = axis_arr[i];
+            //     axis_arr[i].timestep = count; // TODO temperal timestep
+            //     count++;
+            //     dataIn.push(axis_arr[i])
+            // }
+            // // return index;
+            // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+
+            dataIn.push(axis_arr[i]) // testing with full data
         })
     });
 
     TsneTSopt.opt = {
+        // perplexity: 5,
     }
-    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(_.shuffle(dataIn), cluster_info.map(c => c.__metrics.normalize));
 }
 
 function calculateMSE_num(a, b) {

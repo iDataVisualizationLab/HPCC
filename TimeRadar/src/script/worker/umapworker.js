@@ -21,7 +21,8 @@ addEventListener('message',function ({data}){
             console.log('---init data UMAP-----')
             const nEpochs = umap.initializeFit(dataIn);
             console.log(nEpochs)
-            for (let i = 0; i < nEpochs; i++) {
+            for (let i = 0; i < (1000|| nEpochs); i++) {
+            // for (let i = 0; i < (data.opt.nEpochs|| nEpochs); i++) {
                 count++;
                 let t0 = performance.now();
                 umap.step();
