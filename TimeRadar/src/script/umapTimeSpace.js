@@ -33,6 +33,10 @@ d3.umapTimeSpace = function () {
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
             linkConnect: true,
+            component:{
+                dot:{size:2,opacity:0.1},
+                link:{size:0.5,opacity:0.1},
+            }
         },
         controlPanel = {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
@@ -86,7 +90,7 @@ d3.umapTimeSpace = function () {
         tsne = new Worker('src/script/worker/umapworker.js');
         // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         tsne.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
-        console.log(`----inint tsne with: `, graphicopt.opt)
+        console.log(`----inint umap with: `, graphicopt.opt)
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
 
@@ -149,9 +153,9 @@ d3.umapTimeSpace = function () {
                     path[target.name] = [];
                 path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
                 let fillColor = d3.color(colorarr[target.cluster].value);
-                fillColor.opacity = 0.8
+                fillColor.opacity = graphicopt.component.dot.opacity;
                 background_ctx.fillStyle = fillColor + '';
-                background_ctx.fillRect(xscale(d[0]) - 2, yscale(d[1]) - 2, 4, 4);
+                background_ctx.fillRect(xscale(d[0]) - graphicopt.component.dot.size / 2, yscale(d[1]) - graphicopt.component.dot.size / 2, graphicopt.component.dot.size, graphicopt.component.dot.size);
             });
             if (graphicopt.linkConnect) {
                 d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
@@ -166,7 +170,7 @@ d3.umapTimeSpace = function () {
                 })
             }
 
-            if (isradar) {
+            if (isradar && datain.length < 5000) {
                 renderSvgRadar();
             }
         }
@@ -204,11 +208,9 @@ d3.umapTimeSpace = function () {
 
     function drawline(ctx,path,cluster) {
         positionLink_canvas(path,ctx);
-
-        // ctx.beginPath();
-        // ctx.moveTo(xscale(d[0]), yscale(d[1]));
-        // ctx.lineTo(xscale(nexttime[0]), yscale(nexttime[1]));
-        ctx.strokeStyle = colorarr[cluster].value;
+        let fillColor = d3.color(colorarr[cluster].value);
+        fillColor.opacity = graphicopt.component.link.opacity;
+        ctx.strokeStyle = fillColor+'';
         ctx.stroke();
     }
 
@@ -313,13 +315,13 @@ d3.umapTimeSpace = function () {
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
         try {
-            d3.select('.perplexity div').node().noUiSlider.updateOptions({
+            d3.select('.nNeighbors div').node().noUiSlider.updateOptions({
                 range: {
                     'min': 1,
                     'max': Math.round(datain.length/2),
                 }
             });
-            d3.select('.perplexity div').node().noUiSlider.set(20);
+            d3.select('.nNeighbors div').node().noUiSlider.set(graphicopt.nNeighbors||15);
         }catch(e){
 
         }
@@ -352,6 +354,13 @@ d3.umapTimeSpace = function () {
         if (arguments.length) {
             for (let i in __) {
                 if ('undefined' !== typeof __[i]) {
+                    if (i === "opt") {
+                        for (let j in __[i]) {
+                            if ('undefined' !== typeof __[i][j]) {
+                                graphicopt[i][j] = __[i][j];
+                            }
+                        }
+                    } else
                     graphicopt[i] = __[i];
                 }
             }
@@ -400,8 +409,8 @@ function handle_data_umap(tsnedata) {
                 count++;
                 dataIn.push(axis_arr[i])
             }
-            // return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+            // // return index;
+            // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
 
             // dataIn.push(axis_arr[i]) // testing with full data
         })
@@ -409,7 +418,7 @@ function handle_data_umap(tsnedata) {
 
     umapopt.opt = {
         // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
-        nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+        nNeighbors: Math.round(dataIn.length/cluster_info.length/2.5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
         nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
         minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
     }

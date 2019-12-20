@@ -47,7 +47,7 @@ addEventListener('message',function ({data}){
                 // gl = canvas.getContext("2d");
                 break;
             case "inittsne":
-                tsne = new tsnejs.tSNE(data.value);
+                tsne = tsne(data.value);
                 stopCondition = +('1e'+data.value.stopCondition )||stopCondition;
                 // currentMaxIndex = -1;
                 // currentLastIndex = -1;

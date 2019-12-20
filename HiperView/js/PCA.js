@@ -385,6 +385,7 @@ var PCA = function(){
         var pcXV = dot(X,V);
         var pcUdS = dot(U,S);
 
+        // var prod = trunc(sub(pcXV,pcUdS), 1e-11);
         var prod = trunc(sub(pcXV,pcUdS), 1e-12);
         var zero = zeros(prod.length, prod[0].length);
         console.assert(same(prod,zero), 'svd and eig ways must be the same.');

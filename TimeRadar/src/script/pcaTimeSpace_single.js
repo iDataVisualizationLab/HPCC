@@ -19,7 +19,6 @@ d3.pcaTimeSpace = function () {
 
             opt: {
                 dim: 2, // dimensionality of the embedding (2 = default)
-                window:3,
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -32,13 +31,12 @@ d3.pcaTimeSpace = function () {
             },
             linkConnect: true,
             component:{
-                dot:{size:4,opacity:0.2},
-                link:{size:0.5,opacity:0.4},
+                dot:{size:2,opacity:0.1},
+                link:{size:0.5,opacity:0.1},
             }
         },
         controlPanel = {
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
-            window:{text:"Window size", range:[1,10], type:"slider", variable: 'window',width:'100px',callback:()=>handle_data_pca(tsnedata)},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -116,7 +114,7 @@ d3.pcaTimeSpace = function () {
     master.init = function(arr,clusterin) {
         datain = arr;
         cluster = clusterin
-        // handle_data(datain);
+        handle_data(datain);
         updateTableInput();
         xscale.range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
         yscale.range([graphicopt.margin.top,graphicopt.height-graphicopt.margin.bottom]);
@@ -145,7 +143,7 @@ d3.pcaTimeSpace = function () {
             path = {};
             solution.forEach(function (d, i) {
                 const target = datain[i];
-                // target.__metrics.position = d;
+                target.__metrics.position = d;
                 if (!path[target.name])
                     path[target.name] = [];
                 path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
@@ -167,9 +165,9 @@ d3.pcaTimeSpace = function () {
                 })
             }
 
-            // if (isradar && datain.length < 5000) {
-            //     renderSvgRadar();
-            // }
+            if (isradar && datain.length < 5000) {
+                renderSvgRadar();
+            }
         }
     }
 
@@ -187,7 +185,7 @@ d3.pcaTimeSpace = function () {
     master.stop = function(){
         if (tsne) {
             tsne.terminate();
-            // renderSvgRadar()
+            renderSvgRadar()
         }
     };
 
@@ -288,11 +286,8 @@ d3.pcaTimeSpace = function () {
                             },
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
-                            graphicopt.opt[d.content.variable] = + this.get();
-                            if(d.content.callback)
-                                d.content.callback();
-                            else
-                                start();
+                                graphicopt.opt[d.content.variable] = + this.get();
+                            start();
                         });
                     }else if (d.content.type === "checkbox") {
                         let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
@@ -341,13 +336,6 @@ d3.pcaTimeSpace = function () {
         if (arguments.length) {
             for (let i in __) {
                 if ('undefined' !== typeof __[i]) {
-                    if (i === "opt") {
-                        for (let j in __[i]) {
-                            if ('undefined' !== typeof __[i][j]) {
-                                graphicopt[i][j] = __[i][j];
-                            }
-                        }
-                    } else
                     graphicopt[i] = __[i];
                 }
             }
@@ -381,20 +369,29 @@ d3.pcaTimeSpace = function () {
 
 function handle_data_pca(tsnedata) {
     let dataIn = [];
-    PCAopt.opt = pcaTS.graphicopt().opt;
-    for (let h in tsnedata) {
-        let count = 0;
-        for (let t = 0; t < sampleS.timespan.length - PCAopt.opt.window; t++) {
-            let window = _.flatten(d3.range(0, PCAopt.opt.window).map(e =>tsnedata[h][t+e]));
-            window.timestep = count; // TODO temperal timestep
-            let index = tsnedata[h][t+PCAopt.opt.window-1].cluster;
-            window.cluster = index;
-            window.clusterName = cluster_info[index].name;
-            count++;
-            dataIn.push(window)
-        }
 
-    }
+    d3.values(tsnedata).forEach(axis_arr => {
+        let lastcluster;
+        let lastdataarr;
+        let count = 0;
+        sampleS.timespan.forEach((t, i) => {
+            let index = axis_arr[i].cluster;
+            axis_arr[i].clusterName = cluster_info[index].name
+            // // timeline precalculate
+            // if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
+            //     lastcluster = index;
+            //     lastdataarr = axis_arr[i];
+            //     axis_arr[i].timestep = count; // TODO temperal timestep
+            //     count++;
+            //     dataIn.push(axis_arr[i])
+            // }
+            // return index;
+            // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+
+            dataIn.push(axis_arr[i]) // testing with full data
+        })
+    });
+
     PCAopt.opt = {
             dim: 2, // dimensionality of the embedding (2 = default)
     };
