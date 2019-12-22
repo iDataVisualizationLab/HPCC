@@ -31,8 +31,8 @@ d3.pcaTimeSpace = function () {
             },
             linkConnect: true,
             component:{
-                dot:{size:2,opacity:0.1},
-                link:{size:0.5,opacity:0.1},
+                dot:{size:4,opacity:0.2},
+                link:{size:0.8,opacity:0.1},
             }
         },
         controlPanel = {
@@ -129,6 +129,8 @@ d3.pcaTimeSpace = function () {
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
+        d3.select('#tsneInformation+.title').text('PCA')
+
         start();
 
         return master;
@@ -191,13 +193,17 @@ d3.pcaTimeSpace = function () {
 
 
 
-    function positionLink_canvas(path,ctx) { //path 4 element
+    function positionLink_canvas(path, ctx) { //path 4 element
         // return p = new Path2D(positionLink(a,b));
         ctx.beginPath();
         return d3.line()
-            .x(function(d) { return xscale(d[0]); })
-            .y(function(d) { return yscale(d[1]); })
-            .curve(d3.curveCardinalOpen)
+            .x(function (d) {
+                return xscale(d[0]);
+            })
+            .y(function (d) {
+                return yscale(d[1]);
+            })
+            .curve(d3.curveCardinalOpen.tension(0.75))
             .context(ctx)(path);
     }
 
@@ -377,18 +383,18 @@ function handle_data_pca(tsnedata) {
         sampleS.timespan.forEach((t, i) => {
             let index = axis_arr[i].cluster;
             axis_arr[i].clusterName = cluster_info[index].name
-            // // timeline precalculate
-            // if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
-            //     lastcluster = index;
-            //     lastdataarr = axis_arr[i];
-            //     axis_arr[i].timestep = count; // TODO temperal timestep
-            //     count++;
-            //     dataIn.push(axis_arr[i])
-            // }
+            // timeline precalculate
+            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
+                lastcluster = index;
+                lastdataarr = axis_arr[i];
+                axis_arr[i].timestep = count; // TODO temperal timestep
+                count++;
+                dataIn.push(axis_arr[i])
+            }
             // return index;
             // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
 
-            dataIn.push(axis_arr[i]) // testing with full data
+            // dataIn.push(axis_arr[i]) // testing with full data
         })
     });
 

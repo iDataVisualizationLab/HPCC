@@ -34,8 +34,8 @@ d3.umapTimeSpace = function () {
             },
             linkConnect: true,
             component:{
-                dot:{size:2,opacity:0.1},
-                link:{size:0.5,opacity:0.1},
+                dot:{size:4,opacity:0.2},
+                link:{size:0.8,opacity:0.1},
             }
         },
         controlPanel = {
@@ -110,6 +110,7 @@ d3.umapTimeSpace = function () {
                     isBusy = false;
                     render(true);
                     tsne.terminate();
+                    break;
                 default:
                     break;
             }
@@ -133,6 +134,8 @@ d3.umapTimeSpace = function () {
         front_canvas.height = graphicopt.height;
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
+
+        d3.select('#tsneInformation+.title').text('UMAP')
 
         start();
 
@@ -196,13 +199,17 @@ d3.umapTimeSpace = function () {
 
 
 
-    function positionLink_canvas(path,ctx) { //path 4 element
+    function positionLink_canvas(path, ctx) { //path 4 element
         // return p = new Path2D(positionLink(a,b));
         ctx.beginPath();
         return d3.line()
-            .x(function(d) { return xscale(d[0]); })
-            .y(function(d) { return yscale(d[1]); })
-            .curve(d3.curveCardinalOpen)
+            .x(function (d) {
+                return xscale(d[0]);
+            })
+            .y(function (d) {
+                return yscale(d[1]);
+            })
+            .curve(d3.curveCardinalOpen.tension(0.75))
             .context(ctx)(path);
     }
 
@@ -402,23 +409,22 @@ function handle_data_umap(tsnedata) {
             let index = axis_arr[i].cluster;
             axis_arr[i].clusterName = cluster_info[index].name
             // timeline precalculate
-            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup&& calculateMSE_num(lastdataarr,axis_arr[i])>cluster_info[axis_arr[i].cluster].mse*runopt.suddenGroup) {
+            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
                 lastcluster = index;
                 lastdataarr = axis_arr[i];
                 axis_arr[i].timestep = count; // TODO temperal timestep
                 count++;
                 dataIn.push(axis_arr[i])
             }
-            // // return index;
-            // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-
-            // dataIn.push(axis_arr[i]) // testing with full data
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
     });
 
     umapopt.opt = {
         // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
-        nNeighbors: Math.round(dataIn.length/cluster_info.length/2.5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+        nNeighbors: Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+        // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
         nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
         minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
     }

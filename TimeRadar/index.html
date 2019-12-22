@@ -663,14 +663,15 @@
 
                     </svg>
                 </svg>
-                <div id="tsneContent" class="hide" style="position:relative;background-color: white">
-                    <canvas id="tsneScreen"></canvas>
-                    <canvas id="tsneScreen_fornt" style="position:absolute;top:0;left:0"></canvas>
-                    <svg id="tsneScreen_svg" style="position:absolute;top:0;left:0"></svg>
-                    <div id="tsneInformation" style="position:absolute;top:0;left:0">
+                <div id="modelWorkerContent" class="hide" style="position:relative;background-color: white">
+                    <canvas id="modelWorkerScreen"></canvas>
+                    <canvas id="modelWorker_fornt" style="position:absolute;top:0;left:0"></canvas>
+                    <svg id="modelWorker_svg" style="position:absolute;top:0;left:0"></svg>
+                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0">
                         <table>
                         </table>
                     </div>
+                    <h5 class="title" style="position:absolute;top:0;left:50%"></h5>
                 </div>
                 <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
                 <!--<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>-->
@@ -794,10 +795,11 @@
 <script src="../HiperView/myscripts/scatterplot.js"></script>
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
 <!--<script src="src/script/tSNETimeSpace.js"></script>-->
-<script src="src/script/tftSNETimeSpace.js"></script>
-<script src="src/script/pcaTimeSpace.js"></script>
-<script src="src/script/umapTimeSpace.js"></script>
-
+<!--&lt;!&ndash;<script src="src/script/tftSNETimeSpace.js"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;<script src="src/script/pcaTimeSpace.js"></script>&ndash;&gt;-->
+<!--<script src="src/script/pcaTimeSpace_single.js"></script>-->
+<!--<script src="src/script/umapTimeSpace.js"></script>-->
+<script src="src/script/timeSpaceModel.js"></script>
 
 
 <script src="../HiperView/myscripts/violinChart.js"></script>
