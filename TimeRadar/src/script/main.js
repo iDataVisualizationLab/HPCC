@@ -1826,7 +1826,7 @@ $( document ).ready(function() {
         if(sect.options[sect.selectedIndex].value!=='reduceDim') {
             vizMode = false;
             onchangeVizType();
-            d3.select('#tsneContent').classed('hide',true);
+            d3.select('#modelWorkerContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
             let oldChoice = jobMap_runopt.compute.type;
@@ -1884,7 +1884,7 @@ $( document ).ready(function() {
             jobMap.runopt(jobMap_runopt).data(undefined, undefined).draw();
         }else{
             vizMode = sect.options[sect.selectedIndex].getAttribute('value2');
-            d3.select('#tsneContent').classed('hide',false);
+            d3.select('#modelWorkerContent').classed('hide',false);
             d3.select('.mainsvg').classed('hide',true);
             d3.select("#jobControl").attr('disabled','disabled').selectAll('input').attr('disabled','disabled');
             d3.select(suddenGroup_control.parentNode.parentNode).attr('disabled',null);

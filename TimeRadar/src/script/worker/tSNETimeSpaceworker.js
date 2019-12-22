@@ -46,17 +46,12 @@ addEventListener('message',function ({data}){
             canvasopt = data.canvasopt;
             // gl = canvas.getContext("2d");
             break;
-        case "inittsne":
-            tsne = new tsnejs.tSNE(data.value);
-            stopCondition = +('1e'+data.value.stopCondition )||stopCondition;
-            // currentMaxIndex = -1;
-            // currentLastIndex = -1;
-            stop = false;
-            break;
         case "maxstack":
             maxstack = (data.value);
             break;
         case "initDataRaw":
+            tsne = new tsnejs.tSNE(data.value);
+            stopCondition = +('1e'+data.value.stopCondition )||stopCondition;
             totalTime_marker = performance.now();
             dataIn = data.value;
 

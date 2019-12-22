@@ -51,7 +51,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
 
@@ -82,10 +82,10 @@ d3.TimeSpace = function () {
         svg.selectAll('*').remove();
         if (modelWorker)
             modelWorker.terminate();
-        modelWorker = new Worker(this.workerPath);
+        modelWorker = new Worker(self.workerPath);
         // modelWorker.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         modelWorker.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
-        console.log(`----inint ${this.name} with: `, graphicopt.opt)
+        console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
 
@@ -131,7 +131,7 @@ d3.TimeSpace = function () {
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
-        d3.select('#modelWorkerInformation+.title').text(this.name)
+        d3.select('#modelWorkerInformation+.title').text(self.name)
 
         start();
 
@@ -245,6 +245,7 @@ d3.TimeSpace = function () {
         d3.select(background_canvas).style('opacity',1);
         d3.select(front_canvas).style('opacity',0);
     };
+    let self = this;
     master.generateTable = function(){
         d3.select('#modelWorkerInformation table').selectAll('*').remove();
         table_info = d3.select('#modelWorkerInformation table').styles({'width':tableWidth+'px'});
@@ -260,13 +261,13 @@ d3.TimeSpace = function () {
                 {text:"Output",type:"title"},
             ]
         ];
-        d3.values(this.controlPanel).forEach(d=>{
+        d3.values(self.controlPanel).forEach(d=>{
             tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
         });
         d3.values(controlPanelGeneral).forEach(d=>{
             tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
         });
-        tableData[2] = _.concat(tableData[2],this.outputSelection);
+        tableData[2] = _.concat(tableData[2],self.outputSelection);
         let tbodys = table_info.selectAll('tbody').data(tableData);
         tbodys
             .enter().append('tbody')
@@ -285,7 +286,7 @@ d3.TimeSpace = function () {
                     if (d.content.type==="slider"){
                         let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
                         noUiSlider.create(div.node(), {
-                            start: (graphicopt.opt[d.content.variable]),
+                            start: (graphicopt.opt[d.content.variable])|| d.content.range[0],
                             connect: 'lower',
                             tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +value.split('1e')[1];}},
                             step: d.content.step||1,
@@ -317,6 +318,21 @@ d3.TimeSpace = function () {
     }
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
+        try {
+            d3.values(self.controlPanel).forEach((d)=>{
+                if (graphicopt.opt[d.variable]) {
+                    // d3.select('.nNeighbors div').node().noUiSlider.updateOptions({
+                    //     range: {
+                    //         'min': 1,
+                    //         'max': Math.round(datain.length / 2),
+                    //     }
+                    // });
+                    d3.select(`.${d.variable} div`).node().noUiSlider.set(graphicopt.opt[d.variable]);
+                }
+            });
+        }catch(e){
+
+        }
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
@@ -393,7 +409,6 @@ d3.tsneTimeSpace = _.bind(d3.TimeSpace,
             variable: 'stopCondition',
             width: '100px'
         },
-        linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
     },workerPath:'src/script/worker/tSNETimeSpaceworker.js',outputSelection:[ {label: "#Iterations", content: '_', variable: 'iteration'},
         {label: "Cost", content: '_', variable: 'cost'},
         {label: "\u0394 cost", content: '_', variable: 'deltacost'},
@@ -403,7 +418,6 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
     {name:'UMAP',controlPanel: {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
             nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
-            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
         },workerPath:'src/script/worker/umapworker.js',outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
             {label:"Time per step",content:'_',variable:'time'},
             {label:"Total time",content:'_',variable:'totalTime'},]});
