@@ -54,7 +54,7 @@ d3.TimeSpace = function () {
     // grahic 
     let camera,scene,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
-    near = 1,
+    near = 0.1,
     far = 7000;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
@@ -127,7 +127,7 @@ d3.TimeSpace = function () {
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
 
-        far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2);
+        far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
         camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff);
@@ -151,13 +151,16 @@ d3.TimeSpace = function () {
         // zoom set up
         view = d3.select(renderer.domElement);
         zoom = d3.zoom()
-            .scaleExtent([getScaleFromZ(far), getScaleFromZ(near)])
+            .scaleExtent([getScaleFromZ(far), getScaleFromZ(10)])
             .on('zoom', () =>  {
                 let d3_transform = d3.event.transform;
                 zoomHandler(d3_transform);
             });
 
         setUpZoom();
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.addEventListener("change", () => renderer.render(scene, camera));
+
         stop = false;
         animate();
         // background_canvas = document.getElementById("modelWorkerScreen");
@@ -184,11 +187,12 @@ d3.TimeSpace = function () {
         }
     }
     function setUpZoom() {
-        view.call(zoom);
-        let initial_scale = getScaleFromZ(far);
-        var initial_transform = d3.zoomIdentity.translate(graphicopt.width/2, graphicopt.height/2).scale(initial_scale);
-        zoom.transform(view, initial_transform);
-        camera.position.set(0, 0, far);
+        // view.call(zoom);
+        let initial_scale = 1;
+        // var initial_transform = d3.zoomIdentity.translate(graphicopt.width/2, graphicopt.height/2).scale(initial_scale);
+        // zoom.transform(view, initial_transform);
+        camera.position.set(0, 0, getZFromScale(1));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
     function zoomHandler(d3_transform) {
         let scale = d3_transform.k;
@@ -202,8 +206,10 @@ d3.TimeSpace = function () {
                 scatterPlot.rotation.y = x * 0.01;
                 scatterPlot.rotation.x = y * 0.01;
             }
-            camera.position.z = z;
+            // camera.position.z = z;
+            camera.position.set(x, y, z);
         }
+        console.log(scale)
     }
     function getScaleFromZ (camera_z_position) {
         let half_fov = fov/2;
