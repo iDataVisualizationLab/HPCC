@@ -32,7 +32,7 @@ addEventListener('message',function ({data}){
                 return [pc1,pc2];
             });
             render(solution);
-
+            postMessage({action:'stable', status:"done"});
             break;
     }
 });

@@ -46,16 +46,12 @@ d3.TimeSpace = function () {
         },tableWidth = 200
         ,
         runopt = {},
-        isBusy = false,
-        stop = false;
+        isBusy = false;
     let modelWorker,colorscale;
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
-    let fov = 100,
-    near = 1,
-    far = 7000;
+    let camera,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
 
@@ -90,11 +86,12 @@ d3.TimeSpace = function () {
         // modelWorker.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         modelWorker.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
         console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
-
+        colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
+        colorarr.sort((a, b) => a.order - b.order);
 
         modelWorker.postMessage({action: "colorscale", value: colorarr});
         // modelWorker.postMessage({action: "initmodelWorker", value: graphicopt.opt});
-        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain, clusterarr: cluster});
+        modelWorker.postMessage({action: "initDataRaw", value: datain, clusterarr: cluster});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
@@ -118,56 +115,20 @@ d3.TimeSpace = function () {
 
     master.init = function(arr,clusterin) {
         datain = arr;
-        datain.sort((a,b)=>a.timestep-b.timestep);
         cluster = clusterin
         handle_data(datain);
         updateTableInput();
-        xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
-        yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
-        colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
-        colorarr.sort((a, b) => a.order - b.order);
+        xscale.range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
+        yscale.range([graphicopt.margin.top,graphicopt.height-graphicopt.margin.bottom]);
 
-        far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2);
-        camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-        scatterPlot = new THREE.Object3D();
-        scatterPlot.rotation.y = 0;
-        points = createpoints(scatterPlot);
-        path = {};
-        datain.forEach(function (target, i) {
-            target.__metrics.position = [0,0,0];
-            if (!path[target.name])
-                path[target.name] = [];
-            path[target.name].push({name: target.name, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
-        });
-        lines = createLines(scatterPlot);
-        scene.add(scatterPlot);
-
-        // Add canvas
-        renderer = new THREE.WebGLRenderer({canvas: document.getElementById("modelWorkerScreen")});
-        renderer.setSize(graphicopt.width, graphicopt.height);
-        renderer.render(scene, camera);
-        // zoom set up
-        view = d3.select(renderer.domElement);
-        zoom = d3.zoom()
-            .scaleExtent([getScaleFromZ(far), getScaleFromZ(near)])
-            .on('zoom', () =>  {
-                let d3_transform = d3.event.transform;
-                zoomHandler(d3_transform);
-            });
-
-        setUpZoom();
-        stop = false;
-        animate();
-        // background_canvas = document.getElementById("modelWorkerScreen");
-        // background_canvas.width  = graphicopt.width;
-        // background_canvas.height = graphicopt.height;
-        // background_ctx = background_canvas.getContext('2d');
-        // front_canvas = document.getElementById("modelWorkerScreen_fornt");
-        // front_canvas.width  =  graphicopt.width;
-        // front_canvas.height = graphicopt.height;
-        // front_ctx = front_canvas.getContext('2d');
+        background_canvas = document.getElementById("modelWorkerScreen");
+        background_canvas.width  = graphicopt.width;
+        background_canvas.height = graphicopt.height;
+        background_ctx = background_canvas.getContext('2d');
+        front_canvas = document.getElementById("modelWorkerScreen_fornt");
+        front_canvas.width  =  graphicopt.width;
+        front_canvas.height = graphicopt.height;
+        front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
         d3.select('#modelWorkerInformation+.title').text(self.name)
@@ -176,102 +137,41 @@ d3.TimeSpace = function () {
 
         return master;
     };
-    // Three.js render loop
-    function animate() {
-        if (!stop) {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-    }
-    function setUpZoom() {
-        view.call(zoom);
-        let initial_scale = getScaleFromZ(far);
-        var initial_transform = d3.zoomIdentity.translate(graphicopt.width/2, graphicopt.height/2).scale(initial_scale);
-        zoom.transform(view, initial_transform);
-        camera.position.set(0, 0, far);
-    }
-    function zoomHandler(d3_transform) {
-        let scale = d3_transform.k;
-        let x = -(d3_transform.x - graphicopt.width / 2) / scale;
-        let y = (d3_transform.y - graphicopt.height / 2) / scale;
-        let z = getZFromScale(scale);
-        if (graphicopt.dim===2) {
-            camera.position.set(x, y, z);
-        }else{
-            if (z===camera.position.z) {
-                scatterPlot.rotation.y = x * 0.01;
-                scatterPlot.rotation.x = y * 0.01;
-            }
-            camera.position.z = z;
-        }
-    }
-    function getScaleFromZ (camera_z_position) {
-        let half_fov = fov/2;
-        let half_fov_radians = toRadians(half_fov);
-        let half_fov_height = Math.tan(half_fov_radians) * camera_z_position;
-        let fov_height = half_fov_height * 2;
-        let scale = graphicopt.height / fov_height; // Divide visualization height by height derived from field of view
-        return scale;
-    }
 
-    function getZFromScale(scale) {
-        let half_fov = fov/2;
-        let half_fov_radians = toRadians(half_fov);
-        let scale_height = graphicopt.height / scale;
-        let camera_z_position = scale_height / (2 * Math.tan(half_fov_radians));
-        return camera_z_position;
-    }
-
-    function toRadians (angle) {
-        return angle * (Math.PI / 180);
-    }
-    function createpoints(g){
-        let pointsGeometry = new THREE.Geometry();
-
-        let colors = [];
-        for (let target of datain) {
-            // Set vector coordinates from data
-            let vertex = new THREE.Vector3(0, 0, 0);
-            pointsGeometry.vertices.push(vertex);
-            let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            colors.push(color);
-        }
-        pointsGeometry.colors = colors;
-
-        let pointsMaterial = new THREE.PointsMaterial({
-            size: graphicopt.component.dot.size,
-            sizeAttenuation: false,
-            map: new THREE.TextureLoader().load("src/images/circle.png"),
-            vertexColors: THREE.VertexColors,
-            transparent: true
-        });
-
-        let p = new THREE.Points(pointsGeometry, pointsMaterial);
-        g.add(p);
-        return p;
-    }
     function render (isradar){
         if(solution) {
             createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale)
+            background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+            if (filter_by_name && filter_by_name.length)
+                front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+            path = {};
             solution.forEach(function (d, i) {
                 const target = datain[i];
                 target.__metrics.position = d;
-                points.geometry.vertices[i] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
-                const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
-                path[target.name][posPath].value = d;
-                lines[target.name].geometry.vertices[posPath*2] =points.geometry.vertices[i];
-                if (posPath)
-                    lines[target.name].geometry.vertices[posPath*2-1] =points.geometry.vertices[i];
-                lines[target.name].geometry.verticesNeedUpdate = true;
+                if (!path[target.name])
+                    path[target.name] = [];
+                path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
+                let fillColor = d3.color(colorarr[target.cluster].value);
+                fillColor.opacity = graphicopt.component.dot.opacity;
+                background_ctx.fillStyle = fillColor + '';
+                background_ctx.fillRect(xscale(d[0]) - graphicopt.component.dot.size / 2, yscale(d[1]) - graphicopt.component.dot.size / 2, graphicopt.component.dot.size, graphicopt.component.dot.size);
             });
-            points.geometry.verticesNeedUpdate = true;
             if (graphicopt.linkConnect) {
-
+                d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
+                    // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                    for (let i = 0; i < path.length - 1; i++) {
+                        let a = (path[i - 1] || path[i]).value;
+                        let b = path[i].value;
+                        let c = path[i + 1].value;
+                        let d = (path[i + 2] || path[i + 1]).value;
+                        drawline(background_ctx, [a, b, c, d], path[i].cluster);
+                    }
+                })
             }
 
-            // if (isradar && datain.length < 5000) {
-            //     renderSvgRadar();
-            // }
+            if (isradar && datain.length < 5000) {
+                renderSvgRadar();
+            }
         }
     }
 
@@ -289,8 +189,7 @@ d3.TimeSpace = function () {
     master.stop = function(){
         if (modelWorker) {
             modelWorker.terminate();
-            stop = true;
-            // renderSvgRadar();
+            renderSvgRadar()
         }
     };
 
@@ -298,7 +197,8 @@ d3.TimeSpace = function () {
 
     function positionLink_canvas(path, ctx) { //path 4 element
         // return p = new Path2D(positionLink(a,b));
-        d3.line()
+        ctx.beginPath();
+        return d3.line()
             .x(function (d) {
                 return xscale(d[0]);
             })
@@ -307,40 +207,10 @@ d3.TimeSpace = function () {
             })
             .curve(d3.curveCardinalOpen.tension(0.75))
             .context(ctx)(path);
-        return ctx.toShapes(true);
     }
-    function createLine(path){
-        let pointsGeometry = new THREE.Geometry();
 
-        for (let i=0;i <path.length-1;i++){
-            let vertex = new THREE.Vector3(0, 0, 0);
-            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
-            pointsGeometry.vertices.push(vertex);
-            pointsGeometry.colors.push(color);
-            pointsGeometry.vertices.push(vertex);
-            pointsGeometry.colors.push(color);
-        }
-        pointsGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-        pointsGeometry.colors.push( new THREE.Color(d3.color(colorarr[path[path.length-1].cluster].value)+''));
-
-
-        var material = new THREE.LineBasicMaterial( {
-            color: 0xffffff,
-            vertexColors: THREE.VertexColors
-        } );
-
-        return new THREE.LineSegments( pointsGeometry, material );
-    }
-    function createLines(g){
-        let lines = {};
-        Object.keys(path).forEach(k=>{
-            lines[k] = createLine(path[k]);
-            g.add(lines[k]);
-        });
-        return lines;
-    }
     function drawline(ctx,path,cluster) {
-        positionLink_canvas(path,new THREE.ShapePath());
+        positionLink_canvas(path,ctx);
         let fillColor = d3.color(colorarr[cluster].value);
         fillColor.opacity = graphicopt.component.link.opacity;
         ctx.strokeStyle = fillColor+'';
@@ -593,7 +463,7 @@ function handle_data_tsne(tsnedata) {
     TsneTSopt.opt = {
         epsilon: 20, // epsilon is learning rate (10 = default)
         perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-        dim: 3, // dimensionality of the embedding (2 = default)
+        dim: 2, // dimensionality of the embedding (2 = default)
     }
     tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }

@@ -50,7 +50,7 @@ addEventListener('message',function ({data}){
             maxstack = (data.value);
             break;
         case "initDataRaw":
-            tsne = new tsnejs.tSNE(data.value);
+            tsne = new tsnejs.tSNE(data.opt);
             stopCondition = +('1e'+data.value.stopCondition )||stopCondition;
             totalTime_marker = performance.now();
             dataIn = data.value;
