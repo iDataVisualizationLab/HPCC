@@ -17,6 +17,7 @@ addEventListener('message',function ({data}){
             totalTime_marker = performance.now();
             dataIn = data.value;
             count = 0;
+            data.opt.nComponents = data.opt.dim;
             const umap = new UMAP(data.opt);
             console.log('---init data UMAP-----')
             const nEpochs = umap.initializeFit(dataIn);

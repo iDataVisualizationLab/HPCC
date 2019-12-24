@@ -21,16 +21,12 @@ addEventListener('message',function ({data}){
             // console.log(brand_names);
             let matrix = pca.scale(dataIn, true, true);
 
-            let pc = pca.pca(matrix, 2);
+            let pc = pca.pca(matrix, data.opt.dim);
 
             let A = pc[0];  // this is the U matrix from SVD
-            let B = pc[1];  // this is the dV matrix from SVD
+            // let B = pc[1];  // this is the dV matrix from SVD
             let chosenPC = pc[2];   // this is the most value of PCA
-            let solution = dataIn.map((d,i)=>{
-                let pc1 = A[i][chosenPC[0]];
-                let pc2 = A[i][chosenPC[1]];
-                return [pc1,pc2];
-            });
+            let solution = dataIn.map((d,i)=>d3.range(0,data.opt.dim).map(dim=>A[i][chosenPC[dim]]));
             render(solution);
             postMessage({action:'stable', status:"done"});
             break;

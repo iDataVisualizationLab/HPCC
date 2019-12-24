@@ -37,6 +37,7 @@ d3.TimeSpace = function () {
         },
         controlPanelGeneral = {
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
+            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px'},
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -52,7 +53,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,controls,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -157,10 +158,14 @@ d3.TimeSpace = function () {
                 zoomHandler(d3_transform);
             });
 
-        setUpZoom();
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.addEventListener("change", () => renderer.render(scene, camera));
-
+        if (graphicopt.opt.dim===2) {
+            controls.enableRotate = false;
+            controls.screenSpacePanning  = true;
+            controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+        }
+        setUpZoom();
         stop = false;
         animate();
         // background_canvas = document.getElementById("modelWorkerScreen");
@@ -183,6 +188,7 @@ d3.TimeSpace = function () {
     function animate() {
         if (!stop) {
             requestAnimationFrame(animate);
+            controls.update();
             renderer.render(scene, camera);
         }
     }
@@ -192,7 +198,6 @@ d3.TimeSpace = function () {
         // var initial_transform = d3.zoomIdentity.translate(graphicopt.width/2, graphicopt.height/2).scale(initial_scale);
         // zoom.transform(view, initial_transform);
         camera.position.set(0, 0, getZFromScale(1));
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
     function zoomHandler(d3_transform) {
         let scale = d3_transform.k;
@@ -209,7 +214,7 @@ d3.TimeSpace = function () {
             // camera.position.z = z;
             camera.position.set(x, y, z);
         }
-        console.log(scale)
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
     function getScaleFromZ (camera_z_position) {
         let half_fov = fov/2;
@@ -230,6 +235,31 @@ d3.TimeSpace = function () {
 
     function toRadians (angle) {
         return angle * (Math.PI / 180);
+    }
+    function createpoints(g){
+        let radarGeometry = new THREE.Geometry();
+
+        let colors = [];
+        for (let target of datain) {
+            // Set vector coordinates from data
+            let vertex = new THREE.Vector3(0, 0, 0);
+            pointsGeometry.vertices.push(vertex);
+            let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
+            colors.push(color);
+        }
+        pointsGeometry.colors = colors;
+
+        let pointsMaterial = new THREE.PointsMaterial({
+            size: graphicopt.component.dot.size,
+            sizeAttenuation: false,
+            map: new THREE.TextureLoader().load("src/images/circle.png"),
+            vertexColors: THREE.VertexColors,
+            transparent: true
+        });
+
+        let p = new THREE.Points(pointsGeometry, pointsMaterial);
+        g.add(p);
+        return p;
     }
     function createpoints(g){
         let pointsGeometry = new THREE.Geometry();
@@ -271,9 +301,8 @@ d3.TimeSpace = function () {
                 lines[target.name].geometry.verticesNeedUpdate = true;
             });
             points.geometry.verticesNeedUpdate = true;
-            if (graphicopt.linkConnect) {
+            visiableLine(graphicopt.linkConnect)
 
-            }
 
             // if (isradar && datain.length < 5000) {
             //     renderSvgRadar();
@@ -344,6 +373,11 @@ d3.TimeSpace = function () {
             g.add(lines[k]);
         });
         return lines;
+    }
+    function visiableLine(isvisiable){
+        Object.keys(lines).forEach(l=>{
+            lines[l].visible = isvisiable;
+        })
     }
     function drawline(ctx,path,cluster) {
         positionLink_canvas(path,new THREE.ShapePath());
@@ -448,6 +482,18 @@ d3.TimeSpace = function () {
                                 d.content.callback();
                         }).node().checked = graphicopt[d.content.variable];
                         div.append('span')
+                    }else if (d.content.type === "switch") {
+                        let div = d3.select(this).style('width', d.content.width).classed('switch',true)
+                            .append('label').attr('class', 'valign-wrapper')
+                            .html(`${d.content.labels[0]}<input type="checkbox"><span class="lever"></span>${d.content.labels[1]}`)
+                        div.select('input').on('change',function(){
+                            graphicopt.opt[d.content.variable]  =  d.content.values[+this.checked];
+                            if (d.content.callback)
+                                d.content.callback();
+                            else
+                                start();
+                        })
+                            // .node().checked = graphicopt[d.content.variable];
                     }
                 }
             });
@@ -589,7 +635,7 @@ function handle_data_umap(tsnedata) {
         // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
         nNeighbors: Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
         // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
-        nComponents: 2, // The number of components (dimensions) to project the data to (2 = default)
+        dim: 2, // The number of components (dimensions) to project the data to (2 = default)
         minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
     }
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
@@ -599,7 +645,7 @@ function handle_data_tsne(tsnedata) {
     TsneTSopt.opt = {
         epsilon: 20, // epsilon is learning rate (10 = default)
         perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-        dim: 3, // dimensionality of the embedding (2 = default)
+        dim: 2, // dimensionality of the embedding (2 = default)
     }
     tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
