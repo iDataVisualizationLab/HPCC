@@ -425,7 +425,7 @@ d3.TimeSpace = function () {
                 {label:'#Radars',content:datain.length,variable: 'datain'}
             ],
             [
-                {text:"Setting",type:"title"},
+                {text:"Settings",type:"title"},
             ],
             [
                 {text:"Output",type:"title"},
