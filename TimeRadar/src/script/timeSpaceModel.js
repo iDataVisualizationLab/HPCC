@@ -164,6 +164,7 @@ d3.TimeSpace = function () {
             controls.enableRotate = false;
             controls.screenSpacePanning  = true;
             controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+            controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
         }
         setUpZoom();
         stop = false;
