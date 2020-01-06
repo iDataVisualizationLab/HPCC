@@ -197,6 +197,7 @@
     function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
 
     var tSNE = function(opt) {
+        console.log(opt)
         var opt = opt || {};
         this.perplexity = getopt(opt, "perplexity", 30); // effective number of nearest neighbors
         this.dim = getopt(opt, "dim", 2); // by default 2-D tSNE

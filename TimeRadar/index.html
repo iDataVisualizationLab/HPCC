@@ -230,8 +230,10 @@
                                 <option value="bundle" value2 = "groupWithJob">Bundle - Group by similarity wrt jobs</option>
                                 <option value="bundle" value2 = "group">Bundle - Group by similarity</option>
                             </optgroup>
-                            <optgroup label="tSNE">
-                                <option value="tsne" value2 = "single">tSNE - Individual host</option>
+                            <optgroup label="reduceDim">
+                                <option value="reduceDim" value2 = "tsne">t-SNE</option>
+                                <option value="reduceDim" value2 = "pca">PCA</option>
+                                <option value="reduceDim" value2 = "umap">UMAP</option>
                             </optgroup>
                         </select>
                         <div class="col s1">
@@ -661,14 +663,15 @@
 
                     </svg>
                 </svg>
-                <div id="tsneContent" class="hide" style="position:relative;background-color: white">
-                    <canvas id="tsneScreen"></canvas>
-                    <canvas id="tsneScreen_fornt" style="position:absolute;top:0;left:0"></canvas>
-                    <svg id="tsneScreen_svg" style="position:absolute;top:0;left:0"></svg>
-                    <div id="tsneInformation" style="position:absolute;top:0;left:0">
+                <div id="modelWorkerContent" class="hide" style="position:relative;background-color: white">
+                    <canvas id="modelWorkerScreen"></canvas>
+                    <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
+                    <!--<svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0"></svg>-->
+                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0">
                         <table>
                         </table>
                     </div>
+                    <h5 class="title" style="position:absolute;top:0;left:50%"></h5>
                 </div>
                 <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
                 <!--<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>-->
@@ -758,6 +761,8 @@
 <script src="https://d3js.org/d3-format.v1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 <!--<script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>-->
+<script src="../HiperView/js/three.min.js"></script>
+<script src="../HiperView/js/OrbitControls.js"></script>
 <script src="../HiperView/js/FileSaver.min.js"></script>
 <script src="../HiperView/js/pca.min.js"></script>
 
@@ -781,6 +786,9 @@
 <script src="../HiperView/js/binnerN.min.js"></script>
 <script src="../HiperView/js/fisheye.js"></script>
 
+<!--tsne tf-->
+<script src="../HiperView/js/tfjs.js"></script>
+<script src="../HiperView/js/tfjs-tsne.js"></script>
 
 <script src="../HiperView/myscripts/setting.js"></script>
 <script src="../HiperView/myscripts/store.js"></script>
@@ -788,7 +796,14 @@
 <script src="../HiperView/myscripts/radarSum.js"></script>
 <script src="../HiperView/myscripts/scatterplot.js"></script>
 <script src="../HiperView/myscripts/tsnePlot.js"></script>
-<script src="src/script/tSNETimeSpace.js"></script>
+<!--<script src="src/script/tSNETimeSpace.js"></script>-->
+<!--&lt;!&ndash;<script src="src/script/tftSNETimeSpace.js"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;<script src="src/script/pcaTimeSpace.js"></script>&ndash;&gt;-->
+<!--<script src="src/script/pcaTimeSpace_single.js"></script>-->
+<!--<script src="src/script/umapTimeSpace.js"></script>-->
+<script src="src/script/timeSpaceModel.js"></script>
+
+
 <script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/myscripts/histChart.js"></script>
 <!--<script src="src/script/clustercal.js"></script>-->

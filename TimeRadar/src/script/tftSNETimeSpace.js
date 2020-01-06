@@ -16,12 +16,13 @@ d3.tsneTimeSpace = function () {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-
+            //https://github.com/tensorflow/tfjs-tsne
             opt: {
-                epsilon: 20, // epsilon is learning rate (10 = default)
-                perplexity: 1000, // roughly how many neighbors each point influences (30 = default)
-                dim: 2, // dimensionality of the embedding (2 = default)
-                stopCondition: -4, // parameter for tsne worker - Ngan 12/17/2019
+                perplexity: 18, // defaults to 18. Max value is defined by hardware limitations.
+                exaggeration: 4, // defaults to 4
+                exaggerationIter: 300, // defaults to 300
+                exaggerationDecayIter: 200, // defaults to 200
+                momentum: 0.8, // defaults to 0.8
             }, radaropt: {
                 // summary:{quantile:true},
                 mini: true,
@@ -33,21 +34,14 @@ d3.tsneTimeSpace = function () {
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
             linkConnect: true,
-            component:{
-                dot:{size:4,opacity:0.2},
-                link:{size:0.8,opacity:0.1},
-            }
         },
         controlPanel = {
-            epsilon: {text: "Epsilon", range: [1, 40], type: "slider", variable: 'epsilon', width: '100px'},
             perplexity: {text: "Perplexity", range: [1, 1000], type: "slider", variable: 'perplexity', width: '100px'},
-            stopCondition: {
-                text: "Limit \u0394 cost",
-                range: [-12, -3],
-                type: "slider",
-                variable: 'stopCondition',
-                width: '100px'
-            },
+            exaggeration: {text: "Exaggeration", range: [1, 1000], type: "slider", variable: 'exaggeration', width: '100px'},
+            exaggerationIter: {text: "Exaggeration Iter", range: [1, 1000], type: "slider", variable: 'exaggerationIter', width: '100px'},
+            exaggerationDecayIter: {text: "Exaggeration DecayI ter", range: [1, 1000], type: "slider", variable: 'exaggerationDecayIter', width: '100px'},
+            momentum: {text: "Momentum", range: [0.1, 2], type: "slider", variable: 'momentum', step:0.1, width: '100px'},
+
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
         },
         formatTable = {
@@ -67,7 +61,7 @@ d3.tsneTimeSpace = function () {
         ,
         runopt = {},
         isBusy = false;
-    let tsne, colorscale;
+    let tsne_ob, colorscale;
     let master = {}, solution, datain = [], filter_by_name = [], table_info, path, cluster = [];
     let xscale = d3.scaleLinear(), yscale = d3.scaleLinear();
     // grahic 
@@ -97,40 +91,70 @@ d3.tsneTimeSpace = function () {
             // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
         })
     }
-
     function start() {
         svg.selectAll('*').remove();
-        if (tsne)
-            tsne.terminate();
-        tsne = new Worker('src/script/worker/tSNETimeSpaceworker.js');
-        // tsne.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
-        tsne.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
+        if (tsne_ob)
+            // tsne_ob.terminate();
+
         console.log(`----inint tsne with: `, graphicopt.opt);
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
-
-        tsne.postMessage({action: "colorscale", value: colorarr});
-        tsne.postMessage({action: "inittsne", value: graphicopt.opt});
-        tsne.postMessage({action: "initDataRaw", value: datain, clusterarr: cluster});
-        tsne.addEventListener('message', ({data}) => {
-            switch (data.action) {
-                case "render":
-                    isBusy = true;
-                    xscale.domain(data.xscale.domain);
-                    yscale.domain(data.yscale.domain);
-                    solution = data.sol;
-                    updateTableOutput(data.value);
-                    render();
-                    break;
-                case "stable":
-                    isBusy = false;
-                    render(true);
-                    tsne.terminate();
-                    break;
-                default:
-                    break;
+        console.log(`----inint tsne with: `, graphicopt.opt)
+        tsne_ob = tsne.tsne(tf.tensor(datain),graphicopt.opt);
+        iterativeTsne()
+        async function iterativeTsne() {
+            isBusy = true;
+            let count=1;
+            let totalTime_marker=performance.now();
+            let t0 = performance.now();
+            // Get the suggested number of iterations to perform.
+            const knnIterations = tsne_ob.knnIterations();
+            // Do the KNN computation. This needs to complete before we run tsne
+            for(let i = 0; i < knnIterations; ++i){
+                await tsne_ob.iterateKnn();
+                // You can update knn progress in your ui here.
             }
-        })
+            console.log('finish init Data in ', performance.now()-t0);
+
+            const tsneIterations = 1000;
+            for(let i = 0; i < tsneIterations; ++i){
+                t0 = performance.now();
+                await tsne_ob.iterate();
+                // Draw the embedding here...
+                // const coordinates = tsne_ob.coordinates();
+            
+                timeCalculation = performance.now()-t0;
+                // updateTableOutput(processData(await coordinates.data()));
+                updateTableOutput(processData(await tsne_ob.coordsArray()));
+                render();
+
+                count++;
+            }
+            isBusy = false;
+            render(true);
+
+            function processData(sol){
+                // let sol =[];
+                // datain.forEach((d,i)=>{
+                //     sol.push([sol1D[(i<<1)],sol1D[(i<<1)+1]])
+                // });
+
+                // let xrange = d3.extent(sol, d => d[0]);
+                // let yrange = d3.extent(sol, d => d[1]);
+                // const ratio = graphicopt.heightG() / graphicopt.heightG();
+                // if ((yrange[1] - yrange[0]) / (xrange[1] - xrange[0]) > graphicopt.heightG() / graphicopt.heightG()) {
+                //     yscale.domain(yrange);
+                //     let delta = ((yrange[1] - yrange[0]) / ratio - (xrange[1] - xrange[0])) / 2;
+                //     xscale.domain([xrange[0] - delta, xrange[1] + delta])
+                // } else {
+                //     xscale.domain(xrange);
+                //     let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
+                //     yscale.domain([yrange[0] - delta, yrange[1] + delta])
+                // }
+                solution = sol;
+                return {iteration: count,time: timeCalculation, totalTime: performance.now()-totalTime_marker};
+            }
+        }
     }
 
     master.init = function (arr, clusterin) {
@@ -151,47 +175,43 @@ d3.tsneTimeSpace = function () {
         front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#tsneScreen_svg').attrs({width: graphicopt.width, height: graphicopt.height});
 
-        d3.select('#tsneInformation+.title').text('t-SNE')
-
         start();
 
         return master;
     };
 
-    function render (isradar){
-        if(solution) {
-            createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale)
-            background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-            if (filter_by_name && filter_by_name.length)
-                front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-            path = {};
-            solution.forEach(function (d, i) {
-                const target = datain[i];
-                target.__metrics.position = d;
-                if (!path[target.name])
-                    path[target.name] = [];
-                path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
-                let fillColor = d3.color(colorarr[target.cluster].value);
-                fillColor.opacity = graphicopt.component.dot.opacity;
-                background_ctx.fillStyle = fillColor + '';
-                background_ctx.fillRect(xscale(d[0]) - graphicopt.component.dot.size / 2, yscale(d[1]) - graphicopt.component.dot.size / 2, graphicopt.component.dot.size, graphicopt.component.dot.size);
-            });
-            if (graphicopt.linkConnect) {
-                d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
-                    // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
-                    for (let i = 0; i < path.length - 1; i++) {
-                        let a = (path[i - 1] || path[i]).value;
-                        let b = path[i].value;
-                        let c = path[i + 1].value;
-                        let d = (path[i + 2] || path[i + 1]).value;
-                        drawline(background_ctx, [a, b, c, d], path[i].cluster);
-                    }
-                })
-            }
+    function render(isradar) {
+        createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale)
+        background_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+        if (filter_by_name && filter_by_name.length)
+            front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
+        path = {};
+        solution.forEach(function (d, i) {
+            const target = datain[i];
+            target.__metrics.position = d;
+            if (!path[target.name])
+                path[target.name] = [];
+            path[target.name].push({name: target.name, key: target.timestep, value: d, cluster: target.cluster});
+            let fillColor = d3.color(colorarr[target.cluster].value);
+            fillColor.opacity = 0.8
+            background_ctx.fillStyle = fillColor + '';
+            background_ctx.fillRect(xscale(d[0]) - 2, yscale(d[1]) - 2, 4, 4);
+        });
+        if (graphicopt.linkConnect) {
+            d3.values(path).filter(d => d.length > 1 ? d.sort((a, b) => a.t - b.t) : false).forEach(path => {
+                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
+                for (let i = 0; i < path.length - 1; i++) {
+                    let a = (path[i - 1] || path[i]).value;
+                    let b = path[i].value;
+                    let c = path[i + 1].value;
+                    let d = (path[i + 2] || path[i + 1]).value;
+                    drawline(background_ctx, [a, b, c, d], path[i].cluster);
+                }
+            })
+        }
 
-            if (isradar && datain.length < 5000) {
-                renderSvgRadar();
-            }
+        if (isradar) {
+            renderSvgRadar();
         }
     }
 
@@ -207,8 +227,8 @@ d3.tsneTimeSpace = function () {
     }
 
     master.stop = function () {
-        if (tsne) {
-            tsne.terminate();
+        if (tsne_ob) {
+            // tsne_ob.terminate();
             renderSvgRadar()
         }
     };
@@ -224,15 +244,17 @@ d3.tsneTimeSpace = function () {
             .y(function (d) {
                 return yscale(d[1]);
             })
-            .curve(d3.curveCardinalOpen.tension(0.75))
+            .curve(d3.curveCardinalOpen)
             .context(ctx)(path);
     }
 
-    function drawline(ctx,path,cluster) {
-        positionLink_canvas(path,ctx);
-        let fillColor = d3.color(colorarr[cluster].value);
-        fillColor.opacity = graphicopt.component.link.opacity;
-        ctx.strokeStyle = fillColor+'';
+    function drawline(ctx, path, cluster) {
+        positionLink_canvas(path, ctx);
+
+        // ctx.beginPath();
+        // ctx.moveTo(xscale(d[0]), yscale(d[1]));
+        // ctx.lineTo(xscale(nexttime[0]), yscale(nexttime[1]));
+        ctx.strokeStyle = colorarr[cluster].value;
         ctx.stroke();
     }
 
@@ -439,17 +461,17 @@ function handle_data_tsne(tsnedata) {
                 count++;
                 dataIn.push(axis_arr[i])
             }
-            return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+            // // return index;
+            // // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+
+            // dataIn.push(axis_arr[i]) // testing with full data
         })
     });
 
     TsneTSopt.opt = {
-        epsilon: 20, // epsilon is learning rate (10 = default)
-        perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-        dim: 2, // dimensionality of the embedding (2 = default)
+        // perplexity: 5,
     }
-    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(_.shuffle(dataIn), cluster_info.map(c => c.__metrics.normalize));
 }
 
 function calculateMSE_num(a, b) {
