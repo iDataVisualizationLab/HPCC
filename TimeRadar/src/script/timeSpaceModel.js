@@ -53,7 +53,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,controls,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,axesHelper,controls,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -84,6 +84,7 @@ d3.TimeSpace = function () {
     }
 
     function start() {
+        axesHelper.toggleDimension(graphicopt.opt.dim);
         svg.selectAll('*').remove();
         if (modelWorker)
             modelWorker.terminate();
@@ -131,8 +132,11 @@ d3.TimeSpace = function () {
         far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
         camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
         scene = new THREE.Scene();
+        axesHelper = createAxes( graphicopt.widthG()/4 );
         scene.background = new THREE.Color(0xffffff);
         scatterPlot = new THREE.Object3D();
+        scatterPlot.add( axesHelper );
+        scatterPlot.frustumCulled = false;
         scatterPlot.rotation.y = 0;
         points = createpoints(scatterPlot);
         path = {};
@@ -151,6 +155,7 @@ d3.TimeSpace = function () {
         renderer.render(scene, camera);
         // zoom set up
         view = d3.select(renderer.domElement);
+        axesHelper.toggleDimension(graphicopt.opt.dim);
         zoom = d3.zoom()
             .scaleExtent([getScaleFromZ(far), getScaleFromZ(10)])
             .on('zoom', () =>  {
@@ -163,6 +168,8 @@ d3.TimeSpace = function () {
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
             controls.screenSpacePanning  = true;
+            controls.target.set( 0, 0, 0 );
+            controls.enableZoom = true;
             controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
             controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
         }
@@ -186,6 +193,29 @@ d3.TimeSpace = function () {
         return master;
     };
     // Three.js render loop
+    function createAxes(length){
+        var material = new THREE.LineBasicMaterial( { color: 0x000000 } );
+        var geometry = new THREE.BufferGeometry().setFromPoints(  [
+            new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
+            new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0),
+            new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, 0, length)]);
+        let axesHelper = new THREE.LineSegments( geometry, material );
+        axesHelper.toggleDimension = function (dim){
+            if (dim===3){
+                axesHelper.geometry.dispose();
+                axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
+                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
+                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0),
+                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, 0, length)]);
+            }else if(dim===2){
+                axesHelper.geometry.dispose();
+                axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
+                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
+                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0)]);
+            }
+        };
+        return axesHelper;
+    }
     function animate() {
         if (!stop) {
             requestAnimationFrame(animate);
