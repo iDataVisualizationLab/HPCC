@@ -432,6 +432,11 @@ d3.Tsneplot = function () {
             .scaleExtent([0.25, 100])
             //.translateExtent([[-netConfig.width/2,-netConfig.height/2], [netConfig.width*1.5,netConfig.height*1.5]])
             .on("zoom", zoomed);
+        try{
+            zoom.touchable(navigator.maxTouchPoints)
+        }catch(e){
+            console.log('Your device not support navigator.maxTouchPoints')
+        }
         svg.call(zoom);
 
         ss= graphicopt.scalezoom;

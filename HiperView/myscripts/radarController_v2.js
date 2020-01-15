@@ -530,8 +530,7 @@ let radarController = function () {
             .text(function (d) {
                 return toDegrees(d.angle()).toFixed(0) + '\u00B0';
             });
-
-        axis.append("circle")
+        let dragContain = axis.append("circle")
             .attr("cx", 0)
             .attr("cy", function (d, i) {
                 return -rScale( graphicopt.bin||graphicopt.gradient?1:1.05) ;
@@ -545,9 +544,17 @@ let radarController = function () {
             })
             .on('mouseleave',function(){
                 d3.select(this).attr('r',4)
-            }).call(d3.drag().container(function () {
-            return this.parentNode.parentNode;
-        }).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+            });
+        try{
+            dragContain.call(d3.drag().container(function () {
+                return this.parentNode.parentNode;
+            }).touchable(navigator.maxTouchPoints).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+        }catch(e){
+            console.log('Your device not support navigator.maxTouchPoints')
+            dragContain.call(d3.drag().container(function () {
+                return this.parentNode.parentNode;
+            }).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+        }
 
         function onDragAxisStarted (d){
             d3.select(this).style('fill','black');
