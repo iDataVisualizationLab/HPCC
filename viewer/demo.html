@@ -6,13 +6,11 @@
 </head>
 <body>
 
-<script src="../HiperView/js/d3.v4.js"></script>
+<script src="lib/d3.v4.js"></script>
 <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
 <script src="https://d3js.org/d3-quadtree.v1.min.js"></script>
 <script src="https://d3js.org/d3-timer.v1.min.js"></script>
 <script src="https://d3js.org/d3-force.v2.min.js"></script>
-<script src="../HiperView/js/d3.tip.js"></script>
-<script src="../HiperView/js/d3.scaleAdjust.js"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
 <script src="https://d3js.org/d3-color.v1.min.js"></script>
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
@@ -20,24 +18,28 @@
 <script src="https://d3js.org/d3-format.v1.min.js"></script>
 <script>
     let data=[];
-    let set = [10,30,50]
-    d3.range(0,2).forEach(task=>{
+    // let set = [10,30,50]
+    let set = [10,50]
         set.forEach(ins=>{
             set.forEach(tims=>{
-                data.push(
-                    d3.range(0,2).map(vis=> {
-                        return (`${ins}_${tims}_${task ? 'b' : 'a'}_${vis?'l':'b'}`);
-                    }))
-            })
+                if(ins===tims) {
+                    d3.range(0, 2).forEach(task => {
+                        data.push(
+                            d3.range(0, 2).map(vis => {
+                                return {name: `${ins}_${tims}_${task ? 'b' : 'a'}_${vis ? 'b' : 'l'}`};
+                            }))
+                    })
+                }
         })
     })
     d3.select('body').selectAll('div').data(data)
         .enter()
         .append('div')
-        .selectAll('img').data(d=>d)
-        .enter()
-        .append('img')
-        .attr('src',d=>`svg/${d}.svg`)
+            .selectAll('object').data(d=>d)
+            .enter()
+            .append('object')
+            .attr('type',d=>`image/svg+xml`)
+            .attr('data',d=>`svg/${d.name}.svg`)
 </script>
 </body>
 </html>
