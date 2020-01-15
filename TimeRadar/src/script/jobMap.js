@@ -78,7 +78,7 @@ let JobMap = function() {
                 .append('image')
                 .attrs({'height':1,width:1,preserveAspectRatio:'none',
                     'xmlns:xlink':'http://www.w3.org/1999/xlink','xlink:href':'src/images/u.png'});
-        let zoomFunc = d3.zoom().on("zoom",  () =>{
+        let zoomFunc = d3.zoom().touchable(navigator.maxTouchPoints).on("zoom",  () =>{
             g.attr("transform", d3.event.transform);
         });
         svg.append('rect').attr('class','pantarget')
