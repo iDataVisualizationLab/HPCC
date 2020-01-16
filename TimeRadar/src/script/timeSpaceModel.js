@@ -38,12 +38,12 @@ d3.TimeSpace = function () {
         controlPanelGeneral = {
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px'},
-            windownSize: {
+            windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
                 type: "slider",
-                variable: 'windownSize',
-                width: '100px',callback:()=>{windownSize = graphicopt.windownSize; handle_data_TimeSpace(tsnedata);}
+                variable: 'windowsSize',
+                width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.windowsSize; handle_data_TimeSpace(tsnedata);}
             },
         },
         formatTable = {
@@ -519,7 +519,10 @@ d3.TimeSpace = function () {
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
                             graphicopt.opt[d.content.variable] = + this.get();
-                            start();
+                            if (d.content.callback)
+                                d.content.callback();
+                            else
+                                start();
                         });
                     }else if (d.content.type === "checkbox") {
                         let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
@@ -679,12 +682,12 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 //     });
 //     return dataIn;
 // }
-let windownSize = 15;
+let windowsSize = 15;
 function handle_data_model(tsnedata) {
-    windownSize = windownSize||1;
-    console.log(windownSize);
+    windowsSize = windowsSize||1;
+    console.log(windowsSize);
     // get windown surrounding
-    let windowSurrounding =  (windownSize - 1)/2;
+    let windowSurrounding =  (windowsSize - 1)/2;
     let dataIn = [];
     d3.values(tsnedata).forEach(axis_arr => {
         let lastcluster;
