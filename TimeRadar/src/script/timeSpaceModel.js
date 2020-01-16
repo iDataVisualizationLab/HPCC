@@ -197,8 +197,8 @@ d3.TimeSpace = function () {
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
         d3.select('#modelWorkerInformation+.title').text(self.name)
-        d3.select('#modelWorkerScreen').on('click',function(){
-            let coordinator = d3.mouse(this)
+        d3.select('#modelWorkerScreen').on('mousemove',function(){
+            let coordinator = d3.mouse(this);
             mouse.x = coordinator[0]- 1;
             mouse.y = -coordinator[1]+ 1;
         });
@@ -237,8 +237,8 @@ d3.TimeSpace = function () {
             // calculate objects intersecting the picking ray
             var intersects = raycaster.intersectObjects(scene.children);
             //count and look after all objects in the diamonds group
-            console.log(intersects)
             if (intersects.length > 0) {
+                console.log(intersects)
                 if (INTERSECTED != intersects[0].object) {
                     if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
                     INTERSECTED = intersects[0].object;
@@ -354,8 +354,8 @@ d3.TimeSpace = function () {
 
     function handle_data(data){
         data.forEach(d=>{
-            d.__metrics = d.map((m,i)=>{
-                return {axis: serviceFullList[i].text, value: m}
+            d.__metrics = serviceFullList.map((s,i)=>{
+                return {axis: s.text, value: data[i]}
             });
             d.__metrics.name = d.clusterName;
             d.__metrics.name_or = d.name;
@@ -648,27 +648,85 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
 
+// function handle_data_model(tsnedata) {
+//     let dataIn = [];
+//     d3.values(tsnedata).forEach(axis_arr => {
+//         let lastcluster;
+//         let lastdataarr;
+//         let count = 0;
+//         sampleS.timespan.forEach((t, i) => {
+//             let index = axis_arr[i].cluster;
+//             axis_arr[i].clusterName = cluster_info[index].name
+//             // timeline precalculate
+//             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
+//                 lastcluster = index;
+//                 lastdataarr = axis_arr[i];
+//                 axis_arr[i].timestep = count; // TODO temperal timestep
+//                 count++;
+//                 dataIn.push(axis_arr[i])
+//             }
+//             return index;
+//             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+//         })
+//     });
+//     return dataIn;
+// }
+let windownSize = 15;
 function handle_data_model(tsnedata) {
+    windownSize = windownSize||1;
+    // get windown surrounding
+    let windowSurrounding =  (windownSize - 1)/2;
     let dataIn = [];
     d3.values(tsnedata).forEach(axis_arr => {
         let lastcluster;
         let lastdataarr;
         let count = 0;
+        let timeLength = sampleS.timespan.length;
         sampleS.timespan.forEach((t, i) => {
-            let index = axis_arr[i].cluster;
-            axis_arr[i].clusterName = cluster_info[index].name
+            let currentData = axis_arr[i].slice();
+            currentData.cluster = axis_arr[i].cluster;
+            currentData.name = axis_arr[i].name;
+            currentData.timestep = axis_arr[i].timestep;
+            let index = currentData.cluster;
+            currentData.clusterName = cluster_info[index].name;
             // timeline precalculate
-            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
+            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 lastcluster = index;
-                lastdataarr = axis_arr[i];
-                axis_arr[i].timestep = count; // TODO temperal timestep
+                lastdataarr = currentData.slice();
+                currentData.timestep = count; // TODO temperal timestep
                 count++;
-                dataIn.push(axis_arr[i])
+                // make copy of axis data
+                currentData.data = currentData.slice();
+                // adding window
+                for (let w = 0; w<windowSurrounding; w++)
+                {
+                    let currentIndex = i -w;
+                    let currentWData;
+                    if (currentIndex<0) // bounder problem
+                        currentIndex = 0;
+                    currentWData = axis_arr[currentIndex];
+                    currentWData.forEach(d=>{
+                        currentData.push(d);
+                    });
+                }
+                for (let w = 0; w<windowSurrounding; w++)
+                {
+                    let currentIndex = i + w;
+                    let currentWData;
+                    if (currentIndex > timeLength-1) // bounder problem
+                        currentIndex = timeLength-1;
+                    currentWData = axis_arr[currentIndex];
+                    currentWData.forEach(d=>{
+                        currentData.push(d);
+                    });
+                }
+                dataIn.push(currentData)
             }
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
     });
+    console.log(dataIn)
     return dataIn;
 }
 
