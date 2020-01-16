@@ -53,7 +53,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,axesHelper,controls,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,axesHelper,controls,raycaster,INTERSECTED ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -85,6 +85,23 @@ d3.TimeSpace = function () {
 
     function start() {
         axesHelper.toggleDimension(graphicopt.opt.dim);
+        if (graphicopt.opt.dim===2) {
+            controls.enableRotate = false;
+            controls.screenSpacePanning  = true;
+            controls.target.set( 0, 0, 0 );
+            controls.enableZoom = true;
+            controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+            controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+        }else{
+            controls.enableRotate = true;
+            controls.screenSpacePanning  = false;
+            controls.target.set( 0, 0, 0 );
+            controls.enableZoom = true;
+            controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+            controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+        }
+        setUpZoom();
+
         svg.selectAll('*').remove();
         if (modelWorker)
             modelWorker.terminate();
@@ -136,7 +153,6 @@ d3.TimeSpace = function () {
         scene.background = new THREE.Color(0xffffff);
         scatterPlot = new THREE.Object3D();
         scatterPlot.add( axesHelper );
-        scatterPlot.frustumCulled = false;
         scatterPlot.rotation.y = 0;
         points = createpoints(scatterPlot);
         path = {};
@@ -162,17 +178,11 @@ d3.TimeSpace = function () {
                 let d3_transform = d3.event.transform;
                 zoomHandler(d3_transform);
             });
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.addEventListener("change", () => renderer.render(scene, camera));
-        if (graphicopt.opt.dim===2) {
-            controls.enableRotate = false;
-            controls.screenSpacePanning  = true;
-            controls.target.set( 0, 0, 0 );
-            controls.enableZoom = true;
-            controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-            controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
-        }
         setUpZoom();
         stop = false;
         animate();
@@ -187,7 +197,11 @@ d3.TimeSpace = function () {
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
         d3.select('#modelWorkerInformation+.title').text(self.name)
-
+        d3.select('#modelWorkerScreen').on('click',function(){
+            let coordinator = d3.mouse(this)
+            mouse.x = coordinator[0]- 1;
+            mouse.y = -coordinator[1]+ 1;
+        });
         start();
 
         return master;
@@ -218,6 +232,25 @@ d3.TimeSpace = function () {
     }
     function animate() {
         if (!stop) {
+            //update raycaster with mouse movement
+            raycaster.setFromCamera(mouse, camera);
+            // calculate objects intersecting the picking ray
+            var intersects = raycaster.intersectObjects(scene.children);
+            //count and look after all objects in the diamonds group
+            console.log(intersects)
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                    //setting up new material on hover
+                    INTERSECTED.material.emissive.setHex(Math.random() * 0xff00000 - 0xff00000);
+                }
+            } else {
+                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                INTERSECTED = null;
+            }
+
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
@@ -267,31 +300,7 @@ d3.TimeSpace = function () {
     function toRadians (angle) {
         return angle * (Math.PI / 180);
     }
-    function createpoints(g){
-        let radarGeometry = new THREE.Geometry();
 
-        let colors = [];
-        for (let target of datain) {
-            // Set vector coordinates from data
-            let vertex = new THREE.Vector3(0, 0, 0);
-            pointsGeometry.vertices.push(vertex);
-            let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            colors.push(color);
-        }
-        pointsGeometry.colors = colors;
-
-        let pointsMaterial = new THREE.PointsMaterial({
-            size: graphicopt.component.dot.size,
-            sizeAttenuation: false,
-            map: new THREE.TextureLoader().load("src/images/circle.png"),
-            vertexColors: THREE.VertexColors,
-            transparent: true
-        });
-
-        let p = new THREE.Points(pointsGeometry, pointsMaterial);
-        g.add(p);
-        return p;
-    }
     function createpoints(g){
         let pointsGeometry = new THREE.Geometry();
 
@@ -314,6 +323,7 @@ d3.TimeSpace = function () {
         });
 
         let p = new THREE.Points(pointsGeometry, pointsMaterial);
+        p.frustumCulled = false;
         g.add(p);
         return p;
     }
@@ -332,6 +342,7 @@ d3.TimeSpace = function () {
                 lines[target.name].geometry.verticesNeedUpdate = true;
             });
             points.geometry.verticesNeedUpdate = true;
+
             visiableLine(graphicopt.linkConnect)
 
 
@@ -394,8 +405,9 @@ d3.TimeSpace = function () {
             color: 0xffffff,
             vertexColors: THREE.VertexColors
         } );
-
-        return new THREE.LineSegments( pointsGeometry, material );
+        let lineObj = new THREE.LineSegments( pointsGeometry, material );
+        lineObj.frustumCulled = false;
+        return lineObj;
     }
     function createLines(g){
         let lines = {};
