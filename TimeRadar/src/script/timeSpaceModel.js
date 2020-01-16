@@ -38,6 +38,13 @@ d3.TimeSpace = function () {
         controlPanelGeneral = {
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px'},
+            windownSize: {
+                text: "Windows size",
+                range: [1, 21],
+                type: "slider",
+                variable: 'windownSize',
+                width: '100px',callback:()=>{windownSize = graphicopt.windownSize; handle_data_TimeSpace(tsnedata);}
+            },
         },
         formatTable = {
             'time': function(d){return millisecondsToStr(d)},
@@ -674,6 +681,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 let windownSize = 15;
 function handle_data_model(tsnedata) {
     windownSize = windownSize||1;
+    console.log(windownSize);
     // get windown surrounding
     let windowSurrounding =  (windownSize - 1)/2;
     let dataIn = [];

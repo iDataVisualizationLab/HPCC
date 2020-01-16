@@ -1647,6 +1647,7 @@ function onchangeCluster(){
         if (!onchangeVizdata())
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
 }
+let handle_data_TimeSpace;
 function onchangeVizType(){
     tsneTS.stop();
     pcaTS.stop();
@@ -1668,13 +1669,16 @@ function onchangeVizType(){
 function onchangeVizdata(){
     switch (vizMode) {
         case 'tsne':
-            handle_data_tsne(tsnedata);
+            handle_data_TimeSpace =handle_data_tsne;
+            handle_data_TimeSpace(tsnedata);
             return true
         case 'pca':
-            handle_data_pca(tsnedata);
+            handle_data_TimeSpace = handle_data_pca;
+            handle_data_TimeSpace(tsnedata);
             return true;
         case 'umap':
-            handle_data_umap(tsnedata);
+            handle_data_TimeSpace = handle_data_umap;
+            handle_data_TimeSpace(tsnedata);
             return true;
         default:
             return false;
