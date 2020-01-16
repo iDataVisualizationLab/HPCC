@@ -206,8 +206,9 @@ d3.TimeSpace = function () {
         d3.select('#modelWorkerInformation+.title').text(self.name)
         d3.select('#modelWorkerScreen').on('mousemove',function(){
             let coordinator = d3.mouse(this);
-            mouse.x = coordinator[0]- 1;
-            mouse.y = -coordinator[1]+ 1;
+            mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
+            mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
+            // console.log(""+mouse.x+" "+mouse.y);
         });
         start();
 
