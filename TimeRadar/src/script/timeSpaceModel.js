@@ -19,6 +19,7 @@ d3.TimeSpace = function () {
 
             opt: {
                 // dim: 2, // dimensionality of the embedding (2 = default)
+                windowsSize: 1,
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -31,7 +32,7 @@ d3.TimeSpace = function () {
             },
             linkConnect: true,
             component:{
-                dot:{size:4,opacity:0.2},
+                dot:{size:5,opacity:0.2},
                 link:{size:0.8,opacity:0.1},
             }
         },
@@ -43,7 +44,7 @@ d3.TimeSpace = function () {
                 range: [1, 21],
                 type: "slider",
                 variable: 'windowsSize',
-                width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.windowsSize; handle_data_TimeSpace(tsnedata);}
+                width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.opt.windowsSize; handle_data_TimeSpace(tsnedata);}
             },
         },
         formatTable = {
@@ -186,6 +187,7 @@ d3.TimeSpace = function () {
                 zoomHandler(d3_transform);
             });
         raycaster = new THREE.Raycaster();
+        raycaster.params.Points.threshold = 3;
         mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -204,7 +206,7 @@ d3.TimeSpace = function () {
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
         d3.select('#modelWorkerInformation+.title').text(self.name)
-        d3.select('#modelWorkerScreen').on('mousemove',function(){
+        d3.select('#modelWorkerScreen').on('click',function(){
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
@@ -243,7 +245,7 @@ d3.TimeSpace = function () {
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
-            var intersects = raycaster.intersectObjects(scene.children);
+            var intersects = raycaster.intersectObjects(scene.children );
             //count and look after all objects in the diamonds group
             if (intersects.length > 0) {
                 console.log(intersects)
@@ -682,7 +684,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 //     });
 //     return dataIn;
 // }
-let windowsSize = 15;
+let windowsSize = 1;
 function handle_data_model(tsnedata) {
     windowsSize = windowsSize||1;
     console.log(windowsSize);
