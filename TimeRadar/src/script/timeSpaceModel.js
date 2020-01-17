@@ -266,7 +266,12 @@ d3.TimeSpace = function () {
                             lines[datain[i].name].material.opacity = 0;
                         }
                     });
-
+                    let rScale  = d3.scaleLinear().range([graphicopt.component.dot.size,graphicopt.component.dot.size*2])
+                        .domain([0,INTERSECTED.length]);
+                    INTERSECTED.forEach((d,i)=>{
+                        attributes.size.array[d] = rScale(i);
+                    });
+                    attributes.size.needsUpdate = true;
                     attributes.alpha.needsUpdate = true;
                 }
             } else if(INTERSECTED.length){
@@ -276,6 +281,10 @@ d3.TimeSpace = function () {
                         lines[datain[i].name].material.opacity = 1;
                     }
                 });
+                INTERSECTED.forEach((d,i)=>{
+                    attributes.size.array[d] = graphicopt.component.dot.size;
+                });
+                attributes.size.needsUpdate = true;
                 attributes.alpha.needsUpdate = true;
                 INTERSECTED = [];
             }
