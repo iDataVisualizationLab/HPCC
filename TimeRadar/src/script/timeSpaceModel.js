@@ -267,7 +267,7 @@ d3.TimeSpace = function () {
                         }
                     });
                     let rScale  = d3.scaleLinear().range([graphicopt.component.dot.size,graphicopt.component.dot.size*2])
-                        .domain([0,INTERSECTED.length]);
+                        .domain([INTERSECTED.length,0]);
                     INTERSECTED.forEach((d,i)=>{
                         attributes.size.array[d] = rScale(i);
                     });
