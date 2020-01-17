@@ -723,10 +723,9 @@ let JobMap = function() {
                         layout.axis.y.tickFormat.push(null);
                     return data_temp;
                 });
-
                 layout.title = '';
                 layout.title2 = `#host: ${d.values_name.length}`;
-
+                console.log(layout)
                 tooltip_lib.graphicopt({
                     width: tooltip_opt.width,
                     height: 100,
@@ -2287,27 +2286,9 @@ let JobMap = function() {
 
         makeheader();
     }
-    // Establish the desired formatting options using locale.format():
-// https://github.com/d3/d3-time-format/blob/master/README.md#locale_format
-    var formatMillisecond = d3.timeFormat(".%L"),
-        formatSecond = d3.timeFormat(":%S"),
-        formatMinute = function(d){return d3.timeFormat("%I:%M")(d).replace(/^0/,'')}
-    formatHour = function(d){return d3.timeFormat("%I %p")(d).toLowerCase().replace(/^0/,'')},
-        formatDay = d3.timeFormat("%a %d"),
-        formatWeek = d3.timeFormat("%b %d"),
-        formatMonth = d3.timeFormat("%B"),
-        formatYear = d3.timeFormat("%Y");
 
-// Define filter conditions
-    function multiFormat(date) {
-        return (d3.timeSecond(date) < date ? formatMillisecond
-            : d3.timeMinute(date) < date ? formatMinute
-                : d3.timeHour(date) < date ? formatMinute
-                    : d3.timeDay(date) < date ? formatHour
-                        : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
-                            : d3.timeYear(date) < date ? formatMonth
-                                : formatYear)(date);
-    }
+
+
     let filter = []
     jobMap.highlight = function (name) {
         filter.push(name);
@@ -2446,4 +2427,24 @@ let JobMap = function() {
 
 function calculateMSE(a,b){
     return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+}
+// Establish the desired formatting options using locale.format():
+// https://github.com/d3/d3-time-format/blob/master/README.md#locale_format
+var formatMillisecond = d3.timeFormat(".%L"),
+    formatSecond = d3.timeFormat(":%S"),
+    formatMinute = function(d){return d3.timeFormat("%I:%M")(d).replace(/^0/,'')}
+formatHour = function(d){return d3.timeFormat("%I %p")(d).toLowerCase().replace(/^0/,'')},
+    formatDay = d3.timeFormat("%a %d"),
+    formatWeek = d3.timeFormat("%b %d"),
+    formatMonth = d3.timeFormat("%B"),
+    formatYear = d3.timeFormat("%Y");
+// Define filter conditions
+function multiFormat(date) {
+    return (d3.timeSecond(date) < date ? formatMillisecond
+        : d3.timeMinute(date) < date ? formatMinute
+            : d3.timeHour(date) < date ? formatMinute
+                : d3.timeDay(date) < date ? formatHour
+                    : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+                        : d3.timeYear(date) < date ? formatMonth
+                            : formatYear)(date);
 }

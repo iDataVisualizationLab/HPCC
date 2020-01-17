@@ -273,6 +273,8 @@ d3.TimeSpace = function () {
                     });
                     attributes.size.needsUpdate = true;
                     attributes.alpha.needsUpdate = true;
+                    console.log(target.name);
+                    showMetrics(target.name);
                 }
             } else if(INTERSECTED.length){
                 datain.forEach((d,i)=>{
@@ -293,6 +295,58 @@ d3.TimeSpace = function () {
             controls.update();
             renderer.render(scene, camera);
         }
+    }
+    function showMetrics(name) {
+        let maxstep = sampleS.timespan.length - 1;
+        let last_timestep = sampleS.timespan[maxstep];
+        let layout = tooltip_lib.layout();
+        layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
+        layout.axis.x.tickFormat = [multiFormat];
+        const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+        layout.axis.y.label = [];
+        layout.axis.y.domain = [];
+        layout.axis.y.tickFormat = [];
+        layout.background = {
+            type: 'discrete',
+            value: path[name].map((v, i) => {
+                return {
+                    x0: scaletime.invert(v.timestep),
+                    x1: path[name][i + 1] ? scaletime.invert(path[name][i + 1].timestep) : undefined,
+                    color: colorarr[v.cluster].value
+                }
+            })
+        };
+        layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
+        let cdata = datain.filter(d=>d.name===name);
+
+        const data_in = graphicopt.radaropt.schema.map((s,si) => {
+            let temp = hostResults[name][serviceListattr[s.idroot]].map((e,ti) => {
+                return {
+                    y: e[s.id],
+                    x: scaletime.invert(ti),
+                }
+            });
+            temp.label = h;
+            let data_temp = [temp];
+            layout.axis.y.label.push(s.text);
+            layout.axis.y.domain.push(s.range);
+            if (s.range[1] > 1000)
+                layout.axis.y.tickFormat.push(d3.format('~s'));
+            else
+                layout.axis.y.tickFormat.push(null);
+            return data_temp;
+        });
+
+        layout.title = "";
+        layout.title2 = name;
+        var target = d3.select('#tipfollowscursorDiv')
+            .node();
+        console.log(data_in)
+        tooltip_lib.graphicopt({
+            width: tooltip_opt.width,
+            height: 100,
+            margin: tooltip_opt.margin
+        }).data(data_in).layout(layout).show(target);
     }
     function setUpZoom() {
         // view.call(zoom);
