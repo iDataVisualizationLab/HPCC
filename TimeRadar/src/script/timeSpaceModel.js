@@ -146,6 +146,8 @@ d3.TimeSpace = function () {
     master.init = function(arr,clusterin) {
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
+        mapIndex = [];
+        datain.forEach((d,i)=>d.show?mapIndex.push(i):undefined);
         cluster = clusterin
         handle_data(datain);
         updateTableInput();
@@ -206,7 +208,7 @@ d3.TimeSpace = function () {
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
         d3.select('#modelWorkerInformation+.title').text(self.name)
-        d3.select('#modelWorkerScreen').on('click',function(){
+        d3.select('#modelWorkerScreen').on('mousemove',function(){
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
@@ -245,6 +247,7 @@ d3.TimeSpace = function () {
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
+            // console.log(mouse)
             var intersects = raycaster.intersectObjects(scene.children );
             //count and look after all objects in the diamonds group
             if (intersects.length > 0) {
@@ -315,7 +318,8 @@ d3.TimeSpace = function () {
         let pointsGeometry = new THREE.Geometry();
 
         let colors = [];
-        for (let target of datain) {
+        let datafiltered = mapIndex.map(i=>datain[i]);
+        for (let target of datafiltered) {
             // Set vector coordinates from data
             let vertex = new THREE.Vector3(0, 0, 0);
             pointsGeometry.vertices.push(vertex);
@@ -337,18 +341,23 @@ d3.TimeSpace = function () {
         g.add(p);
         return p;
     }
+    let mapIndex =[];
     function render (isradar){
         if(solution) {
-            createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale)
+            createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale);
             solution.forEach(function (d, i) {
+            // mapIndex.forEach(function (i) {
                 const target = datain[i];
                 target.__metrics.position = d;
-                points.geometry.vertices[i] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
+                let pointIndex = mapIndex.indexOf(i);
+                if (pointIndex!==undefined)
+                    points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
+
                 const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
                 path[target.name][posPath].value = d;
-                lines[target.name].geometry.vertices[posPath*2] =points.geometry.vertices[i];
+                lines[target.name].geometry.vertices[posPath*2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
                 if (posPath)
-                    lines[target.name].geometry.vertices[posPath*2-1] =points.geometry.vertices[i];
+                    lines[target.name].geometry.vertices[posPath*2-1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
                 lines[target.name].geometry.verticesNeedUpdate = true;
             });
             points.geometry.verticesNeedUpdate = true;
@@ -703,8 +712,13 @@ function handle_data_model(tsnedata) {
             currentData.timestep = axis_arr[i].timestep;
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
-            // timeline precalculate
             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+                currentData.show = true;
+            // add all points
+            // }
+            // // timeline precalculate
+            // // if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+            // if (true) {
                 lastcluster = index;
                 lastdataarr = currentData.slice();
                 currentData.timestep = count; // TODO temperal timestep
@@ -734,13 +748,13 @@ function handle_data_model(tsnedata) {
                         currentData.push(d);
                     });
                 }
-                dataIn.push(currentData)
+                dataIn.push(currentData);
             }
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
     });
-    console.log(dataIn)
+    // console.log(dataIn);
     return dataIn;
 }
 
