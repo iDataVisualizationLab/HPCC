@@ -189,7 +189,7 @@ d3.TimeSpace = function () {
                 zoomHandler(d3_transform);
             });
         raycaster = new THREE.Raycaster();
-        raycaster.params.Points.threshold = 3;
+        raycaster.params.Points.threshold = 1;
         mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -248,19 +248,32 @@ d3.TimeSpace = function () {
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
             // console.log(mouse)
-            var intersects = raycaster.intersectObjects(scene.children );
+            var intersects = raycaster.intersectObject(points);
             //count and look after all objects in the diamonds group
+            var geometry = points.geometry;
+            var attributes = geometry.attributes;
             if (intersects.length > 0) {
-                console.log(intersects)
-                if (INTERSECTED != intersects[0].object) {
-                    if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-                    INTERSECTED = intersects[0].object;
-                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                    //setting up new material on hover
-                    INTERSECTED.material.emissive.setHex(Math.random() * 0xff00000 - 0xff00000);
+                console.log(intersects);
+                if (INTERSECTED != intersects[0].index) {
+                    attributes.alpha.array.forEach((d,i)=>{
+                        if (i!==INTERSECTED) {
+                            attributes.alpha.array[i] = 0.1;
+                            lines[datain[i].name].material.opacity = 0;
+                        }
+                    });
+                    INTERSECTED = intersects[ 0 ].index;
+                    attributes.alpha.array[ INTERSECTED ] = 1;
+                    lines[datain[INTERSECTED].name].material.opacity = 1;
+                    attributes.alpha.needsUpdate = true;
                 }
-            } else {
-                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+            } else if(INTERSECTED!==null){
+                attributes.alpha.array.forEach((d,i)=>{
+                    if (i!==INTERSECTED) {
+                        attributes.alpha.array[i] = 1;
+                        lines[datain[i].name].material.opacity = 1;
+                    }
+                });
+                attributes.alpha.needsUpdate = true;
                 INTERSECTED = null;
             }
 
@@ -315,25 +328,53 @@ d3.TimeSpace = function () {
     }
 
     function createpoints(g){
-        let pointsGeometry = new THREE.Geometry();
+        let pointsGeometry = new THREE.BufferGeometry();
 
-        let colors = [];
         let datafiltered = mapIndex.map(i=>datain[i]);
-        for (let target of datafiltered) {
+        let colors =  new Float32Array( datafiltered.length * 3 );
+        let pos =  new Float32Array( datafiltered.length * 3 );
+        let alpha =  new Float32Array( datafiltered.length );
+        let sizes =  new Float32Array( datafiltered.length);
+        for (let i=0; i< datafiltered.length;i++) {
+            let target = datafiltered[i];
             // Set vector coordinates from data
-            let vertex = new THREE.Vector3(0, 0, 0);
-            pointsGeometry.vertices.push(vertex);
-            let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            colors.push(color);
+            // let vertex = new THREE.Vector3(0, 0, 0);
+            pos[i*3+0]= 0;
+            pos[i*3+1]= 0;
+            pos[i*3+2]= 0;
+            // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
+            let color = d3.color(colorarr[target.cluster].value);
+            colors[i*3+0]= color.r/255;
+            colors[i*3+1]= color.g/255;
+            colors[i*3+2]= color.b/255;
+            alpha[i]= 1;
+            sizes[i] = graphicopt.component.dot.size;
         }
-        pointsGeometry.colors = colors;
+        pointsGeometry.setAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
+        pointsGeometry.setAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+        pointsGeometry.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
+        pointsGeometry.boundingBox = null;
+        pointsGeometry.computeBoundingSphere();
+        // pointsGeometry.colors = colors;
 
-        let pointsMaterial = new THREE.PointsMaterial({
-            size: graphicopt.component.dot.size,
-            sizeAttenuation: false,
-            map: new THREE.TextureLoader().load("src/images/circle.png"),
-            vertexColors: THREE.VertexColors,
-            transparent: true
+        // let pointsMaterial = new THREE.PointsMaterial({
+        //     size: graphicopt.component.dot.size,
+        //     sizeAttenuation: false,
+        //     map: new THREE.TextureLoader().load("src/images/circle.png"),
+        //     vertexColors: THREE.VertexColors,
+        //     transparent: true
+        // });
+        let pointsMaterial = new THREE.ShaderMaterial( {
+
+            uniforms:       {
+                color: { value: new THREE.Color( 0xffffff ) },
+                pointTexture: { value: new THREE.TextureLoader().load( "src/images/circle.png" ) }
+
+            },
+            vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+            transparent:    true
+
         });
 
         let p = new THREE.Points(pointsGeometry, pointsMaterial);
@@ -350,8 +391,13 @@ d3.TimeSpace = function () {
                 const target = datain[i];
                 target.__metrics.position = d;
                 let pointIndex = mapIndex.indexOf(i);
-                if (pointIndex!==undefined)
-                    points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
+                if (pointIndex!==undefined){
+                    let p = points.geometry.attributes.position.array;
+                    p[pointIndex*3+0] = xscale(d[0]);
+                    p[pointIndex*3+1] = yscale(d[1]);
+                    p[pointIndex*3+2] = xscale(d[2])||0;
+                }
+                    // points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
 
                 const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
                 path[target.name][posPath].value = d;
@@ -360,7 +406,9 @@ d3.TimeSpace = function () {
                     lines[target.name].geometry.vertices[posPath*2-1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
                 lines[target.name].geometry.verticesNeedUpdate = true;
             });
-            points.geometry.verticesNeedUpdate = true;
+            points.geometry.attributes.position.needsUpdate = true;
+            points.geometry.boundingBox = null;
+            points.geometry.computeBoundingSphere();
 
             visiableLine(graphicopt.linkConnect)
 
@@ -421,8 +469,10 @@ d3.TimeSpace = function () {
 
 
         var material = new THREE.LineBasicMaterial( {
+            opacity:1,
             color: 0xffffff,
-            vertexColors: THREE.VertexColors
+            vertexColors: THREE.VertexColors,
+            transparent: true
         } );
         let lineObj = new THREE.LineSegments( pointsGeometry, material );
         lineObj.frustumCulled = false;

@@ -746,6 +746,49 @@
 <div id="radar_Des_div" class="modal custom">
     <!--<div id="radar_Des_div">-->
 </div>
+
+<script type="x-shader/x-vertex" id="vertexshader">
+
+    attribute float alpha;
+    attribute vec3 customColor;
+
+    varying float vAlpha;
+    varying vec3 vColor;
+
+    void main() {
+
+        vAlpha = alpha;
+
+        vColor = customColor;
+
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+        gl_PointSize = 8.0;
+
+        gl_Position = projectionMatrix * mvPosition;
+
+    }
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+
+    uniform vec3 color;
+    uniform sampler2D pointTexture;
+
+    varying float vAlpha;
+    varying vec3 vColor;
+
+    void main() {
+
+        gl_FragColor = vec4( color * vColor, vAlpha );
+
+        gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
+    }
+
+</script>
+
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>
 <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
