@@ -61,7 +61,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,axesHelper,controls,raycaster,INTERSECTED ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -253,28 +253,31 @@ d3.TimeSpace = function () {
             var geometry = points.geometry;
             var attributes = geometry.attributes;
             if (intersects.length > 0) {
-                console.log(intersects);
-                if (INTERSECTED != intersects[0].index) {
-                    attributes.alpha.array.forEach((d,i)=>{
-                        if (i!==INTERSECTED) {
+                if (INTERSECTED.indexOf(intersects[0].index)===-1) {
+                    let target = datain[intersects[ 0 ].index];
+                    INTERSECTED = [];
+                    datain.forEach((d,i)=>{
+                        if (d.name ===target.name) {
+                            INTERSECTED.push(i);
+                            attributes.alpha.array[i] = 1;
+                            lines[d.name].material.opacity = 1;
+                        }else{
                             attributes.alpha.array[i] = 0.1;
                             lines[datain[i].name].material.opacity = 0;
                         }
                     });
-                    INTERSECTED = intersects[ 0 ].index;
-                    attributes.alpha.array[ INTERSECTED ] = 1;
-                    lines[datain[INTERSECTED].name].material.opacity = 1;
+
                     attributes.alpha.needsUpdate = true;
                 }
-            } else if(INTERSECTED!==null){
-                attributes.alpha.array.forEach((d,i)=>{
-                    if (i!==INTERSECTED) {
+            } else if(INTERSECTED.length){
+                datain.forEach((d,i)=>{
+                    if (d.name !==target.name) {
                         attributes.alpha.array[i] = 1;
                         lines[datain[i].name].material.opacity = 1;
                     }
                 });
                 attributes.alpha.needsUpdate = true;
-                INTERSECTED = null;
+                INTERSECTED = [];
             }
 
             requestAnimationFrame(animate);
@@ -352,6 +355,7 @@ d3.TimeSpace = function () {
         }
         pointsGeometry.setAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
         pointsGeometry.setAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+        pointsGeometry.setAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
         pointsGeometry.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
         pointsGeometry.boundingBox = null;
         pointsGeometry.computeBoundingSphere();
