@@ -432,6 +432,7 @@ function multiFormat(date) {
                         : d3.timeYear(date) < date ? formatMonth
                             : formatYear)(date);
 }
+
 function update_Dimension() {
     g = svg.selectAll(".dimension")
         .data(dimensions,d=>d).join(enter => {

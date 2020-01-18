@@ -676,6 +676,9 @@
                 <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
                 <!--<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>-->
             </div>
+            <svg style="position: absolute;z-index: 99; top:0;left:0;pointer-events: none">
+                <circle id="tipfollowscursorDiv" cx="0" cy="0"></circle>
+            </svg>
         </div>
     </div>
 
@@ -746,6 +749,50 @@
 <div id="radar_Des_div" class="modal custom">
     <!--<div id="radar_Des_div">-->
 </div>
+
+<script type="x-shader/x-vertex" id="vertexshader">
+
+    attribute float alpha;
+    attribute float size;
+    attribute vec3 customColor;
+
+    varying float vAlpha;
+    varying vec3 vColor;
+
+    void main() {
+
+        vAlpha = alpha;
+
+        vColor = customColor;
+
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+        gl_PointSize = size ;
+
+        gl_Position = projectionMatrix * mvPosition;
+
+    }
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+
+    uniform vec3 color;
+    uniform sampler2D pointTexture;
+
+    varying float vAlpha;
+    varying vec3 vColor;
+
+    void main() {
+
+        gl_FragColor = vec4( color * vColor, vAlpha );
+
+        gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
+    }
+
+</script>
+
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>
 <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>

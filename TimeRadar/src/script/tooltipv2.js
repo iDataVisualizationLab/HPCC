@@ -560,6 +560,7 @@ let Tooltip_lib = function() {
         if(!radarplot){
             linegraph();
             let heightTip =+ $('#d3-tip')[0].offsetHeight;
+            if (d3.event)
             d3.select('#d3-tip').style('transform',`translate(0px,${(d3.event.y+heightTip-heightdevice)>0?-(d3.event.y+heightTip-heightdevice):0}px)`);
         }else{
             // if (niceOffset){

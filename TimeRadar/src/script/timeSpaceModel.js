@@ -61,7 +61,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,axesHelper,controls,raycaster,INTERSECTED ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -189,7 +189,7 @@ d3.TimeSpace = function () {
                 zoomHandler(d3_transform);
             });
         raycaster = new THREE.Raycaster();
-        raycaster.params.Points.threshold = 3;
+        raycaster.params.Points.threshold = 1;
         mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -248,26 +248,105 @@ d3.TimeSpace = function () {
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
             // console.log(mouse)
-            var intersects = raycaster.intersectObjects(scene.children );
+            var intersects = raycaster.intersectObject(points);
             //count and look after all objects in the diamonds group
+            var geometry = points.geometry;
+            var attributes = geometry.attributes;
             if (intersects.length > 0) {
-                console.log(intersects)
-                if (INTERSECTED != intersects[0].object) {
-                    if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-                    INTERSECTED = intersects[0].object;
-                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                    //setting up new material on hover
-                    INTERSECTED.material.emissive.setHex(Math.random() * 0xff00000 - 0xff00000);
+                if (INTERSECTED.indexOf(intersects[0].index)===-1) {
+                    let target = datain[intersects[ 0 ].index];
+                    INTERSECTED = [];
+                    datain.forEach((d,i)=>{
+                        if (d.name ===target.name) {
+                            INTERSECTED.push(i);
+                            attributes.alpha.array[i] = 1;
+                            lines[d.name].material.opacity = 1;
+                        }else{
+                            attributes.alpha.array[i] = 0.1;
+                            lines[datain[i].name].material.opacity = 0;
+                        }
+                    });
+                    let rScale  = d3.scaleLinear().range([graphicopt.component.dot.size,graphicopt.component.dot.size*2])
+                        .domain([INTERSECTED.length,0]);
+                    INTERSECTED.forEach((d,i)=>{
+                        attributes.size.array[d] = rScale(i);
+                    });
+                    attributes.size.needsUpdate = true;
+                    attributes.alpha.needsUpdate = true;
+                    console.log(target.name);
+                    showMetrics(target.name);
                 }
-            } else {
-                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-                INTERSECTED = null;
+            } else if(INTERSECTED.length){
+                datain.forEach((d,i)=>{
+                    if (d.name !==target.name) {
+                        attributes.alpha.array[i] = 1;
+                        lines[datain[i].name].material.opacity = 1;
+                    }
+                });
+                INTERSECTED.forEach((d,i)=>{
+                    attributes.size.array[d] = graphicopt.component.dot.size;
+                });
+                attributes.size.needsUpdate = true;
+                attributes.alpha.needsUpdate = true;
+                INTERSECTED = [];
             }
 
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
+    }
+    function showMetrics(name) {
+        let maxstep = sampleS.timespan.length - 1;
+        let last_timestep = sampleS.timespan[maxstep];
+        let layout = tooltip_lib.layout();
+        layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
+        layout.axis.x.tickFormat = [multiFormat];
+        const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+        layout.axis.y.label = [];
+        layout.axis.y.domain = [];
+        layout.axis.y.tickFormat = [];
+        layout.background = {
+            type: 'discrete',
+            value: path[name].map((v, i) => {
+                return {
+                    x0: scaletime.invert(v.timestep),
+                    x1: path[name][i + 1] ? scaletime.invert(path[name][i + 1].timestep) : undefined,
+                    color: colorarr[v.cluster].value
+                }
+            })
+        };
+        layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
+        let cdata = datain.filter(d=>d.name===name);
+
+        const data_in = graphicopt.radaropt.schema.map((s,si) => {
+            let temp = hostResults[name][serviceListattr[s.idroot]].map((e,ti) => {
+                return {
+                    y: e[s.id],
+                    x: scaletime.invert(ti),
+                }
+            });
+            temp.label = h;
+            let data_temp = [temp];
+            layout.axis.y.label.push(s.text);
+            layout.axis.y.domain.push(s.range);
+            if (s.range[1] > 1000)
+                layout.axis.y.tickFormat.push(d3.format('~s'));
+            else
+                layout.axis.y.tickFormat.push(null);
+            return data_temp;
+        });
+
+        layout.title = "";
+        layout.title2 = name;
+        var target = d3.select('#tipfollowscursorDiv')
+            .node();
+        console.log(data_in)
+        tooltip_lib.graphicopt({
+            width: tooltip_opt.width,
+            height: 100,
+            margin: tooltip_opt.margin
+        }).data(data_in).layout(layout).show(target);
     }
     function setUpZoom() {
         // view.call(zoom);
@@ -315,25 +394,54 @@ d3.TimeSpace = function () {
     }
 
     function createpoints(g){
-        let pointsGeometry = new THREE.Geometry();
+        let pointsGeometry = new THREE.BufferGeometry();
 
-        let colors = [];
         let datafiltered = mapIndex.map(i=>datain[i]);
-        for (let target of datafiltered) {
+        let colors =  new Float32Array( datafiltered.length * 3 );
+        let pos =  new Float32Array( datafiltered.length * 3 );
+        let alpha =  new Float32Array( datafiltered.length );
+        let sizes =  new Float32Array( datafiltered.length);
+        for (let i=0; i< datafiltered.length;i++) {
+            let target = datafiltered[i];
             // Set vector coordinates from data
-            let vertex = new THREE.Vector3(0, 0, 0);
-            pointsGeometry.vertices.push(vertex);
-            let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            colors.push(color);
+            // let vertex = new THREE.Vector3(0, 0, 0);
+            pos[i*3+0]= 0;
+            pos[i*3+1]= 0;
+            pos[i*3+2]= 0;
+            // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
+            let color = d3.color(colorarr[target.cluster].value);
+            colors[i*3+0]= color.r/255;
+            colors[i*3+1]= color.g/255;
+            colors[i*3+2]= color.b/255;
+            alpha[i]= 1;
+            sizes[i] = graphicopt.component.dot.size;
         }
-        pointsGeometry.colors = colors;
+        pointsGeometry.setAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
+        pointsGeometry.setAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+        pointsGeometry.setAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+        pointsGeometry.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
+        pointsGeometry.boundingBox = null;
+        pointsGeometry.computeBoundingSphere();
+        // pointsGeometry.colors = colors;
 
-        let pointsMaterial = new THREE.PointsMaterial({
-            size: graphicopt.component.dot.size,
-            sizeAttenuation: false,
-            map: new THREE.TextureLoader().load("src/images/circle.png"),
-            vertexColors: THREE.VertexColors,
-            transparent: true
+        // let pointsMaterial = new THREE.PointsMaterial({
+        //     size: graphicopt.component.dot.size,
+        //     sizeAttenuation: false,
+        //     map: new THREE.TextureLoader().load("src/images/circle.png"),
+        //     vertexColors: THREE.VertexColors,
+        //     transparent: true
+        // });
+        let pointsMaterial = new THREE.ShaderMaterial( {
+
+            uniforms:       {
+                color: { value: new THREE.Color( 0xffffff ) },
+                pointTexture: { value: new THREE.TextureLoader().load( "src/images/circle.png" ) }
+
+            },
+            vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+            transparent:    true
+
         });
 
         let p = new THREE.Points(pointsGeometry, pointsMaterial);
@@ -350,8 +458,13 @@ d3.TimeSpace = function () {
                 const target = datain[i];
                 target.__metrics.position = d;
                 let pointIndex = mapIndex.indexOf(i);
-                if (pointIndex!==undefined)
-                    points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
+                if (pointIndex!==undefined){
+                    let p = points.geometry.attributes.position.array;
+                    p[pointIndex*3+0] = xscale(d[0]);
+                    p[pointIndex*3+1] = yscale(d[1]);
+                    p[pointIndex*3+2] = xscale(d[2])||0;
+                }
+                    // points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
 
                 const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
                 path[target.name][posPath].value = d;
@@ -360,7 +473,9 @@ d3.TimeSpace = function () {
                     lines[target.name].geometry.vertices[posPath*2-1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
                 lines[target.name].geometry.verticesNeedUpdate = true;
             });
-            points.geometry.verticesNeedUpdate = true;
+            points.geometry.attributes.position.needsUpdate = true;
+            points.geometry.boundingBox = null;
+            points.geometry.computeBoundingSphere();
 
             visiableLine(graphicopt.linkConnect)
 
@@ -421,8 +536,10 @@ d3.TimeSpace = function () {
 
 
         var material = new THREE.LineBasicMaterial( {
+            opacity:1,
             color: 0xffffff,
-            vertexColors: THREE.VertexColors
+            vertexColors: THREE.VertexColors,
+            transparent: true
         } );
         let lineObj = new THREE.LineSegments( pointsGeometry, material );
         lineObj.frustumCulled = false;
