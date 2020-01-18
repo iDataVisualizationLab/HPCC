@@ -811,7 +811,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 //     return dataIn;
 // }
 let windowsSize = 1;
-function handle_data_model(tsnedata) {
+function handle_data_model(tsnedata,isKeepUndefined) {
     windowsSize = windowsSize||1;
     console.log(windowsSize);
     // get windown surrounding
@@ -831,10 +831,9 @@ function handle_data_model(tsnedata) {
             currentData.clusterName = cluster_info[index].name;
             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
-            // add all points
+            // // add all points
             // }
             // // timeline precalculate
-            // // if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
             // if (true) {
                 lastcluster = index;
                 lastdataarr = currentData.slice();
@@ -865,6 +864,13 @@ function handle_data_model(tsnedata) {
                         currentData.push(d);
                     });
                 }
+                if (isKeepUndefined)
+                {
+                    for (let i = 0; i< currentData.length; i++){
+                        if (currentData[i]===0)
+                            currentData[i] = -1;
+                    }
+                }
                 dataIn.push(currentData);
             }
             return index;
@@ -876,13 +882,13 @@ function handle_data_model(tsnedata) {
 }
 
 function handle_data_umap(tsnedata) {
-    const dataIn = handle_data_model(tsnedata);
+    const dataIn = handle_data_model(tsnedata,true);
     umapopt.opt = {
         // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
         nNeighbors: Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
         // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
         dim: 2, // The number of components (dimensions) to project the data to (2 = default)
-        minDist: 0.1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
+        minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
     }
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
