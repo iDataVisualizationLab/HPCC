@@ -102,7 +102,6 @@ d3.TimeSpace = function () {
 
 
             var allSelected = lassoTool.select();
-            console.log(allSelected);
             for ( var i = 0; i < allSelected.length; i ++ ) {
 
                 let currentIndex = lassoTool.collection[ i ];
@@ -128,7 +127,7 @@ d3.TimeSpace = function () {
 
         }
 
-        return d3.drag()
+        return d3.drag().touchable(navigator.maxTouchPoints)
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended);
@@ -140,7 +139,10 @@ d3.TimeSpace = function () {
             d3.select('#modelWorkerScreen').call(drag());
             // selection tool
         }else{
+            if(lassoTool)
+                lassoTool.reset();
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
+            // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
     }
     function renderSvgRadar() {

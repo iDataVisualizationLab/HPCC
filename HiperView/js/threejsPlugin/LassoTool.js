@@ -22,7 +22,7 @@ THREE.LassoTool = ( function () {
         this.svg = svg;
         this.svg.selectAll('*').remove()
         g = this.svg.append('g').attr('class', 'lasso-group');
-        this.closeDistance = closeDistance||75;
+        this.closeDistance = closeDistance||Infinity;
         this.lassoPolygon = [];
         this.collection = [];
         this.on = function (type, callback) {
@@ -58,7 +58,7 @@ THREE.LassoTool = ( function () {
         // remove the close path
         closePath.remove();
         closePath = null;
-
+        console.log(this.closeDistance)
         // succesfully closed
         if (distance(this.lassoPolygon[0], this.lassoPolygon[this.lassoPolygon.length - 1]) < this.closeDistance) {
             lassoPath.attr('d', polygonToPath(this.lassoPolygon) + 'Z');
