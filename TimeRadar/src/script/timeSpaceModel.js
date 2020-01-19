@@ -38,7 +38,7 @@ d3.TimeSpace = function () {
         },
         controlPanelGeneral = {
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
-            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px'},
+            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -90,12 +90,13 @@ d3.TimeSpace = function () {
             // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
         })
     }
-
+    let obitTrigger= true;
     function start() {
         axesHelper.toggleDimension(graphicopt.opt.dim);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
             controls.screenSpacePanning  = true;
+
             controls.target.set( 0, 0, 0 );
             controls.enableZoom = true;
             controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
@@ -108,7 +109,10 @@ d3.TimeSpace = function () {
             controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
             controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
         }
-        setUpZoom();
+        if (obitTrigger) {
+            setUpZoom();
+            obitTrigger = false;
+        }
 
         svg.selectAll('*').remove();
         if (modelWorker)
@@ -668,6 +672,7 @@ d3.TimeSpace = function () {
                         let div = d3.select(this).style('width', d.content.width).classed('switch',true)
                             .append('label').attr('class', 'valign-wrapper')
                             .html(`${d.content.labels[0]}<input type="checkbox"><span class="lever"></span>${d.content.labels[1]}`)
+                        div.select('input').node().checked = (graphicopt.opt[d.content.variable]+"") ===d.content.labels[1];
                         div.select('input').on('change',function(){
                             graphicopt.opt[d.content.variable]  =  d.content.values[+this.checked];
                             if (d.content.callback)
@@ -883,28 +888,31 @@ function handle_data_model(tsnedata,isKeepUndefined) {
 
 function handle_data_umap(tsnedata) {
     const dataIn = handle_data_model(tsnedata,true);
-    umapopt.opt = {
-        // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
-        nNeighbors: Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
-        // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
-        dim: 2, // The number of components (dimensions) to project the data to (2 = default)
-        minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
-    }
+    if (!umapopt.opt)
+        umapopt.opt = {
+            // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
+            nNeighbors:  Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+            // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+            dim: 2, // The number of components (dimensions) to project the data to (2 = default)
+            minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
+        };
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function handle_data_tsne(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
-    TsneTSopt.opt = {
-        epsilon: 20, // epsilon is learning rate (10 = default)
-        perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
-        dim: 2, // dimensionality of the embedding (2 = default)
-    }
+    if (!TsneTSopt.opt)
+        TsneTSopt.opt = {
+            epsilon: 20, // epsilon is learning rate (10 = default)
+            perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
+            dim: 2, // dimensionality of the embedding (2 = default)
+        }
     tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
 function handle_data_pca(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
-    PCAopt.opt = {
-        dim: 2, // dimensionality of the embedding (2 = default)
-    };
+    if (!PCAopt.opt)
+        PCAopt.opt = {
+            dim: 2, // dimensionality of the embedding (2 = default)
+        };
     pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
 }
