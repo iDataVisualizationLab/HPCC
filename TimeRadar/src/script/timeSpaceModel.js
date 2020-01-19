@@ -31,12 +31,14 @@ d3.TimeSpace = function () {
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
             linkConnect: true,
+            isSelectionMode: false,
             component:{
                 dot:{size:5,opacity:0.2},
                 link:{size:0.8,opacity:0.1},
             }
         },
         controlPanelGeneral = {
+            isSelectionMode: {text: "Select", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
@@ -62,12 +64,87 @@ d3.TimeSpace = function () {
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    
     let fov = 100,
     near = 0.1,
     far = 7000;
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
+    //----------------------drag-----------------------
+    var selectionBox,helper,mouseoverTrigger = true;
+    let drag = ()=>{
+        function dragstarted(d) {
+            // do something
+            mouseoverTrigger = false;
+            let coordinator = d3.mouse(this);
+            mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
+            mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
+            selectionBox.startPoint.set(
+                mouse.x,
+                mouse.y,
+                1 );
+        }
 
+        function dragged(d) {
+            let coordinator = d3.mouse(this);
+            mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
+            mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
+            if ( helper.isDown ) {
+                for ( var i = 0; i < selectionBox.collection.length; i ++ ) {
+
+                    selectionBox.collection[ i ].material.emissive.set( 0x000000 );
+
+                }
+
+                selectionBox.endPoint.set(
+                    mouse.x,
+                    mouse.y,
+                    1 );
+
+                var allSelected = selectionBox.select();
+                console.log(allSelected);
+                for ( var i = 0; i < allSelected.length; i ++ ) {
+
+                    allSelected[ i ].material.emissive.set( 0xffffff );
+
+                }
+
+            }
+        }
+
+        function dragended(d) {
+            mouseoverTrigger = true;
+            selectionBox.endPoint.set(
+                ( event.clientX / window.innerWidth ) * 2 - 1,
+                - ( event.clientY / window.innerHeight ) * 2 + 1,
+                1 );
+
+            // var allSelected = selectionBox.select();
+            //
+            // for ( var i = 0; i < allSelected.length; i ++ ) {
+            //
+            //     allSelected[ i ].material.emissive.set( 0xffffff );
+            //
+            // }
+
+        }
+
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    };
+    function handle_selection_switch(trigger){
+        controls.enabled = !trigger;
+        if (trigger){
+            selectionBox = new THREE.SelectionBox( camera, points );
+            helper = new THREE.SelectionHelper( selectionBox, renderer, 'selectBox' );
+            d3.select('#modelWorkerScreen').call(drag());
+            // selection tool
+        }else{
+            d3.select('#modelWorkerScreen').on('mousedown.drag', null);
+        }
+    }
     function renderSvgRadar() {
         let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
         datapoint.exit().remove();
@@ -93,6 +170,7 @@ d3.TimeSpace = function () {
     let obitTrigger= true;
     function start() {
         axesHelper.toggleDimension(graphicopt.opt.dim);
+        // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
             controls.screenSpacePanning  = true;
@@ -200,6 +278,8 @@ d3.TimeSpace = function () {
         controls.addEventListener("change", () => renderer.render(scene, camera));
         setUpZoom();
         stop = false;
+
+
         animate();
         // background_canvas = document.getElementById("modelWorkerScreen");
         // background_canvas.width  = graphicopt.width;
@@ -211,13 +291,8 @@ d3.TimeSpace = function () {
         // front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
 
-        d3.select('#modelWorkerInformation+.title').text(self.name)
-        d3.select('#modelWorkerScreen').on('mousemove',function(){
-            let coordinator = d3.mouse(this);
-            mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
-            mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
-            // console.log(""+mouse.x+" "+mouse.y);
-        });
+        d3.select('#modelWorkerInformation+.title').text(self.name);
+        handle_selection_switch(graphicopt.isSelectionMode);
         start();
 
         return master;
@@ -252,49 +327,50 @@ d3.TimeSpace = function () {
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
             // console.log(mouse)
-            var intersects = raycaster.intersectObject(points);
-            //count and look after all objects in the diamonds group
-            var geometry = points.geometry;
-            var attributes = geometry.attributes;
-            if (intersects.length > 0) {
-                if (INTERSECTED.indexOf(intersects[0].index)===-1) {
-                    let target = datain[intersects[ 0 ].index];
-                    INTERSECTED = [];
-                    datain.forEach((d,i)=>{
-                        if (d.name ===target.name) {
-                            INTERSECTED.push(i);
+            if (mouseoverTrigger) {
+                var intersects = raycaster.intersectObject(points);
+                //count and look after all objects in the diamonds group
+                var geometry = points.geometry;
+                var attributes = geometry.attributes;
+                if (intersects.length > 0) {
+                    if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+                        let target = datain[intersects[0].index];
+                        INTERSECTED = [];
+                        datain.forEach((d, i) => {
+                            if (d.name === target.name) {
+                                INTERSECTED.push(i);
+                                attributes.alpha.array[i] = 1;
+                                lines[d.name].material.opacity = 1;
+                            } else {
+                                attributes.alpha.array[i] = 0.1;
+                                lines[datain[i].name].material.opacity = 0;
+                            }
+                        });
+                        let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
+                            .domain([INTERSECTED.length, 0]);
+                        INTERSECTED.forEach((d, i) => {
+                            attributes.size.array[d] = rScale(i);
+                        });
+                        attributes.size.needsUpdate = true;
+                        attributes.alpha.needsUpdate = true;
+                        console.log(target.name);
+                        showMetrics(target.name);
+                    }
+                } else if (INTERSECTED.length) {
+                    datain.forEach((d, i) => {
+                        if (d.name !== target.name) {
                             attributes.alpha.array[i] = 1;
-                            lines[d.name].material.opacity = 1;
-                        }else{
-                            attributes.alpha.array[i] = 0.1;
-                            lines[datain[i].name].material.opacity = 0;
+                            lines[datain[i].name].material.opacity = 1;
                         }
                     });
-                    let rScale  = d3.scaleLinear().range([graphicopt.component.dot.size,graphicopt.component.dot.size*2])
-                        .domain([INTERSECTED.length,0]);
-                    INTERSECTED.forEach((d,i)=>{
-                        attributes.size.array[d] = rScale(i);
+                    INTERSECTED.forEach((d, i) => {
+                        attributes.size.array[d] = graphicopt.component.dot.size;
                     });
                     attributes.size.needsUpdate = true;
                     attributes.alpha.needsUpdate = true;
-                    console.log(target.name);
-                    showMetrics(target.name);
+                    INTERSECTED = [];
                 }
-            } else if(INTERSECTED.length){
-                datain.forEach((d,i)=>{
-                    if (d.name !==target.name) {
-                        attributes.alpha.array[i] = 1;
-                        lines[datain[i].name].material.opacity = 1;
-                    }
-                });
-                INTERSECTED.forEach((d,i)=>{
-                    attributes.size.array[d] = graphicopt.component.dot.size;
-                });
-                attributes.size.needsUpdate = true;
-                attributes.alpha.needsUpdate = true;
-                INTERSECTED = [];
             }
-
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);

@@ -12,6 +12,7 @@ THREE.SelectionBox = ( function () {
     var tmpPoint = new THREE.Vector3();
 
     var vecNear = new THREE.Vector3();
+    var vecArray = [];
     var vecTopLeft = new THREE.Vector3();
     var vecTopRight = new THREE.Vector3();
     var vecDownRight = new THREE.Vector3();
@@ -37,7 +38,6 @@ THREE.SelectionBox = ( function () {
         this.startPoint = startPoint || this.startPoint;
         this.endPoint = endPoint || this.endPoint;
         this.collection = [];
-
         this.updateFrustum( this.startPoint, this.endPoint );
         this.searchChildInFrustum( frustum, this.scene );
 
@@ -96,36 +96,121 @@ THREE.SelectionBox = ( function () {
 
     };
 
-    SelectionBox.prototype.searchChildInFrustum = function ( frustum, object ) {
+    SelectionBox.prototype.searchChildInFrustum = function ( frustum, object, isPoints ) {
+        if ( object.visible === false ) return;
+        console.log(object)
+        console.log(object.isMesh );
 
-        if ( object.isMesh ) {
+        if (object.type==="Points"){
+            var _position = new THREE.Vector3();
+            var geometry = object.geometry;
+            var matrixWorld = object.matrixWorld;
 
-            if ( object.material !== undefined ) {
+            // // Checking boundingSphere distance to ray
+            //
+            // if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
+            //
+            // _sphere.copy( geometry.boundingSphere );
+            // _sphere.applyMatrix4( matrixWorld );
+            // _sphere.radius += threshold;
+            //
+            // if ( raycaster.ray.intersectsSphere( _sphere ) === false ) return;
+            //
+            // //
+            //
+            // _inverseMatrix.getInverse( matrixWorld );
+            // _ray.copy( raycaster.ray ).applyMatrix4( _inverseMatrix );
+            //
+            // var localThreshold = threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
+            // var localThresholdSq = localThreshold * localThreshold;
 
-                object.geometry.computeBoundingSphere();
+            if ( geometry.isBufferGeometry ) {
 
-                center.copy( object.geometry.boundingSphere.center );
+                var index = geometry.index;
+                var attributes = geometry.attributes;
+                var positions = attributes.position.array;
 
-                center.applyMatrix4( object.matrixWorld );
+                if ( index !== null ) {
 
-                if ( frustum.containsPoint( center ) ) {
+                    var indices = index.array;
 
-                    this.collection.push( object );
+                    for ( var i = 0, il = indices.length; i < il; i ++ ) {
+
+                        var a = indices[ i ];
+
+                        _position.fromArray( positions, a * 3 );
+
+                        // testPoint( _position, a, localThresholdSq, matrixWorld, raycaster, intersects, this );
+                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld} ,true);
+
+                    }
+
+                } else {
+
+                    for ( var i = 0, l = positions.length / 3; i < l; i ++ ) {
+
+                        _position.fromArray( positions, i * 3 );
+
+                        // testPoint( _position, i, localThresholdSq, matrixWorld, raycaster, intersects, this );
+                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld} ,true);
+
+                    }
+
+                }
+
+            } else {
+
+                var vertices = geometry.vertices;
+
+                for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+
+                    // testPoint( vertices[ i ], i, localThresholdSq, matrixWorld, raycaster, intersects, this );
+                    this.searchChildInFrustum( frustum, {center: vertices[ i ],matrixWorld: matrixWorld} ,true);
 
                 }
 
             }
 
-        }
+        }else if (isPoints){
+            center.copy( object.center );
 
-        if ( object.children.length > 0 ) {
+            center.applyMatrix4( object.matrixWorld );
 
-            for ( var x = 0; x < object.children.length; x ++ ) {
+            if ( frustum.containsPoint( center ) ) {
 
-                this.searchChildInFrustum( frustum, object.children[ x ] );
+                this.collection.push( object.index );
+
+            }
+        }else {
+            if (object.isMesh) {
+
+                if (object.material !== undefined) {
+
+                    object.geometry.computeBoundingSphere();
+
+                    center.copy(object.geometry.boundingSphere.center);
+
+                    center.applyMatrix4(object.matrixWorld);
+
+                    if (frustum.containsPoint(center)) {
+
+                        this.collection.push(object);
+
+                    }
+
+                }
 
             }
 
+            if (object.children.length > 0) {
+
+                for (var x = 0; x < object.children.length; x++) {
+
+                    this.searchChildInFrustum(frustum, object.children[x]);
+
+                }
+
+            }
         }
 
     };
