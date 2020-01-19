@@ -12,7 +12,6 @@ THREE.SelectionBox = ( function () {
     var tmpPoint = new THREE.Vector3();
 
     var vecNear = new THREE.Vector3();
-    var vecArray = [];
     var vecTopLeft = new THREE.Vector3();
     var vecTopRight = new THREE.Vector3();
     var vecDownRight = new THREE.Vector3();

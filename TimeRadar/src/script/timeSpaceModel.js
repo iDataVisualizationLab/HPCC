@@ -38,7 +38,7 @@ d3.TimeSpace = function () {
             }
         },
         controlPanelGeneral = {
-            isSelectionMode: {text: "Select", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
+            isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
@@ -71,7 +71,7 @@ d3.TimeSpace = function () {
     //----------------------color----------------------
     let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
     //----------------------drag-----------------------
-    var selectionBox,helper,mouseoverTrigger = true;
+    var lassoTool,mouseoverTrigger = true;
     let drag = ()=>{
         function dragstarted(d) {
             // do something
@@ -79,55 +79,46 @@ d3.TimeSpace = function () {
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
-            selectionBox.startPoint.set(
-                mouse.x,
-                mouse.y,
-                1 );
+            lassoTool.lassoPolygon = [coordinator];
+            lassoTool.start();
         }
 
         function dragged(d) {
-            console.log(points)
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
-            if ( helper.isDown ) {
-                for ( var i = 0; i < selectionBox.collection.length; i ++ ) {
-                    let currentIndex = selectionBox.collection[ i ];
-                    let currentData = datain[mapIndex[currentIndex]];
-                    let currentColor = d3.color(colorarr[currentData.cluster].value);
-                     points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
-                     points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
-                     points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
+            lassoTool.lassoPolygon.push(coordinator);
 
-                }
-
-                selectionBox.endPoint.set(
-                    mouse.x,
-                    mouse.y,
-                    1 );
-
-                var allSelected = selectionBox.select();
-                console.log(allSelected);
-                for ( var i = 0; i < allSelected.length; i ++ ) {
-
-                    let currentIndex = selectionBox.collection[ i ];
-                    points.geometry.attributes.customColor.array[currentIndex*3]= 0;
-                    points.geometry.attributes.customColor.array[currentIndex*3+1]= 0;
-                    points.geometry.attributes.customColor.array[currentIndex*3+2]= 0;
-                    points.geometry.attributes.customColor.needsUpdate = true;
-                }
+            for ( var i = 0; i < lassoTool.collection.length; i ++ ) {
+                let currentIndex = lassoTool.collection[ i ];
+                let currentData = datain[mapIndex[currentIndex]];
+                let currentColor = d3.color(colorarr[currentData.cluster].value);
+                 points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
+                 points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
+                 points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
 
             }
+
+
+
+            var allSelected = lassoTool.select();
+            console.log(allSelected);
+            for ( var i = 0; i < allSelected.length; i ++ ) {
+
+                let currentIndex = lassoTool.collection[ i ];
+                points.geometry.attributes.customColor.array[currentIndex*3]= 0;
+                points.geometry.attributes.customColor.array[currentIndex*3+1]= 0;
+                points.geometry.attributes.customColor.array[currentIndex*3+2]= 0;
+                points.geometry.attributes.customColor.needsUpdate = true;
+            }
+
+
         }
 
         function dragended(d) {
             mouseoverTrigger = true;
-            selectionBox.endPoint.set(
-                ( event.clientX / window.innerWidth ) * 2 - 1,
-                - ( event.clientY / window.innerHeight ) * 2 + 1,
-                1 );
-
-            // var allSelected = selectionBox.select();
+            lassoTool.end();
+            // var allSelected = lassoTool.select();
             //
             // for ( var i = 0; i < allSelected.length; i ++ ) {
             //
@@ -145,8 +136,7 @@ d3.TimeSpace = function () {
     function handle_selection_switch(trigger){
         controls.enabled = !trigger;
         if (trigger){
-            selectionBox = new THREE.SelectionBox( camera, points );
-            helper = new THREE.SelectionHelper( selectionBox, renderer, 'selectBox' );
+            lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
             d3.select('#modelWorkerScreen').call(drag());
             // selection tool
         }else{
