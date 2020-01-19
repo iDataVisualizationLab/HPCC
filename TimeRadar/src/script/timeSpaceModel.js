@@ -86,13 +86,18 @@ d3.TimeSpace = function () {
         }
 
         function dragged(d) {
+            console.log(points)
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             if ( helper.isDown ) {
                 for ( var i = 0; i < selectionBox.collection.length; i ++ ) {
-
-                    selectionBox.collection[ i ].material.emissive.set( 0x000000 );
+                    let currentIndex = selectionBox.collection[ i ];
+                    let currentData = datain[mapIndex[currentIndex]];
+                    let currentColor = d3.color(colorarr[currentData.cluster].value);
+                     points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
+                     points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
+                     points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
 
                 }
 
@@ -105,8 +110,11 @@ d3.TimeSpace = function () {
                 console.log(allSelected);
                 for ( var i = 0; i < allSelected.length; i ++ ) {
 
-                    allSelected[ i ].material.emissive.set( 0xffffff );
-
+                    let currentIndex = selectionBox.collection[ i ];
+                    points.geometry.attributes.customColor.array[currentIndex*3]= 0;
+                    points.geometry.attributes.customColor.array[currentIndex*3+1]= 0;
+                    points.geometry.attributes.customColor.array[currentIndex*3+2]= 0;
+                    points.geometry.attributes.customColor.needsUpdate = true;
                 }
 
             }

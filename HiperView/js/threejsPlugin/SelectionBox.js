@@ -98,8 +98,6 @@ THREE.SelectionBox = ( function () {
 
     SelectionBox.prototype.searchChildInFrustum = function ( frustum, object, isPoints ) {
         if ( object.visible === false ) return;
-        console.log(object)
-        console.log(object.isMesh );
 
         if (object.type==="Points"){
             var _position = new THREE.Vector3();
@@ -141,7 +139,7 @@ THREE.SelectionBox = ( function () {
                         _position.fromArray( positions, a * 3 );
 
                         // testPoint( _position, a, localThresholdSq, matrixWorld, raycaster, intersects, this );
-                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld} ,true);
+                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld,index:i} ,true);
 
                     }
 
@@ -152,7 +150,7 @@ THREE.SelectionBox = ( function () {
                         _position.fromArray( positions, i * 3 );
 
                         // testPoint( _position, i, localThresholdSq, matrixWorld, raycaster, intersects, this );
-                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld} ,true);
+                        this.searchChildInFrustum( frustum, {center: _position,matrixWorld: matrixWorld,index:i} ,true);
 
                     }
 
@@ -165,7 +163,7 @@ THREE.SelectionBox = ( function () {
                 for ( var i = 0, l = vertices.length; i < l; i ++ ) {
 
                     // testPoint( vertices[ i ], i, localThresholdSq, matrixWorld, raycaster, intersects, this );
-                    this.searchChildInFrustum( frustum, {center: vertices[ i ],matrixWorld: matrixWorld} ,true);
+                    this.searchChildInFrustum( frustum, {center: vertices[ i ],matrixWorld: matrixWorld,index:i} ,true);
 
                 }
 
