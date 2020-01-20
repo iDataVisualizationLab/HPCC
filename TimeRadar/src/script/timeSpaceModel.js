@@ -117,11 +117,13 @@ d3.TimeSpace = function () {
         if (trigger){
             lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
             d3.select('#modelWorkerScreen').call(drag());
+            d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
         }else{
             if(lassoTool)
                 lassoTool.reset();
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
+            d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
     }
@@ -301,6 +303,24 @@ d3.TimeSpace = function () {
         };
         return axesHelper;
     }
+    let radarChartclusteropt = {
+        margin: {top: 0, right: 0, bottom: 0, left: 0},
+        w: 200,
+        h: 200,
+        radiuschange: false,
+        levels:6,
+        dotRadius:2,
+        strokeWidth:1,
+        maxValue: 0.5,
+        isNormalize:true,
+        showHelperPoint: false,
+        roundStrokes: true,
+        ringStroke_width: 0.15,
+        ringColor:'black',
+        fillin:0.5,
+        boxplot:true,
+        animationDuration:100,
+        showText: false};
     function animate() {
         if (!stop) {
             //update raycaster with mouse movement
@@ -842,7 +862,7 @@ d3.TimeSpace = function () {
     };
 
     master.schema = function (_) {
-        return arguments.length ? (graphicopt.radaropt.schema = _,schema = _, master) : schema;
+        return arguments.length ? (graphicopt.radaropt.schema = _,radarChartclusteropt.schema=_,schema = _, master) : schema;
     };
     master.dispatch = function (_) {
         return arguments.length ? (returnEvent = _, master) : returnEvent;
