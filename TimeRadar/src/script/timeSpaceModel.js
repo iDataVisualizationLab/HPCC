@@ -403,6 +403,7 @@ d3.TimeSpace = function () {
 
                 radarChartclusteropt.schema = graphicopt.radaropt.schema
                 radarChartclusteropt.color = function(){return newClustercolor};
+                d3.select('.radarTimeSpace .selectionNum').text(allSelected.length)
                 RadarChart(".radarTimeSpace", [allSelected_Metric], radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
                 lassoTool.needRender = false;
             }
@@ -411,6 +412,11 @@ d3.TimeSpace = function () {
             renderer.render(scene, camera);
         }
     }
+    // function triggerInformationWindow(active){
+    //     d3.select('#modelWorkerInformation').classed('hide',active);
+    //     if (active)
+    //
+    // }
     function showMetrics(name) {
         let maxstep = sampleS.timespan.length - 1;
         let last_timestep = sampleS.timespan[maxstep];
