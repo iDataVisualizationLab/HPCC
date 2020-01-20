@@ -448,15 +448,18 @@ d3.TimeSpace = function () {
 
         // draw table
         let positionscale = d3.scaleLinear().domain([0,1]).range([0,Math.max(graphicopt.radarTableopt.h,40)]);
-        let selectedNest = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(dataArr);
+        let selectedNest = d3.nest().key(d=>d.cluster).rollup(d=>d.length).object(dataArr);
         let selectedCluster = cluster.filter((c,i)=>selectedNest[i]).map(d=>{
             let temp = d.__metrics.slice();
             temp.total = d.total_radar;
-            temp.selected = selectedNest[d.index].value;
+            temp.selected = selectedNest[d.index];
             temp.name = d.name;
             temp.fullName = `Group ${d.orderG+1}${clusterDescription[d.name]?': ':''}${clusterDescription[d.name].text}`;
             return temp
         }).sort((a,b)=>b.selected - a.selected);
+        selectedCluster.forEach((d,i)=>d.index = i);
+        console.log(selectedNest)
+        console.log(selectedCluster)
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
         let holder = d3.select('.relativemap svg.svgHolder');
         holder.attr('width',radarChartclusteropt.width)
@@ -479,8 +482,10 @@ d3.TimeSpace = function () {
         }).styles({
             'fill-opacity'  : 0.5
         });
+        contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5}).text(0);
         bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
-        bg = holder.selectAll('.timeSpace').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(i+0.5)})`);
+        bg = holder.selectAll('.timeSpace');
+        bg.transition().attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
         bg
             .each(function(d){
                 createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill:true});
@@ -488,6 +493,7 @@ d3.TimeSpace = function () {
         bg.select('text.clustername').text(d=>d.fullName);
         bg.select('g.rate').select('rect.totalNum').transition().attr('width',d=>totalscale(d.total));
         bg.select('g.rate').select('rect.contributeNum').style('fill',newClustercolor).transition().attr('width',d=>totalscale(d.selected));
+        bg.select('g.rate').select('text').transition().attr('x',d=>totalscale(d.selected)+2).text(d=>`${d.selected}/${d.total}`)
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
