@@ -466,7 +466,7 @@ d3.TimeSpace = function () {
             .attr('height',positionscale(selectedCluster.length));
         let bg = holder.selectAll('.timeSpace').data(selectedCluster,d=>d.name);
         bg.exit().remove();
-        let bg_new = bg.enter().append('g').attr('class', 'timeSpace');
+        let bg_new = bg.enter().append('g').attr('class', 'timeSpace').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(selectedCluster.length+1)})`);
         bg_new.append('g').attr('class','radar');
         let contributeRect = bg_new.append('g').attr('class','rate').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         contributeRect.append('rect').attr('class','totalNum').attrs({
@@ -482,10 +482,12 @@ d3.TimeSpace = function () {
         }).styles({
             'fill-opacity'  : 0.5
         });
-        contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5}).text(0);
+        let rateText = contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5});
+        rateText.append('tspan').attr('class','contributeNum');
+        rateText.append('tspan').attr('class','totalNum');
         bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         bg = holder.selectAll('.timeSpace');
-        bg.transition().attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
+        bg.transition().duration(200).attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
         bg
             .each(function(d){
                 createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill:true});
@@ -493,7 +495,10 @@ d3.TimeSpace = function () {
         bg.select('text.clustername').text(d=>d.fullName);
         bg.select('g.rate').select('rect.totalNum').transition().attr('width',d=>totalscale(d.total));
         bg.select('g.rate').select('rect.contributeNum').style('fill',newClustercolor).transition().attr('width',d=>totalscale(d.selected));
-        bg.select('g.rate').select('text').transition().attr('x',d=>totalscale(d.selected)+2).text(d=>`${d.selected}/${d.total}`)
+        rateText = bg.select('g.rate').select('text');
+        rateText.transition().attr('x',d=>totalscale(d.total)+2);
+        rateText.select('.contributeNum').transition().text(d=>d.selected);
+        rateText.select('.totalNum').text(d=>'/'+d.total);
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
