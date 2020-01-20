@@ -1014,7 +1014,8 @@ if (typeof RadarChart!== 'undefined') {
 }
 
 // radar draw
-function createRadar_func(datapoint, bg, data, customopt,radaropt,colorscale) {
+function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colorscale) {
+    className = className||"compute linkLineg ";
     let size_w = customopt?(customopt.size?customopt.size:radaropt.w):radaropt.w;
     let size_h = customopt?(customopt.size?customopt.size:radaropt.h):radaropt.h;
     let colorfill = (customopt&&customopt.colorfill)?0.5:false;
@@ -1036,7 +1037,7 @@ function createRadar_func(datapoint, bg, data, customopt,radaropt,colorscale) {
         datapoint = bg
             .append("g")
             .datum(data)
-            .attr("class", d => "compute linkLineg " + fixName2Class(d.name));
+            .attr("class", d => className+" " + fixName2Class(d.name));
 
     }
 

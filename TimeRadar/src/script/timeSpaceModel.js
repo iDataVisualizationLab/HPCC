@@ -30,6 +30,16 @@ d3.TimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+            radarTableopt : {
+                // summary:{quantile:true},
+                mini:true,
+                levels:6,
+                gradient:true,
+                w:40,
+                h:40,
+                showText:false,
+                margin: {top: 0, right: 0, bottom: 0, left: 0},
+            },
             linkConnect: true,
             isSelectionMode: false,
             component:{
@@ -69,7 +79,7 @@ d3.TimeSpace = function () {
     near = 0.1,
     far = 7000;
     //----------------------color----------------------
-    let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale);
+    let createRadar,createRadarTable;
     //----------------------drag-----------------------
     var lassoTool,mouseoverTrigger = true;
     let drag = ()=>{
@@ -190,7 +200,7 @@ d3.TimeSpace = function () {
 
         modelWorker.postMessage({action: "colorscale", value: colorarr});
         // modelWorker.postMessage({action: "initmodelWorker", value: graphicopt.opt});
-        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain, clusterarr: cluster});
+        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain, clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
@@ -217,13 +227,16 @@ d3.TimeSpace = function () {
         datain.sort((a,b)=>a.timestep-b.timestep);
         mapIndex = [];
         datain.forEach((d,i)=>d.show?mapIndex.push(i):undefined);
-        cluster = clusterin
+        handle_cluster (clusterin, datain)
         handle_data(datain);
         updateTableInput();
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
+        //----------------------color----------------------
+        createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
+        createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
 
         far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
         camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
@@ -284,6 +297,11 @@ d3.TimeSpace = function () {
 
         return master;
     };
+    function handle_cluster(clusterin,data){
+        cluster = clusterin;
+        let nesradar = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(data);
+            nesradar.forEach(d=>cluster[d.key].total_radar = d.value);
+    }
     // Three.js render loop
     function createAxes(length){
         var material = new THREE.LineBasicMaterial( { color: 0x000000 } );
@@ -326,6 +344,17 @@ d3.TimeSpace = function () {
         boxplot:true,
         animationDuration:100,
         showText: true};
+
+    function handle_data_summary(allSelected_Data) {
+        return graphicopt.radaropt.schema.map((s, i) => {
+            let d = allSelected_Data.map(e => e[i]);
+            if (d.length)
+                return {axis: s.text, value: ss.mean(d), minval: ss.min(d), maxval: ss.max(d)}
+            else
+                return {axis: s.text, value: 0, minval: 0, maxval: 0}
+        });
+    }
+
     function animate() {
         if (!stop) {
             //update raycaster with mouse movement
@@ -391,25 +420,15 @@ d3.TimeSpace = function () {
                 var allSelected = lassoTool.select();
                 var allSelected_Data = [];
                 for ( var i = 0; i < allSelected.length; i ++ ) {
-                    allSelected_Data.push(datain[mapIndex[allSelected[i]]])
+                    allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
                     let currentIndex = lassoTool.collection[ i ];
                     points.geometry.attributes.customColor.array[currentIndex*3]= newClustercolor.r/255;
                     points.geometry.attributes.customColor.array[currentIndex*3+1]= newClustercolor.g/255;
                     points.geometry.attributes.customColor.array[currentIndex*3+2]= newClustercolor.b/255;
                     points.geometry.attributes.customColor.needsUpdate = true;
                 }
-                const allSelected_Metric = graphicopt.radaropt.schema.map((s,i)=>{
-                    let d = allSelected_Data.map(e=>e[i]);
-                    if(d.length)
-                        return {axis: s.text, value: ss.mean(d),minval:ss.min(d),maxval:ss.max(d)}
-                    else
-                        return {axis: s.text, value: 0,minval:0,maxval:0}
-                });
-
-                radarChartclusteropt.schema = graphicopt.radaropt.schema
-                radarChartclusteropt.color = function(){return newClustercolor};
-                d3.select('.radarTimeSpace .selectionNum').text(allSelected.length)
-                RadarChart(".radarTimeSpace", [allSelected_Metric], radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                // draw summary radar chart
+                drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
                 lassoTool.needRender = false;
             }
             requestAnimationFrame(animate);
@@ -417,11 +436,73 @@ d3.TimeSpace = function () {
             renderer.render(scene, camera);
         }
     }
-    // function triggerInformationWindow(active){
-    //     d3.select('#modelWorkerInformation').classed('hide',active);
-    //     if (active)
-    //
-    // }
+    function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
+        radarChartclusteropt.schema = graphicopt.radaropt.schema
+        radarChartclusteropt.color = function(){return newClustercolor};
+        d3.select('.radarTimeSpace .selectionNum').text(dataArr.length)
+        let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt,"");
+        currentChart.selectAll('.axisLabel').remove();
+        currentChart.select('.axisWrapper .gridCircle').classed('hide',true);
+
+
+        // draw table
+        let positionscale = d3.scaleLinear().domain([0,1]).range([0,Math.max(graphicopt.radarTableopt.h,40)]);
+        let selectedNest = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(dataArr);
+        let selectedCluster = cluster.filter((c,i)=>selectedNest[i]).map(d=>{
+            let temp = d.__metrics.slice();
+            temp.total = d.total_radar;
+            temp.selected = selectedNest[d.index].value;
+            temp.name = d.name;
+            temp.fullName = `Group ${d.orderG+1}${clusterDescription[d.name]?': ':''}${clusterDescription[d.name].text}`;
+            return temp
+        }).sort((a,b)=>b.selected - a.selected);
+        let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
+        let holder = d3.select('.relativemap svg.svgHolder');
+        holder.attr('width',radarChartclusteropt.width)
+            .attr('height',positionscale(selectedCluster.length));
+        let bg = holder.selectAll('.timeSpace').data(selectedCluster,d=>d.name);
+        bg.exit().remove();
+        let bg_new = bg.enter().append('g').attr('class', 'timeSpace');
+        bg_new.append('g').attr('class','radar');
+        let contributeRect = bg_new.append('g').attr('class','rate').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
+        contributeRect.append('rect').attr('class','totalNum').attrs({
+            width:0,
+            height:graphicopt.radarTableopt.h/2,
+            fill: d=>colorscale(d.name)
+        });
+        contributeRect.append('rect').attr('class','contributeNum').attrs({
+            width:0,
+            height:graphicopt.radarTableopt.h/2,
+            fill: d=>colorscale(d.name)
+        });
+        bg_new.append('text').attr('class','clustername').attr('dy','.5rem').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
+        bg = holder.selectAll('.timeSpace').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(i+0.5)})`);
+        bg
+            .each(function(d){
+                createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill:true});
+            });
+        bg.select('text.clustername').text(d=>d.fullName);
+        bg.select('g.rate').select('rect.totalNum').transition().attr('width',d=>totalscale(d.total));
+        bg.select('g.rate').select('rect.contributeNum').transition().attr('width',d=>totalscale(d.selected)).attr('fill',newClustercolor);
+    }
+    function drawEmbedding(data,colorfill) {
+        let newdata =handledata(data);
+        let bg = svg.selectAll('.computeSig');
+        bg.each(function (){
+            let path = d3.select(this);
+            if (path.select(".radar").empty()) {
+                path.append('g').attr('class', 'radar');
+            }
+        });
+        let datapointg = bg.select(".radar")
+            .datum(d=>newdata.find(n=>n.name === d.name))
+            .each(function(d){
+
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), {colorfill:colorfill});
+            });
+        // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
+
+    }
     function showMetrics(name) {
         let maxstep = sampleS.timespan.length - 1;
         let last_timestep = sampleS.timespan[maxstep];
@@ -578,7 +659,7 @@ d3.TimeSpace = function () {
     let mapIndex =[];
     function render (isradar){
         if(solution) {
-            createRadar = _.partialRight(createRadar_func, graphicopt.radaropt, colorscale);
+            createRadar = _.partialRight(createRadar_func,'timeSpace radar', graphicopt.radaropt, colorscale);
             solution.forEach(function (d, i) {
             // mapIndex.forEach(function (i) {
                 const target = datain[i];
@@ -858,7 +939,12 @@ d3.TimeSpace = function () {
             }
             if (graphicopt.radaropt)
                 graphicopt.radaropt.schema = serviceFullList;
-            createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorscale)
+            if (graphicopt.radarTableopt) {
+                graphicopt.radarTableopt.schema = serviceFullList;
+            }
+
+            createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
+            createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
             return master;
         }else {
             return graphicopt;
@@ -1018,7 +1104,7 @@ function handle_data_umap(tsnedata) {
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
         };
-    umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info);
 }
 function handle_data_tsne(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
@@ -1028,7 +1114,7 @@ function handle_data_tsne(tsnedata) {
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
             dim: 2, // dimensionality of the embedding (2 = default)
         }
-    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info);
 }
 function handle_data_pca(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
@@ -1036,5 +1122,5 @@ function handle_data_pca(tsnedata) {
         PCAopt.opt = {
             dim: 2, // dimensionality of the embedding (2 = default)
         };
-    pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info.map(c => c.__metrics.normalize));
+    pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info);
 }

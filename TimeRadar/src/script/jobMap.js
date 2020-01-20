@@ -331,7 +331,7 @@ let JobMap = function() {
                 return 'black';
         }
     }
-    let createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorFunc)
+    let createRadar = _.partialRight(createRadar_func,undefined,graphicopt.radaropt,colorFunc)
     // function createRadar(datapoint, bg, newdata, customopt) {
     //     let size_w = customopt?(customopt.size?customopt.size:graphicopt.radaropt.w):graphicopt.radaropt.w;
     //     let size_h = customopt?(customopt.size?customopt.size:graphicopt.radaropt.h):graphicopt.radaropt.h;
@@ -2337,7 +2337,7 @@ let JobMap = function() {
             }
             if (graphicopt.radaropt)
                 graphicopt.radaropt.schema = schema;
-            createRadar = _.partialRight(createRadar_func,graphicopt.radaropt,colorFunc)
+            createRadar = _.partialRight(createRadar_func,undefined,graphicopt.radaropt,colorFunc)
             return jobMap;
         }else {
             return graphicopt;
