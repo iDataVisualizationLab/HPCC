@@ -393,13 +393,15 @@ d3.TimeSpace = function () {
                     points.geometry.attributes.customColor.array[currentIndex*3+2]= newClustercolor.b/255;
                     points.geometry.attributes.customColor.needsUpdate = true;
                 }
-                const allSelected_Metric = serviceFullList.map((s,i)=>{
+                const allSelected_Metric = graphicopt.radaropt.schema.map((s,i)=>{
                     let d = allSelected_Data.map(e=>e[i]);
                     if(d.length)
                         return {axis: s.text, value: ss.mean(d),minval:ss.min(d),maxval:ss.max(d)}
                     else
                         return {axis: s.text, value: 0,minval:0,maxval:0}
                 });
+
+                radarChartclusteropt.schema = graphicopt.radaropt.schema
                 radarChartclusteropt.color = function(){return newClustercolor};
                 RadarChart(".radarTimeSpace", [allSelected_Metric], radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
                 lassoTool.needRender = false;
@@ -601,7 +603,7 @@ d3.TimeSpace = function () {
 
     function handle_data(data){
         data.forEach(d=>{
-            d.__metrics = serviceFullList.map((s,i)=>{
+            d.__metrics = graphicopt.radaropt.schema.map((s,i)=>{
                 return {axis: s.text, value: data[i]}
             });
             d.__metrics.name = d.clusterName;
