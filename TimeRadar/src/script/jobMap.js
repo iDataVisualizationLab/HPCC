@@ -680,7 +680,7 @@ let JobMap = function() {
                     width: tooltip_opt.width,
                     height: 50,
                     margin: {top: 0, bottom: 0, left: 0, right: 0}
-                }).data(data_in, true).layout(layout).show(target);
+                }).data(data_in, true).layout(layout).show($('#tipfollowscursorDiv')[0]);
             }
 
             function showMetrics() {
@@ -725,12 +725,11 @@ let JobMap = function() {
                 });
                 layout.title = '';
                 layout.title2 = `#host: ${d.values_name.length}`;
-                console.log(layout)
                 tooltip_lib.graphicopt({
                     width: tooltip_opt.width,
                     height: 100,
                     margin: tooltip_opt.margin
-                }).data(data_in).layout(layout).show(target);
+                }).data(data_in).layout(layout).show($('#tipfollowscursorDiv')[0]);
             }
 
             if(runopt.mouse.auto) {
