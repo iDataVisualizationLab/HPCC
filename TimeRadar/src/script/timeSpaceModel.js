@@ -123,6 +123,11 @@ d3.TimeSpace = function () {
             if(lassoTool)
                 lassoTool.reset();
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
+            d3.select('#modelWorkerScreen').on('mousemove', function(){
+                let coordinator = d3.mouse(this);
+                mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
+                mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
+            });
             d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
@@ -320,7 +325,7 @@ d3.TimeSpace = function () {
         fillin:0.5,
         boxplot:true,
         animationDuration:100,
-        showText: false};
+        showText: true};
     function animate() {
         if (!stop) {
             //update raycaster with mouse movement
