@@ -437,9 +437,10 @@ d3.TimeSpace = function () {
         }
     }
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
-        radarChartclusteropt.schema = graphicopt.radaropt.schema
+        let barH = graphicopt.radarTableopt.h/2;
+        radarChartclusteropt.schema = graphicopt.radaropt.schema;
         radarChartclusteropt.color = function(){return newClustercolor};
-        d3.select('.radarTimeSpace .selectionNum').text(dataArr.length)
+        d3.select('.radarTimeSpace .selectionNum').text(dataArr.length);
         let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt,"");
         currentChart.selectAll('.axisLabel').remove();
         currentChart.select('.axisWrapper .gridCircle').classed('hide',true);
@@ -467,15 +468,18 @@ d3.TimeSpace = function () {
         let contributeRect = bg_new.append('g').attr('class','rate').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         contributeRect.append('rect').attr('class','totalNum').attrs({
             width:0,
-            height:graphicopt.radarTableopt.h/2,
-            fill: d=>colorscale(d.name)
+            height:barH
+        }).styles({
+            fill: d=>colorscale(d.name),
+            'fill-opacity'  : 0.5
         });
         contributeRect.append('rect').attr('class','contributeNum').attrs({
             width:0,
-            height:graphicopt.radarTableopt.h/2,
-            fill: d=>colorscale(d.name)
+            height:barH,
+        }).styles({
+            'fill-opacity'  : 0.5
         });
-        bg_new.append('text').attr('class','clustername').attr('dy','.5rem').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
+        bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         bg = holder.selectAll('.timeSpace').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(i+0.5)})`);
         bg
             .each(function(d){
@@ -483,7 +487,7 @@ d3.TimeSpace = function () {
             });
         bg.select('text.clustername').text(d=>d.fullName);
         bg.select('g.rate').select('rect.totalNum').transition().attr('width',d=>totalscale(d.total));
-        bg.select('g.rate').select('rect.contributeNum').transition().attr('width',d=>totalscale(d.selected)).attr('fill',newClustercolor);
+        bg.select('g.rate').select('rect.contributeNum').style('fill',newClustercolor).transition().attr('width',d=>totalscale(d.selected));
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);

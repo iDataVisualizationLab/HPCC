@@ -122,7 +122,7 @@ a .ttu-logo{padding-left:2vw;padding-top:10px;padding-bottom:10px;margin-right:0
 
 
 /* tooltip */
-#Summarynode, .d3-tip {
+#Summarynode, .d3-tip, #modelSelectionInformation {
 	z-index: 99;
 	line-height: 1;
 	padding: 10px;
