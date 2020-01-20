@@ -25,6 +25,7 @@ THREE.LassoTool = ( function () {
         this.closeDistance = closeDistance||Infinity;
         this.lassoPolygon = [];
         this.collection = [];
+        this.needRender = false;
         this.on = function (type, callback) {
             dispatch.on(type, callback);
             return self;

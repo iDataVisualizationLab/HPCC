@@ -81,6 +81,7 @@ d3.TimeSpace = function () {
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             lassoTool.lassoPolygon = [coordinator];
             lassoTool.start();
+            lassoTool.needRender = true;
         }
 
         function dragged(d) {
@@ -88,28 +89,7 @@ d3.TimeSpace = function () {
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             lassoTool.lassoPolygon.push(coordinator);
-
-            for ( var i = 0; i < lassoTool.collection.length; i ++ ) {
-                let currentIndex = lassoTool.collection[ i ];
-                let currentData = datain[mapIndex[currentIndex]];
-                let currentColor = d3.color(colorarr[currentData.cluster].value);
-                 points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
-                 points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
-                 points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
-
-            }
-
-
-
-            var allSelected = lassoTool.select();
-            for ( var i = 0; i < allSelected.length; i ++ ) {
-
-                let currentIndex = lassoTool.collection[ i ];
-                points.geometry.attributes.customColor.array[currentIndex*3]= 0;
-                points.geometry.attributes.customColor.array[currentIndex*3+1]= 0;
-                points.geometry.attributes.customColor.array[currentIndex*3+2]= 0;
-                points.geometry.attributes.customColor.needsUpdate = true;
-            }
+            lassoTool.needRender = true;
 
 
         }
@@ -370,6 +350,39 @@ d3.TimeSpace = function () {
                     attributes.alpha.needsUpdate = true;
                     INTERSECTED = [];
                 }
+            }else if (lassoTool.needRender) {
+                let newClustercolor = d3.color('#000000');
+                for ( var i = 0; i < lassoTool.collection.length; i ++ ) {
+                    let currentIndex = lassoTool.collection[ i ];
+                    let currentData = datain[mapIndex[currentIndex]];
+                    let currentColor = d3.color(colorarr[currentData.cluster].value);
+                    points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
+                    points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
+                    points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
+
+                }
+
+
+                var allSelected = lassoTool.select();
+                var allSelected_Data = [];
+                for ( var i = 0; i < allSelected.length; i ++ ) {
+                    allSelected_Data.push(datain[mapIndex[allSelected[i]]])
+                    let currentIndex = lassoTool.collection[ i ];
+                    points.geometry.attributes.customColor.array[currentIndex*3]= newClustercolor.r/255;
+                    points.geometry.attributes.customColor.array[currentIndex*3+1]= newClustercolor.g/255;
+                    points.geometry.attributes.customColor.array[currentIndex*3+2]= newClustercolor.b/255;
+                    points.geometry.attributes.customColor.needsUpdate = true;
+                }
+                const allSelected_Metric = serviceFullList.map((s,i)=>{
+                    let d = allSelected_Data.map(e=>e[i]);
+                    if(d.length)
+                        return {axis: s.text, value: ss.mean(d),minval:ss.min(d),maxval:ss.max(d)}
+                    else
+                        return {axis: s.text, value: 0,minval:0,maxval:0}
+                });
+                radarChartclusteropt.color = function(){return newClustercolor};
+                RadarChart(".radarTimeSpace", [allSelected_Metric], radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                lassoTool.needRender = false;
             }
             requestAnimationFrame(animate);
             controls.update();

@@ -2362,12 +2362,17 @@ let radarChartclusteropt  = {
                 try {
                     const d = d3.select(d3.event.detail || this).datum();
                     d3.selectAll('#clusterDisplay .axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                    d3.selectAll('#clusterDisplay .axisText').remove();
+                    if (d3.select(this.parentNode).select('.axisText').empty())
+                        d3.select(this.parentNode).append('text').attr('class','axisText').attr('transform','rotate(-90) translate(5,-5)');
+                    d3.select(this.parentNode).select('.axisText').text(d.text);
                     $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
                 }catch(e){}
             },
             mouseleave: function(){
                 const d = d3.select(d3.event.detail||this).datum();
                 d3.selectAll('#clusterDisplay .axis'+d.idroot+'_'+d.id).classed('highlight',false);
+                d3.selectAll('#clusterDisplay .axisText').remove();
             },
         },
     },
@@ -2403,11 +2408,15 @@ function cluster_map (dataRaw) {
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
-                if (!jobMap.runopt().mouse.disable)
+                if (!jobMap.runopt().mouse.disable) {
                     jobMap.highlight(d.id);
+                }
+                d3.select(this).classed('focus',true);
             }).on('mouseleave',function(d){
-                if (!jobMap.runopt().mouse.disable)
+                if (!jobMap.runopt().mouse.disable) {
                     jobMap.unhighlight(d.id);
+                }
+                d3.select(this).classed('focus',false);
             })
             .append('div')
             .attr('class','label')
