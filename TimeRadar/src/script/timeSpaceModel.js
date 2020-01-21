@@ -42,6 +42,7 @@ d3.TimeSpace = function () {
             },
             linkConnect: true,
             isSelectionMode: false,
+            isCurve: false,
             component:{
                 dot:{size:5,opacity:0.2},
                 link:{size:0.8,opacity:0.1},
@@ -50,6 +51,7 @@ d3.TimeSpace = function () {
         controlPanelGeneral = {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
+            isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
                 text: "Windows size",
@@ -73,7 +75,9 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic 
-    let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,points,lines,scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+    let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
+        points,lines,curveLines,straightLines,curves,updateLine,
+        scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     
     let fov = 100,
     near = 0.1,
@@ -230,6 +234,14 @@ d3.TimeSpace = function () {
         handle_cluster (clusterin, datain)
         handle_data(datain);
         updateTableInput();
+        path = {};
+        datain.forEach(function (target, i) {
+            target.__metrics.position = [0,0,0];
+            if (!path[target.name])
+                path[target.name] = [];
+            path[target.name].push({name: target.name, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
+        });
+
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
@@ -247,14 +259,10 @@ d3.TimeSpace = function () {
         scatterPlot.add( axesHelper );
         scatterPlot.rotation.y = 0;
         points = createpoints(scatterPlot);
-        path = {};
-        datain.forEach(function (target, i) {
-            target.__metrics.position = [0,0,0];
-            if (!path[target.name])
-                path[target.name] = [];
-            path[target.name].push({name: target.name, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
-        });
-        lines = createLines(scatterPlot);
+        straightLines = createLines(scatterPlot);
+        curveLines = createCurveLines(scatterPlot);
+        lines = straightLines;
+        toggleLine();
         scene.add(scatterPlot);
 
         // Add canvas
@@ -297,6 +305,20 @@ d3.TimeSpace = function () {
 
         return master;
     };
+    function toggleLine(){
+        if (!graphicopt.isCurve)
+        {
+            visiableLine(false);
+            lines = straightLines;
+            updateLine = updateStraightLine;
+            visiableLine(true);
+        }else{
+            visiableLine(false);
+            lines = curveLines;
+            updateLine = updateCurveLine;
+            visiableLine(true);
+        }
+    }
     function handle_cluster(clusterin,data){
         cluster = clusterin;
         let nesradar = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(data);
@@ -374,10 +396,10 @@ d3.TimeSpace = function () {
                             if (d.name === target.name) {
                                 INTERSECTED.push(i);
                                 attributes.alpha.array[i] = 1;
-                                lines[d.name].material.opacity = 1;
+                                lines[d.name].visible = true;
                             } else {
                                 attributes.alpha.array[i] = 0.1;
-                                lines[datain[i].name].material.opacity = 0;
+                                lines[datain[i].name].visible = false;
                             }
                         });
                         let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
@@ -394,7 +416,7 @@ d3.TimeSpace = function () {
                     datain.forEach((d, i) => {
                         if (d.name !== target.name) {
                             attributes.alpha.array[i] = 1;
-                            lines[datain[i].name].material.opacity = 1;
+                            lines[datain[i].name].visible = true;
                         }
                     });
                     INTERSECTED.forEach((d, i) => {
@@ -435,6 +457,9 @@ d3.TimeSpace = function () {
             controls.update();
             renderer.render(scene, camera);
         }
+    }
+    function drawLink(){
+
     }
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
         let barH = graphicopt.radarTableopt.h/2;
@@ -483,7 +508,7 @@ d3.TimeSpace = function () {
             'fill-opacity'  : 0.5
         });
         let rateText = contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5});
-        rateText.append('tspan').attr('class','contributeNum');
+        rateText.append('tspan').attr('class','contributeNum').attr('dy',1);
         rateText.append('tspan').attr('class','totalNum');
         bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         bg = holder.selectAll('.timeSpace');
@@ -672,7 +697,9 @@ d3.TimeSpace = function () {
         return p;
     }
     let mapIndex =[];
-    function render (isradar){
+
+
+    function render (isCurve){
         if(solution) {
             createRadar = _.partialRight(createRadar_func,'timeSpace radar', graphicopt.radaropt, colorscale);
             solution.forEach(function (d, i) {
@@ -686,15 +713,18 @@ d3.TimeSpace = function () {
                     p[pointIndex*3+1] = yscale(d[1]);
                     p[pointIndex*3+2] = xscale(d[2])||0;
                 }
-                    // points.geometry.vertices[pointIndex] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
-
+            });
+            let center = d3.nest().key(d=>d.cluster).rollup(d=>[d3.mean(d.map(e=>e.__metrics.position[0])),d3.mean(d.map(e=>e.__metrics.position[1])),d3.mean(d.map(e=>e.__metrics.position[2]))]).object(datain);
+            console.log(center)
+            solution.forEach(function (d, i) {
+                const target = datain[i];
                 const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
                 path[target.name][posPath].value = d;
-                lines[target.name].geometry.vertices[posPath*2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
-                if (posPath)
-                    lines[target.name].geometry.vertices[posPath*2-1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2])||0);
-                lines[target.name].geometry.verticesNeedUpdate = true;
+                // updateStraightLine(target, posPath, d);
+                updateLine(target, posPath, d, center[target.cluster]);
+
             });
+
             points.geometry.attributes.position.needsUpdate = true;
             points.geometry.boundingBox = null;
             points.geometry.computeBoundingSphere();
@@ -767,10 +797,67 @@ d3.TimeSpace = function () {
         lineObj.frustumCulled = false;
         return lineObj;
     }
+    function createCurveLine(path,curves){
+        //QuadraticBezierCurve3
+        let lineObj = new THREE.Object3D();
+        for (let i=0;i <path.length-1;i++){
+            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+            var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+            var curve = new THREE.QuadraticBezierCurve3(
+                new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 0, 0, 0 )
+            );
+            curves.push(curve);
+            var points = curve.getPoints( 20 );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var curveObject = new THREE.Line( geometry, material );
+            curveObject.frustumCulled = false;
+            lineObj.add(curveObject);
+        }
+        return lineObj;
+    }
+    function updateCurveLine(target, posPath, d, center) {
+        if (curves[target.name].length) {
+            if (posPath < curves[target.name].length) {
+                var curve = curves[target.name][posPath];
+                curve.v0 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+                curve.v1 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
+                var points = curve.getPoints(20);
+                lines[target.name].children[posPath].geometry.setFromPoints(points);
+                lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
+            }
+            if (posPath) {
+                var curve = curves[target.name][posPath - 1];
+                curve.v2 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+                var points = curve.getPoints(20);
+                lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
+                lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
+            }
+        }
+    }
+    function updateStraightLine(target, posPath, d) {
+        lines[target.name].geometry.vertices[posPath * 2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+        if (posPath)
+            lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+        lines[target.name].geometry.verticesNeedUpdate = true;
+    }
+
     function createLines(g){
         let lines = {};
         Object.keys(path).forEach(k=>{
-            lines[k] = createLine(path[k]);
+            lines[k]= createLine(path[k]);
+            g.add(lines[k]);
+        });
+        return lines;
+    }
+
+    function createCurveLines(g){
+        let lines = {};
+        curves = {};
+        Object.keys(path).forEach(k=>{
+            curves[k] = [];
+            lines[k]= createCurveLine(path[k],curves[k]);
             g.add(lines[k]);
         });
         return lines;
