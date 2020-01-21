@@ -109,12 +109,14 @@ let JobMap = function() {
         const gNodeaxis = g.append('g').attr('class','gNodeaxis hide').attr('transform',`translate(200,0)`);
         gNodeaxis.append('g').attr('class','gMainaxis');
         gNodeaxis.append('g').attr('class','gSubaxis');
-        let annotation = g.append("g")
-            .attr('class','annotation');
-        annotation
+        let annotation_back = g.append("g")
+            .attr('class','annotation_back annotation');
+        annotation_back
             .append("g")
             .attr('class','majorbar');
-        annotation.append('text').attrs({x:400,y:0,class:'tablemessage hide'}).text('LOADING TABLE DATA')
+        annotation_back.append('text').attrs({x:400,y:0,class:'tablemessage hide'}).text('LOADING TABLE DATA');
+        
+        
         linkg = g.append("g")
             .attr('class','linkg');
         nodeg = g.append("g")
@@ -241,6 +243,12 @@ let JobMap = function() {
             jobMap.drawComp();
         });
 
+        let annotation_front = g.append("g")
+            .attr('class','annotation_front annotation');
+        annotation_front
+            .append("g")
+            .attr('class','majorbar');
+
         return jobMap;
     };
 
@@ -261,7 +269,7 @@ let JobMap = function() {
         nodeg.selectAll('*').remove();
         linkg.selectAll('*').remove();
         timebox.selectAll('*').remove();
-        initTimebox()
+        initTimebox();
         g.selectAll('.annotation .majorbar').selectAll('*').remove();
         g.selectAll('.annotation path.jobCover').remove();
         violinRange = [0,0];
@@ -373,23 +381,28 @@ let JobMap = function() {
         let heightbar = graphicopt.radaropt.h/2;
         nodeg.selectAll('.computeNode').each(function(d){
             let value = d.arr[lastIndex].length;
-            let parentn = g.select('.majorbar').select(`g.${d.name}`);
-            
+            let parentn = g.select('.annotation_back .majorbar').select(`g.${d.name}`);
+            let parent_front = g.select('.annotation_front .majorbar').select(`g.${d.name}`);
+
             let vi = parentn.select('g.his');
+            let vi_front = parent_front.select('g.his');
             if(vi.empty()) {
                 vi = parentn.append('g').attr('class', 'his statics').attrs({
+                    'transform': `translate(${graphicopt.radaropt.w / 2*0.75},0)`
+                });
+                vi_front = parent_front.append('g').attr('class', 'his statics').attrs({
                     'transform': `translate(${graphicopt.radaropt.w / 2*0.75},0)`
                 });
                 vi.append('rect').attrs({
                     height: heightbar,
                     'transform': `translate(0,${-heightbar / 2})`
                 });
-                vi.append('text').attrs({'class':'label',dy:'0.5em'});
+                vi_front.append('text').attrs({'class':'label',dy:'0.5em'});
             }
             vi.select('rect').attrs({
                 width: scale(value),})
                 .styles({'fill':d3.hsl(colorFunc(d.name)).brighter(1),'stroke':'none'});
-            vi.select('text').text(value)
+            vi_front.select('text').text(value)
         });
     }
 
@@ -465,16 +478,16 @@ let JobMap = function() {
             // job path
             jobpatharr_sub.sort((a,b)=>a.y-b.y);
             jobpatharr_sta.sort((a,b)=>b.y-a.y);
-            let jobpath = g.select('.annotation').select('path.jobCover');
+            let jobpath = g.select('.annotation_back').select('path.jobCover');
             if (jobpath.empty())
-                jobpath = g.select('.annotation').append('path').attr('class','jobCover');
+                jobpath = g.select('.annotation_back').append('path').attr('class','jobCover');
             jobpath.attr('transform',`translate(${g.select('.computeNode').datum().x2},0)`).datum(_.concat(jobpatharr_sub,jobpatharr_sta)).attr('d',d3.line()
                 .curve(d3.curveStepAfter)
                 .x(d=>d.x)
                 .y(d=>d.y)).style('fill','#ccc')
         }else {
             svg.selectAll('.computeSig').selectAll('.joboverg').remove();
-            g.select('.annotation').select('path.jobCover').remove();
+            g.select('.annotation_back').select('path.jobCover').remove();
         }
         // d3.select('#legend').classed('hide',!isoverlay)
     }
@@ -810,7 +823,7 @@ let JobMap = function() {
     }
 
     jobMap.drawComp = function (){
-        g.select('.majorbar').classed('hide',true);
+        g.selectAll('.majorbar').classed('hide',true);
         switch(runopt.compute.type){
             case "radar":
                 svg.selectAll('.computeNode').selectAll('.piePath').remove();
@@ -818,7 +831,7 @@ let JobMap = function() {
                 svg.select('.gNodeaxis').classed('hide',true);
                 if (clusterNode_data){
                     drawEmbedding(clusterNode_data.map(d=>{let temp = d.__metrics.normalize;temp.name = d.name; return temp;}),runopt.graphic.colorBy==='group');
-                    g.select('.majorbar').classed('hide',false);
+                    g.selectAll('.majorbar').classed('hide',false);
                     drawHistogramMHosts(clusterNode_data);
                 }else {
                     if (arr.length)
@@ -1067,18 +1080,18 @@ let JobMap = function() {
             computers.data().sort((a, b) => (b.arr[lastIndex]||[]).length - (a.arr[lastIndex]||[]).length).forEach((d, i) => d.order = i);// sort by temperal instance
             g.select('.host_title').attrs({'text-anchor':"middle",'x':300,'dy':-20}).text("Major host groups");
             // computers.data().sort((a, b) => b.arr ? b.arr[b.arr.length - 1].length : -1 - a.arr ? a.arr[a.arr.length - 1].length : -1).forEach((d, i) => d.order = i);
-            g.selectAll('.computeNode.new')
+            g.selectAll('.computeNode.new');
             computers.transition().duration(animation_time).attr('transform', d => {
                 d.x = 300;
                 d.x2 = 300;
                 d.y = scaleNode_y(d.order);
                 return `translate(${d.x2},${d.y})`
             });
-            let barhis = g.select('.majorbar').selectAll('g.m').data(computers.data(),d=>d.name);
+            let barhis = g.selectAll('.majorbar').selectAll('g.m').data(computers.data(),d=>d.name);
             barhis.exit().remove();
             barhis. enter().append('g').attr('class',d=>`${d.name} m`);
             barhis.attr('class',d=>`${d.name} m`);
-            g.select('.majorbar').selectAll('g.m').transition().duration(animation_time).attr('transform',d=>`translate(${d.x2},${d.y})`);
+            g.selectAll('.majorbar').selectAll('g.m').transition().duration(animation_time).attr('transform',d=>`translate(${d.x2},${d.y})`);
 
         }
         link.transition().duration(animation_time)
