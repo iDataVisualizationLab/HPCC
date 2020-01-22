@@ -409,7 +409,6 @@ d3.TimeSpace = function () {
                         });
                         attributes.size.needsUpdate = true;
                         attributes.alpha.needsUpdate = true;
-                        console.log(target.name);
                         showMetrics(target.name);
                     }
                 } else if (INTERSECTED.length) {
@@ -483,8 +482,6 @@ d3.TimeSpace = function () {
             return temp
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
-        console.log(selectedNest)
-        console.log(selectedCluster)
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
         let holder = d3.select('.relativemap svg.svgHolder');
         holder.attr('width',radarChartclusteropt.width)
@@ -588,7 +585,6 @@ d3.TimeSpace = function () {
         layout.title2 = name;
         var target = d3.select('#tipfollowscursorDiv')
             .node();
-        console.log(data_in)
         tooltip_lib.graphicopt({
             width: tooltip_opt.width,
             height: 100,
@@ -715,7 +711,6 @@ d3.TimeSpace = function () {
                 }
             });
             let center = d3.nest().key(d=>d.cluster).rollup(d=>[d3.mean(d.map(e=>e.__metrics.position[0])),d3.mean(d.map(e=>e.__metrics.position[1])),d3.mean(d.map(e=>e.__metrics.position[2]))]).object(datain);
-            console.log(center)
             solution.forEach(function (d, i) {
                 const target = datain[i];
                 const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
