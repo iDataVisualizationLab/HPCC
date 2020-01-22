@@ -823,6 +823,7 @@ d3.TimeSpace = function () {
                 var points = curve.getPoints(20);
                 lines[target.name].children[posPath].geometry.setFromPoints(points);
                 lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
+                lines[target.name].children[posPath].geometry.computeBoundingSphere();
             }
             if (posPath) {
                 var curve = curves[target.name][posPath - 1];
@@ -831,6 +832,7 @@ d3.TimeSpace = function () {
                 var points = curve.getPoints(20);
                 lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
                 lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
+                lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
             }
         }
     }
