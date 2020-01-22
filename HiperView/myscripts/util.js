@@ -257,10 +257,12 @@ function saveResults(){
     var jobarr = {};
     var validJobInfo = false;
     hosts.forEach(h=>{
-        jobarr[h.name] = clone_hostResults[h.name].arrJob_scheduling;
-        jobarr[h.name].reduce((o,n)=>validJobInfo = validJobInfo||n[0]!=undefined);
+        if (clone_hostResults[h.name].arrJob_scheduling) {
+            jobarr[h.name] = clone_hostResults[h.name].arrJob_scheduling;
+            jobarr[h.name].reduce((o, n) => validJobInfo = validJobInfo || n[0] != undefined);
+            delete clone_hostResults[h.name].arrJob_scheduling;
+        }
         delete clone_hostResults[h.name].arr;
-        delete clone_hostResults[h.name].arrJob_scheduling;
     });
 
     clone_hostResults['timespan'] = clone_hostResults['timespan'].map(d=>new Date(d).toISOString())

@@ -455,7 +455,7 @@ function simulateResults2(hostname,iter, s){
         if (sampleS[hostname]["arrPower_usage"]== undefined && db!="influxdb") {
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"] = [simisval];
-        }else if (sampleS[hostname]["arrPower_usage"][iter]== undefined  && db!="influxdb"){
+        }else if ((sampleS[hostname]["arrPower_usage"][iter]=== undefined || sampleS[hostname]["arrPower_usage"][iter][0]=== undefined || sampleS[hostname]["arrPower_usage"][iter][0]=== null)  && db!="influxdb"){
             var simisval = handlemissingdata(hostname,iter);
             sampleS[hostname]["arrPower_usage"][iter] = simisval;
         }
