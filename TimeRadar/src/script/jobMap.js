@@ -1442,9 +1442,9 @@ let JobMap = function() {
             .call(path=>freezinghandle(path,[function(d){
                 d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
                 const samesource = link.filter(f=> d===f.source).classed('hide',jobEmpty).classed('highlight',true).data();
-                const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',jobEmpty).classed('highlight',true).data();
-                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',jobEmpty).classed('highlight',true).selectAll('.label').classed('hide',true);
-                g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
+                const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',jobEmpty).classed('highlight',!jobEmpty).data();
+                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',jobEmpty).classed('highlight',!jobEmpty).selectAll('.label').classed('hide',!jobEmpty);
+                g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',!jobEmpty);
 
                 g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
                 linkg.selectAll('.links:not(.highlight)').classed('hide',true);
