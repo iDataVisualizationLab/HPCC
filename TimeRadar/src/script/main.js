@@ -2011,10 +2011,29 @@ $( document ).ready(function() {
         function loadata1(data,job){
             makedataworker();
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
+            _.without(Object.keys(data),'timespan').forEach(h=>{
+                delete data[h].arrCPU_load;
+                serviceLists.forEach((s,si)=>{
+                    if (data[h][serviceListattr[si]])
+                        data[h][serviceListattr[si]] = data.timespan.map((d,i)=>
+                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length):d3.range(0,s.sub.length).map(e=>null));
+                    else
+                        data[h][serviceListattr[si]] = data.timespan.map(d=>d3.range(0,s.sub.length).map(e=>null));
+                })
+            })
             updateDatainformation(data['timespan']);
-            if(job)
-                sampleJobdata = job
             sampleS = data;
+            if(job)
+                sampleJobdata = job;
+            else
+                sampleJobdata = [{
+                    jobID: "1",
+                    name: "1",
+                    nodes: hosts.map(h=>h.name),
+                    startTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                    submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                    user: "dummyJob"
+                }]
             if (choice.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
@@ -2189,7 +2208,14 @@ $( document ).ready(function() {
             updateDatainformation(data['timespan']);
             // if(job)
             //     hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
-            sampleJobdata = job || [];
+            sampleJobdata = job || [{
+                jobID: "1",
+                name: "1",
+                nodes: hosts.map(h=>h.name),
+                startTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                user: "dummyJob"
+            }];
             if(cluster_info){
                 handle_dataRaw();
             }
