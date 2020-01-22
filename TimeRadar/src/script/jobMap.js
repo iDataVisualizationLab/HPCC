@@ -29,11 +29,13 @@ let JobMap = function() {
     let freezing=false,textWarp=200;
     //slider control
     let suddenGroupslider,stepSizeslider;
+    // dummyJob
+    let jobEmpty = false;
     //event
     let callback ={
         mouseover:function(){},
         mouseleave:function(){},
-    }
+    };
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             if(runopt.mouse.disable){
@@ -1165,6 +1167,14 @@ let JobMap = function() {
         nodeg.select('.table.footer').classed('fade', false);
     }
 
+    function toggleComponent(jobEmpty) {
+        linkg.classed('hide', jobEmpty);
+        g.selectAll('.jobNode').classed('hide', jobEmpty);
+        g.selectAll('.table').classed('hide', jobEmpty);
+        g.selectAll('.userNode').classed('hide', jobEmpty);
+        g.selectAll('.pannel .job_title').classed('hide', jobEmpty);
+    }
+
     jobMap.draw = function (){
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
@@ -1431,9 +1441,9 @@ let JobMap = function() {
         g.selectAll('.computeNode')
             .call(path=>freezinghandle(path,[function(d){
                 d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
-                const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
-                const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',false).classed('highlight',true).data();
-                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',false).classed('highlight',true).selectAll('.label').classed('hide',true);
+                const samesource = link.filter(f=> d===f.source).classed('hide',jobEmpty).classed('highlight',true).data();
+                const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',jobEmpty).classed('highlight',true).data();
+                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',jobEmpty).classed('highlight',true).selectAll('.label').classed('hide',true);
                 g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',true);
 
                 g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
@@ -1446,7 +1456,7 @@ let JobMap = function() {
                 if (runopt.compute.type!=='timeline') {
                     d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
                     g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                    g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide',false);
+                    g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide',jobEmpty);
                     g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
@@ -1475,7 +1485,7 @@ let JobMap = function() {
             renderManual(computers, jobNode, link);
         }
         link.call(updatelink,true);
-
+        toggleComponent(jobEmpty);
         jobMap.drawComp();
         function initForce(){
             if (!simulation) {
@@ -1505,6 +1515,7 @@ let JobMap = function() {
     };
     function releasehighlight(){
         g.selectAll('.node').style('pointer-events','auto').classed('fade',false).classed('hide',false).classed('highlight',false);
+        g.selectAll('.node .jobNode').classed('hide',jobEmpty);
         g.selectAll( '.links').classed('hide',false).classed('highlight',false);
         g.select('.table.footer').classed('fade',false);
     }
@@ -1844,6 +1855,7 @@ let JobMap = function() {
             });
 
             let newdata = [];
+            jobEmpty = user_n[0].key ==="dummyJob";
 
             user = user_n.map((d, i) => {
                 d.name = d.key;
@@ -1927,6 +1939,7 @@ let JobMap = function() {
                 Jobscale.domain(d3.extent(data, d => d.values.length));
             }
         }else{
+            toggleComponent(true);
             triggerCal_Cluster=true;
             animation_time = 500;
         }
