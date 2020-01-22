@@ -798,7 +798,9 @@ d3.TimeSpace = function () {
         for (let i=0;i <path.length-1;i++){
             let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
             var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
-            var curve = new THREE.QuadraticBezierCurve3(
+            // var curve = new THREE.QuadraticBezierCurve3(
+            var curve = new THREE.CubicBezierCurve3(
+                new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 )
@@ -824,7 +826,8 @@ d3.TimeSpace = function () {
             }
             if (posPath) {
                 var curve = curves[target.name][posPath - 1];
-                curve.v2 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+                curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
+                curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
                 var points = curve.getPoints(20);
                 lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
                 lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
