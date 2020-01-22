@@ -257,7 +257,7 @@ function saveResults(){
     var jobarr = {};
     var validJobInfo = false;
     hosts.forEach(h=>{
-        if (clone_hostResults[h.name].arrJob_scheduling) {
+        if (clone_hostResults[h.name].arrJob_scheduling&&clone_hostResults[h.name].arrJob_scheduling.length) {
             jobarr[h.name] = clone_hostResults[h.name].arrJob_scheduling;
             jobarr[h.name].reduce((o, n) => validJobInfo = validJobInfo || n[0] != undefined);
             delete clone_hostResults[h.name].arrJob_scheduling;
@@ -973,7 +973,7 @@ function millisecondsToStr (milliseconds) {
         return str;
 }
 
-function updateDatainformation(timearray){
+function updateDatainformation(timearray,filename){
     dataInformation.hostsnum = hosts.length;
     dataInformation.timerange = millisecondsToStr(_.last(timearray)-timearray[0]);
     dataInformation.interval = millisecondsToStr(timearray[1] - timearray[0]);

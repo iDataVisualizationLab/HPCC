@@ -1482,7 +1482,6 @@ function readFilecsv(file) {
 
                 function loadata1(data) {
                     db = "csv";
-
                     newdatatoFormat(data);
 
                     inithostResults();
@@ -1952,7 +1951,7 @@ $( document ).ready(function() {
                 });
             }
             oldchoose =$('#datacom').val();
-            data_info.filename = choice;
+            dataInformation.filename = choice;
             if(!choice.match('csv'))
                 setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
