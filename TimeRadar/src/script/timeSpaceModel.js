@@ -379,6 +379,7 @@ d3.TimeSpace = function () {
 
     function animate() {
         if (!stop) {
+            visiableLine(graphicopt.linkConnect);
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
@@ -723,8 +724,6 @@ d3.TimeSpace = function () {
             points.geometry.attributes.position.needsUpdate = true;
             points.geometry.boundingBox = null;
             points.geometry.computeBoundingSphere();
-
-            visiableLine(graphicopt.linkConnect)
 
 
             // if (isradar && datain.length < 5000) {
