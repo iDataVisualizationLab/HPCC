@@ -808,6 +808,7 @@ d3.TimeSpace = function () {
             var curve = new THREE.QuadraticBezierCurve3(
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
+                new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 )
             );
             curves.push(curve);
