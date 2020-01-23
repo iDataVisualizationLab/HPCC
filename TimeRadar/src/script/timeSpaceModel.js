@@ -79,7 +79,6 @@ d3.TimeSpace = function () {
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,curveLines,straightLines,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
-
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -402,7 +401,7 @@ d3.TimeSpace = function () {
                                 lines[d.name].visible = true;
                             } else {
                                 attributes.alpha.array[i] = 0.1;
-                                lines[datain[i].name].visible = false;
+                                lines[d.name].visible = false;
                             }
                         });
                         let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
@@ -416,10 +415,8 @@ d3.TimeSpace = function () {
                     }
                 } else if (INTERSECTED.length) {
                     datain.forEach((d, i) => {
-                        if (d.name !== target.name) {
                             attributes.alpha.array[i] = 1;
                             lines[datain[i].name].visible = true;
-                        }
                     });
                     INTERSECTED.forEach((d, i) => {
                         attributes.size.array[d] = graphicopt.component.dot.size;
@@ -455,9 +452,11 @@ d3.TimeSpace = function () {
                 drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
                 lassoTool.needRender = false;
             }
+            // visiableLine(graphicopt.linkConnect);
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
+
         }
     }
     function drawLink(){
