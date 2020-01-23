@@ -471,6 +471,12 @@ table {
     word-break: break-all;
 }
 
+table select {
+    padding: 0;
+    height: auto;
+    display: inline-block;
+    margin-left: 0px;
+}
 .row.s12 {
     width:100%;
 }

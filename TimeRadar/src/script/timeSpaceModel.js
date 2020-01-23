@@ -41,7 +41,7 @@ d3.TimeSpace = function () {
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
             curveSegment: 20,
-            linkConnect: true,
+            linkConnect: 'straight',
             isSelectionMode: false,
             isCurve: false,
             component:{
@@ -51,8 +51,11 @@ d3.TimeSpace = function () {
         },
         controlPanelGeneral = {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
-            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
-            isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
+            // linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
+            // isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
+            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight link','Curve link'],values:[false,'straight','curve'],
+                width: '100px',
+                callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
                 text: "Windows size",
@@ -1007,10 +1010,23 @@ d3.TimeSpace = function () {
                                 start();
                         })
                             // .node().checked = graphicopt[d.content.variable];
+                    }else if (d.content.type === "selection") {
+                        let div = d3.select(this).style('width', d.content.width)
+                            .append('select')
+                            .on('change',function(){
+                                graphicopt[d.content.variable]  =  d.content.values[this.value];
+                                if (d.content.callback)
+                                    d.content.callback();
+                            });
+                        div
+                            .selectAll('option').data(d.content.labels)
+                            .enter().append('option')
+                            .attr('value',(e,i)=>i).text((e,i)=>e);
+                        $(div.node()).val( d.content.values.indexOf(graphicopt[d.content.variable]));
                     }
                 }
             });
-    }
+    };
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
         try {
