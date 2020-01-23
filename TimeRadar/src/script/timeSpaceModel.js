@@ -814,7 +814,7 @@ d3.TimeSpace = function () {
             var geometry = new THREE.BufferGeometry().setFromPoints( points );
             // add gradient effect
             colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
-            var colors = new Float32Array( graphicopt.curveSegment * 3 );
+            var colors = new Float32Array( (graphicopt.curveSegment+1) * 3 );
             for (let i=0;i<=graphicopt.curveSegment;i++){
                 let currentColor = d3.color(colorLineScale(i));
                 colors[i*3] = currentColor.r/255;
@@ -834,7 +834,7 @@ d3.TimeSpace = function () {
                 var curve = curves[target.name][posPath];
                 curve.v0 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
                 curve.v1 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
-                var points = curve.getPoints(20);
+                var points = curve.getPoints(graphicopt.curveSegment);
                 lines[target.name].children[posPath].geometry.setFromPoints(points);
                 lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
                 lines[target.name].children[posPath].geometry.computeBoundingSphere();
@@ -843,7 +843,7 @@ d3.TimeSpace = function () {
                 var curve = curves[target.name][posPath - 1];
                 curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
                 curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
-                var points = curve.getPoints(20);
+                var points = curve.getPoints(graphicopt.curveSegment);
                 lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
                 lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
                 lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
