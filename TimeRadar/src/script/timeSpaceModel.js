@@ -51,7 +51,7 @@ d3.TimeSpace = function () {
         },
         controlPanelGeneral = {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
-            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>render(!isBusy)},
+            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
             isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
@@ -380,7 +380,7 @@ d3.TimeSpace = function () {
 
     function animate() {
         if (!stop) {
-            visiableLine(graphicopt.linkConnect);
+            // visiableLine(graphicopt.linkConnect);
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
@@ -416,7 +416,7 @@ d3.TimeSpace = function () {
                 } else if (INTERSECTED.length) {
                     datain.forEach((d, i) => {
                             attributes.alpha.array[i] = 1;
-                            lines[datain[i].name].visible = true;
+                            lines[d.name].visible = true;
                     });
                     INTERSECTED.forEach((d, i) => {
                         attributes.size.array[d] = graphicopt.component.dot.size;
