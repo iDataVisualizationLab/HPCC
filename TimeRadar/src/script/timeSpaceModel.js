@@ -115,14 +115,6 @@ d3.TimeSpace = function () {
         function dragended(d) {
             mouseoverTrigger = true;
             lassoTool.end();
-            // var allSelected = lassoTool.select();
-            //
-            // for ( var i = 0; i < allSelected.length; i ++ ) {
-            //
-            //     allSelected[ i ].material.emissive.set( 0xffffff );
-            //
-            // }
-
         }
 
         return d3.drag().touchable(navigator.maxTouchPoints)
@@ -469,9 +461,7 @@ d3.TimeSpace = function () {
 
         }
     }
-    function drawLink(){
 
-    }
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
         let barH = graphicopt.radarTableopt.h/2;
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
@@ -517,9 +507,9 @@ d3.TimeSpace = function () {
             'fill-opacity'  : 0.5
         });
         let rateText = contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5});
-        rateText.append('tspan').attr('class','contributeNum').attr('dy',1);
-        rateText.append('tspan').attr('class','totalNum');
-        bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
+        rateText.append('tspan').attr('class','contributeNum')
+        rateText.append('tspan').attr('class','totalNum').style('font-size','80%');
+        bg_new.append('text').attr('class','clustername').style('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         bg = holder.selectAll('.timeSpace');
         bg.transition().duration(200).attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
         bg
