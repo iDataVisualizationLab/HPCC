@@ -40,6 +40,7 @@ d3.TimeSpace = function () {
                 showText:false,
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
+            curveSegment: 20,
             linkConnect: true,
             isSelectionMode: false,
             isCurve: false,
@@ -83,6 +84,7 @@ d3.TimeSpace = function () {
     near = 0.1,
     far = 7000;
     //----------------------color----------------------
+    let colorLineScale = d3.scaleLinear().interpolate(d3.interpolateCubehelix);
     let createRadar,createRadarTable;
     //----------------------drag-----------------------
     var lassoTool,mouseoverTrigger = true;
@@ -769,14 +771,13 @@ d3.TimeSpace = function () {
     }
     function createLine(path){
         let pointsGeometry = new THREE.Geometry();
-
         for (let i=0;i <path.length-1;i++){
             let vertex = new THREE.Vector3(0, 0, 0);
-            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+            colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
             pointsGeometry.vertices.push(vertex);
-            pointsGeometry.colors.push(color);
+            pointsGeometry.colors.push(new THREE.Color(d3.color(colorLineScale(0))+''));
             pointsGeometry.vertices.push(vertex);
-            pointsGeometry.colors.push(color);
+            pointsGeometry.colors.push(new THREE.Color(d3.color(colorLineScale(1))+''));
         }
         pointsGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
         pointsGeometry.colors.push( new THREE.Color(d3.color(colorarr[path[path.length-1].cluster].value)+''));
@@ -796,16 +797,34 @@ d3.TimeSpace = function () {
         //QuadraticBezierCurve3
         let lineObj = new THREE.Object3D();
         for (let i=0;i <path.length-1;i++){
-            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
-            var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+            // let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+            // var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+
+            var material = new THREE.LineBasicMaterial( {
+                color: 0xffffff,
+                vertexColors: THREE.VertexColors,
+                transparent: true,
+                opacity: 0.5} );
             var curve = new THREE.QuadraticBezierCurve3(
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 )
             );
             curves.push(curve);
-            var points = curve.getPoints( 20 );
+            var points = curve.getPoints( graphicopt.curveSegment );
             var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            // add gradient effect
+            colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
+            var colors = new Float32Array( graphicopt.curveSegment * 3 );
+            for (let i=0;i<=graphicopt.curveSegment;i++){
+                let currentColor = d3.color(colorLineScale(i));
+                colors[i*3] = currentColor.r/255;
+                colors[i*3+1] = currentColor.g/255;
+                colors[i*3+2] = currentColor.b/255;
+            }
+            console.log(points)
+            console.log(colors)
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
             var curveObject = new THREE.Line( geometry, material );
             curveObject.frustumCulled = false;
             lineObj.add(curveObject);
@@ -839,6 +858,7 @@ d3.TimeSpace = function () {
     }
 
     function createLines(g){
+        colorLineScale.domain([0,1]);
         let lines = {};
         Object.keys(path).forEach(k=>{
             lines[k]= createLine(path[k]);
@@ -848,6 +868,7 @@ d3.TimeSpace = function () {
     }
 
     function createCurveLines(g){
+        colorLineScale.domain([0,graphicopt.curveSegment]);
         let lines = {};
         curves = {};
         Object.keys(path).forEach(k=>{
