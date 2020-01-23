@@ -77,7 +77,7 @@ d3.TimeSpace = function () {
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
-        points,lines,curveLines,straightLines,curves,updateLine,
+        points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
     near = 0.1,
@@ -260,9 +260,14 @@ d3.TimeSpace = function () {
         scatterPlot.add( axesHelper );
         scatterPlot.rotation.y = 0;
         points = createpoints(scatterPlot);
-        straightLines = createLines(scatterPlot);
-        curveLines = createCurveLines(scatterPlot);
+        straightLinesGroup = new THREE.Object3D();
+        curveLinesGroup = new THREE.Object3D();
+        scatterPlot.add( straightLinesGroup );
+        scatterPlot.add( curveLinesGroup );
+        straightLines = createLines(straightLinesGroup);
+        curveLines = createCurveLines(curveLinesGroup);
         lines = straightLines;
+        linesGroup = straightLinesGroup;
         toggleLine();
         scene.add(scatterPlot);
 
@@ -311,13 +316,15 @@ d3.TimeSpace = function () {
         {
             visiableLine(false);
             lines = straightLines;
+            linesGroup = straightLinesGroup;
             updateLine = updateStraightLine;
-            visiableLine(true);
+            visiableLine(graphicopt.linkConnect);
         }else{
             visiableLine(false);
             lines = curveLines;
+            linesGroup = curveLinesGroup;
             updateLine = updateCurveLine;
-            visiableLine(true);
+            visiableLine(graphicopt.linkConnect);
         }
     }
     function handle_cluster(clusterin,data){
@@ -879,9 +886,7 @@ d3.TimeSpace = function () {
         return lines;
     }
     function visiableLine(isvisiable){
-        Object.keys(lines).forEach(l=>{
-            lines[l].visible = isvisiable;
-        })
+        linesGroup.visible = isvisiable;
     }
     function drawline(ctx,path,cluster) {
         positionLink_canvas(path,new THREE.ShapePath());
