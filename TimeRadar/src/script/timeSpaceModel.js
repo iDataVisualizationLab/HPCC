@@ -796,11 +796,15 @@ d3.TimeSpace = function () {
         //QuadraticBezierCurve3
         let lineObj = new THREE.Object3D();
         for (let i=0;i <path.length-1;i++){
-            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
-            var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
-            // var curve = new THREE.QuadraticBezierCurve3(
+            // let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+            // var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+
+            var material = new THREE.LineBasicMaterial( {
+                color: 0xffffff,
+                vertexColors: THREE.VertexColors,
+                transparent: true,
+                opacity: 0.5} );
             var curve = new THREE.CubicBezierCurve3(
-                new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
