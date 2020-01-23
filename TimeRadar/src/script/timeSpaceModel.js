@@ -133,7 +133,7 @@ d3.TimeSpace = function () {
     function handle_selection_switch(trigger){
         controls.enabled = !trigger;
         if (trigger){
-            lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
+            lassoTool = lassoTool||new THREE.LassoTool( camera, points, graphicopt ,svg);
             d3.select('#modelWorkerScreen').call(drag());
             d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
