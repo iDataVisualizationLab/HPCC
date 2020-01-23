@@ -51,8 +51,10 @@ d3.TimeSpace = function () {
         },
         controlPanelGeneral = {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
-            linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
-            isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
+            // linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
+            // isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
+            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['2D','3D'], width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
+
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
                 text: "Windows size",
