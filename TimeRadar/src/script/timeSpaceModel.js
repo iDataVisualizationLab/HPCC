@@ -53,9 +53,9 @@ d3.TimeSpace = function () {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             // linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
             // isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
-            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight link','Curve link'],values:['','straight','curve'],
+            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight link','Curve link'],values:[false,'straight','curve'],
                 width: '100px',
-                callback:()=>{console.log(graphicopt.linkConnect); visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve'}},
+                callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
             windowsSize: {
                 text: "Windows size",
@@ -1014,18 +1014,19 @@ d3.TimeSpace = function () {
                         let div = d3.select(this).style('width', d.content.width)
                             .append('select')
                             .on('change',function(){
-                                graphicopt[d.content.variable]  =  this.value;
+                                graphicopt[d.content.variable]  =  d.content.values[this.value];
                                 if (d.content.callback)
                                     d.content.callback();
-                            })
-                            .selectAll('option').data(d.content.values)
+                            });
+                        div
+                            .selectAll('option').data(d.content.labels)
                             .enter().append('option')
-                            .attr('value',e=>e).text((e,i)=>d.content.labels[i]);
-                        $(div.select('select').node()).val(graphicopt[d.content.variable]);
+                            .attr('value',(e,i)=>i).text((e,i)=>e);
+                        $(div.node()).val( d.content.values.indexOf(graphicopt[d.content.variable]));
                     }
                 }
             });
-    }
+    };
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
         try {
