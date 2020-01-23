@@ -75,11 +75,11 @@ d3.TimeSpace = function () {
     let modelWorker,colorscale;
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
-    // grahic 
+    // grahic
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,curveLines,straightLines,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
-    
+
     let fov = 100,
     near = 0.1,
     far = 7000;
@@ -381,6 +381,7 @@ d3.TimeSpace = function () {
 
     function animate() {
         if (!stop) {
+            visiableLine(graphicopt.linkConnect);
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
@@ -726,8 +727,6 @@ d3.TimeSpace = function () {
             points.geometry.boundingBox = null;
             points.geometry.computeBoundingSphere();
 
-            visiableLine(graphicopt.linkConnect)
-
 
             // if (isradar && datain.length < 5000) {
             //     renderSvgRadar();
@@ -797,15 +796,11 @@ d3.TimeSpace = function () {
         //QuadraticBezierCurve3
         let lineObj = new THREE.Object3D();
         for (let i=0;i <path.length-1;i++){
-            // let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
-            // var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
-
-            var material = new THREE.LineBasicMaterial( {
-                color: 0xffffff,
-                vertexColors: THREE.VertexColors,
-                transparent: true,
-                opacity: 0.5} );
-            var curve = new THREE.QuadraticBezierCurve3(
+            let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+            var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+            // var curve = new THREE.QuadraticBezierCurve3(
+            var curve = new THREE.CubicBezierCurve3(
+                new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
@@ -841,13 +836,16 @@ d3.TimeSpace = function () {
                 var points = curve.getPoints(20);
                 lines[target.name].children[posPath].geometry.setFromPoints(points);
                 lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
+                lines[target.name].children[posPath].geometry.computeBoundingSphere();
             }
             if (posPath) {
                 var curve = curves[target.name][posPath - 1];
-                curve.v2 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+                curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
+                curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
                 var points = curve.getPoints(20);
                 lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
                 lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
+                lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
             }
         }
     }
