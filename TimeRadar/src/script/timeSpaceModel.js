@@ -403,7 +403,6 @@ d3.TimeSpace = function () {
                             } else {
                                 attributes.alpha.array[i] = 0.1;
                                 lines[datain[i].name].visible = false;
-                                console.log(lines[datain[i].name].visible)
                             }
                         });
                         let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
