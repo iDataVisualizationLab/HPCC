@@ -403,6 +403,7 @@ d3.TimeSpace = function () {
                             } else {
                                 attributes.alpha.array[i] = 0.1;
                                 lines[datain[i].name].visible = false;
+                                console.log(lines[datain[i].name].visible)
                             }
                         });
                         let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
@@ -783,7 +784,7 @@ d3.TimeSpace = function () {
 
 
         var material = new THREE.LineBasicMaterial( {
-            opacity:1,
+            opacity:0.5,
             color: 0xffffff,
             vertexColors: THREE.VertexColors,
             transparent: true
@@ -822,8 +823,6 @@ d3.TimeSpace = function () {
                 colors[i*3+1] = currentColor.g/255;
                 colors[i*3+2] = currentColor.b/255;
             }
-            console.log(points)
-            console.log(colors)
             geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
             var curveObject = new THREE.Line( geometry, material );
             curveObject.frustumCulled = false;
