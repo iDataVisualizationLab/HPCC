@@ -1600,7 +1600,7 @@ function handle_dataRaw() {
     //     mouseleave: tsneTS.unhightlight,
     // });
 }
-function onchangeCluster(){
+function onchangeCluster() {
     cluster_info.forEach(d => (d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
     hosts.forEach(h => {
@@ -1642,9 +1642,11 @@ function onchangeCluster(){
     handle_clusterinfo();
 
     //tsne
-    if (!init)
+    if (!init) {
+        onchangeVizType();
         if (!onchangeVizdata())
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined, undefined, undefined, true).draw().drawComp();
+    }
 }
 let handle_data_TimeSpace;
 function onchangeVizType(){
@@ -1831,6 +1833,7 @@ $( document ).ready(function() {
             onchangeVizType();
             d3.select('#modelWorkerContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
+            jobMap.show();
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
             let oldChoice = jobMap_runopt.compute.type;
             let isSwitchtimeline = false;
