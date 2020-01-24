@@ -1600,7 +1600,7 @@ function handle_dataRaw() {
     //     mouseleave: tsneTS.unhightlight,
     // });
 }
-function onchangeCluster(){
+function onchangeCluster() {
     cluster_info.forEach(d => (d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
     hosts.forEach(h => {
@@ -1642,9 +1642,11 @@ function onchangeCluster(){
     handle_clusterinfo();
 
     //tsne
-    if (!init)
+    if (!init) {
+        onchangeVizType();
         if (!onchangeVizdata())
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined, undefined, undefined, true).draw().drawComp();
+    }
 }
 let handle_data_TimeSpace;
 function onchangeVizType(){

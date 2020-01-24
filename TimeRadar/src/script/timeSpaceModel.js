@@ -75,7 +75,7 @@ d3.TimeSpace = function () {
         runopt = {},
         isBusy = false,
         stop = false;
-    let modelWorker,colorscale;
+    let modelWorker,colorscale,reset;
     let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic
@@ -125,7 +125,9 @@ d3.TimeSpace = function () {
     function handle_selection_switch(trigger){
         controls.enabled = !trigger;
         if (trigger){
-            lassoTool = lassoTool||new THREE.LassoTool( camera, points, graphicopt ,svg);
+            if (reset)
+                lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
+            reset= false;
             d3.select('#modelWorkerScreen').call(drag());
             d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
@@ -223,6 +225,7 @@ d3.TimeSpace = function () {
     }
 
     master.init = function(arr,clusterin) {
+        reset = true;
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
         mapIndex = [];
@@ -430,29 +433,34 @@ d3.TimeSpace = function () {
                 }
             }else if (lassoTool.needRender) {
                 let newClustercolor = d3.color('#000000');
-                for ( var i = 0; i < lassoTool.collection.length; i ++ ) {
-                    let currentIndex = lassoTool.collection[ i ];
-                    let currentData = datain[mapIndex[currentIndex]];
-                    let currentColor = d3.color(colorarr[currentData.cluster].value);
-                    points.geometry.attributes.customColor.array[currentIndex*3]= currentColor.r/255;
-                    points.geometry.attributes.customColor.array[currentIndex*3+1]= currentColor.g/255;
-                    points.geometry.attributes.customColor.array[currentIndex*3+2]= currentColor.b/255;
+                try {
+                    for (var i = 0; i < lassoTool.collection.length; i++) {
+                        let currentIndex = lassoTool.collection[i];
+                        let currentData = datain[mapIndex[currentIndex]];
+                        let currentColor = d3.color(colorarr[currentData.cluster].value);
+                        points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
+                        points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
+                        points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
 
+                    }
+
+
+                    var allSelected = lassoTool.select();
+                    var allSelected_Data = [];
+                    for (var i = 0; i < allSelected.length; i++) {
+                        allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
+                        let currentIndex = lassoTool.collection[i];
+                        points.geometry.attributes.customColor.array[currentIndex * 3] = newClustercolor.r / 255;
+                        points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = newClustercolor.g / 255;
+                        points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = newClustercolor.b / 255;
+                        points.geometry.attributes.customColor.needsUpdate = true;
+                    }
+                    // draw summary radar chart
+                    drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
+                }catch(e){
+                    // draw summary radar chart
+                    drawSummaryRadar([],handle_data_summary([]),newClustercolor);
                 }
-
-
-                var allSelected = lassoTool.select();
-                var allSelected_Data = [];
-                for ( var i = 0; i < allSelected.length; i ++ ) {
-                    allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
-                    let currentIndex = lassoTool.collection[ i ];
-                    points.geometry.attributes.customColor.array[currentIndex*3]= newClustercolor.r/255;
-                    points.geometry.attributes.customColor.array[currentIndex*3+1]= newClustercolor.g/255;
-                    points.geometry.attributes.customColor.array[currentIndex*3+2]= newClustercolor.b/255;
-                    points.geometry.attributes.customColor.needsUpdate = true;
-                }
-                // draw summary radar chart
-                drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
                 lassoTool.needRender = false;
             }
             // visiableLine(graphicopt.linkConnect);
