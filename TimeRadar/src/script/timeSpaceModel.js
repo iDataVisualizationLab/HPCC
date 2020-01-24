@@ -53,7 +53,7 @@ d3.TimeSpace = function () {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             // linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
             // isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
-            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight link','Curve link'],values:[false,'straight','curve'],
+            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
             dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
@@ -115,14 +115,6 @@ d3.TimeSpace = function () {
         function dragended(d) {
             mouseoverTrigger = true;
             lassoTool.end();
-            // var allSelected = lassoTool.select();
-            //
-            // for ( var i = 0; i < allSelected.length; i ++ ) {
-            //
-            //     allSelected[ i ].material.emissive.set( 0xffffff );
-            //
-            // }
-
         }
 
         return d3.drag().touchable(navigator.maxTouchPoints)
@@ -133,7 +125,7 @@ d3.TimeSpace = function () {
     function handle_selection_switch(trigger){
         controls.enabled = !trigger;
         if (trigger){
-            lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
+            lassoTool = lassoTool||new THREE.LassoTool( camera, points, graphicopt ,svg);
             d3.select('#modelWorkerScreen').call(drag());
             d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
@@ -469,9 +461,7 @@ d3.TimeSpace = function () {
 
         }
     }
-    function drawLink(){
 
-    }
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
         let barH = graphicopt.radarTableopt.h/2;
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
@@ -517,9 +507,9 @@ d3.TimeSpace = function () {
             'fill-opacity'  : 0.5
         });
         let rateText = contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5});
-        rateText.append('tspan').attr('class','contributeNum').attr('dy',1);
-        rateText.append('tspan').attr('class','totalNum');
-        bg_new.append('text').attr('class','clustername').attr('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
+        rateText.append('tspan').attr('class','contributeNum')
+        rateText.append('tspan').attr('class','totalNum').style('font-size','80%');
+        bg_new.append('text').attr('class','clustername').style('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
         bg = holder.selectAll('.timeSpace');
         bg.transition().duration(200).attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
         bg
@@ -824,7 +814,7 @@ d3.TimeSpace = function () {
             var geometry = new THREE.BufferGeometry().setFromPoints( points );
             // add gradient effect
             colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
-            var colors = new Float32Array( graphicopt.curveSegment * 3 );
+            var colors = new Float32Array( (graphicopt.curveSegment+1) * 3 );
             for (let i=0;i<=graphicopt.curveSegment;i++){
                 let currentColor = d3.color(colorLineScale(i));
                 colors[i*3] = currentColor.r/255;
@@ -844,7 +834,7 @@ d3.TimeSpace = function () {
                 var curve = curves[target.name][posPath];
                 curve.v0 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
                 curve.v1 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
-                var points = curve.getPoints(20);
+                var points = curve.getPoints(graphicopt.curveSegment);
                 lines[target.name].children[posPath].geometry.setFromPoints(points);
                 lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
                 lines[target.name].children[posPath].geometry.computeBoundingSphere();
@@ -853,7 +843,7 @@ d3.TimeSpace = function () {
                 var curve = curves[target.name][posPath - 1];
                 curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
                 curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
-                var points = curve.getPoints(20);
+                var points = curve.getPoints(graphicopt.curveSegment);
                 lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
                 lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
                 lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
