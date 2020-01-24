@@ -280,7 +280,7 @@ d3.TimeSpace = function () {
                 zoomHandler(d3_transform);
             });
         raycaster = new THREE.Raycaster();
-        raycaster.params.Points.threshold = 1;
+        raycaster.params.Points.threshold = graphicopt.component.dot.size;
         mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -416,6 +416,7 @@ d3.TimeSpace = function () {
                         showMetrics(target.name);
                     }
                 } else if (INTERSECTED.length) {
+                    tooltip_lib.hide(); // hide tooltip
                     datain.forEach((d, i) => {
                             attributes.alpha.array[i] = 1;
                             lines[d.name].visible = true;

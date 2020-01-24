@@ -61,7 +61,7 @@ var scaleopt;
 //     "Memory usage", "Fan1 speed", "Fan2 speed", "Fan3 speed", "Fan4 speed", "Power consumption"];
 
 var tool_tip = d3.tip()
-    .attr("class", "d3-tip")
+    .attr("class", "d3-tip radarsTip")
     .attr("id", "d3-tip")
     .offset(()=> {
         if (niceOffset){
@@ -71,11 +71,11 @@ var tool_tip = d3.tip()
     .html(function(d1,hideLine) {
         return cotenttip(hideLine); });
 svg.call(tool_tip);
-d3.select('#d3-tip')
-    .on('mouseenter',()=> {d3.select('#d3-tip').transition().style('opacity', 1)
+d3.select('.radarsTip')
+    .on('mouseenter',()=> {d3.select('.radarsTip').transition().style('opacity', 1)
         .style('pointer-events', 'all');})
-    .on('mouseleave',()=> {d3.select('#d3-tip').transition().delay(4000).duration(4000).style('opacity', 0)
-        .on('end',()=> d3.select('#d3-tip').style('pointer-events', 'none'))});
+    .on('mouseleave',()=> {d3.select('.radarsTip').transition().delay(4000).duration(4000).style('opacity', 0)
+        .on('end',()=> d3.select('.radarsTip').style('pointer-events', 'none'))});
 var fragment = document.createDocumentFragment();
 fragment.appendChild(document.getElementById('d3-tip'));
 document.getElementById('instructions').appendChild(fragment);
