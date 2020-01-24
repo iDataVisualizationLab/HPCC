@@ -281,6 +281,7 @@ let Tooltip_lib = function() {
         // 3. draw
         // ****** Append the path ******
         var line_create = d3.line()
+            .defined(d => !isNaN(d.ys))
             .x((d) => {
                 return d.xs;
             }) // set the x values for the line generator
