@@ -20,8 +20,7 @@ THREE.LassoTool = ( function () {
         this.width = graphicopt.width;
         this.height = graphicopt.height;
         this.svg = svg;
-        this.svg.selectAll('*').remove()
-        g = this.svg.append('g').attr('class', 'lasso-group');
+        this.svg.selectAll('*').remove();
         this.closeDistance = closeDistance||Infinity;
         this.lassoPolygon = [];
         this.collection = [];
@@ -33,6 +32,9 @@ THREE.LassoTool = ( function () {
     }
 
     LassoTool.prototype.start = function (  ) {
+        g = this.svg.select('.group');
+        if (g.empty())
+            g = this.svg.append('g').attr('class', 'lasso-group');
         if (lassoPath) {
             lassoPath.remove();
         }
@@ -59,7 +61,6 @@ THREE.LassoTool = ( function () {
         // remove the close path
         closePath.remove();
         closePath = null;
-        console.log(this.closeDistance)
         // succesfully closed
         if (distance(this.lassoPolygon[0], this.lassoPolygon[this.lassoPolygon.length - 1]) < this.closeDistance) {
             lassoPath.attr('d', polygonToPath(this.lassoPolygon) + 'Z');
