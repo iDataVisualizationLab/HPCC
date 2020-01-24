@@ -775,8 +775,13 @@ let JobMap = function() {
                 }
             }
         }).on('mouseleave',function(d){
-            if(!freezing)
-                tiptimer = setTimeout( ()=> {releasehighlight(); tippannel.hide();},500);
+            if(!freezing) {
+                tiptimer = setTimeout(() => {
+                    releasehighlight();
+                    tippannel.hide();
+                }, 500);
+                tooltip_lib.hide();
+            }
         });
 
         updateaxis();
