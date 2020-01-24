@@ -36,6 +36,7 @@ let JobMap = function() {
         mouseover:function(){},
         mouseleave:function(){},
     };
+    let zoomFunc;
     function freezinghandle(path,mouseOver,mouseLeave){
         path.on('click',function(d){
             if(runopt.mouse.disable){
@@ -62,6 +63,44 @@ let JobMap = function() {
         }
         return path;
     }
+
+    function registEvent() {
+        d3.select('#mouseAction').on("change", function () {
+            const selected_value = $("input[name='mouseAction']:checked").val();
+            if (selected_value === "auto" || selected_value === "disable") {
+                runopt.mouse.auto = selected_value === "auto";
+                runopt.mouse.disable = selected_value === "disable";
+                runopt.mouse.lensing = false;
+            } else {
+                runopt.mouse.auto = false;
+                runopt.mouse.disable = false;
+                runopt.mouse.lensing = selected_value === "lensing";
+                runopt.mouse.showseries = selected_value === "showseries";
+                runopt.mouse.showmetric = selected_value === "showmetric";
+            }
+            if (runopt.mouse.lensing) {
+                g.select('.fisheyeLayer').style('pointer-events', 'auto');
+            } else {
+                g.select('.fisheyeLayer').style('pointer-events', 'none');
+                fisheye_scale.x = d => d;
+            }
+        });
+        d3.select('#resetScreen').on('click', () => {
+            svg.select('.pantarget').transition().duration(750)
+                .call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left, graphicopt.margin.top).scale(1)); // updated for d3 v4
+        });
+        d3.select('#zoomOut').on('click', () => {
+            zoomFunc.scaleBy(svg.select('.pantarget'), 0.5); // updated for d3 v4
+        });
+        d3.select('#zoomIn').on('click', () => {
+            zoomFunc.scaleBy(svg.select('.pantarget'), 2); // updated for d3 v4
+        });
+    }
+
+    jobMap.show = function() {
+        registEvent();
+    };
+
     jobMap.init = function () {
         // fisheye_scale.x= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.widthG()]).focus(graphicopt.widthG()/2);
         fisheye_scale.y= fisheye.scale(d3.scaleIdentity).domain([0,graphicopt.heightG()]).focus(graphicopt.heightG()/2);
@@ -80,7 +119,7 @@ let JobMap = function() {
                 .append('image')
                 .attrs({'height':1,width:1,preserveAspectRatio:'none',
                     'xmlns:xlink':'http://www.w3.org/1999/xlink','xlink:href':'src/images/u.png'});
-        let zoomFunc = d3.zoom().on("zoom",  () =>{
+        zoomFunc = d3.zoom().on("zoom",  () =>{
             g.attr("transform", d3.event.transform);
         });
         try{
@@ -163,37 +202,14 @@ let JobMap = function() {
                 computeUsermetric();
             handle_summary([],true);
         });
+        registEvent(zoomFunc);
 
-        d3.select('#mouseAction').on("change", function () {
-            const selected_value = $("input[name='mouseAction']:checked").val();
-            if (selected_value==="auto"||selected_value==="disable"){
-                runopt.mouse.auto = selected_value==="auto";
-                runopt.mouse.disable = selected_value==="disable";
-                runopt.mouse.lensing = false;
-            }else {
-                runopt.mouse.auto = false;
-                runopt.mouse.disable = false;
-                runopt.mouse.lensing = selected_value === "lensing";
-                runopt.mouse.showseries = selected_value === "showseries";
-                runopt.mouse.showmetric = selected_value === "showmetric";
-            }
-            if (runopt.mouse.lensing) {
-                g.select('.fisheyeLayer').style('pointer-events', 'auto');
-            } else {
-                g.select('.fisheyeLayer').style('pointer-events', 'none');
-                fisheye_scale.x = d=>d;
-            }
+        d3.select('#hideUnchange_control').on("change", function () {
+            runopt.hideUnchange = $(this).prop('checked');
+            jobMap.data().draw();
         });
-        d3.select('#resetScreen').on('click',()=>{
-            svg.select('.pantarget').transition().duration(750)
-                .call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left,graphicopt.margin.top).scale(1) ); // updated for d3 v4
-        });
-        d3.select('#zoomOut').on('click',()=>{
-            zoomFunc.scaleBy(svg.select('.pantarget'),0.5); // updated for d3 v4
-        });
-        d3.select('#zoomIn').on('click',()=>{
-            zoomFunc.scaleBy(svg.select('.pantarget'),2); // updated for d3 v4
-        });
+
+
         d3.select('#jobOverlay').on("change", function () {
             runopt.overlayjob = $(this).prop('checked');
             if (runopt.compute.type==='timeline'){
@@ -210,17 +226,6 @@ let JobMap = function() {
                 jobMap.draw();
             }else if (tableHeader.currentsort==="Job_startTime")
                 tableHeader.currentsort = undefined;
-        });
-        // d3.select('#timelineGroupMode').on("change", function () {
-        //     var sect = document.getElementById("timelineGroupMode");
-        //     runopt.timelineGroupMode = sect.options[sect.selectedIndex].value;
-        //     if (runopt.compute.type==='timeline'){
-        //         jobMap.data().draw();
-        //     }
-        // });
-        d3.select('#hideUnchange_control').on("change", function () {
-            runopt.hideUnchange = $(this).prop('checked');
-            jobMap.data().draw();
         });
 
         suddenGroupslider = document.getElementById('suddenGroup_control');

@@ -1831,6 +1831,7 @@ $( document ).ready(function() {
             onchangeVizType();
             d3.select('#modelWorkerContent').classed('hide',true);
             d3.select('.mainsvg').classed('hide',false);
+            jobMap.show();
             d3.select("#jobControl").attr('disabled',null).selectAll('input').attr('disabled',null);
             let oldChoice = jobMap_runopt.compute.type;
             let isSwitchtimeline = false;
