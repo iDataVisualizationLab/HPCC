@@ -474,12 +474,8 @@ d3.TimeSpace = function () {
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
         let barH = graphicopt.radarTableopt.h/2;
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
-        radarChartclusteropt.color = function(){return newClustercolor};
         d3.select('.radarTimeSpace .selectionNum').text(dataArr.length);
-        let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt,"");
-        currentChart.selectAll('.axisLabel').remove();
-        currentChart.select('.axisWrapper .gridCircle').classed('hide',true);
-
+        renderRadarSummary(dataRadar,newClustercolor);
 
         // draw table
         let positionscale = d3.scaleLinear().domain([0,1]).range([0,Math.max(graphicopt.radarTableopt.h,40)]);
@@ -493,6 +489,7 @@ d3.TimeSpace = function () {
             return temp
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
+        selectedCluster.action = {}
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
         let holder = d3.select('.relativemap svg.svgHolder');
         holder.attr('width',radarChartclusteropt.width)
@@ -535,14 +532,79 @@ d3.TimeSpace = function () {
 
         // add holder action
         let holder_action = d3.select('.relativemap .actionHolder');
-        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster,d=>d.name);
+        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster,(d,i)=>d.name+" "+i);
         btg.exit().remove();
         let btg_new = btg.enter().append('div').attr('class', 'btn_group_holder valign-wrapper').style('height',(d,i)=>`${positionscale(1)}px`)
         .append('div').attr('class', 'btn_group valign-wrapper');
-        btg_new.append('i').attr('class','btn_item material-icons ').html('check_box_outline_blank');
-        btg_new.append('i').attr('class','btn_item material-icons ').html('check_box_outline_blank');
-        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type');
-        btg_new.append('i').attr('class','btn_item material-icons ').html('delete');
+        btg_new.append('i').attr('class','btn_item material-icons currentValue').html('check_box_outline_blank');
+        btg_new.append('i').attr('class','btn_item material-icons selected hide').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('value','merge').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('value','delete').on('click',actionBtn);
+        function actionBtn(d){
+            const target = d3.select(this);
+            const value = target.attr('value');
+            const style = target.style();
+            const parent = d3.select(this.parentNode);
+            parent.select('.currentValue').html(target.html()).style(style);
+            parent.select('.selected.hide').classed('hide',false);
+            target.classed('selected hide',true);
+
+            reviewAction(d.index,value);
+        }
+        function reviewAction(index,action){
+            const target = selectedCluster[index];
+            switch (action) {
+                case 'merge':
+                    // set action data
+                    selectedCluster.action = {'root':index};
+                    selectedCluster.action[target.name] = {name: target.name, action: action, data: dataArr};
+                    // render radar
+                    let newdataRadar = JSON.parse(JSON.stringify(dataRadar));
+                    newdataRadar.forEach((d,i)=>{
+                        d.minvalue = Math.min(d.minvalue,target[i].minvalue);
+                        d.maxvalue = Math.max(d.maxvalue,target[i].maxvalue)
+                    });
+                    renderRadarSummary(newdataRadar,colorscale(target.name));
+                    // adjust other selection data
+                    let otherItem = holder_action.selectAll('div.btn_group_holder').filter(d=>d.index!==index);
+                    otherItem.filter(d=>d.selected !== d.total)
+                        .select('.btn_item[value="no-action"]')
+                        .dispatch('click');
+                    otherItem
+                        .select('.btn_item[value="delete"]')
+                        .classed('hide',d=>d.selected !== d.total)
+                        .filter(d=>d.selected === d.total)
+                        .dispatch('click');
+                    console.log(selectedCluster)
+                    // render bar chart view
+                    break;
+                case 'delete':
+                    selectedCluster.action[target.name] = {name: target.name, action: action};
+                    break;
+                default:
+                    if (selectedCluster.action && !isNaN(selectedCluster.action.root)&&selectedCluster.action[target.name]) {
+                        const isRoot = selectedCluster.action[target.name].data !== undefined;
+                        delete selectedCluster.action[target.name];
+                        if (isRoot) { // if root action selected
+                            // set action data
+                            selectedCluster.action = {};
+                            // render radar
+                            renderRadarSummary(dataRadar, newClustercolor);
+                            // adjust other selection data
+                            const allGroup = holder_action.selectAll('div.btn_group_holder')
+                                .filter(d => d.index !== index).select('.btn_item[value="no-action"]').dispatch('click');
+                            // render bar chart view
+                        }
+                    }
+                    break;
+            }
+        }
+        function renderRadarSummary(dataRadar,color) {
+            radarChartclusteropt.color = function(){return color};
+            let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
+            currentChart.selectAll('.axisLabel').remove();
+            currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
+        }
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);

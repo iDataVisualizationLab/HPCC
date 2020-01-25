@@ -673,14 +673,13 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     width: 100%;
     background-color: rgba(255, 255, 255, 0.53);
     border-radius: 2px;
-    box-shadow: 3px 2px 10px -7px rgba(0,0,0,0.66);
+    box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
+    -webkit-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
+    -moz-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
 }
 
 .btn_group .btn_item{
     width: 100%;
     background-color: rgba(255, 255, 255, 0.58);
     border-radius: 2px;
-    box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
-    -webkit-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
-    -moz-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.66);
 }
