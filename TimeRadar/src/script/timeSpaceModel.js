@@ -532,6 +532,17 @@ d3.TimeSpace = function () {
         rateText.transition().attr('x',d=>totalscale(d.total)+2);
         rateText.select('.contributeNum').transition().text(d=>d.selected);
         rateText.select('.totalNum').text(d=>'/'+d.total);
+
+        // add holder action
+        let holder_action = d3.select('.relativemap .actionHolder');
+        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster,d=>d.name);
+        btg.exit().remove();
+        let btg_new = btg.enter().append('div').attr('class', 'btn_group_holder valign-wrapper').style('height',(d,i)=>`${positionscale(1)}px`)
+        .append('div').attr('class', 'btn_group valign-wrapper');
+        btg_new.append('i').attr('class','btn_item material-icons ').html('check_box_outline_blank');
+        btg_new.append('i').attr('class','btn_item material-icons ').html('check_box_outline_blank');
+        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type');
+        btg_new.append('i').attr('class','btn_item material-icons ').html('delete');
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);

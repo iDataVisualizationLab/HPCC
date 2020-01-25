@@ -681,6 +681,9 @@
                                 <svg class="svgHolder">
 
                                 </svg>
+                                <div class="actionHolder">
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -768,6 +771,9 @@
     <!--<div id="radar_Des_div">-->
 </div>
 
+<div id="cluster_div" class="modal custom">\
+</div>
+
 <script type="x-shader/x-vertex" id="vertexshader">
 
     attribute float alpha;
@@ -811,7 +817,12 @@
 
 </script>
 
-
+<!--load html temple-->
+<script>
+    $(function(){
+        $('#cluster_div').load('src/html/clusterDialog.html');
+    })
+</script>
 
 <!-- load the d3.js library -->
 <script src="../HiperView/js/d3.v4.js"></script>
