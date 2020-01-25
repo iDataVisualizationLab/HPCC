@@ -592,7 +592,7 @@ d3.TimeSpace = function () {
                     x: scaletime.invert(ti),
                 }
             });
-            temp.label = h;
+            temp.label = name;
             let data_temp = [temp];
             layout.axis.y.label.push(s.text);
             layout.axis.y.domain.push(s.range);
