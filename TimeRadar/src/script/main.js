@@ -2518,7 +2518,7 @@ function updateViztype (viztype_in){
 }
 
 let clustercalWorker;
-function recalculateCluster (option,calback) {
+function recalculateCluster (option,calback,customCluster) {
     preloader(true,10,'Process grouping...','#clusterLoading');
     group_opt = option;
     distance = group_opt.normMethod==='l1'?distanceL1:distanceL2
@@ -2532,14 +2532,26 @@ function recalculateCluster (option,calback) {
         serviceFullList: serviceFullList,
         serviceLists:serviceLists,
         serviceList_selected:serviceList_selected,
-        serviceListattr:serviceListattr
+        serviceListattr:serviceListattr,
+        customCluster: customCluster // 1 25 2020 - Ngan
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
             data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
             cluster_info = data.result;
-            clusterDescription = {};
-            recomendName (cluster_info);
+            if (!customCluster) {
+                clusterDescription = {};
+                recomendName(cluster_info);
+            }else{
+                let new_clusterDescription = {};
+                cluster_info.forEach((d,i)=>{
+                    new_clusterDescription[`group_${i+1}`] = {id:`group_${i+1}`,text:clusterDescription[d.name].text};
+                    d.index = i;
+                    d.labels = ''+i;
+                    d.name = `group_${i+1}`;
+                });
+                clusterDescription = new_clusterDescription;
+            }
             recomendColor (cluster_info);
             if (!calback) {
                 cluster_map(cluster_info);
