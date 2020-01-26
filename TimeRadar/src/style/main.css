@@ -683,3 +683,7 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     background-color: rgba(255, 255, 255, 0.58);
     border-radius: 2px;
 }
+.btn-small.invert {
+    color: #8a001a;
+    background-color: #fff3f3;
+}

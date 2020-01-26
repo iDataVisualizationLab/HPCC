@@ -476,7 +476,6 @@ d3.TimeSpace = function () {
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
         d3.select('.radarTimeSpace .selectionNum').text(dataArr.length);
         renderRadarSummary(dataRadar,newClustercolor);
-
         // draw table
         let positionscale = d3.scaleLinear().domain([0,1]).range([0,Math.max(graphicopt.radarTableopt.h,40)]);
         let selectedNest = d3.nest().key(d=>d.cluster).rollup(d=>d.length).object(dataArr);
@@ -489,57 +488,50 @@ d3.TimeSpace = function () {
             return temp
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
-        selectedCluster.action = {}
+        selectedCluster.action = {};
+
+
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
-        let holder = d3.select('.relativemap svg.svgHolder');
-        holder.attr('width',radarChartclusteropt.width)
-            .attr('height',positionscale(selectedCluster.length));
-        let bg = holder.selectAll('.timeSpace').data(selectedCluster,d=>d.name);
-        bg.exit().remove();
-        let bg_new = bg.enter().append('g').attr('class', 'timeSpace').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(selectedCluster.length+1)})`);
-        bg_new.append('g').attr('class','radar');
-        let contributeRect = bg_new.append('g').attr('class','rate').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
-        contributeRect.append('rect').attr('class','totalNum').attrs({
-            width:0,
-            height:barH
-        }).styles({
-            fill: d=>colorscale(d.name),
-            'fill-opacity'  : 0.5
-        });
-        contributeRect.append('rect').attr('class','contributeNum').attrs({
-            width:0,
-            height:barH,
-        }).styles({
-            'fill-opacity'  : 0.5
-        });
-        let rateText = contributeRect.append('text').attrs({'x':2,'y':barH,'dy':-5});
-        rateText.append('tspan').attr('class','contributeNum')
-        rateText.append('tspan').attr('class','totalNum').style('font-size','80%');
-        bg_new.append('text').attr('class','clustername').style('dy','-2').attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2},${0})`);
-        bg = holder.selectAll('.timeSpace');
-        bg.transition().duration(200).attr('transform',(d,i)=>`translate(${graphicopt.radarTableopt.w/2+30},${positionscale(d.index+0.5)})`);
-        bg
-            .each(function(d){
-                createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill:true});
-            });
-        bg.select('text.clustername').text(d=>d.fullName);
-        bg.select('g.rate').select('rect.totalNum').transition().attr('width',d=>totalscale(d.total));
-        bg.select('g.rate').select('rect.contributeNum').style('fill',newClustercolor).transition().attr('width',d=>totalscale(d.selected));
-        rateText = bg.select('g.rate').select('text');
-        rateText.transition().attr('x',d=>totalscale(d.total)+2);
-        rateText.select('.contributeNum').transition().text(d=>d.selected);
-        rateText.select('.totalNum').text(d=>'/'+d.total);
+
+        drawComparationCharts(selectedCluster);
 
         // add holder action
         let holder_action = d3.select('.relativemap .actionHolder');
-        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster,(d,i)=>d.name+" "+i);
-        btg.exit().remove();
+        holder_action.selectAll('div.btn_group_holder').remove();
+        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster);
+        // btg.exit().remove();
         let btg_new = btg.enter().append('div').attr('class', 'btn_group_holder valign-wrapper').style('height',(d,i)=>`${positionscale(1)}px`)
         .append('div').attr('class', 'btn_group valign-wrapper');
         btg_new.append('i').attr('class','btn_item material-icons currentValue').html('check_box_outline_blank');
-        btg_new.append('i').attr('class','btn_item material-icons selected hide').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
-        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('value','merge').on('click',actionBtn);
-        btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('value','delete').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons selected hide').attr('title','action').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('title','merge').attr('value','merge').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('title','delete').attr('value','delete').on('click',actionBtn);
+
+        d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
+        d3.select('#modelSelectionInformation .confirm .cancel').on('click',function(){
+            holder_action.selectAll('div.btn_group_holder').filter(d=>selectedCluster.action.root===d.index).select('.btn_item[value="no-action"]').each(actionBtn);
+        });
+        d3.select('#modelSelectionInformation .confirm .ok').on('click',function(){
+            let index = selectedCluster.action.root;
+            let root = selectedCluster[index];
+            delete selectedCluster.action.root;
+            // delete action
+            let newcluster = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
+            if (selectedCluster.action[root.name].action === 'merge'){
+                let rootCluster = newcluster.find(d=>d.name === root.name);
+                let dataMergeIn = dataArr.filter(e=>e.clusterName!==rootCluster.name);
+                rootCluster.__metrics.normalize = rootCluster.__metrics.normalize.map((d,i)=>(d* root.total + d3.sum(dataMergeIn,e=>e[i]) )/(root.total + dataMergeIn.length));
+            }else if (selectedCluster.action[root.name].action === 'create'){
+            }
+            // changed cluster but not relate to delete and merge
+            selectedCluster.filter(d=>selectedCluster.action[d.name]=== undefined).forEach(e=>{
+                let changedCluster = newcluster.find(d=>d.name === e.name);
+                let dataMoveout = dataArr.filter(e=>e.clusterName===changedCluster.name);
+                changedCluster.__metrics.normalize = changedCluster.__metrics.normalize.map((d,i)=>(d* root.total - d3.sum(dataMoveout,e=>e[i]) )/(root.total - dataMoveout.length));
+            });
+
+            recalculateCluster( {normMethod:$('#normMethod').val()},onchangeCluster,newcluster);
+        });
         function actionBtn(d){
             const target = d3.select(this);
             const value = target.attr('value');
@@ -548,42 +540,49 @@ d3.TimeSpace = function () {
             parent.select('.currentValue').html(target.html()).style(style);
             parent.select('.selected.hide').classed('hide',false);
             target.classed('selected hide',true);
-
             reviewAction(d.index,value);
         }
+        function dialogModel(){
+            d3.select('#modelSelectionInformation .confirm').classed('hide',Object.keys(selectedCluster.action).length===0)
+        }
         function reviewAction(index,action){
-            const target = selectedCluster[index];
+            let target = selectedCluster[index];
             switch (action) {
                 case 'merge':
                     // set action data
                     selectedCluster.action = {'root':index};
-                    selectedCluster.action[target.name] = {name: target.name, action: action, data: dataArr};
+                    selectedCluster.action[target.name] = {name: target.name, index: index, action: action, data: dataArr};
                     // render radar
                     let newdataRadar = JSON.parse(JSON.stringify(dataRadar));
                     newdataRadar.forEach((d,i)=>{
-                        d.minvalue = Math.min(d.minvalue,target[i].minvalue);
-                        d.maxvalue = Math.max(d.maxvalue,target[i].maxvalue)
+                        console.log(d,target[i])
+                        console.log(d.minval,target[i].minval)
+                        console.log(d.maxval,target[i].maxval)
+                        d.value = d3.mean([d.value,target[i].value]);
+                        d.minval = Math.min(d.minval,target[i].minval);
+                        d.maxval = Math.max(d.maxval,target[i].maxval)
                     });
+
                     renderRadarSummary(newdataRadar,colorscale(target.name));
                     // adjust other selection data
                     let otherItem = holder_action.selectAll('div.btn_group_holder').filter(d=>d.index!==index);
                     otherItem.filter(d=>d.selected !== d.total)
                         .select('.btn_item[value="no-action"]')
-                        .dispatch('click');
+                        .each(actionBtn);
                     otherItem
                         .select('.btn_item[value="delete"]')
                         .classed('hide',d=>d.selected !== d.total)
                         .filter(d=>d.selected === d.total)
-                        .dispatch('click');
-                    console.log(selectedCluster)
+                        .each(actionBtn);
                     // render bar chart view
+                    drawComparationCharts(selectedCluster,true)
                     break;
                 case 'delete':
                     selectedCluster.action[target.name] = {name: target.name, action: action};
                     break;
                 default:
                     if (selectedCluster.action && !isNaN(selectedCluster.action.root)&&selectedCluster.action[target.name]) {
-                        const isRoot = selectedCluster.action[target.name].data !== undefined;
+                        const isRoot = selectedCluster.action[target.name].index===selectedCluster.action.root;
                         delete selectedCluster.action[target.name];
                         if (isRoot) { // if root action selected
                             // set action data
@@ -592,12 +591,63 @@ d3.TimeSpace = function () {
                             renderRadarSummary(dataRadar, newClustercolor);
                             // adjust other selection data
                             const allGroup = holder_action.selectAll('div.btn_group_holder')
-                                .filter(d => d.index !== index).select('.btn_item[value="no-action"]').dispatch('click');
+                                .filter(d => d.index !== index).select('.btn_item[value="no-action"]').each(actionBtn);
                             // render bar chart view
+                            drawComparationCharts(selectedCluster);
                         }
                     }
                     break;
             }
+            dialogModel();
+        }
+        // draw function
+        function drawComparationCharts(dataCluster,isReview) {
+            isReview = isReview||false;
+            let rootTotal = 0;
+            if (isReview) {
+                let rootTitem = selectedCluster[selectedCluster.action.root];
+                rootTotal = rootTitem.total - rootTitem.selected + dataArr.length;
+                totalscale.domain([0, Math.max(d3.max(cluster.map(d => d.total_radar)), rootTotal)]);
+            }else
+                totalscale.domain([0,d3.max(cluster.map(d=>d.total_radar))]);
+            let holder = d3.select('.relativemap svg.svgHolder');
+            holder.attr('width', radarChartclusteropt.width)
+                .attr('height', positionscale(dataCluster.length) + 10);
+            let bg = holder.selectAll('.timeSpace').data(dataCluster, d => d.name);
+            bg.exit().remove();
+            let bg_new = bg.enter().append('g').attr('class', 'timeSpace').attr('transform', (d, i) => `translate(${graphicopt.radarTableopt.w / 2 + 30},${positionscale(dataCluster.length + 1)})`);
+            bg_new.append('g').attr('class', 'radar');
+            let contributeRect = bg_new.append('g').attr('class', 'rate').attr('transform', (d, i) => `translate(${graphicopt.radarTableopt.w / 2},${0})`);
+            contributeRect.append('rect').attr('class', 'totalNum').attrs({
+                width: 0,
+                height: barH
+            }).styles({
+                fill: d => colorscale(d.name),
+                'fill-opacity': 0.5
+            });
+            contributeRect.append('rect').attr('class', 'contributeNum').attrs({
+                width: 0,
+                height: barH,
+            }).styles({
+                'fill-opacity': 0.5
+            });
+            let rateText = contributeRect.append('text').attrs({'x': 2, 'y': barH, 'dy': -5});
+            rateText.append('tspan').attr('class', 'contributeNum');
+            rateText.append('tspan').attr('class', 'totalNum').style('font-size', '80%');
+            bg_new.append('text').attr('class', 'clustername').style('dy', '-2').attr('transform', (d, i) => `translate(${graphicopt.radarTableopt.w / 2},${0})`);
+            bg = holder.selectAll('.timeSpace');
+            bg.transition().duration(200).attr('transform', (d, i) => `translate(${graphicopt.radarTableopt.w / 2 + 30},${positionscale(d.index + 0.5)})`);
+            bg
+                .each(function (d) {
+                    createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill: true});
+                });
+            bg.select('text.clustername').text(d => d.fullName);
+            bg.select('g.rate').select('rect.totalNum').transition().attr('width', d => totalscale(isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):d.total));
+            bg.select('g.rate').select('rect.contributeNum').style('fill', newClustercolor).transition().attr('width', d => isReview? 0: totalscale(d.selected));
+            rateText = bg.select('g.rate').select('text');
+            rateText.transition().attr('x', d => totalscale(isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):d.total) + 2);
+            rateText.select('.contributeNum').transition().text(d => isReview? '':d.selected);
+            rateText.select('.totalNum').text(d => isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):('/' + d.total));
         }
         function renderRadarSummary(dataRadar,color) {
             radarChartclusteropt.color = function(){return color};
