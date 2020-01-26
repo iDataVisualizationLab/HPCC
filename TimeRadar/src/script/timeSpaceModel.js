@@ -578,7 +578,7 @@ d3.TimeSpace = function () {
             reviewAction(d.index,value);
         }
         function dialogModel(){
-            d3.select('#modelSelectionInformation .newGroup').classed('hide',selectedCluster.action.root===newCluster.index && !selectedCluster.length)
+            d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length || selectedCluster.action.root===newCluster.index)
             d3.select('#modelSelectionInformation .confirm').classed('hide',Object.keys(selectedCluster.action).length<1)
         }
         function reviewAction(index,action){
