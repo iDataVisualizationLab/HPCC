@@ -377,7 +377,7 @@ d3.TimeSpace = function () {
         return graphicopt.radaropt.schema.map((s, i) => {
             let d = allSelected_Data.map(e => e[i]);
             if (d.length)
-                return {axis: s.text, value: ss.mean(d), minval: ss.min(d), maxval: ss.max(d)}
+                return {axis: s.text, value: d3.mean(d), minval: ss.min(d), maxval: ss.max(d)}
             else
                 return {axis: s.text, value: 0, minval: 0, maxval: 0}
         });
@@ -489,7 +489,7 @@ d3.TimeSpace = function () {
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
         selectedCluster.action = {};
-
+        let newCluster = {name:`group_${cluster_info.length}`};
 
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
 
@@ -508,20 +508,36 @@ d3.TimeSpace = function () {
         btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('title','delete').attr('value','delete').on('click',actionBtn);
 
         d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
+            .on('click',function(){
+                selectedCluster.action.root = undefined;
+                selectedCluster.action[newCluster.name] = {name: newCluster.name, index: index, action: 'create', data: dataArr};
+            });
         d3.select('#modelSelectionInformation .confirm .cancel').on('click',function(){
             holder_action.selectAll('div.btn_group_holder').filter(d=>selectedCluster.action.root===d.index).select('.btn_item[value="no-action"]').each(actionBtn);
         });
         d3.select('#modelSelectionInformation .confirm .ok').on('click',function(){
+            // delete action
             let index = selectedCluster.action.root;
             let root = selectedCluster[index];
-            delete selectedCluster.action.root;
-            // delete action
             let newcluster = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
             if (selectedCluster.action[root.name].action === 'merge'){
                 let rootCluster = newcluster.find(d=>d.name === root.name);
                 let dataMergeIn = dataArr.filter(e=>e.clusterName!==rootCluster.name);
                 rootCluster.__metrics.normalize = rootCluster.__metrics.normalize.map((d,i)=>(d* root.total + d3.sum(dataMergeIn,e=>e[i]) )/(root.total + dataMergeIn.length));
-            }else if (selectedCluster.action[root.name].action === 'create'){
+            }else {
+
+                if (selectedCluster.action[newCluster.name].action === 'create') {
+                    let text = "new cluster";
+
+                    let newCluster_data = {
+                        name: newCluster.name,
+                        text: text,
+                        axis: [],
+                        __metrics: []
+                    };
+                    clusterDescription[newCluster_data.name] = {id: newCluster_data.name, text: text};
+                    newCluster_data.__metrics.normalize = dataRadar.map(d => d.value);
+                }
             }
             // changed cluster but not relate to delete and merge
             selectedCluster.filter(d=>selectedCluster.action[d.name]=== undefined).forEach(e=>{
