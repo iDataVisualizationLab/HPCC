@@ -305,6 +305,8 @@ d3.TimeSpace = function () {
 
         d3.select('#modelWorkerInformation+.title').text(self.name);
         handle_selection_switch(graphicopt.isSelectionMode);
+
+        drawSummaryRadar([],handle_data_summary([]),'#ffffff');
         start();
 
         return master;
