@@ -494,6 +494,7 @@ d3.TimeSpace = function () {
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
+<<<<<<< Updated upstream
         let holder = d3.select('.relativemap svg.svgHolder');
         holder.attr('width',radarChartclusteropt.width)
             .attr('height',positionscale(selectedCluster.length));
@@ -508,6 +509,58 @@ d3.TimeSpace = function () {
         }).styles({
             fill: d=>colorscale(d.name),
             'fill-opacity'  : 0.5
+=======
+
+        drawComparationCharts(selectedCluster);
+
+        // add holder action
+        let holder_action = d3.select('.relativemap .actionHolder');
+        holder_action.selectAll('div.btn_group_holder').remove();
+        let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster);
+        // btg.exit().remove();
+        let btg_new = btg.enter().append('div').attr('class', 'btn_group_holder valign-wrapper').style('height',(d,i)=>`${positionscale(1)}px`)
+        .append('div').attr('class', 'btn_group valign-wrapper');
+        btg_new.append('i').attr('class','btn_item material-icons currentValue').html('check_box_outline_blank');
+        btg_new.append('i').attr('class','btn_item material-icons selected hide').attr('title','action').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('title','merge').attr('value','merge').on('click',actionBtn);
+        btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('title','delete').attr('value','delete').on('click',actionBtn);
+
+        d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
+            .on('click',function(){
+                selectedCluster.action ={root: newCluster.index};
+                selectedCluster.action[newCluster.name] = {name: newCluster.name, index: newCluster.index, action: 'create', data: dataArr};
+                let otherItem = holder_action.selectAll('div.btn_group_holder');
+                otherItem.filter(d=>d.selected !== d.total)
+                    .select('.btn_item[value="no-action"]')
+                    .each(actionBtn);
+                otherItem
+                    .select('.btn_item[value="delete"]')
+                    .classed('hide',d=>d.selected !== d.total)
+                    .filter(d=>d.selected === d.total)
+                    .each(actionBtn);
+                let dataCollection = selectedCluster.map(d=>d);
+                dataCollection.push(newCluster);
+                renderRadarSummary(dataRadar, newClustercolor);
+                drawComparationCharts(dataCollection,true);
+                dialogModel();
+            });
+        d3.select('#modelSelectionInformation .confirm .cancel').on('click',function(){
+            if (selectedCluster.action.root!==newCluster.index)
+                holder_action.selectAll('div.btn_group_holder').filter(d=>selectedCluster.action.root===d.index).select('.btn_item[value="no-action"]').each(actionBtn);
+            else{
+                // set action data
+                selectedCluster.action = {};
+                // render radar
+                renderRadarSummary(dataRadar, newClustercolor);
+                // adjust other selection data
+                const allGroup = holder_action.selectAll('div.btn_group_holder');
+                allGroup.select('.btn_item[value="delete"]').classed('hide',true);
+                allGroup.select('.btn_item[value="no-action"]').each(actionBtn);
+                // render bar chart view
+                drawComparationCharts(selectedCluster);
+                dialogModel();
+            }
+>>>>>>> Stashed changes
         });
         contributeRect.append('rect').attr('class','contributeNum').attrs({
             width:0,
