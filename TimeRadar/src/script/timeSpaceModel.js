@@ -489,7 +489,12 @@ d3.TimeSpace = function () {
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
         selectedCluster.action = {};
-        let newCluster = {name:`group_${cluster_info.length}`};
+        let newCluster = dataRadar.map(d=>d.value);
+        newCluster.index = selectedCluster.length;
+        newCluster.name = `group_${cluster_info.length}`;
+        newCluster.color = newClustercolor;
+        newCluster.total = dataArr.length;
+        newCluster.selected = 0;
 
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
 
@@ -509,8 +514,22 @@ d3.TimeSpace = function () {
 
         d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
             .on('click',function(){
-                selectedCluster.action.root = undefined;
-                selectedCluster.action[newCluster.name] = {name: newCluster.name, index: index, action: 'create', data: dataArr};
+                selectedCluster.action ={root: newCluster.index};
+                selectedCluster.action[newCluster.name] = {name: newCluster.name, index: newCluster.index, action: 'create', data: dataArr};
+                let otherItem = holder_action.selectAll('div.btn_group_holder');
+                otherItem.filter(d=>d.selected !== d.total)
+                    .select('.btn_item[value="no-action"]')
+                    .each(actionBtn);
+                otherItem
+                    .select('.btn_item[value="delete"]')
+                    .classed('hide',d=>d.selected !== d.total)
+                    .filter(d=>d.selected === d.total)
+                    .each(actionBtn);
+                let dataCollection = selectedCluster.map(d=>d);
+                dataCollection.push(newCluster);
+                renderRadarSummary(dataRadar, newClustercolor);
+                drawComparationCharts(dataCollection,true);
+                dialogModel();
             });
         d3.select('#modelSelectionInformation .confirm .cancel').on('click',function(){
             holder_action.selectAll('div.btn_group_holder').filter(d=>selectedCluster.action.root===d.index).select('.btn_item[value="no-action"]').each(actionBtn);
@@ -518,7 +537,7 @@ d3.TimeSpace = function () {
         d3.select('#modelSelectionInformation .confirm .ok').on('click',function(){
             // delete action
             let index = selectedCluster.action.root;
-            let root = selectedCluster[index];
+            let root = selectedCluster[index]||newCluster;
             let newcluster = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
             if (selectedCluster.action[root.name].action === 'merge'){
                 let rootCluster = newcluster.find(d=>d.name === root.name);
@@ -559,7 +578,8 @@ d3.TimeSpace = function () {
             reviewAction(d.index,value);
         }
         function dialogModel(){
-            d3.select('#modelSelectionInformation .confirm').classed('hide',Object.keys(selectedCluster.action).length===0)
+            d3.select('#modelSelectionInformation .newGroup').classed('hide',selectedCluster.action.root===newCluster.index && !selectedCluster.length)
+            d3.select('#modelSelectionInformation .confirm').classed('hide',Object.keys(selectedCluster.action).length<1)
         }
         function reviewAction(index,action){
             let target = selectedCluster[index];
@@ -571,9 +591,6 @@ d3.TimeSpace = function () {
                     // render radar
                     let newdataRadar = JSON.parse(JSON.stringify(dataRadar));
                     newdataRadar.forEach((d,i)=>{
-                        console.log(d,target[i])
-                        console.log(d.minval,target[i].minval)
-                        console.log(d.maxval,target[i].maxval)
                         d.value = d3.mean([d.value,target[i].value]);
                         d.minval = Math.min(d.minval,target[i].minval);
                         d.maxval = Math.max(d.maxval,target[i].maxval)
@@ -606,7 +623,9 @@ d3.TimeSpace = function () {
                             // render radar
                             renderRadarSummary(dataRadar, newClustercolor);
                             // adjust other selection data
-                            const allGroup = holder_action.selectAll('div.btn_group_holder')
+                            const allGroup = holder_action.selectAll('div.btn_group_holder');
+                            allGroup.select('.btn_item[value="delete"]').classed('hide',true);
+                            allGroup
                                 .filter(d => d.index !== index).select('.btn_item[value="no-action"]').each(actionBtn);
                             // render bar chart view
                             drawComparationCharts(selectedCluster);
@@ -621,7 +640,7 @@ d3.TimeSpace = function () {
             isReview = isReview||false;
             let rootTotal = 0;
             if (isReview) {
-                let rootTitem = selectedCluster[selectedCluster.action.root];
+                let rootTitem = selectedCluster[selectedCluster.action.root]===undefined? _.last(dataCluster):selectedCluster[selectedCluster.action.root];
                 rootTotal = rootTitem.total - rootTitem.selected + dataArr.length;
                 totalscale.domain([0, Math.max(d3.max(cluster.map(d => d.total_radar)), rootTotal)]);
             }else
@@ -638,7 +657,7 @@ d3.TimeSpace = function () {
                 width: 0,
                 height: barH
             }).styles({
-                fill: d => colorscale(d.name),
+                fill: d => d.color || colorscale(d.name),
                 'fill-opacity': 0.5
             });
             contributeRect.append('rect').attr('class', 'contributeNum').attrs({
