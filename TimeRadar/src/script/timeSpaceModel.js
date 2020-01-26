@@ -514,7 +514,7 @@ d3.TimeSpace = function () {
         btg_new.append('i').attr('class','btn_item material-icons selected hide').attr('title','action').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
         btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('title','merge').attr('value','merge').on('click',actionBtn);
         btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('title','delete').attr('value','delete').on('click',actionBtn);
-
+        dialogModel();
         d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
             .on('click',function(){
                 selectedCluster.action ={root: newCluster.index};
