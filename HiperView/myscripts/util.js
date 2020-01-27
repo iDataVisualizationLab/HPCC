@@ -1047,7 +1047,7 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
     datapoint.each(function(d){
         d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
         if (colorfill)
-            radar_opt.color = function(){return colorscale(d.name)};
+            radar_opt.color = function(){return d.color||colorscale(d.name)};
         RadarChart(this, [d], radar_opt,"");
     });
     return datapoint;

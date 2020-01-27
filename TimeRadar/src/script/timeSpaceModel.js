@@ -491,17 +491,17 @@ d3.TimeSpace = function () {
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
         selectedCluster.action = {};
-        let newCluster = dataRadar.map(d=>d.value);
+        let newCluster = dataRadar.map(d=>d);
         newCluster.index = selectedCluster.length;
         newCluster.name = `group_${cluster_info.length}`;
         newCluster.color = newClustercolor;
         newCluster.total = dataArr.length;
-        newCluster.selected = 0;
+        newCluster.selected = dataArr.length;
 
         let totalscale = d3.scaleLinear().domain([0,d3.max(cluster.map(d=>d.total_radar))]).range([0,150]);
 
 
-        drawComparationCharts(selectedCluster);
+        drawComparisonCharts(selectedCluster);
 
         // add holder action
         let holder_action = d3.select('.relativemap .actionHolder');
@@ -531,7 +531,7 @@ d3.TimeSpace = function () {
                 let dataCollection = selectedCluster.map(d=>d);
                 dataCollection.push(newCluster);
                 renderRadarSummary(dataRadar, newClustercolor);
-                drawComparationCharts(dataCollection,true);
+                drawComparisonCharts(dataCollection,true);
                 dialogModel();
             });
         d3.select('#modelSelectionInformation .confirm .cancel').on('click',function(){
@@ -547,7 +547,7 @@ d3.TimeSpace = function () {
                 allGroup.select('.btn_item[value="delete"]').classed('hide',true);
                 allGroup.select('.btn_item[value="no-action"]').each(actionBtn);
                 // render bar chart view
-                drawComparationCharts(selectedCluster);
+                drawComparisonCharts(selectedCluster);
                 dialogModel();
             }
         });
@@ -625,7 +625,7 @@ d3.TimeSpace = function () {
                         .filter(d=>d.selected === d.total)
                         .each(actionBtn);
                     // render bar chart view
-                    drawComparationCharts(selectedCluster,true)
+                    drawComparisonCharts(selectedCluster,true)
                     break;
                 case 'delete':
                     selectedCluster.action[target.name] = {name: target.name, action: action};
@@ -645,7 +645,7 @@ d3.TimeSpace = function () {
                             allGroup
                                 .filter(d => d.index !== index).select('.btn_item[value="no-action"]').each(actionBtn);
                             // render bar chart view
-                            drawComparationCharts(selectedCluster);
+                            drawComparisonCharts(selectedCluster);
                         }
                     }
                     break;
@@ -653,7 +653,7 @@ d3.TimeSpace = function () {
             dialogModel();
         }
         // draw function
-        function drawComparationCharts(dataCluster,isReview) {
+        function drawComparisonCharts(dataCluster,isReview) {
             isReview = isReview||false;
             let rootTotal = 0;
             if (isReview) {
@@ -691,7 +691,7 @@ d3.TimeSpace = function () {
             bg.transition().duration(200).attr('transform', (d, i) => `translate(${graphicopt.radarTableopt.w / 2 + 30},${positionscale(d.index + 0.5)})`);
             bg
                 .each(function (d) {
-                    createRadarTable(d3.select(this).select('radar'), d3.select(this), d, {colorfill: true});
+                    createRadarTable(d3.select(this).select('.radar'), d3.select(this), d, {colorfill: true});
                 });
             bg.select('text.clustername').text(d => d.fullName);
             bg.select('g.rate').select('rect.totalNum').transition().attr('width', d => totalscale(isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):d.total));
