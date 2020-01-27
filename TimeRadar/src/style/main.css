@@ -532,9 +532,9 @@ span.clusternum {
 input.clusterlabel {
     border: #7b7b7b solid 0.5px;
     font-size: 12px;
-    height: 1.5rem;
+    height: 1rem;
     margin-bottom: 1px;
-    border-radius: 10px;
+    border-radius: 3px;
     background-color: white;
     padding: 0 5px;
     outline: none;

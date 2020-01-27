@@ -2483,7 +2483,7 @@ function cluster_map (dataRaw) {
             });
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
-        d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text);
+        d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
         d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
     }, 0);
@@ -2551,6 +2551,7 @@ function recalculateCluster (option,calback,customCluster) {
                     d.name = `group_${i+1}`;
                 });
                 clusterDescription = new_clusterDescription;
+                updateclusterDescription();
             }
             recomendColor (cluster_info);
             if (!calback) {
@@ -2617,7 +2618,7 @@ function recomendColor (clusterarr) {
             orderarray.push(c.name);
         });
     clusterarr.filter(c=>c.text==='undefined').forEach(c=>{
-        colorarray.push('black');
+        colorarray.push('gray');
         orderarray.push(c.name);
     });
     // clusterarr.filter(c=>c.text!=='undefined' && c.text.match('undefined')).forEach(c=>{

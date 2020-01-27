@@ -434,8 +434,10 @@ let JobMap = function() {
     let timelineStep = 10;
     let timelineScale = d3.scaleLinear().range([-timelineStep,0]);
     function updateClusterLabel(){
-        if (clusterNode_data)
-            nodeg.selectAll('.computeNode').select('text').text(d=>`Group ${d.orderG+1}: `+clusterdata.find(c=>c.name===d.name).text).call(wrap,true);
+        try {
+            if (clusterNode_data)
+                nodeg.selectAll('.computeNode').select('.label').text(d => `Group ${d.orderG + 1}: ` + clusterdata.find(c => c.name === d.name).text).call(wrap, true);
+        }catch(e){}
     }
     function drawOverlayJob(isoverlay){
         if(isoverlay){

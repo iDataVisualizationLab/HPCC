@@ -400,6 +400,9 @@ d3.TimeSpace = function () {
                 if (intersects.length > 0) {
                     if (INTERSECTED.indexOf(intersects[0].index) === -1) {
                         let target = datain[intersects[0].index];
+                        INTERSECTED.forEach((d, i) => {
+                            attributes.size.array[d] = graphicopt.component.dot.size;
+                        });
                         INTERSECTED = [];
                         datain.forEach((d, i) => {
                             if (d.name === target.name) {
@@ -486,7 +489,9 @@ d3.TimeSpace = function () {
             temp.total = d.total_radar;
             temp.selected = selectedNest[d.index];
             temp.name = d.name;
-            temp.fullName = `Group ${d.orderG+1}${clusterDescription[d.name]?': ':''}${clusterDescription[d.name].text}`;
+            temp.prefixlName = `Group ${d.orderG+1}${clusterDescription[d.name].text?': ':''}`;
+            temp.textName = clusterDescription[d.name].text;
+            temp.fullName = temp.prefixlName+clusterDescription[d.name].text;
             return temp
         }).sort((a,b)=>b.selected - a.selected);
         selectedCluster.forEach((d,i)=>d.index = i);
@@ -530,6 +535,7 @@ d3.TimeSpace = function () {
                     .each(actionBtn);
                 let dataCollection = selectedCluster.map(d=>d);
                 dataCollection.push(newCluster);
+                dataCollection.action = selectedCluster.action;
                 renderRadarSummary(dataRadar, newClustercolor);
                 drawComparisonCharts(dataCollection,true);
                 dialogModel();
@@ -555,15 +561,16 @@ d3.TimeSpace = function () {
             // delete action
             let index = selectedCluster.action.root;
             let root = selectedCluster[index]||newCluster;
+            let mainAction = selectedCluster.action[root.name];
+            let newName = mainAction.rename;
             let newcluster = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
-            if (selectedCluster.action[root.name].action === 'merge'){
+            if (mainAction.action === 'merge'){
                 let rootCluster = newcluster.find(d=>d.name === root.name);
                 let dataMergeIn = dataArr.filter(e=>e.clusterName!==rootCluster.name);
                 rootCluster.__metrics.normalize = rootCluster.__metrics.normalize.map((d,i)=>(d* root.total + d3.sum(dataMergeIn,e=>e[i]) )/(root.total + dataMergeIn.length));
             }else {
 
-                if (selectedCluster.action[newCluster.name].action === 'create') {
-                    let text = "new cluster";
+                if (mainAction.action === 'create') {
 
                     let newCluster_data = {
                         name: newCluster.name,
@@ -571,10 +578,11 @@ d3.TimeSpace = function () {
                         axis: [],
                         __metrics: []
                     };
-                    clusterDescription[newCluster_data.name] = {id: newCluster_data.name, text: text};
                     newCluster_data.__metrics.normalize = dataRadar.map(d => d.value);
+                    clusterDescription[root.name] = {id: root.name, text: newName ||''};
                 }
             }
+            clusterDescription[root.name].text =  newName || clusterDescription[root.name].text;
             // changed cluster but not relate to delete and merge
             selectedCluster.filter(d=>selectedCluster.action[d.name]=== undefined).forEach(e=>{
                 let changedCluster = newcluster.find(d=>d.name === e.name);
@@ -610,7 +618,7 @@ d3.TimeSpace = function () {
                     newdataRadar.forEach((d,i)=>{
                         d.value = d3.mean([d.value,target[i].value]);
                         d.minval = Math.min(d.minval,target[i].minval);
-                        d.maxval = Math.max(d.maxval,target[i].maxval)
+                        d.maxval = Math.max(d.maxval,target[i].maxval);
                     });
 
                     renderRadarSummary(newdataRadar,colorscale(target.name));
@@ -655,13 +663,27 @@ d3.TimeSpace = function () {
         // draw function
         function drawComparisonCharts(dataCluster,isReview) {
             isReview = isReview||false;
+            let inputHolder = d3.select('.relativemap input.clusterlabel');
             let rootTotal = 0;
             if (isReview) {
-                let rootTitem = selectedCluster[selectedCluster.action.root]===undefined? _.last(dataCluster):selectedCluster[selectedCluster.action.root];
+                let rootTitem = (selectedCluster[selectedCluster.action.root]===undefined)? _.last(dataCluster):selectedCluster[selectedCluster.action.root];
                 rootTotal = rootTitem.total - rootTitem.selected + dataArr.length;
                 totalscale.domain([0, Math.max(d3.max(cluster.map(d => d.total_radar)), rootTotal)]);
+                inputHolder.styles({
+                    top: `${positionscale( rootTitem.index +0.5)}px`,
+                    left: `${graphicopt.radarTableopt.w +30}px`,
+                    width: `calc(100% - ${graphicopt.radarTableopt.w + 30 +10}px)`
+                }).attrs({
+                    value: rootTitem.textName||'',
+                }).on('change',function(){
+                    selectedCluster.action[rootTitem.name].rename = $(this).val();
+                });
+                $(inputHolder.node()).val(rootTitem.textName||'');
             }else
                 totalscale.domain([0,d3.max(cluster.map(d=>d.total_radar))]);
+
+            inputHolder.classed('hide',!isReview);
+
             let holder = d3.select('.relativemap svg.svgHolder');
             holder.attr('width', radarChartclusteropt.width)
                 .attr('height', positionscale(dataCluster.length) + 10);
@@ -693,7 +715,7 @@ d3.TimeSpace = function () {
                 .each(function (d) {
                     createRadarTable(d3.select(this).select('.radar'), d3.select(this), d, {colorfill: true});
                 });
-            bg.select('text.clustername').text(d => d.fullName);
+            bg.select('text.clustername').classed('hide',d=>(d.index=== selectedCluster.action.root)).text(d => d.fullName);
             bg.select('g.rate').select('rect.totalNum').transition().attr('width', d => totalscale(isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):d.total));
             bg.select('g.rate').select('rect.contributeNum').style('fill', newClustercolor).transition().attr('width', d => isReview? 0: totalscale(d.selected));
             rateText = bg.select('g.rate').select('text');
