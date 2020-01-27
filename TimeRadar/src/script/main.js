@@ -2551,6 +2551,7 @@ function recalculateCluster (option,calback,customCluster) {
                     d.name = `group_${i+1}`;
                 });
                 clusterDescription = new_clusterDescription;
+                updateclusterDescription();
             }
             recomendColor (cluster_info);
             if (!calback) {

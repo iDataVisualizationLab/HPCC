@@ -498,7 +498,7 @@ d3.TimeSpace = function () {
         selectedCluster.action = {};
         let newCluster = dataRadar.map(d=>d);
         newCluster.index = selectedCluster.length;
-        newCluster.name = `group_${cluster_info.length}`;
+        newCluster.name = `group_${cluster_info.length+1}`;
         newCluster.color = newClustercolor;
         newCluster.total = dataArr.length;
         newCluster.selected = dataArr.length;
@@ -524,6 +524,7 @@ d3.TimeSpace = function () {
             .on('click',function(){
                 selectedCluster.action ={root: newCluster.index};
                 selectedCluster.action[newCluster.name] = {name: newCluster.name, index: newCluster.index, action: 'create', data: dataArr};
+                console.log(selectedCluster.action.root);
                 let otherItem = holder_action.selectAll('div.btn_group_holder');
                 otherItem.filter(d=>d.selected !== d.total)
                     .select('.btn_item[value="no-action"]')
@@ -536,6 +537,7 @@ d3.TimeSpace = function () {
                 let dataCollection = selectedCluster.map(d=>d);
                 dataCollection.push(newCluster);
                 dataCollection.action = selectedCluster.action;
+                console.log(dataCollection)
                 renderRadarSummary(dataRadar, newClustercolor);
                 drawComparisonCharts(dataCollection,true);
                 dialogModel();
@@ -563,9 +565,9 @@ d3.TimeSpace = function () {
             let root = selectedCluster[index]||newCluster;
             let mainAction = selectedCluster.action[root.name];
             let newName = mainAction.rename;
-            let newcluster = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
+            let newclusters = cluster_info.filter(d=>selectedCluster.action[d.name]=== undefined || selectedCluster.action[d.name].action !=="delete");
             if (mainAction.action === 'merge'){
-                let rootCluster = newcluster.find(d=>d.name === root.name);
+                let rootCluster = newclusters.find(d=>d.name === root.name);
                 let dataMergeIn = dataArr.filter(e=>e.clusterName!==rootCluster.name);
                 rootCluster.__metrics.normalize = rootCluster.__metrics.normalize.map((d,i)=>(d* root.total + d3.sum(dataMergeIn,e=>e[i]) )/(root.total + dataMergeIn.length));
             }else {
@@ -580,17 +582,18 @@ d3.TimeSpace = function () {
                     };
                     newCluster_data.__metrics.normalize = dataRadar.map(d => d.value);
                     clusterDescription[root.name] = {id: root.name, text: newName ||''};
+                    newclusters.push(newCluster_data)
                 }
             }
             clusterDescription[root.name].text =  newName || clusterDescription[root.name].text;
             // changed cluster but not relate to delete and merge
             selectedCluster.filter(d=>selectedCluster.action[d.name]=== undefined).forEach(e=>{
-                let changedCluster = newcluster.find(d=>d.name === e.name);
+                let changedCluster = newclusters.find(d=>d.name === e.name);
                 let dataMoveout = dataArr.filter(e=>e.clusterName===changedCluster.name);
                 changedCluster.__metrics.normalize = changedCluster.__metrics.normalize.map((d,i)=>(d* root.total - d3.sum(dataMoveout,e=>e[i]) )/(root.total - dataMoveout.length));
             });
-
-            recalculateCluster( {normMethod:$('#normMethod').val()},function(){onchangeCluster();updateclusterDescription();},newcluster);
+            console.log(newclusters)
+            recalculateCluster( {normMethod:$('#normMethod').val()},onchangeCluster,newclusters);
         });
         function actionBtn(d){
             const target = d3.select(this);
