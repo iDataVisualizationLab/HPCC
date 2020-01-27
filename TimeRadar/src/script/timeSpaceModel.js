@@ -443,7 +443,7 @@ d3.TimeSpace = function () {
                         points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
                         points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
                         points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
-
+                        points.geometry.attributes.customColor.needsUpdate = true;
                     }
 
 
