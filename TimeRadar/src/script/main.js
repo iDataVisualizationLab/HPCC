@@ -2417,7 +2417,7 @@ function cluster_map (dataRaw) {
         temp_b.order = i;
         return temp_b;
     });
-    let orderSimilarity = similarityCal(data)
+    let orderSimilarity = similarityCal(data);
     data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>{
         d.order = i;
         dataRaw.find(c=>c.name===d.id).orderG = i;
@@ -2432,7 +2432,7 @@ function cluster_map (dataRaw) {
     //--end
     let dir = d3.select('#clusterDisplay');
     setTimeout(()=>{
-        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id);
+        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id).order();
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
@@ -2551,7 +2551,6 @@ function recalculateCluster (option,calback,customCluster) {
                     d.name = `group_${i+1}`;
                 });
                 clusterDescription = new_clusterDescription;
-                updateclusterDescription();
             }
             recomendColor (cluster_info);
             if (!calback) {

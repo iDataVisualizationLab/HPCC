@@ -590,7 +590,7 @@ d3.TimeSpace = function () {
                 changedCluster.__metrics.normalize = changedCluster.__metrics.normalize.map((d,i)=>(d* root.total - d3.sum(dataMoveout,e=>e[i]) )/(root.total - dataMoveout.length));
             });
 
-            recalculateCluster( {normMethod:$('#normMethod').val()},onchangeCluster,newcluster);
+            recalculateCluster( {normMethod:$('#normMethod').val()},function(){onchangeCluster();updateclusterDescription();},newcluster);
         });
         function actionBtn(d){
             const target = d3.select(this);
