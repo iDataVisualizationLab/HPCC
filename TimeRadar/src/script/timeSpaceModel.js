@@ -574,7 +574,7 @@ d3.TimeSpace = function () {
 
                     let newCluster_data = {
                         name: newCluster.name,
-                        text: text,
+                        text:  newName ||'',
                         axis: [],
                         __metrics: []
                     };
