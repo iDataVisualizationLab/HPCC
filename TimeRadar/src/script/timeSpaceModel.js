@@ -1362,12 +1362,14 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 //     return dataIn;
 // }
 let windowsSize = 1;
+// let timeWeight = 0;
 function handle_data_model(tsnedata,isKeepUndefined) {
     windowsSize = windowsSize||1;
     console.log(windowsSize);
     // get windown surrounding
     let windowSurrounding =  (windowsSize - 1)/2;
     let dataIn = [];
+    // let timeScale = d3.scaleLinear().domain([0,sampleS.timespan.length-1]).range([0,timeWeight]);
     d3.values(tsnedata).forEach(axis_arr => {
         let lastcluster;
         let lastdataarr;
@@ -1386,12 +1388,14 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             // }
             // // timeline precalculate
             // if (true) {
+
                 lastcluster = index;
                 lastdataarr = currentData.slice();
                 currentData.timestep = count; // TODO temperal timestep
                 count++;
                 // make copy of axis data
                 currentData.data = currentData.slice();
+                // currentData.push(timeScale(axis_arr[i].timestep))
                 // adding window
                 for (let w = 0; w<windowSurrounding; w++)
                 {
@@ -1399,7 +1403,8 @@ function handle_data_model(tsnedata,isKeepUndefined) {
                     let currentWData;
                     if (currentIndex<0) // bounder problem
                         currentIndex = 0;
-                    currentWData = axis_arr[currentIndex];
+                    currentWData = axis_arr[currentIndex].slice();
+                    // currentWData.push(timeScale(axis_arr[currentIndex].timestep))
                     currentWData.forEach(d=>{
                         currentData.push(d);
                     });
@@ -1411,6 +1416,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
                     if (currentIndex > timeLength-1) // bounder problem
                         currentIndex = timeLength-1;
                     currentWData = axis_arr[currentIndex];
+                    // currentWData.push(timeScale(axis_arr[currentIndex].timestep))
                     currentWData.forEach(d=>{
                         currentData.push(d);
                     });

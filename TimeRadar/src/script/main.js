@@ -1551,7 +1551,7 @@ function formatService(init){
 }
 function handle_dataRaw() {
 
-    cluster_info.forEach(d => (d.arr = [], d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    cluster_info.forEach(d => (d.arr = [],d.total=0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
     hosts.forEach(h => {
         tsnedata[h.name] = [];
@@ -1601,7 +1601,7 @@ function handle_dataRaw() {
     // });
 }
 function onchangeCluster() {
-    cluster_info.forEach(d => (d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
     hosts.forEach(h => {
         tsnedata[h.name] = [];
