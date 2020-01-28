@@ -1649,6 +1649,7 @@ function onchangeCluster() {
     }
 }
 let handle_data_TimeSpace;
+let mainviz = jobMap;
 function onchangeVizType(){
     tsneTS.stop();
     pcaTS.stop();
@@ -1656,14 +1657,18 @@ function onchangeVizType(){
     switch (vizMode) {
         case 'tsne':
             tsneTS.generateTable();
+            mainviz = tsneTS;
             return true;
         case 'pca':
             pcaTS.generateTable();
+            mainviz = pcaTS;
             return true;
         case 'umap':
             umapTS.generateTable();
+            mainviz = umapTS;
             return true
         default:
+            mainviz = jobMap;
             return false;
     }
 }
@@ -2437,12 +2442,12 @@ function cluster_map (dataRaw) {
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
                 if (!jobMap.runopt().mouse.disable) {
-                    jobMap.highlight(d.id);
+                    mainviz.highlight(d.id);
                 }
                 d3.select(this).classed('focus',true);
             }).on('mouseleave',function(d){
                 if (!jobMap.runopt().mouse.disable) {
-                    jobMap.unhighlight(d.id);
+                    mainviz.unhighlight(d.id);
                 }
                 d3.select(this).classed('focus',false);
             })

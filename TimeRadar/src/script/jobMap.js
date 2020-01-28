@@ -2329,7 +2329,7 @@ let JobMap = function() {
     let filter = []
     jobMap.highlight = function (name) {
         filter.push(name);
-
+        filter = _.uniq(filter);
         if (runopt.compute.type==='timeline')
             g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
         else

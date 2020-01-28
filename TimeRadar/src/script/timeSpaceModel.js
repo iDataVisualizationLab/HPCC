@@ -76,7 +76,7 @@ d3.TimeSpace = function () {
         isBusy = false,
         stop = false;
     let modelWorker,colorscale,reset;
-    let master={},solution,datain=[],filter_by_name=[],table_info,path,cluster=[];
+    let master={},solution,datain=[],filter=[],table_info,path,cluster=[];
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
     // grahic
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
@@ -157,11 +157,11 @@ d3.TimeSpace = function () {
             return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
         })
             .on('mouseover', d => {
-                master.hightlight([d.name_or])
+                master.highlight([d.name_or])
                 svg.selectAll('.linkLinegg').filter(e => d.name_or !== e.name_or).classed('hide', true)
                 // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
             }).on('mouseleave', d => {
-            master.unhightlight(d.name_or)
+            master.unhighlight(d.name_or)
             svg.selectAll('.linkLinegg.hide').classed('hide', false)
             // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
         })
@@ -392,49 +392,65 @@ d3.TimeSpace = function () {
             raycaster.setFromCamera(mouse, camera);
             // calculate objects intersecting the picking ray
             // console.log(mouse)
-            if (mouseoverTrigger) {
-                var intersects = raycaster.intersectObject(points);
-                //count and look after all objects in the diamonds group
-                var geometry = points.geometry;
-                var attributes = geometry.attributes;
-                if (intersects.length > 0) {
-                    if (INTERSECTED.indexOf(intersects[0].index) === -1) {
-                        let target = datain[intersects[0].index];
+            if (mouseoverTrigger) { // not have filter
+                if (!filter.length) {
+                    var intersects = raycaster.intersectObject(points);
+                    //count and look after all objects in the diamonds group
+                    var geometry = points.geometry;
+                    var attributes = geometry.attributes;
+                    if (intersects.length > 0) {
+                        if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+                            let target = datain[intersects[0].index];
+                            INTERSECTED.forEach((d, i) => {
+                                attributes.size.array[d] = graphicopt.component.dot.size;
+                            });
+                            INTERSECTED = [];
+                            datain.forEach((d, i) => {
+                                if (d.name === target.name) {
+                                    INTERSECTED.push(i);
+                                    attributes.alpha.array[i] = 1;
+                                    lines[d.name].visible = true;
+                                } else {
+                                    attributes.alpha.array[i] = 0.1;
+                                    lines[d.name].visible = false;
+                                }
+                            });
+                            let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
+                                .domain([INTERSECTED.length, 0]);
+                            INTERSECTED.forEach((d, i) => {
+                                attributes.size.array[d] = rScale(i);
+                            });
+                            attributes.size.needsUpdate = true;
+                            attributes.alpha.needsUpdate = true;
+                            showMetrics(target.name);
+                        }
+                    } else if (INTERSECTED.length||ishighlightUpdate) {
+                        ishighlightUpdate = false;
+                        tooltip_lib.hide(); // hide tooltip
+                        datain.forEach((d, i) => {
+                            attributes.alpha.array[i] = 1;
+                            lines[d.name].visible = true;
+                        });
                         INTERSECTED.forEach((d, i) => {
                             attributes.size.array[d] = graphicopt.component.dot.size;
                         });
-                        INTERSECTED = [];
-                        datain.forEach((d, i) => {
-                            if (d.name === target.name) {
-                                INTERSECTED.push(i);
-                                attributes.alpha.array[i] = 1;
-                                lines[d.name].visible = true;
-                            } else {
-                                attributes.alpha.array[i] = 0.1;
-                                lines[d.name].visible = false;
-                            }
-                        });
-                        let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
-                            .domain([INTERSECTED.length, 0]);
-                        INTERSECTED.forEach((d, i) => {
-                            attributes.size.array[d] = rScale(i);
-                        });
                         attributes.size.needsUpdate = true;
                         attributes.alpha.needsUpdate = true;
-                        showMetrics(target.name);
+                        INTERSECTED = [];
                     }
-                } else if (INTERSECTED.length) {
-                    tooltip_lib.hide(); // hide tooltip
+                }else{ // mouse over group
+                    var geometry = points.geometry;
+                    var attributes = geometry.attributes;
                     datain.forEach((d, i) => {
+                        if (filter.indexOf(d.clusterName)!==-1) {
                             attributes.alpha.array[i] = 1;
-                            lines[d.name].visible = true;
+                            // lines[d.name].visible = true;
+                        } else {
+                            attributes.alpha.array[i] = 0.1;
+                            // lines[d.name].visible = false;
+                        }
                     });
-                    INTERSECTED.forEach((d, i) => {
-                        attributes.size.array[d] = graphicopt.component.dot.size;
-                    });
-                    attributes.size.needsUpdate = true;
                     attributes.alpha.needsUpdate = true;
-                    INTERSECTED = [];
                 }
             }else if (lassoTool.needRender) {
                 let newClustercolor = d3.color('#000000');
@@ -1100,31 +1116,18 @@ d3.TimeSpace = function () {
 
 
 
-    master.hightlight = function(namearr){
-        filter_by_name = namearr||[];
-        if (filter_by_name.length) {
-            front_ctx.clearRect(0, 0, graphicopt.width, graphicopt.height);
-            d3.values(path).filter(d=>(filter_by_name.find(n => n === d[0].name)&& d.length)>1?d.sort((a,b)=>a.t-b.t):false).forEach(path=>{
-                // make the combination of 0->4 [0,0,1,2] , [0,1,2,3], [1,2,3,4],[2,3,4,4]
-                for (let i=0;i<path.length-1;i++){
-                    let a =( path[i-1]||path[i]).value;
-                    let b = path[i].value;
-                    let c = path[i+1].value;
-                    let d = (path[i+2]||path[i+1]).value;
-                    drawline(front_ctx,[a,b,c,d],path[i].cluster);
-                }
-            })
-
-            d3.select(background_canvas).style('opacity', 0.1);
-            d3.select(front_canvas).style('opacity', 1);
-
-
+    master.highlight = function(name){
+        if (mouseoverTrigger) {
+            filter.push(name);
+            filter = _.uniq(filter);
         }
     };
-    master.unhightlight = function() {
-        filter_by_name = [];
-        d3.select(background_canvas).style('opacity',1);
-        d3.select(front_canvas).style('opacity',0);
+    let ishighlightUpdate;
+    master.unhighlight = function() {
+        filter = [];
+        ishighlightUpdate = true;
+        // d3.select(background_canvas).style('opacity',1);
+        // d3.select(front_canvas).style('opacity',0);
     };
     let self = this;
     master.generateTable = function(){
