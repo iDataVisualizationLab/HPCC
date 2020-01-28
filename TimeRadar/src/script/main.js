@@ -231,7 +231,7 @@ var color,opa;
 // var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
 // let arrColor = colorScaleList.customFunc('rainbow');
 let arrColor = colorScaleList.d3colorChosefunc('Greys');
-let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
+let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory20);
 setColorsAndThresholds(initialService);
 
 //********tooltip***************
@@ -2607,7 +2607,9 @@ function recomendName (clusterarr){
 }
 
 function recomendColor (clusterarr) {
-    const colorCa = colorScaleList['customschemeCategory'].slice();
+    let colorCa = colorScaleList['customschemeCategory'].slice();
+    if (clusterarr.length>10)
+        colorCa = d3.schemeCategory20;
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
