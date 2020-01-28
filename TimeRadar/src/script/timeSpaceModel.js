@@ -449,6 +449,7 @@ d3.TimeSpace = function () {
                             attributes.alpha.array[i] = 0.1;
                             // lines[d.name].visible = false;
                         }
+                        lines[d.name].visible = false;
                     });
                     attributes.alpha.needsUpdate = true;
                 }
@@ -1386,6 +1387,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+            // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
             // // add all points
             // }

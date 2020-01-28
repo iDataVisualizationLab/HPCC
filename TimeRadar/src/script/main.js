@@ -2613,8 +2613,10 @@ function recomendName (clusterarr){
 
 function recomendColor (clusterarr) {
     let colorCa = colorScaleList['customschemeCategory'].slice();
-    if (clusterarr.length>10)
+    if (clusterarr.length>10 && clusterarr.length<21)
         colorCa = d3.schemeCategory20;
+    else if (clusterarr.length>20)
+        colorCa = clusterarr.map((d,i)=>d3.interpolateTurbo(i/(clusterarr.length-1)));
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
