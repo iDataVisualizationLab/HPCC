@@ -379,7 +379,7 @@ d3.TimeSpace = function () {
         return graphicopt.radaropt.schema.map((s, i) => {
             let d = allSelected_Data.map(e => e[i]);
             if (d.length)
-                return {axis: s.text, value: d3.mean(d), minval: ss.min(d), maxval: ss.max(d)}
+                return {axis: s.text, value: d3.mean(d), minval: d3.min(d), maxval: d3.max(d)}
             else
                 return {axis: s.text, value: 0, minval: 0, maxval: 0}
         });
@@ -1029,7 +1029,7 @@ d3.TimeSpace = function () {
                 vertexColors: THREE.VertexColors,
                 transparent: true,
                 opacity: 0.5} );
-            var curve = new THREE.CubicBezierCurve3(
+            var curve = new THREE.CubicBezierCurve_w3(
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
                 new THREE.Vector3( 0, 0, 0 ),
