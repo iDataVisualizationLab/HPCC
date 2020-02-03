@@ -5,7 +5,7 @@ function checkConf(namekey) {
     var retrievedObject = localStorage.getItem(namekey);
     if (retrievedObject!=null&&retrievedObject!==undefined&&retrievedObject!=="undefined") {
         conf[namekey] = JSON.parse(retrievedObject);
-        console.log('retrievedObject: ', JSON.parse(retrievedObject));
+        // console.log('retrievedObject: ', JSON.parse(retrievedObject));
     } else {
         saveConf(namekey);
     }
