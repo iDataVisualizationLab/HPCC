@@ -202,7 +202,7 @@ d3.TimeSpace = function () {
 
         modelWorker.postMessage({action: "colorscale", value: colorarr});
         // modelWorker.postMessage({action: "initmodelWorker", value: graphicopt.opt});
-        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain, clusterarr: cluster.map(d=>d.__metrics.normalize)});
+        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain,labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
@@ -422,7 +422,8 @@ d3.TimeSpace = function () {
                             });
                             attributes.size.needsUpdate = true;
                             attributes.alpha.needsUpdate = true;
-                            showMetrics(target.name);
+                            // showMetrics(target.name);
+                            showMetrics_plotly(target.name);
                         }
                     } else if (INTERSECTED.length||ishighlightUpdate) {
                         ishighlightUpdate = false;
@@ -818,6 +819,96 @@ d3.TimeSpace = function () {
             height: 100,
             margin: tooltip_opt.margin
         }).data(data_in).layout(layout).show(target);
+    }
+    function showMetrics_plotly(name) {
+        // if (d3.select('#myHnav').classed('.sidehIn')){
+        //
+        // }
+        let maxstep = sampleS.timespan.length - 1;
+        let last_timestep = sampleS.timespan[maxstep];
+        let layout = tooltip_lib.layout();
+        layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
+        layout.axis.x.tickFormat = [multiFormat];
+        const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+        layout.axis.y.label = [];
+        layout.axis.y.domain = [];
+        layout.axis.y.tickFormat = [];
+        layout.shapes = path[name].map((v, i) => {
+            return {
+                type: 'rect',
+                xref: 'x',
+                yref: 'paper',
+                y0: 0,
+                y1: 1,
+                x0: scaletime.invert(v.timestep),
+                x1: path[name][i + 1] ? scaletime.invert(path[name][i + 1].timestep) : undefined,
+                fillcolor: colorarr[v.cluster].value,
+                opacity: 0.5,
+                line: {
+                    width: 0
+                }
+            };
+        });
+        let colorSchema = d3.scaleLinear().range(['#000000','#dddddd']).domain([0,graphicopt.radaropt.schema.length]);
+        layout.colorway = graphicopt.radaropt.schema.map((s,si)=>colorSchema(si))
+        layout.shapes[layout.shapes.length - 1].x1 = last_timestep;
+        console.log(layout.shapes)
+        let cdata = datain.filter(d=>d.name===name);
+
+        const data_in = graphicopt.radaropt.schema.map((s,si) => {
+            let temp = {x:[],
+                y:[],
+                text:[],
+                mode: 'lines',
+                hovertemplate: '%{text}',
+            };
+            hostResults[name][serviceListattr[s.idroot]].forEach((e,ti) => {
+                temp.x.push(scaletime.invert(ti));
+                temp.y.push(d3.scaleLinear().domain(s.range)(e[s.id]));
+                temp.text.push(e[s.id]);
+            });
+            temp.name = s.text;
+            let data_temp = temp;
+            layout.axis.y.label.push(s.text);
+            layout.axis.y.domain.push(s.range);
+            if (s.range[1] > 1000)
+                layout.axis.y.tickFormat.push(d3.format('~s'));
+            else
+                layout.axis.y.tickFormat.push(null);
+            return data_temp;
+        });
+        layout.title = name;
+        layout.title2 = name;
+        layout.yaxis = {
+            autorange: true
+        };
+        layout.xaxis = {
+            autorange: true,
+            rangeselector: {buttons: [
+                    {
+                        count: 1,
+                        label: '5m',
+                        step: 'minute',
+                        stepmode: 'forward'
+                    },
+                    {
+                        count: 6,
+                        label: '1h',
+                        step: 'hour',
+                        stepmode: 'forward'
+                    },
+                    {step: 'all'}
+                ]},
+            range: scaletime.domain(),
+            rangeslider: {range: scaletime.domain()},
+        };
+        Plotly.newPlot('myHnav', data_in, layout);
+
+        // tooltip_lib.graphicopt({
+        //     width: tooltip_opt.width,
+        //     height: 100,
+        //     margin: tooltip_opt.margin
+        // }).data(data_in).layout(layout).show(target);
     }
     function setUpZoom() {
         // view.call(zoom);

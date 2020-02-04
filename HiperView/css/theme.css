@@ -243,7 +243,7 @@ input[type=text].inputHolder:focus,  input[type=search]:focus{
     font-size: 1rem;
     /*text-transform: uppercase;*/
     cursor: pointer;
-
+    z-index: 101;
 }
 .nav__menu-lists{
     margin-left: -15px!important;

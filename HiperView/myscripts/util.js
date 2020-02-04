@@ -602,16 +602,34 @@ function uploadProfile(){
 }
 
 // ui part
-function openNav() {
-    d3.select("#mySidenav").classed("sideIn",true);
-    d3.select("#Maincontent").classed("sideIn",true);
+function openNav(e) {
+    let target = "#mySidenav";
+    let source = "#Maincontent";
+    let customclass = "sideIn";
+    if(e) {
+        target = d3.select(e).attr('data-target') ||target;
+        source = d3.select(e).attr('data-source') || source;
+        customclass = d3.select(e).attr('data-class') ||customclass;
+    }
+    d3.select(target).classed(customclass,true);
+    d3.select(source).classed(customclass,true);
     // _.delay(resetSize, 500);
 }
 
-function closeNav() {
-    d3.select("#mySidenav").classed("sideIn",false);
-    d3.select("#Maincontent").classed("sideIn",false);
-    discovery('#sideNavbtn');
+function closeNav(e) {
+    let target = "#mySidenav";
+    let source = "#Maincontent";
+    let openbtn = "#sideNavbtn";
+    let customclass = "sideIn";
+    if(e) {
+        target = d3.select(e).attr('data-target') ||target;
+        source = d3.select(e).attr('data-source') || source;
+        openbtn = d3.select(e).attr('data-link')|| openbtn;
+        customclass = d3.select(e).attr('data-class') ||customclass;
+    }
+    d3.select(target).classed(customclass,false);
+    d3.select(source).classed(customclass,false);
+    discovery(openbtn);
     // _.delay(resetSize, 500);
 }
 

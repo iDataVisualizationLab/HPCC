@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/6ed220eb7a.js" crossorigin="anonymous"></script>
     <script src="../HiperView/js/jquery-3.3.1.js"></script>
+    <script src="../HiperView/js/jquery-ui.js"></script>
     <script src="../HiperView/js/jquery.dd.js"></script>
     <!-- Compiled and minified CSS -->
 
@@ -44,7 +45,7 @@
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
 </head>
 
-<body text="black" id="mainBody" style="overflow: hidden" class="light">
+<body text="black" id="mainBody" style="" class="light">
 <div class="cover">
     <div class="progressDiv hidden">
         <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
@@ -160,7 +161,7 @@
                     <div  class="row valign-wrapper">
                         <label for="datacom" class="col s4"> Dataset</label>
                         <select id="datacom" class="col s7">
-                            <option value="serviceWed26Sep" data-date="26 Apr 2019">HPC data - 26 Sep 2018</option>
+                            <option value="serviceWed26Sep_removedmetric" data-date="26 Apr 2019">HPC data - 26 Sep 2018</option>
                             <option value="influxdbThus21Mar_1400_1630"  data-date="21 Mar 2019">HPC data - 21 Mar 2019 (Chill water)</option>
                             <option value="influxdbSun23June2019" data-date="23 Jun 2019">HPC data - 23 Jun 2019 (overheat compute-6-2)</option>
                             <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>
@@ -543,9 +544,9 @@
 </div>
 <div id="instructions"></div>
 <div id="Maincontent" class="row s12 no_magrin">
-    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
+    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" data-target="#mySidenav" data-source="#Maincontent" data-class="sideIn" data-link="#sideNavbtn" onclick="closeNav(this)"><i class="material-icons">chevron_left</i></a>
     <div class="overlaySide">
-        <a class="openbtn btn-floating btn waves-effect waves-light pulse" id="sideNavbtn" onclick="openNav()">
+        <a class="openbtn btn-floating btn waves-effect waves-light pulse" data-target="#mySidenav" data-source="#Maincontent" data-class="sideIn" id="sideNavbtn" onclick="openNav(this)">
             <i class="material-icons">chevron_right</i></a>
     </div>
     <div style="clear:both;"></div>
@@ -659,6 +660,9 @@
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>&ndash;&gt;-->
                 <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
             <!--</div>-->
+            <div id="myHnav" class="sideHnavs">
+            </div>
+            <a href="javascript:void(0)" class="closebtn horizontal btn-floating btn waves-effect waves-light" data-target=".sideHnavs" data-source="#Maincontent" data-class="sidehIn" data-link="#hNavbtn" onclick="closeNav(this)"><i class="material-icons">keyboard_arrow_down</i></a>
             <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
 
                 <svg class="mainsvg">
@@ -667,6 +671,10 @@
                     </svg>
                 </svg>
                 <div id="modelWorkerContent" class="hide" style="position:relative;background-color: white">
+                    <div class="overlaySide horizontal">
+                        <a class="openbtn btn-floating btn waves-effect waves-light pulse" data-target=".sideHnavs" data-source="#Maincontent" data-class="sidehIn" data-link="#hNavbtn" id="hNavbtn" onclick="openNav(this)">
+                            <i class="material-icons">keyboard_arrow_down</i></a>
+                    </div>
                     <canvas id="modelWorkerScreen"></canvas>
                     <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
                     <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none"></svg>
@@ -712,29 +720,30 @@
         <svg style="position: absolute;z-index: 99; top:0;left:0;pointer-events: none">
             <circle id="tipfollowscursorDiv" cx="0" cy="0"></circle>
         </svg>
+        <div  id="timelineTool" style="position: absolute;right:0px;top:50px;padding:10px;">
+            <div  style="position: relative">
+                <div>
+                    <a class="toolTip btn" tooltip-pos="left" data-title="Zoom in" id="zoomIn">
+                        <i class="material-icons">add</i>
+                    </a>
+                </div>
+                <div class="row">
+                    <a class="toolTip btn" tooltip-pos="left" data-title="Zoom out" id="zoomOut">
+                        <i class="material-icons">remove</i>
+                    </a>
+                </div>
+                <div class="row">
+                    <a class="toolTip btn" tooltip-pos="left" data-title="Reset Screen" id="resetScreen">
+                        <i class="material-icons">home</i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
 
 </div>
-<div  id="timelineTool" style="position: absolute;right:0px;top:50px;padding:10px;">
-    <div  style="position: relative">
-        <div>
-            <a class="toolTip btn" tooltip-pos="left" data-title="Zoom in" id="zoomIn">
-                <i class="material-icons">add</i>
-            </a>
-        </div>
-        <div class="row">
-            <a class="toolTip btn" tooltip-pos="left" data-title="Zoom out" id="zoomOut">
-                <i class="material-icons">remove</i>
-            </a>
-        </div>
-        <div class="row">
-            <a class="toolTip btn" tooltip-pos="left" data-title="Reset Screen" id="resetScreen">
-                <i class="material-icons">home</i>
-            </a>
-        </div>
-    </div>
-</div>
+
 <!--<div class="sumdrag card" ondrop="drop(event)" ondragover="allowDrop(event)">-->
     <!--<button style="position:absolute;left: 0px;top: -20px;" id = 'dragChart'>Drag</button>-->
     <!--<button style="position:absolute;right: 0;margin: 10px;" id = 'deselectChart'>Deselect Charts</button>-->
@@ -848,6 +857,7 @@
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://d3js.org/d3-format.v1.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 
 <!--THREE js-->

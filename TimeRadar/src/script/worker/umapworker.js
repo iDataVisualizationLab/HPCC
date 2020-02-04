@@ -16,13 +16,15 @@ addEventListener('message',function ({data}){
         case "initDataRaw":
             totalTime_marker = performance.now();
             dataIn = data.value;
+            labels = data.labels;
             count = 0;
             data.opt.nComponents = data.opt.dim;
             const umap = new UMAP(data.opt);
+            umap.setSupervisedProjection(labels);
             console.log('---init data UMAP-----')
             const nEpochs = umap.initializeFit(dataIn);
             console.log(nEpochs)
-            for (let i = 0; i < (5000|| nEpochs); i++) {
+            for (let i = 0; i < (1000|| nEpochs); i++) {
             // for (let i = 0; i < (data.opt.nEpochs|| nEpochs); i++) {
                 count++;
                 let t0 = performance.now();
