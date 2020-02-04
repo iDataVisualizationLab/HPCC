@@ -167,7 +167,18 @@ d3.TimeSpace = function () {
         })
     }
     let obitTrigger= true;
+    let linkConnect_old;
+    function reduceRenderWeight(isResume){
+        if (isResume){
+            graphicopt.linkConnect = linkConnect_old;
+        }else{
+            linkConnect_old = graphicopt.linkConnect;
+            graphicopt.linkConnect = false;
+        }
+        controlPanelGeneral.linkConnect.callback();
+    }
     function start() {
+        reduceRenderWeight();
         axesHelper.toggleDimension(graphicopt.opt.dim);
         // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
@@ -217,6 +228,7 @@ d3.TimeSpace = function () {
                 case "stable":
                     modelWorker.terminate();
                     render(true);
+                    reduceRenderWeight(true);
                     break;
                 default:
                     break;
