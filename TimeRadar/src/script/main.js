@@ -641,7 +641,7 @@ function request(){
                             // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
                             // if(isanimation)
-                                jobMap.draw();
+                                jobMap.draw(true);
                         }
                         countbuffer+=hosts.length;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
@@ -2635,6 +2635,16 @@ function recomendColor (clusterarr) {
     //     orderarray.push(c.name);
     // });
     colorCluster.range(colorarray).domain(orderarray)
+}
+function onMergeSuperGroup() {
+    clusterGroup = {9:0,2:0,5:0,8:0};
+    // testing ----------
+    hosts.forEach(h => {
+        tsnedata[h.name].forEach(d=>{
+            if (clusterGroup[d.cluster]!==undefined)
+                d.cluster = clusterGroup[d.cluster];
+        })
+    })
 }
 function handle_clusterinfo () {
     let data_info = [['Grouping Method:',group_opt.clusterMethod]];

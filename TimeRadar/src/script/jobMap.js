@@ -1187,7 +1187,7 @@ let JobMap = function() {
         g.selectAll('.pannel .job_title').classed('hide', jobEmpty);
     }
 
-    jobMap.draw = function (){
+    jobMap.draw = function (islight){
         let timeStep = new Date(last_timestep.toString());
         let timeStep_r = last_timestep.toString();
         // timebox.html(`<tspan x="10" dy="1.2em">${timeStep.toLocaleTimeString()}</tspan>
@@ -1225,14 +1225,17 @@ let JobMap = function() {
                 'dy':'0.5rem',
                 'fill':'black',
                 'width': textWarp
-            }).merge(computers.select('.computeSig_label')).text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true)
+            }).merge(computers.select('.computeSig_label')).text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name))
+            // .call(wrap,true)
         ;
 
         computers = nodeg.selectAll('.computeNode');
         computers.select('.label').classed('hide',runopt.compute.type==='timeline');
 
         computers.classed('statics', true);
-
+        if(!islight){
+            computers.select('.computeSig_label').call(wrap,true);
+        }
 
         //job node
         if (data.length) {
@@ -2119,7 +2122,7 @@ let JobMap = function() {
                 let clust=_.last(hostOb[d.nodes[0]].timeline.clusterarr).cluster;
                 let key = true;
                 for (let i=1;i<d.nodes.length;i++) {
-                     if (clust!=_.last(hostOb[d.nodes[i]].timeline.clusterarr).cluster) {
+                     if (clust!==_.last(hostOb[d.nodes[i]].timeline.clusterarr).cluster) {
                          key = false;
                          break;
                      }
@@ -2133,7 +2136,7 @@ let JobMap = function() {
                 let clust=_.last(hostOb[d.unqinode[0]].timeline.clusterarr).cluster;
                 let key = true;
                 for (let i=1;i<d.unqinode.length;i++) {
-                    if (clust!=_.last(hostOb[d.unqinode[i]].timeline.clusterarr).cluster) {
+                    if (clust!==_.last(hostOb[d.unqinode[i]].timeline.clusterarr).cluster) {
                         key = false;
                         break;
                     }

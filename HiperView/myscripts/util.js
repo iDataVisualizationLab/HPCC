@@ -665,13 +665,12 @@ function onClickRadarColor (d){
 }
 
 function discovery(d){
-    d3.select(d).style('left','20px')
+    d3.select(d).classed('discovery',true)
         .classed("pulse",true)
-        .transition().delay(5000).duration(1000)
-        .style('left',null)
-    //     .on('end',function() {
-    //     // d3.select(d).classed("pulse",false);
-    // });
+        .transition().delay(5000)
+        .on('end',function() {
+            d3.select(d).classed("discovery",false).classed("pulse",false);
+        });
 
 }
 function switchTheme(){

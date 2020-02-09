@@ -354,16 +354,18 @@ d3.TimeSpace = function () {
         let axesHelper = new THREE.LineSegments( geometry, material );
         axesHelper.toggleDimension = function (dim){
             if (dim===3){
+                axesHelper.visible = true;
                 axesHelper.geometry.dispose();
                 axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
                     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
                     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0),
                     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, 0, length)]);
             }else if(dim===2){
-                axesHelper.geometry.dispose();
-                axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
-                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
-                    new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0)]);
+                // axesHelper.geometry.dispose();
+                axesHelper.visible = false;
+                // axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
+                //     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
+                //     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0)]);
             }
         };
         return axesHelper;
@@ -1486,7 +1488,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             let currentData = axis_arr[i].slice();
             currentData.cluster = axis_arr[i].cluster;
             currentData.name = axis_arr[i].name;
-            currentData.timestep = axis_arr[i].timestep;
+            currentData.__timestep = axis_arr[i].timestep;
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
