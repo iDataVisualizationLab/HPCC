@@ -1,7 +1,7 @@
 importScripts("../../../../HiperView/js/d3.v4.js");
 importScripts("../../../../HiperView/js/PCA.js");
 importScripts("../../../../HiperView/js/underscore-min.js");
-importScripts("https://unpkg.com/simple-statistics@2.2.0/dist/simple-statistics.min.js");
+importScripts("../../../../HiperView/js/simple-statistics.min.js");
 
 let canvasopt,totalTime_marker,dataIn;
 addEventListener('message',function ({data}){

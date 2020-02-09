@@ -76,8 +76,8 @@ d3.TimeSpace = function () {
         isBusy = false,
         stop = false;
     let modelWorker,colorscale,reset;
-    let master={},solution,datain=[],filter=[],table_info,path,cluster=[];
-    let xscale=d3.scaleLinear(),yscale=d3.scaleLinear();
+    let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
+    let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
     let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
@@ -212,8 +212,11 @@ d3.TimeSpace = function () {
 
 
         modelWorker.postMessage({action: "colorscale", value: colorarr});
-        // modelWorker.postMessage({action: "initmodelWorker", value: graphicopt.opt});
-        modelWorker.postMessage({action: "initDataRaw",opt:graphicopt.opt, value: datain,labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
+        // adjust dimension -------------
+        let opt = JSON.parse(JSON.stringify(graphicopt.opt)); // clone option
+        opt.dim = 2;
+        // end - adjust dimension
+        modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
@@ -238,6 +241,7 @@ d3.TimeSpace = function () {
 
     master.init = function(arr,clusterin) {
         reset = true;
+        solution = [];
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
         mapIndex = [];
@@ -250,11 +254,12 @@ d3.TimeSpace = function () {
             target.__metrics.position = [0,0,0];
             if (!path[target.name])
                 path[target.name] = [];
-            path[target.name].push({name: target.name, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
+            path[target.name].push({name: target.name,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
         });
 
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
+        scaleNormalTimestep.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         colorarr = colorscale.domain().map((d, i) => ({name: d, order: +d.split('_')[1], value: colorscale.range()[i]}))
         colorarr.sort((a, b) => a.order - b.order);
         //----------------------color----------------------
@@ -424,6 +429,7 @@ d3.TimeSpace = function () {
                                     INTERSECTED.push(i);
                                     attributes.alpha.array[i] = 1;
                                     lines[d.name].visible = true;
+                                    console.log(d.__timestep)
                                 } else {
                                     attributes.alpha.array[i] = 0.1;
                                     lines[d.name].visible = false;
@@ -789,7 +795,7 @@ d3.TimeSpace = function () {
         let layout = tooltip_lib.layout();
         layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
         layout.axis.x.tickFormat = [multiFormat];
-        const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
+        const scaleTime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
         layout.axis.y.label = [];
         layout.axis.y.domain = [];
         layout.axis.y.tickFormat = [];
@@ -797,8 +803,8 @@ d3.TimeSpace = function () {
             type: 'discrete',
             value: path[name].map((v, i) => {
                 return {
-                    x0: scaletime.invert(v.timestep),
-                    x1: path[name][i + 1] ? scaletime.invert(path[name][i + 1].timestep) : undefined,
+                    x0: scaleTime.invert(v.timestep),
+                    x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].timestep) : undefined,
                     color: colorarr[v.cluster].value
                 }
             })
@@ -810,7 +816,7 @@ d3.TimeSpace = function () {
             let temp = hostResults[name][serviceListattr[s.idroot]].map((e,ti) => {
                 return {
                     y: e[s.id],
-                    x: scaletime.invert(ti),
+                    x: scaleTime.invert(ti),
                 }
             });
             temp.label = name;
@@ -835,18 +841,12 @@ d3.TimeSpace = function () {
         }).data(data_in).layout(layout).show(target);
     }
     function showMetrics_plotly(name) {
-        // if (d3.select('#myHnav').classed('.sidehIn')){
-        //
-        // }
-        let maxstep = sampleS.timespan.length - 1;
-        let last_timestep = sampleS.timespan[maxstep];
         let layout = tooltip_lib.layout();
-        layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
-        layout.axis.x.tickFormat = [multiFormat];
-        const scaletime = d3.scaleTime().domain(layout.axis.x.domain[0]).range([0, maxstep]);
-        layout.axis.y.label = [];
-        layout.axis.y.domain = [];
-        layout.axis.y.tickFormat = [];
+        // layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
+        // layout.axis.x.tickFormat = [multiFormat];
+        // layout.axis.y.label = [];
+        // layout.axis.y.domain = [];
+        // layout.axis.y.tickFormat = [];
         layout.shapes = path[name].map((v, i) => {
             return {
                 type: 'rect',
@@ -854,8 +854,8 @@ d3.TimeSpace = function () {
                 yref: 'paper',
                 y0: 0,
                 y1: 1,
-                x0: scaletime.invert(v.timestep),
-                x1: path[name][i + 1] ? scaletime.invert(path[name][i + 1].timestep) : undefined,
+                x0: scaleTime.invert(v.__timestep),
+                x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].__timestep) : undefined,
                 fillcolor: colorarr[v.cluster].value,
                 opacity: 0.5,
                 line: {
@@ -865,8 +865,7 @@ d3.TimeSpace = function () {
         });
         let colorSchema = d3.scaleLinear().range(['#000000','#dddddd']).domain([0,graphicopt.radaropt.schema.length]);
         layout.colorway = graphicopt.radaropt.schema.map((s,si)=>colorSchema(si))
-        layout.shapes[layout.shapes.length - 1].x1 = last_timestep;
-        console.log(layout.shapes)
+        layout.shapes[layout.shapes.length - 1].x1 = scaleTime.domain()[1];
         let cdata = datain.filter(d=>d.name===name);
 
         const data_in = graphicopt.radaropt.schema.map((s,si) => {
@@ -877,18 +876,18 @@ d3.TimeSpace = function () {
                 hovertemplate: '%{text}',
             };
             hostResults[name][serviceListattr[s.idroot]].forEach((e,ti) => {
-                temp.x.push(scaletime.invert(ti));
+                temp.x.push(scaleTime.invert(ti));
                 temp.y.push(d3.scaleLinear().domain(s.range)(e[s.id]));
                 temp.text.push(e[s.id]);
             });
             temp.name = s.text;
             let data_temp = temp;
-            layout.axis.y.label.push(s.text);
-            layout.axis.y.domain.push(s.range);
-            if (s.range[1] > 1000)
-                layout.axis.y.tickFormat.push(d3.format('~s'));
-            else
-                layout.axis.y.tickFormat.push(null);
+            // layout.axis.y.label.push(s.text);
+            // layout.axis.y.domain.push(s.range);
+            // if (s.range[1] > 1000)
+            //     layout.axis.y.tickFormat.push(d3.format('~s'));
+            // else
+            //     layout.axis.y.tickFormat.push(null);
             return data_temp;
         });
         layout.title = name;
@@ -913,8 +912,8 @@ d3.TimeSpace = function () {
                     },
                     {step: 'all'}
                 ]},
-            range: scaletime.domain(),
-            rangeslider: {range: scaletime.domain()},
+            range: scaleTime.domain(),
+            rangeslider: {range: scaleTime.domain()},
         };
         Plotly.newPlot('myHnav', data_in, layout);
 
@@ -1040,7 +1039,14 @@ d3.TimeSpace = function () {
                     let p = points.geometry.attributes.position.array;
                     p[pointIndex*3+0] = xscale(d[0]);
                     p[pointIndex*3+1] = yscale(d[1]);
-                    p[pointIndex*3+2] = xscale(d[2])||0;
+
+                    // 3rd dimension as time step
+                    // p[pointIndex*3+2] = xscale(d[2])||0;
+                    if(graphicopt.opt.dim===3) {
+                        p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
+                        d[2] = xscale.invert(p[pointIndex * 3 + 2]);
+                    }else
+                        p[pointIndex*3+2] = 0;
                 }
             });
             let center = d3.nest().key(d=>d.cluster).rollup(d=>[d3.mean(d.map(e=>e.__metrics.position[0])),d3.mean(d.map(e=>e.__metrics.position[1])),d3.mean(d.map(e=>e.__metrics.position[2]))]).object(datain);
@@ -1072,7 +1078,10 @@ d3.TimeSpace = function () {
             d.__metrics.name = d.clusterName;
             d.__metrics.name_or = d.name;
             d.__metrics.timestep = d.timestep;
-        })
+        });
+        let maxstep = sampleS.timespan.length - 1;
+        scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
+        scaleNormalTimestep.domain([0, maxstep]);
     }
 
     master.stop = function(){
@@ -1183,8 +1192,10 @@ d3.TimeSpace = function () {
     }
     function updateStraightLine(target, posPath, d) {
         lines[target.name].geometry.vertices[posPath * 2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+        // lines[target.name].geometry.vertices[posPath * 2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), d[2] || 0);
         if (posPath)
             lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+            // lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), d[2] || 0);
         lines[target.name].geometry.verticesNeedUpdate = true;
     }
 
@@ -1544,7 +1555,6 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
     });
-    // console.log(dataIn);
     return dataIn;
 }
 
