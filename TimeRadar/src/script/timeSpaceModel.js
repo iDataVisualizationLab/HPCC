@@ -79,7 +79,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
-    let camera,scene,axesHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
+    let camera,scene,axesHelper,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
@@ -180,6 +180,7 @@ d3.TimeSpace = function () {
     function start() {
         reduceRenderWeight();
         axesHelper.toggleDimension(graphicopt.opt.dim);
+        gridHelper.parent.visible = (graphicopt.opt.dim===3);
         // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
@@ -284,6 +285,10 @@ d3.TimeSpace = function () {
         lines = straightLines;
         linesGroup = straightLinesGroup;
         toggleLine();
+        gridHelper = new THREE.GridHelper( graphicopt.widthG(), 10 );
+        gridHelper.position.z = scaleNormalTimestep.range()[0];
+        gridHelper.rotation.x = -Math.PI / 2;
+        scene.add( new THREE.Object3D().add(gridHelper ));
         scene.add(scatterPlot);
 
         // Add canvas
@@ -441,6 +446,12 @@ d3.TimeSpace = function () {
                             });
                             attributes.size.needsUpdate = true;
                             attributes.alpha.needsUpdate = true;
+                            // add box helper
+                            scene.remove(scene.getObjectByName('boxhelper'));
+                            var box = new THREE.BoxHelper( lines[target.name], 0xdddddd );
+                            box.name = "boxhelper";
+                            scene.add( box );
+
                             // showMetrics(target.name);
                             showMetrics_plotly(target.name);
                         }
@@ -457,6 +468,7 @@ d3.TimeSpace = function () {
                         attributes.size.needsUpdate = true;
                         attributes.alpha.needsUpdate = true;
                         INTERSECTED = [];
+                        scene.remove(scene.getObjectByName('boxhelper'));
                     }
                 }else{ // mouse over group
                     var geometry = points.geometry;
@@ -1235,7 +1247,8 @@ d3.TimeSpace = function () {
     }
     function updateCurveLine(target, d, center) {
         if (curves[target.name]!==undefined) {
-            var curve = new THREE.CatmullRomCurve3( path[target.name].map(p=> new THREE.Vector3(xscale(p.value[0]), yscale(p.value[1]), xscale(p.value[2]) || 0)),false,'catmullrom',0.1);
+            var curve = new THREE.CatmullRomCurve3( path[target.name].map(p=> new THREE.Vector3(xscale(p.value[0]), yscale(p.value[1]), xscale(p.value[2]) || 0)),false,'catmullrom');
+            curve.tension =0.05;
             curves[target.name] = curve;
             var points = curve.getPoints(_.last(path[target.name]).__timestep+1);
             lines[target.name].geometry.setFromPoints(points);
