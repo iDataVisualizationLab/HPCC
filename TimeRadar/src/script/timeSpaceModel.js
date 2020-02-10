@@ -429,7 +429,6 @@ d3.TimeSpace = function () {
                                     INTERSECTED.push(i);
                                     attributes.alpha.array[i] = 1;
                                     lines[d.name].visible = true;
-                                    console.log(d.__timestep)
                                 } else {
                                     attributes.alpha.array[i] = 0.1;
                                     lines[d.name].visible = false;
@@ -841,7 +840,16 @@ d3.TimeSpace = function () {
         }).data(data_in).layout(layout).show(target);
     }
     function showMetrics_plotly(name) {
-        let layout = tooltip_lib.layout();
+        let layout = {
+            paper_bgcolor:"#ddd",
+            plot_bgcolor:"#ddd",
+            margin: {
+                l: 50,
+                r: 50,
+                b: 20,
+                t: 50,
+            },
+        };
         // layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
         // layout.axis.x.tickFormat = [multiFormat];
         // layout.axis.y.label = [];
@@ -1131,63 +1139,106 @@ d3.TimeSpace = function () {
         lineObj.frustumCulled = false;
         return lineObj;
     }
-    function createCurveLine(path,curves){
+    // function createCurveLine(path,curves){
+    //     //QuadraticBezierCurve3
+    //     let lineObj = new THREE.Object3D();
+    //     for (let i=0;i <path.length-1;i++){
+    //         // let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
+    //         // var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
+    //
+    //         var material = new THREE.LineBasicMaterial( {
+    //             color: 0xffffff,
+    //             vertexColors: THREE.VertexColors,
+    //             transparent: true,
+    //             opacity: 0.5} );
+    //         var curve = new THREE.CubicBezierCurve_w3(
+    //             new THREE.Vector3( 0, 0, 0 ),
+    //             new THREE.Vector3( 0, 0, 0 ),
+    //             new THREE.Vector3( 0, 0, 0 ),
+    //             new THREE.Vector3( 0, 0, 0 )
+    //         );
+    //         curves.push(curve);
+    //         var points = curve.getPoints( graphicopt.curveSegment );
+    //         var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    //         // add gradient effect
+    //         colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
+    //         var colors = new Float32Array( (graphicopt.curveSegment+1) * 3 );
+    //         for (let i=0;i<=graphicopt.curveSegment;i++){
+    //             let currentColor = d3.color(colorLineScale(i));
+    //             colors[i*3] = currentColor.r/255;
+    //             colors[i*3+1] = currentColor.g/255;
+    //             colors[i*3+2] = currentColor.b/255;
+    //         }
+    //         geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    //         var curveObject = new THREE.Line( geometry, material );
+    //         curveObject.frustumCulled = false;
+    //         lineObj.add(curveObject);
+    //     }
+    //     return lineObj;
+    // }
+    // function updateCurveLine(target, posPath, d, center) {
+    //     if (curves[target.name].length) {
+    //         if (posPath < curves[target.name].length) {
+    //             var curve = curves[target.name][posPath];
+    //             curve.v0 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+    //             curve.v1 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
+    //             var points = curve.getPoints(graphicopt.curveSegment);
+    //             lines[target.name].children[posPath].geometry.setFromPoints(points);
+    //             lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
+    //             lines[target.name].children[posPath].geometry.computeBoundingSphere();
+    //         }
+    //         if (posPath) {
+    //             var curve = curves[target.name][posPath - 1];
+    //             curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
+    //             curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
+    //             var points = curve.getPoints(graphicopt.curveSegment);
+    //             lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
+    //             lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
+    //             lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
+    //         }
+    //     }
+    // }
+    function createCurveLine(path,curves,key){
         //QuadraticBezierCurve3
         let lineObj = new THREE.Object3D();
-        for (let i=0;i <path.length-1;i++){
-            // let color = new THREE.Color(d3.color(colorarr[path[i].cluster].value)+'');
-            // var material = new THREE.LineBasicMaterial( { color : color.getHex(),transparent: true, opacity: 0.5} );
-
-            var material = new THREE.LineBasicMaterial( {
+        if (path.length>1) {
+            var material = new THREE.LineBasicMaterial({
                 color: 0xffffff,
                 vertexColors: THREE.VertexColors,
                 transparent: true,
-                opacity: 0.5} );
-            var curve = new THREE.CubicBezierCurve_w3(
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 0, 0, 0 ),
-                new THREE.Vector3( 0, 0, 0 )
-            );
-            curves.push(curve);
-            var points = curve.getPoints( graphicopt.curveSegment );
-            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+                opacity: 0.5
+            });
+            var curve = new THREE.CatmullRomCurve3(path.map(p => new THREE.Vector3(0, 0, 0)),false,'catmullrom',0.1);
+            curves[key] = curve;
+            let curveSegment = _.last(path).__timestep+2;
+            var points = curve.getPoints(curveSegment-1);
+            var geometry = new THREE.BufferGeometry().setFromPoints(points);
             // add gradient effect
-            colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
-            var colors = new Float32Array( (graphicopt.curveSegment+1) * 3 );
-            for (let i=0;i<=graphicopt.curveSegment;i++){
-                let currentColor = d3.color(colorLineScale(i));
-                colors[i*3] = currentColor.r/255;
-                colors[i*3+1] = currentColor.g/255;
-                colors[i*3+2] = currentColor.b/255;
+            var colors = new Float32Array(curveSegment * 3);
+            let currentstep = 0;
+            for (let i = 0; i < curveSegment; i++) {
+                if (path[currentstep+1] && path[currentstep+1].__timestep===i) {
+                    currentstep = currentstep+1;
+                }
+                let color = d3.color(colorarr[path[currentstep].cluster].value);
+                colors[i * 3] = color.r / 255;
+                colors[i * 3 + 1] = color.g / 255;
+                colors[i * 3 + 2] = color.b / 255;
             }
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
-            var curveObject = new THREE.Line( geometry, material );
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            var curveObject = new THREE.Line(geometry, material);
+            console.log(curveSegment,path,curveObject)
             curveObject.frustumCulled = false;
-            lineObj.add(curveObject);
+            lineObj = curveObject;
         }
         return lineObj;
     }
-    function updateCurveLine(target, posPath, d, center) {
-        if (curves[target.name].length) {
-            if (posPath < curves[target.name].length) {
-                var curve = curves[target.name][posPath];
-                curve.v0 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
-                curve.v1 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
-                var points = curve.getPoints(graphicopt.curveSegment);
-                lines[target.name].children[posPath].geometry.setFromPoints(points);
-                lines[target.name].children[posPath].geometry.verticesNeedUpdate = true;
-                lines[target.name].children[posPath].geometry.computeBoundingSphere();
-            }
-            if (posPath) {
-                var curve = curves[target.name][posPath - 1];
-                curve.v2 = new THREE.Vector3(xscale(center[0]), yscale(center[1]), xscale(center[2]) || 0);
-                curve.v3 = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
-                var points = curve.getPoints(graphicopt.curveSegment);
-                lines[target.name].children[posPath - 1].geometry.setFromPoints(points);
-                lines[target.name].children[posPath - 1].geometry.verticesNeedUpdate = true;
-                lines[target.name].children[posPath-1].geometry.computeBoundingSphere();
-            }
+    function updateCurveLine(target, d, center) {
+        if (curves[target.name]!==undefined) {
+            var curve = new THREE.CatmullRomCurve3( path[target.name].map(p=> new THREE.Vector3(xscale(p.value[0]), yscale(p.value[1]), xscale(p.value[2]) || 0)),false,'catmullrom',0.1);
+            curves[target.name] = curve;
+            var points = curve.getPoints(_.last(path[target.name]).__timestep+1);
+            lines[target.name].geometry.setFromPoints(points);
         }
     }
     function updateStraightLine(target, posPath, d) {
@@ -1209,17 +1260,30 @@ d3.TimeSpace = function () {
         return lines;
     }
 
+    // function createCurveLines(g){
+    //     colorLineScale.domain([0,graphicopt.curveSegment]);
+    //     let lines = {};
+    //     curves = {};
+    //     Object.keys(path).forEach(k=>{
+    //         curves[k] = [];
+    //         lines[k]= createCurveLine(path[k],curves[k]);
+    //         g.add(lines[k]);
+    //     });
+    //     return lines;
+    // }
+
     function createCurveLines(g){
         colorLineScale.domain([0,graphicopt.curveSegment]);
         let lines = {};
         curves = {};
         Object.keys(path).forEach(k=>{
-            curves[k] = [];
-            lines[k]= createCurveLine(path[k],curves[k]);
+            curves[k] = undefined
+            lines[k]= createCurveLine(path[k],curves,k);
             g.add(lines[k]);
         });
         return lines;
     }
+
     function visiableLine(isvisiable){
         linesGroup.visible = isvisiable;
     }
