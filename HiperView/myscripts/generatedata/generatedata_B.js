@@ -1,7 +1,7 @@
 var sampleS
 d3.json(srcpath+'/myscripts/generatedata/service0206_0806.json',function(dd){bigdata= dd})
 sampleS.timespan = sampleS.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
-timeRange = 2;
+timeRange = 9;
 var csv = 'Series ID';
 sampleS.timespan.filter(t=> t.getDate()===timeRange ).forEach(t=>csv+=(','+t))
 hosts.forEach((h,hi)=>{

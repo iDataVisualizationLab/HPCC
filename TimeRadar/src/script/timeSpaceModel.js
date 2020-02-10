@@ -79,7 +79,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
-    let camera,scene,axesHelper,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
+    let camera,isOrthographic=false,scene,axesHelper,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
@@ -267,8 +267,10 @@ d3.TimeSpace = function () {
         createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
         createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
 
-        far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
-        camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
+        // far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
+        // camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
+        far = graphicopt.width/2*10;
+        camera = new THREE.OrthographicCamera(graphicopt.width / - 2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / - 2, near, far + 1);
         scene = new THREE.Scene();
         axesHelper = createAxes( graphicopt.widthG()/4 );
         scene.background = new THREE.Color(0xffffff);
@@ -298,12 +300,12 @@ d3.TimeSpace = function () {
         // zoom set up
         view = d3.select(renderer.domElement);
         axesHelper.toggleDimension(graphicopt.opt.dim);
-        zoom = d3.zoom()
-            .scaleExtent([getScaleFromZ(far), getScaleFromZ(10)])
-            .on('zoom', () =>  {
-                let d3_transform = d3.event.transform;
-                zoomHandler(d3_transform);
-            });
+        // zoom = d3.zoom()
+        //     .scaleExtent([getScaleFromZ(far), getScaleFromZ(10)])
+        //     .on('zoom', () =>  {
+        //         let d3_transform = d3.event.transform;
+        //         zoomHandler(d3_transform);
+        //     });
         raycaster = new THREE.Raycaster();
         raycaster.params.Points.threshold = graphicopt.component.dot.size;
         mouse = new THREE.Vector2();
@@ -1239,7 +1241,7 @@ d3.TimeSpace = function () {
             }
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
             var curveObject = new THREE.Line(geometry, material);
-            console.log(curveSegment,path,curveObject)
+            // console.log(curveSegment,path,curveObject)
             curveObject.frustumCulled = false;
             lineObj = curveObject;
         }
