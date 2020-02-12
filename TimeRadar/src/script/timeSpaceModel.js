@@ -874,6 +874,7 @@ d3.TimeSpace = function () {
                 type: 'rect',
                 xref: 'x',
                 yref: 'paper',
+                layer: 'below',
                 y0: 0,
                 y1: 1,
                 x0: scaleTime.invert(v.__timestep),
@@ -885,8 +886,11 @@ d3.TimeSpace = function () {
                 }
             };
         });
-        let colorSchema = d3.scaleLinear().range(['#000000','#dddddd']).domain([0,graphicopt.radaropt.schema.length]);
-        layout.colorway = graphicopt.radaropt.schema.map((s,si)=>colorSchema(si))
+        let colorSchema = d3.scaleLinear().range(['#000000','#b8b8b8']).domain(d3.extent(graphicopt.radaropt.schema,d=>d.idroot));
+        let lineType = d3.scaleOrdinal().range(['solid','dot','dashdot']);
+        let markerType = (d)=>d>2?'markers+lines':'lines';
+        // layout.colorway = graphicopt.radaropt.schema.map((s,si)=>colorSchema(s.idroot))
+        layout.colorway = graphicopt.radaropt.schema.map((s,si)=>'#000000')
         layout.shapes[layout.shapes.length - 1].x1 = scaleTime.domain()[1];
         let cdata = datain.filter(d=>d.name===name);
 
@@ -894,8 +898,15 @@ d3.TimeSpace = function () {
             let temp = {x:[],
                 y:[],
                 text:[],
-                mode: 'lines',
+                mode: markerType(s.idroot),
                 hovertemplate: '%{text}',
+                marker:{
+                    symbol:s.id
+                },
+                legendgroup: `group${s.idroot}`,
+                line:{
+                    dash: lineType(s.idroot)
+                }
             };
             hostResults[name][serviceListattr[s.idroot]].forEach((e,ti) => {
                 temp.x.push(scaleTime.invert(ti));
