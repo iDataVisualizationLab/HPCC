@@ -267,10 +267,10 @@ d3.TimeSpace = function () {
         createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
         createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
 
-        // far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
-        // camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
-        far = graphicopt.width/2*10;
-        camera = new THREE.OrthographicCamera(graphicopt.width / - 2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / - 2, near, far + 1);
+        far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
+        camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
+        // far = graphicopt.width/2*10;
+        // camera = new THREE.OrthographicCamera(graphicopt.width / - 2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / - 2, near, far + 1);
         scene = new THREE.Scene();
         axesHelper = createAxes( graphicopt.widthG()/4 );
         scene.background = new THREE.Color(0xffffff);
