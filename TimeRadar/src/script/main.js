@@ -2052,7 +2052,9 @@ $( document ).ready(function() {
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
-            recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [8,10]}},function(){
+
+            let clusternum = (data['timespan'].length<50)?[5,7]:[8,10];
+            recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: clusternum}},function(){
                 handle_dataRaw();
                 initDataWorker();
                 if (!init)

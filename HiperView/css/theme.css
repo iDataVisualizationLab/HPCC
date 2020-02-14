@@ -589,3 +589,19 @@ label {
 .radarTimeSpace .selectionNum::after {
     content: " radars"
 }
+
+#Maincontent .tabs a{
+    font-size: unset;
+    color: gray;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+#Maincontent .tabs .tab {
+    height: auto;
+    line-height: 1.5rem;
+}
+#Maincontent .tabs a.active {
+    border-bottom: 3px solid var(--buttonColor_sub);
+    color: var(--colorMain2);
+    background-color: white;
+}

@@ -144,9 +144,10 @@
                             <option value="serviceWed26Sep_removedmetric" data-date="26 Apr 2019">HPC data - 26 Sep 2018</option>
                             <option value="influxdbThus21Mar_1400_1630"  data-date="21 Mar 2019">HPC data - 21 Mar 2019 (Chill water)</option>
                             <option value="influxdbSun23June2019" data-date="23 Jun 2019">HPC data - 23 Jun 2019 (overheat compute-6-2)</option>
-                            <option value="influxdbSat27Apr_removemetric" selected data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>
+                            <option value="influxdbSat27Apr_removemetric" data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>
                             <option value="influxdb20Apr_withoutJobLoad"  data-date="20 Apr 2019">HPC data - 20 Apr 2019 (with job data)</option>
-                            <option value="influxdb20Sep_2019_withoutJobLoad"  data-date="20 Sep 2019">20 Sep 2019 (with job data)</option>
+                            <option value="influxdb20Sep_2019_withoutJobLoad"  data-date="20 Sep 2019">HPC data - 20 Sep 2019 (with job data)</option>
+                            <option value="influxdb12Feb_2020_withoutJobLoad" selected data-date="12 Feb 2020">HPC data - 12 Feb 2020 (with job data)</option>
                             <option value="csvEmployment"  data-date="1 Jan 1999">US employment data - people</option>
                             <option value="csvEmploymentRate"  data-date="1 Jan 1999">US employment rate data - percentage</option>
                             <option value="csvEmploymentNetchange_drop"  data-date="1 Jan 1999">US employment rate data - %nets change</option>
@@ -658,31 +659,41 @@
                     <canvas id="modelWorkerScreen"></canvas>
                     <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
                     <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none"></svg>
-                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0">
-                        <table>
-                        </table>
-                        <div id="modelSelectionInformation" class="hide" >
+                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0; width: 300px">
+                        <div id="modelSelectionInformation">
                             <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
                                 <span class="selectionNum"></span>
                             </div>
-                            <div class="valign-wrapper relativemap first" style="background: white; position: relative">
-                                <svg class="svgHolder">
+                            <ul class="tabs" style="margin-top: 10px">
+                                <li class="tab col s3"><a class="active" href="#modelSetting">Setting</a></li>
+                                <li class="tab col s3"><a href="#modelSelectionTool">Selection</a></li>
+                                <li class="tab col s3"><a href="#modelRanking">Ranking</a></li>
+                            </ul>
+                            <div id="modelSetting">
+                                <table>
+                                </table>
+                            </div>
+                            <div id="modelSelectionTool">
+                                <div class="valign-wrapper relativemap first" style="background: white; position: relative; width: 100%">
+                                    <svg class="svgHolder">
 
-                                </svg>
-                                <input class="clusterlabel browser-default truncate center-align col hide" type="text" value="8 metric(s) undefined" style=" position: absolute;transform: translate(0,-100%);">
-                                <div class="actionHolder">
+                                    </svg>
+                                    <input class="clusterlabel browser-default truncate center-align col hide" type="text" value="8 metric(s) undefined" style=" position: absolute;transform: translate(0,-100%);">
+                                    <div class="actionHolder">
 
+                                    </div>
+                                </div>
+                                <button class="btn-small waves-effect waves-light valign-wrapper newGroup hide" style="width: 100%" type=submit>
+                                    <i class="material-icons left">add</i> New group from selection
+                                </button>
+                                <div class="confirm hide" style="margin-top: 15px;margin-bottom: 8px">
+                                    <div class="col s8 offset-s2">
+                                        <button type=submit class="btn-small invert animatIcon col ok s6"><i class="material-icons">check</i><div>OK</div></button>
+                                        <button type=submit class="btn-small animatIcon col cancel s6"><i class="material-icons">clear</i><div>CANCEL</div></button>
+                                    </div>
                                 </div>
                             </div>
-                            <button class="btn-small waves-effect waves-light valign-wrapper newGroup hide" style="width: 100%" type=submit>
-                                <i class="material-icons left">add</i> New group from selection
-                            </button>
-                            <div class="confirm hide" style="margin-top: 15px;margin-bottom: 8px">
-                                <div class="col s8 offset-s2">
-                                    <button type=submit class="btn-small invert animatIcon col ok s6"><i class="material-icons">check</i><div>OK</div></button>
-                                    <button type=submit class="btn-small animatIcon col cancel s6"><i class="material-icons">clear</i><div>CANCEL</div></button>
-                                </div>
-                            </div>
+                            <div id="modelRanking"></div>
                         </div>
                     </div>
 

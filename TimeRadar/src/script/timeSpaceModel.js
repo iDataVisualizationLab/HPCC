@@ -47,7 +47,8 @@ d3.TimeSpace = function () {
             component:{
                 dot:{size:5,opacity:0.2},
                 link:{size:0.8,opacity:0.1},
-            }
+            },
+            serviceIndex: 0,
         },
         controlPanelGeneral = {
             isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
@@ -56,7 +57,7 @@ d3.TimeSpace = function () {
             linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
-            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start();}},
+            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start(graphicopt.opt.dim===3);}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -75,7 +76,7 @@ d3.TimeSpace = function () {
         runopt = {},
         isBusy = false,
         stop = false;
-    let modelWorker,colorscale,reset;
+    let modelWorker,plotlyWorker,workerList=[],colorscale,reset;
     let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
@@ -89,6 +90,7 @@ d3.TimeSpace = function () {
     let colorLineScale = d3.scaleLinear().interpolate(d3.interpolateCubehelix);
     let createRadar,createRadarTable;
     //----------------------drag-----------------------
+    let allSelected_Data;
     var lassoTool,mouseoverTrigger = true;
     let drag = ()=>{
         function dragstarted(d) {
@@ -99,6 +101,7 @@ d3.TimeSpace = function () {
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             lassoTool.lassoPolygon = [coordinator];
             lassoTool.start();
+            lassoTool.isend = false;
             lassoTool.needRender = true;
         }
 
@@ -114,6 +117,7 @@ d3.TimeSpace = function () {
 
         function dragended(d) {
             mouseoverTrigger = true;
+            showMetricsArr_plotly(allSelected_Data)
             lassoTool.end();
         }
 
@@ -129,7 +133,7 @@ d3.TimeSpace = function () {
                 lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
             reset= false;
             d3.select('#modelWorkerScreen').call(drag());
-            d3.select('#modelSelectionInformation').classed('hide',false);
+            // d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
         }else{
             if(lassoTool)
@@ -140,7 +144,7 @@ d3.TimeSpace = function () {
                 mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
                 mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             });
-            d3.select('#modelSelectionInformation').classed('hide',true);
+            // d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
     }
@@ -177,7 +181,7 @@ d3.TimeSpace = function () {
         }
         controlPanelGeneral.linkConnect.callback();
     }
-    function start() {
+    function start(skipRecalculate) {
         reduceRenderWeight();
         axesHelper.toggleDimension(graphicopt.opt.dim);
         gridHelper.parent.visible = (graphicopt.opt.dim===3);
@@ -204,9 +208,11 @@ d3.TimeSpace = function () {
         }
 
         svg.selectAll('*').remove();
-        if (modelWorker)
-            modelWorker.terminate();
+        if(skipRecalculate)
+            return;
+        terminateWorker();
         modelWorker = new Worker(self.workerPath);
+        workerList[0] = modelWorker;
         // modelWorker.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
         modelWorker.postMessage({action: "initcanvas", canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}});
         console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
@@ -502,7 +508,7 @@ d3.TimeSpace = function () {
 
 
                     var allSelected = lassoTool.select();
-                    var allSelected_Data = [];
+                    allSelected_Data = [];
                     for (var i = 0; i < allSelected.length; i++) {
                         allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
                         let currentIndex = lassoTool.collection[i];
@@ -571,7 +577,8 @@ d3.TimeSpace = function () {
         btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('title','merge').attr('value','merge').on('click',actionBtn);
         btg_new.append('i').attr('class','btn_item material-icons hide').html('delete').attr('title','delete').attr('value','delete').on('click',actionBtn);
         dialogModel();
-        d3.select('#modelSelectionInformation .newGroup').classed('hide',!selectedCluster.length)
+        d3.select('#modelSelectionInformation .newGroup')
+            .classed('hide',!selectedCluster.length)
             .on('click',function(){
                 selectedCluster.action ={root: newCluster.index};
                 selectedCluster.action[newCluster.name] = {name: newCluster.name, index: newCluster.index, action: 'create', data: dataArr};
@@ -864,11 +871,7 @@ d3.TimeSpace = function () {
                 t: 50,
             },
         };
-        // layout.axis.x.domain = [[sampleS.timespan[0], last_timestep]]; // TODO replace this!
-        // layout.axis.x.tickFormat = [multiFormat];
-        // layout.axis.y.label = [];
-        // layout.axis.y.domain = [];
-        // layout.axis.y.tickFormat = [];
+
         layout.shapes = path[name].map((v, i) => {
             return {
                 type: 'rect',
@@ -930,21 +933,21 @@ d3.TimeSpace = function () {
         };
         layout.xaxis = {
             autorange: true,
-            rangeselector: {buttons: [
-                    {
-                        count: 1,
-                        label: '5m',
-                        step: 'minute',
-                        stepmode: 'forward'
-                    },
-                    {
-                        count: 6,
-                        label: '1h',
-                        step: 'hour',
-                        stepmode: 'forward'
-                    },
-                    {step: 'all'}
-                ]},
+            // rangeselector: {buttons: [
+            //         {
+            //             count: 1,
+            //             label: '5m',
+            //             step: 'minute',
+            //             stepmode: 'forward'
+            //         },
+            //         {
+            //             count: 6,
+            //             label: '1h',
+            //             step: 'hour',
+            //             stepmode: 'forward'
+            //         },
+            //         {step: 'all'}
+            //     ]},
             range: scaleTime.domain(),
             rangeslider: {range: scaleTime.domain()},
         };
@@ -956,6 +959,32 @@ d3.TimeSpace = function () {
         //     margin: tooltip_opt.margin
         // }).data(data_in).layout(layout).show(target);
     }
+    function showMetricsArr_plotly(selectedData) {
+        if (plotlyWorker)
+            plotlyWorker.terminate();
+        plotlyWorker = new Worker('src/script/worker/plotlyWorker.js');
+        workerList[1] = plotlyWorker;
+        setTimeout(()=> {
+            let namelist = _.uniq(selectedData.map(d=>d.name));
+            let hostResults_temp ={};
+            namelist.forEach(n=>hostResults_temp[n] =hostResults[n]);
+            plotlyWorker.postMessage({
+                action: "initDataRaw",
+                // selectedData: selectedData,
+                namelist: namelist,
+                schema: graphicopt.radaropt.schema,
+                serviceIndex: graphicopt.serviceIndex,
+                serviceListattr: serviceListattr,
+                hostResults: hostResults_temp,
+                scaleTime: {domain: scaleTime.domain(), range: scaleTime.range()}
+            });
+            plotlyWorker.addEventListener('message', ({data}) => {
+                Plotly.newPlot('myHnav', data.data_in, data.layout);
+                plotlyWorker.terminate();
+            })
+        })
+    }
+
     function setUpZoom() {
         // view.call(zoom);
         let initial_scale = 1;
@@ -1118,14 +1147,22 @@ d3.TimeSpace = function () {
     }
 
     master.stop = function(){
-        if (modelWorker) {
-            modelWorker.terminate();
-            stop = true;
-            // renderSvgRadar();
-        }
+        terminateWorker();
+        stop = true;
+        // if (modelWorker) {
+        //     modelWorker.terminate();
+        //     plotlyWorker.terminate();
+        //     stop = true;
+        //     // renderSvgRadar();
+        // }
     };
 
-
+    function terminateWorker() {
+        workerList.forEach(w=>{
+            w.terminate();
+        });
+        workerList.length = 0;
+    }
 
     function positionLink_canvas(path, ctx) { //path 4 element
         // return p = new Path2D(positionLink(a,b));
@@ -1338,8 +1375,14 @@ d3.TimeSpace = function () {
     };
     let self = this;
     master.generateTable = function(){
+        $('#modelSelectionInformation .tabs').tabs();
         d3.select('#modelWorkerInformation table').selectAll('*').remove();
-        table_info = d3.select('#modelWorkerInformation table').styles({'width':tableWidth+'px'});
+        table_info = d3.select('#modelWorkerInformation table')
+            .html(` <colgroup>
+       <col span="1" style="width: 40%;">
+       <col span="1" style="width: 60%;">
+    </colgroup>`)
+            // .styles({'width':tableWidth+'px'});
         let tableData = [
             [
                 {text:"Input",type:"title"},
