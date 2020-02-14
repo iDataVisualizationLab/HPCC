@@ -605,3 +605,17 @@ label {
     color: var(--colorMain2);
     background-color: white;
 }
+
+.inline {
+    display: inline-block;
+}
+select.inline{
+    padding: 0;
+    height: auto;
+    display: inline-block;
+    width: auto;
+}
+.tabHolder {
+    background-color: white;
+    padding: 10px;
+}

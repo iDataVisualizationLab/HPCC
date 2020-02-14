@@ -51,7 +51,7 @@ d3.TimeSpace = function () {
             serviceIndex: 0,
         },
         controlPanelGeneral = {
-            isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
+            // isSelectionMode: {text: "Selection", type: "checkbox", variable: 'isSelectionMode', width: '100px',callback:()=>{handle_selection_switch(graphicopt.isSelectionMode);}},
             // linkConnect: {text: "Draw link", type: "checkbox", variable: 'linkConnect', width: '100px',callback:()=>visiableLine(graphicopt.linkConnect)},
             // isCurve: {text: "Curve link", type: "checkbox", variable: 'isCurve', width: '100px',callback:()=>(toggleLine(),render(!isBusy))},
             linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
@@ -261,7 +261,7 @@ d3.TimeSpace = function () {
             target.__metrics.position = [0,0,0];
             if (!path[target.name])
                 path[target.name] = [];
-            path[target.name].push({name: target.name,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
+            path[target.name].push({name: target.name,index:i,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
         });
 
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
@@ -336,6 +336,8 @@ d3.TimeSpace = function () {
         d3.select('#modelWorkerInformation+.title').text(self.name);
         handle_selection_switch(graphicopt.isSelectionMode);
 
+        d3.select('#modelSortBy').on("change", function () {handleTopSort(this.value)})
+
         drawSummaryRadar([],handle_data_summary([]),'#ffffff');
         start();
 
@@ -357,6 +359,45 @@ d3.TimeSpace = function () {
             visiableLine(graphicopt.linkConnect);
         }
     }
+    function handleTopSort(mode){
+        let top =[];
+        switch (mode) {
+            case 'Distance Travel':
+                for (let k in path){
+                    if (path[k].distance)
+                        top.push({key: path[k][0].name,value:path[k].distance});
+                }
+
+                break;
+            case 'Change status':
+                for (let k in path){
+                        top.push({key: path[k][0].name,value:path[k].length});
+                }
+
+                break;
+            default:
+                break
+        }
+        top.sort((a,b)=>b.value-a.value);
+        top = top.slice(0,10)// get top 10
+        updateTop10(top);
+    }
+    let overwrite ;
+    function updateTop10(data){
+        let old = d3.select('#modelRank').selectAll('div.rankItem')
+            .data(data,d=>d.key);
+        old.exit().remove();
+        let newHolder = old.enter().append('div')
+            .attr('class','rankItem');
+        newHolder.append('span').attr('class','name');
+        d3.select('#modelRank').selectAll('div.rankItem')
+            .style('order',(d,i)=>i)
+            .on('mouseover',d=>(overwrite=path[d.key],hightlightNode(path[d.key])))
+            .on('mouseout',d=>(overwrite=undefined))
+            .select('.name').text(d=>d.key)
+
+    }
+
     function handle_cluster(clusterin,data){
         cluster = clusterin;
         let nesradar = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(data);
@@ -417,6 +458,59 @@ d3.TimeSpace = function () {
         });
     }
 
+    function hightlightNode(intersects) { // INTERSECTED
+        var geometry = points.geometry;
+        var attributes = geometry.attributes;
+        if (intersects.length > 0) {
+            if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+                let target = datain[intersects[0].index];
+                INTERSECTED.forEach((d, i) => {
+                    attributes.size.array[d] = graphicopt.component.dot.size;
+                });
+                INTERSECTED = [];
+                datain.forEach((d, i) => {
+                    if (d.name === target.name) {
+                        INTERSECTED.push(i);
+                        attributes.alpha.array[i] = 1;
+                        lines[d.name].visible = true;
+                    } else {
+                        attributes.alpha.array[i] = 0.1;
+                        lines[d.name].visible = false;
+                    }
+                });
+                let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
+                    .domain([INTERSECTED.length, 0]);
+                INTERSECTED.forEach((d, i) => {
+                    attributes.size.array[d] = rScale(i);
+                });
+                attributes.size.needsUpdate = true;
+                attributes.alpha.needsUpdate = true;
+                // add box helper
+                scene.remove(scene.getObjectByName('boxhelper'));
+                var box = new THREE.BoxHelper(lines[target.name], 0xdddddd);
+                box.name = "boxhelper";
+                scene.add(box);
+
+                // showMetrics(target.name);
+                showMetrics_plotly(target.name);
+            }
+        } else if (INTERSECTED.length || ishighlightUpdate) {
+            ishighlightUpdate = false;
+            tooltip_lib.hide(); // hide tooltip
+            datain.forEach((d, i) => {
+                attributes.alpha.array[i] = 1;
+                lines[d.name].visible = true;
+            });
+            INTERSECTED.forEach((d, i) => {
+                attributes.size.array[d] = graphicopt.component.dot.size;
+            });
+            attributes.size.needsUpdate = true;
+            attributes.alpha.needsUpdate = true;
+            INTERSECTED = [];
+            scene.remove(scene.getObjectByName('boxhelper'));
+        }
+    }
+
     function animate() {
         if (!stop) {
             // visiableLine(graphicopt.linkConnect);
@@ -426,58 +520,9 @@ d3.TimeSpace = function () {
             // console.log(mouse)
             if (mouseoverTrigger) { // not have filter
                 if (!filter.length) {
-                    var intersects = raycaster.intersectObject(points);
+                    var intersects = overwrite||raycaster.intersectObject(points);
                     //count and look after all objects in the diamonds group
-                    var geometry = points.geometry;
-                    var attributes = geometry.attributes;
-                    if (intersects.length > 0) {
-                        if (INTERSECTED.indexOf(intersects[0].index) === -1) {
-                            let target = datain[intersects[0].index];
-                            INTERSECTED.forEach((d, i) => {
-                                attributes.size.array[d] = graphicopt.component.dot.size;
-                            });
-                            INTERSECTED = [];
-                            datain.forEach((d, i) => {
-                                if (d.name === target.name) {
-                                    INTERSECTED.push(i);
-                                    attributes.alpha.array[i] = 1;
-                                    lines[d.name].visible = true;
-                                } else {
-                                    attributes.alpha.array[i] = 0.1;
-                                    lines[d.name].visible = false;
-                                }
-                            });
-                            let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
-                                .domain([INTERSECTED.length, 0]);
-                            INTERSECTED.forEach((d, i) => {
-                                attributes.size.array[d] = rScale(i);
-                            });
-                            attributes.size.needsUpdate = true;
-                            attributes.alpha.needsUpdate = true;
-                            // add box helper
-                            scene.remove(scene.getObjectByName('boxhelper'));
-                            var box = new THREE.BoxHelper( lines[target.name], 0xdddddd );
-                            box.name = "boxhelper";
-                            scene.add( box );
-
-                            // showMetrics(target.name);
-                            showMetrics_plotly(target.name);
-                        }
-                    } else if (INTERSECTED.length||ishighlightUpdate) {
-                        ishighlightUpdate = false;
-                        tooltip_lib.hide(); // hide tooltip
-                        datain.forEach((d, i) => {
-                            attributes.alpha.array[i] = 1;
-                            lines[d.name].visible = true;
-                        });
-                        INTERSECTED.forEach((d, i) => {
-                            attributes.size.array[d] = graphicopt.component.dot.size;
-                        });
-                        attributes.size.needsUpdate = true;
-                        attributes.alpha.needsUpdate = true;
-                        INTERSECTED = [];
-                        scene.remove(scene.getObjectByName('boxhelper'));
-                    }
+                    hightlightNode(intersects);
                 }else{ // mouse over group
                     var geometry = points.geometry;
                     var attributes = geometry.attributes;
@@ -1089,7 +1134,7 @@ d3.TimeSpace = function () {
     let mapIndex =[];
 
 
-    function render (isCurve){
+    function render (islast){
         if(solution) {
             createRadar = _.partialRight(createRadar_func,'timeSpace radar', graphicopt.radaropt, colorscale);
             solution.forEach(function (d, i) {
@@ -1120,7 +1165,21 @@ d3.TimeSpace = function () {
                 updateLine(target, posPath, d, center[target.cluster]);
 
             });
-
+            if (islast){
+                for (let name in path){
+                    let temp;
+                    path[name].forEach((p,i)=>{
+                        if (!i){
+                            path[name].distance = 0;
+                            temp = p.value;
+                            return;
+                        }else{
+                            path[name].distance += distance(path[name][i-1].value,p.value)
+                        }
+                    })
+                }
+                handleTopSort($('#modelSortBy').val())
+            }
             points.geometry.attributes.position.needsUpdate = true;
             points.geometry.boundingBox = null;
             points.geometry.computeBoundingSphere();
@@ -1375,7 +1434,11 @@ d3.TimeSpace = function () {
     };
     let self = this;
     master.generateTable = function(){
-        $('#modelSelectionInformation .tabs').tabs();
+        $('#modelSelectionInformation .tabs').tabs({
+            onShow: function(){
+                graphicopt.isSelectionMode = this.index===1;
+                handle_selection_switch(graphicopt.isSelectionMode)}
+        });
         d3.select('#modelWorkerInformation table').selectAll('*').remove();
         table_info = d3.select('#modelWorkerInformation table')
             .html(` <colgroup>

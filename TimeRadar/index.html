@@ -669,11 +669,11 @@
                                 <li class="tab col s3"><a href="#modelSelectionTool">Selection</a></li>
                                 <li class="tab col s3"><a href="#modelRanking">Ranking</a></li>
                             </ul>
-                            <div id="modelSetting">
+                            <div id="modelSetting" class="tabHolder">
                                 <table>
                                 </table>
                             </div>
-                            <div id="modelSelectionTool">
+                            <div id="modelSelectionTool" class="tabHolder no-pad">
                                 <div class="valign-wrapper relativemap first" style="background: white; position: relative; width: 100%">
                                     <svg class="svgHolder">
 
@@ -693,7 +693,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="modelRanking"></div>
+                            <div id="modelRanking" class="tabHolder">
+                                <div  class="row valign-wrapper">
+                                    <label for="modelSortBy" class="col s4">Sort by: </label>
+                                    <select id="modelSortBy" class="col s7 inline">
+                                        <option selected>Distance Travel</option>
+                                        <option>Change status</option>
+                                    </select>
+                                </div>
+                                <div class="row" id="modelRank">
+
+                                </div>
+                            </div>
                         </div>
                     </div>
 
