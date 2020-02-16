@@ -107,6 +107,7 @@
         <tr><td>Time interval:</td><td class="interval"></td></tr>
         <tr><td>Total time step:</td><td class="totalstep"></td></tr>
         <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+        <tr><td>#Data points:</td><td class="datanum"></td></tr>
         </tbody>
     </table>
 </div>
@@ -652,6 +653,14 @@
                     </svg>
                 </svg>
                 <div id="modelWorkerContent" class="hide" style="position:relative;background-color: white">
+                    <div id="modelLoading" class="loading hidden">
+                        <div class="progressDiv hidden">
+                            <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
+                            <div class="progress spinnerC center" style="width: 70%;">
+                                <div class="determinate" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="overlaySide horizontal">
                         <a class="openbtn btn-floating btn waves-effect waves-light pulse" data-target=".sideHnavs" data-source="#Maincontent" data-class="sidehIn" data-link="#hNavbtn" id="hNavbtn" onclick="openNav(this)">
                             <i class="material-icons">keyboard_arrow_down</i></a>
@@ -659,7 +668,7 @@
                     <canvas id="modelWorkerScreen"></canvas>
                     <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
                     <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none"></svg>
-                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0; width: 300px">
+                    <div id="modelWorkerInformation" style="position:absolute;top:0;left:0; width: 300px; z-index: 10 ">
                         <div id="modelSelectionInformation">
                             <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
                                 <span class="selectionNum"></span>
@@ -697,8 +706,8 @@
                                 <div  class="row valign-wrapper">
                                     <label for="modelSortBy" class="col s4">Sort by: </label>
                                     <select id="modelSortBy" class="col s7 inline">
-                                        <option selected>Distance Travel</option>
-                                        <option>Change status</option>
+                                        <option value="Distance Travel" selected>Average travel distance</option>
+                                        <option value="Change status">#Status changes</option>
                                     </select>
                                 </div>
                                 <div class="row" id="modelRank">

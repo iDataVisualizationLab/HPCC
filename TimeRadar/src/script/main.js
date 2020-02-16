@@ -342,7 +342,7 @@ let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker;
 let isbusy = false, imageRequest = false, isanimation=false;
-let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0};
+let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0,datanum:0};
 function makedataworker(){
     if (getDataWorker)
         getDataWorker.terminate();
@@ -1600,6 +1600,15 @@ function handle_dataRaw() {
     //     mouseleave: tsneTS.unhightlight,
     // });
 }
+
+function requestRedraw() {
+    if (!init) {
+        onchangeVizType();
+        if (!onchangeVizdata())
+            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined, undefined, undefined, true).draw().drawComp();
+    }
+}
+
 function onchangeCluster() {
     cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     tsnedata = {};
@@ -1642,11 +1651,7 @@ function onchangeCluster() {
     handle_clusterinfo();
 
     //tsne
-    if (!init) {
-        onchangeVizType();
-        if (!onchangeVizdata())
-            jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined, undefined, undefined, true).draw().drawComp();
-    }
+    requestRedraw();
 }
 let handle_data_TimeSpace;
 let mainviz = jobMap;
@@ -2638,16 +2643,7 @@ function recomendColor (clusterarr) {
     // });
     colorCluster.range(colorarray).domain(orderarray)
 }
-function onMergeSuperGroup() {
-    clusterGroup = {9:0,2:0,5:0,8:0};
-    // testing ----------
-    hosts.forEach(h => {
-        tsnedata[h.name].forEach(d=>{
-            if (clusterGroup[d.cluster]!==undefined)
-                d.cluster = clusterGroup[d.cluster];
-        })
-    })
-}
+
 function handle_clusterinfo () {
     let data_info = [['Grouping Method:',group_opt.clusterMethod]];
     d3.select(`#${group_opt.clusterMethod}profile`).selectAll('label').each(function(d,i) {
@@ -2716,4 +2712,20 @@ function similarityCal(data){
     function similarity (a,b){
         return Math.sqrt(d3.sum(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
     }
+}
+
+// test zone
+function onMergeSuperGroup() {
+    clusterGroup = {9:0,2:0,5:0,8:0};
+    // testing ----------
+    hosts.forEach(h => {
+        tsnedata[h.name].forEach(d=>{
+            if (clusterGroup[d.cluster]!==undefined)
+                d.cluster = clusterGroup[d.cluster];
+        })
+    })
+}
+function onVisibleGroup(groupName,ishide){
+    cluster_info.find(d=>d.name==groupName).hide = ishide;
+    requestRedraw();
 }

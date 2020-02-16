@@ -208,9 +208,14 @@ d3.TimeSpace = function () {
         }
 
         svg.selectAll('*').remove();
-        if(skipRecalculate)
+        if(skipRecalculate) {
+            reduceRenderWeight(true);
             return;
+        }
+        mouseoverTrigger = false;
         terminateWorker();
+        preloader(true,1,'Init data...','#modelLoading');
+        let firstReturn = true;
         modelWorker = new Worker(self.workerPath);
         workerList[0] = modelWorker;
         // modelWorker.postMessage({action:"initcanvas", canvas: offscreen, canvasopt: {width: graphicopt.widthG(), height: graphicopt.heightG()}}, [offscreen]);
@@ -227,6 +232,10 @@ d3.TimeSpace = function () {
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
+                    if(firstReturn) {
+                        preloader(false, undefined, undefined, '#modelLoading');
+                        firstReturn = false;
+                    }
                     isBusy = true;
                     xscale.domain(data.xscale.domain);
                     yscale.domain(data.yscale.domain);
@@ -237,6 +246,7 @@ d3.TimeSpace = function () {
                     break;
                 case "stable":
                     modelWorker.terminate();
+                    mouseoverTrigger = true;
                     render(true);
                     reduceRenderWeight(true);
                     break;
@@ -248,6 +258,7 @@ d3.TimeSpace = function () {
 
     master.init = function(arr,clusterin) {
         reset = true;
+        mouseoverTrigger = false;
         solution = [];
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
@@ -464,9 +475,9 @@ d3.TimeSpace = function () {
         if (intersects.length > 0) {
             if (INTERSECTED.indexOf(intersects[0].index) === -1) {
                 let target = datain[intersects[0].index];
-                INTERSECTED.forEach((d, i) => {
-                    attributes.size.array[d] = graphicopt.component.dot.size;
-                });
+                // INTERSECTED.forEach((d, i) => {
+                //     attributes.size.array[d] = graphicopt.component.dot.size;
+                // });
                 INTERSECTED = [];
                 datain.forEach((d, i) => {
                     if (d.name === target.name) {
@@ -478,12 +489,12 @@ d3.TimeSpace = function () {
                         lines[d.name].visible = false;
                     }
                 });
-                let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
-                    .domain([INTERSECTED.length, 0]);
-                INTERSECTED.forEach((d, i) => {
-                    attributes.size.array[d] = rScale(i);
-                });
-                attributes.size.needsUpdate = true;
+                // let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
+                //     .domain([INTERSECTED.length, 0]);
+                // INTERSECTED.forEach((d, i) => {
+                //     attributes.size.array[d] = rScale(i);
+                // });
+                // attributes.size.needsUpdate = true;
                 attributes.alpha.needsUpdate = true;
                 // add box helper
                 scene.remove(scene.getObjectByName('boxhelper'));
@@ -538,7 +549,7 @@ d3.TimeSpace = function () {
                     });
                     attributes.alpha.needsUpdate = true;
                 }
-            }else if (lassoTool.needRender) {
+            }else if (lassoTool&&lassoTool.needRender) {
                 let newClustercolor = d3.color('#000000');
                 try {
                     for (var i = 0; i < lassoTool.collection.length; i++) {
@@ -1176,9 +1187,10 @@ d3.TimeSpace = function () {
                         }else{
                             path[name].distance += distance(path[name][i-1].value,p.value)
                         }
-                    })
+                    });
+                    path[name].distance /= path[name].length;
                 }
-                handleTopSort($('#modelSortBy').val())
+                handleTopSort($('#modelSortBy').val());
             }
             points.geometry.attributes.position.needsUpdate = true;
             points.geometry.boundingBox = null;
@@ -1251,7 +1263,7 @@ d3.TimeSpace = function () {
 
 
         var material = new THREE.LineBasicMaterial( {
-            opacity:0.5,
+            opacity:0.2,
             color: 0xffffff,
             vertexColors: THREE.VertexColors,
             transparent: true
@@ -1327,18 +1339,18 @@ d3.TimeSpace = function () {
                 color: 0xffffff,
                 vertexColors: THREE.VertexColors,
                 transparent: true,
-                opacity: 0.5
+                opacity: 0.2
             });
             var curve = new THREE.CatmullRomCurve3(path.map(p => new THREE.Vector3(0, 0, 0)),false,'catmullrom',0.1);
             curves[key] = curve;
-            let curveSegment = _.last(path).__timestep+2;
+            let curveSegment = _.last(path).__timestep*3+2;
             var points = curve.getPoints(curveSegment-1);
             var geometry = new THREE.BufferGeometry().setFromPoints(points);
             // add gradient effect
             var colors = new Float32Array(curveSegment * 3);
             let currentstep = 0;
             for (let i = 0; i < curveSegment; i++) {
-                if (path[currentstep+1] && path[currentstep+1].__timestep===i) {
+                if (path[currentstep*3+1] && path[currentstep*3+1].__timestep===i) {
                     currentstep = currentstep+1;
                 }
                 let color = d3.color(colorarr[path[currentstep].cluster].value);
@@ -1359,7 +1371,7 @@ d3.TimeSpace = function () {
             var curve = new THREE.CatmullRomCurve3( path[target.name].map(p=> new THREE.Vector3(xscale(p.value[0]), yscale(p.value[1]), xscale(p.value[2]) || 0)),false,'catmullrom');
             curve.tension =0.05;
             curves[target.name] = curve;
-            var points = curve.getPoints(_.last(path[target.name]).__timestep+1);
+            var points = curve.getPoints(_.last(path[target.name]).__timestep*3+1);
             lines[target.name].geometry.setFromPoints(points);
         }
     }
@@ -1681,7 +1693,6 @@ let windowsSize = 1;
 // let timeWeight = 0;
 function handle_data_model(tsnedata,isKeepUndefined) {
     windowsSize = windowsSize||1;
-    console.log(windowsSize);
     // get windown surrounding
     let windowSurrounding =  (windowsSize - 1)/2;
     let dataIn = [];
@@ -1698,7 +1709,9 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             currentData.__timestep = axis_arr[i].timestep;
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
-            if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+            let appendCondition = !cluster_info[currentData.cluster].hide;
+            appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
+            if (appendCondition) {
             // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
             // // add all points

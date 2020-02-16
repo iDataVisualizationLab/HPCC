@@ -995,6 +995,7 @@ function updateDatainformation(timearray,filename){
     dataInformation.timerange = millisecondsToStr(_.last(timearray)-timearray[0]);
     dataInformation.interval = millisecondsToStr(timearray[1] - timearray[0]);
     dataInformation.totalstep = timearray.length;
+    dataInformation.datanum = d3.format(",.0f")(dataInformation.totalstep*dataInformation.hostsnum);
     let dataholder = d3.select('#datainformation');
     for (key in dataInformation)
         dataholder.select(`.${key}`).text(dataInformation[key]);
