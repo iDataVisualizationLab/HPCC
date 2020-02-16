@@ -1070,3 +1070,17 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
     });
     return datapoint;
 }
+function ordinal_suffix_of(i,sep) {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return sep?'st':(i + "st");
+    }
+    if (j == 2 && k != 12) {
+        return sep?'nd': (i + "nd");
+    }
+    if (j == 3 && k != 13) {
+        return sep?'rd': (i + "rd");
+    }
+    return sep?'th': (i + "th");
+}

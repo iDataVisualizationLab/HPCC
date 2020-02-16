@@ -57,7 +57,7 @@ d3.TimeSpace = function () {
             linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
-            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,3], width: '100px',callback:()=>{obitTrigger=true;start(graphicopt.opt.dim===3);}},
+            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(graphicopt.opt.dim===2.5);}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -80,7 +80,7 @@ d3.TimeSpace = function () {
     let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
-    let camera,isOrthographic=false,scene,axesHelper,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
+    let camera,isOrthographic=false,scene,axesHelper,axesTime,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
         scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
     let fov = 100,
@@ -184,7 +184,7 @@ d3.TimeSpace = function () {
     function start(skipRecalculate) {
         reduceRenderWeight();
         axesHelper.toggleDimension(graphicopt.opt.dim);
-        gridHelper.parent.visible = (graphicopt.opt.dim===3);
+        gridHelper.parent.visible = (graphicopt.opt.dim==2.5);
         // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
@@ -226,7 +226,7 @@ d3.TimeSpace = function () {
         modelWorker.postMessage({action: "colorscale", value: colorarr});
         // adjust dimension -------------
         let opt = JSON.parse(JSON.stringify(graphicopt.opt)); // clone option
-        opt.dim = 2;
+        opt.dim = Math.floor(opt.dim);
         // end - adjust dimension
         modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
@@ -274,7 +274,7 @@ d3.TimeSpace = function () {
                 path[target.name] = [];
             path[target.name].push({name: target.name,index:i,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
         });
-
+        console.log(datain.filter(d=>d[0]===-1))
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
         scaleNormalTimestep.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
@@ -290,6 +290,7 @@ d3.TimeSpace = function () {
         // camera = new THREE.OrthographicCamera(graphicopt.width / - 2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / - 2, near, far + 1);
         scene = new THREE.Scene();
         axesHelper = createAxes( graphicopt.widthG()/4 );
+        axesTime = createTimeaxis();
         scene.background = new THREE.Color(0xffffff);
         scatterPlot = new THREE.Object3D();
         scatterPlot.add( axesHelper );
@@ -382,6 +383,7 @@ d3.TimeSpace = function () {
                 break;
             case 'Change status':
                 for (let k in path){
+                    if (path[k].length>1)
                         top.push({key: path[k][0].name,value:path[k].length});
                 }
 
@@ -389,23 +391,29 @@ d3.TimeSpace = function () {
             default:
                 break
         }
-        top.sort((a,b)=>b.value-a.value);
-        top = top.slice(0,10)// get top 10
+        top.sort((a,b)=>b.value-a.value).forEach((d,i)=>d.order = i);
+        top = top.slice(0,10);// get top 10
         updateTop10(top);
     }
     let overwrite ;
     function updateTop10(data){
-        let old = d3.select('#modelRank').selectAll('div.rankItem')
+        d3.select('#modelRank tbody').selectAll('tr.rankItem').remove();
+        let old = d3.select('#modelRank tbody').selectAll('tr.rankItem')
             .data(data,d=>d.key);
         old.exit().remove();
-        let newHolder = old.enter().append('div')
+        let newHolder = old.enter().append('tr')
             .attr('class','rankItem');
-        newHolder.append('span').attr('class','name');
-        d3.select('#modelRank').selectAll('div.rankItem')
-            .style('order',(d,i)=>i)
+        newHolder.append('td').attr('class','rank');
+        newHolder.append('td').attr('class','name');
+        newHolder.append('td').attr('class','score toolTip');
+
+        let all = d3.select('#modelRank').selectAll('tr.rankItem')
+            .style('order',d=>d.order)
             .on('mouseover',d=>(overwrite=path[d.key],hightlightNode(path[d.key])))
-            .on('mouseout',d=>(overwrite=undefined))
-            .select('.name').text(d=>d.key)
+            .on('mouseout',d=>(overwrite=undefined));
+        all.select('.rank').style('font-size',d=>d.order>2?'unset':`${1.5-d.order*0.2}rem`).html((d,i)=>`${d.order+1}<sup>${ordinal_suffix_of(d.order+1,true)}</sup>`)
+        all.select('.name').text(d=>d.key)
+        all.select('.score').attr('data-title',d=>d.value).text(d=>d.value%1?d3.format('.2s')(d.value):d.value)
 
     }
 
@@ -423,7 +431,11 @@ d3.TimeSpace = function () {
             new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, 0, length)]);
         let axesHelper = new THREE.LineSegments( geometry, material );
         axesHelper.toggleDimension = function (dim){
-            if (dim===3){
+            axesTime.visible = false;
+            if (dim===2.5){
+                axesHelper.visible = false;
+                axesTime.visible = true;
+            }else if (dim===3){
                 axesHelper.visible = true;
                 axesHelper.geometry.dispose();
                 axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
@@ -439,6 +451,41 @@ d3.TimeSpace = function () {
             }
         };
         return axesHelper;
+    }
+    function createTimeaxis(){
+        var dir = new THREE.Vector3( 0, 0, 1 );
+        dir.normalize();
+        var origin = new THREE.Vector3( 0, 0, scaleNormalTimestep.range()[0] );
+        var length = scaleNormalTimestep.range()[1]-scaleNormalTimestep.range()[0];
+        var hex = 0x000000;
+        var arrowGroup = new THREE.Object3D();
+        var arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex, 30,10 );
+        arrowHelper.line.material.linewidth = 4;
+        arrowGroup.add(arrowHelper);
+        var loader = new THREE.FontLoader();
+
+        loader.load( 'src/fonts/optimer_regular.typeface.json', function ( font ) {
+
+            var textGeo = new THREE.TextGeometry( 'Time', {
+                font: font,
+                size: 30,
+                height: 1,
+                curveSegments: 12,
+                bevelEnabled: false
+            } );
+            textGeo.computeBoundingBox();
+            textGeo.computeVertexNormals();
+            textGeo = new THREE.BufferGeometry().fromGeometry( textGeo );
+            let textMesh1 = new THREE.Mesh( textGeo, new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ) );
+            textMesh1.name = 'TimeText';
+            textMesh1.rotation.x = 0;
+            textMesh1.rotation.y = Math.PI/2;
+            textMesh1.lookAt( camera.position );
+            arrowGroup.add(textMesh1)
+        } );
+        scene.add( arrowGroup );
+        arrowGroup.visible = false;
+        return arrowGroup;
     }
     let radarChartclusteropt = {
         margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -461,10 +508,10 @@ d3.TimeSpace = function () {
 
     function handle_data_summary(allSelected_Data) {
         return graphicopt.radaropt.schema.map((s, i) => {
-            let d = allSelected_Data.map(e => e[i]);
-            if (d.length)
-                return {axis: s.text, value: d3.mean(d), minval: d3.min(d), maxval: d3.max(d)}
-            else
+            let d = allSelected_Data.map(e => e[i]>-1?e[i]:undefined);
+            if (d.length) {
+                return {axis: s.text, value: d3.mean(d)||0, minval: d3.min(d)||0, maxval: d3.max(d)||0};
+            }else
                 return {axis: s.text, value: 0, minval: 0, maxval: 0}
         });
     }
@@ -527,8 +574,9 @@ d3.TimeSpace = function () {
             // visiableLine(graphicopt.linkConnect);
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
-            // calculate objects intersecting the picking ray
-            // console.log(mouse)
+            if (axesTime.visible){
+                axesTime.getObjectByName( "TimeText").lookAt( camera.position );
+            }
             if (mouseoverTrigger) { // not have filter
                 if (!filter.length) {
                     var intersects = overwrite||raycaster.intersectObject(points);
@@ -1160,7 +1208,7 @@ d3.TimeSpace = function () {
 
                     // 3rd dimension as time step
                     // p[pointIndex*3+2] = xscale(d[2])||0;
-                    if(graphicopt.opt.dim===3) {
+                    if(graphicopt.opt.dim>2) {
                         p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
                         d[2] = xscale.invert(p[pointIndex * 3 + 2]);
                     }else
@@ -1382,6 +1430,7 @@ d3.TimeSpace = function () {
             lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
             // lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), d[2] || 0);
         lines[target.name].geometry.verticesNeedUpdate = true;
+        lines[target.name].geometry.computeBoundingBox();
     }
 
     function createLines(g){
