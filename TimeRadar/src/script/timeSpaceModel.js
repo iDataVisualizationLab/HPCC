@@ -551,6 +551,7 @@ d3.TimeSpace = function () {
 
                 // showMetrics(target.name);
                 showMetrics_plotly(target.name);
+                renderRadarSummary(target.__metrics,colorarr[target.cluster].value,false)
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
             ishighlightUpdate = false;
@@ -699,7 +700,6 @@ d3.TimeSpace = function () {
                 let dataCollection = selectedCluster.map(d=>d);
                 dataCollection.push(newCluster);
                 dataCollection.action = selectedCluster.action;
-                console.log(dataCollection)
                 renderRadarSummary(dataRadar, newClustercolor);
                 drawComparisonCharts(dataCollection,true);
                 dialogModel();
@@ -888,12 +888,14 @@ d3.TimeSpace = function () {
             rateText.select('.contributeNum').transition().text(d => isReview? '':d.selected);
             rateText.select('.totalNum').text(d => isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):('/' + d.total));
         }
-        function renderRadarSummary(dataRadar,color) {
-            radarChartclusteropt.color = function(){return color};
-            let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
-            currentChart.selectAll('.axisLabel').remove();
-            currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
-        }
+    }
+    function renderRadarSummary(dataRadar,color,boxplot) {
+        radarChartclusteropt.color = function(){return color};
+        radarChartclusteropt.boxplot = boxplot!==undefined?boxplot:true;
+
+        let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
+        currentChart.selectAll('.axisLabel').remove();
+        currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
@@ -1254,7 +1256,7 @@ d3.TimeSpace = function () {
     function handle_data(data){
         data.forEach(d=>{
             d.__metrics = graphicopt.radaropt.schema.map((s,i)=>{
-                return {axis: s.text, value: data[i]}
+                return {axis: s.text, value: d.data[i]}
             });
             d.__metrics.name = d.clusterName;
             d.__metrics.name_or = d.name;
