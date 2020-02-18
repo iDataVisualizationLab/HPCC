@@ -1021,6 +1021,49 @@ function onSaveDescription (){
         }, 0);
     }
 }
+function onSaveClusterInfo() {
+    csv_header = ['labels'];
+    serviceFullList.forEach(d => {
+        csv_header.push(d.text);
+        csv_header.push(d.text + '_min');
+        csv_header.push(d.text + '_max');
+    });
+    csv_header.push('mse');
+
+    dataout = [];
+    serviceFullList.forEach(d => {
+        d.scale = d3.scaleLinear().range(d.range);
+    });
+    cluster_info.forEach((d, i) => {
+        let temp = [i];
+        d.__metrics.forEach((s, i) => {
+            temp.push(serviceFullList[i].scale(s.value));
+            temp.push(serviceFullList[i].scale(s.minval));
+            temp.push(serviceFullList[i].scale(s.maxval));
+        });
+        // if (binopt.clusterMethod ==='leaderbin')
+        //     temp.push(d.bin.distance);
+        temp.push(d.mse);
+        dataout.push(temp);
+    });
+
+    download_csv();
+
+    function download_csv() {
+        var csv = csv_header.join(',') + '\n';
+        dataout.forEach(function (row) {
+            csv += row.join(',');
+            csv += "\n";
+        });
+
+        var filename = $('#savename_clusterInfo').val()+".csv";
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = filename;
+        hiddenElement.click();
+    }
+}
 
 // chart controll ------------------------------------
 let viztype='radar';

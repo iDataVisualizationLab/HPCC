@@ -40,7 +40,7 @@
     <script src="../HiperView/js/jquery.dataTables.min.js"></script>
     <!--<script src="js/select.js"></script>-->
     <script src="../HiperView/js/TimerInterval.js"></script>
-    <script src="../HiperView/js/enjoyhint.js"></script>
+    <!--<script src="../HiperView/js/enjoyhint.js"></script>-->
     <script src="../HiperView/js/tsne.js"></script>
     <!--<link rel="preload" href="https://idatavisualizationlab.github.io/HPCC/HPCViz/images/TTUlogo.png" as="image" media="(height:16%)">-->
 </head>
@@ -148,7 +148,7 @@
                             <option value="influxdbSat27Apr_removemetric" data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>
                             <option value="influxdb20Apr_withoutJobLoad"  data-date="20 Apr 2019">HPC data - 20 Apr 2019 (with job data)</option>
                             <option value="influxdb20Sep_2019_withoutJobLoad"  data-date="20 Sep 2019">HPC data - 20 Sep 2019 (with job data)</option>
-                            <option value="influxdb12Feb_2020_withoutJobLoad" selected data-date="12 Feb 2020">HPC data - 12 Feb 2020 (with job data)</option>
+                            <option value="influxdb17Feb_2020_withoutJobLoad" selected data-date="17 Feb 2020">HPC data - 17 Feb 2020 (with job data)</option>
                             <option value="csvEmployment"  data-date="1 Jan 1999">US employment data - people</option>
                             <option value="csvEmploymentRate"  data-date="1 Jan 1999">US employment rate data - percentage</option>
                             <option value="csvEmploymentNetchange_drop"  data-date="1 Jan 1999">US employment rate data - %nets change</option>
@@ -500,12 +500,20 @@
                                 </table>
                             </div>
                         </div>
-                        <label>Group labels:</label>
-                        <button type="submit" onclick="saveClusterDescription()"  class ="menuBtn modal-trigger btn-small" href="#savedialog_description">
-                            <i class="fas fa-download pauseicon" ></i> Save</button>
-                        <button  type="submit" class ="menuBtn btn-small" id="saveDescriptionbtn">
-                            <i class="fas fa-upload pauseicon" ></i> Load</button>
-                        <input id="description_input_file" class="none" type="file" style="display: none;"/>
+                        <div class="row s12">
+                            <label class="col s4">Group labels:</label>
+                            <button type="submit" onclick="saveClusterDescription()"  class ="menuBtn modal-trigger btn-small" href="#savedialog_description">
+                                <i class="fas fa-download pauseicon" ></i> Save</button>
+                            <button  type="submit" class ="menuBtn btn-small" id="saveDescriptionbtn">
+                                <i class="fas fa-upload pauseicon" ></i> Load</button>
+                            <input id="description_input_file" class="none" type="file" style="display: none;"/>
+                        </div>
+                        <div class="row s12">
+                            <label class="col s4">Cluster information:</label>
+                            <button type="submit" onclick="saveClusterDescription()"  class ="menuBtn modal-trigger btn-small" href="#savedialog_clusterInfo">
+                                <i class="fas fa-download pauseicon" ></i> Save</button>
+                        </div>
+
                     </div>
                 </div>
             </li>
@@ -805,6 +813,19 @@
     <div class="modal-footer">
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveDescription()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
+    </div>
+</div>
+
+<div id="savedialog_clusterInfo" class="modal custom">
+    <div class="modal-content">
+        <div class="input-field col s6">
+            <input placeholder="label_cluster" id="savename_clusterInfo" type="text" class="validate">
+            <label for="savename_profile">File name</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat teal" onclick="onSaveClusterInfo()" style="color: rgba(255, 255, 255, 0.9);">Save</a>
     </div>
 </div>
 <div id="radar_Des_div" class="modal custom">

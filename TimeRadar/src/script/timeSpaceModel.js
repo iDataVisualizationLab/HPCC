@@ -329,8 +329,8 @@ d3.TimeSpace = function () {
         mouse = new THREE.Vector2();
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.addEventListener("change", () => renderer.render(scene, camera));
-        setUpZoom();
+        // controls.addEventListener("change", () => renderer.render(scene, camera));
+        // setUpZoom();
         stop = false;
 
 

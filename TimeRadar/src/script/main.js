@@ -2132,7 +2132,8 @@ $( document ).ready(function() {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-        d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
+        // d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
+        d3.csv(srcpath+'data/cluster_17Feb2020_6_mse.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
             cluster.forEach(d=>{
                 d.radius = +d.radius;
