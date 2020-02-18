@@ -1505,7 +1505,7 @@ function readFilecsv(file) {
 
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
-                    recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [5,10]}},function(){
+                    recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [6,7]}},function(){
                         handle_dataRaw();
 
                         if (!init)
@@ -2059,7 +2059,7 @@ $( document ).ready(function() {
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
 
-            let clusternum = (data['timespan'].length<50)?[5,7]:[8,10];
+            let clusternum = (data['timespan'].length<50)?[5,7]:[6,8];
 
             if(loadclusterInfo){
                 handle_dataRaw();
