@@ -85,7 +85,7 @@ function handleDataJie(dataRaw) {
     console.log(JSON.stringify(jobd));
 }
 
-d3.json(`../HiperView/data/data_with_job_csv/Detail_2020-02-17_2020-02-18_5m.json`, function (error, dataRaw){
+d3.json(`../HiperView/data/data_with_job_csv/Detail_2020-02-16_2020-02-17_5m.json`, function (error, dataRaw){
     handleDataJie(dataRaw);
 
 });
