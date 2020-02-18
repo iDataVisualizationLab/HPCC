@@ -1945,7 +1945,7 @@ $( document ).ready(function() {
         exit_warp();
         const choice = this.value;
         const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
-
+        let loadclusterInfo = false;
 
         if (choice!=='csv') {
             if (db === 'csv'&& !choice.match('csv')) { //reload hostlist
@@ -1968,6 +1968,7 @@ $( document ).ready(function() {
             if(!choice.match('csv'))
                 setTimeout(() => {
                 if (choice !== "nagios" && choice !== "influxdb") {
+                    loadPresetCluster(choice,(status)=>loadclusterInfo= status);
                     d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
                         if (error) {
                             d3.json("data/" + choice + ".json", function (error, data) {
@@ -2059,13 +2060,26 @@ $( document ).ready(function() {
                 .text("" + (data['timespan'][0]).toDateString());
 
             let clusternum = (data['timespan'].length<50)?[5,7]:[8,10];
-            recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: clusternum}},function(){
+
+            if(loadclusterInfo){
                 handle_dataRaw();
                 initDataWorker();
                 if (!init)
                     resetRequest();
                 preloader(false)
-            });
+            }else {
+                recalculateCluster({
+                    clusterMethod: 'leaderbin',
+                    normMethod: 'l2',
+                    bin: {startBinGridSize: 4, range: clusternum}
+                }, function () {
+                    handle_dataRaw();
+                    initDataWorker();
+                    if (!init)
+                        resetRequest();
+                    preloader(false)
+                });
+            }
         }
     });
     $('#description_input_file').on('input',(evt)=>{
@@ -2128,28 +2142,41 @@ $( document ).ready(function() {
     // }
 
     spinner = new Spinner(opts).spin(target);
+
+    function loadPresetCluster(name,calback) {
+        return d3.csv(srcpath + `data/cluster_${name}.csv`, function (cluster) {
+            if (cluster==null)
+                M.toast({html: 'Do not have preset major group information. Recalculate major groups'})
+            cluster.forEach(d => {
+                d.radius = +d.radius;
+                d.mse = +d.mse;
+                d.__metrics = serviceFullList.map(s => {
+                    return {
+                        axis: s.text,
+                        value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
+                        // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
+                        // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
+                    }
+                });
+                d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
+            });
+            cluster_info = cluster;
+            clusterDescription = {};
+            recomendName(cluster_info);
+            recomendColor(cluster_info);
+            if(calback){
+                calback(true);// status
+            }
+        });
+    }
+
     setTimeout(() => {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
-        d3.csv(srcpath+'data/cluster_17Feb2020_6_mse.csv',function(cluster){
         // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
-            cluster.forEach(d=>{
-                d.radius = +d.radius;
-                d.mse = +d.mse;
-                d.__metrics = serviceFullList.map(s=>{return {axis: s.text,
-                    value:d3.scaleLinear().domain(s.range)(d[s.text])||0,
-                    // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
-                    // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
-                }});
-                d.__metrics.normalize = d.__metrics.map((e,i)=>e.value) ;
-            });
-            cluster_info = cluster;
-            clusterDescription= {};
-            recomendName (cluster_info);
-            recomendColor (cluster_info);
-        });
+        loadPresetCluster('influxdb17Feb_2020_withoutJobLoad');
         d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
             if(error) {
             }else{
