@@ -7,6 +7,13 @@ fetch(`http://129.118.104.141:5000/api/v1/?starttime=${timeQuery[0]}&endtime=${t
 let filename = "2020-02-12_2020-02-13_5m";
 
 function handleDataJie(dataRaw) {
+    // DEBUGING
+    // console.log(dataRaw)
+    // console.log(dataRaw.nodesInfo['10.101.7.49'])
+    // console.log(dataRaw.jobsInfo['1128764'])
+    // DEBUGING
+
+
     hosts.forEach(d=>d.ip = `10.101.${d.hpcc_rack}.${d.hpcc_node}`);
     let jobjson = dataRaw.jobsInfo;
     let jobo = {};
@@ -70,11 +77,15 @@ function handleDataJie(dataRaw) {
             })
         })
     });
+    // DEBUGING
+    // console.log(sampleh['compute-7-49']);
+    // console.log(jobd.filter(j=>j['jobID']==='1128764'));
+    // DEBUGING
     console.log(JSON.stringify(sampleh));
     console.log(JSON.stringify(jobd));
 }
 
-d3.json(`../HiperView/data/data_with_job_csv/Detail_2020-02-16_2020-02-17_5m.json`, function (error, dataRaw){
+d3.json(`../HiperView/data/data_with_job_csv/Detail_2020-02-17_2020-02-18_5m.json`, function (error, dataRaw){
     handleDataJie(dataRaw);
 
 });
