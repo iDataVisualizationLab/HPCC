@@ -2577,6 +2577,7 @@ function recalculateCluster (option,calback,customCluster) {
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
+            M.Toast.dismissAll();
             data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
             cluster_info = data.result;
             if (!customCluster) {
