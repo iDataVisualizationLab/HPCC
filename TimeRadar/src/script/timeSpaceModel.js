@@ -274,7 +274,7 @@ d3.TimeSpace = function () {
                 path[target.name] = [];
             path[target.name].push({name: target.name,index:i,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
         });
-        console.log(datain.filter(d=>d[0]===-1))
+        // console.log(datain.filter(d=>d[0]===-1))
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
         yscale.range([-graphicopt.heightG()/2,graphicopt.heightG()/2]);
         scaleNormalTimestep.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
@@ -575,9 +575,11 @@ d3.TimeSpace = function () {
             // visiableLine(graphicopt.linkConnect);
             //update raycaster with mouse movement
             raycaster.setFromCamera(mouse, camera);
-            if (axesTime.visible){
-                axesTime.getObjectByName( "TimeText").lookAt( camera.position );
-            }
+            try {
+                if (axesTime.visible) {
+                    axesTime.getObjectByName("TimeText").lookAt(camera.position);
+                }
+            }catch(e){}
             if (mouseoverTrigger) { // not have filter
                 if (!filter.length) {
                     var intersects = overwrite||raycaster.intersectObject(points);
