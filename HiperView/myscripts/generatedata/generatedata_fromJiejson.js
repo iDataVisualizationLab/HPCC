@@ -22,6 +22,7 @@ function handleDataJie(dataRaw) {
         let d = jobjson[jobID]
         let temp = {
             "nodes": [],
+            "nodes_temp": [],
             "jobID": jobID,
             "user": d.user,
             "startTime": d.startTime.replace('CST', 'CDT'),
@@ -68,8 +69,10 @@ function handleDataJie(dataRaw) {
                     if (data[h.ip]['jobID'][ti].replace)
                         data[h.ip]['jobID'][ti] = JSON.parse(data[h.ip]['jobID'][ti].replace(/'|'/g, '"'));
                     data[h.ip]['jobID'][ti].forEach(jID => {
-                        if (!jobo[jID].nodes.find(m => m === h.name))
+                        if (!jobo[jID].nodes_temp.find(m => m === h.name)) {
+                            jobo[jID].nodes_temp.push(h.name);
                             jobo[jID].nodes.push(h.name);
+                        }
                     });
                     if (ti)
                     // console.log(_.difference(data[h.ip]['jobID'][ti - 1], data[h.ip]['jobID'][ti]))
@@ -78,14 +81,22 @@ function handleDataJie(dataRaw) {
                                 if (jID=="1126680")
                                     console.log(h.name+' '+sampleh.timespan[ti]);
 
-                                // kepp running job only
-                                // _.pull(jobo[jID].nodes, h.name)
-                                jobo[jID].endTime = d3.timeFormat('%a %b %d %X CDT %Y')(new Date(sampleh.timespan[ti].replace('Z', '')));
+                                    _.pull(jobo[jID].nodes, h.name);
+                                    jobo[jID].endTime = d3.timeFormat('%a %b %d %X CDT %Y')(new Date(sampleh.timespan[ti].replace('Z', '')));
                             });
                 }
             })
         })
     });
+    jobd.forEach(j=>{
+        if (j.nodes.length===0){
+            j.nodes = j.nodes_temp.slice();
+            delete j.nodes_temp;
+        }else{
+            delete j.nodes_temp;
+            delete j.endTime;
+        }
+    })
     // DEBUGING
     // console.log(dataRaw.nodesInfo['10.101.7.59']);
     // console.log(jobd.filter(j=>j['jobID']==='1126680'));
