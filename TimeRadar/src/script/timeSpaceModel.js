@@ -1233,7 +1233,7 @@ d3.TimeSpace = function () {
                         d[2] = xscale.invert(p[pointIndex * 3 + 2]);
                     }else {
                         p[pointIndex * 3 + 2] = 0;
-                        if (solution[i].lenth>2)
+                        if (solution[i].length>2)
                             solution[i] = solution[i].slice(0,2);
                     }
                 }
