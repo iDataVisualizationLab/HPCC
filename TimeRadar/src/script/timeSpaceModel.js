@@ -1259,7 +1259,10 @@ d3.TimeSpace = function () {
                             path[name].distance += distance(path[name][i-1].value,p.value)
                         }
                     });
-                    path[name].distance /= path[name].length;
+                    if (graphicopt.opt.dim===2.5)
+                        path[name].distance /= (_.last(path[name]).__timestep);
+                    else
+                        path[name].distance /= path[name].length;
                 }
                 handleTopSort($('#modelSortBy').val());
             }
