@@ -13,7 +13,7 @@ function handleDataJie(dataRaw) {
     // console.log(dataRaw.jobsInfo['1128764'])
     // DEBUGING
 
-
+    temp = dataRaw
     hosts.forEach(d=>d.ip = `10.101.${d.hpcc_rack}.${d.hpcc_node}`);
     let jobjson = dataRaw.jobsInfo;
     let jobo = {};
@@ -63,23 +63,32 @@ function handleDataJie(dataRaw) {
                     sampleh[h.name][arrID][ti] = [];
                 sampleh[h.name][arrID][ti][s.id] = value;
 
-                if (data[h.ip]['jobID'][ti].replace)
-                    data[h.ip]['jobID'][ti] = JSON.parse(data[h.ip]['jobID'][ti].replace(/'|'/g, '"'));
-                data[h.ip]['jobID'][ti].forEach(jID => {
-                    if (!jobo[jID].nodes.find(m => m === h.name))
-                        jobo[jID].nodes.push(h.name);
-                });
-                if (ti)
-                    _.difference(data[h.ip]['jobID'][ti - 1], data[h.ip]['jobID'][ti]) // job has been end
-                        .forEach(jID => {
-                            jobo[jID].endTime = d3.timeFormat('%a %b %d %X CDT %Y')(new Date(sampleh.timespan[ti].replace('Z', '')));
-                        });
+                if (si===0) {
+
+                    if (data[h.ip]['jobID'][ti].replace)
+                        data[h.ip]['jobID'][ti] = JSON.parse(data[h.ip]['jobID'][ti].replace(/'|'/g, '"'));
+                    data[h.ip]['jobID'][ti].forEach(jID => {
+                        if (!jobo[jID].nodes.find(m => m === h.name))
+                            jobo[jID].nodes.push(h.name);
+                    });
+                    if (ti)
+                    // console.log(_.difference(data[h.ip]['jobID'][ti - 1], data[h.ip]['jobID'][ti]))
+                        _.difference(data[h.ip]['jobID'][ti - 1], data[h.ip]['jobID'][ti]) // job has been end
+                            .forEach(jID => {
+                                if (jID=="1126680")
+                                    console.log(h.name+' '+sampleh.timespan[ti]);
+
+                                // kepp running job only
+                                // _.pull(jobo[jID].nodes, h.name)
+                                jobo[jID].endTime = d3.timeFormat('%a %b %d %X CDT %Y')(new Date(sampleh.timespan[ti].replace('Z', '')));
+                            });
+                }
             })
         })
     });
     // DEBUGING
-    // console.log(sampleh['compute-7-49']);
-    // console.log(jobd.filter(j=>j['jobID']==='1128764'));
+    // console.log(dataRaw.nodesInfo['10.101.7.59']);
+    // console.log(jobd.filter(j=>j['jobID']==='1126680'));
     // DEBUGING
     console.log(JSON.stringify(sampleh));
     console.log(JSON.stringify(jobd));
