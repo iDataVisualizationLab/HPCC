@@ -4,8 +4,8 @@ function readData() {
     let hostsList = _.without(d3.keys(sampleS),'timespan');
     let count = 0;
     let comphost;
-    let lengthData = sampleS[hostsList[hostsList.length-1]].arrTemperature.length;
-    let iterationstep =lengthData;
+    let lengthData = sampleS.timespan.length;
+    let iterationstep =lengthData-1;
     sampleS.timespan = sampleS.timespan.map(d=>new Date(d));
     hostsList.forEach(att => {
         var h = {};
@@ -69,7 +69,7 @@ function object2DataPrallel(ob){
             serviceListattrnest.forEach(s=>{
                 s.sub.forEach((sub,sj)=>{
                     eachIn[sub] = com.value[s.key][i][sj];
-                    validkey = validkey&&(eachIn[sub]!==undefined)
+                    // validkey = validkey&&(eachIn[sub]!==undefined)
                 });
             });
             if (validkey) {

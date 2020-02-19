@@ -482,13 +482,16 @@ function simulateResults2(hostname,iter, s){
 }
 
 function handlemissingdata(hostname,iter){
-    var simisval = sampleS[hostname]["arrTemperature"][iter].slice();
-    var simval = simisval.slice(0);
-    simval = (simval[0]+simval[1]+20);
-    if (simval!==undefinedValue && !isNaN(simval) )
-        simisval= [Math.floor(simval)];
-    else
-        simisval= [];
+    if(sampleS[hostname]["arrTemperature"]) {
+        var simisval = sampleS[hostname]["arrTemperature"][iter].slice();
+        var simval = simisval.slice(0);
+        simval = (simval[0] + simval[1] + 20);
+        if (simval !== undefinedValue && !isNaN(simval))
+            simisval = [Math.floor(simval)];
+        else
+            simisval = [];
+    }else
+        simisval=[];
     return simisval;
 }
 
