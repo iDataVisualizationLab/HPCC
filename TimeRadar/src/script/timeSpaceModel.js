@@ -180,7 +180,7 @@ d3.TimeSpace = function () {
         controlPanelGeneral.linkConnect.callback();
     }
     function start(skipRecalculate) {
-        reduceRenderWeight();
+        interuptAnimation();
         axesHelper.toggleDimension(graphicopt.opt.dim);
         gridHelper.parent.visible = (graphicopt.opt.dim==2.5);
         // handle_selection_switch(graphicopt.isSelectionMode);
@@ -211,6 +211,7 @@ d3.TimeSpace = function () {
             reduceRenderWeight(true);
             return;
         }
+        reduceRenderWeight();
         mouseoverTrigger = false;
         terminateWorker();
         preloader(true,1,'Init data...','#modelLoading');
@@ -572,6 +573,8 @@ d3.TimeSpace = function () {
         }
     }
 
+    let animationduration = 120;
+    let animationtimer = undefined;
     function animate() {
         if (!stop) {
             // visiableLine(graphicopt.linkConnect);
@@ -1198,7 +1201,18 @@ d3.TimeSpace = function () {
     }
     let mapIndex =[];
 
-
+    // function transition(){
+    //     interuptAnimation();
+    //     let count = 0 ;
+    //     animationtimer = new IntervalTimer(function(){
+    //         if (count>animationduration)
+    //             animationtimer.stop();
+    //         else{
+    //
+    //         }
+    //         count++;
+    //     },1000/60);
+    // }
     function render (islast){
         if(solution) {
             createRadar = _.partialRight(createRadar_func,'timeSpace radar', graphicopt.radaropt, colorscale);
@@ -1219,8 +1233,7 @@ d3.TimeSpace = function () {
                         d[2] = xscale.invert(p[pointIndex * 3 + 2]);
                     }else {
                         p[pointIndex * 3 + 2] = 0;
-                        if (d.length>2)
-                            solution[i] = solution[i].slice(0,2);
+                        d[2] =0;
                     }
                 }
             });
@@ -1273,9 +1286,13 @@ d3.TimeSpace = function () {
         scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
         scaleNormalTimestep.domain([0, maxstep]);
     }
-
+    function interuptAnimation(){
+        if (animationtimer)
+            animationtimer.stop();
+    }
     master.stop = function(){
         terminateWorker();
+        interuptAnimation()
         stop = true;
         // if (modelWorker) {
         //     modelWorker.terminate();
