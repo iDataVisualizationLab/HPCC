@@ -55,7 +55,7 @@ d3.TimeSpace = function () {
             // linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
-            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(graphicopt.opt.dim===2.5);}},
+            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -207,6 +207,7 @@ d3.TimeSpace = function () {
 
         svg.selectAll('*').remove();
         if(skipRecalculate) {
+            render(true);
             reduceRenderWeight(true);
             return;
         }
@@ -255,6 +256,7 @@ d3.TimeSpace = function () {
     }
 
     master.init = function(arr,clusterin) {
+        needRecalculate = true;
         reset = true;
         mouseoverTrigger = false;
         solution = [];
@@ -303,7 +305,7 @@ d3.TimeSpace = function () {
         lines = straightLines;
         linesGroup = straightLinesGroup;
         toggleLine();
-        gridHelper = new THREE.GridHelper( graphicopt.widthG(), 10 );
+        gridHelper = new THREE.GridHelper( graphicopt.heightG(), 10 );
         gridHelper.position.z = scaleNormalTimestep.range()[0];
         gridHelper.rotation.x = -Math.PI / 2;
         scene.add( new THREE.Object3D().add(gridHelper ));
@@ -352,7 +354,7 @@ d3.TimeSpace = function () {
 
         drawSummaryRadar([],handle_data_summary([]),'#ffffff');
         start();
-
+        needRecalculate = false;
         return master;
     };
     function toggleLine(){
@@ -1215,8 +1217,11 @@ d3.TimeSpace = function () {
                     if(graphicopt.opt.dim>2) {
                         p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
                         d[2] = xscale.invert(p[pointIndex * 3 + 2]);
-                    }else
-                        p[pointIndex*3+2] = 0;
+                    }else {
+                        p[pointIndex * 3 + 2] = 0;
+                        if (d.length>2)
+                            solution[i] = solution[i].slice(0,2);
+                    }
                 }
             });
             let center = d3.nest().key(d=>d.cluster).rollup(d=>[d3.mean(d.map(e=>e.__metrics.position[0])),d3.mean(d.map(e=>e.__metrics.position[1])),d3.mean(d.map(e=>e.__metrics.position[2]))]).object(datain);
@@ -1498,7 +1503,9 @@ d3.TimeSpace = function () {
         // d3.select(front_canvas).style('opacity',0);
     };
     let self = this;
+    let needRecalculate=true;
     master.generateTable = function(){
+        needRecalculate = true
         $('#modelSelectionInformation .tabs').tabs({
             onShow: function(){
                 graphicopt.isSelectionMode = this.index===1;
@@ -1822,7 +1829,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
 
 function handle_data_umap(tsnedata) {
     const dataIn = handle_data_model(tsnedata,true);
-    if (!umapopt.opt)
+    // if (!umapopt.opt)
         umapopt.opt = {
             // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
             nNeighbors:  Math.round(dataIn.length/cluster_info.length/5)+2, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
@@ -1834,7 +1841,7 @@ function handle_data_umap(tsnedata) {
 }
 function handle_data_tsne(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
-    if (!TsneTSopt.opt)
+    // if (!TsneTSopt.opt)
         TsneTSopt.opt = {
             epsilon: 20, // epsilon is learning rate (10 = default)
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
@@ -1844,7 +1851,7 @@ function handle_data_tsne(tsnedata) {
 }
 function handle_data_pca(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
-    if (!PCAopt.opt)
+    // if (!PCAopt.opt)
         PCAopt.opt = {
             dim: 2, // dimensionality of the embedding (2 = default)
         };
