@@ -2147,26 +2147,26 @@ $( document ).ready(function() {
         return d3.csv(srcpath + `data/cluster_${name}.csv`, function (cluster) {
             if (cluster==null)
                 M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
-            else {
-                updateClusterControlUI(cluster.length);
-                cluster.forEach(d => {
-                    d.radius = +d.radius;
-                    d.mse = +d.mse;
-                    d.__metrics = serviceFullList.map(s => {
-                        return {
-                            axis: s.text,
-                            value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
-                            // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
-                            // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
-                        }
-                    });
-                    d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
+
+            updateClusterControlUI((cluster||[]).length);
+            cluster.forEach(d => {
+                d.radius = +d.radius;
+                d.mse = +d.mse;
+                d.__metrics = serviceFullList.map(s => {
+                    return {
+                        axis: s.text,
+                        value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
+                        // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
+                        // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
+                    }
                 });
-                cluster_info = cluster;
-                clusterDescription = {};
-                recomendName(cluster_info);
-                recomendColor(cluster_info);
-            }
+                d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
+            });
+            cluster_info = cluster;
+            clusterDescription = {};
+            recomendName(cluster_info);
+            recomendColor(cluster_info);
+
             if(calback){
                 calback(true);// status
             }
