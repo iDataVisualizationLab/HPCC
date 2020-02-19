@@ -1505,9 +1505,9 @@ function readFilecsv(file) {
 
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
+                    updateClusterControlUI()
                     recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [6,7]}},function(){
                         handle_dataRaw();
-
                         if (!init)
                             resetRequest();
                         preloader(false);
@@ -2146,30 +2146,32 @@ $( document ).ready(function() {
     function loadPresetCluster(name,calback) {
         return d3.csv(srcpath + `data/cluster_${name}.csv`, function (cluster) {
             if (cluster==null)
-                M.toast({html: 'Do not have preset major group information. Recalculate major groups'})
-            cluster.forEach(d => {
-                d.radius = +d.radius;
-                d.mse = +d.mse;
-                d.__metrics = serviceFullList.map(s => {
-                    return {
-                        axis: s.text,
-                        value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
-                        // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
-                        // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
-                    }
+                M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
+            else {
+                updateClusterControlUI(cluster.length);
+                cluster.forEach(d => {
+                    d.radius = +d.radius;
+                    d.mse = +d.mse;
+                    d.__metrics = serviceFullList.map(s => {
+                        return {
+                            axis: s.text,
+                            value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
+                            // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
+                            // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
+                        }
+                    });
+                    d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
                 });
-                d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
-            });
-            cluster_info = cluster;
-            clusterDescription = {};
-            recomendName(cluster_info);
-            recomendColor(cluster_info);
+                cluster_info = cluster;
+                clusterDescription = {};
+                recomendName(cluster_info);
+                recomendColor(cluster_info);
+            }
             if(calback){
                 calback(true);// status
             }
         });
     }
-
     setTimeout(() => {
         //load data
         // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
@@ -2290,6 +2292,20 @@ $( document ).ready(function() {
     // //run Enjoyhint script
     // enjoyhint_instance.run();
 });
+function updateClusterControlUI(n) {
+    if(n) {
+        group_opt.bin.range[0] = n;
+        group_opt.bin.k = n;
+        group_opt.bin.range[1] = n + 1;
+    }
+    if (group_opt.bin.range) {
+        $('#lowrange').val(group_opt.bin.range[0]);
+        $('#highrange').val(group_opt.bin.range[1]);
+    }
+    if(group_opt.bin.k)
+        $('#knum').val(group_opt.bin.k);
+
+}
 let profile = {};
 
 function onfilterdata(schema) {
