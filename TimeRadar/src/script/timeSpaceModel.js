@@ -328,7 +328,7 @@ d3.TimeSpace = function () {
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         // disable the tabIndex to avoid jump element
-        d3.select(renderer.domElement).attr('tabindex',null);   
+        d3.select(renderer.domElement).attr('tabindex',null);
         // controls.addEventListener("change", () => renderer.render(scene, camera));
         setUpZoom();
         stop = false;
