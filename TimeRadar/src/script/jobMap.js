@@ -525,7 +525,7 @@ let JobMap = function() {
 
 
         if (!runopt.compute.bundle) {
-            const radaropt = {colorfill: colorfill, size: (scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 2};
+            const radaropt = {colorfill: colorfill, size: Math.max((scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 2,20)};
             let datapoint;
             if (!runopt.suddenGroup) {
                 datapoint= bg.selectAll(".linkLinegg").interrupt().data(d => d.timeline.clusterarr.map((e,i) => {
@@ -1235,6 +1235,13 @@ let JobMap = function() {
         computers.classed('statics', true);
         if(!islight){
             computers.select('.computeSig_label').call(wrap,true);
+            if(isLastTrigger) {
+                setTimeout(() => {
+                    computeUsermetric();
+                    handle_summary([], true);
+                }, 0);
+                isLastTrigger = false;
+            }
         }
 
         //job node
@@ -1811,6 +1818,7 @@ let JobMap = function() {
     let lastIndex = 0;
     let deltaTime = 0;
     let triggerCal_Cluster = true;
+    let isLastTrigger = false;
     function handle_links (timeStep_r,lastIndex_r,triggerCluster){
         triggerCal_Cluster = triggerCluster||triggerCal_Cluster;
         if (timeStep_r) {
@@ -1831,7 +1839,7 @@ let JobMap = function() {
                 h.timeline = {clusterarr: [], line: [], lineFull: [], clusterarr_sudden: []};
             }
         });
-
+        isLastTrigger = lastIndex===(maxTimestep-1);
         if (lastIndex===(maxTimestep-1)) {
             animation_time = 2000;
             if (triggerCal_Cluster) {
@@ -2154,6 +2162,7 @@ let JobMap = function() {
             tableFooter[0] = {key:'UserID',value:'Summary'}
             tableFooter[1] = {key:'Hosts', value:Hosts.filter(d=>d.user.length).length}
             tableFooter[2] = {key:'Jobs', value:d3.sum(user,d=>d.values.length)};
+
         } else
             clusterdata_timeline = undefined;
         return linkdata
