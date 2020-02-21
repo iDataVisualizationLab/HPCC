@@ -384,10 +384,10 @@ let JobMap = function() {
     // }
 
     function drawHistogramMHosts (dataR) {
-        let scale = d3.scaleLinear().domain(d3.extent(dataR,d=>d.arr[lastIndex].length)).range([0,100]);
+        let scale = d3.scaleLinear().domain(d3.extent(dataR,d=>(d.arr[lastIndex]||[]).length)).range([0,100]);
         let heightbar = graphicopt.radaropt.h/2;
         nodeg.selectAll('.computeNode').each(function(d){
-            let value = d.arr[lastIndex].length;
+            let value = (d.arr[lastIndex]||[]).length;
             let parentn = g.select('.annotation_back .majorbar').select(`g.${d.name}`);
             let parent_front = g.select('.annotation_front .majorbar').select(`g.${d.name}`);
 
@@ -422,12 +422,13 @@ let JobMap = function() {
                 path.append('g').attr('class', 'radar');
             }
         });
-        let datapointg = bg.select(".radar")
-            .datum(d=>newdata.find(n=>n.name === d.name))
-            .each(function(d){
+        if (first)
+            bg.select(".radar")
+                .datum(d=>newdata.find(n=>n.name === d.name))
+                .each(function(d){
 
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), {colorfill:colorfill});
-            });
+                    createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), {colorfill:colorfill});
+                });
         // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
@@ -1206,7 +1207,6 @@ let JobMap = function() {
         // compute pie
         if(first) {
             makeheader();
-            first = false;
         }
         let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,d=> d.name);
         computers.select('.computeSig').datum(d=>d);
@@ -1509,6 +1509,8 @@ let JobMap = function() {
         link.call(updatelink,true);
         toggleComponent(jobEmpty);
         jobMap.drawComp();
+        first = false;
+
         function initForce(){
             if (!simulation) {
                 let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
@@ -1840,7 +1842,7 @@ let JobMap = function() {
             }
         });
         isLastTrigger = lastIndex===(maxTimestep-1);
-        if (lastIndex===(maxTimestep-1)) {
+        if (isLastTrigger) {
             animation_time = 2000;
             if (triggerCal_Cluster) {
                 updateClusterTimeline();
@@ -1985,8 +1987,10 @@ let JobMap = function() {
                     });
                 }
             });
-            clusterNode_data = clusterdata.filter(d=>d.arr.length&&d.arr[lastIndex]);
-            // colorCluster.domain(clusterNode_data.map(d=>d.name));
+            if (isLastTrigger)
+                clusterNode_data = clusterdata.filter(d=>d.arr.length&&d.arr[lastIndex]);
+            else
+                clusterNode_data = clusterdata;
             linkdata = linkdata.filter(d => !d.del);
             linkscale.domain(d3.extent(linkdata,d=>d.links));
         }else

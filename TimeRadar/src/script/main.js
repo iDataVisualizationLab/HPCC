@@ -318,8 +318,7 @@ var TsnePlotopt  = {
         displayMode: 'tsne',
 
     }
-},
-    tooltip_opt={
+},tooltip_opt={
         width: 650,
         height: 400,
         margin:{top:5,bottom:5,left:45,right:85}
@@ -334,7 +333,6 @@ var runopt ={ // run opt global
 };
 var Scatterplot = d3.Scatterplot();
 var Radarplot = d3.radar();
-var TSneplot = d3.Tsneplot().graphicopt(TsnePlotopt).runopt(TsnePlotopt.runopt);
 let jobMap = JobMap().svg(d3.select('#jobmap')).graphicopt(jobMap_opt).runopt(jobMap_runopt).init();
 var distance = distanceL2;
 let tooltip_lib = Tooltip_lib().primarysvg(svg).graphicopt(tooltip_opt).init();
@@ -381,8 +379,6 @@ function initDataWorker(){
 
         }else if (data.action==='returnDataHistory'){
             if (data.result.hindex!==undefined&& data.result.index < lastIndex+1) {
-                if (graphicControl.charType === "T-sne Chart")
-                    TSneplot.data(data.result.arr).draw(data.result.nameh, data.result.index);
                 jobMap.dataComp(data.result.arr);
                 if(isanimation)
                     jobMap.drawComp();
@@ -472,28 +468,28 @@ function drawsummarypoint(harr){
     //xx = xTimeSummaryScale(query_time);
     //updateTimeText();
 
-    switch (graphicControl.sumType) {
-        case "Boxplot":
-            break;
-        case "Scatterplot":
-            break;
-        case "Radar":
-            for (var i in harr) {
-                var h  = harr[i];
-                var name = hosts[h].name;
-                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-                arrServices.name = name;
-                arr.push(arrServices);
-            }
-            Radarplot.data(arr).drawpoint(lastIndex);
-            // Radar Time
-            //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
-            break;
-        case "RadarSummary":
-            getData(name,lastIndex)
-            // Radarplot.data(arr).drawSummarypoint(lastIndex);
-            break;
-        default:
+    // switch (graphicControl.sumType) {
+    //     case "Boxplot":
+    //         break;
+    //     case "Scatterplot":
+    //         break;
+    //     case "Radar":
+    //         for (var i in harr) {
+    //             var h  = harr[i];
+    //             var name = hosts[h].name;
+    //             arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
+    //             arrServices.name = name;
+    //             arr.push(arrServices);
+    //         }
+    //         Radarplot.data(arr).drawpoint(lastIndex);
+    //         // Radar Time
+    //         //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
+    //         break;
+    //     case "RadarSummary":
+    //         getData(name,lastIndex)
+    //         // Radarplot.data(arr).drawSummarypoint(lastIndex);
+    //         break;
+    //     default:
             jobMap.getharr(harr);
             for (var i in harr) {
                 var h  = harr[i];
@@ -506,8 +502,8 @@ function drawsummarypoint(harr){
             jobMap.dataComp_points(arr);
             var h = harr[harr.length-1];
             var name = hosts[h].name;
-            break;
-    }
+    //         break;
+    // }
 
     getData(name,lastIndex)
 }
@@ -559,6 +555,8 @@ function request(){
     isanimation = false
     updatetimeline(0);
     timerequest();
+    console.log('____________read data______________')
+    let times = performance.now();
     interval2 = new IntervalTimer(timerequest , simDuration);
     function timerequest() {
         var midlehandle = function (ri){
@@ -576,8 +574,9 @@ function request(){
                 isanimation = true;
                 getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null);
+                console.log('Time load: ',performance.now() -times)
             }
-            if (graphicControl.mode===layout.HORIZONTAL)
+
                 drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
@@ -636,7 +635,8 @@ function request(){
                         let ri = step_full(iteration);
                         midlehandle_full(ri);
                         if(countbuffer===0) {
-                            getJoblist();
+                            if (islastimestep(lastIndex+1))
+                                getJoblist();
                             // document.getElementById("compDisplay_control").selectedIndex = 4;
                             // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
@@ -860,12 +860,7 @@ function plotResult(result,name,index) {
             else
                 plotArea(arr, name, hpcc_rack, hpcc_node, xStart, y,serviceList.indexOf( selectedService));
             break;
-        case "T-sne Chart":
-            initTsneView();
-            if (!speedup) {
-                getData(name,index||lastIndex,true,true);
-            }
-            break;
+
         default:
             if (!speedup) {
                 getData(name,index||lastIndex,true,true);
@@ -875,12 +870,7 @@ function plotResult(result,name,index) {
 
 
 }
-function initTsneView() {
-    if (!svgStore.detailView.g.select('.rackRect').empty()) {
-        svgStore.detailView.g.selectAll('*').remove();
-        TSneplot.reset(true);
-    }
-}
+
 
 function plotHeat(arr,name,hpcc_rack,hpcc_node,xStart,y,isSingle){
     svgStore.detailView.g.selectAll(".RackSummary").remove();
@@ -1183,7 +1173,6 @@ function playchange(){
 }
 function exit_warp () {
     playchange();
-    TSneplot.remove();
 }
 function pausechange(){
     var e = d3.select('.pause').node();
@@ -1219,12 +1208,11 @@ function resetRequest(){
     svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();
     svg.selectAll(".connectTimeline").style("stroke-opacity", 1);
-    Radarplot.init().clustercallback(d=>TSneplot.clusterBin(d));
+    Radarplot.init();
     jobMap.hosts(hosts).remove(true);
     let control_jobdisplay = d3.select('#compDisplay_control');
     control_jobdisplay.node().options.selectedIndex = 2;
     control_jobdisplay.attr('disabled', '').dispatch('change');
-    TSneplot.reset(true);
 
     timelog = [];
     jobList = undefined;
@@ -1810,14 +1798,7 @@ $( document ).ready(function() {
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
-    d3.select('#clusterDisplay').on('change',function(){
-        TsnePlotopt.runopt.clusterDisplay = this.value;
-        TSneplot.runopt(TsnePlotopt.runopt);
-    });
-    d3.select('#clusterProject').on('change',function(){
-        TsnePlotopt.runopt.clusterProject = this.value;
-        TSneplot.runopt(TsnePlotopt.runopt);
-    });
+
     d3.select('#clusterMethod').on('change',function(){
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
@@ -2316,9 +2297,6 @@ function onSchemaUpdate(schema){
         ser.enable = schema.axis[ser.text].data.enable;
     });
     radarChartOptions.schema = serviceFullList;
-    // if (graphicControl.charType === "T-sne Chart")
-    TSneplot.schema(serviceFullList,firstTime);
-    // if (graphicControl.sumType === "Radar" || graphicControl.sumType === "RadarSummary") {
     Radarplot.schema(serviceFullList,firstTime);
     if (cluster_info){
         jobMap.schema(serviceFullList);
