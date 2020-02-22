@@ -6,14 +6,17 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 26 Sep 2018",
         url:"../HiperView/data/serviceWed26Sep_removedmetric.json",
         description:"",
+        category:'hpcc',
         date:"26 Apr 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdbThus21Mar_1400_1630",
         name:"HPC data - 21 Mar 2019 (Chill water)",
         url:"../HiperView/data/influxdbThus21Mar_1400_1630.json",
         description:"",
+        category:'hpcc',
         date:"21 Mar 2019",
         group:"sample"
     },
@@ -22,6 +25,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 23 Jun 2019 (overheat compute-6-2)",
         url:"../HiperView/data/influxdbSun23June2019.json",
         description:"",
+        category:'hpcc',
         date:"23 Jun 2019",
         group:"sample"
     },
@@ -30,6 +34,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 26 Apr 2019 (with job data)",
         url:"../HiperView/data/influxdbSat27Apr_removemetric.json",
         description:"",
+        category:'hpcc',
         date:"26 Apr 2019",
         group:"sample"
     },
@@ -38,6 +43,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 20 Apr 2019 (with job data)",
         url:"../HiperView/data/influxdb20Apr_withoutJobLoad.json",
         description:"",
+        category:'hpcc',
         date:"20 Apr 2019",
         group:"sample"
     },
@@ -46,6 +52,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 20 Sep 2019 (with job data)",
         url:"../HiperView/data/influxdb20Sep_2019_withoutJobLoad.json",
         description:"",
+        category:'hpcc',
         date:"20 Sep 2019",
         group:"sample"
     },
@@ -54,6 +61,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 16 Feb 2020 (with job data)",
         url:"../HiperView/data/influxdb16Feb_2020_withoutJobLoad.json",
         description:"",
+        category:'hpcc',
         date:"16 Feb 2020",
         group:"sample"
     },
@@ -62,6 +70,7 @@ angular.module('hpccApp').constant('SampleData', [
         name:"HPC data - 17 Feb 2020 (with job data)",
         url:"../HiperView/data/influxdb17Feb_2020_withoutJobLoad.json",
         description:"",
+        category:'hpcc',
         date:"17 Feb 2020",
         group:"sample"
     },

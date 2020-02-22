@@ -46,6 +46,7 @@ angular.module('hpccApp')
 
     // update the schema and stats
     Dataset.onUpdate = [];
+    Dataset.onUpdateFinish = [];
 
     Dataset.update = function(dataset) {
       var updatePromise;
@@ -81,8 +82,12 @@ angular.module('hpccApp')
       });
 
       // Copy the dataset into the config service once it is ready
-      updatePromise.then(function() {
+        updatePromise = updatePromise.then(function() {
         Config.updateDataset(dataset, Dataset.type);
+      });
+
+      Dataset.onUpdateFinish.forEach(function(listener) {
+            updatePromise = updatePromise.then(listener);
       });
 
       return updatePromise;

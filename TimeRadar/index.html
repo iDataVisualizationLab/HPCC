@@ -140,14 +140,14 @@
                         <i class="material-icons expand">chevron_right</i>
                     </div>
                     <div class="collapsible-body">
-                        <!--<div  class="row valign-wrapper">-->
-                            <!--<dataset-selector class="right"></dataset-selector>-->
-                            <!--<div class="current-dataset" title="{{Dataset.currentDataset.name}}">-->
-                                <!--<span style="display:inline-block; margin:0;">Data</span>-->
-                                <!--<i class="fa fa-database"></i>-->
-                                <!--<span class="dataset-name">{{Dataset.currentDataset.name}}</span>-->
-                            <!--</div>-->
-                        <!--</div>-->
+                        <div  class="row valign-wrapper">
+                            <dataset-selector class="right"></dataset-selector>
+                            <div class="current-dataset" title="{{Dataset.currentDataset.name}}">
+                                <span style="display:inline-block; margin:0;">Data</span>
+                                <i class="fa fa-database"></i>
+                                <span class="dataset-name">{{Dataset.currentDataset.name}}</span>
+                            </div>
+                        </div>
                         <div  class="row valign-wrapper">
                             <label for="datacom" class="col s4"> Dataset</label>
                             <select id="datacom" class="col s7">
@@ -978,6 +978,7 @@
     <!--css-->
     <link rel="stylesheet" href="src/script/angular/components/databasetable/changeloadeddataset.css">
     <link rel="stylesheet" href="src/script/angular/components/modal/modal.css">
+    <link rel="stylesheet" href="src/script/angular/components/tabs/tab.css">
     <!--script-->
     <script src="src/script/angular/components/tabs/tab.js"></script>
     <script src="src/script/angular/components/tabs/tabset.js"></script>
@@ -991,6 +992,7 @@
     <script src="src/script/angular/components/databasetable/changeloadeddataset.js"></script>
     <script src="src/script/angular/components/databasetable/datasetselector.js"></script>
     <script src="src/script/angular/components/databasetable/sampledata.js"></script>
+    <script src="src/script/angular/components/loadData/loaddata.service.js"></script>
 
     <script src="src/script/angular/hpccApp.controller.js"></script>
 

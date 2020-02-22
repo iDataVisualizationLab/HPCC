@@ -30,6 +30,7 @@ addEventListener('message',function ({data}) {
                 arr.push(arrServices);
             }
         }
+
         dataSpider3 = arr;
         dataCalculate = arr;
         if (binopt.clusterMethod === 'leaderbin') {

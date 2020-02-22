@@ -1,6 +1,6 @@
 <div class="change-loaded-dataset">
   <div ng-if="userData.length">
-    <h3>Uploaded Datasets</h3>
+    <h6>Uploaded Datasets</h6>
     <ul>
       <li ng-repeat="dataset in userData track by dataset.id"
         ng-class="{selected: Dataset.currentDataset.id === dataset.id}">
@@ -14,7 +14,7 @@
       </li>
     </ul>
   </div>
-  <h3>Explore a Sample Dataset</h3>
+  <h6>Explore a Sample Dataset</h6>
   <ul class="loaded-dataset-list">
     <li ng-repeat="dataset in sampleData track by dataset.id"
       ng-class="{selected: Dataset.currentDataset.id === dataset.id}">

@@ -30,7 +30,7 @@ let data_info = {
     totalStep: 0,
     totalHost: 0
 };
-
+var sampleS
 // job parameter
 let sampleJobdata =[];
 let init = true;
@@ -1921,148 +1921,7 @@ $( document ).ready(function() {
         jobMap_runopt.graphic.colorBy = sect?'user':'group';
         jobMap.runopt(jobMap_runopt).draw();
     });
-    d3.select('#datacom').on("change", function () {
-        preloader(true);
-        exit_warp();
-        const choice = this.value;
-        const choicetext = d3.select(d3.select('#datacom').node().selectedOptions[0]).attr('data-date');
-        let loadclusterInfo = false;
 
-        if (choice!=='csv') {
-            if (db === 'csv'&& !choice.match('csv')) { //reload hostlist
-                d3.json(srcpath+'data/hotslist_Quanah.json', function (error, data) {
-                    if (error) {
-                    } else {
-                        firstTime = true;
-                        hostList = data;
-                        systemFormat();
-                        inithostResults();
-                        jobMap.hosts(hosts);
-                        formatService(true);
-                        MetricController.axisSchema(serviceFullList, true).update();
-                        addDatasetsOptions()
-                    }
-                });
-            }
-            oldchoose =$('#datacom').val();
-            dataInformation.filename = choice;
-            if(!choice.match('csv'))
-                setTimeout(() => {
-                if (choice !== "nagios" && choice !== "influxdb") {
-                    loadPresetCluster(choice,(status)=>loadclusterInfo= status);
-                    d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
-                        if (error) {
-                            d3.json("data/" + choice + ".json", function (error, data) {
-                                if (error) {
-                                    M.toast({html: 'Local data does not exist, try to query from the internet!'})
-                                    d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choice + ".json", function (error, data) {
-                                        if (error) {
-
-                                        }
-                                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
-                                            if (error){
-                                                loadata1(data,undefined);
-                                                return;
-                                            }
-                                            loadata1(data,job);
-                                            return;
-                                        });
-                                    });
-                                    return;
-                                }
-                                return
-                            });
-                            return;
-                        }
-                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
-                            if (error){
-                                loadata1(data,undefined);
-                                return;
-                            }
-                            loadata1(data,job);
-                            return;
-                        });
-                    });
-                }
-                else {
-                    d3.select(".currentDate")
-                        .text("" + (new Date()).toDateString());
-                    realTimesetting(true, choice);
-                    db = choice;
-                    requestService = eval('requestService' + choice);
-                    processResult = eval('processResult_' + choice);
-                    preloader(false)
-                }
-
-            }, 0);
-            else
-                readFilecsv(srcpath+'data/'+choice+'.csv')
-        }else{
-
-            $('#datacom').val(oldchoose);
-            $('#data_input_file').trigger('click');
-        }
-        function loadata1(data,job){
-            makedataworker();
-            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
-            _.without(Object.keys(data),'timespan').forEach(h=>{
-                delete data[h].arrCPU_load;
-                serviceLists.forEach((s,si)=>{
-                    if (data[h][serviceListattr[si]])
-                        data[h][serviceListattr[si]] = data.timespan.map((d,i)=>
-                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length):d3.range(0,s.sub.length).map(e=>null));
-                    else
-                        data[h][serviceListattr[si]] = data.timespan.map(d=>d3.range(0,s.sub.length).map(e=>null));
-                })
-            })
-            updateDatainformation(data['timespan']);
-            sampleS = data;
-            if(job)
-                sampleJobdata = job;
-            else
-                sampleJobdata = [{
-                    jobID: "1",
-                    name: "1",
-                    nodes: hosts.map(h=>h.name),
-                    startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                    submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                    user: "dummyJob"
-                }]
-            if (choice.includes('influxdb')){
-                processResult = processResult_influxdb;
-                db = "influxdb";
-                realTimesetting(false,"influxdb",true);
-            }else {
-                db = "nagios";
-                processResult = processResult_old;
-                realTimesetting(false,undefined,true);
-            }
-            d3.select(".currentDate")
-                .text("" + (data['timespan'][0]).toDateString());
-
-            let clusternum = (data['timespan'].length<50)?[5,7]:[6,8];
-
-            if(loadclusterInfo){
-                handle_dataRaw();
-                initDataWorker();
-                if (!init)
-                    resetRequest();
-                preloader(false)
-            }else {
-                recalculateCluster({
-                    clusterMethod: 'leaderbin',
-                    normMethod: 'l2',
-                    bin: {startBinGridSize: 4, range: clusternum}
-                }, function () {
-                    handle_dataRaw();
-                    initDataWorker();
-                    if (!init)
-                        resetRequest();
-                    preloader(false)
-                });
-            }
-        }
-    });
     $('#description_input_file').on('input',(evt)=>{
         let f = evt.target.files[0];
         var reader = new FileReader();
@@ -2124,98 +1983,70 @@ $( document ).ready(function() {
 
     spinner = new Spinner(opts).spin(target);
 
-    function loadPresetCluster(name,calback) {
-        return d3.csv(srcpath + `data/cluster_${name}.csv`, function (cluster) {
-            if (cluster==null)
-                M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
 
-            updateClusterControlUI((cluster||[]).length);
-            cluster.forEach(d => {
-                d.radius = +d.radius;
-                d.mse = +d.mse;
-                d.__metrics = serviceFullList.map(s => {
-                    return {
-                        axis: s.text,
-                        value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
-                        // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
-                        // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
-                    }
-                });
-                d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
-            });
-            cluster_info = cluster;
-            clusterDescription = {};
-            recomendName(cluster_info);
-            recomendColor(cluster_info);
-
-            if(calback){
-                calback(true);// status
-            }
-        });
-    }
     setTimeout(() => {
-        //load data
-        // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
-        // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-        // d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
-        // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
-        loadPresetCluster('influxdb17Feb_2020_withoutJobLoad');
-        d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
-            if(error) {
-            }else{
-                hostList = data;
-                inithostResults();
-                jobMap.hosts(hosts)
-                // graphicControl.charType =  d3.select('#chartType_control').node().value;
-                // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
-                let choiceinit = d3.select('#datacom').node().value;
-                if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
-                    // d3.select(".currentDate")
-                    //     .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
-                    if (choiceinit.includes('influxdb')) {
-                        // processResult = processResult_influxdb;
-                        db = "influxdb";
-                        realTimesetting(false, "influxdb", true);
-                    } else {
-                        db = "nagios";
-                        // processResult = processResult_old;
-                        realTimesetting(false, undefined, true);
-                    }
-                    let choice = d3.select('#datacom').node().value;
-                    dataInformation.filename = choice+".json";
-                    d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
-                        if (error) {
-                            M.toast({html: 'Local data does not exist, try to query from the internet!'});
-                            d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
-                                if (error) throw error;
-                                d3.select(".currentDate")
-                                    .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
-                                loadata(data)
-                            });
-                            return;
-                        }
-                        d3.select(".currentDate")
-                            .text("" + (new Date(data['timespan'][0]).toDateString()));
-                        d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
-                            if (error){
-                                loadata(data,undefined);
-                                return;
-                            }
-                            loadata(data,job);
-                            return;
-                        });
-                    });
-                }else{ // realtime
-                    d3.select(".currentDate")
-                        .text("" + (new Date()).toDateString());
-                    realTimesetting(true,choiceinit, true);
-                    db = choiceinit;
-                    requestService = eval('requestService'+choiceinit);
-                    processResult = eval('processResult_'+choiceinit);
-                    loadata([])
-                }
-            }
-        });
+    //     //load data
+    //     // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
+    //     // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
+    //     // d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
+    //     // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
+    //     loadPresetCluster('influxdb17Feb_2020_withoutJobLoad');
+    //     d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
+    //         if(error) {
+    //         }else{
+    //             hostList = data;
+    //             inithostResults();
+    //             jobMap.hosts(hosts)
+    //             // graphicControl.charType =  d3.select('#chartType_control').node().value;
+    //             // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
+    //             let choiceinit = d3.select('#datacom').node().value;
+    //             if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
+    //                 // d3.select(".currentDate")
+    //                 //     .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
+    //                 if (choiceinit.includes('influxdb')) {
+    //                     // processResult = processResult_influxdb;
+    //                     db = "influxdb";
+    //                     realTimesetting(false, "influxdb", true);
+    //                 } else {
+    //                     db = "nagios";
+    //                     // processResult = processResult_old;
+    //                     realTimesetting(false, undefined, true);
+    //                 }
+    //                 let choice = d3.select('#datacom').node().value;
+    //                 dataInformation.filename = choice+".json";
+    //                 d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
+    //                     if (error) {
+    //                         M.toast({html: 'Local data does not exist, try to query from the internet!'});
+    //                         d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
+    //                             if (error) throw error;
+    //                             d3.select(".currentDate")
+    //                                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
+    //                             loadata(data)
+    //                         });
+    //                         return;
+    //                     }
+    //                     d3.select(".currentDate")
+    //                         .text("" + (new Date(data['timespan'][0]).toDateString()));
+    //                     d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
+    //                         if (error){
+    //                             loadata(data,undefined);
+    //                             return;
+    //                         }
+    //                         loadata(data,job);
+    //                         return;
+    //                     });
+    //                 });
+    //             }else{ // realtime
+    //                 d3.select(".currentDate")
+    //                     .text("" + (new Date()).toDateString());
+    //                 realTimesetting(true,choiceinit, true);
+    //                 db = choiceinit;
+    //                 requestService = eval('requestService'+choiceinit);
+    //                 processResult = eval('processResult_'+choiceinit);
+    //                 loadata([])
+    //             }
+    //         }
+    //     });
         formatService(true);
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
