@@ -39,7 +39,7 @@ angular.module('hpccApp')
             if(choice.category==='hpcc')
                 setTimeout(() => {
                     if (choice.formatType!=="realtime") {
-                        loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>loadclusterInfo= status);
+                        // loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>loadclusterInfo= status);
                         d3.json(choice.url, function (error, data) {
                             if (error) {
 
@@ -109,19 +109,8 @@ angular.module('hpccApp')
                 .text("" + (data['timespan'][0]).toDateString());
 
             let clusternum = (data['timespan'].length<50)?[5,7]:[6,8];
-
-            if(loadclusterInfo){
-                handle_dataRaw();
-                initDataWorker();
-                if (!init)
-                    resetRequest();
-                preloader(false)
-            }else {
-                recalculateCluster({
-                    clusterMethod: 'leaderbin',
-                    normMethod: 'l2',
-                    bin: {startBinGridSize: 4, range: clusternum}
-                }, function () {
+            loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{loadclusterInfo= status;
+                if(loadclusterInfo){
                     handle_dataRaw();
                     initDataWorker();
                     if (!init)
@@ -129,18 +118,33 @@ angular.module('hpccApp')
                     else
                         main();
                     preloader(false)
-                });
-            }
+                }else {
+                    recalculateCluster({
+                        clusterMethod: 'leaderbin',
+                        normMethod: 'l2',
+                        bin: {startBinGridSize: 4, range: clusternum}
+                    }, function () {
+                        handle_dataRaw();
+                        initDataWorker();
+                        if (!init)
+                            resetRequest();
+                        else
+                            main();
+                        preloader(false)
+                    });
+                }
+
+            });
         }
     }
     function loadPresetCluster(name,calback) {
         return d3.csv(`${name}_cluster.csv`, function (cluster) {
-            if (cluster==null)
+            if (cluster==null) {
                 M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
-            if(calback){
-                calback(false);// status
-            }
-            else {
+                if (calback) {
+                    calback(false);// status
+                }
+            }else {
                 updateClusterControlUI((cluster || []).length);
                 cluster.forEach(d => {
                     d.radius = +d.radius;

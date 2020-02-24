@@ -1493,13 +1493,25 @@ function readFilecsv(file) {
 
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
-                    updateClusterControlUI()
-                    recalculateCluster( {clusterMethod: 'leaderbin',normMethod:'l2',bin:{startBinGridSize: 4,range: [6,7]}},function(){
+                    updateClusterControlUI();
+                    loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{loadclusterInfo= status;
+                    if (loadclusterInfo) {
                         handle_dataRaw();
                         if (!init)
                             resetRequest();
                         preloader(false);
-                    });
+                    }else {
+                        recalculateCluster({
+                            clusterMethod: 'leaderbin',
+                            normMethod: 'l2',
+                            bin: {startBinGridSize: 4, range: [6, 20]}
+                        }, function () {
+                            handle_dataRaw();
+                            if (!init)
+                                resetRequest();
+                            preloader(false);
+                        });
+                    }})
                 }
             }
         })
@@ -2386,7 +2398,7 @@ let clustercalWorker;
 function recalculateCluster (option,calback,customCluster) {
     preloader(true,10,'Process grouping...','#clusterLoading');
     group_opt = option;
-    distance = group_opt.normMethod==='l1'?distanceL1:distanceL2
+    distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
     if (clustercalWorker)
         clustercalWorker.terminate();
     clustercalWorker = new Worker ('src/script/worker/clustercal.js');
