@@ -77,8 +77,7 @@ function getJoblist (iteration,reset){
         if (reset===true || reset===undefined)
             jobList = [];
         jobList = sampleJobdata.filter(s=>new Date(s.startTime)<sampleS.timespan[iteration]&&(s.endTime?new Date(s.endTime)>sampleS.timespan[iteration]:true));
-        //draw userlist data
-        TSneplot.drawUserlist(query_time);
+
     }catch(e){}
 }
 function current_userData () {
