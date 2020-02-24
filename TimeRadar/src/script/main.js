@@ -1459,64 +1459,6 @@ function updateSummaryChartAll() {
     }
 }
 
-function readFilecsv(file) {
-    exit_warp();
-    preloader(true);
-    setTimeout(() => {
-        d3.csv(file, function (error, data) {
-            if (error) {
-            } else {
-                loadata1(data);
-
-                function loadata1(data) {
-                    db = "csv";
-                    newdatatoFormat(data);
-
-                    inithostResults();
-                    formatService(true);
-                    processResult = processResult_csv;
-                    makedataworker();
-                    initDataWorker();
-                    // addDatasetsOptions()
-                    MetricController.axisSchema(serviceFullList, true).update();
-                    realTimesetting(false, "csv", true, data);
-                    updateDatainformation(sampleS['timespan']);
-
-                        sampleJobdata = [{
-                            jobID: "1",
-                            name: "1",
-                            nodes: hosts.map(h=>h.name),
-                            startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                            submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                            user: "dummyJob"
-                        }];
-
-                    d3.select(".currentDate")
-                        .text("" + (sampleS['timespan'][0]).toDateString());
-                    updateClusterControlUI();
-                    loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{loadclusterInfo= status;
-                    if (loadclusterInfo) {
-                        handle_dataRaw();
-                        if (!init)
-                            resetRequest();
-                        preloader(false);
-                    }else {
-                        recalculateCluster({
-                            clusterMethod: 'leaderbin',
-                            normMethod: 'l2',
-                            bin: {startBinGridSize: 4, range: [6, 20]}
-                        }, function () {
-                            handle_dataRaw();
-                            if (!init)
-                                resetRequest();
-                            preloader(false);
-                        });
-                    }})
-                }
-            }
-        })
-    }, 0);
-}
 function onChangeMinMaxFunc(choice){
     preloader(true);
     exit_warp();

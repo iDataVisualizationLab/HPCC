@@ -83,8 +83,8 @@ angular.module('hpccApp').constant('SampleData', [
     },
     {
         id:"zenith_idrac_3.1_through_3.5",
-        name:"zenith data 3.1 to 3.5",
-        url:"../HiperView/data/zenith_idrac_3.1_through_3.5.csv",
+        name:"zenith data 3.1 3.3 3.5",
+        url:"../HiperView/data/zenith_idrac_3.1_3_3.5.csv",
         description:"",
         date:"18 Feb 2020",
         group:"sample",

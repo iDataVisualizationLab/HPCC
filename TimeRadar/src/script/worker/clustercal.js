@@ -50,7 +50,7 @@ addEventListener('message',function ({data}) {
         }
         let process = 50;
         let w = 25;
-        bin.callback(function (iteration) {
+        bin.callback(function (iteration,bin) {
             process = process + w;
             w = w / 2;
             postMessage({

@@ -168,6 +168,13 @@ function newdatatoFormat (data){
             keys[currentkey].r = Object.keys(keys_replace[0])[0]||0;
         keys[currentkey].vi.push(ki)
     });
+    // check unionkeys
+    d3.keys(hostList.data.hostlist).forEach(hname=>{
+        Object.keys(keys).forEach((k,i)=>{
+            if (data.columns.find(c=>c===hname+"-"+k)===undefined)
+                delete keys[k];
+        })
+    });
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
     Object.keys(keys).forEach((k,i)=>{
@@ -191,8 +198,11 @@ function newdatatoFormat (data){
                 range[1] = temprange[1];
         });
         // let range = d3.extent(data,d=>d[variables[i]]);
-        if (keys[k].r)
-            range = serviceLists_or.find(d=>d.text===keys[k].r).sub[0].range;
+        if (keys[k].r) {
+            let suggest_range = serviceLists_or.find(d => d.text === keys[k].r).sub[0].range;
+            if (suggest_range[0]<=range[0]&&suggest_range[1]>=range[1])
+                range = suggest_range;
+        }
         const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(Object.keys(keys).length-1),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);
