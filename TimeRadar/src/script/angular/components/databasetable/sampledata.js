@@ -18,7 +18,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"21 Mar 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdbSun23June2019",
@@ -27,7 +28,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"23 Jun 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdbSat27Apr_removemetric",
@@ -36,7 +38,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"26 Apr 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdb20Apr_withoutJobLoad",
@@ -45,7 +48,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"20 Apr 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdb20Sep_2019_withoutJobLoad",
@@ -54,7 +58,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"20 Sep 2019",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdb16Feb_2020_withoutJobLoad",
@@ -63,7 +68,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"16 Feb 2020",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"influxdb17Feb_2020_withoutJobLoad",
@@ -72,30 +78,34 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"17 Feb 2020",
-        group:"sample"
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"csvEmployment",
         name:"US employment data - people",
-        url:"../HiperView/data/csvEmployment.json",
+        url:"../HiperView/data/csvEmployment.csv",
         description:"",
         date:"1 Jan 1999",
-        group:"sample"
+        group:"sample",
+        formatType:'csv'
     },
     {
         id:"csvEmploymentRate",
         name:"US employment rate data - percentage",
-        url:"../HiperView/data/csvEmploymentRate.json",
+        url:"../HiperView/data/csvEmploymentRate.csv",
         description:"",
         date:"1 Jan 1999",
-        group:"sample"
+        group:"sample",
+        formatType:'csv'
     },
     {
         id:"csvEmploymentNetchange_drop",
         name:"US employment rate data - %nets change",
-        url:"../HiperView/data/csvEmploymentNetchange_drop.json",
+        url:"../HiperView/data/csvEmploymentNetchange_drop.csv",
         description:"",
         date:"1 Jan 1999",
-        group:"sample"
+        group:"sample",
+        formatType:'csv'
     }
 ]);

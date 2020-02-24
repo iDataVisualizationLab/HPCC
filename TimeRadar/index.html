@@ -147,33 +147,36 @@
                                 <i class="fa fa-database"></i>
                                 <span class="dataset-name">{{Dataset.currentDataset.name}}</span>
                             </div>
-                        </div>
-                        <div  class="row valign-wrapper">
-                            <label for="datacom" class="col s4"> Dataset</label>
-                            <select id="datacom" class="col s7">
-                                <option value="serviceWed26Sep_removedmetric" data-date="26 Apr 2019">HPC data - 26 Sep 2018</option>
-                                <option value="influxdbThus21Mar_1400_1630"  data-date="21 Mar 2019">HPC data - 21 Mar 2019 (Chill water)</option>
-                                <option value="influxdbSun23June2019" data-date="23 Jun 2019">HPC data - 23 Jun 2019 (overheat compute-6-2)</option>
-                                <option value="influxdbSat27Apr_removemetric" data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>
-                                <option value="influxdb20Apr_withoutJobLoad"  data-date="20 Apr 2019">HPC data - 20 Apr 2019 (with job data)</option>
-                                <option value="influxdb20Sep_2019_withoutJobLoad"  data-date="20 Sep 2019">HPC data - 20 Sep 2019 (with job data)</option>
-                                <option value="influxdb16Feb_2020_withoutJobLoad" data-date="16 Feb 2020">HPC data - 16 Feb 2020 (with job data)</option>
-                                <option value="influxdb17Feb_2020_withoutJobLoad" selected data-date="17 Feb 2020">HPC data - 17 Feb 2020 (with job data)</option>
-                                <option value="csvEmployment"  data-date="1 Jan 1999">US employment data - people</option>
-                                <option value="csvEmploymentRate"  data-date="1 Jan 1999">US employment rate data - percentage</option>
-                                <option value="csvEmploymentNetchange_drop"  data-date="1 Jan 1999">US employment rate data - %nets change</option>
-                                <!--<option value="csvMiniChallenge2"  data-date="1 Jan 1999">VAST 2019 mini challenge 2 data</option>-->
-                                <!--<option value="influxdbWed24Apr_removemetric" selected data-date="24 Apr 2019">24 Apr 2019 (Job list)</option>-->
-                                <!--<option value="Mean_df" multifile="false">Clusters example (mean only)</option>-->
-
-                                <!--<option value="csv">read files</option>-->
-                                <!--<option value="nagios">Real-time Nagios</option>-->
-                                <!--<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>-->
-                            </select>
                             <div class="col s1">
                                 <button class="information" data-target='datainformation' data-title='Dataset information' >i</button>
                             </div>
                         </div>
+                        <!--<div  class="row valign-wrapper">-->
+                            <!--<label for="datacom" class="col s4"> Dataset</label>-->
+                            <!--<select id="datacom" class="col s7">-->
+                                <!--<option value="serviceWed26Sep_removedmetric" data-date="26 Apr 2019">HPC data - 26 Sep 2018</option>-->
+                                <!--<option value="influxdbThus21Mar_1400_1630"  data-date="21 Mar 2019">HPC data - 21 Mar 2019 (Chill water)</option>-->
+                                <!--<option value="influxdbSun23June2019" data-date="23 Jun 2019">HPC data - 23 Jun 2019 (overheat compute-6-2)</option>-->
+                                <!--<option value="influxdbSat27Apr_removemetric" data-date="26 Apr 2019">HPC data - 26 Apr 2019 (with job data)</option>-->
+                                <!--<option value="influxdb20Apr_withoutJobLoad"  data-date="20 Apr 2019">HPC data - 20 Apr 2019 (with job data)</option>-->
+                                <!--<option value="influxdb20Sep_2019_withoutJobLoad"  data-date="20 Sep 2019">HPC data - 20 Sep 2019 (with job data)</option>-->
+                                <!--<option value="influxdb16Feb_2020_withoutJobLoad" data-date="16 Feb 2020">HPC data - 16 Feb 2020 (with job data)</option>-->
+                                <!--<option value="influxdb17Feb_2020_withoutJobLoad" selected data-date="17 Feb 2020">HPC data - 17 Feb 2020 (with job data)</option>-->
+                                <!--<option value="csvEmployment"  data-date="1 Jan 1999">US employment data - people</option>-->
+                                <!--<option value="csvEmploymentRate"  data-date="1 Jan 1999">US employment rate data - percentage</option>-->
+                                <!--<option value="csvEmploymentNetchange_drop"  data-date="1 Jan 1999">US employment rate data - %nets change</option>-->
+                                <!--&lt;!&ndash;<option value="csvMiniChallenge2"  data-date="1 Jan 1999">VAST 2019 mini challenge 2 data</option>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="influxdbWed24Apr_removemetric" selected data-date="24 Apr 2019">24 Apr 2019 (Job list)</option>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="Mean_df" multifile="false">Clusters example (mean only)</option>&ndash;&gt;-->
+
+                                <!--&lt;!&ndash;<option value="csv">read files</option>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="nagios">Real-time Nagios</option>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="influxdb_range">&#45;&#45;&#45;&#45;custom-&#45;&#45;&#45;&#45;</option>&ndash;&gt;-->
+                            <!--</select>-->
+                            <!--<div class="col s1">-->
+                                <!--<button class="information" data-target='datainformation' data-title='Dataset information' >i</button>-->
+                            <!--</div>-->
+                        <!--</div>-->
                         <div  class="row s12 valign-wrapper hide">
                             <label for="control" class="col s4"> Simulation control</label>
                             <div  class="col s8"  id="control" style="padding-left: 0px;padding-right: 0px;">
@@ -428,7 +431,7 @@
                                     <i class="icon-flowerShape material-icons"></i>
                                 </label>
 
-                            </div >
+                            </div>
                         </div>
                         <div id="RadarController"></div>
                         <div id="RadarController_Table" style = "position:relative">

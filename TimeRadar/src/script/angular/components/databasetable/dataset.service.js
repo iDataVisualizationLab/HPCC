@@ -8,7 +8,7 @@ angular.module('hpccApp')
     var datasets = SampleData;
 
     Dataset.datasets = datasets;
-    Dataset.dataset = datasets[1];
+    Dataset.dataset = datasets[7];
     Dataset.currentDataset = undefined;  // dataset before update
     Dataset.stats = {};
     Dataset.type = undefined;

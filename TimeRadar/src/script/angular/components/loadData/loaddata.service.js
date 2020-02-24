@@ -39,13 +39,13 @@ angular.module('hpccApp')
             if(choice.category==='hpcc')
                 setTimeout(() => {
                     if (choice.formatType!=="realtime") {
-                        loadPresetCluster(choice.url.replace(/(\w+).(\w+)/,'$1'),(status)=>loadclusterInfo= status);
+                        loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>loadclusterInfo= status);
                         d3.json(choice.url, function (error, data) {
                             if (error) {
 
                             }
-                            if(choice.url2) {
-                                d3.json(choice.url2, function (error, job) {
+
+                                d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
                                     if (error) {
                                         loadata1(data, undefined);
                                         return;
@@ -53,9 +53,7 @@ angular.module('hpccApp')
                                     loadata1(data, job);
                                     return;
                                 });
-                            }else{
-                                loadata1(data, undefined);
-                            }
+
                         });
                     }
                     else {
@@ -70,7 +68,7 @@ angular.module('hpccApp')
 
                 }, 0);
             else
-                readFilecsv(choice.url.replace(/(\w+).(\w+)/,'$1')+'.csv')
+                readFilecsv(choice.url)
 
         function loadata1(data,job){
             makedataworker();
@@ -128,6 +126,8 @@ angular.module('hpccApp')
                     initDataWorker();
                     if (!init)
                         resetRequest();
+                    else
+                        main();
                     preloader(false)
                 });
             }
