@@ -8,6 +8,6 @@ angular.module('hpccApp')
 
         Dataset.update(Dataset.dataset).then(function() {
             Config.updateDataset(Dataset.dataset);
-
+            console.log(Dataset.currentDataset.name)
         })
     });

@@ -46,7 +46,7 @@
         <script src="src/script/angular/hpcc.js"></script>
     </head>
 
-    <body text="black" id="mainBody" class="light">
+    <body text="black" id="mainBody" class="light" ng-controller="MainCtrl">
     <div class="cover">
         <div class="progressDiv hidden">
             <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
@@ -140,17 +140,21 @@
                         <i class="material-icons expand">chevron_right</i>
                     </div>
                     <div class="collapsible-body">
-                        <div  class="row valign-wrapper">
-                            <dataset-selector class="right"></dataset-selector>
-                            <div class="current-dataset" title="{{Dataset.currentDataset.name}}">
+
+                            <div class="current-dataset row valign-wrapper" title="{{Dataset.currentDataset.name}}" >
+                                <div class="col s4 right-align">
                                 <span style="display:inline-block; margin:0;">Data</span>
                                 <i class="fa fa-database"></i>
-                                <span class="dataset-name">{{Dataset.currentDataset.name}}</span>
+                                </div>
+                                <div class="col s7 no-padding">
+                                    <span class="dataset-name col s8 truncate no-padding">{{Dataset.currentDataset.name}}</span>
+                                    <dataset-selector></dataset-selector>
+                                </div>
+                                <div class="col s1">
+                                    <button class="information" data-target='datainformation' data-title='Dataset information' >i</button>
+                                </div>
                             </div>
-                            <div class="col s1">
-                                <button class="information" data-target='datainformation' data-title='Dataset information' >i</button>
-                            </div>
-                        </div>
+
                         <!--<div  class="row valign-wrapper">-->
                             <!--<label for="datacom" class="col s4"> Dataset</label>-->
                             <!--<select id="datacom" class="col s7">-->
@@ -546,7 +550,7 @@
         </div>
     </div>
     <div id="instructions"></div>
-    <div id="Maincontent" class="row s12 no_magrin" ng-controller="MainCtrl">
+    <div id="Maincontent" class="row s12 no_magrin">
         <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" data-target="#mySidenav" data-source="#Maincontent" data-class="sideIn" data-link="#sideNavbtn" onclick="closeNav(this)"><i class="material-icons">chevron_left</i></a>
         <div class="overlaySide">
             <a class="openbtn btn-floating btn waves-effect waves-light pulse" data-target="#mySidenav" data-source="#Maincontent" data-class="sideIn" id="sideNavbtn" onclick="openNav(this)">
