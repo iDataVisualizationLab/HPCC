@@ -8,12 +8,13 @@ d3.text(srcpath+"data/data_raw/test_FD004.txt",(data)=>{
         temp.shift();
         temp.shift();
         temp.shift();
+        _.pullAt(temp, [2,7,14,15,18]);
         item.data = temp.slice(0,21);
         return item
     });
     let nest = d3.nest().key(d=>d.id).entries(data)
     nest.forEach(d=>d.values.sort((a,b)=>a.timestep-b.timestep))
-    console.log(nest)
+    console.log(nest);
     let average_cycle = Math.round(d3.mean(nest,d=>d.values.length));
     let dim;
     data = nest.map(d=>{
