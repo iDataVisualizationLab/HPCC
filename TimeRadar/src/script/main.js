@@ -495,12 +495,12 @@ function updatetimeline(index) {
         expectedLength += timearr.length;
     }
     else {
-        if(!hostResults['timespan'])
-            hostResults['timespan']=[];
-        if (isRealtime)
-            hostResults['timespan'].push(new Date());
-        else
-            hostResults['timespan']=sampleS['timespan'].slice(0,index+1)
+        // if(!hostResults['timespan'])
+        //     hostResults['timespan']=[];
+        // if (isRealtime)
+        //     hostResults['timespan'].push(new Date());
+        // else
+        //     hostResults['timespan']=sampleS['timespan'].slice(0,index+1)
         expectedLength++;
     }
 }
@@ -1162,19 +1162,19 @@ function resetRequest(){
     firstTime = true;
     if (interval2)
         interval2.stop();
-    hostResults = {};
-    cluster_info.forEach(c=>c.arr.length=0)
+    // hostResults = {};
+    // cluster_info.forEach(c=>c.arr.length=0)
     expectedLength = 0;
     formatRealtime = getformattime(+timestep_query.split(/[a-z]/)[0],timeshortconvert(timestep_query.match(/[a-z]/)[0]));
     var count =0;
-    for (var att in hostList.data.hostlist) {
-        // to contain the historical query results
-        hostResults[att] = {};
-        hostResults[att].index = count;
-        hostResults[att].arr = [];
-        serviceListattr.forEach(d=>hostResults[att][d]=[]);
-        count++;
-    }
+    // for (var att in hostList.data.hostlist) {
+    //     // to contain the historical query results
+    //     hostResults[att] = {};
+    //     hostResults[att].index = count;
+    //     hostResults[att].arr = [];
+    //     serviceListattr.forEach(d=>hostResults[att][d]=[]);
+    //     count++;
+    // }
     svg.selectAll(".compute").remove();
     svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();

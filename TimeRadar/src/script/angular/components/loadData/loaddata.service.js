@@ -85,7 +85,7 @@ angular.module('hpccApp')
                     startTime: new Date(_.last(sampleS.timespan)-100).toString(),
                     submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
                     user: "dummyJob"
-                }]
+                }];
             if (choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
