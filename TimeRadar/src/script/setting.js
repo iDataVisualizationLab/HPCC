@@ -105,3 +105,19 @@ function systemFormat() {
     thresholds = [[3,98], [0,99], [1050,17850],[0,200] ];
     serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
 }
+
+function inithostResults (worker) {
+    hosts = [];
+    const hostdata = hostList.data.hostlist;
+    hostResults ={};
+    for (var att in hostdata) {
+        var h = {};
+        h.name = att;
+        h.hpcc_rack = hostdata[att].rack?hostdata[att].rack:(+att.split("-")[1]);
+        h.hpcc_node = hostdata[att].node?hostdata[att].node:+att.split("-")[2].split(".")[0];
+        h.index = hosts.length;
+
+        hosts.push(h);
+    }
+    hostResults = sampleS;
+}

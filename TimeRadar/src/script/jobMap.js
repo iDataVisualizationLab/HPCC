@@ -422,14 +422,13 @@ let JobMap = function() {
                 path.append('g').attr('class', 'radar');
             }
         });
-        if (first)
+
             bg.select(".radar")
                 .datum(d=>newdata.find(n=>n.name === d.name))
                 .each(function(d){
 
                     createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), {colorfill:colorfill});
                 });
-        // createRadar(datapointg.select('.linkLineg'), datapointg, newdata, {colorfill:colorfill});
 
     }
     let timelineStep = 10;
@@ -687,7 +686,7 @@ let JobMap = function() {
                 // layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
                 const data_in = d.values_name.map(name => {
                     let data_temp = hostOb[name].data.map((o, i) => {
-                        temp = _.cloneDeep(o);
+                        temp = schema.map((s,si)=>({axis:s.text,value:o[si]}));
                         temp.name = hostOb[name].arrcluster[i];
                         temp.timestep = scaletime.invert(i);
                         return temp;
@@ -726,12 +725,12 @@ let JobMap = function() {
                     })
                 };
                 layout.background.value[layout.background.value.length - 1].x1 = last_timestep;
-                const data_in = schema.map(s => {
+                const data_in = schema.map((s,si) => {
                     let scaleY = d3.scaleLinear().range(s.range);
                     let data_temp = d.values_name.map(h => {
                         let temp = hostOb[h].data.map(e => {
                             return {
-                                y: scaleY(e.find(a => a.axis === s.text).value),
+                                y: scaleY(e[si]),
                                 x: e.time,
                             }
                         });
@@ -1242,298 +1241,314 @@ let JobMap = function() {
                 }, 0);
                 isLastTrigger = false;
             }
-        }
+            //job node
+            if (data.length) {
+                g.select('.job_title').classed('hide', false);
+                let timerange = [d3.min(data, d => new Date(d.submitTime)), timeStep];
+                timerange[0] = new Date(timerange[0].toDateString());
+                timerange[1].setDate(timerange[1].getDate() + 1);
+                timerange[1] = new Date(timerange[1].toDateString());
+                let time_daynum = d3.timeDay.every(1).range(timerange[0], timerange[1]).length;
+                var radius = d3.scaleTime()
+                    .domain(timerange)
+                    .range([graphicopt.job.r_inside, graphicopt.job.r]);
 
-        //job node
-        if (data.length) {
-            g.select('.job_title').classed('hide',false);
-            let timerange = [d3.min(data, d => new Date(d.submitTime)), timeStep];
-            timerange[0] = new Date(timerange[0].toDateString());
-            timerange[1].setDate(timerange[1].getDate() + 1);
-            timerange[1] = new Date(timerange[1].toDateString());
-            let time_daynum = d3.timeDay.every(1).range(timerange[0], timerange[1]).length;
-            var radius = d3.scaleTime()
-                .domain(timerange)
-                .range([graphicopt.job.r_inside, graphicopt.job.r]);
+                var theta = d3.scaleTime()
+                    .domain(timerange)
+                    .range([0, Math.PI * 2 * (time_daynum - 1)]);
 
-            var theta = d3.scaleTime()
-                .domain(timerange)
-                .range([0, Math.PI * 2 * (time_daynum - 1)]);
+                var spiral = d3.radialLine()
+                    .curve(d3.curveCardinal)
+                    .angle(theta)
+                    .radius(radius);
 
-            var spiral = d3.radialLine()
-                .curve(d3.curveCardinal)
-                .angle(theta)
-                .radius(radius);
-
-            let backdround_spiral = d3.timeHour.every(1).range(timerange[0], timerange[1]);
-        }else{
-            g.select('.job_title').classed('hide',true);
-        }
-        let jobNode = nodeg.selectAll('.jobNode').data(data,function(d){return d.name});
-        jobNode.exit().remove();
-        let jobNode_n = jobNode.enter().append('g').attr('class',d=>'node jobNode new '+fixName2Class(fixstr(d.name)));
-
-        jobNode_n.append('circle')
-            .attrs(
-            {'class':'computeSig_b',
-                // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
-                // 'd': d=>spiral(backdround_spiral),
-                'r': graphicopt.job.r,
-                'fill': '#dddddd',
-                'opacity': 0.2,
-                'stroke-width':0,
-            });
-        jobNode_n.append('path')
-            .attrs(
-            {'class':'computeSig_sub submitTime',
-            });
-        jobNode_n.append('path')
-            .attrs(
-                {'class':'computeSig_start timeBoxRunning',
-                })
-        ;
-        jobNode_n.append('text').attr('class','lelftext label').attrs({'x':-graphicopt.job.r}).style('text-anchor','end');
-        jobNode_n.append('text').attr('class','righttext label').attrs({'x':graphicopt.job.r});
-        jobNode = nodeg.selectAll('.jobNode');
-        jobNode.select('.computeSig_b').attr('r',graphicopt.job.r);
-        jobNode.select('.computeSig_sub.submitTime').attr('d',function(d){
-            let temp = d3.timeHour.every(1).range(new Date(d.submitTime),new Date(d.startTime));
-            temp.pop();
-            temp.push(new Date(d.startTime));
-            return spiral(temp);
-        })
-        ;
-        jobNode.select('.computeSig_start.timeBoxRunning') .attr('d',function(d){
-            let temp = d3.timeHour.every(1).range(new Date(d.startTime),new Date(timeStep_r.toString()));
-            temp.pop();
-            temp.push(new Date(timeStep_r.toString()));
-            return spiral(temp);
-        });
-        jobNode.select('.lelftext').text(d=>`#Hosts: ${d.nodes.length}`)
-        jobNode.select('.righttext').text(d=>d.values?`#Jobs: ${d.values.length}`:'')
-
-        jobNode.selectAll('path').style('stroke-width',d=>d.values?Jobscale(d.values.length):1.5);
-
-
-        let userNode = nodeg.selectAll('.userNode').data(user,d=> d.name);
-        userNode.exit().remove();
-        let userNode_n = userNode.enter().append('g').attr('class',d=>'node userNode new '+fixName2Class(fixstr(d.name)));
-
-        userNode_n.append('circle').attrs(
-            {'class':'userNodeSig',
-                'r': graphicopt.user.r,
-            });
-        userNode_n.append('circle').attrs(
-            {'class':'userNodeImg',
-                'r': graphicopt.user.r,
-                'fill': d=>"url(#userpic)"
-            });
-
-        userNode_n.append('text').attrs(
-            // {'class':'userNodeSig_label',
-            //     'y': -graphicopt.user.r,
-            //     'text-anchor':'middle',
-            // });
-            {'class':'userNodeSig_label',
-                'dy': '0.25rem',
-                'x': graphicopt.user.r+4,
-                // 'text-anchor':'middle',
-            });
-
-
-        userNode=nodeg.selectAll('.userNode');
-        userNode.select('.userNodeSig').styles(
-            {
-                'fill-opacity':0.5,
-                'fill': d=>{const color = colorFunc(runopt.graphic.colorBy==='group'?d.cluster:d.name); return color==='black'?'white':color;}
-            });
-        userNode.select('.userNodeSig_label')
-        .text(d=>d.name);
-
-        handle_sort(true,true);
-        updaterow(userNode);
-        // table_header(table_headerNode);
-        // make table footer
-        let table_footerNode = nodeg.select('.table.footer');
-        if (table_footerNode.empty())
-            table_footerNode = nodeg.append('g').attr('class', 'table footer');
-        table_footerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
-
-        table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
-        table_footer(table_footerNode);
-
-
-        let node = nodeg.selectAll('.node');
-
-        let ticked = function() {
-            node.each(d => {
-                d.x = Math.max(graphicopt.node.r, Math.min(d.x, graphicopt.widthG() - graphicopt.node.r));
-            });
-            // if(this.alpha()<0.69) {
-            let range_com = d3.extent(computers.data(), d => d.x);
-            scaleNode.domain(range_com).range([50, 120]);
-            g.select('.host_title').attrs({'text-anchor':"start",'x':100,'dy':scaleNode_y(0)-20}).text("Hosts");
-            computers.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
-            if (runopt.compute.type==='timeline') {
-                // scaleNode_y_middle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
-                scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length-1])
+                let backdround_spiral = d3.timeHour.every(1).range(timerange[0], timerange[1]);
+            } else {
+                g.select('.job_title').classed('hide', true);
             }
-            computers.transition().attr('transform', d => {
-                if (runopt.compute.type==='timeline') {
-                    d.x2 = 200;
-                    d.y2 = scaleNode_y_middle(d.order);
-                }else
-                if (runopt.compute.clusterNode) {
-                    d.x = 200;
-                    d.x2 = 200;
-                }else
+            let jobNode = nodeg.selectAll('.jobNode').data(data, function (d) {
+                return d.name
+            });
+            jobNode.exit().remove();
+            let jobNode_n = jobNode.enter().append('g').attr('class', d => 'node jobNode new ' + fixName2Class(fixstr(d.name)));
+
+            jobNode_n.append('circle')
+                .attrs(
+                    {
+                        'class': 'computeSig_b',
+                        // 'd': d=>spiral([new Date(d.submitTime),new Date(d.startTime),timeStep]),
+                        // 'd': d=>spiral(backdround_spiral),
+                        'r': graphicopt.job.r,
+                        'fill': '#dddddd',
+                        'opacity': 0.2,
+                        'stroke-width': 0,
+                    });
+            jobNode_n.append('path')
+                .attrs(
+                    {
+                        'class': 'computeSig_sub submitTime',
+                    });
+            jobNode_n.append('path')
+                .attrs(
+                    {
+                        'class': 'computeSig_start timeBoxRunning',
+                    })
+            ;
+            jobNode_n.append('text').attr('class', 'lelftext label').attrs({'x': -graphicopt.job.r}).style('text-anchor', 'end');
+            jobNode_n.append('text').attr('class', 'righttext label').attrs({'x': graphicopt.job.r});
+            jobNode = nodeg.selectAll('.jobNode');
+            jobNode.select('.computeSig_b').attr('r', graphicopt.job.r);
+            jobNode.select('.computeSig_sub.submitTime').attr('d', function (d) {
+                let temp = d3.timeHour.every(1).range(new Date(d.submitTime), new Date(d.startTime));
+                temp.pop();
+                temp.push(new Date(d.startTime));
+                return spiral(temp);
+            })
+            ;
+            jobNode.select('.computeSig_start.timeBoxRunning').attr('d', function (d) {
+                let temp = d3.timeHour.every(1).range(new Date(d.startTime), new Date(timeStep_r.toString()));
+                temp.pop();
+                temp.push(new Date(timeStep_r.toString()));
+                return spiral(temp);
+            });
+            jobNode.select('.lelftext').text(d => `#Hosts: ${d.nodes.length}`)
+            jobNode.select('.righttext').text(d => d.values ? `#Jobs: ${d.values.length}` : '')
+
+            jobNode.selectAll('path').style('stroke-width', d => d.values ? Jobscale(d.values.length) : 1.5);
+
+
+            let userNode = nodeg.selectAll('.userNode').data(user, d => d.name);
+            userNode.exit().remove();
+            let userNode_n = userNode.enter().append('g').attr('class', d => 'node userNode new ' + fixName2Class(fixstr(d.name)));
+
+            userNode_n.append('circle').attrs(
+                {
+                    'class': 'userNodeSig',
+                    'r': graphicopt.user.r,
+                });
+            userNode_n.append('circle').attrs(
+                {
+                    'class': 'userNodeImg',
+                    'r': graphicopt.user.r,
+                    'fill': d => "url(#userpic)"
+                });
+
+            userNode_n.append('text').attrs(
+                // {'class':'userNodeSig_label',
+                //     'y': -graphicopt.user.r,
+                //     'text-anchor':'middle',
+                // });
+                {
+                    'class': 'userNodeSig_label',
+                    'dy': '0.25rem',
+                    'x': graphicopt.user.r + 4,
+                    // 'text-anchor':'middle',
+                });
+
+
+            userNode = nodeg.selectAll('.userNode');
+            userNode.select('.userNodeSig').styles(
+                {
+                    'fill-opacity': 0.5,
+                    'fill': d => {
+                        const color = colorFunc(runopt.graphic.colorBy === 'group' ? d.cluster : d.name);
+                        return color === 'black' ? 'white' : color;
+                    }
+                });
+            userNode.select('.userNodeSig_label')
+                .text(d => d.name);
+
+            handle_sort(true, true);
+            updaterow(userNode);
+            // table_header(table_headerNode);
+            // make table footer
+            let table_footerNode = nodeg.select('.table.footer');
+            if (table_footerNode.empty())
+                table_footerNode = nodeg.append('g').attr('class', 'table footer');
+            table_footerNode.append('g').attr('class', 'back').append('path').styles({'fill': '#ddd'});
+
+            table_footerNode.attr('transform', `translate(600,${yscale(user.length)})`);
+            table_footer(table_footerNode);
+
+
+            let node = nodeg.selectAll('.node');
+
+            let ticked = function () {
+                node.each(d => {
+                    d.x = Math.max(graphicopt.node.r, Math.min(d.x, graphicopt.widthG() - graphicopt.node.r));
+                });
+                // if(this.alpha()<0.69) {
+                let range_com = d3.extent(computers.data(), d => d.x);
+                scaleNode.domain(range_com).range([50, 120]);
+                g.select('.host_title').attrs({
+                    'text-anchor': "start",
+                    'x': 100,
+                    'dy': scaleNode_y(0) - 20
+                }).text("Hosts");
+                computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                if (runopt.compute.type === 'timeline') {
+                    // scaleNode_y_middle = d3.scaleLinear().range([yscale.range()[1]/2,yscale.range()[1]/2+10]).domain([computers.data().length/2,computers.data().length/2+1])
+                    scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1])
+                }
+                computers.transition().attr('transform', d => {
+                    if (runopt.compute.type === 'timeline') {
+                        d.x2 = 200;
+                        d.y2 = scaleNode_y_middle(d.order);
+                    } else if (runopt.compute.clusterNode) {
+                        d.x = 200;
+                        d.x2 = 200;
+                    } else
+                        d.x2 = scaleNode(d.x);
+                    if (runopt.compute.clusterNode && this.alpha() < 0.6)
+                        d.y = scaleNode_y(d.order);
+                    return `translate(${d.x2},${d.y2 || d.y})`
+                });
+                let range_job = d3.extent(jobNode.data(), d => d.x);
+                scaleNode.domain(range_job).range([370, 450]);
+                jobNode.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                jobNode.transition().attr('transform', d => {
                     d.x2 = scaleNode(d.x);
-                if (runopt.compute.clusterNode&&this.alpha()<0.6)
-                    d.y = scaleNode_y(d.order);
-                return `translate(${d.x2},${d.y2||d.y})`
+                    if (runopt.compute.clusterNode && this.alpha() < 0.6)
+                        d.y = scaleJob(d.order);
+                    return `translate(${d.x2},${d.y})`
+                });
+
+                link.transition()
+                    .call(updatelink)
+                if (runopt.compute.type === 'timeline')
+                    updateaxis();
+            };
+
+            initForce();
+
+            function getGradID(d) {
+                return 'links' + d.index;
+            }
+
+            simulation
+                .nodes(node.data()).stop();
+            simulation.force("link")
+                .links(linkdata);
+            let link = linkg.selectAll('.links').data(linkdata.filter(d => d.type === undefined), d => d.source.name + "-" + d.target.name);
+            link.exit().remove();
+            let link_n = link.enter()
+                .append('g')
+                .attr("class", "links");
+            link_n
+                .append('path');
+            link_n
+                .append('text').attr("text-anchor", "middle");
+
+
+            link = linkg.selectAll('.links');
+            link.select('text').text(function (d) {
+                return d.links ? d.links : ''
             });
-            let range_job = d3.extent(jobNode.data(), d => d.x);
-            scaleNode.domain(range_job).range([370, 450]);
-            jobNode.data().sort((a,b)=>a.y-b.y).forEach((d,i)=>d.order = i);
-            jobNode.transition().attr('transform', d => {
-                d.x2 = scaleNode(d.x);
-                if (runopt.compute.clusterNode&&this.alpha()<0.6)
-                    d.y = scaleJob(d.order);
-                return `translate(${d.x2},${d.y})`
-            });
+            link.select('path')
+                .attr("stroke", d => colorFunc(getLinkKeyColor(d)))
+                .style("stroke-width", function (d) {
+                    return d.links === undefined ? 1 : linkscale(d.links);
+                });
 
-            link.transition()
-                .call(updatelink)
-            if (runopt.compute.type==='timeline')
-                updateaxis();
-        };
-
-        initForce();
-        function getGradID(d){
-            return 'links'+d.index;
-        }
-        simulation
-            .nodes(node.data()).stop();
-        simulation.force("link")
-            .links(linkdata);
-        let link = linkg.selectAll('.links').data(linkdata.filter(d=>d.type===undefined),d=> d.source.name+ "-" +d.target.name);
-        link.exit().remove();
-        let link_n = link.enter()
-            .append('g')
-            .attr("class", "links");
-        link_n
-            .append('path');
-        link_n
-            .append('text').attr("text-anchor", "middle");
-
-
-        link = linkg.selectAll('.links');
-        link.select('text').text(function(d){return d.links?d.links:''});
-        link.select('path')
-            .attr("stroke", d=> colorFunc(getLinkKeyColor(d)))
-            .style("stroke-width", function (d) {
-                return d.links===undefined?1:linkscale(d.links);
-            });
-
-        // reset freezing action
-        freezing = false;
-        releasehighlight();
-        g.selectAll('.userNode')
-            .call(path=>freezinghandle(path,[function(d){
-                g.selectAll('.userNode').classed('fade',true);
-                d3.select(this).classed('highlight',true);
-                link.classed('hide',true);
-                const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('highlight',true).data();
-                const samesource = link.filter(f=> sametarget.find(e=>e.source===f.target)).classed('hide',false).classed('highlight',true).data();
-                g.selectAll('.jobNode').classed('hide',true);
-                g.selectAll('.jobNode').filter(f=>sametarget.find(e=>e.source===f)).classed('hide',false).classed('highlight',true).selectAll('.label').classed('hide',true);
-                g.selectAll( '.computeNode').classed('fade',true);
-                g.selectAll( '.computeNode').filter(f=>samesource.find(e=>e.source===f)).classed('highlight',true);
-                table_footerNode.classed('fade',true);
-            },null
-            ],[function(d){
-                g.selectAll('.userNode').classed('fade',false);
-                d3.select(this).classed('highlight',false);
-                g.selectAll('.jobNode').classed('hide',false).classed('highlight',false).selectAll('.label').classed('hide',false);
-                g.selectAll( '.computeNode').classed('fade',false).classed('highlight',false);
-                link.classed('hide',false).classed('highlight',false);
-                table_footerNode.classed('fade',false);
-            },null
-            ]));
-        g.selectAll('.computeNode')
-            .call(path=>freezinghandle(path,[function(d){
-                d3.select(this).classed('highlight',true).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,false);
-                const samesource = link.filter(f=> d===f.source).classed('hide',jobEmpty).classed('highlight',true).data();
-                const sametarget = link.filter(f=> samesource.find(e=>e.target===f.source)).classed('hide',jobEmpty).classed('highlight',!jobEmpty).data();
-                g.selectAll('.jobNode').filter(f=>samesource.find(e=>e.target===f)).classed('hide',jobEmpty).classed('highlight',!jobEmpty).selectAll('.label').classed('hide',!jobEmpty);
-                g.selectAll( '.userNode').filter(f=>sametarget.find(e=>e.target===f)).classed('highlight',!jobEmpty);
-
-                g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
-                linkg.selectAll('.links:not(.highlight)').classed('hide',true);
-                g.selectAll('.jobNode:not(.highlight)').classed('hide',true);
-                g.selectAll('.userNode:not(.highlight)').classed('fade',true);
-                table_footerNode.classed('fade',true);
-                callback.mouseover(d.values_name)
-            },null],[function(d){
-                if (runopt.compute.type!=='timeline') {
-                    d3.select(this).select('.computeSig_label').text(d=>d.orderG!==undefined?`Group ${d.orderG+1}${d.text!==''?`: ${d.text}`:''}`:trimNameArray(d.name)).call(wrap,true);
+            // reset freezing action
+            freezing = false;
+            releasehighlight();
+            g.selectAll('.userNode')
+                .call(path => freezinghandle(path, [function (d) {
+                    g.selectAll('.userNode').classed('fade', true);
+                    d3.select(this).classed('highlight', true);
+                    link.classed('hide', true);
+                    const sametarget = link.filter(f => d === f.target).classed('hide', false).classed('highlight', true).data();
+                    const samesource = link.filter(f => sametarget.find(e => e.source === f.target)).classed('hide', false).classed('highlight', true).data();
+                    g.selectAll('.jobNode').classed('hide', true);
+                    g.selectAll('.jobNode').filter(f => sametarget.find(e => e.source === f)).classed('hide', false).classed('highlight', true).selectAll('.label').classed('hide', true);
+                    g.selectAll('.computeNode').classed('fade', true);
+                    g.selectAll('.computeNode').filter(f => samesource.find(e => e.source === f)).classed('highlight', true);
+                    table_footerNode.classed('fade', true);
+                }, null
+                ], [function (d) {
+                    g.selectAll('.userNode').classed('fade', false);
+                    d3.select(this).classed('highlight', false);
+                    g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide', false);
                     g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                    g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide',jobEmpty);
-                    g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     table_footerNode.classed('fade', false);
+                }, null
+                ]));
+            g.selectAll('.computeNode')
+                .call(path => freezinghandle(path, [function (d) {
+                    d3.select(this).classed('highlight', true).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.name)).call(wrap, false);
+                    const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight', true).data();
+                    const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).data();
+                    g.selectAll('.jobNode').filter(f => samesource.find(e => e.target === f)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).selectAll('.label').classed('hide', !jobEmpty);
+                    g.selectAll('.userNode').filter(f => sametarget.find(e => e.target === f)).classed('highlight', !jobEmpty);
+
+                    g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
+                    linkg.selectAll('.links:not(.highlight)').classed('hide', true);
+                    g.selectAll('.jobNode:not(.highlight)').classed('hide', true);
+                    g.selectAll('.userNode:not(.highlight)').classed('fade', true);
+                    table_footerNode.classed('fade', true);
+                    callback.mouseover(d.values_name)
+                }, null], [function (d) {
+                    if (runopt.compute.type !== 'timeline') {
+                        d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.name)).call(wrap, true);
+                        g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                        g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
+                        g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                        link.classed('hide', false).classed('highlight', false);
+                        table_footerNode.classed('fade', false);
+                    }
+                    callback.mouseleave()
+                }, null]));
+            g.selectAll('.jobNode')
+                .call(path => freezinghandle(path, [function (d) {
+                    g.selectAll('.jobNode').classed('hide', true);
+                    d3.select(this).classed('hide', false).classed('highlight', true);
+                    link.classed('hide', true);
+                    const samesource = link.filter(f => d === f.source).classed('hide', false).classed('highlight', true).data();
+                    const sametarget = link.filter(f => d === f.target).classed('hide', false).classed('highlight', true).data();
+                    d3.selectAll('.userNode').classed('fade', true);
+                    d3.selectAll('.userNode').filter(f => samesource.find(e => e.target === f)).classed('highlight', true);
+                    d3.selectAll('.computeNode').classed('fade', true);
+                    d3.selectAll('.computeNode').filter(f => sametarget.find(e => e.source === f)).classed('highlight', true);
+                    table_footerNode.classed('fade', true);
+                }, null], [function (d) {
+                    releaseSelection();
+                }, null]));
+
+            if (!runopt.compute.clusterNode && runopt.compute.type !== 'timeline')
+                simulation.alphaTarget(0.3).on("tick", ticked).restart();
+            else {
+                renderManual(computers, jobNode, link);
+            }
+            link.call(updatelink, true);
+            toggleComponent(jobEmpty);
+            function initForce(){
+                if (!simulation) {
+                    let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
+                    let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
+                    simulation = d3.forceSimulation()
+                        .force("link", d3.forceLink().id(function (d) {
+                            return d.name;
+                        }).distance(200).strength(d => d.type ? 1 : 0.9))
+                        .force("collide", d3.forceCollide(d =>
+                            (d.type === 'job') ? 0.001 : graphicopt.node.r).strength(0.8))
+                        .force("charge1", attractForce)
+                        .force("charge2", repelForce)
+                        .force("x", d3.forceX(function (
+                            d) {
+                            return (d.type === 'job') ? 400 : ((d.type === 'user') ? 600 : 0)
+                        }).strength(function (d) {
+                            return d.type === 'job' ? 0.8 : 0.8
+                        })).alphaTarget(1)
+                        .on("tick", ticked);
+                    simulation.fistTime = true;
+                }else {
                 }
-                callback.mouseleave()
-            },null]));
-        g.selectAll('.jobNode')
-            .call(path=>freezinghandle(path,[function(d){
-                g.selectAll('.jobNode').classed('hide',true);
-                d3.select(this).classed('hide',false).classed('highlight',true);
-                link.classed('hide',true);
-                const samesource = link.filter(f=> d===f.source).classed('hide',false).classed('highlight',true).data();
-                const sametarget = link.filter(f=> d===f.target).classed('hide',false).classed('highlight',true).data();
-                d3.selectAll('.userNode').classed('fade',true);
-                d3.selectAll( '.userNode').filter(f=>samesource.find(e=>e.target===f)).classed('highlight',true);
-                d3.selectAll( '.computeNode').classed('fade',true);
-                d3.selectAll( '.computeNode').filter(f=>sametarget.find(e=>e.source===f)).classed('highlight',true);
-                table_footerNode.classed('fade',true);
-            },null],[function(d){
-                releaseSelection();
-            },null]));
-
-        if (!runopt.compute.clusterNode&&runopt.compute.type!=='timeline')
-            simulation.alphaTarget(0.3).on("tick", ticked).restart();
-        else {
-            renderManual(computers, jobNode, link);
-        }
-        link.call(updatelink,true);
-        toggleComponent(jobEmpty);
-        jobMap.drawComp();
-        first = false;
-
-        function initForce(){
-            if (!simulation) {
-                let repelForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:-150);
-                let attractForce = d3.forceManyBody().strength(d=> (d.type==='job')?0:100);
-                simulation = d3.forceSimulation()
-                    .force("link", d3.forceLink().id(function (d) {
-                        return d.name;
-                    }).distance(200).strength(d => d.type ? 1 : 0.9))
-                    .force("collide", d3.forceCollide(d =>
-                        (d.type === 'job') ? 0.001 : graphicopt.node.r).strength(0.8))
-                    .force("charge1", attractForce)
-                    .force("charge2", repelForce)
-                    .force("x", d3.forceX(function (
-                        d) {
-                        return (d.type === 'job') ? 400 : ((d.type === 'user') ? 600 : 0)
-                    }).strength(function (d) {
-                        return d.type === 'job' ? 0.8 : 0.8
-                    })).alphaTarget(1)
-                    .on("tick", ticked);
-                simulation.fistTime = true;
-            }else {
             }
         }
+        jobMap.drawComp();
+        first = false;
 
         return jobMap;
     };
@@ -1786,35 +1801,39 @@ let JobMap = function() {
     }
 
     function updateClusterTimeline() {
-        let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
-        for (let ts = 0; ts < maxstep + 1; ts++) {
-            clusterdata.forEach(c => {
-                ct = c.arr[ts];
-                if (ct)
-                    ct.forEach(h => {
-                        hostOb[h].arrcluster[ts] = c.name;
-                        let currentarr = hostOb[h].timeline.clusterarr;
-                        if(runopt.suddenGroup && ts>0 && ts<maxstep && calculateMSE(hostOb[h].data[ts-1],hostOb[h].data[ts])>clusterdata.find(c=>c.name===hostOb[h].arrcluster[ts-1]).mse*runopt.suddenGroup ){
-                            hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
-                        }
-                        if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
-                            hostOb[h].timeline.clusterarr.stack++;
-                            hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
-                            if (hostOb[h].timeline.clusterarr.stack === 1)
-                                hostOb[h].timeline.line.push({cluster: c.name, start: ts - 1, end: ts});
-                            else if (hostOb[h].timeline.clusterarr.stack > 1)
-                                hostOb[h].timeline.line[hostOb[h].timeline.line.length - 1].end = ts;
-                        } else {
-                            hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
-                            hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
-                            hostOb[h].timeline.clusterarr.stack = 0;
-                        }
-                    });
+        try {
+            let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
+            for (let ts = 0; ts < maxstep + 1; ts++) {
+                clusterdata.forEach(c => {
+                    ct = c.arr[ts];
+                    if (ct)
+                        ct.forEach(h => {
+                            hostOb[h].arrcluster[ts] = c.name;
+                            let currentarr = hostOb[h].timeline.clusterarr;
+                            if (runopt.suddenGroup && ts > 0 && ts < maxstep && calculateMSE_array(hostOb[h].data[ts - 1], hostOb[h].data[ts]) > clusterdata.find(c => c.name === hostOb[h].arrcluster[ts - 1]).mse * runopt.suddenGroup) {
+                                hostOb[h].timeline.clusterarr_sudden.push({cluster: c.name, timestep: ts});
+                            }
+                            if (currentarr.length && c.name === hostOb[h].timeline.clusterarr[currentarr.length - 1].cluster) {
+                                hostOb[h].timeline.clusterarr.stack++;
+                                hostOb[h].timeline.lineFull[hostOb[h].timeline.lineFull.length - 1].end = ts;
+                                if (hostOb[h].timeline.clusterarr.stack === 1)
+                                    hostOb[h].timeline.line.push({cluster: c.name, start: ts - 1, end: ts});
+                                else if (hostOb[h].timeline.clusterarr.stack > 1)
+                                    hostOb[h].timeline.line[hostOb[h].timeline.line.length - 1].end = ts;
+                            } else {
+                                hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
+                                hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
+                                hostOb[h].timeline.clusterarr.stack = 0;
+                            }
+                        });
 
-            });
+                });
+            }
+            timelineScale.domain([maxstep - 1, maxstep]);
+            // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
+        }catch (e) {
+            
         }
-        timelineScale.domain([maxstep - 1, maxstep]);
-        // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
     }
     let first__timestep = new Date();
     let lastIndex = 0;
@@ -1966,7 +1985,7 @@ let JobMap = function() {
         }else{
             toggleComponent(true);
             triggerCal_Cluster=true;
-            animation_time = 500;
+            animation_time = 0;
         }
 
         if (runopt.compute.clusterNode) {
@@ -2181,7 +2200,7 @@ let JobMap = function() {
     function computeUsermetric(){
         let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
         let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
-        let scaleBack
+        let scaleBack;
         if (index_power!==-1)
          scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
         user.forEach(u=>{
@@ -2195,13 +2214,14 @@ let JobMap = function() {
                     timerange[1] = d3.max(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.endTime))))));
                 if (index_power!==-1)
                     for (let t =timerange[0];t<=timerange[1];t++) {
-                        u.dataRaw.push(hostOb[c].data[t]);
+                        let numbArray = hostOb[c].data[t];
+                        u.dataRaw.push(numbArray);
                         if (!u.PowerUsage)
                             u.PowerUsage = {};
-                        u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(hostOb[c].data[t][index_power].value || 0));
+                        u.PowerUsage.sum = (u.PowerUsage.sum || 0) + Math.round(scaleBack(numbArray[index_power] || 0));
                         u.PowerUsage.time = Math.max(u.PowerUsage.time||0,(timerange[1]-timerange[0])*deltaTime/1000);
                         u.PowerUsage.kwh = Math.round(u.PowerUsage.sum / 1000 / u.PowerUsage.time * 3600);
-                        tableFooter.dataRaw.push(hostOb[c].data[t])
+                        tableFooter.dataRaw.push(numbArray)
                     }
             })
         });
@@ -2212,16 +2232,12 @@ let JobMap = function() {
         if(data.length){
             triggerCal_Usermetric=true;
         }
-        let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
-        let scaleBack
-        if (index_power!==-1)
-            scaleBack = d3.scaleLinear().domain([0,1]).range(schema[index_power].range);
-        user.forEach(d=>d.needRender=(false||render))
         data.forEach(d=>{
             hostOb[d.name].data.push(d); // add new data
         });
         let user_update,rangechange;
         if (isanimation) {
+            user.forEach(d=>d.needRender=(render))
             schema.forEach((s, i) => {
                 let r = getViolinData(tableFooter, i, s);
                 tableFooter[i + 3] = {key: r.axis, value: r};
@@ -2252,7 +2268,7 @@ let JobMap = function() {
         }
     }
     function getViolinData(d, i, s) {
-        let v = (d.dataRaw?d.dataRaw.map(e => e[i].value):d).filter(e => e !== undefined).sort((a, b) => a - b);
+        let v = (d.dataRaw?d.dataRaw.map(e => e[i]):d).filter(e => e !== undefined).sort((a, b) => a - b);
         let r;
         if (v.length) {
             let sumstat = [];
@@ -2480,6 +2496,9 @@ let JobMap = function() {
 
 function calculateMSE(a,b){
     return ss.sum(a.map((d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+}
+function calculateMSE_array(a,b){
+    return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
 }
 // Establish the desired formatting options using locale.format():
 // https://github.com/d3/d3-time-format/blob/master/README.md#locale_format

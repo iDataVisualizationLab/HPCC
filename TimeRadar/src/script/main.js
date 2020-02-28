@@ -340,7 +340,7 @@ let tooltip_layout = tooltip_lib.layout();
 var MetricController = radarController();
 let getDataWorker;
 let isbusy = false, imageRequest = false, isanimation=false;
-let dataInformation={filename:'',timerange:[],interval:'',totalstep:0,hostsnum:0,datanum:0};
+let dataInformation={filename:'',size:0,timerange:[],interval:'',totalstep:0,hostsnum:0,datanum:0};
 function makedataworker(){
     if (getDataWorker)
         getDataWorker.terminate();
@@ -461,51 +461,21 @@ function main() {
 var currentlastIndex;
 var speedup= 0;
 function drawsummarypoint(harr){
-    var arr = [];
-    var xx;
     lastIndex = currentlastIndex;
     query_time = hostResults['timespan'][currentlastIndex];
-    //xx = xTimeSummaryScale(query_time);
-    //updateTimeText();
+    jobMap.getharr(harr);
 
-    // switch (graphicControl.sumType) {
-    //     case "Boxplot":
-    //         break;
-    //     case "Scatterplot":
-    //         break;
-    //     case "Radar":
-    //         for (var i in harr) {
-    //             var h  = harr[i];
-    //             var name = hosts[h].name;
-    //             arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-    //             arrServices.name = name;
-    //             arr.push(arrServices);
-    //         }
-    //         Radarplot.data(arr).drawpoint(lastIndex);
-    //         // Radar Time
-    //         //drawRadarsum(svg, arr, lastIndex, xx-radarsize);
-    //         break;
-    //     case "RadarSummary":
-    //         getData(name,lastIndex)
-    //         // Radarplot.data(arr).drawSummarypoint(lastIndex);
-    //         break;
-    //     default:
-            jobMap.getharr(harr);
-            for (var i in harr) {
-                var h  = harr[i];
-                var name = hosts[h].name;
-                arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-                arrServices.name = name;
-                arrServices.time = hostResults.timespan[lastIndex];
-                arr.push(arrServices);
-            }
-            jobMap.dataComp_points(arr);
-            var h = harr[harr.length-1];
-            var name = hosts[h].name;
-    //         break;
-    // }
-
-    getData(name,lastIndex)
+    jobMap.dataComp_points(harr.map(i=>{
+        var h  = harr[i];
+        var name = hosts[h].name;
+        // arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
+        arrServices = tsnedata[name][lastIndex];// getDataByName(hostResults, name, lastIndex, lastIndex,undefined,0.5);
+        // arrServices.name = name;
+        arrServices.time = hostResults.timespan[lastIndex];
+        return arrServices;
+    }));
+    // var h = harr[harr.length-1];
+    // var name = hosts[h].name;
 }
 function shiftTimeText(){
     if (timelog.length > maxstack-1){ timelog.shift();
@@ -553,11 +523,11 @@ function request(){
 
     jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length);
     isanimation = false
-    updatetimeline(0);
+    // updatetimeline(0);
     timerequest();
     console.log('____________read data______________')
     let times = performance.now();
-    interval2 = new IntervalTimer(timerequest , simDuration);
+    interval2 = new IntervalTimer(timerequest , 0);
     function timerequest() {
         var midlehandle = function (ri){
             let returniteration = ri[0];
@@ -575,9 +545,10 @@ function request(){
                 getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null);
                 console.log('Time load: ',performance.now() -times)
+                getData(hosts[_.last(countarr)].name,lastIndex)
             }
 
-                drawsummarypoint(countarr);
+            drawsummarypoint(countarr);
             countarr.length = 0;
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
@@ -589,7 +560,7 @@ function request(){
                     .text("" + currentMiliseconds.toDateString());
 
                 // cal to plot
-                bin.data([]);
+                // bin.data([]);
                 currentlastIndex = iteration+iterationstep-1;
                 // drawsummary();
                 jobMap.setharr([]);
@@ -600,7 +571,7 @@ function request(){
                 requeststatus = true;
                 haveMiddle = false;
                 iteration += iterationstep;
-                updatetimeline(iteration);
+                // updatetimeline(iteration);
             }
             currentlastIndex = iteration;
             // stop condition
@@ -632,8 +603,8 @@ function request(){
                 }
                 else {
                     do {
-                        let ri = step_full(iteration);
-                        midlehandle_full(ri);
+                        // let ri = step_full(iteration);
+                        midlehandle_full();
                         if(countbuffer===0) {
                             if (islastimestep(lastIndex+1))
                                 getJoblist();
@@ -641,7 +612,7 @@ function request(){
                             // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
                             // if(isanimation)
-                                jobMap.draw(true);
+                            requestAnimationFrame(()=>jobMap.draw(true));
                         }
                         countbuffer+=hosts.length;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
@@ -995,7 +966,7 @@ function getData(nameh,index,skip,usepast){
         getDataWorker.postMessage({
             action: "getbatchData", value: {
                 lastIndex: index,
-                hostResults: hostResults,
+                // hostResults: hostResults,
                 host: nameh,
                 usepast: usepast
             }
@@ -1145,9 +1116,9 @@ function pauseRequest(){
 
 }
 
-function realTimesetting (option,db,init,data){
+function realTimesetting (option,db,init,data,separate){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList,separate:separate});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1400,7 +1371,8 @@ function step_full (iteration){
                     hostResults[name].arr.push(result);
                     // console.log(hosts[count].name+" "+hostResults[name]);
                     serviceList_selected.forEach((s) => {
-                        var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                        // var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
+                        var result = sampleS[hosts[count].name][serviceListattr[s.index]][iteration];//, serviceLists[s.index].text);
                         hostResults[name][serviceListattr[s.index]].push(result);
                     });
                     if (cluster_info) {
@@ -1513,6 +1485,9 @@ function handle_dataRaw() {
                     minval = val;
                 }
             });
+            if (!cluster_info[index].arr[i])
+                cluster_info[index].arr[i]=[];
+            cluster_info[index].arr[i].push(h.name);
             cluster_info[index].total = 1 + cluster_info[index].total || 0;
             cluster_info[index].__metrics.forEach((m, i) => {
                 if (m.minval === undefined || m.minval > axis_arr[i])

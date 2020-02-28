@@ -991,6 +991,7 @@ function millisecondsToStr (milliseconds) {
 }
 
 function updateDatainformation(timearray,filename){
+    dataInformation.size = bytesToString(dataInformation.size);
     dataInformation.hostsnum = hosts.length;
     dataInformation.timerange = millisecondsToStr(_.last(timearray)-timearray[0]);
     dataInformation.interval = millisecondsToStr(timearray[1] - timearray[0]);
@@ -1000,7 +1001,20 @@ function updateDatainformation(timearray,filename){
     for (key in dataInformation)
         dataholder.select(`.${key}`).text(dataInformation[key]);
 }
+function bytesToString (bytes) {
+    // One way to write it, not the prettiest way to write it.
 
+    var fmt = d3.format('.0f');
+    if (bytes < 1024) {
+        return fmt(bytes) + 'B';
+    } else if (bytes < 1024 * 1024) {
+        return fmt(bytes / 1024) + 'kB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+        return fmt(bytes / 1024 / 1024) + 'MB';
+    } else {
+        return fmt(bytes / 1024 / 1024 / 1024) + 'GB';
+    }
+}
 function onSaveDescription (){
     var filename = $('#savename_description').val()+".json";
     var type = "json";

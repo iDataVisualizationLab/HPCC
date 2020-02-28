@@ -6,7 +6,7 @@ angular.module('hpccApp')
     var Loaddata = {
         data:{}
     };
-    let first = true
+    let first = true;
 
     Loaddata.reset = function(hard) {
         Loaddata.data = Dataset.currentDataset;
@@ -29,7 +29,6 @@ angular.module('hpccApp')
                         jobMap.hosts(hosts);
                         formatService(true);
                         MetricController.axisSchema(serviceFullList, true).update();
-                        addDatasetsOptions()
                     }
                 });
                 first = false;
@@ -38,37 +37,28 @@ angular.module('hpccApp')
             dataInformation.filename = choice.name;
             if(choice.category==='hpcc')
                 setTimeout(() => {
-                    if (choice.formatType!=="realtime") {
-                        // loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>loadclusterInfo= status);
-                        d3.json(choice.url, function (error, data) {
+                    console.time("totalTime:");
+                    d3.json(choice.url).on("progress", function(evt) {
+                        dataInformation.size = evt.total;
+                        console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
+                    }).get(function(error,data) {
+                            console.timeEnd("totalTime:");
+                        if (error) {
+
+                        }
+
+                        d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
                             if (error) {
-
+                                loadata1(data, undefined);
+                                return;
                             }
-
-                                d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
-                                    if (error) {
-                                        loadata1(data, undefined);
-                                        return;
-                                    }
-                                    loadata1(data, job);
-                                    return;
-                                });
-
+                            loadata1(data, job);
+                            return;
                         });
-                    }
-                    else {
-                        d3.select(".currentDate")
-                            .text("" + (new Date()).toDateString());
-                        realTimesetting(true, choice.name);
-                        db = choice.name;
-                        requestService = eval('requestService' + choice.name);
-                        processResult = eval('processResult_' + choice.name);
-                        preloader(false)
-                    }
-
+                    });
                 }, 0);
             else
-                readFilecsv(choice.url)
+                readFilecsv(choice.url,choice.separate)
 
         function loadata1(data,job){
             makedataworker();
@@ -99,11 +89,11 @@ angular.module('hpccApp')
             if (choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
-                realTimesetting(false,"influxdb",true);
+                realTimesetting(false,"influxdb",true,sampleS);
             }else {
                 db = "nagios";
                 processResult = processResult_old;
-                realTimesetting(false,undefined,true);
+                realTimesetting(false,undefined,true,sampleS);
             }
             d3.select(".currentDate")
                 .text("" + (data['timespan'][0]).toDateString());
@@ -169,61 +159,62 @@ angular.module('hpccApp')
             }
         });
     }
-    function readFilecsv(file) {
+    function readFilecsv(file,separate) {
+        firstTime= true;
         exit_warp();
         preloader(true);
         setTimeout(() => {
-            d3.csv(file, function (error, data) {
+            d3.csv(file).on("progress", function(evt) {
+                dataInformation.size = evt.total;
+                console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
+            }).get(function (error, data) {
                 if (error) {
                 } else {
-                    loadata1(data);
+                    db = "csv";
+                    newdatatoFormat_noSuggestion(data,separate);
 
-                    function loadata1(data) {
-                        db = "csv";
-                        newdatatoFormat(data);
+                    inithostResults();
+                    formatService(true);
+                    processResult = processResult_csv;
+                    makedataworker();
+                    initDataWorker();
+                    // addDatasetsOptions()
+                    MetricController.axisSchema(serviceFullList, true).update();
+                    realTimesetting(false, "csv", true, sampleS);
+                    updateDatainformation(sampleS['timespan']);
 
-                        inithostResults();
-                        formatService(true);
-                        processResult = processResult_csv;
-                        makedataworker();
-                        initDataWorker();
-                        // addDatasetsOptions()
-                        MetricController.axisSchema(serviceFullList, true).update();
-                        realTimesetting(false, "csv", true, data);
-                        updateDatainformation(sampleS['timespan']);
+                    sampleJobdata = [{
+                        jobID: "1",
+                        name: "1",
+                        nodes: hosts.map(h=>h.name),
+                        startTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                        submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                        user: "dummyJob"
+                    }];
 
-                        sampleJobdata = [{
-                            jobID: "1",
-                            name: "1",
-                            nodes: hosts.map(h=>h.name),
-                            startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                            submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                            user: "dummyJob"
-                        }];
-
-                        d3.select(".currentDate")
-                            .text("" + (sampleS['timespan'][0]).toDateString());
-                        updateClusterControlUI();
-                        loadPresetCluster(file.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{
-                            let loadclusterInfo= status;
-                            if (loadclusterInfo) {
+                    d3.select(".currentDate")
+                        .text("" + (sampleS['timespan'][0]).toDateString());
+                    updateClusterControlUI();
+                    loadPresetCluster(file.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{
+                        let loadclusterInfo= status;
+                        if (loadclusterInfo) {
+                            handle_dataRaw();
+                            if (!init)
+                                resetRequest();
+                            preloader(false);
+                        }else {
+                            recalculateCluster({
+                                clusterMethod: 'leaderbin',
+                                normMethod: 'l2',
+                                bin: {startBinGridSize: 4, range: [7, 8]}
+                            }, function () {
                                 handle_dataRaw();
                                 if (!init)
                                     resetRequest();
                                 preloader(false);
-                            }else {
-                                recalculateCluster({
-                                    clusterMethod: 'leaderbin',
-                                    normMethod: 'l2',
-                                    bin: {startBinGridSize: 4, range: [6, 20]}
-                                }, function () {
-                                    handle_dataRaw();
-                                    if (!init)
-                                        resetRequest();
-                                    preloader(false);
-                                });
-                            }})
-                    }
+                            });
+                        }})
+
                 }
             })
         }, 0);

@@ -6,6 +6,7 @@ hosts,db;
 let histodram = {
     resolution:20,
 };
+let sampleS;
 let h = d3.scaleLinear();
 addEventListener('message',function ({data}){
     switch (data.action) {
@@ -34,7 +35,7 @@ addEventListener('message',function ({data}){
             if(data.db==='csv'){
                 hostList = data.hostList;
                 inithostResults(true);
-                newdatatoFormat(data.data);
+                // newdatatoFormat(data.data,data.separate);
                 processData = eval('processData_' + data.db);
             }else if(data.value) {
                 processData = eval('processData_' + data.db);
@@ -44,11 +45,12 @@ addEventListener('message',function ({data}){
                 else
                     processData = processData_old;
             }
+            sampleS = data.data;
             // serviceFull_selected =[];
             // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             break;
         case 'getbatchData':
-            const arr = plotTsne(data.value.hostResults,data.value.lastIndex,data.value.usepast);
+            const arr = plotTsne(sampleS,data.value.lastIndex,data.value.usepast);
             if (data.value.host===undefined)
                 data.value.host = hosts[hosts.length-1].name;
             const hostIndex = hosts.findIndex(d=>d.name===data.value.host);
@@ -65,7 +67,7 @@ addEventListener('message',function ({data}){
             }
             postMessage({action: 'DataServices',
                 result: {
-                    arr: getsummaryservice(plotTsne(data.value.hostResults, data.value.lastIndex, false, 0, 'undefined')),
+                    arr: getsummaryservice(plotTsne(sampleS, data.value.lastIndex, false, 0, 'undefined')),
                     index: data.value.lastIndex
                 }
             });

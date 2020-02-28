@@ -88,7 +88,8 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"18 Feb 2020",
         group:"sample",
-        formatType:'csv'
+        formatType:'csv',
+        separate:'|',
     },{
         id:"csvEmployment",
         name:"US employment data - people",
