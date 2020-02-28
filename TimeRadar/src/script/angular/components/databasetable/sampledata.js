@@ -120,7 +120,7 @@ angular.module('hpccApp').constant('SampleData', [
     {
         id:"RUL_F004s",
         name:"Rest Useful Life data",
-        url:"../HiperView/data/RUL_F004.csv.csv",
+        url:"../HiperView/data/RUL_F004.csv",
         description:"",
         date:"28 Feb 2020",
         group:"sample",
