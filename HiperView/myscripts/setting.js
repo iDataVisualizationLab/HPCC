@@ -287,7 +287,7 @@ function newdatatoFormat_noSuggestion (data,separate){
             if (suggest_range[0]<=range[0]&&suggest_range[1]>=range[1])
                 range = suggest_range;
         }
-        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(Object.keys(keys).length-1),"range":range}]};
+        const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(Object.keys(keys).length),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);
     });
