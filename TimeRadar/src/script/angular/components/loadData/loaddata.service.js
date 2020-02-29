@@ -206,7 +206,7 @@ angular.module('hpccApp')
                             recalculateCluster({
                                 clusterMethod: 'leaderbin',
                                 normMethod: 'l2',
-                                bin: {startBinGridSize: 4, range: [7, 8]}
+                                bin: {startBinGridSize: 4, range: [7, 9]}
                             }, function () {
                                 handle_dataRaw();
                                 if (!init)
