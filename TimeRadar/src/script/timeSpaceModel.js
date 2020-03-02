@@ -570,10 +570,13 @@ d3.TimeSpace = function () {
             attributes.alpha.needsUpdate = true;
             INTERSECTED = [];
             scene.remove(scene.getObjectByName('boxhelper'));
-            renderRadarSummary([])
+            if (graphicopt.isSelectionMode)
+                renderRadarSummary(selection_radardata.dataRadar,selection_radardata.color,selection_radardata.boxplot)
+            else
+                renderRadarSummary([]);
         }
     }
-
+    let selection_radardata = undefined;
     let animationduration = 120;
     let animationtimer = undefined;
     function animate() {
@@ -650,7 +653,7 @@ d3.TimeSpace = function () {
         let barH = graphicopt.radarTableopt.h/2;
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
         d3.select('.radarTimeSpace .selectionNum').text(dataArr.length);
-        renderRadarSummary(dataRadar,newClustercolor);
+        renderRadarSummary(dataRadar,newClustercolor,true,true);
         // draw table
         let positionscale = d3.scaleLinear().domain([0,1]).range([0,Math.max(graphicopt.radarTableopt.h,40)]);
         let selectedNest = d3.nest().key(d=>d.cluster).rollup(d=>d.length).object(dataArr);
@@ -708,7 +711,7 @@ d3.TimeSpace = function () {
                 let dataCollection = selectedCluster.map(d=>d);
                 dataCollection.push(newCluster);
                 dataCollection.action = selectedCluster.action;
-                renderRadarSummary(dataRadar, newClustercolor);
+                renderRadarSummary(dataRadar, newClustercolor,true,true);
                 drawComparisonCharts(dataCollection,true);
                 dialogModel();
             });
@@ -719,7 +722,7 @@ d3.TimeSpace = function () {
                 // set action data
                 selectedCluster.action = {};
                 // render radar
-                renderRadarSummary(dataRadar, newClustercolor);
+                renderRadarSummary(dataRadar, newClustercolor,true,true);
                 // adjust other selection data
                 const allGroup = holder_action.selectAll('div.btn_group_holder');
                 allGroup.select('.btn_item[value="delete"]').classed('hide',true);
@@ -794,7 +797,7 @@ d3.TimeSpace = function () {
                         d.maxval = Math.max(d.maxval,target[i].maxval);
                     });
 
-                    renderRadarSummary(newdataRadar,colorscale(target.name));
+                    renderRadarSummary(newdataRadar,colorscale(target.name),true,true);
                     // adjust other selection data
                     let otherItem = holder_action.selectAll('div.btn_group_holder').filter(d=>d.index!==index);
                     otherItem.filter(d=>d.selected !== d.total)
@@ -819,7 +822,7 @@ d3.TimeSpace = function () {
                             // set action data
                             selectedCluster.action = {};
                             // render radar
-                            renderRadarSummary(dataRadar, newClustercolor);
+                            renderRadarSummary(dataRadar, newClustercolor,true,true);
                             // adjust other selection data
                             const allGroup = holder_action.selectAll('div.btn_group_holder');
                             allGroup.select('.btn_item[value="delete"]').classed('hide',true);
@@ -897,8 +900,8 @@ d3.TimeSpace = function () {
             rateText.select('.totalNum').text(d => isReview?((d.index=== selectedCluster.action.root)? rootTotal: (d.total - d.selected)):('/' + d.total));
         }
     }
-    function renderRadarSummary(dataRadar,color,boxplot) {
-        d3.select(".radarTimeSpace").classed('hide',!dataRadar.length)
+    function renderRadarSummary(dataRadar,color,boxplot,isselectionMode) {
+        d3.select(".radarTimeSpace").classed('hide',!dataRadar.length);
         if (dataRadar.length) {
             radarChartclusteropt.color = function () {
                 return color
@@ -909,6 +912,8 @@ d3.TimeSpace = function () {
             currentChart.selectAll('.axisLabel').remove();
             currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
         }
+        if (isselectionMode)
+            selection_radardata = {dataRadar,color,boxplot};
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
