@@ -131,11 +131,14 @@ d3.TimeSpace = function () {
                 lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
             reset= false;
             d3.select('#modelWorkerScreen').call(drag());
+            if (selection_radardata)
+                renderRadarSummary(selection_radardata.dataRadar,selection_radardata.color,selection_radardata.boxplot)
             // d3.select('#modelSelectionInformation').classed('hide',false);
             // selection tool
         }else{
             if(lassoTool)
                 lassoTool.reset();
+            renderRadarSummary([]);
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
             d3.select('#modelWorkerScreen').on('mousemove', function(){
                 let coordinator = d3.mouse(this);
@@ -570,7 +573,7 @@ d3.TimeSpace = function () {
             attributes.alpha.needsUpdate = true;
             INTERSECTED = [];
             scene.remove(scene.getObjectByName('boxhelper'));
-            if (graphicopt.isSelectionMode)
+            if (graphicopt.isSelectionMode&&selection_radardata)
                 renderRadarSummary(selection_radardata.dataRadar,selection_radardata.color,selection_radardata.boxplot)
             else
                 renderRadarSummary([]);
