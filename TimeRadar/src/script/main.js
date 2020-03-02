@@ -664,56 +664,11 @@ function decimalColorToHTMLcolor(number) {
     return HTMLcolor;
 }
 
-// function simulateResults2(hostname,iter, s){
-//     var newService;
-//     let serviceIndex =  serviceList.findIndex(d=>d===s);
-//     newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
-//     if (serviceIndex === 4) {
-//         if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
-//             var simisval = handlemissingdata(hostname,iter);
-//             sampleS[hostname]["arrPower_usage"] = [simisval];
-//         }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
-//             if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
-//                 var simisval = handlemissingdata(hostname, iter);
-//                 sampleS[hostname]["arrPower_usage"][iter] = simisval;
-//             }
-//             newService = sampleS[hostname]["arrPower_usage"][iter];
-//         }
-//     }
-//     if (newService === undefined){
-//         newService ={};
-//         newService.result = {};
-//         newService.result.query_time = query_time;
-//         newService.data = {};
-//         newService.data.service={};
-//         newService.data.service.host_name = hostname;
-//         newService.data.service.plugin_output = undefined;
-//     }else {
-//         if (db === "influxdb")
-//             try {
-//                 newService.result.query_time = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ")(newService.result.query_time).getTime();
-//             }catch(e){
-//
-//             }
-//     }
-//     return newService;
-// }
 function simulateResults2(hostname,iter, s){
     var newService;
     let serviceIndex =  serviceList.findIndex(d=>d===s);
     newService = (sampleS[hostname][serviceListattr[serviceIndex]]||[])[iter];
     if (serviceList[serviceIndex] === 'Job_scheduling') {
-        // if (sampleS[hostname]["arrPower_usage"]=== undefined && db!=="influxdb"&& db!=="csv") {
-        //     var simisval = handlemissingdata(hostname,iter);
-        //     sampleS[hostname]["arrPower_usage"] = [simisval];
-        //     newService = simisval;
-        // }else if (sampleS[hostname]["arrPower_usage"]!== undefined) {
-        //     if (sampleS[hostname]["arrPower_usage"][iter] === undefined && db !== "influxdb" && db !== "csv") {
-        //         var simisval = handlemissingdata(hostname, iter);
-        //         sampleS[hostname]["arrPower_usage"][iter] = simisval;
-        //     }
-        //     newService = sampleS[hostname]["arrPower_usage"][iter];
-        // }
         if (sampleJobdata.length)
             return sampleJobdata.filter(s=>s.nodes.find(e=>e===hostname)&&new Date(s.startTime)<sampleS.timespan[iter]&&(s.endTime?new Date(s.endTime)>sampleS.timespan[iter]:true))
     }
@@ -1162,19 +1117,10 @@ function resetRequest(){
     firstTime = true;
     if (interval2)
         interval2.stop();
-    // hostResults = {};
-    // cluster_info.forEach(c=>c.arr.length=0)
     expectedLength = 0;
     formatRealtime = getformattime(+timestep_query.split(/[a-z]/)[0],timeshortconvert(timestep_query.match(/[a-z]/)[0]));
     var count =0;
-    // for (var att in hostList.data.hostlist) {
-    //     // to contain the historical query results
-    //     hostResults[att] = {};
-    //     hostResults[att].index = count;
-    //     hostResults[att].arr = [];
-    //     serviceListattr.forEach(d=>hostResults[att][d]=[]);
-    //     count++;
-    // }
+
     svg.selectAll(".compute").remove();
     svg.selectAll(".h").remove();
     svg.selectAll(".graphsum").remove();
@@ -1327,34 +1273,7 @@ function requestRT(iteration,count) {
     });
 }
 var recordonly = false;
-function step (iteration, count){
-    if (isRealtime){
-        return requestRT(iteration,count);
-    }
-    else{
-        // var result = simulateResults(hosts[count].name);
-        var tmp = iteration;
-        for (i = 0; i < iterationstep; i++) {
-            // Process the result
-            var name = hosts[count].name;
-            if(hostResults[name].arr.length<(iteration+1)) {
-                var result = simulateResults2(hosts[count].name, iteration, selectedService);
-                hostResults[name].arr.push(result);
-                // console.log(hosts[count].name+" "+hostResults[name]);
-                serviceList_selected.forEach((s) => {
-                    var result = simulateResults2(hosts[count].name, iteration, serviceLists[s.index].text);
-                    hostResults[name][serviceListattr[s.index]].push(result);
-                });
-                hostResults[name].arrcluster.push(sampleS[name].arrcluster[iteration]);
-            }
-            plotResult(undefined, name,iteration);
-            iteration++;
-        }
-        iteration = tmp;
-        return [iteration, count];
-    }
-    //return [iteration, count];
-}
+
 function step_full (iteration){
     for (var count =0;count<hosts.length;count++) {
         if (isRealtime) {
@@ -2420,10 +2339,6 @@ function recomendColor (clusterarr) {
         colorarray.push('gray');
         orderarray.push(c.name);
     });
-    // clusterarr.filter(c=>c.text!=='undefined' && c.text.match('undefined')).forEach(c=>{
-    //     colorarray.push('#7f7f7f');
-    //     orderarray.push(c.name);
-    // });
     colorCluster.range(colorarray).domain(orderarray)
 }
 

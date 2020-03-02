@@ -518,19 +518,19 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="row s12">
-                                <label class="col s4">Group labels:</label>
-                                <button type="submit"   class ="menuBtn modal-trigger btn-small" href="#savedialog_description">
-                                    <i class="fas fa-download pauseicon" ></i> Save</button>
-                                <button  type="submit" class ="menuBtn btn-small" id="saveDescriptionbtn">
-                                    <i class="fas fa-upload pauseicon" ></i> Load</button>
-                                <input id="description_input_file" class="none" type="file" style="display: none;"/>
-                            </div>
                             <!--<div class="row s12">-->
-                                <!--<label class="col s4">Group information:</label>-->
-                                <!--<button type="submit" class ="menuBtn modal-trigger btn-small" href="#savedialog_clusterInfo">-->
+                                <!--<label class="col s4">Group labels:</label>-->
+                                <!--<button type="submit"   class ="menuBtn modal-trigger btn-small" href="#savedialog_description">-->
                                     <!--<i class="fas fa-download pauseicon" ></i> Save</button>-->
+                                <!--<button  type="submit" class ="menuBtn btn-small" id="saveDescriptionbtn">-->
+                                    <!--<i class="fas fa-upload pauseicon" ></i> Load</button>-->
+                                <!--<input id="description_input_file" class="none" type="file" style="display: none;"/>-->
                             <!--</div>-->
+                            <div class="row s12">
+                                <label class="col s4">Group information:</label>
+                                <button type="submit" class ="menuBtn modal-trigger btn-small" href="#savedialog_clusterInfo">
+                                    <i class="fas fa-download pauseicon" ></i> Save</button>
+                            </div>
 
                         </div>
                     </div>
@@ -694,11 +694,8 @@
                         <canvas id="modelWorkerScreen"></canvas>
                         <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
                         <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none"></svg>
-                        <div id="modelWorkerInformation" style="position:absolute;top:20px;left:0; width: 300px; z-index: 10 ">
+                        <div id="modelWorkerInformation" style="position:absolute;top:20px;right:0; width: 300px; z-index: 10 ">
                             <div id="modelSelectionInformation">
-                                <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
-                                    <span class="selectionNum"></span>
-                                </div>
                                 <ul class="tabs" style="margin-top: 10px">
                                     <li class="tab col s3"><a class="active" href="#modelSetting">Setting</a></li>
                                     <li class="tab col s3"><a href="#modelSelectionTool">Selection</a></li>
@@ -748,6 +745,9 @@
                                         </tbody>
                                     </table>
                                     </div>
+                                </div>
+                                <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
+                                    <span class="selectionNum"></span>
                                 </div>
                             </div>
                         </div>

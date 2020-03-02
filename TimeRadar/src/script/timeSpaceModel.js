@@ -353,7 +353,7 @@ d3.TimeSpace = function () {
 
         d3.select('#modelSortBy').on("change", function () {handleTopSort(this.value)})
 
-        drawSummaryRadar([],handle_data_summary([]),'#ffffff');
+        drawSummaryRadar([],[],'#ffffff');
         start();
         needRecalculate = false;
         return master;
@@ -570,6 +570,7 @@ d3.TimeSpace = function () {
             attributes.alpha.needsUpdate = true;
             INTERSECTED = [];
             scene.remove(scene.getObjectByName('boxhelper'));
+            renderRadarSummary([])
         }
     }
 
@@ -633,7 +634,7 @@ d3.TimeSpace = function () {
                     drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
                 }catch(e){
                     // draw summary radar chart
-                    drawSummaryRadar([],handle_data_summary([]),newClustercolor);
+                    drawSummaryRadar([],[],newClustercolor);
                 }
                 lassoTool.needRender = false;
             }
@@ -897,12 +898,17 @@ d3.TimeSpace = function () {
         }
     }
     function renderRadarSummary(dataRadar,color,boxplot) {
-        radarChartclusteropt.color = function(){return color};
-        radarChartclusteropt.boxplot = boxplot!==undefined?boxplot:true;
+        d3.select(".radarTimeSpace").classed('hide',!dataRadar.length)
+        if (dataRadar.length) {
+            radarChartclusteropt.color = function () {
+                return color
+            };
+            radarChartclusteropt.boxplot = boxplot !== undefined ? boxplot : true;
 
-        let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
-        currentChart.selectAll('.axisLabel').remove();
-        currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
+            let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
+            currentChart.selectAll('.axisLabel').remove();
+            currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
+        }
     }
     function drawEmbedding(data,colorfill) {
         let newdata =handledata(data);
