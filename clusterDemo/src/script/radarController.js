@@ -1,33 +1,35 @@
 let radarController = function () {
     let graphicopt = {
-            margin: {top: 5, right: 5, bottom: 5, left: 5},
-            width: 310,
-            height: 310,
-            radius: 150,
-            scalezoom: 1,
-            widthView: function(){return this.width*this.scalezoom},
-            heightView: function(){return this.height*this.scalezoom},
-            widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
-            heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
-            roundStrokes: true,
-            labelFactor: 1.05,
-            levels: 6,
-            arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
-            arrThresholds: [],
-            opacityCircles: 0.1,
-            wrapWidth: 60,
-            bin: true,
+        margin: {top: 5, right: 5, bottom: 5, left: 5},
+        width: 310,
+        height: 310,
+        radius: 150,
+        scalezoom: 1,
+        widthView: function(){return this.width*this.scalezoom},
+        heightView: function(){return this.height*this.scalezoom},
+        widthG: function(){return this.widthView()-this.margin.left-this.margin.right},
+        heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
+        roundStrokes: true,
+        labelFactor: 1.05,
+        levels: 6,
+        arrColor: ["#110066", "#4400ff", "#00cccc", "#00dd00", "#ffcc44", "#ff0000", "#660000"],
+        arrThresholds: [],
+        opacityCircles: 0.1,
+        wrapWidth: 60,
+        bin: true,
         color: function () {
             return 'rgb(167, 167, 167)'
-        }
-        };
+        },
+        violinMode:3 // 0: default: 0->max, 1: min-max range, 2: min-max indivitual, 3: min->max
+    };
 
     let svg,g,div,tablediv;
-    let arr;
+    let arr, deltaAng = Math.PI/10;
     let radarcomp = { // schema
-      axis: {}, // axis objects
-      axisList : [],  // axis array
+        axis: {}, // axis objects
+        axisList : [],  // axis array
     };
+    let charType = "radar";
     let radarController ={};
     // color control
     let colorLength = graphicopt.arrColor.length-1;
@@ -69,6 +71,7 @@ let radarController = function () {
     // FUNCTION ZONE
     let onChangeValueFunc = function(){};
     let onChangeFilterFunc = function(){};
+    let onChangeMinMaxFunc = function(){};
 
     // TODO: REPLACE
 
@@ -195,6 +198,19 @@ let radarController = function () {
             radarcomp.axis[axis].data = axiselement;
             radarcomp.axisList[index] = radarcomp.axis[axis];
         });
+
+        // deltaAng = updateDeltaAng ();
+        // radarcomp.axisList.forEach(d=>d.angle())
+    }
+    function updateDeltaAng (){
+        let listang = radarcomp.axisList.map(d=> positiveAngle(d.angle())).sort((a,b)=>a-b);
+        let mindis = Math.PI/4;
+        for (let i = 1;i<listang.length;i++){
+            const a = listang[i] - listang[i-1];
+            if (mindis>a)
+                mindis = a;
+        }
+        return mindis;
     }
     function positiveAngle(angle){
         return angle>0? angle: (angle+Math.PI*2);
@@ -213,7 +229,7 @@ let radarController = function () {
             let table = tablediv.select("table");
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
-                "order": [[3, "desc"], [2, "asc"]],
+                "order": [[0, "asc"], [2, "asc"]],
                 "pageLength": 50,
                 "columnDefs": [
                     {   targets: 0,
@@ -235,7 +251,7 @@ let radarController = function () {
                         className:'summary_chart',
                         "render": function ( d, type, row, meta ) {
                             if (type=='display') {
-                                return '<svg class="s_chart" width="100" height="25"></svg>';
+                                return '<svg class="s_chart" width="160" height="25"></svg>';
                             }
                             return d.summary.outlier.length;
                         }
@@ -272,12 +288,20 @@ let radarController = function () {
                     }else{
                         $(row).removeClass('fieldDisable');
                     }
-                }
+                },
                 // "columns": [
                 //     null,
                 //     {"orderDataType": "dom-text-numeric"},
                 //     {"orderDataType": "dom-disablebtn"},
                 // ]
+                // "dom":'<"toolbar">frtip',
+                // fnInitComplete: function(){
+                //     $("#RadarController_Table .toolbar").html(' <label class="col left-align" style="margin-top:6px"> <input id="dataRange_control" type="checkbox" class="filled-in"> <span>Min-max scale</span> </label>');
+                //     d3.select('#dataRange_control').on('change',function(){
+                //         console.log(this.checked)
+                //         onChangeMinMaxFunc(this.checked);
+                //     });
+                // }
             });
             eventTable();
             dataTable.rows().draw();
@@ -287,7 +311,7 @@ let radarController = function () {
 
         }
     }
-    let violiin_chart = d3.viiolinChart().graphicopt({width:100,height:25,opt:{dataformated:true}});
+    let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},margin: {top: 0, right: 30, bottom: 0, left: 30},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
     function eventTable(){
         tablediv.select("table").selectAll('td.angle').on('input', function (d) {
             updateAngle(svg.selectAll('.dragpoint').filter(s => s.data.text === dataTable.cell(this).data().data.text).node().parentElement, toRadian(this.firstElementChild.value * 1));
@@ -309,14 +333,44 @@ let radarController = function () {
             });
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
-            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
+            sg.call(function(selection){
+                let customrange,displaytick;
+                switch (graphicopt.violinMode) {
+                    case 1:
+                        if (sg.datum().summary.arr.length) {
+                            customrange = [0,1];
+                            displaytick = sg.datum().data.range;
+                        }else{
+                            customrange = [0,0];
+                            displaytick = [0, 0];
+                        }
+                        break;
+                    case 2:
+                        if (sg.datum().summary.arr.length) {
+                            customrange = [sg.datum().summary.arr[0][0], _.last(sg.datum().summary.arr)[0]];
+                            displaytick = [sg.datum().scale.invert(customrange[0]), sg.datum().scale.invert(customrange[1])];
+                        }else{
+                            customrange = [0,0];
+                            displaytick = [0, 0];
+                        }
+                        break;
+                    case 3:
+                        customrange = [0,1];
+                        displaytick = sg.datum().data.range;
+                        break;
+                    default:
+                        customrange = [sg.datum().scale(0),1];
+                        displaytick = [0,sg.datum().data.range[1]];
+                }
+                violiin_chart.graphicopt({customrange:customrange});//fix range from 0
+                return violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)})})
 
     }
     function updateSummaryData (dSum){
 
         try{
-        radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
-        eventTable();
+            radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
+            eventTable();
         }catch(e){
 
         }
@@ -480,8 +534,7 @@ let radarController = function () {
             .text(function (d) {
                 return toDegrees(d.angle()).toFixed(0) + '\u00B0';
             });
-
-        axis.append("circle")
+        let dragContain = axis.append("circle")
             .attr("cx", 0)
             .attr("cy", function (d, i) {
                 return -rScale( graphicopt.bin||graphicopt.gradient?1:1.05) ;
@@ -495,9 +548,17 @@ let radarController = function () {
             })
             .on('mouseleave',function(){
                 d3.select(this).attr('r',4)
-            }).call(d3.drag().container(function () {
-            return this.parentNode.parentNode;
-        }).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+            });
+        try{
+            dragContain.call(d3.drag().container(function () {
+                return this.parentNode.parentNode;
+            }).touchable(navigator.maxTouchPoints).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+        }catch(e){
+            console.log('Your device not support navigator.maxTouchPoints')
+            dragContain.call(d3.drag().container(function () {
+                return this.parentNode.parentNode;
+            }).on("start", onDragAxisStarted).on("drag", onDragAxisDragged).on("end", onDragAxisEnded))
+        }
 
         function onDragAxisStarted (d){
             d3.select(this).style('fill','black');
@@ -559,111 +620,227 @@ let radarController = function () {
     };
     let old_hindex = 0;
     radarController.drawSummary = function(hindex_input){
-       let  hindex = hindex_input|| old_hindex;
-        old_hindex = hindex
-        let data = [handledataRate(hindex)];
-        if (data[0].length===0)
-            data[0] = arr;
-        data = data.map(ditem=>{
-            const ditem_filtered = ditem.filter(d=>radarcomp.axis[d.axis].data.enable);
-            let temp = _.sortBy(ditem_filtered,d=>getAngle(d));
-            temp.bin = ditem.bin; return temp;});
-        function getAngle(d){
-            return radarcomp.axis[d.axis].angle();
-        }
-
-        /////////////////////////////////////////////////////////
-        ///////////// Draw the radar chart blobs ////////////////
-        /////////////////////////////////////////////////////////
-        //The radial line function
-        var radarLine = d3.radialLine()
-            .curve(d3.curveCatmullRom.alpha(0.5))
-            .radius(function(d) {
-                return rScale(d.value||d); })
-            .angle(function(d,i) {  return getAngle(d); });
-
-        var radialAreaGenerator = d3.radialArea()
-            .angle(function(d,i) {  return getAngle(d); })
-            .innerRadius(function(d,i) {
-                return rScale(d.minval);
-            })
-            .outerRadius(function(d,i) {
-                return rScale(d.maxval);
+        try {
+            let hindex = hindex_input || old_hindex;
+            old_hindex = hindex
+            let data = [handledataRate(hindex)];
+            if (data[0].length === 0)
+                data[0] = arr;
+            data = data.map(ditem => {
+                const ditem_filtered = ditem.filter(d => radarcomp.axis[d.axis].data.enable);
+                let temp = _.sortBy(ditem_filtered, d => getAngle(d));
+                temp.bin = ditem.bin;
+                return temp;
             });
 
-        let radialAreaQuantile = d3.radialArea()
-            .angle(function(d,i) {  return getAngle(d); })
-            .innerRadius(function(d,i) {
-                return rScale(d.q1);
-            })
-            .outerRadius(function(d,i) {
-                return rScale(d.q3);
-            });
-
-        if(graphicopt.roundStrokes) {
-            radarLine.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaGenerator.curve(d3.curveCardinalClosed.tension(0.5));
-            radialAreaQuantile.curve(d3.curveCardinalClosed.tension(0.5));
-        }
-
-        //Create a wrapper for the blobs
-        var blobWrapperg = g.selectAll(".radarWrapper")
-            .data(data);
-        blobWrapperg.exit().remove();
-        var blobWrapper = blobWrapperg
-            .enter().append("g")
-            .attr("class", "radarWrapper").style('pointer-events','none');
-
-        //update the outlines
-        var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d=>d);
-
-            function drawMeanLine(paths){
-                return paths
-                    .attr("d", function(d) {return radarLine(d)})
-                    .styles({"fill":'none',
-                        'stroke':'black',
-                        'stroke-width':0.5,
-                        'stroke-dasharray': '1 2'});
+            function getAngle(d) {
+                return radarcomp.axis[d.axis].angle();
             }
-            function drawQuantileArea(paths){
-                return paths
-                    .attr("d", d =>radialAreaQuantile(d))
-                    .styles({"fill":'none',
-                        'stroke':'black',
-                        'stroke-width':0.2});
-            }
+
+            /////////////////////////////////////////////////////////
+            ///////////// Draw the radar chart blobs ////////////////
+            /////////////////////////////////////////////////////////
+            //The radial line function
+            //Create a wrapper for the blobs
+            var blobWrapperg = g.selectAll(".radarWrapper")
+                .data(data);
+            blobWrapperg.exit().remove();
+            var blobWrapper = blobWrapperg
+                .enter().append("g")
+                .attr("class", "radarWrapper").style('pointer-events', 'none');
+
             //update the outlines
-            blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+            var blobWrapperpath = blobWrapperg.select(".radarStroke").datum(d => d);
 
-            blobWrapperpath.style("fill", "none").transition()
-                .attr("d", d => radialAreaGenerator(d))
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapperg.select('clipPath')
-                .select('path')
-                .transition('expand').ease(d3.easePolyInOut)
-                .attr("d", d =>radialAreaGenerator(d));
-            //Create the outlines
-            blobWrapper.append("clipPath")
-                .attr("id",(d,i)=>"sumC")
-                .append("path")
-                .attr("d", d => radialAreaGenerator(d));
-            blobWrapper.append("rect")
-                .style('fill', 'url(#rGradient2)')
-                .attr("clip-path",( d,i)=>"url(#sumC)")
-                .attr("x",-rScale(1.25))
-                .attr("y",-rScale(1.25))
-                .attr("width",rScale(1.25)*2)
-                .attr("height",rScale(1.25)*2);
-            blobWrapper.append("path")
-                .attr("class", "radarStroke")
-                .attr("d", d => radialAreaGenerator(d))
-                .style("fill", "none")
-                .transition()
-                .style("stroke-width", () => graphicopt.strokeWidth + "px")
-                .style("stroke", (d, i) => graphicopt.color(i));
-            blobWrapper
-                .append("path").classed('radarLine',true).style("fill", "none").call(drawMeanLine);
+            let radarLine, radialAreaGenerator, radialAreaQuantile;
+            switch (charType){
+                case "rose":
+                    radarLine = d3.arc()
+                        .outerRadius(function (d) {
+                            return rScale(d.value === undefined ? d : d.value);
+                        })
+                        .innerRadius(0)
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    radialAreaGenerator = d3.arc()
+                        .innerRadius(function (d, i) {
+                            return rScale(d.minval);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.maxval);
+                        })
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    radialAreaQuantile = d3.arc()
+                        .innerRadius(function (d, i) {
+                            return rScale(d.q1);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.q3);
+                        })
+                        .startAngle(function (d, i) {
+                            return -deltaAng;
+                        })
+                        .endAngle(function (d, i) {
+                            return deltaAng;
+                        });
+                    break;
+                case "flower":
+                    const path = d3.line()
+                        .curve(d3.curveBasis);
+                function flowerpath(value) {
+                    let dx = value * deltaAng;
+                    return [[0, 0],
+                        [0.2 * dx, -value * (10 / 19)],
+                        [dx, -value * 0.89],
+                        [0, -value * 1.03],
+                        [-dx, -value * 0.89],
+                        [-0.2 * dx, -value * (10 / 19)],
+                        [0, 0]];
+                }
+                    radarLine = function(d){
+                        let value = rScale(d.value === undefined ? d : d.value);
+                        return path(flowerpath(value));
+                    };
+                    radialAreaGenerator =
+                        function(d){
+                            let value = rScale(d.maxval)-rScale(d.minval);
+                            return path(flowerpath(value).map(p=>p[1]+rScale(d.minval)));
+                        };
+
+                    radialAreaQuantile =
+                        function(d){
+                            let value = rScale(d.q3)-rScale(d.q1);
+                            return path(flowerpath(value).map(p=>p[1]+rScale(d.q1)));
+                        };
+                    break;
+                default:
+                    deltaAng = Math.PI/10
+                    radarLine = d3.radialLine()
+                    // .curve(d3.curveCatmullRom.alpha(0.5))
+                        .radius(function (d) {
+                            return rScale(d.value || d);
+                        })
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        });
+
+                    radialAreaGenerator = d3.radialArea()
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        })
+                        .innerRadius(function (d, i) {
+                            return rScale(d.minval);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.maxval);
+                        });
+
+                    radialAreaQuantile = d3.radialArea()
+                        .angle(function (d, i) {
+                            return getAngle(d);
+                        })
+                        .innerRadius(function (d, i) {
+                            return rScale(d.q1);
+                        })
+                        .outerRadius(function (d, i) {
+                            return rScale(d.q3);
+                        });
+
+                    if (graphicopt.roundStrokes) {
+                        radarLine.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                        radialAreaGenerator.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                        radialAreaQuantile.curve(d3.curveCardinalClosed.tension(charType==="star"?1:0.5));
+                    }
+                function drawMeanLine(paths) {
+                    return paths
+                        .attr("d", function (d) {
+                            return radarLine(d)
+                        })
+                        .styles({
+                            "fill": 'none',
+                            'stroke': 'black',
+                            'stroke-width': 0.5,
+                            'stroke-dasharray': '1 2'
+                        });
+                }
+
+                function drawQuantileArea(paths) {
+                    return paths
+                        .attr("d", d => radialAreaQuantile(d))
+                        .styles({
+                            "fill": 'none',
+                            'stroke': 'black',
+                            'stroke-width': 0.2
+                        });
+                }
+
+                    //update the outlines
+                    blobWrapperg.select('.radarLine').transition().call(drawMeanLine);
+
+                    blobWrapperpath.style("fill", "none").transition()
+                        .attr("d", d => radialAreaGenerator(d))
+                        .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                        .style("stroke", (d, i) => graphicopt.color(i));
+                    blobWrapperg.select('clipPath')
+                        .select('path')
+                        .transition('expand').ease(d3.easePolyInOut)
+                        .attr("d", d => radialAreaGenerator(d));
+                    //Create the outlines
+                    blobWrapper.append("clipPath")
+                        .attr("id", (d, i) => "sumC")
+                        .append("path")
+                        .attr("d", d => radialAreaGenerator(d));
+                    blobWrapper.append("rect")
+                        .style('fill', 'url(#rGradient2)')
+                        .attr("clip-path", (d, i) => "url(#sumC)")
+                        .attr("x", -rScale(1.25))
+                        .attr("y", -rScale(1.25))
+                        .attr("width", rScale(1.25) * 2)
+                        .attr("height", rScale(1.25) * 2);
+                    blobWrapper.append("path")
+                        .attr("class", "radarStroke")
+                        .attr("d", d => radialAreaGenerator(d))
+                        .style("fill", "none")
+                        .transition()
+                        .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                        .style("stroke", (d, i) => graphicopt.color(i));
+                    blobWrapper
+                        .append("path").classed('radarLine', true).style("fill", "none").call(drawMeanLine);
+            }
+
+            if (charType==="rose"||charType==="flower"){
+                deltaAng = Math.PI/9/2;
+                blobWrapperpath.transition()                        .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+                    .attr("d", d => radarLine(d))
+                    .style("fill-opacity", 0.5)
+                    .style("fill", '#8c8c8c')
+                    .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                    .style("stroke-opacity", d => 0.5)
+                    .style("stroke", (d, i) => graphicopt.color(i,d));
+                //Create the outlines
+                blobWrapper.selectAll('.radarStroke').data(d=>d).enter()
+                    .append("path")
+                    .attr("class", "radarStroke")
+                    .attr('transform',(d,i)=>`rotate(${getAngle(d,i)*180/Math.PI},0,0)`)
+                    .attr("d", d => radarLine(d))
+                    .style("fill", '#8c8c8c')
+                    .style("fill-opacity", 0.5)
+                    .style("stroke-width", () => graphicopt.strokeWidth + "px")
+                    .style("stroke-opacity", d =>  0.5)
+                    .style("stroke", (d, i) => graphicopt.color(i,d));
+            }
+        }catch(err){
+
+        }
     };
 
     function handledataRate (hindex){
@@ -739,12 +916,20 @@ let radarController = function () {
         return arguments.length ? (tablediv = _, radarController) : tablediv;
     };
 
+    radarController.charType = function (_) {
+        return arguments.length ? (charType = _, radarController) : charType;
+    };
+
     radarController.onChangeValue = function (_) {
         return arguments.length ? (onChangeValueFunc = _, radarController) : onChangeValueFunc;
     };
 
     radarController.onChangeFilterFunc = function (_) {
         return arguments.length ? (onChangeFilterFunc = _, radarController) : onChangeFilterFunc;
+    };
+
+    radarController.onChangeMinMaxFunc = function (_) {
+        return arguments.length ? (onChangeMinMaxFunc = _, radarController) : onChangeMinMaxFunc;
     };
 
     radarController.data = function (_) {
