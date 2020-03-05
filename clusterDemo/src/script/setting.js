@@ -48,9 +48,11 @@ function newdatatoFormat_cluster (data){
         };
         serviceList.push(k);
         serviceListattr.push(k);
-        let range = d3.extent(data,d=>d[variables[i]]);
+        let range = d3.extent(data,d=>d[variables[i]]); // min-max scale
+        // <editor-fold desc="name detection scale">
         if (keys[k])
             range = serviceLists_or.find(d=>d.text===keys[k]).sub[0].range;
+        // </editor-fold>
         const temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":true,"idroot":i,"angle":i*2*Math.PI/(variables.length),"range":range}]};
         thresholds.push(range);
         serviceLists.push(temp);
