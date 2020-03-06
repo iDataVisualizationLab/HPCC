@@ -6,7 +6,6 @@ hosts,db;
 let histodram = {
     resolution:20,
 };
-let sampleS;
 let h = d3.scaleLinear();
 addEventListener('message',function ({data}){
     switch (data.action) {

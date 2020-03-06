@@ -210,17 +210,29 @@ function newdatatoFormat (data,separate){
     });
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
+    scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
 
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
+    tsnedata = {};
     sampleS['timespan'] = data.map(d=>new Date(d.time||d.timestamp))
     data.forEach(d=>{
         host_name.forEach(h=> {
             serviceListattr.forEach(attr => {
-                 if (sampleS[h]===undefined)
+                 if (sampleS[h]===undefined) {
                      sampleS[h] = {};
+                     tsnedata[h] = [];
+                 }
                 sampleS[h][attr] = sampleS[h][attr]||[];
-                sampleS[h][attr].push(processResult_csv(d[h+separate+attr],attr));
+                 let currentIndex = sampleS[h][attr].length;
+                 if (tsnedata[h][currentIndex]===undefined){
+                     tsnedata[h][currentIndex] = [];
+                     tsnedata[h][currentIndex].name = h;
+                     tsnedata[h][currentIndex].timestep =currentIndex;
+                 }
+                 let retievedData = processResult_csv(d[h+separate+attr],attr);
+                sampleS[h][attr].push(retievedData);
+                tsnedata[h][currentIndex].push(retievedData===null?0:scaleService[i](retievedData)||0);
             });
         })
     });
@@ -230,7 +242,7 @@ function newdatatoFormat_noSuggestion (data,separate){
     serviceList = [];
     serviceLists = [];
     serviceListattr = [];
-    serviceAttr={}
+    serviceAttr={};
     hostList ={data:{hostlist:{}}};
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
@@ -293,17 +305,29 @@ function newdatatoFormat_noSuggestion (data,separate){
     });
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
+    scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
 
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
+    tsnedata = {};
     sampleS['timespan'] = data.map(d=>new Date(d.time||d.timestamp))
     data.forEach(d=>{
         host_name.forEach(h=> {
-            serviceListattr.forEach(attr => {
-                if (sampleS[h]===undefined)
+            serviceListattr.forEach((attr,i) => {
+                if (sampleS[h]===undefined) {
                     sampleS[h] = {};
+                    tsnedata[h] = [];
+                }
                 sampleS[h][attr] = sampleS[h][attr]||[];
-                sampleS[h][attr].push(processResult_csv(d[h+separate+attr],attr));
+                let currentIndex = sampleS[h][attr].length;
+                if (tsnedata[h][currentIndex]===undefined){
+                    tsnedata[h][currentIndex] = [];
+                    tsnedata[h][currentIndex].name = h;
+                    tsnedata[h][currentIndex].timestep =currentIndex;
+                }
+                let retievedData = processResult_csv(d[h+separate+attr],attr);
+                sampleS[h][attr].push(retievedData);
+                tsnedata[h][currentIndex].push(retievedData[0]===null?0:scaleService[i](retievedData[0])||0);
             });
         })
     });

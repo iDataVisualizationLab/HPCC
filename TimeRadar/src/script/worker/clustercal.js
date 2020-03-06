@@ -6,8 +6,9 @@ importScripts("../../../../HiperView/js/d3.v4.js",
     "../../../../HiperView/js/binnerN.min.js",
     "../../../../HiperView/js/simple-statistics.min.js");
 
+
 addEventListener('message',function ({data}) {
-    let binopt = data.binopt, sampleS = data.sampleS, hosts = data.hosts;
+    let binopt = data.binopt, sampleS = data.sampleS, hosts = data.hosts, timeMax = data.timeMax;
     serviceFullList = data.serviceFullList;
     serviceLists = data.serviceLists;
     serviceList_selected = data.serviceList_selected;
@@ -21,30 +22,40 @@ addEventListener('message',function ({data}) {
     });
     let bin;
     var arr = [];
-    dataSpider3 = [];
-    dataCalculate = [];
+    var dataSpider3 = [];
     let cluster;
     if (!customCluster) {
-        for (var i = 0; i < sampleS.timespan.length; i++) {
+        postMessage({
+            action: 'returnData',
+            result: {message: `Normalize data`, process: 10}
+        });
+        for (var i = 0; i < timeMax; i++) {
             for (var h = 0; h < hosts.length; h++) {
                 var name = hosts[h].name;
-                arrServices = getDataByName_withLabel(sampleS, name, i, i, 0);
-                arrServices.name = name;
-                arrServices.indexSamp = i;
-                arrServices.id = h;
-                arr.push(arrServices);
+                if (sampleS[name]) {
+                    arrServices = sampleS[name][i];
+                    arrServices.name = name;
+                    arrServices.indexSamp = i;
+                    arrServices.id = h;
+                    dataSpider3.push(arrServices);
+                }
             }
         }
 
-        dataSpider3 = arr;
-        dataCalculate = arr;
+        // remove outlying
+        dataSpider3 = dataSpider3.filter(d => !d.outlier);
+        console.log(dataSpider3.length)
+        postMessage({
+            action: 'returnData',
+            result: {message: `Binning process`, process: 40}
+        })
         if (binopt.clusterMethod === 'leaderbin') {
-            let estimateSize = Math.max(2, Math.pow(binopt.bin.range[0], 1 / dataSpider3[0].length));
+            let estimateSize = Math.max(2, Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
             console.log('estimateSize: ' + estimateSize);
             bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).distanceMethod(binopt.normMethod).coefficient({
-                reduce_coefficient: 1/2,
+                reduce_coefficient: 0.3,
                 reduce_offset: 0,
-                increase_coefficient: 3,
+                increase_coefficient: 2,
                 increase_offset: 0
             }).data([]);
         } else {
@@ -55,19 +66,17 @@ addEventListener('message',function ({data}) {
         }
         let process = 50;
         let w = 25;
-        bin.callback(function (iteration,bin) {
+        bin.callback(function (iteration) {
             process = process + w;
             w = w / 2;
-            if (bin)
-                console.log(bin)
             postMessage({
                 action: 'returnData',
-                result: {iteration: iteration, process: process}
+                result: {message: `# iterations: ${iteration}`, process: process}
             })
         });
         // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
         bin.data(dataSpider3.map((d, i) => {
-            var dd = d.map(k => k.value);
+            var dd = d.slice();
             dd.data = {name: d.name, id: d.id, indexSamp: d.indexSamp};
             return dd;
         }))
@@ -75,10 +84,10 @@ addEventListener('message',function ({data}) {
 
         postMessage({
             action: 'returnData',
-            result: {iteration: bin.loopcount, process: 99}
+            result: {message: `# iterations: ${bin.loopcount}`, process: 99}
         });
 
-        var keys = dataSpider3[0].map(d => d.axis);
+        var keys = serviceFullList.map(d=>d.text);
         dataSpider3.length = 0;
         console.log("numBins: " + bin.bins.length);
 
@@ -136,16 +145,17 @@ addEventListener('message',function ({data}) {
             temp.__metrics = d.slice();
             temp.__metrics.normalize = temp.__metrics.map((e, i) => e.value);
             const temp_arr = _.groupBy(d.bin.nameob, e => e.timestep);
-            temp.arr = d3.range(0, sampleS.timespan.length).map(e => temp_arr[e] ? temp_arr[e].map(f => f.name) : undefined);
+            temp.arr = d3.range(0, timeMax).map(e => temp_arr[e] ? temp_arr[e].map(f => f.name) : undefined);
             temp.total = d.bin.id.length;
             return temp;
         });
+
     }else{
         customCluster.forEach(d=>d.arr = []);
         // re-assign cluster
         cluster = customCluster;
         let temp_collection = d3.range(0,cluster.length).map(()=>[]);
-        for (var i = 0; i < sampleS.timespan.length; i++) {
+        for (var i = 0; i < timeMax; i++) {
             for (var h = 0; h < hosts.length; h++) {
                 var name = hosts[h].name;
                 arrServices = getDataByName(sampleS, name, i, i, 0,0);
@@ -215,9 +225,9 @@ addEventListener('message',function ({data}) {
     //     csv_header.push('radius');
 
 
-    hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
-        return cluster.findIndex(c => c.arr[i] ? c.arr[i].find(e => e === h.name) : undefined);
-    }));
+    // hosts.forEach(h => sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
+    //     return cluster.findIndex(c => c.arr[i] ? c.arr[i].find(e => e === h.name) : undefined);
+    // }));
 
     // cluster.forEach(c => c.arr = c.arr.slice(0, currentindex))
 
