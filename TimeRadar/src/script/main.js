@@ -1416,7 +1416,7 @@ function handle_dataRaw() {
                     m.maxval = axis_arr[i];
             });
             // axis_arr.cluster = index;
-            tsnedata[h.name].cluster = index;
+            tsnedata[h.name][i].cluster = index;
             // timeline precalculate
             // tsnedata[h.name].push(axis_arr);
 
