@@ -1073,7 +1073,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data,separate){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,hostList:hostList,separate:separate});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,tsnedata:tsnedata,hostList:hostList,separate:separate});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1385,15 +1385,16 @@ function formatService(init){
 function handle_dataRaw() {
 
     cluster_info.forEach(d => (d.arr = [],d.total=0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
-    tsnedata = {};
+    // tsnedata = {};
     hosts.forEach(h => {
-        tsnedata[h.name] = [];
+        // tsnedata[h.name] = [];
         sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
-            let nullkey = false;
-            let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
-            axis_arr.name = h.name;
-            axis_arr.timestep = i;
+            // let nullkey = false;
+            // let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
+            // axis_arr.name = h.name;
+            // axis_arr.timestep = i;
             // reduce time step
+            axis_arr = tsnedata[h.name][i];
 
             let index = 0;
             let minval = Infinity;
@@ -1414,10 +1415,10 @@ function handle_dataRaw() {
                 if (m.maxval === undefined || m.maxval < axis_arr[i])
                     m.maxval = axis_arr[i];
             });
-            axis_arr.cluster = index;
-
+            // axis_arr.cluster = index;
+            tsnedata[h.name].cluster = index;
             // timeline precalculate
-            tsnedata[h.name].push(axis_arr);
+            // tsnedata[h.name].push(axis_arr);
 
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
@@ -1447,14 +1448,15 @@ function requestRedraw() {
 
 function onchangeCluster() {
     cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
-    tsnedata = {};
+    // tsnedata = {};
     hosts.forEach(h => {
-        tsnedata[h.name] = [];
+        // tsnedata[h.name] = [];
         sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
             let nullkey = false;
-            let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
-            axis_arr.name = h.name;
-            axis_arr.timestep = i;
+            // let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
+            let axis_arr = tsnedata[h.name][i];
+            // axis_arr.name = h.name;
+            // axis_arr.timestep = i;
             // reduce time step
 
             let index = 0;
@@ -1473,10 +1475,10 @@ function onchangeCluster() {
                 if (m.maxval === undefined || m.maxval < axis_arr[i])
                     m.maxval = axis_arr[i];
             });
-            axis_arr.cluster = index;
+            // axis_arr.cluster = index;
 
             // timeline precalculate
-            tsnedata[h.name].push(axis_arr);
+            tsnedata[h.name][i].cluster = index;
 
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
@@ -2220,7 +2222,7 @@ function updateViztype (viztype_in){
     }).addClass(`icon-${viztype}Shape`);
     RadarChart = eval(`${viztype}Chart_func`);
     d3.selectAll('.radarPlot .radarWrapper').remove();
-    if (!firstTime) {
+    if (!init) {
         // updateSummaryChartAll();
         MetricController.charType(viztype).drawSummary();
         if (cluster_info) {
@@ -2240,7 +2242,8 @@ function recalculateCluster (option,calback,customCluster) {
     clustercalWorker = new Worker ('src/script/worker/clustercal.js');
     clustercalWorker.postMessage({
         binopt:group_opt,
-        sampleS:sampleS,
+        sampleS:tsnedata,
+        timeMax:sampleS.timespan.length,
         hosts:hosts,
         serviceFullList: serviceFullList,
         serviceLists:serviceLists,
