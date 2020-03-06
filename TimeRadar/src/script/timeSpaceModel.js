@@ -93,7 +93,9 @@ d3.TimeSpace = function () {
     let drag = ()=>{
         function dragstarted(d) {
             // do something
+            isneedrender = true;
             mouseoverTrigger = false;
+            disableMouseover = true;
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
@@ -109,11 +111,12 @@ d3.TimeSpace = function () {
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
             lassoTool.lassoPolygon.push(coordinator);
             lassoTool.needRender = true;
-
+            isneedrender = true;
 
         }
 
         function dragended(d) {
+            disableMouseover = true;
             mouseoverTrigger = true;
             showMetricsArr_plotly(allSelected_Data)
             lassoTool.end();
@@ -144,33 +147,13 @@ d3.TimeSpace = function () {
                 let coordinator = d3.mouse(this);
                 mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
                 mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
-            });
+                mouseoverTrigger = true;
+            }).on('mouseleave',()=>{mouseoverTrigger = false})
             // d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
     }
-    function renderSvgRadar() {
-        let datapoint = svg.selectAll(".linkLinegg").interrupt().data(d => datain.map(e => e.__metrics), d => d.name + d.timestep);
-        datapoint.exit().remove();
-        let datapoint_n = datapoint.enter().append('g')
-            .attr('class', 'linkLinegg timeline');
-        datapoint_n.each(function (d, i) {
-            createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d, {colorfill: true}).classed('hide', d.hide);// hide 1st radar
-        });
 
-        datapoint_n.merge(datapoint).attr('transform', function (d) {
-            return `translate(${xscale(d.position[0])},${yscale(d.position[1])})`
-        })
-            .on('mouseover', d => {
-                master.highlight([d.name_or])
-                svg.selectAll('.linkLinegg').filter(e => d.name_or !== e.name_or).classed('hide', true)
-                // d3.selectAll('.h'+d[0].name).dispatch('mouseover');
-            }).on('mouseleave', d => {
-            master.unhighlight(d.name_or)
-            svg.selectAll('.linkLinegg.hide').classed('hide', false)
-            // d3.selectAll('.h'+d[0].name).dispatch('mouseleave');
-        })
-    }
     let obitTrigger= true;
     let linkConnect_old;
     function reduceRenderWeight(isResume){
@@ -235,6 +218,7 @@ d3.TimeSpace = function () {
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
+                    disableMouseover = true;
                     if(firstReturn) {
                         preloader(false, undefined, undefined, '#modelLoading');
                         firstReturn = false;
@@ -249,9 +233,9 @@ d3.TimeSpace = function () {
                     break;
                 case "stable":
                     modelWorker.terminate();
-                    mouseoverTrigger = true;
                     render(true);
                     reduceRenderWeight(true);
+                    disableMouseover = true
                     break;
                 default:
                     break;
@@ -262,7 +246,6 @@ d3.TimeSpace = function () {
     master.init = function(arr,clusterin) {
         needRecalculate = true;
         reset = true;
-        mouseoverTrigger = false;
         solution = [];
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
@@ -336,6 +319,14 @@ d3.TimeSpace = function () {
         // disable the tabIndex to avoid jump element
         d3.select(renderer.domElement).attr('tabindex',null);
         // controls.addEventListener("change", () => renderer.render(scene, camera));
+        let mouseoverTrigger_time;
+        controls.addEventListener("change", () => {
+            isneedrender = true;
+            disableMouseover=true;
+            if (mouseoverTrigger_time)
+                clearTimeout(mouseoverTrigger_time);
+            mouseoverTrigger_time= setTimeout(function(){disableMouseover=false;},10)
+        });
         setUpZoom();
         stop = false;
 
@@ -578,77 +569,82 @@ d3.TimeSpace = function () {
             else
                 renderRadarSummary([]);
         }
+        isneedrender = true;
     }
     let selection_radardata = undefined;
     let animationduration = 120;
     let animationtimer = undefined;
+    let disableMouseover = false, isneedrender = false;
     function animate() {
         if (!stop) {
-            // visiableLine(graphicopt.linkConnect);
-            //update raycaster with mouse movement
-            raycaster.setFromCamera(mouse, camera);
-            try {
-                if (axesTime.visible) {
-                    axesTime.getObjectByName("TimeText").lookAt(camera.position);
-                }
-            }catch(e){}
-            if (mouseoverTrigger) { // not have filter
-                if (!filter.length) {
-                    var intersects = overwrite||raycaster.intersectObject(points);
-                    //count and look after all objects in the diamonds group
-                    hightlightNode(intersects);
-                }else{ // mouse over group
-                    var geometry = points.geometry;
-                    var attributes = geometry.attributes;
-                    datain.forEach((d, i) => {
-                        if (filter.indexOf(d.clusterName)!==-1) {
-                            attributes.alpha.array[i] = 1;
-                            // lines[d.name].visible = true;
-                        } else {
-                            attributes.alpha.array[i] = 0.1;
-                            // lines[d.name].visible = false;
-                        }
-                        lines[d.name].visible = false;
-                    });
-                    attributes.alpha.needsUpdate = true;
-                }
-            }else if (lassoTool&&lassoTool.needRender) {
-                let newClustercolor = d3.color('#000000');
+            if (isneedrender) {
+                // visiableLine(graphicopt.linkConnect);
+                //update raycaster with mouse movement
                 try {
-                    for (var i = 0; i < lassoTool.collection.length; i++) {
-                        let currentIndex = lassoTool.collection[i];
-                        let currentData = datain[mapIndex[currentIndex]];
-                        let currentColor = d3.color(colorarr[currentData.cluster].value);
-                        points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
-                        points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
-                        points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
-                        points.geometry.attributes.customColor.needsUpdate = true;
+                    if (axesTime.visible) {
+                        axesTime.getObjectByName("TimeText").lookAt(camera.position);
                     }
-
-
-                    var allSelected = lassoTool.select();
-                    allSelected_Data = [];
-                    for (var i = 0; i < allSelected.length; i++) {
-                        allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
-                        let currentIndex = lassoTool.collection[i];
-                        points.geometry.attributes.customColor.array[currentIndex * 3] = newClustercolor.r / 255;
-                        points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = newClustercolor.g / 255;
-                        points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = newClustercolor.b / 255;
-                        points.geometry.attributes.customColor.needsUpdate = true;
-                    }
-                    // draw summary radar chart
-                    drawSummaryRadar(allSelected_Data,handle_data_summary(allSelected_Data),newClustercolor);
-                }catch(e){
-                    // draw summary radar chart
-                    drawSummaryRadar([],[],newClustercolor);
+                } catch (e) {
                 }
-                lassoTool.needRender = false;
-            }
-            // visiableLine(graphicopt.linkConnect);
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
+                if (mouseoverTrigger && !disableMouseover) { // not have filter
+                    raycaster.setFromCamera(mouse, camera);
+                    if (!filter.length) {
+                        var intersects = overwrite || raycaster.intersectObject(points);
+                        //count and look after all objects in the diamonds group
+                        hightlightNode(intersects);
+                    } else { // mouse over group
+                        var geometry = points.geometry;
+                        var attributes = geometry.attributes;
+                        datain.forEach((d, i) => {
+                            if (filter.indexOf(d.clusterName) !== -1) {
+                                attributes.alpha.array[i] = 1;
+                                // lines[d.name].visible = true;
+                            } else {
+                                attributes.alpha.array[i] = 0.1;
+                                // lines[d.name].visible = false;
+                            }
+                            lines[d.name].visible = false;
+                        });
+                        attributes.alpha.needsUpdate = true;
+                    }
+                } else if (lassoTool && lassoTool.needRender) {
+                    let newClustercolor = d3.color('#000000');
+                    try {
+                        for (var i = 0; i < lassoTool.collection.length; i++) {
+                            let currentIndex = lassoTool.collection[i];
+                            let currentData = datain[mapIndex[currentIndex]];
+                            let currentColor = d3.color(colorarr[currentData.cluster].value);
+                            points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
+                            points.geometry.attributes.customColor.needsUpdate = true;
+                        }
 
+
+                        var allSelected = lassoTool.select();
+                        allSelected_Data = [];
+                        for (var i = 0; i < allSelected.length; i++) {
+                            allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
+                            let currentIndex = lassoTool.collection[i];
+                            points.geometry.attributes.customColor.array[currentIndex * 3] = newClustercolor.r / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = newClustercolor.g / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = newClustercolor.b / 255;
+                            points.geometry.attributes.customColor.needsUpdate = true;
+                        }
+                        // draw summary radar chart
+                        drawSummaryRadar(allSelected_Data, handle_data_summary(allSelected_Data), newClustercolor);
+                    } catch (e) {
+                        // draw summary radar chart
+                        drawSummaryRadar([], [], newClustercolor);
+                    }
+                    lassoTool.needRender = false;
+                }
+                // visiableLine(graphicopt.linkConnect);
+                controls.update();
+                renderer.render(scene, camera);
+                isneedrender = false;
+                requestAnimationFrame(animate);
+            }
         }
     }
 
@@ -1285,9 +1281,7 @@ d3.TimeSpace = function () {
             points.geometry.computeBoundingSphere();
 
 
-            // if (isradar && datain.length < 5000) {
-            //     renderSvgRadar();
-            // }
+            isneedrender = true;
         }
     }
 
@@ -1525,15 +1519,18 @@ d3.TimeSpace = function () {
 
 
     master.highlight = function(name){
-        if (mouseoverTrigger) {
+        if (!disableMouseover) {
             filter.push(name);
             filter = _.uniq(filter);
+            isneedrender = true;
+            mouseoverTrigger = true;
         }
     };
     let ishighlightUpdate;
     master.unhighlight = function() {
         filter = [];
         ishighlightUpdate = true;
+        isneedrender = true;
         // d3.select(background_canvas).style('opacity',1);
         // d3.select(front_canvas).style('opacity',0);
     };
