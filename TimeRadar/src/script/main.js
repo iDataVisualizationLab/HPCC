@@ -612,7 +612,8 @@ function request(){
                             // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
                             // if(isanimation)
-                            requestAnimationFrame(()=>jobMap.draw(true));
+                            if(lastIndex%200===0)
+                                requestAnimationFrame(()=>jobMap.draw(true));
                         }
                         countbuffer+=hosts.length;
                     } while ((countbuffer < hosts.length) && (speedup === 2 || (hosts[countbuffer].hpcc_rack === oldrack)) && speedup);
