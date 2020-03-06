@@ -59,7 +59,8 @@ angular.module('hpccApp')
           resolve();
         });
       } else {
-        updatePromise = $http.get(dataset.url, {cache: true}).then(function(response) {
+        updatePromise =
+            $http.get(dataset.url, {cache: true}).then(function(response) {
           var data;
 
           // first see whether the data is JSON, otherwise try to parse CSV
