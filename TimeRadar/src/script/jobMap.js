@@ -525,7 +525,7 @@ let JobMap = function() {
 
 
         if (!runopt.compute.bundle) {
-            const radaropt = {colorfill: colorfill, size: Math.max((scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 2,12)};
+            const radaropt = {colorfill: colorfill, size: Math.min(Math.max((scaleNode_y_middle(1) - scaleNode_y_middle(0)) * 2,12),50)};
             let datapoint;
             if (!runopt.suddenGroup) {
                 datapoint= bg.selectAll(".linkLinegg").interrupt().data(d => d.timeline.clusterarr.map((e,i) => {
