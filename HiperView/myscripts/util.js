@@ -944,8 +944,13 @@ function preloader(on,percentage,message,divid){
         d3.select(divid).classed('hidden', false);
         if(percentage)
             onloaddetermire({message:message||'collecting data....',process:percentage},divid)
-        else
+        else {
             spinner.spin(target);
+            if (message)
+            {
+                d3.select(divid).select('h5.spinnerC').text(message);
+            }
+        }
     }else {
         onloaddetermire({message:'finish',process:100},divid);
         d3.select(divid).classed('hidden', true);
