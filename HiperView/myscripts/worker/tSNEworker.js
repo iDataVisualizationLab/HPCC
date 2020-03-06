@@ -1,9 +1,11 @@
+window =self;
 importScripts("../../js/d3.v4.js");
 importScripts("../../js/tsne.js");
 importScripts("../../js/underscore-min.js");
 importScripts("https://unpkg.com/simple-statistics@2.2.0/dist/simple-statistics.min.js");
 importScripts("../../js/jLouvain.js");
-importScripts("../../js/scagnosticsnd.min.js");
+// importScripts("../../js/scagnosticsnd.min.js");
+importScripts("../../../HiperView20190914/js/scagnosticsnd.min.js");
 importScripts("../../js/jDBSCAN.js");
 let tsne,sol,
     stepnumber = 5,
