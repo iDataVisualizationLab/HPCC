@@ -59,23 +59,25 @@ angular.module('hpccApp')
           resolve();
         });
       } else {
-        updatePromise =
-            $http.get(dataset.url, {cache: true}).then(function(response) {
-          var data;
-
-          // first see whether the data is JSON, otherwise try to parse CSV
-          if (_.isObject(response.data)) {
-             data = response.data;
-             Dataset.type = 'json';
-          }
-          // else {
-          //     // read file
-          //   data = util.read(response.data, {type: 'csv'});
-          //   Dataset.type = 'csv';
-          // }
-
-          updateFromData(dataset, data);
-        });
+        updatePromise = new Promise(function(resolve, reject){
+            resolve(updateFromData(dataset, []));
+        }).then();
+        //     $http.get(dataset.url, {cache: true}).then(function(response) {
+        //   var data;
+        //
+        //   // first see whether the data is JSON, otherwise try to parse CSV
+        //   if (_.isObject(response.data)) {
+        //      data = response.data;
+        //      Dataset.type = 'json';
+        //   }
+        //   // else {
+        //   //     // read file
+        //   //   data = util.read(response.data, {type: 'csv'});
+        //   //   Dataset.type = 'csv';
+        //   // }
+        //
+        //   updateFromData(dataset, data);
+        // });
       }
 
       Dataset.onUpdate.forEach(function(listener) {

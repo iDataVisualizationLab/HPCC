@@ -112,7 +112,7 @@ var opts = {
     className: 'spinner', // The CSS class to assign to the spinner
 };
 var target = document.getElementById('loadingSpinner');
-var spinner;
+var spinner = new Spinner(opts).spin(target);
 // END: loader spinner settings ****************************
 
 var simulation, link, node;
@@ -1832,7 +1832,7 @@ $( document ).ready(function() {
     //         break;
     // }
 
-    spinner = new Spinner(opts).spin(target);
+    // spinner = new Spinner(opts).spin(target);
 
 
     setTimeout(() => {

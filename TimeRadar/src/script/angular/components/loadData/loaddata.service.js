@@ -40,7 +40,7 @@ angular.module('hpccApp')
                     console.time("totalTime:");
                     d3.json(choice.url).on("progress", function(evt) {
                         dataInformation.size = evt.total;
-                        console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
+                        preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
                     }).get(function(error,data) {
                             console.timeEnd("totalTime:");
                         if (error) {
@@ -179,7 +179,8 @@ angular.module('hpccApp')
         setTimeout(() => {
             d3.csv(file).on("progress", function(evt) {
                 dataInformation.size = evt.total;
-                console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
+                preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
+                // console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
             }).get(function (error, data) {
                 if (error) {
                 } else {
@@ -208,6 +209,7 @@ angular.module('hpccApp')
                     d3.select(".currentDate")
                         .text("" + (sampleS['timespan'][0]).toDateString());
                     updateClusterControlUI();
+                    // preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
                     loadPresetCluster(file.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{
                         let loadclusterInfo= status;
                         if (loadclusterInfo) {
