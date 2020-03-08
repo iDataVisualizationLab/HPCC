@@ -71,7 +71,7 @@ addEventListener('message',function ({data}) {
             w = w / 2;
             postMessage({
                 action: 'returnData',
-                result: {iteration:iteration,message: `# iterations: ${iteration}`, process: process}
+                result: {message: `# iterations: ${iteration}`, process: process}
             })
         });
         // bin.data([]).minNumOfBins(8).maxNumOfBins(11);

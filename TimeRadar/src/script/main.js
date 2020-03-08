@@ -2259,7 +2259,7 @@ function recalculateCluster (option,calback,customCluster) {
                 calback();
         }
         if (data.action==='returnData'){
-            onloaddetermire({process:data.result.process,message:`# iterations: ${data.result.iteration}`},'#clusterLoading');
+            onloaddetermire({process:data.result.process,message:data.result.message},'#clusterLoading');
         }
     }, false);
 
