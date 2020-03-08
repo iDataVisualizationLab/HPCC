@@ -44,12 +44,13 @@ addEventListener('message',function ({data}){
                 else
                     processData = processData_old;
             }
-            sampleS = data.data;
+            // sampleS = data.data;
+            tsnedata = data.tsnedata;
             // serviceFull_selected =[];
             // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             break;
         case 'getbatchData':
-            const arr = plotTsne(sampleS,data.value.lastIndex,data.value.usepast);
+            const arr = plotTsne(undefined,data.value.lastIndex,data.value.usepast);
             if (data.value.host===undefined)
                 data.value.host = hosts[hosts.length-1].name;
             const hostIndex = hosts.findIndex(d=>d.name===data.value.host);
@@ -66,7 +67,7 @@ addEventListener('message',function ({data}){
             }
             postMessage({action: 'DataServices',
                 result: {
-                    arr: getsummaryservice(plotTsne(sampleS, data.value.lastIndex, false, 0, 'undefined')),
+                    arr: getsummaryservice(),
                     index: data.value.lastIndex
                 }
             });
@@ -75,8 +76,9 @@ addEventListener('message',function ({data}){
     }
 });
 let serviceFull_selected =[];
-function getsummaryservice(data){
-    let dataf = _.reduce(_.chunk(_.unzip(data),serviceFull_selected.length),function(memo, num){ return memo.map((d,i)=>{d.push(num[i]); return _.flatten(d); })});
+function getsummaryservice(){
+    // let dataf = _.reduce(_.chunk(_.unzip(data),serviceFull_selected.length),function(memo, num){ return memo.map((d,i)=>{d.push(num[i]); return _.flatten(d); })});
+    let dataf = _.unzip(_.flatten(_.values(tsnedata),1));
     let ob = {};
     dataf.forEach((d,i)=>{
         d=d.filter(e=>e!==undefined).sort((a,b)=>a-b);
@@ -130,7 +132,8 @@ function plotTsne(hostResults,lastIndex,isPredict,startIndex_Input,undefinedValu
     for(var h = 0;h < hosts.length;h++)
     {
         var name = hosts[h].name;
-        var arrServices = getDataByName(hostResults, name, startIndex, lastIndex,isPredict,undefinedValue==='undefined'?undefined:0.5);
+        // var arrServices = getDataByName(hostResults, name, startIndex, lastIndex,isPredict,undefinedValue==='undefined'?undefined:0.5);
+        var arrServices = _.flatten(tsnedata[name].slice(startIndex,lastIndex+1));
         arr.push(arrServices);
     }
     return arr;

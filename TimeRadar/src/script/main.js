@@ -1074,7 +1074,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data,separate){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,data:data,tsnedata:tsnedata,hostList:hostList,separate:separate});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,tsnedata:tsnedata,hostList:hostList,separate:separate});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1907,30 +1907,6 @@ $( document ).ready(function() {
             .onChangeFilterFunc(onfilterdata)
             .onChangeMinMaxFunc(onChangeMinMaxFunc)
             .init();
-        function loadata(data,job){
-            d3.select(".cover").select('h5').text('drawLegend...');
-            drawLegend(initialService, arrThresholds, arrColor, dif);
-            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
-            sampleS = data;
-            updateDatainformation(data['timespan']);
-            // if(job)
-            //     hosts.forEach(h=>sampleS[h.name].arrJob_scheduling = job[h.name]);
-            sampleJobdata = job || [{
-                jobID: "1",
-                name: "1",
-                nodes: hosts.map(h=>h.name),
-                startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                user: "dummyJob"
-            }];
-            if(cluster_info){
-                handle_dataRaw();
-            }
-            main();
-            d3.select(".cover").select('h5').text('loading data...');
-            addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
-            preloader(false)
-        }
     },0);
     // Spinner Stop ********************************************************************
 

@@ -325,7 +325,8 @@ function newdatatoFormat_noSuggestion (data,separate){
                     tsnedata[h][currentIndex].name = h;
                     tsnedata[h][currentIndex].timestep =currentIndex;
                 }
-                let retievedData = processResult_csv(d[h+separate+attr],attr);
+                // let retievedData = processResult_csv(d[h+separate+attr],attr);
+                let retievedData = d[variables[i]];
                 sampleS[h][attr].push(retievedData);
                 tsnedata[h][currentIndex].push(retievedData[0]===null?0:scaleService[i](retievedData[0])||0);
             });

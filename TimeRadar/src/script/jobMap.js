@@ -2460,6 +2460,7 @@ let JobMap = function() {
 
     jobMap.hosts = function (a) {
         return arguments.length ? (Hosts = _.cloneDeep( a),makeOb(), jobMap) : Hosts;
+        // return arguments.length ? (Hosts = a,makeOb(), jobMap) : Hosts;
     };
 
     jobMap.maxTimestep = function (_) {
