@@ -71,7 +71,7 @@ addEventListener('message',function ({data}) {
             w = w / 2;
             postMessage({
                 action: 'returnData',
-                result: {message: `# iterations: ${iteration}`, process: process}
+                result: {iteration:iteration,message: `# iterations: ${iteration}`, process: process}
             })
         });
         // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
@@ -82,10 +82,10 @@ addEventListener('message',function ({data}) {
         }))
             .calculate();
 
-        postMessage({
-            action: 'returnData',
-            result: {message: `# iterations: ${bin.loopcount}`, process: 99}
-        });
+        // postMessage({
+        //     action: 'returnData',
+        //     result: {message: `# iterations: ${bin.loopcount}`, process: 99}
+        // });
 
         var keys = serviceFullList.map(d=>d.text);
         dataSpider3.length = 0;
