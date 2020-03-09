@@ -576,7 +576,9 @@ d3.TimeSpace = function () {
     let animationtimer = undefined;
     let disableMouseover = false, isneedrender = false;
     function animate() {
+        console.log(stop)
         if (!stop) {
+            console.log(isneedrender)
             if (isneedrender) {
                 // visiableLine(graphicopt.linkConnect);
                 //update raycaster with mouse movement
@@ -643,8 +645,8 @@ d3.TimeSpace = function () {
                 controls.update();
                 renderer.render(scene, camera);
                 isneedrender = false;
-                requestAnimationFrame(animate);
             }
+            requestAnimationFrame(animate);
         }
     }
 
