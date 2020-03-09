@@ -238,9 +238,9 @@ d3.TimeSpace = function () {
                     break;
                 case "stable":
                     modelWorker.terminate();
+                    disableMouseover = false;
                     render(true);
                     reduceRenderWeight(true);
-                    disableMouseover = true
                     break;
                 default:
                     break;
@@ -552,7 +552,9 @@ d3.TimeSpace = function () {
                 scene.add(box);
 
                 // showMetrics(target.name);
-                showMetrics_plotly(target.name);
+                setTimeout(()=>{
+                    showMetrics_plotly(target.name);
+                });
                 renderRadarSummary(target.__metrics,colorarr[target.cluster].value,false)
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
