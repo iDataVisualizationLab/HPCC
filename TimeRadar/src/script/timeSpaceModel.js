@@ -576,9 +576,7 @@ d3.TimeSpace = function () {
     let animationtimer = undefined;
     let disableMouseover = false, isneedrender = false;
     function animate() {
-        console.log(stop)
         if (!stop) {
-            console.log(isneedrender)
             if (isneedrender) {
                 // visiableLine(graphicopt.linkConnect);
                 //update raycaster with mouse movement
