@@ -306,7 +306,9 @@ function newdatatoFormat_noSuggestion (data,separate){
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
     scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
-
+    serviceFullList.forEach(d=>{
+        d.enable = d.range[0]!==d.range[1];
+    });
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
     tsnedata = {};
