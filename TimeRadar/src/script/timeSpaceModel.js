@@ -95,7 +95,7 @@ d3.TimeSpace = function () {
             // do something
             isneedrender = true;
             mouseoverTrigger = false;
-            disableMouseover = true;
+            // disableMouseover = true;
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
@@ -133,6 +133,7 @@ d3.TimeSpace = function () {
             if (reset)
                 lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
             reset= false;
+            disableMouseover = true;
             d3.select('#modelWorkerScreen').call(drag());
             if (selection_radardata)
                 renderRadarSummary(selection_radardata.dataRadar,selection_radardata.color,selection_radardata.boxplot)
@@ -141,13 +142,17 @@ d3.TimeSpace = function () {
         }else{
             if(lassoTool)
                 lassoTool.reset();
+            disableMouseover = false;
             renderRadarSummary([]);
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
-            d3.select('#modelWorkerScreen').on('mousemove', function(){
+            d3.select('#modelWorkerScreen')
+                .on('mouseover',()=>{isneedrender = true;mouseoverTrigger = true})
+                .on('mousemove', function(){
                 let coordinator = d3.mouse(this);
                 mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
                 mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
                 mouseoverTrigger = true;
+                    isneedrender = true;
             }).on('mouseleave',()=>{mouseoverTrigger = false})
             // d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
