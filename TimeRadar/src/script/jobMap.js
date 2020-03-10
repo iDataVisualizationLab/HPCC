@@ -944,7 +944,10 @@ let JobMap = function() {
                 //     computers.data().sort((a, b) => a.order - b.order).forEach((d, i) => d.order = i);
                 // }else{
                     computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y));
-                    computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                    if (user[0].name!=="dummyJob")
+                        computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                    else
+                        computers.data().forEach((d, i) => d.order = i);
                 }
                 g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
                 scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
@@ -2027,6 +2030,7 @@ let JobMap = function() {
         if (lastIndex===(maxTimestep-1)){
             if (runopt.compute.type==='timeline') {
                 clusterdata_timeline = [];
+                let similarity_queeue = [];
                 switch (runopt.timelineGroupMode) {
                     case 'group':
                         let listcomp = hosts.map(h=>{
@@ -2052,7 +2056,9 @@ let JobMap = function() {
                                 }
 
                                 temp_h.arr = temp_g[k][0].arrcluster;
-                                clusterdata_timeline.push(temp_h);
+                                temp_h.similarity = temp_h.timeline.clusterarr.length;
+                                // clusterdata_timeline.push(temp_h);
+                                similarity_queeue.push(temp_h);
                             }else{
                                 temp_g[k].forEach((n) => {
                                     _.pullAll(linkdata, linkdata.filter(f => f.source === n.name));
@@ -2067,6 +2073,29 @@ let JobMap = function() {
                                 else
                                     t.del = true;
                             })
+                        });
+                        let cluster_len = similarity_queeue.length;
+                        similarity_queeue.sort((a,b)=>a.similarity-b.similarity);
+                        let currenttarget;
+                        let next_target = similarity_queeue.shift();
+                        clusterdata_timeline = d3.range(0,cluster_len).map((i)=>{
+                            currenttarget = next_target;
+                            let sim_index = 0;
+                            let pen_min = +Infinity;
+                            for (let j = 0;j<similarity_queeue.length;j++) {
+                                let pen = 0;
+                                similarity_queeue[j].arr.forEach((c,i)=>{
+                                   pen+= (c===currenttarget.arr[i]);
+                                });
+                                if (pen<pen_min)
+                                {
+                                    sim_index = j;
+                                    if (pen===0) // stop when find the exactlly the same
+                                        break;
+                                }
+                            }
+                            next_target = _.pullAt(similarity_queeue,[sim_index])[0]
+                            return currenttarget;
                         });
 
                         break;
