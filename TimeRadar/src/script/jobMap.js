@@ -271,7 +271,7 @@ let JobMap = function() {
         try {
             jobMap.drawComp();
         }catch(e){
-            
+
         }
     }
 
