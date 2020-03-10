@@ -18,7 +18,7 @@ d3.TimeSpace = function () {
             },
 
             opt: {
-                // dim: 2, // dimensionality of the embedding (2 = default)
+                dim: 2, // dimensionality of the embedding (2 = default)
                 windowsSize: 1,
             },radaropt : {
                 // summary:{quantile:true},
