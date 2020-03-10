@@ -119,8 +119,17 @@ angular.module('hpccApp').constant('SampleData', [
     },
     {
         id:"RUL_F004s",
-        name:"Rest Useful Life data",
+        name:"Rest Useful Life data F004",
         url:"../HiperView/data/RUL_F004.csv",
+        description:"",
+        date:"28 Feb 2020",
+        group:"sample",
+        formatType:'csv'
+    },
+    {
+        id:"RUL_F001s",
+        name:"Rest Useful Life data F001",
+        url:"../HiperView/data/RUL_F001.csv",
         description:"",
         date:"28 Feb 2020",
         group:"sample",
