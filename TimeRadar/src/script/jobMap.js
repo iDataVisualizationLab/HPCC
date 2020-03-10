@@ -233,7 +233,7 @@ let JobMap = function() {
 
         stepSizeslider = document.getElementById('stepSize_control');
         noUiSlider.create(stepSizeslider, {
-            start: 1,
+            start: 1.5,
             connect: 'lower',
             tooltips: {to: function(value){return 'x'+value.toFixed(1)}, from:function(value){return Number(value.replace('x', ''));}},
             step: 0.5,
@@ -256,14 +256,23 @@ let JobMap = function() {
             .append("g")
             .attr('class','majorbar');
 
+        try {
+            yscale.range([0, graphicopt.heightG()])
+        }catch(e){
+
+        }
         return jobMap;
     };
 
     function updateMaxTimestep(){
-        stepSizeslider.noUiSlider.set(1);
-        timelineStep = (yscale.range()[1]/maxTimestep);
+        stepSizeslider.noUiSlider.set(1.5);
+        timelineStep = (yscale.range()[1]*1.5/maxTimestep);
         timelineScale.range([-timelineStep,0]);
-        jobMap.drawComp();
+        try {
+            jobMap.drawComp();
+        }catch(e){
+            
+        }
     }
 
     let tippannel, tiptimer;
@@ -503,6 +512,7 @@ let JobMap = function() {
     let animation_time = 2000;
     function drawEmbedding_timeline(data,colorfill) {
         // console.timeEnd('from compute to draw timeline');
+        console.log('animation_time:',animation_time)
         // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
@@ -554,9 +564,13 @@ let JobMap = function() {
                 datapoint.exit().remove();
             let datapoint_n = datapoint.enter().append('g')
                 .attr('class', 'linkLinegg timeline');
-            datapoint_n.style('opacity',0)
-                .transition().duration(animation_time).style('opacity',1);
-
+            // datapoint.exit().remove();
+            if (animation_time) {
+                datapoint_n.style('opacity', 0)
+                    .transition().duration(animation_time).style('opacity', 1);
+            }else{
+                datapoint_n.style('opacity', 0).style('opacity', 1);
+            }
             datapoint_n.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
             }).each(function (d, i) {
@@ -899,7 +913,7 @@ let JobMap = function() {
     function getsubfixcolormode(){
         return runopt.graphic.colorBy==='group'?'_no':undefined;
     }
-    let yscale,linkscale = d3.scaleSqrt().range([0.3,2]);
+    let yscale=d3.scaleLinear().range([0,graphicopt.heightG()]),linkscale = d3.scaleSqrt().range([0.3,2]);
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
@@ -1194,6 +1208,9 @@ let JobMap = function() {
         // compute pie
         if(first) {
             makeheader();
+        }
+        if(!islight&&animation_time===0){
+            nodeg.selectAll('.computeNode').remove();
         }
         let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,d=> d.name);
         computers.select('.computeSig').datum(d=>d);
@@ -1787,9 +1804,10 @@ let JobMap = function() {
         let clineg_n = clineg.enter().append(g).attr('class','cline_g');
         clineg_n.append('path').attr('class')
     }
-
+    let estimateRadar = 0;
     function updateClusterTimeline() {
         try {
+            estimateRadar = 0;
             let maxstep = d3.max(clusterdata, c => c.arr.length) - 1;
             for (let ts = 0; ts < maxstep + 1; ts++) {
                 clusterdata.forEach(c => {
@@ -1812,15 +1830,18 @@ let JobMap = function() {
                                 hostOb[h].timeline.clusterarr.push({cluster: c.name, timestep: ts});
                                 hostOb[h].timeline.lineFull.push({cluster: c.name, start: ts, end: ts});
                                 hostOb[h].timeline.clusterarr.stack = 0;
+                                estimateRadar++;
                             }
                         });
 
                 });
             }
             timelineScale.domain([maxstep - 1, maxstep]);
+            if(estimateRadar>1000)
+                animation_time = 0;
             // fisheye_scale.x.domain([-maxstep*timelineScale.range()[0],0]);
         }catch (e) {
-            
+            animation_time = 0;
         }
     }
     let first__timestep = new Date();

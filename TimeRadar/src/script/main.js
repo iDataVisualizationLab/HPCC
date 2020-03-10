@@ -1669,6 +1669,8 @@ $( document ).ready(function() {
         updateSummaryChartAll();
     });
     d3.select('#compDisplay_control').on("change", function () {
+        preloader(true,undefined,'Change visualization...');
+        setTimeout(()=>{
         var sect = document.getElementById("compDisplay_control");
         if(sect.options[sect.selectedIndex].value!=='reduceDim') {
             vizMode = false;
@@ -1740,6 +1742,8 @@ $( document ).ready(function() {
             onchangeVizType();
             onchangeVizdata();
         }
+        preloader(false);
+        })
     });
     d3.select('#jobIDCluster_control').on("change", function () {
         jobMap_runopt.compute.clusterJobID = $(this).prop('checked');
