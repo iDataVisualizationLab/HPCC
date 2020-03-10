@@ -50,12 +50,20 @@ d3.TimeSpace = function () {
             },
             serviceIndex: 0,
         },
+
         controlPanelGeneral = {
             linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight'],values:[false,'straight'],
             // linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);isneedrender = true;}},
-            dim: {text: "Dimension", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
+            dim: {text: "Dimension", type: "selection", variableRoot: 'opt',variable: 'dim',labels:['2D','3D respect time','3D'],values:[2,2.5,3], width: '100px',callback:()=>{
+                    preloader(true,10,'Change dimension projection...','#modelLoading');
+                    obitTrigger=true;
+                    setTimeout(()=>{
+                        start(!needRecalculate&&solution[Math.floor(graphicopt.opt.dim)] || graphicopt.opt.dim===2.5);
+                    })
+                }},
+            // dim: {text: "Dimension", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -177,7 +185,7 @@ d3.TimeSpace = function () {
         renderQueue_link={line:false,curve:false}
         interuptAnimation();
         axesHelper.toggleDimension(graphicopt.opt.dim);
-        gridHelper.parent.visible = (graphicopt.opt.dim==2.5);
+        gridHelper.parent.visible = (graphicopt.opt.dim>2);
         // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
@@ -204,6 +212,7 @@ d3.TimeSpace = function () {
         if(skipRecalculate) {
             render(true);
             reduceRenderWeight(true);
+            preloader(false, undefined, undefined, '#modelLoading');
             return;
         }
         reduceRenderWeight();
@@ -235,7 +244,7 @@ d3.TimeSpace = function () {
                     isBusy = true;
                     xscale.domain(data.xscale.domain);
                     yscale.domain(data.yscale.domain);
-                    solution = data.sol;
+                    solution[Math.floor(graphicopt.opt.dim)] = data.sol;
                     updateTableOutput(data.value);
                     isneedCompute = true;
                     render();
@@ -258,7 +267,7 @@ d3.TimeSpace = function () {
         preloader(true,1,'Prepare rendering ...','#modelLoading');
         needRecalculate = true;
         reset = true;
-        solution = [];
+        solution = {};
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
         mapIndex = [];
@@ -1267,9 +1276,9 @@ d3.TimeSpace = function () {
     function render (islast){
         if (isneedCompute) {
             let p = points.geometry.attributes.position.array;
-            if (solution && solution.length) {
+            if (solution[Math.floor(graphicopt.opt.dim)] && solution[Math.floor(graphicopt.opt.dim)].length) {
                 createRadar = _.partialRight(createRadar_func, 'timeSpace radar', graphicopt.radaropt, colorscale);
-                solution.forEach(function (d, i) {
+                solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
                     // mapIndex.forEach(function (i) {
                     const target = datain[i];
                     target.__metrics.position = d;
@@ -1286,13 +1295,13 @@ d3.TimeSpace = function () {
                             d[2] = xscale.invert(p[pointIndex * 3 + 2]);
                         } else {
                             p[pointIndex * 3 + 2] = 0;
-                            if (solution[i].length > 2)
-                                solution[i] = solution[i].slice(0, 2);
+                            if (solution[Math.floor(graphicopt.opt.dim)][i].length > 2)
+                                solution[Math.floor(graphicopt.opt.dim)][i] = solution[Math.floor(graphicopt.opt.dim)][i].slice(0, 2);
                         }
                     }
                 });
                 let center = d3.nest().key(d => d.cluster).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
-                solution.forEach(function (d, i) {
+                solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
                     const target = datain[i];
                     const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
                     path[target.name][posPath].value = d;
@@ -1582,19 +1591,18 @@ d3.TimeSpace = function () {
     let self = this;
     let needRecalculate=true;
     master.generateTable = function(){
+        $( "#modelWorkerInformation" ).draggable({ containment: "parent", scroll: false });
         needRecalculate = true
         $('#modelSelectionInformation .tabs').tabs({
             onShow: function(){
                 graphicopt.isSelectionMode = this.index===1;
-                handle_selection_switch(graphicopt.isSelectionMode)}
+                handle_selection_switch(graphicopt.isSelectionMode);
+            }
         });
         d3.select('#modelWorkerInformation table').selectAll('*').remove();
         table_info = d3.select('#modelWorkerInformation table')
-            .html(` <colgroup>
-       <col span="1" style="width: 40%;">
-       <col span="1" style="width: 60%;">
-    </colgroup>`)
-            // .styles({'width':tableWidth+'px'});
+            .html(` <colgroup><col span="1" style="width: 40%;"><col span="1" style="width: 60%;"></colgroup>`);
+        // .styles({'width':tableWidth+'px'});
         let tableData = [
             [
                 {text:"Input",type:"title"},
@@ -1611,7 +1619,7 @@ d3.TimeSpace = function () {
             tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
         });
         d3.values(controlPanelGeneral).forEach(d=>{
-            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,variableRoot: d.variableRoot,id:d.id})
         });
         tableData[2] = _.concat(tableData[2],self.outputSelection);
         let tbodys = table_info.selectAll('tbody').data(tableData);
@@ -1619,7 +1627,8 @@ d3.TimeSpace = function () {
             .enter().append('tbody')
             .selectAll('tr').data(d=>d)
             .enter().append('tr')
-            .selectAll('td').data(d=>d.type==="title"?[d]:[{text:d.label},d.type?{content:d.content,variable:d.variable}:{text:d.content,variable:d.variable}])
+            .attr('id',d=>d.id?d.id:null)
+            .selectAll('td').data(d=>d.type==="title"?[d]:[{text:d.label},d.type?{content:d.content,variable:d.variable,variableRoor: d.variableRoot}:{text:d.content,variable:d.variable}])
             .enter().append('td')
             .attr('colspan',d=>d.type?"2":null)
             .style('text-align',(d,i)=>d.type==="title"?"center":(i?"right":"left"))
@@ -1632,7 +1641,7 @@ d3.TimeSpace = function () {
                     if (d.content.type==="slider"){
                         let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
                         noUiSlider.create(div.node(), {
-                            start: (graphicopt.opt[d.content.variable])|| d.content.range[0],
+                            start: (graphicopt.opt[d.content.variable]|| (d.content.variableRoot?d.content.variableRoot[d.content.variable]:undefined))|| d.content.range[0],
                             connect: 'lower',
                             tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +value.split('1e')[1];}},
                             step: d.content.step||1,
@@ -1643,7 +1652,10 @@ d3.TimeSpace = function () {
                             },
                         });
                         div.node().noUiSlider.on("change", function () { // control panel update method
-                            graphicopt.opt[d.content.variable] = + this.get();
+                            if (!d.content.variableRoot) {
+                                graphicopt.opt[d.content.variable] = +this.get();
+                            }else
+                                d.content.variableRoot[d.content.variable] = +this.get();
                             if (d.content.callback)
                                 d.content.callback();
                             else
@@ -1673,12 +1685,15 @@ d3.TimeSpace = function () {
                             else
                                 start();
                         })
-                            // .node().checked = graphicopt[d.content.variable];
+                        // .node().checked = graphicopt[d.content.variable];
                     }else if (d.content.type === "selection") {
                         let div = d3.select(this).style('width', d.content.width)
                             .append('select')
                             .on('change',function(){
-                                graphicopt[d.content.variable]  =  d.content.values[this.value];
+                                if (!d.content.variableRoot) {
+                                    graphicopt[d.content.variable]  =  d.content.values[this.value];
+                                }else
+                                    graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
                                 if (d.content.callback)
                                     d.content.callback();
                             });
@@ -1690,6 +1705,25 @@ d3.TimeSpace = function () {
                     }
                 }
             });
+
+
+        // let div = d3.select('#modelDistanceFilter').node();
+        // if (!div.noUiSlider) {
+        //     noUiSlider.create(div, {
+        //         start: 0.5,
+        //         connect: 'upper',
+        //         orientation: 'horizontal', // 'horizontal' or 'vertical'
+        //         range: {
+        //             'min': 0,
+        //             'max': 1,
+        //         },
+        //     });
+        //     div.noUiSlider.on("change", function () { // control panel update method
+        //         graphicopt.filter.distance = +this.get();
+        //         d3.select('#modelFilterBy').dispatch("change");
+        //     });
+        //     d3.select(div).select('.noUi-handle').append('span').attr('class','num');
+        // }
     };
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
