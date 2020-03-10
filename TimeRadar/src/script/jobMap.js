@@ -502,6 +502,7 @@ let JobMap = function() {
     }
     let animation_time = 2000;
     function drawEmbedding_timeline(data,colorfill) {
+        // console.timeEnd('from compute to draw timeline');
         // xscale
         let newdata = handledata(data);
         let bg = svg.selectAll('.computeSig');
@@ -589,19 +590,6 @@ let JobMap = function() {
 
             if (runopt.compute.jobOverlay) {
                 let jobtick = bg.selectAll(".jobtickg").data(d => linkdata);
-                // dataline.exit().remove();
-                // dataline.enter().append('line')
-                //     .attr('class', 'linegg timeline')
-                //     .merge(dataline)
-                //     .attrs(function (d) {
-                //         let parentndata = d3.select(this.parentNode.parentNode).datum();
-                //         return {
-                //             x1: d => fisheye_scale.x(timelineScale(d.end)),
-                //             x2: d => fisheye_scale.x(timelineScale(d.start)),
-                //         }
-                //     }).styles({
-                //     stroke: d => colorFunc(d.cluster),
-                // });
             } else {
                 bg.selectAll(".jobtickg").remove();
             }
@@ -1841,6 +1829,7 @@ let JobMap = function() {
     let triggerCal_Cluster = true;
     let isLastTrigger = false;
     function handle_links (timeStep_r,lastIndex_r,triggerCluster){
+        // console.time('jobmap compute')
         triggerCal_Cluster = triggerCluster||triggerCal_Cluster;
         if (timeStep_r) {
             last_timestep = new Date(timeStep_r.toString());
@@ -2188,6 +2177,8 @@ let JobMap = function() {
 
         } else
             clusterdata_timeline = undefined;
+        // console.timeEnd('jobmap compute');
+        // console.time('from compute to draw timeline');
         return linkdata
     };
     let harr_old=[];
