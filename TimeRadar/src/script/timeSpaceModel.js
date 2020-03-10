@@ -351,7 +351,7 @@ d3.TimeSpace = function () {
         handle_selection_switch(graphicopt.isSelectionMode);
 
         d3.select('#modelSortBy').on("change", function () {handleTopSort(this.value)})
-
+        d3.select('#myHnav').on('change',onRequestplotly)
         drawSummaryRadar([],[],'#ffffff');
         start();
         needRecalculate = false;
@@ -552,9 +552,9 @@ d3.TimeSpace = function () {
                 scene.add(box);
 
                 // showMetrics(target.name);
-                setTimeout(()=>{
-                    showMetrics_plotly(target.name);
-                });
+                lastMetricselection =_.bind(showMetrics_plotly,{},target.name);
+                onRequestplotly();
+
                 renderRadarSummary(target.__metrics,colorarr[target.cluster].value,false)
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
@@ -990,6 +990,13 @@ d3.TimeSpace = function () {
             margin: tooltip_opt.margin
         }).data(data_in).layout(layout).show(target);
     }
+    let lastMetricselection;
+    function onRequestplotly(){
+        if (d3.select('#myHnav').classed('sidehIn')&&lastMetricselection) {
+            lastMetricselection();
+            lastMetricselection = undefined;
+        }
+    }
     function showMetrics_plotly(name) {
         let layout = {
             paper_bgcolor:"#ddd",
@@ -1081,7 +1088,9 @@ d3.TimeSpace = function () {
             range: scaleTime.domain(),
             rangeslider: {range: scaleTime.domain()},
         };
+
         Plotly.newPlot('myHnav', data_in, layout);
+
 
         // tooltip_lib.graphicopt({
         //     width: tooltip_opt.width,

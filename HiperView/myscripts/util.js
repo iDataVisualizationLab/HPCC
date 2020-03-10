@@ -611,7 +611,7 @@ function openNav(e) {
         source = d3.select(e).attr('data-source') || source;
         customclass = d3.select(e).attr('data-class') ||customclass;
     }
-    d3.select(target).classed(customclass,true);
+    d3.select(target).classed(customclass,true).dispatch('change');
     d3.select(source).classed(customclass,true);
     // _.delay(resetSize, 500);
 }
