@@ -185,7 +185,7 @@ d3.TimeSpace = function () {
         renderQueue_link={line:false,curve:false}
         interuptAnimation();
         axesHelper.toggleDimension(graphicopt.opt.dim);
-        gridHelper.parent.visible = (graphicopt.opt.dim>2);
+        gridHelper.parent.visible = (graphicopt.opt.dim===2.5);
         // handle_selection_switch(graphicopt.isSelectionMode);
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
@@ -1291,8 +1291,11 @@ d3.TimeSpace = function () {
                         // 3rd dimension as time step
                         // p[pointIndex*3+2] = xscale(d[2])||0;
                         if (graphicopt.opt.dim > 2) {
-                            p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
-                            d[2] = xscale.invert(p[pointIndex * 3 + 2]);
+                            if (graphicopt.opt.dim===2.5) {
+                                p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
+                                d[2] = xscale.invert(p[pointIndex * 3 + 2]);
+                            }else
+                                p[pointIndex * 3 + 2] = xscale(d[2])
                         } else {
                             p[pointIndex * 3 + 2] = 0;
                             if (solution[Math.floor(graphicopt.opt.dim)][i].length > 2)
