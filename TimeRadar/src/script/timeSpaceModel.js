@@ -41,7 +41,7 @@ d3.TimeSpace = function () {
                 margin: {top: 0, right: 0, bottom: 0, left: 0},
             },
             curveSegment: 20,
-            linkConnect: 'straight',
+            linkConnect: false,
             isSelectionMode: false,
             isCurve: false,
             component:{
@@ -54,8 +54,8 @@ d3.TimeSpace = function () {
             linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight'],values:[false,'straight'],
             // linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
-                callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);}},
-            dim: {text: "Dim", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
+                callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);isneedrender = true;}},
+            dim: {text: "Dimension", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
             windowsSize: {
                 text: "Windows size",
                 range: [1, 21],
@@ -71,6 +71,8 @@ d3.TimeSpace = function () {
             'stopCondition': function(d) {return '1e'+Math.round(d)}
         },tableWidth = 200
         ,
+        renderQueue_link={line:false,curve:false},
+        isneedCompute=true,
         runopt = {},
         isBusy = false,
         stop = false;
@@ -171,6 +173,8 @@ d3.TimeSpace = function () {
         controlPanelGeneral.linkConnect.callback();
     }
     function start(skipRecalculate) {
+        isneedCompute = true;
+        renderQueue_link={line:false,curve:false}
         interuptAnimation();
         axesHelper.toggleDimension(graphicopt.opt.dim);
         gridHelper.parent.visible = (graphicopt.opt.dim==2.5);
@@ -205,7 +209,7 @@ d3.TimeSpace = function () {
         reduceRenderWeight();
         mouseoverTrigger = false;
         terminateWorker();
-        preloader(true,1,'Init data...','#modelLoading');
+        preloader(true,10,'Transfer data to projection function','#modelLoading');
         let firstReturn = true;
         modelWorker = new Worker(self.workerPath);
         workerList[0] = modelWorker;
@@ -233,12 +237,14 @@ d3.TimeSpace = function () {
                     yscale.domain(data.yscale.domain);
                     solution = data.sol;
                     updateTableOutput(data.value);
+                    isneedCompute = true;
                     render();
                     isBusy = false;
                     break;
                 case "stable":
                     modelWorker.terminate();
                     disableMouseover = false;
+                    isneedCompute = true;
                     render(true);
                     reduceRenderWeight(true);
                     break;
@@ -249,6 +255,7 @@ d3.TimeSpace = function () {
     }
 
     master.init = function(arr,clusterin) {
+        preloader(true,1,'Prepare rendering ...','#modelLoading');
         needRecalculate = true;
         reset = true;
         solution = [];
@@ -276,6 +283,8 @@ d3.TimeSpace = function () {
         createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
         createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
 
+        setTimeout(function(){
+            isneedrender = false;
         far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
         camera = new THREE.PerspectiveCamera(fov, graphicopt.width/graphicopt.height, near, far + 1);
         // far = graphicopt.width/2*10;
@@ -287,11 +296,13 @@ d3.TimeSpace = function () {
         scatterPlot = new THREE.Object3D();
         scatterPlot.add( axesHelper );
         scatterPlot.rotation.y = 0;
+        preloader(true,1,'Node create ...','#modelLoading');
         points = createpoints(scatterPlot);
         straightLinesGroup = new THREE.Object3D();
         curveLinesGroup = new THREE.Object3D();
         scatterPlot.add( straightLinesGroup );
         scatterPlot.add( curveLinesGroup );
+        preloader(true,1,'Straight link create ...','#modelLoading');
         straightLines = createLines(straightLinesGroup);
         curveLines = createCurveLines(curveLinesGroup);
         lines = straightLines;
@@ -335,8 +346,6 @@ d3.TimeSpace = function () {
         setUpZoom();
         stop = false;
 
-
-        animate();
         // background_canvas = document.getElementById("modelWorkerScreen");
         // background_canvas.width  = graphicopt.width;
         // background_canvas.height = graphicopt.height;
@@ -354,23 +363,39 @@ d3.TimeSpace = function () {
         d3.select('#myHnav').on('change',onRequestplotly)
         drawSummaryRadar([],[],'#ffffff');
         start();
+        animate();
         needRecalculate = false;
+    },1);
         return master;
     };
     function toggleLine(){
         if (!graphicopt.isCurve)
         {
             visiableLine(false);
+            try {
+                datain.forEach((d, i) => {
+                    straightLines[d.name].visible = curveLines[d.name].visible;
+                    straightLines[d.name].material.opacity = curveLines[d.name].material.opacity;
+                });
+            }catch(e){}
             lines = straightLines;
             linesGroup = straightLinesGroup;
             updateLine = updateStraightLine;
             visiableLine(graphicopt.linkConnect);
+            isneedCompute = (!renderQueue_link.line);
+            renderQueue_link.line = true;
         }else{
             visiableLine(false);
+            datain.forEach((d, i) => {
+                curveLines[d.name].visible = straightLines[d.name].visible;
+                curveLines[d.name].material.opacity = straightLines[d.name].material.opacity;
+            });
             lines = curveLines;
             linesGroup = curveLinesGroup;
             updateLine = updateCurveLine;
             visiableLine(graphicopt.linkConnect);
+            isneedCompute = (!renderQueue_link.curve);
+            renderQueue_link.curve = true;
         }
     }
     function handleTopSort(mode){
@@ -1240,64 +1265,68 @@ d3.TimeSpace = function () {
     //     },1000/60);
     // }
     function render (islast){
-        if(solution) {
-            createRadar = _.partialRight(createRadar_func,'timeSpace radar', graphicopt.radaropt, colorscale);
-            solution.forEach(function (d, i) {
-            // mapIndex.forEach(function (i) {
-                const target = datain[i];
-                target.__metrics.position = d;
-                let pointIndex = mapIndex.indexOf(i);
-                if (pointIndex!==undefined){
-                    let p = points.geometry.attributes.position.array;
-                    p[pointIndex*3+0] = xscale(d[0]);
-                    p[pointIndex*3+1] = yscale(d[1]);
+        if (isneedCompute) {
+            let p = points.geometry.attributes.position.array;
+            if (solution && solution.length) {
+                createRadar = _.partialRight(createRadar_func, 'timeSpace radar', graphicopt.radaropt, colorscale);
+                solution.forEach(function (d, i) {
+                    // mapIndex.forEach(function (i) {
+                    const target = datain[i];
+                    target.__metrics.position = d;
+                    let pointIndex = mapIndex.indexOf(i);
+                    if (pointIndex !== undefined) {
 
-                    // 3rd dimension as time step
-                    // p[pointIndex*3+2] = xscale(d[2])||0;
-                    if(graphicopt.opt.dim>2) {
-                        p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
-                        d[2] = xscale.invert(p[pointIndex * 3 + 2]);
-                    }else {
-                        p[pointIndex * 3 + 2] = 0;
-                        if (solution[i].length>2)
-                            solution[i] = solution[i].slice(0,2);
-                    }
-                }
-            });
-            let center = d3.nest().key(d=>d.cluster).rollup(d=>[d3.mean(d.map(e=>e.__metrics.position[0])),d3.mean(d.map(e=>e.__metrics.position[1])),d3.mean(d.map(e=>e.__metrics.position[2]))]).object(datain);
-            solution.forEach(function (d, i) {
-                const target = datain[i];
-                const posPath = path[target.name].findIndex(e=>e.timestep===target.timestep);
-                path[target.name][posPath].value = d;
-                // updateStraightLine(target, posPath, d);
-                updateLine(target, posPath, d, center[target.cluster]);
+                        p[pointIndex * 3 + 0] = xscale(d[0]);
+                        p[pointIndex * 3 + 1] = yscale(d[1]);
 
-            });
-            if (islast){
-                for (let name in path){
-                    let temp;
-                    path[name].forEach((p,i)=>{
-                        if (!i){
-                            path[name].distance = 0;
-                            temp = p.value;
-                            return;
-                        }else{
-                            path[name].distance += distance(path[name][i-1].value,p.value)
+                        // 3rd dimension as time step
+                        // p[pointIndex*3+2] = xscale(d[2])||0;
+                        if (graphicopt.opt.dim > 2) {
+                            p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
+                            d[2] = xscale.invert(p[pointIndex * 3 + 2]);
+                        } else {
+                            p[pointIndex * 3 + 2] = 0;
+                            if (solution[i].length > 2)
+                                solution[i] = solution[i].slice(0, 2);
                         }
-                    });
-                    if (graphicopt.opt.dim===2.5)
-                        path[name].distance /= (_.last(path[name]).__timestep);
-                    else
-                        path[name].distance /= path[name].length;
+                    }
+                });
+                let center = d3.nest().key(d => d.cluster).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
+                solution.forEach(function (d, i) {
+                    const target = datain[i];
+                    const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
+                    path[target.name][posPath].value = d;
+                    // updateStraightLine(target, posPath, d);
+                    updateLine(target, posPath, d, center[target.cluster]);
+
+                });
+                if (islast) {
+                    for (let name in path) {
+                        let temp;
+                        path[name].forEach((p, i) => {
+                            if (!i) {
+                                path[name].distance = 0;
+                                temp = p.value;
+                                return;
+                            } else {
+                                path[name].distance += distance(path[name][i - 1].value, p.value)
+                            }
+                        });
+                        if (graphicopt.opt.dim === 2.5)
+                            path[name].distance /= (_.last(path[name]).__timestep);
+                        else
+                            path[name].distance /= path[name].length;
+                    }
+                    handleTopSort($('#modelSortBy').val());
                 }
-                handleTopSort($('#modelSortBy').val());
+                points.geometry.attributes.position.needsUpdate = true;
+                points.geometry.boundingBox = null;
+                points.geometry.computeBoundingSphere();
+
+
+                isneedrender = true;
             }
-            points.geometry.attributes.position.needsUpdate = true;
-            points.geometry.boundingBox = null;
-            points.geometry.computeBoundingSphere();
-
-
-            isneedrender = true;
+            isneedCompute = false;
         }
     }
 
