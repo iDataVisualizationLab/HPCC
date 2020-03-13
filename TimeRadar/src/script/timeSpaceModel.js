@@ -1705,7 +1705,10 @@ d3.TimeSpace = function () {
                             .selectAll('option').data(d.content.labels)
                             .enter().append('option')
                             .attr('value',(e,i)=>i).text((e,i)=>e);
-                        $(div.node()).val( d.content.values.indexOf(graphicopt[d.content.variable]));
+                        let default_val = graphicopt[d.content.variable];
+                        if (d.content.variableRoot)
+                            default_val = graphicopt[d.content.variableRoot][d.content.variable];
+                        $(div.node()).val( d.content.values.indexOf(default_val));
                     }
                 }
             });
