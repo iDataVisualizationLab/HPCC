@@ -457,7 +457,7 @@ d3.Tsneplot = function () {
         forcetsne = d3.forceSimulation()
             .alphaDecay(0.005)
             .alpha(0.1)
-            .force('collide', d3.forceCollide().radius(graphicopt.dotRadius))
+            .force('collide', d3.forceCollide().radius(graphicopt.dotRadius).iterations(10))
             .on('tick', function () {
                 if (store.cost){
                     updateEmbedding(store.Y, store.cost);
