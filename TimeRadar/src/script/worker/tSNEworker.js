@@ -42,9 +42,11 @@ addEventListener('message',function ({data}){
                 maxstack = (data.value);
                 break;
             case "initDataRaw":
+                let mask = data.mask;
+                let dataIn = data.value.map(d=>d.filter((e,i)=>mask[i]));
                 console.log('initDataRaw')
                 countstack = 0;
-                tsne.initDataRaw(data.value);
+                tsne.initDataRaw(dataIn);
                 if (data.index===undefined) {
                     currentMaxIndex = -1;
                     currentLastIndex = -1;

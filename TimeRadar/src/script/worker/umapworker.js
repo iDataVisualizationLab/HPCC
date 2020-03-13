@@ -14,8 +14,9 @@ addEventListener('message',function ({data}){
             break;
 
         case "initDataRaw":
+            let mask = data.mask;
             totalTime_marker = performance.now();
-            dataIn = data.value;
+            dataIn = data.value.map(d=>d.filter((e,i)=>mask[i]));
             labels = data.labels;
             count = 0;
             data.opt.nComponents = data.opt.dim;

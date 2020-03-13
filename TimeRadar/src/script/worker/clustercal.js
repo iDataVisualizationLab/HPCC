@@ -33,7 +33,7 @@ addEventListener('message',function ({data}) {
             for (var h = 0; h < hosts.length; h++) {
                 var name = hosts[h].name;
                 if (sampleS[name]) {
-                    arrServices = sampleS[name][i];
+                    arrServices = sampleS[name][i].map((d,i)=>serviceFullList[i].enable?d:0);
                     arrServices.name = name;
                     arrServices.indexSamp = i;
                     arrServices.id = h;
@@ -48,7 +48,7 @@ addEventListener('message',function ({data}) {
         postMessage({
             action: 'returnData',
             result: {message: `Binning process`, process: 40}
-        })
+        });
         if (binopt.clusterMethod === 'leaderbin') {
             let estimateSize = Math.max(2, Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
             console.log('estimateSize: ' + estimateSize);

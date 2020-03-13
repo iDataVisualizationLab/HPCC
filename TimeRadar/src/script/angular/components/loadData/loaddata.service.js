@@ -140,6 +140,7 @@ angular.module('hpccApp')
                         preloader(false)
                     });
                 }
+                firstTime= false;
 
             });
         }
@@ -203,6 +204,7 @@ angular.module('hpccApp')
                     initDataWorker();
                     // addDatasetsOptions()
                     MetricController.axisSchema(serviceFullList, true).update();
+                    firstTime= false;
                     realTimesetting(false, "csv", true, sampleS);
                     updateDatainformation(sampleS['timespan']);
 

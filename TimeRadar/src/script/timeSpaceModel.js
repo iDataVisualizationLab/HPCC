@@ -232,7 +232,7 @@ d3.TimeSpace = function () {
         let opt = JSON.parse(JSON.stringify(graphicopt.opt)); // clone option
         opt.dim = Math.floor(opt.dim);
         // end - adjust dimension
-        modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
+        modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,mask:  serviceFullList.map(d=>d.enable),labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":

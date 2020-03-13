@@ -13,8 +13,9 @@ addEventListener('message',function ({data}){
             break;
 
         case "initDataRaw":
+            let mask = data.mask;
             totalTime_marker = performance.now();
-            dataIn = data.value;
+            dataIn = data.value.map(d=>d.filter((e,i)=>mask[i]));
 
             // pca - compute cluster position
             let pca = new PCA();
