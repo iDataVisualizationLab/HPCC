@@ -1275,6 +1275,7 @@ d3.TimeSpace = function () {
     // }
     function render (islast){
         if (isneedCompute) {
+            try{
             let p = points.geometry.attributes.position.array;
             if (solution[Math.floor(graphicopt.opt.dim)] && solution[Math.floor(graphicopt.opt.dim)].length) {
                 createRadar = _.partialRight(createRadar_func, 'timeSpace radar', graphicopt.radaropt, colorscale);
@@ -1291,10 +1292,10 @@ d3.TimeSpace = function () {
                         // 3rd dimension as time step
                         // p[pointIndex*3+2] = xscale(d[2])||0;
                         if (graphicopt.opt.dim > 2) {
-                            if (graphicopt.opt.dim===2.5) {
+                            if (graphicopt.opt.dim === 2.5) {
                                 p[pointIndex * 3 + 2] = scaleNormalTimestep(target.__timestep);
                                 d[2] = xscale.invert(p[pointIndex * 3 + 2]);
-                            }else
+                            } else
                                 p[pointIndex * 3 + 2] = xscale(d[2])
                         } else {
                             p[pointIndex * 3 + 2] = 0;
@@ -1335,9 +1336,9 @@ d3.TimeSpace = function () {
                 points.geometry.boundingBox = null;
                 points.geometry.computeBoundingSphere();
 
-
                 isneedrender = true;
             }
+            }catch(e){}
             isneedCompute = false;
         }
     }
