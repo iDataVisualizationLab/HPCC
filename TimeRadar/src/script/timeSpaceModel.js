@@ -1885,7 +1885,10 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
-            appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
+            // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
+            appendCondition = appendCondition && !(lastcluster !== undefined) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster);
+            lastcluster = index;
+            lastdataarr = currentData.slice();
             if (appendCondition) {
             // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
@@ -1894,8 +1897,6 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             // // timeline precalculate
             // if (true) {
 
-                lastcluster = index;
-                lastdataarr = currentData.slice();
                 currentData.timestep = count; // TODO temperal timestep
                 count++;
                 // make copy of axis data
