@@ -229,7 +229,7 @@ let radarController = function () {
             let table = tablediv.select("table");
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
-                "order": [[0, "asc"], [2, "asc"]],
+                "order": [[2, "asc"]],
                 "pageLength": 50,
                 "columnDefs": [
                     {   targets: 0,

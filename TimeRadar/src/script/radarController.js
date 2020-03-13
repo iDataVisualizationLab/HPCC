@@ -226,7 +226,7 @@ let radarController = function () {
             let table = tablediv.select("table");
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
-                "order": [[3, "desc"], [2, "asc"]],
+                "order": [[2, "asc"],[3, "asc"]],
                 "pageLength": 50,
                 "columnDefs": [
                     {   targets: 0,
@@ -243,7 +243,7 @@ let radarController = function () {
                     },
                     {   targets: 1,
                         title: 'Summary',
-                        orderable: true,
+                        orderable: false,
                         "data": null,
                         className:'summary_chart',
                         "render": function ( d, type, row, meta ) {
@@ -263,7 +263,7 @@ let radarController = function () {
                                 return '<input type="number" value=' + toDegrees(d.angle()).toFixed(0) + '></input>';
                             }
                             else
-                                return d.angle();
+                                return toDegrees(d.angle());
                         }
                     },
                     {   targets: 3,
