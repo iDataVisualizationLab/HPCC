@@ -495,7 +495,7 @@ d3.TimeSpace = function () {
         d3.select('#distanceFilterHolder').classed('hide',true);
         switch (key) {
             case 'groups':
-                const lists = d3.keys(path).filter(d=>(path[d][0]||{cluster:undefined}).cluster!==(path[d][1]||{cluster:undefined}).cluster);
+                const lists = d3.keys(path).filter(d=>path[d].length>1);
                 highlightGroupNode(lists);
                 break;
             case "umapDistance":
