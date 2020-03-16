@@ -1649,7 +1649,12 @@ $( document ).ready(function() {
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
-
+    d3.select('#distributeLayout').on('click',function(){
+        let temp = serviceFullList.filter((s,i)=>s.enable);
+        temp.sort((a,b)=>a.angle-b.angle);
+        temp.forEach((d,i)=>d.angle=i*2*Math.PI/temp.length);
+        MetricController.axisSchema(serviceFullList).update();
+    })
     d3.select('#clusterMethod').on('change',function(){
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
