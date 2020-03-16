@@ -731,6 +731,8 @@ d3.TimeSpace = function () {
                         lines[d.name].visible = true;
                         lines[d.name].material.opacity = 1;
                         lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
+                        if (d.__metrics.radar)
+                            d.__metrics.radar.dispatch('highlight')
                     } else {
                         if(!visibledata || (visibledata&&visibledata.indexOf(i) !== -1)) {
 
@@ -828,7 +830,8 @@ d3.TimeSpace = function () {
             .attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`)
             .on('highlight',d=>d.radar.classed('fade',false))
             .on('fade',d=>d.radar.classed('fade',true))
-            .on('mouseover',d=>highlightNode([{index:path[d.name_or][0].index}]))
+            .on('mouseover',d=>
+                highlightNode([{index:path[d.name_or].find(e=>e.timestep===d.timestep).index}]))
             .on('mouseoleave',d=>highlightNode([]))
             .each(function(d){
                 d.radar = d3.select(this);
