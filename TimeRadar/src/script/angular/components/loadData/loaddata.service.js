@@ -63,7 +63,7 @@ angular.module('hpccApp')
                     });
                 }, 0);
             else
-                readFilecsv(choice.url,choice.separate)
+                readFilecsv(choice.url,choice.separate,choice)
 
         function loadata1(data,job){
             makedataworker();
@@ -177,72 +177,83 @@ angular.module('hpccApp')
             }
         });
     }
-    function readFilecsv(file,separate) {
+    function readFilecsv(file,separate,object) {
+        separate = separate||'|'
         firstTime= true;
         exit_warp();
         preloader(true);
-        setTimeout(() => {
-            d3.csv(file).on("progress", function(evt) {
-                if (evt.total) {
-                    preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
-                    dataInformation.size = evt.total;
-                }else{
-                    preloader(true, 0, "File loaded: " +bytesToString(evt.loaded));
-                    dataInformation.size = evt.loaded;
-                }
-                // console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
-            }).get(function (error, data) {
-                if (error) {
+
+        function loadcsv(data) {
+            db = "csv";
+            newdatatoFormat_noSuggestion(data, separate);
+
+            inithostResults();
+            formatService(true);
+            processResult = processResult_csv;
+            makedataworker();
+            initDataWorker();
+            // addDatasetsOptions()
+            MetricController.axisSchema(serviceFullList, true).update();
+            firstTime = false;
+            realTimesetting(false, "csv", true, sampleS);
+            updateDatainformation(sampleS['timespan']);
+
+            sampleJobdata = [{
+                jobID: "1",
+                name: "1",
+                nodes: hosts.map(h => h.name),
+                startTime: new Date(_.last(sampleS.timespan) - 100).toString(),
+                submitTime: new Date(_.last(sampleS.timespan) - 100).toString(),
+                user: "dummyJob"
+            }];
+
+            d3.select(".currentDate")
+                .text("" + (sampleS['timespan'][0]).toDateString());
+            updateClusterControlUI();
+            // preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
+            loadPresetCluster(file?file.replace(/(\w+).json|(\w+).csv/, '$1'):'', (status) => {
+                let loadclusterInfo = status;
+                if (loadclusterInfo) {
+                    handle_dataRaw();
+                    if (!init)
+                        resetRequest();
+                    preloader(false);
                 } else {
-                    db = "csv";
-                    newdatatoFormat_noSuggestion(data,separate);
-
-                    inithostResults();
-                    formatService(true);
-                    processResult = processResult_csv;
-                    makedataworker();
-                    initDataWorker();
-                    // addDatasetsOptions()
-                    MetricController.axisSchema(serviceFullList, true).update();
-                    firstTime= false;
-                    realTimesetting(false, "csv", true, sampleS);
-                    updateDatainformation(sampleS['timespan']);
-
-                    sampleJobdata = [{
-                        jobID: "1",
-                        name: "1",
-                        nodes: hosts.map(h=>h.name),
-                        startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                        submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                        user: "dummyJob"
-                    }];
-
-                    d3.select(".currentDate")
-                        .text("" + (sampleS['timespan'][0]).toDateString());
-                    updateClusterControlUI();
-                    // preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
-                    loadPresetCluster(file.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{
-                        let loadclusterInfo= status;
-                        if (loadclusterInfo) {
-                            handle_dataRaw();
-                            if (!init)
-                                resetRequest();
-                            preloader(false);
-                        }else {
-                            recalculateCluster({
-                                clusterMethod: 'leaderbin',
-                                normMethod: 'l2',
-                                bin: {startBinGridSize: 4, range: [7, 9]}
-                            }, function () {
-                                handle_dataRaw();
-                                if (!init)
-                                    resetRequest();
-                                preloader(false);
-                            });
-                        }})
-
+                    recalculateCluster({
+                        clusterMethod: 'leaderbin',
+                        normMethod: 'l2',
+                        bin: {startBinGridSize: 4, range: [7, 9]}
+                    }, function () {
+                        handle_dataRaw();
+                        if (!init)
+                            resetRequest();
+                        preloader(false);
+                    });
                 }
             })
+        }
+
+        setTimeout(() => {
+            if (file) {
+                d3.csv(file).on("progress", function (evt) {
+                    if (evt.total) {
+                        preloader(true, 0, "File loaded: " + Math.round(evt.loaded / evt.total * 100) + '%');
+                        dataInformation.size = evt.total;
+                    } else {
+                        preloader(true, 0, "File loaded: " + bytesToString(evt.loaded));
+                        dataInformation.size = evt.loaded;
+                    }
+                    // console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
+                }).get(function (error, data) {
+                    if (error) {
+                    } else {
+                        loadcsv(data);
+
+                    }
+                })
+            }else{
+                loadcsv(object.values)
+            }
         }, 0);
     }
     Loaddata.reset();
