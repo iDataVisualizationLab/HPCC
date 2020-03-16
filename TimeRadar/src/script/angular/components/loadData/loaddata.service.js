@@ -178,10 +178,10 @@ angular.module('hpccApp')
         });
     }
     function readFilecsv(file,separate,object) {
-        separate = separate||'|'
+        separate = separate||'|';
         firstTime= true;
         exit_warp();
-        preloader(true);
+        preloader(true, 0,"Load data....");
 
         function loadcsv(data) {
             db = "csv";
@@ -252,6 +252,7 @@ angular.module('hpccApp')
                     }
                 })
             }else{
+                dataInformation.size = object.size;
                 loadcsv(object.values)
             }
         }, 0);

@@ -26,8 +26,12 @@ angular.module('hpccApp')
         // Initialize scope variables
         scope.dataset = {
           name: '',
-          data: ''
+          data: '',
+          sampletext:'',
+            column:0,
+            row:0,
         };
+
 
         scope.addDataset = function() {
           var data = d3.csvParse(scope.dataset.data);

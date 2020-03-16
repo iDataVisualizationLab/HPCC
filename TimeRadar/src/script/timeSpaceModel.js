@@ -1,6 +1,6 @@
 d3.TimeSpace = function () {
     let graphicopt = {
-            margin: {top: 40, right: 40, bottom: 40, left: 40},
+            margin: {top: 0, right: 0, bottom: 0, left: 0},
             width: 1500,
             height: 1000,
             scalezoom: 1,
@@ -44,11 +44,14 @@ d3.TimeSpace = function () {
             linkConnect: false,
             isSelectionMode: false,
             isCurve: false,
+            filter:{ distance:0.5},
             component:{
-                dot:{size:5,opacity:0.2},
-                link:{size:0.8,opacity:0.1},
+                dot:{size:5,opacity:0.9},
+                link:{size:1,opacity:0.2, highlight:{opacity:3}},
             },
             serviceIndex: 0,
+            tableLimit: 1500,
+            iscompareMode: false
         },
 
         controlPanelGeneral = {
@@ -56,11 +59,14 @@ d3.TimeSpace = function () {
             // linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight','Curve'],values:[false,'straight','curve'],
                 width: '100px',
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);isneedrender = true;}},
+            linkOpacity:{text:"Link opacity", range:[0.1,1],id:'Link_opacity', type:"slider", variableRoot: graphicopt.component.link,variable: 'opacity',width:'100px',step:0.1,
+                callback:onlinkopacity},
             dim: {text: "Dimension", type: "selection", variableRoot: 'opt',variable: 'dim',labels:['2D','3D respect time','3D'],values:[2,2.5,3], width: '100px',callback:()=>{
                     preloader(true,10,'Change dimension projection...','#modelLoading');
                     obitTrigger=true;
                     setTimeout(()=>{
                         start(!needRecalculate&&solution[Math.floor(graphicopt.opt.dim)] || graphicopt.opt.dim===2.5);
+                        preloader(false,undefined,undefined,'#modelLoading');
                     })
                 }},
             // dim: {text: "Dimension", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
@@ -73,6 +79,7 @@ d3.TimeSpace = function () {
             },
         },
         formatTable = {
+            'opacity':function(d){return d3.format('.1f')(d)},
             'time': function(d){return millisecondsToStr(d)},
             'totalTime': function(d){return millisecondsToStr(d)},
             'iteration': function(d){return d},
@@ -85,27 +92,27 @@ d3.TimeSpace = function () {
         isBusy = false,
         stop = false;
     let modelWorker,plotlyWorker,workerList=[],colorscale,reset;
-    let master={},solution,datain=[],filter=[],table_info,path,cluster=[],scaleTime;
+    let master={},solution,datain=[],filterbyClustername=[],visibledata,table_info,path,cluster=[],scaleTime;
     let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
     // grahic
     let camera,isOrthographic=false,scene,axesHelper,axesTime,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
-        scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg;
+        scatterPlot,colorarr,renderer,view,zoom,background_canvas,background_ctx,front_canvas,front_ctx,svg,clusterMarker;
     let fov = 100,
     near = 0.1,
     far = 7000;
+    //----------------------force----------------------
+    let forceColider,animateTrigger=false;
     //----------------------color----------------------
     let colorLineScale = d3.scaleLinear().interpolate(d3.interpolateCubehelix);
     let createRadar,createRadarTable;
     //----------------------drag-----------------------
     let allSelected_Data;
-    var lassoTool,mouseoverTrigger = true;
+    var lassoTool,mouseoverTrigger = true,iscameraMove = false;
     let drag = ()=>{
         function dragstarted(d) {
-            // do something
             isneedrender = true;
             mouseoverTrigger = false;
-            // disableMouseover = true;
             let coordinator = d3.mouse(this);
             mouse.x = (coordinator[0]/graphicopt.width)*2- 1;
             mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
@@ -126,9 +133,9 @@ d3.TimeSpace = function () {
         }
 
         function dragended(d) {
-            disableMouseover = true;
+            disableMouseover = false;
             mouseoverTrigger = true;
-            showMetricsArr_plotly(allSelected_Data)
+            showMetricsArr_plotly(allSelected_Data);
             lassoTool.end();
         }
 
@@ -141,7 +148,7 @@ d3.TimeSpace = function () {
         controls.enabled = !trigger;
         if (trigger){
             if (reset)
-                lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg);
+                lassoTool = new THREE.LassoTool( camera, points, graphicopt ,svg.select('#modelWorkerScreen_lassotool'));
             reset= false;
             disableMouseover = true;
             d3.select('#modelWorkerScreen').call(drag());
@@ -173,16 +180,23 @@ d3.TimeSpace = function () {
     let linkConnect_old;
     function reduceRenderWeight(isResume){
         if (isResume){
+            svg.select('#modelClusterLabel').classed('hide',false);
             graphicopt.linkConnect = linkConnect_old;
         }else{
+            svg.select('#modelClusterLabel').classed('hide',true);
             linkConnect_old = graphicopt.linkConnect;
             graphicopt.linkConnect = false;
         }
         controlPanelGeneral.linkConnect.callback();
     }
+    function resetFilter(){
+        d3.select('#modelFilterBy').node().options.selectedIndex = 0;
+        d3.select('#modelFilterBy').dispatch('change');
+    }
     function start(skipRecalculate) {
         isneedCompute = true;
-        renderQueue_link={line:false,curve:false}
+        renderQueue_link={line:false,curve:false};
+        resetFilter();
         interuptAnimation();
         axesHelper.toggleDimension(graphicopt.opt.dim);
         gridHelper.parent.visible = (graphicopt.opt.dim===2.5);
@@ -207,8 +221,8 @@ d3.TimeSpace = function () {
             setUpZoom();
             obitTrigger = false;
         }
-
-        svg.selectAll('*').remove();
+        controll_metrics.zoom_or = controls.target.distanceTo( controls.object.position );
+        svg.select('#modelWorkerScreen_svg_g').selectAll('*').remove();
         if(skipRecalculate) {
             render(true);
             reduceRenderWeight(true);
@@ -237,22 +251,34 @@ d3.TimeSpace = function () {
             switch (data.action) {
                 case "render":
                     disableMouseover = true;
-                    if(firstReturn) {
+                    if (firstReturn) {
                         preloader(false, undefined, undefined, '#modelLoading');
                         firstReturn = false;
                     }
-                    isBusy = true;
-                    xscale.domain(data.xscale.domain);
-                    yscale.domain(data.yscale.domain);
-                    solution[Math.floor(graphicopt.opt.dim)] = data.sol;
-                    updateTableOutput(data.value);
-                    isneedCompute = true;
-                    render();
-                    isBusy = false;
+                    if (!isBusy) {
+                        isBusy = true;
+                        xscale.domain(data.xscale.domain);
+                        yscale.domain(data.yscale.domain);
+                        solution[Math.floor(graphicopt.opt.dim)] = data.sol;
+                        updateTableOutput(data.value);
+                        isneedCompute = true;
+                        render();
+                        isBusy = false;
+                    }
                     break;
                 case "stable":
+                    if (firstReturn) {
+                        preloader(false, undefined, undefined, '#modelLoading');
+                        firstReturn = false;
+                        if (data.value) {
+                            xscale.domain(data.xscale.domain);
+                            yscale.domain(data.yscale.domain);
+                            updateTableOutput(data.value);
+                        }
+                    }
                     modelWorker.terminate();
                     disableMouseover = false;
+                    solution[Math.floor(graphicopt.opt.dim)] = data.sol || solution[Math.floor(graphicopt.opt.dim)];
                     isneedCompute = true;
                     render(true);
                     reduceRenderWeight(true);
@@ -263,24 +289,60 @@ d3.TimeSpace = function () {
         })
     }
 
+    // let euclideandistanceHis=[];
+    let umapdistanceHis=[];
+
+    function makeArrowMarker() {
+        let arrow = svg.select('defs').selectAll('marker.arrow').data(cluster_info);
+        arrow.exit().remove();
+        arrow.enter().append('marker').attrs({
+            class:'arrow',
+            markerWidth: "10",
+            markerHeight: "10",
+            refX: "18",
+            refY: "3",
+            orient: "auto",
+            markerUnits: "strokeWidth"
+        }).append('path').attr('d', "M0,0 L0,6 L9,3 z");
+        svg.select('defs').selectAll('marker.arrow')
+            .attr('id', d => "arrow" + d.name)
+            .select('path')
+            .style('fill', d => colorCluster(d.name));
+    }
+    let controll_metrics={old:{zoom:undefined}};
     master.init = function(arr,clusterin) {
         preloader(true,1,'Prepare rendering ...','#modelLoading');
+
+        // makeDataTableFiltered()
+
+        // prepare data
         needRecalculate = true;
         reset = true;
+        mouseoverTrigger = false;
         solution = {};
         datain = arr;
         datain.sort((a,b)=>a.timestep-b.timestep);
         mapIndex = [];
         datain.forEach((d,i)=>d.show?mapIndex.push(i):undefined);
-        handle_cluster (clusterin, datain)
+        handle_cluster (clusterin, datain);
         handle_data(datain);
         updateTableInput();
         path = {};
+
+        // make path object and compute euclideandistance
         datain.forEach(function (target, i) {
             target.__metrics.position = [0,0,0];
+            if (target.name===cluster[target.cluster].leadername)
+                cluster[target.cluster].__metrics.indexLeader = i;
             if (!path[target.name])
                 path[target.name] = [];
-            path[target.name].push({name: target.name,index:i,__timestep: target.__timestep, timestep: target.timestep, value: [0,0,0], cluster: target.cluster});
+            path[target.name].push({
+                name: target.name,
+                index:i,
+                __timestep: target.__timestep,
+                timestep: target.timestep,
+                value: [0,0,0],
+                cluster: target.cluster});
         });
         // console.log(datain.filter(d=>d[0]===-1))
         xscale.range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
@@ -292,6 +354,19 @@ d3.TimeSpace = function () {
         createRadar = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radaropt,colorscale);
         createRadarTable = _.partialRight(createRadar_func,'timeSpace radar',graphicopt.radarTableopt,colorscale);
 
+        // prepare force
+        forceColider = d3.forceSimulation()
+            .alphaDecay(0.005)
+            .alpha(0.1)
+            .force('charge', d3.forceManyBody())
+            .force('collide', d3.forceCollide().radius(graphicopt.radarTableopt.w/2).iterations(10))
+            .on('tick', function () {
+                if (isdrawradar&&svgData&&animateTrigger){
+                    animateTrigger=false;
+                    drawRadar(svgData);
+                }
+            });
+        // prepare screen
         setTimeout(function(){
             isneedrender = false;
         far = graphicopt.width/2 /Math.tan(fov/180*Math.PI/2)*10;
@@ -313,6 +388,7 @@ d3.TimeSpace = function () {
         scatterPlot.add( curveLinesGroup );
         preloader(true,1,'Straight link create ...','#modelLoading');
         straightLines = createLines(straightLinesGroup);
+        preloader(true,1,'Curve link create ...','#modelLoading');
         curveLines = createCurveLines(curveLinesGroup);
         lines = straightLines;
         linesGroup = straightLinesGroup;
@@ -343,32 +419,40 @@ d3.TimeSpace = function () {
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         // disable the tabIndex to avoid jump element
         d3.select(renderer.domElement).attr('tabindex',null);
-        // controls.addEventListener("change", () => renderer.render(scene, camera));
         let mouseoverTrigger_time;
-        controls.addEventListener("change", () => {
-            isneedrender = true;
-            disableMouseover=true;
-            if (mouseoverTrigger_time)
-                clearTimeout(mouseoverTrigger_time);
-            mouseoverTrigger_time= setTimeout(function(){disableMouseover=false;},10)
-        });
+            controls.addEventListener("change", function(d){
+                controll_metrics.x=controls.target.x;
+                controll_metrics.y=controls.target.y;
+                controll_metrics.zoom = controls.target.distanceTo( controls.object.position );
+                controll_metrics.scale = controll_metrics.zoom_or/controll_metrics.zoom;
+                if(isdrawradar&&svgData) {
+                    const scale = controll_metrics.old.zoom/controll_metrics.zoom;
+                    const dx = (-controll_metrics.x + controll_metrics.old.x)*controll_metrics.scale;//*controll_metrics.old.scale/controll_metrics.old.scale;
+                    const deltax = (-controll_metrics.x + controll_metrics.old.x)*controll_metrics.scale*(scale-1);//*controll_metrics.old.scale/controll_metrics.old.scale;
+                    const dy = (controll_metrics.y - controll_metrics.old.y)*controll_metrics.scale;//*controll_metrics.old.scale;
+                    const deltay = (controll_metrics.y - controll_metrics.old.y)*controll_metrics.scale*(scale-1);//*controll_metrics.old.scale;
+                    // controll_metrics.scale = scale;
+
+                    d3.select('#modelWorkerScreen_svg_g').attr('transform', `translate(${dx*scale-graphicopt.widthG()/2*(scale-1)-deltax},${dy*scale-graphicopt.heightG()/2*(scale-1)-deltay}) scale(${scale})`);
+                }
+                isneedrender = true;
+                disableMouseover=true;
+                iscameraMove = true;
+                if (mouseoverTrigger_time)
+                    clearTimeout(mouseoverTrigger_time);
+                mouseoverTrigger_time= setTimeout(function(){disableMouseover=false;},10)
+            });
         setUpZoom();
         stop = false;
 
-        // background_canvas = document.getElementById("modelWorkerScreen");
-        // background_canvas.width  = graphicopt.width;
-        // background_canvas.height = graphicopt.height;
-        // background_ctx = background_canvas.getContext('2d');
-        // front_canvas = document.getElementById("modelWorkerScreen_fornt");
-        // front_canvas.width  =  graphicopt.width;
-        // front_canvas.height = graphicopt.height;
-        // front_ctx = front_canvas.getContext('2d');
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
+        clusterMarker = createClusterLabel();
 
         d3.select('#modelWorkerInformation+.title').text(self.name);
         handle_selection_switch(graphicopt.isSelectionMode);
 
-        d3.select('#modelSortBy').on("change", function () {handleTopSort(this.value)})
+        d3.select('#modelSortBy').on("change", function () {handleTopSort(this.value)});
+            d3.select('#modelFilterBy').on("change", function(){handleFilter(this.value)});
         d3.select('#myHnav').on('change',onRequestplotly)
         drawSummaryRadar([],[],'#ffffff');
         start();
@@ -406,6 +490,78 @@ d3.TimeSpace = function () {
             isneedCompute = (!renderQueue_link.curve);
             renderQueue_link.curve = true;
         }
+    }
+    function handleFilter(key){
+        d3.select('#distanceFilterHolder').classed('hide',true);
+        switch (key) {
+            case 'groups':
+                const lists = d3.keys(path).filter(d=>(path[d][0]||{cluster:undefined}).cluster!==(path[d][1]||{cluster:undefined}).cluster);
+                highlightGroupNode(lists);
+                break;
+            case "umapDistance":
+                d3.selectAll('.modelDistanceFilter_svg').classed('hide',true);
+                d3.select('#modelDistanceFilter_projection_svg').classed('hide',false);
+                d3.select('#distanceFilterHolder').classed('hide',false); // reuse distance filter
+                let filteredumap =d3.keys(path).filter(d=>distancerange(path[d].distance)>=graphicopt.filter.distance);
+                d3.select('#distanceFilterHolder').select('span.num').text(filteredumap.length);
+                highlightGroupNode(filteredumap);
+                break;
+            // case "euclideanDistance":
+            //     d3.selectAll('.modelDistanceFilter_svg').classed('hide',true);
+            //     d3.select('#modelDistanceFilter_euclidean_svg').classed('hide',false);
+            //     d3.select('#distanceFilterHolder').classed('hide',false); // reuse distance filter
+            //     let filteredeuclidean =d3.keys(path).filter(d=>euclideandistancerange(path[d].euclideandistance)>=graphicopt.filter.distance);
+            //     d3.select('#distanceFilterHolder').select('span.num').text(filteredeuclidean.length);
+            //     highlightGroupNode(filteredeuclidean);
+            //     break;
+            default:
+                // if (globalFilter[key])
+                //     highlightGroupNode(globalFilter[key]);
+                // else
+                    highlightGroupNode([]);
+                break;
+        }
+    }
+    function drawHis(div,data,key){
+        let height = 10;
+        let width = 20;
+        let svg = d3.select(div);
+        var x = d3.scaleLinear()
+            .domain(d3.extent(data.arr, function(d) { return d[0]; }))
+            .range([ 0, width ]);
+
+        // Add Y axis
+        var y = d3.scaleSqrt()
+            .domain([0, d3.max(data.arr, function(d) { return d[1]; })])
+            .range([ height, 2 ]);
+
+        let his = svg.select('path.his');
+        let marker = svg.select('line.marker');
+        if (his.empty()) {
+            his = svg.append('path').attr('class', 'his');
+            marker = svg.append('line')
+                .attr('class','marker')
+                .attrs({
+                    x2: 0,
+                    x1: 0,
+                    y2: y.range()[0],
+                    y1: y.range()[1],
+                }).style('stroke-dasharray',2)
+                .style('vector-effect','non-scaling-stroke')
+                .style('stroke','black');
+            ;
+        }
+        his
+            .datum(data.arr).attr('d',d3.area()
+            .x(function(d) { return x(d[0]) })
+            .y0(y(0))
+            .y1(function(d) { return y(d[1]) })
+        ).style('fill','#dddddd');
+        // marker.datum(path[keyGenes][key])
+        //     .attrs(d=>({
+        //         x2: x(d),
+        //         x1: x(d)
+        //     }))
     }
     function handleTopSort(mode){
         let top =[];
@@ -445,7 +601,7 @@ d3.TimeSpace = function () {
 
         let all = d3.select('#modelRank').selectAll('tr.rankItem')
             .style('order',d=>d.order)
-            .on('mouseover',d=>(overwrite=path[d.key],hightlightNode(path[d.key])))
+            .on('mouseover',d=>(overwrite=path[d.key],highlightNode(path[d.key])))
             .on('mouseout',d=>(overwrite=undefined));
         all.select('.rank').style('font-size',d=>d.order>2?'unset':`${1.5-d.order*0.2}rem`).html((d,i)=>`${d.order+1}<sup>${ordinal_suffix_of(d.order+1,true)}</sup>`)
         all.select('.name').text(d=>d.key)
@@ -455,6 +611,7 @@ d3.TimeSpace = function () {
 
     function handle_cluster(clusterin,data){
         cluster = clusterin;
+        cluster.forEach(d=>d.__metrics.projection = {x:0,y:0});
         let nesradar = d3.nest().key(d=>d.cluster).rollup(d=>d.length).entries(data);
             nesradar.forEach(d=>cluster[d.key].total_radar = d.value);
     }
@@ -523,10 +680,11 @@ d3.TimeSpace = function () {
         arrowGroup.visible = false;
         return arrowGroup;
     }
+
     let radarChartclusteropt = {
-        margin: {top: 0, right: 0, bottom: 0, left: 0},
-        w: 200,
-        h: 200,
+        margin: {top: 10, right: 0, bottom: 10, left: 0},
+        w: 300,
+        h: 300,
         radiuschange: false,
         levels:6,
         dotRadius:2,
@@ -538,6 +696,7 @@ d3.TimeSpace = function () {
         ringStroke_width: 0.15,
         ringColor:'black',
         fillin:0.5,
+        labelFactor:0.9,
         boxplot:true,
         animationDuration:100,
         showText: true};
@@ -552,32 +711,46 @@ d3.TimeSpace = function () {
         });
     }
 
-    function hightlightNode(intersects) { // INTERSECTED
+    function highlightNode(intersects) { // INTERSECTED
         var geometry = points.geometry;
         var attributes = geometry.attributes;
-        if (intersects.length > 0) {
+        var targetfilter;
+        if (intersects.length > 0 && (!visibledata||visibledata&&(targetfilter=intersects.find(d=>visibledata.indexOf(d.index)!==-1)))) {
+            linesGroup.visible = true;
+            let targetIndex = intersects[0].index;
+            if (visibledata)
+                targetIndex = targetfilter.index;
             if (INTERSECTED.indexOf(intersects[0].index) === -1) {
-                let target = datain[intersects[0].index];
-                // INTERSECTED.forEach((d, i) => {
-                //     attributes.size.array[d] = graphicopt.component.dot.size;
-                // });
+                let target = datain[targetIndex];
                 INTERSECTED = [];
                 datain.forEach((d, i) => {
                     if (d.name === target.name) {
                         INTERSECTED.push(i);
-                        attributes.alpha.array[i] = 1;
+                        attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = graphicopt.component.dot.size*2;
                         lines[d.name].visible = true;
+                        lines[d.name].material.opacity = 1;
+                        lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
                     } else {
-                        attributes.alpha.array[i] = 0.1;
-                        lines[d.name].visible = false;
+                        if(!visibledata || (visibledata&&visibledata.indexOf(i) !== -1)) {
+
+                            attributes.alpha.array[i] = 0.1;
+                            attributes.size.array[i] = graphicopt.component.dot.size;
+                            lines[d.name].visible = false;
+                            lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                            lines[d.name].material.linewidth = graphicopt.component.link.size;
+                            if (d.__metrics.radar)
+                                d.__metrics.radar.dispatch('fade')
+                        }else{
+                            attributes.alpha.array[i] = 0;
+                            lines[d.name].visible = false;
+                            lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                            lines[d.name].material.linewidth  = graphicopt.component.link.size;
+                        }
                     }
                 });
-                // let rScale = d3.scaleLinear().range([graphicopt.component.dot.size, graphicopt.component.dot.size * 2])
-                //     .domain([INTERSECTED.length, 0]);
-                // INTERSECTED.forEach((d, i) => {
-                //     attributes.size.array[d] = rScale(i);
-                // });
-                // attributes.size.needsUpdate = true;
+
+                attributes.size.needsUpdate = true;
                 attributes.alpha.needsUpdate = true;
                 // add box helper
                 scene.remove(scene.getObjectByName('boxhelper'));
@@ -594,13 +767,36 @@ d3.TimeSpace = function () {
         } else if (INTERSECTED.length || ishighlightUpdate) {
             ishighlightUpdate = false;
             tooltip_lib.hide(); // hide tooltip
-            datain.forEach((d, i) => {
-                attributes.alpha.array[i] = 1;
-                lines[d.name].visible = true;
-            });
-            INTERSECTED.forEach((d, i) => {
-                attributes.size.array[d] = graphicopt.component.dot.size;
-            });
+            linesGroup.visible = !!graphicopt.linkConnect;
+            if (visibledata){
+                if (visibledata.length<graphicopt.tableLimit*2)
+                    linesGroup.visible = true;
+                datain.forEach((d, i) => {
+                    if (visibledata.indexOf(i) !==-1 || (filterGroupsetting.timestep!==undefined && filterGroupsetting.timestep===d.__timestep)){
+                        INTERSECTED.push(i);
+                        attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = graphicopt.component.dot.size;
+                        lines[d.name].visible = filterGroupsetting.timestep===undefined;
+                        lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                        lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
+                        if (d.__metrics.radar)
+                            d.__metrics.radar.dispatch('highlight')
+                    } else {
+                        attributes.alpha.array[i] = 0;
+                        lines[d.name].visible = false;
+                        lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                        lines[d.name].material.linewidth  = graphicopt.component.link.size;
+                    }
+                });
+            }else
+                datain.forEach((d, i) => {
+                    attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                    attributes.size.array[i] = graphicopt.component.dot.size;
+                    lines[d.name].visible = true;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth  = graphicopt.component.link.size;
+                });
+
             attributes.size.needsUpdate = true;
             attributes.alpha.needsUpdate = true;
             INTERSECTED = [];
@@ -612,12 +808,303 @@ d3.TimeSpace = function () {
         }
         isneedrender = true;
     }
+    function drawRadar({data,pos,posStatic}){
+        let dataRadar = [];
+        // let links = {};
+        data.forEach((d,i)=>{
+            dataRadar.push(d.__metrics);
+            // if(!links[d.name])
+            //     links[d.name]=[];
+            pos[i].cluster = d.clusterName;
+            // links[d.name].push(pos[i]);
+        });
+        let g = svg.select('#modelWorkerScreen_svg_g').style('pointer-events','all').select('#modelWorkerScreen_grid')
+        if (g.empty())
+            g = svg.select('#modelWorkerScreen_svg_g').append('g').attr('id','modelWorkerScreen_grid');
+        let old = d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR')
+            .data(dataRadar,d=>d.name_or+'_'+d.timestep).attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`);
+        old.exit().remove();
+        old.enter().append('g').attr('class','timeSpaceR')
+            .attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`)
+            .on('highlight',d=>d.radar.classed('fade',false))
+            .on('fade',d=>d.radar.classed('fade',true))
+            .on('mouseover',d=>highlightNode([{index:path[d.name_or][0].index}]))
+            .on('mouseoleave',d=>highlightNode([]))
+            .each(function(d){
+                d.radar = d3.select(this);
+                createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
+            });
+
+        // let old_link = d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
+        //     .data(_.values(links).filter(d=>d.length===2));
+        // old_link.exit().remove();
+        // old_link.enter().append('line').attr('class','link');
+        // d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
+        //     .attrs(d=>({
+        //         x1:d[0].x,x2:d[1].x,y1:d[0].y,y2:d[1].y,
+        //         'marker-end':d=>`url(#arrow${d[1].cluster})`
+        //     }))
+    }
+    function draw_hexagon(data,hexbin){
+        let old = svg.select('#modelWorkerScreen_grid').selectAll("path")
+            .data(data);
+        old.exit().remove();
+        old.enter().append('path').merge(old)
+            .attr("d", hexbin.hexagon())
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .styles({"fill": '#eeeeee','stroke':'white','stroke-width':2})//d => color(d.length));
+    }
+    function updateforce(){
+        count = 0;
+        forceColider.force('tsne', function (alpha) {
+            function setNewPos(b, neighbor, empty_cell, r, leftover, binO) {
+                let newbin = [];
+                newbin.row = b.row + neighbor[empty_cell][0];
+                newbin.col = b.col + neighbor[empty_cell][1];
+                newbin.x = newbin.col * (radarSize * 2) + (newbin.row % 2) * radarSize
+                newbin.y = newbin.row * r * 3 / 2;
+                leftover.x = newbin.x;
+                leftover.fx = newbin.x;
+                leftover.y = newbin.y;
+                leftover.fy = newbin.y;
+                newbin.push(leftover);
+                bin.push(newbin);
+                binO[newbin.row + '|' + newbin.col] = newbin;
+            }
+
+            if (alpha<0.07||count>100) {
+                forceColider.alphaMin(alpha);
+                if (d3.select('#radarCollider').attr('value')==='2') {
+                    svg.select('#modelWorkerScreen_grid').classed('hide',false);
+                    hexbin = d3.hexbin()
+                        .x(d => d.x)
+                        .y(d => d.y)
+                        .radius(radarSize*2/Math.sqrt(3))
+                    let r  = radarSize*2/Math.sqrt(3);
+                    // let rangeY = (d3.extent(svgData.pos,d=>d.y));
+                    // let rangeX = (d3.extent(svgData.pos,d=>d.x));
+                    // let centers = hexbin.extent([[rangeX[0], rangeY[0]], [rangeX[1], rangeY[1]]]).centers().map(d=>({x:d[0],y:d[1]}));
+                    // bin = hexbin(_.flatten([centers,svgData.pos]));
+                    bin = hexbin(svgData.pos);
+                    bin.sort((a,b)=>a.x-b.x);
+                    bin.sort((a,b)=>a.y-b.y);
+                    // bin.forEach(b=>b.forEach(d=>{d.x = b.x;d.y = b.y;d.fx = b.x;d.fy = b.y}));
+
+                    // console.log(bin)
+                    let binO = {};
+                    bin.forEach(b=>{
+                        b.row = Math.round(b.y/(r*3/2));
+                        b.col = Math.round((b.x-(b.row%2)*radarSize)/(radarSize*2));
+                        binO[b.row+'|'+b.col] = b;
+                    });
+                    const n = bin.length;
+                    let clusterQueeue = {};
+                    const neighbor = [[-1, 1], [0, 1], [1, 1], [1, 0], [0, -1], [-1, 0]];
+                    for (let i=0;i<bin.length;i++){
+                        let b = bin[i];
+                        b[0].x = b.x;
+                        b[0].y = b.y;
+                        b[0].fx = b.x;
+                        b[0].fy = b.y;
+                        while (b.length>1)
+                        {
+                            let leftover = b.pop();
+                            let empty_cell = -1;
+                            if (leftover.cluster===b[0].cluster) {
+                                // find placeholder
+                                empty_cell = neighbor.findIndex(d => !binO[`${b.row + d[0]}|${b.col + d[1]}`]);
+                            }
+                            if (empty_cell===-1){
+                                // can't find placeholder
+                                if (!bin[i+1]){
+                                    if(clusterQueeue[leftover.cluster]) {
+                                        while (clusterQueeue[leftover.cluster].length || empty_cell !== -1) {
+                                            let bb = clusterQueeue[leftover.cluster][0];
+                                            empty_cell = neighbor.findIndex(d => !binO[`${bb.row + d[0]}|${bb.col + d[1]}`]);
+                                            if (empty_cell !== -1) {
+                                                setNewPos(bb, neighbor, empty_cell, r, leftover, binO);
+                                            }
+                                            if (empty_cell === 5 || empty_cell === -1) {
+                                                clusterQueeue[leftover.cluster].shift();
+                                            }
+                                        }
+                                    }else{
+                                        setNewPos(b, [[0,0]], 0, r, leftover, binO)
+                                    }
+                                }else
+                                    bin[i+1].push(leftover)
+                            }else{
+                                setNewPos(b, neighbor, empty_cell, r, leftover, binO);
+                                if (empty_cell<5){
+                                    if (clusterQueeue[b[0].cluster]===undefined)
+                                        clusterQueeue[b[0].cluster] = [];
+                                    clusterQueeue[b[0].cluster].push(b);
+                                }
+                            }
+                        }
+                    }
+                    drawRadar(svgData);
+                    draw_hexagon(bin,hexbin)
+                }
+                forceColider.stop();
+                return;
+            }else {
+                svgData.pos.forEach((d, i) => {
+                    d.fx = null;
+                    d.fy = null;
+                    d.x += alpha * (svgData.posStatic[i].x - d.x);
+                    d.y += alpha * (svgData.posStatic[i].y - d.y);
+                    // const row =  Math.round(d.y/(4/Math.sqrt(3)));
+                    // d.y =row * (4/Math.sqrt(3));
+                    // const col = Math.round(d.x / radarSize/2);
+                    // d.x = (col - row%2/2)*2*radarSize;
+                });
+            }
+            count++;
+        });
+    }
+    // function drawsvg(data,pos){
+    //     let old = d3.select('#modelWorkerScreen_svg').selectAll('.timeSpaceR')
+    //         .data(data.map(d=>d.__metrics));
+    //     old.exit().remove();
+    //     old.enter().append('g').attr('class','timeSpaceR');
+    //     d3.select('#modelWorkerScreen_svg').selectAll('.timeSpaceR')
+    //         .attr('transform',(d,i)=>`translate(${pos[i].x+graphicopt.radarTableopt.w},${pos[i].y+graphicopt.radarTableopt.h / 2})`)
+    //         .each(function(d){
+    //             createRadar(d3.select(this).select('.radar'), d3.select(this), d, {colorfill: true});
+    //         })
+    // }
+    let svgData;
+    function getpos(x,y,z,index){
+        var width = graphicopt.widthG(), height = graphicopt.heightG();
+        var widthHalf = width / 2, heightHalf = height / 2;
+        camera.updateMatrixWorld();
+        var vector = new THREE.Vector3(x,y,z);
+        vector.project(camera);
+
+        vector.x = ( vector.x * widthHalf ) + widthHalf;
+        vector.y = - ( vector.y * heightHalf ) + heightHalf;
+        vector.index = index;
+        return vector;
+    }
+    let filterGroupsetting={timestep:undefined};
+    let isdrawradar = false;
+    let radarSize;
+
+    function startCollide() {
+        d3.select('#modelWorkerScreen_svg').classed('white',true);
+        forceColider.alpha(0.1).force('collide').radius(radarSize).iterations(10);
+        // forceColider.force('charge').distanceMin(radarSize * 2);
+        forceColider.nodes(svgData.pos);
+        updateforce();
+        forceColider.restart()
+    }
+
+    function highlightGroupNode(intersects,timestep) { // INTERSECTED
+        isdrawradar = false;
+        if (intersects.length){
+            if (intersects.length<graphicopt.tableLimit) {
+                isdrawradar = true;
+                linesGroup.visible = true;
+                controll_metrics.old = {x:controll_metrics.x,y:controll_metrics.y,zoom:controll_metrics.zoom,scale:controll_metrics.scale||1};
+                d3.select('#modelWorkerScreen_svg_g').attr('transform',`scale(1) translate(0,0)`);
+                d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide',false);
+                // try {
+                //     updateDataTableFiltered(intersects);
+                // }catch(e){}
+                d3.select("p#filterList").classed('hide',true);
+            }else {
+                linesGroup.visible = !!graphicopt.linkConnect;
+                d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide',true);
+                d3.select("p#filterList").classed('hide',false);
+                d3.select("p#filterList").text(intersects.join(', '));
+                // d3.select("p#filterList+.copybtn").classed('hide', false);
+            }
+        }else{
+            d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide',true)
+            d3.select("p#filterList").text('');
+            d3.select("p#filterList").classed('hide',true);
+            // d3.select("p#filterList+.copybtn").classed('hide',true);
+        }
+        filterGroupsetting.timestep = timestep;
+        var geometry = points.geometry;
+        var attributes = geometry.attributes;
+        if (intersects.length > 0 || !(timestep===undefined)) {
+            let radarData =[];
+            let posArr =[];
+            INTERSECTED = [];
+            visibledata = [];
+            datain.forEach((d, i) => {
+                if (intersects.indexOf(d.name) !==-1 || (timestep!==undefined && timestep===d.__timestep)){
+                    INTERSECTED.push(i);
+                    attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                    lines[d.name].visible = timestep===undefined;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
+                    visibledata.push(i);
+                    radarData.push(d);
+                    posArr.push(getpos(attributes.position.array[i*3],attributes.position.array[i*3+1],attributes.position.array[i*3+2],i));
+                } else {
+                    attributes.alpha.array[i] = 0;
+                    lines[d.name].visible = false;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth  = graphicopt.component.link.size;
+                }
+            });
+
+            attributes.alpha.needsUpdate = true;
+
+            removeBoxHelper();
+
+            if(isdrawradar){
+                svgData = {data:radarData,posStatic:posArr,pos:_.cloneDeep(posArr)};
+                radarSize = Math.min(graphicopt.radaropt.w/2,Math.sqrt(graphicopt.widthG()*graphicopt.heightG()/Math.PI/radarData.length)*0.75);
+
+                // filter cluster by input data
+                const clusterGroup = d3.nest().key(d=>d.cluster).object(radarData);
+                cluster.forEach((d,i)=>d.__metrics.hide=!clusterGroup[i])
+                filterlabelCluster();
+                //
+                d3.select('#radarCollider').dispatch('action');
+
+                // for (let i=0;i<100;i++) {
+                //     forceColider.tick();
+                // }
+                // forceColider.dispatch('tick');
+                // drawRadar(svgData);
+            }else{
+                forceColider.stop();
+            }
+        } else if (visibledata && visibledata.length || ishighlightUpdate) {
+            visibledata = undefined;
+            ishighlightUpdate = false;
+            linesGroup.visible = !!graphicopt.linkConnect;
+            tooltip_lib.hide(); // hide tooltip
+            datain.forEach((d, i) => {
+                attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                lines[d.name].visible = true;
+                lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                lines[d.name].material.linewidth  = graphicopt.component.link.size;
+            });
+            forceColider.stop();
+            attributes.alpha.needsUpdate = true;
+            INTERSECTED = [];
+            removeBoxHelper();
+
+            svgData=undefined;
+            d3.select('#modelWorkerScreen_svg_g').style('pointer-events','none').attr('transform',`translate(0,0) scale(1)`).selectAll('*').remove();
+            cluster.forEach((d,i)=>d.__metrics.hide=false)
+            filterlabelCluster();
+        }
+        isneedrender = true;
+    }
     let selection_radardata = undefined;
     let animationduration = 120;
     let animationtimer = undefined;
     let disableMouseover = false, isneedrender = false;
     function animate() {
         if (!stop) {
+            animateTrigger=true;
             if (isneedrender) {
                 // visiableLine(graphicopt.linkConnect);
                 //update raycaster with mouse movement
@@ -629,15 +1116,15 @@ d3.TimeSpace = function () {
                 }
                 if (mouseoverTrigger && !disableMouseover) { // not have filter
                     raycaster.setFromCamera(mouse, camera);
-                    if (!filter.length) {
+                    if (!filterbyClustername.length) {
                         var intersects = overwrite || raycaster.intersectObject(points);
                         //count and look after all objects in the diamonds group
-                        hightlightNode(intersects);
+                        highlightNode(intersects);
                     } else { // mouse over group
                         var geometry = points.geometry;
                         var attributes = geometry.attributes;
                         datain.forEach((d, i) => {
-                            if (filter.indexOf(d.clusterName) !== -1) {
+                            if (filterbyClustername.indexOf(d.clusterName) !== -1) {
                                 attributes.alpha.array[i] = 1;
                                 // lines[d.name].visible = true;
                             } else {
@@ -683,12 +1170,29 @@ d3.TimeSpace = function () {
                 // visiableLine(graphicopt.linkConnect);
                 controls.update();
                 renderer.render(scene, camera);
-                isneedrender = false;
+                if (solution&&solution.length)
+                    cluster.forEach(c=>{
+                        const pos = position2Vector( datain[c.__metrics.indexLeader].__metrics.position);
+                        c.__metrics.projection = getpos(pos.x,pos.y,pos.z);
+                    });
+                updatelabelCluster();
             }
+            iscameraMove = false;
+            isneedrender = false;
             requestAnimationFrame(animate);
+        }else{
+            if (forceColider)
+                forceColider.stop();
         }
     }
-
+    function removeBoxHelper(){
+        const object = scene.getObjectByName( 'boxhelper');
+        if(object) {
+            object.geometry.dispose();
+            object.material.dispose();
+            scene.remove(object);
+        }
+    }
     function drawSummaryRadar(dataArr,dataRadar,newClustercolor){
         let barH = graphicopt.radarTableopt.h/2;
         radarChartclusteropt.schema = graphicopt.radaropt.schema;
@@ -727,7 +1231,7 @@ d3.TimeSpace = function () {
         let btg = holder_action.selectAll('div.btn_group_holder').data(selectedCluster);
         // btg.exit().remove();
         let btg_new = btg.enter().append('div').attr('class', 'btn_group_holder valign-wrapper').style('height',(d,i)=>`${positionscale(1)}px`)
-        .append('div').attr('class', 'btn_group valign-wrapper');
+            .append('div').attr('class', 'btn_group valign-wrapper');
         btg_new.append('i').attr('class','btn_item material-icons currentValue').html('check_box_outline_blank');
         btg_new.append('i').attr('class','btn_item material-icons selected hide').attr('title','action').html('check_box_outline_blank').attr('value','no-action').on('click',actionBtn);
         btg_new.append('i').attr('class','btn_item material-icons ').html('merge_type').attr('title','merge').attr('value','merge').on('click',actionBtn);
@@ -941,14 +1445,32 @@ d3.TimeSpace = function () {
         }
     }
     function renderRadarSummary(dataRadar,color,boxplot,isselectionMode) {
+        const holder = d3.select(".radarTimeSpace").classed('hide',!dataRadar.length);
+        d3.select("#modelSelectionTool .emptyScreen").classed('hide',dataRadar.length);
         d3.select(".radarTimeSpace").classed('hide',!dataRadar.length);
         if (dataRadar.length) {
             radarChartclusteropt.color = function () {
                 return color
             };
             radarChartclusteropt.boxplot = boxplot !== undefined ? boxplot : true;
+            let currentChart;
+            if (boxplot) {
+                holder.select('.singleRadar').classed('hide',true);
+                currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
+            }else{
+                holder.select('.singleRadar').classed('hide',false);
 
-            let currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
+                    let cloneOpt = _.cloneDeep(radarChartclusteropt)
+                    // cloneOpt.fillin = false;
+                    // cloneOpt.strokeWidth = function(d,i){
+                    //     return d.index?2:4;
+                    // };
+                    // cloneOpt.color = function(i,d){
+                    //     return colorscale(d.name);
+                    // };
+                    currentChart = RadarChart(".radarTimeSpace", [dataRadar], cloneOpt, "");
+
+            }
             currentChart.selectAll('.axisLabel').remove();
             currentChart.select('.axisWrapper .gridCircle').classed('hide', true);
         }
@@ -1273,6 +1795,27 @@ d3.TimeSpace = function () {
     //         count++;
     //     },1000/60);
     // }
+    let distancerange = d3.scaleLinear();
+    let euclideandistancerange = d3.scaleLinear();
+    function createClusterLabel() {
+        svg.select('#modelClusterLabel').selectAll('g.cluster').remove();
+        const marker =  svg.select('#modelClusterLabel').selectAll('g.cluster').data(cluster)
+            .enter().append('g').attr('class', 'cluster');
+        const symbolGenerator = d3.symbol().type(d3.symbolCross).size(100);
+        marker.append('text').attrs({"text-anchor":"middle",y:-10})
+            .styles({'stroke':'white',
+                'font-size':20,
+                'paint-order':'stroke'}).text(d=>d.text);
+        marker.append('path').attr('d',symbolGenerator()).styles({'fill':'black','opacity':0.5});
+        return marker;
+    }
+    function updatelabelCluster() {
+        clusterMarker.attr('transform',d=>`translate(${d.__metrics.projection.x},${d.__metrics.projection.y})`);
+    }
+    function filterlabelCluster() {
+        clusterMarker.classed('hide',d=>d.__metrics.hide);
+    }
+
     function render (islast){
         if (isneedCompute) {
             try{
@@ -1304,16 +1847,19 @@ d3.TimeSpace = function () {
                         }
                     }
                 });
-                let center = d3.nest().key(d => d.cluster).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
-                solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
-                    const target = datain[i];
-                    const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
-                    path[target.name][posPath].value = d;
-                    // updateStraightLine(target, posPath, d);
-                    updateLine(target, posPath, d, center[target.cluster]);
-
-                });
                 if (islast) {
+                    let center = d3.nest().key(d => d.clusterName).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
+                    solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
+                        const target = datain[i];
+                        const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
+                        path[target.name][posPath].value = d;
+                        // updateStraightLine(target, posPath, d);
+                        updateLine(target, posPath, d, path[target.name].map(p => center[datain[p.index].clusterName]));
+
+                    });
+                    let rangeDis = [+Infinity, 0];
+                    let customz = d3.scaleLinear().range(scaleNormalTimestep.range());
+                    let distance_data=[];
                     for (let name in path) {
                         let temp;
                         path[name].forEach((p, i) => {
@@ -1329,14 +1875,23 @@ d3.TimeSpace = function () {
                             path[name].distance /= (_.last(path[name]).__timestep);
                         else
                             path[name].distance /= path[name].length;
+                        if (path[name].distance < rangeDis[0])
+                            rangeDis[0] = path[name].distance;
+                        if (path[name].distance > rangeDis[1])
+                            rangeDis[1] = path[name].distance;
+                        distance_data.push(path[name].distance)
                     }
+                    umapdistanceHis = getHistdata(distance_data,'umap',1000);
+                    drawHis('#modelDistanceFilter_projection_svg',umapdistanceHis,'distance')
                     handleTopSort($('#modelSortBy').val());
-                }
-                points.geometry.attributes.position.needsUpdate = true;
-                points.geometry.boundingBox = null;
-                points.geometry.computeBoundingSphere();
+                    distancerange.domain(rangeDis);
+                    customz.domain(rangeDis);
+                    }
+                    points.geometry.attributes.position.needsUpdate = true;
+                    points.geometry.boundingBox = null;
+                    points.geometry.computeBoundingSphere();
 
-                isneedrender = true;
+                    isneedrender = true;
             }
             }catch(e){}
             isneedCompute = false;
@@ -1407,7 +1962,8 @@ d3.TimeSpace = function () {
 
 
         var material = new THREE.LineBasicMaterial( {
-            opacity:0.2,
+            opacity:graphicopt.component.link.opacity,
+            linewidth:graphicopt.component.link.size,
             color: 0xffffff,
             vertexColors: THREE.VertexColors,
             transparent: true
@@ -1480,6 +2036,8 @@ d3.TimeSpace = function () {
         let lineObj = new THREE.Object3D();
         if (path.length>1) {
             var material = new THREE.LineBasicMaterial({
+                opacity:graphicopt.component.link.opacity,
+                linewidth:graphicopt.component.link.size,
                 color: 0xffffff,
                 vertexColors: THREE.VertexColors,
                 transparent: true,
@@ -1519,7 +2077,10 @@ d3.TimeSpace = function () {
             lines[target.name].geometry.setFromPoints(points);
         }
     }
-    function updateStraightLine(target, posPath, d) {
+    function position2Vector(p){
+        return new THREE.Vector3(xscale(p[0]), yscale(p[1]), xscale(p[2]) || 0);
+    }
+    function updateStraightLine(target, posPath, d, customZ) {
         lines[target.name].geometry.vertices[posPath * 2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), xscale(d[2]) || 0);
         // lines[target.name].geometry.vertices[posPath * 2] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), d[2] || 0);
         if (posPath)
@@ -1527,6 +2088,17 @@ d3.TimeSpace = function () {
             // lines[target.name].geometry.vertices[posPath * 2 - 1] = new THREE.Vector3(xscale(d[0]), yscale(d[1]), d[2] || 0);
         lines[target.name].geometry.verticesNeedUpdate = true;
         lines[target.name].geometry.computeBoundingBox();
+    }
+
+    function onlinkopacity(){
+        setTimeout(()=>{
+            Object.keys(lines).forEach(lk=>{
+                if (lines[lk].visible && lines[lk].material.opacity){
+                    lines[lk].material.opacity = graphicopt.component.link.opacity;
+                }
+            })
+            isneedrender = true;
+        });
     }
 
     function createLines(g){
@@ -1565,6 +2137,7 @@ d3.TimeSpace = function () {
 
     function visiableLine(isvisiable){
         linesGroup.visible = isvisiable;
+        d3.select('#Link_opacity').classed('hide',!isvisiable);
     }
     function drawline(ctx,path,cluster) {
         positionLink_canvas(path,new THREE.ShapePath());
@@ -1578,15 +2151,15 @@ d3.TimeSpace = function () {
 
     master.highlight = function(name){
         if (!disableMouseover) {
-            filter.push(name);
-            filter = _.uniq(filter);
+            filterbyClustername.push(name);
+            filterbyClustername = _.uniq(filterbyClustername);
             isneedrender = true;
             mouseoverTrigger = true;
         }
     };
     let ishighlightUpdate;
     master.unhighlight = function() {
-        filter = [];
+        filterbyClustername = [];
         ishighlightUpdate = true;
         isneedrender = true;
         // d3.select(background_canvas).style('opacity',1);
@@ -1689,7 +2262,6 @@ d3.TimeSpace = function () {
                             else
                                 start();
                         })
-                        // .node().checked = graphicopt[d.content.variable];
                     }else if (d.content.type === "selection") {
                         let div = d3.select(this).style('width', d.content.width)
                             .append('select')
@@ -1714,26 +2286,63 @@ d3.TimeSpace = function () {
             });
 
 
-        // let div = d3.select('#modelDistanceFilter').node();
-        // if (!div.noUiSlider) {
-        //     noUiSlider.create(div, {
-        //         start: 0.5,
-        //         connect: 'upper',
-        //         orientation: 'horizontal', // 'horizontal' or 'vertical'
-        //         range: {
-        //             'min': 0,
-        //             'max': 1,
-        //         },
-        //     });
-        //     div.noUiSlider.on("change", function () { // control panel update method
-        //         graphicopt.filter.distance = +this.get();
-        //         d3.select('#modelFilterBy').dispatch("change");
-        //     });
-        //     d3.select(div).select('.noUi-handle').append('span').attr('class','num');
-        // }
+        let div = d3.select('#modelDistanceFilter').node();
+        if (!div.noUiSlider) {
+            noUiSlider.create(div, {
+                start: 0.5,
+                connect: 'upper',
+                orientation: 'horizontal', // 'horizontal' or 'vertical'
+                range: {
+                    'min': 0,
+                    'max': 1,
+                },
+            });
+            div.noUiSlider.on("change", function () { // control panel update method
+                graphicopt.filter.distance = +this.get();
+                d3.select('#modelFilterBy').dispatch("change");
+            });
+            d3.select(div).select('.noUi-handle').append('span').attr('class','num');
+        }
+        d3.select('#modelCompareMode').on('change',function(){
+            graphicopt.iscompareMode=d3.select(this).property('checked')
+        });
+        d3.select('#radarCollider').attr('value',0).on('click',function(){
+            const target = d3.select(this);
+            const oldValue = target.attr('value');
+            const newValue = (oldValue+1) %3;
+            target.attr('value',newValue);
+            target.dispatch('action')
+        }).on('action',function(){
+            const target = d3.select(this);
+            const newValue = +target.attr('value');
+            switch (newValue) {
+                case 0:
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> No collision`);
+                    if (forceColider) {
+                        svgData.pos = _.cloneDeep(svgData.posStatic);
+                        forceColider.stop();
+                        svg.classed('white',false);
+                        svg.select('#modelWorkerScreen_grid').classed('hide',true);
+                        drawRadar(svgData);
+                    }
+                    break;
+                case 1:
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> Collision detection `);
+                    startCollide();
+                    break;
+                default:
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> Hexagon collision`);
+                    // startCollide();
+                    updateforce();
+                    forceColider.tick();
+                    break;
+            }
+        })
+        d3.select('#radarCollider').dispatch('action');
     };
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
+        d3.select('#modelCompareMode').property('checked',graphicopt.iscompareMode)
         try {
             d3.values(self.controlPanel).forEach((d)=>{
                 if (graphicopt.opt[d.variable]) {
@@ -1757,7 +2366,37 @@ d3.TimeSpace = function () {
 
     }
 
+    function loadProjection(opt,calback){
+        let totalTime_marker = performance.now();
+        d3.json(`data/${dataInformation.filename.replace('.csv','')}_${opt.projectionName}_${opt.nNeighbors}_${opt.dim}_${opt.minDist}.json`).then(function(sol){
 
+            let xrange = d3.extent(sol, d => d[0]);
+            let yrange = d3.extent(sol, d => d[1]);
+            let xscale = d3.scaleLinear().range([0, graphicopt.widthG()]);
+            let yscale = d3.scaleLinear().range([0, graphicopt.heightG()]);
+            const ratio = graphicopt.heightG() / graphicopt.widthG();
+            if ((yrange[1] - yrange[0]) / (xrange[1] - xrange[0]) > graphicopt.heightG() / graphicopt.widthG()) {
+                yscale.domain(yrange);
+                let delta = ((yrange[1] - yrange[0]) / ratio - (xrange[1] - xrange[0])) / 2;
+                xscale.domain([xrange[0] - delta, xrange[1] + delta])
+            } else {
+                xscale.domain(xrange);
+                let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
+                yscale.domain([yrange[0] - delta, yrange[1] + delta])
+            }
+            calback({
+                action: 'stable',
+                value: {iteration: 1, time: 0, totalTime: performance.now() - totalTime_marker},
+                xscale: {domain: xscale.domain()},
+                yscale: {domain: yscale.domain()},
+                sol: sol
+            })
+
+        }).catch(function(e){
+            calback();
+        })
+        // solution = sol;
+    }
 
     master.runopt = function (_) {
         //Put all of the options into a variable called runopt
@@ -1870,6 +2509,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 let windowsSize = 1;
 // let timeWeight = 0;
 function handle_data_model(tsnedata,isKeepUndefined) {
+    preloader(true,1,'preprocess data','#modelLoading');
     windowsSize = windowsSize||1;
     // get windown surrounding
     let windowSurrounding =  (windowsSize - 1)/2;
@@ -1951,7 +2591,7 @@ function handle_data_umap(tsnedata) {
     // if (!umapopt.opt)
         umapopt.opt = {
             // nEpochs: 20, // The number of epochs to optimize embeddings via SGD (computed automatically = default)
-            nNeighbors:  Math.min(15,Math.round(dataIn.length/cluster_info.length/5)+2), // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
+            nNeighbors:  Math.min(30,Math.round(dataIn.length/cluster_info.length/5)+2), // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
             // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)

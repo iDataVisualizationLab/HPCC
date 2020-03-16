@@ -1401,6 +1401,8 @@ function handle_dataRaw() {
             let minval = Infinity;
             cluster_info.forEach((c, i) => {
                 const val = distance(c.__metrics.normalize, axis_arr);
+                if(val===0)
+                    c.leadername = h.name;
                 if (minval > val) {
                     index = i;
                     minval = val;

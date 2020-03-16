@@ -52,16 +52,20 @@ angular.module('hpccApp')
         });
 
         function readFile(file) {
+            preloader(true, 0,"Add data....");
           if (!isTypeValid(file.type, scope.validMimeTypes)) {
             scope.$apply(function() {
-              console.log('Invalid file type. File must be one of following types: ' + scope.validMimeTypes);
+                preloader(false);
+                M.toast({html: 'Invalid file type. File must be one of following types: ' + scope.validMimeTypes});
             });
             return;
           }
           if (!isSizeValid(file.size, scope.maxFileSize)) {
             scope.$apply(function() {
-                console.log('File must be smaller than ' + scope.maxFileSize + ' MB');
+                preloader(false);
+                M.toast({html: 'File must be smaller than ' + scope.maxFileSize + ' MB'});
             });
+
             return;
           }
             if (file.type === "application/json"){
@@ -81,6 +85,12 @@ angular.module('hpccApp')
                 reader.onload = function (evt) {
                     return scope.$apply(function (scope) {
                         scope.dataset.data = evt.target.result;
+                        scope.dataset.size = evt.loaded;
+                        // scope.dataset.sampletext = scope.dataset.data.slice(0,1000);
+                        // scope.dataset.sampletext = scope.dataset.data.split('\n').slice([0,1]).join('\n');
+                        const dataTemp = scope.dataset.data.split('\n');
+                        scope.dataset.column = dataTemp[0].split(',').length;
+                        scope.dataset.row = dataTemp.length;
                         // Strip file name extensions from the uploaded data
                         scope.dataset.name = file.name.replace(/\.\w+$/, '');
                     });

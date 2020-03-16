@@ -12,7 +12,7 @@
         <script src="https://kit.fontawesome.com/6ed220eb7a.js" crossorigin="anonymous"></script>
         <script src="../HiperView/js/jquery-3.3.1.js"></script>
         <script src="../HiperView/js/jquery-ui.js"></script>
-        <script src="../HiperView/js/jquery.dd.js"></script>
+        <!--<script src="../HiperView/js/jquery.dd.js"></script>-->
         <!-- Compiled and minified CSS -->
 
         <script src="../HiperView/js/jBox.all.min.js"></script>
@@ -694,19 +694,35 @@
                         </div>
                         <canvas id="modelWorkerScreen"></canvas>
                         <!--<canvas id="modelWorkerScreen_fornt" style="position:absolute;top:0;left:0"></canvas>-->
-                        <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none"></svg>
-                        <div id="modelWorkerInformation" style="position:absolute;top:20px;right:0; width: 300px; z-index: 10 ">
+                        <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none">
+                            <defs>
+
+                            </defs>
+
+                            <g id="modelWorkerScreen_svg_g">
+
+                            </g>
+                            <g id="modelWorkerScreen_lassotool">
+
+                            </g>
+                            <g id="modelClusterLabel">
+
+                            </g>
+                        </svg>
+                        <div id="modelWorkerInformation" style="position:absolute;top:0px;right:0; width: 350px; z-index: 10; ">
                             <div id="modelSelectionInformation">
                                 <ul class="tabs" style="margin-top: 10px">
                                     <li class="tab col s3"><a class="active" href="#modelSetting">Setting</a></li>
                                     <li class="tab col s3"><a href="#modelSelectionTool">Selection</a></li>
                                     <li class="tab col s3"><a href="#modelRanking">Ranking</a></li>
+                                    <li class="tab col s3"><a href="#modelFilter">Filter</a></li>
                                 </ul>
                                 <div id="modelSetting" class="tabHolder">
                                     <table>
                                     </table>
                                 </div>
                                 <div id="modelSelectionTool" class="tabHolder no-pad">
+                                    <span class="center-align row s12 emptyScreen">Drag and release to select data points</span>
                                     <div class="valign-wrapper relativemap first" style="background: white; position: relative; width: 100%">
                                         <svg class="svgHolder">
 
@@ -745,6 +761,42 @@
 
                                         </tbody>
                                     </table>
+                                    </div>
+                                </div>
+                                <div id="modelFilter" class="tabHolder">
+
+                                    <div  class="row valign-wrapper no_magrin">
+                                        <label for="modelFilterBy" class="col s4">Filter by: </label>
+                                        <select id="modelFilterBy" class="col s7 inline">
+                                            <option value="all" selected>All</option>
+                                            <optgroup label="Changed">
+                                                <option value="groups">Cluster Changed</option>
+                                                <option value="umapDistance">UMAP Distance</option>
+                                                <!--<option value="euclideanDistance">Euclidean Distance</option>-->
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="row valign-wrapper hide" id="samplingHolder">
+                                        <button id="modelSampling">Random display 500 radars</button>
+                                    </div>
+                                    <div class="row valign-wrapper hide" id="distanceFilterHolder">
+                                        <label for="modelDistanceFilter_holder" class="col s4">Distance Filter: </label>
+                                        <div id="modelDistanceFilter_holder" class="col s7 no-padding">
+                                            <svg id="modelDistanceFilter_projection_svg" class="hide modelDistanceFilter_svg"  width="100%" height="30px" viewBox="0 0 20 10" preserveAspectRatio="none"></svg>
+                                            <!--<svg id="modelDistanceFilter_euclidean_svg" class="hide modelDistanceFilter_svg"  width="100%" height="30px" viewBox="0 0 20 10" preserveAspectRatio="none"></svg>-->
+                                            <div id="modelDistanceFilter"></div>
+                                        </div>
+
+                                    </div>
+                                    <div  class="row no_magrin" style="max-height: 200px;overflow-y: auto;">
+                                        <div class="row s12 valign-wrapper">
+                                            <button type="submit" value = 0 class ="menuBtn btn-small filterLimit offset-s5 col" id="radarCollider" ><i class="icon-radarShape material-icons icon"></i> Collision detection</button>
+                                        </div>
+                                        <p id ="filterList" class="no_magrin">
+
+                                        </p>
+                                        <table id="filterTable" class="display stripe compact filterLimit" style="width:100%"></table>
+                                        <!--<button class="copybtn btn hide" style="margin: 10px;position: absolute;right: 0;bottom: 0;">Copy</button>-->
                                     </div>
                                 </div>
                                 <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
@@ -919,6 +971,7 @@
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-format.v1.min.js"></script>
+    <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
 
