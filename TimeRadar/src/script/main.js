@@ -507,7 +507,7 @@ function updatetimeline(index) {
 
 function request(){
     init=false;
-    bin.data([]);
+    // bin.data([]);
     var count = 0;
     var countbuffer = 0;
     var iteration = 0;
@@ -520,6 +520,7 @@ function request(){
     var requeststatus =true;
     var countrecord = 0;
     var missingtimetex = false;
+    let hasjob = sampleJobdata[0].user!=="dummyJob";
 
     jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length);
     isanimation = false
@@ -556,12 +557,16 @@ function request(){
                 // getJoblist(lastIndex,true);
 
                 // Draw date
-                d3.select(".currentDate")
-                    .text("" + currentMiliseconds.toDateString());
+                // d3.select(".currentDate")
+                //     .text("" + currentMiliseconds.toDateString());
 
                 // cal to plot
                 // bin.data([]);
-                currentlastIndex = iteration+iterationstep-1;
+                // currentlastIndex = iteration+iterationstep-1;
+                if(hasjob)
+                    currentlastIndex = iteration+iterationstep-1;
+                else
+                    currentlastIndex = Math.min(iteration+iterationstep-1+sampleS.timespan.length-3,sampleS.timespan.length-1);
                 // drawsummary();
                 jobMap.setharr([]);
                 lastIndex = currentlastIndex+1;
@@ -606,7 +611,7 @@ function request(){
                         // let ri = step_full(iteration);
                         midlehandle_full();
                         if(countbuffer===0) {
-                            if (islastimestep(lastIndex+1))
+                            if (islastimestep(lastIndex+1)&&hasjob)
                                 getJoblist();
                             // document.getElementById("compDisplay_control").selectedIndex = 4;
                             // d3.select('#compDisplay_control').dispatch("change");
@@ -1385,10 +1390,11 @@ function formatService(init){
 }
 function handle_dataRaw() {
 
-    cluster_info.forEach(d => (d.arr = [],d.total=0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    cluster_info.forEach(d => (d.arr = [],d.total=0,d.radius = d.radius||0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     // tsnedata = {};
     hosts.forEach(h => {
         // tsnedata[h.name] = [];
+        let lastCluster = undefined;
         sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
             // let nullkey = false;
             // let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
@@ -1397,17 +1403,28 @@ function handle_dataRaw() {
             // reduce time step
             axis_arr = tsnedata[h.name][i];
 
+            // assign cluster
             let index = 0;
+            let cluster_inRange = {}; // this node belong to how many cluster
             let minval = Infinity;
-            cluster_info.forEach((c, i) => {
+            cluster_info.find((c, i) => {
                 const val = distance(c.__metrics.normalize, axis_arr);
                 if(val===0)
                     c.leadername = h.name;
+                if( val < c.radius)
+                    cluster_inRange[i] =val;
                 if (minval > val) {
                     index = i;
                     minval = val;
                 }
+                return !val;
             });
+
+            // enhance unchange status
+            if (cluster_inRange[lastCluster]!==undefined){
+                index = lastCluster;
+            }
+            //--- end assign cluster
             if (!cluster_info[index].arr[i])
                 cluster_info[index].arr[i]=[];
             cluster_info[index].arr[i].push(h.name);
@@ -1422,7 +1439,7 @@ function handle_dataRaw() {
             tsnedata[h.name][i].cluster = index;
             // timeline precalculate
             // tsnedata[h.name].push(axis_arr);
-
+            lastCluster = index;
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
@@ -1784,24 +1801,7 @@ $( document ).ready(function() {
         jobMap.runopt(jobMap_runopt).draw();
     });
 
-    $('#description_input_file').on('input',(evt)=>{
-        let f = evt.target.files[0];
-        var reader = new FileReader();
-        reader.onload = (function (theFile) {
-            return function (e) {
-                d3.json(e.target.result, function (error, data) {
-                    if (error) {
-                    } else {
-                        clusterDescription = data;
-                        updateclusterDescription();
-                    }
-                });
-            };
-        })(f);
 
-        reader.readAsDataURL(f);
-    });
-    $('#saveDescriptionbtn').on('click',()=>$('#description_input_file').trigger('click'));
     let oldchoose =$('#datacom').val();
     $('#data_input_file').on('click',()=>{preloader(false)})
     $('#data_input_file').on('input', (evt) => {
@@ -2276,7 +2276,7 @@ function recalculateCluster (option,calback,customCluster) {
 
 }
 
-function recomendName (clusterarr){
+function recomendName (clusterarr,haveDescription){
     clusterarr.forEach((c,i)=>{
         c.index = i;
         c.axis = [];
@@ -2304,10 +2304,12 @@ function recomendName (clusterarr){
             c.text = ``;
         else
             c.text = `${name}`;
-        if(!clusterDescription[c.name])
-            clusterDescription[c.name] = {};
-        clusterDescription[c.name].id = c.name;
-        clusterDescription[c.name].text = c.text;
+        if(!haveDescription || !clusterDescription[c.name]){
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+        }
     });
 }
 

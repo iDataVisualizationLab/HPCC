@@ -90,7 +90,7 @@ addEventListener('message',function ({data}) {
         var keys = serviceFullList.map(d=>d.text);
         dataSpider3.length = 0;
         console.log("numBins: " + bin.bins.length);
-
+        const binRadius = bin.binRadius;
         dataSpider3 = bin.bins.map(d => {
             var temp;
             if (bin.normalizedFun)
@@ -139,7 +139,7 @@ addEventListener('message',function ({data}) {
         cluster = dataSpider3.map((d, i) => {
             let temp = {labels: i};
             d.forEach((s, i) => temp[serviceFullList[i].text] = serviceFullList[i].scale(s.value));
-            temp.radius = d.bin.distance;
+            temp.radius = binRadius||d.bin.distance;
             temp.mse = d.bin.mse;
             temp.index = i;
             temp.__metrics = d.slice();

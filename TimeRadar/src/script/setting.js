@@ -84,9 +84,15 @@ function getJoblist (iteration,reset){
     }catch(e){}
 }
 function current_userData () {
-    let jobByuser = d3.nest().key(function(uD){return uD.user}).entries( jobList);
-    jobByuser.forEach(d=>d.unqinode= _.chain(d.values).map(d=>d.nodes).flatten().uniq().value());
-    return jobByuser;
+    try {
+        let jobByuser = d3.nest().key(function (uD) {
+            return uD.user
+        }).entries(jobList);
+        jobByuser.forEach(d => d.unqinode = _.chain(d.values).map(d => d.nodes).flatten().uniq().value());
+        return jobByuser;
+    }catch(e){
+        return [];
+    }
 }
 function systemFormat() {
     jobList=[];

@@ -246,6 +246,7 @@ d3.TimeSpace = function () {
         let opt = JSON.parse(JSON.stringify(graphicopt.opt)); // clone option
         opt.dim = Math.floor(opt.dim);
         // end - adjust dimension
+        datain.forEach(d=>delete d.__metrics.radar);
         modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,mask:  serviceFullList.map(d=>d.enable),labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
@@ -812,43 +813,48 @@ d3.TimeSpace = function () {
     }
     function drawRadar({data,pos,posStatic}){
         let dataRadar = [];
-        // let links = {};
+        let links = {};
         data.forEach((d,i)=>{
             dataRadar.push(d.__metrics);
-            // if(!links[d.name])
-            //     links[d.name]=[];
+            if(!links[d.name])
+                links[d.name]=[];
             pos[i].cluster = d.clusterName;
-            // links[d.name].push(pos[i]);
+            links[d.name].push(pos[i]);
         });
         let g = svg.select('#modelWorkerScreen_svg_g').style('pointer-events','all').select('#modelWorkerScreen_grid')
         if (g.empty())
             g = svg.select('#modelWorkerScreen_svg_g').append('g').attr('id','modelWorkerScreen_grid');
+        let curvelink = d3.line()
+            .curve(d3.curveCatmullRom)
+            .x(d=>d.x)
+            .y(d=>d.y);
+        let old_link = d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
+            .data(_.values(links).filter(d=>d.length>1));
+        old_link.exit().remove();
+        old_link.enter().append('path').attr('class','link');
+        d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
+            .attr('d',curvelink).styles({'stroke':'black','opacity':0.2}).classed('hide',true)
+            .each(function(d){d.object = d3.select(this)});
+
         let old = d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR')
             .data(dataRadar,d=>d.name_or+'_'+d.timestep).attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`);
         old.exit().remove();
         old.enter().append('g').attr('class','timeSpaceR')
             .attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`)
-            .on('highlight',d=>d.radar.classed('fade',false))
-            .on('fade',d=>d.radar.classed('fade',true))
-            .on('mouseover',d=>
-                highlightNode([{index:path[d.name_or].find(e=>e.timestep===d.timestep).index}]))
-            .on('mouseoleave',d=>highlightNode([]))
+            .on('highlight',d=>{d.radar.classed('fade',false);})
+            .on('fade',d=>{d.radar.classed('fade',true);if (links[d.name_or]) links[d.name_or].object.classed('hide',true)})
+            .on('mouseover',d=>{
+                if (links[d.name_or]) links[d.name_or].object.classed('hide',false)
+                highlightNode([{index:path[d.name_or].find(e=>e.timestep===d.timestep).index}])})
+            .on('mouseleave',d=>{ highlightNode([]); if (links[d.name_or]) links[d.name_or].object.classed('hide',true);})
             .each(function(d){
                 d.radar = d3.select(this);
                 createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
             });
 
-        // let old_link = d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
-        //     .data(_.values(links).filter(d=>d.length===2));
-        // old_link.exit().remove();
-        // old_link.enter().append('line').attr('class','link');
-        // d3.select('#modelWorkerScreen_svg_g').selectAll('.link')
-        //     .attrs(d=>({
-        //         x1:d[0].x,x2:d[1].x,y1:d[0].y,y2:d[1].y,
-        //         'marker-end':d=>`url(#arrow${d[1].cluster})`
-        //     }))
     }
-    function draw_hexagon(data,hexbin){
+    function draw_grid_hexagon(data,hexbin){
+        d3.scaleLinear().range([]).domain([]);
         let old = svg.select('#modelWorkerScreen_grid').selectAll("path")
             .data(data);
         old.exit().remove();
@@ -857,10 +863,11 @@ d3.TimeSpace = function () {
             .attr("transform", d => `translate(${d.x},${d.y})`)
             .styles({"fill": '#eeeeee','stroke':'white','stroke-width':2})//d => color(d.length));
     }
+
     function updateforce(){
         count = 0;
         forceColider.force('tsne', function (alpha) {
-            function setNewPos(b, neighbor, empty_cell, r, leftover, binO) {
+            function setNewPos(b, neighbor, empty_cell, r, leftover, binO,bin) {
                 let newbin = [];
                 newbin.row = b.row + neighbor[empty_cell][0];
                 newbin.col = b.col + neighbor[empty_cell][1];
@@ -879,7 +886,7 @@ d3.TimeSpace = function () {
                 forceColider.alphaMin(alpha);
                 if (d3.select('#radarCollider').attr('value')==='2') {
                     svg.select('#modelWorkerScreen_grid').classed('hide',false);
-                    hexbin = d3.hexbin()
+                    let hexbin = d3.hexbin()
                         .x(d => d.x)
                         .y(d => d.y)
                         .radius(radarSize*2/Math.sqrt(3))
@@ -888,7 +895,7 @@ d3.TimeSpace = function () {
                     // let rangeX = (d3.extent(svgData.pos,d=>d.x));
                     // let centers = hexbin.extent([[rangeX[0], rangeY[0]], [rangeX[1], rangeY[1]]]).centers().map(d=>({x:d[0],y:d[1]}));
                     // bin = hexbin(_.flatten([centers,svgData.pos]));
-                    bin = hexbin(svgData.pos);
+                    let bin = hexbin(svgData.pos);
                     bin.sort((a,b)=>a.x-b.x);
                     bin.sort((a,b)=>a.y-b.y);
                     // bin.forEach(b=>b.forEach(d=>{d.x = b.x;d.y = b.y;d.fx = b.x;d.fy = b.y}));
@@ -925,7 +932,7 @@ d3.TimeSpace = function () {
                                             let bb = clusterQueeue[leftover.cluster][0];
                                             empty_cell = neighbor.findIndex(d => !binO[`${bb.row + d[0]}|${bb.col + d[1]}`]);
                                             if (empty_cell !== -1) {
-                                                setNewPos(bb, neighbor, empty_cell, r, leftover, binO);
+                                                setNewPos(bb, neighbor, empty_cell, r, leftover, binO, bin);
                                             }
                                             if (empty_cell === 5 || empty_cell === -1) {
                                                 clusterQueeue[leftover.cluster].shift();
@@ -947,7 +954,7 @@ d3.TimeSpace = function () {
                         }
                     }
                     drawRadar(svgData);
-                    draw_hexagon(bin,hexbin)
+                    draw_grid_hexagon(bin,hexbin)
                 }
                 forceColider.stop();
                 return;
@@ -2346,21 +2353,22 @@ d3.TimeSpace = function () {
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);
         d3.select('#modelCompareMode').property('checked',graphicopt.iscompareMode)
-        try {
-            d3.values(self.controlPanel).forEach((d)=>{
-                if (graphicopt.opt[d.variable]) {
-                    // d3.select('.nNeighbors div').node().noUiSlider.updateOptions({
-                    //     range: {
-                    //         'min': 1,
-                    //         'max': Math.round(datain.length / 2),
-                    //     }
-                    // });
+        d3.values(self.controlPanel).forEach((d)=>{
+            if (graphicopt.opt[d.variable]) {
+                try {
                     d3.select(`.${d.variable} div`).node().noUiSlider.set(graphicopt.opt[d.variable]);
+                }catch(e){
+                    switch (d.type) {
+                        case 'switch':
+                            d3.select(`.${d.variable} input`).node().checked = graphicopt.opt[d.variable];
+                            break;
+                        case 'selection':
+                            $(d3.select(`.${d.variable} selection`).node()).val( d.values.indexOf(graphicopt[d.variable]));
+                            break;
+                    }
                 }
-            });
-        }catch(e){
-
-        }
+            }
+        });
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
@@ -2371,7 +2379,7 @@ d3.TimeSpace = function () {
 
     function loadProjection(opt,calback){
         let totalTime_marker = performance.now();
-        d3.json(`data/${dataInformation.filename.replace('.csv','')}_${opt.projectionName}_${opt.nNeighbors}_${opt.dim}_${opt.minDist}.json`).then(function(sol){
+        d3.json(`data/${dataInformation.filename.replace('.csv','')}_${opt.projectionName}_${opt.nNeighbors}_${opt.dim}_${opt.minDist}_${opt.supervisor}.json`).then(function(sol){
 
             let xrange = d3.extent(sol, d => d[0]);
             let yrange = d3.extent(sol, d => d[1]);
@@ -2481,7 +2489,9 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
     {name:'UMAP',controlPanel: {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
             nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
-        },workerPath:'src/script/worker/umapworker.js',outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
+            supervisor: {text: "Supervised", type: "switch", variable: 'supervisor',labels:['off','on'],values:[false,true], width: '100px'},
+        },workerPath:'src/script/worker/umapworker.js',
+        outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
             {label:"Time per step",content:'_',variable:'time'},
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
@@ -2598,6 +2608,7 @@ function handle_data_umap(tsnedata) {
             // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
+            supervisor: true,
         };
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info);
 }
