@@ -269,7 +269,8 @@ function RadarChart(id, data, options, name) {
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
                 if (cfg.ringColor===undefined) {
-                    var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                    // var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                    var v = d/(cfg.levels-2);
                     return colorTemperature(v);
                 }
                 return cfg.ringColor;
