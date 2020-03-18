@@ -867,11 +867,12 @@ d3.TimeSpace = function () {
     function updateforce(){
         count = 0;
         forceColider.force('tsne', function (alpha) {
+
             function setNewPos(b, neighbor, empty_cell, r, leftover, binO,bin) {
                 let newbin = [];
                 newbin.row = b.row + neighbor[empty_cell][0];
                 newbin.col = b.col + neighbor[empty_cell][1];
-                newbin.x = newbin.col * (radarSize * 2) + (newbin.row % 2) * radarSize
+                newbin.x = newbin.col * (radarSize * 2) + (newbin.row % 2) * radarSize;
                 newbin.y = newbin.row * r * 3 / 2;
                 leftover.x = newbin.x;
                 leftover.fx = newbin.x;
@@ -939,12 +940,12 @@ d3.TimeSpace = function () {
                                             }
                                         }
                                     }else{
-                                        setNewPos(b, [[0,0]], 0, r, leftover, binO)
+                                        setNewPos(b, [[0,0]], 0, r, leftover, binO,bin)
                                     }
                                 }else
                                     bin[i+1].push(leftover)
                             }else{
-                                setNewPos(b, neighbor, empty_cell, r, leftover, binO);
+                                setNewPos(b, neighbor, empty_cell, r, leftover, binO,bin);
                                 if (empty_cell<5){
                                     if (clusterQueeue[b[0].cluster]===undefined)
                                         clusterQueeue[b[0].cluster] = [];
