@@ -1407,14 +1407,14 @@ function handle_dataRaw() {
             let index = 0;
             let cluster_inRange = {}; // this node belong to how many cluster
             let minval = Infinity;
-            cluster_info.find((c, i) => {
+            cluster_info.find((c, ci) => {
                 const val = distance(c.__metrics.normalize, axis_arr);
                 if(val===0)
-                    c.leadername = h.name;
+                    c.leadername = {name:h.name,timestep:i};
                 if( val < c.radius/2)
-                    cluster_inRange[i] =val;
+                    cluster_inRange[ci] =val;
                 if (minval > val) {
-                    index = i;
+                    index = ci;
                     minval = val;
                 }
                 return !val;

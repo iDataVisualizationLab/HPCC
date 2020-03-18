@@ -89,8 +89,7 @@ function RadarChart(id, data, options, name) {
     let colorLength = cfg.arrColor.length-1;
     var dif = 1 / (cfg.levels-2);
     var right = 1 + dif;
-    // cfg.arrThresholds = [-dif]; // 3/18/2020
-    cfg.arrThresholds = [0]; // 3/18/2020
+    cfg.arrThresholds = [-dif];
     for (var i=0;i<colorLength-1;i++)
         cfg.arrThresholds.push(i*dif);
     cfg.arrThresholds.push(right);
@@ -113,9 +112,8 @@ function RadarChart(id, data, options, name) {
     }
     let deltaAng = Math.PI/10;
     // Re-adjust angles
-    minValue = range[0] - (range[1]-range[0])*4/cfg.w;
-    // minValue = range[0]-dif*(range[1]-range[0]); // 3/18/2020
-    maxValue = range[1]+dif*(range[1]-range[0])- (range[1]-range[0])*4/cfg.w;
+    minValue = range[0]-dif*(range[1]-range[0]);
+    maxValue = range[1]+dif*(range[1]-range[0]);
 
     let  radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
     Format = d3.format('');               //Percentage formatting
@@ -256,15 +254,14 @@ function RadarChart(id, data, options, name) {
         });
         //Draw the background circles
         var levels = axisGrid.selectAll(".levels.gridCircle")
-            .data(d3.range(1, (cfg.levels)).reverse());
+            .data(d3.range(1, (cfg.levels + 1)).reverse());
         levels.exit().remove();
         levels.enter()
             .append("circle")
             .attr("class", "levels gridCircle")
             .merge(levels)
             .attr("r", function (d, i) {
-                // return radius / cfg.levels * d;
-                return rScale(d/(cfg.levels-2));
+                return radius / cfg.levels * d;
             })
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {

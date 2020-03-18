@@ -333,7 +333,7 @@ d3.TimeSpace = function () {
         // make path object and compute euclideandistance
         datain.forEach(function (target, i) {
             target.__metrics.position = [0,0,0];
-            if (target.name===cluster[target.cluster].leadername)
+            if (target.name===cluster[target.cluster].leadername.name && target.__timestep===cluster[target.cluster].leadername.timestep)
                 cluster[target.cluster].__metrics.indexLeader = i;
             if (!path[target.name])
                 path[target.name] = [];
@@ -2530,8 +2530,6 @@ function handle_data_model(tsnedata,isKeepUndefined) {
     let dataIn = [];
     // let timeScale = d3.scaleLinear().domain([0,sampleS.timespan.length-1]).range([0,timeWeight]);
     d3.values(tsnedata).forEach(axis_arr => {
-        if (axis_arr[0].name==='49')
-            debugger
         let lastcluster;
         let lastcluster_insterted;
         let lastdataarr;
@@ -2547,6 +2545,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
             appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
+            // appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster));
             // appendCondition = appendCondition && (lastcluster === undefined ) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster)&&axis_arr[i].strickCluster;
             lastcluster = index;
             lastdataarr = currentData.slice();
