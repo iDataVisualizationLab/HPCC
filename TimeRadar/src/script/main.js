@@ -2218,6 +2218,8 @@ function updateViztype (viztype_in){
         if (cluster_info) {
             cluster_map(cluster_info);
             jobMap.draw();
+            if (vizMode)
+                mainviz.redrawRadar();
         }
     }
 }

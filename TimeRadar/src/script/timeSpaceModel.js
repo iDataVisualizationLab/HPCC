@@ -811,7 +811,7 @@ d3.TimeSpace = function () {
         }
         isneedrender = true;
     }
-    function drawRadar({data,pos,posStatic}){
+    function drawRadar({data,pos,posStatic},redraw){
         let dataRadar = [];
         let links = {};
         data.forEach((d,i)=>{
@@ -851,6 +851,12 @@ d3.TimeSpace = function () {
                 d.radar = d3.select(this);
                 createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
             });
+        if(redraw){
+            d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR').each(function(d){
+                d.radar = d3.select(this);
+                createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
+            });
+        }
 
     }
     function draw_grid_hexagon(data,hexbin){
@@ -2350,6 +2356,9 @@ d3.TimeSpace = function () {
             }
         })
         d3.select('#radarCollider').dispatch('action');
+    };
+    master.redrawRadar = function(){
+        drawRadar(svgData,true);
     };
     function updateTableInput(){
         table_info.select(`.datain`).text(e=>datain.length);

@@ -90,7 +90,7 @@ function RadarChart(id, data, options, name) {
     var dif = 1 / (cfg.levels-2);
     var right = 1 + dif;
     // cfg.arrThresholds = [-dif]; // 3/18/2020
-    cfg.arrThresholds = [0]; // 3/18/2020
+    cfg.arrThresholds = [-4/cfg.w]; // 3/18/2020
     for (var i=0;i<colorLength-1;i++)
         cfg.arrThresholds.push(i*dif);
     cfg.arrThresholds.push(right);

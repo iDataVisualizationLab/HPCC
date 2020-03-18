@@ -83,7 +83,8 @@ function RoseChart(id, data, options, name) {
     let colorLength = cfg.arrColor.length-1;
     var dif = 1 / (cfg.levels-2);
     var right = 1 + dif;
-    cfg.arrThresholds = [-dif];
+    // cfg.arrThresholds = [-dif];
+    cfg.arrThresholds = [-4/cfg.w]; // 3/18/2020
     for (var i=0;i<colorLength-1;i++)
         cfg.arrThresholds.push(i*dif);
     cfg.arrThresholds.push(right);
@@ -106,7 +107,8 @@ function RoseChart(id, data, options, name) {
     }
     let deltaAng = Math.PI/allAxis.length/2;
     // Re-adjust angles
-    minValue = range[0]-dif*(range[1]-range[0]);
+    minValue = range[0] - (range[1]-range[0])*4/cfg.w;
+    // minValue = range[0]-dif*(range[1]-range[0]); // 3/18/2020
     maxValue = range[1]+dif*(range[1]-range[0]);
 
     let  radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
@@ -249,19 +251,19 @@ function RoseChart(id, data, options, name) {
         });
         //Draw the background circles
         var levels = axisGrid.selectAll(".levels.gridCircle")
-            .data(d3.range(1, (cfg.levels + 1)).reverse());
+            .data(d3.range(1, (cfg.levels)).reverse());
         levels.exit().remove();
         levels.enter()
             .append("circle")
             .attr("class", "levels gridCircle")
             .merge(levels)
             .attr("r", function (d, i) {
-                return radius / cfg.levels * d;
+                return rScale(d/(cfg.levels-2));
             })
             .style("fill", "#CDCDCD")
             .style("stroke", function (d) {
                 if (cfg.ringColor===undefined) {
-                    var v = (maxValue - minValue) * d / cfg.levels + minValue;
+                    var v = d/(cfg.levels-2);
                     return colorTemperature(v);
                 }
                 return cfg.ringColor;
