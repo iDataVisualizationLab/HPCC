@@ -1411,7 +1411,7 @@ function handle_dataRaw() {
                 const val = distance(c.__metrics.normalize, axis_arr);
                 if(val===0)
                     c.leadername = h.name;
-                if( val < c.radius)
+                if( val < c.radius/2)
                     cluster_inRange[i] =val;
                 if (minval > val) {
                     index = i;
@@ -1421,9 +1421,11 @@ function handle_dataRaw() {
             });
 
             // enhance unchange status
-            if (cluster_inRange[lastCluster]!==undefined){
-                index = lastCluster;
-            }
+            // if (cluster_inRange[lastCluster]!==undefined){
+            //     if (index!==lastCluster)
+            //         console.log(val,cluster_inRange)
+            //     index = lastCluster;
+            // }
             //--- end assign cluster
             if (!cluster_info[index].arr[i])
                 cluster_info[index].arr[i]=[];
@@ -1437,8 +1439,8 @@ function handle_dataRaw() {
             });
             // axis_arr.cluster = index;
             tsnedata[h.name][i].cluster = index;
-            // timeline precalculate
-            // tsnedata[h.name].push(axis_arr);
+            tsnedata[h.name][i].multiClusters = Object.keys(cluster_inRange).length>1;
+            tsnedata[h.name][i].strickCluster = minval<cluster_info[index].radius/2;
             lastCluster = index;
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);

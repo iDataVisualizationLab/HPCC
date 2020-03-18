@@ -2530,7 +2530,10 @@ function handle_data_model(tsnedata,isKeepUndefined) {
     let dataIn = [];
     // let timeScale = d3.scaleLinear().domain([0,sampleS.timespan.length-1]).range([0,timeWeight]);
     d3.values(tsnedata).forEach(axis_arr => {
+        if (axis_arr[0].name==='49')
+            debugger
         let lastcluster;
+        let lastcluster_insterted;
         let lastdataarr;
         let count = 0;
         let timeLength = sampleS.timespan.length;
@@ -2543,11 +2546,13 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
-            appendCondition = appendCondition && !(lastcluster !== undefined) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster);
+            appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
+            // appendCondition = appendCondition && (lastcluster === undefined ) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster)&&axis_arr[i].strickCluster;
             lastcluster = index;
             lastdataarr = currentData.slice();
             if (appendCondition) {
-            // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+                lastcluster_insterted = index;
+                // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
             // // add all points
             // }
