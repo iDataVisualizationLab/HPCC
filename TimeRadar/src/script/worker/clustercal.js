@@ -62,7 +62,7 @@ addEventListener('message',function ({data}) {
                 }).data([]);
                 break;
             case 'binarybin':
-                bin = binarybin();
+                bin = binarybin([],{isNormalized:true});
                 break;
             default:
                 bin = kmeanCluster;
