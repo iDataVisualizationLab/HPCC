@@ -1187,10 +1187,12 @@ d3.TimeSpace = function () {
                 // visiableLine(graphicopt.linkConnect);
                 controls.update();
                 renderer.render(scene, camera);
-                if (solution&&solution.length)
+                if (solution[Math.floor(graphicopt.opt.dim)]&&solution[Math.floor(graphicopt.opt.dim)].length)
                     cluster.forEach(c=>{
-                        const pos = position2Vector( datain[c.__metrics.indexLeader].__metrics.position);
-                        c.__metrics.projection = getpos(pos.x,pos.y,pos.z);
+                        if (datain[c.__metrics.indexLeader]) {
+                            const pos = position2Vector(datain[c.__metrics.indexLeader].__metrics.position);
+                            c.__metrics.projection = getpos(pos.x, pos.y, pos.z);
+                        }
                     });
                 updatelabelCluster();
             }
@@ -1818,7 +1820,7 @@ d3.TimeSpace = function () {
         svg.select('#modelClusterLabel').selectAll('g.cluster').remove();
         const marker =  svg.select('#modelClusterLabel').selectAll('g.cluster').data(cluster)
             .enter().append('g').attr('class', 'cluster');
-        const symbolGenerator = d3.symbol().type(d3.symbolCross).size(100);
+        const symbolGenerator = d3.symbol().type(d3.symbolCross).size(60);
         marker.append('text').attrs({"text-anchor":"middle",y:-10})
             .styles({'stroke':'white',
                 'font-size':20,

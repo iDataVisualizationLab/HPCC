@@ -1390,7 +1390,7 @@ function formatService(init){
 }
 function handle_dataRaw() {
 
-    cluster_info.forEach(d => (d.arr = [],d.total=0,d.radius = d.radius||0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    cluster_info.forEach(d => (d.arr = [],d.total=0,d.radius = d.radius||0, d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined)),d.leadername=undefined));
     // tsnedata = {};
     hosts.forEach(h => {
         // tsnedata[h.name] = [];
@@ -1409,7 +1409,7 @@ function handle_dataRaw() {
             let minval = Infinity;
             cluster_info.find((c, ci) => {
                 const val = distance(c.__metrics.normalize, axis_arr);
-                if(val===0)
+                if(val===0&&c.leadername===undefined)
                     c.leadername = {name:h.name,timestep:i};
                 if( val < c.radius/2)
                     cluster_inRange[ci] =val;
