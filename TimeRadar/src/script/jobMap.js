@@ -2255,7 +2255,7 @@ let JobMap = function() {
                     timerange[1] = d3.max(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.endTime))))));
                 if (index_power!==-1)
                     for (let t =timerange[0];t<=timerange[1];t++) {
-                        let numbArray = hostOb[c].data[t];
+                        let numbArray = tsnedata[c][t].slice();
                         u.dataRaw.push(numbArray);
                         if (!u.PowerUsage)
                             u.PowerUsage = {};
