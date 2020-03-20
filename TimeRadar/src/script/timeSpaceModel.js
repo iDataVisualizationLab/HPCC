@@ -2336,7 +2336,7 @@ d3.TimeSpace = function () {
             const newValue = +target.attr('value');
             switch (newValue) {
                 case 0:
-                    target.html(`<i class="icon-radarShape material-icons icon"></i> No collision`);
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> Radar layout`);
                     if (forceColider&&svgData&&svgData.posStatic) {
                         svgData.pos = _.cloneDeep(svgData.posStatic);
                         forceColider.stop();
@@ -2346,11 +2346,11 @@ d3.TimeSpace = function () {
                     }
                     break;
                 case 1:
-                    target.html(`<i class="icon-radarShape material-icons icon"></i> Collision detection `);
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> Force layout `);
                     startCollide();
                     break;
                 default:
-                    target.html(`<i class="icon-radarShape material-icons icon"></i> Hexagon collision`);
+                    target.html(`<i class="icon-radarShape material-icons icon"></i> Hexagon layout`);
                     // startCollide();
                     updateforce();
                     forceColider.tick();

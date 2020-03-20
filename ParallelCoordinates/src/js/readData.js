@@ -1,4 +1,26 @@
 var query_time
+function initApp(){
+    // load filter file
+        preloader(true,undefined,'Read data file...');
+        readFilecsv(d3.select('#datacom').node().value);
+}
+function formatService(init){
+    // if (runopt.minMax)
+    //     calculateServiceRange();
+    // else
+    serviceLists.forEach(s=>{
+        if(s.text.split('vs.').length>1) {
+            s.enable = false;
+            s.sub[0].enable = false;
+        }
+    })
+    serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
+    conf.serviceList = serviceList;
+    conf.serviceLists = serviceLists;
+    conf.serviceListattr = serviceListattr;
+    conf.serviceListattrnest = serviceListattrnest;
+    drawFiltertable();
+}
 function readData() {
     let hostResults = {}, hosts=[];
     let hostsList = _.without(d3.keys(sampleS),'timespan');
