@@ -842,9 +842,9 @@ d3.TimeSpace = function () {
         old.enter().append('g').attr('class','timeSpaceR')
             .attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`)
             .on('highlight',d=>{d.radar.classed('fade',false);})
-            .on('fade',d=>{d.radar.classed('fade',true);if (links[d.name_or]) links[d.name_or].object.classed('hide',true)})
+            .on('fade',d=>{d.radar.classed('fade',true);if (links[d.name_or]&&links[d.name_or].object) links[d.name_or].object.classed('hide',true)})
             .on('mouseover',d=>{
-                if (links[d.name_or]) links[d.name_or].object.classed('hide',false)
+                if (links[d.name_or]&&links[d.name_or].object) links[d.name_or].object.classed('hide',false)
                 highlightNode([{index:path[d.name_or].find(e=>e.timestep===d.timestep).index}])})
             .on('mouseleave',d=>{ highlightNode([]); if (links[d.name_or]) links[d.name_or].object.classed('hide',true);})
             .each(function(d){
@@ -2337,7 +2337,7 @@ d3.TimeSpace = function () {
             switch (newValue) {
                 case 0:
                     target.html(`<i class="icon-radarShape material-icons icon"></i> No collision`);
-                    if (forceColider) {
+                    if (forceColider&&svgData&&svgData.posStatic) {
                         svgData.pos = _.cloneDeep(svgData.posStatic);
                         forceColider.stop();
                         svg.classed('white',false);
