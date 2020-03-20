@@ -447,6 +447,7 @@ d3.TimeSpace = function () {
         stop = false;
 
         svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width,height:graphicopt.height});
+        svg.select("#modelWorkerScreen_svg_g").selectAll("*").remove();
         clusterMarker = createClusterLabel();
 
         d3.select('#modelWorkerInformation+.title').text(self.name);
