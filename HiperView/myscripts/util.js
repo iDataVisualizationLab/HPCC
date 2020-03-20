@@ -1005,6 +1005,9 @@ function updateDatainformation(timearray,filename){
     let dataholder = d3.select('#datainformation');
     for (key in dataInformation)
         dataholder.select(`.${key}`).text(dataInformation[key]);
+    if(sampleS)
+        d3.select(".currentDate")
+            .text("" + (sampleS['timespan'][0]).toDateString());
 }
 function bytesToString (bytes) {
     // One way to write it, not the prettiest way to write it.
@@ -1048,6 +1051,8 @@ function onSaveClusterInfo() {
         csv_header.push(d.text + '_max');
     });
     csv_header.push('mse');
+    csv_header.push('radius');
+    csv_header.push('description');
 
     dataout = [];
     serviceFullList.forEach(d => {
@@ -1063,6 +1068,8 @@ function onSaveClusterInfo() {
         // if (binopt.clusterMethod ==='leaderbin')
         //     temp.push(d.bin.distance);
         temp.push(d.mse);
+        temp.push(d.radius);
+        temp.push(clusterDescription[d.name].text.replace(/,/g,' '));
         dataout.push(temp);
     });
 

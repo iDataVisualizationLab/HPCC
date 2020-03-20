@@ -944,7 +944,7 @@ let JobMap = function() {
                 //     computers.data().sort((a, b) => a.order - b.order).forEach((d, i) => d.order = i);
                 // }else{
                     computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.name === d.name), f => f.target.y));
-                    if (user[0].name!=="dummyJob")
+                    if (!jobEmpty)
                         computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
                     else
                         computers.data().forEach((d, i) => d.order = i);
@@ -1912,7 +1912,7 @@ let JobMap = function() {
             });
 
             let newdata = [];
-            jobEmpty = user_n[0].key ==="dummyJob";
+            jobEmpty = user_n.length===0||user_n[0].key ==="dummyJob";
 
             user = user_n.map((d, i) => {
                 d.name = d.key;
@@ -2255,7 +2255,7 @@ let JobMap = function() {
                     timerange[1] = d3.max(u.unqinode_ob[c],e=>Math.min(maxTimestep-1,Math.max(0,Math.ceil(timescale(new Date(e.endTime))))));
                 if (index_power!==-1)
                     for (let t =timerange[0];t<=timerange[1];t++) {
-                        let numbArray = hostOb[c].data[t];
+                        let numbArray = tsnedata[c][t].slice();
                         u.dataRaw.push(numbArray);
                         if (!u.PowerUsage)
                             u.PowerUsage = {};

@@ -17,6 +17,7 @@
 
         <script src="../HiperView/js/jBox.all.min.js"></script>
         <link href="../HiperView/css/jBox.all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../HiperView/css/semantic.css">
         <link rel="stylesheet" href="../HiperView/css/materialize.css">
         <link href="../HiperView/css/enjoyhint.css" rel="stylesheet">
         <link rel="stylesheet" href="../HiperView/css/customicon.css">
@@ -32,6 +33,7 @@
         <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
         <script src="src/lib/mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
         <script src="../HiperView/js/nouislider.js"></script>
+        <script src="../HiperView/js/semantic.min.js"></script>
         <!--<link rel="stylesheet" type="text/css" href="css/dd.css" />-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <!--<script src="../HiperView/js/underscore-min.js"></script>-->
@@ -468,6 +470,7 @@
                                     <select id="clusterMethod" class="col s8 radarcontroller_layout">
                                         <option value="leaderbin" selected="selected">Leader Bin</option>
                                         <option value="kmean">K-means</option>
+                                        <!--<option value="binarybin">Binary bin</option>-->
                                     </select>
                                 </div>
                                 <div  class="row valign-wrapper">
@@ -503,6 +506,11 @@
                                         <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
                                     </div>
                                 </form>
+                                <form action="#" class='clusterProfile hide row valign-wrapper' id = "binarybinprofile" onsubmit="recalculateCluster( {clusterMethod: 'binarybin',normMethod:$('#normMethod').val()},onchangeCluster);return false;">
+                                    <div  class="col s3 no_padding valign-wrapper center-align" >
+                                        <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
+                                    </div>
+                                </form>
                             </div>
                             <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
                                 <label class="col s8 offset-s4 left-align">
@@ -531,6 +539,9 @@
                                 <label class="col s4">Group information:</label>
                                 <button type="submit" class ="menuBtn modal-trigger btn-small" href="#savedialog_clusterInfo">
                                     <i class="fas fa-download pauseicon" ></i> Save</button>
+                                <button  type="submit" class ="menuBtn btn-small" id="loadClusterInfobtn">
+                                <i class="fas fa-upload pauseicon" ></i> Load</button>
+                                <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
                             </div>
 
                         </div>

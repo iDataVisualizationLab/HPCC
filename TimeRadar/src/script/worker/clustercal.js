@@ -4,6 +4,7 @@ importScripts("../../../../HiperView/js/d3.v4.js",
     "../../../../HiperView/js/lodash.min.js",
     "../setting.js","../../../../HiperView/js/kmean.js",
     "../../../../HiperView/js/binnerN.min.js",
+    "../../../../HiperView/js/binarybin.min.js",
     "../../../../HiperView/js/simple-statistics.min.js");
 
 
@@ -49,20 +50,26 @@ addEventListener('message',function ({data}) {
             action: 'returnData',
             result: {message: `Binning process`, process: 40}
         });
-        if (binopt.clusterMethod === 'leaderbin') {
-            let estimateSize = Math.max(2, Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
-            console.log('estimateSize: ' + estimateSize);
-            bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).distanceMethod(binopt.normMethod).coefficient({
-                reduce_coefficient: 0.3,
-                reduce_offset: 0,
-                increase_coefficient: 2,
-                increase_offset: 0
-            }).data([]);
-        } else {
-            bin = kmeanCluster;
-            bin.k(binopt.bin.k);
-            bin.distanceMethod(binopt.normMethod);
-            bin.iterations(binopt.bin.iterations);
+        switch (binopt.clusterMethod) {
+            case 'leaderbin':
+                let estimateSize = Math.max(2, Math.pow(binopt.bin.range[1], 1 / dataSpider3[0].length));
+                console.log('estimateSize: ' + estimateSize);
+                bin = binnerN().startBinGridSize(estimateSize).isNormalized(true).minNumOfBins(binopt.bin.range[0]).maxNumOfBins(binopt.bin.range[1]).distanceMethod(binopt.normMethod).coefficient({
+                    reduce_coefficient: 0.3,
+                    reduce_offset: 0,
+                    increase_coefficient: 2,
+                    increase_offset: 0
+                }).data([]);
+                break;
+            case 'binarybin':
+                bin = binarybin([],{isNormalized:true});
+                break;
+            default:
+                bin = kmeanCluster;
+                bin.k(binopt.bin.k);
+                bin.distanceMethod(binopt.normMethod);
+                bin.iterations(binopt.bin.iterations);
+                break;
         }
         let process = 50;
         let w = 25;
@@ -90,7 +97,7 @@ addEventListener('message',function ({data}) {
         var keys = serviceFullList.map(d=>d.text);
         dataSpider3.length = 0;
         console.log("numBins: " + bin.bins.length);
-
+        const binRadius = bin.binRadius;
         dataSpider3 = bin.bins.map(d => {
             var temp;
             if (bin.normalizedFun)
@@ -139,7 +146,7 @@ addEventListener('message',function ({data}) {
         cluster = dataSpider3.map((d, i) => {
             let temp = {labels: i};
             d.forEach((s, i) => temp[serviceFullList[i].text] = serviceFullList[i].scale(s.value));
-            temp.radius = d.bin.distance;
+            temp.radius = binRadius||d.bin.distance;
             temp.mse = d.bin.mse;
             temp.index = i;
             temp.__metrics = d.slice();

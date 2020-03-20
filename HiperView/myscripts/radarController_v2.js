@@ -35,7 +35,8 @@ let radarController = function () {
     let colorLength = graphicopt.arrColor.length-1;
     var dif = 1 / (graphicopt.levels-2);
     var right = 1 + dif;
-    graphicopt.arrThresholds = [-dif];
+    // graphicopt.arrThresholds = [-dif];
+    graphicopt.arrThresholds = [-4/graphicopt.widthG()];
     for (var i=0;i<colorLength-1;i++)
         graphicopt.arrThresholds.push(i*dif);
     graphicopt.arrThresholds.push(right);
@@ -47,6 +48,7 @@ let radarController = function () {
         let colorLength = graphicopt.arrColor.length-1;
         var dif = 1 / (graphicopt.levels-2);
         var right = 1 + dif;
+        // graphicopt.arrThresholds = [-dif];
         graphicopt.arrThresholds = [-dif];
         for (var i=0;i<colorLength-1;i++)
             graphicopt.arrThresholds.push(i/(colorLength-1));
@@ -428,7 +430,7 @@ let radarController = function () {
                 rScale.range([0,radius]);
                 //Draw the background circles
                 axisGrid.   selectAll(".gridCircle")
-                    .data(d3.range(0, (graphicopt.levels)).reverse())
+                    .data(d3.range(1, (graphicopt.levels)).reverse())
                     .enter()
                     .append("circle")
                     .attr("class", "gridCircle")

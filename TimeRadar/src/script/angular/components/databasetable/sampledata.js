@@ -88,8 +88,7 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"18 Feb 2020",
         group:"sample",
-        formatType:'csv',
-        separate:'|',
+        formatType:'csv'
     },{
         id:"csvEmployment",
         name:"US employment data - people",
@@ -97,6 +96,7 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"1 Jan 1999",
         group:"sample",
+        separate:'-',
         formatType:'csv'
     },
     {
@@ -106,6 +106,7 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"1 Jan 1999",
         group:"sample",
+        separate:'-',
         formatType:'csv'
     },
     {
@@ -115,6 +116,7 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"1 Jan 1999",
         group:"sample",
+        separate:'-',
         formatType:'csv'
     },
     // {

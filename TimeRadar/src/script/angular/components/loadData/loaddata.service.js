@@ -11,6 +11,34 @@ angular.module('hpccApp')
     Loaddata.reset = function(hard) {
         Loaddata.data = Dataset.currentDataset;
     };
+    $('#clusterInfo_input_file').on('input',(evt)=>{
+        let f = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = (function (theFile) {
+            return function (e) {
+
+                loadPresetCluster(e.target.result, (status) => {
+                    if (status) {
+                        handle_dataRaw();
+                        try {
+                            initDataWorker();
+                        }catch(e){
+                            console.log(e)
+                        }
+                        if (!init)
+                            resetRequest();
+                        else
+                            main();
+                        preloader(false)
+                    }
+                    firstTime = false;
+                })
+            }
+        })(f);
+
+        reader.readAsDataURL(f);
+    });
+    $('#loadClusterInfobtn').on('click',()=>$('#clusterInfo_input_file').trigger('click'));
     function loadFile(){
         preloader(true);
         exit_warp();
@@ -112,8 +140,6 @@ angular.module('hpccApp')
                 processResult = processResult_old;
                 realTimesetting(false,undefined,true,sampleS);
             }
-            d3.select(".currentDate")
-                .text("" + (data['timespan'][0]).toDateString());
 
             let clusternum = (data['timespan'].length<50)?[5,7]:[6,8];
             loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{loadclusterInfo= status;
@@ -146,15 +172,21 @@ angular.module('hpccApp')
         }
     }
     function loadPresetCluster(name,calback) {
-        return d3.csv(`${name}_cluster.csv`, function (cluster) {
-            if (cluster==null) {
-                M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
+        const fileName = name.includes('data:')?name:`${name}_cluster.csv`;
+        return d3.csv(fileName, function (cluster) {
+            if (cluster==null||checkVliadClusterinfo(cluster)) {
+                if (cluster==null)
+                    M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
+                else
+                    M.toast({html: 'Wrong cluster file format!'});
                 if (calback) {
                     calback(false);// status
                 }
             }else {
                 updateClusterControlUI((cluster || []).length);
-                cluster.forEach(d => {
+                clusterDescription = {};
+                let haveDescription = false;
+                cluster.forEach((d,i) => {
                     d.radius = +d.radius;
                     d.mse = +d.mse;
                     d.__metrics = serviceFullList.map(s => {
@@ -166,16 +198,31 @@ angular.module('hpccApp')
                         }
                     });
                     d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
+                    if(d.description) {
+                        haveDescription = true;
+                        clusterDescription[`group_${i + 1}`] = {id:`group_${i + 1}`,text: d.description};
+                        delete d.description;
+                    }
                 });
                 cluster_info = cluster;
-                clusterDescription = {};
-                recomendName(cluster_info);
+                // clusterDescription = {};
+                recomendName(cluster_info,haveDescription);
                 recomendColor(cluster_info);
                 if(calback){
                     calback(true);// status
                 }
             }
         });
+        function checkVliadClusterinfo(cluster_input){
+            // check the axis
+            cluster_input[0]
+            let invalid = false;
+            serviceFullList.find(s=>{
+                invalid = cluster_input[0][s.text]===undefined
+                return invalid
+            })
+            return invalid;
+        }
     }
     function readFilecsv(file,separate,object) {
         separate = separate||'|';
@@ -193,6 +240,7 @@ angular.module('hpccApp')
             makedataworker();
             initDataWorker();
             // addDatasetsOptions()
+
             MetricController.axisSchema(serviceFullList, true).update();
             firstTime = false;
             realTimesetting(false, "csv", true, sampleS);
@@ -207,8 +255,7 @@ angular.module('hpccApp')
                 user: "dummyJob"
             }];
 
-            d3.select(".currentDate")
-                .text("" + (sampleS['timespan'][0]).toDateString());
+
             updateClusterControlUI();
             // preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
             loadPresetCluster(file?file.replace(/(\w+).json|(\w+).csv/, '$1'):'', (status) => {

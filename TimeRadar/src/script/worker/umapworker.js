@@ -21,7 +21,8 @@ addEventListener('message',function ({data}){
             count = 0;
             data.opt.nComponents = data.opt.dim;
             const umap = new UMAP(data.opt);
-            umap.setSupervisedProjection(labels);
+            if (data.opt.supervisor)
+                umap.setSupervisedProjection(labels);
             console.log('---init data UMAP-----')
             const nEpochs = umap.initializeFit(dataIn);
             console.log(nEpochs)
