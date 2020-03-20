@@ -333,7 +333,7 @@ d3.TimeSpace = function () {
         // make path object and compute euclideandistance
         datain.forEach(function (target, i) {
             target.__metrics.position = [0,0,0];
-            if (target.name===cluster[target.cluster].leadername.name && target.__timestep===cluster[target.cluster].leadername.timestep)
+            if (cluster[target.cluster].leadername&&(target.name===cluster[target.cluster].leadername.name && target.__timestep===cluster[target.cluster].leadername.timestep))
                 cluster[target.cluster].__metrics.indexLeader = i;
             if (!path[target.name])
                 path[target.name] = [];
