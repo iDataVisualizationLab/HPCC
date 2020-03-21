@@ -1,6 +1,6 @@
 var width, height;
 
-var m = [40, 0, 10, 0],
+var m = [60, 0, 10, 0],
     w,
     h,
     xscale,
