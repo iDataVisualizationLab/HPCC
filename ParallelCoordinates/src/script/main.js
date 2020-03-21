@@ -1154,7 +1154,7 @@ function paths(selected, ctx, count) {
     // render all lines until finished or a new brush event
     function animloop(){
         if (i >= n || count < brush_count) {
-            // timel.stop()
+            timel.stop()
             return true;
         }
         var max = d3.min([i+render_speed, n]);
@@ -1163,8 +1163,9 @@ function paths(selected, ctx, count) {
         i = max;
         timer = optimize(timer);  // adjusts render_speed
     };
-
-    d3.timer(animloop);
+    if (timel)
+        timel.stop()
+    timel = d3.timer(animloop);
 }
 let timel
 // transition ticks for reordering, rescaling and inverting
@@ -1217,12 +1218,12 @@ function rescale() {
     // reset yscales, preserving inverted state
     dimensions.forEach(function(d,i) {
         if (yscale[d].inverted) {
-            yscale[d] = d3.scale.linear()
+            yscale[d] = d3.scaleLinear()
                 .domain(d3.extent(data, function(p) { return +p[d]; }))
                 .range([0, h]);
             yscale[d].inverted = true;
         } else {
-            yscale[d] = d3.scale.linear()
+            yscale[d] = d3.scaleLinear()
                 .domain(d3.extent(data, function(p) { return +p[d]; }))
                 .range([h, 0]);
         }
@@ -1263,7 +1264,7 @@ function actives() {
         });
 
     // free text search
-    var query = d3.select("#search")[0][0].value;
+    var query = d3.select("#search").node().value;
     if (query > 0) {
         selected = search(selected, query);
     }
