@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" type="text/css" href="parallel.css" />
     <link rel="stylesheet" type="text/css" href="../HiperView/css/theme.css" />
+    <link rel="stylesheet" type="text/css" href="../TimeRadar/src/style/main.css" />
     <link rel="stylesheet" type="text/css" href="theme.css" />
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -74,6 +75,19 @@
     <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
     <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
 </ul>
+<div id='datainformation'>
+    <table>
+        <tbody>
+        <tr><td>Filename:</td><td class="filename"></td></tr>
+        <tr><td>Size:</td><td class="size"></td></tr>
+        <tr><td>Time range:</td><td class="timerange"></td></tr>
+        <tr><td>Time interval:</td><td class="interval"></td></tr>
+        <tr><td>Total time step:</td><td class="totalstep"></td></tr>
+        <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+        <tr><td>#Data points:</td><td class="datanum"></td></tr>
+        </tbody>
+    </table>
+</div>
     <div id="mySidenav" class="sidenavs">
         <ul id="listvar" class="dropdown-content  s12">
 
@@ -239,6 +253,8 @@
 </div>
 
 </body>
+<script src="../HiperView/js/jBox.all.min.js"></script>
+<link href="../HiperView/css/jBox.all.min.css" rel="stylesheet">
 <!--d3-->
 <script src="src/lib/d3.v5.min.js"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>

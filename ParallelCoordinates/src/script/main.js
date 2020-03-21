@@ -1,6 +1,6 @@
 var width, height;
 
-var m = [60, 0, 10, 0],
+var m = [40, 60, 10, 10],
     w,
     h,
     xscale,
@@ -258,7 +258,53 @@ $( document ).ready(function() {
     d3.select("#DarkTheme").on("click",switchTheme);
 
     // data
+    let tipopt= {position: {
+            x: 'right',
+            y: 'center'
+        },
+        outside: 'x',
+        adjustPosition: true,
+        adjustTracker: true,
+        theme: 'TooltipBorderThick',
+        addClass:'informationDetail',
+        getTitle:'data-title'
+    };
+    d3.selectAll('.information, .toolTip').each(function() {
+        const hasTarget = d3.select(this).attr('data-target');
+        const hasImage = d3.select(this).attr('data-image');
+        let positiont = d3.select(this).attr('tooltip-pos');
+        if (hasTarget||hasImage){
+            tipopt.addClass ='informationDetail';
+            tipopt.position = {
+                x: 'right',
+                y: 'center'
+            }
+            tipopt.outside= 'x';
+            delete tipopt.offset;
+        }else{
+            tipopt.addClass = 'informationDetail mini';
+            if (!positiont) {
+                tipopt.offset = {y: -15};
+                delete tipopt.position;
+                tipopt.outside = "y";
+            }else{
+                tipopt.position = {
+                    x: 'right',
+                    y: 'center'
+                }
+                tipopt.outside= 'x';
+                delete tipopt.offset;
+            }
+        }
+        let tip = $(this).jBox('Tooltip',_.defaults({
+            pointer: (hasTarget||hasImage)?"top:20":(positiont?false:"center")
+        }, tipopt));
+        if (hasTarget)
+            tip.setContent($('#datainformation'));
+        else if(hasImage)
+            tip.setContent(`<img src="src/images/${hasImage}" width="100%"></img>`);
 
+    });
 
 
     // init();
