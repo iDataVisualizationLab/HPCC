@@ -610,8 +610,9 @@ function init() {
     data = object2DataPrallel(sampleS);
 
     // Extract the list of numerical dimensions and create a scale for each.
-    xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
-        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+        let k = s.text;
+        let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
@@ -620,7 +621,8 @@ function init() {
                 return +d[k];
             }))
             .range([h, 0]))));
-    }));
+        return s.enable?xtempscale:false;
+    }).map(s=>s.text));
 
     // Add a group element for each dimension.
     update_Dimension();
@@ -641,8 +643,9 @@ function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
     data = object2DataPrallel(sampleS);
-    xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
-        return (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+        let k = s.text;
+        let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
@@ -651,7 +654,8 @@ function resetRequest() {
                 return +d[k];
             }))
             .range([h, 0]))));
-    }));
+        return s.enable?xtempscale:false;
+    }).map(s=>s.text));
     // Add a group element for each dimension.
     update_Dimension();
     brush();
