@@ -259,120 +259,7 @@ $( document ).ready(function() {
 
     // data
 
-    d3.select('#datacom').on("change", function () {
-        let choiceinit = d3.select('#datacom').node().value;
-        let typefile = d3.select('#datacom').attr('type');
-        d3.select(".currentDate")
-            .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
-        if(typefile==="csv"){
-            readFilecsv(choiceinit);
-        }else {
-            if (choiceinit.includes('influxdb')) {
-                // processResult = processResult_influxdb;
-                db = "influxdb";
-                realTimesetting(false, "influxdb", true);
-            } else {
-                db = "nagios"
-                // processResult = processResult_old;
-                realTimesetting(false, undefined, true);
-            }
-            d3.json("../HiperView/data/" + choiceinit + ".json").then(function (data2) {
-                d3.select(".cover").select('h5').text('drawLegend...');
-                d3.select(".currentDate")
-                    .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
-                // drawLegend(initialService, arrThresholds, arrColor, dif);
-                sampleS = data2;
-                inithostResults();
-                serviceListattrnest = serviceLists.map(d=>({
-                    key:d.text,sub:d.sub.map(e=>e.text)
-                }));
-                selectedService = serviceLists[0].text;
-                formatService(true);
-                processResult = processResult_csv;
-                init();
-                d3.select(".cover").select('h5').text('loading data...');
-                // addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
-                d3.select('.cover').classed('hidden', true);
-                spinner.stop();
-            });
-        }
-        // d3.select('.cover').classed('hidden', false);
-        // // animationtime=true;
-        // spinner.spin(target);
-        // const choice = this.value;
-        // const choicetext = d3.select('#datacom').node().selectedOptions[0].text;
-        // setTimeout(() => {
-        //     if (choice !== "nagios" && choice !== "influxdb")
-        //         d3.json("../HiperView/data/" + choice + ".json").then( function (data2) {
-        //             sampleS = data2;
-        //             if (choice.includes('influxdb')){
-        //                 // processResult = processResult_influxdb;
-        //                 db = "influxdb";
-        //                 realTimesetting(false,"influxdb");
-        //             }else {
-        //                 db = "nagios"
-        //                 // processResult = processResult_old;
-        //                 realTimesetting(false);
-        //             }
-        //             d3.select(".currentDate")
-        //                 .text("" + d3.timeParse("%d %b %Y")(choicetext).toDateString());
-        //             resetRequest();
-        //             d3.select('.cover').classed('hidden', true);
-        //             spinner.stop();
-        //         });
-        //     else {
-        //         realTimesetting(true,choice);
-        //         db = choice;
-        //         requestService = eval('requestService'+choice);
-        //         processResult = eval('processResult_'+choice);
-        //         d3.select(".currentDate")
-        //             .text("" + new Date().toDateString());
-        //         d3.select('.cover').classed('hidden', true);
-        //         spinner.stop();
-        //     }
-        // },0);
-    });
 
-
-    // setTimeout(() => {
-    //     let choiceinit = d3.select('#datacom').node().value;
-    //     let typefile = d3.select('#datacom').attr('type');
-    //     d3.select(".currentDate")
-    //         .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
-    //     if(typefile==="csv"){
-    //         readFilecsv(choiceinit);
-    //     }else {
-    //         if (choiceinit.includes('influxdb')) {
-    //             // processResult = processResult_influxdb;
-    //             db = "influxdb";
-    //             realTimesetting(false, "influxdb", true);
-    //         } else {
-    //             db = "nagios"
-    //             // processResult = processResult_old;
-    //             realTimesetting(false, undefined, true);
-    //         }
-    //         d3.json("../HiperView/data/" + choiceinit + ".json").then(function (data2) {
-    //             d3.select(".cover").select('h5').text('drawLegend...');
-    //             d3.select(".currentDate")
-    //                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
-    //             // drawLegend(initialService, arrThresholds, arrColor, dif);
-    //             sampleS = data2;
-    //             inithostResults();
-    //             serviceListattrnest = serviceLists.map(d=>({
-    //                 key:d.text,sub:d.sub.map(e=>e.text)
-    //             }));
-    //             selectedService = serviceLists[0].text;
-    //             formatService(true);
-    //             processResult = processResult_csv;
-    //             init();
-    //             d3.select(".cover").select('h5').text('loading data...');
-    //             // addDatasetsOptions(); // Add these dataset to the select dropdown, at the end of this files
-    //             d3.select('.cover').classed('hidden', true);
-    //             spinner.stop();
-    //         });
-    //     }
-    // },0);
-    // Spinner Stop ********************************************************************
 
     // init();
 });
@@ -610,7 +497,7 @@ function init() {
     data = object2DataPrallel(sampleS);
 
     // Extract the list of numerical dimensions and create a scale for each.
-    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+    xscale.domain(dimensions =_.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
@@ -643,7 +530,7 @@ function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
     data = object2DataPrallel(sampleS);
-    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+    xscale.domain(dimensions = _.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
