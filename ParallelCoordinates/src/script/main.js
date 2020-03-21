@@ -228,6 +228,23 @@ function drawFiltertable() {
         }
     });
 }
+function filterAxisbyDom(d) {
+    const pdata = d3.select(this.parentElement.parentElement).datum();
+    d.value = this.checked;
+    if (this.checked) {
+        add_axis(pdata.arr, g);
+        d3.select(this.parentElement.parentElement).classed('disable', false);
+    }
+    else {
+        remove_axis(pdata.arr, g);
+        d3.select(this.parentElement.parentElement).classed('disable', true);
+    }
+    // TODO required to avoid a bug
+    var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d => d == pdata.arr));
+    if (extent)
+        extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
+    update_ticks(pdata.arr, extent);
+}
 $( document ).ready(function() {
     console.log('ready');
     $('.tabs').tabs();
