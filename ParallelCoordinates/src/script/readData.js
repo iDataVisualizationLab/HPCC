@@ -14,13 +14,15 @@ function formatService(init){
             s.sub[0].enable = false;
         }
     })
-    serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
+    serviceFullList_Fullrange = _.clone(serviceFullList);
     conf.serviceList = serviceList;
     conf.serviceLists = serviceLists;
     conf.serviceListattr = serviceListattr;
     conf.serviceListattrnest = serviceListattrnest;
     drawFiltertable();
 }
+
+
 function readData() {
     let hostResults = {}, hosts=[];
     let hostsList = _.without(d3.keys(sampleS),'timespan');
@@ -73,18 +75,32 @@ function readData() {
 }
 
 function object2Data(ob){
-    return d3.entries(ob);
+    return d3.entries(ob).filter(d=>d.key!=='timespan');
 }
 
 function object2DataPrallel(ob){
     var temp = object2Data(ob);
     var count = 0;
     var newdata =[];
+    var comlength = sampleS.timespan.length;
     temp.forEach(com=>{
-        var comlength = com.value[serviceListattrnest[0].key].length;
         var namet = com.key.split('-');
-        var rack = namet[1];
-        var host = namet[2];
+        var rack, host;
+        let ishpcc = true;
+        if (namet.length>1) {
+            rack = namet[1];
+            host = namet[2];
+        }else{
+            namet = com.key.split('.'); // IP?
+            if (namet.length>1) {
+                rack = namet[2];
+                host = namet[3];
+            }else {
+                rack = com.key;
+                host = com.key;
+                ishpcc = false;
+            }
+        }
         for (i = 0; i<comlength; i++){
             var eachIn = {};
             var validkey =true;
@@ -95,11 +111,11 @@ function object2DataPrallel(ob){
                 });
             });
             if (validkey) {
-                eachIn.Time = new Date(d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]));
-                eachIn.rack = "Rack " + rack;
+                eachIn.Time = sampleS.timespan[i];
+                eachIn.rack = ishpcc?("Rack " + rack):rack;
                 eachIn.compute = com.key;
-                eachIn.group = "Rack " + rack;
-                eachIn.name = com.key + ', ' + d3.timeFormat("%B %d %Y %H:%M")(com.value['arrTime'][i]);
+                eachIn.group = ishpcc?("Rack " + rack):rack;
+                eachIn.name = com.key + ', ' + d3.timeFormat("%B %d %Y %H:%M")(sampleS.timespan[i]);
                 eachIn.id = com.key + "-" + count;
                 count++;
                 newdata.push(eachIn);

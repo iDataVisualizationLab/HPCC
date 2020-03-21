@@ -2,7 +2,7 @@
 
 angular.module('hpccApp')
 .factory('Loaddata', function($timeout,Dataset,_, Config) {
-
+    var srcpathRoot ="../HiperView/"
     var Loaddata = {
         data:{}
     };
@@ -44,57 +44,41 @@ angular.module('hpccApp')
         exit_warp();
         const choice = Loaddata.data;
         let loadclusterInfo = false;
-
+        var promiseQueue;
 
             if (first||(db === 'csv'&& choice.category==='hpcc')) { //reload hostlist
-                d3.json(srcpath+'data/hotslist_Quanah.json', function (error, data) {
-                    if (error) {
-                    } else {
+                promiseQueue = d3.json(srcpathRoot+'data/hotslist_Quanah.json').then(function (data) {
+
                         firstTime = true;
                         hostList = data;
                         systemFormat();
                         inithostResults();
                         formatService(true);
-                        jobMap.hosts(hosts);
-                        MetricController.axisSchema(serviceFullList, true).update();
-                    }
+                        // MetricController.axisSchema(serviceFullList, true).update();
                 });
                 first = false;
+            }else{
+                promiseQueue = new Promise(function(resolve, reject){
+                    resolve();
+                });
             }
 
             dataInformation.filename = choice.name;
             if(choice.category==='hpcc')
                 setTimeout(() => {
                     console.time("totalTime:");
-                    d3.json(choice.url).on("progress", function(evt) {
-                        if (evt.total) {
-                            preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
-                            dataInformation.size = evt.total;
-                        }else{
-                            preloader(true, 0, "File loaded: " +bytesToString(evt.loaded));
-                            dataInformation.size = evt.loaded;
-                        }
-                    }).get(function(error,data) {
+                    promiseQueue.then(d3.json(choice.url).then(function(data) {
                             console.timeEnd("totalTime:");
-                        if (error) {
 
-                        }
+                            loadata1(data);
 
-                        d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
-                            if (error) {
-                                loadata1(data, undefined);
-                                return;
-                            }
-                            loadata1(data, job);
-                            return;
-                        });
-                    });
+                    }));
                 }, 0);
             else
                 readFilecsv(choice.url,choice.separate,choice)
 
-        function loadata1(data,job){
-            makedataworker();
+        function loadata1(data){
+
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
             _.without(Object.keys(data),'timespan').forEach(h=>{
                 delete data[h].arrCPU_load;
@@ -120,17 +104,7 @@ angular.module('hpccApp')
                     array_normalize.timestep =i;
                     return array_normalize;
                 })});
-            if(job)
-                sampleJobdata = job;
-            else
-                sampleJobdata = [{
-                    jobID: "1",
-                    name: "1",
-                    nodes: hosts.map(h=>h.name),
-                    startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                    submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                    user: "dummyJob"
-                }];
+
             if (choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
@@ -141,34 +115,13 @@ angular.module('hpccApp')
                 realTimesetting(false,undefined,true,sampleS);
             }
 
-            let clusternum = (data['timespan'].length<50)?[5,7]:[6,8];
-            loadPresetCluster(choice.url.replace(/(\w+).json|(\w+).csv/,'$1'),(status)=>{loadclusterInfo= status;
-                if(loadclusterInfo){
-                    handle_dataRaw();
-                    initDataWorker();
-                    if (!init)
-                        resetRequest();
-                    else
-                        main();
-                    preloader(false)
-                }else {
-                    recalculateCluster({
-                        clusterMethod: 'leaderbin',
-                        normMethod: 'l2',
-                        bin: {startBinGridSize: 4, range: clusternum}
-                    }, function () {
-                        handle_dataRaw();
-                        initDataWorker();
-                        if (!init)
-                            resetRequest();
-                        else
-                            main();
-                        preloader(false)
-                    });
-                }
-                firstTime= false;
 
-            });
+            if (!firstTime)
+                resetRequest();
+            else
+                init();
+            preloader(false)
+            firstTime = false;
         }
     }
     function loadPresetCluster(name,calback) {
@@ -233,70 +186,40 @@ angular.module('hpccApp')
         function loadcsv(data) {
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
-
+            serviceListattrnest = serviceLists.map(d=>({
+                key:d.text,sub:d.sub.map(e=>e.text)
+            }));
+            selectedService = serviceLists[0].text;
             inithostResults();
             formatService(true);
             processResult = processResult_csv;
-            makedataworker();
-            initDataWorker();
+
             // addDatasetsOptions()
 
-            MetricController.axisSchema(serviceFullList, true).update();
+            // MetricController.axisSchema(serviceFullList, true).update();
             firstTime = false;
             realTimesetting(false, "csv", true, sampleS);
             updateDatainformation(sampleS['timespan']);
 
-            sampleJobdata = [{
-                jobID: "1",
-                name: "1",
-                nodes: hosts.map(h => h.name),
-                startTime: new Date(_.last(sampleS.timespan) - 100).toString(),
-                submitTime: new Date(_.last(sampleS.timespan) - 100).toString(),
-                user: "dummyJob"
-            }];
 
-
-            updateClusterControlUI();
             // preloader(true, 0, "File loaded: " + Math.round(evt.loaded/evt.total*100)+'%');
-            loadPresetCluster(file?file.replace(/(\w+).json|(\w+).csv/, '$1'):'', (status) => {
-                let loadclusterInfo = status;
-                if (loadclusterInfo) {
-                    handle_dataRaw();
-                    if (!init)
+
+                    if (!firstTime){
                         resetRequest();
+                    }
+                    else{
+                        init();
+                    }
                     preloader(false);
-                } else {
-                    recalculateCluster({
-                        clusterMethod: 'leaderbin',
-                        normMethod: 'l2',
-                        bin: {startBinGridSize: 4, range: [7, 9]}
-                    }, function () {
-                        handle_dataRaw();
-                        if (!init)
-                            resetRequest();
-                        preloader(false);
-                    });
-                }
-            })
+
         }
 
         setTimeout(() => {
             if (file) {
-                d3.csv(file).on("progress", function (evt) {
-                    if (evt.total) {
-                        preloader(true, 0, "File loaded: " + Math.round(evt.loaded / evt.total * 100) + '%');
-                        dataInformation.size = evt.total;
-                    } else {
-                        preloader(true, 0, "File loaded: " + bytesToString(evt.loaded));
-                        dataInformation.size = evt.loaded;
-                    }
-                    // console.log("Amount loaded: " + Math.round(evt.loaded/evt.total*100)+'%')
-                }).get(function (error, data) {
-                    if (error) {
-                    } else {
+                d3.csv(file).then(function (data) {
+
                         loadcsv(data);
 
-                    }
                 })
             }else{
                 dataInformation.size = object.size;

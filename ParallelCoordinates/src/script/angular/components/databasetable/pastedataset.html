@@ -1,0 +1,49 @@
+<div class="paste-data">
+
+<file-dropzone
+  dataset="dataset"
+  max-file-size="100"
+  valid-mime-types="[text/csv, text/json, text/tsv, application/json, application/vnd.ms-excel]">
+
+  <div class="upload-data">
+    <div class="form-group">
+      <label for="dataset-file">File</label>
+      <input type="file" id="dataset-file" accept="text/csv,application/vnd.ms-excel" />
+    </div>
+    <p>
+      Upload a CSV, or paste data in <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a> format into the fields.
+    </p>
+    <div class="dropzone-target">
+      <p>Drop CSV file here</p>
+    </div>
+  </div>
+
+  <form ng-submit="addDataset()">
+    <div class="form-group">
+      <label for="dataset-name">Name</label>
+      <input type="name"
+        ng-model="dataset.name"
+        id="dataset-name"
+        required></input>
+    </div>
+    <div class="form-group">
+      <!--<textarea ng-model="dataset.sampletext"-->
+                <!--maxlength="1000"-->
+        <!--ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 17, 'blur': 0 }}"-->
+        <!--required>-->
+      <!--</textarea>-->
+      <div class="row s12 no_magrin" ng-if="dataset.column" >
+      <label for="columnInput">#Column: </label>
+      <span id="columnInput" >{{dataset.column}}</span>
+      </div>
+      <div class="row s12 no_magrin" ng-if="dataset.row">
+      <label for="columnInput">#Row: </label>
+      <span id="rowInput" >{{dataset.row}}</span>
+      </div>
+    </div>
+    <button type="submit">Add data</button>
+  </form>
+
+</file-dropzone>
+
+</div>
