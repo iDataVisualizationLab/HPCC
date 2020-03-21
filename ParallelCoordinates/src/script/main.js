@@ -272,8 +272,8 @@ function realTimesetting (option,db,init){
     }else{
         processData = db?eval('processData_'+db):processData_old;
     }
-    if(!init)
-        resetRequest();
+    // if(!init)
+    //     resetRequest();
 }
 
 function getBrush(d) {
@@ -446,6 +446,8 @@ function update_Dimension() {
 }
 
 function init() {
+    if(timel)
+        timel.stop();
     width = $("#Maincontent").width()-10;
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
@@ -516,14 +518,18 @@ function init() {
 
 
     // legend = create_legend(colors, brush);
+    if (!serviceFullList.find(d=>d.text===selectedService))
+        selectedService = serviceFullList[0].text();
     const selecteds = d3.select("#axisSetting")
         .select('tbody')
         .selectAll('tr')
         .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
     _.bind(selecteds.on("change"),selecteds.node())();
+
     // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
-    brush();
+    // brush();
+    console.log('---init---');
 }
 
 function resetRequest() {
@@ -545,7 +551,13 @@ function resetRequest() {
     }).map(s=>s.text));
     // Add a group element for each dimension.
     update_Dimension();
-    brush();
+    if (!serviceFullList.find(d=>d.text===selectedService))
+        selectedService = serviceFullList[0].text();
+    const selecteds = d3.select("#axisSetting")
+        .select('tbody')
+        .selectAll('tr')
+        .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
+    _.bind(selecteds.on("change"),selecteds.node())();
 }
 function setColorsAndThresholds(sin) {
     let s = serviceFullList.find(d=>d.text===sin)

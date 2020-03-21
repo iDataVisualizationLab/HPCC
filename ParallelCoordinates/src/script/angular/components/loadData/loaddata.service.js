@@ -28,7 +28,7 @@ angular.module('hpccApp')
                         if (!init)
                             resetRequest();
                         else
-                            main();
+                            init();
                         preloader(false)
                     }
                     firstTime = false;
