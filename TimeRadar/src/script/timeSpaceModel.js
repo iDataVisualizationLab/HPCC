@@ -201,6 +201,7 @@ d3.TimeSpace = function () {
         axesHelper.toggleDimension(graphicopt.opt.dim);
         gridHelper.parent.visible = (graphicopt.opt.dim===2.5);
         // handle_selection_switch(graphicopt.isSelectionMode);
+        console.log(graphicopt.opt.dim)
         if (graphicopt.opt.dim===2) {
             controls.enableRotate = false;
             controls.screenSpacePanning  = true;
@@ -1913,7 +1914,7 @@ d3.TimeSpace = function () {
 
                     isneedrender = true;
             }
-            }catch(e){}
+            }catch(e){console.log(e)}
             isneedCompute = false;
         }
     }
