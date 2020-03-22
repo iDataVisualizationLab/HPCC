@@ -107,6 +107,8 @@ function object2DataPrallel(ob){
             serviceListattrnest.forEach(s=>{
                 s.sub.forEach((sub,sj)=>{
                     eachIn[sub] = com.value[s.key][i][sj];
+                    // if(_.isNaN(eachIn[sub]))
+                    //     eachIn[sub] = undefined
                     // validkey = validkey&&(eachIn[sub]!==undefined)
                 });
             });

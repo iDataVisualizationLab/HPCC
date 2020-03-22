@@ -559,13 +559,14 @@ function init() {
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
 
+    d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
     // Add a group element for each dimension.
     update_Dimension();
 
 
     // legend = create_legend(colors, brush);
     if (!serviceFullList.find(d=>d.text===selectedService))
-        selectedService = serviceFullList[0].text();
+        selectedService = serviceFullList[0].text;
     const selecteds = d3.select("#axisSetting")
         .select('tbody')
         .selectAll('tr')
@@ -595,6 +596,9 @@ function resetRequest() {
             .range([h, 0]))));
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
+
+    d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
+
     // Add a group element for each dimension.
     update_Dimension();
     if (!serviceFullList.find(d=>d.text===selectedService))
@@ -1080,41 +1084,43 @@ function brush() {
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
-    Loadtostore();
+    // Loadtostore();
 }
 
 // render a set of polylines on a canvas
 function paths(selected, ctx, count) {
-    var n = selected.length,
-        i = 0,
-        opacity = d3.min([2/Math.pow(n,0.3),1]),
-        timer = (new Date()).getTime();
+    setTimeout(function(){
+        var n = selected.length,
+            i = 0,
+            opacity = d3.min([2/Math.pow(n,0.3),1]),
+            timer = (new Date()).getTime();
 
-    selection_stats(opacity, n, data.length);
+        selection_stats(opacity, n, data.length);
 
-    //shuffled_data = _.shuffle(selected);
+        //shuffled_data = _.shuffle(selected);
 
-    // complex_data_table(shuffled_data.slice(0,20));
-    shuffled_data = selected;
-    complex_data_table(shuffled_data);
+        // complex_data_table(shuffled_data.slice(0,20));
+        shuffled_data = selected;
+        complex_data_table(shuffled_data);
 
-    ctx.clearRect(0,0,w+1,h+1);
+        ctx.clearRect(0,0,w+1,h+1);
 
-    // render all lines until finished or a new brush event
-    function animloop(){
-        if (i >= n || count < brush_count) {
-            timel.stop()
-            return true;
-        }
-        var max = d3.min([i+render_speed, n]);
-        render_range(shuffled_data, i, max, opacity);
-        render_stats(max,n,render_speed);
-        i = max;
-        timer = optimize(timer);  // adjusts render_speed
-    };
-    if (timel)
-        timel.stop()
-    timel = d3.timer(animloop);
+        // render all lines until finished or a new brush event
+        function animloop(){
+            if (i >= n || count < brush_count) {
+                timel.stop();
+                return true;
+            }
+            var max = d3.min([i+render_speed, n]);
+            render_range(shuffled_data, i, max, opacity);
+            render_stats(max,n,render_speed);
+            i = max;
+            timer = optimize(timer);  // adjusts render_speed
+        };
+        if (timel)
+            timel.stop();
+        timel = d3.timer(animloop);
+    },0);
 }
 let timel
 // transition ticks for reordering, rescaling and inverting
@@ -1320,11 +1326,11 @@ function exclude_data() {
 function add_axis(d,g) {
     // dimensions.splice(dimensions.length-1, 0, d);
     dimensions.push(d);
-    dimensions = _.intersection(_.union(listMetric.toArray(),['Time']),dimensions)    ;
+    dimensions = _.intersection(_.union(['Time'],listMetric.toArray()),dimensions)    ;
     xscale.domain(dimensions);
     // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
     update_Dimension();
-    update_ticks();
+    // update_ticks();
 }
 
 function remove_axis(d,g) {
@@ -1333,7 +1339,7 @@ function remove_axis(d,g) {
     g = g.data(dimensions,d=>d);
     g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
     g.exit().remove();
-    update_ticks();
+    // update_ticks();
 }
 
 d3.select("#keep-data").on("click", keep_data);
