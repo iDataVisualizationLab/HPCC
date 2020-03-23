@@ -2465,7 +2465,7 @@ function orderByCorrelation(){
         mapIndex = mapIndex.filter(d=>d!=maxI);
     } while(mapIndex.length);
     orderIndex.forEach((o,i)=>{
-        serviceFullList[simMatrix[o].index].angle = i*2*Math.PI/orderIndex.length;
+        serviceFullList[o].angle = i*2*Math.PI/orderIndex.length;
     });
 }
 // test zone
