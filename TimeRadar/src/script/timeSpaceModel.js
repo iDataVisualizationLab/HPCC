@@ -1631,6 +1631,8 @@ d3.TimeSpace = function () {
                 temp.text.push(e[s.id]);
             });
             temp.name = s.text;
+            if (si)
+                temp.visible =  'legendonly';
             let data_temp = temp;
             // layout.axis.y.label.push(s.text);
             // layout.axis.y.domain.push(s.range);
