@@ -197,8 +197,8 @@ d3.viiolinChart = function () {
         if (rangeY){
             xNum.domain(rangeY);
         }else{
-            var maxNum = 0
-            for (i in sumstat) {
+            var maxNum = 0;
+            sumstat.forEach((s,i)=>{
                 allBins = sumstat[i].arr;
                 kdeValues = allBins.map(function (a) {
                     return a[1]
@@ -207,7 +207,7 @@ d3.viiolinChart = function () {
                 if (biggest > maxNum) {
                     maxNum = biggest
                 }
-            }
+            });
             xNum.domain([0, maxNum]);
         }
         return sumstat;

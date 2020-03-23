@@ -9,6 +9,7 @@ angular.module('hpccApp')
     let first = true;
 
     Loaddata.reset = function(hard) {
+        enableVariableCorrelation(false);
         Loaddata.data = Dataset.currentDataset;
     };
     $('#clusterInfo_input_file').on('input',(evt)=>{

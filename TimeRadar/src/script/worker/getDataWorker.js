@@ -1,4 +1,5 @@
-importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/js/underscore-min.js","../../../../HiperView/myscripts/setting.js","../setting.js","../../../../HiperView/js/simple-statistics.min.js");
+importScripts("../../../../HiperView/js/d3.v4.js","../../../../HiperView/js/underscore-min.js","../../../../HiperView/myscripts/setting.js","../setting.js",
+    "../../../../HiperView/js/simple-statistics.min.js","../../../../HiperView/myscripts/correlation.js");
 let undefinedValue,
     outlierMultiply = 5,
 globalTrend=false,
@@ -69,14 +70,25 @@ addEventListener('message',function ({data}){
                     index: data.value.lastIndex
                 }
             });
+            if (data.value.lastIndex) {
+                postMessage({
+                    action: 'Correlation',
+                    result: {
+                        arr: correlationCal(dataMetric),
+                        index: data.value.lastIndex
+                    }
+                });
+            }
             postMessage({action: data.action, status:"done" });
             break;
     }
 });
 let serviceFull_selected =[];
+let dataMetric;
 function getsummaryservice(){
     // let dataf = _.reduce(_.chunk(_.unzip(data),serviceFull_selected.length),function(memo, num){ return memo.map((d,i)=>{d.push(num[i]); return _.flatten(d); })});
     let dataf = _.unzip(_.flatten(_.values(tsnedata),1));
+    dataMetric = dataf;
     let ob = {};
     dataf.forEach((d,i)=>{
         d=d.filter(e=>e!==undefined).sort((a,b)=>a-b);
@@ -118,6 +130,27 @@ function getsummaryservice(){
 
     });
     return ob;
+}
+function correlationCal(data){
+    const n = data.length;
+    let simMatrix = [];
+    for (let i = 0;i<n-1; i++){
+        let temp_arr = [];
+        // temp_arr.total = 0;
+        for (let j=i+1; j<n; j++){
+            let tempval = pearsonCorcoef(data[i],data[j]);
+            // temp_arr.total += tempval;
+            temp_arr.push(tempval)
+        }
+        // for (let j=0;j<i;j++)
+        //     temp_arr.total += simMatrix[j][i-1-j];
+        temp_arr.name = serviceFullList[i].text;
+        temp_arr.index = i;
+        simMatrix.push(temp_arr)
+    }
+    return simMatrix;
+
+
 }
 function plotTsne(hostResults,lastIndex,isPredict,startIndex_Input,undefinedValue){
     if (globalTrend)

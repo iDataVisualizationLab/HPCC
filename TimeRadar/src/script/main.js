@@ -389,7 +389,12 @@ function initDataWorker(){
             }
         }
         if (data.action==='DataServices') {
-            MetricController.datasummary(data.result.arr);
+            if (lastIndex === sampleS.timespan.length)
+                MetricController.datasummary(data.result.arr);
+        }
+        if (data.action==='Correlation') {
+                variableCorrelation = data.result.arr;
+                enableVariableCorrelation(true);
         }
     }, false);
 }
@@ -546,7 +551,7 @@ function request(){
                 getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null);
                 console.log('Time load: ',performance.now() -times)
-                getData(hosts[_.last(countarr)].name,lastIndex)
+                getData(_.last(hosts).name,lastIndex)
             }
 
             drawsummarypoint(countarr);
@@ -1670,12 +1675,17 @@ $( document ).ready(function() {
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
+    d3.select('#enableVariableCorrelation').on('click',function(){
+        orderByCorrelation();
+        MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
+    });
+
     d3.select('#distributeLayout').on('click',function(){
-        let temp = serviceFullList.filter((s,i)=>s.enable);
+        let temp = serviceFullList.filter((s,i)=>s.enable).map(s=>({angle:s.anglr,data:s}));
         temp.sort((a,b)=>a.angle-b.angle);
-        temp.forEach((d,i)=>d.angle=i*2*Math.PI/temp.length);
-        MetricController.axisSchema(serviceFullList).update();
-    })
+        temp.forEach((d,i)=>d.data.angle=i*2*Math.PI/temp.length);
+        MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
+    });
     d3.select('#clusterMethod').on('change',function(){
         Radarplot_opt.clusterMethod = this.value;
         Radarplot.binopt(Radarplot_opt);
@@ -2409,6 +2419,55 @@ function similarityCal(data){
     }
 }
 
+function enableVariableCorrelation(isenable){
+    d3.select('#enableVariableCorrelation').classed('disable',!isenable)
+}
+function orderByCorrelation(){
+    let simMatrix = variableCorrelation.filter(v=>(v.total=0,serviceFullList[v.index].enable));
+    const orderMatrix = simMatrix.map(d=>d.index);
+    let mapIndex = [];
+    simMatrix.forEach((v,i)=>{
+        mapIndex.push(i);
+        orderMatrix.forEach(j=>{
+            if (i!==j) {
+                if (j-i>0)
+                    v.total += v[j-i-1];
+                else
+                    v.total += simMatrix[j][i-1-j];
+            }
+        })
+    });
+    mapIndex.sort((a,b)=> simMatrix[a].total-simMatrix[b].total);
+    // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
+    // mapIndex.sort((a,b)=>
+    //     b===undefinedposition?1:(a===undefinedposition?-1:0)
+    // )
+    let current_index = mapIndex.pop();
+    let orderIndex = [simMatrix[current_index].index];
+
+    do{
+        let maxL = Infinity;
+        let maxI = 0;
+        mapIndex.forEach((d)=>{
+            let temp;
+            if (d>simMatrix[current_index].index ){
+                temp = simMatrix[current_index][d-current_index-1];
+            }else{
+                temp = simMatrix[d][current_index-d-1]
+            }
+            if (maxL>temp){
+                maxL = temp;
+                maxI = d;
+            }
+        });
+        orderIndex.push(simMatrix[maxI].index);
+        current_index = maxI;
+        mapIndex = mapIndex.filter(d=>d!=maxI);
+    } while(mapIndex.length);
+    orderIndex.forEach((o,i)=>{
+        serviceFullList[simMatrix[o].index].angle = i*2*Math.PI/orderIndex.length;
+    });
+}
 // test zone
 function onMergeSuperGroup() {
     clusterGroup = {9:0,2:0,5:0,8:0};

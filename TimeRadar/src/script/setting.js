@@ -17,7 +17,7 @@ var serviceFullList_Fullrange = serviceLists2serviceFullList(serviceLists);
 
 srcpath = '../HiperView/';
 
-
+var variableCorrelation;
 let jobMap_opt = {
     margin:{top:90,bottom:20,left:20,right:20},
     width: 1000,

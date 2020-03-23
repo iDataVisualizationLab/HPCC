@@ -366,13 +366,15 @@ let radarController = function () {
                 return violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)})})
 
     }
+    let dataSumIn;
     function updateSummaryData (dSum){
-
+        if(dSum)
+            dataSumIn = dSum;
         try{
-            radarcomp.axisList.forEach(d=>{d.summary = dSum[d.data.text];d.summary.range = d.scale.domain()});
+            radarcomp.axisList.forEach(d=>{d.summary = dataSumIn[d.data.text];d.summary.range = d.scale.domain()});
             eventTable();
         }catch(e){
-
+console.log(e)
         }
     }
     let dataTable;
