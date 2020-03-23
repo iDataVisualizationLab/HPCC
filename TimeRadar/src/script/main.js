@@ -2450,10 +2450,10 @@ function orderByCorrelation(){
         let maxI = 0;
         mapIndex.forEach((d)=>{
             let temp;
-            if (d>simMatrix[current_index].index ){
-                temp = simMatrix[current_index][d-current_index-1];
+            if (orderMatrix[d]>simMatrix[current_index].index ){
+                temp = simMatrix[current_index][orderMatrix[d]-current_index-1];
             }else{
-                temp = simMatrix[d][current_index-d-1]
+                temp = simMatrix[d][current_index-orderMatrix[d]-1]
             }
             if (maxL>temp){
                 maxL = temp;
