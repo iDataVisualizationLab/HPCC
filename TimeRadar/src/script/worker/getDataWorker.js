@@ -134,7 +134,7 @@ function getsummaryservice(){
 function correlationCal(data){
     const n = data.length;
     let simMatrix = [];
-    for (let i = 0;i<n-1; i++){
+    for (let i = 0;i<n; i++){
         let temp_arr = [];
         // temp_arr.total = 0;
         for (let j=i+1; j<n; j++){

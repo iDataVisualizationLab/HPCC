@@ -2437,7 +2437,7 @@ function orderByCorrelation(){
             }
         })
     });
-    mapIndex.sort((a,b)=> simMatrix[a].total-simMatrix[b].total);
+    mapIndex.sort((a,b)=> -simMatrix[a].total+simMatrix[b].total);
     // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
     // mapIndex.sort((a,b)=>
     //     b===undefinedposition?1:(a===undefinedposition?-1:0)
@@ -2446,7 +2446,7 @@ function orderByCorrelation(){
     let orderIndex = [simMatrix[current_index].index];
 
     do{
-        let maxL = Infinity;
+        let maxL = -Infinity;
         let maxI = 0;
         mapIndex.forEach((d)=>{
             let temp;
@@ -2455,7 +2455,7 @@ function orderByCorrelation(){
             }else{
                 temp = simMatrix[d][simMatrix[current_index].index -orderMatrix[d]-1]
             }
-            if (maxL>temp){
+            if (maxL<temp){
                 maxL = temp;
                 maxI = d;
             }
@@ -2465,7 +2465,7 @@ function orderByCorrelation(){
         mapIndex = mapIndex.filter(d=>d!=maxI);
     } while(mapIndex.length);
     orderIndex.forEach((o,i)=>{
-        serviceFullList[o].angle = i*2*Math.PI/orderIndex.length;
+        serviceFullList[o].angle = i*2*Math.PI/(orderIndex.length);
     });
 }
 // test zone
