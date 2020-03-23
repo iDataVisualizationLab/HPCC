@@ -1676,8 +1676,12 @@ $( document ).ready(function() {
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
 
     d3.select('#enableVariableCorrelation').on('click',function(){
-        orderByCorrelation();
-        MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
+        preloader(true,undefined,'Calculate variable correlation....');
+        setTimeout(()=>{
+            orderByCorrelation();
+            MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
+            preloader(false)
+        },0);
     });
 
     d3.select('#distributeLayout').on('click',function(){
@@ -2420,7 +2424,7 @@ function similarityCal(data){
 }
 
 function enableVariableCorrelation(isenable){
-    d3.select('#enableVariableCorrelation').classed('disable',!isenable)
+    d3.select('#enableVariableCorrelation').attr('disabled',!isenable?'':null)
 }
 function orderByCorrelation(){
     let simMatrix = variableCorrelation.filter(v=>(v.total=0,serviceFullList[v.index].enable));

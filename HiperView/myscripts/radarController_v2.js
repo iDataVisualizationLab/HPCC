@@ -232,7 +232,7 @@ let radarController = function () {
             dataTable = $(table.node()).DataTable({
                 data: radarcomp.axisList,
                 "order": [[3, "desc"],[2, "asc"]],
-                "pageLength": 50,
+                "pageLength": 20,
                 "columnDefs": [
                     {   targets: 0,
                         title: "Service name",
@@ -363,7 +363,8 @@ let radarController = function () {
                         displaytick = [0,sg.datum().data.range[1]];
                 }
                 violiin_chart.graphicopt({customrange:customrange});//fix range from 0
-                return violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)})})
+                violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)
+            })})
 
     }
     let dataSumIn;
