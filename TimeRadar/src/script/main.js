@@ -2428,12 +2428,12 @@ function orderByCorrelation(){
     let mapIndex = [];
     simMatrix.forEach((v,i)=>{
         mapIndex.push(i);
-        orderMatrix.forEach(j=>{
+        orderMatrix.forEach((j,jj)=>{
             if (i!==j) {
                 if (j-i>0)
                     v.total += v[j-i-1];
                 else
-                    v.total += simMatrix[j][i-1-j];
+                    v.total += simMatrix[jj][i-1-j];
             }
         })
     });
@@ -2451,9 +2451,9 @@ function orderByCorrelation(){
         mapIndex.forEach((d)=>{
             let temp;
             if (orderMatrix[d]>simMatrix[current_index].index ){
-                temp = simMatrix[current_index][orderMatrix[d]-current_index-1];
+                temp = simMatrix[current_index][orderMatrix[d]-simMatrix[current_index].index -1];
             }else{
-                temp = simMatrix[d][current_index-orderMatrix[d]-1]
+                temp = simMatrix[d][simMatrix[current_index].index -orderMatrix[d]-1]
             }
             if (maxL>temp){
                 maxL = temp;
