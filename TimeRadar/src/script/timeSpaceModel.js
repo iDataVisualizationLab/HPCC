@@ -20,6 +20,7 @@ d3.TimeSpace = function () {
             opt: {
                 dim: 2, // dimensionality of the embedding (2 = default)
                 windowsSize: 1,
+                radarRatio: 1,
             },radaropt : {
                 // summary:{quantile:true},
                 mini:true,
@@ -70,12 +71,19 @@ d3.TimeSpace = function () {
                     })
                 }},
             // dim: {text: "Dimension", type: "switch", variable: 'dim',labels:['2D','3D'],values:[2,2.5], width: '100px',callback:()=>{obitTrigger=true;start(!needRecalculate || graphicopt.opt.dim===2.5);}},
-            windowsSize: {
-                text: "Windows size",
-                range: [1, 21],
+            // windowsSize: {
+            //     text: "Windows size",
+            //     range: [1, 21],
+            //     type: "slider",
+            //     variable: 'windowsSize',
+            //     width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.opt.windowsSize; handle_data_TimeSpace(tsnedata);}
+            // },
+            radarRatio: {
+                text: "Peeling clusters",
+                range: [0, 5],
                 type: "slider",
-                variable: 'windowsSize',
-                width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.opt.windowsSize; handle_data_TimeSpace(tsnedata);}
+                variable: 'radarRatio',
+                width: '100px',callback:()=>{master.stop(); radarRatio = graphicopt.opt.radarRatio; handle_data_TimeSpace(tsnedata);}
             },
         },
         formatTable = {
