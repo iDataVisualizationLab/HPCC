@@ -958,3 +958,54 @@ function getHistdata(d, name, marker) {
     }
     return r;
 }
+function orderByCorrelation(){
+    let simMatrix = variableCorrelation;
+    const orderMatrix = simMatrix.map(d=>d.index);
+    let mapIndex = [];
+    simMatrix.forEach((v,i)=>{
+        v.total =0;
+        mapIndex.push(i);
+        orderMatrix.forEach((j,jj)=>{
+            if (i!==j) {
+                if (j-i>0)
+                    v.total += v[j-i-1];
+                else
+                    v.total += simMatrix[jj][i-1-j];
+            }
+        })
+    });
+    mapIndex.sort((a,b)=> -simMatrix[a].total+simMatrix[b].total);
+    // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
+    // mapIndex.sort((a,b)=>
+    //     b===undefinedposition?1:(a===undefinedposition?-1:0)
+    // )
+    let current_index = mapIndex.pop();
+    let orderIndex = [simMatrix[current_index].index_s];
+
+    do{
+        let maxL = -Infinity;
+        let maxI = 0;
+        mapIndex.forEach((d)=>{
+            let temp;
+            if (orderMatrix[d]>simMatrix[current_index].index ){
+                temp = simMatrix[current_index][orderMatrix[d]-simMatrix[current_index].index -1];
+            }else{
+                temp = simMatrix[d][simMatrix[current_index].index -orderMatrix[d]-1]
+            }
+            if (maxL<temp){
+                maxL = temp;
+                maxI = d;
+            }
+        });
+        orderIndex.push(simMatrix[maxI].index_s);
+        current_index = maxI;
+        mapIndex = mapIndex.filter(d=>d!=maxI);
+    } while(mapIndex.length);
+    orderIndex.forEach((o,i)=>{
+        serviceFullList[o].angle = i*2*Math.PI/(orderIndex.length);
+    });
+}
+
+function enableVariableCorrelation(isenable){
+    d3.select('#enableVariableCorrelation').attr('disabled',!isenable?'':null)
+}

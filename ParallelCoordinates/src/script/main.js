@@ -103,7 +103,7 @@ Array.prototype.naturalSort= function(_){
 
 function drawFiltertable() {
     let listOption = serviceFullList.map((e,ei) => {
-        return {service: e.text, arr: conf.serviceListattrnest[e.idroot].sub[e.id],id:ei, text: e.text, enable: e.enable}
+        return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
     });
     // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
     let table = d3.select("#axisSetting").select('tbody');
@@ -311,7 +311,9 @@ $( document ).ready(function() {
             tip.setContent(`<img src="src/images/${hasImage}" width="100%"></img>`);
 
     });
-
+    d3.select('#enableVariableCorrelation').on('click',function(){
+        getcorrelation();
+    });
 
     // init();
 });
@@ -412,9 +414,9 @@ function dragend(d) {
     delete this.__origin__;
     delete dragging[d];
 }
-
-function correlation(){
-    let variableCorrelation = correlationCal();
+let variableCorrelation
+function getcorrelation(){
+    variableCorrelation = correlationCal(serviceFullList.map(d=>d.enable));
     orderByCorrelation();
     let temp_dimensions = []
     serviceFullList.forEach(s=>{
@@ -425,10 +427,21 @@ function correlation(){
     dimensions = ['Time'];
     temp_dimensions.forEach(d=>dimensions.push(d.key))
     xscale.domain(dimensions);
-    reorderDimlist();
+    listMetric.sort(temp_dimensions.map(d=>d.key));
+    // svg.selectAll(".dimension").each(function(d){
+    //     if (d!=='Time') {
+    //         var extent = d3.brushSelection(d3.select(this));
+    //         if (extent)
+    //             extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
+    //         update_ticks(d, extent);
+    //     }
+    // });
+    update_Dimension()
+    // reorderDimlist();
+    brush()
 }
 function correlationCal(serviceEnable){
-    let data = _.unzip(_.flatten(_.keys(tsnedata).map(e=>tsnedata[e].map(e=>e.__valwithNull)),1));
+    let data = _.unzip(_.flatten(_.keys(tsnedata).map(e=>tsnedata[e].map(e=>e)),1));
     let indexActiveService =[];
     const activeservice = serviceFullList.filter((s,si)=>{
         if(serviceEnable[si])
