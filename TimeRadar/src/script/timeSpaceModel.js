@@ -80,7 +80,8 @@ d3.TimeSpace = function () {
             // },
             radarRatio: {
                 text: "Peeling clusters",
-                range: [0, 5],
+                range: [0.1, 1],
+                step: 0.1,
                 type: "slider",
                 variable: 'radarRatio',
                 width: '100px',callback:()=>{master.stop(); radarRatio = graphicopt.opt.radarRatio; handle_data_TimeSpace(tsnedata);}

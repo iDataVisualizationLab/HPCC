@@ -147,5 +147,5 @@ function initTsnedata() {
 }
 
 function isStrickCluster(d){
-    return radarRatio?d.minDist<cluster_info[d.cluster].radius/radarRatio:true;
+    return radarRatio<1?d.minDist<cluster_info[d.cluster].radius*radarRatio:true;
 }
