@@ -735,6 +735,7 @@ function data_table(sample) {
         .text(function(d) { return d.name; })
 }
 // complex data table
+let complex_data_table_render = false;
 function complex_data_table(sample) {
     var samplenest = d3.nest()
         .key(d=>d.rack).sortKeys(collator.compare)
@@ -793,6 +794,7 @@ function complex_data_table(sample) {
         }
     )
     $('.collapsible').collapsible();
+    complex_data_table_render = false;
 
 }
 // Adjusts rendering speed
@@ -1086,6 +1088,7 @@ function brush() {
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
+    complex_data_table_render = true;
     // Loadtostore();
 }
 
