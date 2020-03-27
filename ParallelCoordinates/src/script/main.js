@@ -250,7 +250,11 @@ $( document ).ready(function() {
     $('.tabs').tabs();
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
-    $('.collapsible').collapsible();
+    $('#leftpanel.collapsible').collapsible({onOpenStart: function(evt){
+            if(d3.select(evt).classed('active')&&complex_data_table_render){
+                complex_data_table(shuffled_data)
+            }
+    }});
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
@@ -1107,7 +1111,8 @@ function paths(selected, ctx, count) {
         // complex_data_table(shuffled_data.slice(0,20));
         shuffled_data = selected;
     console.time('complex_data_table')
-        complex_data_table(shuffled_data);
+    complex_data_table_render = true;
+        // complex_data_table(shuffled_data);
     console.timeEnd('complex_data_table')
         ctx.clearRect(0,0,w+1,h+1);
 
