@@ -17,7 +17,8 @@ addEventListener('message',function ({data}){
             serviceList_selected = data.value.serviceList_selected;
             serviceListattr= data.value.serviceListattr;
             serviceFull_selected =[];
-            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)))
+            serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
+            tsnedata = data.value.tsnedata;
             break;
         case 'isRealtime':
             if (db==='csv')
@@ -44,7 +45,6 @@ addEventListener('message',function ({data}){
                     processData = processData_old;
             }
             // sampleS = data.data;
-            tsnedata = data.tsnedata;
             // serviceFull_selected =[];
             // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             break;

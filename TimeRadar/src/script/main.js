@@ -353,6 +353,7 @@ function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
             db:db,
+            tsnedata:tsnedata,
             cluster_info:cluster_info,
             serviceFullList:serviceFullList,
             serviceLists:serviceLists,
@@ -1084,7 +1085,7 @@ function pauseRequest(){
 
 function realTimesetting (option,db,init,data,separate){
     isRealtime = option;
-    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,tsnedata:tsnedata,hostList:hostList,separate:separate});
+    getDataWorker.postMessage({action:'isRealtime',value:option,db: db,hostList:hostList,separate:separate});
     if (option){
         processData = eval('processData_'+db);
         simDuration = 200;
@@ -1376,13 +1377,14 @@ function onChangeMinMaxFunc(choice){
 
     MetricController.axisSchema(serviceFullList, true).update();
     makedataworker();
+    initTsnedata();
     // initDataWorker();
     recalculateCluster(group_opt,function(){
         handle_dataRaw();
         initDataWorker();
         if (!init)
             resetRequest();
-        preloader(false)
+        preloader(false);
     });
 }
 function formatService(init){

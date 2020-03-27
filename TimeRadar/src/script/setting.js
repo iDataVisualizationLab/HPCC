@@ -130,3 +130,18 @@ function inithostResults (worker) {
     }
     hostResults = sampleS;
 }
+
+function initTsnedata() {
+    tsnedata = {};
+    hosts.forEach(h => {
+        tsnedata[h.name] = sampleS.timespan.map((t, i) => {
+            let array_normalize = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => {
+                let v = sampleS[h.name][serviceListattr[a.id]][i][vi];
+                return d3.scaleLinear().domain(a.sub[0].range)(v === null ? undefined : v) || 0
+            })));
+            array_normalize.name = h.name;
+            array_normalize.timestep = i;
+            return array_normalize;
+        })
+    });
+}
