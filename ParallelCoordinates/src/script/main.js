@@ -251,7 +251,7 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
     $('#leftpanel.collapsible').collapsible({onOpenStart: function(evt){
-            if(d3.select(evt).classed('active')&&complex_data_table_render){
+            if(complex_data_table_render){
                 complex_data_table(shuffled_data)
             }
     }});
