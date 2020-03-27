@@ -89,6 +89,8 @@ d3.TimeSpace = function () {
         },
         formatTable = {
             'opacity':function(d){return d3.format('.1f')(d)},
+            'radarRatio':function(d){return d3.format('.1f')(d)},
+            'minDist':function(d){return d3.format('.1f')(d)},
             'time': function(d){return millisecondsToStr(d)},
             'totalTime': function(d){return millisecondsToStr(d)},
             'iteration': function(d){return d},
