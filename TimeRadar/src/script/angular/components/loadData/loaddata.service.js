@@ -9,7 +9,6 @@ angular.module('hpccApp')
     let first = true;
 
     Loaddata.reset = function(hard) {
-        enableVariableCorrelation(false);
         Loaddata.data = Dataset.currentDataset;
     };
     $('#clusterInfo_input_file').on('input',(evt)=>{
@@ -225,10 +224,10 @@ angular.module('hpccApp')
         function loadcsv(data) {
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
-
             inithostResults();
             formatService(true);
             processResult = processResult_csv;
+            initTsnedata();
             makedataworker();
             initDataWorker();
             // addDatasetsOptions()

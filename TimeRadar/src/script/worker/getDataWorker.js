@@ -48,6 +48,16 @@ addEventListener('message',function ({data}){
             // serviceFull_selected =[];
             // serviceList_selected.forEach(s=>serviceLists[s.index].sub.forEach(sub=>serviceFull_selected.push(sub)));
             break;
+        case 'correlationCal':
+            postMessage({
+                action: 'Correlation',
+                result: {
+                    arr: correlationCal(dataMetric,data.value.serviceEnable),
+                    index: data.value.lastIndex
+                }
+            });
+            postMessage({action: data.action, status:"done" });
+            break;
         case 'getbatchData':
             const arr = plotTsne(undefined,data.value.lastIndex,data.value.usepast);
             if (data.value.host===undefined)
@@ -70,15 +80,6 @@ addEventListener('message',function ({data}){
                     index: data.value.lastIndex
                 }
             });
-            if (data.value.lastIndex) {
-                postMessage({
-                    action: 'Correlation',
-                    result: {
-                        arr: correlationCal(dataMetric),
-                        index: data.value.lastIndex
-                    }
-                });
-            }
             postMessage({action: data.action, status:"done" });
             break;
     }
@@ -87,7 +88,7 @@ let serviceFull_selected =[];
 let dataMetric;
 function getsummaryservice(){
     // let dataf = _.reduce(_.chunk(_.unzip(data),serviceFull_selected.length),function(memo, num){ return memo.map((d,i)=>{d.push(num[i]); return _.flatten(d); })});
-    let dataf = _.unzip(_.flatten(_.values(tsnedata),1));
+    let dataf = _.unzip(_.flatten(_.keys(tsnedata).map(e=>tsnedata[e].map(e=>e.__valwithNull)),1));
     dataMetric = dataf;
     let ob = {};
     dataf.forEach((d,i)=>{
@@ -131,26 +132,30 @@ function getsummaryservice(){
     });
     return ob;
 }
-function correlationCal(data){
-    const n = data.length;
+function correlationCal(data,serviceEnable){
+    let indexActiveService =[];
+    const activeservice = serviceFullList.filter((s,si)=>{
+        if(serviceEnable[si])
+            indexActiveService.push(si);
+        return serviceEnable[si]});
+    const n = activeservice.length;
     let simMatrix = [];
     for (let i = 0;i<n; i++){
         let temp_arr = [];
         // temp_arr.total = 0;
         for (let j=i+1; j<n; j++){
-            let tempval = pearsonCorcoef(data[i],data[j]);
+            let tempval = pearsonCorcoef(data[indexActiveService[i]],data[indexActiveService[j]]);
             // temp_arr.total += tempval;
             temp_arr.push(tempval)
         }
         // for (let j=0;j<i;j++)
         //     temp_arr.total += simMatrix[j][i-1-j];
-        temp_arr.name = serviceFullList[i].text;
+        temp_arr.name = serviceFullList[indexActiveService[i]].text;
         temp_arr.index = i;
+        temp_arr.index_s = indexActiveService[i];
         simMatrix.push(temp_arr)
     }
     return simMatrix;
-
-
 }
 function plotTsne(hostResults,lastIndex,isPredict,startIndex_Input,undefinedValue){
     if (globalTrend)

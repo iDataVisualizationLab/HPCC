@@ -375,7 +375,7 @@ let radarController = function () {
             radarcomp.axisList.forEach(d=>{d.summary = dataSumIn[d.data.text];d.summary.range = d.scale.domain()});
             eventTable();
         }catch(e){
-console.log(e)
+            console.log(e)
         }
     }
     let dataTable;
