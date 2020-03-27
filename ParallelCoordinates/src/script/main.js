@@ -1025,6 +1025,7 @@ function brush() {
 
     // Get lines within extents
     var selected = [];
+
     data
         .filter(function(d) {
             return !_.contains(excluded_groups, d.group);
@@ -1034,6 +1035,7 @@ function brush() {
                 return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
             }) ? selected.push(d) : null;
         });
+
     // free text search
     var query = d3.select("#search").node().value;
     if (query.length > 0) {
@@ -1047,11 +1049,11 @@ function brush() {
         d3.select("#keep-data").attr("disabled", "disabled");
         d3.select("#exclude-data").attr("disabled", "disabled");
     };
-
+    console.time('tallies')
     // total by food group
     var tallies = _(selected)
         .groupBy(function(d) { return d.group; });
-
+    console.timeEnd('tallies')
     // include empty groups
     _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
 
@@ -1089,7 +1091,7 @@ function brush() {
 
 // render a set of polylines on a canvas
 function paths(selected, ctx, count) {
-    setTimeout(function(){
+    // setTimeout(function(){
         var n = selected.length,
             i = 0,
             opacity = d3.min([2/Math.pow(n,0.3),1]),
@@ -1101,8 +1103,9 @@ function paths(selected, ctx, count) {
 
         // complex_data_table(shuffled_data.slice(0,20));
         shuffled_data = selected;
+    console.time('complex_data_table')
         complex_data_table(shuffled_data);
-
+    console.timeEnd('complex_data_table')
         ctx.clearRect(0,0,w+1,h+1);
 
         // render all lines until finished or a new brush event
@@ -1120,7 +1123,7 @@ function paths(selected, ctx, count) {
         if (timel)
             timel.stop();
         timel = d3.timer(animloop);
-    },0);
+    // },0);
 }
 let timel
 // transition ticks for reordering, rescaling and inverting

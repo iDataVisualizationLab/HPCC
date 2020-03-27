@@ -1376,10 +1376,10 @@ function onChangeMinMaxFunc(choice){
 
     MetricController.axisSchema(serviceFullList, true).update();
     makedataworker();
-    initDataWorker();
+    // initDataWorker();
     recalculateCluster(group_opt,function(){
         handle_dataRaw();
-        // initDataWorker();
+        initDataWorker();
         if (!init)
             resetRequest();
         preloader(false)
