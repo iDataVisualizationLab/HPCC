@@ -145,3 +145,7 @@ function initTsnedata() {
         })
     });
 }
+
+function isStrickCluster(d){
+    return radarRatio?d.minDist<cluster_info[d.cluster].radius/radarRatio:true;
+}

@@ -1412,14 +1412,14 @@ function handle_dataRaw() {
 
             // assign cluster
             let index = 0;
-            let cluster_inRange = {}; // this node belong to how many cluster
+            // let cluster_inRange = {}; // this node belong to how many cluster
             let minval = Infinity;
             cluster_info.find((c, ci) => {
                 const val = distance(c.__metrics.normalize, axis_arr);
                 if(val===0&&c.leadername===undefined)
                     c.leadername = {name:h.name,timestep:i};
-                if( val < c.radius/2)
-                    cluster_inRange[ci] =val;
+                // if( val < c.radius/2)
+                //     cluster_inRange[ci] =val;
                 if (minval > val) {
                     index = ci;
                     minval = val;
@@ -1446,8 +1446,9 @@ function handle_dataRaw() {
             });
             // axis_arr.cluster = index;
             tsnedata[h.name][i].cluster = index;
-            tsnedata[h.name][i].multiClusters = Object.keys(cluster_inRange).length>1;
-            tsnedata[h.name][i].strickCluster = minval<cluster_info[index].radius/2;
+            // tsnedata[h.name][i].multiClusters = Object.keys(cluster_inRange).length>1;
+            // tsnedata[h.name][i].strickCluster = minval<cluster_info[index].radius/2;
+            tsnedata[h.name][i].minDist = minval;
             lastCluster = index;
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);

@@ -2536,6 +2536,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 //     return dataIn;
 // }
 let windowsSize = 1;
+let radarRatio = 2;
 // let timeWeight = 0;
 function handle_data_model(tsnedata,isKeepUndefined) {
     preloader(true,1,'preprocess data','#modelLoading');
@@ -2559,7 +2560,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
-            appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
+            appendCondition = appendCondition && (lastcluster === undefined ) || (isStrickCluster(axis_arr[i])&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
             // appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster));
             // appendCondition = appendCondition && (lastcluster === undefined ) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster)&&axis_arr[i].strickCluster;
             lastcluster = index;
