@@ -1993,7 +1993,8 @@ function onSchemaUpdate(schema){
         MetricController.drawSummary();
         if (cluster_info) {
             cluster_map(cluster_info);
-            jobMap.draw();
+            mainviz.redrawRadar()
+            // jobMap.draw();
         }
     }
     // }

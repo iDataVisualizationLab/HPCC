@@ -1560,6 +1560,7 @@ let JobMap = function() {
 
         return jobMap;
     };
+    jobMap.redrawRadar = jobMap.draw;
     function releasehighlight(){
         g.selectAll('.node').style('pointer-events','auto').classed('fade',false).classed('hide',false).classed('highlight',false);
         g.selectAll('.node .jobNode').classed('hide',jobEmpty);
