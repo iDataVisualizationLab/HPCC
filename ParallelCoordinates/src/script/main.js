@@ -102,9 +102,9 @@ Array.prototype.naturalSort= function(_){
 };
 
 function drawFiltertable() {
-    let listOption = d3.merge(conf.serviceLists.map(d => d.sub.map(e => {
-        return {service: e.text, arr: conf.serviceListattrnest[d.id].sub[e.id], text: e.text, enable: e.enable}
-    })));
+    let listOption = serviceFullList.map((e,ei) => {
+        return {service: e.text, arr: conf.serviceListattrnest[e.idroot].sub[e.id],id:ei, text: e.text, enable: e.enable}
+    });
     // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
     let table = d3.select("#axisSetting").select('tbody');
     table
@@ -113,7 +113,7 @@ function drawFiltertable() {
             const tr = enter.append("tr");
             tr.attr('data-id', d => d.arr);
             const alltr = tr.selectAll('td')
-                .data(d => [{key: 'enable', value: d.enable, type: "checkbox"}, {
+                .data(d => [{key: 'enable', value: d, type: "checkbox"}, {
                     key: 'colorBy',
                     value: false,
                     type: "radio"
@@ -138,9 +138,11 @@ function drawFiltertable() {
                 .attrs(function (d, i) {
                     return {
                         type: "checkbox",
-                        checked: d.value ? "checked" : null
+                        checked: serviceFullList[d.value.id].enable ? "checked" : null
                     }
-                }).on('change', function (d) {
+                }).on('adjustValue',function(d){
+                    d3.select(this).attr('checked',serviceFullList[d.value.id].enable ? "checked" : null)
+            }).on('change', function (d) {
                 filterAxisbyDom.call(this, d);
 
 
@@ -229,8 +231,8 @@ function drawFiltertable() {
     });
 }
 function filterAxisbyDom(d) {
-    const pdata = d3.select(this.parentElement.parentElement).datum();
-    d.value = this.checked;
+    const pdata = d.value;
+    serviceFullList[pdata.id].enable = this.checked;
     if (this.checked) {
         add_axis(pdata.arr, g);
         d3.select(this.parentElement.parentElement).classed('disable', false);
@@ -240,7 +242,7 @@ function filterAxisbyDom(d) {
         d3.select(this.parentElement.parentElement).classed('disable', true);
     }
     // TODO required to avoid a bug
-    var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d => d == pdata.arr));
+    var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d => d === pdata.arr));
     if (extent)
         extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
     update_ticks(pdata.arr, extent);
@@ -376,6 +378,7 @@ function reorderDimlist() {
         swap(order_list, pre, next);
         listMetric.sort(order_list);
     }
+    d3.selectAll('#axisSetting tbody input[type="checkbox"]').dispatch('adjustValue')
 }
 
 function dragend(d) {
@@ -408,6 +411,47 @@ function dragend(d) {
     delete this.__dragged__;
     delete this.__origin__;
     delete dragging[d];
+}
+
+function correlation(){
+    let variableCorrelation = correlationCal();
+    orderByCorrelation();
+    let temp_dimensions = []
+    serviceFullList.forEach(s=>{
+        if(dimensions.find(d=>d===s.text))
+            temp_dimensions.push({key:s.text,value:s.angle});
+    });
+    temp_dimensions.sort((a,b)=>a.value-b.value);
+    dimensions = ['Time'];
+    temp_dimensions.forEach(d=>dimensions.push(d.key))
+    xscale.domain(dimensions);
+    reorderDimlist();
+}
+function correlationCal(serviceEnable){
+    let data = _.unzip(_.flatten(_.keys(tsnedata).map(e=>tsnedata[e].map(e=>e.__valwithNull)),1));
+    let indexActiveService =[];
+    const activeservice = serviceFullList.filter((s,si)=>{
+        if(serviceEnable[si])
+            indexActiveService.push(si);
+        return serviceEnable[si]});
+    const n = activeservice.length;
+    let simMatrix = [];
+    for (let i = 0;i<n; i++){
+        let temp_arr = [];
+        // temp_arr.total = 0;
+        for (let j=i+1; j<n; j++){
+            let tempval = pearsonCorcoef(data[indexActiveService[i]],data[indexActiveService[j]]);
+            // temp_arr.total += tempval;
+            temp_arr.push(tempval)
+        }
+        // for (let j=0;j<i;j++)
+        //     temp_arr.total += simMatrix[j][i-1-j];
+        temp_arr.name = serviceFullList[indexActiveService[i]].text;
+        temp_arr.index = i;
+        temp_arr.index_s = indexActiveService[i];
+        simMatrix.push(temp_arr)
+    }
+    return simMatrix;
 }
 function swap (a,indexa,indexb){
     const temp = a[indexa];
@@ -1335,6 +1379,7 @@ function exclude_data() {
 }
 
 function add_axis(d,g) {
+    serviceFullList.find(e=>e.text===d).enable=true;
     // dimensions.splice(dimensions.length-1, 0, d);
     dimensions.push(d);
     dimensions = _.intersection(_.union(['Time'],listMetric.toArray()),dimensions)    ;
@@ -1345,6 +1390,7 @@ function add_axis(d,g) {
 }
 
 function remove_axis(d,g) {
+    serviceFullList.find(e=>e.text===d).enable=false;
     dimensions = _.difference(dimensions, [d]);
     xscale.domain(dimensions);
     g = g.data(dimensions,d=>d);
