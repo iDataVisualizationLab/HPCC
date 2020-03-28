@@ -974,7 +974,7 @@ function orderByCorrelation(){
             }
         })
     });
-    mapIndex.sort((a,b)=> -simMatrix[a].total+simMatrix[b].total);
+    mapIndex.sort((a,b)=> simMatrix[a].total-simMatrix[b].total);
     // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
     // mapIndex.sort((a,b)=>
     //     b===undefinedposition?1:(a===undefinedposition?-1:0)

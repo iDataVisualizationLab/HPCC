@@ -1107,7 +1107,7 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
     className = className||"compute linkLineg ";
     let size_w = customopt?(customopt.size?customopt.size:radaropt.w):radaropt.w;
     let size_h = customopt?(customopt.size?customopt.size:radaropt.h):radaropt.h;
-    let colorfill = (customopt&&customopt.colorfill)?0.5:false;
+    let colorfill = (customopt&&customopt.colorfill)?(customopt.colorfill===true?0.5:customopt.colorfill):false;
     let radar_opt = {
         w: size_w,
         h: size_h,

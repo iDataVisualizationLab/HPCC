@@ -104,7 +104,7 @@ d3.TimeSpace = function () {
         stop = false;
     let modelWorker,plotlyWorker,workerList=[],colorscale,reset;
     let master={},solution,datain=[],filterbyClustername=[],visibledata,table_info,path,cluster=[],scaleTime;
-    let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear();
+    let xscale=d3.scaleLinear(),yscale=d3.scaleLinear(), scaleNormalTimestep=d3.scaleLinear(),radarOpacityScale = d3.scaleLinear().range([0.1,1]);
     // grahic
     let camera,isOrthographic=false,scene,axesHelper,axesTime,gridHelper,controls,raycaster,INTERSECTED =[] ,mouse ,
         points,lines,linesGroup,curveLines,curveLinesGroup,straightLines,straightLinesGroup,curves,updateLine,
@@ -828,13 +828,13 @@ d3.TimeSpace = function () {
         let dataRadar = [];
         let links = {};
         data.forEach((d,i)=>{
-            dataRadar.push(d.__metrics);
+            dataRadar.push({deltaTime: d.__deltaTimestep,value: d.__metrics});
             if(!links[d.name])
                 links[d.name]=[];
             pos[i].cluster = d.clusterName;
             links[d.name].push(pos[i]);
         });
-        let g = svg.select('#modelWorkerScreen_svg_g').style('pointer-events','all').select('#modelWorkerScreen_grid')
+        let g = svg.select('#modelWorkerScreen_svg_g').style('pointer-events','all').select('#modelWorkerScreen_grid');
         if (g.empty())
             g = svg.select('#modelWorkerScreen_svg_g').append('g').attr('id','modelWorkerScreen_grid');
         let curvelink = d3.line()
@@ -850,24 +850,26 @@ d3.TimeSpace = function () {
             .each(function(d){d.object = d3.select(this)});
 
         let old = d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR')
-            .data(dataRadar,d=>d.name_or+'_'+d.timestep).attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`);
+            .data(dataRadar,d=>d.value.name_or+'_'+d.value.timestep).attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`);
         old.exit().remove();
         old.enter().append('g').attr('class','timeSpaceR')
             .attr('transform',(d,i)=>`translate(${pos[i].x},${pos[i].y})`)
-            .on('highlight',d=>{d.radar.classed('fade',false);})
-            .on('fade',d=>{d.radar.classed('fade',true);if (links[d.name_or]&&links[d.name_or].object) links[d.name_or].object.classed('hide',true)})
+            .on('highlight',d=>{d.value.radar.classed('fade',false);})
+            .on('fade',d=>{d.value.radar.classed('fade',true);if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',true)})
             .on('mouseover',d=>{
-                if (links[d.name_or]&&links[d.name_or].object) links[d.name_or].object.classed('hide',false)
-                highlightNode([{index:path[d.name_or].find(e=>e.timestep===d.timestep).index}])})
-            .on('mouseleave',d=>{ highlightNode([]); if (links[d.name_or]) links[d.name_or].object.classed('hide',true);})
+                if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',false);
+                highlightNode([{index:path[d.value.name_or].find(e=>e.timestep===d.value.timestep).index}])})
+            .on('mouseleave',d=>{ highlightNode([]); if (links[d.value.name_or]) links[d.value.name_or].object.classed('hide',true);})
             .each(function(d){
-                d.radar = d3.select(this);
-                createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
+                d.value.radar = d3.select(this);
+                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: radarOpacityScale(d.deltaTime)}).select('.radarStroke')
+                    .style('stroke-opacity',1);
             });
         if(redraw){
             d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR').each(function(d){
-                d.radar = d3.select(this);
-                createRadar(d.radar.select('.radar'), d.radar, d, {size:radarSize*1.25*2,colorfill: true});
+                d.value.radar = d3.select(this);
+                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: radarOpacityScale(d.deltaTime)}).select('.radarStroke')
+                    .style('stroke-opacity',1);
             });
         }
 
@@ -1944,6 +1946,7 @@ d3.TimeSpace = function () {
         let maxstep = sampleS.timespan.length - 1;
         scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
         scaleNormalTimestep.domain([0, maxstep]);
+        radarOpacityScale.domain([1,maxstep+1])
     }
     function interuptAnimation(){
         if (animationtimer)
@@ -2523,29 +2526,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
 
-// function handle_data_model(tsnedata) {
-//     let dataIn = [];
-//     d3.values(tsnedata).forEach(axis_arr => {
-//         let lastcluster;
-//         let lastdataarr;
-//         let count = 0;
-//         sampleS.timespan.forEach((t, i) => {
-//             let index = axis_arr[i].cluster;
-//             axis_arr[i].clusterName = cluster_info[index].name
-//             // timeline precalculate
-//             if (!(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, axis_arr[i]) > cluster_info[axis_arr[i].cluster].mse * runopt.suddenGroup) {
-//                 lastcluster = index;
-//                 lastdataarr = axis_arr[i];
-//                 axis_arr[i].timestep = count; // TODO temperal timestep
-//                 count++;
-//                 dataIn.push(axis_arr[i])
-//             }
-//             return index;
-//             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-//         })
-//     });
-//     return dataIn;
-// }
+
 let windowsSize = 1;
 let radarRatio = 2;
 // let timeWeight = 0;
@@ -2557,6 +2538,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
     let dataIn = [];
     // let timeScale = d3.scaleLinear().domain([0,sampleS.timespan.length-1]).range([0,timeWeight]);
     d3.values(tsnedata).forEach(axis_arr => {
+        let lastRadar; // last Radar on list
         let lastcluster;
         let lastcluster_insterted;
         let lastdataarr;
@@ -2577,6 +2559,8 @@ function handle_data_model(tsnedata,isKeepUndefined) {
             lastcluster = index;
             lastdataarr = currentData.slice();
             if (appendCondition) {
+                if (lastRadar)
+                    lastRadar.__deltaTimestep = i - lastRadar.__timestep+1;
                 lastcluster_insterted = index;
                 // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
                 currentData.show = true;
@@ -2622,11 +2606,13 @@ function handle_data_model(tsnedata,isKeepUndefined) {
                             currentData[i] = -1;
                     }
                 }
+                lastRadar = currentData;
                 dataIn.push(currentData);
             }
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
+        lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
     });
     return dataIn;
 }
