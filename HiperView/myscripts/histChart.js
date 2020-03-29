@@ -141,6 +141,14 @@ d3.histChart = function () {
             .attrs(circleoption)
             .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:xNum.range()[1]);
 
+        if (graphicopt.title){
+            if (g.select('g.title').empty())
+                g.append('g').attr('class','title');
+            g.select('g.title').attr('transform',`translate(${graphicopt.widthG()/2},10)`)
+            let title = g.select('g.title').selectAll('text').data(graphicopt.title);
+            title.exit().remove();
+            title.enter().append('text').style('text-anchor','middle').text(d=>d.text);
+        }
         return his_chart;
     };
 
