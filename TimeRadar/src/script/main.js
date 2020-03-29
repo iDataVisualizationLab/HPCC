@@ -2479,7 +2479,7 @@ function onClusterHistogram(){
         })
         .each(function(d){
         violiin_chart.graphicopt({color:(i)=>colorCluster(d.id),title:[{text:`${nestCluster[d.id].total} status${nestCluster[d.id].total>1?'es':''}`}
-                ,{text:`${nestCluster[d.id].extra} instances`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
+                ,{text:`${nestCluster[d.id].extra} compute`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
     });
     function getHist(v,name,nodes){
         var scale = d3.scaleLinear().domain([0,20]).range([1,sampleS.timespan.length]);

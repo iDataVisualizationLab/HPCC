@@ -110,6 +110,7 @@ d3.histChart = function () {
         let his_bar_n = his_bar.enter().append('g').attr('class','bar');
         his_bar_n.append('rect');
         his_bar = his_bar_n.merge(his_bar).attr('transform',d=>`translate(${h(d[0])},${xNum.range()[1]})`);
+        his_bar.each(function(d){d.elbar=d3.select(this)});
         his_bar.transition().attr('transform',d=>`translate(${h(d[0])},${xNum.range()[1]-xNum(d[1])})`);
         his_bar.select('rect')
             .call(hist_bar);
@@ -126,10 +127,11 @@ d3.histChart = function () {
                 .on('mousemove',function(d){
                     let index = bisect.right(d.arr,h.invert(d3.mouse(this)[0]))
                     if (d.arr[index]) {
-                        d.arr.forEach(e => e.el.classed('hide', true))
+                        d.arr.forEach(e => {e.elbar.classed('fade', true);e.el.classed('hide', true)})
                         d.arr[index].el.classed('hide', false).select('.xvalue').classed('hide',false);
+                        d.arr[index].elbar.classed('fade', false);
                     }
-                }).on('mouseleave',function(d){d.arr.forEach(e=>e.el.classed('hide',f=>!f.mark).select('.xvalue').classed('hide',true));})
+                }).on('mouseleave',function(d){d.arr.forEach(e=>{e.elbar.classed('fade', false);e.el.classed('hide',f=>!f.mark).select('.xvalue').classed('hide',true)})})
         }
         arr[0].outlier = arr[0].outlier||[]
         let circledata =  arr[0].outlier.map(d=>{return d.x?d:{x:d}});
@@ -172,6 +174,7 @@ d3.histChart = function () {
                 .attr('y',(d,i)=>i*12)
                 .style('text-anchor','middle').text(d=>d.text);
         }
+        g.selectAll('text').style('opacity',0.8)
         return his_chart;
     };
 
