@@ -801,9 +801,9 @@
 
                                     </div>
                                     <div  class="row no_magrin" style="max-height: 200px;overflow-y: auto;">
-                                        <div class="row s12 valign-wrapper">
-                                            <button type="submit" value = 0 class ="menuBtn btn-small filterLimit offset-s5 col" id="radarCollider" ><i class="icon-radarShape material-icons icon"></i> Collision detection</button>
-                                        </div>
+<!--                                        <div class="row s12 valign-wrapper">-->
+<!--                                            <button type="submit" value = 0 class ="menuBtn btn-small filterLimit offset-s5 col" id="radarCollider" ><i class="icon-radarShape material-icons icon"></i> Collision detection</button>-->
+<!--                                        </div>-->
                                         <p id ="filterList" class="no_magrin">
 
                                         </p>
@@ -813,6 +813,7 @@
                                 </div>
                                 <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
                                     <span class="selectionNum"></span>
+                                    <span class="selectionName"></span>
                                 </div>
                             </div>
                         </div>
@@ -821,7 +822,17 @@
                             <!--<div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">-->
                             <!--</div>-->
                         <!--</div>-->
-                        <h5 class="title" style="position:absolute;top:0;left:50%"></h5>
+                        <div class="modelHeader" style="position:absolute;top:0;left:50%">
+                            <h5 class="title" style="display: inline-block"></h5>
+                            <div class="input-field" style="display: inline-block">
+                                <select id="radarCollider" class="browser-default inline">
+                                    <option class="item" value="0" selected>Dot view</option>
+                                    <option class="item" value="1">Radar view</option>
+                                    <option class="item" value="2">Force layout</option>
+                                    <option class="item" value="3">Hexagon layout</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
