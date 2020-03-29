@@ -822,15 +822,22 @@
                             <!--<div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">-->
                             <!--</div>-->
                         <!--</div>-->
-                        <div class="modelHeader" style="position:absolute;top:0;left:50%">
+                        <div class="modelHeader" style="transform: translateX(-50%);position:absolute;top:0;left:50%">
                             <h5 class="title" style="display: inline-block"></h5>
                             <div class="input-field" style="display: inline-block">
-                                <select id="radarCollider" class="browser-default inline">
+                                <select id="radarCollider" class="browser-default inline z-depth-2">
                                     <option class="item" value="0" selected>Dot view</option>
                                     <option class="item" value="1">Radar view</option>
                                     <option class="item" value="2">Force layout</option>
                                     <option class="item" value="3">Hexagon layout</option>
                                 </select>
+                                <div class="specialLayout hide" style="display: inline-block">
+                                    <span> Density by: </span>
+                                    <select id="radarOpacity" class="browser-default inline z-depth-2">
+                                        <option class="item" value="0" selected>Radar transparency</option>
+                                        <option class="item" value="1">Bin background</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>

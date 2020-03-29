@@ -1131,6 +1131,8 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
     }
 
     // replace thumnail with radar mini
+    if(data)
+        datapoint.data([data])
     datapoint.each(function(d){
         d3.select(this).attr('transform',`translate(${-radar_opt.w/2},${-radar_opt.h/2})`)
         if (colorfill)

@@ -868,27 +868,37 @@ d3.TimeSpace = function () {
             .on('mouseleave',d=>{ highlightNode([]); if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',true);})
             .each(function(d){
                 d.value.radar = d3.select(this);
-                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: radarOpacityScale(d.deltaTime)}).select('.radarStroke')
+                let colorfill = true;
+                if (!+$('#radarOpacity').val())
+                    colorfill = radarOpacityScale(d.deltaTime);
+                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: colorfill}).select('.radarStroke')
                     .style('stroke-opacity',1);
             });
         if(redraw){
             d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR').each(function(d){
                 d.value.radar = d3.select(this);
-                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: radarOpacityScale(d.deltaTime)}).select('.radarStroke')
+                let colorfill = 0.5;
+                if (!+$('#radarOpacity').val())
+                    colorfill = radarOpacityScale(d.deltaTime);
+                createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: colorfill}).select('.radarStroke')
                     .style('stroke-opacity',1);
             });
         }
 
     }
     function draw_grid_hexagon(data,hexbin){
-        d3.scaleLinear().range([]).domain([]);
-        let old = svg.select('#modelWorkerScreen_grid').selectAll("path")
-            .data(data);
-        old.exit().remove();
-        old.enter().append('path').merge(old)
-            .attr("d", hexbin.hexagon())
-            .attr("transform", d => `translate(${d.x},${d.y})`)
-            .styles({"fill": '#eeeeee','stroke':'white','stroke-width':2})//d => color(d.length));
+        if(hexbin) {
+            d3.scaleLinear().range([]).domain([]);
+            let old = svg.select('#modelWorkerScreen_grid').selectAll("path")
+                .data(data.pos);
+            old.exit().remove();
+            old.enter().append('path').merge(old)
+                .attr("d", hexbin.hexagon())
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .styles({"fill": '#a5a5a5', 'stroke': 'white', 'stroke-width': 2});
+        }
+            svg.select('#modelWorkerScreen_grid').selectAll("path")
+                .style('opacity',(d,i)=>+$('#radarOpacity').val()?radarOpacityScale(data.data[i].__deltaTimestep):0.2)
     }
 
     function updateforce(){
@@ -981,7 +991,7 @@ d3.TimeSpace = function () {
                         }
                     }
                     drawRadar(svgData);
-                    draw_grid_hexagon(bin,hexbin)
+                    draw_grid_hexagon(svgData,hexbin)
                 }
                 forceColider.stop();
                 return;
@@ -2388,19 +2398,30 @@ d3.TimeSpace = function () {
         d3.select('#modelCompareMode').on('change',function(){
             graphicopt.iscompareMode=d3.select(this).property('checked')
         });
-
+        d3.select('#radarOpacity').on('change',function(){
+            if (svgData) {
+                drawRadar(svgData,true);
+                if ($('#radarCollider').val()==='3')
+                    draw_grid_hexagon(svgData);
+            }
+        });
         d3.select('#radarCollider').on('change',function(){
             d3.select(this).dispatch('action')
         }).on('action',function(){
             const newValue = +$('#radarCollider').val();
-            if (newValue)
+            if (newValue) {
                 computesvgData();
+                d3.select('.specialLayout').attr('disabled','').classed('hide',false)
+                    .select('#radarOpacity').attr('disabled','');
+            }
             if (svg)
                 svg.select('#modelWorkerScreen_grid').classed('hide',true);
             switch (newValue) {
                 case 1:
                     // target.html(`<i class="icon-radarShape material-icons icon"></i> Radar layout`);
                     if (forceColider&&svgData&&svgData.posStatic) {
+                        $('#radarOpacity').val(0);
+                        d3.select('#radarOpacity').dispatch('change');
                         svgData.pos = _.cloneDeep(svgData.posStatic);
                         forceColider.stop();
                         svg.classed('white',false);
@@ -2410,15 +2431,20 @@ d3.TimeSpace = function () {
                     break;
                 case 2:
                     // target.html(`<i class="icon-radarShape material-icons icon"></i> Force layout `);
+                    $('#radarOpacity').val(0);
+                    d3.select('#radarOpacity').dispatch('change');
                     startCollide();
                     break;
                 case 3:
                     // target.html(`<i class="icon-radarShape material-icons icon"></i> Hexagon layout`);
+                    d3.select('.specialLayout').attr('disabled',null).select('#radarOpacity').attr('disabled',null);
                     startCollide();
                     // updateforce();
                     // forceColider.tick();
                     break;
                 default:
+
+                    d3.select('.specialLayout').classed('hide',true);
                     if (svg)
                         svg.classed('white',false);
                     if (forceColider&&svgData&&svgData.posStatic) {
