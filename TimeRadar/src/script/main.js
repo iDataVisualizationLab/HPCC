@@ -1652,8 +1652,19 @@ $( document ).ready(function() {
     });
 
     d3.select('#majorGroupDisplay_control').on('change',function() {
-        radarChartclusteropt.boxplot = $(this).prop('checked');
-        cluster_map(cluster_info)
+        switch ($(this).val()) {
+            case "0":
+                radarChartclusteropt.boxplot = false;
+            case "1":
+                radarChartclusteropt.boxplot = true;
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',null);
+                cluster_map(cluster_info);
+                break;
+            case "2":
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',0.2);
+                onClusterHistogram()
+                break;
+        }
     });
 
     $('.fixed-action-btn').floatingActionButton({
@@ -2489,6 +2500,31 @@ function enableVariableCorrelation(isenable){
 // }
 
 // test zone
+function onClusterHistogram(){
+    let h = 50;
+    let w = radarChartclusteropt.w;
+    let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
+    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName)).object(handle_data_model(tsnedata));
+    const customrangeY = [0,d3.max(d3.values(nestCluster),e=>d3.max(e.arr,d=>d[1]))];
+    console.log(customrangeY);
+    d3.select('#clusterDisplay').selectAll('.radarCluster').append('svg').attr('class','clusterHist')
+        .attrs({width: w,height:h})
+        .each(function(d){
+            console.log([nestCluster[d.id]]);
+        violiin_chart.graphicopt({color:(i)=>colorCluster(d.id)}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
+    });
+    function getHist(v,name){
+        var histogram = d3.histogram()
+            .domain([1,sampleS.timespan.length])
+            .thresholds(d3.scaleLinear().domain([1,sampleS.timespan.length]).ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .value(d => d);
+        let hisdata = histogram(v);
+        let sumstat = hisdata.map((d, i) => [(d.x0 + (d.x1 - d.x0) / 2)/sampleS.timespan.length, (d || []).length]);
+        console.log(sumstat)
+        return {axis: name,arr:sumstat,outlier:[],point:[]};
+    }
+}
 function onMergeSuperGroup() {
     clusterGroup = {9:0,2:0,5:0,8:0};
     // testing ----------
