@@ -2460,9 +2460,12 @@ function enableVariableCorrelation(isenable){
 // test zone
 function onClusterHistogram(){
     let h = 50;
-    let w = radarChartclusteropt.w;
-    let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},middleAxis:{'stroke-width':0.5}});
-    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName)).object(handle_data_model(tsnedata));
+    let w = radarChartclusteropt.w*0.85;
+    let interval = sampleS.timespan[1]-sampleS.timespan[0];
+    let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},
+        formatx:(d)=>millisecondsToStr(d*sampleS.timespan.length*interval),
+        middleAxis:{'stroke-width':0.5},displayDetail:true});
+    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName,_.uniq(d.map(e=>e.name)).length)).object(handle_data_model(tsnedata));
     const customrangeY = [0,d3.max(d3.values(nestCluster),e=>d3.max(e.arr,d=>d[1]))];
     console.log(customrangeY);
     d3.select('#clusterDisplay').selectAll('.radarCluster').append('svg')
@@ -2471,20 +2474,23 @@ function onClusterHistogram(){
         .styles({
             'transform':'translateY(-50%)',
             'position': 'absolute',
-            'top':'50%'
+            'top':'50%',
+            'overflow':'visible'
         })
         .each(function(d){
-        violiin_chart.graphicopt({color:(i)=>colorCluster(d.id),title:[{text:`${nestCluster[d.id].total} sample${nestCluster[d.id].total>1?'s':''}`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
+        violiin_chart.graphicopt({color:(i)=>colorCluster(d.id),title:[{text:`${nestCluster[d.id].total} status${nestCluster[d.id].total>1?'es':''}`}
+                ,{text:`${nestCluster[d.id].extra} instances`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
     });
-    function getHist(v,name){
+    function getHist(v,name,nodes){
+        var scale = d3.scaleLinear().domain([0,20]).range([1,sampleS.timespan.length]);
         var histogram = d3.histogram()
             .domain([1,sampleS.timespan.length])
-            .thresholds(d3.scaleLinear().domain([1,sampleS.timespan.length]).ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
             // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
             .value(d => d);
         let hisdata = histogram(v);
         let sumstat = hisdata.map((d, i) => [(d.x0 + (d.x1 - d.x0) / 2)/sampleS.timespan.length, (d || []).length]);
-        return {axis: name,arr:sumstat,total:v.length};
+        return {axis: name,arr:sumstat,total:v.length,extra:nodes};
     }
 }
 function onMergeSuperGroup() {
