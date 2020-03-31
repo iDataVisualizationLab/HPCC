@@ -878,7 +878,7 @@ d3.TimeSpace = function () {
             d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR').each(function(d){
                 d.value.radar = d3.select(this);
                 let colorfill = 0.5;
-                if (!+$('#radarOpacity').val())
+                if (!+$('#radarOpacity').val()>0)
                     colorfill = radarOpacityScale(d.deltaTime);
                 createRadar(d.value.radar.select('.radar'), d.value.radar, d.value, {size:radarSize*1.25*2,colorfill: colorfill}).select('.radarStroke')
                     .style('stroke-opacity',1);
@@ -898,7 +898,7 @@ d3.TimeSpace = function () {
                 .styles({"fill": '#a5a5a5', 'stroke': 'white', 'stroke-width': 2});
         }
             svg.select('#modelWorkerScreen_grid').selectAll("path")
-                .style('opacity',(d,i)=>+$('#radarOpacity').val()?radarOpacityScale(data.data[i].__deltaTimestep):0.2)
+                .style('opacity',(d,i)=>+$('#radarOpacity').val()>0?radarOpacityScale(data.data[i].__deltaTimestep):0.2)
     }
 
     function updateforce(){

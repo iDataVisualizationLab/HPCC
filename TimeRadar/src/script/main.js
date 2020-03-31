@@ -2466,7 +2466,7 @@ function onClusterHistogram(){
     let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},
         formatx:(d)=>millisecondsToStr(d*sampleS.timespan.length*interval),
         middleAxis:{'stroke-width':0.5},displayDetail:true});
-    var scale = d3.scaleTime().domain([interval,interval*sampleS.timespan.length]).range([1,sampleS.timespan.length]).nice();
+    var scale = d3.scaleTime().domain([interval,interval*sampleS.timespan.length]).range([1,sampleS.timespan.length]);
     var histogram = d3.histogram()
         .domain([1,sampleS.timespan.length])
         // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
