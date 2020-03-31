@@ -1125,6 +1125,7 @@ function playchange(){
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
 function exit_warp () {
+    timeSpacedata = undefined
     playchange();
 }
 function pausechange(){
@@ -2465,9 +2466,15 @@ function onClusterHistogram(){
     let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},
         formatx:(d)=>millisecondsToStr(d*sampleS.timespan.length*interval),
         middleAxis:{'stroke-width':0.5},displayDetail:true});
-    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName,_.uniq(d.map(e=>e.name)).length)).object(handle_data_model(tsnedata));
+    var scale = d3.scaleTime().domain([interval,interval*sampleS.timespan.length]).range([1,sampleS.timespan.length]).nice();
+    var histogram = d3.histogram()
+        .domain([1,sampleS.timespan.length])
+        // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .thresholds(scale.ticks(11).map(s=>scale(s)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .value(d => d);
+    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName,_.uniq(d.map(e=>e.name)).length)).object(timeSpacedata?timeSpacedata:handle_data_model(tsnedata,undefined,true));
     const customrangeY = [0,d3.max(d3.values(nestCluster),e=>d3.max(e.arr,d=>d[1]))];
-    console.log(customrangeY);
+
     d3.select('#clusterDisplay').selectAll('.radarCluster').append('svg')
         .attr('class','clusterHist')
         .attrs({width: w,height:h})
@@ -2482,12 +2489,6 @@ function onClusterHistogram(){
                 ,{text:`${nestCluster[d.id].extra} node${nestCluster[d.id].total>1?'s':''}`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
     });
     function getHist(v,name,nodes){
-        var scale = d3.scaleLinear().domain([0,20]).range([1,sampleS.timespan.length]);
-        var histogram = d3.histogram()
-            .domain([1,sampleS.timespan.length])
-            .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-            // .thresholds(x.ticks(runopt.histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-            .value(d => d);
         let hisdata = histogram(v);
         let sumstat = hisdata.map((d, i) => [(d.x0 + (d.x1 - d.x0) / 2)/sampleS.timespan.length, (d || []).length]);
         return {axis: name,arr:sumstat,total:v.length,extra:nodes};

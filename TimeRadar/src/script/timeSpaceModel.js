@@ -2609,9 +2609,11 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
 
 let windowsSize = 1;
 let radarRatio = 2;
+let timeSpacedata;
 // let timeWeight = 0;
-function handle_data_model(tsnedata,isKeepUndefined) {
-    preloader(true,1,'preprocess data','#modelLoading');
+function handle_data_model(tsnedata,isKeepUndefined,notblock) {
+    if(!notblock)
+        preloader(true,1,'preprocess data','#modelLoading');
     windowsSize = windowsSize||1;
     // get windown surrounding
     let windowSurrounding =  (windowsSize - 1)/2;
@@ -2694,6 +2696,7 @@ function handle_data_model(tsnedata,isKeepUndefined) {
         })
         lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
     });
+    timeSpacedata = dataIn;
     return dataIn;
 }
 
