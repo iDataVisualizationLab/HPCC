@@ -154,6 +154,8 @@ function newdatatoFormat (data,separate){
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
     data.forEach(d=>variables.forEach(k=>d[k] = d[k]===""?null:(+d[k]))) // format number
     let keys ={};
+    if (variables.find(k=>k.split(separate).length>1)===undefined)
+        separate = "-";
     variables.forEach((k,ki)=>{
         let split_string = k.split(separate);
         const nameh = split_string.shift();
@@ -248,6 +250,12 @@ function newdatatoFormat_noSuggestion (data,separate){
     // FIXME detect format
     const variables = _.without(Object.keys(data[0]),'timestamp','time');
     data.forEach(d=>variables.forEach(k=>d[k] = d[k]===""?null:(+d[k]))) // format number
+    // test sepatate
+
+    if (variables.find(k=>k.split(separate).length>1)===undefined)
+        separate = "-";
+
+
     let keys ={};
     variables.forEach((k,ki)=>{
         let split_string = k.split(separate);
