@@ -49,6 +49,7 @@ d3.TimeSpace = function () {
             component:{
                 dot:{size:5,opacity:0.9},
                 link:{size:1,opacity:0.2, highlight:{opacity:3}},
+                label:{enable:1}
             },
             serviceIndex: 0,
             tableLimit: 1500,
@@ -62,6 +63,8 @@ d3.TimeSpace = function () {
                 callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);isneedrender = true;}},
             linkOpacity:{text:"Link opacity", range:[0.1,1],id:'Link_opacity', type:"slider", variableRoot: graphicopt.component.link,variable: 'opacity',width:'100px',step:0.1,
                 callback:onlinkopacity},
+            labelMarker:{text: "Display label", type: "selection", variableRoot: graphicopt.component.label,variable: 'enable',labels:['--none--','Cluster label','State label','Cluster + State label'],values:[0,1,2,3], width: '100px',
+                calback:updatelabelCluster},
             dim: {text: "Dimension", type: "selection", variableRoot: 'opt',variable: 'dim',labels:['2D','3D respect time','3D'],values:[2,2.5,3], width: '100px',callback:()=>{
                     preloader(true,10,'Change dimension projection...','#modelLoading');
                     obitTrigger=true;
@@ -114,6 +117,10 @@ d3.TimeSpace = function () {
     far = 7000;
     //----------------------force----------------------
     let forceColider,animateTrigger=false;
+    //----------------------label----------------------
+    // let voronoi = d3.geom.voronoi()
+    //     .x(function(d) { return d.x; })
+    //     .y(function(d) { return d.y; });
     //----------------------color----------------------
     let colorLineScale = d3.scaleLinear().interpolate(d3.interpolateCubehelix);
     let createRadar,createRadarTable;
@@ -343,12 +350,15 @@ d3.TimeSpace = function () {
         handle_data(datain);
         updateTableInput();
         path = {};
-
+        cluster.forEach(c=>c.__metrics.__minDist = Infinity)
         // make path object and compute euclideandistance
         datain.forEach(function (target, i) {
             target.__metrics.position = [0,0,0];
-            if (cluster[target.cluster].leadername&&(target.name===cluster[target.cluster].leadername.name && target.__timestep===cluster[target.cluster].leadername.timestep))
+            // if (cluster[target.cluster].leadername&&(target.name===cluster[target.cluster].leadername.name && target.__timestep===cluster[target.cluster].leadername.timestep))
+            if (cluster[target.cluster].__metrics.__minDist>target.__minDist) {
                 cluster[target.cluster].__metrics.indexLeader = i;
+                cluster[target.cluster].__metrics.__minDist = target.__minDist;
+            }
             if (!path[target.name])
                 path[target.name] = [];
             path[target.name].push({
@@ -1901,7 +1911,46 @@ d3.TimeSpace = function () {
         return marker;
     }
     function updatelabelCluster() {
-        clusterMarker.attr('transform',d=>`translate(${d.__metrics.projection.x},${d.__metrics.projection.y})`);
+        svg.select('#modelNodeLabel').selectAll('.name').remove();
+        if(points.geometry) {
+            if (graphicopt.component.label.enable === 2 || graphicopt.component.label.enable === 3) {
+                let orient = ({
+                    top: text => text.attr("text-anchor", "middle").attr("y", -6),
+                    right: text => text.attr("text-anchor", "start").attr("dy", "0.35em").attr("x", 6),
+                    bottom: text => text.attr("text-anchor", "middle").attr("dy", "0.71em").attr("y", 6),
+                    left: text => text.attr("text-anchor", "end").attr("dy", "0.35em").attr("x", -6)
+                });
+                let pointData = _.chunk(points.geometry.attributes.position.array, 3).map(d => (p = getpos(d[0], d[1], d[2]), [p.x, p.y]));
+                let voronoi = d3.Delaunay.from(pointData)
+                    .voronoi([0, 0, graphicopt.widthG(), graphicopt.heightG()]);
+                let dataLabel = []
+                datain.forEach((d, i) => {
+                    const cell = voronoi.cellPolygon(i);
+                    if (cell && -d3.polygonArea(cell) > 2000)
+                        dataLabel.push([pointData[i], cell, d.name])
+                });
+                svg.select('#modelNodeLabel').selectAll('.name').data(dataLabel).enter()
+                    .append('text').attr('class', 'name')
+                    .each(function ([[x, y], cell]) {
+                        const [cx, cy] = d3.polygonCentroid(cell);
+                        const angle = (Math.round(Math.atan2(cy - y, cx - x) / Math.PI * 2) + 4) % 4;
+                        d3.select(this).call(angle === 0 ? orient.right
+                            : angle === 3 ? orient.top
+                                : angle === 1 ? orient.bottom
+                                    : orient.left);
+                    })
+                    .attr("transform", ([d]) => `translate(${d})`)
+                    .style('opacity', 0.6)
+                    .text(([, , name]) => name);
+            }
+            if (graphicopt.component.label.enable === 1 || graphicopt.component.label.enable === 3) {
+                clusterMarker.attr('transform', d => `translate(${d.__metrics.projection.x},${d.__metrics.projection.y})`);
+            }
+            if (graphicopt.component.label.enable===0||graphicopt.component.label.enable===2){
+                clusterMarker.classed('hide',true);
+            }else
+                clusterMarker.classed('hide',false);
+        }
     }
     function filterlabelCluster() {
         clusterMarker.classed('hide',d=>d.__metrics.hide);
@@ -2358,10 +2407,11 @@ d3.TimeSpace = function () {
                         let div = d3.select(this).style('width', d.content.width)
                             .append('select')
                             .on('change',function(){
-                                if (!d.content.variableRoot) {
-                                    graphicopt[d.content.variable]  =  d.content.values[this.value];
-                                }else
-                                    graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
+                                setValue(d.content,d.content.values[this.value])
+                                // if (!d.content.variableRoot) {
+                                //     graphicopt[d.content.variable]  =  d.content.values[this.value];
+                                // }else
+                                //     graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
                                 if (d.content.callback)
                                     d.content.callback();
                             });
@@ -2370,9 +2420,10 @@ d3.TimeSpace = function () {
                             .enter().append('option')
                             .attr('value',(e,i)=>i).text((e,i)=>e);
                         let default_val = graphicopt[d.content.variable];
-                        if (d.content.variableRoot)
-                            default_val = graphicopt[d.content.variableRoot][d.content.variable];
-                        $(div.node()).val( d.content.values.indexOf(default_val));
+                        // if (d.content.variableRoot)
+                        //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
+                        console.log(getValue(d.content))
+                        $(div.node()).val( d.content.values.indexOf( getValue(d.content)));
                     }
                 }
             });
@@ -2479,6 +2530,26 @@ d3.TimeSpace = function () {
                 }
             }
         });
+    }
+    function setValue(content,value){
+        if (_.isString(content.variableRoot))
+            graphicopt[content.variableRoot][content.variable] = value;
+        else{
+            if (content.variableRoot===undefined)
+                graphicopt[content.variable] = value;
+            else
+                content.variableRoot[content.variable] = value;
+        }
+    }
+    function getValue(content){
+        if (_.isString(content.variableRoot))
+            return graphicopt[content.variableRoot][content.variable];
+        else{
+            if (content.variableRoot===undefined)
+                return graphicopt[content.variable];
+            else
+                return content.variableRoot[content.variable];
+        }
     }
     function updateTableOutput(output){
         d3.entries(output).forEach(d=>{
@@ -2631,6 +2702,7 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
             currentData.cluster = axis_arr[i].cluster;
             currentData.name = axis_arr[i].name;
             currentData.__timestep = axis_arr[i].timestep;
+            currentData.__minDist = axis_arr[i].minDist;
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
