@@ -454,7 +454,7 @@
                     </div>
                 </li>
                 <li class="active">
-                    <div class="collapsible-header"><i class="material-icons">group_work</i> <span> Major host groups </span><span class="col right-align valign-wrapper subText" style="font-size: 12px;">(by the 9 metrics)</span><i class="material-icons expand">chevron_right</i></div>
+                    <div class="collapsible-header"><i class="material-icons">group_work</i> <span> Operational states </span><span class="col right-align valign-wrapper subText" style="font-size: 12px;">(by the 9 metrics)</span><i class="material-icons expand">chevron_right</i></div>
                     <div class="collapsible-body">
                         <div style="position: relative;">
                             <div id="clusterLoading" class="loading hidden">
@@ -514,10 +514,18 @@
                                 </form>
                             </div>
                             <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
-                                <label class="col s8 offset-s4 left-align">
-                                    <input id="majorGroupDisplay_control" checked type="checkbox" class="filled-in">
-                                    <span >Display min-max</span>
-                                </label>
+<!--                                <label class="col s8 offset-s4 left-align">-->
+<!--                                    <input id="majorGroupDisplay_control" checked type="checkbox" class="filled-in">-->
+<!--                                    <span >Display min-max</span>-->
+<!--                                </label>-->
+                                <div class="col s8 offset-s3 left-align">
+                                    <label for="majorGroupDisplay_control">Display: </label>
+                                    <select id="majorGroupDisplay_control">
+                                        <option value="0">Leaders</option>
+                                        <option value="1" selected>Min-Max</option>
+                                        <option value="2">Histogram</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
                                 <button class="information waves-effect waves-light hide" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
@@ -717,6 +725,9 @@
                             <g id="modelWorkerScreen_lassotool">
 
                             </g>
+                            <g id="modelNodeLabel">
+
+                            </g>
                             <g id="modelClusterLabel">
 
                             </g>
@@ -801,9 +812,9 @@
 
                                     </div>
                                     <div  class="row no_magrin" style="max-height: 200px;overflow-y: auto;">
-                                        <div class="row s12 valign-wrapper">
-                                            <button type="submit" value = 0 class ="menuBtn btn-small filterLimit offset-s5 col" id="radarCollider" ><i class="icon-radarShape material-icons icon"></i> Collision detection</button>
-                                        </div>
+<!--                                        <div class="row s12 valign-wrapper">-->
+<!--                                            <button type="submit" value = 0 class ="menuBtn btn-small filterLimit offset-s5 col" id="radarCollider" ><i class="icon-radarShape material-icons icon"></i> Collision detection</button>-->
+<!--                                        </div>-->
                                         <p id ="filterList" class="no_magrin">
 
                                         </p>
@@ -813,6 +824,7 @@
                                 </div>
                                 <div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">
                                     <span class="selectionNum"></span>
+                                    <span class="selectionName"></span>
                                 </div>
                             </div>
                         </div>
@@ -821,7 +833,25 @@
                             <!--<div class="flex_col valign-wrapper radarCluster radarTimeSpace first" style="background: white">-->
                             <!--</div>-->
                         <!--</div>-->
-                        <h5 class="title" style="position:absolute;top:0;left:50%"></h5>
+                        <div class="modelHeader" style="transform: translateX(-50%);position:absolute;top:0;left:50%">
+                            <h5 class="title" style="display: inline-block"></h5>
+                            <div class="input-field" style="display: inline-block">
+                                <select id="radarCollider" class="browser-default inline z-depth-2">
+                                    <option class="item" value="0" selected>Dot view</option>
+                                    <option class="item" value="1">Radar view</option>
+                                    <option class="item" value="2">Force layout</option>
+                                    <option class="item" value="3">Hexagon layout</option>
+                                </select>
+                                <div class="specialLayout hide" style="display: inline-block">
+                                    <span> Density by: </span>
+                                    <select id="radarOpacity" class="browser-default inline z-depth-2">
+                                        <option class="item" value="-1" selected>--none--</option>
+                                        <option class="item" value="0" selected>Radar transparency</option>
+                                        <option class="item" value="1">Bin background</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!--<button id="job_zoom" class="lock float_left btn"><i class="material-icons left"></i></button>-->
@@ -978,6 +1008,7 @@
     <script src="https://d3js.org/d3-force.v2.min.js"></script>
     <script src="../HiperView/js/d3.tip.js"></script>
     <script src="../HiperView/js/d3.scaleAdjust.js"></script>
+    <script src="../HiperView/js/d3-delaunay.min.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>

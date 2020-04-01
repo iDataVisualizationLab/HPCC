@@ -21,6 +21,8 @@ d3.histChart = function () {
                 resolution : 50, // resolution
                 dataformated: false
             },
+            displayDetail:false,
+            formatx:d=>d,
             color: ()=>'black',
         },
         runopt,
@@ -49,8 +51,7 @@ d3.histChart = function () {
         return path.transition().attrs({
             width: h_bandwidth ,
             height: d=> xNum(d[1])*(1+graphicopt.symmetric),
-            x: d=>h(d[0])-h_bandwidth/2,
-            y: d=>xNum.range()[1]-xNum(d[1]),
+            x: -h_bandwidth/2
         }).styles({
             fill :(d,i)=> graphicopt.color(i/(datalength-1))
         })
@@ -83,17 +84,18 @@ d3.histChart = function () {
             ;
             
         }
-        let line = g.selectAll('.lineMean').data([arr[0].mean]);
-        line.exit().remove();
-        line.enter().append('line').attr('class','lineMean')
-            .merge(line)
-            .attrs({
-                x2: d=>h(d),
-                x1: d=>h(d),
-                y1: xNum.range()[0],
-                y2: xNum.range()[1]+graphicopt.symmetric*graphicopt.heightG()/2,
-            });
-
+        if (arr[0].mean) {
+            let line = g.selectAll('.lineMean').data([arr[0].mean]);
+            line.exit().remove();
+            line.enter().append('line').attr('class', 'lineMean')
+                .merge(line)
+                .attrs({
+                    x2: d => h(d),
+                    x1: d => h(d),
+                    y1: xNum.range()[0],
+                    y2: xNum.range()[1] + graphicopt.symmetric * graphicopt.heightG() / 2,
+                });
+        }
         let his_chart = g.selectAll('.hisin').data(arr);
         his_chart.exit().remove();
         let his_n = his_chart.enter()
@@ -102,14 +104,36 @@ d3.histChart = function () {
             // .attr('transform','translate('+graphicopt.margin.left+','+(graphicopt.margin.top+graphicopt.heightG())+')');
 
         his_chart = his_n.merge(his_chart);
-        let his_bar = his_chart.selectAll('.bar').data(d=>d.arr);
+        let his_bar = his_chart.selectAll('g.bar').data(d=>(mm=d3.max(d.arr,e=>e[1]),d.arr.find(e=>e[1]===mm).mark = true,d.arr));
+        his_bar.select('.detailBar').remove();
         his_bar.exit().remove();
-        let his_bar_n = his_bar.enter().append('rect').attr('class','bar')
-            .merge(his_bar)
-            .call(hist_bar)
-
-
-        
+        let his_bar_n = his_bar.enter().append('g').attr('class','bar');
+        his_bar_n.append('rect');
+        his_bar = his_bar_n.merge(his_bar).attr('transform',d=>`translate(${h(d[0])},${xNum.range()[1]})`);
+        his_bar.each(function(d){d.elbar=d3.select(this)});
+        his_bar.transition().attr('transform',d=>`translate(${h(d[0])},${xNum.range()[1]-xNum(d[1])})`);
+        his_bar.select('rect')
+            .call(hist_bar);
+        if (graphicopt.displayDetail) {
+            let bisect = d3.bisector(d=>d[0]);
+            let labelTop = his_bar_n.append('g').attr('class','detailBar').classed('hide',d=>!d.mark).each(function(d){d.el = d3.select(this)});
+            labelTop.append('text').attr('class','yvalue').style('text-anchor','middle').attr('dy',-3)
+                .text(d=>d[1]);
+            labelTop.append('text').attr('class','xvalue').style('text-anchor','middle')
+                .attr('dy',10)
+                .attr('y',d=>xNum(d[1])*(1+graphicopt.symmetric)).classed('hide',d=>true)
+                .text(d=>graphicopt.formatx(d[0]));
+            his_chart.append('rect').attrs({width: graphicopt.widthG(),height:graphicopt.heightG()}).style('opacity',0)
+                .on('mousemove',function(d){
+                    let index = bisect.right(d.arr,h.invert(d3.mouse(this)[0]))
+                    if (d.arr[index]) {
+                        d.arr.forEach(e => {e.elbar.classed('fade', true);e.el.classed('hide', true)})
+                        d.arr[index].el.classed('hide', false).select('.xvalue').classed('hide',false);
+                        d.arr[index].elbar.classed('fade', false);
+                    }
+                }).on('mouseleave',function(d){d.arr.forEach(e=>{e.elbar.classed('fade', false);e.el.classed('hide',f=>!f.mark).select('.xvalue').classed('hide',true)})})
+        }
+        arr[0].outlier = arr[0].outlier||[]
         let circledata =  arr[0].outlier.map(d=>{return d.x?d:{x:d}});
 
         //     var simulation = d3.forceSimulation(circledata)
@@ -128,7 +152,7 @@ d3.histChart = function () {
             .merge(circle_o)
             .attrs(circleoption)
             .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:xNum.range()[1]);
-
+        arr[0].point = arr[0].point||[]
         circledata =  arr[0].point.map(d=>{return d.x?d:{x:d}});
         circle_o = his_chart.selectAll('circle.point').data(circledata);
         circle_o.exit().remove();
@@ -140,6 +164,17 @@ d3.histChart = function () {
             .attrs(circleoption)
             .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:xNum.range()[1]);
 
+        if (graphicopt.title){
+            if (g.select('g.title').empty())
+                g.append('g').attr('class','title');
+            g.select('g.title').attr('transform',`translate(${graphicopt.widthG()/2},10)`)
+            let title = g.select('g.title').selectAll('text').data(graphicopt.title);
+            title.exit().remove();
+            title.enter().append('text')
+                .attr('y',(d,i)=>i*12)
+                .style('text-anchor','middle').text(d=>d.text);
+        }
+        g.selectAll('text').style('opacity',0.8)
         return his_chart;
     };
 

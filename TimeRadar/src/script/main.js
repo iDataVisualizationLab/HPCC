@@ -1125,6 +1125,7 @@ function playchange(){
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
 function exit_warp () {
+    timeSpacedata = undefined
     playchange();
 }
 function pausechange(){
@@ -1652,8 +1653,22 @@ $( document ).ready(function() {
     });
 
     d3.select('#majorGroupDisplay_control').on('change',function() {
-        radarChartclusteropt.boxplot = $(this).prop('checked');
-        cluster_map(cluster_info)
+        switch ($(this).val()) {
+            case "0":
+                radarChartclusteropt.boxplot = false;
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',null);
+                cluster_map(cluster_info);
+                break;
+            case "1":
+                radarChartclusteropt.boxplot = true;
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',null);
+                cluster_map(cluster_info);
+                break;
+            case "2":
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',0.2);
+                onClusterHistogram();
+                break;
+        }
     });
 
     $('.fixed-action-btn').floatingActionButton({
@@ -2210,6 +2225,7 @@ function cluster_map (dataRaw) {
         r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
+            .style('position','relative')
             .each(function(d,i){
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
@@ -2440,55 +2456,44 @@ function similarityCal(data){
 function enableVariableCorrelation(isenable){
     d3.select('#enableVariableCorrelation').attr('disabled',!isenable?'':null)
 }
-// function orderByCorrelation(){
-//     let simMatrix = variableCorrelation.filter(v=>(v.total=0,serviceFullList[v.index].enable));
-//     const orderMatrix = simMatrix.map(d=>d.index);
-//     let mapIndex = [];
-//     simMatrix.forEach((v,i)=>{
-//          v.total =0;
-//         mapIndex.push(i);
-//         orderMatrix.forEach((j,jj)=>{
-//             if (i!==j) {
-//                 if (j-i>0)
-//                     v.total += v[j-i-1];
-//                 else
-//                     v.total += simMatrix[jj][i-1-j];
-//             }
-//         })
-//     });
-//     mapIndex.sort((a,b)=> -simMatrix[a].total+simMatrix[b].total);
-//     // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
-//     // mapIndex.sort((a,b)=>
-//     //     b===undefinedposition?1:(a===undefinedposition?-1:0)
-//     // )
-//     let current_index = mapIndex.pop();
-//     let orderIndex = [simMatrix[current_index].index];
-//
-//     do{
-//         let maxL = -Infinity;
-//         let maxI = 0;
-//         mapIndex.forEach((d)=>{
-//             let temp;
-//             if (orderMatrix[d]>simMatrix[current_index].index ){
-//                 temp = simMatrix[current_index][orderMatrix[d]-simMatrix[current_index].index -1];
-//             }else{
-//                 temp = simMatrix[d][simMatrix[current_index].index -orderMatrix[d]-1]
-//             }
-//             if (maxL<temp){
-//                 maxL = temp;
-//                 maxI = d;
-//             }
-//         });
-//         orderIndex.push(simMatrix[maxI].index);
-//         current_index = maxI;
-//         mapIndex = mapIndex.filter(d=>d!=maxI);
-//     } while(mapIndex.length);
-//     orderIndex.forEach((o,i)=>{
-//         serviceFullList[o].angle = i*2*Math.PI/(orderIndex.length);
-//     });
-// }
+
 
 // test zone
+function onClusterHistogram(){
+    let h = 50;
+    let w = radarChartclusteropt.w*0.85;
+    let interval = sampleS.timespan[1]-sampleS.timespan[0];
+    let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},
+        formatx:(d)=>millisecondsToStr(d*sampleS.timespan.length*interval),
+        middleAxis:{'stroke-width':0.5},displayDetail:true});
+    var scale = d3.scaleTime().domain([interval,interval*sampleS.timespan.length]).range([1,sampleS.timespan.length]);
+    var histogram = d3.histogram()
+        .domain([1,sampleS.timespan.length])
+        // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .thresholds(scale.ticks(11).map(s=>scale(s)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .value(d => d);
+    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName,_.uniq(d.map(e=>e.name)).length)).object(timeSpacedata?timeSpacedata:handle_data_model(tsnedata,undefined,true));
+    const customrangeY = [0,d3.max(d3.values(nestCluster),e=>d3.max(e.arr,d=>d[1]))];
+
+    d3.select('#clusterDisplay').selectAll('.radarCluster').append('svg')
+        .attr('class','clusterHist')
+        .attrs({width: w,height:h})
+        .styles({
+            'transform':'translateY(-50%)',
+            'position': 'absolute',
+            'top':'50%',
+            'overflow':'visible'
+        })
+        .each(function(d){
+        violiin_chart.graphicopt({color:(i)=>colorCluster(d.id),title:[{text:`${nestCluster[d.id].total} state${nestCluster[d.id].total>1?'s':''}`}
+                ,{text:`${nestCluster[d.id].extra} node${nestCluster[d.id].total>1?'s':''}`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
+    });
+    function getHist(v,name,nodes){
+        let hisdata = histogram(v);
+        let sumstat = hisdata.map((d, i) => [(d.x0 + (d.x1 - d.x0) / 2)/sampleS.timespan.length, (d || []).length]);
+        return {axis: name,arr:sumstat,total:v.length,extra:nodes};
+    }
+}
 function onMergeSuperGroup() {
     clusterGroup = {9:0,2:0,5:0,8:0};
     // testing ----------

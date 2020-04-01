@@ -520,7 +520,7 @@ span.clusternum {
 }
 
 .first span.clusternum::after {
-    content: ' temperal instances';
+    content: ' temporal instances';
 }
 .first span.clusterMSE::before {
     content: 'Deviation area: ';
