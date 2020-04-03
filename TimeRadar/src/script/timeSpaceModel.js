@@ -1910,6 +1910,7 @@ d3.TimeSpace = function () {
         marker.append('path').attr('d',symbolGenerator()).styles({'fill':'black','opacity':0.5});
         return marker;
     }
+
     function updatelabelCluster() {
         svg.select('#modelNodeLabel').selectAll('.name').remove();
         if(points.geometry) {
@@ -2297,6 +2298,10 @@ d3.TimeSpace = function () {
             isneedrender = true;
             mouseoverTrigger = true;
         }
+    };
+    master.clusterDataLabel = function(clusterin){
+        cluster.forEach((d,i)=>d.name = clusterin[i].text);
+        svg.select('#modelClusterLabel').selectAll('g.cluster').select('text').attrs({"text-anchor":"middle",y:-10}).text(d=>d.text);
     };
     let ishighlightUpdate;
     master.unhighlight = function() {

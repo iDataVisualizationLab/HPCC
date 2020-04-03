@@ -2207,7 +2207,7 @@ function cluster_map (dataRaw) {
         r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
             let active = d3.select(this).classed('clicked');
             active = !active;
-            d3.select(this).classed('clicked',active)
+            d3.select(this).classed('clicked',active);
             const parent = d3.select(this.parentNode);
             parent.select('span.clusterlabel').classed('hide',active);
             parent.select('input.clusterlabel').classed('hide',!active);
@@ -2245,6 +2245,7 @@ function updateclusterDescription (name,text){
         cluster_map(cluster_info)
     }
     jobMap.clusterDataLabel(cluster_info)
+    mainviz.clusterDataLabel(cluster_info)
 }
 
 function updateViztype (viztype_in){
