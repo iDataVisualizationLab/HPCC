@@ -253,10 +253,11 @@ $( document ).ready(function() {
     $('.dropdown-trigger').dropdown();
     $('.sidenav').sidenav();
     $('#leftpanel.collapsible').collapsible({onOpenStart: function(evt){
-            if(complex_data_table_render){
-                complex_data_table(shuffled_data)
+            console.log(evt)
+            if(d3.select(evt).classed('searchPanel')&&complex_data_table_render){
+                complex_data_table(shuffled_data,true)
             }
-    }});
+        }});
     discovery('#sideNavbtn');
     //$('.tap-target').tapTarget({onOpen: discovery});
 
@@ -797,66 +798,71 @@ function data_table(sample) {
 }
 // complex data table
 let complex_data_table_render = false;
-function complex_data_table(sample) {
-    var samplenest = d3.nest()
-        .key(d=>d.rack).sortKeys(collator.compare)
-        .key(d=>d.compute).sortKeys(collator.compare)
-        .sortValues((a,b)=>a.Time-b.Time)
-        .entries(sample);
-    d3.select("#compute-list").html('');
-    var table = d3.select("#compute-list")
-        .attr('class','collapsible rack')
-        .selectAll("li")
-        .data(samplenest,d=>d.value);
-    var ulAll = table.join(
-        enter=>{
-            let lir = enter.append("li") .attr('class','rack');
-            lir.append('div')
-                .attr('class','collapsible-header')
-                .text(d=>d.key);
-            const lic =  lir.append('div')
-                .attr('class','collapsible-body')
-                .append('div')
-                .attr('class','row marginBottom0')
-                .append('div')
-                .attr('class','col s12 m12')
-                .append('ul')
-                .attr('class','collapsible compute')
-                .datum(d=> d.values)
-                .selectAll('li').data(d=>d)
-                .enter()
-                .append('li').attr('class','compute');
-            lic.append('div')
-                .attr('class','collapsible-header')
-                .text(d=>d.key);
-            const lit = lic
-                .append('div')
-                .attr('class','collapsible-body')
-                .append('div')
-                .attr('class','row marginBottom0')
-                .append('div')
-                .attr('class','col s12 m12')
-                .append('ul')
-                .datum(d=> d.values)
-                .selectAll('li').data(d=>d)
-                .enter()
-                .append('li').attr('class','comtime')
-                .on("mouseover", highlight)
-                .on("mouseout", unhighlight);
+function complex_data_table(sample,render) {
+    if(complex_data_table_render && (render||!d3.select('.searchPanel.active').empty())) {
+        var samplenest = d3.nest()
+            .key(d => d.rack).sortKeys(collator.compare)
+            .key(d => d.compute).sortKeys(collator.compare)
+            .sortValues((a, b) => a.Time - b.Time)
+            .entries(sample);
+        d3.select("#compute-list").html('');
+        var table = d3.select("#compute-list")
+            .attr('class', 'collapsible rack')
+            .selectAll("li")
+            .data(samplenest, d => d.value);
+        var ulAll = table.join(
+            enter => {
+                let lir = enter.append("li").attr('class', 'rack');
+                lir.append('div')
+                    .attr('class', 'collapsible-header')
+                    .text(d => d.key);
+                const lic = lir.append('div')
+                    .attr('class', 'collapsible-body')
+                    .append('div')
+                    .attr('class', 'row marginBottom0')
+                    .append('div')
+                    .attr('class', 'col s12 m12')
+                    .append('ul')
+                    .attr('class', 'collapsible compute')
+                    .datum(d => d.values)
+                    .selectAll('li').data(d => d)
+                    .enter()
+                    .append('li').attr('class', 'compute');
+                lic.append('div')
+                    .attr('class', 'collapsible-header')
+                    .text(d => d.key);
+                const lit = lic
+                    .append('div')
+                    .attr('class', 'collapsible-body')
+                    .append('div')
+                    .attr('class', 'row marginBottom0')
+                    .append('div')
+                    .attr('class', 'col s12 m12')
+                    .append('ul')
+                    .datum(d => d.values)
+                    .selectAll('li').data(d => d)
+                    .enter()
+                    .append('li').attr('class', 'comtime')
+                    .on("mouseover", highlight)
+                    .on("mouseout", unhighlight);
 
-            lit.append("span")
-                .attr("class", "color-block")
-                .style("background", function(d) { return color(selectedService==null?d.group:d[selectedService]) })
-                .style("opacity",0.85);
-            lit.append("span")
-                .text(function(d) { return d3.timeFormat("%B %d %Y %H:%M")(d.Time); });
+                lit.append("span")
+                    .attr("class", "color-block")
+                    .style("background", function (d) {
+                        return color(selectedService == null ? d.group : d[selectedService])
+                    })
+                    .style("opacity", 0.85);
+                lit.append("span")
+                    .text(function (d) {
+                        return d3.timeFormat("%B %d %Y %H:%M")(d.Time);
+                    });
 
-            return lir;
-        }
-    )
-    $('.collapsible').collapsible();
-    complex_data_table_render = false;
-
+                return lir;
+            }
+        )
+        $('.collapsible').collapsible();
+        complex_data_table_render = false;
+    }
 }
 // Adjusts rendering speed
 function optimize(timer) {
@@ -1152,7 +1158,7 @@ function brush() {
     complex_data_table_render = true;
     // Loadtostore();
 }
-
+let shuffled_data=[];
 // render a set of polylines on a canvas
 function paths(selected, ctx, count) {
     // setTimeout(function(){
