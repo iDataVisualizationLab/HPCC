@@ -1653,17 +1653,21 @@ d3.TimeSpace = function () {
             lastMetricselection = undefined;
         }
     }
+    let plotly_layout_single=undefined;
     function showMetrics_plotly(name) {
-        let layout = {
-            paper_bgcolor:"#ddd",
-            plot_bgcolor:"#ddd",
-            margin: {
+        if(!plotly_layout_single){
+            plotly_layout_single = {};
+        }
+        layout = plotly_layout_single;
+        layout. paper_bgcolor ="#ddd";
+        layout.plot_bgcolor = "#ddd";
+        layout.margin= {
                 l: 50,
                 r: 50,
                 b: 20,
                 t: 50,
-            },
-        };
+            };
+        console.log(plotly_layout_single)
 
         layout.shapes = path[name].map((v, i) => {
             return {
@@ -1682,6 +1686,31 @@ d3.TimeSpace = function () {
                 }
             };
         });
+        var updatemenus=[
+            {
+                buttons: [
+                    {
+                        args: [{'xaxis': {rangeslider:{visible:false}},'updatemenus.visiable':[false,true]}],
+                        label: 'Disable range slider',
+                        method: 'relayout'
+                    }, {
+                        args: ['xaxis', {rangeslider:{visible:true}}],
+                        label: 'Enable range slider',
+                        method: 'relayout'
+                    },
+
+                ],
+                direction: 'left',
+                pad: {'r': 1, 't': 1},
+                showactive: true,
+                type: 'buttons',
+                x: 0.1,
+                active: 0,
+                xanchor: 'left',
+                y: 1.1,
+                yanchor: 'top'
+            }
+        ]
         let colorSchema = d3.scaleLinear().range(['#000000','#b8b8b8']).domain(d3.extent(graphicopt.radaropt.schema,d=>d.idroot));
         let lineType = d3.scaleOrdinal().range(['solid','dot','dashdot']);
         let markerType = (d)=>d>2?'markers+lines':'lines';
@@ -1726,29 +1755,14 @@ d3.TimeSpace = function () {
         layout.yaxis = {
             autorange: true
         };
+        layout.updatemenus = updatemenus,
         layout.xaxis = {
             autorange: true,
-            // rangeselector: {buttons: [
-            //         {
-            //             count: 1,
-            //             label: '5m',
-            //             step: 'minute',
-            //             stepmode: 'forward'
-            //         },
-            //         {
-            //             count: 6,
-            //             label: '1h',
-            //             step: 'hour',
-            //             stepmode: 'forward'
-            //         },
-            //         {step: 'all'}
-            //     ]},
             range: scaleTime.domain(),
-            rangeslider: {range: scaleTime.domain()},
+            rangeslider: {range: scaleTime.domain(),visible:!!updatemenus[0].active},
         };
 
-        Plotly.newPlot('myHnav', data_in, layout);
-
+        plot = Plotly.react('myHnav', data_in, layout);
 
         // tooltip_lib.graphicopt({
         //     width: tooltip_opt.width,
