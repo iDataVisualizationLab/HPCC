@@ -746,14 +746,15 @@ d3.TimeSpace = function () {
             let targetIndex = intersects[0].index;
             if (visibledata)
                 targetIndex = targetfilter.index;
-            if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+            // if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+            if (true) {
                 let target = datain[targetIndex];
                 INTERSECTED = [];
                 datain.forEach((d, i) => {
                     if (d.name === target.name) {
                         INTERSECTED.push(i);
                         attributes.alpha.array[i] = graphicopt.component.dot.opacity;
-                        attributes.size.array[i] = graphicopt.component.dot.size*2;
+                        attributes.size.array[i] = target.timestep===d.timestep? graphicopt.component.dot.size*2:graphicopt.component.dot.size;
                         lines[d.name].visible = true;
                         lines[d.name].material.opacity = 1;
                         lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
