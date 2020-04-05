@@ -1660,6 +1660,7 @@ d3.TimeSpace = function () {
         }
         layout = plotly_layout_single;
         layout. paper_bgcolor ="#ddd";
+        layout.height=400,
         layout.plot_bgcolor = "#ddd";
         layout.margin= {
                 l: 50,
@@ -1667,7 +1668,6 @@ d3.TimeSpace = function () {
                 b: 20,
                 t: 50,
             };
-        console.log(plotly_layout_single)
 
         layout.shapes = path[name].map((v, i) => {
             return {
