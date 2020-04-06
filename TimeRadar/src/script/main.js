@@ -1124,6 +1124,10 @@ function playchange(){
     $(e.querySelector('i')).removeClass('fa-pause pauseicon').addClass('fa-play pauseicon');
     svg.selectAll(".connectTimeline").style("stroke-opacity", 0.1);
 }
+function onCalculateClusterAction() {
+    recalculateCluster(group_opt,onchangeCluster);
+}
+
 function exit_warp () {
     timeSpacedata = undefined
     playchange();
@@ -1425,7 +1429,12 @@ function handle_dataRaw() {
             // axis_arr.timestep = i;
             // reduce time step
             axis_arr = tsnedata[h.name][i];
-
+            if(axis_arr.outlier) {
+                let outlierinstance = outlyingList.pointObject[h.name + '_' + i];
+                if (outlierinstance) {
+                    return outlierinstance.cluster;
+                }
+            }
             // assign cluster
             let index = 0;
             // let cluster_inRange = {}; // this node belong to how many cluster
@@ -1504,6 +1513,12 @@ function onchangeCluster() {
             // axis_arr.name = h.name;
             // axis_arr.timestep = i;
             // reduce time step
+            if(axis_arr.outlier) {
+                let outlierinstance = outlyingList.pointObject[h.name + '_' + i];
+                if (outlierinstance) {
+                    return outlierinstance.cluster;
+                }
+            }
 
             let index = 0;
             let minval = Infinity;
@@ -1874,18 +1889,17 @@ $( document ).ready(function() {
     $('#highrange').val(group_opt.bin.range[1]||11);
     $('#knum').val(group_opt.bin.k||5);
     $('#kiteration').val(group_opt.bin.iterations||50);
-    // switch (group_opt.clusterMethod){
-    //     case 'leaderbin':
-    //         $('#startBinGridSize').val(group_opt.bin.startBinGridSize);
-    //         $('#lowrange').val(group_opt.bin.range[0]);
-    //         $('#highrange').val(group_opt.bin.range[1]);
-    //         break;
-    //     case 'kmean':
-    //     default:
-    //         $('#knum').val(group_opt.bin.k);
-    //         $('#kinteration').val(group_opt.bin.iterations);
-    //         break;
-    // }
+
+    // outlier detection
+    d3.select('#outlierDection').on('change',function(){
+        if ($(this).prop('checked')){
+            outlyingList = outlier();
+            onCalculateClusterAction();
+        }else{
+            clusterGroup={};
+            onCalculateClusterAction();
+        }
+    });
 
     // spinner = new Spinner(opts).spin(target);
 
@@ -2235,6 +2249,69 @@ function cluster_map (dataRaw) {
         d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
         d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+    }, 0);
+    outlier_map(outlyingList)
+}
+function outlier_map (data) {
+    //--end
+    let outlyingopt = _.cloneDeep(radarChartclusteropt);
+    outlyingopt.fillin = 0;
+    outlyingopt.boxplot = false;
+    outlyingopt.schema = serviceFullList;
+    let dir = d3.select('#outlierDisplay');
+    setTimeout(()=>{
+        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.labels);
+        r_old.exit().remove();
+        let r_new = r_old.enter().append('div').attr('class','radarCluster')
+            // .on('mouseover',function(d){
+            //     if (!jobMap.runopt().mouse.disable) {
+            //         mainviz.highlight(d.id);
+            //     }
+            //     d3.select(this).classed('focus',true);
+            // }).on('mouseleave',function(d){
+            //     if (!jobMap.runopt().mouse.disable) {
+            //         mainviz.unhighlight(d.id);
+            //     }
+            //     d3.select(this).classed('focus',false);
+            // })
+            .append('div')
+            .attr('class','label')
+            .styles({'position':'absolute',
+                'color':'black',
+                'width': radarChartclusteropt.w+'px',
+                height: '1rem',
+                padding: '10px'
+                // overflow: 'hidden',
+            });
+        // r_new.append('span').attr('class','clusterlabel truncate center-align col s12');
+        // r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+        //     let active = d3.select(this).classed('clicked');
+        //     active = !active;
+        //     d3.select(this).classed('clicked',active)
+        //     const parent = d3.select(this.parentNode);
+        //     parent.select('span.clusterlabel').classed('hide',active);
+        //     parent.select('input.clusterlabel').classed('hide',!active);
+        // });
+        r_new.append('span').attrs({'class':'outlierLabel truncate left-align col s11','type':'text'});
+        r_new.append('span').attr('class','clusternum center-align col s12');
+        // r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
+        //     clusterDescription[d.id].text = $(this).val();
+        //     d3.select(this).classed('hide',true);
+        //     const parent = d3.select(this.parentNode);
+        //     parent.select('.editbtn').classed('clicked',false);
+        //     parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+        //     updateclusterDescription(d.id,clusterDescription[d.id].text);
+        // });
+        dir.selectAll('.radarCluster')
+            .attr('class',(d,i)=>
+                'flex_col valign-wrapper radarCluster radarhoutlying'+(-d.labels))
+            .each(function(d,i){
+                outlyingopt.color = function(){return 'black'};
+                RadarChart(".radarhoutlying"+(-d.labels), d.arr, outlyingopt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+            });
+        dir.selectAll('.radarCluster').select('span.clusternum').text(d=>(d.arr.length).toLocaleString());
+        dir.selectAll('.radarCluster').select('span.outlierLabel').text(d=>`Outlying group ${-d.labels}`);
+
     }, 0);
 }
 function updateclusterDescription (name,text){

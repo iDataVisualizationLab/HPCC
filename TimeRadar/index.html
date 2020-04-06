@@ -553,6 +553,20 @@
                                 <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
                             </div>
 
+                            <div class="divider"></div>
+                            <div class="section">
+                                <div class="row s12 valign-wrapper" style="margin-bottom: 0;">
+                                    <!--<label class="col s4" for="outlierDection">Outlier detection</label>-->
+                                    <label class="col s8 offset-s4 left-align">
+                                        <input id="outlierDection" type="checkbox" class="filled-in">
+                                        <span>Outlier detection</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row s12 flex_contain flex_warp white clusterDisplay" id="outlierDisplay">
+
+                            </div>
+
                         </div>
                     </div>
                 </li>
@@ -690,6 +704,11 @@
                     <!--&lt;!&ndash;<button id="job_zoom" class="lock float_left btn" onclick="zoomtoogle(this)">Pan/Zoom </button>&ndash;&gt;-->
                 <!--</div>-->
                 <div id="myHnav" class="sideHnavs">
+                    <div id="plotly_tip"></div>
+                    <label class="left-align hide" id="plotlySliderButton_holder">
+                        <input id="plotlySliderButton" type="checkbox" class="filled-in">
+                        <span >Range Slider</span>
+                    </label>
                 </div>
                 <a href="javascript:void(0)" class="closebtn horizontal btn-floating btn waves-effect waves-light" data-target=".sideHnavs" data-source="#Maincontent" data-class="sidehIn" data-link="#hNavbtn" onclick="closeNav(this)"><i class="material-icons">keyboard_arrow_down</i></a>
                 <div class='row s12 no_magrin' id="detailZone" style="position: relative;">
@@ -1059,6 +1078,7 @@
     <script src="../HiperView/myscripts/radarSum.js"></script>
     <script src="../HiperView/myscripts/scatterplot.js"></script>
     <script src="../HiperView/myscripts/tsnePlot.js"></script>
+    <script src="../HiperView/myscripts/outlierDetection.js"></script>
     <!--<script src="src/script/tSNETimeSpace.js"></script>-->
     <!--&lt;!&ndash;<script src="src/script/tftSNETimeSpace.js"></script>&ndash;&gt;-->
     <!--&lt;!&ndash;<script src="src/script/pcaTimeSpace.js"></script>&ndash;&gt;-->

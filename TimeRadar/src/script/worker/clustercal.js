@@ -35,6 +35,7 @@ addEventListener('message',function ({data}) {
                 var name = hosts[h].name;
                 if (sampleS[name]) {
                     arrServices = sampleS[name][i].map((d,i)=>serviceFullList[i].enable?d:0);
+                    arrServices.outlier = sampleS[name][i].outlier;
                     arrServices.name = name;
                     arrServices.indexSamp = i;
                     arrServices.id = h;
@@ -42,7 +43,7 @@ addEventListener('message',function ({data}) {
                 }
             }
         }
-
+        console.log(dataSpider3.length)
         // remove outlying
         dataSpider3 = dataSpider3.filter(d => !d.outlier);
         console.log(dataSpider3.length)

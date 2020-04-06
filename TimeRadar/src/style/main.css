@@ -689,3 +689,13 @@ input.clusterlabel:hover, input.clusterlabel:focus{
     color: #8a001a;
     background-color: #fff3f3;
 }
+
+#plotlySliderButton_holder {
+    position: absolute;
+    top:380px;
+    /*left:50px;*/
+    left: calc(100% - 170px);
+}
+#plotlySliderButton_holder.active{
+    top: 300px;
+}

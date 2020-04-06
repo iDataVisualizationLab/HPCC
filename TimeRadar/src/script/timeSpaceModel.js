@@ -792,7 +792,7 @@ d3.TimeSpace = function () {
                 scene.add(box);
 
                 // showMetrics(target.name);
-                lastMetricselection =_.bind(showMetrics_plotly,{},target.name);
+                lastMetricselection =_.bind(showMetrics_plotly,{},target.name,path[target.name].findIndex(d=>d.__timestep===target.__timestep));
                 onRequestplotly();
 
                 renderRadarSummary(target.__metrics,colorarr[target.cluster].value,false)
@@ -1676,13 +1676,13 @@ d3.TimeSpace = function () {
         }
     }
     let plotly_layout_single=undefined;
-    function showMetrics_plotly(name) {
+    function showMetrics_plotly(name,index) {
         if(!plotly_layout_single){
             plotly_layout_single = {};
         }
         layout = plotly_layout_single;
         layout. paper_bgcolor ="#ddd";
-        layout.height=400,
+        layout.height=380,
         layout.plot_bgcolor = "#ddd";
         layout.margin= {
                 l: 50,
@@ -1708,37 +1708,24 @@ d3.TimeSpace = function () {
                 }
             };
         });
-        var updatemenus=[
-            {
-                buttons: [
-                    {
-                        args: [{'xaxis': {rangeslider:{visible:false}},'updatemenus.visiable':[false,true]}],
-                        label: 'Disable range slider',
-                        method: 'relayout'
-                    }, {
-                        args: ['xaxis', {rangeslider:{visible:true}}],
-                        label: 'Enable range slider',
-                        method: 'relayout'
-                    },
-
-                ],
-                direction: 'left',
-                pad: {'r': 1, 't': 1},
-                showactive: true,
-                type: 'buttons',
-                x: 0.1,
-                active: 0,
-                xanchor: 'left',
-                y: 1.1,
-                yanchor: 'top'
-            }
-        ]
         let colorSchema = d3.scaleLinear().range(['#000000','#b8b8b8']).domain(d3.extent(graphicopt.radaropt.schema,d=>d.idroot));
         let lineType = d3.scaleOrdinal().range(['solid','dot','dashdot']);
         let markerType = (d)=>d>2?'markers+lines':'lines';
         // layout.colorway = graphicopt.radaropt.schema.map((s,si)=>colorSchema(s.idroot))
         layout.colorway = graphicopt.radaropt.schema.map((s,si)=>'#000000')
         layout.shapes[layout.shapes.length - 1].x1 = scaleTime.domain()[1];
+        layout.shapes.push({
+            type: 'line',
+            x0: scaleTime.invert(path[name][index].__timestep),
+            y0: 0,
+            x1: scaleTime.invert(path[name][index].__timestep),
+            y1: 1,
+            line: {
+            color: 'black',
+                width: 2,
+                dash: 'dot'
+            }
+        });
         let cdata = datain.filter(d=>d.name===name);
 
         const data_in = graphicopt.radaropt.schema.map((s,si) => {
@@ -1777,15 +1764,19 @@ d3.TimeSpace = function () {
         layout.yaxis = {
             autorange: true
         };
-        layout.updatemenus = updatemenus,
         layout.xaxis = {
             autorange: true,
             range: scaleTime.domain(),
-            rangeslider: {range: scaleTime.domain(),visible:!!updatemenus[0].active},
+            rangeslider: {range: scaleTime.domain(),visible:$('#plotlySliderButton').prop('checked')},
         };
 
-        plot = Plotly.react('myHnav', data_in, layout);
-
+        plot = Plotly.react('plotly_tip', data_in, layout);
+        d3.select("#plotlySliderButton_holder").classed('hide',false);
+        d3.select("#plotlySliderButton").on('change',function(){
+            const isChecked = $(this).prop('checked');
+            d3.select("#plotlySliderButton_holder").classed('active',isChecked);
+            Plotly.relayout('plotly_tip',{'xaxis': {rangeslider:{visible:isChecked}}});
+        })
         // tooltip_lib.graphicopt({
         //     width: tooltip_opt.width,
         //     height: 100,
