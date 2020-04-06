@@ -64,7 +64,7 @@ d3.TimeSpace = function () {
             linkOpacity:{text:"Link opacity", range:[0.1,1],id:'Link_opacity', type:"slider", variableRoot: graphicopt.component.link,variable: 'opacity',width:'100px',step:0.1,
                 callback:onlinkopacity},
             labelMarker:{text: "Display label", type: "selection", variableRoot: graphicopt.component.label,variable: 'enable',labels:['--none--','Cluster label','State label','Cluster + State label'],values:[0,1,2,3], width: '100px',
-                calback:updatelabelCluster},
+                callback:updatelabelCluster},
             dim: {text: "Dimension", type: "selection", variableRoot: 'opt',variable: 'dim',labels:['2D','3D respect time','3D'],values:[2,2.5,3], width: '100px',callback:()=>{
                     preloader(true,10,'Change dimension projection...','#modelLoading');
                     obitTrigger=true;
@@ -181,6 +181,7 @@ d3.TimeSpace = function () {
             renderRadarSummary([]);
             d3.select('#modelWorkerScreen').on('mousedown.drag', null);
             d3.select('#modelWorkerScreen')
+                .on('mousedown',()=>isMousemove=false)
                 .on('mouseover',()=>{isneedrender = true;mouseoverTrigger = true})
                 .on('mousemove', function(){
                 let coordinator = d3.mouse(this);
@@ -188,11 +189,14 @@ d3.TimeSpace = function () {
                 mouse.y = -(coordinator[1]/graphicopt.height)*2+ 1;
                 mouseoverTrigger = true;
                     isneedrender = true;
-            }).on('mouseleave',()=>{mouseoverTrigger = false})
+                    isMousemove = true;
+            }).on('mouseleave',()=>{mouseoverTrigger = false; isMousemove=false;})
+                .on('click',onClick);
             // d3.select('#modelSelectionInformation').classed('hide',true);
             // d3.select('#modelWorkerScreen').on('touchstart.drag', null);
         }
     }
+    let isMousemove = false;
 
     let obitTrigger= true;
     let linkConnect_old;
@@ -443,7 +447,7 @@ d3.TimeSpace = function () {
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         // disable the tabIndex to avoid jump element
-        d3.select(renderer.domElement).attr('tabindex',null);
+            view.attr('tabindex',null);
         let mouseoverTrigger_time;
             controls.addEventListener("change", function(d){
                 controll_metrics.x=controls.target.x;
@@ -461,11 +465,11 @@ d3.TimeSpace = function () {
                     d3.select('#modelWorkerScreen_svg_g').attr('transform', `translate(${dx*scale-graphicopt.widthG()/2*(scale-1)-deltax},${dy*scale-graphicopt.heightG()/2*(scale-1)-deltay}) scale(${scale})`);
                 }
                 isneedrender = true;
-                disableMouseover=true;
+                // mouseoverTrigger=true;
                 iscameraMove = true;
-                if (mouseoverTrigger_time)
-                    clearTimeout(mouseoverTrigger_time);
-                mouseoverTrigger_time= setTimeout(function(){disableMouseover=false;},10)
+                // if (mouseoverTrigger_time)
+                //     clearTimeout(mouseoverTrigger_time);
+                // mouseoverTrigger_time= setTimeout(function(){mouseoverTrigger=false;},10)
             });
         setUpZoom();
         stop = false;
@@ -873,10 +877,14 @@ d3.TimeSpace = function () {
             .on('highlight',d=>{
                 d.value.radar.classed('fade',false);})
             .on('fade',d=>{d.value.radar.classed('fade',true);if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',true)})
+            .on('click',function(){disableMouseover=!disableMouseover; svgData.clickedOb = d3.select(this)})
             .on('mouseover',d=>{
-                if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',false);
-                highlightNode([{index:path[d.value.name_or].find(e=>e.timestep===d.value.timestep).index}])})
-            .on('mouseleave',d=>{ highlightNode([]); if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',true);})
+                if (!disableMouseover){
+                    if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',false);
+                    highlightNode([{index:path[d.value.name_or].find(e=>e.timestep===d.value.timestep).index}])
+                }
+            })
+            .on('mouseleave',d=>{ if (!disableMouseover){highlightNode([]); if (links[d.value.name_or]&&links[d.value.name_or].object) links[d.value.name_or].object.classed('hide',true);}})
             .each(function(d){
                 d.value.radar = d3.select(this);
                 let colorfill = true;
@@ -1091,11 +1099,9 @@ d3.TimeSpace = function () {
         if (intersects.length > 0 || !(timestep===undefined)) {
             let radarData =[];
             let posArr =[];
-            INTERSECTED = [];
             visibledata = [];
             datain.forEach((d, i) => {
                 if (intersects.indexOf(d.name) !==-1 || (timestep!==undefined && timestep===d.__timestep)){
-                    INTERSECTED.push(i);
                     attributes.alpha.array[i] = graphicopt.component.dot.opacity;
                     lines[d.name].visible = timestep===undefined;
                     lines[d.name].material.opacity = graphicopt.component.link.opacity;
@@ -1147,7 +1153,6 @@ d3.TimeSpace = function () {
             });
             forceColider.stop();
             attributes.alpha.needsUpdate = true;
-            INTERSECTED = [];
             removeBoxHelper();
 
             svgData=undefined;
@@ -1197,6 +1202,14 @@ d3.TimeSpace = function () {
     let animationduration = 120;
     let animationtimer = undefined;
     let disableMouseover = false, isneedrender = false;
+    let mouseclick = false;
+    function onClick(){
+        if (!isMousemove) {
+            mouseclick = true;
+            isneedrender = true;
+            console.log('click!')
+        }
+    }
     function animate() {
         if (!stop) {
             animateTrigger=true;
@@ -1209,26 +1222,35 @@ d3.TimeSpace = function () {
                     }
                 } catch (e) {
                 }
-                if (mouseoverTrigger && !disableMouseover) { // not have filter
-                    raycaster.setFromCamera(mouse, camera);
-                    if (!filterbyClustername.length) {
-                        var intersects = overwrite || raycaster.intersectObject(points);
-                        //count and look after all objects in the diamonds group
-                        highlightNode(intersects);
-                    } else { // mouse over group
-                        var geometry = points.geometry;
-                        var attributes = geometry.attributes;
-                        datain.forEach((d, i) => {
-                            if (filterbyClustername.indexOf(d.clusterName) !== -1) {
-                                attributes.alpha.array[i] = 1;
-                                // lines[d.name].visible = true;
-                            } else {
-                                attributes.alpha.array[i] = 0.1;
-                                // lines[d.name].visible = false;
-                            }
-                            lines[d.name].visible = false;
-                        });
-                        attributes.alpha.needsUpdate = true;
+                if (mouseoverTrigger && !iscameraMove && !disableMouseover || mouseclick) { // not have filter
+                    if (!svgData) {
+                        raycaster.setFromCamera(mouse, camera);
+                        if (!filterbyClustername.length) {
+                            var intersects = overwrite || raycaster.intersectObject(points);
+                            //count and look after all objects in the diamonds group
+                            highlightNode(intersects);
+                        } else { // mouse over group
+                            var geometry = points.geometry;
+                            var attributes = geometry.attributes;
+                            datain.forEach((d, i) => {
+                                if (filterbyClustername.indexOf(d.clusterName) !== -1) {
+                                    attributes.alpha.array[i] = 1;
+                                    // lines[d.name].visible = true;
+                                } else {
+                                    attributes.alpha.array[i] = 0.1;
+                                    // lines[d.name].visible = false;
+                                }
+                                lines[d.name].visible = false;
+                            });
+                            attributes.alpha.needsUpdate = true;
+                        }
+                    }
+                    if (mouseclick){
+                        disableMouseover = !!(!disableMouseover && INTERSECTED.length);
+                        mouseclick = false;
+                        if (svgData&&!disableMouseover){
+                            svgData.clickedOb.dispatch('mouseleave')
+                        }
                     }
                 } else if (lassoTool && lassoTool.needRender) {
                     let newClustercolor = d3.color('#000000');
@@ -1927,7 +1949,9 @@ d3.TimeSpace = function () {
     }
 
     function updatelabelCluster() {
+        svg.select('#modelNodeLabel').selectAll('.name').remove();
         if(points.geometry) {
+            if (graphicopt.component.label.enable === 2 || graphicopt.component.label.enable === 3) {
             let orient = ({
                 top: text => text.attr("text-anchor", "middle").attr("y", -6),
                 right: text => text.attr("text-anchor", "start").attr("dy", "0.35em").attr("x", 6),
@@ -1953,7 +1977,6 @@ d3.TimeSpace = function () {
                 if (cell&&-d3.polygonArea(cell) > 2000)
                     dataLabel.push([d, cell, d.name])
             });
-            svg.select('#modelNodeLabel').selectAll('.name').remove();
             svg.select('#modelNodeLabel').selectAll('.name').data(dataLabel).enter()
                 .append('text').attr('class', 'name')
                 .each(function ([[x, y], cell]) {
@@ -1967,8 +1990,14 @@ d3.TimeSpace = function () {
                 .attr("transform", ([d]) => `translate(${d})`)
                 .style('opacity',0.6)
                 .text(([, , name]) => name);
-
-            clusterMarker.attr('transform', d => `translate(${d.__metrics.projection.x},${d.__metrics.projection.y})`);
+            }
+            if (graphicopt.component.label.enable === 1 || graphicopt.component.label.enable === 3) {
+                clusterMarker.attr('transform', d => `translate(${d.__metrics.projection.x},${d.__metrics.projection.y})`);
+            }
+            if (graphicopt.component.label.enable===0||graphicopt.component.label.enable===2)
+                clusterMarker.classed('hide',true);
+            else
+                clusterMarker.classed('hide',false);
         }
     }
     function filterlabelCluster() {
