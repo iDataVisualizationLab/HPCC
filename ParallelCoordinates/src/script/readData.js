@@ -1,4 +1,4 @@
-var query_time
+var query_time;
 function initApp(){
     // load filter file
         preloader(true,undefined,'Read data file...');
@@ -113,11 +113,11 @@ function object2DataPrallel(ob){
                 });
             });
             if (validkey) {
-                eachIn.Time = sampleS.timespan[i];
+                eachIn[stickKey] = stickKey===TIMEKEY? sampleS.timespan[i] : sampleS.timespan.length-1-i;
                 eachIn.rack = ishpcc?("Rack " + rack):rack;
                 eachIn.compute = com.key;
                 eachIn.group = ishpcc?("Rack " + rack):rack;
-                eachIn.name = com.key + ', ' + d3.timeFormat("%B %d %Y %H:%M")(sampleS.timespan[i]);
+                eachIn.name = com.key + ', ' + stickKeyFormat(eachIn[stickKey]);
                 eachIn.id = com.key + "-" + count;
                 count++;
                 newdata.push(eachIn);
@@ -125,6 +125,15 @@ function object2DataPrallel(ob){
         }
 
     });
+    // if(stickKey!==TIMEKEY){
+    //     serviceFullList.push({text: stickKey,
+    //         id: serviceFullList.length,
+    //         enable: true,
+    //         idroot: serviceFullList.length,
+    //         angle: 5.834386356666759,
+    //         range: stickKey!==TIMEKEY?[sampleS.timespan[0],_.last(sampleS.timespan)] [0, sampleS.timespan.length-1]
+    //     })
+    // // }
     // return newdata.filter(d=>d.Time< new Date('Thu Mar 21 2019 16:20:00 GMT-0500 (Central Daylight Time)'))
     return newdata;
 }

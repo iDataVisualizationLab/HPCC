@@ -186,6 +186,13 @@ angular.module('hpccApp')
         function loadcsv(data) {
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
+            if (object.customTime){
+                stickKey = object.customTime.label;
+                stickKeyFormat = object.customTime.format;
+            }else{
+                stickKey = TIMEKEY;
+                stickKeyFormat = TIMEFORMAT;
+            }
             serviceListattrnest = serviceLists.map(d=>({
                 key:d.text,sub:d.sub.map(e=>e.text)
             }));

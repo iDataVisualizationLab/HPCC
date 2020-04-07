@@ -135,6 +135,7 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         date:"28 Feb 2020",
         group:"sample",
-        formatType:'csv'
+        formatType:'csv',
+        customTime: {label:'RUL',format:d=>d}
     }
 ]);

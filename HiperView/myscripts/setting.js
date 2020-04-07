@@ -1,3 +1,9 @@
+// read variable
+const TIMEKEY = "Time";
+const TIMEFORMAT = d3.timeFormat("%B %d %Y %H:%M");
+
+var stickKey = TIMEKEY;
+var stickKeyFormat = TIMEFORMAT;
 // system variable
 var application_name ='HiperView';
 var jobList=[];

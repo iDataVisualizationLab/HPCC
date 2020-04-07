@@ -102,10 +102,13 @@ Array.prototype.naturalSort= function(_){
 };
 
 function drawFiltertable() {
-    let listOption = serviceFullList.map((e,ei) => {
-        return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
+    // let listOption = serviceFullList.map((e,ei) => {
+    //     return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
+    // });
+    let listOption = [{service: stickKey, arr: stickKey,id:-1, text: stickKey, enable: true}]
+    serviceFullList.map((e,ei) => {
+        listOption.push({service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable})
     });
-    // listOption.push({service: 'Rack', arr:'rack', text:'Rack'});
     let table = d3.select("#axisSetting").select('tbody');
     table
         .selectAll('tr').data(listOption)
@@ -138,10 +141,10 @@ function drawFiltertable() {
                 .attrs(function (d, i) {
                     return {
                         type: "checkbox",
-                        checked: serviceFullList[d.value.id].enable ? "checked" : null
+                        checked: serviceFullList[d.value.id]?(serviceFullList[d.value.id].enable ? "checked" : null):'checked'
                     }
                 }).on('adjustValue',function(d){
-                    d3.select(this).attr('checked',serviceFullList[d.value.id].enable ? "checked" : null)
+                    d3.select(this).attr('checked',serviceFullList[d.value.id]?(serviceFullList[d.value.id].enable ? "checked" : null):'checked')
             }).on('change', function (d) {
                 filterAxisbyDom.call(this, d);
 
@@ -425,12 +428,12 @@ function getcorrelation(){
             temp_dimensions.push({key:s.text,value:s.angle});
     });
     temp_dimensions.sort((a,b)=>a.value-b.value);
-    dimensions = ['Time'];
+    dimensions = [stickKey];
     temp_dimensions.forEach(d=>dimensions.push(d.key))
     xscale.domain(dimensions);
     listMetric.sort(temp_dimensions.map(d=>d.key));
     // svg.selectAll(".dimension").each(function(d){
-    //     if (d!=='Time') {
+    //     if (d!==stickKey) {
     //         var extent = d3.brushSelection(d3.select(this));
     //         if (extent)
     //             extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
@@ -607,7 +610,7 @@ function init() {
     data = object2DataPrallel(sampleS);
 
     // Extract the list of numerical dimensions and create a scale for each.
-    xscale.domain(dimensions =_.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
+    xscale.domain(dimensions =_.flatten([{text:stickKey,enable:true},serviceFullList]).filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
@@ -632,7 +635,7 @@ function init() {
     const selecteds = d3.select("#axisSetting")
         .select('tbody')
         .selectAll('tr')
-        .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
+        .filter(d=>d.arr===selectedService).select('input[type="radio"]').property("checked", true);
     _.bind(selecteds.on("change"),selecteds.node())();
 
     // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
@@ -645,7 +648,7 @@ function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
     data = object2DataPrallel(sampleS);
-    xscale.domain(dimensions = _.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
+    xscale.domain(dimensions = _.flatten([{text:stickKey,enable:true},serviceFullList]).filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
@@ -673,17 +676,30 @@ function resetRequest() {
 }
 function setColorsAndThresholds(sin) {
     let s = serviceFullList.find(d=>d.text===sin)
-    const dif = (s.range[1]-s.range[0])/levelStep;
-    const mid = s.range[0]+(s.range[1]-s.range[0])/2;
-    let left = s.range[0]-dif;
-    arrThresholds = [left,s.range[0], s.range[0]+dif, s.range[0]+2*dif, s.range[0]+3*dif, s.range[1], s.range[1]+dif];
+    if (!s){
+        s = {range:stickKey!==TIMEKEY?[yscale[stickKey].domain()[1],yscale[stickKey].domain()[0]]:yscale[stickKey].domain()};
+        const dif = (s.range[1] - s.range[0]) / levelStep;
+        const mid = s.range[0] + (s.range[1] - s.range[0]) / 2;
+        let left = s.range[0] - dif;
+        arrThresholds = [left, s.range[0], s.range[0] + dif, s.range[0] + 2 * dif, s.range[0] + 3 * dif, s.range[1], s.range[1] + dif];
+        opa = d3.scaleLinear()
+            .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
+            .range([1,1,0.1,1,1]);
+    }else
+    {
+        const dif = (s.range[1] - s.range[0]) / levelStep;
+        const mid = s.range[0] + (s.range[1] - s.range[0]) / 2;
+        let left = s.range[0] - dif;
+        arrThresholds = [left, s.range[0], s.range[0] + dif, s.range[0] + 2 * dif, s.range[0] + 3 * dif, s.range[1], s.range[1] + dif];
+        opa = d3.scaleLinear()
+            .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
+            .range([1,1,0.1,1,1]);
+    }
     color = d3.scaleLinear()
         .domain(arrThresholds)
         .range(arrColor)
         .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
-    opa = d3.scaleLinear()
-        .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
-        .range([1,1,0.1,1,1]);
+
 
 }
 
@@ -854,7 +870,7 @@ function complex_data_table(sample,render) {
                     .style("opacity", 0.85);
                 lit.append("span")
                     .text(function (d) {
-                        return d3.timeFormat("%B %d %Y %H:%M")(d.Time);
+                        return stickKeyFormat(d[stickKey]);
                     });
 
                 return lir;
@@ -1398,23 +1414,31 @@ function exclude_data() {
 }
 
 function add_axis(d,g) {
-    serviceFullList.find(e=>e.text===d).enable=true;
-    // dimensions.splice(dimensions.length-1, 0, d);
-    dimensions.push(d);
-    dimensions = _.intersection(_.union(['Time'],listMetric.toArray()),dimensions)    ;
-    xscale.domain(dimensions);
-    // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
+    const target = serviceFullList.find(e=>e.text===d)
+    if(target) {
+        // dimensions.splice(dimensions.length-1, 0, d);
+        target.enable = true;
+        dimensions.push(d);
+        dimensions = _.intersection(_.union([stickKey], listMetric.toArray()), dimensions);
+        xscale.domain(dimensions);
+        // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
+    }
     update_Dimension();
     // update_ticks();
 }
 
 function remove_axis(d,g) {
-    serviceFullList.find(e=>e.text===d).enable=false;
-    dimensions = _.difference(dimensions, [d]);
-    xscale.domain(dimensions);
-    g = g.data(dimensions,d=>d);
-    g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
-    g.exit().remove();
+    const target = serviceFullList.find(e=>e.text===d)
+    if(target) {
+        target.enable = false;
+        dimensions = _.difference(dimensions, [d]);
+        xscale.domain(dimensions);
+        g = g.data(dimensions, d => d);
+        g.attr("transform", function (p) {
+            return "translate(" + position(p) + ")";
+        });
+        g.exit().remove();
+    }
     // update_ticks();
 }
 
