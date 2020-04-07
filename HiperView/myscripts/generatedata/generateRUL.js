@@ -1,4 +1,4 @@
-d3.text(srcpath+"data/data_raw/test_FD001.txt",(data)=>{
+d3.text(srcpath+"data/data_raw/train_FD001.txt",(data)=>{
 
     data = data.split('\n').map(d=>{
         let temp = d.trim().split(' ');

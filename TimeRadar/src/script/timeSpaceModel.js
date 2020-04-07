@@ -1699,8 +1699,8 @@ d3.TimeSpace = function () {
                 layer: 'below',
                 y0: 0,
                 y1: 1,
-                x0: scaleTime.invert(v.__timestep),
-                x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].__timestep) : undefined,
+                x0: scaleTime.invert(v.__timestep-0.5),
+                x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].__timestep-0.5) : undefined,
                 fillcolor: colorarr[v.cluster].value,
                 opacity: 0.5,
                 line: {
@@ -1722,7 +1722,7 @@ d3.TimeSpace = function () {
             y1: 1,
             line: {
             color: 'black',
-                width: 2,
+                width: 1,
                 dash: 'dot'
             }
         });
@@ -1732,11 +1732,12 @@ d3.TimeSpace = function () {
             let temp = {x:[],
                 y:[],
                 text:[],
-                mode: markerType(s.idroot),
+                // mode: markerType(s.idroot),
+                mode: 'lines',
                 hovertemplate: '%{text}',
-                marker:{
-                    symbol:s.id
-                },
+                // marker:{
+                //     symbol:s.id
+                // },
                 legendgroup: `group${s.idroot}`,
                 line:{
                     dash: lineType(s.idroot)
