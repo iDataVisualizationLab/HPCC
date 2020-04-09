@@ -2404,26 +2404,36 @@ let JobMap = function() {
     jobMap.highlight = function (name) {
         filter.push(name);
         filter = _.uniq(filter);
-        if (runopt.compute.type==='timeline')
-            g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
-        else
-            g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
-        g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)
-            .each(function(){
-                (d3.select(this.parentNode.parentNode).classed('computeNode')?d3.select(this.parentNode.parentNode):d3.select(this.parentNode.parentNode.parentNode)).dispatch('mouseover')});
+        setTimeout(()=>{
+            let selected = g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'}`);
+            if (runopt.compute.type==='timeline'){
+                selected.select('.linkLineg').classed('fade2',true);
+                selected.select('.linegg').classed('fade2',true);
+            }else {
+                selected.classed('fade2', true);
+            }
+            g.selectAll('.computeNode').selectAll(`${filter.map(d=>'.'+fixName2Class(d))}`).classed('fade2',false)
+                // TODO: improve interaction with chart here
+                .each(function(){
+                    (d3.select(this.parentNode.parentNode).classed('computeNode')?d3.select(this.parentNode.parentNode):d3.select(this.parentNode.parentNode.parentNode)).dispatch('mouseover')});
+        },0)
     }
     jobMap.unhighlight = function (name) {
         _.pull(filter,name);
-        if (filter.length) {
-            if (runopt.compute.type==='timeline')
-                g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'}  .linkLineg, .computeNode${freezing?'.highlight':':not(.fade)'}  .linegg`).classed('fade2',true);
-            else
-                g.selectAll(`.computeNode${freezing?'.highlight':':not(.fade)'} `).classed('fade2',true);
-            g.selectAll(`${filter.map(d => '.' + fixName2Class(d))}`).classed('fade2', false);
-        }else{
-            g.selectAll(`.fade2`).classed('fade2', false);
-        }
-        releaseSelection();
+        setTimeout(()=> {
+            if (filter.length) {
+                let selected = g.selectAll(`.computeNode${freezing ? '.highlight' : ':not(.fade)'}`);
+                if (runopt.compute.type === 'timeline') {
+                    selected.select('.linkLineg').classed('fade2', true);
+                    selected.select('.linegg').classed('fade2', true);
+                } else
+                    selected.classed('fade2', true);
+                g.selectAll(`${filter.map(d => '.' + fixName2Class(d))}`).classed('fade2', false);
+            } else {
+                g.selectAll(`.fade2`).classed('fade2', false);
+            }
+            releaseSelection();
+        })
     }
     jobMap.callback = function (_) {
         if (arguments.length) {

@@ -63,6 +63,16 @@ angular.module('hpccApp')
         updatePromise = new Promise(function(resolve, reject){
             resolve(updateFromData(dataset, []));
         }).then();
+          // console.time('request time')
+          // fetch('http://129.118.104.141:8080/v1/metrics?start=2020-02-14T12%3A00%3A00%2B00%3A00&end=2020-02-14T18%3A00%3A00%2B00%3A00&interval=5m&value=max').then(d=>d.json()).then(response => {
+          //     console.timeEnd('request time')
+          //     console.time('encode time')
+          //     Object.keys(response).forEach(k=>
+          //         response[k] =JSON.parse(pako.inflate(base64ToBuffer(response[k]['base64(zip(o))']), { to: 'string' })))
+          //     console.timeEnd('encode time')
+          //     console.log(response)
+          // })
+
         //     $http.get(dataset.url, {cache: true}).then(function(response) {
         //   var data;
         //
@@ -97,7 +107,15 @@ angular.module('hpccApp')
       return updatePromise;
     };
 
-
+    function base64ToBuffer(str){
+      str = window.atob(str); // creates a ASCII string
+      var buffer = new ArrayBuffer(str.length),
+          view = new Uint8Array(buffer);
+      for(var i = 0; i < str.length; i++){
+          view[i] = str.charCodeAt(i);
+      }
+      return buffer;
+    }
     function updateFromData(dataset, data) {
       Dataset.data = data;
       Dataset.currentDataset = dataset;
