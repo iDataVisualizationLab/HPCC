@@ -101,6 +101,26 @@ Array.prototype.naturalSort= function(_){
     }
 };
 
+function filterAxisbyDom(d) {
+    const pdata = d3.select(this.parentElement.parentElement).datum();
+    if(d.value !== this.checked) {
+        d.value = this.checked;
+        if (this.checked) {
+            add_axis(pdata.arr, g);
+            d3.select(this.parentElement.parentElement).classed('disable', false);
+        }
+        else {
+            remove_axis(pdata.arr, g);
+            d3.select(this.parentElement.parentElement).classed('disable', true);
+        }
+        // TODO required to avoid a bug
+        var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d => d == pdata.arr));
+        if (extent)
+            extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
+        update_ticks(pdata.arr, extent);
+    }
+}
+
 function drawFiltertable() {
     // let listOption = serviceFullList.map((e,ei) => {
     //     return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
@@ -134,7 +154,8 @@ function drawFiltertable() {
                 }).on('change', function (d) {
                 d3.select('tr.axisActive').classed('axisActive', false);
                 d3.select(this.parentElement.parentElement).classed('axisActive', true);
-                changeVar(d3.select(this.parentElement.parentElement).datum())
+                changeVar(d3.select(this.parentElement.parentElement).datum());
+                brush();
             });
             alltr.filter(d => d.type === "checkbox")
                 .append("input")
@@ -232,23 +253,6 @@ function drawFiltertable() {
 
         }
     });
-}
-function filterAxisbyDom(d) {
-    const pdata = d.value;
-    serviceFullList[pdata.id].enable = this.checked;
-    if (this.checked) {
-        add_axis(pdata.arr, g);
-        d3.select(this.parentElement.parentElement).classed('disable', false);
-    }
-    else {
-        remove_axis(pdata.arr, g);
-        d3.select(this.parentElement.parentElement).classed('disable', true);
-    }
-    // TODO required to avoid a bug
-    var extent = d3.brushSelection(svg.selectAll(".dimension").filter(d => d === pdata.arr));
-    if (extent)
-        extent = extent.map(yscale[d].invert).sort((a, b) => a - b);
-    update_ticks(pdata.arr, extent);
 }
 $( document ).ready(function() {
     console.log('ready');
@@ -553,7 +557,7 @@ function update_Dimension() {
                     });
             return  update.attr("transform", function (d) {
                 return "translate(" + xscale(d) + ")";});
-            });
+            },exit => exit.remove());
 }
 
 function init() {
@@ -603,7 +607,9 @@ function init() {
         .attr("height", height)
         .append("svg:g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
-
+    svg.selectAll('*').remove()
+    // Load the data and visualization
+    isinit = false;
 // Load the data and visualization
 
     // Convert quantitative scales to floats
@@ -617,9 +623,7 @@ function init() {
                 return d[k];
             }))
             .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
-            .domain(d3.extent(data, function (d) {
-                return +d[k];
-            }))
+            .domain(serviceFullList.find(d=>d.text===k).range)
             .range([h, 0]))));
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
@@ -641,29 +645,31 @@ function init() {
     // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
     // brush();
+    brush();
     console.log('---init---');
 }
 
 function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
+    unhighlight()
     data = object2DataPrallel(sampleS);
-    xscale.domain(dimensions = _.flatten([{text:stickKey,enable:true},serviceFullList]).filter(function (s) {
+    yscale = {};
+    xscale.domain(dimensions = _.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
             .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
-            .domain(d3.extent(data, function (d) {
-                return +d[k];
-            }))
+            // .domain(d3.extent(data, function (d) {
+            //     return +d[k];
+            // }))
+            .domain(serviceFullList.find(d=>d.text===k).range)
             .range([h, 0]))));
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
-
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
-
     // Add a group element for each dimension.
     update_Dimension();
     if (!serviceFullList.find(d=>d.text===selectedService))
@@ -673,6 +679,7 @@ function resetRequest() {
         .selectAll('tr')
         .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
     _.bind(selecteds.on("change"),selecteds.node())();
+    brush();
 }
 function setColorsAndThresholds(sin) {
     let s = serviceFullList.find(d=>d.text===sin)
@@ -1059,6 +1066,32 @@ function position(d) {
 }
 
 // Handles a brush event, toggling the display of foreground lines.
+function redraw(selected) {
+    if (selected.length < data.length && selected.length > 0) {
+        d3.select("#keep-data").attr("disabled", null);
+        d3.select("#exclude-data").attr("disabled", null);
+    } else {
+        d3.select("#keep-data").attr("disabled", "disabled");
+        d3.select("#exclude-data").attr("disabled", "disabled");
+    }
+    ;
+
+    // total by food group
+    var tallies = _(selected)
+        .groupBy(function (d) {
+            return d.group;
+        });
+
+    // include empty groups
+    _(colors.domain()).each(function (v, k) {
+        tallies[v] = tallies[v] || [];
+    });
+
+
+    // Render selected lines
+    paths(selected, foreground, brush_count, true);
+}
+
 // TODO refactor
 function brush() {
     var actives = [],
@@ -1172,6 +1205,7 @@ function brush() {
     // Render selected lines
     paths(selected, foreground, brush_count, true);
     complex_data_table_render = true;
+    redraw(selected);
     // Loadtostore();
 }
 let shuffled_data=[];
@@ -1236,7 +1270,7 @@ function update_ticks(d, extent) {
     show_ticks();
 
     // update axes
-    d3.selectAll(".axis")
+    d3.selectAll(".dimension .axis")
         .each(function(d,i) {
             // hide lines for better performance
             d3.select(this).selectAll('line').style("display", "none");
@@ -1261,20 +1295,20 @@ function update_ticks(d, extent) {
 // Rescale to new dataset domain
 function rescale() {
     // reset yscales, preserving inverted state
-    dimensions.forEach(function(d,i) {
-        if (yscale[d].inverted) {
-            yscale[d] = d3.scaleLinear()
-                .domain(d3.extent(data, function(p) { return +p[d]; }))
-                .range([0, h]);
-            yscale[d].inverted = true;
-        } else {
-            yscale[d] = d3.scaleLinear()
-                .domain(d3.extent(data, function(p) { return +p[d]; }))
-                .range([h, 0]);
-        }
-    });
-
-    update_ticks();
+    // dimensions.forEach(function(d,i) {
+    //     if (yscale[d].inverted) {
+    //         yscale[d] = d3.scaleLinear()
+    //             .domain(d3.extent(data, function(p) { return +p[d]; }))
+    //             .range([0, h]);
+    //         yscale[d].inverted = true;
+    //     } else {
+    //         yscale[d] = d3.scaleLinear()
+    //             .domain(d3.extent(data, function(p) { return +p[d]; }))
+    //             .range([h, 0]);
+    //     }
+    // });
+    //
+    // update_ticks();
 
     // Render selected data
     paths(data, foreground, brush_count);
@@ -1294,18 +1328,17 @@ function actives() {
         .each(function(d) {
             // Get extents of brush along each active selection axis (the Y axes)
             actives.push(d);
-            extents.push(d3.brushSelection(this).map(yscale[d].invert));
+            extents.push(d3.brushSelection(this).map(yscale[d].invert).sort((a,b)=>a-b));
         });
     // filter extents and excluded groups
     var selected = [];
     data
-        .filter(function(d) {
-            return !_.contains(excluded_groups, d.group);
-        })
-        .map(function(d) {
-            return actives.every(function(p, i) {
-                return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-            }) ? selected.push(d) : null;
+        .forEach(function(d) {
+            if(!_.contains(excluded_groups, d.group)){
+                !actives.find(function(p, i) {
+                    return extents[i][0] > d[p] || d[p] > extents[i][1];
+                }) ? selected.push(d) : null;
+            }
         });
 
     // free text search
@@ -1374,7 +1407,7 @@ function resetSize() {
 
     // update axis placement
     axis = axis.ticks(1 + height / 50),
-        d3.selectAll(".axis")
+        d3.selectAll(".dimension .axis")
             .each(function (d) {
                 d3.select(this).call(axis.scale(yscale[d]));
             });
@@ -1404,7 +1437,7 @@ function keep_data() {
 
 // Exclude selected from the dataset
 function exclude_data() {
-    new_data = _.difference(data, actives());
+    let new_data = _.difference(data, actives());
     if (new_data.length == 0) {
         alert("I don't mean to be rude, but I can't let you remove all the data.\n\nTry selecting just a few data points then clicking 'Exclude'.");
         return false;
@@ -1422,9 +1455,9 @@ function add_axis(d,g) {
         dimensions = _.intersection(_.union([stickKey], listMetric.toArray()), dimensions);
         xscale.domain(dimensions);
         // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
+        update_Dimension();
+        update_ticks();
     }
-    update_Dimension();
-    // update_ticks();
 }
 
 function remove_axis(d,g) {
@@ -1438,8 +1471,8 @@ function remove_axis(d,g) {
             return "translate(" + position(p) + ")";
         });
         g.exit().remove();
+        update_ticks();
     }
-    // update_ticks();
 }
 
 d3.select("#keep-data").on("click", keep_data);
@@ -1454,7 +1487,7 @@ d3.select("#show-ticks").on("click", show_ticks);
 
 
 function hide_ticks() {
-    d3.selectAll(".axis g").style("display", "none");
+    d3.selectAll(".dimension .axis g").style("display", "none");
     //d3.selectAll(".axis path").style("display", "none");
     d3.selectAll(".background").style("visibility", "hidden");
     d3.selectAll("#hide-ticks").attr("disabled", "disabled");
@@ -1462,7 +1495,7 @@ function hide_ticks() {
 };
 
 function show_ticks() {
-    d3.selectAll(".axis g").style("display", null);
+    d3.selectAll(".dimension .axis g").style("display", null);
     //d3.selectAll(".axis path").style("display", null);
     d3.selectAll(".background").style("visibility", null);
     d3.selectAll("#show-ticks").attr("disabled", "disabled");
@@ -1494,6 +1527,98 @@ function changeVar(d){
         d3.selectAll('.dimension.axisActive').classed('axisActive',false);
         d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
-    brush();
 }
 function exit_warp (){}
+
+let clustercalWorker;
+function recalculateCluster (option,calback,customCluster) {
+    preloader(true,10,'Process grouping...','#clusterLoading');
+    group_opt = option;
+    distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
+    if (clustercalWorker)
+        clustercalWorker.terminate();
+    clustercalWorker = new Worker ('src/script/worker/clustercal.js');
+    clustercalWorker.postMessage({
+        binopt:group_opt,
+        sampleS:tsnedata,
+        timeMax:sampleS.timespan.length,
+        hosts:hosts,
+        serviceFullList: serviceFullList,
+        serviceLists:serviceLists,
+        serviceList_selected:serviceList_selected,
+        serviceListattr:serviceListattr,
+        customCluster: customCluster // 1 25 2020 - Ngan
+    });
+    clustercalWorker.addEventListener('message',({data})=>{
+        if (data.action==='done') {
+            M.Toast.dismissAll();
+            data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
+            cluster_info = data.result;
+            if (!customCluster) {
+                clusterDescription = {};
+                recomendName(cluster_info);
+            }else{
+                let new_clusterDescription = {};
+                cluster_info.forEach((d,i)=>{
+                    new_clusterDescription[`group_${i+1}`] = {id:`group_${i+1}`,text:clusterDescription[d.name].text};
+                    d.index = i;
+                    d.labels = ''+i;
+                    d.name = `group_${i+1}`;
+                });
+                clusterDescription = new_clusterDescription;
+                updateclusterDescription();
+            }
+            recomendColor (cluster_info);
+            if (!calback) {
+                cluster_map(cluster_info);
+                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
+                handle_clusterinfo();
+            }
+            preloader(false, undefined, undefined, '#clusterLoading');
+            clustercalWorker.terminate();
+            if (calback)
+                calback();
+        }
+        if (data.action==='returnData'){
+            onloaddetermire({process:data.result.process,message:data.result.message},'#clusterLoading');
+        }
+    }, false);
+
+}
+
+function recomendName (clusterarr,haveDescription){
+    clusterarr.forEach((c,i)=>{
+        c.index = i;
+        c.axis = [];
+        c.labels = ''+i;
+        c.name = `group_${i+1}`;
+        let zero_el = c.__metrics.filter(f=>!f.value);
+        let name='';
+        if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
+            c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
+            name += `${zero_el.length} metric(s) undefined `;
+        }else if(zero_el.length===c.__metrics.normalize.length){
+            c.text = `undefined`;
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+            return;
+        }
+        name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
+            c.axis.push({id:f.axis,description:'high'});
+            return 'High '+f.axis;
+        }).join(', ');
+        name = name.trim();
+        if (name==='')
+            c.text = ``;
+        else
+            c.text = `${name}`;
+        if(!haveDescription || !clusterDescription[c.name]){
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+        }
+    });
+}
