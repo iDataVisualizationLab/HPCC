@@ -1023,3 +1023,179 @@ function orderByCorrelation(){
 function enableVariableCorrelation(isenable){
     d3.select('#enableVariableCorrelation').attr('disabled',!isenable?'':null)
 }
+
+function distanceL2(a, b){
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+    return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function distanceL1(a,b) {
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=Math.abs(d-b[i])}); //modified
+    return Math.round(dsum*Math.pow(10, 10))/Math.pow(10, 10);
+}
+
+function handle_clusterinfo () {
+    let data_info = [['Grouping Method:',group_opt.clusterMethod]];
+    d3.select(`#${group_opt.clusterMethod}profile`).selectAll('label').each(function(d,i) {
+        data_info.push([d3.select(this).text(), group_opt.bin[Object.keys(group_opt.bin)[i]]])
+    });
+    data_info.push(['#group calculated:',cluster_info.length]);
+    let table = d3.select('#clusterinformation').select('table tbody');
+    let tr=table
+        .selectAll('tr')
+        .data(data_info);
+    tr.exit().remove();
+    let tr_new = tr.enter().append('tr');
+    let td = table.selectAll('tr').selectAll('td').data(d=>d);
+    td.exit().remove();
+    td.enter().append('td')
+        .merge(td)
+        .text(d=>d);
+}
+
+function recomendName (clusterarr,haveDescription){
+    clusterarr.forEach((c,i)=>{
+        c.index = i;
+        c.axis = [];
+        c.labels = ''+i;
+        c.name = `group_${i+1}`;
+        let zero_el = c.__metrics.filter(f=>!f.value);
+        let name='';
+        if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
+            c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
+            name += `${zero_el.length} metric(s) undefined `;
+        }else if(zero_el.length===c.__metrics.normalize.length){
+            c.text = `undefined`;
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+            return;
+        }
+        name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
+            c.axis.push({id:f.axis,description:'high'});
+            return 'High '+f.axis;
+        }).join(', ');
+        name = name.trim();
+        if (name==='')
+            c.text = ``;
+        else
+            c.text = `${name}`;
+        if(!haveDescription || !clusterDescription[c.name]){
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+        }
+    });
+}
+
+function recomendColor (clusterarr) {
+    let colorCa = colorScaleList['customschemeCategory'].slice();
+    if (clusterarr.length>10 && clusterarr.length<21)
+        colorCa = d3.schemeCategory20;
+    else if (clusterarr.length>20)
+        colorCa = clusterarr.map((d,i)=>d3.interpolateTurbo(i/(clusterarr.length-1)));
+    let colorcs = d3.scaleOrdinal().range(colorCa);
+    let colorarray = [];
+    let orderarray = [];
+    // clusterarr.filter(c=>!c.text.match('undefined'))
+    clusterarr.filter(c=>c.text!=='undefined')
+        .forEach(c=>{
+            colorarray.push(colorcs(c.name));
+            orderarray.push(c.name);
+        });
+    clusterarr.filter(c=>c.text==='undefined').forEach(c=>{
+        colorarray.push('gray');
+        orderarray.push(c.name);
+    });
+    colorCluster.range(colorarray).domain(orderarray)
+}
+
+function similarityCal(data){
+    const n = data.length;
+    let simMatrix = [];
+    let mapIndex = [];
+    for (let i = 0;i<n; i++){
+        let temp_arr = [];
+        temp_arr.total = 0;
+        for (let j=i+1; j<n; j++){
+            let tempval = similarity(data[i][0],data[j][0]);
+            temp_arr.total += tempval;
+            temp_arr.push(tempval)
+        }
+        for (let j=0;j<i;j++)
+            temp_arr.total += simMatrix[j][i-1-j];
+        temp_arr.name = data[i][0].name;
+        temp_arr.index = i;
+        mapIndex.push(i);
+        simMatrix.push(temp_arr)
+    }
+    mapIndex.sort((a,b)=> simMatrix[a].total-simMatrix[b].total);
+    // let undefinedposition = data.findIndex(d=>d[0].text.match(': undefined'))
+    // mapIndex.sort((a,b)=>
+    //     b===undefinedposition?1:(a===undefinedposition?-1:0)
+    // )
+    let current_index = mapIndex.pop();
+    let orderIndex = [simMatrix[current_index].index];
+
+    do{
+        let maxL = Infinity;
+        let maxI = 0;
+        mapIndex.forEach((d)=>{
+            let temp;
+            if (d>simMatrix[current_index].index ){
+                temp = simMatrix[current_index][d-current_index-1];
+            }else{
+                temp = simMatrix[d][current_index-d-1]
+            }
+            if (maxL>temp){
+                maxL = temp;
+                maxI = d;
+            }
+        });
+        orderIndex.push(simMatrix[maxI].index);
+        current_index = maxI;
+        mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);
+    return orderIndex;
+    function similarity (a,b){
+        return Math.sqrt(d3.sum(a,(d,i)=>(d.value-b[i].value)*(d.value-b[i].value)));
+    }
+}
+
+function onClusterHistogram(){
+    let h = 50;
+    let w = radarChartclusteropt.w*0.85;
+    let interval = sampleS.timespan[1]-sampleS.timespan[0];
+    let violiin_chart = d3.histChart().graphicopt({width:w,height:h,opt:{dataformated:true},tick:{visibile:false},
+        formatx:(d)=>millisecondsToStr(d*sampleS.timespan.length*interval),
+        middleAxis:{'stroke-width':0.5},displayDetail:true});
+    var scale = d3.scaleTime().domain([interval,interval*sampleS.timespan.length]).range([1,sampleS.timespan.length]);
+    var histogram = d3.histogram()
+        .domain([1,sampleS.timespan.length])
+        // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .thresholds(scale.ticks(11).map(s=>scale(s)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+        .value(d => d);
+    let nestCluster = d3.nest().key(d=>d['clusterName']).rollup(d=>getHist(d.map(e=>e.__deltaTimestep),d[0].clusterName,_.uniq(d.map(e=>e.name)).length)).object(timeSpacedata?timeSpacedata:handle_data_model(tsnedata,undefined,true));
+    const customrangeY = [0,d3.max(d3.values(nestCluster),e=>d3.max(e.arr,d=>d[1]))];
+
+    d3.select('#clusterDisplay').selectAll('.radarCluster').append('svg')
+        .attr('class','clusterHist')
+        .attrs({width: w,height:h})
+        .styles({
+            'transform':'translateY(-50%)',
+            'position': 'absolute',
+            'top':'50%',
+            'overflow':'visible'
+        })
+        .each(function(d){
+            violiin_chart.graphicopt({color:(i)=>colorCluster(d.id),title:[{text:`${nestCluster[d.id].total} state${nestCluster[d.id].total>1?'s':''}`}
+                    ,{text:`${nestCluster[d.id].extra} node${nestCluster[d.id].total>1?'s':''}`}]}).rangeY(customrangeY).data([nestCluster[d.id]]).draw(d3.select(this))
+        });
+    function getHist(v,name,nodes){
+        let hisdata = histogram(v);
+        let sumstat = hisdata.map((d, i) => [(d.x0 + (d.x1 - d.x0) / 2)/sampleS.timespan.length, (d || []).length]);
+        return {axis: name,arr:sumstat,total:v.length,extra:nodes};
+    }
+}

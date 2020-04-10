@@ -619,3 +619,6 @@ select.inline{
     background-color: white;
     padding: 10px;
 }
+svg.no-absolute{
+    position: unset;
+}

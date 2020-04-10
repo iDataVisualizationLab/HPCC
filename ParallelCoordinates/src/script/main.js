@@ -21,27 +21,12 @@ var m = [40, 60, 10, 10],
 
 
 //legend prt
-var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
 var levelStep = 4;
 var arrThresholds;
 var selectedService = "CPU1 Temp";
 var orderLegend;
 var svgLengend;
 //read file
-// var serviceList = ["Temperature","Job_load","Memory_usage","Fans_speed","Power_consum"];
-// var serviceLists = [{text: "Temperature", id: 0, enable:true,
-//     sub:[{text: 'CPU1 Temp', id: 0, enable:true},{text: 'CPU2 Temp', id: 1, enable:true},{text: 'Inlet Temp', id: 2, enable:true}]},
-//     {text: "Job_load", id: 1, enable:true ,sub:[{text: 'Job load', id: 0, enable:true}]},
-//     {text: "Memory_usage", id: 2 , enable:true ,sub:[{text: 'Memory usage', id: 0, enable:true}]},
-//     {text: "Fans_speed", id: 3 , enable:true ,sub:[{text: 'Fan1 speed', id: 0, enable:true},{text: 'Fan2 speed', id: 1, enable:true},{text: 'Fan3 speed', id: 2, enable:true},{text: 'Fan4 speed', id: 3, enable:true}]},
-//     {text: "Power_consum", id: 4 , enable:true ,sub:[{text: 'Power consumption', id: 0, enable:true}]}];
-// var serviceListattr = ["arrTemperature","arrCPU_load","arrMemory_usage","arrFans_health","arrPower_usage"];
-// var serviceListattrnest = [
-//     {key:"arrTemperature", sub:["CPU1 Temp","CPU2 Temp","Inlet Temp"]},
-//     {key:"arrCPU_load", sub:["Job load"]},
-//     {key:"arrMemory_usage", sub:["Memory usage"]},
-//     {key:"arrFans_health", sub:["Fan1 speed","Fan2 speed","Fan3 speed","Fan4 speed"]},
-//     {key:"arrPower_usage", sub:["Power consumption"]}];
 var thresholds = [[3,98], [0,10], [0,99], [1050,17850],[0,200] ];
 var chosenService = 0;
 var conf={};
@@ -58,6 +43,61 @@ function Loadtostore() {
     // checkConf('serviceListattr');
     // checkConf('serviceListattrnest');
 }
+
+// color
+let colorScaleList = {
+    n: 7,
+    rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
+    soil: ["#2244AA","#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#F8E571", "#F2B659", "#eb6424", "#D63128", "#660000"],
+    customschemeCategory:  ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"],
+    customFunc: function(name,arr,num){
+        const n= num||this.n;
+        const arrColor = arr||this[name];
+        let colorLength = arrColor.length;
+        const arrThresholds=d3.range(0,colorLength).map(e=>e/(colorLength-1));
+        let colorTemperature = d3.scaleLinear()
+            .domain(arrThresholds)
+            .range(arrColor)
+            .interpolate(d3.interpolateHcl);
+
+        return d3.range(0,n).map(e=>colorTemperature(e/(n-1)))
+    },
+    d3colorChosefunc: function(name,num){
+        const n = num|| this.n;
+        if (d3[`scheme${name}`]) {
+            if (typeof (d3[`scheme${name}`][0]) !== 'string') {
+                colors = (d3[`scheme${name}`][n]||d3[`scheme${name}`][d3[`scheme${name}`].length-1]).slice();
+            }
+            else
+                colors=  d3[`scheme${name}`].slice();
+        } else {
+            const interpolate = d3[`interpolate${name}`];
+            colors = [];
+            for (let i = 0; i < n; ++i) {
+                colors.push(d3.rgb(interpolate(i / (n - 1))).hex());
+            }
+        }
+        colors = this.customFunc(undefined,colors,n);
+        return colors;
+    },
+},colorArr = {Radar: [
+        {val: 'rainbow',type:'custom',label: 'Rainbow'},
+        {val: 'RdBu',type:'d3',label: 'Blue2Red',invert:true},
+        {val: 'soil',type:'custom',label: 'RedYelBlu'},
+        {val: 'Viridis',type:'d3',label: 'Viridis'},
+        {val: 'Greys',type:'d3',label: 'Greys'}],
+    Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
+
+
+//var arrColor = ['#00c', '#1a9850','#fee08b', '#d73027'];
+// var arrColor = ['#110066','#4400ff', '#00cccc', '#00dd00','#ffcc44', '#ff0000', '#660000'];
+// let arrColor = colorScaleList.customFunc('rainbow');
+// let arrColor = colorScaleList.d3colorChosefunc('Greys');
+var arrColor = ['#000066','#0000ff', '#1a9850', '#ddee00','#ffcc44', '#ff0000', '#660000'];
+let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory10);
+
+var service_custom_added = [];
+var serviceFullList_withExtra =[];
 // let processData = processData_old;
 
 //***********************
@@ -101,10 +141,18 @@ Array.prototype.naturalSort= function(_){
     }
 };
 
+let group_opt = {
+    clusterMethod: 'leaderbin',
+    bin:{
+        startBinGridSize: 5,
+        range: [9,10]
+    }
+};
+
 function filterAxisbyDom(d) {
     const pdata = d3.select(this.parentElement.parentElement).datum();
-    if(d.value !== this.checked) {
-        d.value = this.checked;
+    if(d.value.enable !== this.checked) {
+        d.value.enable = this.checked;
         if (this.checked) {
             add_axis(pdata.arr, g);
             d3.select(this.parentElement.parentElement).classed('disable', false);
@@ -120,21 +168,27 @@ function filterAxisbyDom(d) {
         update_ticks(pdata.arr, extent);
     }
 }
-
+let listOption=[];
 function drawFiltertable() {
     // let listOption = serviceFullList.map((e,ei) => {
     //     return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
     // });
-    let listOption = [{service: stickKey, arr: stickKey,id:-1, text: stickKey, enable: true}]
-    serviceFullList.map((e,ei) => {
-        listOption.push({service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable})
-    });
+    // let listOption = [{service: stickKey, arr: stickKey,id:-1, text: stickKey, enable: true}]
+    // serviceFullList.map((e,ei) => {
+    //     listOption.push({service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable})
+    // });
+    listOption = serviceFullList_withExtra.map((e,ei) => {
+            return {service: e.text, arr: e.text,order:ei,id:e.id, text: e.text, enable: e.enable,hide:e.hide}
+        });
+
     let table = d3.select("#axisSetting").select('tbody');
     table
         .selectAll('tr').data(listOption)
         .join(enter => {
             const tr = enter.append("tr");
             tr.attr('data-id', d => d.arr);
+            tr.classed('hide', d => d.hide);
+            tr.each(function(d){d.tableObj = d3.select(this);})
             const alltr = tr.selectAll('td')
                 .data(d => [{key: 'enable', value: d, type: "checkbox"}, {
                     key: 'colorBy',
@@ -162,10 +216,10 @@ function drawFiltertable() {
                 .attrs(function (d, i) {
                     return {
                         type: "checkbox",
-                        checked: serviceFullList[d.value.id]?(serviceFullList[d.value.id].enable ? "checked" : null):'checked'
+                        checked: serviceFullList_withExtra[d.value.order].enable ? "checked" : null
                     }
                 }).on('adjustValue',function(d){
-                    d3.select(this).attr('checked',serviceFullList[d.value.id]?(serviceFullList[d.value.id].enable ? "checked" : null):'checked')
+                    d3.select(this).attr('checked',serviceFullList_withExtra[d.value.order].enable ? "checked" : null)
             }).on('change', function (d) {
                 filterAxisbyDom.call(this, d);
 
@@ -184,15 +238,20 @@ function drawFiltertable() {
                 .text(d => d.value);
         }, update =>{
                 const tr = update;
+                tr.classed('hide', d => d.hide);
+                tr.each(function(d){d.tableObj = d3.select(this);})
                 tr.attr('data-id', d => d.arr);
                 const alltr = tr.selectAll('td')
-                    .data(d => [{key: 'enable', value: d.enable, type: "checkbox"}, {
+                    .data(d => [{key: 'enable', value: d, type: "checkbox"}, {
                         key: 'colorBy',
                         value: false,
                         type: "radio"
                     }, {key: 'text', value: d.text}]);
                 alltr.filter(d => d.type === undefined)
                     .text(d => d.value);
+                alltr.filter(d => d.type === "checkbox")
+                    .select("input")
+                    .each(function(d){this.checked = serviceFullList_withExtra[d.value.order].enable})
             }
             );
     // comboBox
@@ -322,7 +381,24 @@ $( document ).ready(function() {
     d3.select('#enableVariableCorrelation').on('click',function(){
         getcorrelation();
     });
-
+    d3.select('#majorGroupDisplay_control').on('change',function() {
+        switch ($(this).val()) {
+            case "0":
+                radarChartclusteropt.boxplot = false;
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',null);
+                cluster_map(cluster_info);
+                break;
+            case "1":
+                radarChartclusteropt.boxplot = true;
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',null);
+                cluster_map(cluster_info);
+                break;
+            case "2":
+                d3.selectAll('#clusterDisplay .radarPlot').style('opacity',0.2);
+                onClusterHistogram();
+                break;
+        }
+    });
     // init();
 });
 
@@ -432,8 +508,7 @@ function getcorrelation(){
             temp_dimensions.push({key:s.text,value:s.angle});
     });
     temp_dimensions.sort((a,b)=>a.value-b.value);
-    dimensions = [stickKey];
-    temp_dimensions.forEach(d=>dimensions.push(d.key))
+    dimensions = temp_dimensions.map(d=>d.key)
     xscale.domain(dimensions);
     listMetric.sort(temp_dimensions.map(d=>d.key));
     // svg.selectAll(".dimension").each(function(d){
@@ -501,6 +576,20 @@ function multiFormat(date) {
                             : formatYear)(date);
 }
 
+function getScale(d) {
+    let axisrender =  axis.scale(yscale[d]);
+    if(yscale[d].axisCustom) {
+        if (yscale[d].axisCustom.ticks)
+            axisrender = axisrender.ticks(yscale[d].axisCustom.ticks)
+        if (yscale[d].axisCustom.tickFormat)
+            axisrender = axisrender.tickFormat(yscale[d].axisCustom.tickFormat)
+    }else{
+        axisrender = axisrender.ticks(1 + height / 50);
+        axisrender = axisrender.tickFormat(undefined)
+    }
+    return axisrender;
+}
+
 function update_Dimension() {
     g = svg.selectAll(".dimension")
         .data(dimensions,d=>d).join(enter => {
@@ -518,7 +607,7 @@ function update_Dimension() {
                 .attr("class", "axis")
                 .attr("transform", "translate(0,0)")
                 .each(function (d) {
-                    return d3.select(this).call(axis.scale(yscale[d]));
+                    return d3.select(this).call(getScale(d));
                 })
                 .append("svg:text")
                     .attr("text-anchor", "start")
@@ -554,13 +643,14 @@ function update_Dimension() {
                 update.select(".axis")
                     .attr("transform", "translate(0,0)")
                     .each(function (d) {
-                        return d3.select(this).call(axis.scale(yscale[d]));
+                        return d3.select(this).call(getScale(d));
                     });
             return  update.attr("transform", function (d) {
                 return "translate(" + xscale(d) + ")";});
             },exit => exit.remove());
 }
 function initFunc() {
+    handle_clusterinfo ();
     if(timel)
         timel.stop();
     width = $("#Maincontent").width()-10;
@@ -614,17 +704,21 @@ function initFunc() {
 
     // Convert quantitative scales to floats
     data = object2DataPrallel(sampleS);
-
     // Extract the list of numerical dimensions and create a scale for each.
-    xscale.domain(dimensions =_.flatten([{text:stickKey,enable:true},serviceFullList]).filter(function (s) {
+    xscale.domain(dimensions =serviceFullList_withExtra.filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
             .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
-            .domain(serviceFullList.find(d=>d.text===k).range)
+            // .domain(d3.extent(data, function (d) {
+            //     return +d[k];
+            // }))
+            .domain(serviceFullList_withExtra.find(d=>d.text===k).range||[0,0])
             .range([h, 0]))));
+        if(s.axisCustom)
+            xtempscale.axisCustom = s.axisCustom;
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
 
@@ -652,10 +746,11 @@ function initFunc() {
 function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
+    handle_clusterinfo ()
     unhighlight()
     data = object2DataPrallel(sampleS);
     yscale = {};
-    xscale.domain(dimensions = _.flatten([{text:'Time',enable:true},serviceFullList]).filter(function (s) {
+    xscale.domain(dimensions = serviceFullList_withExtra.filter(function (s) {
         let k = s.text;
         let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
@@ -665,8 +760,10 @@ function resetRequest() {
             // .domain(d3.extent(data, function (d) {
             //     return +d[k];
             // }))
-            .domain(serviceFullList.find(d=>d.text===k).range)
+            .domain(serviceFullList_withExtra.find(d=>d.text===k).range||[0,0])
             .range([h, 0]))));
+        if(s.axisCustom)
+            xtempscale.axisCustom = s.axisCustom;
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
@@ -682,9 +779,9 @@ function resetRequest() {
     brush();
 }
 function setColorsAndThresholds(sin) {
-    let s = serviceFullList.find(d=>d.text===sin);
-    if (!s){
-        s = {range:stickKey!==TIMEKEY?[yscale[stickKey].domain()[1],yscale[stickKey].domain()[0]]:yscale[stickKey].domain()};
+    let s = serviceFullList_withExtra.find(d=>d.text===sin);
+    if (s.idroot===undefined){
+        s.range = stickKey!==TIMEKEY?[yscale[stickKey].domain()[1],yscale[stickKey].domain()[0]]:yscale[stickKey].domain();
         const dif = (s.range[1] - s.range[0]) / levelStep;
         const mid = +s.range[0] + (s.range[1] - s.range[0]) / 2;
         let left = +s.range[0] - dif;
@@ -709,10 +806,14 @@ function setColorsAndThresholds(sin) {
             .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
             .range([1,1,0.1,1,1]);
     }
-    color = d3.scaleLinear()
-        .domain(arrThresholds)
-        .range(arrColor)
-        .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
+    if(s.color) {
+        color = s.color.copy();
+        color.domain(s.color.domain().map(c=>s.axisCustom.tickInvert(c)))
+    }else
+        color = d3.scaleLinear()
+            .domain(arrThresholds)
+            .range(arrColor)
+            .interpolate(d3.interpolateHcl); //interpolateHsl interpolateHcl interpolateRgb
 
 
 }
@@ -1286,7 +1387,7 @@ function update_ticks(d, extent) {
             d3.select(this)
                 .transition()
                 .duration(720)
-                .call(axis.scale(yscale[d]));
+                .call(getScale(d));
 
             // bring lines back
             d3.select(this).selectAll('line').transition().delay(800).style("display", null);
@@ -1416,7 +1517,7 @@ function resetSize() {
     axis = axis.ticks(1 + height / 50),
         d3.selectAll(".dimension .axis")
             .each(function (d) {
-                d3.select(this).call(axis.scale(yscale[d]));
+                d3.select(this).call(getScale(d));
             });
 
     // render data
@@ -1454,12 +1555,12 @@ function exclude_data() {
 }
 
 function add_axis(d,g) {
-    const target = serviceFullList.find(e=>e.text===d)
+    const target = serviceFullList_withExtra.find(e=>e.text===d)
     if(target) {
         // dimensions.splice(dimensions.length-1, 0, d);
         target.enable = true;
         dimensions.push(d);
-        dimensions = _.intersection(_.union([stickKey], listMetric.toArray()), dimensions);
+        dimensions = _.intersection(listMetric.toArray(), dimensions);
         xscale.domain(dimensions);
         // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
         update_Dimension();
@@ -1468,8 +1569,8 @@ function add_axis(d,g) {
 }
 
 function remove_axis(d,g) {
-    const target = serviceFullList.find(e=>e.text===d)
-    if(target) {
+    const target = serviceFullList_withExtra.find(e=>e.text===d)
+
         target.enable = false;
         dimensions = _.difference(dimensions, [d]);
         xscale.domain(dimensions);
@@ -1479,7 +1580,6 @@ function remove_axis(d,g) {
         });
         g.exit().remove();
         update_ticks();
-    }
 }
 
 d3.select("#keep-data").on("click", keep_data);
@@ -1535,7 +1635,13 @@ function changeVar(d){
         d3.selectAll('.dimension').filter(e=>e===selectedService).classed('axisActive',true);
     }
 }
-function exit_warp (){}
+function exit_warp (){
+    if(timel){
+        timel.stop();
+        cluster_info = [];
+        d3.select('#clusterDisplay').selectAll('*').remove();
+    }
+}
 
 let clustercalWorker;
 function recalculateCluster (option,calback,customCluster) {
@@ -1544,7 +1650,7 @@ function recalculateCluster (option,calback,customCluster) {
     distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
     if (clustercalWorker)
         clustercalWorker.terminate();
-    clustercalWorker = new Worker ('src/script/worker/clustercal.js');
+    clustercalWorker = new Worker ('../TimeRadar/src/script/worker/clustercal.js');
     clustercalWorker.postMessage({
         binopt:group_opt,
         sampleS:tsnedata,
@@ -1558,8 +1664,9 @@ function recalculateCluster (option,calback,customCluster) {
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
-            M.Toast.dismissAll();
-            data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
+            try {
+                M.Toast.dismissAll();
+            }catch(e){}
             cluster_info = data.result;
             if (!customCluster) {
                 clusterDescription = {};
@@ -1578,7 +1685,6 @@ function recalculateCluster (option,calback,customCluster) {
             recomendColor (cluster_info);
             if (!calback) {
                 cluster_map(cluster_info);
-                jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
                 handle_clusterinfo();
             }
             preloader(false, undefined, undefined, '#clusterLoading');
@@ -1593,39 +1699,182 @@ function recalculateCluster (option,calback,customCluster) {
 
 }
 
-function recomendName (clusterarr,haveDescription){
-    clusterarr.forEach((c,i)=>{
-        c.index = i;
-        c.axis = [];
-        c.labels = ''+i;
-        c.name = `group_${i+1}`;
-        let zero_el = c.__metrics.filter(f=>!f.value);
-        let name='';
-        if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
-            c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
-            name += `${zero_el.length} metric(s) undefined `;
-        }else if(zero_el.length===c.__metrics.normalize.length){
-            c.text = `undefined`;
-            if(!clusterDescription[c.name])
-                clusterDescription[c.name] = {};
-            clusterDescription[c.name].id = c.name;
-            clusterDescription[c.name].text = c.text;
-            return;
-        }
-        name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
-            c.axis.push({id:f.axis,description:'high'});
-            return 'High '+f.axis;
-        }).join(', ');
-        name = name.trim();
-        if (name==='')
-            c.text = ``;
-        else
-            c.text = `${name}`;
-        if(!haveDescription || !clusterDescription[c.name]){
-            if(!clusterDescription[c.name])
-                clusterDescription[c.name] = {};
-            clusterDescription[c.name].id = c.name;
-            clusterDescription[c.name].text = c.text;
-        }
+function onchangeCluster() {
+    cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
+    // tsnedata = {};
+    hosts.forEach(h => {
+        // tsnedata[h.name] = [];
+        sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
+            let nullkey = false;
+            // let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
+            let axis_arr = tsnedata[h.name][i];
+            // axis_arr.name = h.name;
+            // axis_arr.timestep = i;
+            // reduce time step
+            if(axis_arr.outlier) {
+                let outlierinstance = outlyingList.pointObject[h.name + '_' + i];
+                if (outlierinstance) {
+                    return outlierinstance.cluster;
+                }
+            }
+
+            let index = 0;
+            let minval = Infinity;
+            cluster_info.forEach((c, i) => {
+                const val = distance(c.__metrics.normalize, axis_arr);
+                if (minval > val) {
+                    index = i;
+                    minval = val;
+                }
+            });
+            cluster_info[index].total = 1 + cluster_info[index].total || 0;
+            cluster_info[index].__metrics.forEach((m, i) => {
+                if (m.minval === undefined || m.minval > axis_arr[i])
+                    m.minval = axis_arr[i];
+                if (m.maxval === undefined || m.maxval < axis_arr[i])
+                    m.maxval = axis_arr[i];
+            });
+            // axis_arr.cluster = index;
+
+            // timeline precalculate
+            tsnedata[h.name][i].cluster = index;
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+        })
     });
+    cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
+    data = object2DataPrallel(sampleS);
+    cluster_map(cluster_info);
+    handle_clusterinfo();
+
+    //tsne
+    // requestRedraw();
+}
+let radarChartclusteropt  = {
+    margin: {top: 0, right: 0, bottom: 0, left: 0},
+    w: 180,
+    h: 180,
+    radiuschange: false,
+    levels:6,
+    dotRadius:2,
+    strokeWidth:1,
+    maxValue: 0.5,
+    isNormalize:true,
+    showHelperPoint: false,
+    roundStrokes: true,
+    ringStroke_width: 0.15,
+    ringColor:'black',
+    fillin:0.5,
+    boxplot:true,
+    animationDuration:1000,
+    events:{
+        axis: {
+            mouseover: function(){
+                try {
+                    const d = d3.select(d3.event.detail || this).datum();
+                    d3.selectAll('#clusterDisplay .axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                    d3.selectAll('#clusterDisplay .axisText').remove();
+                    if (d3.select(this.parentNode).select('.axisText').empty())
+                        d3.select(this.parentNode).append('text').attr('class','axisText').attr('transform','rotate(-90) translate(5,-5)');
+                    d3.select(this.parentNode).select('.axisText').text(d.text);
+                    $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
+                }catch(e){}
+            },
+            mouseleave: function(){
+                const d = d3.select(d3.event.detail||this).datum();
+                d3.selectAll('#clusterDisplay .axis'+d.idroot+'_'+d.id).classed('highlight',false);
+                d3.selectAll('#clusterDisplay .axisText').remove();
+            },
+        },
+    },
+    showText: false};
+function cluster_map (dataRaw) {
+    radarChartclusteropt.schema = serviceFullList;
+    let data = dataRaw.map((c,i)=>{
+        let temp = c.__metrics.slice();
+        temp.name = c.labels;
+        temp.text = c.text;
+        temp.total = c.total;
+        temp.mse = c.mse;
+        let temp_b = [temp];
+        temp_b.id = c.name;
+        temp_b.order = i;
+        return temp_b;
+    });
+    let orderSimilarity = similarityCal(data);
+    data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>{
+        d.order = i;
+        dataRaw.find(c=>c.name===d.id).orderG = i;
+    });
+    //--shoudn't here
+    dataRaw.forEach(c=>{
+        let matchitem = data.find(d=>d.id===c.name);
+        // c.text = c.text.replace(`Group ${c.index+1}`,`Group ${matchitem.order+1}`);
+        matchitem[0].text =  c.text;
+    });
+    data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
+    //--end
+    let dir = d3.select('#clusterDisplay');
+    setTimeout(()=>{
+        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id).order();
+        r_old.exit().remove();
+        let r_new = r_old.enter().append('div').attr('class','radarCluster')
+            .on('mouseover',function(d){
+                // if (!jobMap.runopt().mouse.disable) {
+                //     mainviz.highlight(d.id);
+                // }
+                d3.select(this).classed('focus',true);
+            }).on('mouseleave',function(d){
+                // if (!jobMap.runopt().mouse.disable) {
+                //     mainviz.unhighlight(d.id);
+                // }
+                d3.select(this).classed('focus',false);
+            })
+            .append('div')
+            .attr('class','label')
+            .styles({'position':'absolute',
+                'color':'black',
+                'width': radarChartclusteropt.w+'px',
+                height: '1rem',
+                padding: '10px'
+                // overflow: 'hidden',
+            });
+        // r_new.append('span').attr('class','clusterlabel truncate center-align col s12');
+        r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+            let active = d3.select(this).classed('clicked');
+            active = !active;
+            d3.select(this).classed('clicked',active);
+            const parent = d3.select(this.parentNode);
+            parent.select('span.clusterlabel').classed('hide',active);
+            parent.select('input.clusterlabel').classed('hide',!active);
+        });
+        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col s11','type':'text'});
+        r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
+            clusterDescription[d.id].text = $(this).val();
+            d3.select(this).classed('hide',true);
+            const parent = d3.select(this.parentNode);
+            parent.select('.editbtn').classed('clicked',false);
+            parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+            updateclusterDescription(d.id,clusterDescription[d.id].text);
+        });
+        r_new.append('span').attr('class','clusternum center-align col s12');
+        r_new.append('span').attr('class','clusterMSE center-align col s12');
+        dir.selectAll('.radarCluster')
+            .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
+            .style('position','relative')
+            .each(function(d,i){
+                radarChartclusteropt.color = function(){return colorCluster(d.id)};
+                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").classed('no-absolute',true).select('.axisWrapper .gridCircle').classed('hide',true);
+            });
+        d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
+        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
+        d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
+        d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+
+        listOption.find(d=>d.text==='Cluster').tableObj.classed('hide',false);
+        yscale["Cluster"].domain([0,cluster_info.length-1]);
+        yscale["Cluster"].axisCustom.ticks = cluster_info.length;
+    }, 0);
+    // outlier_map(outlyingList)
 }
