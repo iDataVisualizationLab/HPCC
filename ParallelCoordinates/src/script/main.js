@@ -522,7 +522,7 @@ function update_Dimension() {
                 })
                 .append("svg:text")
                     .attr("text-anchor", "start")
-                    .style('transform','rotate(-21deg) translate(-5px,-6px)')
+                    .style('transform','rotate(-15deg) translate(-5px,-6px)')
                 // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
                 .attr("y", -14)
                 .attr("x", 0)
@@ -560,8 +560,7 @@ function update_Dimension() {
                 return "translate(" + xscale(d) + ")";});
             },exit => exit.remove());
 }
-
-function init() {
+function initFunc() {
     if(timel)
         timel.stop();
     width = $("#Maincontent").width()-10;
@@ -674,7 +673,7 @@ function resetRequest() {
     // Add a group element for each dimension.
     update_Dimension();
     if (!serviceFullList.find(d=>d.text===selectedService))
-        selectedService = serviceFullList[0].text();
+        selectedService = serviceFullList[0].text;
     const selecteds = d3.select("#axisSetting")
         .select('tbody')
         .selectAll('tr')

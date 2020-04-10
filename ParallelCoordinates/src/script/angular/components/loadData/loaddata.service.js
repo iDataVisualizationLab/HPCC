@@ -7,7 +7,7 @@ angular.module('hpccApp')
         data:{}
     };
     let first = true;
-
+    let init = true;
     Loaddata.reset = function(hard) {
         Loaddata.data = Dataset.currentDataset;
     };
@@ -28,7 +28,8 @@ angular.module('hpccApp')
                         if (!init)
                             resetRequest();
                         else
-                            init();
+                            initFunc();
+                        init = false
                         preloader(false)
                     }
                     firstTime = false;
@@ -116,10 +117,11 @@ angular.module('hpccApp')
             }
 
 
-            if (!firstTime)
+            if (!init)
                 resetRequest();
             else
-                init();
+                initFunc();
+            init = false;
             preloader(false)
             firstTime = false;
         }
@@ -215,8 +217,9 @@ angular.module('hpccApp')
                         resetRequest();
                     }
                     else{
-                        init();
+                        initFunc();
                     }
+            initFunc = false
                     preloader(false);
 
         }
