@@ -521,7 +521,8 @@ function update_Dimension() {
                     return d3.select(this).call(axis.scale(yscale[d]));
                 })
                 .append("svg:text")
-                .attr("text-anchor", "middle")
+                    .attr("text-anchor", "start")
+                    .style('transform','rotate(-21deg) translate(-5px,-6px)')
                 // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
                 .attr("y", -14)
                 .attr("x", 0)
@@ -682,16 +683,23 @@ function resetRequest() {
     brush();
 }
 function setColorsAndThresholds(sin) {
-    let s = serviceFullList.find(d=>d.text===sin)
+    let s = serviceFullList.find(d=>d.text===sin);
     if (!s){
         s = {range:stickKey!==TIMEKEY?[yscale[stickKey].domain()[1],yscale[stickKey].domain()[0]]:yscale[stickKey].domain()};
         const dif = (s.range[1] - s.range[0]) / levelStep;
-        const mid = s.range[0] + (s.range[1] - s.range[0]) / 2;
-        let left = s.range[0] - dif;
-        arrThresholds = [left, s.range[0], s.range[0] + dif, s.range[0] + 2 * dif, s.range[0] + 3 * dif, s.range[1], s.range[1] + dif];
-        opa = d3.scaleLinear()
-            .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
-            .range([1,1,0.1,1,1]);
+        const mid = +s.range[0] + (s.range[1] - s.range[0]) / 2;
+        let left = +s.range[0] - dif;
+        if (stickKey===TIMEKEY) {
+            arrThresholds = [new Date(left), s.range[0], new Date(+s.range[0] + dif), new Date(+s.range[0] + 2 * dif), new Date(+s.range[0] + 3 * dif), s.range[1], new Date(+s.range[1] + dif)];
+            opa = d3.scaleTime()
+                .domain([new Date(left),s.range[0],new Date(mid), s.range[1], new Date(s.range[1]+dif)])
+                .range([1,1,0.1,1,1]);
+        }else {
+            arrThresholds = [left, s.range[0], s.range[0] + dif, s.range[0] + 2 * dif, s.range[0] + 3 * dif, s.range[1], s.range[1] + dif];
+            opa = d3.scaleLinear()
+                .domain([left,s.range[0],mid, s.range[1], s.range[1]+dif])
+                .range([1,1,0.1,1,1]);
+        }
     }else
     {
         const dif = (s.range[1] - s.range[0]) / levelStep;
