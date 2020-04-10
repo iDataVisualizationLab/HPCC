@@ -3,9 +3,9 @@ let undefinedValue,
 outlierMultiply = 2.5,
 globalTrend=false,
 hosts,db;
-let histodram = {
-    resolution:20,
-};
+// let histodram = {
+//     resolution:20,
+// };
 let h = d3.scaleLinear();
 addEventListener('message',function ({data}){
     switch (data.action) {
