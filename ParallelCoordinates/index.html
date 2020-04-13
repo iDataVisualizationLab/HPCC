@@ -149,6 +149,14 @@
                             </tbody>
                         </table>
                     <button type="submit" class ="menuBtn btn-small" id="enableVariableCorrelation"> Variable Correlation </button>
+                    <div  class="row s12 valign-wrapper">
+                        <label for="overlayPlot" class="col s4 hide"> Overlay: </label>
+                        <select id="overlayPlot" class="col s8">
+                            <option value="none" selected="selected">None</option>
+                            <option value="violin" >Violin plots</option>
+                        </select>
+                    </div>
+
                     <!--<div id="colorContinuos"></div>-->
                     <!--<p id="legend" class="col s12">-->
                     <!--</p>-->
@@ -352,6 +360,7 @@
 <!--data load-->
 <script src="../HiperView/spider/radarChart.js"></script>
 <script src="../HiperView/spider/roseChart.js"></script>
+<script src="../HiperView/myscripts/violinChart.js"></script>
 <script src="../HiperView/js/simple-statistics.min.js"></script>
 
 <script src="../HiperView/myscripts/setting.js"></script>

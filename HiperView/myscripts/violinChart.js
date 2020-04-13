@@ -15,6 +15,9 @@ d3.viiolinChart = function () {
             heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
             direction: 'h',
             dotRadius: 2,
+            showOutlier:true,
+            color:()=>'#00000029',
+            stroke:'black',
             opt:{
                 method : 'DensityEstimator', // epsilon is learning rate (10 = default)
                 resolution : 50, // resolution
@@ -29,13 +32,7 @@ d3.viiolinChart = function () {
     let sizebox = 50;
     let maxlist = 20;
     let viiolinplot ={};
-    let svg, g,linepointer,radarcreate,trackercreate,glowEffect,panel,panel_user,list_user,
-        scaleX_small = d3.scaleLinear(),
-        scaleY_small = d3.scaleLinear(),
-        store={},
-        ss = 1,
-        tx = 0,
-        ty =0;
+    let svg, g,linepointer;
     let needUpdate = false;
     let groupMethod = 'outlier';
     let first = true;
@@ -59,106 +56,185 @@ d3.viiolinChart = function () {
         }
     };
     viiolinplot.draw = function(contain){
-        let axisg = contain.select('.gvisaxis');
-        if (axisg.empty()) {
-            axisg = contain.append('g').attr('class', 'gvisaxis')
-                .attr('transform','translate('+graphicopt.margin.left+','+(graphicopt.margin.top+graphicopt.heightG()/2)+')')
-                .style('stroke','black');
-            axisg.append('line').attr('class','laxis')
+        // h
+        let getpos_func = (p)=>{
+            return p.attr('transform',(d,i)=>`translate(${graphicopt.margin.left},${graphicopt.margin.top+gpos(d.axis+i)})`);
+        };
+        let laxis =(p)=> {
+            return p.styles(graphicopt.middleAxis).attrs({
+                x2: h(1),
+                x1: 0,
+                y1: 0,
+                y2: 0,
+            });
+        };
+        let tick1 = (p)=> {
+            return p
+                .attrs({
+                    y1: -5,
+                    y2: 5,
+                }).styles(graphicopt.ticks)
+        };
+        let tick2 = (p)=> {
+            return p
                 .attrs({
                     x2: h(1),
+                    x1: h(1),
+                    y1: -5,
+                    y2: 5,
+                }).styles(graphicopt.ticks)
+        };
+        let tickLower = p=>{
+            return p.styles({'text-anchor':'end','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[0]))
+                .attrs({
+                    dx: -1,
+                    dy: 4,
                 })
-                .styles(graphicopt.middleAxis)
-            ;
-
-            if(graphicopt.tick===undefined && graphicopt.tick.visibile!= false) {
-                axisg.append('line').attr('class', 'tick')
+        };
+        let tickHigher = p=>{
+            return p .styles({'text-anchor':'start','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[1]))
+                .attrs({
+                    dx: 1,
+                    x: h.range()[1],
+                    dy: 4,
+                });
+        };
+        let draw_median = p=>{
+            return p.attrs({
+                class: 'median',
+                width:2,
+                height: 8,
+                x: d=>h(d),
+                y: -4,
+            })
+        };
+        if (graphicopt.direction==='v') {
+            getpos_func = (p) => {
+                return p.attr('transform', (d, i) => `translate(${graphicopt.margin.left + gpos(d.axis + i)},${graphicopt.margin.top})`);
+            };
+            laxis =(p)=> {
+                return p.styles(graphicopt.middleAxis).attrs({
+                    x2: 0,
+                    x1: 0,
+                    y1: h.range()[0],
+                    y2: h.range()[1],
+                });
+            };
+            tick1 = (p)=> {
+                return p
                     .attrs({
-                        y1: -5,
-                        y2: 5,
+                        x1: -5,
+                        x2: 5,
                     }).styles(graphicopt.ticks)
-                axisg.append('line').attr('class', 'tick')
+            };
+            tick2 = (p)=> {
+                return p
                     .attrs({
-                        x2: h(1),
-                        x1: h(1),
-                        y1: -5,
-                        y2: 5,
+                        y2: h.range()[1],
+                        y1: h.range()[1],
+                        x1: -5,
+                        x2: 5,
                     }).styles(graphicopt.ticks)
-            }
-
-            if(ticksDisplay.length){
-                axisg.append('text').attr('class', 'tickDisplay lower')
+            };
+            tickLower = p=>{
+                return p.styles({'text-anchor':'end','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[0]))
                     .attrs({
-                        dx: -1,
-                        dy: 4,
-                    }).styles({'text-anchor':'end','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[0]));
-                    // }).styles({'text-anchor':'end','stroke-width':0}).text(ticksDisplay[0]<1000?ticksDisplay[0]:d3.format(".2s")(ticksDisplay[0]));
-                axisg.append('text').attr('class', 'tickDisplay higher')
+                        dx: 0,
+                        dy: -1,
+                    })
+            };
+            tickHigher = p=>{
+                return p .styles({'text-anchor':'start','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[1]))
                     .attrs({
-                        dx: 1,
-                        x: h.range()[1],
-                        dy: 4,
-                    }).styles({'text-anchor':'start','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[1]));
-                    // }).styles({'text-anchor':'start','stroke-width':0}).text(ticksDisplay[1]<1000?ticksDisplay[1]:d3.format(".2s")(ticksDisplay[1]));
-            }
-        }else{
-            if(ticksDisplay.length) {
-                axisg.select('.tickDisplay.lower')
-                    .attrs({
-                        dx: -1,
-                        dy: 4,
-                    }).styles({'text-anchor':'end','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[0]));
-                axisg.select('.tickDisplay.higher')
-                    .attrs({
-                        dx: 1,
-                        x: h.range()[1],
-                        dy: 4,
-                    }).styles({'text-anchor':'start','stroke-width':0}).text(d3.format(".2s")(ticksDisplay[1]));
-            }
+                        dx: 0,
+                        y: h.range()[1],
+                        dy: -1,
+                    });
+            };
+            draw_median = p=>{
+                return p.attrs({
+                    class: 'median',
+                    width:8,
+                    height: 2,
+                    y: d=>h(d),
+                    x: -4,
+                })
+            };
         }
-        let viol_chart = contain.selectAll('.violin').data(arr);
+        let viol_chart = contain.selectAll('.violin').data(arr,d=>d.axis)
+            .call(getpos_func);
+        viol_chart.select('.gvisaxis .laxis') .call(laxis);
         viol_chart.exit().remove();
         let viol_n = viol_chart.enter()
             .append('g')
-            .attr('class','violin')
-            .attr('transform','translate('+graphicopt.margin.left+','+(graphicopt.margin.top+graphicopt.heightG()/2)+')');
+            .attr('class','violin').call(getpos_func);
+        let axisg = viol_n.append('g').attr('class', 'gvisaxis')
+            .style('stroke','black');
+            axisg.append('line').attr('class','laxis')
+                .call(laxis);
+
+        if(graphicopt.tick===undefined && graphicopt.tick.visibile!= false) {
+            viol_chart.select('.gvisaxis .tick1') .call(tick1);
+            viol_chart.select('.gvisaxis .tick2') .call(tick1);
+            axisg.append('line').attr('class', 'tick1')
+                .call(tick1);
+            axisg.append('line').attr('class', 'tick2')
+                .call(tick2);
+            if(ticksDisplay.length){
+                viol_chart.select('.gvisaxis text.lower') .call(tickLower);
+                viol_chart.select('.gvisaxis text.higher') .call(tickHigher);
+
+                axisg.append('text').attr('class', 'tickDisplay lower')
+                    .call(tickLower);
+
+                axisg.append('text').attr('class', 'tickDisplay higher')
+                    .call(tickHigher);
+
+            }
+        }
+
+
         viol_n.append("path");
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
-            .style('stroke','black')
+            .style('stroke',graphicopt.stroke)
             .style('stroke-width','0.2')
-            .style('fill','#00000029')
+            .style('fill',d=>graphicopt.color(d.axis))
             // .style('fill','currentColor')
             .attr("d",d=> createviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
         );
 
-        let median_rect = viol_chart.selectAll('rect.median').data(d=>d.median!=undefined?[d.median]:[]);
+        let median_rect = viol_chart.selectAll('rect.median').data(d=>d.median!==undefined?[d.median]:[]).call(draw_median);
         median_rect.exit().remove();
-        median_rect.enter().append('rect').attrs({
-            class: 'median',
-            width:2,
-            height: 8,
-            x: d=>h(d),
-            y: -4,
-        }).style('fill','black')
+        median_rect.enter().append('rect').style('fill','black').call(draw_median);
 
-        const circledata =  arr[0].outlier.map(d=>{return d.x?d:{x:d}});
 
-    //     var simulation = d3.forceSimulation(circledata)
-    //         .force("x", d3.forceX(function(d) { return h(d.val); }).strength(1))
-    //         .force("y", d3.forceY(0))
-    //         .force("collide", d3.forceCollide(graphicopt.dotRadius))
-    //         .stop();
-    //     for (var i = 0; i < 120; ++i) simulation.tick();
-    // console.log(circledata.map(d=>h(d.x)));
-        let circle_o = viol_chart.selectAll('circle.outlier').data(circledata);
-        circle_o.exit().remove();
-        let circlem = circle_o.enter().append('circle').attr('class','outlier')
-            .styles({opacity:0.5,
-            fill: 'rgb(138, 0, 26)'})
-            .merge(circle_o)
-            .attrs(circleoption)
-            .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:0);
+        if(graphicopt.showOutlier) {
+            const circledata = arr[0].outlier.map(d => {
+                return d.x !== undefined ? d : {x: d}
+            });
+
+            //     var simulation = d3.forceSimulation(circledata)
+            //         .force("x", d3.forceX(function(d) { return h(d.val); }).strength(1))
+            //         .force("y", d3.forceY(0))
+            //         .force("collide", d3.forceCollide(graphicopt.dotRadius))
+            //         .stop();
+            //     for (var i = 0; i < 120; ++i) simulation.tick();
+            // console.log(circledata.map(d=>h(d.x)));
+            let circle_o = viol_chart.selectAll('circle.outlier').data(circledata);
+            circle_o.exit().remove();
+            let circlem = circle_o.enter().append('circle').attr('class', 'outlier')
+                .styles({
+                    opacity: 0.5,
+                    fill: 'rgb(138, 0, 26)'
+                })
+                .merge(circle_o)
+                .attrs(circleoption)
+                // .attr('cx',d=> d.y?d.x:h(d.x)).attr('cy',d=>d.y?d.y:0);
+                .attr('cx', d => h(d.x)).attr('cy', d => xNum(d.y ? d.y : 0));
+        }else{
+            viol_chart.selectAll('circle.outlier').remove();
+        }
         return viol_chart;
     };
 
@@ -170,16 +246,27 @@ d3.viiolinChart = function () {
     //         svg.style('visibility','hidden');
     //         viiolinplot.pause();
     //         g.selectAll('*').remove();
-    //     }
+    //     }debugger
     // };
 
 
     let kde;
     let h = d3.scaleLinear();
-    let xNum = d3.scaleLinear()
+    let xNum = d3.scaleSqrt();
+    let gpos = d3.scalePoint().padding(0.5);
     function handledata(data){
-        h.range([0, graphicopt.direction === 'v' ? graphicopt.heightG() : graphicopt.widthG()]);
-        xNum.range([0, (graphicopt.direction === 'h' ? graphicopt.heightG() : graphicopt.widthG())/2]);
+        // h.range([0, graphicopt.direction === 'v' ? graphicopt.heightG() : graphicopt.widthG()]);
+        // xNum.range([0, (graphicopt.direction === 'h' ? graphicopt.heightG() : graphicopt.widthG())/2]);
+        if(graphicopt.direction === 'v') {
+            h.range([graphicopt.heightG(),0]);
+            gpos.domain(data.map((d,i)=>d.axis+i))
+                .range([-graphicopt.widthG()/2,graphicopt.widthG()/2])
+        }else {
+            h.range([0, graphicopt.widthG()]);
+            gpos.domain(data.map((d,i)=>d.axis+i))
+                .range([graphicopt.heightG(),0])
+        }
+        xNum.range([0, gpos.step()/2]);
         let sumstat;
         if (graphicopt.opt.dataformated){
             // if (data[0].arr.length)

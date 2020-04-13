@@ -1884,12 +1884,7 @@ $( document ).ready(function() {
     });
 
     // cluster init
-    $('#clusterMethod').val(group_opt.clusterMethod);
-    $('#startBinGridSize').val(group_opt.bin.startBinGridSize||10);
-    $('#lowrange').val(group_opt.bin.range[0]||9);
-    $('#highrange').val(group_opt.bin.range[1]||11);
-    $('#knum').val(group_opt.bin.k||5);
-    $('#kiteration').val(group_opt.bin.iterations||50);
+    initClusterUi();
 
     // outlier detection
     d3.select('#outlierDection').on('change',function(){

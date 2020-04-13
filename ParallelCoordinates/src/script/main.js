@@ -145,7 +145,7 @@ let group_opt = {
     clusterMethod: 'leaderbin',
     bin:{
         startBinGridSize: 5,
-        range: [9,10]
+        range: [7,8]
     }
 };
 
@@ -170,16 +170,9 @@ function filterAxisbyDom(d) {
 }
 let listOption=[];
 function drawFiltertable() {
-    // let listOption = serviceFullList.map((e,ei) => {
-    //     return {service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable}
-    // });
-    // let listOption = [{service: stickKey, arr: stickKey,id:-1, text: stickKey, enable: true}]
-    // serviceFullList.map((e,ei) => {
-    //     listOption.push({service: e.text, arr: e.text,id:ei, text: e.text, enable: e.enable})
-    // });
     listOption = serviceFullList_withExtra.map((e,ei) => {
-            return {service: e.text, arr: e.text,order:ei,id:e.id, text: e.text, enable: e.enable,hide:e.hide}
-        });
+        return {service: e.text, arr: e.text,order:ei,id:e.id, text: e.text, enable: e.enable,hide:e.hide}
+    });
 
     let table = d3.select("#axisSetting").select('tbody');
     table
@@ -222,45 +215,30 @@ function drawFiltertable() {
                     d3.select(this).attr('checked',serviceFullList_withExtra[d.value.order].enable ? "checked" : null)
             }).on('change', function (d) {
                 filterAxisbyDom.call(this, d);
-
-
                 xscale.domain(dimensions);
-
-                // reorder list
-                // const disable_dims = _.difference(listMetric.toArray(),dimensions);
-                // listMetric.sort(_.union(dimensions,disable_dims));
-
-                // rerender
                 d3.select("#foreground").style("opacity", null);
                 brush();
             });
             alltr.filter(d => d.type === undefined)
                 .text(d => d.value);
         }, update =>{
-                const tr = update;
-                tr.classed('hide', d => d.hide);
-                tr.each(function(d){d.tableObj = d3.select(this);})
-                tr.attr('data-id', d => d.arr);
-                const alltr = tr.selectAll('td')
-                    .data(d => [{key: 'enable', value: d, type: "checkbox"}, {
-                        key: 'colorBy',
-                        value: false,
-                        type: "radio"
-                    }, {key: 'text', value: d.text}]);
-                alltr.filter(d => d.type === undefined)
-                    .text(d => d.value);
-                alltr.filter(d => d.type === "checkbox")
-                    .select("input")
-                    .each(function(d){this.checked = serviceFullList_withExtra[d.value.order].enable})
+            const tr = update;
+            tr.classed('hide', d => d.hide);
+            tr.each(function(d){d.tableObj = d3.select(this);})
+            tr.attr('data-id', d => d.arr);
+            const alltr = tr.selectAll('td')
+                .data(d => [{key: 'enable', value: d, type: "checkbox"}, {
+                    key: 'colorBy',
+                    value: false,
+                    type: "radio"
+                }, {key: 'text', value: d.text}]);
+            alltr.filter(d => d.type === undefined)
+                .text(d => d.value);
+            alltr.filter(d => d.type === "checkbox")
+                .select("input")
+                .each(function(d){this.checked = serviceFullList_withExtra[d.value.order].enable})
             }
-            );
-    // comboBox
-    //     .selectAll('li').data(listOption)
-    //     .join(enter => enter.append("li") .attr('tabindex','0').append("a")
-    //         .attr('href',"#"))
-    //     .text(d=>{return d.text})
-    //     .on('click',changeVar);
-    // $('tbody').sortable();
+        );
     listMetric = Sortable.create($('tbody')[0], {
         animation: 150,
         sort: true,
@@ -300,7 +278,7 @@ function drawFiltertable() {
             // console.log(d3.event);
             const currentAxis = d3.select(evt.dragged).datum();
             const relatedtAxis = d3.select(evt.related).datum();
-            const chosenAxis = svg.selectAll(".dimension").filter(d => d == currentAxis.arr);
+            const chosenAxis = svg.selectAll(".dimension").filter(d => d === currentAxis.arr);
 
 
             d3.event = {};
@@ -313,6 +291,7 @@ function drawFiltertable() {
         }
     });
 }
+let shuffled_data = [];
 $( document ).ready(function() {
     console.log('ready');
     $('.tabs').tabs();
@@ -325,9 +304,6 @@ $( document ).ready(function() {
             }
         }});
     discovery('#sideNavbtn');
-    //$('.tap-target').tapTarget({onOpen: discovery});
-
-    // let comboBox = d3.select("#listvar");
     d3.select("#DarkTheme").on("click",switchTheme);
 
     // data
@@ -399,6 +375,7 @@ $( document ).ready(function() {
                 break;
         }
     });
+    initClusterUi();
     // init();
 });
 
@@ -619,7 +596,15 @@ function update_Dimension() {
                 .text(String)
                 .append("title")
                 .text("Click to invert. Drag to reorder");
-
+            // Add violinplot holder
+                new_dim.append("svg:g")
+                    .attr("class", "plotHolder")
+                    .attr("transform", "translate(0,0)")
+                    // .append('rect')
+                    // .attr('class','background')
+                    // .style('fill','rgba(255,255,255,0.38)')
+                    // .style('transform','translate(-50%,0)')
+                    // .attrs({width:violiin_chart.graphicopt().width,height:violiin_chart.graphicopt().height});
             // Add and store a brush for each axis.
                 new_dim.append("svg:g")
                 .attr("class", "brush")
@@ -639,17 +624,20 @@ function update_Dimension() {
                 return new_dim;
             },
             update =>{
+                isChangeData = true;
                 // Add an axis and title.
                 update.select(".axis")
                     .attr("transform", "translate(0,0)")
                     .each(function (d) {
                         return d3.select(this).call(getScale(d));
                     });
+                // update.select().select('.background')
             return  update.attr("transform", function (d) {
                 return "translate(" + xscale(d) + ")";});
             },exit => exit.remove());
 }
 function initFunc() {
+    dimensions=[]
     handle_clusterinfo ();
     if(timel)
         timel.stop();
@@ -657,6 +645,7 @@ function initFunc() {
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
+    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
     xscale = d3.scalePoint().range([0, w]).padding(0.3);
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
@@ -1251,17 +1240,12 @@ function brush() {
 
     // Get lines within extents
     var selected = [];
-
-    data
-        .filter(function(d) {
-            return !_.contains(excluded_groups, d.group);
-        })
-        .map(function(d) {
-            return actives.every(function(p, dimension) {
-                return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
-            }) ? selected.push(d) : null;
+    data.forEach(function(d) {
+            if(!excluded_groups.find(e=>e===d.group))
+                !actives.find(function(p, dimension) {
+                    return extents[dimension][0] > d[p] || d[p] > extents[dimension][1];
+                }) ? selected.push(d) : null;
         });
-
     // free text search
     var query = d3.select("#search").node().value;
     if (query.length > 0) {
@@ -1275,85 +1259,150 @@ function brush() {
         d3.select("#keep-data").attr("disabled", "disabled");
         d3.select("#exclude-data").attr("disabled", "disabled");
     };
-    console.time('tallies')
+
     // total by food group
     var tallies = _(selected)
         .groupBy(function(d) { return d.group; });
-    console.timeEnd('tallies')
+
     // include empty groups
-    _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
-
-    /*
-    legend
-        .style("text-decoration", function(d) { return _.contains(excluded_groups,d) ? "line-through" : null; })
-        .attr("class", function(d) {
-            return (tallies[d].length > 0)
-                ? "row"
-                : "row off";
-        });
-    barScale.domain([0,data.length]);
-    if (selectedService){
-        legend.selectAll(".color-bar")
-            .style("width", function(d) {
-                return Math.ceil((barScale(tallies[d].length)));
-            });
-
-        legend.selectAll(".tally")
-            .text(function(d,i) { return tallies[d].length });
-    }else {
-        legend.selectAll(".color-bar")
-            .style("width", function(d) {
-                return Math.ceil((barScale(tallies[d].length))) + "px";
-            });
-
-        legend.selectAll(".tally")
-            .text(function(d,i) { return tallies[d].length });
-    }*/
-
-    // Render selected lines
-    paths(selected, foreground, brush_count, true);
+        _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
     complex_data_table_render = true;
     redraw(selected);
     // Loadtostore();
 }
-let shuffled_data=[];
-// render a set of polylines on a canvas
-function paths(selected, ctx, count) {
-    // setTimeout(function(){
-        var n = selected.length,
-            i = 0,
-            opacity = d3.min([2/Math.pow(n,0.3),1]),
-            timer = (new Date()).getTime();
+function axisHistogram(text,range,d){
+    d = d.filter(e=>e)
+    if (d.length) {
+        outlierMultiply = 3
+        var scale = d3.scaleLinear().domain(range);
+        var histogram = d3.histogram()
+            .domain(scale.domain())
+            // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .thresholds(scale.ticks(100))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .value(d => d);
+        let hisdata = histogram(d);
 
-        selection_stats(opacity, n, data.length);
-
-        //shuffled_data = _.shuffle(selected);
-
-        // complex_data_table(shuffled_data.slice(0,20));
-        shuffled_data = selected;
-    console.time('complex_data_table')
-    complex_data_table_render = true;
-        // complex_data_table(shuffled_data);
-    console.timeEnd('complex_data_table')
-        ctx.clearRect(0,0,w+1,h+1);
-
-        // render all lines until finished or a new brush event
-        function animloop(){
-            if (i >= n || count < brush_count) {
-                timel.stop();
-                return true;
-            }
-            var max = d3.min([i+render_speed, n]);
-            render_range(shuffled_data, i, max, opacity);
-            render_stats(max,n,render_speed);
-            i = max;
-            timer = optimize(timer);  // adjusts render_speed
+        let sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
+        r = {
+            axis: text,
+            q1: ss.quantile(d, 0.25),
+            q3: ss.quantile(d, 0.75),
+            median: ss.median(d),
+            // outlier: ,
+            arr: sumstat
         };
-        if (timel)
-            timel.stop();
-        timel = d3.timer(animloop);
-    // },0);
+        // if (d.length>4)
+        // {
+        //     const iqr = r.q3-r.q1;
+        //     console.log('Outliers: ',d.filter(e=>e>(r.q3+outlierMultiply*iqr)||e<(r.q1-outlierMultiply*iqr)).length);
+        //     r.outlier = _.unique(d.filter(e=>e>(r.q3+outlierMultiply*iqr)||e<(r.q1-outlierMultiply*iqr)));
+        //     console.log('Unquie points: ',r.outlier.length);
+        // }else{
+        //     r.outlier =  _.unique(d);
+        // }
+        r.outlier = []
+        return r;
+    }else{
+        return  {
+            axis: text,
+            q1: null,
+            q3: null,
+            median: null,
+            // outlier: ,
+            arr: []
+        };
+    }
 }
+// render a set of polylines on a canvas
+let isChangeData=false;
+
+function plotViolin() {
+    selected = shuffled_data;
+    setTimeout(() => {
+        let dimGlobal = [0, 0];
+        let dimensiondata = {};
+        dimensions.forEach(d => {
+            let s = serviceFullList.find(s => s.text === d);
+            let color = () => "#ffffff";
+            if (s) {
+                let value = [];
+                if (cluster_info.length) {
+                    let cs = {};
+                    cluster_info.forEach((c, ci) => cs[ci] = []);
+                    selected.forEach(e => cs[e.Cluster].push(e[d]));
+                    value = cluster_info.map((c, ci) => axisHistogram(c.name, s.range, cs[ci]));
+                    vMax = d3.max(value, d => d[1]);
+                    dimGlobal[1] = Math.max(vMax, dimGlobal[1]);
+                    color = colorCluster;
+                } else {
+                    value = [axisHistogram(s.text, s.range, selected.map(e => e[d]))];
+                    vMax = d3.max(value[0], d => d[1]);
+                    dimGlobal[1] = Math.max(vMax, dimGlobal[1]);
+                }
+                dimensiondata[d] = {key: s, value: value, color: color};
+
+            }
+        });
+        d3.selectAll('.dimension').select('.plotHolder')
+            .each(function (d) {
+                if (dimensiondata[d]) {
+                    let s = dimensiondata[d].key;
+                    violiin_chart.graphicopt({
+                        customrange: s.range,
+                        rangeY: dimGlobal,
+                        color: dimensiondata[d].color
+                    }).data(dimensiondata[d].value).draw(d3.select(this))
+                }
+            })
+    }, 0)
+}
+
+function paths(selected, ctx, count) {
+
+    var n = selected.length,
+        i = 0,
+        opacity = d3.min([2/Math.pow(n,0.3),1]),
+        timer = (new Date()).getTime();
+
+    selection_stats(opacity, n, data.length);
+
+    //shuffled_data = _.shuffle(selected);
+
+    // complex_data_table(shuffled_data.slice(0,20));
+    shuffled_data = selected;
+    complex_data_table_render = true;
+    ctx.clearRect(0,0,w+1,h+1);
+
+    // render all lines until finished or a new brush event
+    function animloop(){
+        if (i >= n || count < brush_count) {
+            timel.stop();
+            return true;
+        }
+        var max = d3.min([i+render_speed, n]);
+        render_range(shuffled_data, i, max, opacity);
+        render_stats(max,n,render_speed);
+        i = max;
+        timer = optimize(timer);  // adjusts render_speed
+    };
+    if (timel)
+        timel.stop();
+    timel = d3.timer(animloop);
+    if(isChangeData)
+        axisPlot.dispatch('plot',selected);
+}
+let axisPlot =  d3.select('#overlayPlot').on('change',function(){
+    switch ($(this).val()){
+        case 'none':
+            d3.selectAll('.dimension .plotHolder').selectAll('*').remove();
+            d3.select(this).on('plot',()=>{})
+            break;
+        case 'violin':
+            d3.select(this).on('plot',plotViolin)
+            break;
+    }
+    d3.select(this).dispatch('plot')
+});
 let timel
 // transition ticks for reordering, rescaling and inverting
 function update_ticks(d, extent) {
@@ -1402,30 +1451,25 @@ function update_ticks(d, extent) {
 
 // Rescale to new dataset domain
 function rescale() {
-    // reset yscales, preserving inverted state
-    // dimensions.forEach(function(d,i) {
-    //     if (yscale[d].inverted) {
-    //         yscale[d] = d3.scaleLinear()
-    //             .domain(d3.extent(data, function(p) { return +p[d]; }))
-    //             .range([0, h]);
-    //         yscale[d].inverted = true;
-    //     } else {
-    //         yscale[d] = d3.scaleLinear()
-    //             .domain(d3.extent(data, function(p) { return +p[d]; }))
-    //             .range([h, 0]);
-    //     }
-    // });
-    //
-    // update_ticks();
-
+    // adjustRange(data);
+    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+        let k = s.text;
+        let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+            .domain(d3.extent(data, function (d) {
+                return d[k];
+            }))
+            .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
+            .domain(serviceFullList.find(d=>d.text===k).range)
+            .range([h, 0]))));
+        return s.enable?xtempscale:false;
+    }).map(s=>s.text));
+    update_ticks();
     // Render selected data
     paths(data, foreground, brush_count);
 }
 
 // Get polylines within extents
 function actives() {
-    // var actives = dimensions.filter(function(p) { return !yscale[p].brush.empty(); }),
-    //     extents = actives.map(function(p) { return yscale[p].brush.extent(); });
     var actives = [],
         extents = [];
     svg.selectAll(".brush")
@@ -1442,11 +1486,10 @@ function actives() {
     var selected = [];
     data
         .forEach(function(d) {
-            if(!_.contains(excluded_groups, d.group)){
-                !actives.find(function(p, i) {
-                    return extents[i][0] > d[p] || d[p] > extents[i][1];
+            if(!excluded_groups.find(e=>e===d.group))
+                !actives.find(function(p, dimension) {
+                    return extents[dimension][0] > d[p] || d[p] > extents[dimension][1];
                 }) ? selected.push(d) : null;
-            }
         });
 
     // free text search
@@ -1460,13 +1503,13 @@ function actives() {
 
 // Export data
 function export_csv() {
-    var keys = d3.keys(data[0]);
+    var keys =  _.flatten([['id'],serviceFullList.map(s=>s.text)]);
     var rows = actives().map(function(row) {
         return keys.map(function(k) { return row[k]; })
     });
-    var csv = d3.csv.format([keys].concat(rows)).replace(/\n/g,"<br/>\n");
-    var styles = "<style>body { font-family: sans-serif; font-size: 12px; }</style>";
-    window.open("text/csv").document.write(styles + csv);
+    keys[0]=IDkey;
+    var csv = [keys].concat(rows).join('\n');
+    download_csv($('#exportname').val(),csv)
 }
 
 function resetSize() {
@@ -1474,7 +1517,7 @@ function resetSize() {
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
-
+    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
     let chart = d3.select("#chart")
         .style("height", (h + m[0] + m[2]) + "px")
 
@@ -1510,7 +1553,7 @@ function resetSize() {
         .each(function (d) {
             d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
                 .extent([[-10, 0], [10, h]])
-                .on("brush end", brush));
+                .on("brush end", function(){isChangeData = true; brush();}));
         });
 
     // update axis placement
@@ -1553,7 +1596,18 @@ function exclude_data() {
     data = new_data;
     rescale();
 }
-
+function adjustRange(data){
+    let globalRange = [0,0];
+    primaxis.forEach(p=>{
+        let range = d3.extent(data,d=>d[p]);
+        if (range[0]>=0 && range[1]>1&&range[1]>globalRange[1])
+            globalRange[1]=range[1];
+    });
+    primaxis.forEach((p,pi)=>{
+        if (range[0]>=0 && range[1])
+            serviceFullList[pi].range = globalRange;
+    })
+}
 function add_axis(d,g) {
     const target = serviceFullList_withExtra.find(e=>e.text===d)
     if(target) {
@@ -1571,15 +1625,13 @@ function add_axis(d,g) {
 function remove_axis(d,g) {
     const target = serviceFullList_withExtra.find(e=>e.text===d)
 
-        target.enable = false;
-        dimensions = _.difference(dimensions, [d]);
-        xscale.domain(dimensions);
-        g = g.data(dimensions, d => d);
-        g.attr("transform", function (p) {
-            return "translate(" + position(p) + ")";
-        });
-        g.exit().remove();
-        update_ticks();
+    target.enable = false;
+    dimensions = _.difference(dimensions, [d]);
+    xscale.domain(dimensions);
+    g = g.data(dimensions, d => d);
+    g.attr("transform", function (p) {return "translate(" + position(p) + ")";});
+    g.exit().remove();
+    update_ticks();
 }
 
 d3.select("#keep-data").on("click", keep_data);
@@ -1700,6 +1752,7 @@ function recalculateCluster (option,calback,customCluster) {
 }
 
 function onchangeCluster() {
+    unhighlight();
     cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
     // tsnedata = {};
     hosts.forEach(h => {
@@ -1746,9 +1799,7 @@ function onchangeCluster() {
     data = object2DataPrallel(sampleS);
     cluster_map(cluster_info);
     handle_clusterinfo();
-
-    //tsne
-    // requestRedraw();
+    axisPlot.dispatch('plot',selected);
 }
 let radarChartclusteropt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
@@ -1878,3 +1929,6 @@ function cluster_map (dataRaw) {
     }, 0);
     // outlier_map(outlyingList)
 }
+
+// violin
+let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},stroke:null,tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;

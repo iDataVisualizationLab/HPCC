@@ -1199,3 +1199,14 @@ function onClusterHistogram(){
         return {axis: name,arr:sumstat,total:v.length,extra:nodes};
     }
 }
+
+
+// ------------------------UI------------------------------
+function initClusterUi() {
+    $('#clusterMethod').val(group_opt.clusterMethod);
+    $('#startBinGridSize').val(group_opt.bin.startBinGridSize || 10);
+    $('#lowrange').val(group_opt.bin.range[0] || 9);
+    $('#highrange').val(group_opt.bin.range[1] || 11);
+    $('#knum').val(group_opt.bin.k || 5);
+    $('#kiteration').val(group_opt.bin.iterations || 50);
+}

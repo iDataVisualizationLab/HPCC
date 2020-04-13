@@ -1,20 +1,18 @@
 var query_time;
 let cluster_info=[];
+let dataRaw;
 function initApp(){
     // load filter file
         preloader(true,undefined,'Read data file...');
         readFilecsv(d3.select('#datacom').node().value);
 }
 function formatService(init){
-    // if (runopt.minMax)
-    //     calculateServiceRange();
-    // else
     serviceLists.forEach(s=>{
         if(s.text.split('vs.').length>1) {
             s.enable = false;
             s.sub[0].enable = false;
         }
-    })
+    });
     serviceFullList_Fullrange = _.clone(serviceFullList);
     conf.serviceList = serviceList;
     conf.serviceLists = serviceLists;
