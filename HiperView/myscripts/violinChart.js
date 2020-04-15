@@ -42,12 +42,12 @@ d3.viiolinChart = function () {
 
 
     let createviolin = d3.area()
-        .x0(function(d){
-            return(xNum(-d[1])) } )
-        .x1(function(d){ return(xNum(d[1])) } )
-        .y(function(d){ return(h(d[0])) } )
+            .x0(function(d){
+                return(xNum(-d[1])) } )
+            .x1(function(d){ return(xNum(d[1])) } )
+            .y(function(d){ return(h(d[0])) } )
         // .curve(d3.curveLinear)
-        .curve(d3.curveCardinal.tension(0.3))
+        // .curve(d3.curveCardinal.tension(0.3))
     ;
     let circleoption = function (d){
         return {
@@ -260,11 +260,13 @@ d3.viiolinChart = function () {
         if(graphicopt.direction === 'v') {
             h.range([graphicopt.heightG(),0]);
             gpos.domain(data.map((d,i)=>d.axis+i))
-                .range([-graphicopt.widthG()/2,graphicopt.widthG()/2])
+                .range([-graphicopt.widthG()/2,graphicopt.widthG()/2]);
+            createviolin = createviolin.curve(d3.curveMonotoneY)
         }else {
             h.range([0, graphicopt.widthG()]);
             gpos.domain(data.map((d,i)=>d.axis+i))
                 .range([graphicopt.heightG(),0])
+            createviolin = createviolin.curve(d3.curveMonotoneX)
         }
         xNum.range([0, gpos.step()/2]);
         let sumstat;
