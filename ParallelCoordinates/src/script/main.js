@@ -1815,6 +1815,12 @@ function onchangeCluster() {
 function enableClusterAxis(){
     let p = d3.select('#axisSetting tbody tr[data-id="Cluster"]').selectAll('td').filter(d => d.type === "checkbox").select('input');
     p.node().checked = true;
+    selectedService = 'Cluster';
+    const selecteds = d3.select("#axisSetting")
+        .select('tbody')
+        .selectAll('tr')
+        .filter(d=>d.arr===selectedService).select('input[type="radio"]').property("checked", true);
+    _.bind(selecteds.on("change"),selecteds.node())();
     p.dispatch('change');
 }
 let radarChartclusteropt  = {
@@ -1947,4 +1953,4 @@ function cluster_map (dataRaw) {
 }
 
 // violin
-let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},stroke:null,tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
+let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
