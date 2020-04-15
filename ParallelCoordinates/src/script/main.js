@@ -600,6 +600,7 @@ function update_Dimension() {
                 new_dim.append("svg:g")
                     .attr("class", "plotHolder")
                     .attr("transform", "translate(0,0)")
+                    .style('opacity',0.8)
                     // .append('rect')
                     // .attr('class','background')
                     // .style('fill','rgba(255,255,255,0.38)')
