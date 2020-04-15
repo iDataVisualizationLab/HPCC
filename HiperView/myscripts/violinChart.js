@@ -170,8 +170,8 @@ d3.viiolinChart = function () {
             .attr('class','violin').call(getpos_func);
         let axisg = viol_n.append('g').attr('class', 'gvisaxis')
             .style('stroke','black');
-            axisg.append('line').attr('class','laxis')
-                .call(laxis);
+        axisg.append('line').attr('class','laxis')
+            .call(laxis);
 
         if(graphicopt.tick===undefined && graphicopt.tick.visibile!= false) {
             viol_chart.select('.gvisaxis .tick1') .call(tick1);
@@ -202,7 +202,7 @@ d3.viiolinChart = function () {
             .style('fill',d=>graphicopt.color(d.axis))
             // .style('fill','currentColor')
             .attr("d",d=> createviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
-        );
+            );
 
         let median_rect = viol_chart.selectAll('rect.median').data(d=>d.median!==undefined?[d.median]:[]).call(draw_median);
         median_rect.exit().remove();
@@ -362,7 +362,7 @@ d3.viiolinChart = function () {
                     .y(function (d) {
                         return (h(d[0]))
                     })
-                    // .curve(d3.curveCatmullRom);
+                // .curve(d3.curveCatmullRom);
                 circleoption = function (d){
                     return {
                         r: graphicopt.dotRadius,
@@ -382,7 +382,7 @@ d3.viiolinChart = function () {
                     .x(function (d) {
                         return (h(d[0]))
                     })
-                    // .curve(d3.curveCatmullRom);
+                // .curve(d3.curveCatmullRom);
                 circleoption = function (d){
                     return {
                         r: graphicopt.dotRadius,
