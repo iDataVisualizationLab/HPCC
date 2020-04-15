@@ -646,7 +646,6 @@ function initFunc() {
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
-    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
     xscale = d3.scalePoint().range([0, w]).padding(0.3);
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
@@ -711,7 +710,6 @@ function initFunc() {
             xtempscale.axisCustom = s.axisCustom;
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
-
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
     // Add a group element for each dimension.
     update_Dimension();
@@ -1319,6 +1317,7 @@ let isChangeData=false;
 
 function plotViolin() {
     selected = shuffled_data;
+    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
     setTimeout(() => {
         let dimGlobal = [0, 0];
         let dimensiondata = {};
@@ -1529,7 +1528,6 @@ function resetSize() {
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
-    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
     let chart = d3.select("#chart")
         .style("height", (h + m[0] + m[2]) + "px")
 
