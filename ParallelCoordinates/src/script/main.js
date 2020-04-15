@@ -1395,10 +1395,21 @@ let axisPlot =  d3.select('#overlayPlot').on('change',function(){
     switch ($(this).val()){
         case 'none':
             d3.selectAll('.dimension .plotHolder').selectAll('*').remove();
-            d3.select(this).on('plot',()=>{})
+            d3.select(this).on('plot',()=>{});
+            hide_ticks();
+            break;
+        case 'tick':
+            d3.selectAll('.dimension .plotHolder').selectAll('*').remove();
+            d3.select(this).on('plot',()=>{});
+            show_ticks();
             break;
         case 'violin':
-            d3.select(this).on('plot',plotViolin)
+            d3.select(this).on('plot',plotViolin);
+            hide_ticks();
+            break;
+        case 'violin+tick':
+            d3.select(this).on('plot',plotViolin);
+            show_ticks();
             break;
     }
     d3.select(this).dispatch('plot')

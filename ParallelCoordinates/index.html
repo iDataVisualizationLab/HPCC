@@ -149,13 +149,6 @@
                             </tbody>
                         </table>
                     <button type="submit" class ="menuBtn btn-small" id="enableVariableCorrelation"> Variable Correlation </button>
-                    <div  class="row s12 valign-wrapper" style="margin-top: 10px">
-                        <label for="overlayPlot" class="col s4"> Overlay: </label>
-                        <select id="overlayPlot" class="col s8">
-                            <option value="none" selected="selected">None</option>
-                            <option value="violin" >Violin plots</option>
-                        </select>
-                    </div>
 
                     <!--<div id="colorContinuos"></div>-->
                     <!--<p id="legend" class="col s12">-->
@@ -291,10 +284,15 @@
             <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
             <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
             Lines at <strong id="opacity"></strong> opacity.
-            <span class="settings">
-            <button id="hide-ticks">Hide Ticks</button>
-            <button id="show-ticks" disabled="disabled">Show Ticks</button>
-          </span>
+            <div style="display: inline-block;">
+                <label for="overlayPlot" style="display: inline-block;"> Show: </label>
+                <select id="overlayPlot" style="display: inline-block;height: 21px;padding: 0;width: auto;">
+                    <option value="none" selected="selected">None</option>
+                    <option value="tick" selected="selected">ticks</option>
+                    <option value="violin">Violin plots</option>
+                    <option value="violin+tick">Violin plots + ticks</option>
+                </select>
+            </div>
         </div>
         <div style="clear:both;"></div>
     </div>
