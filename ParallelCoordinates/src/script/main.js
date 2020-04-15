@@ -1809,7 +1809,13 @@ function onchangeCluster() {
     data = object2DataPrallel(sampleS);
     cluster_map(cluster_info);
     handle_clusterinfo();
-    axisPlot.dispatch('plot',selected);
+    enableClusterAxis();
+    axisPlot.dispatch('plot');
+}
+function enableClusterAxis(){
+    let p = d3.select('#axisSetting tbody tr[data-id="Cluster"]').selectAll('td').filter(d => d.type === "checkbox").select('input');
+    p.node().checked = true;
+    p.dispatch('change');
 }
 let radarChartclusteropt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
