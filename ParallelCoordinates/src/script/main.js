@@ -10,6 +10,7 @@ var m = [40, 60, 10, 10],
     axis,
     data,
     foreground,
+    foreground_opacity=1,
     background,
     highlighted,
     dimensions,
@@ -216,7 +217,7 @@ function drawFiltertable() {
             }).on('change', function (d) {
                 filterAxisbyDom.call(this, d);
                 xscale.domain(dimensions);
-                d3.select("#foreground").style("opacity", null);
+                d3.select("#foreground").style("opacity", foreground_opacity);
                 brush();
             });
             alltr.filter(d => d.type === undefined)
@@ -469,7 +470,7 @@ function dragend(d) {
 
     reorderDimlist();
     // rerender
-    d3.select("#foreground").style("opacity", null);
+    d3.select("#foreground").style("opacity", foreground_opacity);
     brush();
     delete this.__dragged__;
     delete this.__origin__;
@@ -1025,7 +1026,7 @@ function highlight(d) {
 
 // Remove highlight
 function unhighlight() {
-    d3.select("#foreground").style("opacity", null);
+    d3.select("#foreground").style("opacity", foreground_opacity);
     d3.select("#legend").selectAll(".row").style("opacity", null);
     if (selectedService){
         d3.select("#colorContinuos").selectAll(".row").style("opacity", null);
@@ -1281,7 +1282,21 @@ function axisHistogram(text,range,d){
             .value(d => d);
         let hisdata = histogram(d);
 
-        let sumstat = hisdata.map((d, i) => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
+        let start=-1,startcheck=true,end= hisdata.length-1;
+        let sumstat = hisdata.map((d, i) => {
+            let temp = [d.x0 + (d.x1 - d.x0) / 2, (d || []).length];
+            if (startcheck && temp[1]===0)
+                start = i;
+            else {
+                startcheck = false;
+                if (temp[1]!==0)
+                    end = i;
+            }
+            return temp});
+        if (start===end)
+            sumstat = [];
+        else
+            sumstat = sumstat.filter((d,i)=>i>start&&i<=end);
         r = {
             axis: text,
             q1: ss.quantile(d, 0.25),
@@ -1391,28 +1406,35 @@ function paths(selected, ctx, count) {
     if(isChangeData)
         axisPlot.dispatch('plot',selected);
 }
+
+let isTick = true;
 let axisPlot =  d3.select('#overlayPlot').on('change',function(){
     switch ($(this).val()){
         case 'none':
             d3.selectAll('.dimension .plotHolder').selectAll('*').remove();
             d3.select(this).on('plot',()=>{});
             hide_ticks();
+            foreground_opacity = 1;
             break;
         case 'tick':
             d3.selectAll('.dimension .plotHolder').selectAll('*').remove();
             d3.select(this).on('plot',()=>{});
             show_ticks();
+            foreground_opacity = 1;
             break;
         case 'violin':
             d3.select(this).on('plot',plotViolin);
             hide_ticks();
+            foreground_opacity=0.5;
             break;
         case 'violin+tick':
             d3.select(this).on('plot',plotViolin);
             show_ticks();
+            foreground_opacity=0.5;
             break;
     }
-    d3.select(this).dispatch('plot')
+    d3.select(this).dispatch('plot');
+    d3.select("#foreground").style("opacity", foreground_opacity);
 });
 let timel
 // transition ticks for reordering, rescaling and inverting
@@ -1434,8 +1456,8 @@ function update_ticks(d, extent) {
         d3.selectAll(".brush")
             .each(function(d) { d3.select(this).call(yscale[d].brush = getBrush(d)); })
     }
-
-    show_ticks();
+    if(isTick)
+        show_ticks();
 
     // update axes
     d3.selectAll(".dimension .axis")
@@ -1661,6 +1683,7 @@ function hide_ticks() {
     d3.selectAll(".background").style("visibility", "hidden");
     d3.selectAll("#hide-ticks").attr("disabled", "disabled");
     d3.selectAll("#show-ticks").attr("disabled", null);
+    isTick  =false;
 };
 
 function show_ticks() {
@@ -1669,6 +1692,7 @@ function show_ticks() {
     d3.selectAll(".background").style("visibility", null);
     d3.selectAll("#show-ticks").attr("disabled", "disabled");
     d3.selectAll("#hide-ticks").attr("disabled", null);
+    isTick = true;
 };
 
 function search(selection,str) {
@@ -1953,4 +1977,4 @@ function cluster_map (dataRaw) {
 }
 
 // violin
-let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0.5},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
+let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},stroke:'white',midleTick:false,tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0},ticks:{'stroke-width':0.5},tick:{visibile:false}});;

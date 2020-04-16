@@ -18,6 +18,7 @@ d3.viiolinChart = function () {
             showOutlier:true,
             color:()=>'#00000029',
             stroke:'black',
+            midleTick:true,
             opt:{
                 method : 'DensityEstimator', // epsilon is learning rate (10 = default)
                 resolution : 50, // resolution
@@ -163,7 +164,8 @@ d3.viiolinChart = function () {
         }
         let viol_chart = contain.selectAll('.violin').data(arr,d=>d.axis)
             .call(getpos_func);
-        viol_chart.select('.gvisaxis .laxis') .call(laxis);
+
+        viol_chart.select('.gvisaxis .laxis') .call(laxis).classed('hide',!graphicopt.midleTick);
         viol_chart.exit().remove();
         let viol_n = viol_chart.enter()
             .append('g')
@@ -171,7 +173,7 @@ d3.viiolinChart = function () {
         let axisg = viol_n.append('g').attr('class', 'gvisaxis')
             .style('stroke','black');
         axisg.append('line').attr('class','laxis')
-            .call(laxis);
+            .call(laxis).classed('hide',!graphicopt.midleTick);
 
         if(graphicopt.tick===undefined && graphicopt.tick.visibile!= false) {
             viol_chart.select('.gvisaxis .tick1') .call(tick1);
@@ -198,7 +200,7 @@ d3.viiolinChart = function () {
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
             .style('stroke',graphicopt.stroke)
-            .style('stroke-width','0.2')
+            .style('stroke-width','0.5')
             .style('fill',d=>graphicopt.color(d.axis))
             // .style('fill','currentColor')
             .attr("d",d=> createviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
@@ -234,6 +236,7 @@ d3.viiolinChart = function () {
                 .attr('cx', d => h(d.x)).attr('cy', d => xNum(d.y ? d.y : 0));
         }else{
             viol_chart.selectAll('circle.outlier').remove();
+            contain.selectAll('.violin').classed('hide',d=>d.arr.length===0)
         }
         return viol_chart;
     };

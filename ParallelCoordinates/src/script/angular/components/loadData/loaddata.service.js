@@ -92,6 +92,7 @@ angular.module('hpccApp')
                 })
             });
             updateDatainformation(data['timespan']);
+            // console.log(data["compute-1-26"].arrFans_health[0])
             sampleS = data;
 
             // make normalize data
