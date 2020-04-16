@@ -1155,3 +1155,60 @@ function ordinal_suffix_of(i,sep) {
     }
     return sep?'th': (i + "th");
 }
+function axisHistogram(text,range,d){
+    d = d.filter(e=>e)
+    if (d.length) {
+        outlierMultiply = 3
+        var scale = d3.scaleLinear().domain(range);
+        var histogram = d3.histogram()
+            .domain(scale.domain())
+            // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .thresholds(scale.ticks(100))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .value(d => d);
+        let hisdata = histogram(d);
+
+        let start=-1,startcheck=true,end= hisdata.length-1;
+        let sumstat = hisdata.map((d, i) => {
+            let temp = [d.x0 + (d.x1 - d.x0) / 2, (d || []).length];
+            if (startcheck && temp[1]===0)
+                start = i;
+            else {
+                startcheck = false;
+                if (temp[1]!==0)
+                    end = i;
+            }
+            return temp});
+        if (start===end)
+            sumstat = [];
+        else
+            sumstat = sumstat.filter((d,i)=>i>start&&i<=end);
+        r = {
+            axis: text,
+            q1: ss.quantile(d, 0.25),
+            q3: ss.quantile(d, 0.75),
+            median: ss.median(d),
+            // outlier: ,
+            arr: sumstat
+        };
+        // if (d.length>4)
+        // {
+        //     const iqr = r.q3-r.q1;
+        //     console.log('Outliers: ',d.filter(e=>e>(r.q3+outlierMultiply*iqr)||e<(r.q1-outlierMultiply*iqr)).length);
+        //     r.outlier = _.unique(d.filter(e=>e>(r.q3+outlierMultiply*iqr)||e<(r.q1-outlierMultiply*iqr)));
+        //     console.log('Unquie points: ',r.outlier.length);
+        // }else{
+        //     r.outlier =  _.unique(d);
+        // }
+        r.outlier = []
+        return r;
+    }else{
+        return  {
+            axis: text,
+            q1: null,
+            q3: null,
+            median: null,
+            // outlier: ,
+            arr: []
+        };
+    }
+}
