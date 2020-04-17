@@ -1145,7 +1145,7 @@ function pausechange(){
 
 function resetRequest(){
     pausechange();
-
+    inithostResults();
     tool_tip.hide();
     firstTime = true;
     if (interval2)

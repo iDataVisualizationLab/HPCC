@@ -118,7 +118,7 @@ angular.module('hpccApp')
             });
             updateDatainformation(data['timespan']);
             sampleS = data;
-
+            inithostResults();
             // make normalize data
             initTsnedata();
             if(job)
