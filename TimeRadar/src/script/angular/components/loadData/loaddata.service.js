@@ -83,9 +83,19 @@ angular.module('hpccApp')
                         d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
                             if (error) {
                                 loadata1(data, undefined);
+                                shap={};
+                                d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
+                                    if(!error)
+                                        shap  = shape;
+                                });
                                 return;
                             }
                             loadata1(data, job);
+                            shap={};
+                            d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
+                                if(!error)
+                                    shap  = shape;
+                            });
                             return;
                         });
                     });
@@ -222,6 +232,12 @@ angular.module('hpccApp')
         preloader(true, 0,"Load data....");
 
         function loadcsv(data) {
+            shap={};
+            d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
+                if(!error)
+                    shap  = shape;
+            });
+
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
             inithostResults();

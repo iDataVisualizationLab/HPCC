@@ -1690,7 +1690,7 @@ d3.TimeSpace = function () {
                 b: 20,
                 t: 50,
             };
-
+        layout.legend={traceorder:"normal"}
         layout.shapes = path[name].map((v, i) => {
             return {
                 type: 'rect',
@@ -1727,8 +1727,18 @@ d3.TimeSpace = function () {
             }
         });
         let cdata = datain.filter(d=>d.name===name);
+        
+        let schema = [];
 
-        const data_in = graphicopt.radaropt.schema.map((s,si) => {
+        if (shap[name]){
+            let temp = shap[name].slice();
+            temp.forEach((d,i)=>{d.index = i;d.total = d3.sum(d3.values(d.value))})
+            temp.sort((a,b)=>d3.sum(d3.values(b.value)) - d3.sum(d3.values(a.value)));
+            schema= temp.map(d=>graphicopt.radaropt.schema[d.index])
+        }
+        else
+            schema =graphicopt.radaropt.schema;
+        const data_in = schema.map((s,si) => {
             let temp = {x:[],
                 y:[],
                 text:[],
@@ -1738,7 +1748,7 @@ d3.TimeSpace = function () {
                 // marker:{
                 //     symbol:s.id
                 // },
-                legendgroup: `group${s.idroot}`,
+                // legendgroup: `group${s.idroot}`,
                 line:{
                     dash: lineType(s.idroot)
                 }
