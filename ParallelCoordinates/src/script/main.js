@@ -601,7 +601,7 @@ function update_Dimension() {
                 new_dim.append("svg:g")
                     .attr("class", "plotHolder")
                     .attr("transform", "translate(0,0)")
-                    .style('opacity',0.8)
+
                     // .append('rect')
                     // .attr('class','background')
                     // .style('fill','rgba(255,255,255,0.38)')
@@ -1276,7 +1276,8 @@ let isChangeData=false;
 
 function plotViolin() {
     selected = shuffled_data;
-    violiin_chart.graphicopt({width:Math.min(w/dimensions.length,100),height:h});
+    let violin_w = Math.min(w/dimensions.length/(cluster_info.length||1),50);
+    violiin_chart.graphicopt({width:violin_w*(cluster_info.length||1),height:h, single_w: Math.max(violin_w,50)});
     setTimeout(() => {
         let dimGlobal = [0, 0];
         let dimensiondata = {};
@@ -1367,11 +1368,25 @@ let axisPlot =  d3.select('#overlayPlot').on('change',function(){
             foreground_opacity = 1;
             break;
         case 'violin':
+            violiin_chart.graphicopt({isStack: false});
             d3.select(this).on('plot',plotViolin);
             hide_ticks();
             foreground_opacity=0.5;
             break;
         case 'violin+tick':
+            violiin_chart.graphicopt({isStack: false});
+            d3.select(this).on('plot',plotViolin);
+            show_ticks();
+            foreground_opacity=0.5;
+            break;
+        case 'stack':
+            violiin_chart.graphicopt({isStack: true});
+            d3.select(this).on('plot',plotViolin);
+            hide_ticks();
+            foreground_opacity=0.5;
+            break;
+        case 'stack+tick':
+            violiin_chart.graphicopt({isStack: true});
             d3.select(this).on('plot',plotViolin);
             show_ticks();
             foreground_opacity=0.5;
@@ -1921,4 +1936,4 @@ function cluster_map (dataRaw) {
 }
 
 // violin
-let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},stroke:'white',midleTick:false,tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
+let violiin_chart = d3.viiolinChart().graphicopt({width:160,height:25,opt:{dataformated:true},stroke:'white',isStack:false,midleTick:false,tick:false,showOutlier:false,direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},middleAxis:{'stroke-width':0},ticks:{'stroke-width':0.5},tick:{visibile:false}});;
