@@ -258,7 +258,7 @@ d3.viiolinChart = function () {
 
     let kde;
     let h = d3.scaleLinear();
-    let xNum = d3.scaleSqrt();
+    let xNum = d3.scaleLinear();
     let gpos = d3.scalePoint().padding(0.5);
     function handledata(data){
         // h.range([0, graphicopt.direction === 'v' ? graphicopt.heightG() : graphicopt.widthG()]);
