@@ -327,6 +327,7 @@ var TsnePlotopt  = {
 var TsneTSopt = {width:width,height:height};
 var PCAopt = {width:width,height:height};
 var umapopt = {width:width,height:height};
+var bivariableopt = {width:width,height:height};
 var vizMode = 0; // 0 timeradar, 1 tsne, 2 pca, 3 umap
 var runopt ={ // run opt global
     suddenGroup:0,
@@ -350,6 +351,7 @@ function makedataworker(){
 let tsneTS = d3.tsneTimeSpace();
 let pcaTS = d3.pcaTimeSpace();
 let umapTS = d3.umapTimeSpace();
+let bivariableTS = d3.bivariableTimeSpace();
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
             hosts:hosts,
@@ -1559,6 +1561,7 @@ function onchangeVizType(){
     tsneTS.stop();
     pcaTS.stop();
     umapTS.stop();
+    bivariableTS.stop();
     switch (vizMode) {
         case 'tsne':
             tsneTS.generateTable();
@@ -1571,6 +1574,10 @@ function onchangeVizType(){
         case 'umap':
             umapTS.generateTable();
             mainviz = umapTS;
+            return true
+        case 'bivariable':
+            bivariableTS.generateTable();
+            mainviz = bivariableTS;
             return true
         default:
             mainviz = jobMap;
@@ -1589,6 +1596,10 @@ function onchangeVizdata(){
             return true;
         case 'umap':
             handle_data_TimeSpace = handle_data_umap;
+            handle_data_TimeSpace(tsnedata);
+            return true;
+        case 'bivariable':
+            handle_data_TimeSpace = handle_data_bivariable;
             handle_data_TimeSpace(tsnedata);
             return true;
         default:

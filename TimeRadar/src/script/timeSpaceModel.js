@@ -2430,8 +2430,10 @@ d3.TimeSpace = function () {
                                 d.content.variableRoot[d.content.variable] = +this.get();
                             if (d.content.callback)
                                 d.content.callback();
-                            else
+                            else{
+                                obitTrigger=true;
                                 start();
+                            }
                         });
                     }else if (d.content.type === "checkbox") {
                         let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
@@ -2454,30 +2456,38 @@ d3.TimeSpace = function () {
                             graphicopt.opt[d.content.variable]  =  d.content.values[+this.checked];
                             if (d.content.callback)
                                 d.content.callback();
-                            else
+                            else {
+                                obitTrigger=true;
                                 start();
+                            }
                         })
                     }else if (d.content.type === "selection") {
+                        let label = _.isFunction(d.content.labels)?d.content.labels():d.content.labels;
+                        let values = _.isFunction(d.content.values)?d.content.values():d.content.values;
                         let div = d3.select(this).style('width', d.content.width)
                             .append('select')
                             .on('change',function(){
-                                setValue(d.content,d.content.values[this.value])
+                                setValue(d.content,values[this.value])
                                 // if (!d.content.variableRoot) {
                                 //     graphicopt[d.content.variable]  =  d.content.values[this.value];
                                 // }else
                                 //     graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
                                 if (d.content.callback)
                                     d.content.callback();
+                                else {
+                                    obitTrigger=true;
+                                    start();
+                                }
                             });
                         div
-                            .selectAll('option').data(d.content.labels)
+                            .selectAll('option').data(label)
                             .enter().append('option')
                             .attr('value',(e,i)=>i).text((e,i)=>e);
-                        let default_val = graphicopt[d.content.variable];
-                        // if (d.content.variableRoot)
-                        //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
-                        console.log(getValue(d.content))
-                        $(div.node()).val( d.content.values.indexOf( getValue(d.content)));
+                        // let default_val = graphicopt[d.content.variable];
+                        // // if (d.content.variableRoot)
+                        // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
+                        // console.log(getValue(d.content))
+                        $(div.node()).val( values.indexOf( getValue(d.content)));
                     }
                 }
             });
@@ -2569,16 +2579,18 @@ d3.TimeSpace = function () {
         table_info.select(`.datain`).text(e=>datain.length);
         d3.select('#modelCompareMode').property('checked',graphicopt.iscompareMode)
         d3.values(self.controlPanel).forEach((d)=>{
-            if (graphicopt.opt[d.variable]) {
+            if (graphicopt.opt[d.variable]!==undefined) {
                 try {
-                    d3.select(`.${d.variable} div`).node().noUiSlider.set(graphicopt.opt[d.variable]);
+                    d3.select(`#modelWorkerInformation .${d.variable} div`).node().noUiSlider.set(graphicopt.opt[d.variable]);
                 }catch(e){
                     switch (d.type) {
                         case 'switch':
-                            d3.select(`.${d.variable} input`).node().checked = graphicopt.opt[d.variable];
+                            d3.select(`#modelWorkerInformation .${d.variable} input`).node().checked = graphicopt.opt[d.variable];
                             break;
-                        case 'selection':
-                            $(d3.select(`.${d.variable} selection`).node()).val( d.values.indexOf(graphicopt[d.variable]));
+                        case "selection":
+                            if (d.variable==='var1')
+                            values = _.isFunction(d.values)?d.values():d.values;
+                            $(d3.select(`#modelWorkerInformation .${d.variable} select`).node()).val( getValue(d));
                             break;
                     }
                 }
@@ -2717,9 +2729,9 @@ d3.tsneTimeSpace = _.bind(d3.TimeSpace,
         },
     },workerPath:'src/script/worker/tSNETimeSpaceworker.js',outputSelection:[ {label: "#Iterations", content: '_', variable: 'iteration'},
         {label: "Cost", content: '_', variable: 'cost'},
-        {label: "\u0394 cost", content: '_', variable: 'deltacost'},
-        {label: "Time per step", content: '_', variable: 'time'},
-        {label: "Total time", content: '_', variable: 'totalTime'}]});
+            {label: "\u0394 cost", content: '_', variable: 'deltacost'},
+            {label: "Time per step", content: '_', variable: 'time'},
+            {label: "Total time", content: '_', variable: 'totalTime'}]});
 d3.umapTimeSpace  = _.bind(d3.TimeSpace,
     {name:'UMAP',controlPanel: {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
@@ -2730,7 +2742,13 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             {label:"Time per step",content:'_',variable:'time'},
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
-
+d3.bivariableTimeSpace  = _.bind(d3.TimeSpace,
+    {name:'BiVariable',controlPanel: {
+            var1:{text:"Variable 1", type:"selection",variableRoot:'opt', variable: 'var1',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
+            var2:{text:"Variable 2", type:"selection",variableRoot:'opt', variable: 'var2',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
+        },workerPath:'src/script/worker/bivariableworker.js',
+        outputSelection:[
+            {label:"Total time",content:'_',variable:'totalTime'},]});
 
 let windowsSize = 1;
 let radarRatio = 2;
@@ -2856,4 +2874,14 @@ function handle_data_pca(tsnedata) {
             dim: 2, // dimensionality of the embedding (2 = default)
         };
     pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info);
+}
+function handle_data_bivariable(tsnedata) {
+    const dataIn = handle_data_model(tsnedata);
+    // if (!PCAopt.opt)
+        bivariableopt.opt = {
+            var1: 0, // dimensionality of the embedding (2 = default)
+            var2: 1, // dimensionality of the embedding (2 = default)
+            dim: 2,
+        };
+    bivariableTS.graphicopt(bivariableopt).color(colorCluster).init(dataIn, cluster_info);
 }
