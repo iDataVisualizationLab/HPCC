@@ -338,7 +338,8 @@ d3.TimeSpace = function () {
     let controll_metrics={old:{zoom:undefined}};
     master.init = function(arr,clusterin) {
         preloader(true,1,'Prepare rendering ...','#modelLoading');
-
+        $('#search').on('input', searchHandler); // register for oninput
+        $('#search').on('propertychange', searchHandler); // for IE8
         // makeDataTableFiltered()
 
         // prepare data
@@ -1927,6 +1928,18 @@ d3.TimeSpace = function () {
         return p;
     }
     let mapIndex =[];
+    function searchHandler (e){
+        if (e.target.value!=="") {
+            let results = datain.filter(h=>h.name.includes(e.target.value)).map(h=>({index:path[h.name][0].index}));
+            console.log(results)
+            if(results.length<graphicopt.tableLimit)
+                highlightNode([results[0]]);
+            else
+                highlightNode([])
+        }else{
+            highlightNode([]);
+        }
+    }
 
     // function transition(){
     //     interuptAnimation();

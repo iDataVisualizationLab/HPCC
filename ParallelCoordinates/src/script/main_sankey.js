@@ -153,7 +153,7 @@ let group_opt = {
 let sankey = d3.sankey()
     .nodeSort(null)
     .linkSort(null)
-    .nodeWidth(4)
+    .nodeWidth(6)
     .nodePadding(10);
 function filterAxisbyDom(d) {
     const pdata = d3.select(this.parentElement.parentElement).datum();
@@ -310,7 +310,7 @@ $( document ).ready(function() {
             }
         }});
     discovery('#sideNavbtn');
-    d3.select("#DarkTheme").on("click",switchTheme);
+    d3.select("#DarkTheme").on("click",switchTheme).dispatch("click");
 
     // data
     let tipopt= {position: {
@@ -821,7 +821,7 @@ function setColorsAndThresholds_full() {
     })
 }
 function updateColorsAndThresholds(sin){
-    let s = serviceFullList.find(d=>d.text===sin);
+    let s = serviceFullList_withExtra.find(d=>d.text===sin);
     if (s.idroot===undefined){
         s.range = stickKey!==TIMEKEY?[yscale[stickKey].domain()[1],yscale[stickKey].domain()[0]]:yscale[stickKey].domain();
         const dif = (s.range[1] - s.range[0]) / levelStep;
@@ -1386,10 +1386,15 @@ function paths(selectedRaw, ctx, count){
         services[d] = serviceFullList_withExtra.find(e=>e.text===d);
         if (!services[d].range)
             services[d].range = yscale[d].domain();
-        if (services[d].isString)
-            serviceScale[d]= d3.scaleOrdinal().domain(d3.range(0,services[d].collection.length)).range(services[d].collection);
-        else
-            serviceScale[d]= d3.scaleQuantize().domain(services[d].range).range(d3.scaleLinear().domain(services[d].range).ticks(5));
+        if(services[d].color) {
+            serviceScale[d] = services[d].color.copy();
+            let range = serviceScale[d].domain();
+            serviceScale[d].range(range).domain(d3.range(0,range.length))
+        }else
+            if (services[d].isString)
+                serviceScale[d]= d3.scaleOrdinal().domain(d3.range(0,services[d].collection.length)).range(services[d].collection);
+            else
+                serviceScale[d]= d3.scaleQuantize().domain(services[d].range).range(d3.scaleLinear().domain(services[d].range).ticks(5));
     });
     let selected = selectedRaw.map(d=>{
         let temp = {};
@@ -1406,16 +1411,22 @@ function paths(selectedRaw, ctx, count){
         const links = [];
 
         for (const k of dimensions) {
+            let nodes_key =[];
             for (const d of selected) {
                 const key = JSON.stringify([k, d[k]]);
                 if (nodeByKey.has(key)) continue;
                 const node = {name: d[k]};
-                nodes.push(node);
+                nodes_key.push(node);
                 nodeByKey.set(key, node);
-                indexByKey.set(key, ++index);
             }
-        }
+            nodes_key.sort((a,b)=>-a.name+b.name)
+                .forEach(node=>{
+                    const key = JSON.stringify([k, node.name]);
+                    indexByKey.set(key, ++index);
+                    nodes.push(node)
+                })
 
+        }
         for (let i = 1; i < keys.length; ++i) {
             const a = keys[i - 1];
             const b = keys[i];
@@ -1444,8 +1455,10 @@ function paths(selectedRaw, ctx, count){
         links.sort((a,b)=>a.nameIndex-b.nameIndex);
         return {nodes, links};
     })();
-    sankey = sankey.nodeSort(null)
-        .linkSort(null).extent([[xscale(dimensions[0]), 0], [xscale(_.last(dimensions)), yscale[dimensions[0]].range()[0]]]);;
+    sankey = sankey
+        // .nodeSort(null)
+        .linkSort(null)
+        .extent([[xscale(dimensions[0]), 0], [xscale(_.last(dimensions)), yscale[dimensions[0]].range()[0]]]);;
     const {nodes, links} = sankey({
         nodes: graph.nodes.map(d => Object.assign({}, d)),
         links: graph.links.map(d => Object.assign({}, d))
@@ -1467,7 +1480,7 @@ function paths(selectedRaw, ctx, count){
     node_p.select('rect')
         .attr("height", d => d.y1 - d.y0)
         .attr("width", d => d.x1 - d.x0)
-        .style('fill',d=>coloraxis[dimensions[d.layer]](d.name));
+        .style('fill',d=>d3.hsl(getColor(d.name,services[dimensions[d.layer]])).darker(2));
     node_p.select("title")
         .text(d => `${d.name}\n${d.value.toLocaleString()}`);
     node_p.select('text')
@@ -1492,7 +1505,10 @@ function paths(selectedRaw, ctx, count){
     link_p.select('path')
         .attr('class',d=>'a'+d.nameIndex)
         .attr("d", d3.sankeyLinkHorizontal())
-        .attr("stroke", d => (e=coloraxis[dimensions[0]](selecteds.isString?selecteds.collectionObj[d.names[0]]:+d.names[0])))
+        .attr("stroke", d =>
+        {
+            return getColor(d.names[0]);
+        })
         .attr("stroke-width", d => d.width)
         .call(action)
         .on('click',function(d){
@@ -1513,6 +1529,17 @@ function paths(selectedRaw, ctx, count){
             }
         })
         .each(function(d){d.dom=d3.select(this)});
+    function getColor(d,s){
+        s= s||selecteds;
+        if(serviceScale[s.text].invert)
+            return coloraxis[s.text](serviceScale[s.text].invert(d));
+        else if(serviceScale[s.text].invertExtent){
+            let r = serviceScale[s.text].invertExtent(d);
+            return coloraxis[s.text]((r[0]+r[1])/2);
+        }else{
+            return coloraxis[s.text](d3.scaleOrdinal(serviceScale[s.text].range(),serviceScale[s.text].domain())(d));
+        }
+    }
     function action(p){
         return p.on('mouseover',d=>{
             if(!freeze) {
@@ -1916,6 +1943,7 @@ function recalculateCluster (option,calback,customCluster) {
                 updateclusterDescription();
             }
             recomendColor (cluster_info);
+            updateColorsAndThresholds('Cluster')
             if (!calback) {
                 cluster_map(cluster_info);
                 handle_clusterinfo();

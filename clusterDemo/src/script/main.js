@@ -159,6 +159,7 @@ $( document ).ready(function() {
     //$('.tap-target').tapTarget({onOpen: discovery});
 
     d3.select("#DarkTheme").on("click",switchTheme);
+
     changeRadarColor(colorArr.Radar[0]);
     // color scale create
     creatContain(d3.select('#RadarColor').select('.collapsible-body>.pickercontain'), colorScaleList, colorArr.Radar, onClickRadarColor);
