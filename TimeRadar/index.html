@@ -239,7 +239,7 @@
                                     <option value="reduceDim" value2 = "tsne">t-SNE</option>
                                     <option value="reduceDim" value2 = "pca">PCA</option>
                                     <option value="reduceDim" value2 = "umap">UMAP</option>
-                                    <option value="reduceDim" value2 = "bivariable">biVariable</option>
+                                    <option value="reduceDim" value2 = "bivariable">Scatterplot</option>
                                 </optgroup>
                             </select>
                             <div class="col s1">
@@ -867,6 +867,14 @@
                                         <option class="item" value="-1" selected>--none--</option>
                                         <option class="item" value="0" selected>Radar transparency</option>
                                         <option class="item" value="1">Bin background</option>
+                                    </select>
+                                </div>
+                                <div class="hexagonLayout hide" style="display: inline-block">
+                                    <span> Radar size: </span>
+                                    <select id="radarSize" class="browser-default inline z-depth-2">
+                                        <option class="item" value="0.5" selected>small</option>
+                                        <option class="item" value="1">medium</option>
+                                        <option class="item" value="2">large</option>
                                     </select>
                                 </div>
                             </div>

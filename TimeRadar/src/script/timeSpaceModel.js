@@ -388,6 +388,7 @@ d3.TimeSpace = function () {
             .alphaDecay(0.005)
             .alpha(0.1)
             .force('charge', d3.forceManyBody())
+            .force("link", d3.forceLink())
             .force('collide', d3.forceCollide().radius(graphicopt.radarTableopt.w/2).iterations(10))
             .on('tick', function () {
                 if (isdrawradar&&svgData&&animateTrigger){
@@ -894,7 +895,7 @@ d3.TimeSpace = function () {
                     .style('stroke-opacity',1);
             });
         if(redraw){
-            d3.select('#modelWorkerScreen_svg_g').selectAll('.timeSpaceR').each(function(d){
+            old.each(function(d){
                 d.value.radar = d3.select(this);
                 let colorfill = 0.5;
                 if (!+$('#radarOpacity').val()>0)
@@ -1059,11 +1060,15 @@ d3.TimeSpace = function () {
 
     function startCollide() {
         d3.select('#modelWorkerScreen_svg').classed('white',true);
-        forceColider.alpha(0.1).force('collide').radius(radarSize).iterations(10);
+        forceColider.alpha(0.1).force('collide').radius(function(d){return d.fixed?0:radarSize}).iterations(10);
         // forceColider.force('charge').distanceMin(radarSize * 2);
         forceColider.nodes(svgData.pos);
         updateforce();
         forceColider.restart()
+    }
+
+    function getRadarSze(radarData) {
+        radarSize = Math.min(graphicopt.radaropt.w / 2, Math.sqrt(graphicopt.widthG() * graphicopt.heightG() / Math.PI / radarData.length) * 0.75)*(+$('#radarSize').val());
     }
 
     function highlightGroupNode(intersects,timestep) { // INTERSECTED
@@ -1123,7 +1128,7 @@ d3.TimeSpace = function () {
 
             if(isdrawradar){
                 svgData = {data:radarData,posStatic:posArr,pos:_.cloneDeep(posArr)};
-                radarSize = Math.min(graphicopt.radaropt.w/2,Math.sqrt(graphicopt.widthG()*graphicopt.heightG()/Math.PI/radarData.length)*0.75);
+                getRadarSze(radarData);
 
                 // filter cluster by input data
                 const clusterGroup = d3.nest().key(d=>d.cluster).object(radarData);
@@ -1182,7 +1187,7 @@ d3.TimeSpace = function () {
                     visibledata.push(i);
             });
             svgData = {data: radarData, posStatic: posArr, pos: _.cloneDeep(posArr)};
-            radarSize = Math.min(graphicopt.radaropt.w / 2, Math.sqrt(graphicopt.widthG() * graphicopt.heightG() / Math.PI / radarData.length) * 0.75);
+            getRadarSze(radarData)
 
             // filter cluster by input data
             const clusterGroup = d3.nest().key(d => d.cluster).object(radarData);
@@ -2520,15 +2525,21 @@ d3.TimeSpace = function () {
                     draw_grid_hexagon(svgData);
             }
         });
+        d3.select('#radarSize').on('change',function(){
+            if (svgData) {
+                d3.select('#radarCollider').dispatch('action');
+            }
+        });
         d3.select('#radarCollider').on('change',function(){
             d3.select(this).dispatch('action')
         }).on('action',function(){
             const newValue = +$('#radarCollider').val();
             if (newValue) {
                 computesvgData();
-                d3.select('.specialLayout').attr('disabled','').classed('hide',false)
+                d3.select   ('.specialLayout').attr('disabled','').classed('hide',false)
                     .select('#radarOpacity').attr('disabled','');
             }
+            d3.select('.hexagonLayout').classed('hide',false);
             if (svg)
                 svg.select('#modelWorkerScreen_grid').classed('hide',true);
             switch (newValue) {
@@ -2558,18 +2569,18 @@ d3.TimeSpace = function () {
                     // forceColider.tick();
                     break;
                 default:
-
+                    d3.select('.hexagonLayout').classed('hide',true);
                     d3.select('.specialLayout').classed('hide',true);
                     if (svg)
                         svg.classed('white',false);
                     if (forceColider&&svgData&&svgData.posStatic) {
                         forceColider.stop();
-                        svgData = undefined
+                        svgData = undefined;
                         removeRadar();
                     }
                     break;
             }
-        })
+        });
         d3.select('#radarCollider').dispatch('action');
     };
     master.redrawRadar = function(){
@@ -2743,7 +2754,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
 d3.bivariableTimeSpace  = _.bind(d3.TimeSpace,
-    {name:'BiVariable',controlPanel: {
+    {name:'Scatterplot',controlPanel: {
             var1:{text:"Variable 1", type:"selection",variableRoot:'opt', variable: 'var1',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
             var2:{text:"Variable 2", type:"selection",variableRoot:'opt', variable: 'var2',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
         },workerPath:'src/script/worker/bivariableworker.js',
