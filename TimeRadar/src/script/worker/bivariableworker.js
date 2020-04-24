@@ -13,8 +13,11 @@ addEventListener('message',function ({data}){
             totalTime_marker = performance.now();
             key1 = data.opt.var1;
             key2 = data.opt.var2;
-            dataIn = data.value.map(d=>[d[key1],d[key2]]);
-            console.log(dataIn[0])
+            key3 = data.opt.var3;
+            if (data.opt.dim===2)
+                dataIn = data.value.map(d=>[d[key1],d[key2]]);
+           else
+                dataIn = data.value.map(d=>[d[key1],d[key2],d[key3]]);
             render(dataIn);
             postMessage({action:'stable', status:"done"});
             break;

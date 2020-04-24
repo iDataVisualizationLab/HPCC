@@ -233,6 +233,7 @@ d3.TimeSpace = function () {
             controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
             controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
             enableRadarView(true);
+            d3.select('#modelSetting').selectAll('.dim3').attr('disabled','').select('select, input').attr('disabled','');
         }else{
             controls.enableRotate = true;
             controls.screenSpacePanning  = false;
@@ -241,6 +242,7 @@ d3.TimeSpace = function () {
             controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
             controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
             enableRadarView(false);
+            d3.select('#modelSetting').selectAll('.dim3').attr('disabled',null).select('select, input').attr('disabled',null);
         }
         if (obitTrigger) {
             setUpZoom();
@@ -2406,10 +2408,10 @@ d3.TimeSpace = function () {
             ]
         ];
         d3.values(self.controlPanel).forEach(d=>{
-            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable})
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,class:d.class})
         });
         d3.values(controlPanelGeneral).forEach(d=>{
-            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,variableRoot: d.variableRoot,id:d.id})
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,variableRoot: d.variableRoot,id:d.id,class:d.class})
         });
         tableData[2] = _.concat(tableData[2],self.outputSelection);
         let tbodys = table_info.selectAll('tbody').data(tableData);
@@ -2418,6 +2420,7 @@ d3.TimeSpace = function () {
             .selectAll('tr').data(d=>d)
             .enter().append('tr')
             .attr('id',d=>d.id?d.id:null)
+            .attr('class',d=>d.class?d.class:null)
             .selectAll('td').data(d=>d.type==="title"?[d]:[{text:d.label},d.type?{content:d.content,variable:d.variable,variableRoor: d.variableRoot}:{text:d.content,variable:d.variable}])
             .enter().append('td')
             .attr('colspan',d=>d.type?"2":null)
@@ -2612,8 +2615,8 @@ d3.TimeSpace = function () {
                             d3.select(`#modelWorkerInformation .${d.variable} input`).node().checked = graphicopt.opt[d.variable];
                             break;
                         case "selection":
-                            if (d.variable==='var1')
-                            values = _.isFunction(d.values)?d.values():d.values;
+                            // if (d.variable==='var1')
+                            //     values = _.isFunction(d.values)?d.values():d.values;
                             $(d3.select(`#modelWorkerInformation .${d.variable} select`).node()).val( getValue(d));
                             break;
                     }
@@ -2770,6 +2773,7 @@ d3.bivariableTimeSpace  = _.bind(d3.TimeSpace,
     {name:'Scatterplot',controlPanel: {
             var1:{text:"Variable 1", type:"selection",variableRoot:'opt', variable: 'var1',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
             var2:{text:"Variable 2", type:"selection",variableRoot:'opt', variable: 'var2',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
+            var3:{text:"Variable 3", type:"selection",variableRoot:'opt', variable: 'var3',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length),class:'dim3'},
         },workerPath:'src/script/worker/bivariableworker.js',
         outputSelection:[
             {label:"Total time",content:'_',variable:'totalTime'},]});
@@ -2905,6 +2909,7 @@ function handle_data_bivariable(tsnedata) {
         bivariableopt.opt = {
             var1: 0, // dimensionality of the embedding (2 = default)
             var2: 1, // dimensionality of the embedding (2 = default)
+            var3: 0, // dimensionality of the embedding (2 = default)
             dim: 2,
         };
     bivariableTS.graphicopt(bivariableopt).color(colorCluster).init(dataIn, cluster_info);
