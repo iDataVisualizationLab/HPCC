@@ -644,6 +644,7 @@ function updateDimension() {
             },exit => exit.remove());
 }
 function initFunc() {
+    calculateServiceRange();
     dimensions=[]
     handle_clusterinfo ();
     if(timel)
@@ -739,6 +740,7 @@ function initFunc() {
 }
 
 function resetRequest() {
+    calculateServiceRange();
     // Convert quantitative scales to floats
     // animationtime = false;
     handle_clusterinfo ()
@@ -1263,7 +1265,7 @@ function brush() {
     var b = d3.selectAll('.dimension').nodes()
         .forEach(function(element, i) {
             var dimension = d3.select(element).data()[0];
-            if (_.include(actives, dimension)) {
+            if (_.includes(actives, dimension)) {
                 var extent = extents[actives.indexOf(dimension)];
                 d3.select(element)
                     .selectAll('text')
@@ -1289,7 +1291,7 @@ function brush() {
     // bold dimensions with label
     d3.selectAll('.label')
         .style("font-weight", function(dimension) {
-            if (_.include(actives, dimension)) return "bold";
+            if (_.includes(actives, dimension)) return "bold";
             return null;
         });
 
@@ -1373,6 +1375,7 @@ function plotViolin() {
 }
 
 function paths(selectedRaw, ctx, count){
+    shuffled_data = selectedRaw;
     let freeze = false;
     let selectData = selectedRaw;
     hide_ticks();
@@ -1394,7 +1397,7 @@ function paths(selectedRaw, ctx, count){
             if (services[d].isString)
                 serviceScale[d]= d3.scaleOrdinal().domain(d3.range(0,services[d].collection.length)).range(services[d].collection);
             else
-                serviceScale[d]= d3.scaleQuantize().domain(services[d].range).range(d3.scaleLinear().domain(services[d].range).ticks(5));
+                serviceScale[d]= d3.scaleQuantize().domain(services[d].range).range(d3.scaleLinear().domain(services[d].range).ticks(sankeyResolution));
     });
     let selected = selectedRaw.map(d=>{
         let temp = {};
@@ -1601,6 +1604,11 @@ let axisPlot =  d3.select('#overlayPlot').on('change',function(){
     }
     d3.select(this).dispatch('plot');
     d3.select("#foreground").style("opacity", foreground_opacity);
+});
+let sankeyResolution = 5;
+d3.select('#resolution').on('change',function(){
+    sankeyResolution = +$(this).val();
+    brush();
 });
 let timel
 // transition ticks for reordering, rescaling and inverting

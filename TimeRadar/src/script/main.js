@@ -1606,22 +1606,6 @@ function onchangeVizdata(){
             return false;
     }
 }
-function calculateServiceRange() {
-    serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
-    serviceList_selected.forEach((s, si) => {
-        const sa = serviceListattr[s.index]
-        let min = +Infinity;
-        let max = -Infinity;
-        _.without(Object.keys(sampleS),'timespan').map(h => {
-            let temp_range = d3.extent(_.flatten(sampleS[h][sa]));
-            if (temp_range[0] < min)
-                min = temp_range[0];
-            if (temp_range[1] > max)
-                max = temp_range[1];
-        });
-        serviceLists[si].sub.forEach(sub => sub.range = [min, max]);
-    })
-}
 
 $( document ).ready(function() {
     console.log('ready');

@@ -287,12 +287,20 @@
             <div style="display: inline-block;margin-left: 10px">
                 <label for="overlayPlot" style="display: inline-block;"> Overlay: </label>
                 <select id="overlayPlot" style="display: inline-block;height: 21px;padding: 0;width: auto;">
-                    <option value="none" selected="selected">None</option>
+                    <option value="none" >None</option>
                     <option value="tick" selected="selected">ticks</option>
                     <option value="violin">Violin plots</option>
                     <option value="violin+tick">Violin plots + ticks</option>
                     <option value="stack">Stacked stream</option>
                     <option value="stack+tick">Stacked stream + ticks</option>
+                </select>
+            </div>
+            <div style="display: inline-block;margin-left: 10px">
+                <label for="resolution" style="display: inline-block;"> Resolution: </label>
+                <select id="resolution" style="display: inline-block;height: 21px;padding: 0;width: auto;">
+                    <option value="5" selected="selected">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
                 </select>
             </div>
         </div>
@@ -371,6 +379,7 @@
 <script src="src/script/ulti.js"></script>
 <script src="src/script/readData.js"></script>
 <script src="../HiperView/myscripts/correlation.js"></script>
+<script src="src/script/readData_sankey.js"></script>
 
 <!--angular load-->
 <!--css-->
@@ -398,5 +407,6 @@
 <script src="src/script/angular/hpccApp.controller.js"></script>
 
 <script src="build/js/main.min.js"></script>
+<script src="../HiperView/js/lodash.min.js"></script>
 <script src="src/script/main_sankey.js"></script>
 </html>
