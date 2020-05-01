@@ -741,16 +741,16 @@ function resetRequest() {
     yscale = {};
     xscale.domain(dimensions = serviceFullList_withExtra.filter(function (s) {
         let k = s.text;
-        let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+        let xtempscale = ((s.isDate) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
-            .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
+            .range([h, 0])) || (yscale[k] = d3.scaleLinear()
             // .domain(d3.extent(data, function (d) {
             //     return +d[k];
             // }))
             .domain(serviceFullList_withExtra.find(d=>d.text===k).range||[0,0])
-            .range([h, 0]))));
+            .range([h, 0])));
         if(s.axisCustom)
             xtempscale.axisCustom = s.axisCustom;
         return s.enable?xtempscale:false;
@@ -960,22 +960,22 @@ function complex_data_table(sample,render) {
                     .attr('class', 'col s12 m12')
                     .append('ul')
                     .datum(d => d.values)
-                    .selectAll('li').data(d => d)
-                    .enter()
-                    .append('li').attr('class', 'comtime')
-                    .on("mouseover", highlight)
-                    .on("mouseout", unhighlight);
+                    // .selectAll('li').data(d => d)
+                    // .enter()
+                    // .append('li').attr('class', 'comtime')
+                    // .on("mouseover", highlight)
+                    // .on("mouseout", unhighlight);
 
-                lit.append("span")
-                    .attr("class", "color-block")
-                    .style("background", function (d) {
-                        return color(selectedService == null ? d.group : d[selectedService])
-                    })
-                    .style("opacity", 0.85);
-                lit.append("span")
-                    .text(function (d) {
-                        return stickKeyFormat(d[stickKey]);
-                    });
+                // lit.append("span")
+                //     .attr("class", "color-block")
+                //     .style("background", function (d) {
+                //         return color(selectedService == null ? d.group : d[selectedService])
+                //     })
+                //     .style("opacity", 0.85);
+                // lit.append("span")
+                //     .text(function (d) {
+                //         return stickKeyFormat(d[stickKey]);
+                //     });
 
                 return lir;
             }

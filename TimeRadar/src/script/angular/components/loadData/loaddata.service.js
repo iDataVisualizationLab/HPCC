@@ -111,7 +111,7 @@ angular.module('hpccApp')
                 serviceLists.forEach((s,si)=>{
                     if (data[h][serviceListattr[si]])
                         data[h][serviceListattr[si]] = data.timespan.map((d,i)=>
-                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length):d3.range(0,s.sub.length).map(e=>null));
+                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length).map(e=>e?e:null):d3.range(0,s.sub.length).map(e=>null));
                     else
                         data[h][serviceListattr[si]] = data.timespan.map(d=>d3.range(0,s.sub.length).map(e=>null));
                 })

@@ -80,13 +80,13 @@ angular.module('hpccApp')
 
         function loadata1(data){
 
-            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(d.replace('Z','')))));
+            data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(+d?+d:d.replace('Z','')))));
             _.without(Object.keys(data),'timespan').forEach(h=>{
                 delete data[h].arrCPU_load;
                 serviceLists.forEach((s,si)=>{
                     if (data[h][serviceListattr[si]])
                         data[h][serviceListattr[si]] = data.timespan.map((d,i)=>
-                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length):d3.range(0,s.sub.length).map(e=>null));
+                            data[h][serviceListattr[si]][i]? data[h][serviceListattr[si]][i].slice(0,s.sub.length).map(e=>e?e:undefined):d3.range(0,s.sub.length).map(e=>undefined));
                     else
                         data[h][serviceListattr[si]] = data.timespan.map(d=>d3.range(0,s.sub.length).map(e=>null));
                 })
