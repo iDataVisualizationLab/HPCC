@@ -167,7 +167,7 @@ let JobMap = function() {
             .style('opacity',0)
             .style('pointer-events', runopt.mouse.lensing?'auto':'none');
 
-        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${-50})`);
+        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${0})`);
         table_headerNode.append('g').attr('class','back').append('path').styles({'fill':'#ddd'});
 
         timebox = svg.append('g').attr('class','timebox')
