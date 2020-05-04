@@ -53,13 +53,6 @@ function RoseChart(id, data, options, name) {
 
     var maxValue,minValue,range,arrThresholds,colorTemperature,opaTemperature,allAxis,rScale,scaleMarkedLegend;
     range = thresholds[0];
-    // NEW SETTING
-    //If the supplied maxValue is smaller than the actual one, replace by the max in the data
-    maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
-        return d3.max(i.map(function (o) {
-            return o.value;
-        }))
-    }));
 
     if (cfg.isNormalize){
         minValue = 0;
@@ -594,7 +587,7 @@ function RoseChart(id, data, options, name) {
         function drawMeanLine(paths){
             return paths
                 .attr('transform-origin','0,0')
-                .attr('transform',(d,i)=>`rotate(${getAngle(d,i)}rad)`)
+                .attr('transform',(d,i)=>(console.log(d,getAngle(d,i)),`rotate(${getAngle(d,i)}rad)`))
                 .attr("d", d =>radarLine(d))
                 .styles({"fill":'none',
                     'stroke':'black',
