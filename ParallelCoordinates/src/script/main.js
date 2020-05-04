@@ -960,22 +960,22 @@ function complex_data_table(sample,render) {
                     .attr('class', 'col s12 m12')
                     .append('ul')
                     .datum(d => d.values)
-                    // .selectAll('li').data(d => d)
-                    // .enter()
-                    // .append('li').attr('class', 'comtime')
-                    // .on("mouseover", highlight)
-                    // .on("mouseout", unhighlight);
+                    .selectAll('li').data(d => d)
+                    .enter()
+                    .append('li').attr('class', 'comtime')
+                    .on("mouseover", highlight)
+                    .on("mouseout", unhighlight);
 
-                // lit.append("span")
-                //     .attr("class", "color-block")
-                //     .style("background", function (d) {
-                //         return color(selectedService == null ? d.group : d[selectedService])
-                //     })
-                //     .style("opacity", 0.85);
-                // lit.append("span")
-                //     .text(function (d) {
-                //         return stickKeyFormat(d[stickKey]);
-                //     });
+                lit.append("span")
+                    .attr("class", "color-block")
+                    .style("background", function (d) {
+                        return color(selectedService == null ? d.group : d[selectedService])
+                    })
+                    .style("opacity", 0.85);
+                lit.append("span")
+                    .text(function (d) {
+                        return stickKeyFormat(d[stickKey]);
+                    });
 
                 return lir;
             }
