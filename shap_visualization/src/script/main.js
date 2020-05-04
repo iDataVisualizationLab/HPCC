@@ -85,7 +85,7 @@ d3.json('../HiperView/data/17Feb2020_cluster_info.json',function(e,cluster){
             temp_b.order = i;
             return temp_b;
         }));
-        console.log(new_index)
+
         y.domain(nestComp.sort((a,b)=>new_index[a.index]-new_index[b.index]).map(d=>d.key))
 
         radarChartclusteropt.schema = schema;
