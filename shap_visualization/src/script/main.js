@@ -159,6 +159,7 @@ function similarityCal(data){
                 maxI = d;
             }
         });
+        debugger
         orderIndex.push(simMatrix[maxI].index);
         current_index = maxI;
         mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);

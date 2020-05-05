@@ -205,7 +205,7 @@ function drawFiltertable() {
                 changeVar(d3.select(this.parentElement.parentElement).datum());
                 brush();
             });
-            alltr.filter(d => d.type === "checkbox")
+            alltr.filter(d => d.key === "enable")
                 .append("input")
                 .attrs(function (d, i) {
                     return {
@@ -235,9 +235,9 @@ function drawFiltertable() {
                 }, {key: 'text', value: d.text}]);
             alltr.filter(d => d.type === undefined)
                 .text(d => d.value);
-            alltr.filter(d => d.type === "checkbox")
+            alltr.filter(d => d.key === "enable")
                 .select("input")
-                .each(function(d){this.checked = serviceFullList_withExtra[d.value.order].enable})
+                .each(function(d){this.checked = serviceFullList_withExtra[d.value.order].enable});
             }
         );
     listMetric = Sortable.create($('tbody')[0], {
@@ -395,7 +395,8 @@ function realTimesetting (option,db,init){
 function getBrush(d) {
     return d3.brushY(yscale[d])
         .extent([[-10, 0], [10, h]])
-        .on("brush end", brush);
+        .on("brush", ()=>brush(true))
+        .on("end", ()=>brush());
 }
 function dragstart (d) {
     dragging[d] = this.__origin__ = xscale(d);
@@ -497,7 +498,7 @@ function getcorrelation(){
     //         update_ticks(d, extent);
     //     }
     // });
-    update_Dimension()
+    updateDimension()
     // reorderDimlist();
     brush()
 }
@@ -568,7 +569,7 @@ function getScale(d) {
     return axisrender;
 }
 
-function update_Dimension() {
+function updateDimension() {
     g = svg.selectAll(".dimension")
         .data(dimensions,d=>d).join(enter => {
             const new_dim = enter.append("svg:g")
@@ -713,7 +714,7 @@ function initFunc() {
     }).map(s=>s.text));
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
     // Add a group element for each dimension.
-    update_Dimension();
+    updateDimension();
 
 
     // legend = create_legend(colors, brush);
@@ -757,7 +758,7 @@ function resetRequest() {
     }).map(s=>s.text));
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
     // Add a group element for each dimension.
-    update_Dimension();
+    updateDimension();
     if (!serviceFullList.find(d=>d.text===selectedService))
         selectedService = serviceFullList[0].text;
     const selecteds = d3.select("#axisSetting")
@@ -925,6 +926,9 @@ function complex_data_table(sample,render) {
             .key(d => d.compute).sortKeys(collator.compare)
             .sortValues((a, b) => a.Time - b.Time)
             .entries(sample);
+        let instance = M.Collapsible.getInstance('#compute-list');
+        if (instance)
+            instance.destroy();
         d3.select("#compute-list").html('');
         var table = d3.select("#compute-list")
             .attr('class', 'collapsible rack')
@@ -959,28 +963,35 @@ function complex_data_table(sample,render) {
                     .append('div')
                     .attr('class', 'col s12 m12')
                     .append('ul')
-                    .datum(d => d.values)
-                    .selectAll('li').data(d => d)
-                    .enter()
-                    .append('li').attr('class', 'comtime')
-                    .on("mouseover", highlight)
-                    .on("mouseout", unhighlight);
-
-                lit.append("span")
-                    .attr("class", "color-block")
-                    .style("background", function (d) {
-                        return color(selectedService == null ? d.group : d[selectedService])
-                    })
-                    .style("opacity", 0.85);
-                lit.append("span")
-                    .text(function (d) {
-                        return stickKeyFormat(d[stickKey]);
-                    });
-
+                    .datum(d => d.values);
                 return lir;
             }
-        )
-        $('.collapsible').collapsible();
+        );
+        function updateComtime(p){
+            let lit = p.select('ul').datum(d=>d.values).selectAll('li').data(d => d)
+                .enter()
+                .append('li').attr('class', 'comtime')
+                .on("mouseover", highlight)
+                .on("mouseout", unhighlight);
+
+            lit.append("span")
+                .attr("class", "color-block")
+                .style("background", function (d) {
+                    return color(selectedService == null ? d.group : d[selectedService])
+                })
+                .style("opacity", 0.85);
+            lit.append("span")
+                .text(function (d) {
+                    return stickKeyFormat(d[stickKey]);
+                });
+            return p;
+        }
+        $('#compute-list.collapsible,#compute-list .collapsible').collapsible({
+            onOpenStart: function (evt) {
+                if(d3.select(evt).classed('compute'))
+                    d3.select(evt).call(updateComtime);
+            }
+        });
         complex_data_table_render = false;
     }
 }
@@ -1170,8 +1181,7 @@ function redraw(selected) {
     } else {
         d3.select("#keep-data").attr("disabled", "disabled");
         d3.select("#exclude-data").attr("disabled", "disabled");
-    }
-    ;
+    };
 
     // total by food group
     var tallies = _(selected)
@@ -1190,7 +1200,7 @@ function redraw(selected) {
 }
 
 // TODO refactor
-function brush() {
+function brush(isreview) {
     var actives = [],
         extents = [];
 
@@ -1240,7 +1250,8 @@ function brush() {
 
     // Get lines within extents
     var selected = [];
-    data.forEach(function(d) {
+    data
+        .forEach(function(d) {
             if(!excluded_groups.find(e=>e===d.group))
                 !actives.find(function(p, dimension) {
                     return extents[dimension][0] > d[p] || d[p] > extents[dimension][1];
@@ -1266,7 +1277,10 @@ function brush() {
 
     // include empty groups
         _(colors.domain()).each(function(v,k) {tallies[v] = tallies[v] || []; });
-    complex_data_table_render = true;
+    if(!isreview) {
+        complex_data_table_render = true;
+        complex_data_table(selected);
+    }
     redraw(selected);
     // Loadtostore();
 }
@@ -1608,7 +1622,7 @@ function add_axis(d,g) {
         dimensions = _.intersection(listMetric.toArray(), dimensions);
         xscale.domain(dimensions);
         // g.attr("transform", function(p) { return "translate(" + position(p) + ")"; });
-        update_Dimension();
+        updateDimension();
         update_ticks();
     }
 }
