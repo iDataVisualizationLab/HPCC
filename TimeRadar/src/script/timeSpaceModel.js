@@ -2769,12 +2769,12 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             {label:"Time per step",content:'_',variable:'time'},
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
-d3.bivariableTimeSpace  = _.bind(d3.TimeSpace,
+d3.scatterplotTimeSpace  = _.bind(d3.TimeSpace,
     {name:'Scatterplot',controlPanel: {
             var1:{text:"Variable 1", type:"selection",variableRoot:'opt', variable: 'var1',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
             var2:{text:"Variable 2", type:"selection",variableRoot:'opt', variable: 'var2',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length)},
             var3:{text:"Variable 3", type:"selection",variableRoot:'opt', variable: 'var3',width:'100px',labels:()=>serviceFullList.map(d=>d.text),values:()=>d3.range(0,serviceFullList.length),class:'dim3'},
-        },workerPath:'src/script/worker/bivariableworker.js',
+        },workerPath:'src/script/worker/scatterplotworker.js',
         outputSelection:[
             {label:"Total time",content:'_',variable:'totalTime'},]});
 
@@ -2903,14 +2903,14 @@ function handle_data_pca(tsnedata) {
         };
     pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info);
 }
-function handle_data_bivariable(tsnedata) {
+function handle_data_scatterplot(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
     // if (!PCAopt.opt)
-        bivariableopt.opt = {
+        scatterplotopt.opt = {
             var1: 0, // dimensionality of the embedding (2 = default)
             var2: 1, // dimensionality of the embedding (2 = default)
             var3: 0, // dimensionality of the embedding (2 = default)
             dim: 2,
         };
-    bivariableTS.graphicopt(bivariableopt).color(colorCluster).init(dataIn, cluster_info);
+    scatterplotTS.graphicopt(scatterplotopt).color(colorCluster).init(dataIn, cluster_info);
 }

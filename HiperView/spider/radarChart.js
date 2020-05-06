@@ -36,7 +36,7 @@ function RadarChart(id, data, options, name) {
         ringStroke_width: 0.5,
         schema: undefined,
         animationDuration:100,
-        innerRadius:10,
+        innerRadius:4,
         events:{
             axis: {
                 mouseover: function(){},

@@ -1,0 +1,21 @@
+.tab-container .tab {
+  display: inline-block;
+  padding: 5px 10px;
+  margin-right: 5px;
+  margin-bottom: -1px;
+/ / Top two corners rounded border-radius: 3 px 3 px 0 0;
+  border: 1px solid #ddd;
+  border-bottom-color: #aaa;
+}
+
+.tab-container .tab.active {
+      font-weight: bold;
+      border-color: #aaa;
+      border-bottom: 1px solid white;
+}
+
+.tab-container   .tab-contents {
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 0 3px 3px 3px;
+}
