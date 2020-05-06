@@ -86,7 +86,16 @@ angular.module('hpccApp').constant('SampleData', [
         url:"../HiperView/data/influxdb0413-0418.json",
         description:"",
         category:'hpcc',
-        date:"17 Feb 2020",
+        date:"13 Apr 2020",
+        group:"sample",
+        formatType:'json'
+    },{
+        id:"influxdb0426_2am-0426_10pm",
+        name:"HPC data - 26 Apr 2020 (with job data)",
+        url:"../HiperView/data/influxdb0426_2am-0426_10pm.json",
+        description:"",
+        category:'hpcc',
+        date:"26 Apr 2020",
         group:"sample",
         formatType:'json'
     },{
@@ -95,7 +104,16 @@ angular.module('hpccApp').constant('SampleData', [
         url:"../HiperView/data/influxdb0424-0427.json",
         description:"",
         category:'hpcc',
-        date:"17 Feb 2020",
+        date:"24 Apr 2020",
+        group:"sample",
+        formatType:'json'
+    },{
+        id:"influxdb0424-0427-filtered",
+        name:"HPC data - 24-27 Apr 2020 filtered",
+        url:"../HiperView/data/influxdb0424-0427_filtered.json",
+        description:"",
+        category:'hpcc',
+        date:"24 Apr 2020",
         group:"sample",
         formatType:'json'
     },

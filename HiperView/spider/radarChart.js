@@ -36,6 +36,7 @@ function RadarChart(id, data, options, name) {
         ringStroke_width: 0.5,
         schema: undefined,
         animationDuration:100,
+        innerRadius:10,
         events:{
             axis: {
                 mouseover: function(){},
@@ -90,7 +91,7 @@ function RadarChart(id, data, options, name) {
     var dif = 1 / (cfg.levels-2);
     var right = 1 + dif;
     // cfg.arrThresholds = [-dif]; // 3/18/2020
-    cfg.arrThresholds = [-4/cfg.w]; // 3/18/2020
+    cfg.arrThresholds = [-cfg.innerRadius/cfg.w]; // 3/18/2020
     for (var i=0;i<colorLength-1;i++)
         cfg.arrThresholds.push(i*dif);
     cfg.arrThresholds.push(right);
@@ -113,9 +114,9 @@ function RadarChart(id, data, options, name) {
     }
     let deltaAng = Math.PI/10;
     // Re-adjust angles
-    minValue = range[0] - (range[1]-range[0])*4/cfg.w;
+    minValue = range[0] - (range[1]-range[0])*cfg.innerRadius/cfg.w;
     // minValue = range[0]-dif*(range[1]-range[0]); // 3/18/2020
-    maxValue = range[1]+dif*(range[1]-range[0])- (range[1]-range[0])*4/cfg.w;
+    maxValue = range[1]+dif*(range[1]-range[0])- (range[1]-range[0])*cfg.innerRadius/cfg.w;
 
     let  radius = Math.min(cfg.w / 2, cfg.h / 2);    //Radius of the outermost circle
     Format = d3.format('');               //Percentage formatting

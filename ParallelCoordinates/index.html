@@ -14,9 +14,9 @@
     <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">
 
 
-    <link rel="stylesheet" type="text/css" href="parallel.css" />
     <link href="../HiperView/css/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../HiperView/css/theme.css" />
+    <link rel="stylesheet" type="text/css" href="parallel.css" />
     <link rel="stylesheet" type="text/css" href="../TimeRadar/src/style/main.css" />
     <link rel="stylesheet" type="text/css" href="theme.css" />
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -97,7 +97,7 @@
         <ul id="leftpanel" class="collapsible">
             <li class="searchPanel">
                 <div class="collapsible-header search-wrapper focused">
-                    <input type="text" id="search" placeholder="Search host e.g compute-1-1">
+                    <input type="text" id="search" placeholder="Search host e.g compute-1-1" style="color:white">
                     <i class="material-icons" style="margin: auto;">search</i>
                 </div>
                 <div class="collapsible-body">
@@ -278,7 +278,7 @@
     <div id="header2" class="row s12 marginBottom0">
         <!--<h1>HPCC Explorer</h1>-->
         <button title="Zoom in on selected data" id="keep-data" class="hide" disabled="disabled">Keep</button>
-        <button title="Remove selected data" id="exclude-data" class="hide" disabled="disabled">Exclude</button>
+        <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
         <button title="Export data as CSV" id="export-data" class="hide">Export</button>
         <div class="controls">
             <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->

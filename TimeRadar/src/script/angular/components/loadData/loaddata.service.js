@@ -46,22 +46,6 @@ angular.module('hpccApp')
         let loadclusterInfo = false;
 
 
-            if (first||(db === 'csv'&& choice.category==='hpcc')) { //reload hostlist
-                d3.json(srcpath+'data/hotslist_Quanah.json', function (error, data) {
-                    if (error) {
-                    } else {
-                        firstTime = true;
-                        hostList = data;
-                        systemFormat();
-                        inithostResults();
-                        formatService(true);
-                        jobMap.hosts(hosts);
-                        MetricController.axisSchema(serviceFullList, true).update();
-                    }
-                });
-                first = false;
-            }
-
             dataInformation.filename = choice.name;
             if(choice.category==='hpcc')
                 setTimeout(() => {
@@ -106,6 +90,16 @@ angular.module('hpccApp')
         function loadata1(data,job){
             makedataworker();
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(+d?+d:d.replace('Z','')))));
+            sampleS = data;
+            if (choice.category==='hpcc') { //reload hostlist
+                firstTime = true;
+                systemFormat();
+                inithosts();
+                formatService(true);
+                jobMap.hosts(hosts);
+                MetricController.axisSchema(serviceFullList, true).update();
+                first = false;
+            }
             _.without(Object.keys(data),'timespan').forEach(h=>{
                 delete data[h].arrCPU_load;
                 serviceLists.forEach((s,si)=>{
@@ -117,7 +111,6 @@ angular.module('hpccApp')
                 })
             });
             updateDatainformation(data['timespan']);
-            sampleS = data;
             inithostResults();
             // make normalize data
             initTsnedata();

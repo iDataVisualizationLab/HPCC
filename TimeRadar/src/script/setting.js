@@ -104,7 +104,17 @@ function systemFormat() {
     thresholds = [[3,98], [0,99], [1050,17850],[0,200] ];
     serviceFullList_Fullrange = _.cloneDeep(serviceFullList);
 }
-
+function inithosts(){
+    hostList = {data:{hostlist:{}}};
+    const host_list = _.without(Object.keys(sampleS),'timespan');
+    host_list.forEach((nameh,i)=>{
+        hostList.data.hostlist [nameh] = {
+            rack: nameh.split('-')[1],
+            node: nameh.split('-')[2],
+            id : i,
+        };
+    })
+}
 function inithostResults (worker) {
     hosts = [];
     const hostdata = hostList.data.hostlist;

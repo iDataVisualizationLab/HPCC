@@ -602,12 +602,6 @@ function updateDimension() {
                 new_dim.append("svg:g")
                     .attr("class", "plotHolder")
                     .attr("transform", "translate(0,0)")
-
-                    // .append('rect')
-                    // .attr('class','background')
-                    // .style('fill','rgba(255,255,255,0.38)')
-                    // .style('transform','translate(-50%,0)')
-                    // .attrs({width:violiin_chart.graphicopt().width,height:violiin_chart.graphicopt().height});
             // Add and store a brush for each axis.
                 new_dim.append("svg:g")
                 .attr("class", "brush")
@@ -728,7 +722,6 @@ function initFunc() {
 
     // changeVar(d3.select("#axisSetting").selectAll('tr').data().find(d=>d.arr==selectedService));
     // Render full foreground
-    // brush();
     brush();
     console.log('---init---');
 }
@@ -962,6 +955,7 @@ function complex_data_table(sample,render) {
                     .attr('class', 'row marginBottom0')
                     .append('div')
                     .attr('class', 'col s12 m12')
+                    .styles({'overflow-y': 'auto', 'max-height': '400px'})
                     .append('ul')
                     .datum(d => d.values);
                 return lir;
@@ -1456,22 +1450,27 @@ function update_ticks(d, extent) {
 }
 
 // Rescale to new dataset domain
-function rescale() {
+function rescale(skipRender) {
     // adjustRange(data);
-    xscale.domain(dimensions = serviceFullList.filter(function (s) {
+    serviceFullList_withExtra.forEach(function (s) {
         let k = s.text;
-        let xtempscale = (((_.isDate(data[0][k])) && (yscale[k] = d3.scaleTime()
+        let xtempscale = ((s.isDate) && (yscale[k] = d3.scaleTime()
             .domain(d3.extent(data, function (d) {
                 return d[k];
             }))
-            .range([h, 0])) || (_.isNumber(data[0][k])) && (yscale[k] = d3.scaleLinear()
-            .domain(serviceFullList.find(d=>d.text===k).range)
-            .range([h, 0]))));
-        return s.enable?xtempscale:false;
-    }).map(s=>s.text));
+            .range([h, 0])) || (yscale[k] = d3.scaleLinear()
+            // .domain(d3.extent(data, function (d) {
+            //     return +d[k];
+            // }))
+            .domain(serviceFullList_withExtra.find(d=>d.text===k).range||[0,0])
+            .range([h, 0])));
+        if(s.axisCustom)
+            xtempscale.axisCustom = s.axisCustom;
+    });
     update_ticks();
     // Render selected data
-    paths(data, foreground, brush_count);
+    if(!skipRender)
+        paths(data, foreground, brush_count);
 }
 
 // Get polylines within extents
@@ -1558,7 +1557,9 @@ function resetSize() {
         .each(function (d) {
             d3.select(this).call(yscale[d].brush = d3.brushY(yscale[d])
                 .extent([[-10, 0], [10, h]])
-                .on("brush end", function(){isChangeData = true; brush();}));
+                .on("brush", function(){isChangeData = true; brush(true);})
+                .on("end", function(){isChangeData = true; brush();})
+        );
         });
 
     // update axis placement
