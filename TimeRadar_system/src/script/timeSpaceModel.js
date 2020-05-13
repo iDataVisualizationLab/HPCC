@@ -1932,14 +1932,29 @@ d3.TimeSpace = function () {
     let mapIndex =[];
     function searchHandler (e){
         if (e.target.value!=="") {
-            let results = datain.filter(h=>h.name.includes(e.target.value)).map(h=>({index:path[h.name][0].index}));
-            console.log(results)
-            if(results.length<graphicopt.tableLimit)
-                highlightNode([results[0]]);
-            else
+            let keywords = e.target.value.split(',');
+            let results = datain.filter(h=>keywords.find(k=>h.name.includes(k))).map(h=>({index:path[h.name][0].index,name:h.name}));
+            if(results.length<graphicopt.tableLimit) {
+                if (results.length===1)
+                    highlightNode(results);
+
+                else{
+                    filterbyClustername =results.map(h=>h.name);
+                    console.log(filterbyClustername)
+                    isneedrender = true;
+                    mouseoverTrigger = true;
+                }
+            }else {
                 highlightNode([])
+                filterbyClustername = [];
+            }
+            ishighlightUpdate = true;
+            isneedrender = true;
         }else{
             highlightNode([]);
+            filterbyClustername = [];
+            ishighlightUpdate = true;
+            isneedrender = true;
         }
     }
 

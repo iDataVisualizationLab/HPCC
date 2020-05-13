@@ -226,7 +226,7 @@ angular.module('hpccApp')
 
         function loadcsv(data) {
             shap={};
-            d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
+            d3.json(object.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
                 if(!error)
                     shap  = shape;
             });

@@ -21,6 +21,7 @@ thresholds = [[0,1]]
 d3.json('../HiperView/data/17Feb2020_cluster_info.json',function(e,cluster){
     console.log(cluster)
     d3.json('../HiperView/data/influxdb12Feb_2020_withoutJobLoad.json',function(e,shap){
+        console.log(shap)
         let comp = d3.keys(shap);
         let dim = shap[comp[0]].map(d=>d.axis);
 
