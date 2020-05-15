@@ -63,25 +63,28 @@ angular.module('hpccApp')
                         if (error) {
 
                         }
-
-                        d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_job_compact.json'), function (error, job) {
-                            if (error) {
-                                loadata1(data, undefined);
-                                shap={};
-                                d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
-                                    if(!error)
-                                        shap  = shape;
+                        if (!choice.values) {
+                            d3.json(choice.url.replace(/(\w+).json|(\w+).csv/, '$1_job_compact.json'), function (error, job) {
+                                if (error) {
+                                    loadata1(data, undefined);
+                                    shap = {};
+                                    d3.json(choice.url.replace(/(\w+).json|(\w+).csv/, '$1_shap.json'), function (error, shape) {
+                                        if (!error)
+                                            shap = shape;
+                                    });
+                                    return;
+                                }
+                                loadata1(data, job);
+                                shap = {};
+                                d3.json(choice.url.replace(/(\w+).json|(\w+).csv/, '$1_shap.json'), function (error, shape) {
+                                    if (!error)
+                                        shap = shape;
                                 });
                                 return;
-                            }
-                            loadata1(data, job);
-                            shap={};
-                            d3.json(choice.url.replace(/(\w+).json|(\w+).csv/,'$1_shap.json'), function (error, shape) {
-                                if(!error)
-                                    shap  = shape;
                             });
-                            return;
-                        });
+                        }else{
+                            loadata1(choice.values, choice.jobs);
+                        }
                     });
                 }, 0);
             else
@@ -125,7 +128,7 @@ angular.module('hpccApp')
                     submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
                     user: "dummyJob"
                 }];
-            if (choice.url.includes('influxdb')){
+            if (choice.group==='url'||choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
                 realTimesetting(false,"influxdb",true,sampleS);
