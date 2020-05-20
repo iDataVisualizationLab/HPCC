@@ -1325,40 +1325,40 @@ function plotViolin() {
     }, 0)
 }
 
-function paths(selected, ctx, count) {
+    function paths(selected, ctx, count) {
 
-    var n = selected.length,
-        i = 0,
-        opacity = d3.min([2/Math.pow(n,0.3),1]),
-        timer = (new Date()).getTime();
+        var n = selected.length,
+            i = 0,
+            opacity = d3.min([2/Math.pow(n,0.3),1]),
+            timer = (new Date()).getTime();
 
-    selection_stats(opacity, n, data.length);
+        selection_stats(opacity, n, data.length);
 
-    //shuffled_data = _.shuffle(selected);
+        //shuffled_data = _.shuffle(selected);
 
-    // complex_data_table(shuffled_data.slice(0,20));
-    shuffled_data = selected;
-    complex_data_table_render = true;
-    ctx.clearRect(0,0,w+1,h+1);
+        // complex_data_table(shuffled_data.slice(0,20));
+        shuffled_data = selected;
+        complex_data_table_render = true;
+        ctx.clearRect(0,0,w+1,h+1);
 
-    // render all lines until finished or a new brush event
-    function animloop(){
-        if (i >= n || count < brush_count) {
+        // render all lines until finished or a new brush event
+        function animloop(){
+            if (i >= n || count < brush_count) {
+                timel.stop();
+                return true;
+            }
+            var max = d3.min([i+render_speed, n]);
+            render_range(shuffled_data, i, max, opacity);
+            render_stats(max,n,render_speed);
+            i = max;
+            timer = optimize(timer);  // adjusts render_speed
+        };
+        if (timel)
             timel.stop();
-            return true;
-        }
-        var max = d3.min([i+render_speed, n]);
-        render_range(shuffled_data, i, max, opacity);
-        render_stats(max,n,render_speed);
-        i = max;
-        timer = optimize(timer);  // adjusts render_speed
-    };
-    if (timel)
-        timel.stop();
-    timel = d3.timer(animloop);
-    if(isChangeData)
-        axisPlot.dispatch('plot',selected);
-}
+        timel = d3.timer(animloop);
+        if(isChangeData)
+            axisPlot.dispatch('plot',selected);
+    }
 
 let isTick = true;
 let axisPlot =  d3.select('#overlayPlot').on('change',function(){

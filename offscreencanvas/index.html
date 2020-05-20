@@ -1,0 +1,71 @@
+<html>
+
+<head>
+    <script src="./node_modules/@d3fc/d3fc-element/build/d3fc-element.js"></script>
+    <script src="../HiperView/js/jquery-3.3.1.js"></script>
+    <script src="../HiperView/js/d3.v4.js"></script>
+    <script src="../HiperView/js/lodash.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        d3fc-group {
+            flex: auto;
+            display: flex;
+        }
+
+        d3fc-canvas {
+            flex: auto;
+        }
+
+        #status {
+            padding: 1em;
+            font: monospace;
+            text-align: center;
+        }
+
+        #loading {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+<d3fc-group auto-resize>
+    <d3fc-canvas></d3fc-canvas>
+    <div id="loading">
+        <h2>Loading...</h2>
+        <p>Creating dataset </p>
+    </div>
+</d3fc-group>
+<div style="position: absolute">
+    <select id="variableChoice">
+    </select>
+</div>
+<!--<div id="status">-->
+<!--    <p>-->
+<!--        Point count:-->
+<!--        <a href="?10000">10,000 points</a> |-->
+<!--        <a href="?100000">100,000 points</a> |-->
+<!--        <a href="?1000000">1,000,000 points</a>-->
+<!--    </p>-->
+<!--    <p>-->
+<!--        Timestamp: <span id="timestamp"></span>-->
+<!--    </p>-->
+<!--    <button id="alert">Stop main thread</button>-->
+<!--</div>-->
+<script src="src/script/linegraph.js"></script>
+</body>
+
+</html>
