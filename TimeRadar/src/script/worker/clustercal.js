@@ -103,7 +103,7 @@ addEventListener('message',function ({data}) {
             var temp;
             if (bin.normalizedFun)
                 temp = bin.normalizedFun.scaleBackPoint(d.val).map((e, i) => {
-                    let temparr = d.map(e => e[i]);
+                    let temparr = d.val.map(e => e[i]);
                     return {
                         axis: keys[i], value: e,
                         minval: ss.min(temparr),
@@ -113,7 +113,7 @@ addEventListener('message',function ({data}) {
                 });
             else
                 temp = d.val.map((e, i) => {
-                    let temparr = d.map(e => e[i]);
+                    let temparr = d.val.map(e => e[i]);
                     return {
                         axis: keys[i], value: e,
                         minval: ss.min(temparr),
