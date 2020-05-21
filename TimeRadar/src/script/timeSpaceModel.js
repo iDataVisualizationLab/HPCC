@@ -49,7 +49,7 @@ d3.TimeSpace = function () {
             component:{
                 dot:{size:5,opacity:0.9},
                 link:{size:1,opacity:0.2, highlight:{opacity:3}},
-                label:{enable:1}
+                label:{enable:0}
             },
             serviceIndex: 0,
             tableLimit: 1500,
@@ -312,6 +312,7 @@ d3.TimeSpace = function () {
                     reduceRenderWeight(true);
                     break;
                 default:
+                    preloader(true,data.value.percentage,data.value.message,'#modelLoading');
                     break;
             }
         })
@@ -2763,6 +2764,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
     {name:'UMAP',controlPanel: {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
             nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
+            timeFactor:{text:"Time linearization", range:[0,200], type:"slider", variable: 'timeFactor',width:'100px'},
             supervisor: {text: "Supervised", type: "switch", variable: 'supervisor',labels:['off','on'],values:[false,true], width: '100px'},
         },workerPath:'src/script/worker/umapworker.js',
         outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
@@ -2856,7 +2858,7 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
                 if (isKeepUndefined)
                 {
                     for (let i = 0; i< currentData.length; i++){
-                        if (currentData[i]===0)
+                        if (currentData[i]===null||currentData[i]===undefined)
                             currentData[i] = -1;
                     }
                 }
@@ -2882,6 +2884,7 @@ function handle_data_umap(tsnedata) {
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
             supervisor: true,
+            timeFactor:100,
         };
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info);
 }

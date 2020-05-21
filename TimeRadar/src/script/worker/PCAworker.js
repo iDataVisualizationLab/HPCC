@@ -13,10 +13,21 @@ addEventListener('message',function ({data}){
             break;
 
         case "initDataRaw":
+            postMessage({action:'message', value:{'percentage':20,'message':'Data received. Process data...'}});
             let mask = data.mask;
             totalTime_marker = performance.now();
-            dataIn = data.value.map(d=>d.filter((e,i)=>mask[i]));
-
+            if (data.opt.timeFactor) {
+                let timeFactor = data.value.length/data.opt.timeFactor;
+                dataIn = data.value.map(d => {
+                    let temp = d.filter((e, i) => mask[i]);
+                    temp.push(d.__timestep /timeFactor);
+                    return temp;
+                });
+            }else
+                dataIn = data.value.map(d=>{
+                    return d.filter((e,i)=>mask[i]);
+                });
+            postMessage({action:'message', value:{'percentage':50,'message':'Init PCA'}});
             // pca - compute cluster position
             let pca = new PCA();
             // console.log(brand_names);
