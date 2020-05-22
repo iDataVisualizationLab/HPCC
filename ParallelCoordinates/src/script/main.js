@@ -682,7 +682,7 @@ function initFunc() {
         .attr("height", height)
         .append("svg:g")
         .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
-    svg.selectAll('*').remove()
+    svg.selectAll('*').remove();
     // Load the data and visualization
     isinit = false;
 // Load the data and visualization
