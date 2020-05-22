@@ -274,7 +274,7 @@ d3.TimeSpace = function () {
         opt.dim = Math.floor(opt.dim);
         // end - adjust dimension
         datain.forEach(d=>delete d.__metrics.radar);
-        modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,mask:  serviceFullList.map(d=>d.enable),labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
+        modelWorker.postMessage({action: "initDataRaw",opt:opt, value: datain,mask:  serviceFullList.map(d=>d.enable),maxTimeStep:scaleNormalTimestep.domain()[1],labels: datain.map(d=>d.cluster), clusterarr: cluster.map(d=>d.__metrics.normalize)});
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "render":
@@ -2040,7 +2040,7 @@ d3.TimeSpace = function () {
                     let pointIndex = mapIndex.indexOf(i);
                     if (pointIndex !== undefined) {
 
-                        p[pointIndex * 3 + 0] = xscale(d[0]);
+                        p[pointIndex * 3] = xscale(d[0]);
                         p[pointIndex * 3 + 1] = yscale(d[1]);
 
                         // 3rd dimension as time step
@@ -2743,7 +2743,7 @@ function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
 }
 
-d3.pcaTimeSpace = _.bind(d3.TimeSpace,{name:'PCA',controlPanel: {},workerPath:'src/script/worker/PCAworker.js',outputSelection:[{label:"Total time",content:'_',variable:'totalTime'}]});
+d3.pcaTimeSpace = _.bind(d3.TimeSpace,{name:'PCA',controlPanel: {timeFactor:{text:"Time linearization", range:[0,10], type:"slider",step:0.1, variable: 'timeFactor',width:'100px'}},workerPath:'src/script/worker/PCAworker.js',outputSelection:[{label:"Total time",content:'_',variable:'totalTime'}]});
 d3.tsneTimeSpace = _.bind(d3.TimeSpace,
     {name:'t-SNE',controlPanel: {
         epsilon: {text: "Epsilon", range: [1, 40], type: "slider", variable: 'epsilon', width: '100px'},
@@ -2764,7 +2764,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
     {name:'UMAP',controlPanel: {
             minDist:{text:"Minimum distance", range:[0,1], type:"slider", variable: 'minDist',width:'100px',step:0.1},
             nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
-            timeFactor:{text:"Time linearization", range:[0,200], type:"slider", variable: 'timeFactor',width:'100px'},
+            timeFactor:{text:"Time linearization", range:[0,10], type:"slider",step:0.1, variable: 'timeFactor',width:'100px'},
             supervisor: {text: "Supervised", type: "switch", variable: 'supervisor',labels:['off','on'],values:[false,true], width: '100px'},
         },workerPath:'src/script/worker/umapworker.js',
         outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
@@ -2873,7 +2873,93 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
     timeSpacedata = dataIn;
     return dataIn;
 }
+function handle_data_model_full(tsnedata,isKeepUndefined,notblock) {
+    if(!notblock)
+        preloader(true,1,'preprocess data','#modelLoading');
+    windowsSize = windowsSize||1;
+    // get windown surrounding
+    let windowSurrounding =  (windowsSize - 1)/2;
+    let dataIn = [];
+    // let timeScale = d3.scaleLinear().domain([0,sampleS.timespan.length-1]).range([0,timeWeight]);
+    d3.values(tsnedata).forEach(axis_arr => {
+        let lastRadar; // last Radar on list
+        let lastcluster;
+        let lastcluster_insterted;
+        let lastdataarr;
+        let count = 0;
+        let timeLength = sampleS.timespan.length;
+        sampleS.timespan.forEach((t, i) => {
+            let currentData = axis_arr[i].slice();
+            currentData.cluster = axis_arr[i].cluster;
+            currentData.name = axis_arr[i].name;
+            currentData.__timestep = axis_arr[i].timestep;
+            currentData.__minDist = axis_arr[i].minDist;
+            let index = currentData.cluster;
+            currentData.clusterName = cluster_info[index].name;
+            let appendCondition = !cluster_info[currentData.cluster].hide;
+            // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
+            appendCondition = true;
+            lastcluster = index;
+            lastdataarr = currentData.slice();
+            if (appendCondition) {
+                if (lastRadar)
+                    lastRadar.__deltaTimestep = i - lastRadar.__timestep+1;
+                lastcluster_insterted = index;
+                // if (!(lastcluster !== undefined && index === lastcluster)|| currentData.cluster===13 || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup) {
+                currentData.show = true;
+                // // add all points
+                // }
+                // // timeline precalculate
+                // if (true) {
 
+                currentData.timestep = count; // TODO temperal timestep
+                count++;
+                // make copy of axis data
+                currentData.data = currentData.slice();
+                // currentData.push(timeScale(axis_arr[i].timestep))
+                // adding window
+                for (let w = 0; w<windowSurrounding; w++)
+                {
+                    let currentIndex = i -w;
+                    let currentWData;
+                    if (currentIndex<0) // bounder problem
+                        currentIndex = 0;
+                    currentWData = axis_arr[currentIndex].slice();
+                    // currentWData.push(timeScale(axis_arr[currentIndex].timestep))
+                    currentWData.forEach(d=>{
+                        currentData.push(d);
+                    });
+                }
+                for (let w = 0; w<windowSurrounding; w++)
+                {
+                    let currentIndex = i + w;
+                    let currentWData;
+                    if (currentIndex > timeLength-1) // bounder problem
+                        currentIndex = timeLength-1;
+                    currentWData = axis_arr[currentIndex];
+                    // currentWData.push(timeScale(axis_arr[currentIndex].timestep))
+                    currentWData.forEach(d=>{
+                        currentData.push(d);
+                    });
+                }
+                if (isKeepUndefined)
+                {
+                    for (let i = 0; i< currentData.length; i++){
+                        if (currentData[i]===null||currentData[i]===undefined)
+                            currentData[i] = -1;
+                    }
+                }
+                lastRadar = currentData;
+                dataIn.push(currentData);
+            }
+            return index;
+            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
+        })
+        lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
+    });
+    timeSpacedata = dataIn;
+    return dataIn;
+}
 function handle_data_umap(tsnedata) {
     const dataIn = handle_data_model(tsnedata,true);
     // if (!umapopt.opt)
@@ -2883,8 +2969,8 @@ function handle_data_umap(tsnedata) {
             // nNeighbors: 15, // The number of nearest neighbors to construct the fuzzy manifold (15 = default)
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
-            supervisor: true,
-            timeFactor:100,
+            supervisor: false,
+            timeFactor:2,
         };
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info);
 }
@@ -2895,11 +2981,13 @@ function handle_data_tsne(tsnedata) {
             epsilon: 20, // epsilon is learning rate (10 = default)
             perplexity: Math.round(dataIn.length / cluster_info.length), // roughly how many neighbors each point influences (30 = default)
             dim: 2, // dimensionality of the embedding (2 = default)
+            timeFactor:2,
         }
     tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info);
 }
 function handle_data_pca(tsnedata) {
-    const dataIn = handle_data_model(tsnedata);
+    // const dataIn = handle_data_model(tsnedata);
+    const dataIn = handle_data_model_full(tsnedata);
     // if (!PCAopt.opt)
         PCAopt.opt = {
             dim: 2, // dimensionality of the embedding (2 = default)

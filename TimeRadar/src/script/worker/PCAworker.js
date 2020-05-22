@@ -17,7 +17,8 @@ addEventListener('message',function ({data}){
             let mask = data.mask;
             totalTime_marker = performance.now();
             if (data.opt.timeFactor) {
-                let timeFactor = data.value.length/data.opt.timeFactor;
+                let timeFactor = data.maxTimeStep/data.opt.timeFactor;
+                console.log(data.maxTimeStep,'timeFactor=',timeFactor);
                 dataIn = data.value.map(d => {
                     let temp = d.filter((e, i) => mask[i]);
                     temp.push(d.__timestep /timeFactor);
@@ -31,7 +32,8 @@ addEventListener('message',function ({data}){
             // pca - compute cluster position
             let pca = new PCA();
             // console.log(brand_names);
-            let matrix = pca.scale(dataIn, true, true);
+            // let matrix = pca.scale(dataIn, true, true);
+            let matrix = pca.scale(dataIn, false, false);
 
             let pc = pca.pca(matrix, data.opt.dim);
 
