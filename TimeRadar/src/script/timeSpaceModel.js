@@ -47,8 +47,8 @@ d3.TimeSpace = function () {
             isCurve: false,
             filter:{ distance:0.5},
             component:{
-                dot:{size:5,opacity:0.9},
-                link:{size:1,opacity:0.2, highlight:{opacity:3}},
+                dot:{size:5,opacity:0.9,filter:{size:5, opacity:0.2}},
+                link:{size:1,opacity:0.2, highlight:{opacity:1}},
                 label:{enable:0}
             },
             serviceIndex: 0,
@@ -762,8 +762,8 @@ d3.TimeSpace = function () {
                 datain.forEach((d, i) => {
                     if (d.name === target.name) {
                         INTERSECTED.push(i);
-                        attributes.alpha.array[i] = graphicopt.component.dot.opacity;
-                        attributes.size.array[i] = target.timestep===d.timestep? graphicopt.component.dot.size*2:graphicopt.component.dot.size;
+                        attributes.alpha.array[i] = d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = target.timestep===d.timestep? graphicopt.component.dot.size*2: (d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.size);
                         lines[d.name].visible = true;
                         lines[d.name].material.opacity = 1;
                         lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
@@ -812,8 +812,8 @@ d3.TimeSpace = function () {
                 datain.forEach((d, i) => {
                     if (visibledata.indexOf(i) !==-1 || (filterGroupsetting.timestep!==undefined && filterGroupsetting.timestep===d.__timestep)){
                         INTERSECTED.push(i);
-                        attributes.alpha.array[i] = graphicopt.component.dot.opacity;
-                        attributes.size.array[i] = graphicopt.component.dot.size;
+                        attributes.alpha.array[i] = d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = d.filtered?graphicopt.component.dot.filter.size:graphicopt.component.dot.size;
                         lines[d.name].visible = filterGroupsetting.timestep===undefined;
                         lines[d.name].material.opacity = graphicopt.component.link.opacity;
                         lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
@@ -828,8 +828,8 @@ d3.TimeSpace = function () {
                 });
             }else
                 datain.forEach((d, i) => {
-                    attributes.alpha.array[i] = graphicopt.component.dot.opacity;
-                    attributes.size.array[i] = graphicopt.component.dot.size;
+                    attributes.alpha.array[i] = d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
+                    attributes.size.array[i] = d.filtered?graphicopt.component.dot.filter.size:graphicopt.component.dot.size;
                     lines[d.name].visible = true;
                     lines[d.name].material.opacity = graphicopt.component.link.opacity;
                     lines[d.name].material.linewidth  = graphicopt.component.link.size;
@@ -1111,7 +1111,7 @@ d3.TimeSpace = function () {
             visibledata = [];
             datain.forEach((d, i) => {
                 if (intersects.indexOf(d.name) !==-1 || (timestep!==undefined && timestep===d.__timestep)){
-                    attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                    attributes.alpha.array[i] = d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
                     lines[d.name].visible = timestep===undefined;
                     lines[d.name].material.opacity = graphicopt.component.link.opacity;
                     lines[d.name].material.linewidth  = graphicopt.component.link.highlight.opacity;
@@ -1138,14 +1138,8 @@ d3.TimeSpace = function () {
                 const clusterGroup = d3.nest().key(d=>d.cluster).object(radarData);
                 cluster.forEach((d,i)=>d.__metrics.hide=!clusterGroup[i])
                 filterlabelCluster();
-                //
                 d3.select('#radarCollider').dispatch('action');
 
-                // for (let i=0;i<100;i++) {
-                //     forceColider.tick();
-                // }
-                // forceColider.dispatch('tick');
-                // drawRadar(svgData);
             }else{
                 forceColider.stop();
             }
@@ -1155,7 +1149,7 @@ d3.TimeSpace = function () {
             linesGroup.visible = !!graphicopt.linkConnect;
             tooltip_lib.hide(); // hide tooltip
             datain.forEach((d, i) => {
-                attributes.alpha.array[i] = graphicopt.component.dot.opacity;
+                attributes.alpha.array[i] = d.filtered?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
                 lines[d.name].visible = true;
                 lines[d.name].material.opacity = graphicopt.component.link.opacity;
                 lines[d.name].material.linewidth  = graphicopt.component.link.size;
@@ -1296,7 +1290,7 @@ d3.TimeSpace = function () {
                 // visiableLine(graphicopt.linkConnect);
                 controls.update();
                 renderer.render(scene, camera);
-                if (solution[Math.floor(graphicopt.opt.dim)]&&solution[Math.floor(graphicopt.opt.dim)].length)
+                if ((graphicopt.component.label.enable==1||graphicopt.component.label.enable==3)&&solution[Math.floor(graphicopt.opt.dim)]&&solution[Math.floor(graphicopt.opt.dim)].length)
                     cluster.forEach(c=>{
                         if (datain[c.__metrics.indexLeader]) {
                             const pos = position2Vector(datain[c.__metrics.indexLeader].__metrics.position);
@@ -1894,7 +1888,7 @@ d3.TimeSpace = function () {
             colors[i*3+0]= color.r/255;
             colors[i*3+1]= color.g/255;
             colors[i*3+2]= color.b/255;
-            alpha[i]= 1;
+            alpha[i]= target.filterd?graphicopt.component.dot.filter.opacity:graphicopt.component.dot.opacity;
             sizes[i] = graphicopt.component.dot.size;
         }
         pointsGeometry.setAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
@@ -2118,6 +2112,11 @@ d3.TimeSpace = function () {
             d.__metrics.name_or = d.name;
             d.__metrics.timestep = d.timestep;
         });
+        if (graphicopt.radaropt.schema){
+            data.forEach(d=> {
+                d.filtered = ! graphicopt.radaropt.schema.map((s,si) => s.norm_filter != null ? (d[si] >= s.norm_filter[0]) && (d[si] <= s.norm_filter[1]) : true).reduce((p, c) => c && p);
+            })
+        }
         let maxstep = sampleS.timespan.length - 1;
         scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
         scaleNormalTimestep.domain([0, maxstep]);
@@ -2651,7 +2650,16 @@ d3.TimeSpace = function () {
         });
 
     }
-
+    function handle_filter(){
+        debugger
+        if (datain){
+            handle_data(datain);
+                isneedrender = true;
+            ishighlightUpdate = true;
+                highlightNode([]);
+                console.log(datain.filter(d=>d.filtered).length)
+        }
+    }
     function loadProjection(opt,calback){
         let totalTime_marker = performance.now();
         d3.json(`data/${dataInformation.filename.replace('.csv','')}_${opt.projectionName}_${opt.nNeighbors}_${opt.dim}_${opt.minDist}_${opt.supervisor}.json`).then(function(sol){
@@ -2730,7 +2738,7 @@ d3.TimeSpace = function () {
     };
 
     master.schema = function (_) {
-        return arguments.length ? (graphicopt.radaropt.schema = _,radarChartclusteropt.schema=_,schema = _, master) : schema;
+        return arguments.length ? (graphicopt.radaropt.schema = _,radarChartclusteropt.schema=_,schema = _ ,handle_filter(), master) : schema;
     };
     master.dispatch = function (_) {
         return arguments.length ? (returnEvent = _, master) : returnEvent;

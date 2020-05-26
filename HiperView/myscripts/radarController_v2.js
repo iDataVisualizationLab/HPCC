@@ -48,7 +48,6 @@ let radarController = function () {
         let colorLength = graphicopt.arrColor.length-1;
         var dif = 1 / (graphicopt.levels-2);
         var right = 1 + dif;
-        // graphicopt.arrThresholds = [-dif];
         graphicopt.arrThresholds = [-dif];
         for (var i=0;i<colorLength-1;i++)
             graphicopt.arrThresholds.push(i/(colorLength-1));
@@ -108,22 +107,10 @@ let radarController = function () {
             .extent( [ [-10,-rScale(1)], [10,-rScale(0)] ] )
             .on("brush end", brushended);
     }
-    function brushed(){
-        if (d3.event.sourceEvent.type === "brush") return;
-        var d0 = d3.event.selection.map(v=>radarcomp.axis[this.__data__.data.text].scale.invert(-rScale.invert(v)-0.5)).sort((a,b)=>a-b),
-            d1 = d0.map(Math.round);
 
-        // If empty when rounded, use floor instead.
-        if (d1[0] >= d1[1]) {
-            d1[0] = Math.floor(d0[0]);
-            d1[1] = Math.floor(d1[0]);
-        }
-        d1 = d1.sort((a,b)=>b-a).map(radarcomp.axis[this.__data__.data.text].scale).map(d=>-rScale(d))
-        d3.select(this).call(d3.event.target.move, d1);
-    }
     function brushed(){
         if (d3.event.sourceEvent.type === "brush") return;
-        var d0 = d3.event.selection.map(v=>radarcomp.axis[this.__data__.data.text].scale.invert(-rScale.invert(v)-0.5)).sort((a,b)=>a-b),
+        var d0 = d3.event.selection.map(v=>radarcomp.axis[this.__data__.data.text].scale.invert(-rScale.invert(v))).sort((a,b)=>a-b),
             d1 = d0.map(Math.round);
 
         // If empty when rounded, use floor instead.
@@ -139,7 +126,7 @@ let radarController = function () {
         svg.selectAll(".axis")
             .filter(function(d) {
                 if (d3.brushSelection(this))
-                    radarcomp.axis[d.data.text].filter = d3.brushSelection(this).map(v=>radarcomp.axis[d.data.text].scale.invert(-rScale.invert(v)-0.5)).sort((a,b)=>a-b);
+                    radarcomp.axis[d.data.text].filter = d3.brushSelection(this).map(v=>radarcomp.axis[d.data.text].scale.invert(-rScale.invert(v))).sort((a,b)=>a-b);
                 else
                     radarcomp.axis[d.data.text].filter = null;
                 return radarcomp.axis[d.data.text].filter;

@@ -2008,6 +2008,9 @@ function updateClusterControlUI(n) {
 let profile = {};
 
 function onfilterdata(schema) {
+    serviceFullList.forEach((s,si)=>{s.filter = schema.axis[s.text].filter;s.norm_filter = (s.filter?s.filter.map(d=>d3.scaleLinear().domain(s.range)(d)):s.filter)});
+    mainviz.schema(serviceFullList);
+    // data_filtered = tsnedata.filter(d=>schema.axisList.map(s=> s.filter!=null?(d[s.data.text]>=s.filter[0])&&(d[s.data.text]<=s.filter[1]):true).reduce((p,c)=>c&&p))
 }
 function onSchemaUpdate(schema){
     serviceFullList.forEach(ser=>{
