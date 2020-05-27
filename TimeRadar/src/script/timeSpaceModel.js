@@ -1305,8 +1305,10 @@ d3.TimeSpace = function () {
                     });
                 updatelabelCluster();
                 // console.log(controll_metrics.zoom)
-                if(iscameraMove)
+                if(iscameraMove||onrendercalled) {
                     setVizlevel(graphicopt.zoomLevels.getViz());
+                    onrendercalled = false;
+                }
             }
             iscameraMove = false;
             isneedrender = false;
@@ -2029,11 +2031,12 @@ d3.TimeSpace = function () {
     function filterlabelCluster() {
         clusterMarker.classed('hide',d=>d.__metrics.hide);
     }
-
+    let onrendercalled = false;
     function render (islast){
         if (isneedCompute) {
             try{
             let p = points.geometry.attributes.position.array;
+                onrendercalled = true;
             if (solution[Math.floor(graphicopt.opt.dim)] && solution[Math.floor(graphicopt.opt.dim)].length) {
                 createRadar = _.partialRight(createRadar_func, 'timeSpace radar', graphicopt.radaropt, colorscale);
                 solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
