@@ -2432,6 +2432,7 @@ d3.TimeSpace = function () {
         d3.values(controlPanelGeneral).forEach(d=>{
             tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,variableRoot: d.variableRoot,id:d.id,class:d.class})
         });
+        d3.keys(self.formatTable).forEach(k=>formatTable[k]=self.formatTable[k]);
         tableData[2] = _.concat(tableData[2],self.outputSelection);
         let tbodys = table_info.selectAll('tbody').data(tableData);
         tbodys
@@ -2793,7 +2794,7 @@ d3.umapTimeSpace  = _.bind(d3.TimeSpace,
             nNeighbors:{text:"#Neighbors", range:[1,200], type:"slider", variable: 'nNeighbors',width:'100px'},
             timeFactor:{text:"Time linearization", range:[0,10], type:"slider",step:0.1, variable: 'timeFactor',width:'100px'},
             supervisor: {text: "Supervised", type: "switch", variable: 'supervisor',labels:['off','on'],values:[false,true], width: '100px'},
-        },workerPath:'src/script/worker/umapworker.js',
+        },formatTable:{'timeFactor':function(d){return d3.format('.1f')(d)}},workerPath:'src/script/worker/umapworker.js',
         outputSelection:[ {label:"#Iterations",content:'_',variable: 'iteration'},
             {label:"Time per step",content:'_',variable:'time'},
             {label:"Total time",content:'_',variable:'totalTime'},]});
@@ -2997,6 +2998,7 @@ function handle_data_umap(tsnedata) {
             dim: 2, // The number of components (dimensions) to project the data to (2 = default)
             minDist: 1, // The effective minimum distance between embedded points, used with spread to control the clumped/dispersed nature of the embedding (0.1 = default)
             supervisor: false,
+            random:()=>0,
             timeFactor:2,
         };
     umapTS.graphicopt(umapopt).color(colorCluster).init(dataIn, cluster_info);
