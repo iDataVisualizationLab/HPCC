@@ -41,6 +41,7 @@ addEventListener('message',function ({data}){
             // let B = pc[1];  // this is the dV matrix from SVD
             let chosenPC = pc[2];   // this is the most value of PCA
             let solution = dataIn.map((d,i)=>d3.range(0,data.opt.dim).map(dim=>A[i][chosenPC[dim]]));
+            postMessage({action:'message', value:{'percentage':60,'message':'Generate projection'}});
             render(solution);
             postMessage({action:'stable', status:"done"});
             break;

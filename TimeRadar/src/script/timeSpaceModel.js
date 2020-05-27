@@ -16,7 +16,8 @@ d3.TimeSpace = function () {
             heightG: function () {
                 return this.heightView() - this.margin.top - this.margin.bottom
             },
-
+            zoomLevels:{levels:[{value: 20,viztype: 1},{value:11,viztype:2}],
+                getViz:function(){ return controll_metrics.zoom<=this.levels[0].value?(controll_metrics.zoom<=this.levels[1].value?this.levels[1].viztype:this.levels[0].viztype):0}},
             opt: {
                 dim: 2, // dimensionality of the embedding (2 = default)
                 windowsSize: 1,
@@ -1072,7 +1073,8 @@ d3.TimeSpace = function () {
     }
 
     function getRadarSze(radarData) {
-        radarSize = Math.min(graphicopt.radaropt.w / 2, Math.sqrt(graphicopt.widthG() * graphicopt.heightG() / Math.PI / radarData.length) * 0.75)*(+$('#radarSize').val());
+        // radarSize = Math.min(graphicopt.radaropt.w / 2, Math.sqrt(graphicopt.widthG() * graphicopt.heightG() / Math.PI / radarData.length) * 0.75)*(+$('#radarSize').val());
+        radarSize = (graphicopt.radaropt.w / 2 )*(+$('#radarSize').val());
     }
 
     function highlightGroupNode(intersects,timestep) { // INTERSECTED
@@ -1166,7 +1168,7 @@ d3.TimeSpace = function () {
         isneedrender = true;
     }
     function computesvgData(){
-        if (!svgData) {
+        // if (!svgData) {
             const ismarked =visibledata&& !!visibledata.length;
             d3.select('#modelWorkerScreen_svg_g').style('pointer-events','none').attr('transform',`translate(0,0) scale(1)`).selectAll('*').remove();
             controll_metrics.old = {x:controll_metrics.x,y:controll_metrics.y,zoom:controll_metrics.zoom,scale:controll_metrics.scale||1};
@@ -1177,7 +1179,7 @@ d3.TimeSpace = function () {
             if (!ismarked)
                 visibledata = [];
             datain.forEach((d, i) => {
-                if(!ismarked||ismarked&&visibledata.find(v=>v===i)) {
+                if(d.inscreen&&(!ismarked||ismarked&&visibledata.find(v=>v===i))) {
                     radarData.push(d);
                     posArr.push(getpos(attributes.position.array[i * 3], attributes.position.array[i * 3 + 1], attributes.position.array[i * 3 + 2], i));
                 }
@@ -1191,7 +1193,7 @@ d3.TimeSpace = function () {
             const clusterGroup = d3.nest().key(d => d.cluster).object(radarData);
             cluster.forEach((d, i) => d.__metrics.hide = !clusterGroup[i]);
             filterlabelCluster();
-        }
+        // }
     }
     function enableRadarView(isenable){
         if (isenable){
@@ -1206,6 +1208,7 @@ d3.TimeSpace = function () {
     let animationtimer = undefined;
     let disableMouseover = false, isneedrender = false;
     let mouseclick = false;
+
     function onClick(){
         if (!isMousemove) {
             mouseclick = true;
@@ -1251,7 +1254,7 @@ d3.TimeSpace = function () {
                     if (mouseclick){
                         disableMouseover = !!(!disableMouseover && INTERSECTED.length);
                         mouseclick = false;
-                        if (svgData&&!disableMouseover){
+                        if (svgData&&!disableMouseover && svgData.clickedOb){
                             svgData.clickedOb.dispatch('mouseleave')
                         }
                     }
@@ -1290,6 +1293,9 @@ d3.TimeSpace = function () {
                 // visiableLine(graphicopt.linkConnect);
                 controls.update();
                 renderer.render(scene, camera);
+                var frustum = new THREE.Frustum();
+                frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+                datain.forEach((d,i)=>d.inscreen = frustum.containsPoint(new THREE.Vector3(points.geometry.attributes.position.array[i*3],points.geometry.attributes.position.array[i*3+1],points.geometry.attributes.position.array[i*3+2])));
                 if ((graphicopt.component.label.enable==1||graphicopt.component.label.enable==3)&&solution[Math.floor(graphicopt.opt.dim)]&&solution[Math.floor(graphicopt.opt.dim)].length)
                     cluster.forEach(c=>{
                         if (datain[c.__metrics.indexLeader]) {
@@ -1298,6 +1304,9 @@ d3.TimeSpace = function () {
                         }
                     });
                 updatelabelCluster();
+                // console.log(controll_metrics.zoom)
+                if(iscameraMove)
+                    setVizlevel(graphicopt.zoomLevels.getViz());
             }
             iscameraMove = false;
             isneedrender = false;
@@ -1977,7 +1986,7 @@ d3.TimeSpace = function () {
             });
             let pointData = [];
             points.geometry.attributes.alpha.array.forEach((p,pi)=>{
-                if (p) {
+                if (p>0.2 && datain[pi].inscreen) {
                     let temp = getpos(points.geometry.attributes.position.array[pi * 3], points.geometry.attributes.position.array[pi * 3 + 1], points.geometry.attributes.position.array[pi * 3 + 2]);
                     temp = [temp.x, temp.y];
                     temp.index = pi;
@@ -2382,6 +2391,13 @@ d3.TimeSpace = function () {
     };
     let self = this;
     let needRecalculate=true;
+    function setVizlevel(level){
+        let old_val = +$('#radarCollider').val();
+        if (old_val!==level)
+            $('#radarCollider').val(level);
+        if (level || (old_val!==0 && (level===0)))
+            d3.select('#radarCollider').dispatch('action');
+    }
     master.generateTable = function(){
         $( "#modelWorkerInformation" ).draggable({ containment: "parent", scroll: false });
         needRecalculate = true
