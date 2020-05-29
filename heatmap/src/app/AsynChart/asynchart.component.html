@@ -1,5 +1,12 @@
-<canvas #foreground class="foreground"></canvas>
-<canvas #background class="background"></canvas>
-<canvas #highlighted class="highlighted"></canvas>
-<!--<app-tooltip #tooltip></app-tooltip>-->
-<svg #svg class="chart"></svg>
+<div class="asynchart">
+  <canvas class="foreground" #foreground></canvas>
+  <canvas #background class="background"></canvas>
+  <canvas #highlighted class="highlighted"></canvas>
+  <!--<app-tooltip #tooltip></app-tooltip>-->
+  <svg #svg class="chart">
+    <g class="axis">
+      <g class="xaxis"></g>
+      <g class="yaxis"></g>
+    </g>
+  </svg>
+</div>

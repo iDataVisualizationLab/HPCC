@@ -1,3 +1,4 @@
-<div id="wrapper" (window:resize)="onResize()">
-<app-asynchart [width]="1000" [height]="600" [style.display]="true"></app-asynchart>
+<div id="wrapper" (window:resize)="onResize()" class="container-fluid">
+  <app-service-list [serviceFullList]="serviceFullList" (onChangeService)="onChangeFunc($event)" class="float-right col-2"></app-service-list>
+  <app-asynchart [width]="800" [height]="600" [margin]="{top: 0, right: 100, bottom: 0, left: 0}" [style.display]="true" *ngFor="let datum of data; trackBy: trackByFn; let i = index" [scheme]="datum"></app-asynchart>
 </div>
