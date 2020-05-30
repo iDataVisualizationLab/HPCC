@@ -1,7 +1,9 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {Scheme} from './model';
+import * as mark from './mark';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
+import {ScaleType} from './scale';
 
 
 @Component({
@@ -76,14 +78,14 @@ export class AsynchartComponent implements OnInit, OnChanges, AfterViewInit {
     this._background = this.backgroundNode.nativeElement.getContext('2d');
     this._highlighted = this.highlightedNode.nativeElement.getContext('2d');
     this._svg = d3.select(this.svgNode.nativeElement);
-    this.foreground.globalCompositeOperation = "destination-over";
+    this.foreground.globalCompositeOperation = 'destination-over';
   }
   make_axis(): void {
     const self = this;
     const axisx = d3.axisBottom(self.scheme.x.scale);
-    const ticksx = (this.scheme.x.scale.ticks||this.scheme.x.scale.domain)().length;
+    const ticksx = (this.scheme.x.scale.ticks || this.scheme.x.scale.domain)().length;
     if (this.scheme.x.axis && this.scheme.x.axis.tickValues){
-      let filterFunc = new Function('datum','index',scheme.x.axis.tickValues);
+      const filterFunc = new Function('datum', 'index', self.scheme.x.axis.tickValues);
       axisx.tickValues(this.scheme.x.scale.domain().filter(filterFunc));
     }else
     if (ticksx > 20) {
@@ -99,12 +101,11 @@ export class AsynchartComponent implements OnInit, OnChanges, AfterViewInit {
   onChangeColor(): void {
     const self = this;
     switch (self.scheme.color.type) {
-      case "Linear":
-        self.scheme.color.scale = d3.scaleSequential()
-          .interpolator(d3.interpolateTurbo)
-          .domain(d3.extent(self.scheme.data.value,d=>d[self.scheme.color.key])).unknown("#000000");;
+      case ScaleType.LINEAR:
+        self.scheme.color.scale = d3.scaleSequential(d3.interpolateTurbo)
+          .domain(d3.extent(self.scheme.data.value, d => d[self.scheme.color.key]));
         break;
-      case "Category":
+      case ScaleType.CATEGORY:
         self.scheme.color.scale = d3.scaleOrdinal(d3.schemeCategory10)
         // .interpolate(d3.interpolateTurbo)
         // .domain(d3.extent(scheme.data.value,d=>d[scheme.color.key]));
@@ -196,11 +197,11 @@ export class AsynchartComponent implements OnInit, OnChanges, AfterViewInit {
       // ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),1,scheme.y.scale.bandwidth());
       if (color){
         ctx.fillStyle = color;
-        ctx.fill()
+        ctx.fill();
       }
     };
 
-    const AREA = function(d, ctx, color) {
+    const AREA = function (d, ctx, color) {
       ctx.beginPath();
       scheme.mark.path(d.values);
       if (color){
@@ -214,30 +215,30 @@ export class AsynchartComponent implements OnInit, OnChanges, AfterViewInit {
       ctx.stroke();
     };
     function optimize(timer) {
-      var delta = (new Date()).getTime() - timer;
+      const delta = (new Date()).getTime() - timer;
       render_speed = Math.max(Math.ceil(render_speed * 30 / delta), 100);
       render_speed = Math.min(render_speed, 1000);
       return (new Date()).getTime();
     }
-    if (self.scheme.mark.type === "rect") {
+    if (self.scheme.mark.type === mark.RECT) {
       render_item = RECT_draw;
-      render_items(self.scheme.data.value, foreground, 0);
-    }else if(self.scheme.mark.type==="area"){
+      render_items(self.scheme.data.value, foreground);
+    }else if (self.scheme.mark.type === mark.AREA){
       if (self.scheme.mark.key) {
-        self.scheme.mark.scale = d3.scaleLinear().domain(d3.extent(self.scheme.data.value,d=>d[self.scheme.mark.value])).range([0, -self.scheme.y.scale.bandwidth()*2])
+        self.scheme.mark.scale = d3.scaleLinear().domain(d3.extent(self.scheme.data.value,d => d[self.scheme.mark.value])).range([0, -self.scheme.y.scale.bandwidth()*2])
         self.scheme.mark.path = d3.area()
           .x(function(d) {
             return self.scheme.x.scale(d[self.scheme.x.key]); })
           .y0(function(d) {
-            return self.scheme.y.scale(d[self.scheme.y.key])+self.scheme.y.scale.bandwidth() +self.scheme.mark.scale(0)})
+            return self.scheme.y.scale(d[self.scheme.y.key]) + self.scheme.y.scale.bandwidth() + self.scheme.mark.scale(0)})
           .y1(function(d) {
-            return self.scheme.y.scale(d[self.scheme.y.key])+self.scheme.y.scale.bandwidth() +self.scheme.mark.scale(d[self.scheme.mark.value]); })
+            return self.scheme.y.scale(d[self.scheme.y.key]) + self.scheme.y.scale.bandwidth() + self.scheme.mark.scale(d[self.scheme.mark.value]); })
           .curve(d3.curveMonotoneX)
           .context(foreground);
         render_item = AREA;
         let tranformedData = d3.nest().key(d => d[self.scheme[self.scheme.mark.key].key]).entries(self.scheme.data.value);
         tranformedData.sort((a,b)=>self.scheme[self.scheme.mark.key].scale(a.key)-self.scheme[self.scheme.mark.key].scale(b.key))
-        render_items(tranformedData, foreground, 0);
+        render_items(tranformedData, foreground);
       }
     }
   }

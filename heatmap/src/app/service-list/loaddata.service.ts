@@ -1,47 +1,56 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable, of, Subject} from 'rxjs';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 import {main} from '@angular/compiler-cli/src/main';
 import {init} from 'protractor/built/launcher';
 import {first} from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root',
 })
 export class Loaddata {
-  private _dataObj: any;
-  get dataObj() {return this._dataObj};
-  set dataObj(value) {this._dataObj = value};
+  private DATAOBJ: any;
+  get dataObj() {
+    return this.DATAOBJ;
+  }
+
+  set dataObj(value) {
+    this.DATAOBJ = value;
+  }
+
   sampleS: any;
   hosts: any;
   serviceFullList: any;
   serviceList: any;
-  serviceList_selected: any;
+  serviceListSelected: any;
   serviceListattr: any;
   serviceLists: any;
   serviceAttr: any;
   serviceListattrnest: any;
   dataframe: any;
+
   constructor() {
   }
 
   // reset = (hard) => {
   //   this.dataObj = Dataset.currentDataset;
   // }
-  getDataFrame(callback){
+  getDataFrame(callback) {
     this.loadData(callback);
   }
-  loadData(calback){
+
+  loadData(calback) {
     const self = this;
     const choice = self.dataObj;
     if (choice.category === 'hpcc') {
-       d3.json(choice.url).then((data) => {
-          if (!choice.values) {
-            loadata1(data);
-          } else {
-            loadata1(choice.values);
-          }
-        });
+      d3.json(choice.url).then((data) => {
+        if (!choice.values) {
+          loadata1(data);
+        } else {
+          loadata1(choice.values);
+        }
+      });
 
     }
     // else {
@@ -59,7 +68,13 @@ export class Loaddata {
         delete data[h].arrCPU_load;
         self.serviceLists.forEach((s, si) => {
           if (data[h][self.serviceListattr[si]]) {
-            data[h][self.serviceListattr[si]] = data.timespan.map((d, i) => data[h][self.serviceListattr[si]][i] ? data[h][self.serviceListattr[si]][i].slice(0, s.sub.length).map(e => e ? e : null) : d3.range(0, s.sub.length).map(e => null));
+            data[h][self.serviceListattr[si]] = data.timespan.map((d, i) => {
+              if (data[h][self.serviceListattr[si]][i]) {
+                return data[h][self.serviceListattr[si]][i].slice(0, s.sub.length).map(e => e ? e : null);
+              } else {
+                return d3.range(0, s.sub.length).map(e => null);
+              }
+            });
           } else {
             data[h][self.serviceListattr[si]] = data.timespan.map(d => d3.range(0, s.sub.length).map(e => null));
           }
@@ -70,18 +85,15 @@ export class Loaddata {
       self.hosts.forEach((hname, hi) => {
         const hostdata = self.sampleS[hname];
         self.sampleS.timespan.forEach((t, ti) => {
-          let values = {}
+          const values = {timestep: self.sampleS.timespan[ti], compute: hname};
           self.serviceLists.forEach((s, si) => {
             s.sub.forEach((sub, subi) => {
               values[sub.text] = hostdata[self.serviceListattr[si]][ti][subi];
             });
           });
-          values.timestep = self.sampleS.timespan[ti];
-          values.compute = hname;
           self.dataframe.push(values);
         });
       });
-      // observer.next({dataframe: self.dataframe, serviceFullList: self.serviceFullList});
       // if (choice.group==='url'||choice.url.includes('influxdb')){
       //   processResult = processResult_influxdb;
       //   db = 'influxdb';
@@ -117,72 +129,72 @@ export class Loaddata {
       // });
       function systemFormat() {
         self.serviceList = ['Temperature', 'Job_load', 'Memory_usage', 'Fans_speed', 'Power_consum', 'Job_scheduling'];
-        self.serviceList_selected = [{'text': 'Temperature', 'index': 0}, {'text': 'Job_load', 'index': 1}, {
-          'text': 'Memory_usage',
-          'index': 2
-        }, {'text': 'Fans_speed', 'index': 3}, {'text': 'Power_consum', 'index': 4}];
-
-        self.serviceListattr = ['arrTemperature', 'arrCPU_load', 'arrMemory_usage', 'arrFans_health', 'arrPower_usage', 'arrJob_scheduling'];
+        self.serviceListSelected = [{ text: 'Temperature', index: 0}, {text: 'Job_load', index: 1}, {
+          text: 'Memory_usage',
+          index: 2
+        }, {text: 'Fans_speed', index: 3}, {text: 'Power_consum', index: 4}];
+        self.serviceListattr = ['arrTemperature', 'arrCPU_load', 'arrMemory_usage',
+          'arrFans_health', 'arrPower_usage', 'arrJob_scheduling'];
         self.serviceLists = [{
-          'text': 'Temperature',
-          'id': 0,
-          'enable': false,
-          'sub': [{
-            'text': 'CPU1 Temp',
-            'id': 0,
-            'enable': false,
-            'idroot': 0,
-            'angle': 5.834386356666759,
-            'range': [3, 98]
-          }, {'text': 'CPU2 Temp', 'id': 1, 'enable': false, 'idroot': 0, 'angle': 0, 'range': [3, 98]}, {
-            'text': 'Inlet Temp',
-            'id': 2,
-            'enable': false,
-            'idroot': 0,
-            'angle': 0.4487989505128276,
-            'range': [3, 98]
+          text: 'Temperature',
+          id: 0,
+          enable: false,
+          sub: [{
+            text: 'CPU1 Temp',
+            id: 0,
+            enable: false,
+            idroot: 0,
+            angle: 5.834386356666759,
+            range: [3, 98]
+          }, {text: 'CPU2 Temp', id: 1, enable: false, idroot: 0, angle: 0, range: [3, 98]}, {
+            text: 'Inlet Temp',
+            id: 2,
+            enable: false,
+            idroot: 0,
+            angle: 0.4487989505128276,
+            range: [3, 98]
           }]
         }, {
-          'text': 'Job_load',
-          'id': 1,
-          'enable': false,
-          'sub': [{'text': 'Job load', 'id': 0, 'enable': false, 'idroot': 1, 'angle': 1.2566370614359172, 'range': [0, 10]}]
+          text: 'Job_load',
+          id: 1,
+          enable: false,
+          sub: [{text: 'Job load', id: 0, enable: false, idroot: 1, angle: 1.2566370614359172, range: [0, 10]}]
         }, {
-          'text': 'Memory_usage',
-          'id': 2,
-          'enable': false,
-          'sub': [{'text': 'Memory usage', 'id': 0, 'enable': false, 'idroot': 2, 'angle': 1.8849555921538759, 'range': [0, 99]}]
+          text: 'Memory_usage',
+          id: 2,
+          enable: false,
+          sub: [{text: 'Memory usage', id: 0, enable: false, idroot: 2, angle: 1.8849555921538759, range: [0, 99]}]
         }, {
-          'text': 'Fans_speed',
-          'id': 3,
-          'enable': false,
-          'sub': [{
-            'text': 'Fan1 speed',
-            'id': 0,
-            'enable': false,
-            'idroot': 3,
-            'angle': 2.4751942119192307,
-            'range': [1050, 17850]
+          text: 'Fans_speed',
+          id: 3,
+          enable: false,
+          sub: [{
+            text: 'Fan1 speed',
+            id: 0,
+            enable: false,
+            idroot: 3,
+            angle: 2.4751942119192307,
+            range: [1050, 17850]
           }, {
-            'text': 'Fan2 speed',
-            'id': 1,
-            'enable': false,
-            'idroot': 3,
-            'angle': 2.9239931624320583,
-            'range': [1050, 17850]
+            text: 'Fan2 speed',
+            id: 1,
+            enable: false,
+            idroot: 3,
+            angle: 2.9239931624320583,
+            range: [1050, 17850]
           }, {
-            'text': 'Fan3 speed',
-            'id': 2,
-            'enable': false,
-            'idroot': 3,
-            'angle': 3.372792112944886,
-            'range': [1050, 17850]
-          }, {'text': 'Fan4 speed', 'id': 3, 'enable': false, 'idroot': 3, 'angle': 3.8215910634577135, 'range': [1050, 17850]}]
+            text: 'Fan3 speed',
+            id: 2,
+            enable: false,
+            idroot: 3,
+            angle: 3.372792112944886,
+            range: [1050, 17850]
+          }, {text: 'Fan4 speed', id: 3, enable: false, idroot: 3, angle: 3.8215910634577135, range: [1050, 17850]}]
         }, {
-          'text': 'Power_consum',
-          'id': 4,
-          'enable': false,
-          'sub': [{'text': 'Power consumption', 'id': 0, 'enable': false, 'idroot': 4, 'angle': 4.71238898038469, 'range': [0, 200]}]
+          text: 'Power_consum',
+          id: 4,
+          enable: false,
+          sub: [{text: 'Power consumption', id: 0, enable: false, idroot: 4, angle: 4.71238898038469, range: [0, 200]}]
         }];
         self.serviceFullList = serviceLists2serviceFullList(self.serviceLists);
         self.serviceListattrnest = [
@@ -201,7 +213,7 @@ export class Loaddata {
       }
 
       function serviceLists2serviceFullList(serviceLists) {
-        let temp = [];
+        const temp = [];
         serviceLists.forEach(s => s.sub.forEach(sub => {
           sub.idroot = s.id;
           sub.enable = s.enable && (sub.enable === undefined ? true : sub.enable);
@@ -213,6 +225,7 @@ export class Loaddata {
       calback({dataframe: self.dataframe, serviceFullList: self.serviceFullList});
     }
   }
+
   // function readFilecsv(file,separate,object) {
   //   separate = separate||'|';
   //   firstTime= true;

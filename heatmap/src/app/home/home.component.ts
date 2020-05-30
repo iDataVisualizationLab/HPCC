@@ -16,11 +16,11 @@ export class HomeComponent implements OnInit {
   _data: Scheme[];
   dataframe: any[];
   _serviceFullList: any[];
-  tableTrigger: Subject = new Subject<any>();
-  get data() {return this._data};
-  set data(value) {this._data = value};
-  get serviceFullList() {return this._serviceFullList};
-  set serviceFullList(value) {this._serviceFullList = value;this.onChangeService();};
+  isPagebusy: boolean;
+  get data() {return this._data}
+  set data(value) {this._data = value; }
+  get serviceFullList() {return this._serviceFullList; }
+  set serviceFullList(value) {this._serviceFullList = value; this.onChangeService(); }
   constructor(private loadDataFrame: Loaddata) {
   }
 
@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit {
   @HostListener('document:keydown', ['$event'])
 
   ngOnInit() {
+    this.isPagebusy = true;
     this.onResize();
     this.loadDataFrame.dataObj = {
       id: "serviceWed26Sep_removedmetric",
@@ -46,6 +47,7 @@ export class HomeComponent implements OnInit {
     this.loadDataFrame.getDataFrame( (data) => {
       this.dataframe = data.dataframe;
       this.serviceFullList = data.serviceFullList;
+      this.isPagebusy = false;
       return;
     });
   }
@@ -67,10 +69,10 @@ export class HomeComponent implements OnInit {
   getHeatmap = (selectedService) => {
     return {
       data: {value:this.dataframe},
-      x: {key:'timestep',type:'Band'},
-      y: {key:'compute',type:'Band',visible:false},
-      mark:{type:"rect"},
-      color:{key:selectedService,type:"Linear"}
+      x: {key:'timestep', type: 'Band'},
+      y: {key: 'compute', type: 'Band',visible:false},
+      mark: {type: 'rect'},
+      color: {key:selectedService, type: 'linear'}
     };
   }
   onResize() {

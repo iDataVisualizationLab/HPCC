@@ -21,6 +21,7 @@ export const ScaleType = {
   BIN_ORDINAL: 'bin-ordinal',
 
   // Discrete scales
+  CATEGORY: 'category',
   ORDINAL: 'ordinal',
   POINT: 'point',
   BAND: 'band'
@@ -30,5 +31,5 @@ type ValueOf<T> = T[keyof T];
 export type ScaleType = ValueOf<typeof ScaleType>;
 
 export function scale(s: ScaleType) {
-  return d3[`scale${s}`]();
+  return d3[`scale${s.toLocaleUpperCase}`]();
 }

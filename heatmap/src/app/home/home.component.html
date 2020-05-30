@@ -2,3 +2,10 @@
   <app-service-list [serviceFullList]="serviceFullList" (onChangeService)="onChangeFunc($event)" class="float-right col-2"></app-service-list>
   <app-asynchart [width]="800" [height]="600" [margin]="{top: 0, right: 100, bottom: 0, left: 0}" [style.display]="true" *ngFor="let datum of data; trackBy: trackByFn; let i = index" [scheme]="datum"></app-asynchart>
 </div>
+<div class="d-flex justify-content-center cover text-center" *ngIf="isPagebusy">
+  <div class="spinnerC">
+    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</div>
