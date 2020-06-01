@@ -1,16 +1,16 @@
-<table datatable [dtOptions]="dtOptions" class="row-border hover">
+<table datatable [dtOptions] = "dtOptions" [dtTrigger] = "dtTrigger" class="row-border hover">
   <thead>
   <tr>
     <th>Service name</th>
-<!--    <th>Summary</th>-->
+    <th >Summary</th>
     <th></th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let s of serviceFullList" [ngClass]="{'fieldDisable': !s.enable}">
-    <td>{{ s.text }}</td>
-<!--    <td></td>-->
-    <td class="btngroup">
+    <td style="width: 150px">{{ s.text }}</td>
+    <td style="width: 200px"></td>
+    <td style="width: 50px" class="btngroup">
         <span class="no-shrink  toggleDisable" (click)="onClickDisable(s)">
           <a class="disable-field"><fa-icon [icon]="faCheck"></fa-icon></a>
         </span>

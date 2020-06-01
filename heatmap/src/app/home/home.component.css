@@ -17,3 +17,80 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.sidenavs{
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.21);
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 50px;
+}
+
+.sidenavs.sideIn {
+  width: 400px;
+  overflow-x: visible;
+  overflow-y: auto;
+}
+
+.closebtn{
+  position: fixed;
+  top: 50%;
+  left:-40px;
+}
+.sideIn .closebtn{
+  top: 50%;
+  left: 380px;
+  z-index: 1;
+  transition: 0.5s;
+}
+
+.openbtn{
+  position: absolute;
+  top: 50%;
+  left:-30px;
+}
+
+.openbtn.discovery {
+  left: 20px;
+}
+
+.overlaySide{
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 0px;
+  left: -20px;
+  background-color: rgba(0,0,0,0);
+  z-index: 1000;
+  width: 40px;
+  height: 100%;
+}
+
+.overlaySide:not(.horizontal):hover .openbtn, .overlaySide:not(.horizontal):active .openbtn{
+  left: 20px;
+}
+.overlaySide.horizontal:hover .openbtn, .overlaySide.horizontal:active .openbtn{
+  top: 20px;
+}
+.sideIn .overlaySide:not(.horizontal) {
+  left:-80px;
+}
+
+.sidehIn .overlaySide.horizontal {
+  top:-80px;
+}
+
+#Maincontent {
+  margin-left: 0px;
+  transition: all 0.5s;
+}
+
+.sideIn#Maincontent {
+  position: relative;
+  margin-left: 400px;
+}

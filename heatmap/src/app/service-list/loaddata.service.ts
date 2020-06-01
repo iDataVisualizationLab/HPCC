@@ -1,16 +1,18 @@
 import {Injectable} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
-import {main} from '@angular/compiler-cli/src/main';
-import {init} from 'protractor/built/launcher';
-import {first} from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root',
-})
+
+// @Injectable({
+//   providedIn: 'root',
+// })
+
+@Injectable()
 export class Loaddata {
   private DATAOBJ: any;
+  private dataSource   = new BehaviorSubject<any>([]);
+  private serviceSource   = new BehaviorSubject<any>([]);
   get dataObj() {
     return this.DATAOBJ;
   }
@@ -21,26 +23,24 @@ export class Loaddata {
 
   sampleS: any;
   hosts: any;
-  serviceFullList: any;
+  serviceFullList = this.serviceSource.asObservable();
   serviceList: any;
   serviceListSelected: any;
   serviceListattr: any;
   serviceLists: any;
   serviceAttr: any;
   serviceListattrnest: any;
-  dataframe: any;
+  dataframe = this.dataSource.asObservable();
 
   constructor() {
   }
-
+  onChangeService(newservice){
+    this.serviceSource.next(newservice);
+  }
   // reset = (hard) => {
   //   this.dataObj = Dataset.currentDataset;
   // }
-  getDataFrame(callback) {
-    this.loadData(callback);
-  }
-
-  loadData(calback) {
+  loadData() {
     const self = this;
     const choice = self.dataObj;
     if (choice.category === 'hpcc') {
@@ -81,7 +81,7 @@ export class Loaddata {
         });
       });
 
-      self.dataframe = [];
+      const dataframe = [];
       self.hosts.forEach((hname, hi) => {
         const hostdata = self.sampleS[hname];
         self.sampleS.timespan.forEach((t, ti) => {
@@ -91,9 +91,10 @@ export class Loaddata {
               values[sub.text] = hostdata[self.serviceListattr[si]][ti][subi];
             });
           });
-          self.dataframe.push(values);
+          dataframe.push(values);
         });
       });
+      self.dataSource.next(dataframe);
       // if (choice.group==='url'||choice.url.includes('influxdb')){
       //   processResult = processResult_influxdb;
       //   db = 'influxdb';
@@ -196,7 +197,7 @@ export class Loaddata {
           enable: false,
           sub: [{text: 'Power consumption', id: 0, enable: false, idroot: 4, angle: 4.71238898038469, range: [0, 200]}]
         }];
-        self.serviceFullList = serviceLists2serviceFullList(self.serviceLists);
+        self.serviceSource.next(serviceLists2serviceFullList(self.serviceLists));
         self.serviceListattrnest = [
           {key: 'arrTemperature', sub: ['CPU1 Temp', 'CPU2 Temp', 'Inlet Temp']},
           {key: 'arrCPU_load', sub: ['Job load']},
@@ -221,8 +222,6 @@ export class Loaddata {
         }));
         return temp;
       }
-
-      calback({dataframe: self.dataframe, serviceFullList: self.serviceFullList});
     }
   }
 

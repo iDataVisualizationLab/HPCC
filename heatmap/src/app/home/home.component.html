@@ -1,6 +1,14 @@
-<div id="wrapper" (window:resize)="onResize()" class="container-fluid">
-  <app-service-list [serviceFullList]="serviceFullList" (onChangeService)="onChangeFunc($event)" class="float-right col-2"></app-service-list>
-  <app-asynchart [width]="800" [height]="600" [margin]="{top: 0, right: 100, bottom: 0, left: 0}" [style.display]="true" *ngFor="let datum of data; trackBy: trackByFn; let i = index" [scheme]="datum"></app-asynchart>
+<div id="leftPanel"  class="sidenavs sideIn" [ngClass]="{'sideIn': openNav}">
+    <app-service-list class="col-2" style="margin: 10px"></app-service-list>
+</div>
+<div id="wrapper" (window:resize)="onResize()" id="Maincontent" class="container-fluid" [ngClass]="{'sideIn': openNav}">
+  <a href="javascript:void(0)" class="closebtn btn-circle btn-sm btn-danger" (click)="openNav=false"><fa-icon [icon]="faChevronLeft"></fa-icon>  </a>
+  <div class="overlaySide">
+    <a class="openbtn btn-circle btn-sm btn-danger" id="sideNavbtn" (click)="openNav=true">
+      <fa-icon [icon]="faChevronRight"></fa-icon></a>
+  </div>
+
+  <app-asynchart [width]="1000" [height]="600" [margin]="{top: 0, right: 100, bottom: 80, left: 0}" [style.display]="true" *ngFor="let datum of data; trackBy: trackByFn; let i = index" [scheme]="datum"></app-asynchart>
 </div>
 <div class="d-flex justify-content-center cover text-center" *ngIf="isPagebusy">
   <div class="spinnerC">

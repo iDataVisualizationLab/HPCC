@@ -1,29 +1,31 @@
 import { Component, OnInit, HostListener } from '@angular/core';
+import { useAnimation, transition, trigger, style, animate } from '@angular/animations';
 import {Loaddata} from '../service-list/loaddata.service';
-import {ServiceListComponent} from '../service-list/service-list.component';
-import {Subject} from 'rxjs';
 import {Scheme} from '../AsynChart/model';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  providers: [],
-  styleUrls: ['./home.component.css']
+  providers: [Loaddata],
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
-  private splitScreen: boolean;
-  private isKeyDown: boolean;
   _data: Scheme[];
   dataframe: any[];
   _serviceFullList: any[];
   isPagebusy: boolean;
-  get data() {return this._data}
+  get data() {return this._data }
   set data(value) {this._data = value; }
   get serviceFullList() {return this._serviceFullList; }
   set serviceFullList(value) {this._serviceFullList = value; this.onChangeService(); }
+
   constructor(private loadDataFrame: Loaddata) {
   }
 
+  faChevronLeft = faChevronLeft;
+  faChevronRight = faChevronRight;
+  openNav = false;
   @HostListener('document:keyup', ['$event'])
   @HostListener('document:keydown', ['$event'])
 
@@ -40,27 +42,18 @@ export class HomeComponent implements OnInit {
       group: "sample",
       formatType: 'json'
     };
-    this.getData();
+    this.loadDataFrame.loadData();
+    this.loadDataFrame.serviceFullList.subscribe(serviceFullList => this.serviceFullList = serviceFullList);
+    this.loadDataFrame.dataframe.subscribe(dataframe => (this.isPagebusy = false, this.dataframe = dataframe));
   }
 
-  getData(): void {
-    this.loadDataFrame.getDataFrame( (data) => {
-      this.dataframe = data.dataframe;
-      this.serviceFullList = data.serviceFullList;
-      this.isPagebusy = false;
-      return;
-    });
-  }
-  onChangeFunc($event) {
-    this.serviceFullList = $event;
-  }
   onChangeService(): void {
     let temp_dataframe = [];
     const self = this;
     self.serviceFullList.forEach((s,si)=>{
       if (s.enable)
         temp_dataframe.push(self.getHeatmap(s.text));
-    })
+    });
     self.data = temp_dataframe;
   }
   trackByFn(index, item ) {
