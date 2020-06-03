@@ -114,7 +114,7 @@ let AsynChartCollection = function (){
 
 function handle_data_heatmap () {
     let data = [];
-    heatmapopt.height = heatmapopt.margin.top +heatmapopt.margin.bottom +10;
+    // heatmapopt.height = heatmapopt.margin.top +heatmapopt.margin.bottom +10;
     hosts.forEach((h, hi) => {
         const hname = h.name;
         let hostdata = tsnedata[hname];
