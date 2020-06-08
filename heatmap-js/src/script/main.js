@@ -300,7 +300,7 @@ var TsnePlotopt  = {
 
     }
 }
-var heatmapopt = {width:width,height:Math.min(height,400),margin:{top: 0, right: 100, bottom: 0, left: 0}};
+var heatmapopt = {width:width,height:Math.min(height,400),margin:{top: 7, right: 50, bottom: 20, left: 100}};
 var runopt ={ // run opt global
     suddenGroup:0,
     minMax: 0,
@@ -428,7 +428,7 @@ function setColorsAndThresholds(s) {
 var gaphost = 7;
 
 function main() {
-
+    mainviz.stop();
     inithostResults ();
 
     // disabled graph option
@@ -824,6 +824,7 @@ function pausechange(){
 }
 
 function resetRequest(){
+    mainviz.stop();
     pausechange();
     inithostResults();
     tool_tip.hide();
@@ -1200,7 +1201,6 @@ function onchangeCluster() {
 }
 function onchangeVizType(){
     switch (vizMode) {
-
         case 'heatmap':
             mainviz = heatMap;
             return true;
@@ -1729,7 +1729,9 @@ function recalculateCluster (option,calback,customCluster) {
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
-            M.Toast.dismissAll();
+            try {
+                M.Toast.dismissAll();
+            }catch(e){}
             data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
             cluster_info = data.result;
             if (!customCluster) {

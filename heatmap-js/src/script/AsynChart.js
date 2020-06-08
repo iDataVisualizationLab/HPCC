@@ -103,21 +103,36 @@ function AsynChart(){
         let axis_g = g.append('g').attr('class','axis');
         axis_g.append('g').attr('class','xaxis');
         axis_g.append('g').attr('class','yaxis');
+        makelegend();
     }
     function make_axis(){
-        let axisx = d3.axisBottom(scheme.x.scale);
-        const ticksx = (scheme.x.scale.ticks||scheme.x.scale.domain)().length;
-        if (scheme.x.axis && scheme.x.axis.tickValues){
-            let filterFunc = new Function('datum','index',scheme.x.axis.tickValues)
-            axisx.tickValues(scheme.x.scale.domain().filter(filterFunc))
-        }else
-        if (ticksx > 20)
-            axisx.tickValues(scheme.x.scale.domain().filter((d,i)=>!(i%Math.round(ticksx/20))));
-        g.select('.xaxis').attr('transform',`translate(${0},${graphicopt.heightG()+graphicopt.margin.top})`)
-            .call(axisx);
-        if (scheme.y.visible===undefined||scheme.y.visible==true)
-            g.select('.yaxis').attr('transform',`translate(${graphicopt.margin.left},${0})`)
-                .call(d3.axisRight(scheme.y.scale)).selectAll('.domain, line').style('display','none');
+        setTimeout(function(){
+            let axisx = d3.axisBottom(scheme.x.scale);
+            const ticksx = (scheme.x.scale.ticks||scheme.x.scale.domain)().length;
+            if (scheme.x.axis && scheme.x.axis.tickValues){
+                let filterFunc = new Function('datum','index',scheme.x.axis.tickValues)
+                axisx.tickValues(scheme.x.scale.domain().filter(filterFunc))
+            }else
+            if (ticksx > 100)
+                axisx.tickValues(scheme.x.scale.domain().filter((d,i)=>!(i%Math.round(ticksx/20))));
+            if (scheme.x.axis && scheme.x.axis.tickFormat){
+                let formatFunc = new Function('datum','index',scheme.x.axis.tickFormat);
+                axisx.tickFormat(formatFunc);
+            }
+            g.select('.xaxis').attr('transform',`translate(${0},${graphicopt.heightG()+graphicopt.margin.top})`)
+                .call(axisx);
+            if (scheme.y.visible===undefined|| scheme.y.visible===true) {
+                let axisy = d3.axisLeft(scheme.y.scale);
+                if (scheme.y.axis && scheme.y.axis.tickValues){
+                    const ticksy = (scheme.y.scale.ticks||scheme.y.scale.domain)();
+                    let filterFunc = new Function('datum','index',scheme.y.axis.tickValues);
+                    axisy.tickValues(ticksy.filter(filterFunc))
+                }
+
+                g.select('.yaxis').attr('transform', `translate(${graphicopt.margin.left},${0})`)
+                    .call(axisy).selectAll('.domain, line').style('display', 'none');
+            }
+        },1);
     }
     master.draw = function (){
         initscreen();
@@ -148,7 +163,7 @@ function AsynChart(){
     // render code-----------
     function onChangedata(){
         onChangeVairableX(scheme.x);
-        onChangeVairableX(scheme.y);
+        onChangeVairableY(scheme.y);
     }
     // Adjusts rendering speed
     function render_items(selected, ctx) {
@@ -195,7 +210,7 @@ function AsynChart(){
         return c;
     }
     const RECT_draw = function(d, ctx, color) {
-        ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),scheme.x.scale.bandwidth(),scheme.y.scale.bandwidth());
+        ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),scheme.x.scale(d[scheme.x.keyNext])-scheme.x.scale(d[scheme.x.key]),scheme.y.scale.bandwidth());
         // ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),1,scheme.y.scale.bandwidth());
         if (color){
             ctx.fillStyle = color;
@@ -231,11 +246,11 @@ function AsynChart(){
         switch (scheme.color.type) {
             case "Linear":
                 scheme.__color.scale = d3.scaleSequential()
-                    .interpolator(d3.interpolateTurbo);
+                    .interpolator(d3.interpolateSpectral);
                 if (scheme.__color.domain)
-                    scheme.__color.scale.domain(scheme.__color.domain);
+                    scheme.__color.scale.domain(scheme.__color.domain.reverse());
                 else
-                    scheme.__color.scale.domain(d3.extent(scheme.data.value,d=>d[scheme.color.key]));
+                    scheme.__color.scale.domain(d3.extent(scheme.data.value,d=>d[scheme.color.key]).reverse());
                 break;
             case "Category":
                 scheme.__color.scale = d3.scaleOrdinal(d3.schemeCategory10)
@@ -254,6 +269,7 @@ function AsynChart(){
                     break;
                 case 'Time':
                     variable_prop.scale.domain(d3.extent(scheme.data.value,d=>d[variable_prop.key]));
+                    break;
             }
         }
     }
@@ -266,6 +282,71 @@ function AsynChart(){
                     variable_prop.scale.domain(uniqueV);
                     break;
             }
+        }
+    }
+
+    function makelegend(){
+        svg.select('g.legend').remove();
+        let legend = svg.append('g').attr('class','legend').attr('transform',`translate(${graphicopt.width-graphicopt.margin.right},${graphicopt.margin.top})`);
+        const color = scheme.color.scale;
+        const marginTop = 0;
+        const marginBottom = 0;
+        const marginLeft = 0;
+        const marginRight = 0;
+        const width = 10;
+        const height = 200;
+
+        if (color.interpolate) {
+            const n = Math.min(color.domain().length, color.range().length);
+
+            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(marginTop, height - marginBottom), n));
+
+            legend.append("image")
+                .attr("x", marginLeft)
+                .attr("y", marginTop)
+                .attr("width", width - marginLeft - marginRight)
+                .attr("height", height - marginTop - marginBottom)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+        }// Sequential
+        else if (color.interpolator) {
+            let y = Object.assign(color.copy()
+                    .interpolator(d3.interpolateRound(marginTop, height - marginBottom)),
+                {range() { return [marginTop, height - marginBottom]; }});
+
+            legend.append("image")
+                .attr("x", marginLeft)
+                .attr("y", marginTop)
+                .attr("width", width - marginLeft - marginRight)
+                .attr("height", height - marginTop - marginBottom)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+
+            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+            if (!x.ticks) {
+                if (tickValues === undefined) {
+                    const n = Math.round(ticks + 1);
+                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                }
+                if (typeof tickFormat !== "function") {
+                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                }
+            }
+        }
+        function ramp(color, n = 256) {
+            const canvas = createContext(1, n);
+            const context = canvas.getContext("2d");
+            for (let i = 0; i < n; ++i) {
+                context.fillStyle = color(i / (n - 1));
+                context.fillRect(0, i, 1, 1);
+            }
+            return canvas;
+        }
+        function createContext(width, height) {
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            return canvas;
         }
     }
     // functions
@@ -311,3 +392,4 @@ function AsynChart(){
     };
     return master;
 }
+
