@@ -133,7 +133,7 @@ function handle_data_heatmap () {
         sampleS.timespan.forEach((t, ti) => {
             let values = {};
             serviceFullList.forEach((s, si) => {
-                    values[s.text] = hostdata[ti][si];
+                    values[s.text] = hostdata[ti].__valwithNull[si];
             });
             values.timestep = sampleS.timespan[ti];
             values.next = sampleS.timespan[ti+1]||sampleS.timespan[ti];

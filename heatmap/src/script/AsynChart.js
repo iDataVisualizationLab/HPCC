@@ -139,7 +139,7 @@ function AsynChart(){
         make_axis();
         if (scheme.mark.type==="rect") {
             render_item = RECT_draw;
-            render_items(scheme.data.value, foreground, 0);
+            render_items(scheme.data.value.filter(d=>d[scheme.color.key]!==undefined), foreground, 0);
         }else if(scheme.mark.type==="area"){
             if (scheme.mark.key) {
                 scheme.mark.scale = d3.scaleLinear().domain(d3.extent(scheme.data.value,d=>d[scheme.mark.value])).range([0, -scheme.y.scale.bandwidth()*2])
@@ -210,10 +210,12 @@ function AsynChart(){
         return c;
     }
     const RECT_draw = function(d, ctx, color) {
+        if (color) {
+            ctx.fillStyle = color;
+        }
         ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),scheme.x.scale(d[scheme.x.keyNext])-scheme.x.scale(d[scheme.x.key]),scheme.y.scale.bandwidth());
         // ctx.fillRect(scheme.x.scale(d[scheme.x.key]),scheme.y.scale(d[scheme.y.key]),1,scheme.y.scale.bandwidth());
         if (color){
-            ctx.fillStyle = color;
             ctx.fill()
         }
     };
