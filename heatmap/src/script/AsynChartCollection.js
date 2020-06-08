@@ -60,7 +60,9 @@ let AsynChartCollection = function (){
         }
         itemScheme.color = _.cloneDeep(scheme.color);
         itemScheme.color.key = service;
-        itemScheme.color.domain = [0,1];
+        itemScheme.color.domain = serviceFullList.find(s=>s.text===service).range;
+        itemScheme.color.title = serviceLists[serviceFullList.find(s=>s.text===service).idroot];
+        itemScheme.title = {text : service};
         let temp = {
             id: id,
             plot: new AsynChart().graphicopt(itemGraphicopt).scheme(itemScheme),
@@ -129,11 +131,14 @@ function handle_data_heatmap () {
 
     hostOrder.forEach((h, hi) => {
         const hname = hosts[h].name;
-        let hostdata = tsnedata[hname];
+        let hostdata = sampleS[hname];
+
         sampleS.timespan.forEach((t, ti) => {
             let values = {};
-            serviceFullList.forEach((s, si) => {
-                    values[s.text] = hostdata[ti].__valwithNull[si];
+            serviceLists.forEach((s, si) => {
+                s.sub.forEach((sub,subi)=>{
+                    values[sub.text] = hostdata[serviceListattr[si]][ti][subi];
+                })
             });
             values.timestep = sampleS.timespan[ti];
             values.next = sampleS.timespan[ti+1]||sampleS.timespan[ti];

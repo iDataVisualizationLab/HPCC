@@ -139,7 +139,7 @@ function AsynChart(){
         make_axis();
         if (scheme.mark.type==="rect") {
             render_item = RECT_draw;
-            render_items(scheme.data.value.filter(d=>d[scheme.color.key]!==undefined), foreground, 0);
+            render_items(scheme.data.value.filter(d=>d[scheme.color.key]!==undefined&&d[scheme.color.key]!==null), foreground, 0);
         }else if(scheme.mark.type==="area"){
             if (scheme.mark.key) {
                 scheme.mark.scale = d3.scaleLinear().domain(d3.extent(scheme.data.value,d=>d[scheme.mark.value])).range([0, -scheme.y.scale.bandwidth()*2])
@@ -291,7 +291,7 @@ function AsynChart(){
         svg.select('g.legend').remove();
         let legend = svg.append('g').attr('class','legend').attr('transform',`translate(${graphicopt.width-graphicopt.margin.right},${graphicopt.margin.top})`);
         const color = scheme.color.scale;
-        const marginTop = 0;
+        const marginTop = 20;
         const marginBottom = 0;
         const marginLeft = 0;
         const marginRight = 0;
@@ -325,7 +325,7 @@ function AsynChart(){
                 .attr("xlink:href", ramp(color.interpolator()).toDataURL());
 
             // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!x.ticks) {
+            if (!y.ticks) {
                 if (tickValues === undefined) {
                     const n = Math.round(ticks + 1);
                     tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
@@ -333,6 +333,8 @@ function AsynChart(){
                 if (typeof tickFormat !== "function") {
                     tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
                 }
+            }else{
+                legend.append('g').attr('class','legendTick').call(d3.axisLeft(y));
             }
         }
         function ramp(color, n = 256) {
