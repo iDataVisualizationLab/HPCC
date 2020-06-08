@@ -103,7 +103,7 @@ function AsynChart(){
         let axis_g = g.append('g').attr('class','axis');
         axis_g.append('g').attr('class','xaxis');
         axis_g.append('g').attr('class','yaxis');
-        axis_g.append('g').attr('class','title').attr('transform',`translate(${graphicopt.margin.left+graphicopt.widthG()/2},${graphicopt.margin.top/2})`);
+        axis_g.append('g').attr('class','title').attr('transform',`translate(${graphicopt.margin.left+graphicopt.widthG()/2},${graphicopt.margin.top/3*2})`);
         makelegend();
     }
     function make_axis(){
@@ -135,7 +135,10 @@ function AsynChart(){
             }
 
             if (scheme.title){
-                g.select('g.title').append('text').text(scheme.title.text).attrs(scheme.title)
+                g.select('g.title').append('text').text(scheme.title.text)
+                    .style('text-anchor','middle')
+                    .attr('dy','0.5rem')
+                    .attrs(scheme.title)
             }
         },1);
     }
