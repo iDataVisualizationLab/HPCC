@@ -61,8 +61,8 @@ let AsynChartCollection = function (){
         itemScheme.color = _.cloneDeep(scheme.color);
         itemScheme.color.key = service;
         itemScheme.color.domain = serviceFullList.find(s=>s.text===service).range;
-        itemScheme.color.title = serviceLists[serviceFullList.find(s=>s.text===service).idroot];
-        itemScheme.title = {text : service};
+        itemScheme.color.title = serviceLists[serviceFullList.find(s=>s.text===service).idroot].text;
+        itemScheme.title = {text:service,'font-size':20};
         let temp = {
             id: id,
             plot: new AsynChart().graphicopt(itemGraphicopt).scheme(itemScheme),

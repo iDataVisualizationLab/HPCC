@@ -300,7 +300,7 @@ var TsnePlotopt  = {
 
     }
 }
-var heatmapopt = {width:width,height:Math.min(height,400),margin:{top: 20, right: 50, bottom: 20, left: 100}};
+var heatmapopt = {width:width,height:Math.min(height,400),margin:{top: 50, right: 50, bottom: 20, left: 100}};
 var runopt ={ // run opt global
     suddenGroup:0,
     minMax: 0,
