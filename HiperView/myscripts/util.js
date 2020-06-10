@@ -553,7 +553,12 @@ function downloadProfile(event){
 function onSaveProfile (){
     var filename = $('#savename_profile').val()+".json";
     var type = "json";
-    var str = JSON.stringify(conf);
+    var str = JSON.stringify({
+        serviceList:serviceList,
+        serviceListattr:serviceListattr,
+        serviceListattrnest:serviceListattrnest,
+        serviceLists:serviceLists
+    });
     var file = new Blob([str], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);

@@ -322,7 +322,9 @@ let radarController = function () {
             });
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
-            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)})})
+            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)});
+
+        })
 
     }
     function updateSummaryData (dSum){

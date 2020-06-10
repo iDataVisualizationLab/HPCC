@@ -58,10 +58,14 @@ let AsynChartCollection = function (){
         for (let i in scheme) {
             itemScheme[i] = scheme[i];
         }
+        let service_ob = serviceFullList.find(s=>s.text===service);
         itemScheme.color = _.cloneDeep(scheme.color);
         itemScheme.color.key = service;
-        itemScheme.color.domain = serviceFullList.find(s=>s.text===service).range;
-        itemScheme.color.title = serviceLists[serviceFullList.find(s=>s.text===service).idroot].text;
+        if (service_ob.filter && service_ob.filter.length)
+            itemScheme.color.domain = service_ob.filter.slice();
+        else
+            itemScheme.color.domain = service_ob.range.slice();
+        itemScheme.color.title = serviceLists[service_ob.idroot].text;
         itemScheme.title = {text:service,'font-size':20};
         let temp = {
             id: id,
@@ -76,6 +80,11 @@ let AsynChartCollection = function (){
 
     master.draw = function () {
         master.init();
+        if (isNeedRender) {
+            contain.selectAll('div.plotItem').each(d => d.destroy());
+            contain.selectAll('div.plotItem').remove();
+        }
+        isNeedRender = false;
         const plotItem = contain.selectAll('div.plotItem')
             .data(plotLists,d=>d.id);
         plotItem.exit().each(d=>d.plot.destroy());
@@ -102,6 +111,7 @@ let AsynChartCollection = function (){
         }
 
     };
+    let isNeedRender = true;
     master.scheme = function (__) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
@@ -116,6 +126,9 @@ let AsynChartCollection = function (){
         }
 
     };
+    master.schema = function (){
+        isNeedRender = true;
+    }
     return master;
 };
 
@@ -124,9 +137,9 @@ function handle_data_heatmap () {
     let data = [];
     heatmapopt.height = heatmapopt.margin.top +heatmapopt.margin.bottom +1.5*hosts.length;
     // console.time('correlation compute: ')
-    const hostOrder = getComputeCorrelation(serviceFullList[0].text);
+    // const hostOrder = getComputeCorrelation(serviceFullList[0].text);
     // console.timeEnd('correlation compute: ')
-    // const hostOrder = d3.range(0,hosts.length);
+    const hostOrder = d3.range(0,hosts.length);
     console.time('extractData: ');
 
     hostOrder.forEach((h, hi) => {
