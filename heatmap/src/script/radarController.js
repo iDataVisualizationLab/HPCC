@@ -322,7 +322,11 @@ let radarController = function () {
             });
         tablediv.select("table").selectAll('td.summary_chart svg.s_chart').each(function(d){
             let sg = d3.select(this).datum(dataTable.cell(this.parentElement).data());
-            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)});
+            sg.call(function(selection){return violiin_chart.data([ sg.datum().summary]).draw(selection)})
+                .call((d=>d3.brushY()
+                    .extent( [ [-10,-rScale(1)], [10,-rScale(0)] ] )
+                    .on("brush", brushed)
+                    .on("end", brushended)(d)))
 
         })
 

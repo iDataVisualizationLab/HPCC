@@ -374,6 +374,9 @@ d3.viiolinChart = function () {
         return arguments.length ? (svg = _, viiolinplot) : svg;
 
     };
+    viiolinplot.scale = function(){
+        return h;
+    }
     let rangeY;
     viiolinplot.rangeY = function (_) {
         return arguments.length ? (rangeY = _, viiolinplot) : rangeY;

@@ -28,6 +28,8 @@ let AsynChartCollection = function (){
         return master;
     };
     master.init = function () {
+        if (isNeedRender)
+            plotObj = {};
         let serviceFullList_ob = {};
 
         serviceFullList.find((s,si)=>{
@@ -58,13 +60,14 @@ let AsynChartCollection = function (){
         for (let i in scheme) {
             itemScheme[i] = scheme[i];
         }
+
         let service_ob = serviceFullList.find(s=>s.text===service);
         itemScheme.color = _.cloneDeep(scheme.color);
         itemScheme.color.key = service;
-        if (service_ob.filter && service_ob.filter.length)
-            itemScheme.color.domain = service_ob.filter.slice();
-        else
-            itemScheme.color.domain = service_ob.range.slice();
+        // if (service_ob.filter && service_ob.filter.length)
+        //     itemScheme.color.domain = service_ob.filter.slice();
+        // else
+        itemScheme.color.domain = service_ob.range.slice();
         itemScheme.color.title = serviceLists[service_ob.idroot].text;
         itemScheme.title = {text:service,'font-size':20};
         let temp = {
@@ -81,7 +84,7 @@ let AsynChartCollection = function (){
     master.draw = function () {
         master.init();
         if (isNeedRender) {
-            contain.selectAll('div.plotItem').each(d => d.destroy());
+            contain.selectAll('div.plotItem').each(d => d.plot.destroy());
             contain.selectAll('div.plotItem').remove();
         }
         isNeedRender = false;
@@ -148,16 +151,23 @@ function handle_data_heatmap () {
 
         sampleS.timespan.forEach((t, ti) => {
             let values = {};
-            serviceLists.forEach((s, si) => {
-                s.sub.forEach((sub,subi)=>{
+            let invalid = false;
+            serviceLists.find((s, si) => {
+                s.sub.find((sub,subi)=>{
                     values[sub.text] = hostdata[serviceListattr[si]][ti][subi];
-                })
+                    if (sub.filter&&sub.filter.length)
+                        invalid = invalid || values[sub.text]<sub.filter[0] || values[sub.text]>sub.filter[1];
+                    return invalid;
+                });
+                return invalid;
             });
-            values.timestep = sampleS.timespan[ti];
-            values.next = sampleS.timespan[ti+1]||sampleS.timespan[ti];
-            values.compute = hname;
-            values.rack = 'Rack '+ hosts[h].hpcc_rack;
-            data.push(values);
+            if (!invalid) {
+                values.timestep = sampleS.timespan[ti];
+                values.next = sampleS.timespan[ti + 1] || sampleS.timespan[ti];
+                values.compute = hname;
+                values.rack = 'Rack ' + hosts[h].hpcc_rack;
+                data.push(values);
+            }
         })
     });
 

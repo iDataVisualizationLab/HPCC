@@ -110,12 +110,14 @@ function AsynChart(){
         setTimeout(function(){
             let axisx = d3.axisBottom(scheme.x.scale);
             const ticksx = (scheme.x.scale.ticks||scheme.x.scale.domain)().length;
-            if (scheme.x.axis && scheme.x.axis.tickValues){
-                let filterFunc = new Function('datum','index',scheme.x.axis.tickValues)
-                axisx.tickValues(scheme.x.scale.domain().filter(filterFunc))
-            }else
-            if (ticksx > 100)
-                axisx.tickValues(scheme.x.scale.domain().filter((d,i)=>!(i%Math.round(ticksx/20))));
+            if (ticksx > 100) {
+                if (scheme.x.axis && scheme.x.axis.tickValues) {
+                    let filterFunc = new Function('datum', 'index', scheme.x.axis.tickValues)
+                    axisx.tickValues(scheme.x.scale.domain().filter(filterFunc))
+                }else
+                    axisx.tickValues(scheme.x.scale.domain().filter((d, i) => !(i % Math.round(ticksx / 20))));
+            }
+
             if (scheme.x.axis && scheme.x.axis.tickFormat){
                 let formatFunc = new Function('datum','index',scheme.x.axis.tickFormat);
                 axisx.tickFormat(formatFunc);
@@ -187,7 +189,7 @@ function AsynChart(){
 
         let opacity = scheme.color.opacity;
         if(opacity===undefined)
-            opacity = 1
+            opacity = 1;
         // render all lines until finished or a new brush event
         function animloop(){
             if (i >= n ) {

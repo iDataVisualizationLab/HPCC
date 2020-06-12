@@ -109,6 +109,7 @@ let radarController = function () {
     }
 
     function brushed(){
+
         if (d3.event.sourceEvent.type === "brush") return;
         var d0 = d3.event.selection.map(v=>radarcomp.axis[this.__data__.data.text].scale.invert(-rScale.invert(v))).sort((a,b)=>a-b),
             d1 = d0.map(Math.round);
@@ -350,7 +351,35 @@ let radarController = function () {
                         displaytick = [0,sg.datum().data.range[1]];
                 }
                 violiin_chart.graphicopt({customrange:customrange});//fix range from 0
-                violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection)
+                const v_g = violiin_chart.data([ sg.datum().summary]).setTicksDisplay(displaytick).draw(selection);
+                const scaleX = violiin_chart.scale();
+                selection.select('g.brush').remove();
+                selection.append('g').attr('class','brush')
+                    .attr('transform',`translate(${violiin_chart.graphicopt().margin.left},${violiin_chart.graphicopt().margin.top+violiin_chart.graphicopt().heightG()/2})`)
+                    .call(d3.brushX()
+                    .extent( [ [scaleX(customrange[0]),-5], [scaleX(customrange[1]),5] ] )
+                    .on("brush", brushedX)
+                    .on("end", brushendedX));
+                function brushedX(){
+                    if (d3.event.sourceEvent.type === "brush") return;
+                    var d0 = d3.event.selection.map(v=>radarcomp.axis[this.__data__.data.text].scale.invert(scaleX.invert(v))).sort((a,b)=>a-b),
+                        d1 = d0.map(Math.round);
+
+                    // If empty when rounded, use floor instead.
+                    if (d1[0] >= d1[1]) {
+                        d1[0] = Math.floor(d0[0]);
+                        d1[1] = Math.floor(d1[0]);
+                    }
+                    d1 = d1.sort((a,b)=>a-b).map(radarcomp.axis[this.__data__.data.text].scale).map(d=>scaleX(d))
+                    d3.select(this).call(d3.event.target.move, d1);
+                }
+                function brushendedX(){
+                    if (d3.brushSelection(this))
+                        radarcomp.axis[d.data.text].filter = d3.brushSelection(this).map(v=>radarcomp.axis[d.data.text].scale.invert(scaleX.invert(v))).sort((a,b)=>a-b);
+                    else
+                        radarcomp.axis[d.data.text].filter = null;
+                    onChangeFilterFunc(radarcomp);
+                }
             })})
 
     }
