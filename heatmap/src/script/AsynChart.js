@@ -45,10 +45,12 @@ function AsynChart(){
         background,
         highlighted,
         legend,
+        tooltip,
         render_speed = 50,
         svg,g;
+    let container;
     function initscreen(){
-        let container = d3.select(graphicopt.contain)
+        container = d3.select(graphicopt.contain)
             .style('width',graphicopt.width+'px')
             .style('height',graphicopt.height+'px');
         // Foreground canvas for primary view
@@ -66,6 +68,7 @@ function AsynChart(){
         foreground.strokeStyle = "rgba(0,100,160,0.1)";
         foreground.lineWidth = 1.7;
         foreground.fillText("Loading...", graphicopt.width / 2, graphicopt.height / 2);
+        foreground_obj.on('mouseover',null);
         // Highlight canvas for temporary interactions
         let highlighted_obj = container.select('canvas.highlighted');
         if (container.select('canvas.highlighted').empty()) {
@@ -74,7 +77,7 @@ function AsynChart(){
                 .style('top',0)
                 .style('left',0);
         }
-        highlighted = highlighted_obj.node().getContext('2d');
+        highlighted = highlighted_obj.classed('hide',true).node().getContext('2d');
         highlighted_obj.attr('width',graphicopt.width).attr('height',graphicopt.height);
         highlighted.strokeStyle = "rgba(0,100,160,1)";
         highlighted.lineWidth = 4;
@@ -86,7 +89,7 @@ function AsynChart(){
                 .style('top',0)
                 .style('left',0);
         }
-        background_obj.attr('width',graphicopt.width).attr('height',graphicopt.height);
+        background_obj.attr('width',graphicopt.width).attr('height',graphicopt.height).classed('hide',true);
         background = background_obj.node().getContext('2d');
         background.strokeStyle = "rgba(0,100,160,0.1)";
         background.lineWidth = 1.7;
@@ -105,6 +108,24 @@ function AsynChart(){
         axis_g.append('g').attr('class','yaxis');
         axis_g.append('g').attr('class','title').attr('transform',`translate(${graphicopt.margin.left+graphicopt.widthG()/2},${graphicopt.margin.top/3*2})`);
         makelegend();
+
+        tooltip = container.select('div.tooltip');
+        if (tooltip.empty()){
+            tooltip = container.append('div').attr('class','tooltip')
+                .style('opacity',0)
+                .styles({
+                    position: 'absolute',
+                    display: 'inline-block',
+                    padding: '10px',
+                    color: '#000',
+                    'background-color': '#fff',
+                    border: '1px solid #999',
+                    'border-radius': '2px',
+                    'pointer-events': 'none',
+                    opacity: 0,
+                    'z-index': 1,
+                });
+        }
     }
     function make_axis(){
         setTimeout(function(){
@@ -144,12 +165,47 @@ function AsynChart(){
             }
         },1);
     }
+    let quadTree;
     master.draw = function (){
         initscreen();
         make_axis();
         if (scheme.mark.type==="rect") {
             render_item = RECT_draw;
-            render_items(scheme.data.value.filter(d=>d[scheme.color.key]!==undefined&&d[scheme.color.key]!==null), foreground, 0);
+            const filteredData = scheme.data.value.filter(d=>d[scheme.color.key]!==undefined&&d[scheme.color.key]!==null);
+            quadTree = d3.quadtree()
+                .x((d)=>scheme.x.scale(d[scheme.x.key]))
+                .y(d=>scheme.y.scale(d[scheme.y.key]))
+                .extent([[graphicopt.margin.left, graphicopt.margin.top], [graphicopt.margin.left+graphicopt.widthG(), graphicopt.margin.top+graphicopt.heightG()]])
+                .addAll(filteredData);
+            const foreground_obj = container.select('canvas.foreground');
+            foreground_obj.on('mousemove',function(){
+                var mouse = d3.mouse(this),
+                    closest = quadTree.find(mouse[0],mouse[1]);
+                if(closest){
+                    tooltip
+                        .style('opacity', 0.8)
+                        .style('top', mouse[1] + 'px')
+                        .style('left', mouse[0] + 'px')
+                        .html(scheme.x.key+': ' + closest[scheme.x.key] + '<br>' + scheme.y.key+': ' + closest[scheme.y.key] + '<br>' + scheme.color.key+': ' + closest[scheme.color.key]);
+                } else {
+                    tooltip
+                        .style('opacity', 0);
+                }
+
+                // container.select('canvas.highlight').attr("cx", x(closest[0]))
+                //     .attr("cy", y(closest[1]));
+            }).on('mouseout',function(){
+                tooltip
+                    .style('opacity', 0);
+            });
+            // foreground_obj.on("mouseover",function(){
+            //     container.select('canvas.highlight').classed("hidden", false);
+            // });
+            //
+            // foreground_obj.on("mouseout",function(){
+            //     container.select('canvas.highlight').classed("hidden", true);
+            // });
+            render_items(filteredData, foreground, 0);
         }else if(scheme.mark.type==="area"){
             if (scheme.mark.key) {
                 scheme.mark.scale = d3.scaleLinear().domain(d3.extent(scheme.data.value,d=>d[scheme.mark.value])).range([0, -scheme.y.scale.bandwidth()*2])
@@ -292,6 +348,13 @@ function AsynChart(){
                 case 'Band':
                     let uniqueV = _.uniq(scheme.data.value.map(d=>d[variable_prop.key]));
                     variable_prop.scale.domain(uniqueV);
+                    variable_prop.scale.invert = function(value){
+                        var domain = variable_prop.scale.domain();
+                        var paddingOuter = variable_prop.scale(domain[0]);
+                        var eachBand = variable_prop.scale.step();
+                        var index = Math.floor(((value - paddingOuter) / eachBand));
+                        return domain[Math.max(0,Math.min(index, domain.length-1))];
+                    };
                     break;
             }
         }
