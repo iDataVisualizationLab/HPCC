@@ -172,18 +172,20 @@ function handle_data_heatmap () {
     });
 
     // rack
-    // const rackData = d3.nest().key(d=>d.rack).key(d=>d.timestep).rollup(d=>{
-    //     let values = {};
-    //     serviceFullList.forEach((s, si) => {
-    //     values[s.text] = d3.mean(d,e=>e[s.text]);})
-    //     values.timestep = d[0].timestep;
-    //     values.next = d[0].next;
-    //     values.compute = d[0].compute;
-    //     values.rack = d[0].rack;
-    //     return values;
-    // }).entries(data);
-    // data = [];
-    // rackData.forEach(d=>d.values.forEach(e=>data.push(e.value)));
+    if (heatmapopt.israck) {
+        const rackData = d3.nest().key(d=>d.rack).key(d=>d.timestep).rollup(d=>{
+            let values = {};
+            serviceFullList.forEach((s, si) => {
+            values[s.text] = d3.mean(d,e=>e[s.text]);})
+            values.timestep = d[0].timestep;
+            values.next = d[0].next;
+            values.compute = d[0].compute;
+            values.rack = d[0].rack;
+            return values;
+        }).entries(data);
+        data = [];
+        rackData.forEach(d=>d.values.forEach(e=>data.push(e.value)));
+    }
     // end rack
 
     console.timeEnd('extractData: ')
@@ -195,6 +197,9 @@ function handle_data_heatmap () {
         mark:{type:"rect"},
         color:{key:undefined,type:"Linear",domain:[0,1]}
     };
+    if (heatmapopt.israck) {
+        scheme.y = {key:'rack',type:'Band'};
+    }
     preloader(true, 0,"Generate heatmap....");
     heatMap.graphicopt(heatmapopt).scheme(scheme).reset().draw();
 }

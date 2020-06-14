@@ -116,6 +116,15 @@ angular.module('hpccApp').constant('SampleData', [
         date:"24 Apr 2020",
         group:"sample",
         formatType:'json'
+    },{
+        id:"influxdbWed10Jun_1145",
+        name:"HPC data - 28 May-09 June 2020",
+        url:"../HiperView/data/influxdbWed10Jun_1145.json",
+        description:"",
+        category:'hpcc',
+        date:"28 May 2020",
+        group:"sample",
+        formatType:'json'
     },
     {
         id:"zenith_idrac_3.1_through_3.5",

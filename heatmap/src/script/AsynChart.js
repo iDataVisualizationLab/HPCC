@@ -147,10 +147,13 @@ function AsynChart(){
                 .call(axisx);
             if (scheme.y.visible===undefined|| scheme.y.visible===true) {
                 let axisy = d3.axisLeft(scheme.y.scale);
-                if (scheme.y.axis && scheme.y.axis.tickValues){
-                    const ticksy = (scheme.y.scale.ticks||scheme.y.scale.domain)();
-                    let filterFunc = new Function('datum','index',scheme.y.axis.tickValues);
-                    axisy.tickValues(ticksy.filter(filterFunc))
+                const ticksy = (scheme.y.scale.ticks||scheme.y.scale.domain)().length;
+                if (ticksy > 100) {
+                    if (scheme.y.axis && scheme.y.axis.tickValues) {
+                        const ticksy = (scheme.y.scale.ticks || scheme.y.scale.domain)();
+                        let filterFunc = new Function('datum', 'index', scheme.y.axis.tickValues);
+                        axisy.tickValues(ticksy.filter(filterFunc))
+                    }
                 }
 
                 g.select('.yaxis').attr('transform', `translate(${graphicopt.margin.left},${0})`)
