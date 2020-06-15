@@ -97,7 +97,80 @@ let AsynChartCollection = function (){
             .attr('class','plotItem')
             .attr('id',d=>d.id)
             .styles({width:graphicopt.width+'px', height:graphicopt.height+'px', position: 'relative'})
-            .each(d=>d.plot.draw());
+            .each(d=>{
+                //draw heatmap
+                d.plot.draw();
+                // make custom input button
+                const legendRange = d.plot.scheme().legend.scale.domain().sort((a,b)=>a-b);
+                const legendSize = d.plot.container().select('.legend image').node().getBoundingClientRect();
+                const svgSize = d.plot.container().select('svg').node().getBoundingClientRect();
+                let customRange = legendRange.slice();
+                let applybtn = d.plot.container().append('div').attr('class','no_padding valign-wrapper center-align rangeChangeBtn')
+                    .html(`<button type="submit" class="btn-small animatIcon"><i class="material-icons">check</i><div>Apply</div></button>`)
+                    .styles({
+                        position:'absolute',
+                        'top': (legendSize.y-svgSize.y+legendSize.height+50)+'px',
+                        'left': (legendSize.x-svgSize.x)+'px',
+                        'transform':d=>`translate(-100%,0)`
+                    })
+                    .classed('hide',true);
+                applybtn.on('click',function(){
+                    const scheme = d.plot.scheme();
+                    scheme.color.domain = customRange.slice()
+                    d.plot.scheme(scheme);
+                    d.plot.draw();
+                    applybtn.classed('hide', true);
+                    canclebtn.classed('hide', true);
+                });
+                let canclebtn = d.plot.container().append('div').attr('class','rangeResetBtn')
+                    .text('Cancle')
+                    .html(`<button type="submit" class="btn-small green darken-2" style="padding:0"><i class="material-icons">clear</i></button>`)
+                    .styles({
+                        position:'absolute',
+                        'top': (legendSize.y-svgSize.y+legendSize.height+50)+'px',
+                        'left': (legendSize.x-svgSize.x)+'px'
+                    })
+                    .classed('hide',true);
+                canclebtn.on('click',function(){
+                    customRange = legendRange.slice();
+                    rangeo.each(function(d){
+                        $(this).val(customRange[+(d.key==='upLimit')]);
+                    });
+                    applybtn.classed('hide', true);
+                    canclebtn.classed('hide', true);
+                });
+                let rangeo = d.plot.container().selectAll('input.range')
+                    .data([{key:'upLimit',value:legendRange[1],pos:legendSize.y-svgSize.y},
+                        {key:'lowLimit',value:legendRange[0],pos:legendSize.y-svgSize.y+legendSize.height}])
+                    .enter().append('input')
+                    .attr('class','range')
+                    .styles({
+                        position:'absolute',
+                        width: '60px',
+                        height: '20px',
+                        'border-radius': '2px',
+                        'display':'block',
+                        'background-color':'white',
+                        'top':d=>d.pos+'px',
+                        'left': legendSize.x-svgSize.x+'px',
+                        'padding-right': '2px',
+                        'font-size':'12px',
+                        'transform':d=>`translate(-100%,${d.key==='upLimit'?-100:0}%)`
+                    })
+                    .attr('type',"number").attr('value',d=>d.value)
+                    .on('input',function(d){
+                        customRange[+(d.key==='upLimit')] = +$(this).val();
+                        console.log(customRange)
+                        if (_.isEqual(customRange,legendRange)) {
+                            applybtn.classed('hide', true);
+                            canclebtn.classed('hide', true);
+                        }else {
+                            applybtn.classed('hide', false);
+                            canclebtn.classed('hide', false);
+                        }
+                    });
+
+            });
         preloader(false);
     };
     master.graphicopt = function (__) {

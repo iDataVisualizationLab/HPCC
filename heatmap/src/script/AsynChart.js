@@ -97,6 +97,7 @@ function AsynChart(){
         svg = container.select("svg.chart");
         if (svg.empty()) {
             svg = container.append('svg')
+                .attr('class','chart')
                 .attr("width", graphicopt.width)
                 .attr("height", graphicopt.height);
         }
@@ -169,6 +170,7 @@ function AsynChart(){
         },1);
     }
     let quadTree;
+
     master.draw = function (){
         initscreen();
         make_axis();
@@ -410,11 +412,12 @@ function AsynChart(){
                     tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
                 }
             }else{
+                scheme.legend = {scale:y};
                 legend.append('g').attr('class','legendTick').call(d3.axisLeft(y));
             }
         }
         if (scheme.color.title){
-            legend.append('text').text(scheme.color.title).attr('y',marginTop -4).style('text-anchor','middle')
+            legend.append('text').text(scheme.color.title).attr('y',marginTop -34).style('text-anchor','middle')
         }
         function ramp(color, n = 256) {
             const canvas = createContext(1, n);
@@ -458,6 +461,7 @@ function AsynChart(){
         }
 
     };
+    master.container = ()=>container;
     master.scheme = function (__) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
@@ -469,7 +473,7 @@ function AsynChart(){
             init_scheme();
             return master;
         }else {
-            return graphicopt;
+            return scheme;
         }
 
     };
