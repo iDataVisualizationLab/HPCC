@@ -101,12 +101,12 @@ let AsynChartCollection = function (){
                 //draw heatmap
                 d.plot.draw();
                 // make custom input button
-                const legendRange = d.plot.scheme().legend.scale.domain().sort((a,b)=>a-b);
+                let legendRange = d.plot.scheme().legend.scale.domain().sort((a,b)=>a-b);
                 const legendSize = d.plot.container().select('.legend image').node().getBoundingClientRect();
                 const svgSize = d.plot.container().select('svg').node().getBoundingClientRect();
                 let customRange = legendRange.slice();
                 let applybtn = d.plot.container().append('div').attr('class','no_padding valign-wrapper center-align rangeChangeBtn')
-                    .html(`<button type="submit" class="btn-small animatIcon"><i class="material-icons">check</i><div>Apply</div></button>`)
+                    .html(`<button type="submit" class="btn-small animatIcon green darken-2"><i class="material-icons">check</i><div>Apply</div></button>`)
                     .styles({
                         position:'absolute',
                         'top': (legendSize.y-svgSize.y+legendSize.height+50)+'px',
@@ -115,8 +115,9 @@ let AsynChartCollection = function (){
                     })
                     .classed('hide',true);
                 applybtn.on('click',function(){
+                    legendRange = customRange.slice();
                     const scheme = d.plot.scheme();
-                    scheme.color.domain = customRange.slice()
+                    scheme.color.domain = customRange.slice();
                     d.plot.scheme(scheme);
                     d.plot.draw();
                     applybtn.classed('hide', true);
@@ -124,7 +125,7 @@ let AsynChartCollection = function (){
                 });
                 let canclebtn = d.plot.container().append('div').attr('class','rangeResetBtn')
                     .text('Cancle')
-                    .html(`<button type="submit" class="btn-small green darken-2" style="padding:0"><i class="material-icons">clear</i></button>`)
+                    .html(`<button type="submit" class="btn-small red darken-4" style="padding:0"><i class="material-icons">clear</i></button>`)
                     .styles({
                         position:'absolute',
                         'top': (legendSize.y-svgSize.y+legendSize.height+50)+'px',
@@ -159,14 +160,24 @@ let AsynChartCollection = function (){
                     })
                     .attr('type',"number").attr('value',d=>d.value)
                     .on('input',function(d){
-                        customRange[+(d.key==='upLimit')] = +$(this).val();
-                        console.log(customRange)
+                        let index = +(d.key==='upLimit');
+                        customRange[index] = +$(this).val();
                         if (_.isEqual(customRange,legendRange)) {
                             applybtn.classed('hide', true);
                             canclebtn.classed('hide', true);
                         }else {
                             applybtn.classed('hide', false);
                             canclebtn.classed('hide', false);
+                            if ((index*2-1)*(-customRange[index]+legendRange[index])<0)
+                            {
+                                // wrong input
+                                applybtn.select('input').attr('disabled', '');
+                            }else{
+                                if (!(((!index)*2-1)*(-customRange[+!index]+legendRange[+!index])<0))
+                                {
+                                    applybtn.select('input').attr('disabled', null);
+                                }
+                            }
                         }
                     });
 
