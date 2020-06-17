@@ -88,7 +88,7 @@ angular.module('hpccApp')
                     });
                 }, 0);
             else
-                readFilecsv(choice.url,choice.separate,choice)
+                readFilecsv(choice.url,choice.separate,choice);
 
         function loadata1(data,job){
             makedataworker();
