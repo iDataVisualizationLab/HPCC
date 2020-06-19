@@ -7,6 +7,7 @@ angular.module('hpccApp')
     var Config = {};
 
     Config.data = {};
+    Config.layout = {};
     Config.config = {};
 
     Config.getConfig = function() {
@@ -17,6 +18,9 @@ angular.module('hpccApp')
       return Config.data;
     };
 
+      Config.getLayout = function() {
+          return Config.layout;
+      };
 
     Config.updateDataset = function(dataset, type) {
       if (dataset.values) {
@@ -29,6 +33,18 @@ angular.module('hpccApp')
         Config.data.formatType = type;
       }
     };
+
+      Config.updateLayout = function(layout, type) {
+          if (layout.values) {
+              Config.layout.values = layout.values;
+              delete Config.layout.url;
+              Config.layout.formatType = undefined;
+          } else {
+              Config.layout.url = layout.url;
+              delete Config.layout.values;
+              Config.layout.formatType = type;
+          }
+      };
 
     return Config;
   });

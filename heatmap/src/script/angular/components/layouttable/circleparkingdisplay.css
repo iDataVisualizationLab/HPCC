@@ -1,0 +1,16 @@
+.circlepacking-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 80%;
+    vertical-align: middle;
+    overflow: hidden;
+}
+.circlepacking-svg-content {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    "cursor", "pointer";
+}
+

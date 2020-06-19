@@ -141,12 +141,12 @@
                         </div>
                         <div class="row valign-wrapper">
                             <div class="col s4 right-align">
-                                <span style="display:inline-block; margin:0;">Instance layout</span>
+                                <span style="display:inline-block; margin:0;">Layout</span>
                                 <i class="fas fa-sitemap"></i>
                             </div>
-                            <div class="col s7 no-padding" title="{{Dataset.currentDataset.name}}" >
-                                <span class="dataset-name col s8 truncate no-padding">{{Dataset.currentDataset.name}}</span>
-                                <dataset-selector></dataset-selector>
+                            <div class="col s7 no-padding" title="{{Layout.currentLayout.name}}" >
+                                <span class="layout-name col s8 truncate no-padding">{{Layout.currentLayout.name}}</span>
+                                <layout-selector></layout-selector>
                             </div>
                             <div class="col s1">
                                 <button class="information" data-target='datainformation' data-title='Dataset information' >i</button>
@@ -664,6 +664,7 @@
     </div>
 
     <database-table></database-table>
+    <layout-table></layout-table>
 
     <script type="x-shader/x-vertex" id="vertexshader">
 
@@ -801,6 +802,8 @@
     <link rel="stylesheet" href="src/script/angular/components/databasetable/pastedataset.css">
     <link rel="stylesheet" href="src/script/angular/components/modal/modal.css">
     <link rel="stylesheet" href="src/script/angular/components/tabs/tab.css">
+    <link rel="stylesheet" href="src/script/angular/components/layouttable/layoutdisplay.css">
+    <link rel="stylesheet" href="src/script/angular/components/layouttable/circleparkingdisplay.css">
     <!--script-->
     <script src="src/script/angular/components/tabs/tab.js"></script>
     <script src="src/script/angular/components/tabs/tabset.js"></script>
@@ -817,6 +820,15 @@
     <script src="src/script/angular/components/databasetable/pastedataset.js"></script>
     <script src="src/script/angular/components/databasetable/loadurl.js"></script>
     <script src="src/script/angular/components/databasetable/sampledata.js"></script>
+
+    <script src="src/script/angular/components/layouttable/layoutdisplay.js"></script>
+    <script src="src/script/angular/components/layouttable/circleparkingdisplay.js"></script>
+    <script src="src/script/angular/components/layouttable/layoutTable.service.js"></script>
+    <script src="src/script/angular/components/layouttable/layoutTable.js"></script>
+    <script src="src/script/angular/components/layouttable/layout.service.js"></script>
+    <script src="src/script/angular/components/layouttable/layoutselector.js"></script>
+    <script src="src/script/angular/components/layouttable/layout.service.js"></script>
+    <script src="src/script/angular/components/layouttable/sampledata.js"></script>
     <script src="src/script/angular/components/loadData/loaddata.service.js"></script>
 
     <script src="src/script/angular/hpccApp.controller.js"></script>

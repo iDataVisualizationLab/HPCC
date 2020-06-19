@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('hpccApp')
-.factory('Loaddata', function($timeout,Dataset,_, Config) {
+.factory('Loaddata', function($timeout,Dataset,Layout,_, Config) {
 
     var Loaddata = {
         data:{}
@@ -83,7 +83,7 @@ angular.module('hpccApp')
                                 return;
                             });
                         }else{
-                            loadata1(choice.values, choice.jobs);
+                            loadata1(choice.values.slice(), choice.jobs);
                         }
                     });
                 }, 0);
@@ -306,7 +306,7 @@ angular.module('hpccApp')
                 })
             }else{
                 dataInformation.size = object.size;
-                loadcsv(object.values)
+                loadcsv(object.values.slice())
             }
         }, 0);
     }
@@ -316,6 +316,11 @@ angular.module('hpccApp')
         console.log(Dataset.currentDataset);
         if (Loaddata.data.name)
             loadFile(Dataset.currentDataset);
+    });
+    Layout.onUpdateFinish.push(function() {
+        console.log(Layout)
+        // if (Loaddata.data.name)
+        //     loadFile(Dataset.currentDataset);
     });
     return Loaddata;
 })
