@@ -3,6 +3,16 @@
         <svg class="circlepacking-svg-content"
              ng-style="{background: color(0)}"
              viewBox="{{-width / 2}} {{-height / 2}} {{width}} {{height}}">
+            <defs>
+                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="10 10" result="glow"/>
+                    <feMerge>
+                        <feMergeNode in="glow"/>
+                        <feMergeNode in="glow"/>
+                        <feMergeNode in="glow"/>
+                    </feMerge>
+                </filter>
+            </defs>
         </svg>
     </div>
     <label class="row" ng-if="service.serviceText">

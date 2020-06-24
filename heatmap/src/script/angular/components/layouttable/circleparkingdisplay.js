@@ -27,8 +27,8 @@ angular.module('hpccApp')
                 scope.service.serviceText = serviceFullList.map(d=>d.text);
                 scope.service.selectedService = 0;
                 scope.Layout = Layout;
-                scope.width = 1000;
-                scope.height = 800;
+                scope.width = 800;
+                scope.height = 640;
                 const width = scope.width;
                 const height = scope.height;
                 scope.color = (d)=>'#fff';
@@ -75,6 +75,7 @@ angular.module('hpccApp')
                         .selectAll("text")
                         .data(root.descendants())
                         .enter().append("text")
+                        .style('font-size',d => d.parent === root ? 18 : 12)
                         .style("fill-opacity", d => d.parent === root ? 1 : 0)
                         .style("display", d => d.parent === root ? "inline" : "none")
                         .text(d => d.data.name);
