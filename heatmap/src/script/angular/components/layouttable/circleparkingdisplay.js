@@ -164,15 +164,15 @@ angular.module('hpccApp')
                     node = node.enter().append("circle")
                         .call(updateNode).merge(node);
 
-                    let topValue = root.leaves().slice().sort((a,b)=>getMetric(a)-getMetric(b));
+                    let topValue = root.leaves().slice().filter(d=>getMetric(d)!=null).sort((a,b)=>getMetric(a)-getMetric(b));
                     topValue = _.flatten([topValue.slice(0,5),topValue.slice(topValue.length-5,topValue.length)]);
                     value_text = gvalue.selectAll(".value_text")
                         .data(topValue)
-                        .text(d=>d3.format('.1f')(getMetric(d)));
+                        .text(d=>d3.format('.0f')(getMetric(d)));
                     value_text.exit().remove();
                     value_text = value_text.enter().append("text")
                         .attr('class','value_text')
-                        .text(d=>d3.format('.1f')(getMetric(d))).merge(value_text);
+                        .text(d=>d3.format('.0f')(getMetric(d))).merge(value_text);
                     zoomTo(currentZoomData)
                 }
                 function getMetric(a){
