@@ -175,8 +175,16 @@ angular.module('hpccApp')
                     value_text.exit().remove();
                     value_text = value_text.enter().append("text")
                         .attr('class','value_text')
-                        .text(d=>d3.format('.0f')(getMetric(d))).merge(value_text);
-                    label.style('fill',d=>{
+                        .text(d=>d3.format('.0f')(getMetric(d))).merge(value_text)
+                        .call(textcolor);
+                    label.call(textcolor);
+                    zoomTo(currentZoomData)
+                }
+                function getMetric(a){
+                        return a.data.metrics[serviceFullList[scope.serviceSelected].text];
+                }
+                function textcolor(p){
+                        return p.style('fill',d=>{
                         if(d.children)
                             return '#ffffff';
                         else
@@ -186,11 +194,7 @@ angular.module('hpccApp')
                             return '#000000'+' 1px 1px 0px';
                         else
                             return invertColor(invertColor(d.color,true),true)+' 1px 1px 0px';
-                    });
-                    zoomTo(currentZoomData)
-                }
-                function getMetric(a){
-                        return a.data.metrics[serviceFullList[scope.serviceSelected].text];
+                    })
                 }
                 function invertColor(hex, bw) {
                     const color = d3.color(hex)
