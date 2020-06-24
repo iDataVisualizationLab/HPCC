@@ -94,7 +94,7 @@ angular.module('hpccApp')
             makedataworker();
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(+d?+d:d.replace('Z','')))));
             sampleS = data;
-            Dataset.data = sampleS;
+            Dataset.data = {sampleS:sampleS};
             if (choice.category==='hpcc') { //reload hostlist
                 firstTime = true;
                 systemFormat();
@@ -117,17 +117,20 @@ angular.module('hpccApp')
             inithostResults();
             // make normalize data
             initTsnedata();
-            if(job)
+            if(job) {
                 sampleJobdata = job;
-            else
+                Dataset.data.job = job;
+            }else {
+                Dataset.data.job = [];
                 sampleJobdata = [{
                     jobID: "1",
                     name: "1",
-                    nodes: hosts.map(h=>h.name),
-                    startTime: new Date(_.last(sampleS.timespan)-100).toString(),
-                    submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                    nodes: hosts.map(h => h.name),
+                    startTime: new Date(_.last(sampleS.timespan) - 100).toString(),
+                    submitTime: new Date(_.last(sampleS.timespan) - 100).toString(),
                     user: "dummyJob"
                 }];
+            }
             if (choice.group==='url'||choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";
@@ -240,7 +243,7 @@ angular.module('hpccApp')
 
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
-            Dataset.data = sampleS
+            Dataset.data = {sampleS:sampleS,job:[]}
             inithostResults();
             formatService(true);
             processResult = processResult_csv;

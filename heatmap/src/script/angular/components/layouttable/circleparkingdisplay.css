@@ -30,6 +30,7 @@
     "cursor", "pointer";
 }
 .circlepacking-svg-content text {
-    fill: #111;
-    text-shadow: rgba(255, 255, 255, 0.6) 1px 1px 0px;
+    fill: #ffffff;
+    text-shadow: rgba(0, 0, 0, 0.5) 1px 1px 0px;
+    /*text-shadow: 0 1px 0 #000, 1px 0 0 #000, 0 -1px 0 #000, -1px 0 0 #000;*/
 }

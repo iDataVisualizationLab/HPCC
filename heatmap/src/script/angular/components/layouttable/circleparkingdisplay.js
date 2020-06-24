@@ -135,7 +135,7 @@ angular.module('hpccApp')
                                                 value:1,
                                                 metrics:{}
                                             };
-                                            serviceFullList.forEach(s=>item.metrics[s.text]=_.last(Dataset.data[d][serviceListattr[s.idroot]])[s.id]);
+                                            serviceFullList.forEach(s=>item.metrics[s.text]=_.last(Dataset.data.sampleS[d][serviceListattr[s.idroot]])[s.id]);
                                             return item;
                                         })
                                 }))
@@ -144,10 +144,13 @@ angular.module('hpccApp')
                     function updateNode(node){
                         return node
                             .attr("fill", d => {
-                                if(d.children)
-                                    return color(d.depth)
-                                else
-                                    return colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text])
+                                if(d.children) {
+                                    d.color =  color(d.depth);
+                                    return d.color;
+                                }else {
+                                    d.color = colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text]);
+                                    return d.color;
+                                }
                             })
                             .attr("pointer-events", d => !d.children ? "none" : null)
                             .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
@@ -173,10 +176,39 @@ angular.module('hpccApp')
                     value_text = value_text.enter().append("text")
                         .attr('class','value_text')
                         .text(d=>d3.format('.0f')(getMetric(d))).merge(value_text);
+                    label.style('fill',d=>{
+                        if(d.children)
+                            return '#ffffff';
+                        else
+                            return invertColor(d.color,true);
+                    }).style('text-shadow',function(d){
+                        if(d.children)
+                            return '#000000'+' 1px 1px 0px';
+                        else
+                            return invertColor(invertColor(d.color,true),true)+' 1px 1px 0px';
+                    });
                     zoomTo(currentZoomData)
                 }
                 function getMetric(a){
                         return a.data.metrics[serviceFullList[scope.serviceSelected].text];
+                }
+                function invertColor(hex, bw) {
+                    const color = d3.color(hex)
+                    var r = color.r,
+                        g = color.g,
+                        b = color.b;
+                    if (bw) {
+                        // http://stackoverflow.com/a/3943023/112731
+                        return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                            ? '#000000'
+                            : '#FFFFFF';
+                    }
+                    // invert color components
+                    color.r = (255 - r);
+                    color.g = (255 - g);
+                    color.b = (255 - b);
+                    // pad each with zeros and return
+                    return color.toString();
                 }
                 var datasetWatcher = scope.$watch(function() {
                     return serviceFullList;
