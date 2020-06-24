@@ -34,7 +34,13 @@ angular.module('hpccApp')
                 scope.color = (d)=>'#fff';
                 scope.serviceSelected = 0;
                 scope.colorItem = Config.getConfig().colorScheme?Config.getConfig().colorScheme.copy():d3.scaleSequential();
-                scope.colorItem.domain(serviceFullList[scope.serviceSelected].range);
+                scope.colorItem.domain(serviceFullList[scope.serviceSelected].range.slice().reverse());
+                const colorItem = function(d){
+                    if (d)
+                        return scope.colorItem(d);
+                    else
+                        return '#afafaf';
+                }
 
                     const color = d3.scaleLinear()
                         .domain([0, 5])
@@ -59,10 +65,10 @@ angular.module('hpccApp')
                         .on("click", () => zoom(root));
 
                     let node;
-                    svg.append('g').attr('class','circleG')
-                    updateNodes();
+                    svg.append('g').attr('class','circleG');
 
                     const label = svg.append("g")
+                        .attr('class','label')
                         .style("font", "10px sans-serif")
                         .attr("pointer-events", "none")
                         .attr("text-anchor", "middle")
@@ -72,8 +78,13 @@ angular.module('hpccApp')
                         .style("fill-opacity", d => d.parent === root ? 1 : 0)
                         .style("display", d => d.parent === root ? "inline" : "none")
                         .text(d => d.data.name);
-
-                    zoomTo([root.x, root.y, root.r * 2]);
+                    let value_text;
+                    const gvalue = svg.append("g").attr('class','value')
+                        .style("font", "10px sans-serif")
+                        .attr("pointer-events", "none")
+                        .attr("text-anchor", "middle");
+                let currentZoomData  = [root.x, root.y, root.r * 2];
+                    updateNodes();
 
                     function zoomTo(v) {
                         const k = width / v[2];
@@ -81,8 +92,10 @@ angular.module('hpccApp')
                         view = v;
 
                         label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                        value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
                         node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
                         node.attr("r", d => d.r * k);
+                        return v
                     }
 
                     function zoom(d) {
@@ -94,7 +107,7 @@ angular.module('hpccApp')
                             .duration(d3.event.altKey ? 7500 : 750)
                             .tween("zoom", d => {
                                 const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
-                                return t => zoomTo(i(t));
+                                return t => currentZoomData = zoomTo(i(t));
                             });
 
                         label
@@ -103,6 +116,10 @@ angular.module('hpccApp')
                             .style("fill-opacity", d => d.parent === focus ? 1 : 0)
                             .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
                             .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+                        value_text
+                            .transition(transition)
+                            .attr('dy',function(d) { if (d.parent === focus) return 15; else return 0; })
+
                     }
 
                     function data2tree(data){
@@ -129,7 +146,7 @@ angular.module('hpccApp')
                                 if(d.children)
                                     return color(d.depth)
                                 else
-                                    return scope.colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text])
+                                    return colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text])
                             })
                             .attr("pointer-events", d => !d.children ? "none" : null)
                             .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
@@ -145,6 +162,20 @@ angular.module('hpccApp')
                     node.exit().remove();
                     node = node.enter().append("circle")
                         .call(updateNode).merge(node);
+
+                    let topValue = root.leaves().slice().sort((a,b)=>getMetric(a)-getMetric(b));
+                    topValue = _.flatten([topValue.slice(0,5),topValue.slice(topValue.length-5,topValue.length)]);
+                    value_text = gvalue.selectAll(".value_text")
+                        .data(topValue)
+                        .text(d=>d3.format('.1f')(getMetric(d)));
+                    value_text.exit().remove();
+                    value_text = value_text.enter().append("text")
+                        .attr('class','value_text')
+                        .text(d=>d3.format('.1f')(getMetric(d))).merge(value_text);
+                    zoomTo(currentZoomData)
+                }
+                function getMetric(a){
+                        return a.data.metrics[serviceFullList[scope.serviceSelected].text];
                 }
                 var datasetWatcher = scope.$watch(function() {
                     return serviceFullList;
@@ -154,7 +185,7 @@ angular.module('hpccApp')
 
                 scope.serviceWatcher = function() {
                     scope.serviceSelected = this.serviceSelected;
-                    this.colorItem.domain(serviceFullList[this.serviceSelected].range);
+                    this.colorItem.domain(serviceFullList[this.serviceSelected].range.slice().reverse());
                     updateNodes();
                 };
 
