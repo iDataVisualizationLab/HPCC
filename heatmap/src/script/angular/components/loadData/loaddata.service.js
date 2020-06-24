@@ -94,6 +94,7 @@ angular.module('hpccApp')
             makedataworker();
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(+d?+d:d.replace('Z','')))));
             sampleS = data;
+            Dataset.data = sampleS;
             if (choice.category==='hpcc') { //reload hostlist
                 firstTime = true;
                 systemFormat();
@@ -239,6 +240,7 @@ angular.module('hpccApp')
 
             db = "csv";
             newdatatoFormat_noSuggestion(data, separate);
+            Dataset.data = sampleS
             inithostResults();
             formatService(true);
             processResult = processResult_csv;

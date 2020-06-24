@@ -1,6 +1,13 @@
-<div class="circlepacking-container" style="height: 70vh">
-    <svg class="circlepacking-svg-content"
-         ng-style="{background: color(0)}"
-         viewBox="{{-width / 2}} {{-height / 2}} {{width}} {{height}}">
-    </svg>
+<div>
+    <div class="circlepacking-container" style="height: 70vh">
+        <svg class="circlepacking-svg-content"
+             ng-style="{background: color(0)}"
+             viewBox="{{-width / 2}} {{-height / 2}} {{width}} {{height}}">
+        </svg>
+    </div>
+    <label class="row" ng-if="service.serviceText">
+        <select class="browser-default col s4" ng-model="serviceSelected" ng-change="serviceWatcher()" >
+            <option ng-value="$index" ng-repeat="s in service.serviceText" ng-model="service.selectedService">{{s}}</option>
+        </select>
+    </label>
 </div>

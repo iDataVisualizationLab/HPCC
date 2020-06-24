@@ -1,3 +1,19 @@
+#layout-table .modal-wrapper{
+    margin: 50px auto;
+    width: calc( 100vw - 100px );
+    max-height: calc( 100vh - 100px );
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; //vertical
+    align-items: stretch;
+    background-color: #fafafa;
+    padding: 6px;
+    z-index: 1;
+    border-radius: 2px;
+    will-change: top, opacity;
+
+}
 .circlepacking-container {
     display: inline-block;
     position: relative;

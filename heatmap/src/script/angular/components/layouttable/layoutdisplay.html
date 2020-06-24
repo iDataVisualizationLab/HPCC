@@ -1,7 +1,7 @@
 <div class="row s12 flex_contain flex_warp white" style="overflow-y: auto; max-height: 70vh">
     <div class="flex_col valign-wrapper first layoutGroup" ng-repeat="rack in Layout.data.groups" >
         <div class="holder" ng-click="rack.collapse=!rack.collapse">
-            <div class="row s12" style="margin:10px">
+            <div class="row s12" style="margin:5px">
                 <span class="name truncate col">{{rack.Name}}</span>
                 <div class="info col"><span class="info selected">{{rack.selected}}</span> <span class="info total" >/{{rack.total}}</span> </div>
             </div>

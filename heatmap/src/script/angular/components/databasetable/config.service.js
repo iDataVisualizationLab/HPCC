@@ -10,8 +10,17 @@ angular.module('hpccApp')
     Config.layout = {};
     Config.config = {};
 
+
     Config.getConfig = function() {
-      return {};
+      return Config.config;
+    };
+
+    Config.updateConfig = function(config){
+        for (let i in config) {
+            if ('undefined' !== typeof config[i]) {
+                Config.config[i] = config[i];
+            }
+        }
     };
 
     Config.getData = function() {
