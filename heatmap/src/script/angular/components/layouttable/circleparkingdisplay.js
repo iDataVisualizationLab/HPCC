@@ -30,7 +30,7 @@ angular.module('hpccApp')
                     .key(d=>d.jobID.split('.'))
                     .entries(Dataset.data.currentjob);
                 scope.users.forEach(d=>d.computes=_.uniq(_.flattenDeep(d.values.map(e=>e.values.map(c=>c.nodes)))));
-                scope.users.sort((a,b)=>b.values.length-a.values.length)
+                scope.users.sort((a,b)=>b.computes.length-a.computes.length)
                 scope.Layout = Layout;
                 scope.width = 800;
                 scope.height = 640;
