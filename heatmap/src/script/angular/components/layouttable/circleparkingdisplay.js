@@ -26,6 +26,11 @@ angular.module('hpccApp')
                 scope.service={};
                 scope.service.serviceText = serviceFullList.map(d=>d.text);
                 scope.service.selectedService = 0;
+                scope.users = d3.nest().key(d=>d.user)
+                    .key(d=>d.jobID.split('.'))
+                    .entries(Dataset.data.currentjob);
+                scope.users.forEach(d=>d.computes=_.uniq(_.flattenDeep(d.values.map(e=>e.values.map(c=>c.nodes)))));
+                scope.users.sort((a,b)=>b.values.length-a.values.length)
                 scope.Layout = Layout;
                 scope.width = 800;
                 scope.height = 640;
@@ -152,6 +157,7 @@ angular.module('hpccApp')
                                     return d.color;
                                 }
                             })
+                            .classed('compute',d=>!d.children)
                             .attr("pointer-events", d => !d.children ? "none" : null)
                             .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
                             .on("mouseout", function() { d3.select(this).attr("stroke", null); })
@@ -179,6 +185,14 @@ angular.module('hpccApp')
                         .call(textcolor);
                     label.call(textcolor);
                     zoomTo(currentZoomData)
+                }
+                scope.onUserSelected = function (user){
+                    svg.select('g.circleG').classed('fade',true);
+                    node.filter(d=>d.children || ((!d.children)&& user.computes.find(c=>c===d.data.name))).classed('highlight',true)
+                };
+                scope.onUserDeselected = function (user){
+                    svg.select('g.circleG').classed('fade',false);
+                    node.classed('highlight',false)
                 }
                 function getMetric(a){
                         return a.data.metrics[serviceFullList[scope.serviceSelected].text];

@@ -120,6 +120,7 @@ angular.module('hpccApp')
             if(job) {
                 sampleJobdata = job;
                 Dataset.data.job = job;
+                Dataset.data.currentjob = job.filter(d=>!d.endTime)
             }else {
                 Dataset.data.job = [];
                 sampleJobdata = [{
