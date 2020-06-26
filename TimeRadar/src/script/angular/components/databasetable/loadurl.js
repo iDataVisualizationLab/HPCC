@@ -42,8 +42,8 @@ angular.module('hpccApp')
 
                 scope.addDataset = function() {
                     console.log(scope.dataset)
-                    scope.dataset.url = `https://redfish.hpcc.ttu.edu:8080/v1/metrics?start=${scope.url.start}&end=${scope.url.end}&interval=${scope.url.interval}&value=${scope.url.value}&compress=${scope.url.compress}`
-                    // https://redfish.hpcc.ttu.edu:8080/v1/metrics?start=2020-02-14T12%3A00%3A00-05%3A00&end=2020-02-14T18%3A00%3A00-05%3A00&interval=5m&value=max&compress=true
+                    scope.dataset.url = `https://influx.ttu.edu:8080/v1/metrics?start=${scope.url.start}&end=${scope.url.end}&interval=${scope.url.interval}&value=${scope.url.value}&compress=${scope.url.compress}`
+                    // https://influx.ttu.edu:8080/v1/metrics?start=2020-02-14T12%3A00%3A00-05%3A00&end=2020-02-14T18%3A00%3A00-05%3A00&interval=5m&value=max&compress=true
                     d3.json(scope.dataset.url,(response)=> {
                         Object.keys(response).forEach(k => response[k] = JSON.parse(pako.inflate(base64ToArrayBuffer(response[k]['base64(zip(o))']), {to: 'string'})));
                         let data=handleDataUrl(response)
