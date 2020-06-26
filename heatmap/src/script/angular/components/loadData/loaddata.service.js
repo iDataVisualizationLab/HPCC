@@ -83,7 +83,7 @@ angular.module('hpccApp')
                                 return;
                             });
                         }else{
-                            loadata1(choice.values.slice(), choice.jobs);
+                            loadata1(choice.values, choice.jobs);
                         }
                     });
                 }, 0);
