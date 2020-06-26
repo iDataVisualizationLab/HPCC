@@ -40,7 +40,7 @@ addEventListener('message',function ({data}){
     }
 });
 function buildQuery(query){
-    let str = 'http://redfish.hpcc.ttu.edu:8080/v1/metrics?';
+    let str = 'https://influx.ttu.edu:8080/v1/metrics?';
     for (let key in query){
         str+=`${key}=${query[key]}`
     }
