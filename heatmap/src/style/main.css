@@ -1,7 +1,9 @@
 :root {
     --sideNavwidth: 400px;
 }
-
+html, body {
+    height: unset;
+}
 svg.mainsvg {
     background-color: white;
 }

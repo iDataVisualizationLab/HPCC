@@ -27,39 +27,30 @@ angular.module('hpccApp')
                     const flat = _.flatten(r.value).filter(e=>e!==null);
                     r.total=flat.length;
                     r.selected=flat.filter(c=>!(Layout.data.hostsObj[c].notSelected||Layout.data.hostsObj[c].notExisted)).length;
-                })
-                // Initialize scope variables
-                // scope.dataset = {
-                //     name: '',
-                //     data: '',
-                //     sampletext:'',
-                //     column:0,
-                //     row:0,
-                // };
-                //
-                //
-                // scope.addDataset = function() {
-                //     var data = d3.csvParse(scope.dataset.data);
-                //
-                //     var pastedDataset = {
-                //         id: Date.now(),  // time as id
-                //         name: scope.dataset.name,
-                //         values: data,
-                //         group: 'pasted'
-                //     };
-                //
-                //     // Log that we have pasted data
-                //
-                //
-                //     // Register the pasted data as a new dataset
-                //     Dataset.dataset = Dataset.add(pastedDataset);
-                //
-                //     // Activate the newly-registered dataset
-                //     Dataset.update(Dataset.dataset);
-                //
-                //     // Close this directive's containing modal
-                //     closeModal();
-                // };
+                });
+                scope.services = serviceFullList;
+                scope.serviceSelected = serviceFullList[0];
+                scope.data = {};
+                d3.keys(Layout.data.hostsObj).forEach(h=>{
+                    scope.data[h] = {};
+                    serviceFullList.forEach(s=>scope.data[h][s.text]=_.last(Dataset.data.sampleS[h][serviceListattr[s.idroot]])[s.id]);
+                });
+                scope.colorItem = Config.getConfig().colorScheme?Config.getConfig().colorScheme.copy():d3.scaleSequential();
+                scope.colorItem.domain(scope.serviceSelected.range.slice().reverse());
+                const colorItem = function(d){
+                    if (d)
+                        return scope.colorItem(d);
+                    else
+                        return '#afafaf';
+                }
+
+                scope.serviceWatcher = function() {
+                    scope.serviceSelected = this.serviceSelected;
+                    this.colorItem.domain(this.serviceSelected.range.slice().reverse());
+                    // updateNodes();
+                };
+
+
             }
         };
     });

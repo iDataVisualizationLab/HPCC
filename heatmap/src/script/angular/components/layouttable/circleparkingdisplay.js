@@ -25,7 +25,6 @@ angular.module('hpccApp')
 
                 scope.service={};
                 scope.service.serviceText = serviceFullList.map(d=>d.text);
-                scope.service.selectedService = 0;
                 scope.users = d3.nest().key(d=>d.user)
                     .key(d=>d.jobID.split('.'))
                     .entries(Dataset.data.currentjob);
