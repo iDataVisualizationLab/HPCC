@@ -10,6 +10,7 @@
     border-radius: 10px;
     border: #99979a;
     width: 100%;
+    padding-bottom: 5px;
 }
 .layoutGroup div.info {
     float:right;
