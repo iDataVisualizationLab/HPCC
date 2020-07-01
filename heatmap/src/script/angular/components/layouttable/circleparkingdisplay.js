@@ -243,7 +243,7 @@ angular.module('hpccApp')
                 function sortDataby(service){
                     data.children.forEach(r=>{
                         r.children.sort((a,b)=>{
-                            return a.metrics[service]-b.metrics[service];
+                            return b.metrics[service]-a.metrics[service];
                         })
                     })
 
