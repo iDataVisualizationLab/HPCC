@@ -36,6 +36,7 @@
     border-radius: 2px;
     height: 14px;
     border: solid 1px #9c9c9c;
+    text-align: center;
 }
 .element span.notSelected {
     transform: scale(0.8);
