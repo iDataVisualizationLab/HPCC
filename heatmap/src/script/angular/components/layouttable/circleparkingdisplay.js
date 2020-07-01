@@ -60,7 +60,7 @@ angular.module('hpccApp')
                                 .sort((a, b) => b.value - a.value))
                     }
                     const data = data2tree(Layout.data.groups);
-
+                    sortDataby(serviceFullList[scope.serviceSelected].text);
                     let root = pack(data);
                     let focus = root;
                     let view;
@@ -137,7 +137,7 @@ angular.module('hpccApp')
                                             return item;
                                         })
                                 }))
-                        }
+                        };
                     }
                     function updateNode(node){
                         return node
