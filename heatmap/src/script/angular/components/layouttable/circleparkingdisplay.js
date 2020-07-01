@@ -83,19 +83,24 @@ angular.module('hpccApp')
                         .attr("pointer-events", "none")
                         .attr("text-anchor", "middle");
                 let currentZoomData  = [root.x, root.y, root.r * 2];
-                    updateNodes();
+                updateNodes();
 
-                    function zoomTo(v) {
-                        const k = width / v[2];
+                function zoomTo(v,istransition) {
+                    const k = width / v[2];
 
-                        view = v;
+                    view = v;
 
-                        label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-                        value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-                        node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-                        node.attr("r", d => d.r * k);
-                        return v
-                    }
+                    label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                    value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                    let node_animation;
+                    if(istransition)
+                        node_animation = node.transition();
+                    else
+                        node_animation = node;
+                    node_animation.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                    node.attr("r", d => d.r * k);
+                    return v
+                }
 
                     function zoom(d) {
                         const focus0 = focus;
@@ -160,7 +165,7 @@ angular.module('hpccApp')
                 function updateNodes(){
                     node=svg.select('g.circleG')
                         .selectAll("circle")
-                        .data(root.descendants().slice(1))
+                        .data(root.descendants().slice(1),d=>d.data.name)
                         .call(updateNode);
                     node.exit().remove();
                     node = node.enter().append("circle")
