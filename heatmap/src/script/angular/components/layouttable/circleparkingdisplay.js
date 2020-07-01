@@ -61,7 +61,7 @@ angular.module('hpccApp')
                     }
                     const data = data2tree(Layout.data.groups);
 
-                    const root = pack(data);
+                    let root = pack(data);
                     let focus = root;
                     let view;
 
@@ -71,18 +71,12 @@ angular.module('hpccApp')
                     let node;
                     svg.append('g').attr('class','circleG');
 
-                    const label = svg.append("g")
-                        .attr('class','label')
-                        .style("font", "10px sans-serif")
-                        .attr("pointer-events", "none")
-                        .attr("text-anchor", "middle")
-                        .selectAll("text")
-                        .data(root.descendants())
-                        .enter().append("text")
-                        .style('font-size',d => d.parent === root ? 18 : 12)
-                        .style("fill-opacity", d => d.parent === root ? 1 : 0)
-                        .style("display", d => d.parent === root ? "inline" : "none")
-                        .text(d => d.data.name);
+                    let label ;
+                    svg.append("g")
+                    .attr('class','label')
+                    .style("font", "10px sans-serif")
+                    .attr("pointer-events", "none")
+                    .attr("text-anchor", "middle");
                     let value_text;
                     const gvalue = svg.append("g").attr('class','value')
                         .style("font", "10px sans-serif")
@@ -182,6 +176,15 @@ angular.module('hpccApp')
                         .attr('class','value_text')
                         .text(d=>d3.format('.0f')(getMetric(d))).merge(value_text)
                         .call(textcolor);
+                    label = svg.select("g.label")
+                        .selectAll("text")
+                        .data(root.descendants());
+                    label.exit().remove()
+                    label = label.enter().append('text')
+                        .style('font-size',d => d.parent === root ? 18 : 12)
+                        .style("fill-opacity", d => d.parent === root ? 1 : 0)
+                        .style("display", d => d.parent === root ? "inline" : "none")
+                        .text(d => d.data.name).merge(label);
                     label.call(textcolor);
                     zoomTo(currentZoomData)
                 }
@@ -232,10 +235,19 @@ angular.module('hpccApp')
                 }, function() {
                     scope.service.serviceText = serviceFullList.map(d=>d.text);
                 });
+                function sortDataby(service){
+                    data.children.forEach(r=>{
+                        r.children.sort((a,b)=>{
+                            return a.metrics[service]-b.metrics[service];
+                        })
+                    })
 
+                }
                 scope.serviceWatcher = function() {
                     scope.serviceSelected = this.serviceSelected;
                     this.colorItem.domain(serviceFullList[this.serviceSelected].range.slice().reverse());
+                    sortDataby(serviceFullList[this.serviceSelected].text);
+                    root = pack(data);
                     updateNodes();
                 };
 
