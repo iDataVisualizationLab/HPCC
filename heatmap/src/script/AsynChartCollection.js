@@ -275,7 +275,6 @@ function handle_data_heatmap () {
         rackData.forEach(d=>d.values.forEach(e=>data.push(e.value)));
     }
     // end rack
-    console.log(data)
     console.timeEnd('extractData: ')
     let scheme = {
         data:{value:data},

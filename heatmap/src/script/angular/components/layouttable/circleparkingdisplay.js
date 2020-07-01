@@ -162,7 +162,7 @@ angular.module('hpccApp')
                             .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
                     }
 
-                function updateNodes(){
+                function updateNodes(istransition){
                     node=svg.select('g.circleG')
                         .selectAll("circle")
                         .data(root.descendants().slice(1),d=>d.data.name)
@@ -191,7 +191,7 @@ angular.module('hpccApp')
                         .style("display", d => d.parent === root ? "inline" : "none")
                         .text(d => d.data.name).merge(label);
                     label.call(textcolor);
-                    zoomTo(currentZoomData)
+                    zoomTo(currentZoomData,istransition)
                 }
                 scope.onUserSelected = function (user){
                     svg.select('g.circleG').classed('fade',true);
@@ -253,7 +253,7 @@ angular.module('hpccApp')
                     this.colorItem.domain(serviceFullList[this.serviceSelected].range.slice().reverse());
                     sortDataby(serviceFullList[this.serviceSelected].text);
                     root = pack(data);
-                    updateNodes();
+                    updateNodes(true);
                 };
 
                 scope.$on('$destroy', function() {
