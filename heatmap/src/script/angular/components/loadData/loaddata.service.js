@@ -323,8 +323,16 @@ angular.module('hpccApp')
         if (Loaddata.data.name)
             loadFile(Dataset.currentDataset);
     });
-    Layout.onUpdateFinish.push(function() {
-        console.log(Layout)
+    Layout.onUpdateHostFinish.push(function() {
+        if (hosts) {
+            hosts.forEach(h=>{
+                if (Layout.data.hostsObj[h.name] && Layout.data.hostsObj[h.name].notSelected)
+                    h.notSelected = true;
+                else
+                    h.notSelected = false;
+            })
+            onfilterdata();
+        }
         // if (Loaddata.data.name)
         //     loadFile(Dataset.currentDataset);
     });

@@ -18,7 +18,6 @@ angular.module('hpccApp')
         // update the schema and stats
         Layout.onUpdate = [];
         Layout.onUpdateFinish = [];
-
         Layout.update = function(dataset) {
             var updatePromise;
 
@@ -58,7 +57,19 @@ angular.module('hpccApp')
 
             return updatePromise;
         };
-
+        Layout.onUpdateHostFinish = [];
+        Layout.updateHost = function() {
+            var updatePromise;
+            updatePromise = new Promise(function(resolve, reject){
+                d3.keys(Layout.data.hostsObj).forEach(k=>{
+                    Layout.data.hostsObj[k].notSelected = !Layout.data.hostsObj[k].preselected;
+                });
+                resolve()
+            });
+            Layout.onUpdateHostFinish.forEach(function(listener) {
+                updatePromise = updatePromise.then(listener);
+            });
+        }
         function updateFromData(dataset, data) {
             Layout.data = data;
             Layout.currentLayout = dataset;

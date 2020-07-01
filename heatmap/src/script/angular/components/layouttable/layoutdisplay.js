@@ -23,15 +23,18 @@ angular.module('hpccApp')
                     }
                 }
                 scope.Layout = Layout;
+                let inputState = [];
                 Layout.data.groups.forEach(r=>{
                     const flat = _.flatten(r.value).filter(e=>e!==null);
                     r.total=flat.length;
                     r.selected=flat.filter(c=>!(Layout.data.hostsObj[c].notSelected||Layout.data.hostsObj[c].notExisted)).length;
+                    inputState.push(r.selected);
                 });
                 scope.services = serviceFullList;
                 scope.serviceSelected = serviceFullList[0];
                 scope.data = {};
                 d3.keys(Layout.data.hostsObj).forEach(h=>{
+                    Layout.data.hostsObj[h].preselected = !Layout.data.hostsObj[h].notSelected;
                     scope.data[h] = {};
                     serviceFullList.forEach(s=>scope.data[h][s.text]=_.last(Dataset.data.sampleS[h][serviceListattr[s.idroot]])[s.id]);
                 });
@@ -42,8 +45,27 @@ angular.module('hpccApp')
                         return scope.colorItem(d);
                     else
                         return '#afafaf';
-                }
-
+                };
+                scope.onSelect = function(c,event,rack){
+                    event.stopPropagation();
+                    if (Layout.data.hostsObj[c].preselected)
+                        rack.selected--;
+                    else
+                        rack.selected++;
+                    Layout.data.hostsObj[c].preselected = !Layout.data.hostsObj[c].preselected
+                };
+                scope.reset = function(){
+                    Layout.data.groups.forEach((r,i)=>{
+                        r.selected=inputState[i];
+                        d3.keys(Layout.data.hostsObj).forEach(h=> {
+                            Layout.data.hostsObj[h].preselected = !Layout.data.hostsObj[h].notSelected;
+                        })
+                    });
+                };
+                scope.apply = function(){
+                    Layout.updateHost();
+                    closeModal();
+                };
                 scope.serviceWatcher = function() {
                     scope.serviceSelected = this.serviceSelected;
                     this.colorItem.domain(this.serviceSelected.range.slice().reverse());

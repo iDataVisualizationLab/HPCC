@@ -31,16 +31,17 @@
     color: #99979a;
 }
 .element span {
-    background: #22d1ee;
     color: #0e153a;
     border-radius: 2px;
     height: 14px;
+    border: solid 1px #9c9c9c;
 }
 .element span.notSelected {
-    background-color: rgba(34, 209, 238, 0.5);
-    color: #4f5d76;
+    transform: scale(0.8);
+    border: unset;
 }
 .element span.notExisted {
     background-color: rgb(193, 193, 193);
     color: #99979a;
+    border: unset;
 }

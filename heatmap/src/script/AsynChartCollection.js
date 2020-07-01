@@ -25,6 +25,7 @@ let AsynChartCollection = function (){
         const plotItem = contain.selectAll('div.plotItem');
         plotItem.each(d=>d.plot.destroy())
         plotItem.remove();
+        isNeedRender = true;
         return master;
     };
     master.init = function () {
@@ -230,6 +231,9 @@ function handle_data_heatmap () {
     console.time('extractData: ');
 
     hostOrder.forEach((h, hi) => {
+        if (hosts[h].notSelected) {
+            return;
+        }
         const hname = hosts[h].name;
         let hostdata = sampleS[hname];
 
@@ -271,7 +275,7 @@ function handle_data_heatmap () {
         rackData.forEach(d=>d.values.forEach(e=>data.push(e.value)));
     }
     // end rack
-
+    console.log(data)
     console.timeEnd('extractData: ')
     let scheme = {
         data:{value:data},
