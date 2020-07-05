@@ -144,23 +144,23 @@ angular.module('hpccApp')
                                 }))
                         };
                     }
-                    function updateNode(node){
-                        return node
-                            .attr("fill", d => {
-                                if(d.children) {
-                                    d.color =  color(d.depth);
-                                    return d.color;
-                                }else {
-                                    d.color = colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text]);
-                                    return d.color;
-                                }
-                            })
-                            .classed('compute',d=>!d.children)
-                            .attr("pointer-events", d => !d.children ? "none" : null)
-                            .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-                            .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-                            .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
-                    }
+                function updateNode(node){
+                    return node
+                        .attr("fill", d => {
+                            if(d.children) {
+                                d.color =  color(d.depth);
+                                return d.color;
+                            }else {
+                                d.color = colorItem(d.data.metrics[serviceFullList[scope.serviceSelected].text]);
+                                return d.color;
+                            }
+                        })
+                        .classed('compute',d=>!d.children)
+                        .attr("pointer-events", d => !d.children ? "none" : null)
+                        .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+                        .on("mouseout", function() { d3.select(this).attr("stroke", null); })
+                        .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+                }
 
                 function updateNodes(istransition){
                     node=svg.select('g.circleG')

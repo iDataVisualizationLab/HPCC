@@ -1,0 +1,60 @@
+svg {
+    font: 12px sans-serif;
+}
+
+
+.inner_node {
+    pointer-events: all;
+}
+.inner_node text{
+    fill: black;
+}
+
+.inner_node rect {
+    pointer-events: all;
+    stroke: #1d3557;
+    fill: #f0f0f0;
+}
+
+.inner_node.highlight rect {
+    stroke: #e63946;
+    stroke-width: 2px;
+    fill: #f1faee;
+}
+.inner_node.highlight text{
+    fill: black;
+}
+
+.outer_node circle {
+    /*fill: #f1faee;*/
+    stroke: #1d3557;
+    stroke-width: 0.5px;
+    pointer-events: all;
+}
+
+.outer_node.highlight circle
+{
+    stroke: #e63946;
+    stroke-width: 2px;
+}
+
+text {
+    /*font: 10px sans-serif;*/
+    /*text-anchor: middle;*/
+    pointer-events: none;
+
+}
+
+.outer_node.highlight text{
+    /*stroke:#e63946;*/
+    font-weight: bold;
+}
+
+.link {
+    fill: none;
+    /*stroke: #a8dadc;*/
+}
+
+.hide {
+    display: none;
+}
