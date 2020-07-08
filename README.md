@@ -1,6 +1,10 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
 # 2020
 
+JobCircularlayout real-time: http://localhost:63342/HPCC/JobCircularLayout/index.html?mode=realTime
+
+JobCircularlayout simulation: http://localhost:63342/HPCC/JobCircularLayout/index.html
+
 Heatmap: https://idatavisualizationlab.github.io/HPCC/heatmap/
 
 TimeRadar Current: https://idatavisualizationlab.github.io/HPCC/TimeRadar
