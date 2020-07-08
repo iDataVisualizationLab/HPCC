@@ -45,9 +45,10 @@ let graphicopt = {
 };
 
 
-graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
-graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
+
 function draw({computers,jobs,users,sampleS,serviceSelected}){
+    graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
+    graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     _colorItem.domain(serviceFullList[serviceSelected].range.slice().reverse());
@@ -101,7 +102,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
         d.x = outerX(i);
-        d.y = graphicopt.diameter()/2 - max_radius*2-30;
+        d.y = graphicopt.diameter()/2 //- max_radius*2-30;
         // d.y = outerY(i);
         d.relatedLinks = [];
         d.relatedNodes = [];
@@ -221,7 +222,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         })
         p.select('text.groupLabel')
             .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-            .attr("transform", function(d) { return d.x < 180 ? `translate(30)` : `rotate(180)translate(-30)`; })
+            .attr("transform", function(d) { return d.x < 180 ? `rotate(${90-d.x})translate(${max_radius})` : `rotate(${360-d.x+90})translate(${-max_radius})`; })
             .text(function(d) {
                 return d.name; });
         return p.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; });
@@ -389,7 +390,7 @@ let nest = function (seq, keys) {
 
 function pack (data){
     return d3.pack()
-        .size([graphicopt.diameter()/3, graphicopt.diameter()/3])
+        .size([graphicopt.diameter()/2, graphicopt.diameter()/2])
         .padding(3)
         (d3.hierarchy(data)
             .sum(d => d.value)

@@ -8,12 +8,16 @@ class Timeline{
     #play=()=>{
         const self = this;
         self.playbutton.datum().status=true;
+        self.timeline.classed('progress-bar-animated',true)
+        self.timeline.classed('progress-bar-striped',true)
         self.playbutton.call(self.playbutton_icon)
     };
     callbackPlay=()=>{};
     #pause=()=>{
         const self = this;
         self.playbutton.datum().status=false;
+        self.timeline.classed('progress-bar-animated',false)
+        self.timeline.classed('progress-bar-striped',false)
         self.playbutton.call(self.playbutton_icon)
     };
     callbackPause=()=>{};
