@@ -73,6 +73,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
     }
 
+    graphicopt.el = svg
     // Set the y scale of rectangles
     graphicopt.iLength = d3.keys(users).length;
     let innerY = d3.scaleLinear()
@@ -412,6 +413,7 @@ function projectX(x)
 
 function mouseover(d){
     // Bring to front
+    graphicopt.el.classed('onhighlight',true);
     d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
     d3.select(this).classed('highlight', true);
     for (let i = 0; i < d.relatedNodes.length; i++)
@@ -428,12 +430,13 @@ function mouseover(d){
     }
 
     for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].moveToFront().attr('stroke', '#fc4903');
+        d.relatedLinks[i].moveToFront().classed('highlight', true);
     }
 }
 
 
 function mouseout(d){
+    graphicopt.el.classed('onhighlight',false);
     d3.select(this).classed('highlight', false);
     for (let i = 0; i < d.relatedNodes.length; i++)
     {
@@ -449,6 +452,6 @@ function mouseout(d){
     }
 
     for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].attr("stroke", "#457b9d" );
+        d.relatedLinks[i].classed("highlight", false );
     }
 }

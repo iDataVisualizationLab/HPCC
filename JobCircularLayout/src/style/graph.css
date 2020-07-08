@@ -31,17 +31,18 @@ svg {
     stroke-width: 0.5px;
     pointer-events: all;
 }
-
-.outer_node.highlight circle
-{
-    stroke: #e63946;
-    stroke-width: 2px;
+.onhighlight .outer_node circle{
+    opacity: 0.1;
 }
-
+.onhighlight .link {
+    opacity: 0;
+}
+.onhighlight .link.highlight {
+    opacity: 1;
+}
 .outer_node circle.highlight
 {
-    stroke: #e63946;
-    stroke-width: 2px;
+    opacity: 1;
 }
 
 text {
