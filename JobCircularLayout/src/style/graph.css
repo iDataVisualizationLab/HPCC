@@ -38,6 +38,12 @@ svg {
     stroke-width: 2px;
 }
 
+.outer_node circle.highlight
+{
+    stroke: #e63946;
+    stroke-width: 2px;
+}
+
 text {
     /*font: 10px sans-serif;*/
     /*text-anchor: middle;*/

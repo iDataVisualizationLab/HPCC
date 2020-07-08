@@ -106,7 +106,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         // d.y = outerY(i);
         d.relatedLinks = [];
         d.relatedNodes = [];
-        d.pack = pack_all.children[i];
+
+        d.pack = pack_all.children.find(c=>c.data.name===d.name);
         d.pack.children.forEach(e=>{
             e.x -= d.pack.x;
             e.y -= d.pack.y;
@@ -131,6 +132,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             v.source = d.key;
             v.sourceData = d;
             v.target = Layout.compute_layout[c];
+            v.targetChildren = c;
             return v;
         });
         d.links.forEach(e=>{
@@ -156,8 +158,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
                 d.targetX = v.targetX;
                 d.targetY = v.targetY;
                 d.targetData = v.node;
-                d.sourceData.relatedNodes.push(d.targetData);
-                d.targetData.relatedNodes.push(d.sourceData);
+                d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
+                d.targetData.relatedNodes.push({data:d.sourceData});
             }
         }))
     });
@@ -195,7 +197,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         onodesg = svg.append("g").attr("class", "outer_nodes")
     }
     let onode = onodesg.selectAll(".outer_node")
-        .data(rack_arr);
+        .data(rack_arr,d=>d.name);
     onode.call(updateOnode);
     onode.exit().remove();
     let onode_n = onode.enter().append("g")
@@ -218,7 +220,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
 
         p.each(function(d){
           d.node=d3.select(this);
-            makecirclepacking(d.node);
+          d.childrenNode = makecirclepacking(d.node);
         })
         p.select('text.groupLabel')
             .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
@@ -274,17 +276,21 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
 
-        updateNodes();
+        return updateNodes();
 
         function updateNodes(istransition) {
+            let childrenNode = {};
             node = svg.select('g.circleG')
                 .selectAll("circle")
                 .data(root.descendants().slice(1), d => d.data.name)
                 .call(updateNode);
+
             node.exit().remove();
             node = node.enter().append("circle")
                 .call(updateNode).merge(node);
-
+            // node.each(function(d){
+            //     childrenNode[d.data.name] = d3.select(this)
+            // })
             label = svg.select("g.label")
                 .selectAll("text")
                 .data(root.descendants());
@@ -297,33 +303,36 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
                 .text(d => d.data.name).merge(label);
             label.call(textcolor);
             zoomTo([root.x, root.y, root.r * 2], istransition)
+            return childrenNode;
+            function updateNode(node) {
+                node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
+                return node
+                    .attr("fill", d => {
+                        if(d.children) {
+                            // d.color =  color(d.depth);
+                            // return d.color;
+                            d.color = '#dddddd';
+                            return d.color;
+                        }else {
+                            d.color = colorItem(d.data.metrics[serviceFullList[serviceSelected].text]);
+                            return d.color;
+                        }
+                        // d.color = '#dddddd'
+                        // return d.color
+                    })
+                    .classed('compute', d => !d.children)
+                    .attr("pointer-events", d => !d.children ? "none" : null)
+                    .on("mouseover", function () {
+                        d3.select(this).attr("stroke", "#000");
+                    })
+                    .on("mouseout", function () {
+                        d3.select(this).attr("stroke", null);
+                    })
+                    .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+            }
         }
 
-        function updateNode(node) {
-            return node
-                .attr("fill", d => {
-                    if(d.children) {
-                        // d.color =  color(d.depth);
-                        // return d.color;
-                        d.color = '#dddddd';
-                        return d.color;
-                    }else {
-                        d.color = colorItem(d.data.metrics[serviceFullList[serviceSelected].text]);
-                        return d.color;
-                    }
-                    // d.color = '#dddddd'
-                    // return d.color
-                })
-                .classed('compute', d => !d.children)
-                .attr("pointer-events", d => !d.children ? "none" : null)
-                .on("mouseover", function () {
-                    d3.select(this).attr("stroke", "#000");
-                })
-                .on("mouseout", function () {
-                    d3.select(this).attr("stroke", null);
-                })
-                .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
-        }
+
 
         function zoomTo(v,istransition) {
             k=1;
@@ -407,7 +416,14 @@ function mouseover(d){
     d3.select(this).classed('highlight', true);
     for (let i = 0; i < d.relatedNodes.length; i++)
     {
-        d.relatedNodes[i].node.classed('highlight', true);
+        if (d.relatedNodes[i].key)
+            try {
+                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
+            }catch(e){
+                console.log(d.relatedNodes[i].key)
+            }
+        else
+            d.relatedNodes[i].data.node.classed('highlight', true);
         // .attr("width", 18).attr("height", 18);
     }
 
@@ -421,7 +437,14 @@ function mouseout(d){
     d3.select(this).classed('highlight', false);
     for (let i = 0; i < d.relatedNodes.length; i++)
     {
-        d.relatedNodes[i].node.classed('highlight', false);
+        if (d.relatedNodes[i].key)
+            try {
+                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
+            }catch(e){
+
+            }
+        else
+            d.relatedNodes[i].data.node.classed('highlight', false);
         // .attr("width", config.rect_width).attr("height", config.rect_height);
     }
 
