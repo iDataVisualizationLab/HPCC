@@ -92,7 +92,12 @@ class Simulation {
         const compress = false;
         const url = self.getUrl({_start,_end,interval,value,compress});
         console.log(url)
-        return d3.json(url).then(function(data){self.#data = data; return data;});
+        return d3.json(url).then(function(data){
+            self.#currentTime = currentTime;
+            self.#data = data;
+            data.currentTime = new Date(_.last(data.time_stamp))
+            return data;
+        });
     }
     getUrl({_start,_end,interval,value,compress}){
         const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
