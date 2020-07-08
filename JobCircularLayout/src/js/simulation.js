@@ -93,9 +93,9 @@ class Simulation {
         const url = self.getUrl({_start,_end,interval,value,compress});
         console.log(url)
         return d3.json(url).then(function(data){
-            self.#currentTime = currentTime;
+            data.currentTime = new Date(_.last(data.time_stamp)*1000);
+            self.#currentTime = data.currentTime;
             self.#data = data;
-            data.currentTime = new Date(_.last(data.time_stamp))
             return data;
         });
     }
