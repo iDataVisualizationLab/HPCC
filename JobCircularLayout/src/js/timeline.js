@@ -86,6 +86,7 @@ class Timeline{
         this.timeline
             .style("width", `${this.timeConf.scale(this.currentValue)}%`)
             .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
+            .text(this.currentValue.toLocaleString())
     }
 
 }
