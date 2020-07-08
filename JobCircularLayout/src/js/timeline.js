@@ -3,6 +3,7 @@ class Timeline{
     playbutton;
     timelineHolder;
     timeline;
+    meassage;
     timeConf={scale:d3.scaleTime().range([0,100])};
     #play=()=>{
         const self = this;
@@ -50,6 +51,10 @@ class Timeline{
             .attr('aria-valuenow',"0")
             .attr('aria-valuemin',"0")
             .attr('aria-valuemax',"100");
+        this.meassage = this.el.append('div')
+            .attr('class','message')
+            .style("width", "calc(20% - 60px)")
+            .append('span');
     }
     play(){
 

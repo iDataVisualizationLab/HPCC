@@ -10,6 +10,7 @@ class Simulation {
     onFinishQuery=[];
     onDataChange=[];
     onUpdateTime=[];
+    onStartQuery=()=>{};
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
@@ -25,9 +26,10 @@ class Simulation {
         }
     }
     request(){
-        if (this.isRealTime || (this.#index<this.#data.time_stamp.length)) {
+        if (this.isRealTime || (!this.isRealTime&&this.#data===undefined)||(this.#index<this.#data.time_stamp.length)) {
             let updatePromise;
             let self = this;
+            this.onStartQuery();
             if (self.isRealTime)
                 updatePromise = this.requestFromURL();
             else
@@ -57,9 +59,9 @@ class Simulation {
                     if (timer)
                         timer.stop();
                     const currentTime = self.#data.time_stamp[index];
-                    
+
                     const jobs_info = _.omit(self.#data.jobs_info, function (val, key, object) {
-                        return (val.start_time*1000 <= currentTime) && (val.finish_time*1000 > currentTime);
+                        return (val.start_time*1000 > currentTime) || ((val.finish_time!==null)&&(val.finish_time*1000 < currentTime));
                     });
                     const nodes_info = {};
                     d3.keys(self.#data.nodes_info).forEach(c => {
@@ -83,7 +85,24 @@ class Simulation {
     requestFromURL(){
         const self = this;
        // todo need method to cancle
+        const _end = new Date(); //'2020-02-14T12:00:00-05:00'
+        let _start = new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
+        const interval = '5m';
+        const value = 'max';
+        const compress = false;
+        const url = self.getUrl({_start,_end,interval,value,compress});
+        console.log(url)
         return d3.json(url).then(function(data){self.#data = data; return data;});
+    }
+    getUrl({_start,_end,interval,value,compress}){
+        const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
+        const start = timeFormat(_start)
+        const end = timeFormat(_end)
+        interval = interval||'5m';
+        value = value||'max';
+        compress = compress||false;
+        const url = `https://influx.ttu.edu:8080/v1/metrics?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
+        return url;
     }
     setInterval(interval){
         this.interval = interval;    }
@@ -94,7 +113,8 @@ class Simulation {
             // this.timer.restart(this.request.bind(this),this.interval);
             this.timer.stop();
         // else
-            this.timer = d3.interval(this.request.bind(this),this.interval);
+        this.request()
+        this.timer = d3.interval(this.request.bind(this),this.interval);
     }
     pause(){
         if(this.timer)

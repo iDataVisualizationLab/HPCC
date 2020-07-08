@@ -11,26 +11,39 @@ let Layout = {
 
 let serviceSelected = 0;
 
-let request = new Simulation('src/data/742020.json');
-let timelineControl = new Timeline('#timelineControl');
-timelineControl.callbackPlay = request.start.bind(request);
-timelineControl.callbackPause = request.pause.bind(request);
-request.callbackStop = timelineControl.pause.bind(timelineControl);
-// timelineControl.stop = request.stop.bind(request);
+// let request = new Simulation('src/data/742020.json');
+let request, timelineControl;
 
 $(document).ready(function(){
-
-    request.onDataChange.push(timelineControl.domain.bind(timelineControl));
-    request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-    request.onFinishQuery.push(queryData);
-    request.setInterval(1000)
+    try {
+        let mode = window.location.search.substring(1).split("mode=")[1].split('&')[0].replace(/%20/g,' '); // get data name after app=
+        if (mode==='realTime')
+            request = new Simulation();
+        else
+            request = new Simulation('src/data/742020.json');
+    }catch(e){
+        request = new Simulation('src/data/742020.json');
+    }
+    initTimeElement();
     queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     // queryLayout().then(()=>request.request());
 });
-//
-// let queue = [queryLayout,queryData];
-// queue.forEach((q,i)=>{
-//     if (queue[i+1])
-//         q().then(queue[i+1]);
-//
-// });
+
+function initTimeElement(){
+    timelineControl = new Timeline('#timelineControl');
+    timelineControl.callbackPlay = request.start.bind(request);
+    timelineControl.callbackPause = request.pause.bind(request);
+    request.callbackStop = timelineControl.pause.bind(timelineControl);
+
+    request.onDataChange.push(timelineControl.domain.bind(timelineControl));
+    request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
+
+    if (request.isRealTime) {
+        request.onStartQuery=()=>timelineControl.meassage.text('query data....');
+        request.onFinishQuery.push((d)=>(timelineControl.meassage.text(''),d));
+        request.setInterval(60000);
+    }else
+        request.setInterval(1000);
+
+    request.onFinishQuery.push(queryData);
+}
