@@ -24,18 +24,23 @@ class Simulation {
         }
     }
     request(){
-        let updatePromise;
-        let self = this;
-        if (self.isRealTime)
-            updatePromise = this.requestFromURL();
-        else
-            updatePromise = this.requestFromData(this.#index);
-        this.onFinishQuery.forEach(function(listener) {
-            updatePromise = updatePromise.then(listener);
-        });
-        this.onUpdateTime.forEach(function(listener) {
-            updatePromise = updatePromise.then(()=>listener(self.#currentTime));
-        });
+        console.log(this.#index)
+        if (this.isRealTime || (this.#index<this.#data.time_stamp.length)) {
+            let updatePromise;
+            let self = this;
+            if (self.isRealTime)
+                updatePromise = this.requestFromURL();
+            else
+                updatePromise = this.requestFromData(this.#index);
+            this.onFinishQuery.forEach(function (listener) {
+                updatePromise = updatePromise.then(listener);
+            });
+            this.onUpdateTime.forEach(function (listener) {
+                updatePromise = updatePromise.then(() => listener(self.#currentTime));
+            });
+        }else{
+            this.stop()
+        }
     }
     requestFromData(index){
         const self = this;
@@ -80,12 +85,15 @@ class Simulation {
        // todo need method to cancle
         return d3.json(url).then(function(data){self.#data = data; return data;});
     }
+    setInterval(interval){
+        this.interval = interval;    }
     start(interval){
         if(interval)
             this.interval = interval;
         if(this.timer)
-            this.timer.restart(this.request.bind(this),this.interval);
-        else
+            // this.timer.restart(this.request.bind(this),this.interval);
+            this.timer.stop();
+        // else
             this.timer = d3.interval(this.request.bind(this),this.interval);
     }
     pause(){

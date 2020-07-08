@@ -82,9 +82,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     graphicopt.mid = Math.round(graphicopt.oLength/2);
     const deadAngle = 30;
     let outerX = d3.scaleLinear()
-        .domain([0, graphicopt.mid, graphicopt.mid, graphicopt.oLength-1])
+        .domain([0, graphicopt.mid-1, graphicopt.mid, graphicopt.oLength-1])
         .range([deadAngle, 180-deadAngle, 180+deadAngle ,360-deadAngle]);
-
 
 
     // Setup the positions of inner nodes
@@ -244,18 +243,16 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     inode_n.append("text")
         .attr('text-anchor', 'start')
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
-    inode_n.call(updateInode)
-    inode_n.each(function(d){
-        const ob = d3.select(this);
-        d.node=ob;
-
-    });
+    inode_n.call(updateInode);
 
 
 
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
 
     function updateInode(p){
+        p.each(function(d){
+            d.node=d3.select(this);
+        })
         p.select('rect').attr('width', graphicopt.rect.width)
             .attr('height', graphicopt.rect.height)
             .attr('id', d=>d.key);
