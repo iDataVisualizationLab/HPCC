@@ -41,7 +41,7 @@ function initTimeElement(){
     if (request.isRealTime) {
         request.onStartQuery=()=>timelineControl.meassage.text('query data....');
         request.onFinishQuery.push((d)=>(timelineControl.meassage.text(''),d));
-        request.setInterval(60000);
+        request.setInterval(120000);
     }else
         request.setInterval(1000);
 
