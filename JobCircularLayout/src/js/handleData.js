@@ -12,13 +12,13 @@ function handleData(data){
     const computers = data[COMPUTE];
     const jobs = data[JOB]; // object
     const rack = Layout.data;
-    console.log('totaljob: ',d3.keys(jobs).length);
-    Object.keys(jobs).forEach(j=>{
-        const d = jobs[j];
-        if (!d.finish_time) {
-            delete jobs[j]
-        }
-    }); // lastest job
+    // console.log('totaljob: ',d3.keys(jobs).length);
+    // Object.keys(jobs).forEach(j=>{
+    //     const d = jobs[j];
+    //     if (!d.finish_time) {
+    //         delete jobs[j]
+    //     }
+    // }); // lastest job
     const user_job = d3.nest()
         .key(d=>d.value[USER]) //user
         .key(d=>d.key.split('.')[0]) //job array

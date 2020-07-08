@@ -6,6 +6,7 @@ class Simulation {
     #currentTime;
     isRealTime;
     query;
+    callbackStop = ()=>{};
     onFinishQuery=[];
     onDataChange=[];
     onUpdateTime=[];
@@ -24,7 +25,6 @@ class Simulation {
         }
     }
     request(){
-        console.log(this.#index)
         if (this.isRealTime || (this.#index<this.#data.time_stamp.length)) {
             let updatePromise;
             let self = this;
@@ -57,9 +57,9 @@ class Simulation {
                     if (timer)
                         timer.stop();
                     const currentTime = self.#data.time_stamp[index];
-
+                    
                     const jobs_info = _.omit(self.#data.jobs_info, function (val, key, object) {
-                        return (val.start_time <= currentTime) && (val.finish_time > currentTime);
+                        return (val.start_time*1000 <= currentTime) && (val.finish_time*1000 > currentTime);
                     });
                     const nodes_info = {};
                     d3.keys(self.#data.nodes_info).forEach(c => {
@@ -104,6 +104,7 @@ class Simulation {
         if (this.timer) {
             this.timer.stop();
             this.#index =0;
+            this.callbackStop();
         }
     }
     destroy(){

@@ -15,6 +15,7 @@ let request = new Simulation('src/data/742020.json');
 let timelineControl = new Timeline('#timelineControl');
 timelineControl.callbackPlay = request.start.bind(request);
 timelineControl.callbackPause = request.pause.bind(request);
+request.callbackStop = timelineControl.pause.bind(timelineControl);
 // timelineControl.stop = request.stop.bind(request);
 
 $(document).ready(function(){
