@@ -14,14 +14,33 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 </head>
 <body>
+    <nav class="navbar fixed-top navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="../HiperView/images/TTUlogo.png" width="120" height="30" class="d-inline-block align-top" alt="">
+            Job Viewer
+        </a>
+        <form class="form-inline">
+            <ul class="nav nav-pills" id = 'navMode'>
+                <li class="nav-item demo">
+                    <a class="nav-link active" href="index.html" target="_blank">Demo</a>
+                </li>
+                <li class="nav-item realtime">
+                    <a class="nav-link" href="index.html?mode=realTime" target="_blank">RealTime</a>
+                </li>
+            </ul>
+        </form>
+    </nav>
+    <div class="container" style="margin-top: 56px">
+            <div class="row" id="timelineControl">
 
-    <div class="row" id="timelineControl">
+            </div>
+            <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 96px);width: 100%; margin: 0px">
+        <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
+                <svg id="circularLayout">
 
-    </div>
-    <div class="row">
-        <svg id="circularLayout">
-
-        </svg>
+                </svg>
+        <!--        </div>-->
+        </div>
     </div>
 
 <!--    <script src="src/lib/nouislider.js"></script>-->

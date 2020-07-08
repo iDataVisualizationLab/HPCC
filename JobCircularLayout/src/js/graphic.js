@@ -45,7 +45,8 @@ let graphicopt = {
 };
 
 
-
+graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
+graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
 function draw({computers,jobs,users,sampleS,serviceSelected}){
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);

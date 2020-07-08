@@ -18,9 +18,20 @@ $(document).ready(function(){
     try {
         let mode = window.location.search.substring(1).split("mode=")[1].split('&')[0].replace(/%20/g,' '); // get data name after app=
         if (mode==='realTime')
+        {
+            // set up ui
+            d3.select('#navMode').selectAll('li a').classed('active',false);
+            d3.select('#navMode').select('li.realtime a').classed('active',true);
+            //---------
             request = new Simulation();
-        else
+        }
+        else {
+            // set up ui
+            d3.select('#navMode').selectAll('li').classed('active',false);
+            d3.select('#navMode').select('li.demo a').classed('active',true);
+            //---------
             request = new Simulation('src/data/742020.json');
+        }
     }catch(e){
         request = new Simulation('src/data/742020.json');
     }

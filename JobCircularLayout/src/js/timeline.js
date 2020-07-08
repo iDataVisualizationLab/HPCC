@@ -53,7 +53,7 @@ class Timeline{
             .attr('aria-valuemax',"100");
         this.meassage = this.el.append('div')
             .attr('class','message')
-            .style("width", "calc(20% - 60px)")
+            .style("width", "calc(20% - 80px)")
             .append('span');
     }
     play(){
