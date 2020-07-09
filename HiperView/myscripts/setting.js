@@ -227,7 +227,7 @@ function newdatatoFormat (data,separate){
     sampleS['timespan'] = data.map(d=>new Date(d.time||d.timestamp))
     data.forEach(d=>{
         host_name.forEach(h=> {
-            serviceListattr.forEach(attr => {
+            serviceListattr.forEach((attr,i) => {
                  if (sampleS[h]===undefined) {
                      sampleS[h] = {};
                      tsnedata[h] = [];
