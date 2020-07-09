@@ -44,12 +44,14 @@ function initTimeElement(){
     timelineControl = new Timeline('#timelineControl');
     timelineControl.callbackPlay = request.start.bind(request);
     timelineControl.callbackPause = request.pause.bind(request);
+    timelineControl.step = _.partial(request.request.bind(request),0);
     request.callbackStop = timelineControl.pause.bind(timelineControl);
 
     request.onDataChange.push(timelineControl.domain.bind(timelineControl));
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
 
     if (request.isRealTime) {
+        timelineControl.disableHandle(true);
         request.onStartQuery=()=>timelineControl.meassage.text('query data....');
         request.onFinishQuery.push((d)=>(timelineControl.meassage.text(''),d));
         request.setInterval(120000);

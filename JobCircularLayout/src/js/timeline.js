@@ -3,7 +3,9 @@ class Timeline{
     playbutton;
     timelineHolder;
     timeline;
+    timelineHandler;
     meassage;
+    step = ()=>{};
     timeConf={scale:d3.scaleTime().range([0,100])};
     #play=()=>{
         const self = this;
@@ -47,18 +49,51 @@ class Timeline{
         this.playbutton.call(self.playbutton_icon);
 
         this.timelineHolder = this.el.append('div')
-            .attr('class',"progress align-self-center")
+            .attr('class','progress-bar-wrapper align-self-center')
             .style("width", "80%");
         this.timeline = this.timelineHolder.append('div')
+            .attr('class',"progress")
+            .style("width", "100%")
+            .on('click',onClickTimeline)
+            .append('div')
             .attr('class','progress-bar')
             .attr('role',"progressbar")
             .attr('aria-valuenow',"0")
             .attr('aria-valuemin',"0")
             .attr('aria-valuemax',"100");
+        this.timelineHandler = this.timelineHolder
+            .append('div').attr('class','progress-bar-handle align-self-center');
         this.meassage = this.el.append('div')
             .attr('class','message')
             .style("width", "calc(20% - 80px)")
             .append('span');
+
+        this.timelineHandler.call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+        function dragstarted(d) {
+            self.pause();
+        }
+
+        function dragged(d) {
+            // d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+        }
+
+        function dragended(d) {
+            // d3.select(this).attr("stroke", null);
+        }
+
+        function onClickTimeline(){
+            self.pause();
+            const mouse = d3.mouse(this);
+            const value = mouse[0]/this.getBoundingClientRect().width*100;
+            self.step(self.timeConf.scale.invert(value));
+        }
+    }
+    disableHandle(isdisable){
+        this.timelineHolder.classed('disabled',isdisable)
     }
     play(){
 
@@ -87,10 +122,12 @@ class Timeline{
             this.currentValue = value;
         else
             this.currentValue = new Date(value);
+        const percentage = this.timeConf.scale(this.currentValue)
         this.timeline
-            .style("width", `${this.timeConf.scale(this.currentValue)}%`)
+            .style("width", `${percentage}%`)
             .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
-            .text(this.currentValue.toLocaleString())
+            .text(this.currentValue.toLocaleString());
+        this.timelineHandler.style('left',`${percentage}%`)
     }
 
 }

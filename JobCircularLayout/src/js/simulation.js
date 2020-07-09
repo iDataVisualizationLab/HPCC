@@ -25,7 +25,12 @@ class Simulation {
 
         }
     }
-    request(){
+    request(timesexlapse,index){
+        if(index!=undefined && this.#data)
+            if (_.isDate(index))
+                this.#index = d3.bisect(this.#data.time_stamp,index)
+            else
+                this.#index = index;
         if (this.isRealTime || (!this.isRealTime&&this.#data===undefined)||(this.#index<this.#data.time_stamp.length)) {
             let updatePromise;
             let self = this;
