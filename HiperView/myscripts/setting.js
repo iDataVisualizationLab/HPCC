@@ -219,8 +219,9 @@ function newdatatoFormat (data,separate){
     });
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
-    scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
-
+    // scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
+    scaleService = serviceLists.map(d=>d.sub.map(sub=>d3.scaleLinear().domain(sub.range)));
+    debugger
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
     tsnedata = {};
@@ -241,7 +242,9 @@ function newdatatoFormat (data,separate){
                  }
                  let retievedData = processResult_csv(d[h+separate+attr],attr);
                 sampleS[h][attr].push(retievedData);
-                tsnedata[h][currentIndex].push(retievedData===null?0:scaleService[i](retievedData)||0);
+                retievedData.forEach((r,sub_index)=> {
+                    tsnedata[h][currentIndex].push(r === null ? 0 : scaleService[i][sub_index](r) || 0);
+                });
             });
         })
     });
