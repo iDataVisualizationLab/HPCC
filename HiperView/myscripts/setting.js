@@ -221,7 +221,6 @@ function newdatatoFormat (data,separate){
     serviceFullList = serviceLists2serviceFullList(serviceLists);
     // scaleService = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
     scaleService = serviceLists.map(d=>d.sub.map(sub=>d3.scaleLinear().domain(sub.range)));
-    
     const host_name = Object.keys(hostList.data.hostlist);
     sampleS = {};
     tsnedata = {};
