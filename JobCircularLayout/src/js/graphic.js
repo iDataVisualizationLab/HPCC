@@ -419,7 +419,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         if (isFreeze) {
             const contain = d3.select('.informationHolder').datum(d);
             contain.select('.card-header').text(d => 'User: ' + d.key);
-            contain.select('.card-body').html(`<table id="informationTable" class="display" style="width:100%">
+            contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
                         <th></th>
