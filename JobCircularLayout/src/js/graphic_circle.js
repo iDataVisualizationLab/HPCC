@@ -73,7 +73,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
     }
 
-    graphicopt.el = svg;
+    graphicopt.el = svg
     // Set the y scale of rectangles
     graphicopt.iLength = d3.keys(users).length;
     let innerY = d3.scaleLinear()
@@ -102,12 +102,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
-        const pos = angle2position(outerX(i),graphicopt.diameter()/2)
-        d.x = pos[0];
-        d.y = pos[1]; //- max_radius*2-30;
-        const pos_bundle = angle2position(outerX(i),graphicopt.diameter()/2-max_radius-20)
-        d.x_bundle = pos_bundle[0];
-        d.y_bundle = pos_bundle[1];
+        d.x = outerX(i);
+        d.y = graphicopt.diameter()/2; //- max_radius*2-30;
         // d.y = outerY(i);
         d.relatedLinks = [];
         d.relatedNodes = [];
@@ -151,18 +147,50 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     // Create the mapping of target nodes and their positions
     let targetPos = [];
     rack_arr.forEach((d, i)=>{
-        targetPos.push({"targetX": d.x, "targetY": d.y,"targetX_bundle":d.x_bundle,"targetY_bundle":d.y_bundle, "target": d.name , node: d});
+        targetPos.push({"targetX": d.x, "targetY": d.y, "target": d.name , node: d});
         return targetPos
     });
     // console.log(targetPos);
 
+    // Join target positions with links data by target nodes
+    links.forEach(d=>{
+        targetPos.forEach((v=>{
+            if (d.target === v.target){
+                d.targetX = v.targetX;
+                d.targetY = v.targetY;
+                d.targetData = v.node;
+                d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
+                d.targetData.relatedNodes.push({data:d.sourceData});
+            }
+        }))
+    });
 
+    // Define link layout
+    let link = d3.linkHorizontal()
+        .source(d=>[-d.targetY * Math.sin(projectX(d.targetX)), d.targetY * Math.cos(projectX(d.targetX))])
+        .target(d=>[d.targetX > 180 ? d.sourceX : d.sourceX + graphicopt.rect.width, d.sourceY + graphicopt.rect.height / 2])
 
     // Append links between inner nodes and outer nodes
     let linksg = svg.select("g.links");
     if(linksg.empty()){
         linksg = svg.append("g").attr("class", "links")
     }
+    let nodeLink = linksg
+        .selectAll(".link")
+        .data(links)
+        .join("path")
+        .attr("class", "link")
+        .attr("fill", "none")
+        .attr("stroke", "#457b9d")
+        .attr("stroke-width", d=>d.width/6)
+        // .attr("d", d=>diagonal(d))
+        .attr("d", link);
+    nodeLink.each(function(d){
+        const ob = d3.select(this);
+        d.sourceData.relatedLinks.push(ob);
+        d.targetData.relatedLinks.push(ob);
+        d.node=ob;
+    });
 
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
@@ -194,13 +222,13 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         p.each(function(d){
           d.node=d3.select(this);
           d.childrenNode = makecirclepacking(d.node);
-        });
+        })
         p.select('text.groupLabel')
-            .attr("text-anchor", function(d) { return d.x > 0 ? "start" : "end"; })
-            .attr("dx", function(d) { return d.x > 0 ? max_radius : -max_radius; })
+            .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+            .attr("transform", function(d) { return d.x < 180 ? `rotate(${90-d.x})translate(${max_radius})` : `rotate(${360-d.x+90})translate(${-max_radius})`; })
             .text(function(d) {
                 return d.name; });
-        return p.attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+        return p.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; });
     }
 
     // draw inner node
@@ -222,57 +250,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
     inode_n.call(updateInode);
 
-    // Join target positions with links data by target nodes
-    links.forEach(d=>{
-        targetPos.forEach((v=>{
 
-            if (d.target === v.target){
-                d.targetX = v.targetX_bundle;
-                d.targetY  = v.targetY_bundle;
-                const targetChildren = v.node.pack.children.find(c=>c.data.name===d.targetChildren)
-                d.targetX_l = v.targetX+targetChildren.x;
-                d.targetY_l = v.targetY+targetChildren.y;
-                d.targetData = v.node;
-                d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
-                d.targetData.relatedNodes.push({data:d.sourceData});
-                d.color = targetChildren.color;
-            }
-        }))
-    });
-
-    // Define link layout
-    // let link = d3.linkHorizontal()
-    //     .source(d=>[d.targetX_l, d.targetY_l])
-    //     .target(d=>[d.targetX < 0 ? d.sourceX : d.sourceX + graphicopt.rect.width, d.sourceY + graphicopt.rect.height / 2])
-    const line = d3.line()
-        .curve(d3.curveBundle.beta(0.8));
-    let link = function(d){
-
-        const target_pos = [d.targetX_l, d.targetY_l];
-        const source_pos = [d.targetX < 0 ? d.sourceX : d.sourceX + graphicopt.rect.width, d.sourceY + graphicopt.rect.height / 2];
-        const pos1 = [d.targetX, d.targetY];
-        const pos3 = [source_pos[0]+(pos1[0]-source_pos[0])/4, source_pos[1]];
-        const pos2 = [source_pos[0]+(pos1[0]-source_pos[0])/2, source_pos[1]];
-
-        return line([target_pos,pos1,pos2,pos3,source_pos])
-    }
-
-    let nodeLink = linksg
-        .selectAll(".link")
-        .data(links)
-        .join("path")
-        .attr("class", "link")
-        .attr("fill", "none")
-        .attr("stroke", d=>d.color)
-        .attr("stroke-width", d=>d.width/6)
-        // .attr("d", d=>diagonal(d))
-        .attr("d", link);
-    nodeLink.each(function(d){
-        const ob = d3.select(this);
-        d.sourceData.relatedLinks.push(ob);
-        d.targetData.relatedLinks.push(ob);
-        d.node=ob;
-    });
 
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
 
@@ -479,5 +457,5 @@ function mouseout(d){
 }
 
 function angle2position(angle,radius){
-    return [Math.sin(angle/180*Math.PI)*radius,-Math.cos(angle/180*Math.PI)*radius];
+    return [Math.sin(angle)*radius,Math.sin(angle)*radius]
 }

@@ -17,28 +17,40 @@ svg {
 }
 
 .inner_node.highlight rect {
-    stroke: #e63946;
+    opacity: 1;
     stroke-width: 2px;
     fill: #f1faee;
 }
 .inner_node.highlight text{
     fill: black;
 }
+.onhighlight .inner_node {
+    opacity: 0.1;
+}
 
+.onhighlight .inner_node.highlight {
+    opacity: 1;
+}
 .outer_node circle {
     /*fill: #f1faee;*/
     stroke: #1d3557;
     stroke-width: 0.5px;
     pointer-events: all;
 }
+.onhighlight .outer_node.highlight circle{
+    opacity: 1;
+}
 .onhighlight .outer_node circle{
     opacity: 0.1;
 }
-.onhighlight .link {
+.onhighlight g.links .link {
     opacity: 0;
 }
-.onhighlight .link.highlight {
+.onhighlight g.links .link.highlight {
     opacity: 1;
+}
+g.links .link {
+    opacity: 0.5;
 }
 .outer_node circle.highlight
 {
