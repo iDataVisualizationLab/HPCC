@@ -45,8 +45,10 @@ let graphicopt = {
 };
 
 
+let isFreeze = false;
 
 function draw({computers,jobs,users,sampleS,serviceSelected}){
+    isFreeze = false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
@@ -63,7 +65,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         .attr("width", graphicopt.width)
         .attr("height", graphicopt.height)
         .select("g.content")
-        .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
+        .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")")
+        .on('click',()=>{isFreeze=false});
     if (svg.empty()){
         svg = d3.select('#circularLayout')
             .attr("width", graphicopt.width)
@@ -203,6 +206,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     onode.exit().remove();
     let onode_n = onode.enter().append("g")
         .attr("class", "outer_node")
+        .on('click',()=>{isFreeze=!isFreeze})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     onode_n.append('g').attr('class','circleG');
@@ -242,6 +246,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
+        .on('click',()=>{isFreeze=!isFreeze})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect');
@@ -413,46 +418,50 @@ function projectX(x)
 
 function mouseover(d){
     // Bring to front
-    graphicopt.el.classed('onhighlight',true);
-    d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
-    d3.select(this).classed('highlight', true);
-    for (let i = 0; i < d.relatedNodes.length; i++)
+    if(!isFreeze)
     {
-        if (d.relatedNodes[i].key)
-            try {
-                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
-            }catch(e){
-                console.log(d.relatedNodes[i].key)
-            }
-        else
-            d.relatedNodes[i].data.node.classed('highlight', true);
-        // .attr("width", 18).attr("height", 18);
-    }
+        graphicopt.el.classed('onhighlight',true);
+        d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
+        d3.select(this).classed('highlight', true);
+        for (let i = 0; i < d.relatedNodes.length; i++)
+        {
+            if (d.relatedNodes[i].key)
+                try {
+                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
+                }catch(e){
+                    console.log(d.relatedNodes[i].key)
+                }
+            else
+                d.relatedNodes[i].data.node.classed('highlight', true);
+            // .attr("width", 18).attr("height", 18);
+        }
 
-    for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].moveToFront().classed('highlight', true);
+        for (let i = 0; i < d.relatedLinks.length; i++){
+            d.relatedLinks[i].moveToFront().classed('highlight', true);
+        }
     }
 }
 
 
 function mouseout(d){
-    graphicopt.el.classed('onhighlight',false);
-    d3.select(this).classed('highlight', false);
-    for (let i = 0; i < d.relatedNodes.length; i++)
-    {
-        if (d.relatedNodes[i].key)
-            try {
-                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
-            }catch(e){
+    if (!isFreeze) {
+        graphicopt.el.classed('onhighlight', false);
+        d3.select(this).classed('highlight', false);
+        for (let i = 0; i < d.relatedNodes.length; i++) {
+            if (d.relatedNodes[i].key)
+                try {
+                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
+                } catch (e) {
 
-            }
-        else
-            d.relatedNodes[i].data.node.classed('highlight', false);
-        // .attr("width", config.rect_width).attr("height", config.rect_height);
-    }
+                }
+            else
+                d.relatedNodes[i].data.node.classed('highlight', false);
+            // .attr("width", config.rect_width).attr("height", config.rect_height);
+        }
 
-    for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].classed("highlight", false );
+        for (let i = 0; i < d.relatedLinks.length; i++) {
+            d.relatedLinks[i].classed("highlight", false);
+        }
     }
 }
 

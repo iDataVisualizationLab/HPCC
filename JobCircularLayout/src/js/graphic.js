@@ -44,9 +44,10 @@ let graphicopt = {
     "mid": 11
 };
 
-
+let isFreeze= false;
 
 function draw({computers,jobs,users,sampleS,serviceSelected}){
+    isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
@@ -63,7 +64,12 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
         .attr("width", graphicopt.width)
         .attr("height", graphicopt.height)
         .select("g.content")
-        .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
+        .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")")
+        .on('click',()=>{if (isFreeze){
+            const func = isFreeze;
+            isFreeze = false;
+            func();
+        }});
     if (svg.empty()){
         svg = d3.select('#circularLayout')
             .attr("width", graphicopt.width)
@@ -175,6 +181,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     onode.exit().remove();
     let onode_n = onode.enter().append("g")
         .attr("class", "outer_node")
+        .on('click',freezeHandle)
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     onode_n.append('g').attr('class','circleG');
@@ -214,6 +221,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
+        .on('click',freezeHandle)
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect');
@@ -291,6 +299,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
 
     function makecirclepacking(svg) {
         let node;
+        let view;
         // svg.append('g').attr('class', 'circleG');
         root = svg.datum().pack;
         let label;
@@ -351,7 +360,27 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
                     .on("mouseout", function () {
                         d3.select(this).attr("stroke", null);
                     })
-                    .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+                    // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+                function zoom(d) {
+                    const focus0 = focus;
+
+                    focus = d;
+
+                    const transition = svg.transition()
+                        .duration(d3.event.altKey ? 7500 : 750)
+                        .tween("zoom", d => {
+                            const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
+                            return t => currentZoomData = zoomTo(i(t));
+                        });
+
+                    label
+                        .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+                        .transition(transition)
+                        .style("fill-opacity", d => d.parent === focus ? 1 : 0)
+                        .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+                        .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+
+                }
             }
         }
 
@@ -359,9 +388,9 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
 
         function zoomTo(v,istransition) {
             k=1;
-            // const k = width / v[2];
+            // const k = graphicopt.widthG() / v[2];
             //
-            // view = v;
+            view = v;
             //
             // label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
             // value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
@@ -373,6 +402,17 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
             node.attr("r", d => d.r * k);
             return v
+        }
+    }
+    function freezeHandle(){
+        if (isFreeze){
+            const func = isFreeze;
+            isFreeze = false;
+            func();
+        }else{
+            isFreeze = true;
+            isFreeze = (function(){d3.select(this).dispatch('mouseout')}).bind(this);
+            d3.event.stopPropagation();
         }
     }
 }
@@ -434,48 +474,51 @@ function projectX(x)
 }
 
 function mouseover(d){
-    // Bring to front
-    graphicopt.el.classed('onhighlight',true);
-    d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
-    d3.select(this).classed('highlight', true);
-    for (let i = 0; i < d.relatedNodes.length; i++)
-    {
-        if (d.relatedNodes[i].key)
-            try {
-                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
-            }catch(e){
-                console.log(d.relatedNodes[i].key)
-            }
-        else
-            d.relatedNodes[i].data.node.classed('highlight', true);
-        // .attr("width", 18).attr("height", 18);
-    }
+    if (!isFreeze)
+   {     // Bring to front
+        graphicopt.el.classed('onhighlight',true);
+        d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
+        d3.select(this).classed('highlight', true);
+        for (let i = 0; i < d.relatedNodes.length; i++)
+        {
+            if (d.relatedNodes[i].key)
+                try {
+                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
+                }catch(e){
+                    console.log(d.relatedNodes[i].key)
+                }
+            else
+                d.relatedNodes[i].data.node.classed('highlight', true);
+            // .attr("width", 18).attr("height", 18);
+        }
 
-    for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].moveToFront().classed('highlight', true);
-    }
+        for (let i = 0; i < d.relatedLinks.length; i++){
+            d.relatedLinks[i].moveToFront().classed('highlight', true);
+        }}
 }
 
 
 function mouseout(d){
-    graphicopt.el.classed('onhighlight',false);
-    d3.select(this).classed('highlight', false);
-    for (let i = 0; i < d.relatedNodes.length; i++)
-    {
-        if (d.relatedNodes[i].key)
-            try {
-                d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
-            }catch(e){
+    if(!isFreeze)
+        {graphicopt.el.classed('onhighlight',false);
+        d3.select(this).classed('highlight', false);
+        for (let i = 0; i < d.relatedNodes.length; i++)
+        {
+            if (d.relatedNodes[i].key)
+                try {
+                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
+                }catch(e){
 
-            }
-        else
-            d.relatedNodes[i].data.node.classed('highlight', false);
-        // .attr("width", config.rect_width).attr("height", config.rect_height);
-    }
+                }
+            else
+                d.relatedNodes[i].data.node.classed('highlight', false);
+            // .attr("width", config.rect_width).attr("height", config.rect_height);
+        }
 
-    for (let i = 0; i < d.relatedLinks.length; i++){
-        d.relatedLinks[i].classed("highlight", false );
-    }
+        for (let i = 0; i < d.relatedLinks.length; i++){
+            d.relatedLinks[i].classed("highlight", false );
+        }
+        }
 }
 
 function angle2position(angle,radius){
