@@ -46,7 +46,7 @@ let graphicopt = {
 
 let isFreeze= false;
 
-function draw({computers,jobs,users,sampleS,serviceSelected}){
+function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
@@ -221,7 +221,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
-        .on('click',freezeHandle)
+        .on('click',function(d){freezeHandle.bind(this)();userTable(d);})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect');
@@ -413,6 +413,91 @@ function draw({computers,jobs,users,sampleS,serviceSelected}){
             isFreeze = true;
             isFreeze = (function(){d3.select(this).dispatch('mouseout')}).bind(this);
             d3.event.stopPropagation();
+        }
+    }
+    function userTable(d){
+        if (isFreeze) {
+            const contain = d3.select('.informationHolder').datum(d);
+            contain.select('.card-header').text(d => 'User: ' + d.key);
+            contain.select('.card-body').html(`<table id="informationTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Job ID</th>
+                        <th>Job Name</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        <th>Cpu Cores</th>
+                        <th>Total Nodes</th>
+                        <th>TaskID</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>Job ID</th>
+                        <th>Job Name</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        <th>Cpu Cores</th>
+                        <th>Total Nodes</th>
+                        <th>TaskID</th>
+                    </tr>
+                </tfoot>
+            </table>`);
+            const jobData = d.value.job.map(j=>{
+                const jobID = j.split('.');
+                const job=_.clone(jobs[j]);
+                job['id']=jobID[0];
+                job['duration']=currentTime - job['start_time']*1000;
+                job['task_id'] = jobID[1]||'n/a';
+                return job})
+            var table = $('#informationTable').DataTable( {
+                "data": jobData,
+                "columns": [
+                    {
+                        "className":      'details-control',
+                        "orderable":      false,
+                        "data":           null,
+                        "defaultContent": ''
+                    },
+                    { "data": "id" },
+                    { "data": "job_name" },
+                    { "data": "start_time" ,
+                        "render": function ( data, type, row ) {
+                            if(type!=='ordering')
+                                return d3.timeFormat('%m/%d/%Y %H:%M')(new Date(data*1000));
+                            return data;
+                        }},
+                    { "data": "duration",
+                        "render": function ( data, type, row ) {
+                            if(type!=='ordering')
+                                return millisecondsToStr_axproximate(data);
+                            return data;
+                        }},
+                    { "data": "cpu_cores" },
+                    { "data": "total_nodes" },
+                    { "data": "task_id" },
+                ],
+                "order": [[1, 'asc']]
+            } );
+
+            // Add event listener for opening and closing details
+            $('#example tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row( tr );
+
+                if ( row.child.isShown() ) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child( format(row.data()) ).show();
+                    tr.addClass('shown');
+                }
+            } );
         }
     }
 }

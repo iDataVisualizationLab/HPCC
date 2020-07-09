@@ -64,7 +64,8 @@ function queryData(data) {
         let  sampleS = handleDataUrl(data).sampleS;
         adjustTree(sampleS);
         let {computers,jobs,users} = handleData(data);
-        draw({computers,jobs,users,sampleS,serviceSelected});
+        const currentTime = data.currentTime;
+        draw({computers,jobs,users,sampleS,serviceSelected,currentTime});
 }
 
 // read data

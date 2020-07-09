@@ -1,3 +1,6 @@
+html{
+    font-size: 11px;
+}
 .btn-circle.btn-sm {
     width: 30px;
     height: 30px;
@@ -21,4 +24,9 @@
     border-radius: 35px;
     font-size: 12px;
     text-align: center;
+}
+.informationHolder{
+    position: absolute;
+    top: 0;
+    right: 0;
 }
