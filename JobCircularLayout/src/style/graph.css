@@ -32,7 +32,7 @@ svg {
 .onhighlight .inner_node.highlight {
     opacity: 1;
 }
-.outer_node circle {
+.outer_node circle.compute {
     /*fill: #f1faee;*/
     stroke: #1d3557;
     stroke-width: 0.5px;
