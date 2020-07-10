@@ -1,5 +1,5 @@
 svg {
-    font: 12px sans-serif;
+    font-size: 12px;
 }
 
 
@@ -35,13 +35,16 @@ svg {
 .outer_node circle.compute {
     /*fill: #f1faee;*/
     stroke: #1d3557;
-    stroke-width: 0.5px;
+    stroke-width: 0.1;
     pointer-events: all;
 }
-.onhighlight .outer_node.highlight circle{
+.onhighlight .outer_node.highlight.highlightSummary .circleG circle{
+    opacity: 0;
+}
+.onhighlight .outer_node.highlight .circleG circle{
     opacity: 1;
 }
-.onhighlight .outer_node circle{
+.onhighlight .outer_node .circleG circle{
     opacity: 0.1;
 }
 .onhighlight g.links .link {
@@ -51,9 +54,10 @@ svg {
     opacity: 1;
 }
 g.links .link {
-    opacity: 0.5;
+    opacity: 0.95;
+    stroke-width:0.3;
 }
-.outer_node circle.highlight
+.onhighlight .outer_node .circleG circle.highlight, .onhighlight .outer_node.highlight.highlightSummary .circleG circle.highlight
 {
     opacity: 1;
 }
@@ -65,7 +69,10 @@ text {
 
 }
 
-.outer_node.highlight text{
+.outer_node.highlightSummary .summary{
+    display: block;
+}
+.outer_node.highlightSummary text{
     /*stroke:#e63946;*/
     font-weight: bold;
 }

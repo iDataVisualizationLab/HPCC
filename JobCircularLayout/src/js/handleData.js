@@ -17,7 +17,7 @@ function handleData(data){
     //     const d = jobs[j];
     //     if (!d.finish_time) {
     //         delete jobs[j]
-    //     }
+    //     }tree
     // }); // lastest job
     const user_job = d3.nest()
         .key(d=>d.value[USER]) //user
@@ -39,8 +39,8 @@ function adjustTree(sampleS){
 
 function data2tree(data,sampleS){
     const compute_layoutLink = {};
-    const tree =  {name:"__main__",children:data.map(d=>(
-            {
+    const tree =  {name:"__main__",children:data.map(d=>{
+            const el = {
                 name:d.key,
                 children:_.flatten(d.value)
                     .filter(e=>e!==null)
@@ -55,7 +55,23 @@ function data2tree(data,sampleS){
                         compute_layoutLink[c] = d.key;
                         return item;
                     })
-            }))
+            };
+            el.summary={};
+            if (sampleS)
+                serviceFullList.forEach(s=>{
+                    const dataarr = el.children.map(d=>d.metrics[s.text]);
+                    el.summary[s.text] = {
+                        min: d3.min(dataarr),
+                        max:d3.max(dataarr),
+                        // q1:d3.min(dataarr),
+                        // q3:d3.min(dataarr),
+                        // median:d3.min(dataarr),
+                        average: d3.mean(dataarr),
+                        // std:d3.min(dataarr),
+                    };
+                });
+            return el;
+    })
     };
     return {tree,compute_layoutLink};
 }

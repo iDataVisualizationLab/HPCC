@@ -1,6 +1,9 @@
 html{
     font-size: 11px;
 }
+body{
+    color: black;
+}
 .btn-circle.btn-sm {
     width: 30px;
     height: 30px;
@@ -30,7 +33,18 @@ html{
     top: 80px;
     right: 0;
     max-width: 500px;
+    color: white;
 }
 .hide {
     display: none;
+}
+.dataTables_scroll {
+    background-color: white;
+    color: black;
+}
+
+li.theme{
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.75rem;
 }

@@ -59,7 +59,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         if (d)
             return _colorItem(d);
         else
-            return '#afafaf';
+            // return '#afafaf';
+            return '#ffffff';
     };
 
     let svg_ = d3.select('#circularLayout')
@@ -111,6 +112,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     });
 
     // Setup the positions of outer nodes
+    Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-a.metrics[serviceFullList[serviceSelected].text]+b.metrics[serviceFullList[serviceSelected].text]))
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
@@ -190,6 +192,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     let onode_n = onode.enter().append("g")
         .attr("class", "outer_node");
     onode_n.append('g').attr('class','circleG');
+    onode_n.append('g').attr('class','summary hide');
     onode_n.append('g').attr('class','label')
         .attr('class','label')
         .style("font", "10px sans-serif")
@@ -198,7 +201,13 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
 
     onode_n.append("text")
         .attr('class','groupLabel')
-        .attr("dy", ".31em");
+        .attr("dy", ".31em")
+        .style('pointer-events','all')
+        .on('click',freezeHandle)
+        .on("mouseover", function(d){
+            d.node.classed('highlightSummary',true);
+            mouseover.bind(d3.select(this.parentNode).select('.circleG').select('circle').node())(d)})
+        .on("mouseout", function(d){mouseout.bind(d3.select(this.parentNode).select('.circleG').select('circle').node())(d)});
 
     onode_n.call(updateOnode)
     function updateOnode(p){
@@ -281,7 +290,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         .attr("class", "link")
         .attr("fill", "none")
         .attr("stroke", d=>d.color)
-        .attr("stroke-width", d=>d.width/6)
+        // .attr("stroke-width", 0.3)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
     nodeLink.each(function(d){
@@ -317,6 +326,25 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             .style("font", "10px sans-serif")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
+        const summary_map = [
+            ['min','max','average']
+        ];
+        const summary_y = d3.scaleLinear().range([0,root.r]).domain(_colorItem.domain().sort((a,b)=>a-b))
+        const summary_path = svg.select('g.summary')
+            .selectAll('path')
+            .attr('class','summary')
+            .data(summary_map.map(d=>({key:d, data:root.data.summary[serviceFullList[serviceSelected].text]})))
+            .call(updateSummary);
+        summary_path.exit().remove();
+        summary_path.enter().append('path').attr('class','summary').call(updateSummary);
+
+        const summary_circle = svg.select('g.summary')
+            .selectAll('circle')
+            .attr('class','summary')
+            .data(summary_map[0].map(d=>({key:d, data:root.data.summary[serviceFullList[serviceSelected].text][d]})))
+            .call(updateSummaryCircle);
+        summary_circle.exit().remove();
+        summary_circle.enter().append('circle').attr('class','summary').call(updateSummaryCircle);
 
         return updateNodes();
 
@@ -365,8 +393,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                     .classed('compute', d => !d.children)
                     .attr("pointer-events", d => !d.children ? "none" : null)
                     .on('click',freezeHandle)
-                    .on("mouseover", function(d){mouseover.bind(this)(d.data)})
-                    .on("mouseout", function(d){mouseout.bind(this)(d.data)})
+                    .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
+                    .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
                 function zoom(d) {
                     const focus0 = focus;
@@ -390,7 +418,18 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                 }
             }
         }
-
+        function updateSummary(p){
+            p.attr('d',d=>d3.arc().innerRadius(summary_y(d.data[d.key[0]])+2)
+                .outerRadius(summary_y(d.data[d.key[1]])-1)
+                .startAngle(0)
+                .endAngle(Math.PI*2)())
+                .attr('fill',d=>_colorItem(d.data[d.key[2]]));
+        }
+        function updateSummaryCircle(p){
+            p.attr('r',d=>summary_y(d.data))
+                .attr('fill','none')
+                .attr('stroke',d=>_colorItem(d.data));
+        }
 
 
         function zoomTo(v,istransition) {
@@ -440,18 +479,6 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                         <th>TaskID</th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th></th>
-                        <th>Job ID</th>
-                        <th>Job Name</th>
-                        <th>Start Time</th>
-                        <th>Duration</th>
-                        <th>Cpu Cores</th>
-                        <th>Total Nodes</th>
-                        <th>TaskID</th>
-                    </tr>
-                </tfoot>
             </table>`);
             const jobData = d.value.job.map(j=>{
                 const jobID = j.split('.');
@@ -627,7 +654,7 @@ let nest = function (seq, keys) {
 
 function pack (data){
     return d3.pack()
-        .size([graphicopt.diameter()/2, graphicopt.diameter()/2])
+        .size([graphicopt.diameter()/5*3, graphicopt.diameter()/5*3])
         .padding(3)
         (d3.hierarchy(data)
             .sum(d => d.value)
@@ -644,6 +671,9 @@ function mouseover(d){
         graphicopt.el.classed('onhighlight',true);
         d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
         d3.select(this).classed('highlight', true);
+        if (d.node){
+            d.node.classed('highlight', true);
+        }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
             if (d.relatedNodes[i].key)
@@ -652,8 +682,10 @@ function mouseover(d){
                 }catch(e){
                     console.log(d.relatedNodes[i].key)
                 }
-            else
+            else {
                 d.relatedNodes[i].data.node.classed('highlight', true);
+
+            }
             // .attr("width", 18).attr("height", 18);
         }
 
@@ -665,8 +697,12 @@ function mouseover(d){
 
 function mouseout(d){
     if(!isFreeze)
-        {graphicopt.el.classed('onhighlight',false);
-        d3.select(this).classed('highlight', false);
+        {
+            graphicopt.el.classed('onhighlight',false);
+            d3.select(this).classed('highlight', false);
+            if(d.node){
+                d.node.classed('highlight', false).classed('highlightSummary', false);
+            }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
             if (d.relatedNodes[i].key)
