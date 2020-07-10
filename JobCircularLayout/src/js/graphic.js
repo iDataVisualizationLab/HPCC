@@ -31,7 +31,7 @@ let graphicopt = {
       return this.margin.top+this.heightG()/2;
     },
     rect:{
-        "width": 120,
+        "width": 125,
         "height": 16,
     },
     pack:{
@@ -122,6 +122,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         d.pack.children.forEach(e=>{
             e.x -= d.pack.x;
             e.y -= d.pack.y;
+            e.data.relatedLinks = [];
+            e.data.relatedNodes = [];
             e.depth = 1;
         });
         d.pack.x = 0;
@@ -180,10 +182,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     onode.call(updateOnode);
     onode.exit().remove();
     let onode_n = onode.enter().append("g")
-        .attr("class", "outer_node")
-        .on('click',freezeHandle)
-        .on("mouseover", mouseover)
-        .on("mouseout", mouseout);
+        .attr("class", "outer_node");
     onode_n.append('g').attr('class','circleG');
     onode_n.append('g').attr('class','label')
         .attr('class','label')
@@ -224,7 +223,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         .on('click',function(d){freezeHandle.bind(this)();userTable(d);})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
-    inode_n.append('rect');
+    inode_n.append('rect')
+        .attr('rx',3);
     inode_n.append("text")
         .attr('text-anchor', 'start')
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
@@ -241,6 +241,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                 d.targetX_l = v.targetX+targetChildren.x;
                 d.targetY_l = v.targetY+targetChildren.y;
                 d.targetData = v.node;
+                d.targetData.childrenNode[d.targetChildren].datum().data.relatedNodes.push({data:d.sourceData})
                 d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
                 d.targetData.relatedNodes.push({data:d.sourceData});
                 d.color = targetChildren.color;
@@ -254,6 +255,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     //     .target(d=>[d.targetX < 0 ? d.sourceX : d.sourceX + graphicopt.rect.width, d.sourceY + graphicopt.rect.height / 2])
     const line = d3.line()
         .curve(d3.curveBundle.beta(0.8));
+        // .curve(d3.curveCardinal.tension(0.1));
     let link = function(d){
 
         const target_pos = [d.targetX_l, d.targetY_l];
@@ -262,6 +264,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         const pos3 = [source_pos[0]+(pos1[0]-source_pos[0])/4, source_pos[1]];
         const pos2 = [source_pos[0]+(pos1[0]-source_pos[0])/2, source_pos[1]];
 
+        // return line([target_pos,pos1,pos2,pos3,source_pos])
         return line([target_pos,pos1,pos2,pos3,source_pos])
     }
 
@@ -277,6 +280,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         .attr("d", link);
     nodeLink.each(function(d){
         const ob = d3.select(this);
+        d.targetData.childrenNode[d.targetChildren].datum().data.relatedLinks.push(ob)
         d.sourceData.relatedLinks.push(ob);
         d.targetData.relatedLinks.push(ob);
         d.node=ob;
@@ -292,7 +296,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             .attr('height', graphicopt.rect.height)
             .attr('id', d=>d.key);
         p.select('text')
-            .text(d=>d.key+' ( '+d.value.job.length+' jobs )');
+            .html(d=>d.key+'  <tspan style="font-weight: bold">'+d.value.job.length+'</tspan> jobs');
         return p.attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
     }
 
@@ -314,7 +318,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             let childrenNode = {};
             node = svg.select('g.circleG')
                 .selectAll("circle")
-                .data(root.descendants().slice(1), d => d.data.name)
+                .data(root.descendants(), d => d.data.name)
                 .call(updateNode);
 
             node.exit().remove();
@@ -354,12 +358,9 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                     })
                     .classed('compute', d => !d.children)
                     .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on("mouseover", function () {
-                        d3.select(this).attr("stroke", "#000");
-                    })
-                    .on("mouseout", function () {
-                        d3.select(this).attr("stroke", null);
-                    })
+                    .on('click',freezeHandle)
+                    .on("mouseover", function(d){mouseover.bind(this)(d.data)})
+                    .on("mouseout", function(d){mouseout.bind(this)(d.data)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
                 function zoom(d) {
                     const focus0 = focus;
@@ -417,6 +418,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     }
     function userTable(d){
         if (isFreeze) {
+            d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
             contain.select('.card-header').text(d => 'User: ' + d.key);
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
@@ -454,6 +456,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                 return job})
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
+                "scrollX": true,
                 "columns": [
                     {
                         "className":      'details-control',
@@ -483,7 +486,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             } );
 
             // Add event listener for opening and closing details
-            $('#example tbody').on('click', 'td.details-control', function () {
+            $('#informationTable tbody').on('click', 'td.details-control', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
 
@@ -498,7 +501,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
                     tr.addClass('shown');
                 }
             } );
-        }
+        }else
+            d3.select('.informationHolder').classed('hide',true)
     }
 }
 function textcolor(p){

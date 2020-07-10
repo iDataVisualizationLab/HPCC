@@ -27,6 +27,10 @@ html{
 }
 .informationHolder{
     position: absolute;
-    top: 0;
+    top: 80px;
     right: 0;
+    max-width: 500px;
+}
+.hide {
+    display: none;
 }
