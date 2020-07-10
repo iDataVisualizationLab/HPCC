@@ -90,6 +90,7 @@ class Simulation {
     requestFromURL(){
         const self = this;
        // todo need method to cancle
+        console.time('request time: ')
         const _end = new Date(); //'2020-02-14T12:00:00-05:00'
         let _start = new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
         const interval = '5m';
@@ -101,6 +102,7 @@ class Simulation {
             data.currentTime = new Date(_.last(data.time_stamp)*1000);
             self.#currentTime = data.currentTime;
             self.#data = data;
+            console.timeEnd('request time: ')
             return data;
         });
     }

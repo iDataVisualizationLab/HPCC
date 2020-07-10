@@ -30,6 +30,7 @@ let graphicopt = {
     centerY: function () {
       return this.margin.top+this.heightG()/2;
     },
+    color:{},
     rect:{
         "width": 125,
         "height": 16,
@@ -48,6 +49,7 @@ let isFreeze= false;
 
 function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
     isFreeze= false;
+    graphicopt.color.title =  serviceFullList[serviceSelected].text;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
@@ -58,13 +60,16 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             return _colorItem(d);
         else
             return '#afafaf';
-    }
+    };
 
-    let svg = d3.select('#circularLayout')
+    let svg_ = d3.select('#circularLayout')
         .attr("width", graphicopt.width)
         .attr("height", graphicopt.height)
+        .style('overflow','visible');
+    let svg = svg_
         .select("g.content")
-        .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")")
+        // .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")")
+        .attr("transform", "translate(" + (graphicopt.margin.left+graphicopt.diameter()/2) + "," + graphicopt.centerY() + ")")
         .on('click',()=>{if (isFreeze){
             const func = isFreeze;
             isFreeze = false;
@@ -76,7 +81,8 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             .attr("height", graphicopt.height)
             .append("g")
             .attr('class','content')
-            .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
+            // .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
+    .attr("transform", "translate(" + (graphicopt.margin.left+graphicopt.diameter()/2) + "," + graphicopt.centerY() + ")")
     }
 
     graphicopt.el = svg;
@@ -285,7 +291,7 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         d.targetData.relatedLinks.push(ob);
         d.node=ob;
     });
-
+    makelegend()
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
 
     function updateInode(p){
@@ -503,6 +509,76 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
             } );
         }else
             d3.select('.informationHolder').classed('hide',true)
+    }
+    function makelegend(){
+        svg_.select('g.legend').remove();
+        let legend = svg_.append('g').attr('class','legend').attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
+        const color = _colorItem;
+        const marginTop = 20;
+        const marginBottom = 0;
+        const marginLeft = 0;
+        const marginRight = 0;
+        const width = 10;
+        const height = 200;
+
+        if (color.interpolate) {
+            const n = Math.min(color.domain().length, color.range().length);
+
+            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(marginTop, height - marginBottom), n));
+
+            legend.append("image")
+                .attr("x", marginLeft)
+                .attr("y", marginTop)
+                .attr("width", width - marginLeft - marginRight)
+                .attr("height", height - marginTop - marginBottom)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+        }// Sequential
+        else if (color.interpolator) {
+            let y = Object.assign(color.copy()
+                    .interpolator(d3.interpolateRound(marginTop, height - marginBottom)),
+                {range() { return [marginTop, height - marginBottom]; }});
+
+            legend.append("image")
+                .attr("x", marginLeft)
+                .attr("y", marginTop)
+                .attr("width", width - marginLeft - marginRight)
+                .attr("height", height - marginTop - marginBottom)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+
+            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+            if (!y.ticks) {
+                if (tickValues === undefined) {
+                    const n = Math.round(ticks + 1);
+                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                }
+                if (typeof tickFormat !== "function") {
+                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                }
+            }else{
+                graphicopt.legend = {scale:y};
+                legend.append('g').attr('class','legendTick').call(d3.axisLeft(y));
+            }
+        }
+        if (graphicopt.color.title){
+            legend.append('text').text(graphicopt.color.title).attr('y',marginTop -34).style('text-anchor','middle')
+        }
+        function ramp(color, n = 256) {
+            const canvas = createContext(1, n);
+            const context = canvas.getContext("2d");
+            for (let i = 0; i < n; ++i) {
+                context.fillStyle = color(i / (n - 1));
+                context.fillRect(0, i, 1, 1);
+            }
+            return canvas;
+        }
+        function createContext(width, height) {
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            return canvas;
+        }
     }
 }
 function textcolor(p){
