@@ -78,5 +78,5 @@ function millisecondsToStr_axproximate (milliseconds) {
 function loadTheme(event){
     const theme = d3.select(event.target).attr('value')
     d3.select(document.getElementsByTagName('BODY')[0]).select('link#theme')
-        .attr('href',`src/style/bootstrap.${theme}.min.css`)
+        .attr('href',`src/style/bootstrap${theme!=''?'.'+theme:''}.min.css`)
 }

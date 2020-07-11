@@ -47,4 +47,9 @@ li.theme{
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 0.75rem;
+    transition: all;
+    border: 0.1px solid var(--gray);
+}
+li.theme:hover{
+    transform: scale(1.5);
 }

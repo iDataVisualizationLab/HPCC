@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Title</title>
-    <link rel="stylesheet" type="text/css" href="src/DataTables/DataTables-1.10.21/css/dataTables.bootstrap4.css"/>
-    <link rel="stylesheet" href="src/style/main.css">
-    <link rel="stylesheet" href="src/style/graph.css">
-    <link rel="stylesheet" href="src/style/timeline.css">
-    <link rel="stylesheet" href="src/style/nouislider.css">
 
     <script src="src/lib/jquery-3.2.1.min.js"></script>
 <!--    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>-->
@@ -23,11 +18,12 @@
         </a>
         <form class="form-inline">
             <ul class="nav" style="padding-right: 10px">
-                <li class="theme" value="slate" style="background-color: #272B30" onclick="loadTheme(event)"></li>
-                <li class="theme" value="solar" style="background-color: #002B36" onclick="loadTheme(event)"></li>
-                <li class="theme" value="spacelab" style="background-image: linear-gradient(white, #eee 50%, #e4e4e4);" onclick="loadTheme(event)"></li>
-                <li class="theme" value="yeti" style="background-color: #008cba" onclick="loadTheme(event)"></li>
-                <li class="theme" value="united" style="background-color: #E95420" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="slate" style="background-color: #272B30" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="solar" style="background-color: #002B36" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="" style="background-color: #ffffff" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="spacelab" style="background-image: linear-gradient(white, #eee 50%, #bebebe);" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="yeti" style="background-color: #008cba" onclick="loadTheme(event)"></li>
+                <li class="theme shadow" value="united" style="background-color: #E95420" onclick="loadTheme(event)"></li>
             </ul>
             <ul class="nav nav-pills" id = 'navMode'>
                 <li class="nav-item demo">
@@ -60,6 +56,11 @@
         </div>
     </div>
     <link id="theme" rel="stylesheet" href="src/style/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="src/DataTables/DataTables-1.10.21/css/dataTables.bootstrap4.css"/>
+    <link rel="stylesheet" href="src/style/main.css">
+    <link rel="stylesheet" href="src/style/graph.css">
+    <link rel="stylesheet" href="src/style/timeline.css">
+    <link rel="stylesheet" href="src/style/nouislider.css">
 
 <!--    <script src="src/lib/nouislider.js"></script>-->
     <script src="src/lib/d3.v5.min.js"></script>
