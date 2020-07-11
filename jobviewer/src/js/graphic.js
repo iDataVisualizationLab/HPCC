@@ -343,7 +343,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
         const summary_map = [
-            ['min','max','average']
+            ['min','max','mean']
         ];
         const summary_y = d3.scaleLinear().range([0,root.r]).domain(_colorItem.domain().sort((a,b)=>a-b))
         const summary_path = svg.select('g.summary')
@@ -361,7 +361,12 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             .call(updateSummaryCircle);
         summary_circle.exit().remove();
         summary_circle.enter().append('circle').attr('class','summary').call(updateSummaryCircle);
-
+        let annotation = svg.select('g.summary').select('text.annotation');
+        if (annotation.empty())
+            annotation = svg.select('g.summary').append('text')
+                .attr('class','annotation')
+                .style('text-anchor','middle');
+        annotation.text(`mean=${Math.round(root.data.summary[serviceFullList[serviceSelected].text].mean)}`)
         return updateNodes();
 
         function updateNodes(istransition) {

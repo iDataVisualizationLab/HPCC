@@ -66,7 +66,7 @@ function data2tree(data,sampleS){
                         // q1:d3.min(dataarr),
                         // q3:d3.min(dataarr),
                         // median:d3.min(dataarr),
-                        average: d3.mean(dataarr),
+                        mean: d3.mean(dataarr),
                         // std:d3.min(dataarr),
                     };
                 });
