@@ -46,8 +46,21 @@ let graphicopt = {
 };
 
 let isFreeze= false;
-
-function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
+function serviceControl(){
+    d3.select('#serviceSelection')
+        .on('change',function(){
+            serviceSelected = +$(this).val();
+            currentDraw(serviceSelected);
+        })
+        .selectAll('option')
+        .data(serviceFullList)
+        .enter()
+        .append('option')
+        .attr('value',(d,i)=>i)
+        .text(d=>d.text)
+}
+function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
+    serviceControl()
     isFreeze= false;
     graphicopt.color.title =  serviceFullList[serviceSelected].text;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;

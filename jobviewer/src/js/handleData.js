@@ -75,13 +75,14 @@ function data2tree(data,sampleS){
     };
     return {tree,compute_layoutLink};
 }
-
+let currentDraw=()=>{};
 function queryData(data) {
-        let  sampleS = handleDataUrl(data).sampleS;
-        adjustTree(sampleS);
-        let {computers,jobs,users} = handleData(data);
-        const currentTime = data.currentTime;
-        draw({computers,jobs,users,sampleS,serviceSelected,currentTime});
+    let  sampleS = handleDataUrl(data).sampleS;
+    adjustTree(sampleS);
+    let {computers,jobs,users} = handleData(data);
+    const currentTime = data.currentTime;
+    currentDraw = _.partial(draw,computers,jobs,users,sampleS,currentTime);
+    currentDraw(serviceSelected);
 }
 
 // read data

@@ -30,7 +30,6 @@ class Timeline{
         this.playbutton = this.el.append('button')
             .attr('type',"button")
             .attr('class',"btn btn-primary btn-circle btn-sm")
-            .style("margin-left", "30px")
             .datum({status:isplay})
             .on('click',function(d){
                 d.status=!d.status;
@@ -50,7 +49,7 @@ class Timeline{
 
         this.timelineHolder = this.el.append('div')
             .attr('class','progress-bar-wrapper align-self-center')
-            .style("width", "80%");
+            .style("width", "calc(100% - 30px - 100px)");
         this.timeline = this.timelineHolder.append('div')
             .attr('class',"progress")
             .style("width", "100%")
@@ -65,7 +64,7 @@ class Timeline{
             .append('div').attr('class','progress-bar-handle align-self-center');
         this.meassage = this.el.append('div')
             .attr('class','message')
-            .style("width", "calc(20% - 80px)")
+            .style("width", "100px")
             .append('span');
 
         this.timelineHandler.call(d3.drag()
