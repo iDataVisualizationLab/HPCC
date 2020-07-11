@@ -5,7 +5,7 @@ JobViewer real-time: https://idatavisualizationlab.github.io/HPCC/jobviewer/inde
 
 JobViewer simulation: https://idatavisualizationlab.github.io/HPCC/jobviewer/index.html
 
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobViewer.png)
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobViewer.PNG)
 
 Heatmap: https://idatavisualizationlab.github.io/HPCC/heatmap/
 
