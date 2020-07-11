@@ -49,7 +49,7 @@ class Timeline{
 
         this.timelineHolder = this.el.append('div')
             .attr('class','progress-bar-wrapper align-self-center')
-            .style("width", "calc(100% - 30px - 100px)");
+            .style("width", "calc(100% - 30px - 200px)");
         this.timeline = this.timelineHolder.append('div')
             .attr('class',"progress")
             .style("width", "100%")
@@ -62,11 +62,13 @@ class Timeline{
             .attr('aria-valuemax',"100");
         this.timelineHandler = this.timelineHolder
             .append('div').attr('class','progress-bar-handle align-self-center');
-        this.meassage = this.el.append('div')
-            .attr('class','message')
-            .style("width", "100px")
-            .append('span');
 
+        this.meassageHolder = this.el.append('div')
+            .attr('class','message align-items-center row')
+            .style("width", "200px");
+        this.meassageHolder.append('div').attr('class','spinner-border spinner-border-sm').attr('role','status').html(`<span class="sr-only">Loading...</span>
+</div>`)
+        this.meassage = this.meassageHolder.append('span').attr('class','col');
         this.timelineHandler.call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)

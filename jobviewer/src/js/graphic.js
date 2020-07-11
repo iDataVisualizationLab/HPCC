@@ -13,6 +13,7 @@ let graphicopt = {
     width: window.innerWidth,
     height: window.innerHeight,
     scalezoom: 1,
+    zoom:d3.zoom(),
     widthView: function () {
         return this.width * this.scalezoom
     },
@@ -82,22 +83,27 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("height", graphicopt.height)
         .style('overflow','visible');
     let svg = svg_
-        .select("g.content")
-        // .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")")
-        .attr("transform", "translate(" + (graphicopt.margin.left+graphicopt.diameter()/2) + "," + graphicopt.centerY() + ")")
-        .on('click',()=>{if (isFreeze){
-            const func = isFreeze;
-            isFreeze = false;
-            func();
-        }});
+        .select("g.content");
+    function zoomed(){
+        svg.attr("transform", d3.event.transform);
+    }
     if (svg.empty()){
+        let startZoom = d3.zoomIdentity;
+        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2;
+        startZoom.y = graphicopt.centerY();
         svg = d3.select('#circularLayout')
+            .call(graphicopt.zoom.on("zoom", zoomed))
             .attr("width", graphicopt.width)
             .attr("height", graphicopt.height)
             .append("g")
             .attr('class','content')
-            // .attr("transform", "translate(" + graphicopt.centerX() + "," + graphicopt.centerY() + ")");
-    .attr("transform", "translate(" + (graphicopt.margin.left+graphicopt.diameter()/2) + "," + graphicopt.centerY() + ")")
+            // .attr("transform", "translate(" + (graphicopt.margin.left+graphicopt.diameter()/2) + "," + graphicopt.centerY() + ")")
+            .on('click',()=>{if (isFreeze){
+                const func = isFreeze;
+                isFreeze = false;
+                func();
+            }})
+        svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
     }
 
     graphicopt.el = svg;
@@ -177,7 +183,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         return links
     });
 
-
     // Create the mapping of target nodes and their positions
     let targetPos = [];
     rack_arr.forEach((d, i)=>{
@@ -193,6 +198,25 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     if(linksg.empty()){
         linksg = svg.append("g").attr("class", "links")
     }
+    // Join target positions with links data by target nodes
+    links.forEach(d=>{
+        targetPos.forEach((v=>{
+
+            if (d.target === v.target){
+                d.targetX = v.targetX_bundle;
+                d.targetY  = v.targetY_bundle;
+                const targetChildren = v.node.pack.children.find(c=>c.data.name===d.targetChildren)
+                d.targetX_l = v.targetX+targetChildren.x;
+                d.targetY_l = v.targetY+targetChildren.y;
+                d.targetData = v.node;
+                targetChildren.data.relatedNodes.push({data:d.sourceData})
+                d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
+                d.targetData.relatedNodes.push({data:d.sourceData});
+                d.target_prim = targetChildren;
+            }
+        }))
+    });
+    const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length]).range([0,10])
 
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
@@ -261,24 +285,24 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
     inode_n.call(updateInode);
 
-    // Join target positions with links data by target nodes
-    links.forEach(d=>{
-        targetPos.forEach((v=>{
-
-            if (d.target === v.target){
-                d.targetX = v.targetX_bundle;
-                d.targetY  = v.targetY_bundle;
-                const targetChildren = v.node.pack.children.find(c=>c.data.name===d.targetChildren)
-                d.targetX_l = v.targetX+targetChildren.x;
-                d.targetY_l = v.targetY+targetChildren.y;
-                d.targetData = v.node;
-                d.targetData.childrenNode[d.targetChildren].datum().data.relatedNodes.push({data:d.sourceData})
-                d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
-                d.targetData.relatedNodes.push({data:d.sourceData});
-                d.color = targetChildren.color;
-            }
-        }))
-    });
+    // // Join target positions with links data by target nodes
+    // links.forEach(d=>{
+    //     targetPos.forEach((v=>{
+    //
+    //         if (d.target === v.target){
+    //             d.targetX = v.targetX_bundle;
+    //             d.targetY  = v.targetY_bundle;
+    //             const targetChildren = v.node.pack.children.find(c=>c.data.name===d.targetChildren)
+    //             d.targetX_l = v.targetX+targetChildren.x;
+    //             d.targetY_l = v.targetY+targetChildren.y;
+    //             d.targetData = v.node;
+    //             d.targetData.childrenNode[d.targetChildren].datum().data.relatedNodes.push({data:d.sourceData})
+    //             d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
+    //             d.targetData.relatedNodes.push({data:d.sourceData});
+    //             d.color = targetChildren.color;
+    //         }
+    //     }))
+    // });
 
     // Define link layout
     // let link = d3.linkHorizontal()
@@ -305,7 +329,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .join("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", d=>d.color)
+        .attr("stroke", d=>d.target_prim.color)
         // .attr("stroke-width", 0.3)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
@@ -399,6 +423,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
                 return node
                     .attr("fill", d => {
+
                         if(d.children) {
                             // d.color =  color(d.depth);
                             // return d.color;
@@ -410,6 +435,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         }
                         // d.color = '#dddddd'
                         // return d.color
+                    })
+                    .style('stroke-width',d=>{
+                        return circleStrokeScale(d.data.relatedNodes.length);
                     })
                     .classed('compute', d => !d.children)
                     .attr("pointer-events", d => !d.children ? "none" : null)
