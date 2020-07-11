@@ -69,7 +69,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
-    _colorItem.domain(serviceFullList[serviceSelected].range.slice().reverse());
+    _colorItem.domain((serviceFullList[serviceSelected].filter||serviceFullList[serviceSelected].range).slice().reverse());
     const colorItem = function(d){
         if (d)
             return _colorItem(d);
@@ -587,39 +587,46 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d3.select('.informationHolder').classed('hide',true)
     }
     function makelegend(){
-        svg_.select('g.legend').remove();
-        let legend = svg_.append('g').attr('class','legend').attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
         const color = _colorItem;
-        const marginTop = 20;
-        const marginBottom = 0;
-        const marginLeft = 0;
+        const marginTop = 10;
+        const marginBottom = 10;
+        const marginLeft = 40;
         const marginRight = 0;
         const width = 10;
         const height = 200;
+        const legendHolder = d3.select('#legendHolder');
+        legendHolder.style('left',Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)+'px')
+        const svg = legendHolder.select('svg.legend')
+            .attr('width',width+marginLeft+marginRight)
+            .attr('height',height+marginTop+marginBottom);
+        svg.select('g.legend').remove();
+        let legend = svg.append('g').attr('class','legend')
+            .attr('transform',`translate(${marginLeft},${marginTop})`);
+            // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
 
         if (color.interpolate) {
             const n = Math.min(color.domain().length, color.range().length);
 
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(marginTop, height - marginBottom), n));
+            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
 
             legend.append("image")
-                .attr("x", marginLeft)
-                .attr("y", marginTop)
-                .attr("width", width - marginLeft - marginRight)
-                .attr("height", height - marginTop - marginBottom)
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width)
+                .attr("height", height)
                 .attr("preserveAspectRatio", "none")
                 .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
         }// Sequential
         else if (color.interpolator) {
             let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(marginTop, height - marginBottom)),
-                {range() { return [marginTop, height - marginBottom]; }});
+                    .interpolator(d3.interpolateRound(0, height)),
+                {range() { return [0, height]; }});
 
             legend.append("image")
-                .attr("x", marginLeft)
-                .attr("y", marginTop)
-                .attr("width", width - marginLeft - marginRight)
-                .attr("height", height - marginTop - marginBottom)
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width)
+                .attr("height", height)
                 .attr("preserveAspectRatio", "none")
                 .attr("xlink:href", ramp(color.interpolator()).toDataURL());
 
@@ -637,9 +644,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 legend.append('g').attr('class','legendTick').call(d3.axisLeft(y));
             }
         }
-        if (graphicopt.color.title){
-            legend.append('text').text(graphicopt.color.title).attr('y',marginTop -34).style('text-anchor','middle')
-        }
         function ramp(color, n = 256) {
             const canvas = createContext(1, n);
             const context = canvas.getContext("2d");
@@ -655,7 +659,54 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             canvas.height = height;
             return canvas;
         }
+
+        // make custom input button
+        let legendRange = graphicopt.legend.scale.domain().sort((a,b)=>a-b);
+        let customRange = legendRange.slice();
+        const groupbtn = legendHolder.select('.btn-group')
+        let applybtn = legendHolder.select('#range_apply')
+            .on('click',function(){
+                debugger
+                    legendRange = customRange.slice();
+                    serviceFullList[serviceSelected].filter = customRange.slice();
+                    currentDraw(serviceSelected);
+                groupbtn.classed('hide', true);
+            });
+        let canclebtn = legendHolder.select('#range_cancle')
+            .on('click',function(){
+                customRange = serviceFullList[serviceSelected].range.slice();
+                rangeo.each(function(d){
+                    $(this).val(customRange[+(d.key==='upLimit')]);
+                });
+                currentDraw(serviceSelected);
+                groupbtn.classed('hide', true);
+            });
+        let rangeo = legendHolder.selectAll('input.range')
+            .data([{key:'upLimit',value:legendRange[1]},
+                {key:'lowLimit',value:legendRange[0]}])
+                .attr('value',d=>d.value)
+            .on('input',function(d){
+                let index = +(d.key==='upLimit');
+                customRange[index] = +$(this).val();
+                if (_.isEqual(customRange,legendRange)) {
+                    groupbtn.classed('hide', true);
+                }else {
+                    groupbtn.classed('hide', false);
+                    if ((index*2-1)*(-customRange[index]+legendRange[index])<0)
+                    {
+                        // wrong input
+                        applybtn.attr('disabled', '');
+                    }else{
+                        if (!(((!index)*2-1)*(-customRange[+!index]+legendRange[+!index])<0))
+                        {
+                            applybtn.attr('disabled', null);
+                        }
+                    }
+                }
+            });
+
     }
+
 }
 function textcolor(p){
     return p.style('fill',d=>{

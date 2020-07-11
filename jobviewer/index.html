@@ -37,13 +37,8 @@
     </nav>
     <div class="container" style="margin-top: 56px">
         <div class="row align-items-center">
-            <div class="row col-9" id="timelineControl">
+            <div class="row col-12" id="timelineControl">
 
-            </div>
-            <div class="col-3">
-                <label class=col" for="serviceSelection">Visualizing: </label>
-                <select class=col" id="serviceSelection">
-                </select>
             </div>
         </div>
         <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 96px);width: 100%; margin: 0px">
@@ -51,6 +46,34 @@
             <svg id="circularLayout">
 
             </svg>
+            <div id="legendHolder" class="position-absolute" style="top:0px">
+                <div>
+                    <label class=col" for="serviceSelection">Visualizing: </label>
+                    <select class=col" id="serviceSelection">
+                    </select>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-7">
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-max">max</span>
+                            </div>
+                            <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
+                        </div>
+                        <svg class="legend"></svg>
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-min">min</span>
+                            </div>
+                            <input type="number" id="range_min" class="form-control range" aria-label="range_min aria-describedby="addon-min">
+                        </div>
+                        <div class="btn-group hide" role="group" >
+                            <button id="range_apply" type="button" class="btn btn-success">Apply</button>
+                            <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
     <!--        </div>-->
         </div>
     </div>

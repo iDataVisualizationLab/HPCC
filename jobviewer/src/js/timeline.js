@@ -71,7 +71,7 @@ class Timeline{
             this.meassageHolder.select('.spinner-border').classed('hide',message==="");
             this.meassage.text(message);
             }.bind(this);
-        this.meassageHolder.append('div').attr('class','spinner-border spinner-border-sm').attr('role','status').html(`<span class="sr-only">Loading...</span>
+        this.meassageHolder.append('div').attr('class','spinner-border spinner-border-sm hide').attr('role','status').html(`<span class="sr-only">Loading...</span>
 </div>`)
         this.meassage = this.meassageHolder.append('span').attr('class','col');
         this.timelineHandler.call(d3.drag()
