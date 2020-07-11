@@ -65,7 +65,12 @@ class Timeline{
 
         this.meassageHolder = this.el.append('div')
             .attr('class','message align-items-center row')
+            .style("padding-left", "20px")
             .style("width", "200px");
+        this.meassageHolder.setMessage=function(message){
+            this.meassageHolder.select('.spinner-border').classed('hide',message==="");
+            this.meassage.text(message);
+            }.bind(this);
         this.meassageHolder.append('div').attr('class','spinner-border spinner-border-sm').attr('role','status').html(`<span class="sr-only">Loading...</span>
 </div>`)
         this.meassage = this.meassageHolder.append('span').attr('class','col');
