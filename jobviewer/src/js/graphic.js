@@ -205,9 +205,11 @@ function draw({computers,jobs,users,sampleS,serviceSelected,currentTime}){
         .style('pointer-events','all')
         .on('click',freezeHandle)
         .on("mouseover", function(d){
-            d.node.classed('highlightSummary',true);
-            mouseover.bind(d3.select(this.parentNode).select('.circleG').select('circle').node())(d)})
-        .on("mouseout", function(d){mouseout.bind(d3.select(this.parentNode).select('.circleG').select('circle').node())(d)});
+            if (!isFreeze) {
+                d.node.classed('highlightSummary', true);
+                _.bind(mouseover, d.childrenNode[d.name].node())(d)
+            }})
+        .on("mouseout", function(d){_.bind(mouseout,d.childrenNode[d.name].node())(d)});
 
     onode_n.call(updateOnode)
     function updateOnode(p){
