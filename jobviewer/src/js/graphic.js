@@ -69,11 +69,15 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
-    _colorItem.domain((serviceFullList[serviceSelected].filter||serviceFullList[serviceSelected].range).slice().reverse());
+    const range_cal_or = serviceFullList[serviceSelected].range.slice();
+    const range_cal = (serviceFullList[serviceSelected].filter||serviceFullList[serviceSelected].range).slice();
+    _colorItem.domain(range_cal.slice().reverse());
     const colorItem = function(d){
-        if (d)
+        if (d) {
+            if (d < range_cal[0] || d > range_cal[1])
+                return 'none'
             return _colorItem(d);
-        else
+        }else
             // return '#afafaf';
             return '#ffffff';
     };
@@ -369,7 +373,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         const summary_map = [
             ['min','max','mean']
         ];
-        const summary_y = d3.scaleLinear().range([0,root.r]).domain(_colorItem.domain().sort((a,b)=>a-b))
+        const summary_y = d3.scaleLinear().range([0,root.r]).domain(range_cal_or)
         const summary_path = svg.select('g.summary')
             .selectAll('path')
             .attr('class','summary')
@@ -661,7 +665,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         }
 
         // make custom input button
-        let legendRange = graphicopt.legend.scale.domain().sort((a,b)=>a-b);
+        let legendRange = serviceFullList[serviceSelected].range;
         let customRange = legendRange.slice();
         const groupbtn = legendHolder.select('.btn-group')
         let applybtn = legendHolder.select('#range_apply')
@@ -722,21 +726,25 @@ function textcolor(p){
     })
 }
 function invertColor(hex, bw) {
-    const color = d3.color(hex)
-    var r = color.r,
-        g = color.g,
-        b = color.b;
-    if (bw) {
-        // http://stackoverflow.com/a/3943023/112731
-        return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
-            : '#FFFFFF';
+    try {
+        const color = d3.color(hex)
+        var r = color.r,
+            g = color.g,
+            b = color.b;
+        if (bw) {
+            // http://stackoverflow.com/a/3943023/112731
+            return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                ? '#000000'
+                : '#FFFFFF';
+        }
+        // invert color components
+        color.r = (255 - r);
+        color.g = (255 - g);
+        color.b = (255 - b);
+        // pad each with zeros and return
+    }catch(e){
+        return 'none'
     }
-    // invert color components
-    color.r = (255 - r);
-    color.g = (255 - g);
-    color.b = (255 - b);
-    // pad each with zeros and return
     return color.toString();
 }
 
