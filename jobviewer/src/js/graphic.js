@@ -7,7 +7,7 @@ d3.selection.prototype.moveToFront = function() {
 
 
 // setting
-
+let tooltip = d3.tip().html(function (d){return `<span>${d}</span>`})
 let graphicopt = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
     width: window.innerWidth,
@@ -106,6 +106,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 isFreeze = false;
                 func();
             }});
+        svg.call(tooltip)
         isFirst = true;
     }
 
@@ -824,8 +825,9 @@ function mouseover(d){
         for (let i = 0; i < d.relatedLinks.length; i++){
             d.relatedLinks[i].moveToFront().classed('highlight', true);
         }}
-    if (d.tooltip)
-        d.tooltip.classed('hide',false)
+    if (d.tooltip) {
+        tooltip.show(d.name)
+    }
 }
 
 
@@ -854,8 +856,9 @@ function mouseout(d){
             d.relatedLinks[i].classed("highlight", false );
         }
         }
-    if (d.tooltip)
-        d.tooltip.classed('hide',true)
+    if (d.tooltip) {
+        tooltip.hide()
+    }
 }
 
 function angle2position(angle,radius){
