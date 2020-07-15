@@ -92,10 +92,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     function zoomed(){
         svg.attr("transform", d3.event.transform);
     }
+    let isFirst = false;
     if (svg.empty()){
-        let startZoom = d3.zoomIdentity;
-        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2;
-        startZoom.y = graphicopt.centerY();
         svg = d3.select('#circularLayout')
             .call(graphicopt.zoom.on("zoom", zoomed))
             .attr("width", graphicopt.width)
@@ -107,8 +105,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 const func = isFreeze;
                 isFreeze = false;
                 func();
-            }})
-        svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
+            }});
+        isFirst = true;
     }
 
     graphicopt.el = svg;
@@ -165,6 +163,12 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.pack.depth = 0;
         return d;
     });
+    if(isFirst){
+        let startZoom = d3.zoomIdentity;
+        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2+max_radius+20;
+        startZoom.y = graphicopt.centerY();
+        svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
+    }
 
     // create  links data, including source nodes, target nodes and their positions
     let links = [];
