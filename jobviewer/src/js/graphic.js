@@ -165,7 +165,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     });
     if(isFirst){
         let startZoom = d3.zoomIdentity;
-        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2+max_radius+34;
+        startZoom.x = Math.max(graphicopt.margin.left+graphicopt.diameter()/2+max_radius+34,(graphicopt.width-450)/2);
+        // startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2+max_radius+34;
         startZoom.y = graphicopt.centerY();
         svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
     }
@@ -619,7 +620,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         const width = 10;
         const height = 200;
         const legendHolder = d3.select('#legendHolder');
-        legendHolder.style('left',Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)+'px')
+        legendHolder.style('left',Math.min(d3.zoomIdentity.x+graphicopt.diameter()/2,graphicopt.width-graphicopt.margin.right)+'px')
         const svg = legendHolder.select('svg.legend')
             .attr('width',width+marginLeft+marginRight)
             .attr('height',height+marginTop+marginBottom);
