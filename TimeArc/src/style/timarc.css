@@ -1,0 +1,61 @@
+/*#messages_table .dataTable th:not(:first-child) {*/
+    /*width: unset !important;*/
+/*}*/
+:root {
+    --fontBigger: 14px;
+    --fontSmaller: 12px;
+}
+#messages_table table.dataTable td{
+    line-height: 1.25rem;
+}
+
+#messages_table label select {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 1.5rem;
+    width:auto;
+    display: unset;
+}
+#lensingbtn:hover {
+    background-color: #fc8;
+}
+
+.light .tablediv{
+    padding: 10px;
+    background-color: #dddd;
+    margin-bottom: 0px;
+    margin-top: 20px;
+}
+.timeBox {
+    fill: #dddd;
+}
+
+.notselectable {
+    pointer-events: none;
+}
+
+.light table.dataTable tbody tr
+{
+    background-color: rgba(255, 255, 255,1);
+}
+text tspan {
+    font-weight: 900
+}
+
+.SearchTerm {
+    font-weight: bold;
+    font-size: var(--fontBigger);
+}
+.fontBigger {
+    font-size: var(--fontBigger);
+}
+.tick {
+    font-size: var(--fontSmaller);
+}
+
+.fontSmaller {
+    font-size: var(--fontSmaller);
+}
+.light #Chartcontent {
+    background-color: white;
+}
