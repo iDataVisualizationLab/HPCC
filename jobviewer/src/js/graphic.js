@@ -224,7 +224,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             return false
         }))
     });
-    const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length]).range([0,10])
+    const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length||1]).range([0,10])
 
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
