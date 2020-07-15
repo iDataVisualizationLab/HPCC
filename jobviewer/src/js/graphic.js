@@ -165,7 +165,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     });
     if(isFirst){
         let startZoom = d3.zoomIdentity;
-        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2+max_radius+20;
+        startZoom.x = graphicopt.margin.left+graphicopt.diameter()/2+max_radius+34;
         startZoom.y = graphicopt.centerY();
         svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
     }
