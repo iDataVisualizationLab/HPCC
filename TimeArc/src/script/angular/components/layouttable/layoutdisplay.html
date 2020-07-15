@@ -1,0 +1,31 @@
+<div>
+    <div class="row">
+        <label class="col s4" ng-if="services">
+            <select class="browser-default" ng-model="serviceSelected" ng-change="serviceWatcher()" >
+                <option ng-value="s" ng-repeat="s in services" ng-model="service.selectedService">{{s.text}}</option>
+            </select>
+        </label>
+        <div>
+            <button ng-click="apply()">Apply</button>
+            <button ng-click="reset()">Reset</button>
+        </div>
+    </div>
+    <div class="row s12 flex_contain flex_warp white" style="overflow-y: auto; max-height: 70vh">
+        <div class="flex_col valign-wrapper first layoutGroup" ng-repeat="rack in Layout.data.groups" >
+            <div class="holder" ng-click="rack.collapse=!rack.collapse">
+                <div class="row s12" style="margin:5px">
+                    <span class="name truncate col">{{rack.Name}}</span>
+                    <div class="info col"><span class="info selected">{{rack.selected}}</span> <span class="info total" >/{{rack.total}}</span> </div>
+                </div>
+                <div class="row s12" ng-repeat="r in rack.value track by $index" style="margin-bottom: 0px" ng-if="rack.collapse" ng-click="$event.stopPropagation()">
+                    <div class="col element" style="width: {{1/r.length*100}}%;" ng-repeat="c in r track by $index">
+                        <span ng-class="{'notSelected': Layout.data.hostsObj[c]&&!Layout.data.hostsObj[c].preselected, 'notExisted': !Layout.data.hostsObj[c]||(Layout.data.hostsObj[c]&&Layout.data.hostsObj[c].notExisted)}"
+                              ng-click="onSelect(c,$event,rack)"
+                              style="background-color: {{c?colorItem(data[c][serviceSelected.text]):null}}"
+                              class="col s12">{{c.replace('compute-','')}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -67,6 +67,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     graphicopt.color.title =  serviceFullList[serviceSelected].text;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
+    const serviceName = serviceFullList[serviceSelected].text;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     const range_cal_or = serviceFullList[serviceSelected].range.slice();
@@ -156,6 +157,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             e.y -= d.pack.y;
             e.data.relatedLinks = [];
             e.data.relatedNodes = [];
+            e.data.disable = e.data.metrics[serviceName] < range_cal[0] || e.data.metrics[serviceName] > range_cal[1]
             e.depth = 1;
         });
         d.pack.x = 0;
@@ -203,8 +205,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         linksg = svg.append("g").attr("class", "links")
     }
     // Join target positions with links data by target nodes
-    links.forEach(d=>{
-        targetPos.forEach((v=>{
+    links.filter(d=>{
+        targetPos.find((v=>{
 
             if (d.target === v.target){
                 d.targetX = v.targetX_bundle;
@@ -217,7 +219,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
                 d.targetData.relatedNodes.push({data:d.sourceData});
                 d.target_prim = targetChildren;
+                return true
             }
+            return false
         }))
     });
     const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length]).range([0,10])

@@ -1,0 +1,49 @@
+.layoutGroup{
+    position: relative;
+    width:25%;
+    margin: 0;
+    padding: 10px;
+}
+.layoutGroup .holder {
+    margin: 0;
+    background: #DDDDDD;
+    border-radius: 10px;
+    border: #99979a;
+    width: 100%;
+    padding-bottom: 5px;
+}
+.layoutGroup div.info {
+    float:right;
+}
+.layoutGroup .holder:hover{
+    -webkit-box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.3);
+}
+
+.layoutGroup .info.selected{
+    padding-right:0;
+    font-size: 150%;
+    color: #0e153a;
+    border-radius: 2px;
+}
+
+.layoutGroup .info.total{
+    padding-left:0;
+    color: #99979a;
+}
+.element span {
+    color: #0e153a;
+    border-radius: 2px;
+    height: 14px;
+    border: solid 1px #9c9c9c;
+    text-align: center;
+}
+.element span.notSelected {
+    transform: scale(0.8);
+    border: unset;
+}
+.element span.notExisted {
+    background-color: rgb(193, 193, 193);
+    color: #99979a;
+    border: unset;
+}

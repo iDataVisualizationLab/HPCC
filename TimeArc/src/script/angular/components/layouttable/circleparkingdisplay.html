@@ -1,0 +1,18 @@
+<div>
+    <div class="row">
+        <label class="col s4" ng-if="service.serviceText">
+            <select class="browser-default" ng-model="serviceSelected" ng-change="serviceWatcher()" >
+                <option ng-value="$index" ng-repeat="s in service.serviceText" ng-model="service.selectedService">{{s}}</option>
+            </select>
+        </label>
+        <md-virtual-repeat-container class="horizontal-container col s8" md-orient-horizontal>
+            <div md-virtual-repeat="u in users" class="repeated-item" flex ng-mouseover="onUserSelected(u)" ng-mouseleave="onUserDeselected(u)">{{u.key}}</div>
+        </md-virtual-repeat-container>
+    </div>
+        <div class="circlepacking-container" style="height: 70vh">
+            <svg class="circlepacking-svg-content"
+                 ng-style="{background: color(0)}"
+                 viewBox="{{-width / 2}} {{-height / 2}} {{width}} {{height}}">
+            </svg>
+        </div>
+</div>
