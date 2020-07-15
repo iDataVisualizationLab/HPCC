@@ -527,13 +527,13 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Job ID</th>
-                        <th>Job Name</th>
+                        <th>JobID</th>
+                        <th>JobName</th>
                         <th>User</th>
-                        <th>Start Time</th>
+                        <th>StartTime</th>
                         <th>Duration</th>
-                        <th>Cpu Cores</th>
-                        <th>Total Nodes</th>
+                        <th>Cores</th>
+                        <th>Nodes</th>
                         <th>TaskID</th>
                     </tr>
                 </thead>
