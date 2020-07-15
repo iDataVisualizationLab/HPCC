@@ -426,7 +426,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             label = label.enter().append('text')
                 .classed('hide',true)
                 .style('font-size', d => (d.parent === root ? 12 : 10) +'px')
-                .style("fill-opacity", d => d.parent === root ? 1 : 0)
                 // .style("display", d => d.parent === root ? "inline" : "none")
                 .text(d => d.data.name).merge(label);
             label.each(function(d){
