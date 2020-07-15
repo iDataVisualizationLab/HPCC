@@ -427,8 +427,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .classed('hide',true)
                 .style('font-size', d => d.parent === root ? 18 : 12)
                 .style("fill-opacity", d => d.parent === root ? 1 : 0)
-                .style("display", d => 'none')//d.parent === root ? "inline" : "none")
+                // .style("display", d => d.parent === root ? "inline" : "none")
                 .text(d => d.data.name).merge(label);
+            label.each(function(d){
+                d.data.tooltip = d3.select(this);
+            })
             label.call(textcolor);
             zoomTo([root.x, root.y, root.r * 2], istransition)
             return childrenNode;
@@ -453,6 +456,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         return circleStrokeScale(d.data.relatedNodes.length);
                     })
                     .classed('compute', d => !d.children)
+                    .attr('title',d=>d.data.name)
                     .attr("pointer-events", d => !d.children ? "none" : null)
                     .on('click',function(d){freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
@@ -500,7 +504,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             //
             view = v;
             //
-            // label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
             // value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
             // let node_animation;
             // if(istransition)
@@ -821,6 +825,8 @@ function mouseover(d){
         for (let i = 0; i < d.relatedLinks.length; i++){
             d.relatedLinks[i].moveToFront().classed('highlight', true);
         }}
+    if (d.tooltip)
+        d.tooltip.classed('hide',false)
 }
 
 
@@ -849,6 +855,8 @@ function mouseout(d){
             d.relatedLinks[i].classed("highlight", false );
         }
         }
+    if (d.tooltip)
+        d.tooltip.classed('hide',true)
 }
 
 function angle2position(angle,radius){
