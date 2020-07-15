@@ -283,7 +283,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
-        .on('click',function(d){freezeHandle.bind(this)();userTable(d);})
+        .on('click',function(d){freezeHandle.bind(this)();userTable(d,'user');})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect')
@@ -449,7 +449,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     })
                     .classed('compute', d => !d.children)
                     .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',freezeHandle)
+                    .on('click',function(d){freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                     .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
@@ -518,17 +518,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d3.event.stopPropagation();
         }
     }
-    function userTable(d){
+    function userTable(d,type){
         if (isFreeze) {
             d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
-            contain.select('.card-header').text(d => 'User: ' + d.key);
+            contain.select('.card-header').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
                         <th></th>
                         <th>Job ID</th>
                         <th>Job Name</th>
+                        <th>User</th>
                         <th>Start Time</th>
                         <th>Duration</th>
                         <th>Cpu Cores</th>
@@ -537,13 +538,23 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     </tr>
                 </thead>
             </table>`);
-            const jobData = d.value.job.map(j=>{
-                const jobID = j.split('.');
-                const job=_.clone(jobs[j]);
-                job['id']=jobID[0];
-                job['duration']=currentTime - job['start_time']*1000;
-                job['task_id'] = jobID[1]||'n/a';
-                return job})
+            let jobData = [];
+            if (type==='user')
+                jobData = d.value.job.map(j=>{
+                    const jobID = j.split('.');
+                    const job=_.clone(jobs[j]);
+                    job['id']=jobID[0];
+                    job['duration']=currentTime - job['start_time']*1000;
+                    job['task_id'] = jobID[1]||'n/a';
+                    return job});
+            else
+                jobData = _.flatten(d.data.relatedNodes.map(e=>e.data.value.job)).map(j=>{
+                    const jobID = j.split('.');
+                    const job=_.clone(jobs[j]);
+                    job['id']=jobID[0];
+                    job['duration']=currentTime - job['start_time']*1000;
+                    job['task_id'] = jobID[1]||'n/a';
+                    return job});
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
                 "scrollX": true,
@@ -556,6 +567,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     },
                     { "data": "id" },
                     { "data": "job_name" },
+                    { "data": "user_name" },
                     { "data": "start_time" ,
                         "render": function ( data, type, row ) {
                             if(type!=='ordering')
