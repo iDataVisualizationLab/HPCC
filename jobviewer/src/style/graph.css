@@ -96,15 +96,9 @@ text {
 #informationTable  .collapHeader{
     min-width: 12px!important;
 }
-#informationTable  .details-control.symbol {
-    background: url('../../src/style/icon/caret-right-fill.svg') no-repeat center center;
-    background-size: 10px 10px;
-    cursor: pointer;
-}
-#informationTable tr.shown .details-control.symbol {
-    background: url('../../src/style/icon/caret-down-fill.svg') no-repeat center center;
-    background-size: 10px 10px;
-    cursor: pointer;
+#informationTable  .details-control span{
+    height: 2rem;
+    overflow-y: hidden;
 }
 #informationTable .morebtn{
     font-size: 0.8rem;
@@ -112,3 +106,14 @@ text {
     color: black;
     padding: 1px;
 }
+
+#informationTable .morebtn[value='close']{
+    display: none;
+}
+#informationTable tr.shown .morebtn[value='close']{
+    display: block;
+}
+#informationTable tr.shown .morebtn[value='open']{
+    display: none;
+}
+

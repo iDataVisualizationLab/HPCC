@@ -594,7 +594,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 return data.length;
                             if (type==='display')
                                 if (data.length>2)
-                                    return `${data.slice(0,2).join('\n')}
+                                    return `<span>${row.isexpand?data.join('\n'): data.slice(0,2).join('\n')}</span>
                                         <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
                                         <button type="button" class="btn btn-block morebtn" value="close">
                                         <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
@@ -631,30 +631,24 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 highlight2Stack.forEach(n=>n.classed('highlight2',false))
                 highlight2Stack = [];
             });
-            $('#informationTable tbody').on('click', 'td.details-control', function () {
+            $('#informationTable tbody').on('click', 'td button.morebtn', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
-                debugger
-                if ( row.child.isShown() ) {
-                    // This row is already open - close it
-                    row.child.hide();
-                    tr.removeClass('shown');
+
+                if ( d3.select(this).attr('value')==='open' ) {
+                    row.data().isexpand = true;
+                    d3.select(tr[0]).classed('shown',true)
+                        .select('span').text(row.data().node_list.join('\n'));
                 }
                 else {
                     // Open this row
-                    row.child( format(row.data()) ).show();
-                    tr.addClass('shown');
+                    row.data().isexpand = false;
+                    d3.select(tr[0]).classed('shown',false)
+                        .select('span').text(row.data().node_list.slice(0,2).join('\n'));
                 }
             });
         }else
             d3.select('.informationHolder').classed('hide',true);
-        function format ( d ) {
-            // `d` is the original data object for the row
-            return `<div class="detailComp">
-                    ${d.node_list.map(comp=>`<span class="badge badge-pill badge-primary">${comp}</span>
-                  `).join('')}
-                    </div>`;
-        }
     }
     function makelegend(){
         const color = _colorItem;
