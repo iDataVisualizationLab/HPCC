@@ -117,3 +117,6 @@ text {
     display: none;
 }
 
+.d3-tip span {
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
+}

@@ -81,20 +81,34 @@ class Timeline{
 
         function dragstarted(d) {
             self.pause();
+            self.timeline.style('transition','unset')
+            self.timelineHandler.style('transition','unset')
         }
 
         function dragged(d) {
+            let value = d3.event.x/self.timelineHolder.node().getBoundingClientRect().width*100;
+            value = Math.min(Math.max(0,value),100);
+            // self.currentValue = self.timeConf.scale.invert(percentage);
+            // self.timeline
+            //     .style("width", `${percentage}%`)
+            //     .attr('aria-valuenow',self.timeConf.scale(self.currentValue))
+            //     .text(self.currentValue.toLocaleString());
+            // self.timelineHandler.style('left',`${percentage}%`);
+            requestAnimationFrame(()=> self.step(self.timeConf.scale.invert(value)))
             // d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
         }
 
         function dragended(d) {
+            self.timeline.style('transition',null)
+            self.timelineHandler.style('transition',null)
             // d3.select(this).attr("stroke", null);
         }
 
         function onClickTimeline(){
             self.pause();
             const mouse = d3.mouse(this);
-            const value = mouse[0]/this.getBoundingClientRect().width*100;
+            let value = mouse[0]/this.getBoundingClientRect().width*100;
+            value = Math.min(Math.max(0,value),100);
             self.step(self.timeConf.scale.invert(value));
         }
     }

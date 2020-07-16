@@ -7,7 +7,7 @@ d3.selection.prototype.moveToFront = function() {
 
 
 // setting
-let tooltip = d3.tip().html(function (d){return `<span>${d}</span>`})
+let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 let graphicopt = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
     width: window.innerWidth,
