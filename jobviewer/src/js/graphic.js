@@ -535,7 +535,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th class="collapHeader"></th>
                         <th>JobID</th>
                         <th>JobName</th>
                         <th>User</th>
@@ -569,7 +569,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 "scrollX": true,
                 "columns": [
                     {
-                        "className":      'details-control',
+                        "className":      'details-control symbol',
                         "orderable":      false,
                         "data":           null,
                         "defaultContent": ''
@@ -590,14 +590,24 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                             return data;
                         }},
                     { "data": "cpu_cores" },
-                    { "data": "total_nodes" },
+                    { "data": "node_list" ,"className":'details-control text-wrap',
+                        "render": function ( data, type, row ) {
+                            if(type==='ordering')
+                                return data.length;
+                            if (type==='display')
+                                if (data.length>2)
+                                    return data.slice(0,2).join('\n')+'\n+'+(data.length-2)+' more';
+                                else
+                                    return data.join('\n');
+                            return data;
+                        }},
                     { "data": "task_id" },
                 ],
                 "order": [[1, 'asc']]
             } );
 
             // Add event listener for opening and closing details
-            $('#informationTable tbody').on('click', 'td.details-control', function () {
+            $('#informationTable tbody').on('click', 'td.details-control, td.details-control.symbol', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
 
@@ -613,7 +623,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 }
             } );
         }else
-            d3.select('.informationHolder').classed('hide',true)
+            d3.select('.informationHolder').classed('hide',true);
+        function format ( d ) {
+            // `d` is the original data object for the row
+            return `<div class="detailComp">
+                    ${d.node_list.map(comp=>`<span class="badge badge-pill badge-primary">${comp}</span>
+                  `).join('')}
+                    </div>`;
+        }
     }
     function makelegend(){
         const color = _colorItem;

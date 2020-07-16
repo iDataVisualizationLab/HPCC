@@ -86,3 +86,20 @@ text {
 .hide {
     display: none;
 }
+
+#informationTable .detailComp {
+    width: 400px;
+}
+#informationTable  .collapHeader{
+    min-width: 12px!important;
+}
+#informationTable  .details-control.symbol {
+    background: url('../../src/style/icon/caret-right-fill.svg') no-repeat center center;
+    background-size: 10px 10px;
+    cursor: pointer;
+}
+#informationTable tr.shown .details-control.symbol {
+    background: url('../../src/style/icon/caret-down-fill.svg') no-repeat center center;
+    background-size: 10px 10px;
+    cursor: pointer;
+}
