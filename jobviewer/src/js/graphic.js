@@ -256,7 +256,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr('class','groupLabel')
         .attr("dy", ".31em")
         .style('pointer-events','all')
-        .on('click',freezeHandle)
+        .on('click',function(){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();})
         .on("mouseover", function(d){
             if (!isFreeze) {
                 d.node.classed('highlightSummary', true);
@@ -290,7 +290,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
-        .on('click',function(d){freezeHandle.bind(this)();userTable(d,'user');})
+        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect')
@@ -431,7 +431,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 // .style("display", d => d.parent === root ? "inline" : "none")
                 .text(d => d.data.name).merge(label);
             label.each(function(d){
-                d.data.tooltip = d3.select(this);
+                if (!d.children)
+                 d.data.tooltip = d3.select(this);
             })
             label.call(textcolor);
             zoomTo([root.x, root.y, root.r * 2], istransition)
@@ -459,7 +460,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     .classed('compute', d => !d.children)
                     .attr('title',d=>d.data.name)
                     .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',function(d){freezeHandle.bind(this)();userTable(d,'compute');})
+                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                     .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
@@ -536,7 +537,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
-                        <th class="collapHeader"></th>
                         <th>JobID</th>
                         <th>JobName</th>
                         <th>User</th>
@@ -572,12 +572,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 "data": jobData,
                 "scrollX": true,
                 "columns": [
-                    {
-                        "className":      'details-control symbol',
-                        "orderable":      false,
-                        "data":           null,
-                        "defaultContent": ''
-                    },
                     { "data": "id" },
                     { "data": "job_name" },
                     { "data": "user_name" },
@@ -600,14 +594,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 return data.length;
                             if (type==='display')
                                 if (data.length>2)
-                                    return data.slice(0,2).join('\n')+'\n+'+(data.length-2)+' more';
+                                    return `${data.slice(0,2).join('\n')}
+                                        <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
+                                        <button type="button" class="btn btn-block morebtn" value="close">
+                                        <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
+                                        </button>`;
                                 else
                                     return data.join('\n');
                             return data;
                         }},
                     { "data": "task_id" },
                 ],
-                "order": [[1, 'asc']]
+                "order": [[0, 'asc']]
             } );
 
             // Add event listener for opening and closing details
@@ -632,11 +630,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 svg.classed('onhighlight2',false);
                 highlight2Stack.forEach(n=>n.classed('highlight2',false))
                 highlight2Stack = [];
-            })
-            $('#informationTable tbody').on('click', 'td.details-control, td.details-control.symbol', function () {
+            });
+            $('#informationTable tbody').on('click', 'td.details-control', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
-
+                debugger
                 if ( row.child.isShown() ) {
                     // This row is already open - close it
                     row.child.hide();
@@ -647,7 +645,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     row.child( format(row.data()) ).show();
                     tr.addClass('shown');
                 }
-            } );
+            });
         }else
             d3.select('.informationHolder').classed('hide',true);
         function format ( d ) {

@@ -106,3 +106,9 @@ text {
     background-size: 10px 10px;
     cursor: pointer;
 }
+#informationTable .morebtn{
+    font-size: 0.8rem;
+    background-color: #c0c0c0;
+    color: black;
+    padding: 1px;
+}
