@@ -48,6 +48,7 @@ let graphicopt = {
 };
 
 let isFreeze= false;
+let highlight2Stack = []
 function serviceControl(){
     d3.select('#serviceSelection')
         .on('change',function(){
@@ -557,13 +558,16 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
             else
-                jobData = _.flatten(d.data.relatedNodes.map(e=>e.data.value.job)).map(j=>{
+                jobData = _.flatten(d.data.relatedNodes
+                    .map(e=>e.data.value.job)).map(j=>{
                     const jobID = j.split('.');
                     const job=_.clone(jobs[j]);
+                    if (job.node_list.indexOf(d.data.name)===-1)
+                        return false;
                     job['id']=jobID[0];
                     job['duration']=currentTime - job['start_time']*1000;
                     job['task_id'] = jobID[1]||'n/a';
-                    return job});
+                    return job}).filter(d=>d);
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
                 "scrollX": true,
@@ -607,6 +611,28 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             } );
 
             // Add event listener for opening and closing details
+            $('#informationTable tbody').on('mouseover', 'td', function () {
+                highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                highlight2Stack = [];
+                var tr = $(this).closest('tr');
+                var row = table.row( tr );
+                if (row.data()) {
+                    row.data().node_list.forEach(c => {
+                        svg.classed('onhighlight2', true);
+                        rack_arr.find(r => {
+                            if (r.childrenNode[c]) {
+                                highlight2Stack.push(r.childrenNode[c])
+                                r.childrenNode[c].classed('highlight2', true);
+                                return true;
+                            }
+                        });
+                    })
+                }
+            }).on('mouseleave', 'td', function () {
+                svg.classed('onhighlight2',false);
+                highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                highlight2Stack = [];
+            })
             $('#informationTable tbody').on('click', 'td.details-control, td.details-control.symbol', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
@@ -712,7 +738,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         const groupbtn = legendHolder.select('.btn-group')
         let applybtn = legendHolder.select('#range_apply')
             .on('click',function(){
-                debugger
                     legendRange = customRange.slice();
                     serviceFullList[serviceSelected].filter = customRange.slice();
                     currentDraw(serviceSelected);

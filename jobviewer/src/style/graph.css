@@ -26,11 +26,11 @@ svg {
 .inner_node.highlight text{
     fill: black;
 }
-.onhighlight .inner_node {
+.onhighlight2 .inner_node, .onhighlight2 .inner_node.highlight, .onhighlight .inner_node {
     opacity: 0.1;
 }
 
-.onhighlight .inner_node.highlight {
+.onhighlight2 .inner_node.highlight2, .onhighlight .inner_node.highlight {
     opacity: 1;
 }
 .outer_node circle.compute {
@@ -42,10 +42,14 @@ svg {
 .onhighlight .outer_node.highlight.highlightSummary .circleG circle{
     opacity: 0;
 }
-.onhighlight .outer_node.highlight .circleG circle{
+.onhighlight2 .outer_node .circleG circle.highlight2,
+.onhighlight2.onhighlight .outer_node .circleG circle.highlight.highlight2,
+.onhighlight .outer_node .circleG circle.highlight,
+.onhighlight .outer_node.highlight .circleG circle
+{
     opacity: 1;
 }
-.onhighlight .outer_node .circleG circle{
+.onhighlight2 .outer_node .circleG circle, .onhighlight2.onhighlight .outer_node .circleG circle.highlight, .onhighlight .outer_node .circleG circle{
     opacity: 0.1;
 }
 .onhighlight g.links .link {
@@ -54,13 +58,10 @@ svg {
 .onhighlight g.links .link.highlight {
     opacity: 1;
 }
+
 g.links .link {
     opacity: 0.95;
     stroke-width:0.3;
-}
-.onhighlight .outer_node .circleG circle.highlight, .onhighlight .outer_node.highlight.highlightSummary .circleG circle.highlight
-{
-    opacity: 1;
 }
 
 text {
