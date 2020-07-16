@@ -616,14 +616,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 var row = table.row( tr );
                 if (row.data()) {
                     const currentData = row.data();
+                    svg.classed('onhighlight2', true);
                     currentData.node_list.forEach(c => {
-                        svg.classed('onhighlight2', true);
                         rack_arr.find(r => {
                             if (r.childrenNode[c]) {
                                 highlight2Stack.push(r.childrenNode[c]);
                                 r.childrenNode[c].classed('highlight2', true);
-                                r.relatedLinks.forEach(d=>{
-                                    if (d.datum().source===currentData.user_name && d.datum().targetChildren===c){
+                                r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
+                                    if (d.datum().source===currentData.user_name){
                                         highlight2Stack.push(d);
                                         d.classed('highlight2',true);
                                     }

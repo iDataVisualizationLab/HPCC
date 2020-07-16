@@ -29,7 +29,7 @@ class Simulation {
         if(index!=undefined && this.#data)
             if (_.isDate(index)) {
                 let range = [d3.bisectLeft(this.#data.time_stamp, index),d3.bisectRight(this.#data.time_stamp, index)];
-               
+
                 if ((this.#data.time_stamp[range[1]]-index )>(index-this.#data.time_stamp[range[0]]))
                     this.#index = range[0];
                 else
