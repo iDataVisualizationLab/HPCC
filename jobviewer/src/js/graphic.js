@@ -622,11 +622,10 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                             if (r.childrenNode[c]) {
                                 highlight2Stack.push(r.childrenNode[c]);
                                 r.childrenNode[c].classed('highlight2', true);
-                                r.relatedLinks.find(d=>{
+                                r.relatedLinks.forEach(d=>{
                                     if (d.datum().source===currentData.user_name && d.datum().targetChildren===c){
                                         highlight2Stack.push(d);
                                         d.classed('highlight2',true);
-                                        return true;
                                     }
                                 });
                                 return true;
