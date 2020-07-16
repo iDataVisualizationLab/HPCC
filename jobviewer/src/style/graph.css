@@ -26,7 +26,8 @@ svg {
 .inner_node.highlight text{
     fill: black;
 }
-.onhighlight2 .inner_node, .onhighlight2 .inner_node.highlight, .onhighlight .inner_node {
+/*.onhighlight2 .inner_node, .onhighlight2.onhighlight .inner_node.highlight, .onhighlight .inner_node {*/
+.onhighlight .inner_node {
     opacity: 0.1;
 }
 
@@ -45,7 +46,8 @@ svg {
 .onhighlight2 .outer_node .circleG circle.highlight2,
 .onhighlight2.onhighlight .outer_node .circleG circle.highlight.highlight2,
 .onhighlight .outer_node .circleG circle.highlight,
-.onhighlight .outer_node.highlight .circleG circle
+.onhighlight .outer_node.highlight .circleG circle,
+.onhighlight .outer_node.highlight.highlightSummary .circleG circle.highlight
 {
     opacity: 1;
 }
