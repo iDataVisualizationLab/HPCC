@@ -615,20 +615,35 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
                 if (row.data()) {
-                    row.data().node_list.forEach(c => {
+                    const currentData = row.data();
+                    currentData.node_list.forEach(c => {
                         svg.classed('onhighlight2', true);
                         rack_arr.find(r => {
                             if (r.childrenNode[c]) {
-                                highlight2Stack.push(r.childrenNode[c])
+                                highlight2Stack.push(r.childrenNode[c]);
                                 r.childrenNode[c].classed('highlight2', true);
+                                r.relatedLinks.find(d=>{
+                                    if (d.datum().source===currentData.user_name && d.datum().targetChildren===c){
+                                        highlight2Stack.push(d);
+                                        d.classed('highlight2',true);
+                                        return true;
+                                    }
+                                });
                                 return true;
                             }
                         });
-                    })
+                    });
+                    users_arr.find(u => {
+                        if (u.key===currentData.user_name) {
+                            highlight2Stack.push(u.node);
+                            u.node.classed('highlight2', true);
+                            return true;
+                        }
+                    });
                 }
             }).on('mouseleave', 'td', function () {
                 svg.classed('onhighlight2',false);
-                highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                highlight2Stack.forEach(n=>n.classed('highlight2',false));
                 highlight2Stack = [];
             });
             $('#informationTable tbody').on('click', 'td button.morebtn', function () {
