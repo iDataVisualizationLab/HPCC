@@ -27,9 +27,14 @@ class Simulation {
     }
     request(timesexlapse,index){
         if(index!=undefined && this.#data)
-            if (_.isDate(index))
-                this.#index = d3.bisect(this.#data.time_stamp,index)
-            else
+            if (_.isDate(index)) {
+                let range = [d3.bisectLeft(this.#data.time_stamp, index),d3.bisectRight(this.#data.time_stamp, index)];
+               
+                if ((this.#data.time_stamp[range[1]]-index )>(index-this.#data.time_stamp[range[0]]))
+                    this.#index = range[0];
+                else
+                    this.#index = range[1];
+            }else
                 this.#index = index;
         if (this.isRealTime || (!this.isRealTime&&this.#data===undefined)||(this.#index<this.#data.time_stamp.length)) {
             let updatePromise;

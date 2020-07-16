@@ -673,7 +673,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         const width = 10;
         const height = 200;
         const legendHolder = d3.select('#legendHolder');
-        legendHolder.style('left',Math.min(d3.zoomIdentity.x+graphicopt.diameter()/2,graphicopt.width-graphicopt.margin.right)+'px')
+        legendHolder.style('left',Math.min(d3.zoomIdentity.x+graphicopt.diameter()/2+80,graphicopt.width-graphicopt.margin.right)+'px')
         const svg = legendHolder.select('svg.legend')
             .attr('width',width+marginLeft+marginRight)
             .attr('height',height+marginTop+marginBottom);
