@@ -144,7 +144,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
 
     // Setup the positions of inner nodes
-    const users_arr = d3.entries(users).map(function(d, i) {
+
+    const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
         d.x = -(graphicopt.rect.width / 2);
         d.y = innerY(i);
         d.relatedLinks = [];
@@ -256,6 +257,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             return false
         }))
     });
+
     const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length||1]).range([0,10])
 
     // Append outer nodes (circles)
@@ -319,6 +321,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
     inode_n.append('rect')
+        .style('fill-opacity',0.8)
         .attr('rx',3);
     inode_n.append("text")
         .attr('text-anchor', 'start')
