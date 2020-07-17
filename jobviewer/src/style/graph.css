@@ -34,24 +34,24 @@ svg {
 .onhighlight2 .inner_node.highlight2, .onhighlight2.onhighlight .inner_node.highlight.highlight2, .onhighlight .inner_node.highlight {
     opacity: 1;
 }
-.outer_node circle.compute {
+.outer_node .compute {
     /*fill: #f1faee;*/
     stroke: #1d3557;
     stroke-width: 0.1;
     pointer-events: all;
 }
-.onhighlight .outer_node.highlight.highlightSummary .circleG circle{
+.onhighlight .outer_node.highlight.highlightSummary .circleG .element{
     opacity: 0;
 }
-.onhighlight2 .outer_node .circleG circle.highlight2,
-.onhighlight2.onhighlight .outer_node .circleG circle.highlight.highlight2,
-.onhighlight .outer_node .circleG circle.highlight,
-.onhighlight .outer_node.highlight .circleG circle,
-.onhighlight .outer_node.highlight.highlightSummary .circleG circle.highlight
+.onhighlight2 .outer_node .circleG .element.highlight2,
+.onhighlight2.onhighlight .outer_node .circleG .element.highlight.highlight2,
+.onhighlight .outer_node .circleG .element.highlight,
+.onhighlight .outer_node.highlight .circleG .element,
+.onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
 {
     opacity: 1;
 }
-.onhighlight2 .outer_node .circleG circle, .onhighlight2.onhighlight .outer_node .circleG circle.highlight, .onhighlight .outer_node .circleG circle{
+.onhighlight2 .outer_node .circleG .element, .onhighlight2.onhighlight .outer_node .circleG .element.highlight, .onhighlight .outer_node .circleG .element{
     opacity: 0.1;
 }
 .onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {

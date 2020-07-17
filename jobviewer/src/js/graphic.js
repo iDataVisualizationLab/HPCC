@@ -48,36 +48,52 @@ let graphicopt = {
 };
 
 let isFreeze= false;
-let highlight2Stack = []
+let highlight2Stack = [];
+let vizservice=[];
 function serviceControl(){
+    vizservice =serviceFullList.slice();
+    vizservice.push({text:'User',range:[]})
     d3.select('#serviceSelection')
         .on('change',function(){
             serviceSelected = +$(this).val();
             currentDraw(serviceSelected);
         })
         .selectAll('option')
-        .data(serviceFullList)
+        .data(vizservice)
         .enter()
         .append('option')
         .attr('value',(d,i)=>i)
+        .attr('data-value',(d,i)=>d)
         .text(d=>d.text)
 }
+
 function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     serviceControl()
     isFreeze= false;
-    graphicopt.color.title =  serviceFullList[serviceSelected].text;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
-    const serviceName = serviceFullList[serviceSelected].text;
+    const serviceName = vizservice[serviceSelected].text;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
-    const range_cal_or = serviceFullList[serviceSelected].range.slice();
-    const range_cal = (serviceFullList[serviceSelected].filter||serviceFullList[serviceSelected].range).slice();
-    _colorItem.domain(range_cal.slice().reverse());
+    let getOutofRange = ()=>{}
+    if(serviceName==='User') {
+        vizservice[serviceSelected].range = d3.keys(users);
+        _colorItem = d3.scaleOrdinal(d3.schemeCategory10);
+        getOutofRange = ()=>false
+    }else{
+        getOutofRange = getOutofRange_cont
+    }
+    const range_cal_or = vizservice[serviceSelected].range.slice();
+    const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
+    if(serviceName!=='User')
+        _colorItem.domain(range_cal.slice().reverse());
+    else
+        _colorItem.domain(range_cal.slice());
     const colorItem = function(d){
         if (d) {
-            if (d < range_cal[0] || d > range_cal[1])
-                return 'none'
+            if (serviceName!=='User')
+                if (d < range_cal[0] || d > range_cal[1])
+                    return 'none'
             return _colorItem(d);
         }else
             // return '#afafaf';
@@ -137,7 +153,10 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     });
 
     // Setup the positions of outer nodes
-    Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-a.metrics[serviceFullList[serviceSelected].text]+b.metrics[serviceFullList[serviceSelected].text]))
+    function getData(d){
+        return d.metrics[vizservice[serviceSelected].text]
+    }
+    Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-getData(a)+getData(b)))
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
@@ -155,11 +174,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.pack.children.forEach(e=>{
             e.x -= d.pack.x;
             e.y -= d.pack.y;
+            e.data.metrics
             e.data.relatedLinks = [];
             e.data.relatedNodes = [];
-            e.data.disable = e.data.metrics[serviceName] < range_cal[0] || e.data.metrics[serviceName] > range_cal[1]
+            e.data.disable = getOutofRange(e.data.metrics);
+            e.data.drawData = undefined;
             e.depth = 1;
         });
+        d.drawData = [{startAngle: 0,endAngle:360,r:d.pack.r}];
         d.pack.x = 0;
         d.pack.y =0;
         d.pack.depth = 0;
@@ -195,6 +217,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         // links.push(d.links);
         return links
     });
+    if (serviceName==='User')
+        users_arr.forEach((d, i)=>{
+            d.color = colorItem(d.key)})
 
     // Create the mapping of target nodes and their positions
     let targetPos = [];
@@ -300,29 +325,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
     inode_n.call(updateInode);
 
-    // // Join target positions with links data by target nodes
-    // links.forEach(d=>{
-    //     targetPos.forEach((v=>{
-    //
-    //         if (d.target === v.target){
-    //             d.targetX = v.targetX_bundle;
-    //             d.targetY  = v.targetY_bundle;
-    //             const targetChildren = v.node.pack.children.find(c=>c.data.name===d.targetChildren)
-    //             d.targetX_l = v.targetX+targetChildren.x;
-    //             d.targetY_l = v.targetY+targetChildren.y;
-    //             d.targetData = v.node;
-    //             d.targetData.childrenNode[d.targetChildren].datum().data.relatedNodes.push({data:d.sourceData})
-    //             d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
-    //             d.targetData.relatedNodes.push({data:d.sourceData});
-    //             d.color = targetChildren.color;
-    //         }
-    //     }))
-    // });
 
-    // Define link layout
-    // let link = d3.linkHorizontal()
-    //     .source(d=>[d.targetX_l, d.targetY_l])
-    //     .target(d=>[d.targetX < 0 ? d.sourceX : d.sourceX + graphicopt.rect.width, d.sourceY + graphicopt.rect.height / 2])
     const line = d3.line()
         .curve(d3.curveBundle.beta(0.8));
         // .curve(d3.curveCardinal.tension(0.1));
@@ -344,7 +347,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .join("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", d=>d.target_prim.color)
+        .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color})
         // .attr("stroke-width", 0.3)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
@@ -363,6 +366,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d.node=d3.select(this);
         })
         p.select('rect').attr('width', graphicopt.rect.width)
+            .style('fill',d=>d.color)
             .attr('height', graphicopt.rect.height)
             .attr('id', d=>d.key);
         p.select('text')
@@ -385,38 +389,45 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             ['min','max','mean']
         ];
         const summary_y = d3.scaleLinear().range([0,root.r]).domain(range_cal_or)
-        const summary_path = svg.select('g.summary')
-            .selectAll('path')
-            .attr('class','summary')
-            .data(summary_map.map(d=>({key:d, data:root.data.summary[serviceFullList[serviceSelected].text]})))
-            .call(updateSummary);
-        summary_path.exit().remove();
-        summary_path.enter().append('path').attr('class','summary').call(updateSummary);
+        if (vizservice[serviceSelected].text!=='User') {
+            const summary_path = svg.select('g.summary')
+                .selectAll('path')
+                .attr('class', 'summary')
+                .data(summary_map.map(d => ({key: d, data: root.data.summary[vizservice[serviceSelected].text]})))
+                .call(updateSummary);
+            summary_path.exit().remove();
+            summary_path.enter().append('path').attr('class', 'summary').call(updateSummary);
 
-        const summary_circle = svg.select('g.summary')
-            .selectAll('circle')
-            .attr('class','summary')
-            .data(summary_map[0].map(d=>({key:d, data:root.data.summary[serviceFullList[serviceSelected].text][d]})))
-            .call(updateSummaryCircle);
-        summary_circle.exit().remove();
-        summary_circle.enter().append('circle').attr('class','summary').call(updateSummaryCircle);
-        let annotation = svg.select('g.summary').select('text.annotation');
-        if (annotation.empty())
-            annotation = svg.select('g.summary').append('text')
-                .attr('class','annotation')
-                .style('text-anchor','middle');
-        annotation.text(`mean=${Math.round(root.data.summary[serviceFullList[serviceSelected].text].mean)}`)
+            const summary_circle = svg.select('g.summary')
+                .selectAll('circle')
+                .attr('class', 'summary')
+                .data(summary_map[0].map(d => ({
+                    key: d,
+                    data: root.data.summary[serviceFullList[serviceSelected].text][d]
+                })))
+                .call(updateSummaryCircle);
+            summary_circle.exit().remove();
+            summary_circle.enter().append('circle').attr('class', 'summary').call(updateSummaryCircle);
+            let annotation = svg.select('g.summary').select('text.annotation');
+            if (annotation.empty())
+                annotation = svg.select('g.summary').append('text')
+                    .attr('class', 'annotation')
+                    .style('text-anchor', 'middle');
+            annotation.text(`mean=${Math.round(root.data.summary[serviceFullList[serviceSelected].text].mean)}`)
+        }else{
+            svg.select('g.summary').selectAll('*').remove()
+        }
         return updateNodes();
 
         function updateNodes(istransition) {
             let childrenNode = {};
             node = svg.select('g.circleG')
-                .selectAll("circle")
+                .selectAll("g")
                 .data(root.descendants(), d => d.data.name)
                 .call(updateNode);
 
             node.exit().remove();
-            node = node.enter().append("circle")
+            node = node.enter().append("g")
                 .call(updateNode).merge(node);
             // node.each(function(d){
             //     childrenNode[d.data.name] = d3.select(this)
@@ -440,6 +451,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             function updateNode(node) {
                 node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
                 return node
+                    .attr('class','element')
                     .attr("fill", d => {
 
                         if(d.children) {
@@ -448,7 +460,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                             d.color = '#dddddd';
                             return d.color;
                         }else {
-                            d.color = colorItem(d.data.metrics[serviceFullList[serviceSelected].text]);
+                            d.color = colorItem(d.data.metrics[vizservice[serviceSelected].text]);
                             return d.color;
                         }
                         // d.color = '#dddddd'
@@ -458,32 +470,12 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         return circleStrokeScale(d.data.relatedNodes.length);
                     })
                     .classed('compute', d => !d.children)
-                    .attr('title',d=>d.data.name)
                     .attr("pointer-events", d => !d.children ? "none" : null)
                     .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                     .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
-                function zoom(d) {
-                    const focus0 = focus;
 
-                    focus = d;
-
-                    const transition = svg.transition()
-                        .duration(d3.event.altKey ? 7500 : 750)
-                        .tween("zoom", d => {
-                            const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
-                            return t => currentZoomData = zoomTo(i(t));
-                        });
-
-                    label
-                        .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
-                        .transition(transition)
-                        .style("fill-opacity", d => d.parent === focus ? 1 : 0)
-                        .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-                        .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
-
-                }
             }
         }
         function updateSummary(p){
@@ -514,9 +506,47 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // else
             //     node_animation = node;
             node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("r", d => d.r * k);
+            if (vizservice[serviceSelected].text==='User')
+                debugger
+            let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
+                .attr('d',getRenderFunc)
+                .style('fill',d=>d.color);
+            path.exit().remove();
+            path.enter().append('path')
+            .attr('d',getRenderFunc).style('fill',d=>d.color);
             return v
         }
+    }
+    function getOutofRange_cont(e){
+        return e[serviceName] < range_cal[0] || e[serviceName] > range_cal[1]
+    }
+    function getDrawData(e) {
+        if (serviceName !== 'User')
+            return [{startAngle:0,endAngle:360,r:e.r}];
+        if (e.data.relatedNodes.length>1) {
+            const data = d3.pie().value(1)(e.data.relatedNodes);
+            data.forEach(d => {
+                d.r = e.r;
+                d.color = d.data.data.color;
+            });
+
+            return data;
+        }
+        return [{
+            data: {},
+            endAngle: 360,
+            index: 0,
+            padAngle: 0,
+            startAngle: 0,
+            value: 1,
+            r:e.r,
+            color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
+        }]
+    }
+    function getRenderFunc(d){
+        return d3.arc()
+            .innerRadius(0)
+            .outerRadius(d.r * k)(d);
     }
     function freezeHandle(){
         if (isFreeze){
@@ -665,123 +695,128 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d3.select('.informationHolder').classed('hide',true);
     }
     function makelegend(){
-        const color = _colorItem;
-        const marginTop = 10;
-        const marginBottom = 10;
-        const marginLeft = 40;
-        const marginRight = 0;
-        const width = 10;
-        const height = 200;
-        const legendHolder = d3.select('#legendHolder');
-        legendHolder.style('left',Math.min(d3.zoomIdentity.x+graphicopt.diameter()/2+80,graphicopt.width-graphicopt.margin.right)+'px')
-        const svg = legendHolder.select('svg.legend')
-            .attr('width',width+marginLeft+marginRight)
-            .attr('height',height+marginTop+marginBottom);
-        svg.select('g.legend').remove();
-        let legend = svg.append('g').attr('class','legend')
-            .attr('transform',`translate(${marginLeft},${marginTop})`);
+        if (vizservice[serviceSelected].text!=='User') {
+            const color = _colorItem;
+            const marginTop = 10;
+            const marginBottom = 10;
+            const marginLeft = 40;
+            const marginRight = 0;
+            const width = 10;
+            const height = 200;
+            const legendHolder = d3.select('#legendHolder');
+            legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px')
+            const svg = legendHolder.select('svg.legend')
+                .attr('width', width + marginLeft + marginRight)
+                .attr('height', height + marginTop + marginBottom);
+            svg.select('g.legend').remove();
+            let legend = svg.append('g').attr('class', 'legend')
+                .attr('transform', `translate(${marginLeft},${marginTop})`);
             // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
 
-        if (color.interpolate) {
-            const n = Math.min(color.domain().length, color.range().length);
+            if (color.interpolate) {
+                const n = Math.min(color.domain().length, color.range().length);
 
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
+                let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
 
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
-        }// Sequential
-        else if (color.interpolator) {
-            let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
-                {range() { return [0, height]; }});
+                legend.append("image")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+            }// Sequential
+            else if (color.interpolator) {
+                let y = Object.assign(color.copy()
+                        .interpolator(d3.interpolateRound(0, height)),
+                    {
+                        range() {
+                            return [0, height];
+                        }
+                    });
 
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+                legend.append("image")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xlink:href", ramp(color.interpolator()).toDataURL());
 
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!y.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+                if (!y.ticks) {
+                    if (tickValues === undefined) {
+                        const n = Math.round(ticks + 1);
+                        tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                    }
+                    if (typeof tickFormat !== "function") {
+                        tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                    }
+                } else {
+                    graphicopt.legend = {scale: y};
+                    legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
                 }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            }else{
-                graphicopt.legend = {scale:y};
-                legend.append('g').attr('class','legendTick').call(d3.axisLeft(y));
             }
-        }
-        function ramp(color, n = 256) {
-            const canvas = createContext(1, n);
-            const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
-            return canvas;
-        }
-        function createContext(width, height) {
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas;
-        }
 
-        // make custom input button
-        let legendRange = serviceFullList[serviceSelected].range;
-        let customRange = legendRange.slice();
-        const groupbtn = legendHolder.select('.btn-group')
-        let applybtn = legendHolder.select('#range_apply')
-            .on('click',function(){
+            function ramp(color, n = 256) {
+                const canvas = createContext(1, n);
+                const context = canvas.getContext("2d");
+                for (let i = 0; i < n; ++i) {
+                    context.fillStyle = color(i / (n - 1));
+                    context.fillRect(0, i, 1, 1);
+                }
+                return canvas;
+            }
+
+            function createContext(width, height) {
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                return canvas;
+            }
+
+            // make custom input button
+            let legendRange = vizservice[serviceSelected].range;
+            let customRange = legendRange.slice();
+            const groupbtn = legendHolder.select('.btn-group')
+            let applybtn = legendHolder.select('#range_apply')
+                .on('click', function () {
                     legendRange = customRange.slice();
                     serviceFullList[serviceSelected].filter = customRange.slice();
                     currentDraw(serviceSelected);
-                groupbtn.classed('hide', true);
-            });
-        let canclebtn = legendHolder.select('#range_cancle')
-            .on('click',function(){
-                customRange = serviceFullList[serviceSelected].range.slice();
-                rangeo.each(function(d){
-                    $(this).val(customRange[+(d.key==='upLimit')]);
-                });
-                currentDraw(serviceSelected);
-                groupbtn.classed('hide', true);
-            });
-        let rangeo = legendHolder.selectAll('input.range')
-            .data([{key:'upLimit',value:legendRange[1]},
-                {key:'lowLimit',value:legendRange[0]}])
-                .attr('value',d=>d.value)
-            .on('input',function(d){
-                let index = +(d.key==='upLimit');
-                customRange[index] = +$(this).val();
-                if (_.isEqual(customRange,legendRange)) {
                     groupbtn.classed('hide', true);
-                }else {
-                    groupbtn.classed('hide', false);
-                    if ((index*2-1)*(-customRange[index]+legendRange[index])<0)
-                    {
-                        // wrong input
-                        applybtn.attr('disabled', '');
-                    }else{
-                        if (!(((!index)*2-1)*(-customRange[+!index]+legendRange[+!index])<0))
-                        {
-                            applybtn.attr('disabled', null);
+                });
+            let canclebtn = legendHolder.select('#range_reset')
+                .on('click', function () {
+                    customRange = serviceFullList[serviceSelected].range.slice();
+                    rangeo.each(function (d) {
+                        $(this).val(customRange[+(d.key === 'upLimit')]);
+                    });
+                    currentDraw(serviceSelected);
+                    groupbtn.classed('hide', true);
+                });
+            let rangeo = legendHolder.selectAll('input.range')
+                .data([{key: 'upLimit', value: legendRange[1]},
+                    {key: 'lowLimit', value: legendRange[0]}])
+                .attr('value', d => d.value)
+                .on('input', function (d) {
+                    let index = +(d.key === 'upLimit');
+                    customRange[index] = +$(this).val();
+                    // if (_.isEqual(customRange, legendRange)) {
+                    //     groupbtn.classed('hide', true);
+                    // } else {
+                        groupbtn.classed('hide', false);
+                        if ((index * 2 - 1) * (-customRange[index] + legendRange[index]) < 0) {
+                            // wrong input
+                            applybtn.attr('disabled', '');
+                        } else {
+                            if (!(((!index) * 2 - 1) * (-customRange[+!index] + legendRange[+!index]) < 0)) {
+                                applybtn.attr('disabled', null);
+                            }
                         }
-                    }
-                }
-            });
-
+                    // }
+                });
+        }
     }
 
 }
@@ -911,4 +946,8 @@ function mouseout(d){
 
 function angle2position(angle,radius){
     return [Math.sin(angle/180*Math.PI)*radius,-Math.cos(angle/180*Math.PI)*radius];
+}
+
+function circlePath(cx, cy, r){
+    return 'M '+cx+' '+cy+' m -'+r+', 0 a '+r+','+r+' 0 1,0 '+(r*2)+',0 a '+r+','+r+' 0 1,0 -'+(r*2)+',0';
 }
