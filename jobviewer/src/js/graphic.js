@@ -157,7 +157,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     // Setup the positions of outer nodes
     function getData(d){
         if (serviceName==='User')
-            return d.user.length?userIndex[d.user[0]]:-1;
+            return d.user.length//?userIndex[d.user[0]]:-1;
         return d.metrics[vizservice[serviceSelected].text]
     }
     Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-getData(a)+getData(b)))
