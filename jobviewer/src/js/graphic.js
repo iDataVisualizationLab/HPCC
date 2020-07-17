@@ -78,7 +78,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let getOutofRange = ()=>{}
     if(serviceName==='User') {
         vizservice[serviceSelected].range = d3.keys(users);
-        _colorItem = d3.scaleOrdinal(d3.schemeCategory10);
+        _colorItem = d3.scaleOrdinal(d3.schemeCategory20);
         getOutofRange = ()=>false
     }else{
         getOutofRange = getOutofRange_cont
@@ -704,7 +704,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             const width = 10;
             const height = 200;
             const legendHolder = d3.select('#legendHolder');
-            legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px')
+            legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px');
+            legendHolder.select('.legendView').classed('hide',false);
             const svg = legendHolder.select('svg.legend')
                 .attr('width', width + marginLeft + marginRight)
                 .attr('height', height + marginTop + marginBottom);
@@ -816,7 +817,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         }
                     // }
                 });
-        }
+        }else
+            d3.select('#legendHolder .legendView').classed('hide',true);
     }
 
 }
