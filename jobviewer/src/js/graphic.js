@@ -144,8 +144,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
 
     // Setup the positions of inner nodes
-
+    const userIndex={};
     const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
+        userIndex[d.key]=i;
         d.x = -(graphicopt.rect.width / 2);
         d.y = innerY(i);
         d.relatedLinks = [];
@@ -155,6 +156,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
     // Setup the positions of outer nodes
     function getData(d){
+        if (serviceName==='User')
+            return d.user.length?userIndex[d.user[0]]:-1;
         return d.metrics[vizservice[serviceSelected].text]
     }
     Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-getData(a)+getData(b)))
@@ -175,7 +178,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.pack.children.forEach(e=>{
             e.x -= d.pack.x;
             e.y -= d.pack.y;
-            e.data.metrics
             e.data.relatedLinks = [];
             e.data.relatedNodes = [];
             e.data.disable = getOutofRange(e.data.metrics);
@@ -509,8 +511,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // else
             //     node_animation = node;
             node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            if (vizservice[serviceSelected].text==='User')
-                debugger
             let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
                 .attr('d',getRenderFunc)
                 .style('fill',d=>d.color);
