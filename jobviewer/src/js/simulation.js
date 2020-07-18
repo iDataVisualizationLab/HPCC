@@ -98,12 +98,13 @@ class Simulation {
         console.time('request time: ')
         const _end = new Date(); //'2020-02-14T12:00:00-05:00'
         let _start = new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
-        const interval = '5m';
+        const interval = '1m';
         const value = 'max';
         const compress = false;
         const url = self.getUrl({_start,_end,interval,value,compress});
         console.log(url)
         return d3.json(url).then(function(data){
+            data.time_stamp=data.time_stamp.map(e=>e/1000000);
             data.currentTime = new Date(_.last(data.time_stamp)*1000);
             self.#currentTime = data.currentTime;
             self.#data = data;

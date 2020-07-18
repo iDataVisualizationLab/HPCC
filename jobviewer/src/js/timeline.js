@@ -5,6 +5,7 @@ class Timeline{
     timeline;
     timelineHandler;
     meassage;
+    timelineTicks;
     step = ()=>{};
     timeConf={scale:d3.scaleTime().range([0,100])};
     #play=()=>{
@@ -62,7 +63,10 @@ class Timeline{
             .attr('aria-valuemax',"100");
         this.timelineHandler = this.timelineHolder
             .append('div').attr('class','progress-bar-handle align-self-center');
-
+        this.timelineTicks = this.timelineHolder
+            .append('div').attr('class','ticksHandeler')
+            .style('position','relative').style('width','100%');
+        this.#updateTick();
         this.meassageHolder = this.el.append('div')
             .attr('class','message align-items-center row')
             .style("padding-left", "20px")
@@ -112,6 +116,21 @@ class Timeline{
             self.step(self.timeConf.scale.invert(value));
         }
     }
+    #updateTick(){
+        const ticks = this.timeConf.scale.ticks()
+        this.timelineTicks.selectAll('div.ticksLabel').data(ticks,d=>d)
+            .join('div').attr('class','ticksLabel').style('position','absolute').style('transform','translate(-50%,10px)')
+            .text(d=>multiFormat(d)).style('left',d=>this.timeConf.scale(d)+'%');
+        this.timelineTicks.selectAll('div.ticks').data(ticks,d=>d)
+            .join('div').attr('class','ticks').style('position','absolute').style('transform','translate(-50%,2px)')
+            .style('margin-left','-1px')
+            .style('width','2px')
+            .style('background-color','#ddd')
+            .style('height','8px').style('left',d=>this.timeConf.scale(d)+'%');;
+        // this.timelineTicks.selectAll('div.ticks').data(ticks,d=>d)
+        //     .join('div').attr('class','ticks').style('position','absolute').style('transform','translateX(-50%)')
+        //     .text(d=>multiFormat(d)).style('left',d=>this.timeConf.scale(d)+'%');
+    }
     disableHandle(isdisable){
         this.timelineHolder.classed('disabled',isdisable)
     }
@@ -121,7 +140,6 @@ class Timeline{
         this.callbackPlay();
     }
     pause(){
-
         this.#pause();
         this.callbackPause();
     }
@@ -136,6 +154,7 @@ class Timeline{
     }
     domain(domain){
         this.timeConf.scale.domain(domain);
+        this.#updateTick();
     }
     update(value){
         if (_.isDate(value))
