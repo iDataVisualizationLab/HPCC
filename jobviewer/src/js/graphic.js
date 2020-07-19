@@ -448,7 +448,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .text(d => d.data.name).merge(label);
             label.each(function(d){
                 if (!d.children)
-                 d.data.tooltip = d3.select(this);
+                    d.data.tooltip = d3.select(this);
             })
             label.call(textcolor);
             zoomTo([root.x, root.y, root.r * 2], istransition)
@@ -627,13 +627,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 return data.length;
                             if (type==='display')
                                 if (data.length>2)
-                                    return `<span>${row.isexpand?data.join('\n'): data.slice(0,2).join('\n')}</span>
+                                    return `<span>${row.isexpand?data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n')
+                                        : data.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
                                         <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
                                         <button type="button" class="btn btn-block morebtn" value="close">
                                         <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
                                         </button>`;
                                 else
-                                    return data.join('\n');
+                                    return data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n');
                             return data;
                         }},
                     { "data": "task_id" },
@@ -642,15 +643,17 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             } );
 
             // Add event listener for opening and closing details
-            $('#informationTable tbody').on('mouseover', 'td', function () {
+            $('#informationTable tbody').on('mouseover', 'td, .tableCompute', function (event) {
+                event.stopPropagation();
                 highlight2Stack.forEach(n=>n.classed('highlight2',false))
                 highlight2Stack = [];
-                var tr = $(this).closest('tr');
-                var row = table.row( tr );
+                let tr = $(this).closest('tr');
+                let row = table.row( tr );
+                const isSingle =  d3.select(event.target).classed('tableCompute')
                 if (row.data()) {
                     const currentData = row.data();
                     svg.classed('onhighlight2', true);
-                    currentData.node_list.forEach(c => {
+                    (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
                         rack_arr.find(r => {
                             if (r.childrenNode[c]) {
                                 highlight2Stack.push(r.childrenNode[c]);
