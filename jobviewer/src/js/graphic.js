@@ -657,6 +657,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         rack_arr.find(r => {
                             if (r.childrenNode[c]) {
                                 highlight2Stack.push(r.childrenNode[c]);
+                                highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
+                                r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
+                                
                                 r.childrenNode[c].classed('highlight2', true);
                                 r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
                                     if (d.datum().source===currentData.user_name){

@@ -40,6 +40,9 @@ svg {
     stroke-width: 0.1;
     pointer-events: all;
 }
+.outer_node text.highlight2.hide{
+    display: block;
+}
 .onhighlight .outer_node.highlight.highlightSummary .circleG .element{
     opacity: 0;
 }
