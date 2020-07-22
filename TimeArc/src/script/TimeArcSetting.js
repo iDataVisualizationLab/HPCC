@@ -29,7 +29,8 @@ let TimeArcSetting = function (){
     let master = {};
     let TimeArc  = d3.TimeArc();
     let isFirst = true;
-    let catergogryList=[{key: 'user', value: {colororder: 0}},{key: 'compute', value: {colororder: 1}}]
+    let catergogryList=[{key: 'user', value: {colororder: 0}},{key: 'compute', value: {colororder: 1}}];
+    master.timearc = TimeArc;
     master.reset = function(){
 
         return master;

@@ -217,7 +217,17 @@ d3.TimeArc = function () {
         .y1(function (d) {
             return d.yNode + yScale(d.value);
         });
-
+    var area_compute = d3.area()
+        .curve(d3.curveCatmullRomOpen)
+        .x(function (d) {
+            return xStep + xScale(d.monthId);
+        })
+        .y0(function (d) {
+            return d.yNode + yScale(d.value[0]);
+        })
+        .y1(function (d) {
+            return d.yNode + yScale(d.value[1]);
+        });
 
     var numberInputTerms = 0;
     var listMonth;
@@ -702,11 +712,12 @@ d3.TimeArc = function () {
                 const selected = data.selectedService;
                 data.tsnedata[nodes[i].name].forEach(d=>{
                     var mon = new Object();
-                    mon.value = d[selected]*termMaxMax2*0.6;
+                    mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
                     mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
                     mon.yNode = nodes[i].y;
                     nodes[i].monthly.push(mon);
                 })
+                nodes[i].monthly.noneSymetric = true;
             }
         }
 
@@ -1201,6 +1212,8 @@ d3.TimeArc = function () {
                 for (var i = 0; i < d.monthly.length; i++) {
                     d.monthly[i].yNode = d.y;     // Copy node y coordinate
                 }
+                if (d.monthly.noneSymetric)
+                    return area_compute(d.monthly)
                 return area(d.monthly);
             });
         linkArcs.attr("d", linkArc);
@@ -1260,6 +1273,8 @@ d3.TimeArc = function () {
                 for (var i = 0; i < d.monthly.length; i++) {
                     d.monthly[i].yNode = d.y;     // Copy node y coordinate
                 }
+                if (d.monthly.noneSymetric)
+                    return area_compute(d.monthly)
                 return area(d.monthly);
             });
         linkArcs.transition().duration(250).attr("d", linkArc);
