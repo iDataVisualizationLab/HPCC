@@ -57,3 +57,7 @@ li.theme:hover{
 .no_leftmagrin {
     margin-left: 0;
 }
+form input,form select {
+    padding-left: 2px;
+    padding-right: 2px;
+}

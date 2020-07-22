@@ -96,23 +96,21 @@
                             <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
                         </div>
                         <label for="lowrange" class="col-6 radarcontroller_layout">#Groups from </label>
-                            <input type="number" id="lowrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                            <span class="col-2 no_leftmagrin">to</span>
-                            <input type="number" id="highrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
+                        <input type="number" id="lowrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                        <span class="col-2 no_leftmagrin">to</span>
+                        <input type="number" id="highrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
 
-                            <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
+                        <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
 
                     </form>
-                    <form action="#" class='clusterProfile hide row valign-wrapper' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
-                        <label for="knum" class="col-5 radarcontroller_layout">#Groups</label>
-                        <div  class="col-5 no-pad-left valign-wrapper">
-                            <input type="number" id="knum" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
-                            <span class="col-6 no_leftmagrin"> #Iterations</span>
-                            <input type="number" id="kiteration" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
-                        </div>
-                        <div  class="col-3 no_padding valign-wrapper center-align" >
-                            <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
-                        </div>
+                    <form action="#" class='clusterProfile hide row col-12' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                        <label for="knum" class="col-6 radarcontroller_layout">#Groups</label>
+
+                        <input type="number" id="knum" class="col-6 radarcontroller_layout browser-default no_leftmagrin">
+                        <label for="knum" class="col-6 radarcontroller_layout">#Iterations</label>
+                        <input type="number" id="kiteration" class="col-6 radarcontroller_layout browser-default no_leftmagrin" >
+
+                        <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
                     </form>
                     <form action="#" class='clusterProfile hide row valign-wrapper' id = "binarybinprofile" onsubmit="recalculateCluster( {clusterMethod: 'binarybin',normMethod:$('#normMethod').val()},onchangeCluster);return false;">
                         <div  class="col-3 no_padding valign-wrapper center-align" >

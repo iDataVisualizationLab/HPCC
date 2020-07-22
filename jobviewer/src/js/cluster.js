@@ -55,7 +55,6 @@ function initClusterUI(){
     $('#kiteration').val(group_opt.bin.iterations || 50);
     d3.select('#clusterMethod').on('change',function(){
         group_opt.clusterMethod = this.value;
-        updateSummaryChartAll();
         d3.selectAll('.clusterProfile').classed('hide',true);
         d3.select(`#${this.value}profile`).classed('hide',false);
     });
