@@ -98,7 +98,7 @@ class Simulation {
         console.time('request time: ')
         const _end = new Date(); //'2020-02-14T12:00:00-05:00'
         let _start = new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
-        const interval = '1m';
+        const interval = '5m';
         const value = 'max';
         const compress = false;
         const url = self.getUrl({_start,_end,interval,value,compress});
