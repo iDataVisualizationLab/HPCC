@@ -30,10 +30,10 @@ $(document).ready(function(){
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
             //---------
-            request = new Simulation('src/data/742020.json');
+            request = new Simulation('src/data/7222020.json');
         }
     }catch(e){
-        request = new Simulation('src/data/742020.json');
+        request = new Simulation('src/data/7222020.json');
     }
     initClusterUI();
     initTimeElement();

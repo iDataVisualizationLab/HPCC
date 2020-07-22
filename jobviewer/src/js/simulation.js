@@ -15,7 +15,15 @@ class Simulation {
         this.isRealTime = !url;
         if (!this.isRealTime) {
             let updatePromise=d3.json(url).then((data) => {
-                data.time_stamp = data.time_stamp.map(d=>new Date(d*1000))
+                data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
+                d3.keys(data.jobs_info).forEach(jID=>{
+                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                    if(data.jobs_info[jID].start_time>9999999999999)
+                    {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
+                        data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
+                        if (data.jobs_info[jID].finish_time)
+                            data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+                })
                 this.data = data;
                 this.onDataChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
@@ -71,7 +79,7 @@ class Simulation {
                     const currentTime = self.data.time_stamp[index];
 
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
-                        return (val.start_time*1000 > currentTime) || ((val.finish_time!==null)&&(val.finish_time*1000 < currentTime));
+                        return (val.start_time > currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
                     });
                     const nodes_info = {};
                     d3.keys(self.data.nodes_info).forEach(c => {
@@ -104,8 +112,8 @@ class Simulation {
         const url = self.getUrl({_start,_end,interval,value,compress});
         console.log(url)
         return d3.json(url).then(function(data){
-            data.time_stamp=data.time_stamp.map(e=>e/1000000);
-            data.currentTime = new Date(_.last(data.time_stamp)*1000);
+            data.time_stamp=data.time_stamp.map(e=>e);
+            data.currentTime = new Date(_.last(data.time_stamp));
             self.#currentTime = data.currentTime;
             self.data = data;
             console.timeEnd('request time: ')

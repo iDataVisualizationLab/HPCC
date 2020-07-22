@@ -55,8 +55,15 @@ function handleDataUrl(dataRaw) {
             name: ip,
         }
     });
-
-
+    d3.keys(dataRaw.jobs_info).forEach(jID=>{
+        dataRaw.jobs_info[jID].node_list = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        if(dataRaw.jobs_info[jID].start_time>9999999999999)
+        {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
+        dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
+        if (dataRaw.jobs_info[jID].finish_time)
+            dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
+    })
+    dataRaw.time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
     // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
     // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
     var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];

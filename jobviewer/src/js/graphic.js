@@ -665,7 +665,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     const jobID = j.split('.');
                     const job=_.clone(jobs[j]);
                     job['id']=jobID[0];
-                    job['duration']=currentTime - job['start_time']*1000;
+                    job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
             else
@@ -676,7 +676,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     if (job.node_list.indexOf(d.data.name)===-1)
                         return false;
                     job['id']=jobID[0];
-                    job['duration']=currentTime - job['start_time']*1000;
+                    job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job}).filter(d=>d);
             var table = $('#informationTable').DataTable( {
@@ -689,7 +689,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     { "data": "start_time" ,
                         "render": function ( data, type, row ) {
                             if(type!=='ordering')
-                                return d3.timeFormat('%m/%d/%Y %H:%M')(new Date(data*1000));
+                                return d3.timeFormat('%m/%d/%Y %H:%M')(new Date(data));
                             return data;
                         }},
                     { "data": "duration",
