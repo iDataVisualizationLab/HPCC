@@ -113,6 +113,9 @@ function handle_data_timeArc () {
             }
         })
     });
+    scheme.data.tsnedata = tsnedata;
+    scheme.data.timespan = sampleS.timespan.slice();
+    scheme.data.selectedService = 0;
     scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     timeArc.graphicopt(timeArcopt).scheme(scheme).draw();
 }

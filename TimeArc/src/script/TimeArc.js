@@ -659,42 +659,56 @@ d3.TimeArc = function () {
 
         // compute the monthly data
         termMaxMax2 = 0;
+        debugger
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
-            for (var m = 0; m < totalTimeSteps; m++) {
-                var mon = new Object();
-                if (terms[nodes[i].name][m]) {
-                    mon.value = terms[nodes[i].name][m];
-                    if (mon.value > termMaxMax2)
-                        termMaxMax2 = mon.value;
-                    mon.monthId = m;
-                    mon.yNode = nodes[i].y;
-                    nodes[i].monthly.push(mon);
-                }
-            }
-            // Add another item to first
-            if (nodes[i].monthly.length > 0) {
-                var firstObj = nodes[i].monthly[0];
-                if (firstObj.monthId > 0) {
+            if (!data.tsnedata[nodes[i].name]){
+                for (var m = 0; m < totalTimeSteps; m++) {
                     var mon = new Object();
-                    mon.value = 0;
-                    mon.monthId = firstObj.monthId - 1;
-                    mon.yNode = firstObj.yNode;
-                    nodes[i].monthly.unshift(mon);
+                    if (terms[nodes[i].name][m]) {
+                        mon.value = terms[nodes[i].name][m];
+                        if (mon.value > termMaxMax2)
+                            termMaxMax2 = mon.value;
+                        mon.monthId = m;
+                        mon.yNode = nodes[i].y;
+                        nodes[i].monthly.push(mon);
+                    }
                 }
+                // Add another item to first
+                if (nodes[i].monthly.length > 0) {
+                    var firstObj = nodes[i].monthly[0];
+                    if (firstObj.monthId > 0) {
+                        var mon = new Object();
+                        mon.value = 0;
+                        mon.monthId = firstObj.monthId - 1;
+                        mon.yNode = firstObj.yNode;
+                        nodes[i].monthly.unshift(mon);
+                    }
 
-                // Add another item
-                var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
-                if (lastObj.monthId < totalTimeSteps - 1) {
-                    var mon = new Object();
-                    mon.value = 0;
-                    mon.monthId = lastObj.monthId + 1;
-                    mon.yNode = lastObj.yNode;
-                    nodes[i].monthly.push(mon);
+                    // Add another item
+                    var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
+                    if (lastObj.monthId < totalTimeSteps - 1) {
+                        var mon = new Object();
+                        mon.value = 0;
+                        mon.monthId = lastObj.monthId + 1;
+                        mon.yNode = lastObj.yNode;
+                        nodes[i].monthly.push(mon);
+                    }
                 }
             }
         }
-
+        for (var i = 0; i < numNode; i++) {
+            if (data.tsnedata[nodes[i].name]){
+                const selected = data.selectedService;
+                data.tsnedata[nodes[i].name].forEach(d=>{
+                    var mon = new Object();
+                    mon.value = d[selected]*termMaxMax2*0.6;
+                    mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
+                    mon.yNode = nodes[i].y;
+                    nodes[i].monthly.push(mon);
+                })
+            }
+        }
 
         // Construct an array of only parent nodes
         pNodes = new Array(numNode); //nodes;
