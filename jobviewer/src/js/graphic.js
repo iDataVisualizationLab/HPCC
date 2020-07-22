@@ -178,7 +178,33 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     function getData(d){
         if (serviceName==='User')
             return d.user.length//?userIndex[d.user[0]]:-1;
+        if (serviceName==='Radar'&&d.cluster)
+            return -d.cluster.arr.length;
         return d.metrics[vizservice[serviceSelected].text]
+    }
+    if (serviceName==='Radar'&&cluster_info&&Layout.tree.children[0].children[0].metrics.Radar===undefined)
+    {
+        cluster_info.forEach(d=>d.arr=[])
+        Layout.tree.children.forEach(d=>{
+            d.children.forEach(e=>{
+                let axis_arr = tsnedata[e.name][0];
+                let index = 0;
+                let minval = Infinity;
+                cluster_info.find((c, ci) => {
+                    const val = distance(c.__metrics.normalize, axis_arr);
+                    if(val===0&&c.leadername===undefined)
+                        c.leadername = {name:e.name,timestep:0};
+                    if (minval > val) {
+                        index = ci;
+                        minval = val;
+                    }
+                    return !val;
+                });
+                cluster_info[index].arr.push(e.name);
+                e.metrics.Radar = cluster_info[index].name;
+                e.cluster = cluster_info[index];
+            })
+        })
     }
     Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-getData(a)+getData(b)))
     let pack_all = pack(Layout.tree);
@@ -202,22 +228,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             e.data.relatedNodes = [];
             e.data.disable = getOutofRange(e.data.metrics);
             e.data.drawData = undefined;
-            if (cluster_info){
-                let axis_arr = tsnedata[e.data.name][0];
-                let index = 0;
-                let minval = Infinity;
-                cluster_info.find((c, ci) => {
-                    const val = distance(c.__metrics.normalize, axis_arr);
-                    if(val===0&&c.leadername===undefined)
-                        c.leadername = {name:e.data.name,timestep:0};
-                    if (minval > val) {
-                        index = ci;
-                        minval = val;
-                    }
-                    return !val;
-                });
-                e.data.metrics.Radar = cluster_info[index].name;
-            }
             e.depth = 1;
         });
         d.drawData = [{startAngle: 0,endAngle:360,r:d.pack.r}];
