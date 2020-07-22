@@ -111,8 +111,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     const colorItem = function(d){
         if (d) {
             if (serviceName!=='User')
-                if (d < range_cal[0] || d > range_cal[1])
-                    return 'none';
+                if (serviceName!=='Radar')
+                    if (d < range_cal[0] || d > range_cal[1])
+                        return 'none';
             return _colorItem(d);
         }else
             // return '#afafaf';
@@ -201,6 +202,22 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             e.data.relatedNodes = [];
             e.data.disable = getOutofRange(e.data.metrics);
             e.data.drawData = undefined;
+            if (cluster_info){
+                let axis_arr = tsnedata[e.data.name][0];
+                let index = 0;
+                let minval = Infinity;
+                cluster_info.find((c, ci) => {
+                    const val = distance(c.__metrics.normalize, axis_arr);
+                    if(val===0&&c.leadername===undefined)
+                        c.leadername = {name:e.data.name,timestep:0};
+                    if (minval > val) {
+                        index = ci;
+                        minval = val;
+                    }
+                    return !val;
+                });
+                e.data.metrics.Radar = cluster_info[index].name;
+            }
             e.depth = 1;
         });
         d.drawData = [{startAngle: 0,endAngle:360,r:d.pack.r}];
@@ -562,6 +579,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         if (serviceName === 'Radar'){
             if (!e.children) {
                 let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])||0}))];
+                radarvalue[0].name = e.data.metrics['Radar']
                 radarvalue.isRadar = true;
                 radarvalue.r = e.r*2;
                 radarvalue.type = 'radar';

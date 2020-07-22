@@ -1,5 +1,5 @@
 class Simulation {
-    #data;
+    data;
     timer;
     interval=1000;
     #index=0;
@@ -16,7 +16,7 @@ class Simulation {
         if (!this.isRealTime) {
             let updatePromise=d3.json(url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d*1000))
-                this.#data = data;
+                this.data = data;
                 this.onDataChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
                 });
@@ -26,17 +26,17 @@ class Simulation {
         }
     }
     request(timesexlapse,index){
-        if(index!=undefined && this.#data)
+        if(index!=undefined && this.data)
             if (_.isDate(index)) {
-                let range = [d3.bisectLeft(this.#data.time_stamp, index),d3.bisectRight(this.#data.time_stamp, index)];
+                let range = [d3.bisectLeft(this.data.time_stamp, index),d3.bisectRight(this.data.time_stamp, index)];
 
-                if ((this.#data.time_stamp[range[1]]-index )>(index-this.#data.time_stamp[range[0]]))
+                if ((this.data.time_stamp[range[1]]-index )>(index-this.data.time_stamp[range[0]]))
                     this.#index = range[0];
                 else
                     this.#index = range[1];
             }else
                 this.#index = index;
-        if (this.isRealTime || (!this.isRealTime&&this.#data===undefined)||(this.#index<this.#data.time_stamp.length)) {
+        if (this.isRealTime || (!this.isRealTime&&this.data===undefined)||(this.#index<this.data.time_stamp.length)) {
             let updatePromise;
             let self = this;
             this.onStartQuery();
@@ -58,26 +58,26 @@ class Simulation {
         const self = this;
        return new Promise((resolve,refuse)=>{
            let timer;
-            if (!this.#data){
+            if (!this.data){
                 timer = d3.interval(update,100);
             }
             else{
                 update();
             }
             function update() {
-                if (self.#data) {
+                if (self.data) {
                     if (timer)
                         timer.stop();
-                    const currentTime = self.#data.time_stamp[index];
+                    const currentTime = self.data.time_stamp[index];
 
-                    const jobs_info = _.omit(self.#data.jobs_info, function (val, key, object) {
+                    const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
                         return (val.start_time*1000 > currentTime) || ((val.finish_time!==null)&&(val.finish_time*1000 < currentTime));
                     });
                     const nodes_info = {};
-                    d3.keys(self.#data.nodes_info).forEach(c => {
+                    d3.keys(self.data.nodes_info).forEach(c => {
                         nodes_info[c] = {};
-                        d3.keys(self.#data.nodes_info[c]).forEach(s => {
-                            nodes_info[c][s] = [self.#data.nodes_info[c][s][index]];
+                        d3.keys(self.data.nodes_info[c]).forEach(s => {
+                            nodes_info[c][s] = [self.data.nodes_info[c][s][index]];
                         })
                     });
                     const time_stamp = [currentTime];
@@ -107,7 +107,7 @@ class Simulation {
             data.time_stamp=data.time_stamp.map(e=>e/1000000);
             data.currentTime = new Date(_.last(data.time_stamp)*1000);
             self.#currentTime = data.currentTime;
-            self.#data = data;
+            self.data = data;
             console.timeEnd('request time: ')
             return data;
         });

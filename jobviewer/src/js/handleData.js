@@ -80,35 +80,14 @@ function data2tree(data,sampleS,computers){
     return {tree,compute_layoutLink};
 }
 let currentDraw=()=>{};
+let tsnedata = {};
 function queryData(data) {
-    let  sampleS = handleDataUrl(data).sampleS;
+    const data_ = handleDataUrl(data);
+    let  sampleS = data_.sampleS;
+    tsnedata = data_.tsnedata;
     let {computers,jobs,users} = handleData(data);
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
     currentDraw = _.partial(draw,computers,jobs,users,sampleS,currentTime);
     currentDraw(serviceSelected);
 }
-
-// read data
-// function queryData() {
-//     timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
-//     _end = new Date(); //'2020-02-14T12:00:00-05:00'
-//     _start = new Date(_end.getTime()); //'2020-02-14T18:00:00-05:
-//     _start.setMinutes(_start.getMinutes() - 5);
-//     start = timeFormat(_start)
-//     end = timeFormat(_end)
-//     interval = '5m';
-//     value = 'max';
-//     compress = false;
-//     console.time('requestdata')
-//     url = `https://influx.ttu.edu:8080/v1/metrics?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
-//     console.log(url)
-//     // return d3.json(url).then(function(data){
-//     return d3.json('src/data/742020.json').then(function (data) {
-//         console.timeEnd('requestdata')
-//         let  sampleS = handleDataUrl(data).sampleS;
-//         adjustTree(sampleS);
-//         let {computers,jobs,users} = handleData(data);
-//         draw({computers,jobs,users,sampleS,serviceSelected});
-//     })
-// }

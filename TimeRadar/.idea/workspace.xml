@@ -2,15 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3dbfa8ac-6280-46ee-a20a-5f3758b5efc6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../jobviewer/src/js/cluster.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../jobviewer/src/lib/radarChart.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../jobviewer/src/js/worker/clustercal.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/script/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/script/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../jobviewer/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/cluster.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/cluster.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/graphic.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/graphic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/ulti.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/ulti.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../jobviewer/src/style/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/style/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/handleData.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/handleData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/setting.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/simulation.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/simulation.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -20,7 +20,7 @@ let radarChartclusteropt  = {
     ringStroke_width: 0.15,
     ringColor:'black',
     fillin:0.5,
-    boxplot:true,
+    boxplot:false,
     animationDuration:1000,
     events:{
         axis: {
@@ -119,57 +119,12 @@ function handle_dataRaw() {
     handle_clusterinfo();
 }
 function onchangeCluster() {
-    cluster_info.forEach(d => (d.total=0,d.__metrics.forEach(e => (e.minval = undefined, e.maxval = undefined))));
-    // tsnedata = {};
-    hosts.forEach(h => {
-        // tsnedata[h.name] = [];
-        sampleS[h.name].arrcluster = sampleS.timespan.map((t, i) => {
-            let nullkey = false;
-            // let axis_arr = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => (v = sampleS[h.name][serviceListattr[a.id]][i][vi], d3.scaleLinear().domain(a.sub[0].range)(v === null ? (nullkey = true, undefined) : v) || 0))));
-            let axis_arr = tsnedata[h.name][i];
-            // axis_arr.name = h.name;
-            // axis_arr.timestep = i;
-            // reduce time step
-            if(axis_arr.outlier) {
-                let outlierinstance = outlyingList.pointObject[h.name + '_' + i];
-                if (outlierinstance) {
-                    return outlierinstance.cluster;
-                }
-            }
-
-            let index = 0;
-            let minval = Infinity;
-            cluster_info.forEach((c, i) => {
-                const val = distance(c.__metrics.normalize, axis_arr);
-                if (minval > val) {
-                    index = i;
-                    minval = val;
-                }
-            });
-            cluster_info[index].total = 1 + cluster_info[index].total || 0;
-            cluster_info[index].__metrics.forEach((m, i) => {
-                if (m.minval === undefined || m.minval > axis_arr[i])
-                    m.minval = axis_arr[i];
-                if (m.maxval === undefined || m.maxval < axis_arr[i])
-                    m.maxval = axis_arr[i];
-            });
-            // axis_arr.cluster = index;
-
-            // timeline precalculate
-            tsnedata[h.name][i].cluster = index;
-
-            return index;
-            // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
-        })
-    });
-    cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
     cluster_map(cluster_info);
     handle_clusterinfo();
-
-    //tsne
-    requestRedraw();
+    currentDraw(serviceSelected);
 }
 function cluster_map (dataRaw) {
+    radarChartclusteropt.schema = serviceFullList;
     let data = dataRaw.map((c,i)=>{
         let temp = c.__metrics.slice();
         temp.name = c.labels;
@@ -181,8 +136,9 @@ function cluster_map (dataRaw) {
         temp_b.order = i;
         return temp_b;
     });
-    let orderSimilarity = similarityCal(data);
-    data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order))).forEach((d,i)=>{
+    // let orderSimilarity = similarityCal(data);
+    // data.sort((a,b)=>( orderSimilarity.indexOf(a.order)-orderSimilarity.indexOf(b.order)))
+    data.forEach((d,i)=>{
         d.order = i;
         dataRaw.find(c=>c.name===d.id).orderG = i;
     });
@@ -200,14 +156,14 @@ function cluster_map (dataRaw) {
         r_old.exit().remove();
         let r_new = r_old.enter().append('div').attr('class','radarCluster')
             .on('mouseover',function(d){
-                if (!jobMap.runopt().mouse.disable) {
-                    mainviz.highlight(d.id);
-                }
+                // if (!jobMap.runopt().mouse.disable) {
+                //     mainviz.highlight(d.id);
+                // }
                 d3.select(this).classed('focus',true);
             }).on('mouseleave',function(d){
-                if (!jobMap.runopt().mouse.disable) {
-                    mainviz.unhighlight(d.id);
-                }
+                // if (!jobMap.runopt().mouse.disable) {
+                //     mainviz.unhighlight(d.id);
+                // }
                 d3.select(this).classed('focus',false);
             })
             .append('div')
@@ -219,26 +175,26 @@ function cluster_map (dataRaw) {
                 padding: '10px'
                 // overflow: 'hidden',
             });
-        // r_new.append('span').attr('class','clusterlabel truncate center-align col s12');
-        r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
-            let active = d3.select(this).classed('clicked');
-            active = !active;
-            d3.select(this).classed('clicked',active);
-            const parent = d3.select(this.parentNode);
-            parent.select('span.clusterlabel').classed('hide',active);
-            parent.select('input.clusterlabel').classed('hide',!active);
-        });
-        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col s11','type':'text'});
-        r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
-            clusterDescription[d.id].text = $(this).val();
-            d3.select(this).classed('hide',true);
-            const parent = d3.select(this.parentNode);
-            parent.select('.editbtn').classed('clicked',false);
-            parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
-            updateclusterDescription(d.id,clusterDescription[d.id].text);
-        });
-        r_new.append('span').attr('class','clusternum center-align col s12');
-        r_new.append('span').attr('class','clusterMSE center-align col s12');
+        //
+        // r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+        //     let active = d3.select(this).classed('clicked');
+        //     active = !active;
+        //     d3.select(this).classed('clicked',active);
+        //     const parent = d3.select(this.parentNode);
+        //     parent.select('span.clusterlabel').classed('hide',active);
+        //     parent.select('input.clusterlabel').classed('hide',!active);
+        // });
+        // r_new.append('span').attrs({'class':'clusterlabel truncate left-align col s11','type':'text'});
+        // r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
+        //     clusterDescription[d.id].text = $(this).val();
+        //     d3.select(this).classed('hide',true);
+        //     const parent = d3.select(this.parentNode);
+        //     parent.select('.editbtn').classed('clicked',false);
+        //     parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+        //     updateclusterDescription(d.id,clusterDescription[d.id].text);
+        // });
+        // r_new.append('span').attr('class','clusternum center-align col s12');
+        // r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .style('position','relative')
@@ -246,13 +202,13 @@ function cluster_map (dataRaw) {
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
-        d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
-        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
-        d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
-        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
-        d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+        // d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
+        // d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
+        // d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
+        // d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
+        // d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
     }, 0);
-    outlier_map(outlyingList)
+    // outlier_map(outlyingList)
 }
 function updateclusterDescription (name,text){
     if (name)
@@ -263,17 +219,19 @@ function updateclusterDescription (name,text){
     }
 }
 function recalculateCluster (option,calback,customCluster) {
-    preloader(true,10,'Process grouping...','#clusterLoading');
+    // preloader(true,10,'Process grouping...','#clusterLoading');
+
+
     group_opt = option;
     distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
     if (clustercalWorker)
         clustercalWorker.terminate();
-    clustercalWorker = new Worker ('src/script/worker/clustercal.js');
+    clustercalWorker = new Worker ('src/js/worker/clustercal.js');
     clustercalWorker.postMessage({
         binopt:group_opt,
         sampleS:tsnedata,
-        timeMax:sampleS.timespan.length,
-        hosts:hosts,
+        timeMax:1,
+        hosts:d3.keys(tsnedata).map(h=>({name:h})),
         serviceFullList: serviceFullList,
         serviceLists:serviceLists,
         serviceList_selected:serviceList_selected,
@@ -282,8 +240,8 @@ function recalculateCluster (option,calback,customCluster) {
     });
     clustercalWorker.addEventListener('message',({data})=>{
         if (data.action==='done') {
-            M.Toast.dismissAll();
-            data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
+            $('.toast').toast('dispose')
+            // data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
             cluster_info = data.result;
             if (!customCluster) {
                 clusterDescription = {};
@@ -305,14 +263,14 @@ function recalculateCluster (option,calback,customCluster) {
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
                 handle_clusterinfo();
             }
-            preloader(false, undefined, undefined, '#clusterLoading');
+            // preloader(false, undefined, undefined, '#clusterLoading');
             clustercalWorker.terminate();
             if (calback)
                 calback();
         }
-        if (data.action==='returnData'){
-            onloaddetermire({process:data.result.process,message:data.result.message},'#clusterLoading');
-        }
+        // if (data.action==='returnData'){
+        //     onloaddetermire({process:data.result.process,message:data.result.message},'#clusterLoading');
+        // }
     }, false);
 
 }
@@ -355,4 +313,80 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
         RadarChart(this, [d], radar_opt,"");
     });
     return datapoint;
+}
+function distanceL2(a, b){
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=(d-b[i])*(d-b[i])});
+    return Math.round(Math.sqrt(dsum)*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function distanceL1(a,b) {
+    let dsum = 0;
+    a.forEach((d,i)=> {dsum +=Math.abs(d-b[i])}); //modified
+    return Math.round(dsum*Math.pow(10, 10))/Math.pow(10, 10);
+}
+function recomendName (clusterarr,haveDescription){
+    clusterarr.forEach((c,i)=>{
+        c.index = i;
+        c.axis = [];
+        c.labels = ''+i;
+        c.name = `group_${i+1}`;
+        let zero_el = c.__metrics.filter(f=>!f.value);
+        let name='';
+        if (zero_el.length && zero_el.length<c.__metrics.normalize.length){
+            c.axis = zero_el.map(z=>{return{id:z.axis,description:'undefined'}});
+            name += `${zero_el.length} metric(s) undefined `;
+        }else if(zero_el.length===c.__metrics.normalize.length){
+            c.text = `undefined`;
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+            return;
+        }
+        name += c.__metrics.filter(f=>f.value>0.75).map(f=>{
+            c.axis.push({id:f.axis,description:'high'});
+            return 'High '+f.axis;
+        }).join(', ');
+        name = name.trim();
+        if (name==='')
+            c.text = ``;
+        else
+            c.text = `${name}`;
+        if(!haveDescription || !clusterDescription[c.name]){
+            if(!clusterDescription[c.name])
+                clusterDescription[c.name] = {};
+            clusterDescription[c.name].id = c.name;
+            clusterDescription[c.name].text = c.text;
+        }
+    });
+}
+
+function recomendColor (clusterarr) {
+    let colorCa = colorScaleList['customschemeCategory'].slice();
+    if (clusterarr.length>10 && clusterarr.length<21)
+        colorCa = d3.schemeCategory20;
+    else if (clusterarr.length>20)
+        colorCa = clusterarr.map((d,i)=>d3.interpolateTurbo(i/(clusterarr.length-1)));
+    let colorcs = d3.scaleOrdinal().range(colorCa);
+    let colorarray = [];
+    let orderarray = [];
+    // clusterarr.filter(c=>!c.text.match('undefined'))
+    clusterarr.filter(c=>c.text!=='undefined')
+        .forEach(c=>{
+            colorarray.push(colorcs(c.name));
+            orderarray.push(c.name);
+        });
+    clusterarr.filter(c=>c.text==='undefined').forEach(c=>{
+        colorarray.push('gray');
+        orderarray.push(c.name);
+    });
+    colorCluster.range(colorarray).domain(orderarray)
+}
+
+function handle_clusterinfo () {
+    let data_info = [['Grouping Method:',group_opt.clusterMethod]];
+    d3.select(`#${group_opt.clusterMethod}profile`).selectAll('label').each(function(d,i) {
+        data_info.push([d3.select(this).text(), group_opt.bin[Object.keys(group_opt.bin)[i]]])
+    });
+    data_info.push(['#group calculated:',cluster_info.length]);
 }
