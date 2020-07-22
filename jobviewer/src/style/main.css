@@ -57,7 +57,7 @@ li.theme:hover{
 .no_leftmagrin {
     margin-left: 0;
 }
-form input,form select {
+form input.radarcontroller_layout,form select.radarcontroller_layout {
     padding-left: 2px;
     padding-right: 2px;
 }

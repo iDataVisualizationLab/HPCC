@@ -76,7 +76,13 @@ function handleDataUrl(dataRaw) {
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
-                let value = _.isArray(data[h.ip][sa][ti])?data[h.ip][sa][ti].map(d=>d===""?null:((+d) * scale)):[(data[h.ip][sa][ti]===""?null:((+data[h.ip][sa][ti]) * scale))];
+                let value = [];
+                if (!_.isArray(data[h.ip][sa][ti])){
+                    data[h.ip][sa][ti] = [data[h.ip][sa][ti]]
+                }
+                for (let ii = 0;ii<serviceLists[si].sub.length;ii++){
+                    value.push((data[h.ip][sa][ti][ii]==='' || data[h.ip][sa][ti][ii]===undefined)?null:data[h.ip][sa][ti][ii]*scale)
+                }
                 let arrID = serviceListattr[si];
                 let currentIndex =  sampleh[h.name][arrID].length;
                 sampleh[h.name][arrID][ti] = value;
