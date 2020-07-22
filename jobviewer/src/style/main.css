@@ -1,5 +1,6 @@
 html{
     font-size: 11px;
+    overflow-x: hidden;
 }
 body{
     /*color: black;*/
@@ -52,4 +53,7 @@ li.theme{
 }
 li.theme:hover{
     transform: scale(1.5);
+}
+.no_leftmagrin {
+    margin-left: 0;
 }

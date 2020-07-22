@@ -35,6 +35,7 @@ $(document).ready(function(){
     }catch(e){
         request = new Simulation('src/data/742020.json');
     }
+    initClusterUI();
     initTimeElement();
     queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     // queryLayout().then(()=>request.request());

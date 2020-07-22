@@ -95,8 +95,42 @@ function multiFormat(date) {
                         : d3.timeYear(date) < date ? formatMonth
                             : formatYear)(date);
 }
+function UpdateGradient(svg) { // using global arrcolor
+    let rdef = svg.select('defs.gradient');
+    let rg,rg2,lg;
+    if (rdef.empty()){
+        rdef = svg.append("defs").attr('class','gradient');
+        rg = rdef
+            .append("radialGradient")
+            .attr("id", "rGradient");
+        rg2 = rdef.append("radialGradient")
+            .attr("id", "rGradient2");
+        lg = rdef.append("linearGradient")
+            .attr("id", "lradient");
+    }
+    else {
+        rg = rdef.select('#rGradient');
+        rg2 = rdef.select('#rGradient2');
+        lg = rdef.select('#lradient');
+    }
+    let opacityGradient =undefined
+    // const rangeop = d3.range(0,arrColor.length);
+    // const opas = d3.scaleLinear().domain([1,arrColor.length/2-1]).range([1,0.5]);
+    // let opacityGradient = d3.scaleLinear().domain(rangeop).range(rangeop.map(d=>opas(d>(arrColor.length/2-1)?(arrColor.length-1-d):d)));
+    createGradient(rg,4,arrColor,opacityGradient);
+    createGradient(rg2,0,arrColor,opacityGradient);
+    createLinearGradient('v',lg,0,arrColor,opacityGradient);
+
+}
+function fixName2Class(s) {
+    return 'h'+s.replace(/ |#|\./gi,''); //avoid . and number format
+}
+function positiveAngle(angle){
+    return angle>0? angle: (angle+Math.PI*2);
+}
 function loadTheme(event){
     const theme = d3.select(event.target).attr('value')
     d3.select(document.getElementsByTagName('BODY')[0]).select('link#theme')
         .attr('href',`src/style/bootstrap${theme!=''?'.'+theme:''}.css`)
 }
+

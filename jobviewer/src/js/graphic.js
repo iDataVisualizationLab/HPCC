@@ -44,7 +44,19 @@ let graphicopt = {
     "diameter": function(){return Math.min(this.widthG(),this.heightG())},
     "oLength": 22,
     "iLength": 22,
-    "mid": 11
+    "mid": 11,
+    radaropt : {
+        // summary:{quantile:true},
+        mini:true,
+        levels:6,
+        gradient:true,
+        w:40,
+        h:40,
+        showText:false,
+        margin: {top: 0, right: 0, bottom: 0, left: 0},
+        isNormalize:false,
+        schema:serviceFullList
+    }
 };
 
 let isFreeze= false;
@@ -52,7 +64,8 @@ let highlight2Stack = [];
 let vizservice=[];
 function serviceControl(){
     vizservice =serviceFullList.slice();
-    vizservice.push({text:'User',range:[]})
+    vizservice.push({text:'User',range:[]});
+    vizservice.push({text:'Radar',range:[]});
     d3.select('#serviceSelection')
         .on('change',function(){
             serviceSelected = +$(this).val();
@@ -68,7 +81,8 @@ function serviceControl(){
 }
 
 function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
-    serviceControl()
+    serviceControl();
+    graphicopt.radaropt.schema = serviceFullList;
     isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
@@ -80,26 +94,31 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         vizservice[serviceSelected].range = d3.keys(users);
         _colorItem = d3.scaleOrdinal(d3.schemeCategory20);
         getOutofRange = ()=>false
-    }else{
+    } else if (serviceName==='Radar') {
+        _colorItem = colorCluster;
+        getOutofRange = ()=>false
+    }
+    else{
         getOutofRange = getOutofRange_cont
     }
     const range_cal_or = vizservice[serviceSelected].range.slice();
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
     if(serviceName!=='User')
-        _colorItem.domain(range_cal.slice().reverse());
+        if(serviceName!=='Radar')
+            _colorItem.domain(range_cal.slice().reverse());
     else
         _colorItem.domain(range_cal.slice());
     const colorItem = function(d){
         if (d) {
             if (serviceName!=='User')
                 if (d < range_cal[0] || d > range_cal[1])
-                    return 'none'
+                    return 'none';
             return _colorItem(d);
         }else
             // return '#afafaf';
             return '#ffffff';
     };
-
+    let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,colorItem);
     let svg_ = d3.select('#circularLayout')
         .attr("width", graphicopt.width)
         .attr("height", graphicopt.height)
@@ -216,7 +235,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         });
         d.links.forEach(e=>{
             links.push(e);
-        })
+        });
         // links.push(d.links);
         return links
     });
@@ -353,8 +372,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("class", "link")
         .attr("fill", "none")
         .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color})
-        // .attr("stroke-width", 0.3)
-        // .attr("d", d=>diagonal(d))
         .attr("d", link);
     nodeLink.each(function(d){
         const ob = d3.select(this);
@@ -393,8 +410,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         const summary_map = [
             ['min','max','mean']
         ];
-        const summary_y = d3.scaleLinear().range([0,root.r]).domain(range_cal_or)
-        if (vizservice[serviceSelected].text!=='User') {
+        const summary_y = d3.scaleLinear().range([0,root.r]).domain(range_cal_or);
+        if (vizservice[serviceSelected].text==='User'||vizservice[serviceSelected].text==='Radar'){
+            svg.select('g.summary').selectAll('*').remove()
+        }
+        else{
             const summary_path = svg.select('g.summary')
                 .selectAll('path')
                 .attr('class', 'summary')
@@ -419,15 +439,13 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     .attr('class', 'annotation')
                     .style('text-anchor', 'middle');
             annotation.text(`mean=${Math.round(root.data.summary[serviceFullList[serviceSelected].text].mean)}`)
-        }else{
-            svg.select('g.summary').selectAll('*').remove()
         }
         return updateNodes();
 
         function updateNodes(istransition) {
             let childrenNode = {};
             node = svg.select('g.circleG')
-                .selectAll("g")
+                .selectAll("g.element")
                 .data(root.descendants(), d => d.data.name)
                 .call(updateNode);
 
@@ -499,24 +517,41 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
         function zoomTo(v,istransition) {
             k=1;
-            // const k = graphicopt.widthG() / v[2];
-            //
             view = v;
             //
             label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            // value_text.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            // let node_animation;
-            // if(istransition)
-            //     node_animation = node.transition();
-            // else
-            //     node_animation = node;
             node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
-                .attr('d',getRenderFunc)
-                .style('fill',d=>d.color);
-            path.exit().remove();
-            path.enter().append('path')
-            .attr('d',getRenderFunc).style('fill',d=>d.color);
+            node.selectAll('g').remove();
+            if (serviceName!=='Radar'){
+                let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
+                    .attr('d',getRenderFunc)
+                    .style('fill',d=>d.color);
+                path.exit().remove();
+                path.enter().append('path')
+                    .attr('class','circle')
+                .attr('d',getRenderFunc).style('fill',d=>d.color);
+            }else{
+                node.filter(d=>{
+                    if (!d.data.drawData || d.data.drawData.type!=="radar") {
+                         d.data.drawData=getDrawData(d);
+                    }
+                    return !d.data.drawData.isRadar;
+                }).selectAll('path').data(d=>d.data.drawData)
+                    .join('path').attr('d',getRenderFunc)
+                    .style('fill',d=>d.color);
+                const radarNode = node.filter(d=>d.data.drawData.isRadar);
+                radarNode.selectAll('path.circle').remove();
+                radarNode
+                    .selectAll('g').data(d=>[d.data.drawData])
+                    .join('g').attr('class','radar  ')
+                    .style('fill',d=>d.color)
+                    .each(function(d){
+                        setTimeout(()=>{
+                            createRadar(d3.select(this), d3.select(this), d[0], {size:d.r,colorfill: 0.5}).select('.radarStroke')
+                                .style('stroke-opacity',1);
+                        },0);
+                    });
+            }
             return v
         }
     }
@@ -524,32 +559,47 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         return e[serviceName] < range_cal[0] || e[serviceName] > range_cal[1]
     }
     function getDrawData(e) {
-        if (serviceName !== 'User')
-            return [{startAngle:0,endAngle:360,r:e.r}];
-        if (e.data.relatedNodes.length>1) {
-            const data = d3.pie().value(1)(e.data.relatedNodes);
-            data.forEach(d => {
-                d.r = e.r;
-                d.color = d.data.data.color;
-            });
+        if (serviceName === 'Radar'){
+            if (!e.children) {
+                let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])||0}))];
+                radarvalue.isRadar = true;
+                radarvalue.r = e.r*2;
+                radarvalue.type = 'radar';
+                return radarvalue
+            }
+            const radarvalue = [{startAngle:0,endAngle:360,r:e.r}];
+            radarvalue.type = 'radar';
+            return radarvalue
+        }else if (serviceName ==='User'){
+            if (e.data.relatedNodes.length>1) {
+                const data = d3.pie().value(1)(e.data.relatedNodes);
+                data.forEach(d => {
+                    d.r = e.r;
+                    d.color = d.data.data.color;
+                });
 
-            return data;
-        }
-        return [{
-            data: {},
-            endAngle: 360,
-            index: 0,
-            padAngle: 0,
-            startAngle: 0,
-            value: 1,
-            r:e.r,
-            color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
-        }]
+                return data;
+            }
+            return [{
+                data: {},
+                endAngle: 360,
+                index: 0,
+                padAngle: 0,
+                startAngle: 0,
+                value: 1,
+                r:e.r,
+                color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
+            }]
+        }else
+            return [{startAngle:0,endAngle:360,r:e.r}];
     }
     function getRenderFunc(d){
-        return d3.arc()
-            .innerRadius(0)
-            .outerRadius(d.r * k)(d);
+        if (serviceName!=='Radar'|| !d.isRadar)
+            return d3.arc()
+                .innerRadius(0)
+                .outerRadius(d.r * k)(d);
+        // else
+        //     return _.partial(createRadar)
     }
     function freezeHandle(){
         if (isFreeze){
@@ -659,7 +709,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 highlight2Stack.push(r.childrenNode[c]);
                                 highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
                                 r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
-                                
+
                                 r.childrenNode[c].classed('highlight2', true);
                                 r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
                                     if (d.datum().source===currentData.user_name){
@@ -704,7 +754,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d3.select('.informationHolder').classed('hide',true);
     }
     function makelegend(){
-        if (vizservice[serviceSelected].text!=='User') {
+        if (vizservice[serviceSelected].text==='User'){
+            d3.select('#legendHolder .legendView').classed('hide',true);
+            d3.select('#legendHolder .clusterView').classed('hide',true);
+        }else if (vizservice[serviceSelected].text==='Radar'){
+            d3.select('#legendHolder .legendView').classed('hide',true);
+            d3.select('#legendHolder .clusterView').classed('hide',false);
+        }else{
+            d3.select('#legendHolder .clusterView').classed('hide',true);
             const color = _colorItem;
             const marginTop = 10;
             const marginBottom = 10;
@@ -826,8 +883,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         }
                     // }
                 });
-        }else
-            d3.select('#legendHolder .legendView').classed('hide',true);
+        }
     }
 
 }

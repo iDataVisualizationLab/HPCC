@@ -1896,68 +1896,6 @@ $( document ).ready(function() {
 
 
     setTimeout(() => {
-    //     //load data
-    //     // d3.csv(srcpath+'data/cluster_27sep2018_9_kmean.csv',function(cluster){
-    //     // d3.csv(srcpath+'data/cluster_27sep2018 _9.csv',function(cluster){
-    //     // d3.csv(srcpath+'data/cluster_27sep2018_10_mse.csv',function(cluster){
-    //     // d3.csv(srcpath+'data/cluster_27sep2018 _11.csv',function(cluster){
-    //     loadPresetCluster('influxdb17Feb_2020_withoutJobLoad');
-    //     d3.json(srcpath+'data/hotslist_Quanah.json',function(error,data){
-    //         if(error) {
-    //         }else{
-    //             hostList = data;
-    //             inithostResults();
-    //             jobMap.hosts(hosts)
-    //             // graphicControl.charType =  d3.select('#chartType_control').node().value;
-    //             // graphicControl.sumType =  d3.select('#summaryType_control').node().value;
-    //             let choiceinit = d3.select('#datacom').node().value;
-    //             if (choiceinit !== "nagios" && choiceinit !== "influxdb") {
-    //                 // d3.select(".currentDate")
-    //                 //     .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').node().selectedOptions[0].text).toDateString());
-    //                 if (choiceinit.includes('influxdb')) {
-    //                     // processResult = processResult_influxdb;
-    //                     db = "influxdb";
-    //                     realTimesetting(false, "influxdb", true);
-    //                 } else {
-    //                     db = "nagios";
-    //                     // processResult = processResult_old;
-    //                     realTimesetting(false, undefined, true);
-    //                 }
-    //                 let choice = d3.select('#datacom').node().value;
-    //                 dataInformation.filename = choice+".json";
-    //                 d3.json(srcpath+"data/" + choice + ".json", function (error, data) {
-    //                     if (error) {
-    //                         M.toast({html: 'Local data does not exist, try to query from the internet!'});
-    //                         d3.json("https://media.githubusercontent.com/media/iDataVisualizationLab/HPCC/master/HiperView/data/" + choiceinit + ".json", function (error, data) {
-    //                             if (error) throw error;
-    //                             d3.select(".currentDate")
-    //                                 .text("" + d3.timeParse("%d %b %Y")(d3.select('#datacom').select('[selected="selected"]').text()).toDateString());
-    //                             loadata(data)
-    //                         });
-    //                         return;
-    //                     }
-    //                     d3.select(".currentDate")
-    //                         .text("" + (new Date(data['timespan'][0]).toDateString()));
-    //                     d3.json (srcpath+"data/" + choice + "_job_compact.json", function (error, job) {
-    //                         if (error){
-    //                             loadata(data,undefined);
-    //                             return;
-    //                         }
-    //                         loadata(data,job);
-    //                         return;
-    //                     });
-    //                 });
-    //             }else{ // realtime
-    //                 d3.select(".currentDate")
-    //                     .text("" + (new Date()).toDateString());
-    //                 realTimesetting(true,choiceinit, true);
-    //                 db = choiceinit;
-    //                 requestService = eval('requestService'+choiceinit);
-    //                 processResult = eval('processResult_'+choiceinit);
-    //                 loadata([])
-    //             }
-    //         }
-    //     });
         formatService(true);
         MetricController.graphicopt({width:365,height:365})
             .div(d3.select('#RadarController'))
@@ -1968,28 +1906,6 @@ $( document ).ready(function() {
             .onChangeMinMaxFunc(onChangeMinMaxFunc)
             .init();
     },0);
-    // Spinner Stop ********************************************************************
-
-    // // Turtorial
-    // //initialize instance
-    // var enjoyhint_instance = new EnjoyHint({});
-    //
-    // //simple config.
-    // //Only one step - highlighting(with description) "New" button
-    // //hide EnjoyHint after a click on the button.
-    //     var enjoyhint_script_steps = [
-    //         {
-    //             'click .openbtn' : 'Click the ">" button to open control panel'
-    //         },{
-    //             'change #compDisplay_control' : 'Change the visualization type via this selection'
-    //         }
-    //     ];
-    //
-    // //set script config
-    //     enjoyhint_instance.set(enjoyhint_script_steps);
-    //
-    // //run Enjoyhint script
-    // enjoyhint_instance.run();
 });
 function updateClusterControlUI(n) {
     if(n) {
