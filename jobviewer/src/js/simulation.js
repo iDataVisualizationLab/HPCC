@@ -112,8 +112,16 @@ class Simulation {
         const url = self.getUrl({_start,_end,interval,value,compress});
         console.log(url)
         return d3.json(url).then(function(data){
-            data.time_stamp=data.time_stamp.map(e=>e);
-            data.currentTime = new Date(_.last(data.time_stamp));
+            data.time_stamp=data.time_stamp.map(e=>new Date(e/1000000));
+            d3.keys(data.jobs_info).forEach(jID=>{
+                data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                if(data.jobs_info[jID].start_time>9999999999999)
+                {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
+                    data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
+                    if (data.jobs_info[jID].finish_time)
+                        data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+            })
+            data.currentTime = _.last(data.time_stamp);
             self.#currentTime = data.currentTime;
             self.data = data;
             console.timeEnd('request time: ')
