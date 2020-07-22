@@ -117,6 +117,7 @@ function handle_data_timeArc () {
     scheme.data.tsnedata = tsnedata;
     scheme.data.timespan = sampleS.timespan.slice();
     scheme.data.selectedService = 0;
-    scheme.limitTime = d3.extent(scheme.data,d=>d.date)
+    // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
+    scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
     timeArc.graphicopt(timeArcopt).scheme(scheme).draw();
 }

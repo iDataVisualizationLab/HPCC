@@ -223,10 +223,10 @@ d3.TimeArc = function () {
             return xStep + xScale(d.monthId);
         })
         .y0(function (d) {
-            return d.yNode + yScale(d.value[0]);
+            return d.yNode - yScale(d.value[0]);
         })
         .y1(function (d) {
-            return d.yNode + yScale(d.value[1]);
+            return d.yNode - yScale(d.value[1]);
         });
 
     var numberInputTerms = 0;
@@ -705,6 +705,7 @@ d3.TimeArc = function () {
                         nodes[i].monthly.push(mon);
                     }
                 }
+                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}]
             }
         }
         for (var i = 0; i < numNode; i++) {
@@ -717,7 +718,25 @@ d3.TimeArc = function () {
                     mon.yNode = nodes[i].y;
                     nodes[i].monthly.push(mon);
                 })
-                nodes[i].monthly.noneSymetric = true;
+                nodes[i].noneSymetric = true;
+                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly.map(d=>{
+                    if(d.value[1]>0)
+                        return d;
+                    const mon = new Object();
+                        mon.value = [0, 0];
+                        mon.monthId = d.monthId;
+                        mon.yNode = d.y;
+                    return mon;
+                }),color:"rgb(145,207,96)"},
+                    {node:nodes[i],value:nodes[i].monthly.map(d=>{
+                            if(d.value[0]<0)
+                                return d;
+                            const mon = new Object();
+                            mon.value = [0, 0];
+                            mon.monthId = d.monthId;
+                            mon.yNode = d.y;
+                            return mon;
+                        }),color:"rgb(252, 141, 89)"}]
             }
         }
 
@@ -731,7 +750,7 @@ d3.TimeArc = function () {
         svg.selectAll(".layer").remove();
         svg.select('g.nodeHolder').selectAll(".layer")
             .data(pNodes)
-            .enter().append("path")
+            .enter().append("g")
             .attr("class", "layer")
             .style("stroke", function (d) {
                 return "#000";
@@ -1207,22 +1226,33 @@ d3.TimeArc = function () {
             });
         // }
 
-        svg.selectAll(".layer")
-            .attr("d", function (d) {
-                for (var i = 0; i < d.monthly.length; i++) {
-                    d.monthly[i].yNode = d.y;     // Copy node y coordinate
-                }
-                if (d.monthly.noneSymetric)
-                    return area_compute(d.monthly)
-                return area(d.monthly);
-            });
+        let layerpath = svg.selectAll(".layer")
+            .selectAll('path.layerpath')
+            .data(d=>d.drawData);
+        layerpath.call(updatelayerpath);
+        layerpath.exit().remove();
+        layerpath.enter().append('path')
+            .attr('class','layerpath')
+            .call(updatelayerpath);
+
         linkArcs.attr("d", linkArc);
         // if (force.alpha()<0.03)
         //     force.stop();
 
         updateTimeLegend();
     }
-
+    function updatelayerpath(p){
+        return p
+            .style('fill',d=>d.color||'unset')
+            .attr("d", function (d) {
+            for (var i = 0; i < d.value.length; i++) {
+                d.value[i].yNode = d.node.y;     // Copy node y coordinate
+            }
+            if (d.node.noneSymetric)
+                return area_compute(d.value)
+            return area(d.value);
+        });
+    }
     function updateTransition(durationTime) {
         nodes.forEach(function (d) {
             d.x = xStep + xScale(d.month);
@@ -1268,15 +1298,15 @@ d3.TimeArc = function () {
             return "translate(" + (d.x+d.step) + "," + d.y + ")";
         });*/
 
-        svg.selectAll(".layer").transition().duration(durationTime)
-            .attr("d", function (d) {
-                for (var i = 0; i < d.monthly.length; i++) {
-                    d.monthly[i].yNode = d.y;     // Copy node y coordinate
-                }
-                if (d.monthly.noneSymetric)
-                    return area_compute(d.monthly)
-                return area(d.monthly);
-            });
+        let layerpath = svg.selectAll(".layer")
+            .selectAll('path.layerpath')
+            .data(d=>d.drawData);
+        layerpath.transition().duration(durationTime).call(updatelayerpath);
+        layerpath.exit().remove();
+        layerpath.enter().append('path')
+            .attr('class','layerpath')
+            .call(updatelayerpath);
+
         linkArcs.transition().duration(250).attr("d", linkArc);
         updateTimeLegend();
         updateTimeBox(durationTime);
