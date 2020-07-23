@@ -108,7 +108,7 @@ d3.TimeArc = function () {
     var coordinate = [0, 0];
     var XGAP_ = 12; // gap between months on xAxis
 
-    let minYdis = 4;
+    let minYdis = 10;
 
     let mouseover_dispath = ()=>{};
     let mouseout_dispath = ()=>{};
@@ -191,6 +191,10 @@ d3.TimeArc = function () {
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
             .force('y',  d3.forceY(0).strength(0.015))
+            .on("end", function () {
+            detactTimeSeries();
+            drawStreamLegend();
+        }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
             // .alphaTarget(0.9)
         force.stop();
         // .size([width, height]);
@@ -289,40 +293,12 @@ d3.TimeArc = function () {
         drawTimeBox(); // This box is for brushing
         drawLensingButton();
 
-        computeNodes();
-        adjustStreamheight();
-        computeLinks();
-        drawStreamLegend();
-        force.force('link').distance(function (l) {
-            if (searchTerm !== "") {
-                if (l.source.name == searchTerm || l.target.name == searchTerm) {
-                    var order =  l.__timestep__;
-                    return (12 * order);
-                }
-                else
-                    return 0;
-            }
-            return 0;
-        });
-
-        //Creates the graph data structure out of the json data
-        force.nodes(nodes)
-            .force('link').links(links);
-
-        force.on("end", function () {
-            detactTimeSeries();
-            drawStreamLegend();
-        }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
-
-        force.alpha(1)
-            // .alphaTarget(1)
-            .restart();
-
         $(function () {
             $("#search").autocomplete({
                 data: Array2Object(termArray)
             });
         });
+        recompute();
         first = false;
     };
     function Array2Object (arr){
@@ -359,6 +335,7 @@ d3.TimeArc = function () {
             computeNodes();
             adjustStreamheight()
             computeLinks();
+            drawStreamLegend();
 
             force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                 .nodes(nodes)
@@ -716,7 +693,7 @@ d3.TimeArc = function () {
                         mon.monthId = d.monthId;
                         mon.yNode = d.y;
                     return mon;
-                }),color:"rgb(145,207,96)"},
+                }),color:"steelblue"},
                     {node:nodes[i],value:nodes[i].monthly.map(d=>{
                             if(d.value[0]<0)
                                 return d;
@@ -1267,7 +1244,7 @@ d3.TimeArc = function () {
         if (graphicopt.fixscreence)
             step = (maxheight - 25) / (customNode + 1);
         else {
-            step = Math.min(Math.max((maxheight - 25) / (customNode + 1), minYdis), 20);
+            step = Math.max((maxheight - 25) / (customNode + 1), minYdis);
             if (numNode > 10)
                 graphicopt.height = customNode * step + 20 + graphicopt.margin.top + graphicopt.margin.bottom;
             else {
@@ -1860,9 +1837,6 @@ d3.TimeArc = function () {
 
         const axisl = grang.append("g")
             .attr("class", "x axis fontSmaller")
-            // .attr("transform", "translate(0," + ySlider + ")")
-            // .attr("font-family", "sans-serif")
-            // .attr("font-size", "10px")
             .call(d3.axisBottom()
                 .scale(xScaleSlider)
                 .ticks(4)
@@ -1876,26 +1850,19 @@ d3.TimeArc = function () {
             .attr('dy','0.8em');
         grang.append("text")
             .attr("class", "sliderlabel")
-            // .attr("x", xSlider)
             .attr("y", -14)
             .attr("dy", ".21em")
-            // .attr("font-family", "sans-serif")
-            // .attr("font-size", "10px")
             .text('Filter links:')
             .style("text-anchor","start");
         grang.append("text")
             .attr("class", "sliderText fontSmaller")
-            // .attr("x", xSlider)
             .attr("y", 26)
             .attr("dy", ".21em")
-            // .attr("font-family", "sans-serif")
-            // .attr("font-size", "10px")
             .style("text-anchor","start")
-            .html(`Mentioned ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> messages together`);
+            .html(`Mentioned ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> utilizing together`);
 
         slider = grang.append("g")
             .attr("class", "slider")
-            // .attr("transform", "translate(0," + ySlider + ")")
             .call(brush);
 
         slider.selectAll(".extent,.resize")
