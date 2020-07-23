@@ -187,16 +187,11 @@ d3.TimeArc = function () {
 //Set up the force layout
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-12))
-            // .charge(-12)
-            //.linkStrength(5)
-            // .linkDistance(0)
             .force("link", d3.forceLink().distance(0))
-            // .gravity(0.01)
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
-            .force('y',  d3.forceY(0).strength(0.015));
-        //.friction(0.95)
-        // .alphaTarget(0.9)
+            .force('y',  d3.forceY(0).strength(0.015))
+            // .alphaTarget(0.9)
         force.stop();
         // .size([width, height]);
         catergogryList.forEach((d,i)=> d.order = i);
@@ -237,9 +232,11 @@ d3.TimeArc = function () {
     var links2 = [];
     var nodes2List = {};
     var links2List = {};
-
+    let summary = {user:0,compute:0}
     function handledata (arr) {
         updateTimeScale();
+
+        summary = {user:0,compute:0};
         terms = new Object();
 
         termMaxMax = 1;
@@ -257,6 +254,10 @@ d3.TimeArc = function () {
                         terms[term].frequency = 0;
                         terms[term].maxTimeIndex = -100;   // initialized negative
                         terms[term].category = c;
+                        if (c==='user'){
+                            summary['user']++;
+                        }else
+                            summary['compute']++;
                     }
                     if (!terms[term][m])
                         terms[term][m] = d.__terms__[term];
@@ -291,15 +292,7 @@ d3.TimeArc = function () {
         computeNodes();
         adjustStreamheight();
         computeLinks();
-
-
-        // force.force('link').strength(function (l) {
-        //     if (l.value)
-        //         return (8 + l.value * 2);
-        //     else
-        //         return 1;
-        // });
-        //
+        drawStreamLegend();
         force.force('link').distance(function (l) {
             if (searchTerm !== "") {
                 if (l.source.name == searchTerm || l.target.name == searchTerm) {
@@ -309,13 +302,7 @@ d3.TimeArc = function () {
                 else
                     return 0;
             }
-            else {
-                if (l.source.name == 'COVID-19' || l.target.name == 'COVID-19') {
-                    return l.__timestep__*4;
-                }
-                else
-                    return 0;
-            }
+            return 0;
         });
 
         //Creates the graph data structure out of the json data
@@ -324,9 +311,12 @@ d3.TimeArc = function () {
 
         force.on("end", function () {
             detactTimeSeries();
-        }).on("tick", timeArc.update);
+            drawStreamLegend();
+        }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
 
-        force.alpha(1).restart();
+        force.alpha(1)
+            // .alphaTarget(1)
+            .restart();
 
         $(function () {
             $("#search").autocomplete({
@@ -639,9 +629,6 @@ d3.TimeArc = function () {
             nod.isConnectedmaxTimeIndex = termArray3[i].isConnectedmaxTimeIndex;
             nod.maxTimeIndex = termArray3[i].isConnectedmaxTimeIndex;
             nod.month = termArray3[i].isConnectedmaxTimeIndex;
-            // nod.isConnectedmaxTimeIndex = maxTimeIndexRelationship;
-            // nod.maxTimeIndex = maxTimeIndexRelationship;
-            // nod.month = maxTimeIndexRelationship;
             nod.x = xStep + xScale(nod.month);   // 2016 initialize x position
             nod.y = graphicopt.heightG() / 2;
             if (nodeY_byName[nod.name] != undefined)
@@ -669,7 +656,8 @@ d3.TimeArc = function () {
 
         // compute the monthly data
         termMaxMax2 = 0;
-        debugger
+        nodes.userNum = 0;
+        nodes.computeNum = 0;
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (!data.tsnedata[nodes[i].name]){
@@ -705,7 +693,8 @@ d3.TimeArc = function () {
                         nodes[i].monthly.push(mon);
                     }
                 }
-                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}]
+                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}];
+                nodes.userNum++;
             }
         }
         for (var i = 0; i < numNode; i++) {
@@ -736,7 +725,8 @@ d3.TimeArc = function () {
                             mon.monthId = d.monthId;
                             mon.yNode = d.y;
                             return mon;
-                        }),color:"rgb(252, 141, 89)"}]
+                        }),color:"rgb(252, 141, 89)"}];
+                nodes.computeNum++;
             }
         }
 
@@ -1175,18 +1165,14 @@ d3.TimeArc = function () {
             return "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,1 " + d.source.x + "," + d.source.y;
     }
 
-    timeArc.update = ()=> {
+    timeArc.update = (isforce)=> {
         let marker;
         nodes.forEach(function (d) {
-            // if (searchTerm!="")
-            //    d.x += (xScale(d.month)-d.x)*0.1;
-            //else
-            //     d.x += (xScale(d.month)-d.x)*0.005;
 
-            d.x += (graphicopt.widthG() / 2 - d.x) * 0.05;
+            d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
 
             if (d.parentNode >= 0) {
-                d.y += (nodes[d.parentNode].y - d.y) * 0.5;
+                d.y += (nodes[d.parentNode].y - d.y||0) * 0.5;
                 // d.y = nodes[d.parentNode].y;
             }
             else if (d.childNodes) {
@@ -1208,38 +1194,30 @@ d3.TimeArc = function () {
             }
         });
 
-        // if (document.getElementById("checkbox1").checked) {
-        //     linkArcs.style("stroke-width", 0);
-        //
-        //     nodeG.transition().duration(500).attr("transform", function (d) {
-        //         return "translate(" + 200 + "," + d.y + ")"
-        //     })
-        //     svg.selectAll(".nodeText").style("text-anchor", "start")
-        //
-        // }
-        // else {
-            nodeG.attr("transform", function (d) {
-                return "translate(" + d.x + "," + d.y + ")"
-            })
-            linkArcs.style("stroke-width", function (d) {
-                return d.value;
-            });
-        // }
+        nodeG.attr("transform", function (d) {
+            return "translate(" + d.x + "," + d.y + ")"
+        })
+        linkArcs.style("stroke-width", function (d) {
+            return d.value;
+        });
 
-        let layerpath = svg.selectAll(".layer")
-            .selectAll('path.layerpath')
-            .data(d=>d.drawData);
-        layerpath.call(updatelayerpath);
-        layerpath.exit().remove();
-        layerpath.enter().append('path')
-            .attr('class','layerpath')
-            .call(updatelayerpath);
+        if(!isforce)
+        {
+            let layerpath = svg.selectAll(".layer")
+                .selectAll('path.layerpath')
+                .data(d=>d.drawData);
+            layerpath.call(updatelayerpath);
+            layerpath.exit().remove();
+            layerpath.enter().append('path')
+                .attr('class','layerpath')
+                .call(updatelayerpath);
+        }
 
         linkArcs.attr("d", linkArc);
         // if (force.alpha()<0.03)
         //     force.stop();
 
-        updateTimeLegend();
+        // updateTimeLegend();
     }
     function updatelayerpath(p){
         return p
@@ -1267,36 +1245,6 @@ d3.TimeArc = function () {
             d.xConnected = xStep + xScale(d.isConnectedmaxTimeIndex);
             return "translate(" + d.xConnected + "," + d.y + ")"
         })
-
-        /*
-        nodeG.style("fill" , function(d) {
-            var color = nodes.forEach(function(node) {
-                if (d.name == node.name && d.month!=node.month ){
-                    console.log("d.name="+d.name +" node.name="+node.name);
-                    console.log("d.month="+d.month +" node.month="+node.month);
-                    return "#f0f";
-                }
-                else
-                    return "#000";
-            });
-            return "#00f";
-        });*/
-
-        /*nodeG.forEach(function(d) {
-           d.xConnected=xStep+xScale(d.isConnectedmaxTimeIndex);
-        });*/
-
-        /*
-        nodeG.attr("transform", function(d) {
-            var step = 0;
-            d.step=0;
-            nodes.forEach(function(node) {
-                if (d.name == node.name && d.month!=node.month && node.x<d.x && d.x<node.x+100){
-                    d.step=-5000;
-                }
-            });
-            return "translate(" + (d.x+d.step) + "," + d.y + ")";
-        });*/
 
         let layerpath = svg.selectAll(".layer")
             .selectAll('path.layerpath')
@@ -1394,7 +1342,6 @@ d3.TimeArc = function () {
         force.alpha(0);
         force.stop();
         updateTransition(1000);
-        drawStreamLegend();
     }
 
     timeArc.searchNode = searchNode;
@@ -1709,10 +1656,14 @@ d3.TimeArc = function () {
         let measagelegendg = svg.select('g.measagelegendg');
         if (measagelegendg.empty()) {
             measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            measagelegendg.append('text').text('').datum({current:termArray3.length,total:termArray.length})
-                .on('changetermnum',function(d){d3.select(this).html(`<tspan>${d.current}</tspan> terms of ${d.total}`)});
+            measagelegendg
+                .selectAll('text').data([{current:nodes.userNum,type:'users',total:summary['user']},{current:nodes.computeNum,type:'computes',total:summary['compute']}])
+                .enter()
+                .append('text')
+                .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
         }
-        measagelegendg.select('text').datum({current:numNode,total:termArray.length}).dispatch('changetermnum');
+        measagelegendg.selectAll('text').data([{current:nodes.userNum,type:'users',total:summary['user']},{current:nodes.computeNum,type:'computes',total:summary['compute']}])
+            .html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
         yoffset += 60;
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
@@ -1883,58 +1834,6 @@ d3.TimeArc = function () {
     };
 
     d3.select(self.frameElement).style("height", diameter + "px");
-
-    /*
-    function tick(event) {
-      link_selection.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-      var force_influence = 0.9;
-      node_selection
-        .each(function(d) {
-          d.x += (d.treeX - d.x) * (force_influence); //*event.alpha;
-          d.y += (d.treeY - d.y) * (force_influence); //*event.alpha;
-        });
-     // circles.attr("cx", function(d) { return d.x; })
-      //    .attr("cy", function(d) { return d.y; });
-
-    }*/
-
-
-// Toggle children on click.
-    function click(d) {
-
-    }
-
-    /*
-    function collide(alpha) {
-      var quadtree = d3.geom.quadtree(tree_nodes);
-      return function(d) {
-        quadtree.visit(function(quad, x1, y1, x2, y2) {
-        if (quad.point && (quad.point !== d) && (quad.point !== d.parent) && (quad.point.parent !== d)) {
-             var rb = getRadius(d) + getRadius(quad.point),
-            nx1 = d.x - rb,
-            nx2 = d.x + rb,
-            ny1 = d.y - rb,
-            ny2 = d.y + rb;
-
-            var x = d.x - quad.point.x,
-                y = d.y - quad.point.y,
-                l = Math.sqrt(x * x + y * y);
-              if (l < rb) {
-              l = (l - rb) / l * alpha;
-              d.x -= x *= l;
-              d.y -= y *= l;
-              quad.point.x += x;
-              quad.point.y += y;
-            }
-          }
-          return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-        });
-      };
-    }
-    */
     // /===============================================
     var brush;
     var slider;
