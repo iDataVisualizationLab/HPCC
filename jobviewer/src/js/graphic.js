@@ -375,9 +375,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let inode_n = inode.enter()
         .append("g")
         .attr("class", "inner_node")
-        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
-        .on("mouseover", mouseover)
-        .on("mouseout", mouseout);
+    ;
     inode_n.append('rect')
         .style('fill-opacity',0.8)
         .attr('rx',3);
@@ -424,6 +422,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         p.each(function(d){
             d.node=d3.select(this);
         });
+        p.on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
+            .on("mouseover", mouseover)
+            .on("mouseout", mouseout)
         p.select('rect').attr('width', graphicopt.rect.width)
             .style('fill',d=>d.color)
             .attr('height', graphicopt.rect.height)
