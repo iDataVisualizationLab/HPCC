@@ -162,18 +162,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .domain([0, graphicopt.mid-1, graphicopt.mid, graphicopt.oLength-1])
         .range([deadAngle, 180-deadAngle, 180+deadAngle ,360-deadAngle]);
 
-
-    // Setup the positions of inner nodes
-    const userIndex={};
-    const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
-        userIndex[d.key]=i;
-        d.x = -(graphicopt.rect.width / 2);
-        d.y = innerY(i);
-        d.relatedLinks = [];
-        d.relatedNodes = [];
-        return d;
-    });
-
     // Setup the positions of outer nodes
     function getData(d){
         if (serviceName==='User')
@@ -182,6 +170,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             return -d.cluster.arr.length;
         return d.metrics[vizservice[serviceSelected].text]
     }
+    let cluster_dict = {};
     if (serviceName==='Radar'&&cluster_info&&Layout.tree.children[0].children[0].metrics.Radar===undefined)
     {
         cluster_info.forEach(d=>d.arr=[])
@@ -201,6 +190,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     return !val;
                 });
                 cluster_info[index].arr.push(e.name);
+                cluster_dict[e.name] = cluster_info[index].name;
                 e.metrics.Radar = cluster_info[index].name;
                 e.cluster = cluster_info[index];
             })
@@ -236,6 +226,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.pack.depth = 0;
         return d;
     });
+
+    // Setup the positions of inner nodes
+    const userIndex={};
+    // const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
+    const users_arr = d3.entries(users).sort((a,b)=>b.value.job.length-a.value.job.length).map(function(d, i) {
+        userIndex[d.key]=i;
+        d.x = -(graphicopt.rect.width / 2);
+        d.y = innerY(i);
+        d.relatedLinks = [];
+        d.relatedNodes = [];
+        return d;
+    });
     if(isFirst){
         let startZoom = d3.zoomIdentity;
         startZoom.x = Math.max(graphicopt.margin.left+graphicopt.diameter()/2+max_radius+34,(graphicopt.width-450)/2);
@@ -248,7 +250,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let links = [];
 
     users_arr.forEach((d, i)=>{
-        // links.push({"x": d.x, "y": d.y, "link": d.links })
         d.links = d.value.node.map((c)=>{
             // Layout.compute_layout[v]
             let v = {};
@@ -266,9 +267,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         // links.push(d.links);
         return links
     });
-    if (serviceName==='User')
-        users_arr.forEach((d, i)=>{
-            d.color = colorItem(d.key)})
 
     // Create the mapping of target nodes and their positions
     let targetPos = [];
@@ -277,14 +275,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         return targetPos
     });
     // console.log(targetPos);
-
-
-
-    // Append links between inner nodes and outer nodes
-    let linksg = svg.select("g.links");
-    if(linksg.empty()){
-        linksg = svg.append("g").attr("class", "links")
-    }
     // Join target positions with links data by target nodes
     links.filter(d=>{
         targetPos.find((v=>{
@@ -305,6 +295,26 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             return false
         }))
     });
+
+    if (serviceName==='User')
+        users_arr.forEach((d, i)=>{
+            d.color = colorItem(d.key)
+        });
+    else if (serviceName==='Radar')
+        users_arr.forEach((d, i)=>{
+            const uniq = {};
+            d.value.node.forEach(c=>uniq[cluster_dict[c]]=1);
+            const keys = d3.keys(uniq);
+            if (keys.length===1)
+                d.color = colorItem(keys[0])
+        })
+
+
+    // Append links between inner nodes and outer nodes
+    let linksg = svg.select("g.links");
+    if(linksg.empty()){
+        linksg = svg.append("g").attr("class", "links")
+    }
 
     const circleStrokeScale = d3.scaleLinear().domain([0,users_arr.length||1]).range([0,10])
 
@@ -413,7 +423,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     function updateInode(p){
         p.each(function(d){
             d.node=d3.select(this);
-        })
+        });
         p.select('rect').attr('width', graphicopt.rect.width)
             .style('fill',d=>d.color)
             .attr('height', graphicopt.rect.height)
@@ -705,8 +715,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 return data.length;
                             if (type==='display')
                                 if (data.length>2)
-                                    return `<span>${row.isexpand?data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n')
-                                        : data.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
+                                    return `<span>${(row.isexpand?data: data.slice(0,2)).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
                                         <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
                                         <button type="button" class="btn btn-block morebtn" value="close">
                                         <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
@@ -717,51 +726,57 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                         }},
                     { "data": "task_id" },
                 ],
-                "order": [[0, 'asc']]
-            } );
+                "order": [[0, 'asc']],
+                "drawCallback": function( settings ) {
+                    // Add event listener for opening and closing details
+                    $('#informationTable tbody').on('mouseover', 'tr, .tableCompute', function (event) {
+                        event.stopPropagation();
+                        highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                        highlight2Stack = [];
+                        let tr = $(this).closest('tr');
+                        let row = table.row( tr );
+                        d3.select(tr[0]).style('font-weight','unset');
+                        d3.select(this).style('font-weight','bold');
+                        const isSingle =  d3.select(event.target).classed('tableCompute')
+                        if (row.data()) {
+                            const currentData = row.data();
+                            svg.classed('onhighlight2', true);
+                            (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
+                                rack_arr.find(r => {
+                                    if (r.childrenNode[c]) {
+                                        highlight2Stack.push(r.childrenNode[c]);
+                                        highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
+                                        r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
 
-            // Add event listener for opening and closing details
-            $('#informationTable tbody').on('mouseover', 'td, .tableCompute', function (event) {
-                event.stopPropagation();
-                highlight2Stack.forEach(n=>n.classed('highlight2',false))
-                highlight2Stack = [];
-                let tr = $(this).closest('tr');
-                let row = table.row( tr );
-                const isSingle =  d3.select(event.target).classed('tableCompute')
-                if (row.data()) {
-                    const currentData = row.data();
-                    svg.classed('onhighlight2', true);
-                    (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
-                        rack_arr.find(r => {
-                            if (r.childrenNode[c]) {
-                                highlight2Stack.push(r.childrenNode[c]);
-                                highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
-                                r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
-
-                                r.childrenNode[c].classed('highlight2', true);
-                                r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                    if (d.datum().source===currentData.user_name){
-                                        highlight2Stack.push(d);
-                                        d.classed('highlight2',true);
+                                        r.childrenNode[c].classed('highlight2', true);
+                                        r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
+                                            if (d.datum().source===currentData.user_name){
+                                                highlight2Stack.push(d);
+                                                d.classed('highlight2',true);
+                                            }
+                                        });
+                                        return true;
                                     }
                                 });
-                                return true;
-                            }
-                        });
-                    });
-                    users_arr.find(u => {
-                        if (u.key===currentData.user_name) {
-                            highlight2Stack.push(u.node);
-                            u.node.classed('highlight2', true);
-                            return true;
+                            });
+                            users_arr.find(u => {
+                                if (u.key===currentData.user_name) {
+                                    highlight2Stack.push(u.node);
+                                    u.node.classed('highlight2', true);
+                                    return true;
+                                }
+                            });
                         }
+                    }).on('mouseleave', 'tr, .tableCompute', function () {
+                        let tr = $(this).closest('tr');
+                        d3.select(this).style('font-weight','unset');
+                        svg.classed('onhighlight2',false);
+                        highlight2Stack.forEach(n=>n.classed('highlight2',false));
+                        highlight2Stack = [];
                     });
                 }
-            }).on('mouseleave', 'td', function () {
-                svg.classed('onhighlight2',false);
-                highlight2Stack.forEach(n=>n.classed('highlight2',false));
-                highlight2Stack = [];
-            });
+            } );
+
             $('#informationTable tbody').on('click', 'td button.morebtn', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row( tr );
@@ -769,13 +784,13 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 if ( d3.select(this).attr('value')==='open' ) {
                     row.data().isexpand = true;
                     d3.select(tr[0]).classed('shown',true)
-                        .select('span').text(row.data().node_list.join('\n'));
+                        .select('span').html(row.data().node_list.map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
                 }
                 else {
                     // Open this row
                     row.data().isexpand = false;
                     d3.select(tr[0]).classed('shown',false)
-                        .select('span').text(row.data().node_list.slice(0,2).join('\n'));
+                        .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
                 }
             });
         }else
