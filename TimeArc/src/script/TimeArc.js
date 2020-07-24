@@ -1722,7 +1722,8 @@ d3.TimeArc = function () {
         updateTransition(250);
         updateTimeLegend();
     }
-    let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
+    // let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
+    let colorCatergory = d3.scaleOrdinal().range(["#ddd"]);
     function getColor(category, count) {
         // var minSat = 80;
         // var maxSat = 180;

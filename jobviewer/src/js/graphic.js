@@ -506,7 +506,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 if (!d.children)
                     d.data.tooltip = d3.select(this);
             })
-            label.call(textcolor);
+            // label.call(textcolor);
+            label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px')
             zoomTo([root.x, root.y, root.r * 2], istransition)
             return childrenNode;
             function updateNode(node) {
