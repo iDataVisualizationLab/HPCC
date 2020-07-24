@@ -1105,7 +1105,7 @@ d3.TimeArc = function () {
         if(searchTerm==='')
             valueSlider = 10;
         slider.call(brush.move, [0, valueSlider].map(xScaleSlider));
-        svg.select('.sliderText').html(`Mentioned ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> messages together`);
+        svg.select('.sliderText').html(`User has  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job running at a time`);
         recompute();
     }
 
@@ -1645,7 +1645,7 @@ d3.TimeArc = function () {
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
             streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            streamlegendg.append('text').text('Stream height (by # messages):')
+            streamlegendg.append('text').text('Stream height (by # jobs):')
         }
         let streampath = streamlegendg.select('path.pathlegend');
         if (streampath.empty())
@@ -1896,7 +1896,7 @@ d3.TimeArc = function () {
             valueSlider = d3.max(d3.event.selection.map(xScaleSlider.invert));
             valueSlider = Math.min(valueSlider, valueMax);
             handle.attr("cx", xScaleSlider(valueSlider));
-            svg.select('.sliderText').html(`Mentioned ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> messages together`);
+            svg.select('.sliderText').html(`User has  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job running at a time`);
             d3.select(this).call(d3.event.target.move, [0,valueSlider].map(xScaleSlider));
         }
     }
