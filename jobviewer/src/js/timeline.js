@@ -7,7 +7,7 @@ class Timeline{
     meassage;
     timelineTicks;
     step = ()=>{};
-    timeConf={scale:d3.scaleTime().range([0,100])};
+    timeConf={scale:d3.scaleTime().range([0,100]).domain([0,0])};
     #play=()=>{
         const self = this;
         self.playbutton.datum().status=true;
@@ -117,19 +117,19 @@ class Timeline{
         }
     }
     #updateTick(){
-        const ticks = this.timeConf.scale.ticks()
-        this.timelineTicks.selectAll('div.ticksLabel').data(ticks,d=>d)
-            .join('div').attr('class','ticksLabel').style('position','absolute').style('transform','translate(-50%,10px)')
-            .text(d=>multiFormat(d)).style('left',d=>this.timeConf.scale(d)+'%');
-        this.timelineTicks.selectAll('div.ticks').data(ticks,d=>d)
-            .join('div').attr('class','ticks').style('position','absolute').style('transform','translate(-50%,2px)')
-            .style('margin-left','-1px')
-            .style('width','2px')
-            .style('background-color','#ddd')
-            .style('height','8px').style('left',d=>this.timeConf.scale(d)+'%');;
-        // this.timelineTicks.selectAll('div.ticks').data(ticks,d=>d)
-        //     .join('div').attr('class','ticks').style('position','absolute').style('transform','translateX(-50%)')
-        //     .text(d=>multiFormat(d)).style('left',d=>this.timeConf.scale(d)+'%');
+        if (this.timeConf.scale.domain()[0]-this.timeConf.scale.domain()[1])
+       {
+            const ticks = this.timeConf.scale.ticks()
+            this.timelineTicks.selectAll('div.ticksLabel').data(ticks,d=>d)
+                .join('div').attr('class','ticksLabel').style('position','absolute').style('transform','translate(-50%,10px)')
+                .text(d=>multiFormat(d)).style('left',d=>this.timeConf.scale(d)+'%');
+            this.timelineTicks.selectAll('div.ticks').data(ticks,d=>d)
+                .join('div').attr('class','ticks').style('position','absolute').style('transform','translate(-50%,2px)')
+                .style('margin-left','-1px')
+                .style('width','2px')
+                .style('background-color','#ddd')
+                .style('height','8px').style('left',d=>this.timeConf.scale(d)+'%');
+       }
     }
     disableHandle(isdisable){
         this.timelineHolder.classed('disabled',isdisable)
