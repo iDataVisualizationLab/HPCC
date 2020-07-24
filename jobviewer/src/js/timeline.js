@@ -161,7 +161,9 @@ class Timeline{
             this.currentValue = value;
         else
             this.currentValue = new Date(value);
-        const percentage = this.timeConf.scale(this.currentValue)
+        let percentage = 100;
+        if (this.timeConf.scale.domain()[0]-this.timeConf.scale.domain()[1])
+            percentage = this.timeConf.scale(this.currentValue);
         this.timeline
             .style("width", `${percentage}%`)
             .attr('aria-valuenow',this.timeConf.scale(this.currentValue))

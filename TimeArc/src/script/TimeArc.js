@@ -1723,7 +1723,7 @@ d3.TimeArc = function () {
         updateTimeLegend();
     }
     // let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
-    let colorCatergory = d3.scaleOrdinal().range(["#ddd"]);
+    let colorCatergory = d3.scaleOrdinal().range(["#828282","steelblue"]);
     function getColor(category, count) {
         // var minSat = 80;
         // var maxSat = 180;

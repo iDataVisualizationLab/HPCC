@@ -97,8 +97,8 @@ let TimeArcSetting = function (){
 function handle_data_timeArc () {
     let scheme ={limitColums : [0,10],
         limitTime : [sampleS.timespan[0],_.last(sampleS.timespan)],
-        time: {rate:1,unit:'Hour'},
-        timeLink: {rate:1,unit:'Hour'},
+        time: {rate:5,unit:'Minute'},
+        // timeLink: {rate:5,unit:'Minute'},
         timeformat: d3.timeDay.every(1),
     };
     let dataObj = {};
