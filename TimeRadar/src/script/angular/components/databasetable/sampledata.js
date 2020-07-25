@@ -148,7 +148,7 @@ angular.module('hpccApp').constant('SampleData', [
     {
         id:"csvEmploymentNetchange_drop",
         name:"US employment rate data - %nets change",
-        url:"../HiperView/data/csvEmploymentNetchange_drop.csv",
+        url:"../HiperView/data/csvEmploymentNetchange.csv",
         description:"",
         date:"1 Jan 1999",
         group:"sample",
