@@ -95,7 +95,7 @@ let TimeArcSetting = function (){
     };
     master.layout = function(d){
         layout = {};
-        d.forEach(k=>layout[k.Name]= _.flatten(k.value))
+        d.forEach(k=>layout[k.Name]= _.flatten(k.value).filter(d=>d))
         TimeArc.classMap(layout)
     };
     return master;

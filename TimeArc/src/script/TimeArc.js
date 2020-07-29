@@ -23,7 +23,8 @@ d3.TimeArc = function () {
         time: {rate:1,unit:'Year'},
         timeformat: d3.timeYear.every(1),
         stickyTerms:[],
-        termGroup:{}
+        termGroup:{},
+        groupTimeLineMode:'summary'//'onDisplay',
     };
     let svg,force;
     let UnitArray = ['Minute','Hour','Day','Month','Year'];
@@ -242,7 +243,9 @@ d3.TimeArc = function () {
     function handleclassMap(classes){
         class2term = classes;
         term2class = {};
-        d3.keys(class2term).forEach(k=>class2term[k].forEach(t=>term2class[t] = {key:k,value:class2term[k]}));
+        d3.keys(class2term).forEach(k=>{
+            class2term[k].forEach(t=>term2class[t] = {key:k,value:class2term[k]})
+        });
     }
 
     function upadateTerms(term, c, m, count) {
@@ -271,8 +274,14 @@ d3.TimeArc = function () {
 
         summary = {user:0,compute:0};
         terms = new Object();
-
         termMaxMax = 1;
+        Object.keys(class2term).forEach(c=>{
+            arr.tsnedata[c]=[];
+            arr.tsnedata[c].current = [];
+            arr.tsnedata[c].total = [];
+            arr.tsnedata[c].totalObj = {};
+        });
+
         arr.forEach(function (d) {
             // Process date
             // d.date = new Date(d["time"]);
@@ -286,6 +295,11 @@ d3.TimeArc = function () {
                     if (term2class[term]){
                         upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
                         d.__terms__[term2class[term].key] = d.category[c][term];
+                        if ( !arr.tsnedata[term2class[term].key].totalObj[term])
+                        {
+                            arr.tsnedata[term2class[term].key].totalObj[term]=1;
+                            arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                        }
                     }
                 }
             }
@@ -527,29 +541,12 @@ d3.TimeArc = function () {
     }
     let offsetYStream = 0;
     function computeNodes() {
-        Object.keys(class2term).forEach(c=>class2term[c].obj=[]);
+        Object.keys(class2term).forEach(c=>{
+            class2term[c].obj=[];
+            data.tsnedata[c].current=[]
+        });
         // check substrings of 100 first terms
         console.log("termArray.length = " + termArray.length);
-
-        // for (var i = 0; i < numNode2; i++) {
-        //     for (var j = 0; j < numNode2; j++) {
-        //         if (i == j) continue;
-        //         if (termArray[j].term.indexOf(termArray[i].term) > -1)
-        //             termArray[i].isSubtring = 1;
-        //     }
-        // }
-
-        // termArray2 = [];
-        // for (var i = 0; i < numNode2; i++) {
-        //     // if (termArray.length < numberInputTerms / 3 || !termArray[i].isSubtring)  // only remove substring when there are too many of them
-        //         termArray2.push(termArray[i])
-        // }
-        // console.log("termArray2.length = " + termArray2.length);
-
-
-        // computeConnectivity(termArray, termArray.length);
-
-
         termArray2 = [];
         for (var i = 0; i < termArray.length; i++) {
             // if (termArray[i].isSearchTerm || termArray[i].isConnected > 0)
@@ -559,13 +556,6 @@ d3.TimeArc = function () {
 
 
         termArray2.sort(function (a, b) {
-            // if (a.isConnected < b.isConnected) {
-            //     return 1;
-            // }
-            // else if (a.isConnected > b.isConnected) {
-            //     return -1;
-            // }
-            // else {
             if (a.max < b.max) {
                 return 1;
             }
@@ -586,6 +576,7 @@ d3.TimeArc = function () {
         computeConnectivity(termArray3, termArray3.length);
 
         nodes = [];
+        activeRack = {};
         for (var i = 0; i < termArray3.length; i++) {
             var nod = new Object();
             nod.id = i;
@@ -616,11 +607,40 @@ d3.TimeArc = function () {
              {
                  if (term2class[nod.name] && !term2class[nod.name].disable){
                      term2class[nod.name].value.obj.push(nod);
+                     data.tsnedata[term2class[nod.name].key].current.push(data.tsnedata[nod.name]);
+                     activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
                  }else
                     nodes.push(nod);
              }
 
         }
+        // rack calculate
+        if (runopt.groupTimeLineMode==='onDisplay'){
+            Object.keys(activeRack).forEach(k=>{
+                let r = activeRack[k]
+                r.length=0;
+                r.current[0].forEach((t,ti)=>{
+                    r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])))
+                    r[ti].timestep = ti;
+                })
+            })
+        }else{
+            Object.keys(activeRack).forEach(k=>{
+                let r = activeRack[k];
+                r.length=0;
+                if (r.total_s)
+                    r.total_s.forEach((v,vi)=>r.push((val = v.slice(),val.timestep=vi,val)));
+                else{
+                    r.total_s = [];
+                    r.current[0].forEach((t,ti)=>{
+                        r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])));
+                        r[ti].timestep = ti;
+                        r.total_s.push(r[ti]);
+                    })
+                }
+            })
+        }
+        // calculate
         numNode = nodes.length;
 
         console.log("numNode=" + numNode);
@@ -674,7 +694,8 @@ d3.TimeArc = function () {
                 const selected = data.selectedService;
                 data.tsnedata[nodes[i].name].forEach(d=>{
                     var mon = new Object();
-                    mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
+                    // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
+                    mon.value = [0, (d[selected]-0.6)*termMaxMax2/0.4].sort((a,b)=>a-b);
                     mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
                     mon.yNode = nodes[i].y;
                     nodes[i].monthly.push(mon);
@@ -894,7 +915,7 @@ d3.TimeArc = function () {
         nodeG.append("text")
             .attr("class", "nodeText")
             .attr("dy", ".35em")
-            .attr('fill',d=>d.group==='user'?'red':'unset')
+            .attr('fill',d=>d.group==='user'?'#7c6dee':'unset')
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
             .classed("SearchTerm", d=> d.isSearchTerm)
@@ -1720,7 +1741,7 @@ d3.TimeArc = function () {
         updateTimeLegend();
     }
     // let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
-    let colorCatergory = d3.scaleOrdinal().range(["#828282","steelblue"]);
+    let colorCatergory = d3.scaleOrdinal().range(["#7c6dee","steelblue","#828282"]);
     function getColor(category, count) {
         // var minSat = 80;
         // var maxSat = 180;
