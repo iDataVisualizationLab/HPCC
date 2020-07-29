@@ -236,7 +236,39 @@ d3.TimeArc = function () {
     var links2 = [];
     var nodes2List = {};
     var links2List = {};
-    let summary = {user:0,compute:0}
+    let summary = {user:0,compute:0};
+    let class2term = {};
+    let term2class = {};
+    function handleclassMap(classes){
+        class2term = classes;
+        term2class = {};
+        d3.keys(class2term).forEach(k=>class2term[k].forEach(t=>term2class[t] = k));
+    }
+
+    function upadateTerms(term, c, m, count) {
+        if (!terms[term]) {
+            terms[term] = new Object();
+            terms[term].frequency = 0;
+            terms[term].maxTimeIndex = -100;   // initialized negative
+            terms[term].category = c;
+            if (c === 'user') {
+                summary['user']++;
+            } else
+                summary['compute']++;
+        }
+        if (!terms[term][m])
+            terms[term][m] = count;
+        else {
+            terms[term][m] += count;
+            if (terms[term][m] > terms[term].frequency) {
+                terms[term].frequency = terms[term][m];
+                terms[term].maxTimeIndex = m;
+                if (terms[term].frequency > termMaxMax)
+                    termMaxMax = terms[term].frequency;
+            }
+        }
+    }
+
     function handledata (arr) {
         updateTimeScale();
 
@@ -253,26 +285,10 @@ d3.TimeArc = function () {
             for (let c in d.category) {
                 for (let term in d.category[c]) {
                     d.__terms__[term] = d.category[c][term];
-                    if (!terms[term]) {
-                        terms[term] = new Object();
-                        terms[term].frequency = 0;
-                        terms[term].maxTimeIndex = -100;   // initialized negative
-                        terms[term].category = c;
-                        if (c==='user'){
-                            summary['user']++;
-                        }else
-                            summary['compute']++;
-                    }
-                    if (!terms[term][m])
-                        terms[term][m] = d.__terms__[term];
-                    else {
-                        terms[term][m] += d.__terms__[term];
-                        if (terms[term][m] > terms[term].frequency) {
-                            terms[term].frequency = terms[term][m];
-                            terms[term].maxTimeIndex = m;
-                            if (terms[term].frequency > termMaxMax)
-                                termMaxMax = terms[term].frequency;
-                        }
+                    upadateTerms(term, c, m, d.__terms__[term]);
+                    if (term2class[term]){
+                        upadateTerms(term2class[term], c, m, d.__terms__[term]);
+                        d.__terms__[term2class[term]] = d.category[c][term];
                     }
                 }
             }
@@ -371,33 +387,10 @@ d3.TimeArc = function () {
         }
 
         var removeList = {};   // remove list **************
-        // removeList["russia"] =1;
-        // removeList["china"] =1;
 
         removeList["<Location with-held due to contract>"] = 1;
         catergogryObjectReject = {}
         catergogryList.filter(e=>e.disable).forEach(e=>{catergogryObjectReject[e.key]=1});
-        // removeList["barack obama"] = 1;
-        // removeList["john mccain"] = 1;
-        // removeList["mitt romney"] = 1;
-        // //  removeList["hillary clinton"] =1;
-        // //  removeList["paul ryan"] =1;
-        // removeList["sarah palin"] = 1;
-        // removeList["israel"] = 1;
-        //
-        //
-        // removeList["source"] = 1;
-        // removeList["person"] = 1;
-        // removeList["location"] = 1;
-        // removeList["organization"] = 1;
-        // removeList["miscellaneous"] = 1;
-        //
-        // removeList["muckreads weekly deadly force"] = 1
-        // removeList["propublica"] = 1;
-        // removeList["white this alabama judge has figured out how"] = 1;
-        // removeList["dea ’s facebook impersonato"] = 1;
-        // removeList["dismantle roe"] = 1;
-        // removeList["huffington post"] = 1;
 
 
         termArray = [];
@@ -693,7 +686,7 @@ d3.TimeArc = function () {
                         mon.monthId = d.monthId;
                         mon.yNode = d.y;
                     return mon;
-                }),color:"steelblue"},
+                }),color:"rgb(252, 141, 89)"},
                     {node:nodes[i],value:nodes[i].monthly.map(d=>{
                             if(d.value[0]<0)
                                 return d;
@@ -702,7 +695,7 @@ d3.TimeArc = function () {
                             mon.monthId = d.monthId;
                             mon.yNode = d.y;
                             return mon;
-                        }),color:"rgb(252, 141, 89)"}];
+                        }),color:"steelblue"}];
                 nodes.computeNum++;
             }
         }
@@ -1336,12 +1329,14 @@ d3.TimeArc = function () {
 
     timeArc.termGroup = function (_) {
         return arguments.length ? (runopt.termGroup = _, timeArc) : runopt.termGroup;
-
     };
+
+    timeArc.classMap = function (_){
+        return arguments.length ? (handleclassMap(_), timeArc) : class2term;
+    }
 
     timeArc.data = function (_) {
         return arguments.length ? (handledata(_), timeArc) : arr;
-
     };
     timeArc.termArray3 = function (_) {
         return arguments.length ? (timeArc) : termArray3;

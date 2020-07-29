@@ -30,6 +30,7 @@ let TimeArcSetting = function (){
     let TimeArc  = d3.TimeArc();
     let isFirst = true;
     let catergogryList=[{key: 'user', value: {colororder: 0}},{key: 'compute', value: {colororder: 1}}];
+    let layout={};
     master.timearc = TimeArc;
     master.reset = function(){
 
@@ -91,6 +92,11 @@ let TimeArcSetting = function (){
     };
     master.schema = function (){
         isNeedRender = true;
+    };
+    master.layout = function(d){
+        layout = {};
+        d.forEach(k=>layout[k.Name]= _.flatten(k.value))
+        TimeArc.classMap(layout)
     };
     return master;
 };

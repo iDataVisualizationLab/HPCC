@@ -330,8 +330,15 @@ angular.module('hpccApp')
                     h.notSelected = true;
                 else
                     h.notSelected = false;
-            })
-            onfilterdata();
+            });
+            onfilterdata(undefined,Layout.data.groups);
+        }
+        // if (Loaddata.data.name)
+        //     loadFile(Dataset.currentDataset);
+    });
+    Layout.onUpdate.push(function() {
+        if (hosts) {
+            mainviz.layout(Layout.data.groups);
         }
         // if (Loaddata.data.name)
         //     loadFile(Dataset.currentDataset);
