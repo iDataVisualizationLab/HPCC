@@ -242,7 +242,7 @@ d3.TimeArc = function () {
     function handleclassMap(classes){
         class2term = classes;
         term2class = {};
-        d3.keys(class2term).forEach(k=>class2term[k].forEach(t=>term2class[t] = k));
+        d3.keys(class2term).forEach(k=>class2term[k].forEach(t=>term2class[t] = {key:k,value:class2term[k]}));
     }
 
     function upadateTerms(term, c, m, count) {
@@ -286,10 +286,10 @@ d3.TimeArc = function () {
                 for (let term in d.category[c]) {
                     d.__terms__[term] = d.category[c][term];
                     upadateTerms(term, c, m, d.__terms__[term]);
-                    if (term2class[term]){
-                        upadateTerms(term2class[term], c, m, d.__terms__[term]);
-                        d.__terms__[term2class[term]] = d.category[c][term];
-                    }
+                    // if (term2class[term]){
+                    //     upadateTerms(term2class[term], c, m, d.__terms__[term]);
+                    //     d.__terms__[term2class[term]] = d.category[c][term];
+                    // }
                 }
             }
 
@@ -616,7 +616,12 @@ d3.TimeArc = function () {
                 maxCount[nod.group] = nod.max;
 
             if (termArray3[i].isConnected > 0)  // Only allow connected items
-                nodes.push(nod);
+             {
+                 if (term2class[nod.name]){
+                     term2class[nod.name].value.node = nodes.length;
+                 }
+                 nodes.push(nod);
+             }
 
         }
         numNode = nodes.length;
@@ -729,7 +734,6 @@ d3.TimeArc = function () {
     function computeLinks() {
         links = [];
         relationshipMaxMax2 = 1;
-
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
             for (var j = i + 1; j < numNode; j++) {
@@ -762,6 +766,13 @@ d3.TimeArc = function () {
                                     nod.maxTimeIndex = nodes[i].maxTimeIndex;
                                     nod.month = m;
 
+                                    nod.classNode = term2class[nod.name];
+                                    if (nod.classNode&& !nod.classNode.disable)
+                                    {
+                                        if (!nodes[nod.classNode.value.node].childNodes2)
+                                            nodes[nod.classNode.value.node].childNodes2 = new Array();
+                                        nodes[nod.classNode.value.node].childNodes2.push(nod.id);
+                                    }
                                     nod.parentNode = i;   // this is the new property to define the parent node
                                     if (!nodes[i].childNodes)
                                         nodes[i].childNodes = new Array();
@@ -783,7 +794,7 @@ d3.TimeArc = function () {
                                     nod.max = nodes[j].max;
                                     nod.maxTimeIndex = nodes[j].maxTimeIndex;
                                     nod.month = m;
-
+                                    nod.classNode = term2class[nod.name];
                                     nod.parentNode = j;   // this is the new property to define the parent node
                                     if (!nodes[j].childNodes)
                                         nodes[j].childNodes = new Array();
@@ -1137,23 +1148,38 @@ d3.TimeArc = function () {
 
     timeArc.update = (isforce)=> {
         let marker;
-        nodes.forEach(function (d) {
+        nodes.forEach(function (d,i) {
 
             d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
 
-            if (d.parentNode >= 0) {
-                d.y += (nodes[d.parentNode].y - d.y||0) * 0.5;
-                // d.y = nodes[d.parentNode].y;
+            if (d.classNode) {
+                d.y += (nodes[d.classNode.value.node].y - d.y||0);
             }
-            else if (d.childNodes) {
+            else if (d.childNodes2) {
                 var yy = 0;
-                for (var i = 0; i < d.childNodes.length; i++) {
-                    var child = d.childNodes[i];
+                for (var i = 0; i < d.childNodes2.length; i++) {
+                    var child = d.childNodes2[i];
                     yy += nodes[child].y;
                 }
-                if (d.childNodes.length > 0) {
-                    yy = yy / d.childNodes.length; // average y coordinate
-                    d.y += (yy - d.y) * 0.2;
+                if (d.childNodes2.length > 0) {
+                    yy = yy / d.childNodes2.length; // average y coordinate
+                    d.y += (yy - d.y) * 1;
+                }
+            }else{
+                if (d.parentNode >= 0) {
+                    d.y += (nodes[d.parentNode].y - d.y||0) * 0.5;
+                    // d.y = nodes[d.parentNode].y;
+                }
+                else if (d.childNodes) {
+                    var yy = 0;
+                    for (var i = 0; i < d.childNodes.length; i++) {
+                        var child = d.childNodes[i];
+                        yy += nodes[child].y;
+                    }
+                    if (d.childNodes.length > 0) {
+                        yy = yy / d.childNodes.length; // average y coordinate
+                        d.y += (yy - d.y) * 0.2;
+                    }
                 }
             }
             if (runopt.termGroup[d.name]){
