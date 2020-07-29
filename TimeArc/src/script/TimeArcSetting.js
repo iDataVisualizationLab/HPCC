@@ -109,10 +109,14 @@ function handle_data_timeArc () {
     };
     let dataObj = {};
     scheme.data=[];
+    scheme.data.timespan = sampleS.timespan.slice();
     sampleJobdata.forEach(j=>{
         j.nodes.forEach(comp=>{
             if (!dataObj[j.user+j.startTime+comp]) {
-                const data = {category: {user: {}, compute: {}}, date: new Date(j.startTime)};
+                let date = new Date(j.startTime);
+                if (date<scheme.data.timespan[0])
+                    date = scheme.data.timespan[0];
+                const data = {category: {user: {}, compute: {}}, date: date};
                 data.category.user[j.user] = 1;
                 data.category.compute[comp] = 1;
                 dataObj[j.user + j.startTime + comp] = data;
@@ -121,7 +125,6 @@ function handle_data_timeArc () {
         })
     });
     scheme.data.tsnedata = tsnedata;
-    scheme.data.timespan = sampleS.timespan.slice();
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]

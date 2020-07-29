@@ -268,7 +268,7 @@ d3.TimeArc = function () {
             terms[term][m] = count;
         else {
             terms[term][m] += count;
-            if (terms[term][m] > terms[term].frequency) {
+            if ((terms[term][m] > terms[term].frequency) && m>=0) {
                 terms[term].frequency = terms[term][m];
                 terms[term].maxTimeIndex = m;
                 if (terms[term].frequency > termMaxMax)
@@ -613,8 +613,9 @@ d3.TimeArc = function () {
 
             if (!maxCount[nod.group] || nod.max > maxCount[nod.group])
                 maxCount[nod.group] = nod.max;
-
-            if (termArray3[i].isConnected > 0)  // Only allow connected items
+            if (class2term[nod.name]){ // is rack
+                class2term[nod.name].classnode = nod;
+            }else if (termArray3[i].isConnected > 0)  // Only allow connected items
              {
                  if (term2class[nod.name] && !term2class[nod.name].disable){
                      term2class[nod.name].value.obj.push(nod);
@@ -624,6 +625,34 @@ d3.TimeArc = function () {
                     nodes.push(nod);
              }
 
+        }
+        // rack calculate
+        if (runopt.groupTimeLineMode==='onDisplay'){
+            Object.keys(activeRack).forEach(k=>{
+                nodes.push(class2term[k].classnode);
+                let r = activeRack[k];
+                r.length=0;
+                r.current[0].forEach((t,ti)=>{
+                    r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])))
+                    r[ti].timestep = ti;
+                })
+            })
+        }else{
+            Object.keys(activeRack).forEach(k=>{
+                nodes.push(class2term[k].classnode);
+                let r = activeRack[k];
+                r.length=0;
+                if (r.total_s)
+                    r.total_s.forEach((v,vi)=>r.push((val = v.slice(),val.timestep=vi,val)));
+                else{
+                    r.total_s = [];
+                    r.total[0].forEach((t,ti)=>{
+                        r.push(r.total[0][0].map((s,si)=> d3.mean(r.total,d=>d[ti][si])));
+                        r[ti].timestep = ti;
+                        r.total_s.push(r[ti]);
+                    })
+                }
+            })
         }
         // calculate
         numNode = nodes.length;
@@ -675,32 +704,7 @@ d3.TimeArc = function () {
             }
         }
 
-        // rack calculate
-        if (runopt.groupTimeLineMode==='onDisplay'){
-            Object.keys(activeRack).forEach(k=>{
-                let r = activeRack[k]
-                r.length=0;
-                r.current[0].forEach((t,ti)=>{
-                    r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])))
-                    r[ti].timestep = ti;
-                })
-            })
-        }else{
-            Object.keys(activeRack).forEach(k=>{
-                let r = activeRack[k];
-                r.length=0;
-                if (r.total_s)
-                    r.total_s.forEach((v,vi)=>r.push((val = v.slice(),val.timestep=vi,val)));
-                else{
-                    r.total_s = [];
-                    r.total[0].forEach((t,ti)=>{
-                        r.push(r.total[0][0].map((s,si)=> d3.mean(r.total,d=>d[ti][si])));
-                        r[ti].timestep = ti;
-                        r.total_s.push(r[ti]);
-                    })
-                }
-            })
-        }
+
         for (var i = 0; i < numNode; i++) {
             if (data.tsnedata[nodes[i].name]){
                 const selected = data.selectedService;
