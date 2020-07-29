@@ -251,10 +251,7 @@ d3.TimeArc = function () {
             terms[term].frequency = 0;
             terms[term].maxTimeIndex = -100;   // initialized negative
             terms[term].category = c;
-            if (c === 'user') {
-                summary['user']++;
-            } else
-                summary['compute']++;
+            summary[c]++;
         }
         if (!terms[term][m])
             terms[term][m] = count;
@@ -286,10 +283,10 @@ d3.TimeArc = function () {
                 for (let term in d.category[c]) {
                     d.__terms__[term] = d.category[c][term];
                     upadateTerms(term, c, m, d.__terms__[term]);
-                    // if (term2class[term]){
-                    //     upadateTerms(term2class[term], c, m, d.__terms__[term]);
-                    //     d.__terms__[term2class[term]] = d.category[c][term];
-                    // }
+                    if (term2class[term]){
+                        upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
+                        d.__terms__[term2class[term].key] = d.category[c][term];
+                    }
                 }
             }
 
@@ -530,7 +527,7 @@ d3.TimeArc = function () {
     }
     let offsetYStream = 0;
     function computeNodes() {
-
+        Object.keys(class2term).forEach(c=>class2term[c].obj=[]);
         // check substrings of 100 first terms
         console.log("termArray.length = " + termArray.length);
 
@@ -617,10 +614,10 @@ d3.TimeArc = function () {
 
             if (termArray3[i].isConnected > 0)  // Only allow connected items
              {
-                 if (term2class[nod.name]){
-                     term2class[nod.name].value.node = nodes.length;
-                 }
-                 nodes.push(nod);
+                 if (term2class[nod.name] && !term2class[nod.name].disable){
+                     term2class[nod.name].value.obj.push(nod);
+                 }else
+                    nodes.push(nod);
              }
 
         }
@@ -767,12 +764,6 @@ d3.TimeArc = function () {
                                     nod.month = m;
 
                                     nod.classNode = term2class[nod.name];
-                                    if (nod.classNode&& !nod.classNode.disable)
-                                    {
-                                        if (!nodes[nod.classNode.value.node].childNodes2)
-                                            nodes[nod.classNode.value.node].childNodes2 = new Array();
-                                        nodes[nod.classNode.value.node].childNodes2.push(nod.id);
-                                    }
                                     nod.parentNode = i;   // this is the new property to define the parent node
                                     if (!nodes[i].childNodes)
                                         nodes[i].childNodes = new Array();
@@ -903,7 +894,7 @@ d3.TimeArc = function () {
         nodeG.append("text")
             .attr("class", "nodeText")
             .attr("dy", ".35em")
-            .style("fill", "#000000")
+            .attr('fill',d=>d.group==='user'?'red':'unset')
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
             .classed("SearchTerm", d=> d.isSearchTerm)
@@ -1151,37 +1142,22 @@ d3.TimeArc = function () {
         nodes.forEach(function (d,i) {
 
             d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
-
-            if (d.classNode) {
-                d.y += (nodes[d.classNode.value.node].y - d.y||0);
+            if (d.parentNode >= 0) {
+                d.y += (nodes[d.parentNode].y - d.y||0) * 0.5;
+                // d.y = nodes[d.parentNode].y;
             }
-            else if (d.childNodes2) {
+            else if (d.childNodes) {
                 var yy = 0;
-                for (var i = 0; i < d.childNodes2.length; i++) {
-                    var child = d.childNodes2[i];
+                for (var i = 0; i < d.childNodes.length; i++) {
+                    var child = d.childNodes[i];
                     yy += nodes[child].y;
                 }
-                if (d.childNodes2.length > 0) {
-                    yy = yy / d.childNodes2.length; // average y coordinate
-                    d.y += (yy - d.y) * 1;
-                }
-            }else{
-                if (d.parentNode >= 0) {
-                    d.y += (nodes[d.parentNode].y - d.y||0) * 0.5;
-                    // d.y = nodes[d.parentNode].y;
-                }
-                else if (d.childNodes) {
-                    var yy = 0;
-                    for (var i = 0; i < d.childNodes.length; i++) {
-                        var child = d.childNodes[i];
-                        yy += nodes[child].y;
-                    }
-                    if (d.childNodes.length > 0) {
-                        yy = yy / d.childNodes.length; // average y coordinate
-                        d.y += (yy - d.y) * 0.2;
-                    }
+                if (d.childNodes.length > 0) {
+                    yy = yy / d.childNodes.length; // average y coordinate
+                    d.y += (yy - d.y) * 0.2;
                 }
             }
+
             if (runopt.termGroup[d.name]){
                 if (marker)
                     d.y = marker
