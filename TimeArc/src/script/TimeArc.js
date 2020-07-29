@@ -24,7 +24,7 @@ d3.TimeArc = function () {
         timeformat: d3.timeYear.every(1),
         stickyTerms:[],
         termGroup:{},
-        groupTimeLineMode:'summary'//'onDisplay',
+        groupTimeLineMode:'onDisplay'//'onDisplay', //'summary'
     };
     let svg,force;
     let UnitArray = ['Minute','Hour','Day','Month','Year'];
@@ -183,6 +183,14 @@ d3.TimeArc = function () {
             .attr("class","arrowHead");
         xStep = graphicopt.margin.left;
         maxheight  = graphicopt.heightG();
+        d3.select('#rackDisplayControl').on('change',function(){
+            if ($(this).prop('checked')){
+                runopt.groupTimeLineMode = "summary";
+            }else{
+                runopt.groupTimeLineMode = "onDisplay";
+            }
+            recompute();
+        })
 //******************* Forced-directed layout
 
 //Set up the force layout
@@ -333,7 +341,7 @@ d3.TimeArc = function () {
         arr.forEach(d=>temp[d.term]= null);
         return temp;
     }
-    function recompute() {
+    function recompute(isSkipforce) {
         var bar = document.getElementById('progBar'),
             fallback = document.getElementById('downloadProgress'),
             loaded = 0;
@@ -363,12 +371,15 @@ d3.TimeArc = function () {
             adjustStreamheight()
             computeLinks();
             drawStreamLegend();
-
-            force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-                .nodes(nodes)
-                .force('link').links(links);
-            force.alpha(1);
-            force.restart();
+            if (!isSkipforce){
+                force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+                    .nodes(nodes)
+                    .force('link').links(links);
+                force.alpha(1);
+                force.restart();
+            }else{
+                timeArc.update()
+            }
         }
     }
 
@@ -614,32 +625,6 @@ d3.TimeArc = function () {
              }
 
         }
-        // rack calculate
-        if (runopt.groupTimeLineMode==='onDisplay'){
-            Object.keys(activeRack).forEach(k=>{
-                let r = activeRack[k]
-                r.length=0;
-                r.current[0].forEach((t,ti)=>{
-                    r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])))
-                    r[ti].timestep = ti;
-                })
-            })
-        }else{
-            Object.keys(activeRack).forEach(k=>{
-                let r = activeRack[k];
-                r.length=0;
-                if (r.total_s)
-                    r.total_s.forEach((v,vi)=>r.push((val = v.slice(),val.timestep=vi,val)));
-                else{
-                    r.total_s = [];
-                    r.current[0].forEach((t,ti)=>{
-                        r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])));
-                        r[ti].timestep = ti;
-                        r.total_s.push(r[ti]);
-                    })
-                }
-            })
-        }
         // calculate
         numNode = nodes.length;
 
@@ -688,6 +673,33 @@ d3.TimeArc = function () {
                 nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}];
                 nodes.userNum++;
             }
+        }
+
+        // rack calculate
+        if (runopt.groupTimeLineMode==='onDisplay'){
+            Object.keys(activeRack).forEach(k=>{
+                let r = activeRack[k]
+                r.length=0;
+                r.current[0].forEach((t,ti)=>{
+                    r.push(r.current[0][0].map((s,si)=> d3.mean(r.current,d=>d[ti][si])))
+                    r[ti].timestep = ti;
+                })
+            })
+        }else{
+            Object.keys(activeRack).forEach(k=>{
+                let r = activeRack[k];
+                r.length=0;
+                if (r.total_s)
+                    r.total_s.forEach((v,vi)=>r.push((val = v.slice(),val.timestep=vi,val)));
+                else{
+                    r.total_s = [];
+                    r.total[0].forEach((t,ti)=>{
+                        r.push(r.total[0][0].map((s,si)=> d3.mean(r.total,d=>d[ti][si])));
+                        r[ti].timestep = ti;
+                        r.total_s.push(r[ti]);
+                    })
+                }
+            })
         }
         for (var i = 0; i < numNode; i++) {
             if (data.tsnedata[nodes[i].name]){
