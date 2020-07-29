@@ -245,7 +245,7 @@ d3.TimeArc = function () {
     var links2 = [];
     var nodes2List = {};
     var links2List = {};
-    let summary = {user:0,compute:0};
+    let summary = {user:0,compute:0,rack:0}; // todo auto detect group
     let class2term = {};
     let term2class = {};
     function handleclassMap(classes){
@@ -280,7 +280,7 @@ d3.TimeArc = function () {
     function handledata (arr) {
         updateTimeScale();
 
-        summary = {user:0,compute:0};
+        summary = {user:0,compute:0,rack:0};
         terms = new Object();
         termMaxMax = 1;
         Object.keys(class2term).forEach(c=>{
@@ -664,6 +664,7 @@ d3.TimeArc = function () {
         termMaxMax2 = 0;
         nodes.userNum = 0;
         nodes.computeNum = 0;
+        nodes.rackNum = 0;
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (!data.tsnedata[nodes[i].name]){
@@ -735,7 +736,7 @@ d3.TimeArc = function () {
                             mon.yNode = d.y;
                             return mon;
                         }),color:"steelblue"}];
-                nodes.computeNum++;
+                nodes[nodes[i].group+'Num']++;
             }
         }
 
@@ -1668,12 +1669,12 @@ d3.TimeArc = function () {
         if (measagelegendg.empty()) {
             measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
             measagelegendg
-                .selectAll('text').data([{current:nodes.userNum,type:'users',total:summary['user']},{current:nodes.computeNum,type:'computes',total:summary['compute']}])
+                .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
                 .enter()
                 .append('text')
                 .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
         }
-        measagelegendg.selectAll('text').data([{current:nodes.userNum,type:'users',total:summary['user']},{current:nodes.computeNum,type:'computes',total:summary['compute']}])
+        measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
             .html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
         yoffset += 60;
         let streamlegendg = svg.select('g.streamlegendg');
