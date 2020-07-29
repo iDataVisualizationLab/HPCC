@@ -945,6 +945,7 @@ d3.TimeArc = function () {
             //     return d.isSearchTerm ? "12px" : "11px";
             // })
             .text(function (d) {
+                d.nodeTarget = d3.select(this);
                 return d.name
             });
         nodeG.on('mouseover', mouseovered_Term)
@@ -1678,6 +1679,7 @@ d3.TimeArc = function () {
                 recompute();
             },
             onCloseStart:function(evt){
+                debugger
                 d3.select(evt).datum().value.disable = false;
                 recompute();
             }
