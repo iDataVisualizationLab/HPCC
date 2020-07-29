@@ -109,7 +109,7 @@ d3.TimeArc = function () {
     var coordinate = [0, 0];
     var XGAP_ = 12; // gap between months on xAxis
 
-    let minYdis = 10;
+    let minYdis = 12;
 
     let mouseover_dispath = ()=>{};
     let mouseout_dispath = ()=>{};
@@ -326,6 +326,7 @@ d3.TimeArc = function () {
         drawColorLegend();
         drawTimeLegend();
         drawTimeBox(); // This box is for brushing
+        updateTimeLegend();
         drawLensingButton();
 
         $(function () {
@@ -554,7 +555,8 @@ d3.TimeArc = function () {
     function computeNodes() {
         Object.keys(class2term).forEach(c=>{
             class2term[c].obj=[];
-            data.tsnedata[c].current=[]
+            data.tsnedata[c].current=[];
+            class2term[c].active =false;
         });
         // check substrings of 100 first terms
         console.log("termArray.length = " + termArray.length);
@@ -617,9 +619,10 @@ d3.TimeArc = function () {
                 class2term[nod.name].classnode = nod;
             }else if (termArray3[i].isConnected > 0)  // Only allow connected items
              {
-                 if (term2class[nod.name] && !term2class[nod.name].disable){
+                 if (term2class[nod.name] && !term2class[nod.name].value.disable){
                      term2class[nod.name].value.obj.push(nod);
                      data.tsnedata[term2class[nod.name].key].current.push(data.tsnedata[nod.name]);
+                     term2class[nod.name].value.active=true;
                      activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
                  }else
                     nodes.push(nod);
@@ -1295,7 +1298,8 @@ d3.TimeArc = function () {
         if (graphicopt.min_height) {
             graphicopt.height = Math.max(graphicopt.height, graphicopt.min_height + graphicopt.margin.top + graphicopt.margin.bottom);
         }
-        svg.attr('height', graphicopt.height);
+        // svg.attr('height', graphicopt.height);
+        svg.attr('height', Math.max(maxheight,graphicopt.height));
         //var totalH = termArray.length*step;
         offsetYStream = step;
         return {step, step};
@@ -1332,13 +1336,11 @@ d3.TimeArc = function () {
             return a.y - b.y;
         });
 
-        console.log(termArray.length);
         adjustStreamheight();
         let count = 0
         for (var i = 0; i < termArray.length; i++) {
             let currentNode = nodes[termArray[i].nodeId];
             if (graphicopt.display && graphicopt.display.customTerms &&graphicopt.display.customTerms[currentNode.name]) {
-                console.log(currentNode)
                 const customSetting = graphicopt.display.customTerms[currentNode.name];
                 Object.keys(customSetting).forEach(e=>currentNode[e] = _.isFunction(customSetting[e])?customSetting[e](currentNode,nodes):customSetting[e])
             }
@@ -1436,15 +1438,17 @@ d3.TimeArc = function () {
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     // Add color legend
     function drawColorLegend() {
-        var xx = 6;
+        var xx = 10;
         // var y1 = 20;
         // var y2 = 34;
         // var y3 = 48;
         // var y4 = 62;
         var rr = 6;
-        let yscale = d3.scaleLinear().range([33,50]);
+        var yoffset = ySlider+60;
+        let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
         svg.append('text').text('Color legend: ').attrs({
-            y: 20,
+            x: xx,
+            y: yoffset,
             'font-weight': 'bold'
         });
         let legendg = svg.selectAll('g.nodeLegend')
@@ -1646,8 +1650,55 @@ d3.TimeArc = function () {
                 return d.x; });
     }
 
+    function drawClassCollection(yoffset, xoffset) {
+        let y = d3.scaleLinear()
+
+        let classHolderg = d3.select('#rackCollection')
+            .style('left', `${xoffset}px`)
+            .style('top', `${yoffset}px`);
+        let classdata = d3.entries(class2term);
+        let classg = classHolderg
+            .selectAll('li.className').data(classdata);
+        classg.call(updateClassg);
+        classg.exit().remove();
+        let classNewg = classg.enter()
+            .append('li')
+            .attr('class', 'className');
+        const  header = classNewg.append('div').attr('class','collapsible-header');
+        header.append('span');
+        header.append('i').attr('class','material-icons expand').text('chevron_right');
+        classNewg.append('ul').attr('class','collapsible-body');
+        classNewg.call(updateClassg)
+
+
+        M.Collapsible.init(classHolderg.node(), {
+            accordion: false,
+            onOpenStart:function(evt){
+                d3.select(evt).datum().value.disable = true;
+                recompute();
+            },
+            onCloseStart:function(evt){
+                d3.select(evt).datum().value.disable = false;
+                recompute();
+            }
+        });
+        return yoffset;
+
+        function updateClassg(p){
+            p.classed('active',d=>d.value.disable)
+            p.select('div.collapsible-header').select('span').text(d=>d.key);
+            const span = p.select('.collapsible-body')
+                .selectAll('li.classElement')
+                .data(d=>d.value.obj);
+            span.exit().remove();
+            span.enter().append('li')
+                .text(d=>d.name);
+
+        }
+    }
+
     function drawStreamLegend () {
-        let yoffset = ySlider+60;
+        let yoffset = ySlider+60+90;
         let yStreamoffset = 20;
         let xoffset = xSlider;
         let ticknum = 3;
@@ -1720,6 +1771,8 @@ d3.TimeArc = function () {
                 "dy":'0.25rem',
                 "dx":'2px',
             }).text(d=>Math.round(d.y));
+        yoffset += yStreamoffset + subscale.range()[1];
+        yoffset = drawClassCollection(yoffset, xoffset);
     }
     var buttonLensingWidth =80;
     var buttonheight =15;
@@ -1852,7 +1905,7 @@ d3.TimeArc = function () {
     var slider;
     var handle;
     var xScaleSlider;
-    var xSlider = 120;
+    var xSlider = 10;
     var widthSlider = 180;
     var ySlider = 30;
     var valueSlider = 2;

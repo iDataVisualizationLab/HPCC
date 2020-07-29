@@ -571,7 +571,7 @@
                     <svg class="mainsvg hide">
 
                     </svg>
-                    <div id="chart_holder">
+                    <div id="chart_holder" style="position: relative;height: calc(100vh - 60px);background-color: white">
                         <div class = 'row s12 valign-wrapper' style="margin-bottom: 0;">
                             <div class="input-field col" style="margin: 0px 5px;padding-left: 0px;">
                                 <input type="text"  id="search" class="autocomplete inputHolder" placeholder="input here">
@@ -595,6 +595,9 @@
                             <button class="col s1" style="width: fit-content;float:right" id = "lensingbtn">lensing</button>
                         </div>
                         <svg id="Chartcontent" class="active"></svg>
+                        <ul id = 'rackCollection' class="collapsible expandable" style="position:absolute">
+
+                        </ul>
                     </div>
                 </div>
             </div>

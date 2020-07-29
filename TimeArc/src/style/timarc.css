@@ -59,3 +59,65 @@ text tspan {
 .light #Chartcontent {
     background-color: white;
 }
+
+#rackCollection {
+    width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#rackCollection .collapsible-body {
+    padding: 2px 12px;
+}
+#rackCollection .collapsible-header {
+    padding: 2px 6px;
+    background-color: var(--colorMain2_light);
+}
+#rackCollection li .expand {
+    transform: rotate(0deg);
+
+
+    /* Legacy vendor prefixes that you probably don't need... */
+
+    /* Safari */
+    -webkit-transform: rotate(0deg);
+
+    /* Firefox */
+    -moz-transform: rotate(0deg);
+
+    /* IE */
+    -ms-transform: rotate(0deg);
+
+    /* Opera */
+    -o-transform: rotate(0deg);
+
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0);
+    -webkit-transition: all 1s; /* Safari prior 6.1 */
+    transition: all 1s;
+    position: absolute;
+    right: 0;
+}
+#rackCollection li.active .expand {
+    transform: rotate(90deg);
+
+
+    /* Legacy vendor prefixes that you probably don't need... */
+
+    /* Safari */
+    -webkit-transform: rotate(90deg);
+
+    /* Firefox */
+    -moz-transform: rotate(90deg);
+
+    /* IE */
+    -ms-transform: rotate(90deg);
+
+    /* Opera */
+    -o-transform: rotate(90deg);
+
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    -webkit-transition: all 1s; /* Safari prior 6.1 */
+    transition: all 1s;
+}
