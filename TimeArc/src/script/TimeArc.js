@@ -426,7 +426,7 @@ d3.TimeArc = function () {
 
             var maxNet = 0;
             var maxTimeIndex = -1;
-            for (var m = 1; m < totalTimeSteps; m++) {
+            for (var m = 0; m < totalTimeSteps; m++) {
                 if (terms[att][m]) {
                     var previous = 0;
                     if (terms[att][m - 1])
@@ -787,7 +787,7 @@ d3.TimeArc = function () {
                 if (relationship[term1 + "__" + term2] && relationship[term1 + "__" + term2].max >= Math.round(valueSlider)) {
                     let linkstack={};
                     let currentLinkstack;
-                    for (var m = 1; m < totalTimeSteps; m++) {
+                    for (var m = 0; m < totalTimeSteps; m++) {
                         if (relationship[term1 + "__" + term2][m] && relationship[term1 + "__" + term2][m] >= Math.round(valueSlider)) {
                             var sourceNodeId = i;
                             var targetNodeId = j;
