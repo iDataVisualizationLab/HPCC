@@ -268,7 +268,7 @@ d3.TimeArc = function () {
             terms[term][m] = count;
         else {
             terms[term][m] += count;
-            if ((terms[term][m] > terms[term].frequency) && m>=0) {
+            if ((terms[term][m] > terms[term].frequency)) {
                 terms[term].frequency = terms[term][m];
                 terms[term].maxTimeIndex = m;
                 if (terms[term].frequency > termMaxMax)
@@ -563,7 +563,11 @@ d3.TimeArc = function () {
         termArray2 = [];
         for (var i = 0; i < termArray.length; i++) {
             // if (termArray[i].isSearchTerm || termArray[i].isConnected > 0)
-            termArray2.push(termArray[i]);
+            // if (class2term[termArray[i].term])
+            //     if (!class2term[termArray[i].term].disable)
+            //         termArray2.push(termArray[i]);
+            // else
+                termArray2.push(termArray[i]);
         }
         console.log("termArray2.length = " + termArray2.length);
 
@@ -622,8 +626,10 @@ d3.TimeArc = function () {
                  if (term2class[nod.name] && !term2class[nod.name].value.disable){
                      term2class[nod.name].value.obj.push(nod);
                      data.tsnedata[term2class[nod.name].key].current.push(data.tsnedata[nod.name]);
-                     term2class[nod.name].value.active=true;
-                     activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
+                     if (!term2class[nod.name].value.disable){
+                         term2class[nod.name].value.active=true;
+                         activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
+                     }
                  }else
                     nodes.push(nod);
              }
@@ -774,6 +780,8 @@ d3.TimeArc = function () {
         relationshipMaxMax2 = 1;
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
+            if (term1==='rnieman')
+                    debugger
             for (var j = i + 1; j < numNode; j++) {
                 var term2 = nodes[j].name;
                 if (relationship[term1 + "__" + term2] && relationship[term1 + "__" + term2].max >= Math.round(valueSlider)) {
@@ -900,6 +908,7 @@ d3.TimeArc = function () {
 
         //Create all the line svgs but without locations yet
         svg.selectAll(".linkArc").remove();
+
         linkArcs = svg.select("g.linkHolder").selectAll("path")
             .data(links)
             .enter().append("path")
@@ -918,6 +927,7 @@ d3.TimeArc = function () {
             .data(pNodes).enter().append("g")
             .attr("class", "nodeG")
             .attr("transform", function (d) {
+                d.nodeTarget = d3.select(this);
                 return "translate(" + d.x + "," + d.y + ")"
             });
 
@@ -945,7 +955,6 @@ d3.TimeArc = function () {
             //     return d.isSearchTerm ? "12px" : "11px";
             // })
             .text(function (d) {
-                d.nodeTarget = d3.select(this);
                 return d.name
             });
         nodeG.on('mouseover', mouseovered_Term)
@@ -1652,7 +1661,7 @@ d3.TimeArc = function () {
     }
 
     function drawClassCollection(yoffset, xoffset) {
-        let y = d3.scaleLinear()
+        let y = d3.scaleLinear();
 
         let classHolderg = d3.select('#rackCollection')
             .style('left', `${xoffset}px`)
@@ -1679,7 +1688,6 @@ d3.TimeArc = function () {
                 recompute();
             },
             onCloseStart:function(evt){
-                debugger
                 d3.select(evt).datum().value.disable = false;
                 recompute();
             }
@@ -1694,7 +1702,9 @@ d3.TimeArc = function () {
                 .data(d=>d.value.obj);
             span.exit().remove();
             span.enter().append('li')
-                .text(d=>d.name);
+                .text(d=>d.name)
+                .on('mouseover',function(d){nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseover')})
+                .on('mouseout',function(d){nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseout')});
 
         }
     }
