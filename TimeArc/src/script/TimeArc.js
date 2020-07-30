@@ -1063,8 +1063,7 @@ d3.TimeArc = function () {
             svg.selectAll(".layer")
                 .style("fill-opacity", 1)
                 .style("stroke-opacity", 0.5);
-            linkArcs = svg.selectAll(".linkArc")
-                .style("stroke-opacity", 1);
+            linkArcs.style("stroke-opacity", 1);
             if (graphicopt.display&&graphicopt.display.links){
                 linkArcs.styles(graphicopt.display.links)
             }
@@ -1105,8 +1104,10 @@ d3.TimeArc = function () {
             svg.selectAll(".layer")
                 .style("fill-opacity", 1)
                 .style("stroke-opacity", 0.5);
-            svg.selectAll(".linkArc")
-                .style("stroke-opacity", 1);
+            linkArcs.style("stroke-opacity", 1);
+            if (graphicopt.display&&graphicopt.display.links){
+                linkArcs.styles(graphicopt.display.links)
+            }
             nodeG.transition().duration(500).attr("transform", function (n) {
                 return "translate(" + n.xConnected + "," + n.y + ")"
             })
@@ -1128,8 +1129,6 @@ d3.TimeArc = function () {
                 .style("stroke-opacity", 0.1);
             d.messagearr = data.filter(m=>m.__terms__[d.name]);
             mouseover_dispath([d,[{color:getColor(d.group), text:d.name, group:d.group}]]);
-            // console.log(termArray.map(t=>{return{color:colorCatergory(t.category), text:t.term, group:t.category}}))
-            // mouseover_dispath([d,termArray.map(t=>{return{color:colorCatergory(t.category), text:t.term, group:t.category}})]);
         }
     }
 
@@ -1139,8 +1138,10 @@ d3.TimeArc = function () {
             svg.selectAll(".layer")
                 .style("fill-opacity", 1)
                 .style("stroke-opacity", 0.5);
-            svg.selectAll(".linkArc")
-                .style("stroke-opacity", 1);
+            linkArcs.style("stroke-opacity", 1);
+            if (graphicopt.display&&graphicopt.display.links){
+                linkArcs.styles(graphicopt.display.links)
+            }
         }
         mouseout_dispath(d);
     }
