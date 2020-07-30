@@ -1960,7 +1960,7 @@ d3.TimeArc = function () {
             .attr("y", 26)
             .attr("dy", ".21em")
             .style("text-anchor","start")
-            .html(`Mentioned ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> utilizing together`);
+            .html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
 
         slider = grang.append("g")
             .attr("class", "slider")
@@ -1996,7 +1996,7 @@ d3.TimeArc = function () {
             valueSlider = d3.max(d3.event.selection.map(xScaleSlider.invert));
             valueSlider = Math.min(valueSlider, valueMax);
             handle.attr("cx", xScaleSlider(valueSlider));
-            svg.select('.sliderText').html(`User has  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job running at a time`);
+            svg.select('.sliderText').html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
             d3.select(this).call(d3.event.target.move, [0,valueSlider].map(xScaleSlider));
         }
     }
