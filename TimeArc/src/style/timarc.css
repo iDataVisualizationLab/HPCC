@@ -124,3 +124,6 @@ text tspan {
 .timeLegendText {
     font-size: 12px;
 }
+.slider_range .handle.handle--e, .slider_range .handle.handle--w {
+    display: none;
+}
