@@ -1648,7 +1648,8 @@ d3.TimeArc = function () {
                 if (isMainGrid(d))
                     return 1;
                 else {
-                    if (isLensing && lMonth-lensingMul<=i && i<=lMonth+lensingMul)
+                    // if (isLensing && lMonth-lensingMul<=i && i<=lMonth+lensingMul)
+                    if (isLensing && lMonth==i)
                         return 1;
                     else
                         return 0;

@@ -121,3 +121,6 @@ text tspan {
     -webkit-transition: all 1s; /* Safari prior 6.1 */
     transition: all 1s;
 }
+.timeLegendText {
+    font-size: 12px;
+}
