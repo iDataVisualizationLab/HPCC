@@ -1466,10 +1466,9 @@ d3.TimeArc = function () {
         let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
         if (svg.select('.colorlegendtext').empty())
             svg.append('text').text('Color legend: ').attrs({
-                class: 'colorlegendtext',
+                class: 'colorlegendtext legendText',
                 x: xx,
-                y: yoffset,
-                'font-weight': 'bold'
+                y: yoffset
             });
 
         let legendg_o = svg.selectAll('g.nodeLegend')
@@ -1763,7 +1762,7 @@ d3.TimeArc = function () {
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
             streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            streamlegendg.append('text').text('User stream height (by # jobs):')
+            streamlegendg.append('text').text('User stream height (by # jobs):').attr('class','legendText')
         }
         let streampath = streamlegendg.select('path.pathlegend');
         if (streampath.empty())
@@ -1777,7 +1776,7 @@ d3.TimeArc = function () {
         d3.range(1,ticknum*4+2).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
 
         streamdata.push({x:1,y:0});
-        streampath.datum(streamdata).attr('d',area_min).style('fill','#ddd');
+        streampath.datum(streamdata).attr('d',area_min).style('fill',colorCatergory('user'));
 
         let lineold = streamlegendg.selectAll('line.arrow').data(streamdata.filter(d=>d.tick));
         lineold.exit().remove();
@@ -1804,7 +1803,7 @@ d3.TimeArc = function () {
                 "y":d=>yStreamoffset +yScale(0),
                 "dy":'0.25rem',
                 "dx":'2px',
-            }).text(d=>Math.round(d.y));
+            }).style('text-shadow', 'rgba(255, 255, 255, 0.6) 1px 1px 0px').text(d=>Math.round(d.y));
         yoffset += yStreamoffset + subscale.range()[1];
         yoffset = drawClassCollection(yoffset, xoffset);
     }
@@ -1972,7 +1971,7 @@ d3.TimeArc = function () {
         axisl.selectAll('.tick text')
             .attr('dy','0.8em');
         grang.append("text")
-            .attr("class", "sliderlabel")
+            .attr("class", "sliderlabel legendText")
             .attr("y", -14)
             .attr("dy", ".21em")
             .text('Filter links:')

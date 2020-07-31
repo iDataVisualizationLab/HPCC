@@ -127,3 +127,6 @@ text tspan {
 .slider_range .handle.handle--e, .slider_range .handle.handle--w {
     display: none;
 }
+.legendText {
+    font-weight: bold;
+}
