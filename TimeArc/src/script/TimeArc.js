@@ -780,8 +780,6 @@ d3.TimeArc = function () {
         relationshipMaxMax2 = 1;
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
-            if (term1==='rnieman')
-                    debugger
             for (var j = i + 1; j < numNode; j++) {
                 var term2 = nodes[j].name;
                 if (relationship[term1 + "__" + term2] && relationship[term1 + "__" + term2].max >= Math.round(valueSlider)) {
@@ -1668,6 +1666,7 @@ d3.TimeArc = function () {
             .style('left', `${xoffset}px`)
             .style('top', `${yoffset}px`);
         let classdata = d3.entries(class2term);
+        console.log(classdata)
         let classg = classHolderg
             .selectAll('li.className').data(classdata);
         classg.call(updateClassg);
@@ -1700,12 +1699,17 @@ d3.TimeArc = function () {
             p.select('div.collapsible-header').select('span').text(d=>d.key);
             const span = p.select('.collapsible-body')
                 .selectAll('li.classElement')
-                .data(d=>d.value.obj);
+                .data(d=>(console.log(d.value.obj),d.value.obj)).text(d=>d.name);
             span.exit().remove();
             span.enter().append('li')
                 .text(d=>d.name)
-                .on('mouseover',function(d){nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseover')})
-                .on('mouseout',function(d){nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseout')});
+                .attr('class','classElement')
+                .on('mouseover',function(d){
+                    d3.select(this).style('font-weight','bold');
+                    nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseover')})
+                .on('mouseout',function(d){
+                    d3.select(this).style('font-weight',null)
+                    nodes.find(e=>e.id===d.id).nodeTarget.dispatch('mouseout')});
 
         }
     }
