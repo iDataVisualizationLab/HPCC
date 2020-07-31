@@ -1495,7 +1495,7 @@ d3.TimeArc = function () {
             .style("fill",d=>getColor(d.key));
 
         legendg.merge(legendg_o).select('text')
-            .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`${d.value.current}/`:''}${summary[d.key]})`);
+            .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
     }
     function onclickcategory(d) {
         if(d.disable){
@@ -1709,8 +1709,8 @@ d3.TimeArc = function () {
         return yoffset;
 
         function updateClassg(p){
-            p.classed('active',d=>d.value.disable)
-            p.select('div.collapsible-header').select('span').text(d=>d.key);
+            p.classed('active',d=>d.value.disable);
+            p.select('div.collapsible-header').select('span').text(d=>`${d.key} (${d.value.obj.length}/${d.value.length})`);
             const span = p.select('.collapsible-body')
                 .selectAll('li.classElement')
                 .data(d=>d.value.obj.sort((a,b)=>d3.ascending(a.name, b.name))).text(d=>d.name);
