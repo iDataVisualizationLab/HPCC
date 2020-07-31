@@ -33,8 +33,8 @@ angular.module('hpccApp')
                     row:0,
                 };
                 scope.url = {
-                    start:'2020-02-14T12:00:00-05:00',
-                    end:'2020-02-14T18:00:00-05:00',
+                    start:'2020-07-27T12:00:00-05:00',
+                    end:'2020-07-28T12:00:00-05:00',
                     interval:'5m',
                     value:'max',
                     compress:'true'
@@ -93,14 +93,14 @@ angular.module('hpccApp')
                         let d = jobjson[jobID];
                         // d.node_list = JSON.parse(d.node_list.replace(/'/g,'"'));
                         let temp = {
-                            "nodes": d.node_list.map(ip=>hosts.find(d=>d.ip===ip).name),
+                            "nodes": d.node_list.map(ip=>hosts.find(d=>d.ip===ip.split('-')[0]).name),
                             "jobID": ""+jobID,
                             "user": d.user_name,
-                            "startTime": d.start_time*1000,
-                            "submitTime": d.submit_time*1000
+                            "startTime": d.start_time/1000000,
+                            "submitTime": d.submit_time/1000000
                         };
                         if (d['finish_time'])
-                            temp.endTime = d['finish_time']*1000;
+                            temp.endTime = d['finish_time']/1000000;
                         jobo[jobID] = temp;
                         jobd.push(jobo[jobID]);
                     }
@@ -116,7 +116,7 @@ angular.module('hpccApp')
                     ser.pop();
 
                     let data = dataRaw.nodes_info;
-                    sampleh.timespan = dataRaw.time_stamp.map(d=>d*1000);
+                    sampleh.timespan = dataRaw.time_stamp.map(d=>d/1000000);
                     hosts.forEach(h => {
                         sampleh[h.name] = {};
                         ser.forEach(s => sampleh[h.name][s] = []);

@@ -724,7 +724,6 @@ d3.TimeArc = function () {
                     }
                 }
                 nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
-
                 // Add another item to first
                 if (nodes[i].monthly.length > 0) {
                     var firstObj = nodes[i].monthly[0];
@@ -805,7 +804,9 @@ d3.TimeArc = function () {
             .style("fill-opacity", 1)
             .style("fill", function (d, i) {
                 return getColor(d.group, d.max);
-            }).on('mouseover', mouseovered_Layer)
+            })
+            .on('click',handleFreez)
+            .on('mouseover', mouseovered_Layer)
             .on("mouseout", mouseouted_Layer);
 
     }
@@ -949,6 +950,7 @@ d3.TimeArc = function () {
             .style("stroke-width", function (d) {
                 return d.value;
             })
+            .on('click',handleFreez)
             .on('mouseover', mouseovered_Link)
             .on("mouseout", mouseouted_Link);
         if (graphicopt.display&&graphicopt.display.links){
@@ -991,7 +993,9 @@ d3.TimeArc = function () {
             .text(function (d) {
                 return d.name
             });
-        nodeG.on('mouseover', mouseovered_Term)
+        nodeG
+            .on('click',handleFreez)
+            .on('mouseover', mouseovered_Term)
             .on("mouseout", mouseouted_Term);
 
         // console.log("gggg**************************"+searchTerm);
@@ -1016,141 +1020,156 @@ d3.TimeArc = function () {
         });
 
     }
-
+    function handleFreez(){
+        isFreez = !isFreez;
+    }
 
 
     function mouseovered_Term(d) {
-        if (force.alpha() == 0) {
-            var list = new Object();
-            list[d.name] = new Object();
-            d.messagearr = [];
-            svg.selectAll(".linkArc")
-                .style("stroke-opacity", function (l) {
-                    let name;
-                    if (l.source.name === d.name)
-                        name=l.target.name;
-                    else if (l.target.name === d.name)
-                        name=l.source.name;
-                    if (name) {
-                        if (!list[name]) {
-                            list[name] = new Object();
-                            list[name].count = 1;
-                            list[name].year = l.__timestep__;
-                            list[name].linkcount = l.count;
-                            d.messagearr =_.uniq(_.flatten([ d.messagearr,l.message]));
-                        }
-                        else {
-                            list[name].count++;
-                            // if (l.count > list[name].count) {
-                            //     list[name].linkcount = l.count;
-                            //     list[name].year = l.__timestep__;
-                            d.messagearr =_.uniq(_.flatten( [d.messagearr,l.message]));
-                            // }
-                        }
-                        return 1;
-                    }
-                    else
-                        return 0.01;
-                });
-            mouseover_dispath([d,d3.keys(list).map(l=>{
-                let cat = termArray3.find(t=>t.term===l).category;
-                return{color:getColor(cat), text:l, group:cat}})]);
-            nodeG.style("fill-opacity", function (n) {
-                if (list[n.name])
-                    return 1;
-                else
-                    return 0.1;
-            })
-                .style("font-weight", function (n) {
-                    return d.name == n.name ? "bold" : "";
-                })
-            ;
-
-            nodeG.transition().duration(500).attr("transform", function (n) {
-                if (list[n.name] && n.name != d.name) {
-                    var newX = xStep + xScale(list[n.name].year);
-                    return "translate(" + newX + "," + n.y + ")"
-                }
-                else {
-                    return "translate(" + n.xConnected + "," + n.y + ")"
-                }
-            })
-            svg.selectAll(".layer")
-                .style("fill-opacity", function (n) {
+        if(!isFreez) {
+            if (force.alpha() == 0) {
+                var list = new Object();
+                list[d.name] = new Object();
+                d.messagearr = [];
+                svg.selectAll(".linkArc")
+                    .style("stroke-opacity", function (l) {
+                        let name;
+                        if (l.source.name === d.name)
+                            name = l.target.name;
+                        else if (l.target.name === d.name)
+                            name = l.source.name;
+                        if (name) {
+                            if (!list[name]) {
+                                list[name] = new Object();
+                                list[name].count = 1;
+                                list[name].year = l.__timestep__;
+                                list[name].linkcount = l.count;
+                                d.messagearr = _.uniq(_.flatten([d.messagearr, l.message]));
+                            } else {
+                                list[name].count++;
+                                // if (l.count > list[name].count) {
+                                //     list[name].linkcount = l.count;
+                                //     list[name].year = l.__timestep__;
+                                d.messagearr = _.uniq(_.flatten([d.messagearr, l.message]));
+                                // }
+                            }
+                            return 1;
+                        } else
+                            return 0.01;
+                    });
+                mouseover_dispath([d, d3.keys(list).map(l => {
+                    let cat = termArray3.find(t => t.term === l).category;
+                    return {color: getColor(cat), text: l, group: cat}
+                })]);
+                nodeG.style("fill-opacity", function (n) {
                     if (list[n.name])
                         return 1;
                     else
                         return 0.1;
                 })
-                .style("stroke-opacity", function (n) {
-                    if (list[n.name])
-                        return 1;
-                    else
-                        return 0;
-                });
+                    .style("font-weight", function (n) {
+                        return d.name == n.name ? "bold" : "";
+                    })
+                ;
+
+                nodeG.transition().duration(500).attr("transform", function (n) {
+                    if (list[n.name] && n.name != d.name) {
+                        var newX = xStep + xScale(list[n.name].year);
+                        return "translate(" + newX + "," + n.y + ")"
+                    } else {
+                        return "translate(" + n.xConnected + "," + n.y + ")"
+                    }
+                })
+                svg.selectAll(".layer")
+                    .style("fill-opacity", function (n) {
+                        if (list[n.name])
+                            return 1;
+                        else
+                            return 0.1;
+                    })
+                    .style("stroke-opacity", function (n) {
+                        if (list[n.name])
+                            return 1;
+                        else
+                            return 0;
+                    });
+            }
         }
     }
 
     function mouseouted_Term(d) {
-        if (force.alpha() == 0) {
-            nodeG.style("fill-opacity", 1);
-            svg.selectAll(".layer")
-                .style("fill-opacity", 1)
-                .style("stroke-opacity", 0.5);
-            linkArcs.style("stroke-opacity", 1);
-            if (graphicopt.display&&graphicopt.display.links){
-                linkArcs.styles(graphicopt.display.links)
+        if(!isFreez) {
+            if (force.alpha() == 0) {
+                nodeG.style("fill-opacity", 1);
+                svg.selectAll(".layer")
+                    .style("fill-opacity", 1)
+                    .style("stroke-opacity", 0.5);
+                linkArcs.style("stroke-opacity", 1);
+                if (graphicopt.display && graphicopt.display.links) {
+                    linkArcs.styles(graphicopt.display.links)
+                }
+                nodeG.transition().duration(500).attr("transform", function (n) {
+                    return "translate(" + n.xConnected + "," + n.y + ")"
+                })
             }
-            nodeG.transition().duration(500).attr("transform", function (n) {
-                return "translate(" + n.xConnected + "," + n.y + ")"
-            })
+            mouseout_dispath(d);
         }
-        mouseout_dispath(d);
     }
 
     function mouseovered_Link(d) {
-        if (force.alpha() == 0) {
-            d.messagearr = d.message;
-            d3.select(this).style("stroke-opacity", 1);
-            svg.selectAll(".linkArc").filter(e=>e!==d)
-                .style("stroke-opacity", 0.01);
-            nodeG.filter(n=>n.name!==d.target.name&&n.name!==d.source.name).style("fill-opacity", 0.1)
-                .style("font-weight", '').transition().duration(500).attr("transform", function (n) {return "translate(" + n.xConnected + "," + n.y + ")"});
-            nodeG.filter(n=>n.name===d.target.name||n.name===d.source.name).style("fill-opacity", 1)
-                .style("font-weight", 'bold')
-                .transition().transition().duration(500).attr("transform", function (n) {
-                var newX = xStep + xScale(d.__timestep__);
-                return "translate(" + newX + "," + n.y + ")"});
-            svg.selectAll(".layer").filter(n=>n.name!==d.target.name&&n.name!==d.source.name)
-                .style("fill-opacity", 0.1)
-                .style("stroke-opacity",0);
-            svg.selectAll(".layer").filter(n=>n.name===d.target.name||n.name===d.source.name).style("fill-opacity", 1)
-                .style("stroke-opacity", 1);
-            let cat_source = termArray3.find(t=>t.term===d.source.name).category;
-            let cat_target = termArray3.find(t=>t.term===d.target.name).category;
-            mouseover_dispath([d,[{color:getColor(cat_source), text:d.source.name, group:cat_source},{color:getColor(cat_target), text:d.target.name, group:cat_target}]]);
+        if(!isFreez) {
+            if (force.alpha() == 0) {
+                d.messagearr = d.message;
+                d3.select(this).style("stroke-opacity", 1);
+                svg.selectAll(".linkArc").filter(e => e !== d)
+                    .style("stroke-opacity", 0.01);
+                nodeG.filter(n => n.name !== d.target.name && n.name !== d.source.name).style("fill-opacity", 0.1)
+                    .style("font-weight", '').transition().duration(500).attr("transform", function (n) {
+                    return "translate(" + n.xConnected + "," + n.y + ")"
+                });
+                nodeG.filter(n => n.name === d.target.name || n.name === d.source.name).style("fill-opacity", 1)
+                    .style("font-weight", 'bold')
+                    .transition().transition().duration(500).attr("transform", function (n) {
+                    var newX = xStep + xScale(d.__timestep__);
+                    return "translate(" + newX + "," + n.y + ")"
+                });
+                svg.selectAll(".layer").filter(n => n.name !== d.target.name && n.name !== d.source.name)
+                    .style("fill-opacity", 0.1)
+                    .style("stroke-opacity", 0);
+                svg.selectAll(".layer").filter(n => n.name === d.target.name || n.name === d.source.name).style("fill-opacity", 1)
+                    .style("stroke-opacity", 1);
+                let cat_source = termArray3.find(t => t.term === d.source.name).category;
+                let cat_target = termArray3.find(t => t.term === d.target.name).category;
+                mouseover_dispath([d, [{
+                    color: getColor(cat_source),
+                    text: d.source.name,
+                    group: cat_source
+                }, {color: getColor(cat_target), text: d.target.name, group: cat_target}]]);
+            }
         }
     }
 
     function mouseouted_Link(d) {
-        if (force.alpha() == 0) {
-            nodeG.style("fill-opacity", 1);
-            svg.selectAll(".layer")
-                .style("fill-opacity", 1)
-                .style("stroke-opacity", 0.5);
-            linkArcs.style("stroke-opacity", 1);
-            if (graphicopt.display&&graphicopt.display.links){
-                linkArcs.styles(graphicopt.display.links)
+        if(!isFreez){
+            if (force.alpha() == 0) {
+                nodeG.style("fill-opacity", 1);
+                svg.selectAll(".layer")
+                    .style("fill-opacity", 1)
+                    .style("stroke-opacity", 0.5);
+                linkArcs.style("stroke-opacity", 1);
+                if (graphicopt.display&&graphicopt.display.links){
+                    linkArcs.styles(graphicopt.display.links)
+                }
+                nodeG.transition().duration(500).attr("transform", function (n) {
+                    return "translate(" + n.xConnected + "," + n.y + ")"
+                })
             }
-            nodeG.transition().duration(500).attr("transform", function (n) {
-                return "translate(" + n.xConnected + "," + n.y + ")"
-            })
+            mouseout_dispath(d);
         }
-        mouseout_dispath(d);
     }
-
+    let isFreez = false;
     function mouseovered_Layer(d) {
-        if (force.alpha() == 0) {
+        if (force.alpha() == 0 && !isFreez) {
             nodeG.style("fill-opacity", 0.1);
             nodeG.filter(n=>n.name===d.name).style("fill-opacity", 1);
             svg.selectAll(".layer")
@@ -1167,17 +1186,19 @@ d3.TimeArc = function () {
     }
 
     function mouseouted_Layer(d) {
-        if (force.alpha() == 0) {
-            nodeG.style("fill-opacity", 1);
-            svg.selectAll(".layer")
-                .style("fill-opacity", 1)
-                .style("stroke-opacity", 0.5);
-            linkArcs.style("stroke-opacity", 1);
-            if (graphicopt.display&&graphicopt.display.links){
-                linkArcs.styles(graphicopt.display.links)
+        if (!isFreez) {
+            if (force.alpha() == 0) {
+                nodeG.style("fill-opacity", 1);
+                svg.selectAll(".layer")
+                    .style("fill-opacity", 1)
+                    .style("stroke-opacity", 0.5);
+                linkArcs.style("stroke-opacity", 1);
+                if (graphicopt.display && graphicopt.display.links) {
+                    linkArcs.styles(graphicopt.display.links)
+                }
             }
+            mouseout_dispath(d);
         }
-        mouseout_dispath(d);
     }
 
     function searchNode(value) {
