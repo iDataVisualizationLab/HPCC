@@ -369,7 +369,7 @@ d3.TimeArc = function () {
         function alertFunc() {
             readTermsAndRelationships();
             computeNodes();
-            adjustStreamheight()
+            adjustStreamheight();
             computeLinks();
             drawStreamLegend();
             if (!isSkipforce){
@@ -1288,11 +1288,13 @@ d3.TimeArc = function () {
 
     function adjustStreamheight() {
 // var step = Math.min((graphicopt.heightG() - 25) / (numNode + 1), 15);
+
         const customNode = runopt.termGroup? d3.keys(runopt.termGroup).length + numNode:numNode;
         if (graphicopt.fixscreence)
             step = (maxheight - 25) / (customNode + 1);
         else {
-            step = Math.max((maxheight - 25) / (customNode + 1), minYdis);
+            // step = Math.min(Math.max((maxheight - 25) / (customNode + 1), minYdis),minYdis*2);
+            step = minYdis;
             if (numNode > 10)
                 graphicopt.height = customNode * step + 20 + graphicopt.margin.top + graphicopt.margin.bottom;
             else {
