@@ -289,7 +289,7 @@ d3.TimeArc = function () {
             arr.tsnedata[c].total = [];
             arr.tsnedata[c].totalObj = {};
         });
-
+        arr.userdata = {}
         arr.forEach(function (d) {
             // Process date
             // d.date = new Date(d["time"]);
@@ -298,15 +298,26 @@ d3.TimeArc = function () {
             d.__terms__ = {};
             for (let c in d.category) {
                 for (let term in d.category[c]) {
-                    d.__terms__[term] = d.category[c][term];
-                    upadateTerms(term, c, m, d.__terms__[term]);
-                    if (term2class[term]){
-                        upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
-                        d.__terms__[term2class[term].key] = d.category[c][term];
-                        if ( !arr.tsnedata[term2class[term].key].totalObj[term])
-                        {
-                            arr.tsnedata[term2class[term].key].totalObj[term]=1;
-                            arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                    if(d.type!=='endTime') {
+                        d.__terms__[term] = d.category[c][term];
+                        if (term2class[term]) {
+                            upadateTerms(term, c, m, d.__terms__[term]);
+                            upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
+                            d.__terms__[term2class[term].key] = d.category[c][term];
+                            if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
+                                arr.tsnedata[term2class[term].key].totalObj[term] = 1;
+                                arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                            }
+                        }else{
+                            const current = arr.userdata[term]||0;
+                            arr.userdata[term] = current + d.__terms__[term];
+                            upadateTerms(term, c, m, arr.userdata[term]);
+                        }
+                    }else{
+                        if (!term2class[term]){
+                            const current = arr.userdata[term]||0;
+                            arr.userdata[term] = current - d.category[c][term];
+                            terms[term][m] = arr.userdata[term];
                         }
                     }
                 }
@@ -685,17 +696,35 @@ d3.TimeArc = function () {
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (!data.tsnedata[nodes[i].name]){
+                let finishStep = 0;
+                let startStep = 0;
+                let isStart = false;
+                let current = 0;
                 for (var m = 0; m < totalTimeSteps; m++) {
-                    var mon = new Object();
-                    if (terms[nodes[i].name][m]) {
+
+                    if (terms[nodes[i].name][m]!==undefined) {
+                        if(!isStart)
+                            startStep = m;
+                        isStart = true;
+                        var mon = new Object();
                         mon.value = terms[nodes[i].name][m];
+                        current = mon.value;
                         if (mon.value > termMaxMax2)
                             termMaxMax2 = mon.value;
                         mon.monthId = m;
                         mon.yNode = nodes[i].y;
                         nodes[i].monthly.push(mon);
+                        finishStep= m;
+                    }else if(isStart) {
+                        var mon = new Object();
+                        mon.value = current;
+                        mon.monthId = m;
+                        mon.yNode = nodes[i].y;
+                        nodes[i].monthly.push(mon);
                     }
                 }
+                nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
+
                 // Add another item to first
                 if (nodes[i].monthly.length > 0) {
                     var firstObj = nodes[i].monthly[0];
