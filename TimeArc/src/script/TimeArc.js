@@ -1746,7 +1746,7 @@ d3.TimeArc = function () {
                 .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
                 .enter()
                 .append('text')
-                .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
+                .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
         }
         measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
             .html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
@@ -1834,7 +1834,7 @@ d3.TimeArc = function () {
         updateTimeLegend();
     }
     // let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
-    let colorCatergory = d3.scaleOrdinal().range(["#7c6dee","steelblue","#828282"]);
+    let colorCatergory = d3.scaleOrdinal().range(["#080","steelblue","#828282"]);
     function getColor(category, count) {
         // var minSat = 80;
         // var maxSat = 180;
