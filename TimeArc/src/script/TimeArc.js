@@ -1153,7 +1153,7 @@ d3.TimeArc = function () {
         if(searchTerm==='')
             valueSlider = 10;
         slider.call(brush.move, [0, valueSlider].map(xScaleSlider));
-        svg.select('.sliderText').html(`User has  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job running at a time`);
+        svg.select('.sliderText').html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
         recompute();
     }
 
