@@ -621,15 +621,18 @@ d3.TimeArc = function () {
                 maxCount[nod.group] = nod.max;
             if (class2term[nod.name]){ // is rack
                 class2term[nod.name].classnode = nod;
-            }else if (termArray3[i].isConnected > 0)  // Only allow connected items
+            }else if (termArray3[i].isConnected >= valueSlider)  // Only allow connected items
              {
-                 if (term2class[nod.name] && !term2class[nod.name].value.disable){
+                 if (term2class[nod.name]){
                      term2class[nod.name].value.obj.push(nod);
                      data.tsnedata[term2class[nod.name].key].current.push(data.tsnedata[nod.name]);
-                     if (!term2class[nod.name].value.disable){
-                         term2class[nod.name].value.active=true;
+                     if (!term2class[nod.name].value.disable) {
+                         term2class[nod.name].value.active = true;
                          activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
+                     }else{
+                         nodes.push(nod);
                      }
+
                  }else
                     nodes.push(nod);
              }
@@ -1699,7 +1702,7 @@ d3.TimeArc = function () {
             p.select('div.collapsible-header').select('span').text(d=>d.key);
             const span = p.select('.collapsible-body')
                 .selectAll('li.classElement')
-                .data(d=>(console.log(d.value.obj),d.value.obj)).text(d=>d.name);
+                .data(d=>d.value.obj.sort((a,b)=>d3.ascending(a.name, b.name))).text(d=>d.name);
             span.exit().remove();
             span.enter().append('li')
                 .text(d=>d.name)
