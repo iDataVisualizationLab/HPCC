@@ -594,6 +594,8 @@ d3.TimeArc = function () {
 
         nodes = [];
         activeRack = {};
+        availableRack = {};
+        catergogryList.forEach(d=>d.value.current = 0);
         for (var i = 0; i < termArray3.length; i++) {
             var nod = new Object();
             nod.id = i;
@@ -626,6 +628,8 @@ d3.TimeArc = function () {
                  if (term2class[nod.name]){
                      term2class[nod.name].value.obj.push(nod);
                      data.tsnedata[term2class[nod.name].key].current.push(data.tsnedata[nod.name]);
+                     catergogryObject[nod.group].current++;
+                     availableRack[term2class[nod.name].key]=1;
                      if (!term2class[nod.name].value.disable) {
                          term2class[nod.name].value.active = true;
                          activeRack[term2class[nod.name].key] = data.tsnedata[term2class[nod.name].key];
@@ -633,11 +637,14 @@ d3.TimeArc = function () {
                          nodes.push(nod);
                      }
 
-                 }else
+                 }else{
                     nodes.push(nod);
+                    catergogryObject[nod.group].current++;
+                 }
              }
 
         }
+        catergogryObject['rack'].current=Object.keys(availableRack).length;
         // rack calculate
         if (runopt.groupTimeLineMode==='onDisplay'){
             Object.keys(activeRack).forEach(k=>{
@@ -674,9 +681,7 @@ d3.TimeArc = function () {
 
         // compute the monthly data
         termMaxMax2 = 0;
-        nodes.userNum = 0;
-        nodes.computeNum = 0;
-        nodes.rackNum = 0;
+
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (!data.tsnedata[nodes[i].name]){
@@ -713,7 +718,6 @@ d3.TimeArc = function () {
                     }
                 }
                 nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}];
-                nodes.userNum++;
             }
         }
 
@@ -748,7 +752,6 @@ d3.TimeArc = function () {
                             mon.yNode = d.y;
                             return mon;
                         }),color:"steelblue"}];
-                nodes[nodes[i].group+'Num']++;
             }
         }
 
@@ -1461,14 +1464,18 @@ d3.TimeArc = function () {
         var rr = 6;
         var yoffset = ySlider+60;
         let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
-        svg.append('text').text('Color legend: ').attrs({
-            x: xx,
-            y: yoffset,
-            'font-weight': 'bold'
-        });
-        let legendg = svg.selectAll('g.nodeLegend')
-            .data(catergogryList)
-            .enter()
+        if (svg.select('.colorlegendtext').empty())
+            svg.append('text').text('Color legend: ').attrs({
+                class: 'colorlegendtext',
+                x: xx,
+                y: yoffset,
+                'font-weight': 'bold'
+            });
+
+        let legendg_o = svg.selectAll('g.nodeLegend')
+            .data(catergogryList);
+        legendg_o.exit().remove();
+        const legendg = legendg_o.enter()
             .append('g')
             .attr('class','nodeLegend')
             .attr('transform',(d,i)=>'translate('+xx+','+yscale(i)+')')
@@ -1484,11 +1491,11 @@ d3.TimeArc = function () {
             .attr("x", xx+10)
             .attr("y", 0)
             .attr("dy", ".21em")
-            // .attr("font-family", "sans-serif")
-            // .attr("font-size", "11px")
             .style("text-anchor", "left")
-            .style("fill",d=>getColor(d.key))
-            .text(d=>d.value.text||d.key);
+            .style("fill",d=>getColor(d.key));
+
+        legendg.merge(legendg_o).select('text')
+            .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`${d.value.current}/`:''}${summary[d.key]})`);
     }
     function onclickcategory(d) {
         if(d.disable){
@@ -1722,6 +1729,7 @@ d3.TimeArc = function () {
     }
 
     function drawStreamLegend () {
+        drawColorLegend();
         let yoffset = ySlider+60+90;
         let yStreamoffset = 20;
         let xoffset = xSlider;
