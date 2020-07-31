@@ -1749,7 +1749,7 @@ d3.TimeArc = function () {
                 .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
         }
         measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
-            .html(d=>`<tspan>${d.current}</tspan> ${d.type} of ${d.total}`);
+            .html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
         yoffset += 60;
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
