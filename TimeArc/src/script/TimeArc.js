@@ -621,7 +621,7 @@ d3.TimeArc = function () {
                 maxCount[nod.group] = nod.max;
             if (class2term[nod.name]){ // is rack
                 class2term[nod.name].classnode = nod;
-            }else if (termArray3[i].isConnected >= valueSlider)  // Only allow connected items
+            }else if (termArray3[i].isConnected >= Math.round(valueSlider))  // Only allow connected items
              {
                  if (term2class[nod.name]){
                      term2class[nod.name].value.obj.push(nod);
@@ -946,7 +946,7 @@ d3.TimeArc = function () {
         nodeG.append("text")
             .attr("class", "nodeText")
             .attr("dy", ".35em")
-            .attr('fill',d=>d.group==='user'?'#7c6dee':'unset')
+            .attr('fill',d=>d.group==='user'?colorCatergory(d.group):'unset')
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
             .classed("SearchTerm", d=> d.isSearchTerm)
@@ -1739,18 +1739,18 @@ d3.TimeArc = function () {
                 return yStreamoffset + yScale(d.y);
             });
 
-        let measagelegendg = svg.select('g.measagelegendg');
-        if (measagelegendg.empty()) {
-            measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            measagelegendg
-                .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
-                .enter()
-                .append('text')
-                .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
-        }
-        measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
-            .html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
-        yoffset += 60;
+        // let measagelegendg = svg.select('g.measagelegendg');
+        // if (measagelegendg.empty()) {
+        //     measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
+        //     measagelegendg
+        //         .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
+        //         .enter()
+        //         .append('text')
+        //         .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
+        // }
+        // measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
+        //     .html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
+        // yoffset += 60;
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
             streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
