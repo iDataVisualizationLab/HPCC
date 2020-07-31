@@ -946,7 +946,7 @@ d3.TimeArc = function () {
         nodeG.append("text")
             .attr("class", "nodeText")
             .attr("dy", ".35em")
-            .attr('fill',d=>d.group==='user'?colorCatergory(d.group):'unset')
+            .attr('fill',d=>d.group==='user'?d3.color(colorCatergory(d.group)).darker(1):'unset')
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
             .classed("SearchTerm", d=> d.isSearchTerm)
