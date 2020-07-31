@@ -1702,8 +1702,6 @@ d3.TimeArc = function () {
     }
 
     function drawClassCollection(yoffset, xoffset) {
-        let y = d3.scaleLinear();
-
         let classHolderg = d3.select('#rackCollection')
             .style('left', `${xoffset}px`)
             .style('top', `${yoffset}px`);
@@ -1833,7 +1831,8 @@ d3.TimeArc = function () {
                 "dy":'0.25rem',
                 "dx":'2px',
             }).style('text-shadow', 'rgba(255, 255, 255, 0.6) 1px 1px 0px').text(d=>Math.round(d.y));
-        yoffset += yStreamoffset + subscale.range()[1];
+
+        yoffset += yStreamoffset + step*2+20;
         yoffset = drawClassCollection(yoffset, xoffset);
     }
     var buttonLensingWidth =80;
