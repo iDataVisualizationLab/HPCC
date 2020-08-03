@@ -1593,7 +1593,7 @@ d3.TimeSpace = function () {
                 currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
             }else{
                 d3.select('.selectionName').classed('hide',false);
-                d3.select('.selectionName').text(`${dataRadar.name_or} at ${scaleTime.invert(dataRadar.timestep).toISOString()}`)
+                d3.select('.selectionName').text(`${dataRadar.name_or} at ${scaleTime.invert(dataRadar.__timestep).toISOString()}`)
                 holder.select('.singleRadar').classed('hide',false);
 
                     let cloneOpt = _.cloneDeep(radarChartclusteropt);
@@ -2123,6 +2123,7 @@ d3.TimeSpace = function () {
             d.__metrics.name = d.clusterName;
             d.__metrics.name_or = d.name;
             d.__metrics.timestep = d.timestep;
+            d.__metrics.__timestep = d.__timestep;
         });
         if (graphicopt.radaropt.schema){
             data.forEach(d=> {
@@ -2671,7 +2672,6 @@ d3.TimeSpace = function () {
 
     }
     function handle_filter(){
-        debugger
         if (datain){
             handle_data(datain);
                 isneedrender = true;
