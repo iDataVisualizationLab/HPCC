@@ -476,21 +476,22 @@ function main() {
 var currentlastIndex;
 var speedup= 0;
 function drawsummarypoint(harr){
+    const stepup = lastIndex-currentlastIndex;
     lastIndex = currentlastIndex;
     query_time = hostResults['timespan'][currentlastIndex];
-    jobMap.getharr(harr);
-
-    jobMap.dataComp_points(harr.map(i=>{
+    // jobMap.getharr(harr);
+    const stack = {};
+    const datain =harr.map(i=>{
         var h  = harr[i];
         var name = hosts[h].name;
-        // arrServices = getDataByName_withLabel(hostResults, name, lastIndex, lastIndex,0.5);
-        arrServices = tsnedata[name][lastIndex];// getDataByName(hostResults, name, lastIndex, lastIndex,undefined,0.5);
-        // arrServices.name = name;
-        arrServices.time = hostResults.timespan[lastIndex];
+        if (stack[name]===undefined)
+            stack[name] = stepup;
+        arrServices = tsnedata[name][lastIndex-stack[name]];// getDataByName(hostResults, name, lastIndex, lastIndex,undefined,0.5);
+        arrServices.time = hostResults.timespan[lastIndex-stack[name]];
+        stack[name]--;
         return arrServices;
-    }));
-    // var h = harr[harr.length-1];
-    // var name = hosts[h].name;
+    });
+    jobMap.dataComp_points(datain);
 }
 function shiftTimeText(){
     if (timelog.length > maxstack-1){ timelog.shift();
@@ -552,16 +553,19 @@ function request(){
             countarr.push(returnCount);
             count += 1;
         };
-        var midlehandle_full = function (ri){
-            countarr = d3.range(0,hosts.length);
-            count = hosts.length;
+        var midlehandle_full = function (step){
+            countarr = [];
+            for (let i = 0;i<step;i++)
+                for (let j = 0;j<hosts.length;j++)
+                    countarr.push(j)
+            count = countarr.length;
         };
         var drawprocess = function ()  {
             if (islastimestep(lastIndex+1)) {
                 isanimation = true;
                 getData(_.last(hosts).name,lastIndex,true,true);
                 d3.select('#compDisplay_control').attr('disabled',null);
-                console.log('Time load: ',performance.now() -times)
+                console.log('Time load: ',performance.now() -times);
                 getData(_.last(hosts).name,lastIndex)
             }
 
@@ -570,19 +574,7 @@ function request(){
             // fullset draw
             if (count > (hosts.length-1)) {// Draw the summary Box plot ***********************************************************
 
-                // getJoblist(lastIndex,true);
-
-                // Draw date
-                // d3.select(".currentDate")
-                //     .text("" + currentMiliseconds.toDateString());
-
-                // cal to plot
-                // bin.data([]);
-                // currentlastIndex = iteration+iterationstep-1;
-                if(hasjob)
-                    currentlastIndex = iteration+iterationstep-1;
-                else
-                    currentlastIndex = Math.min(iteration+iterationstep-1+sampleS.timespan.length-3,sampleS.timespan.length-1);
+                currentlastIndex = iteration+iterationstep-1;
                 // drawsummary();
                 jobMap.setharr([]);
                 lastIndex = currentlastIndex+1;
@@ -592,6 +584,10 @@ function request(){
                 requeststatus = true;
                 haveMiddle = false;
                 iteration += iterationstep;
+                if(hasjob)
+                    iterationstep = 1;
+                else
+                    iterationstep = Math.min(iteration+iterationstep-1+sampleS.timespan.length-3,sampleS.timespan.length-1)-iteration+1;
                 // updatetimeline(iteration);
             }
             currentlastIndex = iteration;
@@ -625,14 +621,12 @@ function request(){
                 else {
                     do {
                         // let ri = step_full(iteration);
-                        midlehandle_full();
+                        midlehandle_full(iterationstep);
+
                         if(countbuffer===0) {
                             if (islastimestep(lastIndex+1)&&hasjob)
                                 getJoblist();
-                            // document.getElementById("compDisplay_control").selectedIndex = 4;
-                            // d3.select('#compDisplay_control').dispatch("change");
                             jobMap.data(jobList,hostResults.timespan[lastIndex],lastIndex);
-                            // if(isanimation)
                             if(lastIndex%200===0)
                                 requestAnimationFrame(()=>jobMap.draw(true));
                         }
