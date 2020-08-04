@@ -54,8 +54,11 @@ function data2tree(data,sampleS,computers){
                             metrics:{},
                             user: computers?computers[c].user:[]
                         };
-                        if (sampleS)
+                        if (sampleS){
                             serviceFullList.forEach(s=>item.metrics[s.text]=_.last(sampleS[c][serviceListattr[s.idroot]])[s.id]);
+                            if (computers)
+                                computers[c].metric = item.metrics
+                        }
                         compute_layoutLink[c] = d.key;
                         return item;
                     })

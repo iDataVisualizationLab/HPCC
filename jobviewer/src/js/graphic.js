@@ -79,7 +79,14 @@ function serviceControl(){
         .attr('data-value',(d,i)=>d)
         .text(d=>d.text)
 }
-
+function initdraw(){
+    d3.select('#userSort').on('change',function(){
+        currentDraw(serviceSelected);
+    })
+}
+function getUsersort(){
+    return $('#userSort').val()
+}
 function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     serviceControl();
     graphicopt.radaropt.schema = serviceFullList;
@@ -234,8 +241,23 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
     // Setup the positions of inner nodes
     const userIndex={};
+    const users_arr_entries = d3.entries(users);
     // const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
-    const users_arr = d3.entries(users).sort((a,b)=>b.value.job.length-a.value.job.length).map(function(d, i) {
+    switch (getUsersort()) {
+        case 'job':
+            users_arr_entries.sort((a,b)=>b.value.job.length-a.value.job.length);
+            break;
+        case 'compute':
+            users_arr_entries.sort((a,b)=>b.value.node.length-a.value.node.length);
+            break;
+        default:
+            users_arr_entries.forEach(u=>{
+                u.value.node_metrics = d3.mean(u.value.node.map(c=>computers[c].metric[serviceName]));
+            });
+            users_arr_entries.sort((a,b)=>b.value.node_metrics-a.value.node_metrics);
+            break;
+    }
+    const users_arr = users_arr_entries.map(function(d, i) {
         userIndex[d.key]=i;
         d.x = -(graphicopt.rect.width / 2);
         d.y = innerY(i);
