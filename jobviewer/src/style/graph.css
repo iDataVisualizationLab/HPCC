@@ -84,6 +84,9 @@ text {
     font-weight: bold;
 }
 
+.outer_node .circle.invalid{
+    fill: black;
+}
 .link {
     fill: none;
     /*stroke: #a8dadc;*/

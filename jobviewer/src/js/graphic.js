@@ -90,16 +90,20 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     let getOutofRange = ()=>{}
+    let getOutofRange_prim = ()=>{}
     if(serviceName==='User') {
         vizservice[serviceSelected].range = d3.keys(users);
         _colorItem = d3.scaleOrdinal(d3.schemeCategory20);
         getOutofRange = ()=>false
+        getOutofRange_prim = ()=>false
     } else if (serviceName==='Radar') {
         _colorItem = colorCluster;
         getOutofRange = ()=>false
+        getOutofRange_prim = ()=>false
     }
     else{
         getOutofRange = getOutofRange_cont
+        getOutofRange_prim = getOutofRange_prim_cont
     }
     const range_cal_or = vizservice[serviceSelected].range.slice();
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
@@ -217,6 +221,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             e.data.relatedLinks = [];
             e.data.relatedNodes = [];
             e.data.disable = getOutofRange(e.data.metrics);
+            e.data.invalid = getOutofRange_prim(e.data.metrics);
             e.data.drawData = undefined;
             e.depth = 1;
         });
@@ -515,10 +520,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 return node
                     .attr('class','element')
                     .attr("fill", d => {
-
                         if(d.children) {
-                            // d.color =  color(d.depth);
-                            // return d.color;
                             d.color = '#dddddd';
                             return d.color;
                         }else {
@@ -564,10 +566,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             if (serviceName!=='Radar'){
                 let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
                     .attr('d',getRenderFunc)
+                    .classed('invalid',d=>d.invalid)
+                    .style('filter',d=>d.invalid?'url("#glow")':null)
                     .style('fill',d=>d.color);
                 path.exit().remove();
                 path.enter().append('path')
                     .attr('class','circle')
+                    .classed('invalid',d=>d.invalid)
+                    .style('filter',d=>d.invalid?'url("#glow")':null)
                 .attr('d',getRenderFunc).style('fill',d=>d.color);
             }else{
                 node.filter(d=>{
@@ -596,6 +602,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     }
     function getOutofRange_cont(e){
         return e[serviceName] < range_cal[0] || e[serviceName] > range_cal[1]
+    }
+    function getOutofRange_prim_cont(e){
+        return (e[serviceName]) && (e[serviceName] < range_cal_or[0] || e[serviceName] > range_cal_or[1]);
     }
     function getDrawData(e) {
         if (serviceName === 'Radar'){
@@ -630,8 +639,10 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 r:e.r,
                 color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
             }]
-        }else
-            return [{startAngle:0,endAngle:360,r:e.r}];
+        }else{
+            const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.data.invalid}];
+            return dataout;
+        }
     }
     function getRenderFunc(d){
         if (serviceName!=='Radar'|| !d.isRadar)
