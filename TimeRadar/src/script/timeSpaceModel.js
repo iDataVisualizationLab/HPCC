@@ -1593,7 +1593,7 @@ d3.TimeSpace = function () {
                 currentChart = RadarChart(".radarTimeSpace", [dataRadar], radarChartclusteropt, "");
             }else{
                 d3.select('.selectionName').classed('hide',false);
-                d3.select('.selectionName').text(`${dataRadar.name_or} at ${scaleTime.invert(dataRadar.__timestep).toISOString()}`)
+                d3.select('.selectionName').text(`${dataRadar.name_or} at ${scaleTime.invert(dataRadar.__timestep).toISOString()}`) 
                 holder.select('.singleRadar').classed('hide',false);
 
                     let cloneOpt = _.cloneDeep(radarChartclusteropt);
