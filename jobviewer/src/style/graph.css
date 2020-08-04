@@ -126,3 +126,7 @@ text {
 .d3-tip span {
     text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
 }
+#circularLayoutHolder select{
+    padding-left: 2px;
+    padding-right: 2px;
+}
