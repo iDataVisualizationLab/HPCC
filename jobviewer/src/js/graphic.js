@@ -107,10 +107,10 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     }
     const range_cal_or = vizservice[serviceSelected].range.slice();
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
-    if(serviceName!=='User')
+    if(serviceName!=='User'){
         if(serviceName!=='Radar')
             _colorItem.domain(range_cal.slice().reverse());
-    else
+    }else
         _colorItem.domain(range_cal.slice());
     const colorItem = function(d){
         if (d) {
@@ -175,7 +175,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         return d.metrics[vizservice[serviceSelected].text]
     }
     let cluster_dict = {};
-    if (serviceName==='Radar'&&cluster_info&&Layout.tree.children[0].children[0].metrics.Radar===undefined)
+    if (serviceName==='Radar'&&cluster_info)
     {
         cluster_info.forEach(d=>d.arr=[])
         Layout.tree.children.forEach(d=>{
