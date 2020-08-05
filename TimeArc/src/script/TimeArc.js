@@ -569,8 +569,10 @@ d3.TimeArc = function () {
         console.log("numberInputTerms=" + numberInputTerms);
 
         // Compute relationship **********************************************************
-        numNode = Math.min(1000, termArray.length);
-        numNode2 = Math.min(500, termArray.length);
+        // numNode = Math.min(1000, termArray.length);
+        // numNode2 = Math.min(500, termArray.length);
+        numNode = termArray.length;
+        numNode2 = termArray.length;
         var selectedTerms = {};
         for (var i = 0; i < numNode2; i++) {
             selectedTerms[termArray[i].term] = termArray[i].max;
