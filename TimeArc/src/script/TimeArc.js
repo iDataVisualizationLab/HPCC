@@ -284,7 +284,7 @@ d3.TimeArc = function () {
         }else {
             terms[term][m] += count;
         }
-        
+
         if ((terms[term][m] > terms[term].frequency)) {
             terms[term].frequency = terms[term][m];
             terms[term].maxTimeIndex = m;
