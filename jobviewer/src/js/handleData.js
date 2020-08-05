@@ -49,6 +49,12 @@ function getData(d){
     return d.metrics[vizservice[serviceSelected].text]
 }
 
+function getData_delta(d){
+    if ( vizservice[serviceSelected].text!=='User' && vizservice[serviceSelected].text!=='Radar')
+        return d.metrics_delta[vizservice[serviceSelected].text];
+    return 0;
+}
+
 function data2tree(data,sampleS,computers){
     const compute_layoutLink = {};
     const tree =  {name:"__main__",children:data.map(d=>{
@@ -59,12 +65,16 @@ function data2tree(data,sampleS,computers){
                             name:c,
                             value:1,
                             metrics:{},
+                            metrics_delta:{},
                             user: computers?computers[c].user:[]
                         };
                         if (sampleS){
                             serviceFullList.forEach(s=>item.metrics[s.text]=_.last(sampleS[c][serviceListattr[s.idroot]])[s.id]);
                             if (computers)
                                 computers[c].metric = item.metrics
+                            if (Layout.computers_old){
+                                serviceFullList.forEach(s=>item.metrics_delta[s.text] = item.metrics[s.text]-Layout.computers_old[c].metric[s.text]);
+                            }
                         }
                         compute_layoutLink[c] = d.key;
                         return item;
@@ -98,6 +108,7 @@ function queryData(data) {
     let {computers,jobs,users} = handleData(data);
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
+    Layout.computers_old = computers;
     currentDraw = _.partial(draw,computers,jobs,users,sampleS,currentTime);
     currentDraw(serviceSelected);
 }

@@ -46,6 +46,7 @@ let graphicopt = {
     "iLength": 22,
     "mid": 11,
     animationTime:500,
+    threshold:0.5,
     radaropt : {
         // summary:{quantile:true},
         mini:true,
@@ -219,14 +220,16 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.relatedNodes = [];
 
         d.pack = pack_all.children.find(c=>c.data.name===d.name);
-        d.pack.children.forEach(e=>{
+        d.pack.children.forEach((e,ei)=>{
             e.x -= d.pack.x;
             e.y -= d.pack.y;
             e.data.relatedLinks = [];
             e.data.relatedNodes = [];
+            e.data.currentID = ei;
             e.data.disable = getOutofRange(e.data.metrics);
             e.data.invalid = getOutofRange_prim(e.data.metrics);
             e.data.drawData = undefined;
+            e.data.highlight = Math.abs(scale_prim(e.data.metrics_delta))>graphicopt.threshold;
             e.depth = 1;
         });
         d.drawData = [{startAngle: 0,endAngle:360,r:d.pack.r}];
@@ -300,7 +303,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     });
     // console.log(targetPos);
     // Join target positions with links data by target nodes
-    links.filter(d=>{
+    links.forEach(d=>{
         targetPos.find((v=>{
 
             if (d.target === v.target){
@@ -356,6 +359,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("class", "outer_node");
     onode_n.append('g').attr('class','circleG');
     onode_n.append('g').attr('class','summary hide');
+    onode_n.append('g').attr('class','glowEffect');
     onode_n.append('g').attr('class','label')
         .attr('class','label')
         .style("font", "10px sans-serif")
@@ -374,7 +378,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             }})
         .on("mouseout", function(d){_.bind(mouseout,d.childrenNode[d.name].node())(d)});
 
-    onode_n.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).call(updateOnode)
+    onode_n.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).call(updateOnode);
     function updateOnode(p){
 
         p.each(function(d){
@@ -535,13 +539,45 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     d.data.tooltip = d3.select(this);
             })
             // label.call(textcolor);
-            label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px')
+            label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px');
+
+            // glowEffect = svg.select('g.glowEffect')
+            //     .selectAll("defs.glowElement")
+            //     .data(root.descendants(), d => d.data.name)
+            //     .call(updateGlow);
+            //
+            // glowEffect.exit().remove();
+            // glowEffect_n = glowEffect.enter().append("defs")
+            //     .attr('class','glowElement');
+            // glowEffect_n.append('filter');
+            // glowEffect_n
+            //     .call(updateGlow).merge(glowEffect);
+            function updateGlow(p){
+                p.select('filter')
+                    .attr('id',d=>'c'+d.data.currentID)
+                    .html(`<feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"></feMergeNode>
+                            <feMergeNode in="SourceGraphic"></feMergeNode>
+                        </feMerge>`);
+                return p;
+            }
+
             zoomTo([root.x, root.y, root.r * 2], istransition)
             return childrenNode;
             function updateNode(node) {
                 node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
-                return node
+                node
                     .attr('class','element')
+                    .classed('compute', d => !d.children)
+                    .attr("pointer-events", d => !d.children ? "none" : null)
+                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
+                    .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
+                    .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
+                    // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+                // node
+                    // .interrupt().transition().duration(graphicopt.animationTime)
+                    // .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                     .attr("fill", d => {
                         if(d.children) {
                             d.color = '#dddddd';
@@ -555,14 +591,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     })
                     .style('stroke-width',d=>{
                         return circleStrokeScale(d.data.relatedNodes.length);
-                    })
-                    .classed('compute', d => !d.children)
-                    .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
-                    .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
-                    .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
-                    // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
-
+                    });
+                return node;
             }
         }
         function updateSummary(p){
@@ -628,6 +658,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     }
     function getOutofRange_prim_cont(e){
         return (e[serviceName]) && (e[serviceName] < range_cal_or[0] || e[serviceName] > range_cal_or[1]);
+    }
+    function scale_prim(e){
+        return d3.scaleLinear().range(range_cal_or)(e[serviceName]);
     }
     function getDrawData(e) {
         if (serviceName === 'Radar'){
