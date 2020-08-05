@@ -46,7 +46,7 @@ let graphicopt = {
     "iLength": 22,
     "mid": 11,
     animationTime:500,
-    threshold:0.5,
+    threshold:0.3,
     radaropt : {
         // summary:{quantile:true},
         mini:true,
@@ -541,17 +541,17 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // label.call(textcolor);
             label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px');
 
-            // glowEffect = svg.select('g.glowEffect')
-            //     .selectAll("defs.glowElement")
-            //     .data(root.descendants(), d => d.data.name)
-            //     .call(updateGlow);
-            //
-            // glowEffect.exit().remove();
-            // glowEffect_n = glowEffect.enter().append("defs")
-            //     .attr('class','glowElement');
-            // glowEffect_n.append('filter');
-            // glowEffect_n
-            //     .call(updateGlow).merge(glowEffect);
+            glowEffect = svg.select('g.glowEffect')
+                .selectAll("defs.glowElement")
+                .data(root.descendants(), d => d.data.name)
+                .call(updateGlow);
+
+            glowEffect.exit().remove();
+            glowEffect_n = glowEffect.enter().append("defs")
+                .attr('class','glowElement');
+            glowEffect_n.append('filter');
+            glowEffect_n
+                .call(updateGlow).merge(glowEffect);
             function updateGlow(p){
                 p.select('filter')
                     .attr('id',d=>'c'+d.data.currentID)
@@ -577,7 +577,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
                 // node
                     // .interrupt().transition().duration(graphicopt.animationTime)
-                    // .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
+                    .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                     .attr("fill", d => {
                         if(d.children) {
                             d.color = '#dddddd';
@@ -660,7 +660,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         return (e[serviceName]) && (e[serviceName] < range_cal_or[0] || e[serviceName] > range_cal_or[1]);
     }
     function scale_prim(e){
-        return d3.scaleLinear().range(range_cal_or)(e[serviceName]);
+        return d3.scaleLinear().domain(range_cal_or.map(d=>d-range_cal_or[0]))(e[serviceName]);
     }
     function getDrawData(e) {
         if (serviceName === 'Radar'){
