@@ -292,73 +292,45 @@ d3.TimeArc = function () {
         }
     }
     let handleInfo = handleByJob;
-    function handleByJob(d, term, c, m, arr) {
-        if (d.type !== 'endTime') {
-            d.__terms__[term] = d.category[c][term];
-            if (term2class[term]) {
-                upadateTerms(term, c, m, d.__terms__[term]);
-                upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
-                d.__terms__[term2class[term].key] = d.category[c][term];
-                if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
-                    arr.tsnedata[term2class[term].key].totalObj[term] = 1;
-                    arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
-                }
-            } else {
-                const current = arr.userdata[term] || 0;
-                arr.userdata[term] = current + d.__terms__[term];
-                upadateTerms(term, c, m, d.__terms__[term]);
-            }
-        } else {
-            // add user information
-            if (!term2class[term]) {
-                const current = arr.userdata[term] || 0;
-                arr.userdata[term] = current - d.category[c][term];
-                terms[term][m] = arr.userdata[term];
-            }
-        }
+
+
+    function handleByJob(e, arr, c, m) {
+        let term = e.key;
+        arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        e.values.forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
+        upadateTerms(term, c, m, arr.userdata[term].current)
     }
-    function handleByCompute(d, term, c, m, arr) {
-        if (d.type !== 'endTime') { // start
-            d.__terms__[term] = d.category[c][term];
-            if (term2class[term]) {
-                upadateTerms(term, c, m, d.__terms__[term]);
-                upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
-                d.__terms__[term2class[term].key] = d.category[c][term];
-                if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
-                    arr.tsnedata[term2class[term].key].totalObj[term] = 1;
-                    arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
-                }
-            } else {
-                arr.userdata[term] = arr.userdata[term] || {};
-                let count = 0;
-                Object.keys(d.category['compute']).forEach(c=>{
-                        if (!arr.userdata[term][c]){
-                            arr.userdata[term][c] = 1;
-                            count++;
+
+    function handleByCompute(e, arr, c, m) {
+        let term = e.key;
+        arr.userdata[term].current = arr.userdata[term].current||{};
+
+        e.values.forEach(s=>{
+            if(s.key==='startTime'){
+                s.values.forEach(d=>{
+                    d.__terms__[term] = 2;
+                    Object.keys(d.category['compute']).forEach(c=>{
+                        if (!arr.userdata[term].current[c]){
+                            arr.userdata[term].current[c] = 1;
                         }else
-                            arr.userdata[term][c]++;
-                });
-                upadateTerms(term, c, m, count);
-            }
-        } else { // end
-            // add user information
-            if (!term2class[term]) {
-                arr.userdata[term] = arr.userdata[term] || {};
-                Object.keys(d.category['compute']).forEach(c=>{
-                    if (arr.userdata[term][c]) {
-                        arr.userdata[term][c] --;
+                            arr.userdata[term].current[c]++;
+                    });
+                })
+            }else{
+                s.values.forEach(d=>{
+                    Object.keys(d.category['compute']).forEach(c=>{
+                        arr.userdata[term].current[c] --;
                         if (arr.userdata[term][c]===0) // no job using this
                             delete arr.userdata[term][c];
-                    }
-                });
-                terms[term][m] = Object.keys(arr.userdata[term]).length;
+                    });
+                })
             }
-        }
+        });
+        upadateTerms(term, c, m, Object.keys(arr.userdata[term].current).length)
     }
-
     function handledata (arr) {
         updateTimeScale();
-
+        arr.sort((a,b)=>a.date-b.date);
         summary = {user:0,compute:0,rack:0};
         terms = new Object();
         termMaxMax = 1;
@@ -368,20 +340,76 @@ d3.TimeArc = function () {
             arr.tsnedata[c].total = [];
             arr.tsnedata[c].totalObj = {};
         });
-        arr.userdata = {}
-        arr.forEach(function (d) {
-            // Process date
-            // d.date = new Date(d["time"]);
-            var m = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
-            d.__timestep__ = m;
+        arr.userdata = {};
+
+        const dataByTime = d3.nest().key(d=>{
+            d.__timestep__ = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
+            if (d.type !== 'endTime') {
+                for (let term in d.category['user']){
+                    if (!arr.userdata[term])
+                        arr.userdata[term] = {job:{},current:0}
+                    arr.userdata[term].job[d.id] = d.__timestep__;
+                }
+            }else{
+                for (let term in d.category['user'])
+                    if (arr.userdata[term].job[term]===d.__timestep__)
+                        d.__timestep__ ++;
+            }
             d.__terms__ = {};
-            for (let c in d.category) {
-                for (let term in d.category[c]) {
-                    handleInfo(d, term, c, m, arr);
+            return d.__timestep__;
+        }).entries(arr);
+        dataByTime.forEach(function(month){
+            const m = +month.key;
+            // compute
+            let c = 'compute';
+            month.values.forEach(d=> {
+                if (d.type==='startTime'){
+                    for (let term in d.category[c]){
+                        d.__terms__[term] = 1; //compute
+                        upadateTerms(term, c, m, d.__terms__[term]);
+                        upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
+                        d.__terms__[term2class[term].key] = d.category[c][term];
+                        if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
+                            arr.tsnedata[term2class[term].key].totalObj[term] = 1;
+                            arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                        }
+
+                    }
+                }
+            });
+            // user
+            const nest_user = d3.nest().key(d=>d3.keys(d.category['user'])[0]).key(d=>d.type).entries(month.values);
+            c = 'user';
+            nest_user.forEach(e=>{
+                handleInfo(e, arr, c, m);
+            })
+        });
+        //re calculate for user data
+        Object.keys(arr.userdata).forEach(term=>{
+            terms[term].frequency = 0;
+            terms[term].maxTimeIndex = -100;
+            for (var m = 0; m < totalTimeSteps; m++) {
+                if ((terms[term][m] > terms[term].frequency)) {
+                    terms[term].frequency = terms[term][m];
+                    terms[term].maxTimeIndex = m;
+                    if (terms[term].frequency > termMaxMax)
+                        termMaxMax = terms[term].frequency;
                 }
             }
-
-        });
+        })
+        // arr.forEach(function (d) {
+        //     // Process date
+        //     // d.date = new Date(d["time"]);
+        //     var m = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
+        //     d.__timestep__ = m;
+        //     d.__terms__ = {};
+        //     for (let c in d.category) {
+        //         for (let term in d.category[c]) {
+        //             handleInfo(d, term, c, m, arr);
+        //         }
+        //     }
+        //
+        // });
         data = arr;
         console.log("DONE reading the input file = " + data.length);
     }
@@ -556,7 +584,7 @@ d3.TimeArc = function () {
             for (var term1 in d.__terms__) {
                 if (selectedTerms[term1]) {   // if the term is in the selected 100 terms
                     for (var term2 in d.__terms__) {
-                        if (selectedTerms[term2]) {   // if the term is in the selected 100 terms
+                        if (selectedTerms[term2] && d.__terms__[term2]!==d.__terms__[term1]) {   // if the term is in the selected 100 terms and 2 different category
                             if (!relationship[term1 + "__" + term2]) {
                                 relationship[term1 + "__" + term2] = new Object();
                                 relationship[term1 + "__" + term2].max = 1;

@@ -111,25 +111,21 @@ function handle_data_timeArc () {
     scheme.data=[];
     scheme.data.timespan = sampleS.timespan.slice();
     sampleJobdata.forEach(j=>{
-        j.nodes.forEach(comp=>{
-            function linkData(key) {
-                let date = new Date(j[key]);
-                if (date < scheme.data.timespan[0])
-                    date = scheme.data.timespan[0];
-                const data = {category: {user: {}, compute: {}}, date: date};
-                data.category.user[j.user] = 1;
-                data.category.compute[comp] = 1;
-                data.type = key;
-                dataObj[j.user + j.startTime + comp] = data;
-                scheme.data.push(data);
-            }
+        function linkData(key) {
+            let date = new Date(j[key]);
+            if (date < scheme.data.timespan[0])
+                date = scheme.data.timespan[0];
+            const data = {category: {user: {}, compute: {}}, date: date};
+            data.category.user[j.user] = 1;
+            j.nodes.forEach(comp=>data.category.compute[comp] = 1)
+            data.type = key;
+            data.id = j.jobID;
+            scheme.data.push(data);
+        }
 
-            if (!dataObj[j.user+j.startTime+comp]) {
-                linkData('startTime');
-                if (j.endTime)
-                    linkData('endTime');
-            }
-        })
+        linkData('startTime');
+        if (j.endTime)
+            linkData('endTime');
     });
     scheme.data.tsnedata = tsnedata;
     scheme.data.selectedService = 0;
