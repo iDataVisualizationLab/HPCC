@@ -2076,9 +2076,9 @@ d3.TimeArc = function () {
             .on("end", brushend);
 
         let grang = svg.select('g.slider_range');
+
         let axisl = grang.select("g.x.axis");
         slider = grang.select("g.slider");
-        handle = slider.select(".handle--custom");
         if (grang.empty())
         {
             grang = svg.append('g')
@@ -2099,12 +2099,20 @@ d3.TimeArc = function () {
                 .attr("dy", ".21em")
                 .style("text-anchor","start");
             slider = grang.append("g")
-                .attr("class", "slider")
-                .call(brush);
+                .attr("class", "slider");
+            slider.call(brush);
+
+            slider.selectAll(".extent,.resize")
+                .remove();
+
+            slider.select(".background")
+                .attr("y",-5)
+                .attr("height", 10);
             handle = slider.append("circle")
                 .attr("class", "handle--custom")
                 .attr("stroke", "#000")
                 .attr("cursor", "ew-resize")
+                .style("pointer-events", "none")
                 .attr("r", 5);
         }
         axisl.call(d3.axisBottom()
@@ -2123,14 +2131,6 @@ d3.TimeArc = function () {
             .html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
 
 
-        slider.call(brush);
-
-        slider.selectAll(".extent,.resize")
-            .remove();
-
-        slider.select(".background")
-            .attr("y",-5)
-            .attr("height", 10);
 
         handle.attr("cx", xScaleSlider(valueSlider));
         slider.call(brush.move, [0, valueSlider].map(xScaleSlider));

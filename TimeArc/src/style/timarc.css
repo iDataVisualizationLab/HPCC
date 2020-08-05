@@ -125,7 +125,7 @@ text tspan {
     font-size: 12px;
 }
 .slider_range .handle.handle--e, .slider_range .handle.handle--w {
-    display: none;
+    opacity: 0;
 }
 .legendText {
     font-weight: bold;
