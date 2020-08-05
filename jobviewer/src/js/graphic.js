@@ -554,6 +554,10 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .call(updateGlow).merge(glowEffect);
             function updateGlow(p){
                 p.select('filter')
+                    .attr("width","300%")
+                    .attr("x","-100%")
+                    .attr("y","-100%")
+                    .attr("height","300%")
                     .attr('id',d=>'c'+d.data.currentID)
                     .html(`<feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
                         <feMerge>
