@@ -83,6 +83,10 @@ function serviceControl(){
 function initdraw(){
     d3.select('#userSort').on('change',function(){
         currentDraw(serviceSelected);
+    });
+    d3.select('#sort_apply').on('click',function(){
+        sortData();
+        currentDraw(serviceSelected)
     })
 }
 function getUsersort(){
@@ -174,14 +178,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .domain([0, graphicopt.mid-1, graphicopt.mid, graphicopt.oLength-1])
         .range([deadAngle, 180-deadAngle, 180+deadAngle ,360-deadAngle]);
 
-    // Setup the positions of outer nodes
-    function getData(d){
-        if (serviceName==='User')
-            return d.user.length//?userIndex[d.user[0]]:-1;
-        if (serviceName==='Radar'&&d.cluster)
-            return -d.cluster.arr.length;
-        return d.metrics[vizservice[serviceSelected].text]
-    }
     let cluster_dict = {};
     if (serviceName==='Radar'&&cluster_info)
     {
@@ -208,7 +204,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             })
         })
     }
-    Layout.tree.children.forEach(d=>d.children.sort((a,b)=>-getData(a)+getData(b)))
+
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
@@ -577,7 +573,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .attr('fill',d=>_colorItem(d.data[d.key[2]]));
         }
         function updateSummaryCircle(p){
-            p.attr('r',d=>summary_y(d.data))
+            p.attr('r',d=>Math.max(summary_y(d.data)<0,0))
                 .attr('fill','none')
                 .attr('stroke',d=>_colorItem(d.data));
         }
@@ -1101,3 +1097,4 @@ function angle2position(angle,radius){
 function circlePath(cx, cy, r){
     return 'M '+cx+' '+cy+' m -'+r+', 0 a '+r+','+r+' 0 1,0 '+(r*2)+',0 a '+r+','+r+' 0 1,0 -'+(r*2)+',0';
 }
+

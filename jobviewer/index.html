@@ -55,9 +55,9 @@
                     </filter>
                 </defs>
             </svg>
-            <div id="legendHolder" class="position-absolute" style="top:0px">
+            <div id="legendHolder" class="position-absolute" style="top:0px;width: 300px">
                 <div class="row">
-                    <label class="col-6" for="userSort">Sort user by: </label>
+                    <label class="col-4" for="userSort">Sort users by: </label>
                     <select class="col-6" id="userSort">
                         <option value="job">#Jobs</option>
                         <option value="compute">#Compute</option>
@@ -65,19 +65,21 @@
                     </select>
                 </div>
                 <div class="row">
-                    <label class="col-6" for="serviceSelection">Visualizing: </label>
+                    <label class="col-4" for="serviceSelection">Visualizing: </label>
                     <select class="col-6" id="serviceSelection">
                     </select>
+                    <button id="sort_apply" type="button" class="btn btn-success btn-sm">Sort</button>
                 </div>
-                <div class="row justify-content-center legendView hide">
-                    <div class="col-7">
+                <div class="row legendView hide">
+                    <label class="col-4"></label>
+                    <div class="col-6 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
                         <div class="input-group flex-nowrap">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="addon-max">max</span>
                             </div>
                             <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
                         </div>
-                        <svg class="legend"></svg>
+                        <svg class="legend" style="transform: translateX(50px)"></svg>
                         <div class="input-group flex-nowrap">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="addon-min">min</span>
