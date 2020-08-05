@@ -190,7 +190,22 @@ d3.TimeArc = function () {
                 runopt.groupTimeLineMode = "onDisplay";
             }
             recompute();
-        })
+        });
+        d3.select('#userDisplay_control').on('change',function(){
+            d3.select(this).dispatch('changeVal');
+            handledata(data);
+            timeArc.draw();
+        }).on('changeVal',()=>{
+            runopt.userStreamMode =  $('#userDisplay_control').val();
+            switch (runopt.userStreamMode){
+                case 'job':
+                    handleInfo = handleByJob;
+                    break;
+                case 'compute':
+                    handleInfo = handleByCompute;
+                    break
+            }
+        }).dispatch('changeVal')
 //******************* Forced-directed layout
 
 //Set up the force layout
@@ -276,6 +291,70 @@ d3.TimeArc = function () {
             }
         }
     }
+    let handleInfo = handleByJob;
+    function handleByJob(d, term, c, m, arr) {
+        if (d.type !== 'endTime') {
+            d.__terms__[term] = d.category[c][term];
+            if (term2class[term]) {
+                upadateTerms(term, c, m, d.__terms__[term]);
+                upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
+                d.__terms__[term2class[term].key] = d.category[c][term];
+                if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
+                    arr.tsnedata[term2class[term].key].totalObj[term] = 1;
+                    arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                }
+            } else {
+                const current = arr.userdata[term] || 0;
+                arr.userdata[term] = current + d.__terms__[term];
+                upadateTerms(term, c, m, d.__terms__[term]);
+            }
+        } else {
+            // add user information
+            if (!term2class[term]) {
+                const current = arr.userdata[term] || 0;
+                arr.userdata[term] = current - d.category[c][term];
+                terms[term][m] = arr.userdata[term];
+            }
+        }
+    }
+    function handleByCompute(d, term, c, m, arr) {
+        if (d.type !== 'endTime') { // start
+            d.__terms__[term] = d.category[c][term];
+            if (term2class[term]) {
+                upadateTerms(term, c, m, d.__terms__[term]);
+                upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
+                d.__terms__[term2class[term].key] = d.category[c][term];
+                if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
+                    arr.tsnedata[term2class[term].key].totalObj[term] = 1;
+                    arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
+                }
+            } else {
+                arr.userdata[term] = arr.userdata[term] || {};
+                let count = 0;
+                Object.keys(d.category['compute']).forEach(c=>{
+                        if (!arr.userdata[term][c]){
+                            arr.userdata[term][c] = 1;
+                            count++;
+                        }else
+                            arr.userdata[term][c]++;
+                });
+                upadateTerms(term, c, m, count);
+            }
+        } else { // end
+            // add user information
+            if (!term2class[term]) {
+                arr.userdata[term] = arr.userdata[term] || {};
+                Object.keys(d.category['compute']).forEach(c=>{
+                    if (arr.userdata[term][c]) {
+                        arr.userdata[term][c] --;
+                        if (arr.userdata[term][c]===0) // no job using this
+                            delete arr.userdata[term][c];
+                    }
+                });
+                terms[term][m] = Object.keys(arr.userdata[term]).length;
+            }
+        }
+    }
 
     function handledata (arr) {
         updateTimeScale();
@@ -298,28 +377,7 @@ d3.TimeArc = function () {
             d.__terms__ = {};
             for (let c in d.category) {
                 for (let term in d.category[c]) {
-                    if(d.type!=='endTime') {
-                        d.__terms__[term] = d.category[c][term];
-                        if (term2class[term]) {
-                            upadateTerms(term, c, m, d.__terms__[term]);
-                            upadateTerms(term2class[term].key, 'rack', m, d.__terms__[term]);
-                            d.__terms__[term2class[term].key] = d.category[c][term];
-                            if (!arr.tsnedata[term2class[term].key].totalObj[term]) {
-                                arr.tsnedata[term2class[term].key].totalObj[term] = 1;
-                                arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
-                            }
-                        }else{
-                            const current = arr.userdata[term]||0;
-                            arr.userdata[term] = current + d.__terms__[term];
-                            upadateTerms(term, c, m, arr.userdata[term]);
-                        }
-                    }else{
-                        if (!term2class[term]){
-                            const current = arr.userdata[term]||0;
-                            arr.userdata[term] = current - d.category[c][term];
-                            terms[term][m] = arr.userdata[term];
-                        }
-                    }
+                    handleInfo(d, term, c, m, arr);
                 }
             }
 
@@ -1306,7 +1364,7 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric)
-                return area_compute(d.value)
+                return area_compute(d.value);
             return area(d.value);
         });
     }
@@ -1571,7 +1629,7 @@ d3.TimeArc = function () {
             }
         );
 
-        timeLegend = svg.select('timeLegend');
+        timeLegend = svg.select('.timeLegend');
         if (timeLegend.empty()) {
             timeLegend = svg.append('g').attr('class', 'timeLegend');
             timeLegend.append('g').attr('class','timebrush');
@@ -1810,8 +1868,9 @@ d3.TimeArc = function () {
         let streamlegendg = svg.select('g.streamlegendg');
         if (streamlegendg.empty()) {
             streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            streamlegendg.append('text').text('User stream height (by # jobs):').attr('class','legendText')
+            streamlegendg.append('text').attr('class','legendText')
         }
+        streamlegendg.select('text.legendText').text(`User stream height (by # ${runopt.userStreamMode}):`);
         let streampath = streamlegendg.select('path.pathlegend');
         if (streampath.empty())
             streampath = streamlegendg.append('path')
@@ -1895,23 +1954,9 @@ d3.TimeArc = function () {
     // let colorCatergory = d3.scaleOrdinal(d3.schemeCategory10);
     let colorCatergory = d3.scaleOrdinal().range(["#080","steelblue","#828282"]);
     function getColor(category, count) {
-        // var minSat = 80;
-        // var maxSat = 180;
-        // var percent = count/maxCount[category];
-        // var sat = minSat+Math.round(percent*(maxSat-minSat));
         if (catergogryObject[category].customcolor)
             return catergogryObject[category].customcolor;
         return  colorCatergory(category)
-        // if (category=="person")
-        //     return "rgb("+sat+", "+255+", "+sat+")" ; // leaf node
-        // else if (category=="location")
-        //     return "rgb("+255+", "+sat+", "+sat+")" ; // leaf node
-        // else if (category=="organization")
-        //     return "rgb("+sat+", "+sat+", "+255+")" ; // leaf node
-        // else if (category=="miscellaneous")
-        //     return "rgb("+(215)+", "+(215)+", "+(sat)+")" ; // leaf node
-        // else
-        //     return "#000000";
 
     }
 
@@ -2002,39 +2047,49 @@ d3.TimeArc = function () {
             .on("brush", brushed)
             .on("end", brushend);
 
-        const grang = svg.append('g')
-            .attr('class','slider_range')
-            .attr('transform',"translate("+xSlider+"," + ySlider + ")")
+        let grang = svg.select('g.slider_range');
+        let axisl = grang.select("g.x.axis");
+        slider = grang.select("g.slider");
+        if (grang.empty())
+        {
+            grang = svg.append('g')
+                .attr('class','slider_range')
+                .attr('transform',"translate("+xSlider+"," + ySlider + ")")
 
-        const axisl = grang.append("g")
-            .attr("class", "x axis fontSmaller")
-            .call(d3.axisBottom()
-                .scale(xScaleSlider)
-                .ticks(4)
-                .tickFormat(function(d) { return d; })
-                .tickSize(0)
-                .tickPadding(5));
+            axisl = grang.append("g")
+                .attr("class", "x axis fontSmaller");
+            grang.append("text")
+                .attr("class", "sliderlabel legendText")
+                .attr("y", -14)
+                .attr("dy", ".21em")
+                .text('Filter links:')
+                .style("text-anchor","start");
+            grang.append("text")
+                .attr("class", "sliderText fontSmaller")
+                .attr("y", 26)
+                .attr("dy", ".21em")
+                .style("text-anchor","start");
+            slider = grang.append("g")
+                .attr("class", "slider")
+                .call(brush);
+        }
+        axisl.call(d3.axisBottom()
+             .scale(xScaleSlider)
+             .ticks(4)
+             .tickFormat(function(d) { return d; })
+             .tickSize(0)
+             .tickPadding(5))
         axisl.select(".domain")
             .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
             .attr("class", "halo");
         axisl.selectAll('.tick text')
             .attr('dy','0.8em');
-        grang.append("text")
-            .attr("class", "sliderlabel legendText")
-            .attr("y", -14)
-            .attr("dy", ".21em")
-            .text('Filter links:')
-            .style("text-anchor","start");
-        grang.append("text")
-            .attr("class", "sliderText fontSmaller")
-            .attr("y", 26)
-            .attr("dy", ".21em")
-            .style("text-anchor","start")
+
+        grang.select("text.sliderText")
             .html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
 
-        slider = grang.append("g")
-            .attr("class", "slider")
-            .call(brush);
+
+        slider.call(brush);
 
         slider.selectAll(".extent,.resize")
             .remove();
