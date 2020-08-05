@@ -297,7 +297,7 @@ d3.TimeArc = function () {
     function handleByJob(e, arr, c, m) {
         let term = e.key;
         arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
-        e.values.forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
+        e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         upadateTerms(term, c, m, arr.userdata[term].current)
     }
 
@@ -2078,6 +2078,7 @@ d3.TimeArc = function () {
         let grang = svg.select('g.slider_range');
         let axisl = grang.select("g.x.axis");
         slider = grang.select("g.slider");
+        handle = slider.select(".handle--custom");
         if (grang.empty())
         {
             grang = svg.append('g')
@@ -2100,6 +2101,11 @@ d3.TimeArc = function () {
             slider = grang.append("g")
                 .attr("class", "slider")
                 .call(brush);
+            handle = slider.append("circle")
+                .attr("class", "handle--custom")
+                .attr("stroke", "#000")
+                .attr("cursor", "ew-resize")
+                .attr("r", 5);
         }
         axisl.call(d3.axisBottom()
              .scale(xScaleSlider)
@@ -2126,14 +2132,7 @@ d3.TimeArc = function () {
             .attr("y",-5)
             .attr("height", 10);
 
-        handle = slider.selectAll(".handle--custom")
-            .data([{type: "e"}])
-            .enter().append("circle")
-            .attr("class", "handle--custom")
-            .attr("stroke", "#000")
-            .attr("cursor", "ew-resize")
-            .attr("r", 5)
-            .attr("cx", xScaleSlider(valueSlider));
+        handle.attr("cx", xScaleSlider(valueSlider));
         slider.call(brush.move, [0, valueSlider].map(xScaleSlider));
     }
 
