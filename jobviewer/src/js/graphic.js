@@ -45,6 +45,7 @@ let graphicopt = {
     "oLength": 22,
     "iLength": 22,
     "mid": 11,
+    animationTime:500,
     radaropt : {
         // summary:{quantile:true},
         mini:true,
@@ -348,6 +349,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
     if(onodesg.empty()){
+        console.log('empty')
         onodesg = svg.append("g").attr("class", "outer_nodes")
     }
     let onode = onodesg.selectAll(".outer_node")
@@ -376,7 +378,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             }})
         .on("mouseout", function(d){_.bind(mouseout,d.childrenNode[d.name].node())(d)});
 
-    onode_n.call(updateOnode)
+    onode_n.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).call(updateOnode)
     function updateOnode(p){
 
         p.each(function(d){
@@ -388,7 +390,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             .attr("dx", function(d) { return d.x > 0 ? max_radius : -max_radius; })
             .text(function(d) {
                 return d.name; });
-        return p.attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+        p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+        return p;
     }
 
     // draw inner node
@@ -429,11 +432,12 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
     let nodeLink = linksg
         .selectAll(".link")
-        .data(links)
+        .data(links,d=>d.target+' '+d.source)
         .join("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color})
+        .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color});
+    nodeLink.interrupt().transition().duration(graphicopt.animationTime)
         .attr("d", link);
     nodeLink.each(function(d){
         const ob = d3.select(this);
@@ -458,7 +462,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             .attr('id', d=>d.key);
         p.select('text')
             .html(d=>d.key+'  <tspan style="font-weight: bold">'+d.value.job.length+'</tspan> jobs');
-        return p.attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
+        p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
+        return p;
     }
 
 
@@ -582,8 +587,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             k=1;
             view = v;
             //
-            label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            label.interrupt().transition().duration(graphicopt.animationTime).attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            node.interrupt().transition().duration(graphicopt.animationTime).attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
             node.selectAll('g').remove();
             if (serviceName!=='Radar'){
                 let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
