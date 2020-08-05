@@ -279,16 +279,17 @@ d3.TimeArc = function () {
             terms[term].category = c;
             summary[c]++;
         }
-        if (!terms[term][m])
+        if (!terms[term][m]){
             terms[term][m] = count;
-        else {
+        }else {
             terms[term][m] += count;
-            if ((terms[term][m] > terms[term].frequency)) {
-                terms[term].frequency = terms[term][m];
-                terms[term].maxTimeIndex = m;
-                if (terms[term].frequency > termMaxMax)
-                    termMaxMax = terms[term].frequency;
-            }
+        }
+        
+        if ((terms[term][m] > terms[term].frequency)) {
+            terms[term].frequency = terms[term][m];
+            terms[term].maxTimeIndex = m;
+            if (terms[term].frequency > termMaxMax)
+                termMaxMax = terms[term].frequency;
         }
     }
     let handleInfo = handleByJob;
