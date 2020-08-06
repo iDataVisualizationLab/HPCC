@@ -30,10 +30,11 @@ $(document).ready(function(){
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
             //---------
-            request = new Simulation('src/data/7222020.json');
+            // request = new Simulation('src/data/7222020.json');
+            request = new Simulation('src/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
         }
     }catch(e){
-        request = new Simulation('src/data/7222020.json');
+        request = new Simulation('src/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
     }
     initClusterUI();
     initdraw();
