@@ -554,14 +554,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .call(updateGlow).merge(glowEffect);
             function updateGlow(p){
                 p.select('filter')
-                    .attr("width","300%")
-                    .attr("x","-100%")
-                    .attr("y","-100%")
-                    .attr("height","300%")
+                    .attr("width","400%")
+                    .attr("x","-150%")
+                    .attr("y","-150%")
+                    .attr("height","400%")
                     .attr('id',d=>'c'+d.data.currentID)
-                    .html(`<feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                    .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
                         <feMerge>
-                            <feMergeNode in="coloredBlur"></feMergeNode>
+                            <feMergeNode in="coloredBlur3"></feMergeNode>
+                            <feMergeNode in="coloredBlur2"></feMergeNode>
+                            <feMergeNode in="coloredBlur1"></feMergeNode>
                             <feMergeNode in="SourceGraphic"></feMergeNode>
                         </feMerge>`);
                 return p;
