@@ -34,7 +34,34 @@ d3.json(url).then(function(data){
         })
     }
     data_out.sort((a,b)=>a[0]-b[0]);
-    download(''+_start+' '+_end+'.log',data_out.map(d=>d.join('|')).join('\n'))
+    download(''+_start+' '+_end+'.log',data_out.map(d=>d.join('|')).join('\n'));
+
+    console.log(users)
+    color.domain().forEach(u=>{
+        d3.interval(function(){
+        let svgname = u;
+        d3.select('body').select('svg.avatar').remove();
+        svg = d3.select('body').append('svg').attr('class','avatar')
+            .attr('width',60)
+            .attr('height',60);
+        svg.append('rect')
+            .attr('x',60/2-22.5)
+            .attr('y',40)
+            .attr('width',45)
+            .attr('height',25)
+            .style('fill',color(u));
+        svg.append('circle')
+            .attr('cx',30)
+            .attr('cy',22)
+            .attr('r',20)
+            .style('fill',color(u));
+        var svgString = getSVGString(svg.node());
+        svgString2Image( svgString, 60, 60, 'png', save ); // passes Blob and filesize String to the callback
+        function save( dataBlob, filesize ){
+            saveAs( dataBlob, svgname+'.png' ); // FileSaver.js function
+        }
+        },100)
+    });
 });
 
 

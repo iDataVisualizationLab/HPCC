@@ -81,6 +81,7 @@ class Simulation {
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
                         return (val.start_time > currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
                     });
+
                     const nodes_info = {};
                     d3.keys(self.data.nodes_info).forEach(c => {
                         nodes_info[c] = {};
