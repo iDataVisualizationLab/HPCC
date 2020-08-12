@@ -62,3 +62,19 @@ main {
     width: 100%;
     transition: margin 1s;
 }
+.ui-draggable .card-header {
+    padding: .5rem 0.25rem;
+}
+.ui-draggable .handle{
+    opacity: 0;
+    fill: #aaa;
+}
+.ui-draggable .card-header .window-controls bi{
+    fill: #aaa;
+}
+.ui-draggable .handle{
+    opacity: 0;
+}
+.ui-draggable:hover .handle {
+    opacity: 1;
+}
