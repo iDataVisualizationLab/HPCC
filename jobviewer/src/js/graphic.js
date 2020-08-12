@@ -875,13 +875,13 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     }
     function makelegend(){
         if (vizservice[serviceSelected].text==='User'){
-            d3.select('#legendHolder .legendView').classed('hide',true);
-            d3.select('#legendHolder .clusterView').classed('hide',true);
+            d3.select('.legendView').classed('hide',true);
+            d3.select('.clusterView').classed('hide',true);
         }else if (vizservice[serviceSelected].text==='Radar'){
-            d3.select('#legendHolder .legendView').classed('hide',true);
-            d3.select('#legendHolder .clusterView').classed('hide',false);
+            d3.select('.legendView').classed('hide',true);
+            d3.select('.clusterView').classed('hide',false);
         }else{
-            d3.select('#legendHolder .clusterView').classed('hide',true);
+            d3.select('.clusterView').classed('hide',true);
             const color = _colorItem;
             const marginTop = 10;
             const marginBottom = 10;
@@ -889,9 +889,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             const marginRight = 0;
             const width = 10;
             const height = 200;
-            const legendHolder = d3.select('#legendHolder');
-            legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px');
-            legendHolder.select('.legendView').classed('hide',false);
+            const legendHolder = d3.select('.legendView').classed('hide',false);
+            // legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px');
+            // legendHolder.select('.legendView').classed('hide',false);
             const svg = legendHolder.select('svg.legend')
                 .attr('width', width + marginLeft + marginRight)
                 .attr('height', height + marginTop + marginBottom);
