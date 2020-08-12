@@ -29,7 +29,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a id="controlsHead" class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#controls" aria-expanded="true" aria-controls="controls">
+                            <a id="controlsHead" class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#controls" data-action="#controlOnToolbar" aria-expanded="true" aria-controls="controls">
                                 <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-tools" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M0 1l1-1 3.081 2.2a1 1 0 0 1 .419.815v.07a1 1 0 0 0 .293.708L10.5 9.5l.914-.305a1 1 0 0 1 1.023.242l3.356 3.356a1 1 0 0 1 0 1.414l-1.586 1.586a1 1 0 0 1-1.414 0l-3.356-3.356a1 1 0 0 1-.242-1.023L9.5 10.5 3.793 4.793a1 1 0 0 0-.707-.293h-.071a1 1 0 0 1-.814-.419L0 1zm11.354 9.646a.5.5 0 0 0-.708.708l3 3a.5.5 0 0 0 .708-.708l-3-3z"/>
                                     <path fill-rule="evenodd" d="M15.898 2.223a3.003 3.003 0 0 1-3.679 3.674L5.878 12.15a3 3 0 1 1-2.027-2.027l6.252-6.341A3 3 0 0 1 13.778.1l-2.142 2.142L12 4l1.757.364 2.141-2.141zm-13.37 9.019L3.001 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026z"/>
@@ -38,21 +38,28 @@
                                     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                                 </svg></span>
                             </a>
-                            <div id="controls" class="collapse" aria-labelledby="controlsHead" data-parent="#menu">
-                                <div class="card-body">
-                                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                            <div id="controls" class="collapse" aria-labelledby="controlsHead" data-action="#controlOnToolbar" data-parent="#menu">
+                                <div class="card-body row" id="controlHolderMenu">
+
                                 </div>
                             </div>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a id="analyticsHead" class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#analytic" data-action="#analyticOnToolbar" aria-expanded="true" aria-controls="analytic">
                                 <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-bar-chart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <rect width="4" height="5" x="1" y="10" rx="1"/>
                                     <rect width="4" height="9" x="6" y="6" rx="1"/>
                                     <rect width="4" height="14" x="11" y="1" rx="1"/>
                                 </svg>
-                                <span>Analytics</span>
+                                <span>Analytics <svg width="14" height="14" viewBox="0 0 16 16" class="bi bi-chevron-right arrow" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg></span>
                             </a>
+                            <div id="analytic" class="collapse" data-action="#analyticOnToolbar" aria-labelledby="controlsHead" data-parent="#menu">
+                                <div id="analyticHolderMenu">
+
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -101,102 +108,95 @@
                             </filter>
                         </defs>
                     </svg>
-                    <div id="legendHolder" class="position-absolute card" style="top:0px;width: 300px">
+                    <div id="legendHolder" class="position-absolute card" style="top:0px;width: 300px; ;left: 50%">
                         <div class="card-header">
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                                 <path fill-rule="evenodd" transform="translate(5,0)" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                             </svg>
-                            Controls
+                            Controls panel
                             <nav class="window-controls float-right">
-                                <div class="minimize" data-toggle="tooltip" data-placement="top" title="minimize">
+                                <div class="minimize" data-toggle="tooltip" data-placement="top" title="minimize" onclick="minimizeToolbar()">
                                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-dash" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M3.5 8a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/>
                                     </svg>
                                 </div>
                             </nav>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
+                        <div class="card-body row" id="controlOnToolbarHolder">
+                            <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
                                 <label class="col-4" for="userSort">Sort users by: </label>
-                                <select class="col-6" id="userSort">
+                                <select class="col-8" id="userSort">
                                     <option value="job">#Jobs</option>
                                     <option value="compute">#Compute</option>
                                     <option value="metric">Current metric</option>
                                 </select>
-                            </div>
-                            <div class="row">
                                 <label class="col-4" for="serviceSelection">Visualizing: </label>
                                 <select class="col-6" id="serviceSelection">
                                 </select>
-                                <button id="sort_apply" type="button" class="btn btn-success btn-sm">Sort</button>
+                                <button id="sort_apply" type="button" class="btn btn-success btn-sm col-2">Sort</button>
                             </div>
-                            <div class="row legendView hide">
-                                <label class="col-4"></label>
-                                <div class="col-6 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
-                                    <div class="input-group flex-nowrap">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="addon-max">max</span>
+                        </div>
+                        <div class="card-body row" id="analyticOnToolbarHolder">
+                            <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
+                                <div class="row legendView hide">
+                                    <label class="col-4"></label>
+                                    <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                        <div class="input-group flex-nowrap">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="addon-max">max</span>
+                                            </div>
+                                            <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
                                         </div>
-                                        <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
-                                    </div>
-                                    <svg class="legend" style="transform: translateX(50px)"></svg>
-                                    <div class="input-group flex-nowrap">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="addon-min">min</span>
+                                        <svg class="legend" style="transform: translateX(50px)"></svg>
+                                        <div class="input-group flex-nowrap">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="addon-min">min</span>
+                                            </div>
+                                            <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
                                         </div>
-                                        <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
-                                    </div>
-                                    <div class="btn-group hide" role="group" >
-                                        <button id="range_apply" type="button" class="btn btn-success">Apply</button>
-                                        <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                                        <div class="btn-group hide" role="group" >
+                                            <button id="range_apply" type="button" class="btn btn-success">Apply</button>
+                                            <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row clusterView hide" style="width: 300px">
-                                <div  class="row col-12">
-                                    <label for="clusterMethod" class="col-6 radarcontroller_layout"> Grouping Method</label>
-                                    <select id="clusterMethod" class="col-6 radarcontroller_layout">
+                                <div class="card-body row clusterView hide">
+                                    <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
+                                    <select id="clusterMethod" class="col-8 radarcontroller_layout">
                                         <option value="leaderbin" selected="selected">Leader Bin</option>
                                         <option value="kmean">K-means</option>
                                         <!--<option value="binarybin">Binary bin</option>-->
                                     </select>
-                                </div>
-                                <div  class="row col-12">
-                                    <label for="normMethod" class="col-6 radarcontroller_layout"> Distance Function</label>
-                                    <select id="normMethod" class="col-6 radarcontroller_layout">
+                                    <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
+                                    <select id="normMethod" class="col-8 radarcontroller_layout">
                                         <option value="l1">L1 norm - Manhattan Distance</option>
                                         <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
                                     </select>
-                                </div>
-                                <form action="#" class='clusterProfile row col-12' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
-                                    <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>
-                                    <div  class="col-6 hide">
-                                        <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
+                                    <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+        <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+        <!--                                <div  class="col-6 hide">-->
+        <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+        <!--                                </div>-->
+                                        <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
+                                        <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                        <span class="col-2 no_leftmagrin">to</span>
+                                        <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                        <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+
+                                    </form>
+                                    <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                        <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+                                        <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                                        <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
+                                        <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                        <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+                                    </form>
+                                    <div class="d-flex justify-content-center white row" id="clusterDisplay">
                                     </div>
-                                    <label for="lowrange" class="col-6 radarcontroller_layout">#Groups from </label>
-                                    <input type="number" id="lowrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                                    <span class="col-2 no_leftmagrin">to</span>
-                                    <input type="number" id="highrange" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                    <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
-
-                                </form>
-                                <form action="#" class='clusterProfile hide row col-12' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
-                                    <label for="knum" class="col-6 radarcontroller_layout">#Groups</label>
-
-                                    <input type="number" id="knum" class="col-6 radarcontroller_layout browser-default no_leftmagrin">
-                                    <label for="knum" class="col-6 radarcontroller_layout">#Iterations</label>
-                                    <input type="number" id="kiteration" class="col-6 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                    <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
-                                </form>
-                                <form action="#" class='clusterProfile hide row valign-wrapper' id = "binarybinprofile" onsubmit="recalculateCluster( {clusterMethod: 'binarybin',normMethod:$('#normMethod').val()},onchangeCluster);return false;">
-                                    <div  class="col-3 no_padding valign-wrapper center-align" >
-                                        <button type="submit" class="btn btn-success animatIcon"><div>Submit</div></button>
-                                    </div>
-                                </form>
-                                <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
                                 </div>
                             </div>
                         </div>

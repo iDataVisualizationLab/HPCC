@@ -48,6 +48,9 @@
 .sidebar.active .nav-item span{
     display: unset;
 }
+.sidebar.active .nav-item .collapse.show{
+    background-color: white;
+}
 .sidebar-sticky {
     position: relative;
     top: 0;
@@ -77,4 +80,21 @@ main {
 }
 .ui-draggable:hover .handle {
     opacity: 1;
+}
+#legendHolder .row label, #sidenav .row label{
+    padding-left: 0;
+    padding-right: 0;
+}
+.no-padding {
+    padding: 0!important;
+}
+.card .row,.card-body.row {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 10px;
+}
+.card-body .row {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
 }
