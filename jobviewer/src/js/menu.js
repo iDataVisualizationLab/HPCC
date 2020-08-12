@@ -8,6 +8,21 @@ function minimizeToolbar(){
     extractToolbar("#analyticOnToolbar",true);
     d3.select("#legendHolder").classed("hide",true);
 }
+function maxmizeToolbar(){
+    extractToolbar("#controlOnToolbar",false);
+    extractToolbar("#analyticOnToolbar",false);
+    d3.select("#legendHolder").classed("hide",false);
+}
+function enableControlpanel(){
+    d3.select("#legendHolder").classed("hide",false);
+}
+function toggleControlpanel(){
+    const old_state = d3.select("#legendHolder").classed("hide");
+    if (old_state){
+        maxmizeToolbar();
+    }else
+        minimizeToolbar()
+}
 function extractToolbar(id,status){
     const node = $(id);
     if (status){
