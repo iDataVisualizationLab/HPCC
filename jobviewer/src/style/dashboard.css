@@ -98,3 +98,9 @@ main {
     margin-right: 0;
     padding: 0;
 }
+.bi-window .slash{
+    display: none;
+}
+.bi-window.disable .slash{
+    display: block;
+}

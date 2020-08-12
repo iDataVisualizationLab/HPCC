@@ -7,11 +7,13 @@ function minimizeToolbar(){
     extractToolbar("#controlOnToolbar",true);
     extractToolbar("#analyticOnToolbar",true);
     d3.select("#legendHolder").classed("hide",true);
+    d3.select('#windownToggleIcon').classed('disable',true)
 }
 function maxmizeToolbar(){
     extractToolbar("#controlOnToolbar",false);
     extractToolbar("#analyticOnToolbar",false);
     d3.select("#legendHolder").classed("hide",false);
+    d3.select('#windownToggleIcon').classed('disable',false)
 }
 function enableControlpanel(){
     d3.select("#legendHolder").classed("hide",false);
