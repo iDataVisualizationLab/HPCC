@@ -107,6 +107,7 @@ main .sidebar {
     transition: margin-left 0.5s;
 }
 .all-scroll {cursor: all-scroll;}
+.auto {cursor: auto;}
 @media screen and (max-height: 450px) {
     .sidebar {
         padding-top: 15px;
