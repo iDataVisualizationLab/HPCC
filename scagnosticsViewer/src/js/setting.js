@@ -68,7 +68,7 @@ function handleDataUrl(dataRaw) {
     // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
     // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
     var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
-    var alternative_scale = [1,0.5,1,0.5];
+    var alternative_scale = [1,1,1,0.5];
 
     var sampleh = {};
     var ser = serviceListattr.slice();
