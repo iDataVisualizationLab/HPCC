@@ -374,7 +374,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
       <tbody>
       ${serviceactive.map(s=>`<tr><td>${s.text}</td><td>${sampleS[e.data][serviceListattr[s.idroot]][0][s.id]}</td></tr>`).join('')}
 </tbody>`})
-                });
+                }).on('mouseout',function(){tooltip.hide()});
             scattersvg.selectAll('circle.outlier').data(d.value.metrics.outlyingPoints)
                 .join('circle')
                 .attr('class','outlier')
