@@ -7,7 +7,11 @@ d3.selection.prototype.moveToFront = function() {
 
 
 // setting
-let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
+let tooltip = d3.tip().attr('class', 'd3-tip').direction('ne').html(function (d){return `<div class="card">
+<div class="card-header">
+    ${d.header}
+  </div>
+<div class="card-body">${d.body}</div></div>`})
 let graphicopt = {
     margin: {top: 50, right: 0, bottom: 0, left: 100},
     width: window.innerWidth,
@@ -58,6 +62,24 @@ let graphicopt = {
         margin: {top: 0, right: 0, bottom: 0, left: 0},
         isNormalize:false,
         schema:serviceFullList
+    },scatteropt : {
+        margin: {top: 5, right: 5, bottom: 5, left: 5},
+        width: 200,
+        height: 200,
+        scalezoom: 1,
+        zoom:d3.zoom(),
+        widthView: function () {
+            return this.width * this.scalezoom
+        },
+        heightView: function () {
+            return this.height * this.scalezoom
+        },
+        widthG: function () {
+            return this.widthView() - this.margin.left - this.margin.right
+        },
+        heightG: function () {
+            return this.heightView() - this.margin.top - this.margin.bottom
+        }
     }
 };
 
@@ -80,6 +102,7 @@ function serviceControl(){
         .text(d=>d.text)
 }
 function initdraw(){
+    $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     // d3.select('#userSort').on('change',function(){
     //     currentDraw(serviceSelected);
     // });
@@ -110,7 +133,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     _colorItem.domain(range_cal.slice().reverse());
 
     const colorItem = function(d){
-        if (d) {
+        if (d!==undefined&&d!==null) {
             if (d < range_cal[0] || d > range_cal[1])
                 return 'none';
             return _colorItem(d);
@@ -151,15 +174,23 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let min_size = Math.min(graphicopt.heightG(),graphicopt.widthG());
     let X = d3.scaleBand()
         .domain(matrixListSingle)
+        .padding(0.1)
         .range([0, min_size]);
 
     // Set the y scale
     let Y = d3.scaleBand()
         .domain(matrixListSingle)
+        .padding(0.1)
         .range([0,min_size]);
 
-
+    const dataoboj = {};
     const datain = d3.entries(Layout.scag).map(function(d, i) {
+        if(!dataoboj[d.value.dim[0]])
+            dataoboj[d.value.dim[0]] = [];
+        dataoboj[d.value.dim[0]].push(d);
+        if(!dataoboj[d.value.dim[1]])
+            dataoboj[d.value.dim[1]] = [];
+        dataoboj[d.value.dim[1]].push(d);
         d.x = X(d.value.dim[0]);
         d.y = Y(d.value.dim[1]);
 
@@ -168,9 +199,26 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.disable = getOutofRange(d.value.metrics);
         d.invalid = getOutofRange_prim(d.value.metrics);
         d.drawData = undefined;
+        d.tooltip={
+            header:` ${d.key.replace('||',' v.s. ')}`,
+            body:`<table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${scagMetrics.map(s=>{
+            return `<tr><td>${s.id+1}</td><td>${s.text}</td><td>${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
+        }).join('')}
+      </tbody>
+    </table>`}
         // d.highlight = Math.abs(scale_prim(d.value.metrics_delta))>graphicopt.threshold;
         return d;
     });
+    datain.forEach(d=>d.relatedNodes=datain.filter(e=>(e.value.dim[0]===d.value.dim[0] )|| (e.value.dim[1]===d.value.dim[1])));
     if(isFirst){
         let startZoom = d3.zoomIdentity;
         startZoom.x = graphicopt.margin.left;
@@ -203,27 +251,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         p.each(function(d){
           d.node=d3.select(this);
         });
-        p.on('mouseover',function(d){tooltip.show(`<div class="card">
-<div class="card-header">
-    ${d.key.replace('||',' v.s. ')}
-  </div>
-<div class="card-body">
-    <table class="table table-sm table-striped">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Name</th>
-          <th scope="col">Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${scagMetrics.map(s=>{
-            return `<tr><td>${s.id}</td><td>${s.text}</td><td>${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
-        })}
-      </tbody>
-    </table>
-  </div>
-</div>`)})
+        p.on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();scatterPlot(d)})
+            .on('mouseover',mouseover)
+            .on('mouseout',mouseout);
         p.select('rect.scatterplot').attr('width',X.bandwidth()).attr('height',Y.bandwidth())
             .style('fill',function(d){
                 d.color = colorItem(d.value.metrics[serviceName]);
@@ -306,149 +336,54 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             d3.event.stopPropagation();
         }
     }
-    function userTable(d,type){
+    function scatterPlot(d){
         if (isFreeze) {
+            const serviceactive = serviceFullList.filter(s=>d.value.dim.find(dim=>dim===s.text))
             d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
-            contain.select('.card-header').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
-            contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>JobID</th>
-                        <th>JobName</th>
-                        <th>User</th>
-                        <th>StartTime</th>
-                        <th>Duration</th>
-                        <th>Cores</th>
-                        <th>Nodes</th>
-                        <th>TaskID</th>
-                    </tr>
-                </thead>
-            </table>`);
-            let jobData = [];
-            if (type==='user')
-                jobData = d.value.job.map(j=>{
-                    const jobID = j.split('.');
-                    const job=_.clone(jobs[j]);
-                    job['id']=jobID[0];
-                    job['duration']=currentTime - job['start_time'];
-                    job['task_id'] = jobID[1]||'n/a';
-                    return job});
-            else
-                jobData = _.flatten(d.data.relatedNodes
-                    .map(e=>e.data.value.job)).map(j=>{
-                    const jobID = j.split('.');
-                    const job=_.clone(jobs[j]);
-                    if (job.node_list.indexOf(d.data.name)===-1)
-                        return false;
-                    job['id']=jobID[0];
-                    job['duration']=currentTime - job['start_time'];
-                    job['task_id'] = jobID[1]||'n/a';
-                    return job}).filter(d=>d);
-            var table = $('#informationTable').DataTable( {
-                "data": jobData,
-                "scrollX": true,
-                "columns": [
-                    { "data": "id" },
-                    { "data": "job_name" },
-                    { "data": "user_name" },
-                    { "data": "start_time" ,
-                        "render": function ( data, type, row ) {
-                            if(type!=='ordering')
-                                return d3.timeFormat('%m/%d/%Y %H:%M')(new Date(data));
-                            return data;
-                        }},
-                    { "data": "duration",
-                        "render": function ( data, type, row ) {
-                            if(type!=='ordering')
-                                return millisecondsToStr_axproximate(data);
-                            return data;
-                        }},
-                    { "data": "cpu_cores" },
-                    { "data": "node_list" ,"className":'details-control text-wrap',
-                        "render": function ( data, type, row ) {
-                            if(type==='ordering')
-                                return data.length;
-                            if (type==='display')
-                                if (data.length>2)
-                                    return `<span>${(row.isexpand?data: data.slice(0,2)).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
-                                        <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
-                                        <button type="button" class="btn btn-block morebtn" value="close">
-                                        <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
-                                        </button>`;
-                                else
-                                    return data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n');
-                            return data;
-                        }},
-                    { "data": "task_id" },
-                ],
-                "order": [[0, 'asc']],
-                "drawCallback": function( settings ) {
-                    // Add event listener for opening and closing details
-                    $('#informationTable tbody').on('mouseover', 'tr, .tableCompute', function (event) {
-                        event.stopPropagation();
-                        highlight2Stack.forEach(n=>n.classed('highlight2',false))
-                        highlight2Stack = [];
-                        let tr = $(this).closest('tr');
-                        let row = table.row( tr );
-                        d3.select(tr[0]).style('font-weight','unset');
-                        d3.select(this).style('font-weight','bold');
-                        const isSingle =  d3.select(event.target).classed('tableCompute')
-                        if (row.data()) {
-                            const currentData = row.data();
-                            svg.classed('onhighlight2', true);
-                            (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
-                                rack_arr.find(r => {
-                                    if (r.childrenNode[c]) {
-                                        highlight2Stack.push(r.childrenNode[c]);
-                                        highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
-                                        r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
-
-                                        r.childrenNode[c].classed('highlight2', true);
-                                        r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                            if (d.datum().source===currentData.user_name){
-                                                highlight2Stack.push(d);
-                                                d.classed('highlight2',true);
-                                            }
-                                        });
-                                        return true;
-                                    }
-                                });
-                            });
-                            users_arr.find(u => {
-                                if (u.key===currentData.user_name) {
-                                    highlight2Stack.push(u.node);
-                                    u.node.classed('highlight2', true);
-                                    return true;
-                                }
-                            });
-                        }
-                    }).on('mouseleave', 'tr, .tableCompute', function () {
-                        let tr = $(this).closest('tr');
-                        d3.select(this).style('font-weight','unset');
-                        svg.classed('onhighlight2',false);
-                        highlight2Stack.forEach(n=>n.classed('highlight2',false));
-                        highlight2Stack = [];
-                    });
-                }
-            } );
-
-            $('#informationTable tbody').on('click', 'td button.morebtn', function () {
-                var tr = $(this).closest('tr');
-                var row = table.row( tr );
-
-                if ( d3.select(this).attr('value')==='open' ) {
-                    row.data().isexpand = true;
-                    d3.select(tr[0]).classed('shown',true)
-                        .select('span').html(row.data().node_list.map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
-                }
-                else {
-                    // Open this row
-                    row.data().isexpand = false;
-                    d3.select(tr[0]).classed('shown',false)
-                        .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
-                }
-            });
+            contain.select('.card-header p').text(d => d.key);
+            contain.select('.card-body.information').html(d.tooltip.body);
+            const opt = graphicopt.scatteropt;
+            const scattersvg = contain.select('.card-body.svg').select('svg');
+            scattersvg.attr('width',opt.width);
+            scattersvg.attr('height',opt.height);
+            const x =d3.scaleLinear().range([opt.margin.left,opt.width - opt.margin.right]);
+            const y =d3.scaleLinear().range([opt.height - opt.margin.bottom, opt.margin.top]);
+            scattersvg.selectAll('rect.background').data([1]).join('rect')
+                .attr('class','background')
+                .attr('width',opt.width)
+                .attr('height',opt.height)
+                .attr('stroke','black')
+                .attr('fill','#ddd')
+            scattersvg.selectAll('circle.point').data(d.value.metrics.normalizedPoints)
+                .join('circle')
+                .attr('class','point')
+                .attr('cx',d=>x(d[0]))
+                .attr('cy',d=>y(d[1]))
+                .attr('r',3)
+                .attr('fill','black')
+                .attr('opacity',0.8)
+                .on('mouseover',function(e){
+                    tooltip.show({header:e.data,body:`<table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Metric</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+      ${serviceactive.map(s=>`<tr><td>${s.text}</td><td>${sampleS[e.data][serviceListattr[s.idroot]][0][s.id]}</td></tr>`).join('')}
+</tbody>`})
+                });
+            scattersvg.selectAll('circle.outlier').data(d.value.metrics.outlyingPoints)
+                .join('circle')
+                .attr('class','outlier')
+                .attr('cx',d=>x(d[0]))
+                .attr('cy',d=>y(d[1]))
+                .attr('r',3)
+                .attr('fill','none')
+                .attr('stroke','red')
+                .attr('opacity',0.8)
         }else
             d3.select('.informationHolder').classed('hide',true);
     }
@@ -548,13 +483,13 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             let applybtn = legendHolder.select('#range_apply')
                 .on('click', function () {
                     legendRange = customRange.slice();
-                    serviceFullList[serviceSelected].filter = customRange.slice();
+                    scagMetrics[serviceSelected].filter = customRange.slice();
                     currentDraw(serviceSelected);
                     groupbtn.classed('hide', true);
                 });
             let canclebtn = legendHolder.select('#range_reset')
                 .on('click', function () {
-                    customRange = serviceFullList[serviceSelected].range.slice();
+                    customRange = scagMetrics[serviceSelected].range.slice();
                     rangeo.each(function (d) {
                         $(this).val(customRange[+(d.key === 'upLimit')]);
                     });
@@ -658,24 +593,15 @@ function mouseover(d){
         }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
-            if (d.relatedNodes[i].key)
-                try {
-                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
-                }catch(e){
-                    console.log(d.relatedNodes[i].key)
-                }
-            else {
-                d.relatedNodes[i].data.node.classed('highlight', true);
-
-            }
-            // .attr("width", 18).attr("height", 18);
+            d.relatedNodes[i].node.classed('highlight', true);
         }
 
         for (let i = 0; i < d.relatedLinks.length; i++){
             d.relatedLinks[i].moveToFront().classed('highlight', true);
-        }}
+        }
+   }
     if (d.tooltip) {
-        tooltip.show(d.name)
+        tooltip.show(d.tooltip)
     }
 }
 
@@ -690,14 +616,7 @@ function mouseout(d){
             }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
-            if (d.relatedNodes[i].key)
-                try {
-                    d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
-                }catch(e){
-
-                }
-            else
-                d.relatedNodes[i].data.node.classed('highlight', false);
+                d.relatedNodes[i].node.classed('highlight', false);
             // .attr("width", config.rect_width).attr("height", config.rect_height);
         }
 

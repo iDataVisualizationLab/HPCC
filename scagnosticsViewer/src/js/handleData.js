@@ -49,12 +49,21 @@ function data2scag(sampleS,computers){
     let scag = {};
     if (sampleS){
         const scaleservice = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
-        const norm=Object.keys(computers).map(c=>serviceFullList.map((s,si)=> Math.max(scaleservice[si](sampleS[c][serviceListattr[s.idroot]][0][s.id])??0,0)));
+        const norm=Object.keys(computers)
+            .map(c=>{
+                const out = serviceFullList.map((s,si)=> Math.max(scaleservice[si](sampleS[c][serviceListattr[s.idroot]][0][s.id])??0,0));
+                out.name = c;
+                return out;
+            });
         console.time('scag:')
         let count=0;
         for (let i =0;i<serviceFullList.length-1;i++){
             for (let j =i+1;j<serviceFullList.length;j++){
-                const points = norm.map(d=>[d[i],d[j]]);
+                const points = norm.map(d=>{
+                    const out = [d[i],d[j]];
+                    out.data = d.name;
+                    return out;
+                });
                 scag[serviceFullList[i].text+"||"+serviceFullList[j].text] = {dim:[serviceFullList[i].text,serviceFullList[j].text],metrics:new scagnostics(points, scagOpt)};
                 count++
             }

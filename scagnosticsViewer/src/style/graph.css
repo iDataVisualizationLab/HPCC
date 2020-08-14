@@ -27,7 +27,7 @@ svg {
     fill: black;
 }
 .onhighlight2 .inner_node, .onhighlight2.onhighlight .inner_node.highlight, .onhighlight .inner_node {
-/*.onhighlight .inner_node {*/
+    /*.onhighlight .inner_node {*/
     opacity: 0.1;
 }
 
@@ -43,18 +43,18 @@ svg {
 .outer_node text.highlight2.hide{
     display: block;
 }
-.onhighlight .outer_node.highlight.highlightSummary .circleG .element{
+.onhighlight .outer_node.highlight.highlightSummary .scatterplot{
     opacity: 0;
 }
-.onhighlight2 .outer_node .circleG .element.highlight2,
-.onhighlight2.onhighlight .outer_node .circleG .element.highlight.highlight2,
-.onhighlight .outer_node .circleG .element.highlight,
-.onhighlight .outer_node.highlight .circleG .element,
-.onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
+.onhighlight2 .outer_node .scatterplot.highlight2,
+.onhighlight2.onhighlight .outer_node .scatterplot.highlight.highlight2,
+.onhighlight .outer_node .scatterplot.highlight,
+.onhighlight .outer_node.highlight .scatterplot,
+.onhighlight .outer_node.highlight.highlightSummary .scatterplot.highlight
 {
     opacity: 1;
 }
-.onhighlight2 .outer_node .circleG .element, .onhighlight2.onhighlight .outer_node .circleG .element.highlight, .onhighlight .outer_node .circleG .element{
+.onhighlight2 .outer_node .scatterplot, .onhighlight2.onhighlight .outer_node .scatterplot.highlight, .onhighlight .outer_node .scatterplot{
     opacity: 0.1;
 }
 .onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {
