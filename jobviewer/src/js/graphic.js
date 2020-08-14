@@ -591,7 +591,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                             d.color = '#dddddd';
                             return d.color;
                         }else {
-                            d.color = colorItem(d.data.metrics[vizservice[serviceSelected].text]);
+                            d.color = colorItem(d.data.metrics[serviceName]);
                             return d.color;
                         }
                         // d.color = '#dddddd'

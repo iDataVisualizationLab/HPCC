@@ -94,14 +94,14 @@ angular.module('hpccApp')
                         let d = jobjson[jobID];
                         // d.node_list = JSON.parse(d.node_list.replace(/'/g,'"'));
                         let temp = {
-                            "nodes": d.node_list.map(ip=>hosts.find(d=>d.ip===ip).name),
+                            "nodes": d.node_list.map(ip=>hosts.find(d=>d.ip===ip.split('-')[0]).name),
                             "jobID": ""+jobID,
                             "user": d.user_name,
-                            "startTime": d.start_time*1000,
-                            "submitTime": d.submit_time*1000
+                            "startTime": d.start_time/1000000,
+                            "submitTime": d.submit_time/1000000
                         };
                         if (d['finish_time'])
-                            temp.endTime = d['finish_time']*1000;
+                            temp.endTime = d['finish_time']/1000000;
                         jobo[jobID] = temp;
                         jobd.push(jobo[jobID]);
                     }
