@@ -203,7 +203,27 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         p.each(function(d){
           d.node=d3.select(this);
         });
-        p.on('mouseover',function(d){tooltip.show(d)})
+        p.on('mouseover',function(d){tooltip.show(`<div class="card">
+<div class="card-header">
+    ${d.key.replace('||',' v.s. ')}
+  </div>
+<div class="card-body">
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${scagMetrics.map(s=>{
+            return `<tr><td>${s.id}</td><td>${s.text}</td><td>${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
+        })}
+      </tbody>
+    </table>
+  </div>
+</div>`)})
         p.select('rect.scatterplot').attr('width',X.bandwidth()).attr('height',Y.bandwidth())
             .style('fill',function(d){
                 d.color = colorItem(d.value.metrics[serviceName]);
