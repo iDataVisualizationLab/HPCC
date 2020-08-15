@@ -16,8 +16,13 @@ let request, timelineControl;
 
 $(document).ready(function(){
     try {
-        let mode = window.location.search.substring(1).split("mode=")[1].split('&')[0].replace(/%20/g,' '); // get data name after app=
-        if (mode==='realTime')
+        // let mode = window.location.search.substring(1).split("mode=")[1].split('&')[0].replace(/%20/g,' '); // get data name after app=
+        let command = window.location.search.substring(1).split("&").map(d=>d.split('=')); // get data name after app=
+        command = _.object(command.map(d=>d[0]),command.map(d=>d[1])); // get data name after app=
+
+        if(command.service!==undefined && _.isNumber(+command.service))
+            serviceSelected = +command.service;
+        if (command.mode==='realTime')
         {
             // set up ui
             d3.select('#navMode').selectAll('li a').classed('active',false);

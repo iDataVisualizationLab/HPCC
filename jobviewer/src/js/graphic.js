@@ -79,6 +79,7 @@ function serviceControl(){
         .append('option')
         .attr('value',(d,i)=>i)
         .attr('data-value',(d,i)=>d)
+        .attr('selected',(d,i)=>i===serviceSelected?'':null)
         .text(d=>d.text)
 }
 function initdraw(){
