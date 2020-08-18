@@ -82,6 +82,14 @@ d3.TimeSpace = function () {
             //     variable: 'windowsSize',
             //     width: '100px',callback:()=>{master.stop(); windowsSize = graphicopt.opt.windowsSize; handle_data_TimeSpace(tsnedata);}
             // },
+            allPoint: {
+                text: "Show all data",
+                type: "switch",
+                variable: 'allPoint',
+                labels:['off','on'],
+                values:[false,true], width: '100px',
+                callback:()=>{master.stop(); handle_data_TimeSpace(tsnedata);}
+            },
             radarRatio: {
                 text: "Peeling clusters",
                 range: [0.1, 1],
@@ -2771,7 +2779,10 @@ function calculateMSE_num(a,b){
     return ss.sum(a.map((d,i)=>(d-b[i])*(d-b[i])));
 }
 
-d3.pcaTimeSpace = _.bind(d3.TimeSpace,{name:'PCA',controlPanel: {timeFactor:{text:"Time linearization", range:[0,10], type:"slider",step:0.1, variable: 'timeFactor',width:'100px'}},workerPath:'src/script/worker/PCAworker.js',outputSelection:[{label:"Total time",content:'_',variable:'totalTime'}]});
+d3.pcaTimeSpace = _.bind(d3.TimeSpace,{name:'PCA',controlPanel: {
+        timeFactor:{text:"Time linearization", range:[0,10], type:"slider",step:0.1, variable: 'timeFactor',width:'100px'}
+    },
+    workerPath:'src/script/worker/PCAworker.js',outputSelection:[{label:"Total time",content:'_',variable:'totalTime'}]});
 d3.tsneTimeSpace = _.bind(d3.TimeSpace,
     {name:'t-SNE',controlPanel: {
         epsilon: {text: "Epsilon", range: [1, 40], type: "slider", variable: 'epsilon', width: '100px'},
@@ -3015,17 +3026,20 @@ function handle_data_tsne(tsnedata) {
     tsneTS.graphicopt(TsneTSopt).color(colorCluster).init(dataIn, cluster_info);
 }
 function handle_data_pca(tsnedata) {
-    // const dataIn = handle_data_model(tsnedata);
-    const dataIn = handle_data_model_full(tsnedata);
-    // if (!PCAopt.opt)
-        PCAopt.opt = {
-            dim: 2, // dimensionality of the embedding (2 = default)
-        };
+    let dataIn=[];
+    let allPoint = PCAopt.opt&&PCAopt.opt.allPoint;
+    if (PCAopt.opt&&PCAopt.opt.allPoint){
+        dataIn = handle_data_model_full(tsnedata)
+    }else
+        dataIn = handle_data_model(tsnedata);
+    PCAopt.opt = {
+        dim: 2, // dimensionality of the embedding (2 = default)
+        allPoint: allPoint
+    };
     pcaTS.graphicopt(PCAopt).color(colorCluster).init(dataIn, cluster_info);
 }
 function handle_data_scatterplot(tsnedata) {
     const dataIn = handle_data_model(tsnedata);
-    // if (!PCAopt.opt)
         scatterplotopt.opt = {
             var1: 0, // dimensionality of the embedding (2 = default)
             var2: 1, // dimensionality of the embedding (2 = default)
