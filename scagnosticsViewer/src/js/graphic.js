@@ -128,7 +128,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     //     // .interpolator(d3.interpolateSpectral);
     //     .interpolator(d3.interpolateRdYlBu);
     let _colorItem = d3.scaleLinear()
-        .range(colorScaleList.scag)
+        .range(colorScaleList.scag.slice().reverse())
         .interpolate(d3.interpolateHcl);
     let getOutofRange = ()=>{};
     let getOutofRange_prim = ()=>{};
