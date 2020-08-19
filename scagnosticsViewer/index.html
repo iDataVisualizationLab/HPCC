@@ -11,6 +11,7 @@
 <!--    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>-->
     <script src="src/lib/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="src/DataTables/datatables.min.js"></script>
+    <script src="node_modules/@d3fc/d3fc-element/build/d3fc-element.js"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -119,6 +120,15 @@
                             </filter>
                         </defs>
                     </svg>
+                    <d3fc-group style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width:100%;
+                    height:100%;pointer-events: none
+                    ">
+                        <d3fc-canvas></d3fc-canvas>
+                    </d3fc-group>
                     <div id="legendHolder" class="position-absolute card" style="top:0px;width: 300px; ;left: 70%">
                         <div class="card-header all-scroll ">
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -251,6 +261,7 @@
     <script src="src/js/scagnosticSetting.js"></script>
     <script src="src/js/handleData.js"></script>
     <script src="src/js/cluster.js"></script>
+    <script src="src/js/scatterMatrix.js"></script>
     <script src="src/js/graphic.js"></script>
     <script src="src/js/menu.js"></script>
     <script src="src/js/main.js"></script>

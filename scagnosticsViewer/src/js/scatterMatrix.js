@@ -1,21 +1,47 @@
 // Ngan Nguyen -IDVL 8/18/2020
 d3.scatterMatrix = function(){
     let master = {};
-    let canvas;
+    let canvasContainer,canvas,worker;
+    // function
+    let onMessageCalback =()=>{};
     master.init = function(){
-        const offscreenCanvas = canvas.transferControlToOffscreen();
-        const worker = new Worker('worker/scatterplot.js'); // worker location
-        worker.postMessage({ offscreenCanvas }, [offscreenCanvas]);
-        canvasContainer.addEventListener('measure', ({ detail }) => {
-            const { width, height } = detail;
-            worker.postMessage({ width, height });
-        });
+        if (!worker) {
+            worker = new Worker('src/js/worker/scatterplot.js');
+            canvas = canvasContainer
+                .querySelector('canvas');
+            if (canvas.transferControlToOffscreen == null) {
+                alert(`It looks like OffscreenCanvas isn't supported by your browser`);
+            }
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            worker.postMessage({ offscreenCanvas }, [offscreenCanvas]);
+            worker.addEventListener('message', ({ data }) => { // message
+                if (data !== 'frame') { // receive message
+                    onMessageCalback( data);
+                } else { //render done
+                    onMessageCalback('');
+                }
+            });
+        }
+        // canvasContainer.addEventListener('measure', ({ detail }) => {
+        //     master.update_size(detail);
+        // });
         return master;
     };
-    master.draw = function(){
+    master.update_size = function (detail){
+        const { width, height ,transform} = detail;
+        d3.select(canvas).style('width',width+'px').style('height',height+'px')
+        worker.postMessage({ width, height, transform });
+    };
+    master.draw = function(data){
+        worker.postMessage({data});
         canvasContainer.requestRedraw();
     };
-    master.canvas = function(_){
-        return arguments.length?(canvas=_,master):canvas;
+    master.canvasContainer = function(_){
+        return arguments.length?(canvasContainer=_,master):canvasContainer;
     }
+    master.onProcess = function(_){
+        return arguments.length?(onMessageCalback=_,master):onMessageCalback;
+    }
+
+    return master;
 }

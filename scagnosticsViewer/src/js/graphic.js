@@ -18,6 +18,7 @@ let graphicopt = {
     height: window.innerHeight,
     scalezoom: 1,
     zoom:d3.zoom(),
+    transform:{k:1,x:0,y:0},
     widthView: function () {
         return this.width * this.scalezoom
     },
@@ -86,6 +87,7 @@ let graphicopt = {
 let isFreeze= false;
 let highlight2Stack = [];
 let vizservice=[];
+let scaterMatix;
 function serviceControl(){
     vizservice =scagMetrics.slice();
     d3.select('#serviceSelection')
@@ -103,6 +105,7 @@ function serviceControl(){
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
+    scaterMatix = d3.scatterMatrix().canvasContainer($('d3fc-canvas')[0]).init();
     // d3.select('#userSort').on('change',function(){
     //     currentDraw(serviceSelected);
     // });
@@ -148,7 +151,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let svg = svg_
         .select("g.content");
     function zoomed(){
+        graphicopt.transform =d3.event.transform;
         svg.attr("transform", d3.event.transform);
+        scaterMatix.update_size(graphicopt)
     }
     let isFirst = false;
     if (svg.empty()){
@@ -163,7 +168,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 isFreeze = false;
                 func();
             }});
-        svg.append('g').attr('class','axis')
+        svg.append('g').attr('class','axis');
         svg.call(tooltip);
         isFirst = true;
     }
@@ -236,6 +241,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     if(onodesg.empty()){
         onodesg = svg.append("g").attr("class", "outer_nodes")
     }
+    // prepare data
+    let dataDraw=[];
+    scaterMatix.update_size(graphicopt);
+    let x_inside = d3.scaleLinear().range([0,X.bandwidth()]);
+    let y_inside = d3.scaleLinear().range([Y.bandwidth(),0]);
     let onode = onodesg.selectAll(".outer_node")
         .data(datain,d=>d.key);
     onode.call(updateOnode);
@@ -246,10 +256,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .append('rect').attr('class','scatterplot');
     onode_n.append('g').attr('class','glowEffect');
     
-    onode_n.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).call(updateOnode);
+    onode_n.call(updateOnode);
     function updateOnode(p){
-        p.each(function(d){
-          d.node=d3.select(this);
+        p.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).each(function(d){
+            d.value.metrics.normalizedPoints.forEach(e=>dataDraw.push({x:d.x+x_inside(e[0]),y:d.y+y_inside(e[1]),data:e.data}))
+            d.node=d3.select(this);
         });
         p.on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();scatterPlot(d)})
             .on('mouseover',mouseover)
@@ -266,7 +277,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
         return p;
     }
-    makelegend()
+    scaterMatix.draw(dataDraw);
+    makelegend();
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
 
 
