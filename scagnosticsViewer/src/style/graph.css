@@ -2,49 +2,20 @@ svg {
     font-size: 12px;
     fill: currentcolor;
 }
-
-
-.inner_node {
-    pointer-events: all;
-}
-.inner_node text{
-    fill: black;
-}
-
-.inner_node rect {
-    pointer-events: all;
-    stroke: #000000;
-    stroke-width: 0.3;
-    fill: #f0f0f0;
-}
-
-.inner_node.highlight rect {
-    opacity: 1;
-    /*stroke-width: 2px;*/
-    /*fill: #f1faee;*/
-}
-.inner_node.highlight text{
-    fill: black;
-}
-.onhighlight2 .inner_node, .onhighlight2.onhighlight .inner_node.highlight, .onhighlight .inner_node {
-    /*.onhighlight .inner_node {*/
-    opacity: 0.1;
-}
-
-.onhighlight2 .inner_node.highlight2, .onhighlight2.onhighlight .inner_node.highlight.highlight2, .onhighlight .inner_node.highlight {
-    opacity: 1;
-}
 .outer_node .compute {
     /*fill: #f1faee;*/
     stroke: #1d3557;
     stroke-width: 0.1;
     pointer-events: all;
 }
+rect.scatterplot {
+    rx:4
+}
 .outer_node text.highlight2.hide{
     display: block;
 }
 .onhighlight .outer_node.highlight.highlightSummary .scatterplot{
-    opacity: 0;
+    opacity: 0.5;
 }
 .onhighlight2 .outer_node .scatterplot.highlight2,
 .onhighlight2.onhighlight .outer_node .scatterplot.highlight.highlight2,
@@ -54,8 +25,13 @@ svg {
 {
     opacity: 1;
 }
+.onhighlight .focus rect.scatterplot{
+    stroke: black;
+    stroke-width: 3px;
+}
+
 .onhighlight2 .outer_node .scatterplot, .onhighlight2.onhighlight .outer_node .scatterplot.highlight, .onhighlight .outer_node .scatterplot{
-    opacity: 0.1;
+    opacity: 0.4;
 }
 .onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {
     opacity: 0;

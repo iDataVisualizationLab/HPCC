@@ -182,29 +182,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-body row clusterView">
-                                    <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
-                                        <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
-                                        <select id="clusterMethod" class="col-8 radarcontroller_layout">
-                                            <option value="leader" selected="selected">Leader</option>
-                                            <option value="hexagon">Hexagon</option>
-                                        </select>
-                                        <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
-                                        <select id="normMethod" class="col-8 radarcontroller_layout">
-                                            <option value="l1">L1 norm - Manhattan Distance</option>
-                                            <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
-                                        </select>
-                                        <label for="startBinGridSize" class="col-4 radarcontroller_layout">Initial diameter</label>
-                                        <input type="number" id="startBinGridSize" class="radarcontroller_layout col-8 browser-default">
-
-                                        <label for="minBins" class="col-4 radarcontroller_layout">min Bins</label>
-                                        <input type="number" id="minBins" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                                        <label for="maxBins" class="col-4 radarcontroller_layout">max Bins</label>
-                                        <input type="number" id="maxBins" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
-                                        <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
-
-                                    </form>
-                                    </div>
                                 </div>
                             </div>
                         </div>

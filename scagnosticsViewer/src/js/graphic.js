@@ -433,7 +433,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
 
             if (color.interpolate) {
-                debugger
                 const n = Math.min(color.domain().length, color.range().length);
 
                 let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
@@ -617,18 +616,13 @@ function mouseover(d){
     if (!isFreeze)
    {     // Bring to front
         graphicopt.el.classed('onhighlight',true);
-        d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
-        d3.select(this).classed('highlight', true);
+        d3.select(this).classed('highlight', true).classed('focus', true);
         if (d.node){
             d.node.classed('highlight', true);
         }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
             d.relatedNodes[i].node.classed('highlight', true);
-        }
-
-        for (let i = 0; i < d.relatedLinks.length; i++){
-            d.relatedLinks[i].moveToFront().classed('highlight', true);
         }
    }
     if (d.tooltip) {
@@ -641,18 +635,13 @@ function mouseout(d){
     if(!isFreeze)
         {
             graphicopt.el.classed('onhighlight',false);
-            d3.select(this).classed('highlight', false);
+            d3.select(this).classed('highlight', false).classed('focus', false);
             if(d.node){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
             }
         for (let i = 0; i < d.relatedNodes.length; i++)
         {
                 d.relatedNodes[i].node.classed('highlight', false);
-            // .attr("width", config.rect_width).attr("height", config.rect_height);
-        }
-
-        for (let i = 0; i < d.relatedLinks.length; i++){
-            d.relatedLinks[i].classed("highlight", false );
         }
         }
     if (d.tooltip) {
