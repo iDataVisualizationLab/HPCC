@@ -47,9 +47,7 @@ let graphicopt = {
         height:100
     },
     "diameter": function(){return Math.min(this.widthG(),this.heightG())},
-    "oLength": 22,
-    "iLength": 22,
-    "mid": 11,
+    "violin": d3.viiolinChart().graphicopt({width:25,height:50,opt:{dataformated:true},direction:'v',margin: {top: 0, right: 0, bottom: 0, left: 0},tick:{visibile:false}}),
     animationTime:500,
     threshold:0.3,
     radaropt : {
@@ -420,18 +418,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             const marginLeft = 40;
             const marginRight = 0;
             const width = 10;
+            const width_violin = 30;
             const height = 200;
             const legendHolder = d3.select('.legendView').classed('hide',false);
             // legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px');
             // legendHolder.select('.legendView').classed('hide',false);
             const svg = legendHolder.select('svg.legend')
-                .attr('width', width + marginLeft + marginRight)
+                .attr('width', width + marginLeft + marginRight+width_violin)
                 .attr('height', height + marginTop + marginBottom);
             svg.select('g.legend').remove();
             let legend = svg.append('g').attr('class', 'legend')
                 .attr('transform', `translate(${marginLeft},${marginTop})`);
             // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
-
             if (color.interpolate) {
                 const n = Math.min(color.domain().length, color.range().length);
 
@@ -508,7 +506,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
             // make custom input button
             let legendRange = vizservice[serviceSelected].range;
-            let customRange = legendRange.slice();
+            let customRange = vizservice[serviceSelected].filter??vizservice[serviceSelected].range.slice();
+            let legend_violin = legend.append('g').attr('class', 'violin')
+                .attr('transform', `translate(${width},0)`);
+            debugger
+            graphicopt.violin.graphicopt({width:width_violin,height:height,customrange:customRange})
+                .data([ getHistdata(datain.filter(d=>!d.disable).map(d=>d.value.metrics[serviceName]),serviceName,customRange)])
+                .draw(legend_violin)
+
             const groupbtn = legendHolder.select('.btn-group')
             let applybtn = legendHolder.select('#range_apply')
                 .on('click', function () {

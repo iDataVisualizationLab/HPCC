@@ -10,7 +10,31 @@ let scagOpt = {
 };
 function scag2string(scag){
     let temp = {};
-    // temp['normalizedPoints']=scag.normalizedPoints;
+    temp['outlyingPoints']=scag.outlyingPoints;
     scagMetrics.forEach(s=>temp[s.attr] = scag[s.attr])
     return _.clone(temp)
+}
+function calculateScag(self){
+    JSON.stringify(self.data.time_stamp.map((d,index)=>{
+        const currentTime = self.data.time_stamp[index];
+
+
+        const nodes_info = {};
+        d3.keys(self.data.nodes_info).forEach(c => {
+            nodes_info[c] = {};
+            d3.keys(self.data.nodes_info[c]).forEach(s => {
+                nodes_info[c][s] = [self.data.nodes_info[c][s][index]];
+            })
+        });
+        const time_stamp = [currentTime];
+        return {nodes_info, time_stamp}
+    }).map(data=>{
+        const data_ = handleDataUrl(data);
+        let  sampleS = data_.sampleS;
+        tsnedata = data_.tsnedata;
+        let {computers,jobs,users} = handleData(data);
+        adjustScag(sampleS,computers);
+        return _.mapObject(Layout.scag,function(val,key){
+            return {dim: val.dim.slice(),metrics:scag2string(val.metrics)};})
+    }))
 }

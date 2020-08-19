@@ -1,3 +1,7 @@
+let histodram ={
+    resolution: 20,
+    outlierMultiply: 3,
+}
 function millisecondsToStr (milliseconds) {
     // TIP: to find current time in milliseconds, use:
     // var  current_time_milliseconds = new Date().getTime();
@@ -235,6 +239,48 @@ function svgString2Image( svgString, width, height, format, callback ) {
     };
 
     image.src = imgsrc;
+}
+
+function getHistdata(d, name, range) {
+    d = d.filter(e => e !== undefined).sort((a, b) => a - b);
+    let r;
+    if (d.length) {
+        var x = d3.scaleLinear()
+            .domain(range??d3.extent(d));
+        var histogram = d3.histogram()
+            .domain(x.domain())
+            .thresholds(x.ticks(histodram.resolution))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .value(d => d);
+        let hisdata = histogram(d);
+
+        let sumstat = hisdata.map(d => [d.x0 + (d.x1 - d.x0) / 2, (d || []).length]);
+        r = {
+            axis: name,
+            q1: ss.quantileSorted(d, 0.25),
+            q3: ss.quantileSorted(d, 0.75),
+            median: ss.medianSorted(d),
+            // outlier: ,
+            arr: sumstat
+        };
+        if (d.length > 4) {
+            const iqr = r.q3 - r.q1;
+            const lowLimit = r.q3 + histodram.outlierMultiply * iqr;
+            const upLimit = r.q1 - histodram.outlierMultiply * iqr;
+            r.outlier = _.uniq(d.filter(e => e > lowLimit || e < upLimit));
+        } else {
+            r.outlier = _.uniq(d);
+        }
+    } else {
+        r = {
+            axis: name,
+            q1: undefined,
+            q3: undefined,
+            median: undefined,
+            outlier: [],
+            arr: []
+        };
+    }
+    return r;
 }
 
 function download(filename, text) {
