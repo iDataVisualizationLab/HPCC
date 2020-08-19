@@ -36,19 +36,20 @@ let series = fc
         context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA);
     });
 function render() {
-    fillColor = fillColor.data(data)
+    fillColor = fillColor.data(data);
     series(data);
+    console.log('frame')
     postMessage('frame');
 }
 addEventListener('message', ({ data: { offscreenCanvas, width, height, transform, data } }) => {
     if (offscreenCanvas) {
-        console.log('Rendering...')
         postMessage('Rendering...');
         const gl = offscreenCanvas.getContext('webgl');
         series.context(gl);
         render();
     }
     if (data!= null){
+        console.log('Update data...')
         handleData(data);
         render();
     }
