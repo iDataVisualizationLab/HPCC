@@ -124,9 +124,12 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     graphicopt.width = document.getElementById('matrixLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('matrixLayoutHolder').getBoundingClientRect().height;
     const serviceName = vizservice[serviceSelected].attr;
-    let _colorItem = d3.scaleSequential()
-        // .interpolator(d3.interpolateSpectral);
-        .interpolator(d3.interpolateRdYlBu);
+    // let _colorItem = d3.scaleSequential()
+    //     // .interpolator(d3.interpolateSpectral);
+    //     .interpolator(d3.interpolateRdYlBu);
+    let _colorItem = d3.scaleLinear()
+        .range(colorScaleList.scag)
+        .interpolate(d3.interpolateHcl);
     let getOutofRange = ()=>{};
     let getOutofRange_prim = ()=>{};
     getOutofRange = getOutofRange_cont;
@@ -134,7 +137,9 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
     const range_cal_or = vizservice[serviceSelected].range.slice();
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
-    _colorItem.domain(range_cal.slice().reverse());
+    // _colorItem.domain(range_cal.slice().reverse());
+    const colorscale_temp = d3.scaleLinear().domain([0,_colorItem.range().length-1]).range(range_cal.slice().reverse())
+    _colorItem.domain(_colorItem.range().map((d,i)=>colorscale_temp(i)));
 
     const colorItem = function(d){
         if (d!==undefined&&d!==null) {
@@ -428,6 +433,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
 
             if (color.interpolate) {
+                debugger
                 const n = Math.min(color.domain().length, color.range().length);
 
                 let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
@@ -439,6 +445,18 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     .attr("height", height)
                     .attr("preserveAspectRatio", "none")
                     .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+                if (!y.ticks) {
+                    if (tickValues === undefined) {
+                        const n = Math.round(ticks + 1);
+                        tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                    }
+                    if (typeof tickFormat !== "function") {
+                        tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                    }
+                } else {
+                    graphicopt.legend = {scale: y};
+                    legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
+                }
             }// Sequential
             else if (color.interpolator) {
                 let y = Object.assign(color.copy()
