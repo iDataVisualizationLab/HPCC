@@ -13,6 +13,10 @@ let data =[],
     x=d3.scaleLinear().range([-0.5,0.5]),
     y=d3.scaleLinear().range([-0.5,0.5]),
     _transform=new Transform(1,0,0);
+
+let fillColor = fc
+    .webglFillColor()
+    .value(d => d.color??[0,0,0,0.6]);
 let series = fc
     .seriesWebglPoint()
     .xScale(x)
@@ -20,8 +24,19 @@ let series = fc
     .crossValue(d => d.x)
     .mainValue(d => d.y)
     .size(d => d.size??10)
-    .equals((previousData, data) => previousData.length > 0);
+    .defined(() => true)
+    .equals((previousData, data) => previousData.length > 0)
+    .decorate(program => {
+        // Set the color of the points.
+        fillColor(program);
+
+        // Enable blending of transparent colors.
+        const context = program.context();
+        context.enable(context.BLEND);
+        context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA);
+    });
 function render() {
+    fillColor = fillColor.data(data)
     series(data);
     postMessage('frame');
 }
