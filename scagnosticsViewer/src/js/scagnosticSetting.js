@@ -4,7 +4,13 @@ let scagOpt = {
     startBinGridSize: 20,
     isNormalized: true,
     isBinned: false,
-    outlyingUpperBound: undefined,
-    minBins: 50,
-    maxBins: 250
+    minBins: 10,
+    maxBins: 250,
+    outlyingUpperBound:3
 };
+function scag2string(scag){
+    let temp = {};
+    // temp['normalizedPoints']=scag.normalizedPoints;
+    scagMetrics.forEach(s=>temp[s.attr] = scag[s.attr])
+    return _.clone(temp)
+}

@@ -16,7 +16,7 @@ let data =[],
 
 let fillColor = fc
     .webglFillColor()
-    .value(d => d.color??[0,0,0,0.6]);
+    .value(d => d.color??[0,0,0,0.75]);
 let series = fc
     .seriesWebglPoint()
     .xScale(x)

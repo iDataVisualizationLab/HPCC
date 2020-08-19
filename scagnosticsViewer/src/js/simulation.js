@@ -1,5 +1,6 @@
 class Simulation {
     data;
+    scag;
     timer;
     interval=1000;
     #index=0;
@@ -14,7 +15,9 @@ class Simulation {
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
-            let updatePromise=d3.json(url).then((data) => {
+            let updatePromise=d3.json(url.replace('.json','_scag.json')).then(d=>this.scag=d)
+                .catch(err=>console.log('not found scag preset!'))
+                .then(()=>d3.json(url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
                 d3.keys(data.jobs_info).forEach(jID=>{
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
@@ -29,7 +32,7 @@ class Simulation {
                     listener(d3.extent(data.time_stamp));
                 });
                 return d3.extent(data.time_stamp);
-            });
+            }));
 
         }
     }
@@ -89,10 +92,11 @@ class Simulation {
                             nodes_info[c][s] = [self.data.nodes_info[c][s][index]];
                         })
                     });
+                    const scag = (self.scag??[])[index];
                     const time_stamp = [currentTime];
                     self.#currentTime = currentTime;
                     self.#index ++;
-                    resolve({jobs_info, nodes_info, time_stamp,currentTime})
+                    resolve({jobs_info, nodes_info, time_stamp,currentTime,scag})
 
                 }
             }

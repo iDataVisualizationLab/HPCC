@@ -222,7 +222,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
       </thead>
       <tbody>
         ${scagMetrics.map(s=>{
-            return `<tr><td>${s.id+1}</td><td>${s.text}</td><td>${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
+            return `<tr><td>${s.id+1}</td><td>${s.text}</td><td class="number">${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
         }).join('')}
       </tbody>
     </table>`}
@@ -390,7 +390,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         </tr>
       </thead>
       <tbody>
-      ${serviceactive.map(s=>`<tr><td>${s.text}</td><td>${sampleS[e.data][serviceListattr[s.idroot]][0][s.id]}</td></tr>`).join('')}
+      ${serviceactive.map(s=>`<tr><td>${s.text}</td><td class="number">${sampleS[e.data][serviceListattr[s.idroot]][0][s.id].toLocaleString()}</td></tr>`).join('')}
 </tbody>`})
                 }).on('mouseout',function(){tooltip.hide()});
             scattersvg.selectAll('circle.outlier').data(d.value.metrics.outlyingPoints)

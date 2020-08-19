@@ -9,7 +9,8 @@ svg {
     pointer-events: all;
 }
 rect.scatterplot {
-    rx:4
+    rx:4;
+    paint-order: stroke;
 }
 .outer_node text.highlight2.hide{
     display: block;
@@ -98,7 +99,9 @@ text {
 #informationTable tr.shown .morebtn[value='open']{
     display: none;
 }
-
+table td.number{
+    text-align: right;
+}
 .d3-tip span {
     text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
 }

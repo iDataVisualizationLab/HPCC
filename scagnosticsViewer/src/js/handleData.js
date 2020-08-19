@@ -25,8 +25,8 @@ function handleData(data){
     });
     return {computers,jobs,users}
 }
-function adjustScag(sampleS,computers){
-    let {scag} = data2scag(sampleS,computers);
+function adjustScag(sampleS,computers,scagdata){
+    let {scag} = data2scag(sampleS,computers,scagdata);
     Layout.scag = scag;
 }
 
@@ -45,9 +45,10 @@ function getData_delta(d){
     return 0;
 }
 
-function data2scag(sampleS,computers){
+function data2scag(sampleS,computers,scagdata){
     let scag = {};
     if (sampleS){
+        console.time('scag:');
         const scaleservice = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
         const norm=Object.keys(computers)
             .map(c=>{
@@ -55,17 +56,30 @@ function data2scag(sampleS,computers){
                 out.name = c;
                 return out;
             });
-        console.time('scag:')
-        let count=0;
-        for (let i =0;i<serviceFullList.length-1;i++){
-            for (let j =i+1;j<serviceFullList.length;j++){
-                const points = norm.map(d=>{
-                    const out = [d[i],d[j]];
-                    out.data = d.name;
-                    return out;
-                });
-                scag[serviceFullList[i].text+"||"+serviceFullList[j].text] = {dim:[serviceFullList[i].text,serviceFullList[j].text],metrics:new scagnostics(points, scagOpt)};
-                count++
+        if(scagdata){
+            for (let i =0;i<serviceFullList.length-1;i++){
+                for (let j =i+1;j<serviceFullList.length;j++){
+                    const points = norm.map(d=>{
+                        const out = [d[i],d[j]];
+                        out.data = d.name;
+                        return out;
+                    });
+                    scagdata[serviceFullList[i].text+"||"+serviceFullList[j].text].metrics.normalizedPoints = points;
+                }
+            }
+            scag = scagdata
+            console.timeEnd('scag:')
+            return {scag};
+        }else{
+            for (let i =0;i<serviceFullList.length-1;i++){
+                for (let j =i+1;j<serviceFullList.length;j++){
+                    const points = norm.map(d=>{
+                        const out = [d[i],d[j]];
+                        out.data = d.name;
+                        return out;
+                    });
+                    scag[serviceFullList[i].text+"||"+serviceFullList[j].text] = {dim:[serviceFullList[i].text,serviceFullList[j].text],metrics:new scagnostics(points, scagOpt)};
+                }
             }
         }
         console.timeEnd('scag:')
@@ -80,7 +94,7 @@ function queryData(data) {
     let  sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;
     let {computers,jobs,users} = handleData(data);
-    adjustScag(sampleS,computers);
+    adjustScag(sampleS,computers,data.scag);
     const currentTime = data.currentTime;
     Layout.computers_old = computers;
     currentDraw = _.partial(draw,computers,jobs,users,sampleS,currentTime);
