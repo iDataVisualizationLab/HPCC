@@ -125,7 +125,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     graphicopt.height = document.getElementById('matrixLayoutHolder').getBoundingClientRect().height;
     const serviceName = vizservice[serviceSelected].attr;
     let _colorItem = d3.scaleSequential()
-        .interpolator(d3.interpolateSpectral);
+        // .interpolator(d3.interpolateSpectral);
+        .interpolator(d3.interpolateRdYlBu);
     let getOutofRange = ()=>{};
     let getOutofRange_prim = ()=>{};
     getOutofRange = getOutofRange_cont;
