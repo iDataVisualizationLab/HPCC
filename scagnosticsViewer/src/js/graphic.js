@@ -244,8 +244,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     // prepare data
     let dataDraw=[];
     scaterMatix.update_size(graphicopt);
-    let x_inside = d3.scaleLinear().range([0,X.bandwidth()]);
-    let y_inside = d3.scaleLinear().range([Y.bandwidth(),0]);
+    let x_inside = d3.scaleLinear().range([5,X.bandwidth()-5]);
+    let y_inside = d3.scaleLinear().range([Y.bandwidth()-5,5]);
     let onode = onodesg.selectAll(".outer_node")
         .data(datain,d=>d.key);
     onode.call(updateOnode);
