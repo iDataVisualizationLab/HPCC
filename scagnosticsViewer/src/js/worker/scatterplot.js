@@ -24,8 +24,7 @@ let series = fc
     .crossValue(d => d.x)
     .mainValue(d => d.y)
     .size(d => d.size??10)
-    .defined(() => true)
-    .equals((previousData, data) => previousData.length > 0)
+    // .equals((previousData, data) => previousData.length > 0)
     .decorate(program => {
         // Set the color of the points.
         fillColor(program);
