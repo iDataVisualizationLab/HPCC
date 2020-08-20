@@ -54,10 +54,12 @@ class Timeline{
 
         this.timelineHolder = this.el.append('div')
             .attr('class','progress-bar-wrapper align-self-center')
+            .style("height", "30px")
             .style("width", "calc(100% - 30px - 200px)");
         this.timeline = this.timelineHolder.append('div')
             .attr('class',"progress")
             .style("width", "100%")
+            .style("height", "100%")
             .on('click',onClickTimeline)
             .append('div')
             .attr('class','progress-bar')
@@ -67,8 +69,10 @@ class Timeline{
             .attr('aria-valuemax',"100");
         this.vioinHolder = this.timelineHolder.append('svg')
             .style("position", "absolute")
+            .style("top", "0")
             .style("width", "100%")
-            .style("height", "20px")
+            .style("opacity", "0.3")
+            .style("height", "30px")
             .attr("preserveAspectRatio","none")
             .attr('viewBox',`0 0 1000 20`);
         this.timelineHandler = this.timelineHolder

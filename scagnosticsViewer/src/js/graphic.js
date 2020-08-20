@@ -7,7 +7,7 @@ d3.selection.prototype.moveToFront = function() {
 
 
 // setting
-let tooltip = d3.tip().attr('class', 'd3-tip').direction('ne').html(function (d){return `<div class="card">
+let tooltip = d3.tip().attr('class', 'd3-tip').direction('ne').html(function (d){return `<div class="card text-white bg-secondary">
 <div class="card-header">
     ${d.header}
   </div>
@@ -223,7 +223,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         d.drawData = undefined;
         d.tooltip={
             header:` ${d.key.replace('||',' v.s. ')}`,
-            body:`<table class="table table-sm table-striped">
+            body:`<table class="table table-sm table-striped bg-light" style="margin-bottom: 0">
       <thead>
         <tr>
           <th scope="col">#</th>
@@ -233,7 +233,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
       </thead>
       <tbody>
         ${scagMetrics.map(s=>{
-            return `<tr><td>${s.id+1}</td><td>${s.text}</td><td class="number">${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
+            return `<tr${s.attr===serviceName?' class="font-weight-bold"':''}><td>${s.id+1}</td><td>${s.text}</td><td class="number">${d3.format('.2f')(d.value.metrics[s.attr])}</td></tr>`
         }).join('')}
       </tbody>
     </table>`}
