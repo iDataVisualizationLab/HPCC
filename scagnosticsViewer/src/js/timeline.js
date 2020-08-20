@@ -151,7 +151,7 @@ class Timeline{
         if(this.vioinData&&this.vioinChoice){
             const dataIn = this.vioinData.map(d=>this.vioinChoice.getData(d));
             let x = d3.scaleLinear().range([0,1000]).domain([0,dataIn.length-1]);
-            const y = d3.scaleLinear().range([0,20]);
+            const y = d3.scaleLinear().range([20,0]);
             var area = d3.area()
                 .x((d,i) => x(i))
                 .y1(d => y(d))
