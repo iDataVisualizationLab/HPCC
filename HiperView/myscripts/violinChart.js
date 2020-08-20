@@ -198,12 +198,13 @@ d3.viiolinChart = function () {
             }
         }
 
-
+        viol_chart.attr("d",d=> createviolin(d.arr)   // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+        );
         viol_n.append("path");
+        viol_n.style('stroke',graphicopt.stroke)
+            .style('stroke-width','0.2');
         viol_chart = viol_n.merge(viol_chart);
         viol_chart.select('path').datum(d=>{return d;})
-            .style('stroke',graphicopt.stroke)
-            .style('stroke-width','0.2')
             .style('fill',d=>graphicopt.color(d.axis))
             .transition()
             // .style('fill','currentColor')

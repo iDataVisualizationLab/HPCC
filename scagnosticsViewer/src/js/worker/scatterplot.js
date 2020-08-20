@@ -37,7 +37,6 @@ let series = fc
 function render() {
     fillColor = fillColor.data(data);
     series(data);
-    console.log('frame')
     postMessage('frame');
 }
 addEventListener('message', ({ data: { offscreenCanvas, width, height, transform, data } }) => {
@@ -48,7 +47,6 @@ addEventListener('message', ({ data: { offscreenCanvas, width, height, transform
         render();
     }
     if (data!= null){
-        console.log('Update data...')
         handleData(data);
         render();
     }
@@ -72,7 +70,6 @@ addEventListener('message', ({ data: { offscreenCanvas, width, height, transform
 
 function handleData(_data){
     data=_data;
-    console.log(xScale.domain())
     // xScale.domain(d3.extent(_data,d=>d.x));
     // yScale.domain(d3.extent(_data,d=>d.y).reverse());
     // x.domain(_transform.rescaleX(xScale).domain());

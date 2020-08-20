@@ -6,6 +6,9 @@ class Timeline{
     timelineHandler;
     meassage;
     timelineTicks;
+    vioinHolder;
+    vioinData;
+    vioinChoice;
     step = ()=>{};
     timeConf={scale:d3.scaleTime().range([0,100]).domain([0,0])};
     #play=()=>{
@@ -28,6 +31,7 @@ class Timeline{
     constructor(elName,isplay) {
         const self = this;
         this.el = d3.select(elName);
+        this.vioinChoice = {getData:function(){}};
         this.playbutton = this.el.append('button')
             .attr('type',"button")
             .attr('class',"btn btn-primary btn-circle btn-sm")
@@ -61,12 +65,19 @@ class Timeline{
             .attr('aria-valuenow',"0")
             .attr('aria-valuemin',"0")
             .attr('aria-valuemax',"100");
+        this.vioinHolder = this.timelineHolder.append('svg')
+            .style("position", "absolute")
+            .style("width", "100%")
+            .style("height", "20px")
+            .attr("preserveAspectRatio","none")
+            .attr('viewBox',`0 0 1000 20`);
         this.timelineHandler = this.timelineHolder
             .append('div').attr('class','progress-bar-handle align-self-center');
         this.timelineTicks = this.timelineHolder
             .append('div').attr('class','ticksHandeler')
             .style('position','relative').style('width','100%');
         this.#updateTick();
+        this.#updateViolin();
         this.meassageHolder = this.el.append('div')
             .attr('class','message align-items-center row')
             .style("padding-left", "20px")
@@ -131,6 +142,25 @@ class Timeline{
                 .style('height','8px').style('left',d=>this.timeConf.scale(d)+'%');
        }
     }
+    onViolinSelectionChange(opt){
+        Object.keys(opt).forEach(k=>this.vioinChoice[k] = opt[k]);
+        this.#updateViolin()
+    }
+    #updateViolin(){
+        this.vioinHolder.classed('hide',!this.vioinData)
+        if(this.vioinData&&this.vioinChoice){
+            const dataIn = this.vioinData.map(d=>this.vioinChoice.getData(d));
+            let x = d3.scaleLinear().range([0,1000]).domain([0,dataIn.length-1]);
+            const y = d3.scaleLinear().range([0,20]);
+            var area = d3.area()
+                .x((d,i) => x(i))
+                .y1(d => y(d))
+                .y0(y(0));
+            this.vioinHolder.selectAll('path').data([dataIn])
+                .join('path')
+                .attr('d',area);
+        }
+    }
     disableHandle(isdisable){
         this.timelineHolder.classed('disabled',isdisable)
     }
@@ -151,6 +181,11 @@ class Timeline{
         function pause_icon(){
             return "M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z";
         }
+    }
+    violinDataChange(d){
+        console.log(d)
+        this.vioinData = d;
+        this.#updateViolin();
     }
     domain(domain){
         this.timeConf.scale.domain(domain);

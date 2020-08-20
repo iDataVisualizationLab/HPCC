@@ -86,11 +86,23 @@ let isFreeze= false;
 let highlight2Stack = [];
 let vizservice=[];
 let scaterMatix;
+let timelineViolinopt;
+let first = true;
 function serviceControl(){
     vizservice =scagMetrics.slice();
+    if(first){
+        timelineViolinopt = timelineViolinopt?? serviceFullList[0].text+"||"+serviceFullList[1].text;
+        timelineControl.onViolinSelectionChange.bind(timelineControl)({
+            getData:function(d){
+                return d[timelineViolinopt].metrics[scagMetrics[serviceSelected].attr]
+            }
+        });
+        first = false;
+    }
     d3.select('#serviceSelection')
         .on('change',function(){
             serviceSelected = +$(this).val();
+            timelineControl.onViolinSelectionChange.bind(timelineControl)({});
             currentDraw(serviceSelected);
         })
         .selectAll('option')
@@ -104,6 +116,7 @@ function serviceControl(){
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     scaterMatix = d3.scatterMatrix().canvasContainer($('d3fc-canvas')[0]).init();
+
     // d3.select('#userSort').on('change',function(){
     //     currentDraw(serviceSelected);
     // });
@@ -424,7 +437,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             // legendHolder.style('left', Math.min(d3.zoomIdentity.x + graphicopt.diameter() / 2 + 80, graphicopt.width - graphicopt.margin.right) + 'px');
             // legendHolder.select('.legendView').classed('hide',false);
             const svg = legendHolder.select('svg.legend')
-                .attr('width', width + marginLeft + marginRight+width_violin)
+                .attr('width', width + marginLeft + marginRight+width_violin+5)
                 .attr('height', height + marginTop + marginBottom);
             svg.select('g.legend').remove();
             let legend = svg.append('g').attr('class', 'legend')
@@ -508,11 +521,14 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             let legendRange = vizservice[serviceSelected].range;
             let customRange = vizservice[serviceSelected].filter??vizservice[serviceSelected].range.slice();
             let legend_violin = legend.append('g').attr('class', 'violin')
-                .attr('transform', `translate(${width},0)`);
-            debugger
+                .attr('transform', `translate(${width+5},0)`);
+            legend.append('clipPath').attr('id','legendClipPath')
+                .append('rect').attr('width',width_violin/2).attr('height',height)
             graphicopt.violin.graphicopt({width:width_violin,height:height,customrange:customRange})
                 .data([ getHistdata(datain.filter(d=>!d.disable).map(d=>d.value.metrics[serviceName]),serviceName,customRange)])
                 .draw(legend_violin)
+                .attr('clip-path',"url(#legendClipPath)")
+                .select('.laxis').classed('hide',true);
 
             const groupbtn = legendHolder.select('.btn-group')
             let applybtn = legendHolder.select('#range_apply')

@@ -11,12 +11,18 @@ class Simulation {
     onFinishQuery=[];
     onDataChange=[];
     onUpdateTime=[];
+    onScagChange=[];
     onStartQuery=()=>{};
     constructor(url) {
         this.isRealTime = !url;
+        let self = this;
         if (!this.isRealTime) {
             let updatePromise=d3.json(url.replace('.json','_scag.json')).then(d=>this.scag=d)
-                .catch(err=>console.log('not found scag preset!'))
+                .catch(err=>console.log('not found scag preset!')).then(()=>{
+                    this.onScagChange.forEach(function(listener) {
+                        listener(self.scag);
+                    });
+                })
                 .then(()=>d3.json(url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
                 d3.keys(data.jobs_info).forEach(jID=>{

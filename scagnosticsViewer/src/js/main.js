@@ -56,8 +56,8 @@ function initTimeElement(){
     request.callbackStop = timelineControl.pause.bind(timelineControl);
 
     request.onDataChange.push(timelineControl.domain.bind(timelineControl));
+    request.onScagChange.push(timelineControl.violinDataChange.bind(timelineControl));
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-
     if (request.isRealTime) {
         timelineControl.disableHandle(true);
         request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');

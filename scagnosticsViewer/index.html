@@ -101,7 +101,7 @@
                     </form>
                 </nav>
                 <div class="container">
-                    <div class="row align-items-center" style="margin-bottom: 20px">
+                    <div class="row align-items-center">
                         <div class="row col-12" id="timelineControl">
 
                         </div>
@@ -160,16 +160,16 @@
                         </div>
                         <div class="card-body row" id="analyticOnToolbarHolder">
                             <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                <div class="row legendView hide">
-                                    <label class="col-4"></label>
-                                    <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                <div class="row col-12 legendView hide">
+                                    <label class="col-3"></label>
+                                    <div class="col-6 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
                                         <div class="input-group flex-nowrap">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text" id="addon-max">max</span>
                                             </div>
                                             <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
                                         </div>
-                                        <svg class="legend" style="transform: translateX(50px)"></svg>
+                                        <svg class="legend" style="transform: translateX(20px)"></svg>
                                         <div class="input-group flex-nowrap">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text" id="addon-min">min</span>
@@ -181,6 +181,7 @@
                                             <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
                                         </div>
                                     </div>
+                                    <label class="col-3"></label>
                                 </div>
                                 </div>
                             </div>
