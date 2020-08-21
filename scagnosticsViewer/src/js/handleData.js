@@ -90,6 +90,7 @@ function data2scag(sampleS,computers,scagdata){
 let currentDraw=()=>{};
 let tsnedata = {};
 function queryData(data) {
+    Layout.scagpair = scagpair(serviceFullList);
     const data_ = handleDataUrl(data);
     let  sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;

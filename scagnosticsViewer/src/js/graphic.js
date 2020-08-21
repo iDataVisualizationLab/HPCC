@@ -110,8 +110,22 @@ function serviceControl(){
         .enter()
         .append('option')
         .attr('value',(d,i)=>i)
-        .attr('data-value',(d,i)=>d)
+        .attr('data-value',(d,i)=>d.text)
         .text(d=>d.text)
+    d3.select('#timelineVariable')
+        .on('change',function(){
+            timelineViolinopt = $(this).val();
+            timelineControl.onViolinSelectionChange.bind(timelineControl)({});
+            currentDraw(serviceSelected);
+        })
+        .selectAll('option')
+        .data(Layout.scagpair)
+        .enter()
+        .append('option')
+        .attr('checked',d=>d===timelineViolinopt)
+        .attr('value',d=>d)
+        .attr('data-value',d=>d)
+        .text(d=>d)
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });

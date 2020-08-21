@@ -8,6 +8,15 @@ let scagOpt = {
     maxBins: 250,
     outlyingUpperBound:3
 };
+function scagpair(serviceFullList) {
+    let pair = [];
+    for (let i =0;i<serviceFullList.length-1;i++) {
+        for (let j = i + 1; j < serviceFullList.length; j++) {
+            pair.push(serviceFullList[i].text+"||"+serviceFullList[j].text)
+        }
+    }
+    return pair;
+}
 function scag2string(scag){
     let temp = {};
     temp['outlyingPoints']=scag.outlyingPoints;

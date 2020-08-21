@@ -73,6 +73,7 @@ class Timeline{
             .style("width", "100%")
             .style("opacity", "0.3")
             .style("height", "30px")
+            .style("pointer-events", "none")
             .attr("preserveAspectRatio","none")
             .attr('viewBox',`0 0 1000 20`);
         this.timelineHandler = this.timelineHolder
@@ -187,7 +188,6 @@ class Timeline{
         }
     }
     violinDataChange(d){
-        console.log(d)
         this.vioinData = d;
         this.#updateViolin();
     }
