@@ -407,7 +407,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                 .attr('fill','black')
                 .attr('opacity',0.6)
                 .on('mouseover',function(e){
-                    tooltip.show({header:e.data,body:`<table class="table table-sm table-striped">
+                    tooltip.show({header:e.data,body:`<table class="table table-sm table-striped bg-light" style="margin-bottom: 0">
       <thead>
         <tr>
           <th scope="col">Metric</th>
