@@ -437,7 +437,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .join("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color});
+        // .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color});
+        .attr("stroke", d=>{return '#ddd'});
     nodeLink.interrupt().transition().duration(graphicopt.animationTime)
         .attr("d", link);
     nodeLink.each(function(d){
