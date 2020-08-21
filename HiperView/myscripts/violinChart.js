@@ -286,7 +286,6 @@ d3.viiolinChart = function () {
             else
                 xNumrange = graphicopt.widthG()/data.length
         xNum.range([0, xNumrange]);
-        console.log(xNum.range()[1])
         let sumstat;
         if (graphicopt.opt.dataformated){
             // if (data[0].arr.length)
