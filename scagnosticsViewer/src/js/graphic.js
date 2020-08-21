@@ -122,7 +122,7 @@ function serviceControl(){
         .data(Layout.scagpair)
         .enter()
         .append('option')
-        .attr('checked',d=>d===timelineViolinopt)
+        .attr('checked',d=>d===timelineViolinopt?'':null)
         .attr('value',d=>d)
         .attr('data-value',d=>d)
         .text(d=>d)
@@ -292,7 +292,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         p.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).each(function(d){
             d.value.metrics.normalizedPoints.forEach(e=>dataDraw.push({x:d.x+x_inside(e[0]),y:d.y+y_inside(e[1]),data:e.data}))
             d.node=d3.select(this);
-        });
+        }) .classed('timelineMarker',d=>d.key===timelineViolinopt);
         p.on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();scatterPlot(d)})
             .on('mouseover',mouseover)
             .on('mouseout',mouseout);
@@ -535,7 +535,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
             let legendRange = vizservice[serviceSelected].range;
             let customRange = vizservice[serviceSelected].filter??vizservice[serviceSelected].range.slice();
             let legend_violin = legend.append('g').attr('class', 'violin')
-                .attr('transform', `translate(${width+5},0)`);
+                .attr('transform', `translate(${width},0)`);
             legend.append('clipPath').attr('id','legendClipPath')
                 .append('rect').attr('width',width_violin/2).attr('height',height)
             graphicopt.violin.graphicopt({width:width_violin,height:height,customrange:customRange})

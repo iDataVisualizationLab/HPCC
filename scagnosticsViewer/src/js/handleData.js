@@ -52,7 +52,10 @@ function data2scag(sampleS,computers,scagdata){
         const scaleservice = serviceFullList.map(d=>d3.scaleLinear().domain(d.range));
         const norm=Object.keys(computers)
             .map(c=>{
-                const out = serviceFullList.map((s,si)=> Math.max(scaleservice[si](sampleS[c][serviceListattr[s.idroot]][0][s.id])??0,0));
+                const out = serviceFullList.map((s,si)=> {
+                    const d = scaleservice[si](sampleS[c][serviceListattr[s.idroot]][0][s.id])??null;
+                    return d<0?null:d;
+                });
                 out.name = c;
                 return out;
             });
@@ -67,7 +70,7 @@ function data2scag(sampleS,computers,scagdata){
                     scagdata[serviceFullList[i].text+"||"+serviceFullList[j].text].metrics.normalizedPoints = points;
                 }
             }
-            scag = scagdata
+            scag = scagdata;
             console.timeEnd('scag:')
             return {scag};
         }else{
@@ -78,7 +81,9 @@ function data2scag(sampleS,computers,scagdata){
                         out.data = d.name;
                         return out;
                     });
-                    scag[serviceFullList[i].text+"||"+serviceFullList[j].text] = {dim:[serviceFullList[i].text,serviceFullList[j].text],metrics:new scagnostics(points, scagOpt)};
+                    scag[serviceFullList[i].text+"||"+serviceFullList[j].text] = {dim:[serviceFullList[i].text,serviceFullList[j].text],
+                        metrics:new scagnostics(points.filter(d=>(d[0]!==null)&&(d[1]!==null)), scagOpt)};
+                    scag[serviceFullList[i].text+"||"+serviceFullList[j].text].metrics.normalizedPoints = points
                 }
             }
         }

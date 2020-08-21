@@ -119,3 +119,8 @@ table td.number{
     padding-right: 2px;
     padding-left: 2px;
 }
+
+.timelineMarker .scatterplot{
+    stroke: var(--primary);
+    stroke-width: 3;
+}
