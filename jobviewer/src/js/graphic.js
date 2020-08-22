@@ -675,7 +675,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     function getDrawData(e) {
         if (serviceName === 'Radar'){
             if (!e.children) {
-                let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])||0}))];
+                let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:Math.max(d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])??0,0)}))];
                 radarvalue[0].name = e.data.metrics['Radar']
                 radarvalue.isRadar = true;
                 radarvalue.r = e.r*2;

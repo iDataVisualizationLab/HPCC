@@ -198,8 +198,12 @@ function cluster_map (dataRaw) {
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
             .style('position','relative')
             .each(function(d,i){
+                const datadraw = [d[0].map(e=>({axis:e.axis,value:Math.max(e.value,0)}))];
+                datadraw[0].name = d[0].name;
+                datadraw[0].text = d[0].text;
+                datadraw.id = d.id;
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
-                RadarChart(".radarh"+d.id, d, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                RadarChart(".radarh"+d.id, datadraw, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
         // d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         // d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
