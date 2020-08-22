@@ -94,6 +94,7 @@ function initdraw(){
 function getUsersort(){
     return $('#userSort').val()
 }
+let userColor = d3.scaleOrdinal(d3.schemeCategory20);
 function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     serviceControl();
     graphicopt.radaropt.schema = serviceFullList;
@@ -107,7 +108,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     let getOutofRange_prim = ()=>{}
     if(serviceName==='User') {
         vizservice[serviceSelected].range = d3.keys(users);
-        _colorItem = d3.scaleOrdinal(d3.schemeCategory20);
+        debugger
+        _colorItem = userColor;
         getOutofRange = ()=>false
         getOutofRange_prim = ()=>false
     } else if (serviceName==='Radar') {
@@ -124,7 +126,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     if(serviceName!=='User'){
         if(serviceName!=='Radar')
             _colorItem.domain(range_cal.slice().reverse());
-    }else
+    }else if(serviceName==='Radar')
         _colorItem.domain(range_cal.slice());
     const colorItem = function(d){
         if (d) {
