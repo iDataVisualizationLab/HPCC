@@ -1,6 +1,7 @@
 //parametter
 const COMPUTE = 'nodes_info';
 const JOB = 'jobs_info';
+const JOBNAME = 'job_name';
 const USER = 'user_name';
 
 const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
@@ -22,6 +23,8 @@ $(document).ready(function(){
 
         if(command.service!==undefined && _.isNumber(+command.service))
             serviceSelected = +command.service;
+        if(command.metric!==undefined && _.isNumber(+command.metric))
+            serviceSelected = +command.metric;
         if (command.mode==='realTime')
         {
             // set up ui

@@ -136,7 +136,13 @@
                         </div>
                         <div class="card-body row" id="controlOnToolbarHolder">
                             <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
-                                <label class="col-4" for="userSort">Sort users by: </label>
+<!--                                <label class="col-4" for="innerDisplay">Central nodes display: </label>-->
+                                <label class="col-4" for="innerDisplay">Central nodes: </label>
+                                <select class="col-8" id="innerDisplay">
+                                    <option value="users">User</option>
+                                    <option value="jobName">Job Name</option>
+                                </select>
+                                <label class="col-4" for="userSort">Sort <span>users</span> by: </label>
                                 <select class="col-8" id="userSort">
                                     <option value="job">#Jobs</option>
                                     <option value="compute">#Compute</option>

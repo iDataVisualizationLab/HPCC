@@ -87,6 +87,9 @@ function initdraw(){
     d3.select('#userSort').on('change',function(){
         currentDraw(serviceSelected);
     });
+    d3.select('#innerDisplay').on('change',function(){
+        currentDraw(serviceSelected);
+    });
     d3.select('#sort_apply').on('click',function(){
         sortData();
         currentDraw(serviceSelected)
@@ -98,20 +101,29 @@ function closeToolTip(){
 function getUsersort(){
     return $('#userSort').val()
 }
+function getInnerNodeAttr(){
+    return $('#innerDisplay').val()
+}
 let userColor = d3.scaleOrdinal(d3.schemeCategory20);
-function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
+function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelected){
     serviceControl();
     graphicopt.radaropt.schema = serviceFullList;
     isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
+    let innerKey = USER;
+    let innerObj = users;
+    if (getInnerNodeAttr()!=='users') {
+        innerKey = 'job_name_short';
+        innerObj = jobByNames;
+    }
     const serviceName = vizservice[serviceSelected].text;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     let getOutofRange = ()=>{}
     let getOutofRange_prim = ()=>{}
     if(serviceName==='User') {
-        vizservice[serviceSelected].range = d3.keys(users);
+        vizservice[serviceSelected].range = d3.keys(innerObj);
         debugger
         _colorItem = userColor;
         getOutofRange = ()=>false
@@ -122,8 +134,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         getOutofRange_prim = ()=>false
     }
     else{
-        getOutofRange = getOutofRange_cont
-        getOutofRange_prim = getOutofRange_prim_cont
+        getOutofRange = getOutofRange_cont;
+        getOutofRange_prim = getOutofRange_prim_cont;
     }
     const range_cal_or = vizservice[serviceSelected].range.slice();
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
@@ -173,7 +185,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
     graphicopt.el = svg;
     // Set the y scale of rectangles
-    graphicopt.iLength = d3.keys(users).length;
+    graphicopt.iLength = d3.keys(innerObj).length;
     let innerY = d3.scaleLinear()
         .domain([0, graphicopt.iLength])
         .range([-graphicopt.iLength * graphicopt.rect.height/ 2, graphicopt.iLength * graphicopt.rect.height / 2]);
@@ -247,9 +259,11 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     });
 
     // Setup the positions of inner nodes
+    // debugger
     const userIndex={};
-    const users_arr_entries = d3.entries(users);
-    // const users_arr = d3.entries(users).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
+    const users_arr_entries = d3.entries(innerObj);
+    // const users_arr_entries = d3.entries(jobByNames);
+    // const users_arr = d3.entries(innerObj).sort((a,b)=>b.value.node.length-a.value.node.length).map(function(d, i) {
     switch (getUsersort()) {
         case 'job':
             users_arr_entries.sort((a,b)=>b.value.job.length-a.value.job.length);
@@ -773,6 +787,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                     job['id']=jobID[0];
                     job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
+                    debugger
                     return job}).filter(d=>d);
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
@@ -835,7 +850,8 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
 
                                         r.childrenNode[c].classed('highlight2', true);
                                         r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                            if (d.datum().source===currentData.user_name){
+                                            debugger
+                                            if (d.datum().source===currentData[innerKey]){
                                                 highlight2Stack.push(d);
                                                 d.classed('highlight2',true);
                                             }
@@ -845,7 +861,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
                                 });
                             });
                             users_arr.find(u => {
-                                if (u.key===currentData.user_name) {
+                                if (u.key===currentData[innerKey]) {
                                     highlight2Stack.push(u.node);
                                     u.node.classed('highlight2', true);
                                     return true;

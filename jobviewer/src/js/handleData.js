@@ -11,7 +11,7 @@ function queryLayout() {
 
 function handleData(data){
     const computers = data[COMPUTE];
-    _.mapObject(computers,(d,i)=>d.user=[])
+    _.mapObject(computers,(d,i)=>(d.user=[],d.jobName=[]))
     const jobs = data[JOB]; // object
     const rack = Layout.data;
     // console.log('totaljob: ',d3.keys(jobs).length);
@@ -33,7 +33,32 @@ function handleData(data){
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
         return {node,job,jobMain}
     });
-    return {computers,jobs,users}
+    const jobName_job = d3.nest()
+        .key(d=>d.value[JOBNAME].slice(0,3)) //user
+        .key(d=>d.key.split('.')[0]) //job array
+        .entries(d3.entries(jobs));
+    const jobByNames = {};
+    jobName_job.forEach((val,i)=>{
+        let d = val.values;
+        const job = [];
+        const jobName = [];
+
+        const node = _.uniq(_.flatten(d.map(d=>d.values.map(d=>{
+            job.push(d.key);
+            jobName.push(d.value[JOBNAME]);
+            return d.value.node_list}))));
+        let key = val.key;
+        let lengthK = _.uniq(jobName).length;
+        if(lengthK>1)
+            key +='...(+'+lengthK+')';
+        else
+            key = jobName[0];
+        d.map(d=>d.values.forEach(d=>d.value['job_name_short']= key))
+        node.forEach(c=> computers[c].jobName.push(key));
+        const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
+        jobByNames[key] =  {node,job,jobMain}
+    });
+    return {computers,jobs,jobByNames,users}
 }
 function adjustTree(sampleS,computers){
     let {tree,compute_layoutLink} = data2tree(Layout.data_flat,sampleS,computers);
@@ -66,7 +91,8 @@ function data2tree(data,sampleS,computers){
                             value:1,
                             metrics:{},
                             metrics_delta:{},
-                            user: computers?computers[c].user:[]
+                            user: computers?computers[c].user:[],
+                            jobName: computers?computers[c].jobName:[]
                         };
                         if (sampleS){
                             serviceFullList.forEach(s=>item.metrics[s.text]=_.last(sampleS[c][serviceListattr[s.idroot]])[s.id]);
@@ -105,11 +131,11 @@ function queryData(data) {
     const data_ = handleDataUrl(data);
     let  sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;
-    let {computers,jobs,users} = handleData(data);
+    let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
     Layout.computers_old = computers;
-    currentDraw = _.partial(draw,computers,jobs,users,sampleS,currentTime);
+    currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     currentDraw(serviceSelected);
 }
 
