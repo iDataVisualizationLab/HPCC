@@ -83,6 +83,7 @@ function serviceControl(){
         .text(d=>d.text)
 }
 function initdraw(){
+    $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     d3.select('#userSort').on('change',function(){
         currentDraw(serviceSelected);
     });
@@ -90,6 +91,9 @@ function initdraw(){
         sortData();
         currentDraw(serviceSelected)
     })
+}
+function closeToolTip(){
+    d3.select('.informationHolder').classed('hide',true);
 }
 function getUsersort(){
     return $('#userSort').val()
@@ -440,7 +444,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         .attr("class", "link")
         .attr("fill", "none")
         // .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color});
-        .attr("stroke", d=>{return '#ddd'});
+        .attr("stroke", d=>{return '#aaa'});
     nodeLink.interrupt().transition().duration(graphicopt.animationTime)
         .attr("d", link);
     nodeLink.each(function(d){
@@ -735,7 +739,7 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
         if (isFreeze) {
             d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
-            contain.select('.card-header').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
+            contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
