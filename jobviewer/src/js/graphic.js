@@ -1071,10 +1071,6 @@ function pack (data){
             .sum(d => d.value)
             .sort((a, b) => b.value - a.value))
 }
-function projectX(x)
-{
-    return ((x - 90) / 180 * Math.PI) - (Math.PI/2);
-}
 
 function mouseover(d){
     if (!isFreeze)
