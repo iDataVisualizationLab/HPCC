@@ -55,10 +55,21 @@ function initClusterUI(){
     $('#kiteration').val(group_opt.bin.iterations || 50);
     d3.select('#clusterMethod').on('change',function(){
         group_opt.clusterMethod = this.value;
+        const el = this.selectedOptions[0];
         d3.selectAll('.clusterProfile').classed('hide',true);
         d3.select(`#${this.value}profile`).classed('hide',false);
+        const assignFunction = d3.select(el).attr('assign-function');
+        if (assignFunction)
+            getCluster = eval(assignFunction);
+        else
+            getCluster = getMathCluster;
+        const calculateFunction = d3.select(el).attr('cluster-function');
+        if (calculateFunction)
+            eval(calculateFunction)();
+        onchangeCluster()
     });
 }
+
 function onCalculateClusterAction() {
     recalculateCluster(group_opt,onchangeCluster);
 }
@@ -120,6 +131,11 @@ function handle_dataRaw() {
 function onchangeCluster() {
     cluster_map(cluster_info);
     handle_clusterinfo();
+    Layout.tree.children.forEach(d=>{
+        d.children.forEach(e=>{
+            getCluster(e);
+        })
+    });
     currentDraw(serviceSelected);
 }
 function cluster_map (dataRaw) {
@@ -392,4 +408,75 @@ function handle_clusterinfo () {
         data_info.push([d3.select(this).text(), group_opt.bin[Object.keys(group_opt.bin)[i]]])
     });
     data_info.push(['#group calculated:',cluster_info.length]);
+}
+let getCluster = getMathCluster;
+function getMathCluster(e){
+    // calculate cluster here
+    let axis_arr = tsnedata[e.name][0];
+    let index = 0;
+    let minval = Infinity;
+    cluster_info.find((c, ci) => {
+        const val = distance(c.__metrics.normalize, axis_arr);
+        if(val===0&&c.leadername===undefined)
+            c.leadername = {name:e.name,timestep:0};
+        if (minval > val) {
+            index = ci;
+            minval = val;
+        }
+        return !val;
+    });
+    cluster_info[index].arr.push(e.name);
+    e.metrics.Radar = cluster_info[index].name;
+    e.cluster = cluster_info[index];
+}
+function calJobNameCluster(){
+    cluster_info = d3.entries(Layout.jobByNames).map((j,ji)=>{
+        let c = {
+            arr: [],
+            axis: [],
+            index: ji,
+            labels: ''+ji,
+            mse:+'a',
+            name: "group_"+(ji+1),
+            orderG: 0,
+            text: j.key,
+            total: j.value.node.length,
+            __metrics:[]
+        };
+        let data = j.value.node.map(n=>tsnedata[n][0]);
+        c.__metrics = serviceFullList.map((s,si)=>{
+            let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
+            let val = d3.mean(_temp);
+            c[s.text] = d3.scaleLinear().range(s.range)(val);
+            return {axis: s.text,
+                maxval: d3.max(_temp),
+                mean: val,
+                minval: d3.min(_temp),
+                value: val}
+        });
+        return c
+    });
+    onchangeCluster();
+}
+function getJobNameCluster(e){
+    let index = [];
+    cluster_info.filter((c, ci) => {
+        e.jobName.forEach(jobn=> {
+            if (jobn === c.text) {
+                c.arr.push(e.name);
+                index.push(ci);
+                if (index.length === 1) {
+                    e.metrics.Radar = c.name;
+                    e.cluster = c;
+                } else if (index.length === 2) {
+                    e.metrics.Radar = [e.metrics.Radar,c.name];
+                    e.cluster = [e.cluster,c];
+                } else {
+                    e.metrics.Radar.push(c.name);
+                    e.cluster.push(c);
+                }
+                return true;
+            }
+        })
+    });
 }

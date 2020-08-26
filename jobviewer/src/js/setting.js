@@ -93,6 +93,7 @@ function handleDataUrl(dataRaw) {
                 let arrID = serviceListattr[si];
                 let currentIndex =  sampleh[h.name][arrID].length;
                 sampleh[h.name][arrID][ti] = value;
+
                 if (tsnedata[h.name][currentIndex]===undefined){
                     tsnedata[h.name][currentIndex] = [];
                     tsnedata[h.name][currentIndex].name = h.name;

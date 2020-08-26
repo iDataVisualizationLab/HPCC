@@ -81,6 +81,11 @@ function getData_delta(d){
 }
 
 function data2tree(data,sampleS,computers){
+    let serviceName = null;
+    if (cluster_info&&vizservice[serviceSelected].text==='Radar'){
+        cluster_info.forEach(d=>d.arr=[])
+        serviceName = vizservice[serviceSelected].text;
+    }
     const compute_layoutLink = {};
     const tree =  {name:"__main__",children:data.map(d=>{
             const el = {
@@ -101,6 +106,10 @@ function data2tree(data,sampleS,computers){
                             if (Layout.computers_old){
                                 serviceFullList.forEach(s=>item.metrics_delta[s.text] = item.metrics[s.text]-Layout.computers_old[c].metric[s.text]);
                             }
+                        }
+                        if (serviceName==='Radar'&&cluster_info)
+                        {
+                            getCluster(item)
                         }
                         compute_layoutLink[c] = d.key;
                         return item;
@@ -134,6 +143,7 @@ function queryData(data) {
     let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
+    Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
     currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     currentDraw(serviceSelected);

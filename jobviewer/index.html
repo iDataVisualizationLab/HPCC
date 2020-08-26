@@ -137,7 +137,7 @@
                         <div class="card-body row" id="controlOnToolbarHolder">
                             <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
 <!--                                <label class="col-4" for="innerDisplay">Central nodes display: </label>-->
-                                <label class="col-4" for="innerDisplay">Central nodes: </label>
+                                <label class="col-4" for="innerDisplay">Center lists: </label>
                                 <select class="col-8" id="innerDisplay">
                                     <option value="users">User</option>
                                     <option value="job name">Job Name</option>
@@ -183,7 +183,7 @@
                                     <select id="clusterMethod" class="col-8 radarcontroller_layout">
                                         <option value="leaderbin" selected="selected">Leader Bin</option>
                                         <option value="kmean">K-means</option>
-                                        <option value="jobName" distanceFunc="none">Job Name</option>
+                                        <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
                                         <!--<option value="binarybin">Binary bin</option>-->
                                     </select>
                                     <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>

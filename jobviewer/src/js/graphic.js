@@ -203,30 +203,13 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     let cluster_dict = {};
     if (serviceName==='Radar'&&cluster_info)
     {
-        cluster_info.forEach(d=>d.arr=[])
         Layout.tree.children.forEach(d=>{
             d.children.forEach(e=>{
-                let axis_arr = tsnedata[e.name][0];
-                let index = 0;
-                let minval = Infinity;
-                cluster_info.find((c, ci) => {
-                    const val = distance(c.__metrics.normalize, axis_arr);
-                    if(val===0&&c.leadername===undefined)
-                        c.leadername = {name:e.name,timestep:0};
-                    if (minval > val) {
-                        index = ci;
-                        minval = val;
-                    }
-                    return !val;
-                });
-                cluster_info[index].arr.push(e.name);
-                cluster_dict[e.name] = cluster_info[index].name;
-                e.metrics.Radar = cluster_info[index].name;
-                e.cluster = cluster_info[index];
+                cluster_dict[e.name] = e.metrics.Radar;
             })
         })
     }
-
+    debugger
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
@@ -353,10 +336,21 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     else if (serviceName==='Radar')
         users_arr.forEach((d, i)=>{
             const uniq = {};
-            d.value.node.forEach(c=>uniq[cluster_dict[c]]=1);
-            const keys = d3.keys(uniq);
-            if (keys.length===1)
-                d.color = colorItem(keys[0])
+            let multiKey = false;
+            d.value.node.find(c=>{
+                if (_.isArray(cluster_dict[c]))
+                    multiKey=true;
+                else
+                    uniq[cluster_dict[c]]=1
+                return multiKey;
+            });
+            if (multiKey)
+                d.color='black'
+            else{
+                const keys = d3.keys(uniq);
+                if (keys.length===1)
+                    d.color = colorItem(keys[0])
+            }
         })
 
 
@@ -485,6 +479,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             .attr('height', graphicopt.rect.height)
             .attr('id', d=>d.key);
         p.select('text')
+            .style('fill',d=>d.color==='black'?'white':null)
             .html(d=>d.key+'  <tspan style="font-weight: bold">'+d.value.job.length+'</tspan> jobs');
         p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
         return p;
