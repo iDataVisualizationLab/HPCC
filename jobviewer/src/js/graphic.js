@@ -152,7 +152,8 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 if (serviceName!=='Radar')
                     if (d < range_cal[0] || d > range_cal[1])
                         return 'none';
-            return _colorItem(d);
+
+            return _.isArray(d)?'black':_colorItem(d);
         }else
             // return '#afafaf';
             return '#ffffff';
@@ -344,9 +345,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     uniq[cluster_dict[c]]=1
                 return multiKey;
             });
-            if (multiKey)
-                d.color='black'
-            else{
+            if (!multiKey){
                 const keys = d3.keys(uniq);
                 if (keys.length===1)
                     d.color = colorItem(keys[0])

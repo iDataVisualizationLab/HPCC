@@ -212,6 +212,9 @@ function cluster_map (dataRaw) {
         // r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
+            .attr('data-toggle',"tooltip")
+            .attr('data-placement',"top")
+            .attr('title',d=>d[0].text)
             .style('position','relative')
             .each(function(d,i){
                 const datadraw = [d[0].map(e=>({axis:e.axis,value:Math.max(e.value,0)}))];
