@@ -78,6 +78,7 @@ function serviceControl(){
         .enter()
         .append('option')
         .attr('value',(d,i)=>i)
+        .attr('class',d=>d.text==='User'?'innerName':null)
         .attr('data-value',(d,i)=>d)
         .attr('selected',(d,i)=>i===serviceSelected?'':null)
         .text(d=>d.text)
@@ -88,6 +89,7 @@ function initdraw(){
         currentDraw(serviceSelected);
     });
     d3.select('#innerDisplay').on('change',function(){
+        d3.selectAll('.innerName').text(getInnerNodeAttr())
         currentDraw(serviceSelected);
     });
     d3.select('#sort_apply').on('click',function(){
