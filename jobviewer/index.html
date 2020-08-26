@@ -144,7 +144,7 @@
                                 </select>
                                 <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>
                                 <select class="col-8" id="userSort">
-                                    <option value="job">#Jobs</option>
+                                    <option value="job">#Job IDs</option>
                                     <option value="compute">#Compute</option>
                                     <option value="metric">Current metric</option>
                                 </select>
@@ -183,6 +183,7 @@
                                     <select id="clusterMethod" class="col-8 radarcontroller_layout">
                                         <option value="leaderbin" selected="selected">Leader Bin</option>
                                         <option value="kmean">K-means</option>
+                                        <option value="jobName" distanceFunc="none">Job Name</option>
                                         <!--<option value="binarybin">Binary bin</option>-->
                                     </select>
                                     <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
