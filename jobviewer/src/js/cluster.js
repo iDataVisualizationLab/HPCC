@@ -447,9 +447,11 @@ function calJobNameCluster(){
             __metrics:[]
         };
         let data = j.value.node.map(n=>tsnedata[n][0]);
+        c._metricsSum = 0;
         c.__metrics = serviceFullList.map((s,si)=>{
             let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
             let val = d3.mean(_temp);
+            c._metricsSum+=val;
             c[s.text] = d3.scaleLinear().range(s.range)(val);
             return {axis: s.text,
                 maxval: d3.max(_temp),
@@ -457,8 +459,16 @@ function calJobNameCluster(){
                 minval: d3.min(_temp),
                 value: val}
         });
+
         return c
     });
+    cluster_info.sort((a,b)=>b._metricsSum - a._metricsSum)
+        .forEach((c,ci)=>{
+            c.index = ci;
+            c.labels = ci;
+            c.name = "group_"+(ci+1);
+            c.order = ci;
+        });
     onchangeCluster();
 }
 function getJobNameCluster(e){
