@@ -145,8 +145,8 @@ function queryData(data) {
     const currentTime = data.currentTime;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
-    if (group_opt.recall){
-        getCluster();
+    if (vizservice[serviceSelected].text==='Radar' && group_opt.recall){
+        group_opt.recall()
         cluster_map(cluster_info);
         handle_clusterinfo();
         Layout.tree.children.forEach(d=>{

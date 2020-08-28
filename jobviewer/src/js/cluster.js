@@ -61,14 +61,15 @@ function initClusterUI(){
         const assignFunction = d3.select(el).attr('assign-function');
         if (assignFunction){
             getCluster = eval(assignFunction);
-            group_opt.recall=true;
         }else{
-            group_opt.recall=false;
             getCluster = getMathCluster;
         }
         const calculateFunction = d3.select(el).attr('cluster-function');
-        if (calculateFunction)
+        group_opt.recall=false;
+        if (calculateFunction){
+            group_opt.recall=eval(calculateFunction);
             eval(calculateFunction)();
+        }
         onchangeCluster()
     });
 }
@@ -472,7 +473,7 @@ function calJobNameCluster(){
             c.name = "group_"+(ci+1);
             c.order = ci;
         });
-
+    recomendColor(cluster_info)
 }
 function getJobNameCluster(e){
     let index = [];
