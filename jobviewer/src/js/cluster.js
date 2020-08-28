@@ -59,10 +59,13 @@ function initClusterUI(){
         d3.selectAll('.clusterProfile').classed('hide',true);
         d3.select(`#${this.value}profile`).classed('hide',false);
         const assignFunction = d3.select(el).attr('assign-function');
-        if (assignFunction)
+        if (assignFunction){
             getCluster = eval(assignFunction);
-        else
+            group_opt.recall=true;
+        }else{
+            group_opt.recall=false;
             getCluster = getMathCluster;
+        }
         const calculateFunction = d3.select(el).attr('cluster-function');
         if (calculateFunction)
             eval(calculateFunction)();
@@ -469,7 +472,7 @@ function calJobNameCluster(){
             c.name = "group_"+(ci+1);
             c.order = ci;
         });
-    onchangeCluster();
+
 }
 function getJobNameCluster(e){
     let index = [];

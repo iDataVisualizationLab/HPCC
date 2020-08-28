@@ -145,6 +145,16 @@ function queryData(data) {
     const currentTime = data.currentTime;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
+    if (group_opt.recall){
+        getCluster();
+        cluster_map(cluster_info);
+        handle_clusterinfo();
+        Layout.tree.children.forEach(d=>{
+            d.children.forEach(e=>{
+                getCluster(e);
+            })
+        });
+    }
     currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     currentDraw(serviceSelected);
 }
