@@ -145,7 +145,7 @@ function queryData(data) {
     const currentTime = data.currentTime;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
-    if (vizservice[serviceSelected].text==='Radar' && group_opt.recall){
+    if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){
         group_opt.recall()
         cluster_map(cluster_info);
         handle_clusterinfo();
