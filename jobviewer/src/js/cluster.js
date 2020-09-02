@@ -501,16 +501,18 @@ function calUserNameCluster(){
         };
         let data = j.value.node.map(n=>tsnedata[n][0]);
         c._metricsSum = 0;
-        c.__metrics = serviceFullList.map((s,si)=>{
+        c.__metrics = [];
+        c.__metrics.bins = data;
+        serviceFullList.forEach((s,si)=>{
             let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
             let val = d3.mean(_temp);
             c._metricsSum+=val;
             c[s.text] = d3.scaleLinear().range(s.range)(val);
-            return {axis: s.text,
+            c.__metrics.push({axis: s.text,
                 maxval: d3.max(_temp),
                 mean: val,
                 minval: d3.min(_temp),
-                value: val}
+                value: val});
         });
 
         return c
