@@ -7,8 +7,8 @@ let group_opt = {
 };
 let radarChartclusteropt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
-    w: 80,
-    h: 80,
+    w: 130,
+    h: 130,
     radiuschange: false,
     levels:6,
     dotRadius:2,
@@ -143,6 +143,7 @@ function onchangeCluster() {
     currentDraw(serviceSelected);
 }
 function cluster_map (dataRaw) {
+    let isNameChangeable = false;
     radarChartclusteropt.schema = serviceFullList;
     let data = dataRaw.map((c,i)=>{
         let temp = c.__metrics.slice();
@@ -195,24 +196,31 @@ function cluster_map (dataRaw) {
                 // overflow: 'hidden',
             });
         //
-        // r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
-        //     let active = d3.select(this).classed('clicked');
-        //     active = !active;
-        //     d3.select(this).classed('clicked',active);
-        //     const parent = d3.select(this.parentNode);
-        //     parent.select('span.clusterlabel').classed('hide',active);
-        //     parent.select('input.clusterlabel').classed('hide',!active);
-        // });
-        // r_new.append('span').attrs({'class':'clusterlabel truncate left-align col s11','type':'text'});
-        // r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'}).on('change',function(d){
-        //     clusterDescription[d.id].text = $(this).val();
-        //     d3.select(this).classed('hide',true);
-        //     const parent = d3.select(this.parentNode);
-        //     parent.select('.editbtn').classed('clicked',false);
-        //     parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
-        //     updateclusterDescription(d.id,clusterDescription[d.id].text);
-        // });
-        // r_new.append('span').attr('class','clusternum center-align col s12');
+        if (isNameChangeable)
+            r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+                let active = d3.select(this).classed('clicked');
+                active = !active;
+                d3.select(this).classed('clicked',active);
+                const parent = d3.select(this.parentNode);
+                parent.select('span.clusterlabel').classed('hide',active);
+                parent.select('input.clusterlabel').classed('hide',!active);
+            });
+        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col '+(isNameChangeable?'s11':'s12'),'type':'text'})
+            .style('padding',0)
+            .style('display','block');
+        if(isNameChangeable)
+        {
+            r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'})
+                .on('change',function(d){
+                    clusterDescription[d.id].text = $(this).val();
+                    d3.select(this).classed('hide',true);
+                    const parent = d3.select(this.parentNode);
+                    parent.select('.editbtn').classed('clicked',false);
+                    parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
+                    updateclusterDescription(d.id,clusterDescription[d.id].text);
+                });
+        }
+        r_new.append('span').attr('class','clusternum center-align col s12').style('display','block');;
         // r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
             .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
@@ -228,11 +236,13 @@ function cluster_map (dataRaw) {
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, datadraw, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
-        // d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
-        // d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
-        // d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
-        // d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
-        // d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+        d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
+        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
+        if(isNameChangeable){
+            d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
+            d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+        }
     }, 0);
     // outlier_map(outlyingList)
 }
