@@ -102,7 +102,7 @@ function data2tree(data,sampleS,computers){
                         if (sampleS){
                             serviceFullList.forEach(s=>item.metrics[s.text]=_.last(sampleS[c][serviceListattr[s.idroot]])[s.id]);
                             if (computers)
-                                computers[c].metric = item.metrics
+                                computers[c].metric = item.metrics;
                             if (Layout.computers_old){
                                 serviceFullList.forEach(s=>item.metrics_delta[s.text] = item.metrics[s.text]-Layout.computers_old[c].metric[s.text]);
                             }
@@ -143,6 +143,7 @@ function queryData(data) {
     let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
+    Layout.users = users;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
     if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){

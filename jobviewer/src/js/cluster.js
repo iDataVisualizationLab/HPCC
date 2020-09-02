@@ -60,7 +60,7 @@ function initClusterUI(){
         d3.select(`#${this.value}profile`).classed('hide',false);
         const assignFunction = d3.select(el).attr('assign-function');
         if (assignFunction){
-            getCluster = eval(assignFunction);
+            getCluster = _.partial(eval(assignFunction), d3.select(el).attr('value'));
         }else{
             getCluster = getMathCluster;
         }
@@ -485,10 +485,50 @@ function calJobNameCluster(){
         });
     recomendColor(cluster_info)
 }
-function getJobNameCluster(e){
+function calUserNameCluster(){
+    cluster_info = d3.entries(Layout.users).map((j,ji)=>{
+        let c = {
+            arr: [],
+            axis: [],
+            index: ji,
+            labels: ''+ji,
+            mse:+'a',
+            name: "group_"+(ji+1),
+            orderG: 0,
+            text: j.key,
+            total: j.value.node.length,
+            __metrics:[]
+        };
+        let data = j.value.node.map(n=>tsnedata[n][0]);
+        c._metricsSum = 0;
+        c.__metrics = serviceFullList.map((s,si)=>{
+            let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
+            let val = d3.mean(_temp);
+            c._metricsSum+=val;
+            c[s.text] = d3.scaleLinear().range(s.range)(val);
+            return {axis: s.text,
+                maxval: d3.max(_temp),
+                mean: val,
+                minval: d3.min(_temp),
+                value: val}
+        });
+
+        return c
+    });
+    cluster_info.sort((a,b)=>b._metricsSum - a._metricsSum)
+        .forEach((c,ci)=>{
+            c.index = ci;
+            c.labels = ci;
+            c.name = "group_"+(ci+1);
+            c.order = ci;
+        });
+    recomendColor(cluster_info)
+}
+function getJobNameCluster(key,e){
     let index = [];
     cluster_info.filter((c, ci) => {
-        e.jobName.forEach(jobn=> {
+        debugger
+        e[key].forEach(jobn=> {
             if (jobn === c.text) {
                 c.arr.push(e.name);
                 index.push(ci);
