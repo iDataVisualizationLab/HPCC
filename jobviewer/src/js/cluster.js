@@ -160,6 +160,7 @@ function cluster_map (dataRaw) {
             radarChartclusteropt.fillin = 0
         }
         temp_b.id = c.name;
+        temp_b.total = c.total;
         temp_b.order = i;
         return temp_b;
     });
@@ -250,7 +251,7 @@ function cluster_map (dataRaw) {
             });
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
-        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||0).toLocaleString());
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||d.total||0).toLocaleString());
         if(isNameChangeable){
             d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
             d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
@@ -459,93 +460,65 @@ function getMathCluster(e){
     e.cluster = cluster_info[index];
 }
 function calJobNameCluster(){
-    cluster_info = d3.entries(Layout.jobByNames).map((j,ji)=>{
-        let c = {
-            arr: [],
-            axis: [],
-            index: ji,
-            labels: ''+ji,
-            mse:+'a',
-            name: "group_"+(ji+1),
-            orderG: 0,
-            text: j.key,
-            total: j.value.node.length,
-            __metrics:[]
-        };
-        let data = j.value.node.map(n=>tsnedata[n][0]);
-        c._metricsSum = 0;
-        c.__metrics = serviceFullList.map((s,si)=>{
-            let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
-            let val = d3.mean(_temp);
-            c._metricsSum+=val;
-            c[s.text] = d3.scaleLinear().range(s.range)(val);
-            return {axis: s.text,
-                maxval: d3.max(_temp),
-                mean: val,
-                minval: d3.min(_temp),
-                value: val}
-        });
-
-        return c
-    });
-    cluster_info.sort((a,b)=>b._metricsSum - a._metricsSum)
-        .forEach((c,ci)=>{
-            c.index = ci;
-            c.labels = ci;
-            c.name = "group_"+(ci+1);
-            c.order = ci;
-        });
+    groupbyProperty('jobByNames')
     recomendColor(cluster_info)
 }
-function calUserNameCluster(){
-    debugger
-    cluster_info = d3.entries(Layout.users).map((j,ji)=>{
+
+function groupbyProperty(key) {
+    cluster_info = d3.entries(Layout[key]).map((j, ji) => {
         let c = {
             arr: [],
             axis: [],
             index: ji,
-            labels: ''+ji,
-            mse:+'a',
-            name: "group_"+(ji+1),
+            labels: '' + ji,
+            mse: +'a',
+            name: "group_" + (ji + 1),
             orderG: 0,
             text: j.key,
             total: j.value.node.length,
-            __metrics:[]
+            __metrics: []
         };
-        let data = j.value.node.map(n=>tsnedata[n][0]);
+        let data = j.value.node.map(n => tsnedata[n][0]);
         c._metricsSum = 0;
         c.__metrics = [];
         c.__metrics.summary = [];
-        data.forEach(d=>{
-            let _temp=[];
-            serviceFullList.forEach((s,si)=>{
-                let val = Math.max(0,d[si]);
+        data.forEach(d => {
+            let _temp = [];
+            serviceFullList.forEach((s, si) => {
+                let val = Math.max(0, d[si]);
                 c[s.text] = d3.scaleLinear().range(s.range)(val);
                 _temp.push({axis: s.text, value: val});
             });
             c.__metrics.push(_temp);
         })
-        serviceFullList.forEach((s,si)=>{
-            let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
+        serviceFullList.forEach((s, si) => {
+            let _temp = data.filter(d => d[si] >= 0).map(d => d[si]);
             let val = d3.mean(_temp);
-            c._metricsSum+=val;
+            c._metricsSum += val;
             c[s.text] = d3.scaleLinear().range(s.range)(val);
-            c.__metrics.summary.push({axis: s.text,
+            c.__metrics.summary.push({
+                axis: s.text,
                 maxval: d3.max(_temp),
                 mean: val,
                 minval: d3.min(_temp),
-                value: val});
+                value: val
+            });
         });
 
         return c
     });
-    cluster_info.sort((a,b)=>b._metricsSum - a._metricsSum)
-        .forEach((c,ci)=>{
+    cluster_info.sort((a, b) => b._metricsSum - a._metricsSum)
+        .forEach((c, ci) => {
             c.index = ci;
             c.labels = ci;
-            c.name = "group_"+(ci+1);
+            c.name = "group_" + (ci + 1);
             c.order = ci;
         });
+}
+
+function calUserNameCluster(){
+    debugger
+    groupbyProperty('users');
     recomendColor(cluster_info)
 }
 function getJobNameCluster(key,e){
