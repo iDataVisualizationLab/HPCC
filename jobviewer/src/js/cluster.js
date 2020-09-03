@@ -151,7 +151,14 @@ function cluster_map (dataRaw) {
         temp.text = c.text;
         temp.total = c.total;
         temp.mse = c.mse;
-        let temp_b = [temp];
+        let temp_b;
+        if (temp[0].axis){
+            temp_b = [temp];
+            radarChartclusteropt.fillin = 0.5;
+        }else{
+            temp_b = temp;
+            radarChartclusteropt.fillin = 0
+        }
         temp_b.id = c.name;
         temp_b.order = i;
         return temp_b;
@@ -229,9 +236,14 @@ function cluster_map (dataRaw) {
             .attr('title',d=>d[0].text)
             .style('position','relative')
             .each(function(d,i){
-                const datadraw = [d[0].map(e=>({axis:e.axis,value:Math.max(e.value,0)}))];
-                datadraw[0].name = d[0].name;
-                datadraw[0].text = d[0].text;
+                let datadraw = d.map(e=>{
+                    let temp = e.map(e=>({axis:e.axis,value:Math.max(e.value,0)}));
+                    temp.name = e.name;
+                    temp.text = e.text;
+                    return temp;
+                });
+                // datadraw[0].name = d[0].name;
+                // datadraw[0].text = d[0].text;
                 datadraw.id = d.id;
                 radarChartclusteropt.color = function(){return colorCluster(d.id)};
                 RadarChart(".radarh"+d.id, datadraw, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
@@ -486,6 +498,7 @@ function calJobNameCluster(){
     recomendColor(cluster_info)
 }
 function calUserNameCluster(){
+    debugger
     cluster_info = d3.entries(Layout.users).map((j,ji)=>{
         let c = {
             arr: [],
@@ -502,13 +515,22 @@ function calUserNameCluster(){
         let data = j.value.node.map(n=>tsnedata[n][0]);
         c._metricsSum = 0;
         c.__metrics = [];
-        c.__metrics.bins = data;
+        c.__metrics.summary = [];
+        data.forEach(d=>{
+            let _temp=[];
+            serviceFullList.forEach((s,si)=>{
+                let val = Math.max(0,d[si]);
+                c[s.text] = d3.scaleLinear().range(s.range)(val);
+                _temp.push({axis: s.text, value: val});
+            });
+            c.__metrics.push(_temp);
+        })
         serviceFullList.forEach((s,si)=>{
             let _temp = data.filter(d=>d[si]>=0).map(d=>d[si]);
             let val = d3.mean(_temp);
             c._metricsSum+=val;
             c[s.text] = d3.scaleLinear().range(s.range)(val);
-            c.__metrics.push({axis: s.text,
+            c.__metrics.summary.push({axis: s.text,
                 maxval: d3.max(_temp),
                 mean: val,
                 minval: d3.min(_temp),
@@ -529,7 +551,6 @@ function calUserNameCluster(){
 function getJobNameCluster(key,e){
     let index = [];
     cluster_info.filter((c, ci) => {
-        debugger
         e[key].forEach(jobn=> {
             if (jobn === c.text) {
                 c.arr.push(e.name);

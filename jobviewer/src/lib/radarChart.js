@@ -62,11 +62,6 @@ function RadarChart(id, data, options, name) {
     range = [0,1]
     // NEW SETTING
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
-    maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
-        return d3.max(i.map(function (o) {
-            return o.value;
-        }))
-    }));
 
     if (cfg.isNormalize){
         minValue = 0;
