@@ -41,11 +41,13 @@ $(document).ready(function(){
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
             // request = new Simulation('../HiperView/data/8122020.json');
-            request = new Simulation('../HiperView/data/814_821_2020.json');
+            // request = new Simulation('../HiperView/data/814_821_2020.json');
+            request = new Simulation('../HiperView/data/9214_9215_2020.json');
         }
     }catch(e){
         // request = new Simulation('../HiperView/data/8122020.json');
-        request = new Simulation('../HiperView/data/814_821_2020.json');
+        // request = new Simulation('../HiperView/data/814_821_2020.json');
+        request = new Simulation('../HiperView/data/9214_9215_2020.json');
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 15_45_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
     }
