@@ -415,7 +415,8 @@ function recomendColor (clusterarr) {
     if (clusterarr.length>9 && clusterarr.length<21)
         colorCa = d3.schemeCategory20;
     else if (clusterarr.length>20)
-        colorCa = clusterarr.map((d,i)=>d3.interpolateTurbo(i/(clusterarr.length-1)));
+        colorCa = d3.schemeCategory20;
+        // colorCa = clusterarr.map((d,i)=>d3.interpolateTurbo(i/(clusterarr.length-1)));
     let colorcs = d3.scaleOrdinal().range(colorCa);
     let colorarray = [];
     let orderarray = [];
