@@ -330,7 +330,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         }))
     });
 
-    if (serviceName==='User')
+    if (serviceName==='User'|| $('#clusterMethod').val()==='user')
         users_arr.forEach((d, i)=>{
             d.color = colorItem(d.key)
         });
