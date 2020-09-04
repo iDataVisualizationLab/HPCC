@@ -330,10 +330,15 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         }))
     });
 
-    if (serviceName==='User'|| $('#clusterMethod').val()==='user')
+    if (serviceName==='User')
         users_arr.forEach((d, i)=>{
             d.color = colorItem(d.key)
         });
+    else if ($('#clusterMethod').val()==='user'){
+        users_arr.forEach((d, i)=>{
+            d.color = colorItem(cluster_info.find(c=>c.text===d.key).name)
+        })
+    }
     else if (serviceName==='Radar')
         users_arr.forEach((d, i)=>{
             const uniq = {};
