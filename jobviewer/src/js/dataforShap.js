@@ -1,4 +1,4 @@
-d3.json('https://influx.ttu.edu:8080/v1/metrics?start=2020-09-02T14:50:00-05:00&end=2020-09-02T15:50:00-05:00&interval=5m&value=max&compress=false').then(function(data){
+d3.json('https://influx.ttu.edu:8080/v1/metrics?start=2020-09-02T14:50:00-05:00&end=2020-09-03T14:50:00-05:00&interval=5m&value=max&compress=false').then(function(data){
     data.time_stamp=data.time_stamp.map(e=>new Date(e/1000000));
     d3.keys(data.jobs_info).forEach(jID=>{
         data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
