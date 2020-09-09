@@ -537,6 +537,7 @@ function request(){
     var countrecord = 0;
     var missingtimetex = false;
     let hasjob = sampleJobdata[0].user!=="dummyJob";
+    iterationstep = 1;
 
     jobMap.maxTimestep(isRealtime? undefined: sampleS.timespan.length);
     isanimation = false

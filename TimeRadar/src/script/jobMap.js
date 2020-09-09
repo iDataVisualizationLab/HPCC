@@ -627,15 +627,6 @@ let JobMap = function() {
                     if (supportp)
                         data_path.push([fisheye_scale.x(timelineScale(d.end+1)),scaleNode_y_middle(datap.timeline.lineFull[i+1].cluster,d.end+1,datap.name)]);
                     return curveBundle(data_path);
-                    // linkHorizontal({
-                    //     source: {
-                    //         x: fisheye_scale.x(timelineScale(d.end)),
-                    //         y: scaleNode_y_middle(d.cluster,d.end,datap.values_name[0]),
-                    //     },
-                    //     target: {
-                    //         x: fisheye_scale.x(timelineScale(d.start)),
-                    //         y: scaleNode_y_middle(datap[i+1].cluster,datap[i+1].end,datap.values_name[0]),
-                    //     }});
                 })
             datacurve.exit().remove();
             datacurve.enter()
@@ -1215,6 +1206,8 @@ let JobMap = function() {
         if(!islight&&animation_time===0){
             nodeg.selectAll('.computeNode').remove();
         }
+
+        // hosts/compute
         let computers = nodeg.selectAll('.computeNode').data(clusterdata_timeline||clusterNode_data||Hosts,d=> d.name);
         computers.select('.computeSig').datum(d=>d);
         computers.exit().remove();
@@ -1324,7 +1317,7 @@ let JobMap = function() {
 
             jobNode.selectAll('path').style('stroke-width', d => d.values ? Jobscale(d.values.length) : 1.5);
 
-
+            // user node
             let userNode = nodeg.selectAll('.userNode').data(user, d => d.name);
             userNode.exit().remove();
             let userNode_n = userNode.enter().append('g').attr('class', d => 'node userNode new ' + fixName2Class(fixstr(d.name)));
@@ -1366,6 +1359,7 @@ let JobMap = function() {
             userNode.select('.userNodeSig_label')
                 .text(d => d.name);
 
+            // table
             handle_sort(true, true);
             updaterow(userNode);
             // table_header(table_headerNode);
