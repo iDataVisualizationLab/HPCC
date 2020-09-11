@@ -334,7 +334,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         users_arr.forEach((d, i)=>{
             d.color = colorItem(d.key)
         });
-    else if ($('#clusterMethod').val()==='user'){
+    else if (serviceName==="Radar" && $('#clusterMethod').val()==='user'){
         users_arr.forEach((d, i)=>{
             d.color = colorItem(cluster_info.find(c=>c.text===d.key).name)
         })
@@ -372,6 +372,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         console.log('empty')
         onodesg = svg.append("g").attr("class", "outer_nodes")
     }
+    debugger
     let onode = onodesg.selectAll(".outer_node")
         .data(rack_arr,d=>d.name);
     onode.call(updateOnode);

@@ -9,7 +9,7 @@ d3.json('https://influx.ttu.edu:8080/v1/metrics?start=2020-09-02T14:50:00-05:00&
                 data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
     });
 
-    var datashap= 'user,'+serviceFullList.map(d=>d.text).join(',')+'\n';
+    var datashap= 'user,node,time,'+serviceFullList.map(d=>d.text).join(',')+'\n';
     var serviceattr = serviceListattr.slice();
     serviceattr.pop();
     data.time_stamp.forEach((t,index)=>{
@@ -38,7 +38,7 @@ d3.json('https://influx.ttu.edu:8080/v1/metrics?start=2020-09-02T14:50:00-05:00&
                 serviceattr.forEach(attr=>{
                     sampleS[comp][attr][0].forEach(v=>temp.push(v));
                 });
-                datashap+= d.key+','+temp.join(',')+'\n';
+                datashap+= d.key+','+comp+','+t+','+temp.join(',')+'\n';
             })
         })
     });
