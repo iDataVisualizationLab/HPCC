@@ -574,15 +574,15 @@ let JobMap = function() {
             datapoint_n.attr('transform', function (d) {
                 return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
             }).each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt).classed('hide', d.hide);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt)//.classed('hide', d.hide);// hide 1st radar
             });
             datapoint.style('opacity',1).transition().duration(animation_time)
                 .attr('transform', function (d) {
                     return `translate(${fisheye_scale.x(timelineScale(d.timestep))},${scaleNode_y_middle(d3.select(this.parentNode).datum().order)})`
                 }).each(function (d, i) {
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt).classed('hide', d.hide);// hide 1st radar
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), newdata.find(n => n.name === d.name), radaropt)//.classed('hide', d.hide);// hide 1st radar
             });
-            bg.style('stroke-width', d => linkscale(d.values_name.length));
+            bg.style('stroke-width', d => d.values_name?linkscale(d.values_name.length):1);
 
             // bg.selectAll("path.linegg").remove();
             let dataline = bg.selectAll(".linegg").interrupt().data(d => d.timeline.line,d=>d.cluster+'_'+d.start).attr('class', d => `linegg timeline ${fixName2Class(d.cluster)}`);
@@ -595,6 +595,7 @@ let JobMap = function() {
                 .attr('d',function(d){
                     return d3.line().curve(d3.curveMonotoneX).x(function(d){return fisheye_scale.x(timelineScale(d))}).y(()=> scaleNode_y_middle(d3.select(this.parentNode).datum().order))(d3.range(d.start,d.end+1))})
                 .merge(dataline)
+                .attr("vector-effect","non-scaling-stroke")
                 .styles({
                     stroke: d => colorFunc(d.cluster),
                     'stroke-width': function (d) {
@@ -913,7 +914,7 @@ let JobMap = function() {
     function getsubfixcolormode(){
         return runopt.graphic.colorBy==='group'?'_no':undefined;
     }
-    let yscale=d3.scaleLinear().range([0,graphicopt.heightG()]),linkscale = d3.scaleSqrt().range([0.3,2]);
+    let yscale=d3.scaleLinear().range([0,graphicopt.heightG()]),linkscale = d3.scaleSqrt().range([1,2.5]);
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
