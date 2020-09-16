@@ -41,7 +41,7 @@ function initdraw(){
         currentDraw()
     });
     serviceControl();
-    drawObject.init().color(getColorScale()).onFinishDraw(makelegend);
+    drawObject.init().color(getColorScale()).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
 }
 function getColorScale(){
     serviceName = vizservice[serviceSelected]
@@ -193,6 +193,54 @@ function makelegend(){
                 }
                 // }
             });
+    }
+}
+function getRenderFunc(d){
+    let serviceName = vizservice[serviceSelected].text;
+    if (serviceName!=='Radar'|| !d.isRadar)
+        return d3.arc()
+            .innerRadius(0)
+            .outerRadius(d.r )(d);
+    // else
+    //     return _.partial(createRadar)
+}
+function getDrawData(e) {
+    let serviceName = vizservice[serviceSelected]
+    if (serviceName === 'Radar'){
+        if (!e.children) {
+            let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:Math.max(d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])??0,0)}))];
+            radarvalue[0].name = e.data.metrics['Radar']
+            radarvalue.isRadar = true;
+            radarvalue.r = e.r*2;
+            radarvalue.type = 'radar';
+            return radarvalue
+        }
+        const radarvalue = [{startAngle:0,endAngle:360,r:e.r}];
+        radarvalue.type = 'radar';
+        return radarvalue
+    }else if (serviceName ==='User'){
+        if (e.data.relatedNodes.length>1) {
+            const data = d3.pie().value(1)(e.data.relatedNodes);
+            data.forEach(d => {
+                d.r = e.r;
+                d.color = d.data.data.color;
+            });
+
+            return data;
+        }
+        return [{
+            data: {},
+            endAngle: 360,
+            index: 0,
+            padAngle: 0,
+            startAngle: 0,
+            value: 1,
+            r:e.r,
+            color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
+        }]
+    }else{
+        const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.data.invalid}];
+        return dataout;
     }
 }
 // setting

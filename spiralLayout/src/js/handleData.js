@@ -172,8 +172,7 @@ function createdata(){
     serviceName = vizservice[serviceSelected]
     let dataviz = [];
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
-        debugger
-        dataviz.push({key:c,value:getData(c)})
+        dataviz.push({data:c,value:getData(c),key:c.name});
     }));
     dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
     dataviz.forEach((d,i)=>d.id=i);
@@ -181,7 +180,7 @@ function createdata(){
 }
 function sortData(){
     const dataviz =  drawObject.data();
-    dataviz.sort((a,b)=>b.value-a.value);
+    dataviz.sort((a,b)=>-b.value+a.value);
     dataviz.forEach((d,i)=>d.id=i);
     Layout.order = dataviz.map(d=>d.key);
     Layout.order.object = {};

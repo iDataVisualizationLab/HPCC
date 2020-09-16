@@ -69,31 +69,199 @@ let SpitalLayout = function(){
                 return d.id;
             }))
             .range([0, spiralLength]);
-        g.selectAll("circle")
-            .data(data)
-            .join("circle")
-            .attr("cx", function(d,i){
+        data.forEach(d=>{
+            var linePer = spiralScale(d.id),
+                posOnLine = path.node().getPointAtLength(linePer),
+                angleOnLine = path.node().getPointAtLength(linePer - barWidth);
 
-                var linePer = spiralScale(d.id),
-                    posOnLine = path.node().getPointAtLength(linePer),
-                    angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+            d.linePer = linePer; // % distance are on the spiral
+            d.x = posOnLine.x; // x postion on the spiral
+            d.y = posOnLine.y; // y position on the spiral
+            d.r = d.r??miniradius;
+            d.drawData = [{startAngle: 0,endAngle:360,r:d.r??miniradius}];
+            d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
+        })
+        let onode = g.selectAll(".outer_node")
+            .data(data,d=>d.key);
+        onode.call(updateOnode);
+        onode.exit().remove();
+        let onode_n = onode.enter().append("g")
+            .attr("class", "outer_node");
+        onode_n.append('g').attr('class','circleG');
+        onode_n.append('g').attr('class','summary hide');
+        onode_n.append('g').attr('class','glowEffect');
+        onode_n.append('g').attr('class','label')
+            .attr('class','label')
+            .style("font", "10px sans-serif")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle");
+            //
+            //
+            // .attr('')
+            // .attr("cx", function(d,i){
+            //     return d.cx;
+            // })
+            // .attr("cy", function(d){
+            //     return d.cy;
+            // })
+            // .attr("r", d=>d.r??miniradius)
+            // .attr("opacity", 0.85)
+            // .style("fill", d=>color(d.value))
+            // .on('mouseover',function(d){
+            //     tooltip.show(d.key.name)});
+        onFinishDraw.forEach(d=>d());
 
-                d.linePer = linePer; // % distance are on the spiral
-                d.cx = posOnLine.x; // x postion on the spiral
-                d.cy = posOnLine.y; // y position on the spiral
+        function updateOnode(p){
+            p.each(function(d){
+                d.node=d3.select(this);
+                d.childrenNode = makecirclepacking(d.node);
+            });
+            p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+            return p;
+        }
+        function makecirclepacking(svg) {
+            let node;
+            let view;
+            return updateNodes();
 
-                d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
+            function updateNodes(istransition) {
+                let childrenNode = {};
+                node = svg.select('g.circleG')
+                    .selectAll("g.element")
+                    .data(d=>[d], d => d.key)
+                    .call(updateNode);
 
-                return d.cx;
-            })
-            .attr("cy", function(d){
-                return d.cy;
-            })
-            .attr("r", d=>d.r??miniradius)
-            .attr("opacity", 0.85)
-            .style("fill", d=>color(d.value));
-        onFinishDraw.forEach(d=>d())
+                node.exit().remove();
+                node = node.enter().append("g")
+                    .call(updateNode).merge(node);
+
+                label = svg.select("g.label")
+                    .selectAll("text")
+                    .data(d=>[d]);
+                label.exit().remove();
+                label = label.enter().append('text')
+                    .classed('hide',true)
+                    .style('font-size', '10px')
+                    .text(d => d.key).merge(label);
+                label.each(function(d){
+                    if (!d.children)
+                        d.data.tooltip = d3.select(this);
+                });
+                label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px');
+
+                glowEffect = svg.select('g.glowEffect')
+                    .selectAll("defs.glowElement")
+                    .data(d=>[d], d => d.key)
+                    .call(updateGlow);
+
+                glowEffect.exit().remove();
+                glowEffect_n = glowEffect.enter().append("defs")
+                    .attr('class','glowElement');
+                glowEffect_n.append('filter');
+                glowEffect_n
+                    .call(updateGlow).merge(glowEffect);
+                function updateGlow(p){
+                    p.select('filter')
+                        .attr("width","400%")
+                        .attr("x","-150%")
+                        .attr("y","-150%")
+                        .attr("height","400%")
+                        .attr('id',d=>'c'+d.data.currentID)
+                        .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur3"></feMergeNode>
+                            <feMergeNode in="coloredBlur2"></feMergeNode>
+                            <feMergeNode in="coloredBlur1"></feMergeNode>
+                            <feMergeNode in="SourceGraphic"></feMergeNode>
+                        </feMerge>`);
+                    return p;
+                }
+
+                zoomTo(istransition)
+                return childrenNode;
+                function updateNode(node) {
+                    node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
+                    node
+                        .attr('class','element')
+                        .classed('compute', true)
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
+                        .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
+                        .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
+                        // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+                        // node
+                        // .interrupt().transition().duration(graphicopt.animationTime)
+                        .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
+                        .attr("fill", d => {
+                                d.color = color(d.data.metrics[serviceName]);
+                                return d.color;
+                        })
+                        // .style('stroke-width',d=>{
+                        //     return circleStrokeScale(d.data.relatedNodes.length);
+                        // });
+                    return node;
+                }
+            }
+
+
+            function zoomTo(istransition) {
+                //to do
+                serviceName = vizservice[serviceSelected].text
+                label.interrupt().transition().duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
+                node.selectAll('g').remove();
+                if (serviceName!=='Radar'){
+                    let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
+                        .attr('d',getRenderFunc)
+                        .classed('invalid',d=>d.invalid)
+                        .style('filter',d=>d.invalid?'url("#glow")':null)
+                        .style('fill',d=>d.color);
+                    path.exit().remove();
+                    path.enter().append('path')
+                        .attr('class','circle')
+                        .classed('invalid',d=>d.invalid)
+                        .style('filter',d=>d.invalid?'url("#glow")':null)
+                        .attr('d',getRenderFunc).style('fill',d=>d.color);
+                }else{
+                    node.filter(d=>{
+                        if (!d.data.drawData || d.data.drawData.type!=="radar") {
+                            d.data.drawData=getDrawData(d);
+                        }
+                        return !d.data.drawData.isRadar;
+                    }).selectAll('path').data(d=>d.data.drawData)
+                        .join('path').attr('d',getRenderFunc)
+                        .style('fill',d=>d.color);
+                    const radarNode = node.filter(d=>d.data.drawData.isRadar);
+                    radarNode.selectAll('path.circle').remove();
+                    radarNode
+                        .selectAll('g').data(d=>[d.data.drawData])
+                        .join('g').attr('class','radar  ')
+                        .style('fill',d=>d.color)
+                        .each(function(d){
+                            setTimeout(()=>{
+                                createRadar(d3.select(this), d3.select(this), d[0], {size:d.r,colorfill: 0.5}).select('.radarStroke')
+                                    .style('stroke-opacity',1);
+                            },0);
+                        });
+                }
+            }
+        }
     };
+    let getRenderFunc = function(){ return d3.arc()
+                .innerRadius(0)
+    };
+    let getDrawData = function(){return[];}
+    function freezeHandle(){
+        if (isFreeze){
+            const func = isFreeze;
+            isFreeze = false;
+            func();
+        }else{
+            isFreeze = true;
+            isFreeze = (function(){d3.select(this).dispatch('mouseout')}).bind(this);
+            d3.event.stopPropagation();
+        }
+    }
     master.init=function(){
         // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;
         // graphicopt.height = d3.select(maindiv).node().getBoundingClientRect().height;
@@ -136,6 +304,12 @@ let SpitalLayout = function(){
     };
     master.graphicopt = function(_data) {
         return arguments.length?(graphicopt=_data,master):graphicopt;
+    };
+    master.getRenderFunc = function(_data) {
+        return arguments.length?(getRenderFunc=_data,master):getRenderFunc;
+    };
+    master.getDrawData = function(_data) {
+        return arguments.length?(getDrawData=_data,master):getDrawData;
     };
     master.onFinishDraw = function(_data) {
         onFinishDraw.push(_data)
