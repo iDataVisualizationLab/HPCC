@@ -61,6 +61,7 @@ let SpitalLayout = function(){
         var spiralLength = path.node().getTotalLength(),
             N = 274,
             barWidth = (spiralLength / N) - 1;
+        var miniradius = spiralLength/data.length/2;
         var formatNum=d3.format(".2s")
         var spiralScale = d3.scaleLinear()
             .domain(d3.extent(data, function(d){
@@ -87,7 +88,7 @@ let SpitalLayout = function(){
             .attr("cy", function(d){
                 return d.cy;
             })
-            .attr("r", d=>d.r??10)
+            .attr("r", d=>d.r??miniradius)
             .attr("opacity", 0.85)
             .style("fill", d=>color(d.value));
     };

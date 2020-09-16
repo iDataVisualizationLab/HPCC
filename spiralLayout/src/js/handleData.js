@@ -167,7 +167,7 @@ function createdata(){
     serviceName = vizservice[serviceSelected];
     let dataviz = d3.keys(tsnedata).map(c=>{
         return {key:c,value:tsnedata[c][0][serviceSelected]}
-    }).sort((a,b)=>a.value-b.value);
+    }).sort((a,b)=>-a.value+b.value);
     dataviz.forEach((d,i)=>d.id=i);
     drawObject.data(dataviz);
 }
