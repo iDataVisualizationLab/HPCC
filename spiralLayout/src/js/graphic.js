@@ -205,7 +205,7 @@ function getRenderFunc(d){
     //     return _.partial(createRadar)
 }
 function getDrawData(e) {
-    let serviceName = vizservice[serviceSelected]
+    let serviceName = vizservice[serviceSelected].text;
     if (serviceName === 'Radar'){
         if (!e.children) {
             let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:Math.max(d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])??0,0)}))];

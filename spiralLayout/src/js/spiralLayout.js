@@ -28,6 +28,18 @@ let SpitalLayout = function(){
         numSpirals:4,
         start: 0,
         end: 2.25,
+        radaropt : {
+            // summary:{quantile:true},
+            mini:true,
+            levels:6,
+            gradient:true,
+            w:40,
+            h:40,
+            showText:false,
+            margin: {top: 0, right: 0, bottom: 0, left: 0},
+            isNormalize:false,
+            schema:serviceFullList
+        }
     };
 
     let informationdiv = '.informationHolder', maindiv='#circularLayout';
@@ -41,8 +53,10 @@ let SpitalLayout = function(){
         d3.select(informationdiv).classed('hide',true);
     }
     let master={};
+    let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
     master.draw = function() {
         isFreeze= false;
+        createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
         var radius = d3.scaleLinear()
             .domain([graphicopt.start, graphicopt.end])
             .range([r*0.1, r]);
@@ -63,6 +77,8 @@ let SpitalLayout = function(){
             N = 274,
             barWidth = (spiralLength / N) - 1;
         var miniradius = spiralLength/data.length/2;
+        graphicopt.radaropt.w = miniradius*2;
+        graphicopt.radaropt.h = miniradius*2;
         var formatNum=d3.format(".2s")
         var spiralScale = d3.scaleLinear()
             .domain(d3.extent(data, function(d){
@@ -78,7 +94,7 @@ let SpitalLayout = function(){
             d.x = posOnLine.x; // x postion on the spiral
             d.y = posOnLine.y; // y position on the spiral
             d.r = d.r??miniradius;
-            d.drawData = [{startAngle: 0,endAngle:360,r:d.r??miniradius}];
+            d.drawData[0].r = d.r;
             d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
         })
         let onode = g.selectAll(".outer_node")
@@ -189,12 +205,9 @@ let SpitalLayout = function(){
                         .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
                         .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
-                        // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
-                        // node
-                        // .interrupt().transition().duration(graphicopt.animationTime)
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
-                                d.color = color(d.data.metrics[serviceName]);
+                                d.color = color(d.value);
                                 return d.color;
                         })
                         // .style('stroke-width',d=>{
@@ -207,11 +220,11 @@ let SpitalLayout = function(){
 
             function zoomTo(istransition) {
                 //to do
-                serviceName = vizservice[serviceSelected].text
+                serviceName = vizservice[serviceSelected].text;
                 label.interrupt().transition().duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
                 node.selectAll('g').remove();
                 if (serviceName!=='Radar'){
-                    let path = node.selectAll('path').data(d=>{return  d.data.drawData||(d.data.drawData=getDrawData(d),d.data.drawData)})
+                    let path = node.selectAll('path').data(d=>d.drawData)
                         .attr('d',getRenderFunc)
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
@@ -223,18 +236,11 @@ let SpitalLayout = function(){
                         .style('filter',d=>d.invalid?'url("#glow")':null)
                         .attr('d',getRenderFunc).style('fill',d=>d.color);
                 }else{
-                    node.filter(d=>{
-                        if (!d.data.drawData || d.data.drawData.type!=="radar") {
-                            d.data.drawData=getDrawData(d);
-                        }
-                        return !d.data.drawData.isRadar;
-                    }).selectAll('path').data(d=>d.data.drawData)
-                        .join('path').attr('d',getRenderFunc)
-                        .style('fill',d=>d.color);
-                    const radarNode = node.filter(d=>d.data.drawData.isRadar);
+
+                    const radarNode = node;
                     radarNode.selectAll('path.circle').remove();
                     radarNode
-                        .selectAll('g').data(d=>[d.data.drawData])
+                        .selectAll('g').data(d=>[d.drawData])
                         .join('g').attr('class','radar  ')
                         .style('fill',d=>d.color)
                         .each(function(d){
@@ -316,32 +322,16 @@ let SpitalLayout = function(){
         return master;
     };
     function mouseover(d){
-        if (!isFreeze)
-        {     // Bring to front
-            graphicopt.el.classed('onhighlight',true);
-            d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
+        if (!isFreeze) {     // Bring to front
+            g.classed('onhighlight', true);
+            d3.selectAll('.links .link').sort(function (a, b) {
+                return d.relatedLinks.indexOf(a.node);
+            });
             d3.select(this).classed('highlight', true);
-            if (d.node){
+            if (d.node) {
                 d.node.classed('highlight', true);
             }
-            for (let i = 0; i < d.relatedNodes.length; i++)
-            {
-                if (d.relatedNodes[i].key)
-                    try {
-                        d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', true);
-                    }catch(e){
-                        console.log(d.relatedNodes[i].key)
-                    }
-                else {
-                    d.relatedNodes[i].data.node.classed('highlight', true);
-
-                }
-                // .attr("width", 18).attr("height", 18);
-            }
-
-            for (let i = 0; i < d.relatedLinks.length; i++){
-                d.relatedLinks[i].moveToFront().classed('highlight', true);
-            }}
+        }
         if (d.tooltip) {
             tooltip.show(d.name)
         }
@@ -349,26 +339,10 @@ let SpitalLayout = function(){
     function mouseout(d){
         if(!isFreeze)
         {
-            graphicopt.el.classed('onhighlight',false);
+            g.classed('onhighlight',false);
             d3.select(this).classed('highlight', false);
             if(d.node){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
-            }
-            for (let i = 0; i < d.relatedNodes.length; i++)
-            {
-                if (d.relatedNodes[i].key)
-                    try {
-                        d.relatedNodes[i].data.childrenNode[d.relatedNodes[i].key].classed('highlight', false);
-                    }catch(e){
-
-                    }
-                else
-                    d.relatedNodes[i].data.node.classed('highlight', false);
-                // .attr("width", config.rect_width).attr("height", config.rect_height);
-            }
-
-            for (let i = 0; i < d.relatedLinks.length; i++){
-                d.relatedLinks[i].classed("highlight", false );
             }
         }
         if (d.tooltip) {

@@ -172,7 +172,9 @@ function createdata(){
     serviceName = vizservice[serviceSelected]
     let dataviz = [];
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
-        dataviz.push({data:c,value:getData(c),key:c.name});
+        let data = {data:c,value:getData(c),key:c.name};
+        data.drawData  = getDrawData(data);
+        dataviz.push(data);
     }));
     dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
     dataviz.forEach((d,i)=>d.id=i);
