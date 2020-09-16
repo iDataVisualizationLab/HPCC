@@ -164,19 +164,27 @@ function queryData(data) {
     // currentDraw(serviceSelected);
 }
 function createdata(){
-    serviceName = vizservice[serviceSelected];
-    let dataviz = d3.keys(tsnedata).map(c=>{
-        return {key:c,value:tsnedata[c][0][serviceSelected]}
-    }).sort((a,b)=>-a.value+b.value);
+    if (!Layout.order){ // init order
+        Layout.order = _.flatten(Layout.data_flat.map(d=>d.value));
+        Layout.order.object = {};
+        Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
+    }
+    serviceName = vizservice[serviceSelected]
+    let dataviz = [];
+    Layout.tree.children.forEach(r=>r.children.forEach(c=>{
+        debugger
+        dataviz.push({key:c,value:getData(c)})
+    }));
+    dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
     dataviz.forEach((d,i)=>d.id=i);
     drawObject.data(dataviz);
 }
 function sortData(){
-    const layout_array =  Layout.data_flat;
-    Layout.tree.children.forEach((d,i)=>{
-        let orderData = {};
-        d.children.sort((a,b)=>-getData(a)+getData(b));
-        d.children.forEach((e,i)=>orderData[e.name]=i);
-        layout_array[i].value.sort((a,b)=>orderData[a]-orderData[b]);
-    });
+    const dataviz =  drawObject.data();
+    dataviz.sort((a,b)=>b.value-a.value);
+    dataviz.forEach((d,i)=>d.id=i);
+    Layout.order = dataviz.map(d=>d.key);
+    Layout.order.object = {};
+    Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
+    drawObject.data(dataviz);
 }

@@ -33,6 +33,7 @@ let SpitalLayout = function(){
     let informationdiv = '.informationHolder', maindiv='#circularLayout';
     let isFreeze= false;
     let data=[],svg,g,r=0;
+    let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
@@ -91,6 +92,7 @@ let SpitalLayout = function(){
             .attr("r", d=>d.r??miniradius)
             .attr("opacity", 0.85)
             .style("fill", d=>color(d.value));
+        onFinishDraw.forEach(d=>d())
     };
     master.init=function(){
         // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;
@@ -124,9 +126,20 @@ let SpitalLayout = function(){
             startZoom.y = graphicopt.centerY();
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
         }
+        return master
     };
     master.data = function(_data) {
-        data=_data;
+        return arguments.length?(data=_data,master):data;
+    };
+    master.color = function(_data) {
+        return arguments.length?(color=_data,master):color;
+    };
+    master.graphicopt = function(_data) {
+        return arguments.length?(graphicopt=_data,master):graphicopt;
+    };
+    master.onFinishDraw = function(_data) {
+        onFinishDraw.push(_data)
+        return master;
     };
     function mouseover(d){
         if (!isFreeze)
