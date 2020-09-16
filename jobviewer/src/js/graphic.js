@@ -210,7 +210,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             })
         })
     }
-    debugger
     let pack_all = pack(Layout.tree);
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
@@ -372,7 +371,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         console.log('empty')
         onodesg = svg.append("g").attr("class", "outer_nodes")
     }
-    debugger
+
     let onode = onodesg.selectAll(".outer_node")
         .data(rack_arr,d=>d.name);
     onode.call(updateOnode);
@@ -469,9 +468,18 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         d.targetData.relatedLinks.push(ob);
         d.node=ob;
     });
-    makelegend()
+    makelegend();
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
 
+    // if (serviceName!=="Radar" && serviceName!=="User"){
+    //     makeRanking();
+    // }
+    function makeRanking(data){
+        let table = d3.select('.ranking table tbody');
+        table.selectAll('tr').data(data).join('tr')
+            .selectAll('td').data(d=>d).join('td')
+            .html(d=>d);
+    }
     function updateInode(p){
         p.each(function(d){
             d.node=d3.select(this);
@@ -489,8 +497,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
         return p;
     }
-
-
     function makecirclepacking(svg) {
         let node;
         let view;
