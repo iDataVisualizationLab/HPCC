@@ -42,20 +42,19 @@ let SpitalLayout = function(){
         }
     };
 
-    let informationdiv = '.informationHolder', maindiv='#circularLayout';
+    let maindiv='#circularLayout';
     let isFreeze= false;
     let data=[],svg,g,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
-    function closeToolTip(){
-        d3.select(informationdiv).classed('hide',true);
-    }
+    let getColorScale = function(){return color};
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
     master.draw = function() {
         isFreeze= false;
+        color=getColorScale();
         createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
         var radius = d3.scaleLinear()
             .domain([graphicopt.start, graphicopt.end])
@@ -308,6 +307,9 @@ let SpitalLayout = function(){
     master.color = function(_data) {
         return arguments.length?(color=_data,master):color;
     };
+    master.getColorScale = function(_data) {
+        return arguments.length?(getColorScale=_data,master):getColorScale;
+    };
     master.graphicopt = function(_data) {
         return arguments.length?(graphicopt=_data,master):graphicopt;
     };
@@ -321,6 +323,7 @@ let SpitalLayout = function(){
         onFinishDraw.push(_data)
         return master;
     };
+    master.isFreeze = function(){return isFreeze}
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
@@ -350,7 +353,7 @@ let SpitalLayout = function(){
         }
     }
     var theta = function(r) {
-        return graphicopt.numSpirals * Math.PI * r;
+        return -graphicopt.numSpirals * Math.PI * r;
     };
 
     return master;

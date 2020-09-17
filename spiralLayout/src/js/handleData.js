@@ -69,8 +69,9 @@ function adjustTree(sampleS,computers){
 function getData(d){
     if ( vizservice[serviceSelected].text==='User')
         return d.user.length//?userIndex[d.user[0]]:-1;
-    if ( vizservice[serviceSelected].text==='Radar'&&d.cluster)
-        return -d.cluster.arr.length;
+    if ( vizservice[serviceSelected].text==='Radar'&&d.cluster){
+        return d.cluster.name;
+    }
     return d.metrics[vizservice[serviceSelected].text]
 }
 
@@ -144,6 +145,7 @@ function queryData(data) {
     adjustTree(sampleS,computers);
     const currentTime = data.currentTime;
     Layout.users = users;
+    Layout.jobs = jobs;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
     if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){

@@ -140,7 +140,8 @@ function onchangeCluster() {
             getCluster(e);
         })
     });
-    currentDraw(serviceSelected);
+    createdata();
+    currentDraw();
 }
 function cluster_map (dataRaw) {
     let isNameChangeable = false;

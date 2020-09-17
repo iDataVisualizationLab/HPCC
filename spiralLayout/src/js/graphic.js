@@ -14,7 +14,6 @@ function serviceControl(){
         .on('change',function(){
             serviceSelected = +$(this).val();
             createdata();
-            drawObject.color(getColorScale())
             currentDraw();
         })
         .selectAll('option')
@@ -41,10 +40,159 @@ function initdraw(){
         currentDraw()
     });
     serviceControl();
-    drawObject.init().color(getColorScale()).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
+    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
+}
+function userTable(d,type){
+    if (drawObject.isFreeze) {
+        d3.select('.informationHolder').classed('hide',false);
+        const contain = d3.select('.informationHolder').datum(d);
+        contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
+        contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>JobID</th>
+                        <th>JobName</th>
+                        <th>User</th>
+                        <th>StartTime</th>
+                        <th>Duration</th>
+                        <th>Cores</th>
+                        <th>Nodes</th>
+                        <th>TaskID</th>
+                    </tr>
+                </thead>
+            </table>`);
+        let jobData = [];
+        if (type==='user')
+            jobData = d.value.job.map(j=>{
+                const jobID = j.split('.');
+                const job=_.clone(jobs[j]);
+                job['id']=jobID[0];
+                job['duration']=currentTime - job['start_time'];
+                job['task_id'] = jobID[1]||'n/a';
+                return job});
+        else{
+            debugger
+            jobData = _.flatten(d.data.jobName.map(j=>Layout.jobByNames[j].job)).map(j=>{
+                const jobID = j.split('.');
+                const job=_.clone(Layout.jobs[j]);
+                if (job.node_list.indexOf(d.data.name)===-1)
+                    return false;
+                job['id']=jobID[0];
+                job['duration']=currentTime - job['start_time'];
+                job['task_id'] = jobID[1]||'n/a';
+                debugger
+                return job}).filter(d=>d);
+        }
+        var table = $('#informationTable').DataTable( {
+            "data": jobData,
+            "scrollX": true,
+            "columns": [
+                { "data": "id" },
+                { "data": "job_name" },
+                { "data": "user_name" },
+                { "data": "start_time" ,
+                    "render": function ( data, type, row ) {
+                        if(type!=='ordering')
+                            return d3.timeFormat('%m/%d/%Y %H:%M')(new Date(data));
+                        return data;
+                    }},
+                { "data": "duration",
+                    "render": function ( data, type, row ) {
+                        if(type!=='ordering')
+                            return millisecondsToStr_axproximate(data);
+                        return data;
+                    }},
+                { "data": "cpu_cores" },
+                { "data": "node_list" ,"className":'details-control text-wrap',
+                    "render": function ( data, type, row ) {
+                        if(type==='ordering')
+                            return data.length;
+                        if (type==='display')
+                            if (data.length>2)
+                                return `<span>${(row.isexpand?data: data.slice(0,2)).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
+                                        <button type="button" class="btn btn-block morebtn" value="open">${data.length-2} more</button>
+                                        <button type="button" class="btn btn-block morebtn" value="close">
+                                        <img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img>
+                                        </button>`;
+                            else
+                                return data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n');
+                        return data;
+                    }},
+                { "data": "task_id" },
+            ],
+            "order": [[0, 'asc']],
+            "drawCallback": function( settings ) {
+                // Add event listener for opening and closing details
+                $('#informationTable tbody').on('mouseover', 'tr, .tableCompute', function (event) {
+                    event.stopPropagation();
+                    highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                    highlight2Stack = [];
+                    let tr = $(this).closest('tr');
+                    let row = table.row( tr );
+                    d3.select(tr[0]).style('font-weight','unset');
+                    d3.select(this).style('font-weight','bold');
+                    const isSingle =  d3.select(event.target).classed('tableCompute')
+                    if (row.data()) {
+                        const currentData = row.data();
+                        svg.classed('onhighlight2', true);
+                        (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
+                            rack_arr.find(r => {
+                                if (r.childrenNode[c]) {
+                                    highlight2Stack.push(r.childrenNode[c]);
+                                    highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
+                                    r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
+
+                                    r.childrenNode[c].classed('highlight2', true);
+                                    r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
+                                        debugger
+                                        if (d.datum().source===currentData[innerKey]){
+                                            highlight2Stack.push(d);
+                                            d.classed('highlight2',true);
+                                        }
+                                    });
+                                    return true;
+                                }
+                            });
+                        });
+                        users_arr.find(u => {
+                            if (u.key===currentData[innerKey]) {
+                                highlight2Stack.push(u.node);
+                                u.node.classed('highlight2', true);
+                                return true;
+                            }
+                        });
+                    }
+                }).on('mouseleave', 'tr, .tableCompute', function () {
+                    let tr = $(this).closest('tr');
+                    d3.select(this).style('font-weight','unset');
+                    svg.classed('onhighlight2',false);
+                    highlight2Stack.forEach(n=>n.classed('highlight2',false));
+                    highlight2Stack = [];
+                });
+            }
+        } );
+
+        $('#informationTable tbody').on('click', 'td button.morebtn', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row( tr );
+
+            if ( d3.select(this).attr('value')==='open' ) {
+                row.data().isexpand = true;
+                d3.select(tr[0]).classed('shown',true)
+                    .select('span').html(row.data().node_list.map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
+            }
+            else {
+                // Open this row
+                row.data().isexpand = false;
+                d3.select(tr[0]).classed('shown',false)
+                    .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
+            }
+        });
+    }else
+        d3.select('.informationHolder').classed('hide',true);
 }
 function getColorScale(){
-    serviceName = vizservice[serviceSelected]
+    serviceName = vizservice[serviceSelected].text;
     let _colorItem = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     if(serviceName==='User') {
@@ -52,6 +200,7 @@ function getColorScale(){
         debugger
         _colorItem = userColor;
     } else if (serviceName==='Radar') {
+        debugger
         _colorItem = colorCluster;
     }
     const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
@@ -61,6 +210,9 @@ function getColorScale(){
     }else if(serviceName==='Radar')
         _colorItem.domain(range_cal.slice());
     return _colorItem;
+}
+function closeToolTip(){
+    d3.select('.informationHolder').classed('hide',true);
 }
 function makelegend(){
     let graphicopt = drawObject.graphicopt();
