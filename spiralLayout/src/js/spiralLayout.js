@@ -25,9 +25,9 @@ let SpitalLayout = function(){
             return this.margin.top+this.heightG()/2;
         },
         color:{},
-        numSpirals:4,
+        // numSpirals:4+67/100,
         start: 0,
-        end: Math.PI*2+0,
+        end: Math.PI*2*(467/100),
         radaropt : {
             // summary:{quantile:true},
             mini:true,
@@ -72,29 +72,24 @@ let SpitalLayout = function(){
             .style("stroke", "lightgrey")
             .style("stroke-dasharray", ("6, 5"))
             .style("opacity",0.2);
-        var spiralLength = path.node().getTotalLength(),
-            N = 274,
-            barWidth = (spiralLength / N) - 1;
+        var spiralLength = path.node().getTotalLength();
         var miniradius = spiralLength/data.length/2;
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
-        var formatNum=d3.format(".2s")
         var spiralScale = d3.scaleLinear()
             .domain(d3.extent(data, function(d){
                 return d.id;
             }))
-            .range([0, spiralLength]);
+            .range([graphicopt.start, graphicopt.end]);
         data.forEach(d=>{
-            var linePer = spiralScale(d.id),
-                posOnLine = path.node().getPointAtLength(linePer),
-                angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+            var anglePer = spiralScale(d.id);
 
-            d.linePer = linePer; // % distance are on the spiral
-            d.x = posOnLine.x; // x postion on the spiral
-            d.y = posOnLine.y; // y position on the spiral
+            d.a = theta(anglePer); // % distance are on the spiral
+            d.lineR = radius(anglePer);
+            d.x = d.lineR*Math.sin(d.a); // x postion on the spiral
+            d.y = -d.lineR*Math.cos(d.a); // y position on the spiral
             d.r = d.r??miniradius;
             d.drawData[0].r = d.r;
-            d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
         })
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
@@ -194,7 +189,7 @@ let SpitalLayout = function(){
                     return p;
                 }
 
-                zoomTo(istransition)
+                zoomTo(istransition);
                 return childrenNode;
                 function updateNode(node) {
                     node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
@@ -355,7 +350,7 @@ let SpitalLayout = function(){
         }
     }
     var theta = function(r) {
-        return -graphicopt.numSpirals * (r-graphicopt.start)-graphicopt.start;
+        return -(r-graphicopt.start)-graphicopt.start;
     };
 
     return master;
