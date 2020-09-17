@@ -43,6 +43,7 @@ function initdraw(){
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
 }
 function userTable(d,type){
+    highlight2Stack = [];
     if (drawObject.isFreeze) {
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
@@ -67,18 +68,19 @@ function userTable(d,type){
                 const jobID = j.split('.');
                 const job=_.clone(jobs[j]);
                 job['id']=jobID[0];
-                job['duration']=currentTime - job['start_time'];
+                job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
                 return job});
         else{
             debugger
-            jobData = _.flatten(d.data.jobName.map(j=>Layout.jobByNames[j].job)).map(j=>{
+
+            jobData = Layout.computers_old[d.key].job_id[0].map(j=>{
                 const jobID = j.split('.');
                 const job=_.clone(Layout.jobs[j]);
                 if (job.node_list.indexOf(d.data.name)===-1)
                     return false;
                 job['id']=jobID[0];
-                job['duration']=currentTime - job['start_time'];
+                job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
                 debugger
                 return job}).filter(d=>d);
@@ -134,7 +136,7 @@ function userTable(d,type){
                     const isSingle =  d3.select(event.target).classed('tableCompute')
                     if (row.data()) {
                         const currentData = row.data();
-                        svg.classed('onhighlight2', true);
+                        drawObject.g.classed('onhighlight2', true);
                         (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
                             rack_arr.find(r => {
                                 if (r.childrenNode[c]) {
@@ -165,7 +167,7 @@ function userTable(d,type){
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    svg.classed('onhighlight2',false);
+                    drawObject.g.classed('onhighlight2',false);
                     highlight2Stack.forEach(n=>n.classed('highlight2',false));
                     highlight2Stack = [];
                 });

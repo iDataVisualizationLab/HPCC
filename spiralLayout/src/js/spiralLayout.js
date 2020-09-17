@@ -244,6 +244,7 @@ let SpitalLayout = function(){
                         .style('fill',d=>d.color)
                         .each(function(d){
                             setTimeout(()=>{
+                                d[0].color = color(_.isArray(d[0].name)?d[0].name[0]:d[0].name);
                                 createRadar(d3.select(this), d3.select(this), d[0], {size:d.r,colorfill: 0.5}).select('.radarStroke')
                                     .style('stroke-opacity',1);
                             },0);
@@ -323,6 +324,7 @@ let SpitalLayout = function(){
         onFinishDraw.push(_data)
         return master;
     };
+    master.g = g;
     master.isFreeze = function(){return isFreeze}
     function mouseover(d){
         if (!isFreeze) {     // Bring to front

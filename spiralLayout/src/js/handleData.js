@@ -67,10 +67,12 @@ function adjustTree(sampleS,computers){
 
 // Setup the positions of outer nodes
 function getData(d){
+    if(d.name==='10.101.1.9')
+        debugger
     if ( vizservice[serviceSelected].text==='User')
         return d.user.length//?userIndex[d.user[0]]:-1;
     if ( vizservice[serviceSelected].text==='Radar'&&d.cluster){
-        return d.cluster.name;
+        return d.cluster.length?d.cluster[0].name:d.cluster.name;
     }
     return d.metrics[vizservice[serviceSelected].text]
 }
@@ -143,7 +145,7 @@ function queryData(data) {
     tsnedata = data_.tsnedata;
     let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
-    const currentTime = data.currentTime;
+    Layout.currentTime = data.currentTime;
     Layout.users = users;
     Layout.jobs = jobs;
     Layout.jobByNames = jobByNames;
