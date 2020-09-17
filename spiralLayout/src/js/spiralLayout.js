@@ -27,7 +27,7 @@ let SpitalLayout = function(){
         color:{},
         numSpirals:4,
         start: 0,
-        end: 2.25,
+        end: Math.PI*2+0,
         radaropt : {
             // summary:{quantile:true},
             mini:true,
@@ -355,7 +355,7 @@ let SpitalLayout = function(){
         }
     }
     var theta = function(r) {
-        return -graphicopt.numSpirals * Math.PI * r;
+        return -graphicopt.numSpirals * (r-graphicopt.start)-graphicopt.start;
     };
 
     return master;
