@@ -201,22 +201,21 @@ function sortData(data){
     let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
         .filter(d=>d.value>0);
     let dataObject = request.queryRange(Layout.currentTime,6,rankList.map(d=>d.data.key));
-    dataObject = handleSmalldata(dataObject);
-    let s = vizservice[serviceSelected];
-    if (s.idroot!==undefined){
-        rankList.forEach(d=> {
-            const c = d.data.key;
-            for (let i = 1;i<dataObject[c][serviceListattr[s.idroot]].length;i++)
-            {
-                d.data.stackdelta.push(dataObject[c][serviceListattr[s.idroot]][i][s.id]-dataObject[c][serviceListattr[s.idroot]][i-1][s.id])
-            }
-        })
+    if (d3.keys(dataObject).length){
+        dataObject = handleSmalldata(dataObject);
+        let s = vizservice[serviceSelected];
+        if (s.idroot!==undefined){
+            rankList.forEach(d=> {
+                const c = d.data.key;
+                for (let i = 1;i<dataObject[c][serviceListattr[s.idroot]].length;i++)
+                {
+                    d.data.stackdelta.push(dataObject[c][serviceListattr[s.idroot]][i][s.id]-dataObject[c][serviceListattr[s.idroot]][i-1][s.id])
+                }
+            })
+        }
     }
-
     rankList.forEach(d=>{
             d.data.highlight=true;
-            debugger
-            d.data.stackdelta
         }); // highlight changed
     Layout.order = dataviz.map(d=>d.key);
     Layout.order.object = {};
