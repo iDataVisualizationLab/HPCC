@@ -108,6 +108,7 @@ let SpitalLayout = function(){
             .style("font", "10px sans-serif")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
+        onode_n.call(updateOnode)
             //
             //
             // .attr('')
