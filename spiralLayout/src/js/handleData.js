@@ -189,7 +189,9 @@ function sortData(data){
     Layout.order.deltarank = [];
     dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
     debugger
-    Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5).forEach(d=>d.data.highlight=true); // highlight changed
+    Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
+        .filter(d=>d.value>2)
+        .forEach(d=>d.data.highlight=true); // highlight changed
     Layout.order = dataviz.map(d=>d.key);
     Layout.order.object = {};
     Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
