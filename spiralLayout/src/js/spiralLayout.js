@@ -25,6 +25,7 @@ let SpitalLayout = function(){
             return this.margin.top+this.heightG()/2;
         },
         animationTime:1000,
+        trajectoryNum:5,
         color:{},
         // numSpirals:4+67/100,
         start: 0,
@@ -53,6 +54,7 @@ let SpitalLayout = function(){
     let getColorScale = function(){return color};
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
+    let trajectory = {};
     master.draw = function() {
         isFreeze= false;
         color=getColorScale();
@@ -128,8 +130,23 @@ let SpitalLayout = function(){
                 d.childrenNode = makecirclepacking(d.node);
             });
             p.interrupt();
-            debugger
-            p.filter(d=>d.highlight).transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+            p.filter(d=>d.highlight).transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
+                .on('start',function(d){
+                    if (trajectory[d.key])
+                        trajectory[d.key].forEach(d=>d.remove());
+                    trajectory[d.key] = d3.range(0,graphicopt.trajectoryNum).map((i)=>{
+                        const el = d3.select(this).clone([true]);
+                        el.attr('class','cloned').style('opacity',1).transition().delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.5).ease(d3.easeQuadIn).duration(graphicopt.animationTime*(1-0.5*i/graphicopt.trajectoryNum))
+                            .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(0.1)`; })
+                            .style('opacity',0)
+                            .on('end',()=>{
+                                el.remove();});
+                        return el;
+                    });
+                });
+            //     .on('end',(d)=>{
+            //     trajectory[d.key].forEach(d=>d.remove());
+            // });
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
         }

@@ -188,7 +188,6 @@ function sortData(data){
     dataviz.sort((a,b)=>-b.value+a.value);
     Layout.order.deltarank = [];
     dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
-    debugger
     Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
         .filter(d=>d.value>2)
         .forEach(d=>d.data.highlight=true); // highlight changed
