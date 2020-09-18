@@ -161,7 +161,7 @@ function queryData(data) {
     currentDraw = ()=>{
         drawObject.draw();
         d3.select('#RankingList tbody').selectAll('tr')
-            .data(drawObject.data().filter(d=>d.highlight).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
+            .data(drawObject.data().filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
             .join('tr').selectAll('td')
             .data(d=>d).join('td').html(d=>d);
 
@@ -194,12 +194,14 @@ function sortData(data){
     const dataviz =  data??drawObject.data();
     dataviz.sort((a,b)=>-b.value+a.value);
     Layout.order.deltarank = [];
-    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
+    // dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
+    // let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
+    //     .filter(d=>d.value>2);
+    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(getData_delta(d.data))})));
     let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-        .filter(d=>d.value>2);
+        .filter(d=>d.value>0);
     let dataObject = request.queryRange(Layout.currentTime,6,rankList.map(d=>d.data.key));
     dataObject = handleSmalldata(dataObject);
-    debugger
     let s = vizservice[serviceSelected];
     if (s.idroot!==undefined){
         rankList.forEach(d=> {

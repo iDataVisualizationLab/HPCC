@@ -151,3 +151,8 @@ text {
     color: #d60000;
     padding: 2px;
 }
+
+#RankingList table th:last-child,#RankingList table tr td:last-child{
+    padding-left: 0;
+    padding-right: 0;
+}
