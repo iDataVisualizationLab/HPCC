@@ -135,3 +135,19 @@ text {
     padding-right: 2px;
     padding-left: 2px;
 }
+
+.upsymbol::before{
+    content: "▲";
+    color: #43d63a;
+    padding: 2px;
+}
+.equalsymbol::before{
+    content: '-';
+    color: #acaab0;
+    padding: 4.5px;
+}
+.downsymbol::before{
+    content: "▼";
+    color: #d60000;
+    padding: 2px;
+}

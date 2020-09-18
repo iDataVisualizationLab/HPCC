@@ -10,9 +10,11 @@ function serviceControl(){
     vizservice =serviceFullList.slice();
     vizservice.push({text:'User',range:[]});
     vizservice.push({text:'Radar',range:[]});
+    d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#serviceSelection')
         .on('change',function(){
             serviceSelected = +$(this).val();
+            d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
             createdata();
             currentDraw();
         })

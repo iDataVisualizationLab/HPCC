@@ -62,6 +62,23 @@ class Simulation {
             this.stop()
         }
     }
+    queryRange(timepoint,step,list){
+        let self= this;
+        if(this.data&&list.length){
+            let index = self.data.time_stamp.findIndex(d=>d>timepoint);
+            index = (index===-1?self.data.time_stamp.length:index);
+            const nodes_info = {};
+            list.forEach(c => {
+                nodes_info[c] = {};
+                d3.keys(self.data.nodes_info[c]).forEach(s => {
+                    nodes_info[c][s] = self.data.nodes_info[c][s].slice(Math.max(0,index-step),index);
+                })
+            });
+            let time_stamp = self.data.time_stamp.slice(Math.max(0,index-step),index)
+            return {nodes_info,time_stamp};
+        }
+        return {};
+    }
     requestFromData(index){
         const self = this;
        return new Promise((resolve,refuse)=>{

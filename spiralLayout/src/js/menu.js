@@ -1,5 +1,5 @@
 function initMenu(){
-    $('#legendHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
+    $('.windown').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     $('[data-toggle="tooltip"]').tooltip();
     initSideBar()
 }

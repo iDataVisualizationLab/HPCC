@@ -158,7 +158,14 @@ function queryData(data) {
             })
         });
     }
-    currentDraw = drawObject.draw;
+    currentDraw = ()=>{
+        drawObject.draw();
+        d3.select('#RankingList tbody').selectAll('tr')
+            .data(drawObject.data().filter(d=>d.highlight).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
+            .join('tr').selectAll('td')
+            .data(d=>d).join('td').html(d=>d);
+
+    };
     createdata();
     // _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     currentDraw();
@@ -187,10 +194,28 @@ function sortData(data){
     const dataviz =  data??drawObject.data();
     dataviz.sort((a,b)=>-b.value+a.value);
     Layout.order.deltarank = [];
-    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
-    Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-        .filter(d=>d.value>2)
-        .forEach(d=>d.data.highlight=true); // highlight changed
+    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
+    let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
+        .filter(d=>d.value>2);
+    let dataObject = request.queryRange(Layout.currentTime,6,rankList.map(d=>d.data.key));
+    dataObject = handleSmalldata(dataObject);
+    debugger
+    let s = vizservice[serviceSelected];
+    if (s.idroot!==undefined){
+        rankList.forEach(d=> {
+            const c = d.data.key;
+            for (let i = 1;i<dataObject[c][serviceListattr[s.idroot]].length;i++)
+            {
+                d.data.stackdelta.push(dataObject[c][serviceListattr[s.idroot]][i][s.id]-dataObject[c][serviceListattr[s.idroot]][i-1][s.id])
+            }
+        })
+    }
+
+    rankList.forEach(d=>{
+            d.data.highlight=true;
+            debugger
+            d.data.stackdelta
+        }); // highlight changed
     Layout.order = dataviz.map(d=>d.key);
     Layout.order.object = {};
     Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
