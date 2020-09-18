@@ -24,6 +24,7 @@ let SpitalLayout = function(){
         centerY: function () {
             return this.margin.top+this.heightG()/2;
         },
+        animationTime:1000,
         color:{},
         // numSpirals:4+67/100,
         start: 0,
@@ -126,7 +127,10 @@ let SpitalLayout = function(){
                 d.node=d3.select(this);
                 d.childrenNode = makecirclepacking(d.node);
             });
-            p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+            p.interrupt();
+            debugger
+            p.filter(d=>d.highlight).transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+            p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
         }
         function makecirclepacking(svg) {

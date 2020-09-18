@@ -67,10 +67,8 @@ function adjustTree(sampleS,computers){
 
 // Setup the positions of outer nodes
 function getData(d){
-    if(d.name==='10.101.1.9')
-        debugger
     if ( vizservice[serviceSelected].text==='User')
-        return d.user.length//?userIndex[d.user[0]]:-1;
+        return d.user;//?userIndex[d.user[0]]:-1;
     if ( vizservice[serviceSelected].text==='Radar'&&d.cluster){
         return d.cluster.length?d.cluster[0].name:d.cluster.name;
     }
@@ -173,21 +171,25 @@ function createdata(){
         Layout.order.object = {};
         Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
     }
-    serviceName = vizservice[serviceSelected]
+    serviceName = vizservice[serviceSelected];
     let dataviz = [];
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
         let data = {data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
         dataviz.push(data);
     }));
-    dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
-    dataviz.forEach((d,i)=>d.id=i);
-    drawObject.data(dataviz);
+    // dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
+    // dataviz.forEach((d,i)=>d.id=i);
+    // drawObject.data(dataviz);
+    sortData(dataviz)
 }
-function sortData(){
-    const dataviz =  drawObject.data();
+function sortData(data){
+    const dataviz =  data??drawObject.data();
     dataviz.sort((a,b)=>-b.value+a.value);
-    dataviz.forEach((d,i)=>d.id=i);
+    Layout.order.deltarank = [];
+    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
+    debugger
+    Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5).forEach(d=>d.data.highlight=true); // highlight changed
     Layout.order = dataviz.map(d=>d.key);
     Layout.order.object = {};
     Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
