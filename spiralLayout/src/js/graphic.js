@@ -30,8 +30,8 @@ function serviceControl(){
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
-    d3.select('#userSort').on('change',function(){
-        currentDraw(serviceSelected);
+    d3.select('#trajectoryStyle').on('change',function(){
+        drawObject.trajectoryStyle($(this).val());
     });
     d3.select('#innerDisplay').on('change',function(){
         d3.selectAll('.innerName').text(getInnerNodeAttr())
@@ -46,7 +46,7 @@ function initdraw(){
 }
 function userTable(d,type){
     highlight2Stack = [];
-    if (drawObject.isFreeze) {
+    if (drawObject.isFreeze()) {
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
         contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
@@ -138,7 +138,7 @@ function userTable(d,type){
                     const isSingle =  d3.select(event.target).classed('tableCompute')
                     if (row.data()) {
                         const currentData = row.data();
-                        drawObject.g.classed('onhighlight2', true);
+                        drawObject.g().classed('onhighlight2', true);
                         (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
                             rack_arr.find(r => {
                                 if (r.childrenNode[c]) {
@@ -169,7 +169,7 @@ function userTable(d,type){
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    drawObject.g.classed('onhighlight2',false);
+                    drawObject.g().classed('onhighlight2',false);
                     highlight2Stack.forEach(n=>n.classed('highlight2',false));
                     highlight2Stack = [];
                 });
@@ -397,6 +397,11 @@ function getDrawData(e) {
     }else{
         const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.data.invalid}];
         return dataout;
+    }
+}
+function openPopup(d,svg){
+    if (drawObject.isFreeze()) {
+        drawObject.addSubgraph(svg.clone([true]));
     }
 }
 // setting

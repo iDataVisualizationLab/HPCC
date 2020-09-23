@@ -41,12 +41,13 @@ let SpitalLayout = function(){
             margin: {top: 0, right: 0, bottom: 0, left: 0},
             isNormalize:false,
             schema:serviceFullList
-        }
+        },
+        trajectory:{bandSize:10,colorScheme:"interpolateViridis"}
     };
 
     let maindiv='#circularLayout';
     let isFreeze= false;
-    let data=[],svg,g,r=0;
+    let data=[],main_svg,g,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
@@ -55,11 +56,13 @@ let SpitalLayout = function(){
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
     let trajectory = {};
+    let subgraph = {el:[],limit:3};
+    let spiralScale,radius;
     master.draw = function() {
         isFreeze= false;
         color=getColorScale();
         createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
-        var radius = d3.scaleLinear()
+        radius = d3.scaleLinear()
             .domain([graphicopt.start, graphicopt.end])
             .range([r*0.1, r]);
         var points = d3.range(graphicopt.start, graphicopt.end + 0.001, (graphicopt.end - graphicopt.start) / 1000);
@@ -79,7 +82,7 @@ let SpitalLayout = function(){
         var miniradius = spiralLength/data.length/2;
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
-        var spiralScale = d3.scaleLinear()
+        spiralScale = d3.scaleLinear()
             .domain(d3.extent(data, function(d){
                 return d.id;
             }))
@@ -108,7 +111,7 @@ let SpitalLayout = function(){
             .style("font", "10px sans-serif")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
-        onode_n.call(updateOnode)
+        onode_n.call(updateOnode);
             //
             //
             // .attr('')
@@ -137,8 +140,12 @@ let SpitalLayout = function(){
                         trajectory[d.key].forEach(d=>d.remove());
                     trajectory[d.key] = d3.range(0,graphicopt.trajectoryNum).map((i)=>{
                         const el = d3.select(this).clone([true]);
-                        el.attr('class','cloned').style('opacity',1).transition().delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.5).ease(d3.easeQuadIn).duration(graphicopt.animationTime*(1-0.5*i/graphicopt.trajectoryNum))
-                            .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(0.1)`; })
+                        el.attr('class','cloned').style('opacity',1)
+                            .attr("transform", function(d) { return d3.select(this).attr('transform')+` scale(0.1)`; })
+                            .transition()
+                            .delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.1).ease(d3.easeQuadIn)
+                            .duration(graphicopt.animationTime*(1-0.4*i/graphicopt.trajectoryNum))
+                            .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(1)`; })
                             .style('opacity',0)
                             .on('end',()=>{
                                 el.remove();});
@@ -218,7 +225,7 @@ let SpitalLayout = function(){
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');openPopup(d,main_svg);})
                         .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
@@ -237,7 +244,7 @@ let SpitalLayout = function(){
             function zoomTo(istransition) {
                 //to do
                 serviceName = vizservice[serviceSelected].text;
-                label.interrupt().transition().duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
+                label.interrupt().transition().ease(d3.easeQuadIn).duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
                 node.selectAll('g').remove();
                 if (serviceName!=='Radar'){
                     let path = node.selectAll('path').data(d=>d.drawData)
@@ -289,14 +296,15 @@ let SpitalLayout = function(){
         // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;
         // graphicopt.height = d3.select(maindiv).node().getBoundingClientRect().height;
         r = d3.min([graphicopt.width, graphicopt.height]) / 2-20 ;
-        let svg = d3.select(maindiv)
+        main_svg = d3.select(maindiv)
             .attr("width", graphicopt.width)
             .attr("height", graphicopt.height)
             .style('overflow','visible');
-        g = svg
+        g = main_svg
             .select("g.content");
         function zoomed(){
             g.attr("transform", d3.event.transform);
+            subgraph.el.forEach(svg=>svg.select('g.content').attr("transform", d3.event.transform))
         }
         if (g.empty()){
             g = d3.select(maindiv)
@@ -316,6 +324,7 @@ let SpitalLayout = function(){
             startZoom.x = graphicopt.centerX();
             startZoom.y = graphicopt.centerY();
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
+            g.append('g').attr('class','trajectoryHolder').attr('pointer-events','none');
         }
         return master
     };
@@ -341,8 +350,32 @@ let SpitalLayout = function(){
         onFinishDraw.push(_data)
         return master;
     };
-    master.g = g;
-    master.isFreeze = function(){return isFreeze}
+    master.trajectoryStyle=function(_data) {
+        if (arguments.length){
+            switch (_data) {
+                case 'line':
+                    draw_trajectory = draw_trajectory_line;
+                    break;
+                case 'contour':
+                    draw_trajectory = draw_trajectory_contours;
+                    break;
+            }
+            if (master.current_trajectory_data)
+                draw_trajectory(master.current_trajectory_data);
+            return master;
+        }
+        return draw_trajectory;
+    };
+    master.g = function(){return g};
+    master.isFreeze = function(){return isFreeze};
+    master.addSubgraph = function(subsvg){
+        subsvg.style('overflow','hidden').style('border','1px solid black').style('border-radius','5px').style('background-color','white')
+        subgraph.el.push(subsvg);
+        while ( subgraph.el.length> subgraph.limit){
+            subgraph.el.shift().remove();
+        }
+        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
+    };
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
@@ -353,10 +386,43 @@ let SpitalLayout = function(){
             if (d.node) {
                 d.node.classed('highlight', true);
             }
+            master.current_trajectory_data = {g,d,data:Layout.ranking.byComputer[d.name][serviceName]};
+            draw_trajectory(master.current_trajectory_data);
         }
         if (d.tooltip) {
             tooltip.show(d.name)
         }
+    }
+    let draw_trajectory = draw_trajectory_line;
+    master.current_trajectory_data = undefined;
+    function draw_trajectory_line({g,d,data}){
+        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectory'+d.id)
+            .data([data])
+            .join('path')
+            .attr('class','trajectory trajectory'+d.id)
+            .attr('transform',null)
+            .attr('d',d3.line()
+                .curve(d3.curveCatmullRom)
+                .x(e=>radius(spiralScale(e))*Math.sin(theta(spiralScale(e))))
+                .y(e=>-radius(spiralScale(e))*Math.cos(theta(spiralScale(e)))))
+            .style('fill','none').style('stroke','black').style('opacity',0.3);
+    }
+    function draw_trajectory_contours({g,d,data}){
+        const contours = d3.contourDensity()
+            .x(e=>radius(spiralScale(e))*Math.sin(theta(spiralScale(e)))+graphicopt.centerX())
+            .y(e=>-radius(spiralScale(e))*Math.cos(theta(spiralScale(e)))+graphicopt.centerY())
+            .size( [graphicopt.widthG(), graphicopt.heightG()])
+            .bandwidth(graphicopt.trajectory.bandSize)
+            (data);
+        const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
+            .domain(d3.extent(contours, d => d.value ));
+        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectory'+d.id)
+            .data(contours)
+            .join('path')
+            .attr('transform',`translate(${-graphicopt.centerX()},${-graphicopt.centerY()})`)
+            .attr('class','trajectory trajectory'+d.id)
+            .attr("d", d3.geoPath())
+            .style("fill", d => color(d.value)).style('opacity',null);
     }
     function mouseout(d){
         if(!isFreeze)
@@ -366,6 +432,8 @@ let SpitalLayout = function(){
             if(d.node){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
             }
+            g.selectAll('path.trajectory').remove();
+            master.current_trajectory_data = undefined;
         }
         if (d.tooltip) {
             tooltip.hide()

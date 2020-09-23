@@ -8,6 +8,7 @@ class Simulation {
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];
+    onTimeChange=[];
     onDataChange=[];
     onUpdateTime=[];
     onStartQuery=()=>{};
@@ -23,10 +24,13 @@ class Simulation {
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
                         if (data.jobs_info[jID].finish_time)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
-                })
+                });
                 this.data = data;
-                this.onDataChange.forEach(function(listener) {
+                this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
+                });
+                this.onDataChange.forEach(function(listener) {
+                    listener(data);
                 });
                 return d3.extent(data.time_stamp);
             });
@@ -94,7 +98,6 @@ class Simulation {
                     if (timer)
                         timer.stop();
                     const currentTime = self.data.time_stamp[index];
-
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
                         return (val.start_time > currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
                     });

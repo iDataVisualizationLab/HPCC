@@ -136,11 +136,16 @@
                         </div>
                         <div class="card-body row" id="controlOnToolbarHolder">
                             <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
-                                <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>
-                                <select class="col-8" id="userSort">
-                                    <option value="job">#Job IDs</option>
-                                    <option value="compute">#Compute</option>
-                                    <option value="metric">Current metric</option>
+<!--                                <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>-->
+<!--                                <select class="col-8" id="userSort">-->
+<!--                                    <option value="job">#Job IDs</option>-->
+<!--                                    <option value="compute">#Compute</option>-->
+<!--                                    <option value="metric">Current metric</option>-->
+<!--                                </select>-->
+                                <label class="col-4" for="serviceSelection">Trajectory style: </label>
+                                <select class="col-6" id="trajectoryStyle">
+                                    <option value="line">Curve</option>
+                                    <option value="contour">Heatmap</option>
                                 </select>
                                 <label class="col-4" for="serviceSelection">Visualizing: </label>
                                 <select class="col-6" id="serviceSelection">

@@ -67,7 +67,8 @@ function initTimeElement(){
     timelineControl.step = _.partial(request.request.bind(request),0);
     request.callbackStop = timelineControl.pause.bind(timelineControl);
 
-    request.onDataChange.push(timelineControl.domain.bind(timelineControl));
+    request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
+    request.onDataChange.push(handleRankingData);
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
 
     if (request.isRealTime) {

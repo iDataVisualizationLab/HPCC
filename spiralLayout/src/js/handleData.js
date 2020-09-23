@@ -222,3 +222,28 @@ function sortData(data){
     Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
     drawObject.data(dataviz);
 }
+
+function handleRankingData(data){
+    let sampleS = handleSmalldata(data);
+    let hosts = d3.keys(sampleS);
+    hosts.shift();
+    let ranking = {byComputer:{},byMetric:{}};
+    hosts.forEach(h=>ranking.byComputer[h]={});
+    sampleS.timespan.forEach((t,ti)=>{
+        serviceFullList.forEach(ser=>{
+            if (!ranking.byMetric[ser.text])
+                ranking.byMetric[ser.text]=[];
+            ranking.byMetric[ser.text][ti]={};
+            let sorteddata = hosts.map(h=>{
+                if(!ranking.byComputer[h][ser.text])
+                    ranking.byComputer[h][ser.text] = [];
+                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id]};
+            }).sort((a,b)=>-b.value+a.value);
+            sorteddata.forEach((d,i)=>{
+                ranking.byMetric[ser.text][ti][d.key] = i;
+                ranking.byComputer[d.key][ser.text][ti] = i;
+            });
+        })
+    });
+    Layout.ranking = ranking;
+}
