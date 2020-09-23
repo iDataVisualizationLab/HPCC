@@ -59,7 +59,8 @@ let SpitalLayout = function(){
     let subgraph = {el:[],limit:3};
     let spiralScale,radius;
     master.draw = function() {
-        isFreeze= false;
+        if (isFreeze)
+            freezeHandle();
         color=getColorScale();
         createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
         radius = d3.scaleLinear()
