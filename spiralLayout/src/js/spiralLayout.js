@@ -377,13 +377,20 @@ let SpitalLayout = function(){
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
     master.addSubgraph = function(subsvg){
-        subsvg.style('overflow','hidden').style('border','1px solid black')
+        subsvg.attr('class','subgraph')
+            .style('overflow','hidden').style('border','1px solid black')
             .style('position','relative')
             .style('border-radius','5px').style('background-color','white')
         subgraph.el.push(subsvg);
         while ( subgraph.el.length> subgraph.limit){
             subgraph.el.shift().remove();
         }
+        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
+    };
+    master.removeSubgraph = function(subsvg){
+        const index = subsvg.attr('id').replace('subgraph','');
+        subgraph.el.filter((s,i)=>i!==index);
+        subsvg.remove();
         subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
     };
     function mouseover(d){

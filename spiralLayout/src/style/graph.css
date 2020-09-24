@@ -156,3 +156,22 @@ text {
     padding-left: 0;
     padding-right: 0;
 }
+
+.closeButton {
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+}
+div.subgraph:hover .closeButton {
+    background-color: var(--red);
+    color:white;
+}
+.closeButton svg{
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.subgraph {
+    height:fit-content;
+}

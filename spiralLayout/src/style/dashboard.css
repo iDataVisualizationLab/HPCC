@@ -104,3 +104,7 @@ main {
 .bi-window.disable .slash{
     display: block;
 }
+
+.card.windown {
+    height: fit-content;
+}
