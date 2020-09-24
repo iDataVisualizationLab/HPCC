@@ -158,13 +158,13 @@ let SpitalLayout = function(){
                         .attr("stroke-dashoffset", seg*2)
                         .transition().duration(graphicopt.animationTime*0.2)
                         .attr("stroke-dashoffset", seg)
-                        // .on('end',()=>{
-                        //     trajectory[d.key].remove();});
+                        .on('end',()=>{
+                            trajectory[d.key].remove();});
                         return trajectory[d.key];
                 }).transition().duration(graphicopt.animationTime*0.2)
-                // .on('end',(d)=>{
-                //     trajectory[d.key].remove();
-                // });
+                .on('end',(d)=>{
+                    trajectory[d.key].remove();
+                });
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
         }
