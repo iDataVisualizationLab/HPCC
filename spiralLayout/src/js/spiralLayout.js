@@ -135,23 +135,32 @@ let SpitalLayout = function(){
                 d.childrenNode = makecirclepacking(d.node);
             });
             p.interrupt();
-            p.filter(d=>d.highlight).transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
+            p.filter(function(d){
+                if (d.highlight)
+                    d.oldpos = d3.select(this).attr('transform').replace(/translate\(|\)/g,'').split(',').map(e=>+e.trim());
+                return d.highlight;
+            })
+                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
                 .on('start',function(d){
                     if (trajectory[d.key])
-                        trajectory[d.key].forEach(d=>d.remove());
-                    trajectory[d.key] = d3.range(0,graphicopt.trajectoryNum).map((i)=>{
-                        const el = d3.select(this).clone([true]);
-                        el.attr('class','cloned').style('opacity',1)
-                            .attr("transform", function(d) { return d3.select(this).attr('transform')+` scale(0.1)`; })
-                            .transition()
-                            .delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.1).ease(d3.easeQuadIn)
-                            .duration(graphicopt.animationTime*(1-0.4*i/graphicopt.trajectoryNum))
-                            .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(1)`; })
-                            .style('opacity',0)
-                            .on('end',()=>{
-                                el.remove();});
-                        return el;
-                    });
+                        trajectory[d.key].remove();
+                    trajectory[d.key] = d3.select(this.parentNode).append('path')
+                        .attr('class','cloned').style('opacity',0.8)
+                        .attr('d',d3.line()([d.oldpos,[d.x,d.y]]))
+                        .style('fill','none')
+                        .style('stroke','black');
+                    let totalLength = trajectory[d.key].node().getTotalLength();
+                    trajectory[d.key].attr("stroke-dasharray",50 + " " + totalLength)
+                        .attr("stroke-offset", totalLength)
+                        .transition()
+                        // .delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.1).ease(d3.easeQuadIn)
+                        .duration(graphicopt.animationTime)
+                        .attr("stroke-dashoffset", 0)
+                        // .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(1)`; })
+                        // .style('opacity',0)
+                        // .on('end',()=>{
+                        //     trajectory[d.key].remove();});
+                        return trajectory[d.key];
                 });
             //     .on('end',(d)=>{
             //     trajectory[d.key].forEach(d=>d.remove());
