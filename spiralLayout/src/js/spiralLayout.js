@@ -140,7 +140,7 @@ let SpitalLayout = function(){
                     d.oldpos = d3.select(this).attr('transform').replace(/translate\(|\)/g,'').split(',').map(e=>+e.trim());
                 return d.highlight;
             })
-                .transition().duration(graphicopt.animationTime*0.8).ease(d3.easeQuad).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
+                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
                 .on('start',function(d){
                     if (trajectory[d.key])
                         trajectory[d.key].remove();
@@ -154,14 +154,12 @@ let SpitalLayout = function(){
                     trajectory[d.key].attr("stroke-dasharray",seg + " " + totalLength)
                         .attr("stroke-dashoffset", totalLength+seg*2)
                         .transition()
-                        .duration(graphicopt.animationTime*0.8).ease(d3.easeQuad)
-                        .attr("stroke-dashoffset", seg*2)
-                        .transition().duration(graphicopt.animationTime*0.2)
+                        .duration(graphicopt.animationTime)
                         .attr("stroke-dashoffset", seg)
                         .on('end',()=>{
                             trajectory[d.key].remove();});
                         return trajectory[d.key];
-                }).transition().duration(graphicopt.animationTime*0.2)
+                })
                 .on('end',(d)=>{
                     trajectory[d.key].remove();
                 });
@@ -379,7 +377,9 @@ let SpitalLayout = function(){
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
     master.addSubgraph = function(subsvg){
-        subsvg.style('overflow','hidden').style('border','1px solid black').style('border-radius','5px').style('background-color','white')
+        subsvg.style('overflow','hidden').style('border','1px solid black')
+            .style('position','relative')
+            .style('border-radius','5px').style('background-color','white')
         subgraph.el.push(subsvg);
         while ( subgraph.el.length> subgraph.limit){
             subgraph.el.shift().remove();

@@ -401,7 +401,17 @@ function getDrawData(e) {
 }
 function openPopup(d,svg){
     if (drawObject.isFreeze()) {
-        drawObject.addSubgraph(svg.clone([true]));
+        debugger
+        const cloned = svg.clone(true);
+        cloned.attr('id',null).attr('class','svgClone').style('position','relative');
+        const parent = d3.select(svg.node().parentNode).append('div');
+        parent.node().appendChild(cloned.node());
+        parent.append('span').style('position','absolute')
+            .style('top',0).style('left','50%').text(timelineControl.currentValue.toLocaleString()+"|"+vizservice[serviceSelected].text+'|'+d.key)
+            .style('text-align','center')
+            .style('transform','translateX(-50%)');
+        parent.appen()
+        drawObject.addSubgraph(parent);
     }
 }
 // setting
