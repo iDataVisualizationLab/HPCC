@@ -140,31 +140,31 @@ let SpitalLayout = function(){
                     d.oldpos = d3.select(this).attr('transform').replace(/translate\(|\)/g,'').split(',').map(e=>+e.trim());
                 return d.highlight;
             })
-                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
+                .transition().duration(graphicopt.animationTime*0.8).ease(d3.easeQuad).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
                 .on('start',function(d){
                     if (trajectory[d.key])
                         trajectory[d.key].remove();
                     trajectory[d.key] = d3.select(this.parentNode).append('path')
-                        .attr('class','cloned').style('opacity',0.8)
+                            .attr('class','cloned').style('opacity',0.8)
                         .attr('d',d3.line()([d.oldpos,[d.x,d.y]]))
                         .style('fill','none')
                         .style('stroke','black');
                     let totalLength = trajectory[d.key].node().getTotalLength();
-                    trajectory[d.key].attr("stroke-dasharray",50 + " " + totalLength)
-                        .attr("stroke-offset", totalLength)
+                    let seg = Math.min(totalLength*0.5,50)
+                    trajectory[d.key].attr("stroke-dasharray",seg + " " + totalLength)
+                        .attr("stroke-dashoffset", totalLength+seg*2)
                         .transition()
-                        // .delay(graphicopt.animationTime*(i/graphicopt.trajectoryNum)*0.1).ease(d3.easeQuadIn)
-                        .duration(graphicopt.animationTime)
-                        .attr("stroke-dashoffset", 0)
-                        // .attr("transform", function(d) { return `translate(${d.x},${d.y}) scale(1)`; })
-                        // .style('opacity',0)
+                        .duration(graphicopt.animationTime*0.8).ease(d3.easeQuad)
+                        .attr("stroke-dashoffset", seg*2)
+                        .transition().duration(graphicopt.animationTime*0.2)
+                        .attr("stroke-dashoffset", seg)
                         // .on('end',()=>{
                         //     trajectory[d.key].remove();});
                         return trajectory[d.key];
-                });
-            //     .on('end',(d)=>{
-            //     trajectory[d.key].forEach(d=>d.remove());
-            // });
+                }).transition().duration(graphicopt.animationTime*0.2)
+                // .on('end',(d)=>{
+                //     trajectory[d.key].remove();
+                // });
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
         }
