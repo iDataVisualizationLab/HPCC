@@ -2,7 +2,7 @@ class Simulation {
     data;
     timer;
     interval=1000;
-    #index=0;
+    index=0;
     #currentTime;
     isRealTime;
     query;
@@ -29,6 +29,7 @@ class Simulation {
                 this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
                 });
+
                 this.onDataChange.forEach(function(listener) {
                     listener(data);
                 });
@@ -43,19 +44,19 @@ class Simulation {
                 let range = [d3.bisectLeft(this.data.time_stamp, index),d3.bisectRight(this.data.time_stamp, index)];
 
                 if ((this.data.time_stamp[range[1]]-index )>(index-this.data.time_stamp[range[0]]))
-                    this.#index = range[0];
+                    this.index = range[0];
                 else
-                    this.#index = range[1];
+                    this.index = range[1];
             }else
-                this.#index = index;
-        if (this.isRealTime || (!this.isRealTime&&this.data===undefined)||(this.#index<this.data.time_stamp.length)) {
+                this.index = index;
+        if (this.isRealTime || (!this.isRealTime&&this.data===undefined)||(this.index<this.data.time_stamp.length)) {
             let updatePromise;
             let self = this;
             this.onStartQuery();
             if (self.isRealTime)
                 updatePromise = this.requestFromURL();
             else
-                updatePromise = this.requestFromData(this.#index);
+                updatePromise = this.requestFromData(this.index);
             this.onFinishQuery.forEach(function (listener) {
                 updatePromise = updatePromise.then(listener);
             });
@@ -111,7 +112,7 @@ class Simulation {
                     });
                     const time_stamp = [currentTime];
                     self.#currentTime = currentTime;
-                    self.#index ++;
+                    self.index ++;
                     resolve({jobs_info, nodes_info, time_stamp,currentTime})
 
                 }
@@ -178,7 +179,7 @@ class Simulation {
     stop(){
         if (this.timer) {
             this.timer.stop();
-            this.#index =0;
+            this.index =0;
             this.callbackStop();
         }
     }

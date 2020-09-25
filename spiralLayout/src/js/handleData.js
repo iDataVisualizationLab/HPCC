@@ -192,7 +192,12 @@ function createdata(){
 }
 function sortData(data){
     const dataviz =  data??drawObject.data();
-    dataviz.sort((a,b)=>-b.value+a.value);
+    // Layout.ranking
+    if (Layout.ranking.byMetric[vizservice[serviceSelected].text]){
+        const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][request.index-1];
+        dataviz.sort((a,b)=>rankIndex[a.key]-rankIndex[b.key])
+    }else
+        dataviz.sort((a,b)=>-b.value+a.value);
     Layout.order.deltarank = [];
     // dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
     // let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
@@ -224,10 +229,16 @@ function sortData(data){
 }
 
 function handleRankingData(data){
+    console.time('handleRankingData');
     let sampleS = handleSmalldata(data);
+    let {computers,jobs,users,jobByNames} = handleData(data);
+    Layout.usersStatic = users;
     let hosts = d3.keys(sampleS);
     hosts.shift();
-    let ranking = {byComputer:{},byMetric:{}};
+    let ranking = {byComputer:{},byMetric:{},byUser:{}};
+    d3.keys(users).forEach(u=>{ranking.byUser[u]={};
+        serviceFullList.forEach(s=>ranking.byUser[u][s.text]=[])
+    });
     hosts.forEach(h=>ranking.byComputer[h]={});
     sampleS.timespan.forEach((t,ti)=>{
         serviceFullList.forEach(ser=>{
@@ -237,13 +248,19 @@ function handleRankingData(data){
             let sorteddata = hosts.map(h=>{
                 if(!ranking.byComputer[h][ser.text])
                     ranking.byComputer[h][ser.text] = [];
-                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id]};
+                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
             }).sort((a,b)=>-b.value+a.value);
             sorteddata.forEach((d,i)=>{
                 ranking.byMetric[ser.text][ti][d.key] = i;
                 ranking.byComputer[d.key][ser.text][ti] = i;
+                d.user.forEach(u=>{
+                    if (!ranking.byUser[u][ser.text][d.key])
+                        ranking.byUser[u][ser.text][d.key] = [];
+                    ranking.byUser[u][ser.text][d.key][ti]=i;
+                });
             });
-        })
+        });
     });
     Layout.ranking = ranking;
+    console.timeEnd('handleRankingData');
 }

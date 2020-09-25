@@ -56,7 +56,6 @@ $(document).ready(function(){
     initClusterUI();
     initdraw();
     initTimeElement();
-    queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     // queryLayout().then(()=>request.request());
 });
 
@@ -68,7 +67,7 @@ function initTimeElement(){
     request.callbackStop = timelineControl.pause.bind(timelineControl);
 
     request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
-    request.onDataChange.push(handleRankingData);
+    // request.onDataChange.push(handleRankingData);
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
 
     if (request.isRealTime) {
@@ -80,4 +79,5 @@ function initTimeElement(){
         request.setInterval(1000);
 
     request.onFinishQuery.push(queryData);
+    request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(()=>timelineControl.play.bind(timelineControl)()));
 }

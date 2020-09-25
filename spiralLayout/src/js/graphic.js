@@ -425,6 +425,10 @@ function openPopup(d,svg){
         drawObject.addSubgraph(parent);
     }
 }
+function drawUserList(){
+    d3.select('#UserList table tbody')
+        .selectAll('tr').data(Layout.ranking.byUser)
+}
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 let drawObject = new SpitalLayout();

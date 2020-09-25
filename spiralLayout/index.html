@@ -36,7 +36,7 @@
                                     <path d="M3 3.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1.5 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1.5 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
                                     <path class="slash" fill-rule="evenodd" d="M0 0H1L16 16H15z"/>
                                 </svg>
-                                <span>Toggle Control panel windown</span>
+                                <span>Toggle Control panel window</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -119,7 +119,7 @@
                             </filter>
                         </defs>
                     </svg>
-                    <div id="legendHolder" class="position-absolute card windown" style="top:0px;width: 300px; ;left: 70%">
+                    <div id="legendHolder" class="position-absolute card windown" style="top:0px;width: 320px; ;left: 70%">
                         <div class="card-header all-scroll ">
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -134,115 +134,117 @@
                                 </div>
                             </nav>
                         </div>
-                        <div class="card-body row" id="controlOnToolbarHolder">
-                            <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
-<!--                                <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>-->
-<!--                                <select class="col-8" id="userSort">-->
-<!--                                    <option value="job">#Job IDs</option>-->
-<!--                                    <option value="compute">#Compute</option>-->
-<!--                                    <option value="metric">Current metric</option>-->
-<!--                                </select>-->
-                                <label class="col-4" for="serviceSelection">Trajectory style: </label>
-                                <select class="col-6" id="trajectoryStyle">
-                                    <option value="line">Curve</option>
-                                    <option value="contour">Heatmap</option>
-                                </select>
-                                <label class="col-4" for="serviceSelection">Visualizing: </label>
-                                <select class="col-6" id="serviceSelection">
-                                </select>
-                                <button id="sort_apply" type="button" class="btn btn-success btn-sm col-2">Sort</button>
+                        <div style="max-height: 80vh; overflow-y: auto">
+                            <div class="card-body row" id="controlOnToolbarHolder">
+                                <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">
+    <!--                                <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>-->
+    <!--                                <select class="col-8" id="userSort">-->
+    <!--                                    <option value="job">#Job IDs</option>-->
+    <!--                                    <option value="compute">#Compute</option>-->
+    <!--                                    <option value="metric">Current metric</option>-->
+    <!--                                </select>-->
+                                    <label class="col-4" for="serviceSelection">Trajectory style: </label>
+                                    <select class="col-6" id="trajectoryStyle">
+                                        <option value="line">Curve</option>
+                                        <option value="contour">Heatmap</option>
+                                    </select>
+                                    <label class="col-4" for="serviceSelection">Visualizing: </label>
+                                    <select class="col-6" id="serviceSelection">
+                                    </select>
+                                    <button id="sort_apply" type="button" class="btn btn-success btn-sm col-2">Sort</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card-body row" id="analyticOnToolbarHolder">
-                            <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                <div class="row legendView hide">
-                                    <label class="col-4"></label>
-                                    <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
-                                        <div class="input-group flex-nowrap">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="addon-max">max</span>
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>
+                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
+                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#RankingListHolder">Ranking</a></li>
+                            </ul>
+                            <div class="card-body row tab-content">
+                                <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
+                                    <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
+                                        <div class="row legendView hide">
+                                            <label class="col-4"></label>
+                                            <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                                <div class="input-group flex-nowrap">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="addon-max">max</span>
+                                                    </div>
+                                                    <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
+                                                </div>
+                                                <svg class="legend" style="transform: translateX(50px)"></svg>
+                                                <div class="input-group flex-nowrap">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" id="addon-min">min</span>
+                                                    </div>
+                                                    <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
+                                                </div>
+                                                <div class="btn-group hide" role="group" >
+                                                    <button id="range_apply" type="button" class="btn btn-success">Apply</button>
+                                                    <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                                                </div>
                                             </div>
-                                            <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
                                         </div>
-                                        <svg class="legend" style="transform: translateX(50px)"></svg>
-                                        <div class="input-group flex-nowrap">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="addon-min">min</span>
+                                        <div class="card-body row clusterView hide">
+                                            <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
+                                            <select id="clusterMethod" class="col-8 radarcontroller_layout">
+                                                <option value="leaderbin" selected="selected">Leader Bin</option>
+                                                <option value="kmean">K-means</option>
+                                                <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
+                                                <option value="user" distanceFunc="none" cluster-function="calUserNameCluster" assign-function="getJobNameCluster">User</option>
+                                                <!--<option value="binarybin">Binary bin</option>-->
+                                            </select>
+                                            <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
+                                            <select id="normMethod" class="col-8 radarcontroller_layout">
+                                                <option value="l1">L1 norm - Manhattan Distance</option>
+                                                <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+                                            </select>
+                                            <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+                                                <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+                                                <!--                                <div  class="col-6 hide">-->
+                                                <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+                                                <!--                                </div>-->
+                                                <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
+                                                <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                                <span class="col-2 no_leftmagrin">to</span>
+                                                <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                                <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+
+                                            </form>
+                                            <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                                <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+                                                <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                                                <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
+                                                <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                                <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+                                            </form>
+                                            <div class="d-flex justify-content-center white row" id="clusterDisplay">
                                             </div>
-                                            <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
-                                        </div>
-                                        <div class="btn-group hide" role="group" >
-                                            <button id="range_apply" type="button" class="btn btn-success">Apply</button>
-                                            <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-body row clusterView hide">
-                                    <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
-                                    <select id="clusterMethod" class="col-8 radarcontroller_layout">
-                                        <option value="leaderbin" selected="selected">Leader Bin</option>
-                                        <option value="kmean">K-means</option>
-                                        <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
-                                        <option value="user" distanceFunc="none" cluster-function="calUserNameCluster" assign-function="getJobNameCluster">User</option>
-                                        <!--<option value="binarybin">Binary bin</option>-->
-                                    </select>
-                                    <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
-                                    <select id="normMethod" class="col-8 radarcontroller_layout">
-                                        <option value="l1">L1 norm - Manhattan Distance</option>
-                                        <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
-                                    </select>
-                                    <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
-        <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
-        <!--                                <div  class="col-6 hide">-->
-        <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
-        <!--                                </div>-->
-                                        <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
-                                        <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
-                                        <span class="col-2 no_leftmagrin">to</span>
-                                        <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                        <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
-
-                                    </form>
-                                    <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
-                                        <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
-
-                                        <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                                        <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
-                                        <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                        <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
-                                    </form>
-                                    <div class="d-flex justify-content-center white row" id="clusterDisplay">
+                                <div id="userOnToolbarHolder" class="tab-pane fade" role="tabpanel">
+                                    <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder" data-minimize="controlHolderMenu">
+                                        <table class="table">
+                                            <thead><tr><th>User name</th><th>#Jobs</th><th>#Nodes</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div id="RankingListHolder" class="tab-pane fade" role="tabpanel">
+                                    <div id="RankingList" class="row table-responsive" data-maximize="RankingListHolder" data-minimize="controlHolderMenu">
+                                        <table class="table">
+                                            <thead><tr><th>Node</th><th class="serviceName">Node</th><th></th><th></th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div id="rankingHolder" class="position-absolute card windown" style="bottom:0px;width: 300px; ;left: 70%">
-                        <div class="card-header all-scroll ">
-                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                <path fill-rule="evenodd" transform="translate(5,0)" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                            </svg>
-                            Highlight List
-                            <nav class="window-controls float-right auto">
-                                <div class="minimize" data-toggle="tooltip" data-placement="top" title="minimize" onclick="minimizeToolbar()">
-                                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-dash" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M3.5 8a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/>
-                                    </svg>
-                                </div>
-                            </nav>
-                        </div>
-                        <div class="card-body row" id="RankingListHolder">
-                            <div id="RankingList" class="row table-responsive" data-maximize="RankingListHolder" data-minimize="controlHolderMenu">
-                                <table class="table">
-                                    <thead><tr><th>Node</th><th class="serviceName">Node</th><th></th><th></th></tr></thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
                 <div class="floatRight card bg-secondary mb-3 informationHolder hide">
                     <div class="card-header all-scroll">

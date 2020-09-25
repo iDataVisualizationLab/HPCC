@@ -64,8 +64,6 @@ function handleDataUrl(dataRaw) {
             dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
     })
     let time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
-    // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
-    // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
     var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
     var alternative_scale = [1,1,1,0.5];
 
@@ -115,6 +113,48 @@ function handleSmalldata(dataRaw){
     });
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
     let time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
+    let sampleh = {};
+    var ser = serviceListattr.slice();
+    ser.pop();
+    sampleh.timespan = time_stamp.map(d=>d*1000);
+    let data = dataRaw.nodes_info;
+    hosts.forEach(h => {
+        sampleh[h.name] = {};
+        ser.forEach(s => sampleh[h.name][s] = []);
+        alternative_service.forEach((sa, si) => {
+            var scale = alternative_scale[si];
+            sampleh.timespan.forEach((dt, ti) => {
+                let value = [];
+                if (!_.isArray(data[h.ip][sa][ti])){
+                    data[h.ip][sa][ti] = [data[h.ip][sa][ti]]
+                }
+                for (let ii = 0;ii<serviceLists[si].sub.length;ii++){
+                    value.push((data[h.ip][sa][ti][ii]==='' || data[h.ip][sa][ti][ii]===undefined)?null:data[h.ip][sa][ti][ii]*scale)
+                }
+                let arrID = serviceListattr[si];
+                sampleh[h.name][arrID][ti] = value;
+            })
+        })
+    });
+    return sampleh;
+}
+function handleAllData(dataRaw){
+    let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
+        return {
+            ip: ip,
+            name: ip,
+        }
+    });
+    d3.keys(dataRaw.jobs_info).forEach(jID=>{
+        dataRaw.jobs_info[jID].node_list_short = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        if(dataRaw.jobs_info[jID].start_time>9999999999999)
+        {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
+            dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
+            if (dataRaw.jobs_info[jID].finish_time)
+                dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
+    });
+    scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
+    let time_stamp = dataRaw.time_stamp.map(d=>d/1000000);
     let sampleh = {};
     var ser = serviceListattr.slice();
     ser.pop();
