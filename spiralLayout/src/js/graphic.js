@@ -431,8 +431,10 @@ function drawUserList(){
         .join('tr')
         .on('mouseover',function(d){
             debugger
-            drawObject.drawTrajectory(d,)
-            Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]
+            drawObject.drawTrajectory(d,d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).map(d=>{
+                d.value.key = d.key;
+                return d.value;
+            }))
         })
         .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
         .join('td').text(d=>d);

@@ -417,15 +417,16 @@ let SpitalLayout = function(){
     let draw_trajectory = draw_trajectory_line;
     master.current_trajectory_data = undefined;
     function draw_trajectory_line({g,d,data}){
+        const dataDraw = d3.nest().key(d=>d.key).entries(data);
         g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(data)
+            .data(dataDraw)
             .join('path')
             .attr('class','trajectory trajectoryPath')
             .attr('transform',null)
-            .attr('d',d3.line()
+            .attr('d',d=>d3.line()
                 .curve(d3.curveCatmullRom)
                 .x(e=>radius(spiralScale(e))*Math.sin(theta(spiralScale(e))))
-                .y(e=>-radius(spiralScale(e))*Math.cos(theta(spiralScale(e)))))
+                .y(e=>-radius(spiralScale(e))*Math.cos(theta(spiralScale(e))))(d.values))
             .style('fill','none').style('stroke','black').style('opacity',0.3);
     }
     function draw_trajectory_contours({g,d,data}){
