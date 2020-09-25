@@ -150,7 +150,7 @@ let SpitalLayout = function(){
                         .style('fill','none')
                         .style('stroke','black');
                     let totalLength = trajectory[d.key].node().getTotalLength();
-                    let seg = Math.min(totalLength*0.5,50)
+                    let seg = Math.min(totalLength*0.7,75)
                     trajectory[d.key].attr("stroke-dasharray",seg + " " + totalLength)
                         .attr("stroke-dashoffset", totalLength+seg*2)
                         .transition()
