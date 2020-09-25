@@ -417,10 +417,10 @@ let SpitalLayout = function(){
     let draw_trajectory = draw_trajectory_line;
     master.current_trajectory_data = undefined;
     function draw_trajectory_line({g,d,data}){
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectory'+d.id)
-            .data([data])
+        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
+            .data(data)
             .join('path')
-            .attr('class','trajectory trajectory'+d.id)
+            .attr('class','trajectory trajectoryPath')
             .attr('transform',null)
             .attr('d',d3.line()
                 .curve(d3.curveCatmullRom)
@@ -437,12 +437,13 @@ let SpitalLayout = function(){
             (data);
         const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
             .domain(d3.extent(contours, d => d.value ));
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectory'+d.id)
+        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
             .data(contours)
             .join('path')
             .attr('transform',`translate(${-graphicopt.centerX()},${-graphicopt.centerY()})`)
-            .attr('class','trajectory trajectory'+d.id)
+            .attr('class','trajectory trajectoryPath')
             .attr("d", d3.geoPath())
+            .style('stroke',null)
             .style("fill", d => color(d.value)).style('opacity',null);
     }
     function mouseout(d){
