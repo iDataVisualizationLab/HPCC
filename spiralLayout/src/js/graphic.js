@@ -427,7 +427,14 @@ function openPopup(d,svg){
 }
 function drawUserList(){
     d3.select('#UserList table tbody')
-        .selectAll('tr').data(Layout.ranking.byUser)
+        .selectAll('tr').data(d3.entries(Layout.usersStatic).sort((a,b)=>b.value.node.length-a.value.node.length))
+        .join('tr')
+        .on('mouseover',function(d){
+            debugger
+            Layout.ranking.byUser
+        })
+        .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
+        .join('td').text(d=>d);
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})

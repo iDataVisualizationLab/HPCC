@@ -403,12 +403,16 @@ let SpitalLayout = function(){
             if (d.node) {
                 d.node.classed('highlight', true);
             }
-            master.current_trajectory_data = {g,d,data:Layout.ranking.byComputer[d.name][serviceName]};
-            draw_trajectory(master.current_trajectory_data);
+            master.drawTrajectory(d)
         }
         if (d.tooltip) {
             tooltip.show(d.name)
         }
+    }
+    master.drawTrajectory = function(d,data){
+        data = data||Layout.ranking.byComputer[d.name][serviceName]
+        master.current_trajectory_data = {g,d,data:data};
+        draw_trajectory(master.current_trajectory_data);
     }
     let draw_trajectory = draw_trajectory_line;
     master.current_trajectory_data = undefined;
