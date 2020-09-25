@@ -351,6 +351,7 @@ function makelegend(){
             });
     }
 }
+
 function getRenderFunc(d){
     let serviceName = vizservice[serviceSelected].text;
     if (serviceName!=='Radar'|| !d.isRadar)
@@ -430,11 +431,26 @@ function drawUserList(){
         .selectAll('tr').data(d3.entries(Layout.usersStatic).sort((a,b)=>b.value.node.length-a.value.node.length))
         .join('tr')
         .on('mouseover',function(d){
-            debugger
-            drawObject.drawTrajectory(d,d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).map(d=>{
-                d.value.key = d.key;
-                return d.value;
-            }))
+            if(!drawObject.isFreeze()){
+                drawObject.drawTrajectory(d,d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).map(d=>{
+                    d.value.key = d.key;
+                    return d.value;
+                }));
+                d3.select(this).classed('highlight',true).style('font-weight','bolder');
+                debugger
+                drawObject.highlight(d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).filter(d=>d.value[request.index-1]!=undefined).map(d=>d.key))
+            }
+        }).on('mouseout',function(d){
+            if(!drawObject.isFreeze()){
+                drawObject.g().selectAll('path.trajectory').remove();
+                drawObject.g().select('.TrajectoryLegend').remove();
+                drawObject.current_trajectory_data = undefined;
+                d3.selectAll('.highlight').classed('highlight',false).style('font-weight',null);
+                drawObject.releasehighlight();
+            }
+        }).on('click',function(d){
+            drawObject.freezeHandle.bind(this)();
+            openPopup(d,drawObject.main_svg())
         })
         .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
         .join('td').text(d=>d);

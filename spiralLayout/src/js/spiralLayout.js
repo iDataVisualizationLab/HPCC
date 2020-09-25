@@ -300,6 +300,8 @@ let SpitalLayout = function(){
             d3.event.stopPropagation();
         }
     }
+    master.freezeHandle = freezeHandle;
+    master.main_svg = function(){return main_svg};
     master.init=function(){
         // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;
         // graphicopt.height = d3.select(maindiv).node().getBoundingClientRect().height;
@@ -393,6 +395,82 @@ let SpitalLayout = function(){
         subsvg.remove();
         subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
     };
+    function makeTrajectoryLegend(color){
+        const marginTop = 10;
+        const marginBottom = 10;
+        const marginLeft = 40;
+        const marginRight = 0;
+        const width = 10;
+        const height = 200;
+        g.selectAll('.TrajectoryLegend').remove();
+        const svg = g.append('g').attr('class','TrajectoryLegend')
+            .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
+        svg.append('text').text('Trajectory heat map')
+        let legend = svg.append('g').attr('class', 'legend')
+            .attr('transform', `translate(${marginLeft},${marginTop})`);
+
+        if (color.interpolate) {
+            const n = Math.min(color.domain().length, color.range().length);
+
+            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
+
+            legend.append("image")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width)
+                .attr("height", height)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+        }// Sequential
+        else if (color.interpolator) {
+            let y = Object.assign(color.copy()
+                    .interpolator(d3.interpolateRound(0, height)),
+                {
+                    range() {
+                        return [0, height];
+                    }
+                });
+
+            legend.append("image")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width)
+                .attr("height", height)
+                .attr("preserveAspectRatio", "none")
+                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+
+            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+            if (!y.ticks) {
+                if (tickValues === undefined) {
+                    const n = Math.round(ticks + 1);
+                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                }
+                if (typeof tickFormat !== "function") {
+                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                }
+            } else {
+                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
+            }
+        }
+
+        function ramp(color, n = 256) {
+            const canvas = createContext(1, n);
+            const context = canvas.getContext("2d");
+            for (let i = 0; i < n; ++i) {
+                context.fillStyle = color(i / (n - 1));
+                context.fillRect(0, i, 1, 1);
+            }
+            return canvas;
+        }
+
+        function createContext(width, height) {
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            return canvas;
+        }
+
+    }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
@@ -409,6 +487,16 @@ let SpitalLayout = function(){
             tooltip.show(d.name)
         }
     }
+    master.highlight = function(listKey){
+        g.classed('onhighlight', true);
+        g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
+            .classed('highlight', true);
+    };
+    master.releasehighlight = function(){
+        g.classed('onhighlight', false);
+        g.selectAll('.element.highlight')
+            .classed('highlight', false);
+    };
     master.drawTrajectory = function(d,data){
         data = data||Layout.ranking.byComputer[d.name][serviceName]
         master.current_trajectory_data = {g,d,data:data};
@@ -453,6 +541,8 @@ let SpitalLayout = function(){
             .attr("d", d3.geoPath())
             .style('stroke',null)
             .style("fill", d => color(d.value)).style('opacity',null);
+        debugger
+        makeTrajectoryLegend(color)
     }
     function mouseout(d){
         if(!isFreeze)
@@ -463,6 +553,7 @@ let SpitalLayout = function(){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
             }
             g.selectAll('path.trajectory').remove();
+            g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;
         }
         if (d.tooltip) {
