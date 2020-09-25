@@ -42,7 +42,7 @@ let SpitalLayout = function(){
             isNormalize:false,
             schema:serviceFullList
         },
-        trajectory:{bandSize:10,colorScheme:"interpolateViridis"}
+        trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"}
     };
 
     let maindiv='#circularLayout';
@@ -436,11 +436,12 @@ let SpitalLayout = function(){
         let dataDraw = data;
         if (_.isArray(data[0]))
             dataDraw = _.flatten(data);
+        dataDraw = dataDraw.filter(d=>d!=undefined);
         const contours = d3.contourDensity()
             .x(e=>radius(spiralScale(e))*Math.sin(theta(spiralScale(e)))+graphicopt.centerX())
             .y(e=>-radius(spiralScale(e))*Math.cos(theta(spiralScale(e)))+graphicopt.centerY())
             .size( [graphicopt.widthG(), graphicopt.heightG()])
-            .bandwidth(graphicopt.trajectory.bandSize)
+            .bandwidth(graphicopt.trajectory.bandwidth)
             (dataDraw);
         const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
             .domain(d3.extent(contours, d => d.value ));
