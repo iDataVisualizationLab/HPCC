@@ -138,40 +138,12 @@ function userTable(d,type){
                     const isSingle =  d3.select(event.target).classed('tableCompute')
                     if (row.data()) {
                         const currentData = row.data();
-                        drawObject.g().classed('onhighlight2', true);
-                        (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
-                            rack_arr.find(r => {
-                                if (r.childrenNode[c]) {
-                                    highlight2Stack.push(r.childrenNode[c]);
-                                    highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
-                                    r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
-
-                                    r.childrenNode[c].classed('highlight2', true);
-                                    r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                        debugger
-                                        if (d.datum().source===currentData[innerKey]){
-                                            highlight2Stack.push(d);
-                                            d.classed('highlight2',true);
-                                        }
-                                    });
-                                    return true;
-                                }
-                            });
-                        });
-                        users_arr.find(u => {
-                            if (u.key===currentData[innerKey]) {
-                                highlight2Stack.push(u.node);
-                                u.node.classed('highlight2', true);
-                                return true;
-                            }
-                        });
+                        drawObject.highlight2(isSingle? [d3.select(event.target).text()]:currentData.node_list);
                     }
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    drawObject.g().classed('onhighlight2',false);
-                    highlight2Stack.forEach(n=>n.classed('highlight2',false));
-                    highlight2Stack = [];
+                    drawObject.releasehighlight2();
                 });
             }
         } );

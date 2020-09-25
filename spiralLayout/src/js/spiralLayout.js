@@ -497,6 +497,16 @@ let SpitalLayout = function(){
         g.selectAll('.element.highlight')
             .classed('highlight', false);
     };
+    master.highlight2 = function(listKey){
+        g.classed('onhighlight2', true);
+        g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
+            .classed('highlight2', true);
+    };
+    master.releasehighlight2 = function(){
+        g.classed('onhighlight2', false);
+        g.selectAll('.element.highlight2')
+            .classed('highlight2', false);
+    };
     master.drawTrajectory = function(d,data){
         data = data||Layout.ranking.byComputer[d.name][serviceName]
         master.current_trajectory_data = {g,d,data:data};
