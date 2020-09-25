@@ -1,9 +1,13 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
 # 2020
 
+spiralLayout historical data: https://idatavisualizationlab.github.io/HPCC/spiralLayout/index.html
+
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/spiralLayout.PNG)
+
 JobViewer real-time: https://idatavisualizationlab.github.io/HPCC/jobviewer/index.html?mode=realTime
 
-JobViewer simulation: https://idatavisualizationlab.github.io/HPCC/jobviewer/index.html
+JobViewer historical data: https://idatavisualizationlab.github.io/HPCC/jobviewer/index.html
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/HiperView/Images_cases/JobViewer.PNG)
 
