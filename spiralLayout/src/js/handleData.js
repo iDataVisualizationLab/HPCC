@@ -194,7 +194,7 @@ function sortData(data){
     const dataviz =  data??drawObject.data();
     // Layout.ranking
     if (Layout.ranking.byMetric[vizservice[serviceSelected].text]){
-        const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][request.index-1];
+        const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][Math.max(request.index-1,0)];
         dataviz.sort((a,b)=>rankIndex[a.key]-rankIndex[b.key])
     }else
         dataviz.sort((a,b)=>-b.value+a.value);

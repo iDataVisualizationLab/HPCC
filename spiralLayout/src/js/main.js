@@ -75,9 +75,12 @@ function initTimeElement(){
         request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');
         request.onFinishQuery.push((d)=>(timelineControl.meassageHolder.setMessage(''),d));
         request.setInterval(120000);
-    }else
+        request.onFinishQuery.push((data)=> {handleRankingData(data);queryData(data);drawUserList();});
+        queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
+    }else{
         request.setInterval(1000);
-
-    request.onFinishQuery.push(queryData);
-    request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
+        request.onFinishQuery.push(queryData);
+        request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
+    }
+    // request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
 }
