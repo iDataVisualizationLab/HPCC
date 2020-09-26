@@ -135,34 +135,55 @@ let SpitalLayout = function(){
                 d.childrenNode = makecirclepacking(d.node);
             });
             p.interrupt();
-            p.filter(function(d){
+            let els = p.filter(function(d){
                 if (d.highlight)
                     d.oldpos = d3.select(this).attr('transform').replace(/translate\(|\)/g,'').split(',').map(e=>+e.trim());
                 return d.highlight;
+            });
+            els
+                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+            els.on('end',(d)=>{
+                trajectory[d.key].el.remove();
+                trajectory[d.key].grad.remove();
+            });
+            els.each(function(d){
+                if (trajectory[d.key]){
+                    trajectory[d.key].el.remove();
+                    trajectory[d.key].grad.remove();
+                }
+                trajectory[d.key] = {};
+                trajectory[d.key].grad = g.select('defs').append('radialGradient').attr('id','grad'+d.key)
+                    .attr("gradientUnits","userSpaceOnUse")
+                    .attr('r',50)
+                    .attr('cx',d.oldpos[0])
+                    .attr('cy',d.oldpos[1])
+                    .attr('fx',d.oldpos[0])
+                    .attr('fy',d.oldpos[1])
+                ;
+                trajectory[d.key].grad.html(`<stop offset="0" style="stop-color:${color(d.value)};stop-opacity:1"></stop>
+      <stop offset="1" style="stop-color:${color(d.value)};stop-opacity:0"></stop>`);
+
+                trajectory[d.key].grad.transition()
+                    .duration(graphicopt.animationTime)
+                    .attr('cx',d.x)
+                    .attr('cy',d.y)
+                    .attr('fx',d.x)
+                    .attr('fy',d.y)
+
+                trajectory[d.key].el = d3.select(this.parentNode).append('path')
+                    .attr('class','cloned').style('opacity',0.8)
+                    .style('fill','none')
+                    .attr('stroke',`url(#grad${d.key})`)
+                    .attr('stroke-width',d.r??miniradius)
+                    .attr('d',d3.line()([d.oldpos,d.oldpos]));
+                trajectory[d.key].el
+                    .transition()
+                    .duration(graphicopt.animationTime)
+                    .attr('d',d3.line()([d.oldpos,[d.x,d.y]]))
+                    .on('end',()=>{
+                        trajectory[d.key].el.remove();
+                        trajectory[d.key].grad.remove();});
             })
-                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
-                .on('start',function(d){
-                    if (trajectory[d.key])
-                        trajectory[d.key].remove();
-                    trajectory[d.key] = d3.select(this.parentNode).append('path')
-                            .attr('class','cloned').style('opacity',0.8)
-                        .attr('d',d3.line()([d.oldpos,[d.x,d.y]]))
-                        .style('fill','none')
-                        .style('stroke','black');
-                    let totalLength = trajectory[d.key].node().getTotalLength();
-                    let seg = Math.min(totalLength*0.7,75)
-                    trajectory[d.key].attr("stroke-dasharray",seg + " " + totalLength)
-                        .attr("stroke-dashoffset", totalLength+seg*2)
-                        .transition()
-                        .duration(graphicopt.animationTime)
-                        .attr("stroke-dashoffset", seg)
-                        .on('end',()=>{
-                            trajectory[d.key].remove();});
-                        return trajectory[d.key];
-                })
-                .on('end',(d)=>{
-                    trajectory[d.key].remove();
-                });
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
         }
@@ -334,6 +355,7 @@ let SpitalLayout = function(){
             startZoom.x = graphicopt.centerX();
             startZoom.y = graphicopt.centerY();
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
+            g.append('defs');
             g.append('g').attr('class','trajectoryHolder').attr('pointer-events','none');
         }
         return master
