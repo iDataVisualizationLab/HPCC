@@ -417,7 +417,7 @@ function drawUserList(){
                 drawObject.g().selectAll('path.trajectory').remove();
                 drawObject.g().select('.TrajectoryLegend').remove();
                 drawObject.current_trajectory_data = undefined;
-                drawObject.g().selectAll('.highlight').classed('highlight',false).style('font-weight',null);
+                d3.selectAll('.highlight').classed('highlight',false).style('font-weight',null);
                 drawObject.releasehighlight();
             }
         }).on('click',function(d){
