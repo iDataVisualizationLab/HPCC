@@ -100,7 +100,7 @@ angular.module('hpccApp')
                             "submitTime": d.submit_time/1000000
                         };
                         if (d['finish_time'])
-                            temp.endTime = d['finish_time']*1000;
+                            temp.endTime = d['finish_time']/1000000;
                         jobo[jobID] = temp;
                         jobd.push(jobo[jobID]);
                     }
@@ -116,7 +116,8 @@ angular.module('hpccApp')
                     ser.pop();
 
                     let data = dataRaw.nodes_info;
-                    sampleh.timespan = dataRaw.time_stamp.map(d=>d);
+                    sampleh.timespan = dataRaw.time_stamp.map(d=>d/1000000);
+                    debugger
                     hosts.forEach(h => {
                         sampleh[h.name] = {};
                         ser.forEach(s => sampleh[h.name][s] = []);
