@@ -175,3 +175,7 @@ div.subgraph:hover .closeButton {
 .subgraph {
     height:fit-content;
 }
+
+#UserList tr.highlight {
+    font-weight: bolder;
+}

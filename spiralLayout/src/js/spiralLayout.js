@@ -58,6 +58,8 @@ let SpitalLayout = function(){
     let trajectory = {};
     let subgraph = {el:[],limit:3};
     let spiralScale,radius;
+    master.mouseover = function(d){};
+    master.mouseout = function(d){};
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
@@ -421,7 +423,7 @@ let SpitalLayout = function(){
         const marginTop = 10;
         const marginBottom = 10;
         const marginLeft = 40;
-        const marginRight = 0;
+        const marginRight = 20;
         const width = 10;
         const height = 200;
         g.selectAll('.TrajectoryLegend').remove();
@@ -503,7 +505,8 @@ let SpitalLayout = function(){
             if (d.node) {
                 d.node.classed('highlight', true);
             }
-            master.drawTrajectory(d)
+            master.drawTrajectory(d);
+            master.mouseover(d);
         }
         if (d.tooltip) {
             tooltip.show(d.name)
@@ -587,6 +590,7 @@ let SpitalLayout = function(){
             g.selectAll('path.trajectory').remove();
             g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;
+            master.mouseout(d);
         }
         if (d.tooltip) {
             tooltip.hide()

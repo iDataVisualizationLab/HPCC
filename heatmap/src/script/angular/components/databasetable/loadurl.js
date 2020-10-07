@@ -116,7 +116,7 @@ angular.module('hpccApp')
                     ser.pop();
 
                     let data = dataRaw.nodes_info;
-                    sampleh.timespan = dataRaw.time_stamp.map(d=>d*1000);
+                    sampleh.timespan = dataRaw.time_stamp.map(d=>d);
                     hosts.forEach(h => {
                         sampleh[h.name] = {};
                         ser.forEach(s => sampleh[h.name][s] = []);

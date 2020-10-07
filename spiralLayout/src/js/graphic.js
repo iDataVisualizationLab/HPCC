@@ -399,7 +399,7 @@ function openPopup(d,svg){
     }
 }
 function drawUserList(){
-    d3.select('#UserList table tbody')
+    let user_info = d3.select('#UserList table tbody')
         .selectAll('tr').data(d3.entries(Layout.usersStatic).sort((a,b)=>b.value.node.length-a.value.node.length))
         .join('tr')
         .on('mouseover',function(d){
@@ -408,7 +408,7 @@ function drawUserList(){
                     d.value.key = d.key;
                     return d.value;
                 }));
-                d3.select(this).classed('highlight',true).style('font-weight','bolder');
+                d3.select(this).classed('highlight',true);
                 debugger
                 drawObject.highlight(d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).filter(d=>d.value[request.index-1]!=undefined).map(d=>d.key))
             }
@@ -417,15 +417,23 @@ function drawUserList(){
                 drawObject.g().selectAll('path.trajectory').remove();
                 drawObject.g().select('.TrajectoryLegend').remove();
                 drawObject.current_trajectory_data = undefined;
-                d3.selectAll('.highlight').classed('highlight',false).style('font-weight',null);
+                d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
                 drawObject.releasehighlight();
             }
         }).on('click',function(d){
             drawObject.freezeHandle.bind(this)();
             openPopup(d,drawObject.main_svg())
-        })
+        });
+    user_info
         .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
         .join('td').text(d=>d);
+    drawObject.mouseover=function(d){
+        debugger
+        user_info.filter(u=>d.user.indexOf(u.key)!==-1).classed('highlight',true);
+    };
+    drawObject.mouseout =function(d){
+        user_info.classed('highlight',false);
+    };
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
