@@ -52,8 +52,11 @@ $(document).ready(function(){
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 15_45_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
     }
+    updateProcess({percentage:5,text:'Load UI...'})
     initMenu();
+    updateProcess({percentage:10,text:'Load Cluster UI...'})
     initClusterUI();
+    updateProcess({percentage:15,text:'Init Graph...'});
     initdraw();
     initTimeElement();
     // queryLayout().then(()=>request.request());
@@ -73,14 +76,23 @@ function initTimeElement(){
     if (request.isRealTime) {
         timelineControl.disableHandle(true);
         request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');
-        request.onFinishQuery.push((d)=>(timelineControl.meassageHolder.setMessage(''),d));
+        request.onFinishQuery.push((d)=>(timelineControl.meassageHolder.setMessage(''),updateProcess(),d));
         request.setInterval(120000);
         request.onFinishQuery.push((data)=> {handleRankingData(data);queryData(data);drawUserList();});
         queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     }else{
         request.setInterval(1000);
         request.onFinishQuery.push(queryData);
-        request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
+        request.onDataChange.push((data)=> queryLayout().then(()=>{
+            updateProcess({percentage:50,text:'Preprocess data'})
+            setTimeout(()=>{
+                handleRankingData(data);
+                updateProcess({percentage:80,text:'Preprocess data'})
+                drawUserList();
+                timelineControl.play.bind(timelineControl)();
+                updateProcess();
+            },0);
+        }));
     }
     // request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
 }
