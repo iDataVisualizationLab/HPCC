@@ -37,12 +37,24 @@ $(document).ready(function(){
             // set up ui
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
+            let url = 'src/data/922020-932020-145000.json';
+            if (command.timeStart!==undefined&&command.timeEnd!==undefined){ `2020-02-14T12:00:00-05:00`
+                _start = new Date(command.timeStart);
+                _end = new Date(command.timeEnd);
+                const interval = '5m';
+                const value = 'max';
+                const compress = false;
+                debugger
+                if (!(_.isNaN(_start.getDate())||_.isNaN(_end.getDate()))){
+                    url= d3.json(getUrl({_start,_end,interval,value,compress}));
+                }
+            }
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
             // request = new Simulation('../HiperView/data/8122020.json');
             // request = new Simulation('../HiperView/data/814_821_2020.json');
-            request = new Simulation('src/data/922020-932020-145000.json');
+            request = new Simulation(url);
         }
     }catch(e){
         // request = new Simulation('../HiperView/data/8122020.json');
