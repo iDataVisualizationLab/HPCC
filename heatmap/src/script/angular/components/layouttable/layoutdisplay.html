@@ -17,6 +17,17 @@
                     <span class="name truncate col">{{rack.Name}}</span>
                     <div class="info col"><span class="info selected">{{rack.selected}}</span> <span class="info total" >/{{rack.total}}</span> </div>
                 </div>
+                <div class="row s12" style="margin-bottom: 0px;padding-left:10px" ng-if="rack.collapse" ng-click="$event.stopPropagation()">
+                    <label>
+                        <input type="checkbox" class="filled-in"
+                               ng-click="onSelectAll($event,rack)"
+                               ng-checked="rack.selected===rack.total"
+                               ng-indeterminate = "(rack.selected!==rack.total)&&(rack.selected)"/>
+<!--                        <input type="checkbox" class="filled-in" ng-indeterminate = "rack.selected!==rack.total"/>-->
+                        <span>Select</span>
+                    </label>
+
+                </div>
                 <div class="row s12" ng-repeat="r in rack.value track by $index" style="margin-bottom: 0px" ng-if="rack.collapse" ng-click="$event.stopPropagation()">
                     <div class="col element" style="width: {{1/r.length*100}}%;" ng-repeat="c in r track by $index">
                         <span ng-class="{'notSelected': Layout.data.hostsObj[c]&&!Layout.data.hostsObj[c].preselected, 'notExisted': !Layout.data.hostsObj[c]||(Layout.data.hostsObj[c]&&Layout.data.hostsObj[c].notExisted)}"

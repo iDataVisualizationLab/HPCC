@@ -7,6 +7,17 @@
  * # pasteDataset
  */
 angular.module('hpccApp')
+    .directive('ngIndeterminate', function($compile) {
+        return {
+            restrict: 'A',
+            link: function(scope, element, attributes) {
+                scope.$watch(attributes['ngIndeterminate'], function (value) {
+                    element.prop('indeterminate', !!value);
+                });
+            }
+        };
+    });
+angular.module('hpccApp')
     .directive('layoutDisplay', function (Layout,Dataset, Config, _) {
         return {
             templateUrl: 'src/script/angular/components/layouttable/layoutdisplay.html',
@@ -53,6 +64,16 @@ angular.module('hpccApp')
                     else
                         rack.selected++;
                     Layout.data.hostsObj[c].preselected = !Layout.data.hostsObj[c].preselected
+                };
+                scope.onSelectAll = function(event,rack){
+                    event.stopPropagation();
+                    if (rack.selected===rack.total){
+                        d3.keys(Layout.data.hostsObj).forEach(c=>Layout.data.hostsObj[c].preselected = false);
+                        rack.selected = 0;
+                    }else{
+                        d3.keys(Layout.data.hostsObj).forEach(c=>Layout.data.hostsObj[c].preselected = true);
+                        rack.selected = rack.total;
+                    }
                 };
                 scope.reset = function(){
                     Layout.data.groups.forEach((r,i)=>{

@@ -223,7 +223,9 @@ let AsynChartCollection = function (){
 function handle_data_heatmap () {
     preloader(true, 0,"Process data input for heatmap....");
     let data = [];
-    heatmapopt.height = heatmapopt.margin.top +heatmapopt.margin.bottom +1.5*hosts.length;
+    let maxHeight = 1.5*hosts.length;
+    heatmapopt.height = heatmapopt.margin.top +heatmapopt.margin.bottom +Math.max(1.5*hosts.filter(d=>!d.notSelected).length,50);
+    debugger
     // console.time('correlation compute: ')
     // const hostOrder = getComputeCorrelation(serviceFullList[0].text);
     // console.timeEnd('correlation compute: ')
