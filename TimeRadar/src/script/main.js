@@ -1430,6 +1430,7 @@ function handle_dataRaw() {
             if(axis_arr.outlier) {
                 let outlierinstance = outlyingList.pointObject[h.name + '_' + i];
                 if (outlierinstance) {
+                    tsnedata[h.name][i].cluster = outlierinstance.cluster;
                     return outlierinstance.cluster;
                 }
             }
@@ -1544,6 +1545,7 @@ function onchangeCluster() {
         })
     });
     cluster_info.forEach(c => c.mse = ss.sum(c.__metrics.map(e => (e.maxval - e.minval) * (e.maxval - e.minval))));
+    outlyingList.forEach(o=>cluster_info[o.labels]=o)
     cluster_map(cluster_info);
     handle_clusterinfo();
 
