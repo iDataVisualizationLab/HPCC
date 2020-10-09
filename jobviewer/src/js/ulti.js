@@ -249,3 +249,13 @@ function download(filename, text) {
 
     document.body.removeChild(element);
 }
+function getUrl({_start,_end,interval,value,compress}){
+    const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
+    const start = timeFormat(_start)
+    const end = timeFormat(_end)
+    interval = interval||'5m';
+    value = value||'max';
+    compress = compress||false;
+    const url = `https://influx.ttu.edu:8080/v1/metrics?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
+    return url;
+}

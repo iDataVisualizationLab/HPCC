@@ -14,7 +14,7 @@ class Simulation {
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
-            let updatePromise=d3.json(url).then((data) => {
+            let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
                 d3.keys(data.jobs_info).forEach(jID=>{
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
@@ -101,12 +101,12 @@ class Simulation {
     getRunningJob(currentTime){
         return {}
     }
-    requestFromURL(){
+    requestFromURL(start,end){
         const self = this;
        // todo need method to cancle
         console.time('request time: ')
-        const _end = new Date(); //'2020-02-14T12:00:00-05:00'
-        let _start = new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
+        const _end = end??new Date(); //'2020-02-14T12:00:00-05:00'
+        let _start = start??new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
         const interval = '5m';
         const value = 'max';
         const compress = false;
