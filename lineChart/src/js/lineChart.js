@@ -45,7 +45,7 @@ let LineChart = function(){
         if (isFreeze)
             freezeHandle();
         color=getColorScale();
-
+        debugger
         onFinishDraw.forEach(d=>d());
 
         function updateOnode(p){
