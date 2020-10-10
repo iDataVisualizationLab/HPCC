@@ -168,66 +168,76 @@
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                        <div class="row legendView hide">
-                                            <label class="col-4"></label>
-                                            <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
-                                                <div class="input-group flex-nowrap">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="addon-max">max</span>
+                                        <label class="col-4" for="nodeColor">Node color by: </label>
+                                        <select class="col-6" id="nodeColor">
+                                            <option value="">Current metric</option>
+                                            <option value="rack">Rack</option>
+                                        </select>
+                                        <div class="MetricsLegend">
+                                            <div class="row legendView hide">
+                                                <label class="col-4"></label>
+                                                <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                                    <div class="input-group flex-nowrap">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" id="addon-max">max</span>
+                                                        </div>
+                                                        <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
                                                     </div>
-                                                    <input type="number" id="range_max" class="form-control range" aria-label="range_max" aria-describedby="addon-max">
-                                                </div>
-                                                <svg class="legend" style="transform: translateX(50px)"></svg>
-                                                <div class="input-group flex-nowrap">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="addon-min">min</span>
+                                                    <svg class="legend" style="transform: translateX(50px)"></svg>
+                                                    <div class="input-group flex-nowrap">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" id="addon-min">min</span>
+                                                        </div>
+                                                        <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
                                                     </div>
-                                                    <input type="number" id="range_min" class="form-control range" aria-label="range_min" aria-describedby="addon-min">
+                                                    <div class="btn-group hide" role="group" >
+                                                        <button id="range_apply" type="button" class="btn btn-success">Apply</button>
+                                                        <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                                                    </div>
                                                 </div>
-                                                <div class="btn-group hide" role="group" >
-                                                    <button id="range_apply" type="button" class="btn btn-success">Apply</button>
-                                                    <button id="range_reset" type="button" class="btn btn-secondary">reset</button>
+                                            </div>
+                                            <div class="card-body row clusterView hide">
+                                                <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
+                                                <select id="clusterMethod" class="col-8 radarcontroller_layout">
+                                                    <option value="leaderbin" selected="selected">Leader Bin</option>
+                                                    <option value="kmean">K-means</option>
+                                                    <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
+                                                    <option value="user" distanceFunc="none" cluster-function="calUserNameCluster" assign-function="getJobNameCluster">User</option>
+                                                    <!--<option value="binarybin">Binary bin</option>-->
+                                                </select>
+                                                <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
+                                                <select id="normMethod" class="col-8 radarcontroller_layout">
+                                                    <option value="l1">L1 norm - Manhattan Distance</option>
+                                                    <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+                                                </select>
+                                                <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+                                                    <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+                                                    <!--                                <div  class="col-6 hide">-->
+                                                    <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+                                                    <!--                                </div>-->
+                                                    <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
+                                                    <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                                    <span class="col-2 no_leftmagrin">to</span>
+                                                    <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                                    <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+
+                                                </form>
+                                                <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                                    <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+                                                    <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                                                    <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
+                                                    <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
+
+                                                    <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+                                                </form>
+                                                <div class="d-flex justify-content-center white row" id="clusterDisplay">
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="card-body row clusterView hide">
-                                            <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
-                                            <select id="clusterMethod" class="col-8 radarcontroller_layout">
-                                                <option value="leaderbin" selected="selected">Leader Bin</option>
-                                                <option value="kmean">K-means</option>
-                                                <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
-                                                <option value="user" distanceFunc="none" cluster-function="calUserNameCluster" assign-function="getJobNameCluster">User</option>
-                                                <!--<option value="binarybin">Binary bin</option>-->
-                                            </select>
-                                            <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
-                                            <select id="normMethod" class="col-8 radarcontroller_layout">
-                                                <option value="l1">L1 norm - Manhattan Distance</option>
-                                                <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
-                                            </select>
-                                            <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
-                                                <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
-                                                <!--                                <div  class="col-6 hide">-->
-                                                <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
-                                                <!--                                </div>-->
-                                                <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
-                                                <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
-                                                <span class="col-2 no_leftmagrin">to</span>
-                                                <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                                <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
-
-                                            </form>
-                                            <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
-                                                <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
-
-                                                <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                                                <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
-                                                <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
-
-                                                <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
-                                            </form>
-                                            <div class="d-flex justify-content-center white row" id="clusterDisplay">
-                                            </div>
+                                        <div class="RackLegend row-cols-6">
+                                            <svg width="290"><g class="content"></g></svg>
                                         </div>
                                     </div>
                                 </div>

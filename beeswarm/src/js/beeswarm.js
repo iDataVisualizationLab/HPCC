@@ -114,13 +114,11 @@ let Beeswarm = function(){
             els
                 .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             els.on('end',(d)=>{
-                trajectory[d.key].el.remove();
-                trajectory[d.key].grad.remove();
+                deleteTrajectory(d);
             });
             els.each(function(d){
                 if (trajectory[d.key]){
-                    trajectory[d.key].el.remove();
-                    trajectory[d.key].grad.remove();
+                    deleteTrajectory(d);
                 }
                 trajectory[d.key] = {};
                 trajectory[d.key].grad = g.select('defs').append('radialGradient').attr('id','grad'+d.key)
@@ -157,6 +155,12 @@ let Beeswarm = function(){
             })
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
+        }
+        function deleteTrajectory(d){
+            if (trajectory[d.key].el)
+                trajectory[d.key].el.remove();
+            if (trajectory[d.key].grad)
+                trajectory[d.key].grad.remove();
         }
         function dodge (data, radius)  {
             const radius2 = radius ** 2;
@@ -273,7 +277,7 @@ let Beeswarm = function(){
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
-                                d.color = color(d.value);
+                                d.color = color(d.value,d);
                                 return d.color;
                         })
                         // .style('stroke-width',d=>{
@@ -384,7 +388,7 @@ let Beeswarm = function(){
         return arguments.length?(color=_data,master):color;
     };
     master.getColorScale = function(_data) {
-        return arguments.length?(getColorScale=_data,master):getColorScale;
+        return arguments.length?(getColorScale=_data?_data:function(){return color},master):getColorScale;
     };
     master.graphicopt = function(_data) {
         if (arguments.length){
@@ -580,6 +584,7 @@ let Beeswarm = function(){
         dataDraw = dataDraw.filter(d=>d!=undefined);
         const contours = d3.contourDensity()
             .x(e=>alignmentScale(e))
+            .y(graphicopt.heightG())
             .size( [graphicopt.widthG(), graphicopt.heightG()])
             .bandwidth(graphicopt.trajectory.bandwidth)
             (dataDraw);
@@ -588,7 +593,7 @@ let Beeswarm = function(){
         g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
             .data(contours)
             .join('path')
-            // .attr('transform',`translate(${-graphicopt.centerX()},${-graphicopt.centerY()})`)
+            // .attr('transform',`translate(0,${graphicopt.heightG()})`)
             .attr('class','trajectory trajectoryPath')
             .attr("d", d3.geoPath())
             .style('stroke',null)

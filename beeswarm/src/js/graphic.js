@@ -43,6 +43,37 @@ function initdraw(){
         sortData();
         currentDraw()
     });
+    d3.select('#nodeColor').on('change',function(){
+        const val = $(this).val();
+        drawObject.graphicopt({colorMode:val});
+        if(val==='') {
+            d3.select('.MetricsLegend').classed('hide', false);
+            d3.select('.RackLegend').classed('hide', true);
+        }else {
+            d3.select('.MetricsLegend').classed('hide',true);
+            let svg = d3.select('.RackLegend').classed('hide',false)
+                .select('svg');
+            let g = svg.select('g.content');
+            let color = getColorScale();
+            let padding = 16;
+            let margin = {top:10,left:70,right:0,bottom:0};
+            let w = 280;
+            let h = (color.domain().length+1) * padding;
+            svg.attr('width',w+margin.left+margin.right).attr('height',h+margin.top+margin.bottom);
+            g.attr('transform',`translate(${margin.left},${margin.top})`)
+            let rackel = g.selectAll('.rackEl').data(color.domain().map((d,i)=>({key:d,value:color.range()[i]})))
+                .join('g')
+                .attr('class','rackEl').attr('transform',(d,i)=>`translate(0,${i*padding})`);
+            rackel.selectAll('circle.dot').data(d=>[d]).join('circle').attr('class','dot')
+                .style('r',3)
+                .style('fill',d=>d.value);
+            rackel.selectAll('text.dot').data(d=>[d]).join('text').attr('class','dot')
+                .attr('x',5).attr('dy',5)
+                .text(d=>d.key)
+                .style('fill',d=>d.value);
+        }
+        currentDraw()
+    })
     serviceControl();
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
 }
@@ -170,24 +201,32 @@ function userTable(d,type){
         d3.select('.informationHolder').classed('hide',true);
 }
 function getColorScale(){
-    serviceName = vizservice[serviceSelected].text;
-    let _colorItem = d3.scaleSequential()
-        .interpolator(d3.interpolateSpectral);
-    if(serviceName==='User') {
-        vizservice[serviceSelected].range = d3.keys(innerObj);
-        debugger
-        _colorItem = userColor;
-    } else if (serviceName==='Radar') {
-        debugger
-        _colorItem = colorCluster;
+    if (drawObject.graphicopt().colorMode!=='rack'){
+        serviceName = vizservice[serviceSelected].text;
+        let _colorItem = d3.scaleSequential()
+            .interpolator(d3.interpolateSpectral);
+        if(serviceName==='User') {
+            vizservice[serviceSelected].range = d3.keys(innerObj);
+            debugger
+            _colorItem = userColor;
+        } else if (serviceName==='Radar') {
+            debugger
+            _colorItem = colorCluster;
+        }
+        const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
+        if(serviceName!=='User'){
+            if(serviceName!=='Radar')
+                _colorItem.domain(range_cal.slice().reverse());
+        }else if(serviceName==='Radar')
+            _colorItem.domain(range_cal.slice());
+        return _colorItem;
+    }else{
+        let colorbyRack = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.keys(Layout.data));
+        let _colorItem = (value,d)=>d?colorbyRack(Layout.compute_layout[d.key]):null;
+        _colorItem.domain = ()=>colorbyRack.domain();
+        _colorItem.range = ()=>colorbyRack.range();
+        return _colorItem;
     }
-    const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
-    if(serviceName!=='User'){
-        if(serviceName!=='Radar')
-            _colorItem.domain(range_cal.slice().reverse());
-    }else if(serviceName==='Radar')
-        _colorItem.domain(range_cal.slice());
-    return _colorItem;
 }
 function closeToolTip(){
     d3.select('.informationHolder').classed('hide',true);
