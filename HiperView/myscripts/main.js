@@ -29,7 +29,9 @@ var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
     minHeight = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
-    height = Math.max(minHeight,heightdevice-100),
+    height = Math.max(minHeight,heightdevice-100);
+if (height===minHeight)
+    svg.style('height',null)
 
 svg = svg
     .attrs({
