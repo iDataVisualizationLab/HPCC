@@ -223,9 +223,22 @@ function sortData(data){
 function handleDataUser(users,jobs){
     let data = [];
     for (let user in users){
-        let item = {key:user,value:[0,0],data:users[user],collection:[]};
+        let item = {key:user,value:[],data:users[user],collection:[]};
         users[user].job.forEach(j=>{
-            item.collection.push([jobs[j].start_time,jobs[j].finish_time||Layout.timeRange[1]]);
+            let el = [jobs[j].start_time,jobs[j].finish_time||Layout.timeRange[1]];
+            el.name = j;
+            item.collection.push(el);
+        })
+        item.collection.sort((a,b)=>a[0]-b[0]);
+        let currentTime = [-1,-1]
+        item.collection.forEach(j=>{
+            if(j[0]>currentTime[1]){
+                currentTime = [j[0],j[1]];
+                item.value.push(currentTime);
+            }else if (j[1]>currentTime[1]){
+                
+            }
+
         })
         debugger
     }
