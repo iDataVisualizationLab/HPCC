@@ -475,6 +475,7 @@ function drawUserList(){
     drawObject.mouseout =function(d){
         user_info.classed('highlight',false);
     };
+    subObject.init().graphicopt({range:Layout.timeRange}).data(Layout.userTimeline).draw()
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})

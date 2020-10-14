@@ -112,11 +112,11 @@ function handleSmalldata(dataRaw){
         }
     });
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
-    let time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
+    let time_stamp = dataRaw.time_stamp.map(d=>d>9999999999999?(d/1000000):d)
     let sampleh = {};
     var ser = serviceListattr.slice();
     ser.pop();
-    sampleh.timespan = time_stamp.map(d=>d*1000);
+    sampleh.timespan = time_stamp.map(d=>d);
     let data = dataRaw.nodes_info;
     hosts.forEach(h => {
         sampleh[h.name] = {};
@@ -148,7 +148,7 @@ function handleAllData(dataRaw){
     d3.keys(dataRaw.jobs_info).forEach(jID=>{
         dataRaw.jobs_info[jID].node_list_short = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
-        {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
+        {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000;
             dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
             if (dataRaw.jobs_info[jID].finish_time  && data.jobs_info[jID].finish_time>9999999999999)
                 dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}

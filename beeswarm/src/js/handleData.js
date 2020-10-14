@@ -223,34 +223,39 @@ function sortData(data){
 function handleDataUser(users,jobs){
     let data = [];
     for (let user in users){
-        let item = {key:user,value:[],data:users[user],collection:[]};
+        let item = {key:user,value:[],range:[Infinity,-Infinity],data:users[user],collection:[]};
         users[user].job.forEach(j=>{
-            let el = [jobs[j].start_time,jobs[j].finish_time||Layout.timeRange[1]];
+            let el = [Math.max(jobs[j].start_time,Layout.timeRange[0]),jobs[j].finish_time||Layout.timeRange[1]];
             el.name = j;
             item.collection.push(el);
         })
         item.collection.sort((a,b)=>a[0]-b[0]);
-        let currentTime = [-1,-1]
+        let currentTime = [-1,-1];
         item.collection.forEach(j=>{
             if(j[0]>currentTime[1]){
                 currentTime = [j[0],j[1]];
+                currentTime.names=[j.name];
                 item.value.push(currentTime);
             }else if (j[1]>currentTime[1]){
-                
+                currentTime[1] = j[1];
+                currentTime.names.push(j.name);
             }
-
-        })
-        debugger
+            if (currentTime[0]<item.range[0])
+                item.range[0] = currentTime[0];
+            if (currentTime[1]>item.range[1])
+                item.range[1] = currentTime[1];
+        });
+        data.push(item);
     }
+    return data;
 }
 function handleRankingData(data){
     console.time('handleRankingData');
     let sampleS = handleSmalldata(data);
     let {computers,jobs,users,jobByNames} = handleData(data);
     Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]]
-    Layout.usersStatic = users;
     debugger
-    handleDataUser(users,jobs);
+    Layout.usersStatic = users;
     let hosts = d3.keys(sampleS);
     hosts.shift();
     let ranking = {byComputer:{},byMetric:{},byUser:{}};
@@ -280,5 +285,6 @@ function handleRankingData(data){
         });
     });
     Layout.ranking = ranking;
+    Layout.userTimeline = handleDataUser(users,jobs);
     console.timeEnd('handleRankingData');
 }

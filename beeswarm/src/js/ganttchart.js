@@ -29,6 +29,7 @@ let Gantt = function(){
             return this.margin.top+this.heightG()/2;
         },
         hi: 5,
+        padding: 0.1,
         animationTime:1000,
         color:{}
     };
@@ -42,11 +43,12 @@ let Gantt = function(){
         .interpolator(d3.interpolateSpectral);
     let getColorScale = function(){return color};
     let master={};
-    let radius,alignmentScale;
+    let radius,x,y;
     master.mouseover = function(d){};
     master.mouseout = function(d){};
     master.sortFunc = function(a,b){return a.order-b.order};
     master.draw = function() {
+        debugger
         if (isFreeze)
             freezeHandle();
         color=getColorScale();
@@ -55,18 +57,25 @@ let Gantt = function(){
             graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom+(N-1)*((1+graphicopt.padding)*graphicopt.hi);
         else
             graphicopt.height = graphicopt["max-height"];
-        svg.attr('height',graphicopt.height)
-        let y = d3.scalePoint().range([0,graphicopt.height]).padding(graphicopt.padding);
-        let x = d3.scaleTime().domain([d3.min(data,d=>d.value[0]),d3.max(data,d=>d.value[1])]).range([0,graphicopt.widthG()]);
+        main_svg.attr('height',graphicopt.height);
+        y = d3.scalePoint().range([0,graphicopt.height]).padding(graphicopt.padding);
+        debugger
+        x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
+
         data.sort(master.sortFunc);
+        y.domain(data.map(d=>d.key));
         data.forEach((d,i)=>{
             d.order = i;
             d.y = y(d.key);
             d.h = graphicopt.hi;
-            d.x = x(d.value[0]);
+            d.x = 0;
             d.w = x(d.value[1])-d.x;
-            d.drawData = [[0,0],[d.w,0]]
-        })
+            d.drawData = d.value.map(e=>{
+                let item = e.map(f=>x(f));
+                item.names = e.names;
+                return item
+            })
+        });
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
         onode.call(updateOnode);
@@ -83,7 +92,7 @@ let Gantt = function(){
             .attr("text-anchor", "middle");
         onode_n.call(updateOnode);
 
-        g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(alignmentScale))
+        g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
         onFinishDraw.forEach(d=>d());
 
         function updateOnode(p){
@@ -187,8 +196,8 @@ let Gantt = function(){
             }
         }
     };
-    let getRenderFunc = function(){ return d3.arc()
-                .innerRadius(0)
+    let getRenderFunc = function(d){
+        return `M${d[0]} 0 L${d[1]} 0`;
     };
     let getDrawData = function(){return[];}
     function freezeHandle(){
