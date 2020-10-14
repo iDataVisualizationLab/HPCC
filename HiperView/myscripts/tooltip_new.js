@@ -100,6 +100,7 @@ function cotenttip (hideLine){
 // Add radar chart to the end of html page
 var countRadarChart = 1;
 function addSVG(hideLine){
+    d3.select('#snapshootHolder').classed('hide',false);
     if (hideLine){
         RadarChart("#radarChart" + countRadarChart, dataSpider2, radarChartOptions, dataSpider2.name);
     }
