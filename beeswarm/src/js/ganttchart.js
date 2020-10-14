@@ -1,9 +1,13 @@
+// data type {key, value, order(optional), data(extra data)}
+
+
 let Gantt = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 20},
         width: 1000,
         height: 500,
+        'max-height': 500,
         scalezoom: 1,
         zoom:d3.zoom(),
         widthView: function () {
@@ -24,8 +28,8 @@ let Gantt = function(){
         centerY: function () {
             return this.margin.top+this.heightG()/2;
         },
+        hi: 5,
         animationTime:1000,
-        trajectoryNum:5,
         color:{}
     };
 
@@ -41,28 +45,27 @@ let Gantt = function(){
     let radius,alignmentScale;
     master.mouseover = function(d){};
     master.mouseout = function(d){};
+    master.sortFunc = function(a,b){return a.order-b.order};
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
         color=getColorScale();
-        createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
-        radius = d3.scaleLinear()
-            .domain([graphicopt.start, graphicopt.end])
-            .range([r*0.1, r]);
-
-        var miniradius = 3;
-        graphicopt.radaropt.w = miniradius*2;
-        graphicopt.radaropt.h = miniradius*2;
-        alignmentScale = d3.scaleLinear()
-            .domain(graphicopt.range?? d3.extent(data, function(d){
-                return d.value;
-            }))
-            .range([0, graphicopt.widthG()]);
-        dodge(data,miniradius*2);
-        data.forEach(d=>{
-            d.y = graphicopt.heightG()-d.y-miniradius;
-            d.r = d.r??miniradius;
-            d.drawData[0].r = d.r;
+        let N = data.length;
+        if (!graphicopt.collapse)
+            graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom+(N-1)*((1+graphicopt.padding)*graphicopt.hi);
+        else
+            graphicopt.height = graphicopt["max-height"];
+        svg.attr('height',graphicopt.height)
+        let y = d3.scalePoint().range([0,graphicopt.height]).padding(graphicopt.padding);
+        let x = d3.scaleTime().domain([d3.min(data,d=>d.value[0]),d3.max(data,d=>d.value[1])]).range([0,graphicopt.widthG()]);
+        data.sort(master.sortFunc);
+        data.forEach((d,i)=>{
+            d.order = i;
+            d.y = y(d.key);
+            d.h = graphicopt.hi;
+            d.x = x(d.value[0]);
+            d.w = x(d.value[1])-d.x;
+            d.drawData = [[0,0],[d.w,0]]
         })
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
@@ -96,48 +99,92 @@ let Gantt = function(){
             });
             els
                 .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
-            els.on('end',(d)=>{
-                deleteTrajectory(d);
-            });
-            els.each(function(d){
-                if (trajectory[d.key]){
-                    deleteTrajectory(d);
-                }
-                trajectory[d.key] = {};
-                trajectory[d.key].grad = g.select('defs').append('radialGradient').attr('id','grad'+d.key)
-                    .attr("gradientUnits","userSpaceOnUse")
-                    .attr('r',50)
-                    .attr('cx',d.oldpos[0])
-                    .attr('cy',d.oldpos[1])
-                    .attr('fx',d.oldpos[0])
-                    .attr('fy',d.oldpos[1])
-                ;
-                trajectory[d.key].grad.html(`<stop offset="0" style="stop-color:${color(d.value)};stop-opacity:1"></stop>
-      <stop offset="1" style="stop-color:${color(d.value)};stop-opacity:0"></stop>`);
 
-                trajectory[d.key].grad.transition()
-                    .duration(graphicopt.animationTime)
-                    .attr('cx',d.x)
-                    .attr('cy',d.y)
-                    .attr('fx',d.x)
-                    .attr('fy',d.y)
-
-                trajectory[d.key].el = d3.select(this.parentNode).append('path')
-                    .attr('class','cloned').style('opacity',0.8)
-                    .style('fill','none')
-                    .attr('stroke',`url(#grad${d.key})`)
-                    .attr('stroke-width',d.r??miniradius)
-                    .attr('d',d3.line()([d.oldpos,d.oldpos]));
-                trajectory[d.key].el
-                    .transition()
-                    .duration(graphicopt.animationTime)
-                    .attr('d',d3.line()([d.oldpos,[d.x,d.y]]))
-                    .on('end',()=>{
-                        trajectory[d.key].el.remove();
-                        trajectory[d.key].grad.remove();});
-            })
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
+        }
+        function makecirclepacking(svg) {
+            let node;
+            return updateNodes();
+
+            function updateNodes(istransition) {
+                let childrenNode = {};
+                node = svg.select('g.circleG')
+                    .selectAll("g.element")
+                    .data(d=>[d], d => d.key)
+                    .call(updateNode);
+
+                node.exit().remove();
+                node = node.enter().append("g")
+                    .call(updateNode).merge(node);
+
+                glowEffect = svg.select('g.glowEffect')
+                    .selectAll("defs.glowElement")
+                    .data(d=>[d], d => d.key)
+                    .call(updateGlow);
+
+                glowEffect.exit().remove();
+                glowEffect_n = glowEffect.enter().append("defs")
+                    .attr('class','glowElement');
+                glowEffect_n.append('filter');
+                glowEffect_n
+                    .call(updateGlow).merge(glowEffect);
+                function updateGlow(p){
+                    p.select('filter')
+                        .attr("width","400%")
+                        .attr("x","-150%")
+                        .attr("y","-150%")
+                        .attr("height","400%")
+                        .attr('id',d=>'c'+d.data.currentID)
+                        .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
+                        <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur3"></feMergeNode>
+                            <feMergeNode in="coloredBlur2"></feMergeNode>
+                            <feMergeNode in="coloredBlur1"></feMergeNode>
+                            <feMergeNode in="SourceGraphic"></feMergeNode>
+                        </feMerge>`);
+                    return p;
+                }
+
+                zoomTo(istransition);
+                return childrenNode;
+                function updateNode(node) {
+                    node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
+                    node
+                        .attr('class','element')
+                        .classed('compute', true)
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');openPopup(d,main_svg);})
+                        .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
+                        .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
+                        .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
+                        .attr("fill", d => {
+                            d.color = color(d.value,d);
+                            return d.color;
+                        })
+                        .style('stroke-width',d=>{
+                            return d.h;
+                        });
+                    return node;
+                }
+            }
+
+
+            function zoomTo(istransition) {
+                node.selectAll('g').remove();
+                let path = node.selectAll('path').data(d=>d.drawData)
+                    .attr('d',getRenderFunc)
+                    .classed('invalid',d=>d.invalid)
+                    .style('filter',d=>d.invalid?'url("#glow")':null)
+                    .style('fill',d=>d.color);
+                path.exit().remove();
+                path.enter().append('path')
+                    .attr('class','circle')
+                    .classed('invalid',d=>d.invalid)
+                    .style('filter',d=>d.invalid?'url("#glow")':null)
+                    .attr('d',getRenderFunc).style('fill',d=>d.color);
+            }
         }
     };
     let getRenderFunc = function(){ return d3.arc()
@@ -196,6 +243,12 @@ let Gantt = function(){
         }
         return master
     };
+    master.padding = function(_data) {
+        return arguments.length?(graphicopt.padding=_data,master):graphicopt.padding;
+    };
+    master.collapse = function(_data) {
+        return arguments.length?(graphicopt.collapse=_data,master):graphicopt.collapse;
+    };
     master.data = function(_data) {
         return arguments.length?(data=_data,master):data;
     };
@@ -222,100 +275,10 @@ let Gantt = function(){
         onFinishDraw.push(_data)
         return master;
     };
-    master.trajectoryStyle=function(_data) {
-        if (arguments.length){
-            switch (_data) {
-                case 'line':
-                    draw_trajectory = draw_trajectory_line;
-                    break;
-                case 'contour':
-                    draw_trajectory = draw_trajectory_contours;
-                    break;
-            }
-            if (master.current_trajectory_data)
-                draw_trajectory(master.current_trajectory_data);
-            return master;
-        }
-        return draw_trajectory;
-    };
+
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
-    function makeTrajectoryLegend(color){
-        const marginTop = 10;
-        const marginBottom = 10;
-        const marginLeft = 40;
-        const marginRight = 20;
-        const width = 10;
-        const height = 200;
-        g.selectAll('.TrajectoryLegend').remove();
-        const svg = g.append('g').attr('class','TrajectoryLegend')
-            .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
-        svg.append('text').text('Trajectory heat map')
-        let legend = svg.append('g').attr('class', 'legend')
-            .attr('transform', `translate(${marginLeft},${marginTop})`);
 
-        if (color.interpolate) {
-            const n = Math.min(color.domain().length, color.range().length);
-
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
-        }// Sequential
-        else if (color.interpolator) {
-            let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
-                {
-                    range() {
-                        return [0, height];
-                    }
-                });
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
-
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!y.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
-                }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            } else {
-                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
-            }
-        }
-
-        function ramp(color, n = 256) {
-            const canvas = createContext(1, n);
-            const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
-            return canvas;
-        }
-
-        function createContext(width, height) {
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas;
-        }
-
-    }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
@@ -353,52 +316,6 @@ let Gantt = function(){
         g.selectAll('.element.highlight2')
             .classed('highlight2', false);
     };
-    master.drawTrajectory = function(d,data){
-        data = data||Layout.ranking.byComputer[d.name][serviceName]
-        master.current_trajectory_data = {g,d,data:data};
-        draw_trajectory(master.current_trajectory_data);
-    }
-    let draw_trajectory = draw_trajectory_line;
-    master.current_trajectory_data = undefined;
-    function draw_trajectory_line({g,d,data}){
-        let dataDraw = data;
-        if (!_.isArray(data[0]))
-            dataDraw = [data];
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(dataDraw)
-            .join('path')
-            .attr('class','trajectory trajectoryPath')
-            .attr('transform',null)
-            .attr('d',d3.line()
-                .curve(d3.curveCatmullRom)
-                .defined(e => e !== undefined)
-                .x(e=>alignmentScale(e)))
-            .style('fill','none').style('stroke','black').style('opacity',0.3);
-    }
-    function draw_trajectory_contours({g,d,data}){
-        let dataDraw = data;
-        if (_.isArray(data[0]))
-            dataDraw = _.flatten(data);
-        dataDraw = dataDraw.filter(d=>d!=undefined);
-        const contours = d3.contourDensity()
-            .x(e=>alignmentScale(e))
-            .y(graphicopt.heightG())
-            .size( [graphicopt.widthG(), graphicopt.heightG()])
-            .bandwidth(graphicopt.trajectory.bandwidth)
-            (dataDraw);
-        const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
-            .domain(d3.extent(contours, d => d.value ));
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(contours)
-            .join('path')
-            // .attr('transform',`translate(0,${graphicopt.heightG()})`)
-            .attr('class','trajectory trajectoryPath')
-            .attr("d", d3.geoPath())
-            .style('stroke',null)
-            .style("fill", d => color(d.value)).style('opacity',null);
-        debugger
-        makeTrajectoryLegend(color)
-    }
     function mouseout(d){
         if(!isFreeze)
         {
@@ -416,9 +333,6 @@ let Gantt = function(){
             tooltip.hide()
         }
     }
-    var theta = function(r) {
-        return -(r-graphicopt.start)-graphicopt.start;
-    };
 
     return master;
 };

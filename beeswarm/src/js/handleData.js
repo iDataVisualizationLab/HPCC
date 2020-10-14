@@ -14,13 +14,6 @@ function handleData(data){
     _.mapObject(computers,(d,i)=>(d.user=[],d.jobName=[]))
     const jobs = data[JOB]; // object
     const rack = Layout.data;
-    // console.log('totaljob: ',d3.keys(jobs).length);
-    // Object.keys(jobs).forEach(j=>{
-    //     const d = jobs[j];
-    //     if (!d.finish_time) {
-    //         delete jobs[j]
-    //     }tree
-    // }); // lastest job
     const user_job = d3.nest()
         .key(d=>d.value[USER]) //user
         .key(d=>d.key.split('.')[0]) //job array
@@ -227,12 +220,24 @@ function sortData(data){
     Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
     drawObject.data(dataviz);
 }
-
+function handleDataUser(users,jobs){
+    let data = [];
+    for (let user in users){
+        let item = {key:user,value:[0,0],data:users[user],collection:[]};
+        users[user].job.forEach(j=>{
+            item.collection.push([jobs[j].start_time,jobs[j].finish_time||Layout.timeRange[1]]);
+        })
+        debugger
+    }
+}
 function handleRankingData(data){
     console.time('handleRankingData');
     let sampleS = handleSmalldata(data);
     let {computers,jobs,users,jobByNames} = handleData(data);
+    Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]]
     Layout.usersStatic = users;
+    debugger
+    handleDataUser(users,jobs);
     let hosts = d3.keys(sampleS);
     hosts.shift();
     let ranking = {byComputer:{},byMetric:{},byUser:{}};

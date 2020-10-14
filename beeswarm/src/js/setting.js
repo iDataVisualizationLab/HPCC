@@ -60,7 +60,7 @@ function handleDataUrl(dataRaw) {
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
         {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
         dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
-        if (dataRaw.jobs_info[jID].finish_time)
+        if (dataRaw.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
             dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
     })
     let time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
@@ -150,7 +150,7 @@ function handleAllData(dataRaw){
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
         {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
             dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
-            if (dataRaw.jobs_info[jID].finish_time)
+            if (dataRaw.jobs_info[jID].finish_time  && data.jobs_info[jID].finish_time>9999999999999)
                 dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
     });
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);

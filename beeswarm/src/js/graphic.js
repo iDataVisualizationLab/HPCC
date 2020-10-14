@@ -479,3 +479,4 @@ function drawUserList(){
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 let drawObject = new Beeswarm();
+let subObject = new Gantt();
