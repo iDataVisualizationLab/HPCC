@@ -27,12 +27,16 @@ var margin = {top: 5, right: 0, bottom: 10, left: 0};
 
 var svg = d3.select(".mainsvg"),
     width = +document.getElementById("mainBody").offsetWidth,
-    height = +svg.attr("height")-margin.top-margin.bottom,
+    minHeight = +svg.attr("height")-margin.top-margin.bottom,
     heightdevice = + document.getElementById("mainBody").offsetHeight,
+    height = Math.max(minHeight,heightdevice-100),
 
 svg = svg
     .attrs({
         width: width,
+    })
+    .attrs({
+        height: height,
     })
     .append("g")
     .attr("transform",
@@ -98,7 +102,7 @@ var endtDate = new Date("1/1/2019");
 var today = new Date();
 
 var maxHostinRack= 30;//60;
-var h_rack = 580;//980;
+var h_rack = height-320//580;//980;
 var w_rack = (width-23)/10-1;
 var w_gap =0;
 var node_size = 6;
@@ -400,59 +404,6 @@ function initVerticalView(){
             .attr("stroke", "#000")
             .attr("stroke-width", 1)
             .style("box-shadow", "10px 10px 10px #666");
-        // svgStore.detailView.label.selectAll(".rackRect")
-        //     .data(racks)
-        //     .enter().append("rect")
-        //     .attr("class", "rackRect")
-        //     .attr("x", function (d, i) {
-        //         return d.x - 6;
-        //     })
-        //     .attr("y", function (d) {
-        //         return d.y;
-        //     })
-        //     .attr("rx", 10)
-        //     .attr("ry", 10)
-        //     .attr("width", (d, i) => (w_rack))
-        //     .attr("height", d=>d.h)
-        //     .attr("fill", "#fff")
-        //     .attr("stroke", "#000")
-        //     .attr("stroke-width", 1)
-        //     .style("box-shadow", "10px 10px 10px #666");
-        // svgStore.detailView.label.selectAll(".rackRectText1")
-        //     .data(racksnewor)
-        //     .enter().append("text")
-        //     .attr("class", "rackRectText1")
-        //     .attr("x", function (d) {
-        //         return d.x + w_rack / 2 - 20;
-        //     })
-        //     .attr("y", function (d) {
-        //         return d.y - 6;
-        //     })
-        //     .attr("fill", "currentColor")
-        //     .style("text-anchor", "middle")
-        //     .style("font-size", 16)
-        //     .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        //     .attr("font-family", "sans-serif")
-        //     .text(function (d) {
-        //         return "Rack " + d.id;
-        //         //return "Rack " + d.id + ":   " + d.hosts.length + " hosts";
-        //     });
-
-        // Draw host names **********************
-
-        // for (var i = 1; i <= hosts.length; i++) {
-        //     var yy = getHostY(1, i);
-        //     svgStore.detailView.label.append("text")
-        //         .attr("class", "hostText")
-        //         .attr("x", 32)
-        //         .attr("y", yy + 1)
-        //         .attr("fill", "currentColor")
-        //         .style("text-anchor", "end")
-        //         .style("font-size", "12px")
-        //         .style("text-shadow", "1px 1px 0 rgba(255, 255, 255")
-        //         .attr("font-family", "sans-serif")
-        //         .text("Host");
-        // }
         filterhost = hosts.map(d=>d.name);
         for (var i = 0; i < hosts.length; i++) {
             var name = hosts[i].name;
@@ -835,7 +786,7 @@ function changeView(v){
         getHostY = getHostY_HORIZONTAL;
         w_rack = (width-23)/10-1;
         maxstack = 7;
-        d3.select('.mainsvg').attr("height",1000);
+        d3.select('.mainsvg').attr("height",height);
         cleanUp();
         playchange();
         drawHorizontalView();
