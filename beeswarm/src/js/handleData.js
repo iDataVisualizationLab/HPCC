@@ -230,21 +230,36 @@ function handleDataUser(users,jobs){
             item.collection.push(el);
         })
         item.collection.sort((a,b)=>a[0]-b[0]);
-        let currentTime = [-1,-1];
+        let timeFormat = d3.timeMinute.every(5);
+        let uniqTime = {};
+        let timeArray = [];
         item.collection.forEach(j=>{
-            if(j[0]>currentTime[1]){
-                currentTime = [j[0],j[1]];
-                currentTime.names=[j.name];
-                item.value.push(currentTime);
-            }else if (j[1]>currentTime[1]){
-                currentTime[1] = j[1];
-                currentTime.names.push(j.name);
-            }
-            if (currentTime[0]<item.range[0])
-                item.range[0] = currentTime[0];
-            if (currentTime[1]>item.range[1])
-                item.range[1] = currentTime[1];
+            const start = timeFormat(j[0]);
+            const end = (timeFormat(j[0])===timeFormat(j[1]))?timeFormat(j[1]+5*60*1000):timeFormat(j[1]);
+            if (!uniqTime[start])
+                timeArray.push(start);
+            if (!uniqTime[end])
+                timeArray.push(end);
+            uniqTime[start] = 1;
+            uniqTime[end] = 1;
         });
+        timeArray.sort((a,b)=>a-b);
+        timeArray.forEach((t,ti)=>uniqTime[t]=ti);
+        let timeSection = [];
+        for (let i=0;i<timeArray.length-1;i++){
+            let it = [timeArray[i],timeArray[i+1]];
+            it.names = [];
+            timeSection.push(it);
+        }
+        item.collection.forEach(j=>{
+            const start = timeFormat(j[0]);
+            const end = (timeFormat(j[0])===timeFormat(j[1]))?timeFormat(j[1]+5*60*1000):timeFormat(j[1]);
+
+            for (let i = uniqTime[start];i<uniqTime[end];i++){
+                timeSection[i].names.push(j.name);
+            }
+        });
+        item.value = timeSection.filter(d=>d.names.length)
         data.push(item);
     }
     return data;
@@ -253,8 +268,8 @@ function handleRankingData(data){
     console.time('handleRankingData');
     let sampleS = handleSmalldata(data);
     let {computers,jobs,users,jobByNames} = handleData(data);
-    Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]]
-    debugger
+    Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]];
+    Layout.jobsStatic = jobs;
     Layout.usersStatic = users;
     let hosts = d3.keys(sampleS);
     hosts.shift();

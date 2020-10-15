@@ -40,7 +40,7 @@ let Gantt = function(){
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
-        .interpolator(d3.interpolateSpectral);
+        .interpolator(d3.interpolateViridis);
     let getColorScale = function(){return color};
     let master={};
     let radius,x,y;
@@ -48,22 +48,20 @@ let Gantt = function(){
     master.mouseout = function(d){};
     master.sortFunc = function(a,b){return a.order-b.order};
     master.draw = function() {
-        debugger
         if (isFreeze)
             freezeHandle();
-        color=getColorScale();
+        // color=getColorScale();
         let N = data.length;
         if (!graphicopt.collapse)
             graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom+(N-1)*((1+graphicopt.padding)*graphicopt.hi);
         else
             graphicopt.height = graphicopt["max-height"];
         main_svg.attr('height',graphicopt.height);
-        y = d3.scalePoint().range([0,graphicopt.height]).padding(graphicopt.padding);
-        debugger
+        y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
         x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
-
         data.sort(master.sortFunc);
         y.domain(data.map(d=>d.key));
+        let range= [Infinity,-Infinity];
         data.forEach((d,i)=>{
             d.order = i;
             d.y = y(d.key);
@@ -73,9 +71,14 @@ let Gantt = function(){
             d.drawData = d.value.map(e=>{
                 let item = e.map(f=>x(f));
                 item.names = e.names;
+                if(range[0]>e.names.length)
+                    range[0] = e.names.length
+                if(range[1]<e.names.length)
+                    range[1] = e.names.length
                 return item
             })
         });
+        color.domain(range);
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
         onode.call(updateOnode);
@@ -168,10 +171,10 @@ let Gantt = function(){
                         .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
-                        .attr("fill", d => {
-                            d.color = color(d.value,d);
-                            return d.color;
-                        })
+                        // .attr("fill", d => {
+                        //     d.color = color(d.value,d);
+                        //     return d.color;
+                        // })
                         .style('stroke-width',d=>{
                             return d.h;
                         });
@@ -183,16 +186,18 @@ let Gantt = function(){
             function zoomTo(istransition) {
                 node.selectAll('g').remove();
                 let path = node.selectAll('path').data(d=>d.drawData)
-                    .attr('d',getRenderFunc)
-                    .classed('invalid',d=>d.invalid)
-                    .style('filter',d=>d.invalid?'url("#glow")':null)
-                    .style('fill',d=>d.color);
-                path.exit().remove();
-                path.enter().append('path')
+                    .join('path')
                     .attr('class','circle')
                     .classed('invalid',d=>d.invalid)
                     .style('filter',d=>d.invalid?'url("#glow")':null)
-                    .attr('d',getRenderFunc).style('fill',d=>d.color);
+                    .attr('d',getRenderFunc)
+                    .classed('invalid',d=>d.invalid)
+                    .style('filter',d=>d.invalid?'url("#glow")':null)
+                    .attr("stroke", d => {
+                        // d.color = color(d.value,d);
+                        d.color = color(d.names.length);
+                        return d.color;
+                    });
             }
         }
     };

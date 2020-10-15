@@ -475,7 +475,21 @@ function drawUserList(){
     drawObject.mouseout =function(d){
         user_info.classed('highlight',false);
     };
-    subObject.init().graphicopt({range:Layout.timeRange}).data(Layout.userTimeline).draw()
+}
+function getColorGant(){
+
+    let colorGantt =d3.scaleSequential()
+        .interpolator(d3.interpolateSpectral);
+    let _colorItem = (value,d)=>d?colorGantt(d.names.length):null;
+    _colorItem.domain = ()=>colorGantt.domain();
+    _colorItem.range = ()=>colorGantt.range();
+    return _colorItem;
+}
+function initdrawGantt(){
+    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange})
+}
+function drawGantt(){
+    subObject.data(Layout.userTimeline).draw()
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
