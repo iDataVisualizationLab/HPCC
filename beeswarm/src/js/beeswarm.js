@@ -56,8 +56,26 @@ let Beeswarm = function(){
     let trajectory = {};
     let subgraph = {el:[],limit:3};
     let radius,alignmentScale;
-    master.mouseover = function(d){};
-    master.mouseout = function(d){};
+    master.mouseover = [];
+    master.mouseover.dict={};
+    master.mouseout = [];
+    master.mouseout.dict={};
+    master.mouseoverAdd = function(id,func){
+        if (master.mouseover.dict[id]!==undefined)
+            master.mouseover[master.mouseover.dict[id]] = func;
+        else {
+            master.mouseover.push(func)
+            master.mouseover.dict[id] = master.mouseover.length-1;
+        }
+    }
+    master.mouseoutAdd = function(id,func){
+        if (master.mouseout.dict[id]!==undefined)
+            master.mouseout[master.mouseout.dict[id]] = func;
+        else {
+            master.mouseout.push(func)
+            master.mouseout.dict[id] = master.mouseout.length-1;
+        }
+    }
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
@@ -529,7 +547,7 @@ let Beeswarm = function(){
                 d.node.classed('highlight', true);
             }
             master.drawTrajectory(d);
-            master.mouseover(d);
+            master.mouseover.forEach(f=>f(d));
         }
         if (d.tooltip) {
             tooltip.show(d.name)
@@ -560,7 +578,7 @@ let Beeswarm = function(){
         master.current_trajectory_data = {g,d,data:data};
         draw_trajectory(master.current_trajectory_data);
     }
-    let draw_trajectory = draw_trajectory_line;
+    let draw_trajectory = draw_trajectory_contours;
     master.current_trajectory_data = undefined;
     function draw_trajectory_line({g,d,data}){
         let dataDraw = data;
@@ -612,7 +630,7 @@ let Beeswarm = function(){
             g.selectAll('path.trajectory').remove();
             g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;
-            master.mouseout(d);
+            master.mouseout.forEach(f=>f(d))
         }
         if (d.tooltip) {
             tooltip.hide()

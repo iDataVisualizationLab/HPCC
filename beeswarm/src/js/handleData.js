@@ -259,7 +259,12 @@ function handleDataUser(users,jobs){
                 timeSection[i].names.push(j.name);
             }
         });
-        item.value = timeSection.filter(d=>d.names.length)
+        item.value = timeSection.filter(d=>d.names.length);
+        item.value2 = item.value.map(d=>{
+            let it = d.slice();
+            it.names = _.uniq(_.flatten(d.names.map(j=>jobs[j].node_list)))
+            return it;
+        });
         data.push(item);
     }
     return data;

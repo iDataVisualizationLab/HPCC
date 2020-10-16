@@ -468,13 +468,12 @@ function drawUserList(){
     user_info
         .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
         .join('td').text(d=>d);
-    drawObject.mouseover=function(d){
-        debugger
+    drawObject.mouseoverAdd('userlist',function(d){
         user_info.filter(u=>d.user.indexOf(u.key)!==-1).classed('highlight',true);
-    };
-    drawObject.mouseout =function(d){
+    });
+    drawObject.mouseoutAdd('userlist',function(d){
         user_info.classed('highlight',false);
-    };
+    });
 }
 function getColorGant(){
 
@@ -486,7 +485,20 @@ function getColorGant(){
     return _colorItem;
 }
 function initdrawGantt(){
-    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange})
+    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange});
+    drawObject.mouseoverAdd('gantt',function(d){
+        subObject.highlight(d.user);
+    });
+    drawObject.mouseoutAdd('gantt',function(d){
+        subObject.releasehighlight();
+    });
+
+    subObject.mouseoverAdd('gantt',function(d){
+        drawObject.highlight((d.value2.find(e=>(e[1]>=Layout.currentTime)&&(e[0]<=Layout.currentTime))||{names:[]}).names);
+    });
+    subObject.mouseoutAdd('gantt',function(d){
+        drawObject.releasehighlight();
+    });
 }
 function drawGantt(){
     subObject.data(Layout.userTimeline).draw()

@@ -28,7 +28,7 @@ let Gantt = function(){
         centerY: function () {
             return this.margin.top+this.heightG()/2;
         },
-        hi: 5,
+        hi: 10,
         padding: 0.1,
         animationTime:1000,
         color:{}
@@ -40,12 +40,30 @@ let Gantt = function(){
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
-        .interpolator(d3.interpolateViridis);
+        .interpolator(d3.interpolateSpectral);
     let getColorScale = function(){return color};
     let master={};
     let radius,x,y;
-    master.mouseover = function(d){};
-    master.mouseout = function(d){};
+    master.mouseover = [];
+    master.mouseover.dict={};
+    master.mouseout = [];
+    master.mouseout.dict={};
+    master.mouseoverAdd = function(id,func){
+        if (master.mouseover.dict[id]!==undefined)
+            master.mouseover[master.mouseover.dict[id]] = func;
+        else {
+            master.mouseover.push(func)
+            master.mouseover.dict[id] = master.mouseover.length-1;
+        }
+    }
+    master.mouseoutAdd = function(id,func){
+        if (master.mouseout.dict[id]!==undefined)
+            master.mouseout[master.mouseout.dict[id]] = func;
+        else {
+            master.mouseout.push(func)
+            master.mouseout.dict[id] = master.mouseout.length-1;
+        }
+    }
     master.sortFunc = function(a,b){return a.order-b.order};
     master.draw = function() {
         if (isFreeze)
@@ -61,24 +79,42 @@ let Gantt = function(){
         x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
         y.domain(data.map(d=>d.key));
-        let range= [Infinity,-Infinity];
+        let sizeScale = d3.scaleSqrt().domain(d3.extent(_.flatten(data.map(d=>d.value.map(d=>d.names.length))))).range([1,graphicopt.hi/2])
+        let range= sizeScale.domain();
         data.forEach((d,i)=>{
             d.order = i;
             d.y = y(d.key);
             d.h = graphicopt.hi;
             d.x = 0;
             d.w = x(d.value[1])-d.x;
-            d.drawData = d.value.map(e=>{
-                let item = e.map(f=>x(f));
+            d.tooltip=d.key;
+            d.drawData = [];
+            d.value.forEach(e=>{
+                let item = e.map(f=>[x(f),-sizeScale(e.names.length)/2]);
                 item.names = e.names;
+                item.type='top';
+                item.size = e.names.length;
                 if(range[0]>e.names.length)
-                    range[0] = e.names.length
+                    range[0] = e.names.length;
                 if(range[1]<e.names.length)
-                    range[1] = e.names.length
-                return item
+                    range[1] = e.names.length;
+                d.drawData.push(item)
+            });
+            d.value2.forEach(e=>{
+                let item = e.map(f=>[x(f),sizeScale(e.names.length)/2]);
+                item.type='bottom';
+                item.names = e.names;
+                item.size = e.names.length;
+                if(range[0]>e.names.length)
+                    range[0] = e.names.length;
+                if(range[1]<e.names.length)
+                    range[1] = e.names.length;
+                d.drawData.push(item)
             })
         });
-        color.domain(range);
+        color.domain([range[1],range[0]]);
+        // let sizeScale = d3.scaleLinear().domain(range).range([1,graphicopt.hi])
+        // let sizeScale = d3.scaleLinear().domain(range).range([1,graphicopt.hi/2])
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
         onode.call(updateOnode);
@@ -168,8 +204,8 @@ let Gantt = function(){
                         .attr('class','element')
                         .classed('compute', true)
                         .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');openPopup(d,main_svg);})
-                        .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
-                        .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
+                        .on("mouseover", function(d){mouseover.bind(this)(d)})
+                        .on("mouseout", function(d){mouseout.bind(this)(d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         // .attr("fill", d => {
                         //     d.color = color(d.value,d);
@@ -195,14 +231,20 @@ let Gantt = function(){
                     .style('filter',d=>d.invalid?'url("#glow")':null)
                     .attr("stroke", d => {
                         // d.color = color(d.value,d);
-                        d.color = color(d.names.length);
-                        return d.color;
-                    });
+                        // d.color = color(d.size);
+                        // return d.color;
+                        return d.type==='top'?'red':'green';
+                    })
+                    .attr('stroke-width',d=>sizeScale(d.size))
+                ;
             }
         }
     };
+    // let getRenderFunc = function(d){
+    //     return `M${d[0]} 0 L${d[1]} 0`;
+    // };
     let getRenderFunc = function(d){
-        return `M${d[0]} 0 L${d[1]} 0`;
+        return `M${d[0][0]} ${d[0][1]} L${d[1][0]} ${d[1][1]}`;
     };
     let getDrawData = function(){return[];}
     function freezeHandle(){
@@ -303,11 +345,10 @@ let Gantt = function(){
             if (d.node) {
                 d.node.classed('highlight', true);
             }
-            master.drawTrajectory(d);
-            master.mouseover(d);
+            master.mouseover.forEach(f=>f(d));
         }
         if (d.tooltip) {
-            tooltip.show(d.name)
+            tooltip.show(d.tooltip)
         }
     }
     master.highlight = function(listKey){
@@ -341,7 +382,7 @@ let Gantt = function(){
             g.selectAll('path.trajectory').remove();
             g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;
-            master.mouseout(d);
+            master.mouseout.forEach(f=>f(d));
         }
         if (d.tooltip) {
             tooltip.hide()
