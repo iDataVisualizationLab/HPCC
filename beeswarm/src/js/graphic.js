@@ -450,8 +450,8 @@ function drawUserList(){
                     return d.value;
                 }));
                 d3.select(this).classed('highlight',true);
-                debugger
                 drawObject.highlight(d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).filter(d=>d.value[request.index-1]!=undefined).map(d=>d.key))
+                subObject.highlight([d.key])
             }
         }).on('mouseout',function(d){
             if(!drawObject.isFreeze()){
@@ -460,14 +460,19 @@ function drawUserList(){
                 drawObject.current_trajectory_data = undefined;
                 d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
                 drawObject.releasehighlight();
+                subObject.releasehighlight();
             }
         }).on('click',function(d){
             drawObject.freezeHandle.bind(this)();
-            openPopup(d,drawObject.main_svg())
+            openPopup(d,drawObject.main_svg());
+            subObject.freezeHandle.bind(this)();
         });
     user_info
-        .selectAll('td').data(d=>[d.key,d.value.job.length,d.value.node.length])
-        .join('td').text(d=>d);
+        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length}])
+        .join('td')
+        .style('text-align',d=>(d.key==='job'||d.key==='compute')?'end':null)
+        .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
+        .text(d=>d.value);
     drawObject.mouseoverAdd('userlist',function(d){
         user_info.filter(u=>d.user.indexOf(u.key)!==-1).classed('highlight',true);
     });
@@ -492,13 +497,19 @@ function initdrawGantt(){
     drawObject.mouseoutAdd('gantt',function(d){
         subObject.releasehighlight();
     });
-
+    drawObject.clickAdd('gantt',function(d){
+        subObject.freezeHandle.bind(this)();
+    });
     subObject.mouseoverAdd('gantt',function(d){
         drawObject.highlight((d.value2.find(e=>(e[1]>=Layout.currentTime)&&(e[0]<=Layout.currentTime))||{names:[]}).names);
     });
     subObject.mouseoutAdd('gantt',function(d){
         drawObject.releasehighlight();
     });
+    subObject.clickAdd('gantt',function(d){
+        drawObject.freezeHandle.bind(this)();
+    });
+
 }
 function drawGantt(){
     subObject.data(Layout.userTimeline).draw()

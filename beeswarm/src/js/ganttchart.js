@@ -28,8 +28,8 @@ let Gantt = function(){
         centerY: function () {
             return this.margin.top+this.heightG()/2;
         },
-        hi: 8,
-        padding: 0.1,
+        hi: 12,
+        padding: 0,
         animationTime:1000,
         color:{}
     };
@@ -48,6 +48,8 @@ let Gantt = function(){
     master.mouseover.dict={};
     master.mouseout = [];
     master.mouseout.dict={};
+    master.click = [];
+    master.click.dict={};
     master.mouseoverAdd = function(id,func){
         if (master.mouseover.dict[id]!==undefined)
             master.mouseover[master.mouseover.dict[id]] = func;
@@ -62,6 +64,14 @@ let Gantt = function(){
         else {
             master.mouseout.push(func)
             master.mouseout.dict[id] = master.mouseout.length-1;
+        }
+    }
+    master.clickAdd = function(id,func){
+        if (master.click.dict[id]!==undefined)
+            master.click[master.click.dict[id]] = func;
+        else {
+            master.click.push(func)
+            master.click.dict[id] = master.click.length-1;
         }
     }
     master.sortFunc = function(a,b){return a.order-b.order};
@@ -95,7 +105,7 @@ let Gantt = function(){
         x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
         y.domain(data.map(d=>d.key));
-        let sizeScale = d3.scaleSqrt().domain(d3.extent(_.flatten(data.map(d=>d.value.map(d=>d.names.length))))).range([1,graphicopt.hi/2])
+        let sizeScale = d3.scaleSqrt().domain(d3.extent(_.flatten(data.map(d=>d.value.map(d=>d.names.length))))).range([1,graphicopt.hi/2*1.2]);
         let range= sizeScale.domain();
         data.forEach((d,i)=>{
             d.order = i;
@@ -108,6 +118,7 @@ let Gantt = function(){
             d.value.forEach(e=>{
                 let item = e.map(f=>[x(f),-sizeScale(e.names.length)/2]);
                 item.names = e.names;
+                item.r = sizeScale(e.names.length);
                 item.type='top';
                 item.size = e.names.length;
                 if(range[0]>e.names.length)
@@ -118,6 +129,7 @@ let Gantt = function(){
             });
             d.value2.forEach(e=>{
                 let item = e.map(f=>[x(f),sizeScale(e.names.length)/2]);
+                item.r = sizeScale(e.names.length);
                 item.type='bottom';
                 item.names = e.names;
                 item.size = e.names.length;
@@ -222,7 +234,7 @@ let Gantt = function(){
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');openPopup(d,main_svg);})
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');master.click.forEach(f=>f());openPopup(d,main_svg);})
                         .on("mouseover", function(d){mouseover.bind(this)(d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
@@ -252,7 +264,7 @@ let Gantt = function(){
                         // d.color = color(d.value,d);
                         // d.color = color(d.size);
                         // return d.color;
-                        return d.type==='top'?'red':'green';
+                        return d.type==='top'?'rgba(166,86,40,0.75)':'rgba(55,126,184,0.75)';
                     })
                     .attr('stroke-width',d=>sizeScale(d.size))
                 ;

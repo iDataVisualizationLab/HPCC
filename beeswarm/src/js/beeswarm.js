@@ -60,6 +60,8 @@ let Beeswarm = function(){
     master.mouseover.dict={};
     master.mouseout = [];
     master.mouseout.dict={};
+    master.click = [];
+    master.click.dict={};
     master.mouseoverAdd = function(id,func){
         if (master.mouseover.dict[id]!==undefined)
             master.mouseover[master.mouseover.dict[id]] = func;
@@ -74,6 +76,14 @@ let Beeswarm = function(){
         else {
             master.mouseout.push(func)
             master.mouseout.dict[id] = master.mouseout.length-1;
+        }
+    }
+    master.clickAdd = function(id,func){
+        if (master.click.dict[id]!==undefined)
+            master.click[master.click.dict[id]] = func;
+        else {
+            master.click.push(func)
+            master.click.dict[id] = master.click.length-1;
         }
     }
     master.draw = function() {
@@ -290,7 +300,7 @@ let Beeswarm = function(){
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');openPopup(d,main_svg);})
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');master.click.forEach(f=>f());openPopup(d,main_svg);})
                         .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
