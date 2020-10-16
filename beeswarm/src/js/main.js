@@ -84,7 +84,9 @@ function initTimeElement(){
     request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
     // request.onDataChange.push(handleRankingData);
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-
+    request.onUpdateTime.push(function(time){
+        subObject.updateTimeHandle(time)
+    });
     if (request.isRealTime) {
         timelineControl.disableHandle(true);
         request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');

@@ -65,6 +65,10 @@ let Gantt = function(){
         }
     }
     master.sortFunc = function(a,b){return a.order-b.order};
+    master.updateTimeHandle = function (time){
+        main_svg.select('#timeClip rect').transition().attr('width',x(time));
+        g.select('.timeHandleHolder').transition().attr('transform',`translate(${x(time)},0)`);
+    }
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
@@ -75,6 +79,9 @@ let Gantt = function(){
         else
             graphicopt.height = graphicopt["max-height"];
         main_svg.attr('height',graphicopt.height);
+        main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
+        g.select('.timeHandleHolder').attr('transform','translate(0,0)')
+            .select('.timeStick').attr('y2',graphicopt.heightG())
         y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
         x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
@@ -115,7 +122,8 @@ let Gantt = function(){
         color.domain([range[1],range[0]]);
         // let sizeScale = d3.scaleLinear().domain(range).range([1,graphicopt.hi])
         // let sizeScale = d3.scaleLinear().domain(range).range([1,graphicopt.hi/2])
-        let onode = g.selectAll(".outer_node")
+        let drawArea = g.select('.drawArea');
+        let onode = drawArea.attr('clip-path','url(#timeClip)').selectAll(".outer_node")
             .data(data,d=>d.key);
         onode.call(updateOnode);
         onode.exit().remove();
@@ -130,6 +138,8 @@ let Gantt = function(){
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
         onode_n.call(updateOnode);
+        g.select('.background').node().appendChild(drawArea.clone(true).node())
+        g.select('.background').select('.drawArea').attr('clip-path',null)
 
         g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
         onFinishDraw.forEach(d=>d());
@@ -268,6 +278,9 @@ let Gantt = function(){
             .attr("width", graphicopt.width)
             .attr("height", graphicopt.height)
             .style('overflow','visible');
+        if(main_svg.select('#timeClip').empty())
+            main_svg.append('defs').append('clipPath').attr('id','timeClip')
+                .append('rect').attr('width',0).attr('height',graphicopt.heightG());
         g = main_svg
             .select("g.content");
         function zoomed(){
@@ -286,6 +299,8 @@ let Gantt = function(){
                     isFreeze = false;
                     func();
                 }});
+            g.append('g').attr('class','background').style('opacity',0.2);
+            g.append('g').attr('class','drawArea');
             let axis = g.append('g').attr('class','axis');
             axisx = axis.append('g').attr('class','axisx');
             axisy = axis.append('g').attr('class','axisy');
@@ -295,7 +310,11 @@ let Gantt = function(){
             startZoom.y = graphicopt.margin.top;
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
-            g.append('g').attr('class','trajectoryHolder').attr('pointer-events','none');
+            g.append('g').attr('class','timeHandleHolder')
+                .append('line').attr('class','timeStick')
+                .attr('y2',graphicopt.heightG())
+                .style('stroke','black')
+                .attr('stroke-dasharray','2 1');
         }
         return master
     };
