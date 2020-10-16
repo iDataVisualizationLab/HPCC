@@ -434,6 +434,9 @@ let Beeswarm = function(){
                 case 'contour':
                     draw_trajectory = draw_trajectory_contours;
                     break;
+                default:
+                    draw_trajectory = empty;
+                    break;
             }
             if (master.current_trajectory_data)
                 draw_trajectory(master.current_trajectory_data);
@@ -578,8 +581,10 @@ let Beeswarm = function(){
         master.current_trajectory_data = {g,d,data:data};
         draw_trajectory(master.current_trajectory_data);
     }
-    let draw_trajectory = draw_trajectory_contours;
+    let draw_trajectory = empty;
     master.current_trajectory_data = undefined;
+    function empty(){
+    }
     function draw_trajectory_line({g,d,data}){
         let dataDraw = data;
         if (!_.isArray(data[0]))

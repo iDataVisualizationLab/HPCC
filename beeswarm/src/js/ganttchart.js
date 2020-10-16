@@ -28,7 +28,7 @@ let Gantt = function(){
         centerY: function () {
             return this.margin.top+this.heightG()/2;
         },
-        hi: 10,
+        hi: 8,
         padding: 0.1,
         animationTime:1000,
         color:{}
@@ -73,7 +73,7 @@ let Gantt = function(){
 
         if (data.length&&data[0].drawData)
             g.select('.timeHandleHolder').selectAll('.vticks').data(data.filter(d=>d.value.find(e=>(e[0]<=time)&&(e[1]>=time))),d=>d.key)
-                .join(enter=>enter.append('text').attr('class','vticks').attr('y',d=>d.y).attr('dx',5).attr('dy','0.5rem').attr('x',d=>d.x).attr('opacity',0).text(d=>d.key)
+                .join(enter=>enter.append('text').attr('class','vticks').attr('y',d=>d.y).attr('dx',5).attr('dy',5).attr('x',d=>d.x).attr('opacity',0).text(d=>d.key)
                         .call(enter => enter.transition().duration(graphicopt.animationTime).attr('opacity',1).style('font-weight','bold'))
                     ,update=>update.call(update => update.style('font-weight',null).transition().duration(graphicopt.animationTime).attr('y',d=>d.y).attr('x',d=>d.x))
                     ,exit=>exit.call(exit => exit.transition().duration(graphicopt.animationTime).attr('x',d=>d.x+20).attr('opacity',0).remove()));
