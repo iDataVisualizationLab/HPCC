@@ -259,3 +259,8 @@ function getUrl({_start,_end,interval,value,compress}){
     const url = `https://influx.ttu.edu:8080/v1/metrics?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
     return url;
 }
+
+// data frame 2 monster format
+function convert2json(sampleS){
+
+}

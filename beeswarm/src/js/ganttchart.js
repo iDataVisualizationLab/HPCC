@@ -381,7 +381,7 @@ let Gantt = function(){
     }
     master.highlight = function(listKey){
         g.classed('onhighlight', true);
-        g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
+        g.selectAll('.element').filter(d=>listKey.find(e=>d&&(e===d.key)))
             .classed('highlight', true);
     };
     master.releasehighlight = function(){
