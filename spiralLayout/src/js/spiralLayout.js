@@ -419,17 +419,17 @@ let SpitalLayout = function(){
         subsvg.remove();
         subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
     };
-    function makeTrajectoryLegend(color){
+    function makeTrajectoryLegend(color,unit){
         const marginTop = 10;
         const marginBottom = 10;
         const marginLeft = 40;
-        const marginRight = 20;
+        const marginRight = 0;
         const width = 10;
         const height = 200;
         g.selectAll('.TrajectoryLegend').remove();
         const svg = g.append('g').attr('class','TrajectoryLegend')
             .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
-        svg.append('text').text('Trajectory heat map')
+        svg.append('text').text('Trajectory distribution (%)').attr('x',width + marginLeft + marginRight).style('text-anchor','end');
         let legend = svg.append('g').attr('class', 'legend')
             .attr('transform', `translate(${marginLeft},${marginTop})`);
 
@@ -464,13 +464,14 @@ let SpitalLayout = function(){
                 .attr("xlink:href", ramp(color.interpolator()).toDataURL());
 
             // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+            debugger
             if (!y.ticks) {
                 if (tickValues === undefined) {
                     const n = Math.round(ticks + 1);
                     tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
                 }
                 if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                    tickFormat = d3.format((tickFormat === undefined ? ",f" : tickFormat)+unit);
                 }
             } else {
                 legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
@@ -566,8 +567,19 @@ let SpitalLayout = function(){
             .size( [graphicopt.widthG(), graphicopt.heightG()])
             .bandwidth(graphicopt.trajectory.bandwidth)
             (dataDraw);
+        debugger
+        const base = _.last(d3.contourDensity().size( [graphicopt.widthG(), graphicopt.heightG()])
+            .bandwidth(graphicopt.trajectory.bandwidth) (dataDraw.map(d=>[graphicopt.widthG()/2, graphicopt.heightG()/2]))).value;
+        contours.forEach(c=>c.points = c.value/base*100);
+        // contours.forEach(c=>c.points = (graphicopt.widthG()* graphicopt.heightG())*c.value);
+        // contours[0].points = 100
+        // for (let i=1;i<contours.length;i++){
+        //     contours[i].points = (contours[0].value/contours[i].value)*100;
+        // }
+        // contours[contours.length-1].points = d3.geoPath().area(contours[contours.length-1])*contours[].value;
+        debugger
         const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
-            .domain(d3.extent(contours, d => d.value ));
+            .domain(d3.extent(contours, d => d.points ));
         g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
             .data(contours)
             .join('path')
@@ -575,9 +587,9 @@ let SpitalLayout = function(){
             .attr('class','trajectory trajectoryPath')
             .attr("d", d3.geoPath())
             .style('stroke',null)
-            .style("fill", d => color(d.value)).style('opacity',null);
-        debugger
-        makeTrajectoryLegend(color)
+            .style("fill", d => color(d.points)).style('opacity',null);
+
+        makeTrajectoryLegend(color,'%')
     }
     function mouseout(d){
         if(!isFreeze)
