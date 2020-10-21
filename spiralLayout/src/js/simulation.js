@@ -4,7 +4,7 @@ class Simulation {
     interval=1000;
     index=0;
     #currentTime;
-    isRealTime;
+    isRealTime; userDict={};
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];
@@ -17,7 +17,11 @@ class Simulation {
         if (!this.isRealTime) {
             let updatePromise=d3.json(url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{
+                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
+                        this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
+                    data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];if (!this.userDict[data.jobs_info[jID].user_name])
+                        this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
+                    data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
@@ -136,6 +140,9 @@ class Simulation {
         return d3.json(url).then(function(data){
             data.time_stamp=data.time_stamp.map(e=>new Date(e/1000000));
             d3.keys(data.jobs_info).forEach(jID=>{
+                if (!self.userDict[data.jobs_info[jID].user_name])
+                    self.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(self.userDict).length;
+                data.jobs_info[jID].user_name = self.userDict[data.jobs_info[jID].user_name];
                 data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
                 if(data.jobs_info[jID].start_time>9999999999999)
                 {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000

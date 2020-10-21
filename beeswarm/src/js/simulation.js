@@ -4,22 +4,20 @@ class Simulation {
     interval=1000;
     index=0;
     #currentTime;
-    isRealTime;
+    isRealTime; userDict={};
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];
     onTimeChange=[];
     onDataChange=[];
     onUpdateTime=[];
-    userDict={};
     onStartQuery=()=>{};
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{
-                    if (!this.userDict[data.jobs_info[jID].user_name])
+                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
                         this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
                     data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
