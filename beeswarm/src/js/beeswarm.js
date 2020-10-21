@@ -45,7 +45,7 @@ let Beeswarm = function(){
 
     let maindiv='#circularLayout';
     let isFreeze= false;
-    let data=[],main_svg,g,r=0;
+    let data=[],quadtree=[],main_svg,g,brush,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
@@ -85,7 +85,7 @@ let Beeswarm = function(){
             master.click.push(func)
             master.click.dict[id] = master.click.length-1;
         }
-    }
+    };
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
@@ -108,7 +108,55 @@ let Beeswarm = function(){
             d.y = graphicopt.heightG()-d.y-miniradius;
             d.r = d.r??miniradius;
             d.drawData[0].r = d.r;
-        })
+        });
+
+        quadtree = d3.quadtree()
+            .extent([[-1, -1], [graphicopt.widthG() + 1, graphicopt.heightG() + 1]])
+            .x(d=>d.x)
+            .y(d=>d.y)
+            .addAll(data);
+        function switchMode(){
+            if (graphicopt.actionMode==='zoom'){
+                d3.select(maindiv).select('.brushHolder').classed('hide',true);
+                d3.select(maindiv)
+                    .call(graphicopt.zoom.on("zoom", zoomed))
+            }else{
+                brush = d3.brush()
+                    .on("brush end", brushed);
+                d3.select(maindiv).select('.brushHolder').classed('hide',false)
+                    .call(brush)
+            }
+        }
+        function zoomed(){
+            g.attr("transform", d3.event.transform);
+            subgraph.el.forEach(svg=>svg.select('g.content').attr("transform", d3.event.transform))
+        }
+        function brushed() {
+            let selection =d3.event.selection;
+            data.forEach(d => {d.selected = false;
+                master.mouseout.forEach(f=>f(d.data));
+            });
+            master.releasehighlight();
+            if (selection) search(quadtree, selection);
+            let listkey = data.filter(d=>d.selected);
+            if (listkey.length){
+                master.highlight(listkey.map(d=>d.key));
+                master.mouseover.forEach(f=>listkey.forEach(d=>f(d.data)));
+            }
+        }
+        function search(quadtree, [[x0, y0], [x3, y3]]) {
+            quadtree.visit((node, x1, y1, x2, y2) => {
+                if (!node.length) {
+                    do {
+                        const x= node.data.x;
+                        const y= node.data.y;
+                        const d = node.data;
+                        d.selected = x >= x0 && x < x3 && y >= y0 && y < y3;
+                    } while ((node = node.next));
+                }
+                return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+            });
+        }
         let onode = g.selectAll(".outer_node")
             .data(data,d=>d.key);
         onode.call(updateOnode);
@@ -126,6 +174,9 @@ let Beeswarm = function(){
         onode_n.call(updateOnode);
 
         g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(alignmentScale))
+
+        switchMode();
+
         onFinishDraw.forEach(d=>d());
 
         function updateOnode(p){
@@ -379,13 +430,9 @@ let Beeswarm = function(){
             .style('overflow','visible');
         g = main_svg
             .select("g.content");
-        function zoomed(){
-            g.attr("transform", d3.event.transform);
-            subgraph.el.forEach(svg=>svg.select('g.content').attr("transform", d3.event.transform))
-        }
+
         if (g.empty()){
             g = d3.select(maindiv)
-                .call(graphicopt.zoom.on("zoom", zoomed))
                 .attr("width", graphicopt.width)
                 .attr("height", graphicopt.height)
                 .append("g")
@@ -396,6 +443,7 @@ let Beeswarm = function(){
                     isFreeze = false;
                     func();
                 }});
+            d3.select(maindiv).append('g').attr('class','brushHolder');
             let axis = g.append('g').attr('class','axis');
             axisx = axis.append('g').attr('class','axisx');
             axisy = axis.append('g').attr('class','axisy');

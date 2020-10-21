@@ -179,3 +179,13 @@ div.subgraph:hover .closeButton {
 #UserList tr.highlight {
     font-weight: bolder;
 }
+
+.brushHolder rect.overlay {
+    opacity:0
+}
+
+.brushHolder .selection {
+    fill: none;
+    stroke: currentColor;
+    stroke-dasharray: 4 2;
+}
