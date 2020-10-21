@@ -262,10 +262,21 @@ function getUrl({_start,_end,interval,value,compress}){
 
 // data frame 2 monster format
 function convert2json(sampleS){
+    alternative_service = serviceFullList.map(d=>d.text);
+    alternative_scale = alternative_service.map(d=>1)
     let dataout = {
-        jobs:{},
-        nodes: {},
+        jobs_info:{},
+        nodes_info: {},
         time_stamp:[]
     }
-
+    dataout.time_stamp =  sampleS.timespan.map(d=>(+d)*1000000)  // to nano second
+    d3.keys(sampleS).filter(d=>d!=='timespan').map(c=>{
+        dataout.nodes_info[c] = {};
+        const comp = sampleS[c];
+        serviceFullList.forEach(k=>{
+            dataout.nodes_info[c][k.text] = dataout.time_stamp.map((t,ti)=> comp[serviceListattr[k.idroot]][ti][k.id])
+        });
+        dataout.nodes_info[c]['job_id'] = dataout.time_stamp.map((t,ti)=> [])
+    });
+    return dataout
 }
