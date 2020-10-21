@@ -617,7 +617,9 @@ let Beeswarm = function(){
     master.highlight = function(listKey){
         g.classed('onhighlight', true);
         g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
-            .classed('highlight', true);
+            .classed('highlight', true)
+            .each(d=>{
+                (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});
     };
     master.releasehighlight = function(){
         g.classed('onhighlight', false);

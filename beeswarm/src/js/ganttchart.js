@@ -85,8 +85,16 @@ let Gantt = function(){
             g.select('.timeHandleHolder').selectAll('.vticks').data(data.filter(d=>d.value.find(e=>(e[0]<=time)&&(e[1]>=time))),d=>d.key)
                 .join(enter=>enter.append('text').attr('class','vticks').attr('y',d=>d.y).attr('dx',5).attr('dy',5).attr('x',d=>d.x).attr('opacity',0).text(d=>d.key)
                         .call(enter => enter.transition().duration(graphicopt.animationTime).attr('opacity',1).style('font-weight','bold'))
+                        .each(function(d){
+                            d.relatedNode.push(d3.select(this));
+                        })
                     ,update=>update.call(update => update.style('font-weight',null).transition().duration(graphicopt.animationTime).attr('y',d=>d.y).attr('x',d=>d.x))
-                    ,exit=>exit.call(exit => exit.transition().duration(graphicopt.animationTime).attr('x',d=>d.x+20).attr('opacity',0).remove()));
+                    ,exit=>exit.call(exit => {
+                        exit.each(function(d){
+                            d.relatedNode = d.relatedNode.filter((e)=>e.datum().key!==d.key);
+                        });
+                        exit.transition().duration(graphicopt.animationTime).attr('x',d=>d.x+20).attr('opacity',0).remove()
+                    }));
     }
     master.draw = function() {
         if (isFreeze)
@@ -113,7 +121,6 @@ let Gantt = function(){
             d.h = graphicopt.hi;
             d.x = 0;
             d.w = x(d.value[1])-d.x;
-            d.tooltip=d.key;
             d.drawData = [];
             d.value.forEach(e=>{
                 let item = e.map(f=>[x(f),-sizeScale(e.names.length)/2]);
@@ -139,6 +146,7 @@ let Gantt = function(){
                     range[1] = e.names.length;
                 d.drawData.push(item)
             })
+            d.relatedNode = [];
         });
         color.domain([range[1],range[0]]);
         // let sizeScale = d3.scaleLinear().domain(range).range([1,graphicopt.hi])
@@ -385,6 +393,7 @@ let Gantt = function(){
             if (d.node) {
                 d.node.classed('highlight', true);
             }
+            d.relatedNode.forEach(e=>e.classed('highlight', true))
             master.mouseover.forEach(f=>f(d));
         }
         if (d.tooltip) {
@@ -394,11 +403,15 @@ let Gantt = function(){
     master.highlight = function(listKey){
         g.classed('onhighlight', true);
         g.selectAll('.element').filter(d=>listKey.find(e=>d&&(e===d.key)))
-            .classed('highlight', true);
+            .classed('highlight', true)
+            .each(d=>{
+            (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});;
     };
     master.releasehighlight = function(){
         g.classed('onhighlight', false);
         g.selectAll('.element.highlight')
+            .classed('highlight', false);
+        g.selectAll('.vticks.highlight')
             .classed('highlight', false);
     };
     master.highlight2 = function(listKey){
@@ -419,6 +432,7 @@ let Gantt = function(){
             if(d.node){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
             }
+            d.relatedNode.forEach(e=>e.classed('highlight', false).classed('highlightSummary', false));
             g.selectAll('path.trajectory').remove();
             g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;

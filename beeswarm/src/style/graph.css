@@ -43,13 +43,15 @@ svg {
 .outer_node text.highlight2.hide{
     display: block;
 }
-.onhighlight .outer_node.highlight.highlightSummary .circleG .element{
+.onhighlight .outer_node.highlight.highlightSummary .circleG .element,
+.onhighlight .vticks{
     opacity: 0;
 }
 .onhighlight2 .outer_node .circleG .element.highlight2,
 .onhighlight2.onhighlight .outer_node .circleG .element.highlight.highlight2,
 .onhighlight .outer_node .circleG .element.highlight,
 .onhighlight .outer_node.highlight .circleG .element,
+.onhighlight .vticks.highlight,
 .onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
 {
     opacity: 1;
