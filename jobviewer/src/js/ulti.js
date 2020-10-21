@@ -262,5 +262,10 @@ function getUrl({_start,_end,interval,value,compress}){
 
 // data frame 2 monster format
 function convert2json(sampleS){
+    let dataout = {
+        jobs:{},
+        nodes: {},
+        time_stamp:[]
+    }
 
 }

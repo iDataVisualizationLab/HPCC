@@ -8,6 +8,7 @@ class Simulation {
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];
+    onTimeChange=[];
     onDataChange=[];
     onUpdateTime=[];
     onStartQuery=()=>{};
@@ -21,12 +22,16 @@ class Simulation {
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
-                        if (data.jobs_info[jID].finish_time)
+                        if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
-                })
+                });
                 this.data = data;
                 this.onDataChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
+                });
+
+                this.onDataChange.forEach(function(listener) {
+                    listener(data);
                 });
                 return d3.extent(data.time_stamp);
             });
@@ -62,6 +67,23 @@ class Simulation {
             this.stop()
         }
     }
+    queryRange(timepoint,step,list){
+        let self= this;
+        if(this.data&&list.length){
+            let index = self.data.time_stamp.findIndex(d=>d>timepoint);
+            index = (index===-1?self.data.time_stamp.length:index);
+            const nodes_info = {};
+            list.forEach(c => {
+                nodes_info[c] = {};
+                d3.keys(self.data.nodes_info[c]).forEach(s => {
+                    nodes_info[c][s] = self.data.nodes_info[c][s].slice(Math.max(0,index-step),index);
+                })
+            });
+            let time_stamp = self.data.time_stamp.slice(Math.max(0,index-step),index)
+            return {nodes_info,time_stamp};
+        }
+        return {};
+    }
     requestFromData(index){
         const self = this;
        return new Promise((resolve,refuse)=>{
@@ -77,7 +99,6 @@ class Simulation {
                     if (timer)
                         timer.stop();
                     const currentTime = self.data.time_stamp[index];
-
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
                         return (val.start_time > currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
                     });
@@ -119,7 +140,7 @@ class Simulation {
                 if(data.jobs_info[jID].start_time>9999999999999)
                 {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                     data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
-                    if (data.jobs_info[jID].finish_time)
+                    if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                         data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
             })
             data.currentTime = _.last(data.time_stamp);
