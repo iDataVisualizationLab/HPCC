@@ -56,36 +56,24 @@ let Beeswarm = function(){
     let trajectory = {};
     let subgraph = {el:[],limit:3};
     let radius,alignmentScale;
-    master.mouseover = [];
-    master.mouseover.dict={};
-    master.mouseout = [];
-    master.mouseout.dict={};
-    master.click = [];
-    master.click.dict={};
-    master.mouseoverAdd = function(id,func){
-        if (master.mouseover.dict[id]!==undefined)
-            master.mouseover[master.mouseover.dict[id]] = func;
-        else {
-            master.mouseover.push(func)
-            master.mouseover.dict[id] = master.mouseover.length-1;
+    createEventHandle('onBrush');
+    createEventHandle('offBrush');
+    createEventHandle('mouseover');
+    createEventHandle('mouseout');
+    createEventHandle('click');
+    function createEventHandle(key){
+        master[key] = [];
+        master[key].dict = {};
+        master[key+'Add'] = function(id,func){
+            if (master[key].dict[id]!==undefined)
+                master[key][master[key].dict[id]] = func;
+            else {
+                master[key].push(func)
+                master[key].dict[id] = master[key].length-1;
+            }
         }
     }
-    master.mouseoutAdd = function(id,func){
-        if (master.mouseout.dict[id]!==undefined)
-            master.mouseout[master.mouseout.dict[id]] = func;
-        else {
-            master.mouseout.push(func)
-            master.mouseout.dict[id] = master.mouseout.length-1;
-        }
-    }
-    master.clickAdd = function(id,func){
-        if (master.click.dict[id]!==undefined)
-            master.click[master.click.dict[id]] = func;
-        else {
-            master.click.push(func)
-            master.click.dict[id] = master.click.length-1;
-        }
-    };
+
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
@@ -141,8 +129,11 @@ let Beeswarm = function(){
             if (selection) search(quadtree, selection);
             let listkey = data.filter(d=>d.selected);
             if (listkey.length){
-                master.highlight(listkey.map(d=>d.key));
+                master.highlight(listkey.map(d=>d.key));;
                 master.mouseover.forEach(f=>listkey.forEach(d=>f(d.data)));
+                master.onBrush.forEach(f=>listkey.forEach(d=>f(d.data)));
+            }else{
+                master.offBrush.forEach(f=>f());
             }
         }
         function search(quadtree, [[x0, y0], [x3, y3]]) {

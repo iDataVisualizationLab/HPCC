@@ -500,6 +500,14 @@ function initdrawGantt(){
     drawObject.clickAdd('gantt',function(d){
         subObject.freezeHandle.bind(this)();
     });
+    drawObject.onBrushAdd('gantt',function(d){
+        subObject.freezeHandle.bind(this)();
+        // subObject.highlight2(d.user);
+    });
+    drawObject.offBrushAdd('gantt',function(d){
+        subObject.freezeHandle.bind(this)();
+        // subObject.releasehighlight2();
+    });
     subObject.mouseoverAdd('gantt',function(d){
         drawObject.highlight((d.value2.find(e=>(e[1]>=Layout.currentTime)&&(e[0]<=Layout.currentTime))||{names:[]}).names);
     });

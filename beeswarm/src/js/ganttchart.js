@@ -294,7 +294,7 @@ let Gantt = function(){
         }else{
             isFreeze = true;
             isFreeze = (function(){d3.select(this).dispatch('mouseout')}).bind(this);
-            d3.event.stopPropagation();
+            if (d3.event.stopPropagation) d3.event.stopPropagation();
         }
     }
     master.freezeHandle = freezeHandle;
@@ -395,6 +395,13 @@ let Gantt = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight', true))
             master.mouseover.forEach(f=>f(d));
+        }else{
+            g.classed('onhighlight2', true);
+            d3.select(this).classed('highlight2', true);
+            if (d.node) {
+                d.node.classed('highlight2', true);
+            }
+            d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
         if (d.tooltip) {
             tooltip.show(d.tooltip)
@@ -416,7 +423,7 @@ let Gantt = function(){
     };
     master.highlight2 = function(listKey){
         g.classed('onhighlight2', true);
-        g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
+        g.selectAll('.element').filter(d=>listKey.find(e=>d&&(e===d.key)))
             .classed('highlight2', true);
     };
     master.releasehighlight2 = function(){
@@ -437,6 +444,13 @@ let Gantt = function(){
             g.select('.TrajectoryLegend').remove();
             master.current_trajectory_data = undefined;
             master.mouseout.forEach(f=>f(d));
+        }else{
+            g.classed('onhighlight2', false);
+            d3.select(this).classed('highlight2', false);
+            if (d.node) {
+                d.node.classed('highlight2', false);
+            }
+            d.relatedNode.forEach(e=>e.classed('highlight2', false));
         }
         if (d.tooltip) {
             tooltip.hide()
