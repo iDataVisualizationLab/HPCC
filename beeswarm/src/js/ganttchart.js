@@ -297,7 +297,15 @@ let Gantt = function(){
             if (d3.event.stopPropagation) d3.event.stopPropagation();
         }
     }
+    function freezeHandleTrigger(value){
+        if (value){
+            isFreeze = ()=>{};
+        }else{
+            isFreeze = false;
+        }
+    }
     master.freezeHandle = freezeHandle;
+    master.freezeHandleTrigger = freezeHandleTrigger;
     master.main_svg = function(){return main_svg};
     master.init=function(){
         // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;

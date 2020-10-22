@@ -108,8 +108,8 @@ function userTable(d,type){
                 return job});
         else{
             debugger
-
-            jobData = Layout.computers_old[d.key].job_id[0].map(j=>{
+            if(Layout.computers_old[d.key])
+                jobData = Layout.computers_old[d.key].job_id[0].map(j=>{
                 const jobID = j.split('.');
                 const job=_.clone(Layout.jobs[j]);
                 if (job.node_list.indexOf(d.data.name)===-1)
@@ -501,11 +501,11 @@ function initdrawGantt(){
         subObject.freezeHandle.bind(this)();
     });
     drawObject.onBrushAdd('gantt',function(d){
-        subObject.freezeHandle.bind(this)();
+        subObject.freezeHandleTrigger.bind(this)(true);
         // subObject.highlight2(d.user);
     });
     drawObject.offBrushAdd('gantt',function(d){
-        subObject.freezeHandle.bind(this)();
+        subObject.freezeHandleTrigger.bind(this)(false);
         // subObject.releasehighlight2();
     });
     subObject.mouseoverAdd('gantt',function(d){

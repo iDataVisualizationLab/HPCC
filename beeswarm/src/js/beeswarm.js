@@ -129,7 +129,7 @@ let Beeswarm = function(){
             if (selection) search(quadtree, selection);
             let listkey = data.filter(d=>d.selected);
             if (listkey.length){
-                master.highlight(listkey.map(d=>d.key));;
+                master.highlight(listkey.map(d=>d.key));
                 master.mouseover.forEach(f=>listkey.forEach(d=>f(d.data)));
                 master.onBrush.forEach(f=>listkey.forEach(d=>f(d.data)));
             }else{

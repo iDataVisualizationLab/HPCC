@@ -47,12 +47,14 @@ svg {
 .onhighlight .outer_node.highlight.highlightSummary .circleG .element,
 .onhighlight .vticks{
     opacity: 0;
+    pointer-events: none;
 }
 .onhighlight2 .outer_node .circleG .element.highlight.highlight2,
 .onhighlight2.onhighlight .outer_node .circleG .element.highlight.highlight2,
 .onhighlight .outer_node .circleG .element.highlight,
 .onhighlight .outer_node.highlight .circleG .element,
 .onhighlight .vticks.highlight,
+.onhighlight2 .vticks.highlight.highlight2,
 .onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
 {
     opacity: 1;
