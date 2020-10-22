@@ -28,7 +28,7 @@ class Simulation {
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
                 });
                 this.data = data;
-                this.onDataChange.forEach(function(listener) {
+                this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
                 });
 
