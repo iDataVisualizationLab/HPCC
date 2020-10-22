@@ -122,6 +122,7 @@ let Beeswarm = function(){
                     .call(graphicopt.zoom.on("zoom", zoomed))
             }else{
                 brush = d3.brush()
+                    .extent([[graphicopt.margin.left,graphicopt.margin.top],[graphicopt.widthG(),graphicopt.heightG()]])
                     .on("brush end", brushed);
                 d3.select(maindiv).select('.brushHolder').classed('hide',false)
                     .call(brush)
@@ -443,7 +444,6 @@ let Beeswarm = function(){
                     isFreeze = false;
                     func();
                 }});
-            d3.select(maindiv).append('g').attr('class','brushHolder');
             let axis = g.append('g').attr('class','axis');
             axisx = axis.append('g').attr('class','axisx');
             axisy = axis.append('g').attr('class','axisy');
@@ -454,6 +454,8 @@ let Beeswarm = function(){
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
             g.append('g').attr('class','trajectoryHolder').attr('pointer-events','none');
+
+            d3.select(maindiv).append('g').attr('class','brushHolder');
         }
         return master
     };

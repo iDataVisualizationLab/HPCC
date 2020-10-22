@@ -242,6 +242,10 @@ function handleDataUser(users,jobs){
                 timeArray.push(end);
             uniqTime[start] = 1;
             uniqTime[end] = 1;
+            if(start<item.range[0])
+                item.range[0] = start;
+            else if(end>item.range[1])
+                item.range[1] = end
         });
         timeArray.sort((a,b)=>a-b);
         timeArray.forEach((t,ti)=>uniqTime[t]=ti);
@@ -267,6 +271,7 @@ function handleDataUser(users,jobs){
         });
         data.push(item);
     }
+    data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
 function handleRankingData(data){
