@@ -72,22 +72,6 @@
       "Phase Space"
     ]
   },
-  "TimeRadar": {
-    "title": "TimeRadar",
-    "thumb": "TimeRadar.png",
-    "url": "https://idatavisualizationlab.github.io/HPCC/TimeRadar/",
-    "tags": [
-      "MONSTER API"
-    ],
-    "pros": [
-      "System overview and time series information in one visualization",
-      "Provide simple and focus view (only display radar when group has changed)"
-    ],
-    "cons": [
-      "Depend on grouping method","User need introduction before using this visualization"
-    ],
-    "types": ["Radar chart", "Time Radar", "Line chart", "PCA", "t-SNE", "UMAP"]
-  },
   "ParallelCoordinates": {
     "title": "ParallelCoordinates",
     "thumb": "ParallelCoordinates.png",
@@ -107,6 +91,22 @@
       "Violin plot",
       "Stack stream"
     ]
+  },
+  "TimeRadar": {
+    "title": "TimeRadar",
+    "thumb": "TimeRadar.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/TimeRadar/",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "System overview and time series information in one visualization",
+      "Provide simple and focus view (only display radar when group has changed)"
+    ],
+    "cons": [
+      "Depend on grouping method","User need introduction before using this visualization"
+    ],
+    "types": ["Radar chart", "Time Radar", "Line chart", "PCA", "t-SNE", "UMAP"]
   },
   "Heatmap": {
     "title": "Heatmap",
