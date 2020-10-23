@@ -1,0 +1,154 @@
+{
+  "Hiperview": {
+    "title": "Hiperview",
+    "thumb": "Hiperview.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html",
+    "tags": [
+      "Real-time supported"
+    ],
+    "pros": [
+      "Display physical layout",
+      "Time data is encoded in the sequence of heat map cell",
+      "Radar chart summary bundle every timestep"
+    ],
+    "cons": [
+      "Limit timestep display"
+    ],
+    "types": [
+      "Heatmap",
+      "Area chart",
+      "Radar chart",
+      "Box plot",
+      "Dynamic t-SNE"
+    ]
+  },
+  "TimeRadar": {
+    "title": "TimeRadar",
+    "thumb": "TimeRadar.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/TimeRadar/",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "System overview and time series information in one visualization",
+      "Provide simple and focus view (only display radar when group has changed)"
+    ],
+    "cons": [
+      "Depend on grouping method","User need introduction before using this visualization"
+    ],
+    "types": ["Radar chart", "Time Radar", "Line chart", "PCA", "t-SNE", "UMAP"]
+  },
+  "ParallelCoordinates": {
+    "title": "ParallelCoordinates",
+    "thumb": "ParallelCoordinates.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html",
+    "tags": [],
+    "pros": [
+      "Capture System status",
+      "Show all range of individual metric",
+      "All metrics visible"
+    ],
+    "cons": ["Lack of physical information",
+      "Hard to follow the status of single node",
+      "Need more space for if increase the number of metrics",
+      "heavy render time - application slow down when the number of node and time-step increase"],
+    "types": [
+      "Parallel coordinate",
+      "Violin plot",
+      "Stack stream"
+    ]
+  },
+  "Heatmap": {
+    "title": "Heatmap",
+    "thumb": "Heatmap.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/heatmap/",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Display physical layout",
+      "Time data is encoded in the sequence of heat map cell",
+      "Radar chart summary bundle every timestep"
+    ],
+    "cons": [
+      "Limit timestep display"
+    ],
+    "types": [
+      "Heatmap",
+      "Area chart",
+      "Radar chart",
+      "Box plot",
+      "Dynamic t-SNE"
+    ]
+  },
+  "JobViewer": {
+    "title": "JobViewer",
+    "thumb": "JobViewer.gif",
+    "url": "https://idatavisualizationlab.github.io/HPCC/jobviewer/index.html",
+    "tags": [
+      "Real-time supported","MONSTER API"
+    ],
+    "pros": [
+      "Capture System status","Clear snapshot of single metric","User , job and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information","Lack of entire time range illustration"
+    ],
+    "types": [
+      "Radar chart","Circle parking"
+    ]
+  },
+  "Scagnostics Viewer": {
+    "title": "Scagnostics Viewer",
+    "thumb": "Scag.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/scagnosticsViewer/index.html",
+    "tags": [
+      "Real-time supported","MONSTER API"
+    ],
+    "pros": [
+      "Capture System status","All metrics available"
+    ],
+    "cons": [
+      "Not common features (scagnostics)","Lack of physical information","Lack of entire time range illustration"
+    ],
+    "types": [
+      "Scatter plot","Area chart","Violin plot"
+    ]
+  },
+  "Spiral Layout": {
+    "title": "Spiral Layout",
+    "thumb": "Circularlayout.gif",
+    "url": "https://idatavisualizationlab.github.io/HPCC/spiralLayout/index.html",
+    "tags": [
+      "Real-time supported","MONSTER API"
+    ],
+    "pros": [
+      "Capture System status","Snapshot of single metric","Highlight trajectory of entire time range of single compute"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "Radar chart","Circular layout","Density Contour"
+    ]
+  },
+  "JobSwarm": {
+    "title": "JobSwarm",
+    "url": "https://idatavisualizationlab.github.io/HPCC/beeswarm/index.html",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Capture System status",
+      "Snapshot of single metric",
+      "Highlight trajectory of entire time range of single compute",
+      "User , job and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "Bee swarm","Time line","Density Contour"
+    ]
+  }
+}
