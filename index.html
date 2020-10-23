@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <style>
         .card-img-top{
-            height: 337px;
+            height: 200px;
             object-fit: cover;
             object-position: 0 0;
             /*height: auto;*/
@@ -29,7 +29,7 @@
     </a>
 </nav>
 <main>
-    <section class="row justify-content-md-center">
+    <section class="row justify-content-md-center jumbotron">
         <div class="justify-content-md-center row"  style="width: 90%">
             <div class="btn-group" role="group" aria-label="Basic example">
                 <button type="button" class="btn btn-secondary">Left</button>
@@ -78,12 +78,11 @@
             .data(data).join('div')
             .attr('class','detail')
             .attr('data-aos',(d,i)=>(i%2)?'fade-left':'fade-right')
-            .attr('class','row')
             .attr('id',d=>str2class(d.key))
             .html(d=>`<hr><h3>${d.key}</h3><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
-    <li>Pros:<ul>${d.value.types.map(e=>`<li>${e}</li>`).join('')}</ul></li>
+    <li>Visualization supported:<ul>${d.value.types.map(e=>`<li>${e}</li>`).join('')}</ul></li>
 </ul>
  <img src="src/image/${d.value.thumb}" class="img-fluid" alt="...">
 `)
