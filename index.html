@@ -34,17 +34,19 @@
     </style>
     <title>HPCC</title>
 </head>
-<body>
-<nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="#">
-        <img src="HiperView/images/TTUlogo.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
-    </a>
-    <div class="align-middle">HPCC visualization</div>
-    <img src="src/image/iDVL.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
-</nav>
-<main>
-    <section class="row justify-content-md-center jumbotron">
-        <div class="justify-content-md-center row"  style="width: 90%">
+<body data-spy="scroll" data-target="#gallery_tab" data-offset="0">
+<header>
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="HiperView/images/TTUlogo.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+        </a>
+        <div class="align-middle">HPCC visualization</div>
+        <img src="src/image/iDVL.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+    </nav>
+</header>
+<main role="main">
+    <section class="jumbotron text-center">
+        <div class="justify-content-md-center"  style="width: 90%">
 <!--            <div class="btn-group" role="group" aria-label="Basic example">-->
 <!--                <button type="button" class="btn btn-secondary">All</button>-->
 <!--                <button type="button" class="btn btn-secondary">Realtime-supported</button>-->
@@ -63,11 +65,11 @@
             </div>
         </div>
     </section>
-    <section class="row" data-spy="scroll" data-target="#gallery_tab" data-offset="0">
-        <div class="container" id="detailList">
+    <div>
+        <div class="container" id="detailList" style="overflow: hidden">
             <div></div>
         </div>
-    </section>
+    </div>
     <a type="button" class="btn btn-small btn-outline-primary" id="toTop" onclick="topFunction()" data-toggle="tooltip" data-placement="top" title="Go to top">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
@@ -121,7 +123,8 @@
             .attr('class','detail')
             .attr('data-aos',(d,i)=>(i%2)?'fade-left':'fade-right')
             .attr('id',d=>str2class(d.key))
-            .html(d=>`<hr><h3>${d.key}</h3><ul>
+            .html(d=>`<hr><div class="row justify-content-between"><h3>${d.key}</h3>
+    <a type="button" class="btn btn-success float-right" href="${d.value.url}" target="_blank">Demo</a></div><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Visualization supported:${d.value.types.map(e=>`<span class="badge tag" >${e}</span>`).join('|')}</li>
