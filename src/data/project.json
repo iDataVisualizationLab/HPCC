@@ -134,6 +134,7 @@
   },
   "JobSwarm": {
     "title": "JobSwarm",
+    "thumb": "jobswarm.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/beeswarm/index.html",
     "tags": [
       "MONSTER API"
