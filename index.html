@@ -23,6 +23,14 @@
             bottom:20px;
             right:20px;
         }
+        .tag {
+            /*margin: 0 2px;*/
+            /*color: white;*/
+            font-weight: unset;
+        }
+        .gtab .card:hover {
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
     </style>
     <title>Hello, world!</title>
 </head>
@@ -36,11 +44,11 @@
 <main>
     <section class="row justify-content-md-center jumbotron">
         <div class="justify-content-md-center row"  style="width: 90%">
-            <div class="btn-group" role="group" aria-label="Basic example">
-                <button type="button" class="btn btn-secondary">Left</button>
-                <button type="button" class="btn btn-secondary">Middle</button>
-                <button type="button" class="btn btn-secondary">Right</button>
-            </div>
+<!--            <div class="btn-group" role="group" aria-label="Basic example">-->
+<!--                <button type="button" class="btn btn-secondary">All</button>-->
+<!--                <button type="button" class="btn btn-secondary">Realtime-supported</button>-->
+<!--                <button type="button" class="btn btn-secondary">Right</button>-->
+<!--            </div>-->
             <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 justify-content-md-center" id="gallery_tab">
                 <div class="col mb-4 gtab">
                     <div class="card h-100">
@@ -59,7 +67,11 @@
             <div></div>
         </div>
     </section>
-    <a type="button" class="btn btn-small btn-outline-primary" id="toTop" onclick="topFunction()"></a>
+    <a type="button" class="btn btn-small btn-outline-primary" id="toTop" onclick="topFunction()" data-toggle="tooltip" data-placement="top" title="Go to top">
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+    </svg>
+    </a>
 </main>
 <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -69,6 +81,9 @@
 
 <script>
     AOS.init();
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
     //Get the button:
     mybutton = document.getElementById("toTop");
 
@@ -90,10 +105,11 @@
     }
     d3.json('src/data/project.json').then(_data=>{
         const data = d3.entries(_data);
+        // const typechartTag = d3.scaleOrdinal(d3.schemeCategory10);
         d3.select('#gallery_tab').selectAll('div.gtab')
         .data(data).join('div')
         .attr('class','gtab col mb-4')
-            .html(d=>`<a href="#${str2class(d.key)}"><div class="card h-100">
+            .html(d=>`<a href="#${str2class(d.key)}"><div class="card h-100 shadow-sm">
                         <img src="src/image/${d.value.thumb}" class="card-img-top" alt="...">
                         <div class="card-body">
                             <span class="card-title">${d.value.title}</span>
@@ -107,7 +123,7 @@
             .html(d=>`<hr><h3>${d.key}</h3><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
-    <li>Visualization supported:<ul>${d.value.types.map(e=>`<li>${e}</li>`).join('')}</ul></li>
+    <li>Visualization supported:${d.value.types.map(e=>`<span class="badge tag" >${e}</span>`).join('|')}</li>
 </ul>
  <img src="src/image/${d.value.thumb}" class="img-fluid" alt="...">
 `)
