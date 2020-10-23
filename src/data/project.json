@@ -22,6 +22,56 @@
       "Dynamic t-SNE"
     ]
   },
+  "HiperVR": {
+    "title": "HiperVR",
+    "thumb": "HiperVR_2.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html",
+    "tags": [],
+    "pros": [
+      "Display physical layout"
+    ],
+    "cons": [
+      "Lack of entire time range illustration"
+    ],
+    "types": [
+      "Heatmap",
+      "Scatter plot",
+      "Paraset"
+    ]
+  },
+  "ClusterView": {
+    "title": "ClusterView",
+    "thumb": "ClusterView.PNG",
+    "url": "https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html",
+    "tags": [],
+    "pros": [
+      "Inspect Clustering result"
+    ],
+    "cons": [
+    ],
+    "types": [
+      "Radar chart"
+    ]
+  },
+  "Phase Space": {
+    "title": "Phase Space",
+    "thumb": "PhaseSpace.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html",
+    "tags": [
+      "Real-time supported"
+    ],
+    "pros": [
+      "Capture System status of single metric",
+      "Focus on similarity of the trend"
+    ],
+    "cons": [
+      "Lack of physic information","Single metric","Not a common visualization"
+    ],
+    "types": [
+      "Scatter plot",
+      "Phase Space"
+    ]
+  },
   "TimeRadar": {
     "title": "TimeRadar",
     "thumb": "TimeRadar.png",
