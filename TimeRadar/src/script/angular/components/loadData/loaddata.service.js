@@ -16,7 +16,8 @@ angular.module('hpccApp')
             if (!userDict[j.user])
                 userDict[j.user] = 'user'+d3.keys(userDict).length;
             j.user = userDict[j.user];
-        })
+        });
+        job = job.filter(d=>[17,0,11,5,3,23,2].indexOf(+d.user.replace('user',''))!==-1);
         return job;
     }
     $('#clusterInfo_input_file').on('input',(evt)=>{
@@ -127,8 +128,6 @@ angular.module('hpccApp')
             initTsnedata();
             if(job){
                 sampleJobdata = handleJobData(job);
-
-
             }else
                 sampleJobdata = [{
                     jobID: "1",

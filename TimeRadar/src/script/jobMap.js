@@ -2366,6 +2366,7 @@ let JobMap = function() {
     }
 
     function updateLayout(data){
+
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
         tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'#Hosts'}, {key:'Jobs',value: '#Jobs'}];
@@ -2373,7 +2374,11 @@ let JobMap = function() {
             'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
             'Hosts': {id:'Hosts',text:'#Hosts',type:'num',x: 120,y:20,width:60},
             'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 170,y:20,width:52},
+            // 'CPU1 Temp': {id: "CPU1 Temp", type: "graph", x: 185, y: 0, width: 70},
+            // 'Power consumption':{id: "Power consumption",type: "graph",width: 70,x: 255,y: 0}
+
         }
+        debugger
         let offset = tableLayout.column['Jobs'].x;
         let padding = 15;
         if (showtable)
@@ -2384,6 +2389,7 @@ let JobMap = function() {
             })
         else
             tableLayout.row.width = offset+tableLayout.row["graph-width"]+padding;
+        debugger
         // tableLayout.row.width +=70;
         tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:70};
         tableHeader.push({key:'PowerUsage', value:'kWh'});
