@@ -280,3 +280,17 @@ function convert2json(sampleS){
     });
     return dataout
 }
+function convertJob2file(data){
+    d3.entries(data.jobs_info).map(d=>{
+        const item =  {
+            jobID: d.key,
+            nodes: d.value.node_list.map(d=>`compute-${d.split('.')[2]}-${d.split('.')[3]}`),
+            startTime: new Date(d.value.start_time).toGMTString(),
+            submitTime: new Date(d.value.submit_time).toGMTString(),
+            user: d.value.user_name
+        };
+        if (d.value.finish_time)
+            item.endTime = new Date(d.value.finish_time).toGMTString();
+        return item;
+    })
+}

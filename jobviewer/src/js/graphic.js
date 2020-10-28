@@ -11,7 +11,7 @@ let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>$
 let graphicopt = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
     width: window.innerWidth,
-    height: window.innerHeight,
+    height: 28*15,
     scalezoom: 1,
     zoom:d3.zoom(),
     widthView: function () {
@@ -34,7 +34,7 @@ let graphicopt = {
     },
     color:{},
     rect:{
-        "width": 125,
+        "width": 100,//125,
         "height": 16,
     },
     pack:{
@@ -111,8 +111,10 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     serviceControl();
     graphicopt.radaropt.schema = serviceFullList;
     isFreeze= false;
-    graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
-    graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
+    // graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
+    // graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
+    graphicopt.height = 34*15;
+    graphicopt.width = ((34*15)/document.getElementById('circularLayoutHolder').getBoundingClientRect().height)*document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     debugger
     let innerKey = USER;
     let innerObj = users;
@@ -215,7 +217,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     let max_radius = d3.max(pack_all.children,d=>d.r);
     const rack_arr = Layout.tree.children.map(function(d, i) {
         const pos = angle2position(outerX(i),graphicopt.diameter()/2)
-        d.x = pos[0];
+        d.x = pos[0]+(pos[0]>0?1:-1)*100;
         d.y = pos[1]; //- max_radius*2-30;
         const pos_bundle = angle2position(outerX(i),graphicopt.diameter()/2-max_radius-20)
         d.x_bundle = pos_bundle[0];
@@ -391,6 +393,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     onode_n.append("text")
         .attr('class','groupLabel')
         .attr("dy", ".31em")
+        .style("font-size", 14)
         .style('pointer-events','all')
         .on('click',function(){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();})
         .on("mouseover", function(d){
@@ -432,8 +435,13 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         .style('fill-opacity',0.8)
         .attr('rx',3);
     inode_n.append("text")
+        .attr('class','leftAlign')
         .attr('text-anchor', 'start')
         .attr("transform", "translate(" + 5 + ", " + 13 + ")");
+    inode_n.append("text")
+        .attr('class','rightAlign')
+        .attr('text-anchor', 'end')
+        .attr("transform", "translate(" + (graphicopt.rect.width-5) + ", " + 13 + ")");
     inode_n.call(updateInode);
 
 
@@ -492,9 +500,12 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             .style('fill',d=>d.color)
             .attr('height', graphicopt.rect.height)
             .attr('id', d=>d.key);
-        p.select('text')
+        p.select('text.leftAlign')
             .style('fill',d=>d.color==='black'?'white':null)
-            .html(d=>d.key+'  <tspan style="font-weight: bold">'+d.value.job.length+'</tspan> jobs');
+            .html(d=>d.key);
+        p.select('text.rightAlign')
+            .style('fill',d=>d.color==='black'?'white':null)
+            .html(d=>'<tspan style="font-weight: bold">'+d.value.job.length+`</tspan> job<tspan opacity="${(d.value.job.length)>1?1:0}">s</tspan>`);
         p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")");
         return p;
     }
@@ -547,7 +558,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             let childrenNode = {};
             node = svg.select('g.circleG')
                 .selectAll("g.element")
-                .data(root.descendants(), d => d.data.name)
+                .data(root.descendants(), d=>d.data.name)
                 .call(updateNode);
 
             node.exit().remove();
@@ -619,7 +630,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                     .attr("fill", d => {
                         if(d.children) {
-                            d.color = '#dddddd';
+                            d.color = '#bbb'//'#dddddd';
                             return d.color;
                         }else {
                             d.color = colorItem(d.data.metrics[serviceName]);
@@ -629,8 +640,11 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                         // return d.color
                     })
                     .style('stroke-width',d=>{
-                        return circleStrokeScale(d.data.relatedNodes.length);
-                    });
+                        return d.children?0:(d.data.relatedNodes.length?circleStrokeScale(d.data.relatedNodes.length):1);
+                    })
+                    // .style('stroke',d=>{
+                    //     return d.data.relatedNodes.length?'black':'white'
+                    // });
                 return node;
             }
         }
@@ -1090,7 +1104,7 @@ let nest = function (seq, keys) {
 
 function pack (data){
     return d3.pack()
-        .size([graphicopt.diameter()/5*3, graphicopt.diameter()/5*3])
+        .size([document.getElementById('circularLayoutHolder').getBoundingClientRect().height/5*3, document.getElementById('circularLayoutHolder').getBoundingClientRect().height/5*3])
         .padding(3)
         (d3.hierarchy(data)
             .sum(d => d.value)

@@ -589,8 +589,9 @@ function updateDimension() {
                     return d3.select(this).call(getScale(d));
                 })
                 .append("svg:text")
-                    .attr("text-anchor", "start")
-                    .style('transform','rotate(-15deg) translate(-5px,-6px)')
+                    // .attr("text-anchor", "start")
+                    .attr("text-anchor", "middle")
+                    // .style('transform','rotate(-15deg) translate(-5px,-6px)')
                 // .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
                 .attr("y", -14)
                 .attr("x", 0)
@@ -689,6 +690,10 @@ function initFunc() {
 
     // Convert quantitative scales to floats
     data = object2DataPrallel(sampleS);
+    serviceFullList_withExtra[3].range = [20,90];
+    serviceFullList_withExtra[4].range = [20,90];
+    serviceFullList_withExtra[8].range = [6000,14000];
+    serviceFullList_withExtra[12].range = [60,180];
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions =serviceFullList_withExtra.filter(function (s) {
         let k = s.text;
@@ -706,6 +711,8 @@ function initFunc() {
             xtempscale.axisCustom = s.axisCustom;
         return s.enable?xtempscale:false;
     }).map(s=>s.text));
+    yscale["username"].domain([-0.5,userList.length+0.5]);
+    yscale["username"].axisCustom.ticks = userList.length+1;
     d3.select('#search').attr('placeholder',`Search host e.g ${data[0].compute}`);
     // Add a group element for each dimension.
     updateDimension();
@@ -874,6 +881,7 @@ function create_legend(colors,brush) {
 function render_range(selection, i, max, opacity) {
     selection.slice(i,max).forEach(function(d) {
         path(d, foreground, colorCanvas(selectedService==null?d.group:d[selectedService],opacity));
+
         // if (animationtime){
         //     timel.stop();
         //     animationtime = false;
@@ -1169,6 +1177,7 @@ function position(d) {
 
 // Handles a brush event, toggling the display of foreground lines.
 function redraw(selected) {
+    selected = selected.filter(d=>(d['Inlet Temp']!==undefined)&&(d['CPU1 Temp']!==undefined))
     if (selected.length < data.length && selected.length > 0) {
         d3.select("#keep-data").attr("disabled", null);
         d3.select("#exclude-data").attr("disabled", null);
@@ -1188,7 +1197,7 @@ function redraw(selected) {
         tallies[v] = tallies[v] || [];
     });
 
-
+    selected.sort((a,b)=>a.username-b.username)
     // Render selected lines
     paths(selected, foreground, brush_count, true);
 }
@@ -1302,10 +1311,21 @@ function plotViolin() {
                     vMax = d3.max(value, d => d[1]);
                     dimGlobal[1] = Math.max(vMax, dimGlobal[1]);
                     color = colorCluster;
-                } else {
-                    value = [axisHistogram(s.text, s.range, selected.map(e => e[d]))];
-                    vMax = d3.max(value[0], d => d[1]);
+                }
+                // else {
+                //     value = [axisHistogram(s.text, s.range, selected.map(e => e[d]))];
+                //     vMax = d3.max(value[0], d => d[1]);
+                //     dimGlobal[1] = Math.max(vMax, dimGlobal[1]);
+                // }
+                else{
+                    let cs = {};
+                    userList.forEach((c, ci) => cs[ci] = []);
+                    selected.forEach(e => {if (cs[e.username]) cs[e.username].push(e[d]);});
+                    value = userList.map((c, ci) => axisHistogram(c, s.range, cs[ci]));
+                    vMax = d3.max(value, d => d[1]);
                     dimGlobal[1] = Math.max(vMax, dimGlobal[1]);
+                    color = service_custom_added[2].color;
+
                 }
                 dimensiondata[d] = {key: s, value: value, color: color};
 

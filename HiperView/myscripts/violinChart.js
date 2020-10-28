@@ -410,12 +410,14 @@ d3.viiolinChart = function () {
                     .y(function (d) {
                         return (h(d[0]))
                     })
-                if (graphicopt.isStack)
+                if (graphicopt.isStack){
+                    let xNum2 = d3.scaleSqrt().domain(xNum.domain()).range(xNum.range());
                     createviolin.x0(function (d) {
-                        return (xNum(d[2]))
+                        return (xNum2(d[2]))
                     }).x1(function (d) {
-                        return (xNum(d[1]))
+                        return (xNum2(d[1]))
                     })
+                }
                 // .curve(d3.curveCatmullRom);
                 circleoption = function (d){
                     return {

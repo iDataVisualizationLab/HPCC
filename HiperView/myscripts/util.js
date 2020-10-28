@@ -1168,12 +1168,12 @@ function axisHistogram(text,range,d){
         var histogram = d3.histogram()
             .domain(scale.domain())
             // .thresholds(d3.range(0,20).map(d=>scale(d)))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-            .thresholds(scale.ticks(100))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .thresholds(scale.ticks(50))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
             .value(d => d);
         let hisdata = histogram(d);
 
         let start=-1,startcheck=true,end= hisdata.length-1;
-        let sumstat = hisdata.map((d, i) => {
+        let sumstat_f = hisdata.map((d, i) => {
             let temp = [d.x0 + (d.x1 - d.x0) / 2, (d || []).length];
             if (startcheck && temp[1]===0)
                 start = i;
@@ -1183,10 +1183,13 @@ function axisHistogram(text,range,d){
                     end = i;
             }
             return temp});
-        if (start===end)
-            sumstat = [];
-        else
-            sumstat = sumstat.filter((d,i)=>i>start&&i<=end);
+        let sumstat = [];
+        if (start!==end){
+            sumstat_f.forEach((d,i)=>{
+                if (i>start-1&&i<=end+1)
+                    sumstat.push(d)
+            });
+        }
         r = {
             axis: text,
             q1: ss.quantile(d, 0.25),

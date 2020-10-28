@@ -448,10 +448,10 @@ let SpitalLayout = function(){
         }// Sequential
         else if (color.interpolator) {
             let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
+                    .interpolator(d3.interpolateRound(height,0)),
                 {
                     range() {
-                        return [0, height];
+                        return [height,0];
                     }
                 });
 
@@ -461,7 +461,7 @@ let SpitalLayout = function(){
                 .attr("width", width)
                 .attr("height", height)
                 .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+                .attr("xlink:href", ramp(color.interpolator(),undefined,true).toDataURL());
 
             // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
             debugger
@@ -478,13 +478,19 @@ let SpitalLayout = function(){
             }
         }
 
-        function ramp(color, n = 256) {
+        function ramp(color, n = 256,inverse=false) {
             const canvas = createContext(1, n);
             const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
+            if (inverse)
+                for (let i = 0; i < n; ++i) {
+                    context.fillStyle = color(i / (n - 1));
+                    context.fillRect(0, n-1-i, 1, 1);
+                }
+            else
+                for (let i = 0; i < n; ++i) {
+                    context.fillStyle = color(i / (n - 1));
+                    context.fillRect(0, i, 1, 1);
+                }
             return canvas;
         }
 

@@ -11,6 +11,16 @@ angular.module('hpccApp')
     Loaddata.reset = function(hard) {
         Loaddata.data = Dataset.currentDataset;
     };
+    function handleJobData(job){
+        let userDict = {};
+        job.forEach(j=>{
+            if (!userDict[j.user])
+                userDict[j.user] = 'user'+d3.keys(userDict).length;
+            j.user = userDict[j.user];
+        });
+        console.log(userDict)
+        return job;
+    }
     $('#clusterInfo_input_file').on('input',(evt)=>{
         let f = evt.target.files[0];
         var reader = new FileReader();
@@ -65,20 +75,26 @@ angular.module('hpccApp')
             }
 
             dataInformation.filename = choice.name;
-            if(choice.category==='hpcc')
-                setTimeout(() => {
-                    console.time("totalTime:");
-                    promiseQueue.then(d3.json(choice.url).then(function(data) {
-                            console.timeEnd("totalTime:");
-
-                            loadata1(data);
-
-                    }));
-                }, 0);
-            else
+        if(choice.category==='hpcc')
+            setTimeout(() => {
+                console.time("totalTime:");
+                d3.json(choice.url).then(function(data) {
+                    console.timeEnd("totalTime:");
+                    if (!choice.values) {
+                        d3.json(choice.url.replace(/(\w+).json|(\w+).csv/, '$1_job_compact.json')).then(function (job) {
+                            loadata1(data, job);
+                        }).catch(function(){
+                            loadata1(data, undefined);
+                        });
+                    }else{
+                        loadata1(choice.values, choice.jobs);
+                    }
+                });
+            }, 0);
+        else
                 readFilecsv(choice.url,choice.separate,choice)
 
-        function loadata1(data){
+        function loadata1(data,job){
 
             data['timespan'] = data.timespan.map(d=>new Date(d3.timeFormat('%a %b %d %X CDT %Y')(new Date(+d?+d:d.replace('Z','')))));
             _.without(Object.keys(data),'timespan').forEach(h=>{
@@ -106,7 +122,12 @@ angular.module('hpccApp')
                     array_normalize.timestep =i;
                     return array_normalize;
                 })});
+            if(job){
+                sampleJobdata = handleJobData(job);
 
+
+            }else
+                sampleJobdata = [];
             if (choice.url.includes('influxdb')){
                 processResult = processResult_influxdb;
                 db = "influxdb";

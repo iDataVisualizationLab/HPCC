@@ -1,11 +1,12 @@
 var query_time;
 let cluster_info=[];
-let dataRaw;
+let dataRaw,sampleJobdata=[];
 function initApp(){
     // load filter file
         preloader(true,undefined,'Read data file...');
         readFilecsv(d3.select('#datacom').node().value);
 }
+let userList = ['user6','user12']
 function formatService(init){
     serviceLists.forEach(s=>{
         if(s.text.split('vs.').length>1) {
@@ -18,9 +19,13 @@ function formatService(init){
     conf.serviceLists = serviceLists;
     conf.serviceListattr = serviceListattr;
     conf.serviceListattrnest = serviceListattrnest;
-    service_custom_added = [{text:'Time',id:-1,enable:true,isDate:true,class:"sorting_disabled"},{text:'Cluster',id:-2,enable:false,hide:true,
+    service_custom_added = [{text:'Time',id:-1,enable:true,isDate:true,class:"sorting_disabled"},
+        {text:'Cluster',id:-2,enable:false,hide:true,
         color:colorCluster,
-        axisCustom:{ticks:0,tickFormat:d=> `Group ${cluster_info[d].orderG+1}`,tickInvert:d=> cluster_info.find(c=>c.name===d).index}}];
+        axisCustom:{ticks:0,tickFormat:d=> `Group ${cluster_info[d].orderG+1}`,tickInvert:d=> cluster_info.find(c=>c.name===d).index}},
+        {text:'username',id:-3,enable:true,hide:false,
+            color:d3.scaleOrdinal([d3.schemeCategory10[1],d3.schemeCategory10[0],'#666']).domain([...userList,'']),
+            axisCustom:{ticks:3,tickFormat:d=> `${[...userList,''][d]===''?'Other users':([...userList,''][d]===undefined?'':[...userList,''][d])}`,tickInvert:(d,i)=> [...userList,''].indexOf(d)}}];
     serviceFullList_withExtra = _.flatten([service_custom_added,serviceFullList]);
     drawFiltertable();
 }
@@ -123,12 +128,19 @@ function object2DataPrallel(ob){
                 eachIn.Cluster =com.value['arrcluster']?(com.value['arrcluster'][i]):0;
                 eachIn.name = com.key + ', ' + stickKeyFormat(eachIn[stickKey]);
                 eachIn.id = com.key + "-" + count;
+                // eachIn.usernames = _.uniq(sampleJobdata.filter(d=>d.nodes.indexOf(com.key)&&(d.endTime?(new Date(d.endTime)<=sampleS.timespan[i]):true)&&(new Date(d.startTime)>=sampleS.timespan[i]))
+                //     .map(d=>d.user));
+                // eachIn.username = eachIn.usernames.indexOf('user12')!==-1?'user12':'';
+                eachIn.username_or = (sampleJobdata.find(d=>userList.indexOf(d.user)!==-1&&d.nodes.indexOf(com.key)!==-1&&(d.endTime?(new Date(d.endTime)>=sampleS.timespan[i]):true)&&(new Date(d.startTime)<=sampleS.timespan[i]))??{user:''}).user;
+                eachIn.username_or2 = (sampleJobdata.find(d=>d.nodes.indexOf(com.key)!==-1&&(d.endTime?(new Date(d.endTime)>=sampleS.timespan[i]):true)&&(new Date(d.startTime)<=sampleS.timespan[i]))??{user:''}).user;
+                eachIn.username = [...userList,''].indexOf( eachIn.username_or);
                 count++;
-                newdata.push(eachIn);
+                newdata.push(eachIn)
             }
         }
 
     });
+
     // if(stickKey!==TIMEKEY){
     //     serviceFullList.push({text: stickKey,
     //         id: serviceFullList.length,
@@ -139,6 +151,11 @@ function object2DataPrallel(ob){
     //     })
     // // }
     // return newdata.filter(d=>d.Time< new Date('Thu Mar 21 2019 16:20:00 GMT-0500 (Central Daylight Time)'))
+    let nest = d3.nest().key(d=>d.username).entries(newdata);
+    let minN = d3.min(nest,d=>d.values.length);
+
+    newdata = [];
+    nest.forEach(d=>d.values.slice(0,minN*2).forEach(e=>newdata.push(e)));
     return newdata;
 }
 

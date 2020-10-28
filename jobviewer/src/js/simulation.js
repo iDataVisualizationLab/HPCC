@@ -17,8 +17,9 @@ class Simulation {
         if (!this.isRealTime) {
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
-                        this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
+                d3.keys(data.jobs_info).forEach(jID=>{
+                    if (!this.userDict[data.jobs_info[jID].user_name])
+                        this.userDict[data.jobs_info[jID].user_name] = 'User '+d3.keys(this.userDict).length;
                     data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
                     if(data.jobs_info[jID].start_time>9999999999999)
@@ -139,7 +140,7 @@ class Simulation {
             data.time_stamp=data.time_stamp.map(e=>new Date(e/1000000));
             d3.keys(data.jobs_info).forEach(jID=>{
                 if (!self.userDict[data.jobs_info[jID].user_name])
-                    self.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(self.userDict).length;
+                    self.userDict[data.jobs_info[jID].user_name] = 'User '+d3.keys(self.userDict).length;
                 data.jobs_info[jID].user_name = self.userDict[data.jobs_info[jID].user_name];
                 data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
                 if(data.jobs_info[jID].start_time>9999999999999)
