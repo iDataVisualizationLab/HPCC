@@ -17,16 +17,22 @@ class Simulation {
         if (!this.isRealTime) {
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
+                d3.keys(data.jobs_info).forEach(jID=>{
+                    if (!this.userDict[data.jobs_info[jID].user_name])
                         this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
                     data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
-                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>encodeNodeName(c.split('-')[0]));
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
                         if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
                 });
+
+                d3.keys(data.nodes_info).forEach(c=>{
+                    data.nodes_info[encodeNodeName(c)] = data.nodes_info[c];
+                    delete data.nodes_info[c];
+                })
                 this.data = data;
                 this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
@@ -141,12 +147,16 @@ class Simulation {
                 if (!self.userDict[data.jobs_info[jID].user_name])
                     self.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(self.userDict).length;
                 data.jobs_info[jID].user_name = self.userDict[data.jobs_info[jID].user_name];
-                data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>encodeNodeName(c.split('-')[0]));
                 if(data.jobs_info[jID].start_time>9999999999999)
                 {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                     data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
                     if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                         data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+            })
+            d3.keys(data.nodes_info).forEach(c=>{
+                data.nodes_info[encodeNodeName(c)] = data.nodes_info[c];
+                delete data.nodes_info[c];
             })
             data.currentTime = _.last(data.time_stamp);
             self.#currentTime = data.currentTime;
@@ -191,4 +201,8 @@ class Simulation {
     destroy(){
         console.log('timeline destroyed!');
     }
+}
+function encodeNodeName(ip){
+    const com = ip.split('.');
+    return `node ${com[2]}-${com[3]}`
 }

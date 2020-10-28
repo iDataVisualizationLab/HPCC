@@ -56,7 +56,7 @@ function handleDataUrl(dataRaw) {
         }
     });
     d3.keys(dataRaw.jobs_info).forEach(jID=>{
-        dataRaw.jobs_info[jID].node_list = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        // dataRaw.jobs_info[jID].node_list = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
         {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
         dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
@@ -146,7 +146,7 @@ function handleAllData(dataRaw){
         }
     });
     d3.keys(dataRaw.jobs_info).forEach(jID=>{
-        dataRaw.jobs_info[jID].node_list_short = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        // dataRaw.jobs_info[jID].node_list_short = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
         {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000;
             dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000

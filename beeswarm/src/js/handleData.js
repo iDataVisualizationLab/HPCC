@@ -1,6 +1,11 @@
 
 function queryLayout() {
     return d3.json('../jobviewer/src/data/layout.json').then(layout => {
+        // encode
+        d3.keys(layout).forEach(r=>{
+            layout[r] = layout[r].map(cn=>cn.map(c=>encodeNodeName(c)))
+        });
+
         Layout.data = layout;
         Layout.data_flat = d3.entries(layout).map(d=>(d.value=_.flatten(d.value).filter(e=>e!==null),d));
         let {tree,compute_layoutLink} = data2tree(Layout.data_flat);
@@ -312,4 +317,11 @@ function handleRankingData(data){
     Layout.ranking = ranking;
     Layout.userTimeline = handleDataUser(users,jobs);
     console.timeEnd('handleRankingData');
+}
+
+function encodeNodeName(ip){
+    if (ip){
+    const com = ip.split('.');
+    return `node ${com[2]}-${com[3]}`}
+    return ip;
 }
