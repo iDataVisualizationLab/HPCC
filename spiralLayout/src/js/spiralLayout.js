@@ -115,20 +115,20 @@ let SpitalLayout = function(){
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
         onode_n.call(updateOnode);
-            //
-            //
-            // .attr('')
-            // .attr("cx", function(d,i){
-            //     return d.cx;
-            // })
-            // .attr("cy", function(d){
-            //     return d.cy;
-            // })
-            // .attr("r", d=>d.r??miniradius)
-            // .attr("opacity", 0.85)
-            // .style("fill", d=>color(d.value))
-            // .on('mouseover',function(d){
-            //     tooltip.show(d.key.name)});
+        //
+        //
+        // .attr('')
+        // .attr("cx", function(d,i){
+        //     return d.cx;
+        // })
+        // .attr("cy", function(d){
+        //     return d.cy;
+        // })
+        // .attr("r", d=>d.r??miniradius)
+        // .attr("opacity", 0.85)
+        // .style("fill", d=>color(d.value))
+        // .on('mouseover',function(d){
+        //     tooltip.show(d.key.name)});
         onFinishDraw.forEach(d=>d());
 
         function updateOnode(p){
@@ -261,12 +261,12 @@ let SpitalLayout = function(){
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
-                                d.color = color(d.value);
-                                return d.color;
+                            d.color = color(d.value);
+                            return d.color;
                         })
-                        // .style('stroke-width',d=>{
-                        //     return circleStrokeScale(d.data.relatedNodes.length);
-                        // });
+                    // .style('stroke-width',d=>{
+                    //     return circleStrokeScale(d.data.relatedNodes.length);
+                    // });
                     return node;
                 }
             }
@@ -309,7 +309,7 @@ let SpitalLayout = function(){
         }
     };
     let getRenderFunc = function(){ return d3.arc()
-                .innerRadius(0)
+        .innerRadius(0)
     };
     let getDrawData = function(){return[];}
     function freezeHandle(){
@@ -429,7 +429,7 @@ let SpitalLayout = function(){
         g.selectAll('.TrajectoryLegend').remove();
         const svg = g.append('g').attr('class','TrajectoryLegend')
             .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
-        svg.append('text').text('Trajectory distribution (%)').attr('x',width + marginLeft + marginRight).style('text-anchor','end');
+        svg.append('text').text('Distribution (%)').attr('x',width + marginLeft + marginRight).style('text-anchor','end');
         let legend = svg.append('g').attr('class', 'legend')
             .attr('transform', `translate(${marginLeft},${marginTop})`);
 
@@ -448,10 +448,10 @@ let SpitalLayout = function(){
         }// Sequential
         else if (color.interpolator) {
             let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
+                    .interpolator(d3.interpolateRound(height,0)),
                 {
                     range() {
-                        return [0, height];
+                        return [height,0];
                     }
                 });
 
@@ -461,7 +461,7 @@ let SpitalLayout = function(){
                 .attr("width", width)
                 .attr("height", height)
                 .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+                .attr("xlink:href", ramp(color.interpolator(),undefined,true).toDataURL());
 
             // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
             debugger
@@ -478,13 +478,19 @@ let SpitalLayout = function(){
             }
         }
 
-        function ramp(color, n = 256) {
+        function ramp(color, n = 256,inverse=false) {
             const canvas = createContext(1, n);
             const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
+            if (inverse)
+                for (let i = 0; i < n; ++i) {
+                    context.fillStyle = color(i / (n - 1));
+                    context.fillRect(0, n-1-i, 1, 1);
+                }
+            else
+                for (let i = 0; i < n; ++i) {
+                    context.fillStyle = color(i / (n - 1));
+                    context.fillRect(0, i, 1, 1);
+                }
             return canvas;
         }
 
