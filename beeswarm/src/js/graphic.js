@@ -464,7 +464,7 @@ function drawUserList(){
             }
         }).on('click',function(d){
             drawObject.freezeHandle.bind(this)();
-            openPopup(d,drawObject.main_svg());
+            // openPopup(d,drawObject.main_svg());
             subObject.freezeHandle.bind(this)();
         });
     user_info
