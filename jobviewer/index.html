@@ -223,15 +223,16 @@
 
                                         <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
                                     </form>
+                                    <label class="col-4">Group information:</label>
+                                    <div class="col-8">
+                                        <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">
+                                            <i class="fas fa-download pauseicon" ></i> Save</button>
+                                        <button  type="submit" class ="menuBtn modal-trigger btn-small" id="loadClusterInfobtn">
+                                            <i class="fas fa-upload pauseicon" ></i> Load</button>
+                                        <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
+                                    </div>
                                     <div class="d-flex justify-content-center white row" id="clusterDisplay">
-                                        <div class="row s12">
-                                            <label class="col s4">Group information:</label>
-                                            <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">
-                                                <i class="fas fa-download pauseicon" ></i> Save</button>
-                                            <button  type="submit" class ="menuBtn btn-small" id="loadClusterInfobtn">
-                                                <i class="fas fa-upload pauseicon" ></i> Load</button>
-                                            <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
-                                        </div>
+
                                     </div>
                                 </div>
                             </div>

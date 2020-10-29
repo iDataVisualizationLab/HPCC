@@ -107,3 +107,7 @@ main {
 .bi-window.disable .slash{
     display: block;
 }
+
+#legendHolder label{
+    padding-right: 0;
+}
