@@ -133,6 +133,10 @@ function data2tree(data,sampleS,computers){
             return el;
     })
     };
+    if (cluster_info&&vizservice[serviceSelected].text==='Radar') {
+        cluster_info.forEach(d => (d.total = d.arr.length));
+        cluster_map(cluster_info)
+    }
     return {tree,compute_layoutLink};
 }
 let currentDraw=()=>{};
