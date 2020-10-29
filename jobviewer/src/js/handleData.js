@@ -174,3 +174,90 @@ function sortData(){
         layout_array[i].value.sort((a,b)=>orderData[a]-orderData[b]);
     });
 }
+
+$('#loadClusterInfobtn').on('click',()=>$('#clusterInfo_input_file').trigger('click'));
+$('#clusterInfo_input_file').on('input',(evt)=>{
+    let f = evt.target.files[0];
+    var reader = new FileReader();
+    reader.onload = (function (theFile) {
+        return function (e) {
+            loadPresetCluster(e.target.result, onchangeCluster)
+        }
+    })(f);
+
+    reader.readAsDataURL(f);
+});
+function loadPresetCluster(name,calback) {
+    const fileName = name.includes('data:')?name:`${name}_cluster.csv`;
+    return d3.csv(fileName).then(function (cluster) {
+        if (cluster==null||checkVliadClusterinfo(cluster)) {
+            if (cluster==null){
+                d3.select('body').append('div')
+                    .attr('data-autohide',true)
+                    .attr('id','clusterInfo')
+                    .html(`<div class="toast-header">
+                      <strong class="mr-auto text-primary">Load Cluster Information</strong>
+                      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+                    </div>
+                    <div class="toast-body">
+                      Do not have preset major group information. Recalculate major groups
+                    </div>`);
+                $('.clusterInfo').toast('show');
+            }else{
+                d3.select('body').append('div')
+                    .attr('data-autohide',true)
+                    .attr('id','clusterInfo')
+                    .html(`<div class="toast-header">
+                      <strong class="mr-auto text-primary">Load Cluster Information</strong>
+                      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+                    </div>
+                    <div class="toast-body">
+                      Wrong cluster file format!
+                    </div>`);
+                $('.clusterInfo').toast('show');
+            }
+            if (calback) {
+                calback(false);// status
+            }
+        }else {
+            clusterDescription = {};
+            let haveDescription = false;
+            cluster.forEach((d,i) => {
+                d.radius = +d.radius;
+                d.mse = +d.mse;
+                d.__metrics = serviceFullList.map(s => {
+                    return {
+                        axis: s.text,
+                        value: d3.scaleLinear().domain(s.range)(d[s.text]) || 0,
+                        // minval:d3.scaleLinear().domain(s.range)(d[s.text+'_min'])||0,
+                        // maxval:d3.scaleLinear().domain(s.range)(d[s.text+'_max'])||0,
+                    }
+                });
+                d.__metrics.normalize = d.__metrics.map((e, i) => e.value);
+                if(d.description) {
+                    haveDescription = true;
+                    clusterDescription[`group_${i + 1}`] = {id:`group_${i + 1}`,text: d.description};
+                    delete d.description;
+                }
+            });
+            cluster.forEach(c=>c.arr=[]);
+            cluster_info = cluster;
+            // clusterDescription = {};
+            recomendName(cluster_info,haveDescription);
+            recomendColor(cluster_info);
+            if(calback){
+                calback(true);// status
+            }
+        }
+    });
+    function checkVliadClusterinfo(cluster_input){
+        // check the axis
+        cluster_input[0]
+        let invalid = false;
+        serviceFullList.find(s=>{
+            invalid = cluster_input[0][s.text]===undefined
+            return invalid
+        })
+        return invalid;
+    }
+}

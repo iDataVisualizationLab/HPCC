@@ -46,6 +46,7 @@ let radarChartclusteropt  = {
 let cluster_info,clusterDescription,clusterGroup={};
 let clustercalWorker;
 let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory20);
+distance = distanceL2;
 function initClusterUI(){
     $('#clusterMethod').val(group_opt.clusterMethod);
     $('#startBinGridSize').val(group_opt.bin.startBinGridSize || 10);
@@ -133,13 +134,15 @@ function handle_dataRaw() {
     handle_clusterinfo();
 }
 function onchangeCluster() {
-    cluster_map(cluster_info);
-    handle_clusterinfo();
+    cluster_info.forEach(d => (d.total = 0));
     Layout.tree.children.forEach(d=>{
         d.children.forEach(e=>{
             getCluster(e);
         })
     });
+    cluster_info.forEach(d => (d.total = d.arr.length));
+    cluster_map(cluster_info);
+    handle_clusterinfo();
     currentDraw(serviceSelected);
 }
 function cluster_map (dataRaw) {
