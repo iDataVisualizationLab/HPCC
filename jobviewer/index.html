@@ -224,6 +224,14 @@
                                         <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
                                     </form>
                                     <div class="d-flex justify-content-center white row" id="clusterDisplay">
+                                        <div class="row s12">
+                                            <label class="col s4">Group information:</label>
+                                            <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">
+                                                <i class="fas fa-download pauseicon" ></i> Save</button>
+                                            <button  type="submit" class ="menuBtn btn-small" id="loadClusterInfobtn">
+                                                <i class="fas fa-upload pauseicon" ></i> Load</button>
+                                            <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -254,6 +262,23 @@
             </main>
         </div>
     </div>
+
+    <div class="modal fade " id="savedialog_clusterInfo" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="input-field col s6">
+                        <label for="savename_clusterInfo">File name</label>
+                        <input placeholder="label_cluster" id="savename_clusterInfo" type="text" class="validate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="onSaveClusterInfo()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <link id="theme" rel="stylesheet" href="src/style/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="src/DataTables/DataTables-1.10.21/css/dataTables.bootstrap4.css"/>
     <link rel="stylesheet" href="src/style/main.css">
@@ -281,6 +306,7 @@
 
     <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
     <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
+    <script src="../HiperView/myscripts/util.js"></script>
     <script src="src/js/ulti.js"></script>
     <script src="src/lib/radarChart.js"></script>
     <script src="src/js/timeline.js"></script>

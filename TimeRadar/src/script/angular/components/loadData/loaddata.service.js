@@ -127,8 +127,6 @@ angular.module('hpccApp')
             initTsnedata();
             if(job){
                 sampleJobdata = handleJobData(job);
-
-
             }else
                 sampleJobdata = [{
                     jobID: "1",
@@ -260,6 +258,17 @@ angular.module('hpccApp')
 
             MetricController.axisSchema(serviceFullList, true).update();
             firstTime = false;
+            //job data
+            sampleJobdata = [{
+                jobID: "1",
+                name: "1",
+                nodes: hosts.map(h=>h.name),
+                startTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                submitTime: new Date(_.last(sampleS.timespan)-100).toString(),
+                user: "dummyJob"
+            }];
+
+
             realTimesetting(false, "csv", true, sampleS);
             updateDatainformation(sampleS['timespan']);
 
