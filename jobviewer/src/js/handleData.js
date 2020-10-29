@@ -83,7 +83,7 @@ function getData_delta(d){
 function data2tree(data,sampleS,computers){
     let serviceName = null;
     if (cluster_info&&vizservice[serviceSelected].text==='Radar'){
-        cluster_info.forEach(d=>d.arr=[])
+        cluster_info.forEach(d=>(d.arr=[],d.total=0));
         serviceName = vizservice[serviceSelected].text;
     }
     const compute_layoutLink = {};
@@ -132,6 +132,10 @@ function data2tree(data,sampleS,computers){
             return el;
     })
     };
+    if (cluster_info&&vizservice[serviceSelected].text==='Radar') {
+        cluster_info.forEach(d => (d.total = d.arr.length));
+        cluster_map(cluster_info)
+    }
     return {tree,compute_layoutLink};
 }
 let currentDraw=()=>{};
@@ -147,7 +151,8 @@ function queryData(data) {
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
     if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){
-        group_opt.recall()
+        group_opt.recall();
+        cluster_info.forEach(d=>d.total=d.arr.length)
         cluster_map(cluster_info);
         handle_clusterinfo();
         Layout.tree.children.forEach(d=>{

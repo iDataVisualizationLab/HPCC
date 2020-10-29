@@ -113,7 +113,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
     graphicopt.height = document.getElementById('circularLayoutHolder').getBoundingClientRect().height;
-    debugger
+
     let innerKey = USER;
     let innerObj = users;
     if (getInnerNodeAttr()!=='users') {
