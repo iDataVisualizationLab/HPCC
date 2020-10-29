@@ -133,17 +133,19 @@ function handle_dataRaw() {
     radarChartclusteropt.schema = serviceFullList;
     handle_clusterinfo();
 }
-function onchangeCluster() {
-    cluster_info.forEach(d => (d.total = 0));
-    Layout.tree.children.forEach(d=>{
-        d.children.forEach(e=>{
-            getCluster(e);
-        })
-    });
-    cluster_info.forEach(d => (d.total = d.arr.length));
-    cluster_map(cluster_info);
-    handle_clusterinfo();
-    currentDraw(serviceSelected);
+function onchangeCluster(isError) {
+    if (isError!==false){
+        cluster_info.forEach(d => (d.total = 0));
+        Layout.tree.children.forEach(d=>{
+            d.children.forEach(e=>{
+                getCluster(e);
+            })
+        });
+        cluster_info.forEach(d => (d.total = d.arr.length));
+        cluster_map(cluster_info);
+        handle_clusterinfo();
+        currentDraw(serviceSelected);
+    }
 }
 function cluster_map (dataRaw) {
     let isNameChangeable = false;

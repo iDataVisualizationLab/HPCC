@@ -192,9 +192,9 @@ function loadPresetCluster(name,calback) {
     return d3.csv(fileName).then(function (cluster) {
         if (cluster==null||checkVliadClusterinfo(cluster)) {
             if (cluster==null){
-                d3.select('body').append('div')
+                d3.select('#toastHolder').append('div')
                     .attr('data-autohide',true)
-                    .attr('id','clusterInfo')
+                    .attr('class','clusterInfo')
                     .html(`<div class="toast-header">
                       <strong class="mr-auto text-primary">Load Cluster Information</strong>
                       <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
@@ -203,10 +203,11 @@ function loadPresetCluster(name,calback) {
                       Do not have preset major group information. Recalculate major groups
                     </div>`);
                 $('.clusterInfo').toast('show');
+
             }else{
-                d3.select('body').append('div')
+                d3.select('#toastHolder').append('div')
                     .attr('data-autohide',true)
-                    .attr('id','clusterInfo')
+                    .attr('class','clusterInfo')
                     .html(`<div class="toast-header">
                       <strong class="mr-auto text-primary">Load Cluster Information</strong>
                       <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
