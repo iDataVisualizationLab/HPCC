@@ -117,7 +117,7 @@ let Sankey = function(){
             d.order = i;
             d.relatedNode = [];
         });
-        // color.domain([range[1],range[0]]);
+        color = d3.scaleOrdinal(d3.schemeCategory20);
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
         debugger
@@ -150,10 +150,10 @@ let Sankey = function(){
                     const names = prefix.map(k => d[k]);
                     const key = JSON.stringify(names);
                     const value = d.value || 1;
-                    const arr = d.arr || [d.key];//just ad for testing
+                    // const arr = d.arr || [d.key];//just ad for testing
                     let link = linkByKey.get(key);
                     if (link) { link.value += value;
-                    link.arr = [...(link.arr??[]),...arr];
+                    // link.arr = [...(link.arr??[]),...arr];
                     continue; }
                     link = {
                         source: indexByKey.get(JSON.stringify([a, d[a]])),
@@ -193,8 +193,8 @@ let Sankey = function(){
         node_p.select('rect')
             .attr("height", d => d.y1 - d.y0)
             .attr("width", d => d.x1 - d.x0)
-            // .style('fill',d=>d3.hsl(getColor(d.name,services[dimensions[d.layer]])).darker(2));
-            .style('fill','gray');
+            .style('fill',d=>d3.hsl(color(d.name)).darker(2));
+            // .style('fill','gray');
         node_p.select("title")
             .text(d => `${d.name}\n${d.value.toLocaleString()}`);
         node_p.select('text')
@@ -202,7 +202,8 @@ let Sankey = function(){
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
             .attr("dy", "0.35em")
             .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
-            .text(d => d.text)
+            .text(d => d.text);
+
         let link_g = svg_paraset.select('.links');
         if(link_g.empty()){
             link_g = svg_paraset.append('g').classed('links',true);
@@ -212,16 +213,37 @@ let Sankey = function(){
             .attr("fill", "none")
             .attr("opacity", 0.5)
             .selectAll("g")
-            .data(links,d=>d)
+            .data(links,(d,i)=>(d._id = 'link_'+i,d))
             .join(
-                enter => (e=enter.append("g").style("mix-blend-mode", "multiply"),e.append("path"),e.append("title"),e),
+                enter => {
+                    e=enter.append("g").style("mix-blend-mode", "multiply");
+                    e.append("path");
+                    e.append("title");
+                    // gradient
+                    const gradient = e.append("linearGradient")
+                        .attr("id", d => d._id)
+                        .attr("gradientUnits", "userSpaceOnUse")
+                        .attr("x1", d => d.source.x1)
+                        .attr("x2", d => d.target.x0);
+
+                    gradient.append("stop")
+                        .attr("offset", "0%")
+                        .attr("stop-color", d => color(d.source.name));
+
+                    gradient.append("stop")
+                        .attr("offset", "100%")
+                        .attr("stop-color", d => color(d.target.name));
+                    // gradient ---end
+                    return e
+                },
             );
+
         link_p.select('path')
             .attr('class',d=>'a'+d.nameIndex)
             .attr("d", d3.sankeyLinkHorizontal())
             .attr("stroke", d =>
             {
-                return 'gray';//getColor(d.names[0]);
+                return `url(#${d._id})`;
             })
             .attr("stroke-width", d => d.width)
             // .attr("stroke-width", 1)
