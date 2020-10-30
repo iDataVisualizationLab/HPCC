@@ -1406,6 +1406,7 @@ function paths(selectedRaw, ctx, count){
         });
         return temp;
     });
+    debugger
     let graph = (()=> {
         let index = -1;
         const nodes = [];
