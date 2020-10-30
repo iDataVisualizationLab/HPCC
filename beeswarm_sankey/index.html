@@ -179,12 +179,18 @@
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                        <label class="col-4" for="nodeColor">Node color by: </label>
-                                        <select class="col-6" id="nodeColor">
-                                            <option value="">Current metric</option>
-                                            <option value="rack">Rack</option>
+                                        <label class="col-4" for="userSort">Sort user node by: </label>
+                                        <select class="col-6" id="userSort">
+                                            <option value="size">size</option>
+                                            <option value="">None</option>
                                         </select>
-                                        <div class="MetricsLegend">
+                                        <div class="col-2"></div>
+<!--                                        <label class="col-4" for="nodeColor">Node color by: </label>-->
+<!--                                        <select class="col-6" id="nodeColor">-->
+<!--                                            <option value="">Current metric</option>-->
+<!--                                            <option value="rack">Rack</option>-->
+<!--                                        </select>-->
+                                        <div class="MetricsLegend hide">
                                             <div class="row legendView hide">
                                                 <label class="col-4"></label>
                                                 <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
@@ -321,7 +327,7 @@
 
     <script src="src/js/beeswarm.js"></script>
     <script src="src/js/ganttchart.js"></script>
-    <script src="../HiperView/js/d3-sankey.js"></script>
+    <script src="src/js/d3-sankey.js"></script>
     <script src="src/js/sankey.js"></script>
 
     <script src="src/js/sidebar.js"></script>

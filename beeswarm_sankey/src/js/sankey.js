@@ -39,14 +39,12 @@ let Sankey = function(){
     let data=[],main_svg,g,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
-    var color = d3.scaleSequential()
-        .interpolator(d3.interpolateSpectral);
+    var color = d3.scaleOrdinal(d3.schemeCategory20);
     let getColorScale = function(){return color};
     let master={};
     let radius,x,y;
+    let nodeSort = undefined;
     let sankey = d3.sankey()
-        .nodeSort(null)
-        .linkSort(null)
         .nodeWidth(6)
         .nodePadding(10);
     master.mouseover = [];
@@ -117,7 +115,6 @@ let Sankey = function(){
             d.order = i;
             d.relatedNode = [];
         });
-        color = d3.scaleOrdinal(d3.schemeCategory20);
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
         debugger
@@ -169,7 +166,7 @@ let Sankey = function(){
             return {nodes, links};
         })();
         sankey = sankey
-            // .nodeSort(null)
+            .nodeSort(nodeSort)
             // .linkSort(null)
             .extent([[x.range()[0], 0], [x.range()[1], y.range()[1]]]);
         const {nodes, links} = sankey({
@@ -183,11 +180,19 @@ let Sankey = function(){
             node_g = svg_paraset.append('g').classed('nodes',true);
         }
         debugger
+        // nodes.forEach(n=>{
+        //     n.y0_o = n.y0;
+        //     n.y1_o = n.y1;
+        //     const newsize = Math.pow(n.y1_o-n.y0_o,0.7);
+        //     n.y0 = (n.y1_o-n.y0_o)/2 - newsize/2 +n.y0_o;
+        //     n.y1 = n.y0 + newsize;
+        // });
+        // links.forEach(l=>l.width= Math.pow(l.width,0.7));
         let node_p = node_g
-            .selectAll("g")
+            .selectAll("g.outer_node")
             .data(nodes,d=>d.name)
             .join(
-                enter => (e=enter.append("g"),e.append("title"),e.append("rect"),e.append("text"),e),
+                enter => (e=enter.append("g").attr('class','outer_node'),e.append("title"),e.append("rect"),e.append("text"),e),
             ).attr('transform',d=>`translate(${d.x0},${d.y0})`);
             // ).attr('transform',d=>`translate(${x(d.time)},${d.y0})`);
         node_p.select('rect')
@@ -266,9 +271,8 @@ let Sankey = function(){
         //     .attr("pointer-events", "none")
         //     .attr("text-anchor", "middle");
         // onode_n.call(updateOnode);
-        g.select('.background').node().appendChild(drawArea.clone(true).node())
+        // g.select('.background').node().appendChild(drawArea.clone(true).node())
         g.select('.background').select('.drawArea').attr('clip-path',null)
-
         g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
         onFinishDraw.forEach(d=>d());
 
@@ -473,6 +477,19 @@ let Sankey = function(){
         }else
             return graphicopt;
     };
+    master.sankeyOpt = function(_data){
+        if (_data.nodeSort){
+            switch (_data.nodeSort) {
+                case '':
+                    nodeSort = undefined;
+                    break;
+                case 'size':
+                    nodeSort = function(a,b){return a.value-b.value};
+                    break;
+            }
+        }
+        return master;
+    }
     master.getRenderFunc = function(_data) {
         return arguments.length?(getRenderFunc=_data,master):getRenderFunc;
     };

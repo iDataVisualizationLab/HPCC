@@ -74,6 +74,10 @@ function initdraw(){
         }
         currentDraw()
     })
+    d3.select('#userSort').on('change',function(){
+        const val = $(this).val();
+        subObject.sankeyOpt({nodeSort:val}).draw();
+    })
     serviceControl();
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
 }
