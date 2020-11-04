@@ -125,7 +125,6 @@ let Sankey = function(){
             let index = -1;
             const nodes = [];
             const nodeByKey = new Map;
-            const nodeRelated = new Map;
             const indexByKey = new Map;
             const nodeLabel = new Map;
             const links = [];
@@ -140,8 +139,6 @@ let Sankey = function(){
                         node.first = true;
                         nodeLabel.set(text, node);
                     }
-                    if (d[k]&& d[k].length>1)
-                        nodeRelated.set(key,d[k].map(e=>JSON.stringify([k, e])));
                     nodes.push(node);
                     nodeByKey.set(key, node);
                     indexByKey.set(key, ++index);
@@ -172,19 +169,7 @@ let Sankey = function(){
                     linkByKey.set(key, link);
                 }
             }
-            let crossLink = [];
-            nodeRelated.forEach((d,key)=>{
-                const source = indexByKey.get(key);
-                nodeRelated.get(key).forEach(t=>{
-                    const target = indexByKey.get(t);
-                    if (target!==undefined)
-                        crossLink.push({
-                            source,
-                            target
-                        })
-                })
-            })
-            return {nodes, links,crossLink};
+            return {nodes, links};
         })();
 
         sankey = sankey
@@ -199,10 +184,6 @@ let Sankey = function(){
             n.x = n.x0;
             n.y = n.y0 + (n.y1-n.y0)/2;
         })
-        graph.crossLink.forEach(l=>{
-            l.source = nodes[l.source];
-            l.target = nodes[l.target];
-        });
 
         svg_paraset = drawArea;
         let node_g = svg_paraset.select('.nodes');
@@ -287,28 +268,6 @@ let Sankey = function(){
         // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
         link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
 
-        let crosslink_g = svg_paraset.select('.crosslinks');
-        if(crosslink_g.empty()){
-            crosslink_g = svg_paraset.append('g').classed('crosslinks',true);
-        }
-        let crosslink_p = crosslink_g
-            .attr("fill", "none")
-            .attr("opacity", 0.5)
-            .attr('stroke','black')
-            .selectAll("path")
-            .data(graph.crossLink)
-            .join('path')
-            .attr('d',linkArc)
-
-        function linkArc(d) {
-            var dx = d.target.x - d.source.x,
-                dy = d.target.y - d.source.y,
-                dr = Math.sqrt(dx * dx + dy * dy) / 2;
-            if (d.source.y < d.target.y)
-                return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-            else
-                return "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,1 " + d.source.x + "," + d.source.y;
-        }
         //
         // let onode = drawArea.attr('clip-path','url(#timeClip)').selectAll(".outer_node")
         //     .data(data,d=>d.key);
