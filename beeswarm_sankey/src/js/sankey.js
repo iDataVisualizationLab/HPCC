@@ -106,7 +106,7 @@ let Sankey = function(){
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')
             .select('.timeStick').attr('y2',graphicopt.heightG())
         y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
-        x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
+        // x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
         y.domain(data.map(d=>d.key));
         // let sizeScale = d3.scaleSqrt().domain(d3.extent(_.flatten(data.map(d=>d.value.map(d=>d.names.length))))).range([1,graphicopt.hi/2*1.2]);
@@ -118,20 +118,30 @@ let Sankey = function(){
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
         debugger
+        let keys = Layout.timespan.slice(0,24);
+        x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
-        let keys = Layout.timespan.slice(0,20);
         let graph = (()=> {
             let index = -1;
             const nodes = [];
             const nodeByKey = new Map;
+            const nodeRelated = new Map;
             const indexByKey = new Map;
+            const nodeLabel = new Map;
             const links = [];
 
             for (const k of keys) {
                 for (const d of data) {
-                    const key = JSON.stringify([k, d[k]]);
+                    const text =  d[k]?d[k].join(','):d[k];
+                    const key = JSON.stringify([k, text]);
                     if (nodeByKey.has(key)) continue;
-                    const node = {name: d[k]};
+                    const node = {name: text};
+                    if (!nodeLabel.has(text)) {
+                        node.first = true;
+                        nodeLabel.set(text, node);
+                    }
+                    if (d[k]&& d[k].length>1)
+                        nodeRelated.set(key,d[k].map(e=>JSON.stringify([k, e])));
                     nodes.push(node);
                     nodeByKey.set(key, node);
                     indexByKey.set(key, ++index);
@@ -147,14 +157,14 @@ let Sankey = function(){
                     const names = prefix.map(k => d[k]);
                     const key = JSON.stringify(names);
                     const value = d.value || 1;
-                    // const arr = d.arr || [d.key];//just ad for testing
+                    const arr = d.arr || [d.key];//just ad for testing
                     let link = linkByKey.get(key);
                     if (link) { link.value += value;
-                    // link.arr = [...(link.arr??[]),...arr];
+                    link.arr = [...(link.arr??[]),...arr];
                     continue; }
                     link = {
-                        source: indexByKey.get(JSON.stringify([a, d[a]])),
-                        target: indexByKey.get(JSON.stringify([b, d[b]])),
+                        source: indexByKey.get(JSON.stringify([a, d[a].join(',')])),
+                        target: indexByKey.get(JSON.stringify([b, d[b].join(',')])),
                         names,
                         value
                     };
@@ -162,9 +172,21 @@ let Sankey = function(){
                     linkByKey.set(key, link);
                 }
             }
-
-            return {nodes, links};
+            let crossLink = [];
+            nodeRelated.forEach((d,key)=>{
+                const source = indexByKey.get(key);
+                nodeRelated.get(key).forEach(t=>{
+                    const target = indexByKey.get(t);
+                    if (target!==undefined)
+                        crossLink.push({
+                            source,
+                            target
+                        })
+                })
+            })
+            return {nodes, links,crossLink};
         })();
+
         sankey = sankey
             .nodeSort(nodeSort)
             // .linkSort(null)
@@ -172,6 +194,14 @@ let Sankey = function(){
         const {nodes, links} = sankey({
             nodes: graph.nodes.map(d => Object.assign({}, d)),
             links: graph.links.map(d => Object.assign({}, d))
+        });
+        nodes.forEach(n=>{
+            n.x = n.x0;
+            n.y = n.y0 + (n.y1-n.y0)/2;
+        })
+        graph.crossLink.forEach(l=>{
+            l.source = nodes[l.source];
+            l.target = nodes[l.target];
         });
 
         svg_paraset = drawArea;
@@ -206,8 +236,9 @@ let Sankey = function(){
             .attr("x", d => d.x0 < width / 2 ? 6 :- 6)
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
             .attr("dy", "0.35em")
-            .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
-            .text(d => d.text);
+            .attr("text-anchor", d => d.x0 === 0 ? "start" : "end")
+            .text(d => {
+                return d.first?d.name:''});
 
         let link_g = svg_paraset.select('.links');
         if(link_g.empty()){
@@ -253,8 +284,31 @@ let Sankey = function(){
             .attr("stroke-width", d => d.width)
             // .attr("stroke-width", 1)
             .each(function(d){d.dom=d3.select(this)});
-        link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
-        // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
+        // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+        link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
+
+        let crosslink_g = svg_paraset.select('.crosslinks');
+        if(crosslink_g.empty()){
+            crosslink_g = svg_paraset.append('g').classed('crosslinks',true);
+        }
+        let crosslink_p = crosslink_g
+            .attr("fill", "none")
+            .attr("opacity", 0.5)
+            .attr('stroke','black')
+            .selectAll("path")
+            .data(graph.crossLink)
+            .join('path')
+            .attr('d',linkArc)
+
+        function linkArc(d) {
+            var dx = d.target.x - d.source.x,
+                dy = d.target.y - d.source.y,
+                dr = Math.sqrt(dx * dx + dy * dy) / 2;
+            if (d.source.y < d.target.y)
+                return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            else
+                return "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,1 " + d.source.x + "," + d.source.y;
+        }
         //
         // let onode = drawArea.attr('clip-path','url(#timeClip)').selectAll(".outer_node")
         //     .data(data,d=>d.key);

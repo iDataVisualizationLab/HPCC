@@ -249,10 +249,11 @@ function handleDataComputeByUser(computers,jobs){
     for (let comp in computers){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
-            if (jIDs.length)
-                item.values.push(jobs[jIDs[0]].user_name);
-            else
-                item.values.push(null)
+            if (jIDs.length){
+                let username = _.uniq(jIDs.map(j=>jobs[j].user_name));
+                item.values.push(username.sort());
+            }else
+                item.values.push(null);
             item[Layout.timespan[i]] = item.values[i];
         });
         data.push(item);

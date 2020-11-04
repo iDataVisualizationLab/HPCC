@@ -15,6 +15,7 @@ class Simulation {
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
+            console.time('load data')
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
                 d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
@@ -27,6 +28,7 @@ class Simulation {
                         if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
                 });
+                console.timeEnd('load data')
                 this.data = data;
                 this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
