@@ -4,7 +4,7 @@
 let Sankey = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
-        margin: {top: 20, right: 20, bottom: 20, left: 20},
+        margin: {top: 20, right: 20, bottom: 20, left: 100},
         width: 1000,
         height: 700,
         'max-height': 500,
@@ -80,7 +80,7 @@ let Sankey = function(){
     master.sortFunc = function(a,b){return a.order-b.order};
     master.updateTimeHandle = function (time){
         main_svg.select('#timeClip rect').interrupt();
-        main_svg.select('#timeClip rect').transition().duration(graphicopt.animationTime).attr('width',x(time));
+        main_svg.select('#timeClip rect').transition().duration(graphicopt.animationTime).attr('width',x(time)+graphicopt.margin.left);
         g.select('.timeHandleHolder').interrupt();
         g.select('.timeHandleHolder').transition().duration(graphicopt.animationTime).attr('transform',`translate(${x(time)},0)`);
 
@@ -131,17 +131,22 @@ let Sankey = function(){
 
             for (const k of keys) {
                 for (const d of data) {
-                    const text =  d[k]?d[k].join(','):d[k];
-                    const key = JSON.stringify([k, text]);
-                    if (nodeByKey.has(key)) continue;
-                    const node = {name: text};
-                    if (!nodeLabel.has(text)) {
-                        node.first = true;
-                        nodeLabel.set(text, node);
-                    }
-                    nodes.push(node);
-                    nodeByKey.set(key, node);
-                    indexByKey.set(key, ++index);
+                    // if (!d[k]) {
+                        // d[k].forEach(text=>{
+                        const text = d[k].join(',')
+                            const key = JSON.stringify([k, text]);
+                            if (nodeByKey.has(key))
+                                continue // return
+                            const node = {name: text};
+                            if (!nodeLabel.has(text)) {
+                                node.first = true;
+                                nodeLabel.set(text, node);
+                            }
+                            nodes.push(node);
+                            nodeByKey.set(key, node);
+                            indexByKey.set(key, ++index);
+                        // });
+                    // }
                 }
             }
 
@@ -175,7 +180,7 @@ let Sankey = function(){
         sankey = sankey
             .nodeSort(nodeSort)
             // .linkSort(null)
-            .extent([[x.range()[0], 0], [x.range()[1], y.range()[1]]]);
+            .extent([[x.range()[0], 0], [x.range()[1], graphicopt.heightG()-10]]);
         const {nodes, links} = sankey({
             nodes: graph.nodes.map(d => Object.assign({}, d)),
             links: graph.links.map(d => Object.assign({}, d))
@@ -214,10 +219,10 @@ let Sankey = function(){
         node_p.select("title")
             .text(d => `${d.name}\n${d.value.toLocaleString()}`);
         node_p.select('text')
-            .attr("x", d => d.x0 < width / 2 ? 6 :- 6)
+            .attr("x", - 6)
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
             .attr("dy", "0.35em")
-            .attr("text-anchor", d => d.x0 === 0 ? "start" : "end")
+            .attr("text-anchor", "end")
             .text(d => {
                 return d.first?d.name:''});
 
@@ -433,7 +438,7 @@ let Sankey = function(){
             .style('overflow','visible');
         if(main_svg.select('#timeClip').empty())
             main_svg.append('defs').append('clipPath').attr('id','timeClip')
-                .append('rect').attr('width',0).attr('height',graphicopt.heightG());
+                .append('rect').attr('x',-graphicopt.margin.left).attr('width',graphicopt.margin.left).attr('height',graphicopt.heightG());
         g = main_svg
             .select("g.content");
         function zoomed(){
