@@ -133,7 +133,7 @@ let Sankey = function(){
                 for (const d of data) {
                     // if (!d[k]) {
                         // d[k].forEach(text=>{
-                        const text = d[k].join(',')
+                        const text = getUserName(d[k]);
                             const key = JSON.stringify([k, text]);
                             if (nodeByKey.has(key))
                                 continue // return
@@ -165,8 +165,8 @@ let Sankey = function(){
                     link.arr = [...(link.arr??[]),...arr];
                     continue; }
                     link = {
-                        source: indexByKey.get(JSON.stringify([a, d[a].join(',')])),
-                        target: indexByKey.get(JSON.stringify([b, d[b].join(',')])),
+                        source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
+                        target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
                         names,
                         value
                     };
@@ -424,6 +424,9 @@ let Sankey = function(){
         }else{
             isFreeze = false;
         }
+    }
+    function getUserName(arr){
+        return arr.length?('User '+arr.map(d=>d.replace('user','')).join(',')):'No user';
     }
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
