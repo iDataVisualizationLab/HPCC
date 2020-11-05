@@ -180,7 +180,7 @@ let Sankey = function(){
         sankey = sankey
             .nodeSort(nodeSort)
             // .linkSort(null)
-            .extent([[x.range()[0], 0], [x.range()[1], graphicopt.heightG()-10]]);
+            .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
         const {nodes, links} = sankey({
             nodes: graph.nodes.map(d => Object.assign({}, d)),
             links: graph.links.map(d => Object.assign({}, d))
