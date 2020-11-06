@@ -476,9 +476,9 @@ function drawUserList(){
             subObject.freezeHandle.bind(this)();
         });
     user_info
-        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length}])
+        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length},{key:'core',value:d.value.totalCore}])
         .join('td')
-        .style('text-align',d=>(d.key==='job'||d.key==='compute')?'end':null)
+        .style('text-align',d=>(d.key==='job'||d.key==='compute'||d.key==='core')?'end':null)
         .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
         .text(d=>d.value);
     drawObject.mouseoverAdd('userlist',function(d){

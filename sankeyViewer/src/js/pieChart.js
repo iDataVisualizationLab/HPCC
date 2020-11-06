@@ -70,14 +70,17 @@ function UserPie(){
             .outerRadius(radius * 0.9);
 
         /* ------- PIE SLICES -------*/
-        var slice = g.select(".slices").selectAll("path.slice")
+        var slice = g.select(".slices").selectAll("g.slice")
             .data(dataViz, d=>d.data.key)
-            .join("path")
+            .join(enter=>{
+                let e = enter.append('g').attr('class','slice');
+                e.append('path').attr('class','slice').style("opacity", 0.5);
+                e.append('title');
+                return e;
+            }   );
+        slice.select('path')
             .style("fill", d=>color(d.data.key))
-            .attr("class", "slice")
-            .classed('hide',d=>d.data.key===emptyKey);
-
-        slice
+            .classed('hide',d=>d.data.key===emptyKey)
             .transition().duration(1000)
             .attrTween("d", function(d) {
                 this._current = this._current || d;
@@ -87,6 +90,7 @@ function UserPie(){
                     return arc(interpolate(t));
                 };
             });
+        slice.select('title').text(d=>d.data.key+': '+d.value)
         /* ------- TEXT LABELS -------*/
 
         var text = g.select(".labels").selectAll("text")
