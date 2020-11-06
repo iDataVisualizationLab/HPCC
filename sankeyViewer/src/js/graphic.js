@@ -80,6 +80,10 @@ function initdraw(){
     })
     serviceControl();
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
+    userPie.init();
+    d3.select('#hideStable').on('change',function(){
+        subObject.sankeyOpt({hideStable:this.checked}).draw();
+    })
 }
 function userTable(d,type){
     highlight2Stack = [];
@@ -524,7 +528,12 @@ function initdrawGantt(){
 
 }
 function drawGantt(){
-    subObject.data(Layout.userTimeline).draw()
+    subObject.data(Layout.userTimeline).draw();
+    if (userPie){
+        userPie.color(subObject.color());
+        if (userPie.data().length)
+            userPie.draw();
+    }
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})

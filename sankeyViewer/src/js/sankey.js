@@ -5,7 +5,7 @@ let Sankey = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 100},
-        width: 1000,
+        width: 1400,
         height: 700,
         'max-height': 500,
         scalezoom: 1,
@@ -45,8 +45,8 @@ let Sankey = function(){
     let radius,x,y;
     let nodeSort = undefined;
     let sankey = d3.sankey()
-        .nodeWidth(6)
-        .nodePadding(10);
+        .nodeWidth(0.1)
+        .nodePadding(5);
     master.mouseover = [];
     master.mouseover.dict={};
     master.mouseout = [];
@@ -117,36 +117,34 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        debugger
-        let keys = Layout.timespan.slice(0,24);
+        let keys = Layout.timespan.slice(0,288/2);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
         let graph = (()=> {
             let index = -1;
-            const nodes = [];
+            let nodes = [];
             const nodeByKey = new Map;
             const indexByKey = new Map;
             const nodeLabel = new Map;
-            const links = [];
-
+            let links = [];
+            const nodeList = {};
             for (const k of keys) {
                 for (const d of data) {
-                    // if (!d[k]) {
-                        // d[k].forEach(text=>{
-                        const text = getUserName(d[k]);
-                            const key = JSON.stringify([k, text]);
-                            if (nodeByKey.has(key))
-                                continue // return
-                            const node = {name: text};
-                            if (!nodeLabel.has(text)) {
-                                node.first = true;
-                                nodeLabel.set(text, node);
-                            }
-                            nodes.push(node);
-                            nodeByKey.set(key, node);
-                            indexByKey.set(key, ++index);
-                        // });
-                    // }
+                    const text = getUserName(d[k]);
+                    const key = JSON.stringify([k, text]);
+                    if (nodeByKey.has(key))
+                        continue // return
+                    const node = {name: text,relatedLinks:[],id:++index};
+                    if (!nodeLabel.has(text)) {
+                        node.first = true;
+                        nodeLabel.set(text, node);
+                        nodeList[text] = [];
+                        color(text)
+                    }
+                    nodes.push(node);
+                    nodeByKey.set(key, node);
+                    indexByKey.set(key, index);
+                    nodeList[text].push(node);
                 }
             }
 
@@ -156,28 +154,58 @@ let Sankey = function(){
                 const prefix = keys.slice(0, i + 1);
                 const linkByKey = new Map;
                 for (const d of data) {
-                    const names = prefix.map(k => d[k]);
+                    const sourceName = JSON.stringify([a, getUserName(d[a])]);
+                    const targetName = JSON.stringify([b, getUserName(d[b])]);
+                    const names = [sourceName,targetName];
                     const key = JSON.stringify(names);
                     const value = d.value || 1;
                     const arr = d.arr || [d.key];//just ad for testing
                     let link = linkByKey.get(key);
-                    if (link) { link.value += value;
-                    link.arr = [...(link.arr??[]),...arr];
-                    continue; }
+                    if (link) {
+                        link.value += value;
+                        link.arr = [...(link.arr??[]),...arr];
+                        continue;
+                    }
                     link = {
                         source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
                         target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
                         names,
+                        arr,
                         value
                     };
+                    if (getUserName(d[a])!==getUserName(d[b])){
+                        nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
+                        nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
+                    }
                     links.push(link);
                     linkByKey.set(key, link);
                 }
+            }
+            if (graphicopt.hideStable){
+                let removeNodes = {};
+                const listUser = {};
+                d3.entries(nodeList).forEach(n=>{
+                    let removeList = {};
+                    if (!n.value.find(e=>{if (!e.relatedLinks.length) removeList[e.id] = true; return e.relatedLinks.length}))
+                        d3.keys(removeList).forEach(k=>removeNodes[k] =true);
+                })
+
+                nodes = nodes.filter((n,index)=>{
+                    if (!removeNodes[n.id])
+                        return true;
+                    else{
+                        // listUser[n.name] = n;
+                        return false;
+                    }
+                });
+                // console.log(listUser)
+                links = links.filter(l=>!(removeNodes[l.source]||removeNodes[l.target]))
             }
             return {nodes, links};
         })();
 
         sankey = sankey
+            .nodeId(function(d){return d.id})
             .nodeSort(nodeSort)
             // .linkSort(null)
             .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
@@ -195,29 +223,23 @@ let Sankey = function(){
         if(node_g.empty()){
             node_g = svg_paraset.append('g').classed('nodes',true);
         }
-        debugger
-        // nodes.forEach(n=>{
-        //     n.y0_o = n.y0;
-        //     n.y1_o = n.y1;
-        //     const newsize = Math.pow(n.y1_o-n.y0_o,0.7);
-        //     n.y0 = (n.y1_o-n.y0_o)/2 - newsize/2 +n.y0_o;
-        //     n.y1 = n.y0 + newsize;
-        // });
-        // links.forEach(l=>l.width= Math.pow(l.width,0.7));
         let node_p = node_g
             .selectAll("g.outer_node")
             .data(nodes,d=>d.name)
             .join(
-                enter => (e=enter.append("g").attr('class','outer_node'),e.append("title"),e.append("rect"),e.append("text"),e),
-            ).attr('transform',d=>`translate(${d.x0},${d.y0})`);
+                enter => (e=enter.append("g").attr('class','outer_node'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                update => update.call(update=>update.transition().attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                exit => exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('transform',d=>`translate(${d.x0},${d.y0}) scale(1,0)`).remove()),
+            );
             // ).attr('transform',d=>`translate(${x(d.time)},${d.y0})`);
-        node_p.select('rect')
-            .attr("height", d => d.y1 - d.y0)
-            .attr("width", d => d.x1 - d.x0)
-            .style('fill',d=>d3.hsl(color(d.name)).darker(2));
-            // .style('fill','gray');
-        node_p.select("title")
-            .text(d => `${d.name}\n${d.value.toLocaleString()}`);
+        // node_p.select('rect')
+        //     .transition().duration(graphicopt.animationTime)
+        //     .attr("height", d => d.y1 - d.y0)
+        //     .attr("width", d => d.x1 - d.x0)
+        //     .style('fill',d=>d3.hsl(color(d.name)).darker(2));
+        //     // .style('fill','gray');
+        // node_p.select("title")
+        //     .text(d => `${d.name}\n${d.value.toLocaleString()}`);
         node_p.select('text')
             .attr("x", - 6)
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
@@ -235,7 +257,7 @@ let Sankey = function(){
             .attr("fill", "none")
             .attr("opacity", 0.5)
             .selectAll("g")
-            .data(links,(d,i)=>(d._id = 'link_'+i,d))
+            .data(links,(d,i)=>(d._id = 'link_'+i, d.names))
             .join(
                 enter => {
                     e=enter.append("g").style("mix-blend-mode", "multiply");
@@ -257,148 +279,64 @@ let Sankey = function(){
                         .attr("stop-color", d => color(d.target.name));
                     // gradient ---end
                     return e
-                },
+                },update => {
+                    e=update;
+                    // gradient
+                    const gradient = e.select("linearGradient")
+                        .attr("id", d => d._id)
+                        .attr("gradientUnits", "userSpaceOnUse")
+                        .attr("x1", d => d.source.x1)
+                        .attr("x2", d => d.target.x0);
+
+                    gradient.append("stop")
+                        .attr("offset", "0%")
+                        .attr("stop-color", d => color(d.source.name));
+
+                    gradient.append("stop")
+                        .attr("offset", "100%")
+                        .attr("stop-color", d => color(d.target.name));
+                    // gradient ---end
+                    return e
+                },exit=>{
+                    return exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('transform','scale(1,0)').remove())
+                }
             );
 
         link_p.select('path')
             .attr('class',d=>'a'+d.nameIndex)
-            .attr("d", d3.sankeyLinkHorizontal())
-            .attr("stroke", d =>
-            {
-                return `url(#${d._id})`;
-            })
-            .attr("stroke-width", d => d.width)
-            // .attr("stroke-width", 1)
+            .classed('hide',d=>d.arr===undefined)
+            // .transition().duration(graphicopt.animationTime)
+            .attr("d", linkPath)
+            .attr("fill", d => `url(#${d._id})`)
+            .attr("stroke", d => `url(#${d._id})`)
+            .attr("stroke-width", 0.1)
+            // .attr("stroke-width", d => d.width)
             .each(function(d){d.dom=d3.select(this)});
         // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
         link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
 
-        //
-        // let onode = drawArea.attr('clip-path','url(#timeClip)').selectAll(".outer_node")
-        //     .data(data,d=>d.key);
-        // onode.call(updateOnode);
-        // onode.exit().remove();
-        // let onode_n = onode.enter().append("g")
-        //     .attr("class", "outer_node");
-        // onode_n.append('g').attr('class','circleG');
-        // onode_n.append('g').attr('class','summary hide');
-        // onode_n.append('g').attr('class','glowEffect');
-        // onode_n.append('g').attr('class','label')
-        //     .attr('class','label')
-        //     .style("font", "10px sans-serif")
-        //     .attr("pointer-events", "none")
-        //     .attr("text-anchor", "middle");
-        // onode_n.call(updateOnode);
-        // g.select('.background').node().appendChild(drawArea.clone(true).node())
+        function horizontalSource(d) {
+            return [d.source.x1, d.y0];
+        }
+
+        function horizontalTarget(d) {
+            return [d.target.x0, d.y1];
+        }
+
+        function linkPath(d) {
+            const source = horizontalSource(d);
+            const target = horizontalTarget(d);
+            const thick = d.width/2;
+            const width = (target[0]-source[0])/2;
+            // return d3.line().curve(d3.curveBasis)([source,[source[0]+width,source[1]],[target[0]-width,target[1]],target]);
+            return `M ${source[0]} ${source[1]-thick} C ${source[0]+width} ${source[1]-thick}, ${target[0]-width} ${target[1]-thick}, ${target[0]} ${target[1]-thick} 
+            L ${target[0]} ${target[1]+thick} C ${target[0]-width} ${target[1]+thick}, ${source[0]+width} ${source[1]+thick}, ${source[0]} ${source[1]+thick} Z`;
+        }
+
         g.select('.background').select('.drawArea').attr('clip-path',null)
         g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
         onFinishDraw.forEach(d=>d());
 
-        function updateOnode(p){
-            p.each(function(d){
-                d.node=d3.select(this);
-                d.childrenNode = makecirclepacking(d.node);
-            });
-            p.interrupt();
-            let els = p.filter(function(d){
-                if (d.highlight)
-                    d.oldpos = d3.select(this).attr('transform').replace(/translate\(|\)/g,'').split(',').map(e=>+e.trim());
-                return d.highlight;
-            });
-            els
-                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
-
-            p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
-            return p;
-        }
-        function makecirclepacking(svg) {
-            let node;
-            return updateNodes();
-
-            function updateNodes(istransition) {
-                let childrenNode = {};
-                node = svg.select('g.circleG')
-                    .selectAll("g.element")
-                    .data(d=>[d], d => d.key)
-                    .call(updateNode);
-
-                node.exit().remove();
-                node = node.enter().append("g")
-                    .call(updateNode).merge(node);
-
-                glowEffect = svg.select('g.glowEffect')
-                    .selectAll("defs.glowElement")
-                    .data(d=>[d], d => d.key)
-                    .call(updateGlow);
-
-                glowEffect.exit().remove();
-                glowEffect_n = glowEffect.enter().append("defs")
-                    .attr('class','glowElement');
-                glowEffect_n.append('filter');
-                glowEffect_n
-                    .call(updateGlow).merge(glowEffect);
-                function updateGlow(p){
-                    p.select('filter')
-                        .attr("width","400%")
-                        .attr("x","-150%")
-                        .attr("y","-150%")
-                        .attr("height","400%")
-                        .attr('id',d=>'c'+d.data.currentID)
-                        .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
-                        <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
-                        <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
-                        <feMerge>
-                            <feMergeNode in="coloredBlur3"></feMergeNode>
-                            <feMergeNode in="coloredBlur2"></feMergeNode>
-                            <feMergeNode in="coloredBlur1"></feMergeNode>
-                            <feMergeNode in="SourceGraphic"></feMergeNode>
-                        </feMerge>`);
-                    return p;
-                }
-
-                zoomTo(istransition);
-                return childrenNode;
-                function updateNode(node) {
-                    node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
-                    node
-                        .attr('class','element')
-                        .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');master.click.forEach(f=>f());openPopup(d,main_svg);})
-                        .on("mouseover", function(d){mouseover.bind(this)(d)})
-                        .on("mouseout", function(d){mouseout.bind(this)(d)})
-                        .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
-                        // .attr("fill", d => {
-                        //     d.color = color(d.value,d);
-                        //     return d.color;
-                        // })
-                        .style('stroke-width',d=>{
-                            return d.h;
-                        });
-                    return node;
-                }
-            }
-
-
-            function zoomTo(istransition) {
-                node.selectAll('g').remove();
-                let path = node.selectAll('path').data(d=>d.drawData)
-                    .join('path')
-                    .attr('class','circle')
-                    .classed('invalid',d=>d.invalid)
-                    .style('filter',d=>d.invalid?'url("#glow")':null)
-                    .attr('d',getRenderFunc)
-                    .classed('invalid',d=>d.invalid)
-                    .style('filter',d=>d.invalid?'url("#glow")':null)
-                    .attr("stroke", d => {
-                        // d.color = color(d.value,d);
-                        // d.color = color(d.size);
-                        // return d.color;
-                        return d.type==='top'?'rgba(166,86,40,0.75)':'rgba(55,126,184,0.75)';
-                    })
-                    .attr('stroke-width',d=>sizeScale(d.size))
-                ;
-            }
-        }
     };
     // let getRenderFunc = function(d){
     //     return `M${d[0]} 0 L${d[1]} 0`;
@@ -426,7 +364,7 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return arr.length?('User '+arr.map(d=>d.replace('user','')).join(',')):'No user';
+        return (arr&&arr.length)?('User '+arr.map(d=>d.replace('user','')).join(',')):'No user';
     }
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
@@ -509,6 +447,8 @@ let Sankey = function(){
                     break;
             }
         }
+        if (_data.hideStable!==undefined)
+            graphicopt.hideStable = _data.hideStable;
         return master;
     }
     master.getRenderFunc = function(_data) {

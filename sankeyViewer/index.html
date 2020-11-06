@@ -185,6 +185,15 @@
                                             <option selected value="">None</option>
                                         </select>
                                         <div class="col-2"></div>
+
+                                        <label class="col-4" for="hideStable">Hide stable users: </label>
+                                        <label class="col-8 left-align">
+                                            <input id="hideStable" type="checkbox" class="filled-in">
+                                            <span ></span>
+                                        </label>
+                                        <div>
+                                            <svg id="pieChart"></svg>
+                                        </div>
 <!--                                        <label class="col-4" for="nodeColor">Node color by: </label>-->
 <!--                                        <select class="col-6" id="nodeColor">-->
 <!--                                            <option value="">Current metric</option>-->
@@ -325,6 +334,7 @@
     <script src="src/lib/d3.tip.js"></script>
     <script src="src/lib/underscore-min.js"></script>
 
+    <script src="src/js/pieChart.js"></script>
     <script src="src/js/beeswarm.js"></script>
     <script src="src/js/ganttchart.js"></script>
     <script src="src/js/d3-sankey.js"></script>

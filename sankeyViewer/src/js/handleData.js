@@ -1,4 +1,4 @@
-
+let maxCore = 36;
 function queryLayout() {
     return d3.json('../jobviewer/src/data/layout.json').then(layout => {
         Layout.data = layout;
@@ -6,6 +6,7 @@ function queryLayout() {
         let {tree,compute_layoutLink} = data2tree(Layout.data_flat);
         Layout.tree = tree;
         Layout.compute_layout = compute_layoutLink;
+        userPie.maxValue(d3.keys(Layout.compute_layout).length*maxCore);
     });
 }
 
@@ -18,13 +19,14 @@ function handleData(data){
         .key(d=>d.value[USER]) //user
         .key(d=>d.key.split('.')[0]) //job array
         .object(d3.entries(jobs));
-    const users = _.mapObject(user_job,(d,i)=>{
+    const users = _.mapObject(user_job,(u,i)=>{
         const job = [];
-        const node = _.uniq(_.flatten(_.values(d).map(d=>d.map(d=>(job.push(d.key),d.value.node_list)))));
+        let totalCore = 0;
+        const node = _.uniq(_.flatten(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d.value.cpu_cores,d.value.node_list)))));
 
         node.forEach(c=> computers[c].user.push(i))
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        return {node,job,jobMain}
+        return {node,job,jobMain,totalCore}
     });
     const jobName_job = d3.nest()
         .key(d=>d.value[JOBNAME].slice(0,3)) //user
@@ -156,7 +158,8 @@ function queryData(data) {
         });
     }
     currentDraw = ()=>{
-        drawObject.draw();
+        // drawObject.draw();
+        userPie.data(Layout.users).draw();
         d3.select('#RankingList tbody').selectAll('tr')
             .data(drawObject.data().filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
             .join('tr').selectAll('td')
@@ -245,7 +248,6 @@ function handleDataUser_old(users,jobs){
 }
 function handleDataComputeByUser(computers,jobs){
     let data = [];
-    debugger
     for (let comp in computers){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
