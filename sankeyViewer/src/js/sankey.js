@@ -117,7 +117,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan.slice(0,288/2);
+        let keys = Layout.timespan//.slice(0,288/2);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
         let graph = (()=> {
@@ -245,6 +245,8 @@ let Sankey = function(){
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
             .attr("dy", "0.35em")
             .attr("text-anchor", "end")
+            .attr("fill", d=>d.first?color(d.name):'none')
+            .attr("font-weight", "bold")
             .text(d => {
                 return d.first?d.name:''});
 
