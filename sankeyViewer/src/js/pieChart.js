@@ -36,6 +36,7 @@ function UserPie(){
     let maxValue = 0;
     let main_svg,g;
     let emptyKey = "No User";
+    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return`<div class="card"><div class="card-body">${d}</div></div>`})
     master.init = function(){
         main_svg = d3.select(maindiv)
             .attr("width", graphicopt.width)
@@ -53,7 +54,8 @@ function UserPie(){
                 .attr('opacity',0.5)
                 .attr('fill','none');
             g.append('text').attr('class',"sumLabels");
-        }
+        };
+        g.call(tooltip);
     };
 
     master.draw = function(){
@@ -78,6 +80,7 @@ function UserPie(){
                 e.append('title');
                 return e;
             }   );
+        // slice.each(function(d){d.node=d3.select(this)});
         slice.select('path')
             .style("fill", d=>color(d.data.key))
             .classed('hide',d=>d.data.key===emptyKey)
@@ -90,7 +93,12 @@ function UserPie(){
                     return arc(interpolate(t));
                 };
             });
-        slice.select('title').text(d=>d.data.key+': '+d.value)
+        slice.select('title').text(d=>d.data.key+' #Cores: '+d.value);
+        slice.on('mouseover',function(d){tooltip.show(`<h6>${d.data.key}</h6><br><span> #Cores: ${d.value}</span>
+<br><span> #Compute: ${d.data.value.node.length}</span>`);
+        d3.select(this).style('stroke','black');
+        })
+            .on('mouseout',function(d){d3.select(this).style('stroke','none');tooltip.hide()})
         /* ------- TEXT LABELS -------*/
 
         var text = g.select(".labels").selectAll("text")
