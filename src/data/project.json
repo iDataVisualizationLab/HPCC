@@ -201,5 +201,24 @@
     "types": [
       "Bee swarm","Time line","Density Contour"
     ]
+  },
+  "SankeyViewer": {
+    "title": "SankeyViewer",
+    "thumb": "SankeyViewer.PNG",
+    "url": "https://idatavisualizationlab.github.io/HPCC/sankeyViewer/index.html",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Capture User status",
+      "Snapshot of user utilizing",
+      "User , job and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "Sankey","Pie chart"
+    ]
   }
 }
