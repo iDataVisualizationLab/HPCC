@@ -23,7 +23,6 @@ function handleData(data){
         const job = [];
         let totalCore = 0;
         const node = _.uniq(_.flatten(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d.value.cpu_cores,d.value.node_list)))));
-
         node.forEach(c=> computers[c].user.push(i))
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
         return {node,job,jobMain,totalCore}
@@ -252,8 +251,11 @@ function handleDataComputeByUser(computers,jobs){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
-                let username = _.uniq(jIDs.map(j=>jobs[j].user_name));
-                item.values.push(username.sort());
+                let jobArr = jIDs.map(j=>jobs[j]);
+                let username = d3.nest().key(d=>d.user_name)
+                    .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
+                username.total = d3.sum(username,e=>e.value)
+                item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
             }else
                 item.values.push(null);
             item[Layout.timespan[i]] = item.values[i];
@@ -263,6 +265,27 @@ function handleDataComputeByUser(computers,jobs){
     data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
+// function handleDataComputeByUser(computers,jobs,timespan){
+//     let data = [];
+//     debugger
+//     for (let jID in  jobs){
+//         jobs[jID].node_list.forEach(comp=>{
+//             let item = {key:comp,values:[],value:jobs[jID].node_list_obj[comp],data:jobs[jID]};
+//             timespan.forEach(t=>{
+//                 if ((new Date(jobs[jID].start_time)<=t) && (!jobs[jID].finish_time || (t<=new Date(jobs[jID].finish_time)))){
+//                     item[t] = [{key:jobs[jID].user_name,value:jobs[jID].node_list_obj[comp]}];
+//                     item[t].total = jobs[jID].node_list_obj[comp];
+//                 }else {
+//                     item[t] = [];
+//                     item[t].total = jobs[jID].node_list_obj[comp];
+//                 }
+//                 item.values.push(item[t])
+//             });
+//             data.push(item);
+//         })
+//     };
+//     return data;
+// }
 function handleRankingData(data){
     console.time('handleRankingData');
     let sampleS = handleSmalldata(data);
@@ -301,6 +324,6 @@ function handleRankingData(data){
     Layout.ranking = ranking;
     Layout.timespan = sampleS.timespan;
 
-    Layout.userTimeline = handleDataComputeByUser(computers,jobs);
+    Layout.userTimeline = handleDataComputeByUser(computers,jobs,Layout.timespan);
     console.timeEnd('handleRankingData');
 }

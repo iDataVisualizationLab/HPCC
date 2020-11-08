@@ -46,6 +46,7 @@ let Sankey = function(){
     let nodeSort = undefined;
     let sankey = d3.sankey()
         .nodeWidth(0.1)
+        // .nodeAlign(d3.sankeyLeft)
         .nodePadding(5);
     master.mouseover = [];
     master.mouseover.dict={};
@@ -117,7 +118,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,288/2);
+        let keys = Layout.timespan//.slice(0,20);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
         let graph = (()=> {
@@ -128,25 +129,27 @@ let Sankey = function(){
             const nodeLabel = new Map;
             let links = [];
             const nodeList = {};
-            for (const k of keys) {
+            keys.forEach((k,ki)=>{
                 for (const d of data) {
-                    const text = getUserName(d[k]);
-                    const key = JSON.stringify([k, text]);
-                    if (nodeByKey.has(key))
-                        continue // return
-                    const node = {name: text,relatedLinks:[],id:++index};
-                    if (!nodeLabel.has(text)) {
-                        node.first = true;
-                        nodeLabel.set(text, node);
-                        nodeList[text] = [];
-                        color(text)
+                    if(d[k]){
+                        const text = getUserName(d[k]);
+                        const key = JSON.stringify([k, text]);
+                        if (nodeByKey.has(key))
+                            continue // return
+                        const node = {name: text,time:k,layer:ki,relatedLinks:[],id:++index};
+                        if (!nodeLabel.has(text)) {
+                            node.first = true;
+                            nodeLabel.set(text, node);
+                            nodeList[text] = [];
+                            color(text)
+                        }
+                        nodes.push(node);
+                        nodeByKey.set(key, node);
+                        indexByKey.set(key, index);
+                        nodeList[text].push(node);
                     }
-                    nodes.push(node);
-                    nodeByKey.set(key, node);
-                    indexByKey.set(key, index);
-                    nodeList[text].push(node);
                 }
-            }
+            })
 
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -154,31 +157,35 @@ let Sankey = function(){
                 const prefix = keys.slice(0, i + 1);
                 const linkByKey = new Map;
                 for (const d of data) {
-                    const sourceName = JSON.stringify([a, getUserName(d[a])]);
-                    const targetName = JSON.stringify([b, getUserName(d[b])]);
-                    const names = [sourceName,targetName];
-                    const key = JSON.stringify(names);
-                    const value = d.value || 1;
-                    const arr = d.arr || [d.key];//just ad for testing
-                    let link = linkByKey.get(key);
-                    if (link) {
-                        link.value += value;
-                        link.arr = [...(link.arr??[]),...arr];
-                        continue;
+                    if (d[a] && d[b]){
+                        const sourceName = JSON.stringify([a, getUserName(d[a])]);
+                        const targetName = JSON.stringify([b, getUserName(d[b])]);
+                        const names = [sourceName,targetName];
+                        const key = JSON.stringify(names);
+                        // const value = d.value || 1;
+                        const value = d[a].total;
+                        const arr = d.arr || [d.key];//just ad for testing
+                        let link = linkByKey.get(key);
+                        if (link) {
+                            link.value += value;
+                            // link.arr = [...(link.arr??[]),...arr];
+                            link.arr = [link.value];
+                            continue;
+                        }
+                        link = {
+                            source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
+                            target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
+                            names,
+                            arr,
+                            value
+                        };
+                        if (getUserName(d[a])!==getUserName(d[b])){
+                            nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
+                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
+                        }
+                        links.push(link);
+                        linkByKey.set(key, link);
                     }
-                    link = {
-                        source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
-                        target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
-                        names,
-                        arr,
-                        value
-                    };
-                    if (getUserName(d[a])!==getUserName(d[b])){
-                        nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
-                        nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
-                    }
-                    links.push(link);
-                    linkByKey.set(key, link);
                 }
             }
             if (graphicopt.hideStable){
@@ -204,8 +211,7 @@ let Sankey = function(){
             return {nodes, links};
         })();
 
-        sankey = sankey
-            .nodeId(function(d){return d.id})
+        sankey.nodeId(function(d){return d.id})
             .nodeSort(nodeSort)
             // .linkSort(null)
             .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
@@ -213,11 +219,9 @@ let Sankey = function(){
             nodes: graph.nodes.map(d => Object.assign({}, d)),
             links: graph.links.map(d => Object.assign({}, d))
         });
-        nodes.forEach(n=>{
-            n.x = n.x0;
-            n.y = n.y0 + (n.y1-n.y0)/2;
-        })
-
+        links.forEach((d,i)=>{
+            d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
+        });
         svg_paraset = drawArea;
         let node_g = svg_paraset.select('.nodes');
         if(node_g.empty()){
@@ -228,18 +232,9 @@ let Sankey = function(){
             .data(nodes,d=>d.name)
             .join(
                 enter => (e=enter.append("g").attr('class','outer_node'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                update => update.call(update=>update.transition().attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                exit => exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('transform',d=>`translate(${d.x0},${d.y0}) scale(1,0)`).remove()),
+                update => update.call(update=>update.transition().duration(graphicopt.animationTime).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                exit => exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove()),
             );
-            // ).attr('transform',d=>`translate(${x(d.time)},${d.y0})`);
-        // node_p.select('rect')
-        //     .transition().duration(graphicopt.animationTime)
-        //     .attr("height", d => d.y1 - d.y0)
-        //     .attr("width", d => d.x1 - d.x0)
-        //     .style('fill',d=>d3.hsl(color(d.name)).darker(2));
-        //     // .style('fill','gray');
-        // node_p.select("title")
-        //     .text(d => `${d.name}\n${d.value.toLocaleString()}`);
         node_p.select('text')
             .attr("x", - 6)
             .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
@@ -254,65 +249,64 @@ let Sankey = function(){
         if(link_g.empty()){
             link_g = svg_paraset.append('g').classed('links',true);
         }
-
+        debugger
         let link_p = link_g
             .attr("fill", "none")
             .attr("opacity", 0.5)
             .selectAll("g")
-            .data(links,(d,i)=>(d._id = 'link_'+i, d.names))
+            .data(links,(d,i)=>d._id)
             .join(
                 enter => {
-                    e=enter.append("g").style("mix-blend-mode", "multiply");
-                    e.append("path");
-                    e.append("title");
+                    e=enter.append("g").style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                     // gradient
                     const gradient = e.append("linearGradient")
                         .attr("id", d => d._id)
                         .attr("gradientUnits", "userSpaceOnUse")
                         .attr("x1", d => d.source.x1)
                         .attr("x2", d => d.target.x0);
-
-                    gradient.append("stop")
-                        .attr("offset", "0%")
-                        .attr("stop-color", d => color(d.source.name));
-
-                    gradient.append("stop")
-                        .attr("offset", "100%")
-                        .attr("stop-color", d => color(d.target.name));
+                    gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        .join('stop')
+                        .attr("offset", d=>`${d[0]}%`)
+                        .attr("stop-color", d => d[1]);
                     // gradient ---end
+                    const path = e.append("path").attr('class',d=>'a'+d.nameIndex)
+                        .classed('hide',d=>d.arr===undefined)
+                        .attr("fill", d => `url(#${d._id})`)
+                        .attr("stroke", d => `url(#${d._id})`)
+                        .attr("stroke-width", 0.1)
+                        .attr("d", linkPath)
+                        .attr("opacity", 0)
+                        .transition().duration(graphicopt.animationTime)
+                        .attr("opacity", 1);
+                    path.each(function(d){d.dom=d3.select(this)});
+                    e.append("title");
                     return e
                 },update => {
-                    e=update;
                     // gradient
-                    const gradient = e.select("linearGradient")
+                    const gradient = update.select("linearGradient")
                         .attr("id", d => d._id)
-                        .attr("gradientUnits", "userSpaceOnUse")
+                        .attr("gradientUnits", "userSpaceOnUse");
+                    gradient
                         .attr("x1", d => d.source.x1)
                         .attr("x2", d => d.target.x0);
 
-                    gradient.append("stop")
-                        .attr("offset", "0%")
-                        .attr("stop-color", d => color(d.source.name));
-
-                    gradient.append("stop")
-                        .attr("offset", "100%")
-                        .attr("stop-color", d => color(d.target.name));
+                    gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        .join('stop')
+                        .attr("offset", d=>`${d[0]}%`)
+                        .attr("stop-color", d => d[1]);
                     // gradient ---end
+                    update.select('path').attr("fill", d => `url(#${d._id})`)
+                        .attr("stroke", d => `url(#${d._id})`)
+                        .attr("stroke-width", 0.1).transition().duration(graphicopt.animationTime)
+                        .attr("d", linkPath);
+
                     return e
                 },exit=>{
-                    return exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('transform','scale(1,0)').remove())
+                    return exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove())
                 }
             );
 
         link_p.select('path')
-            .attr('class',d=>'a'+d.nameIndex)
-            .classed('hide',d=>d.arr===undefined)
-            // .transition().duration(graphicopt.animationTime)
-            .attr("d", linkPath)
-            .attr("fill", d => `url(#${d._id})`)
-            .attr("stroke", d => `url(#${d._id})`)
-            .attr("stroke-width", 0.1)
-            // .attr("stroke-width", d => d.width)
             .each(function(d){d.dom=d3.select(this)});
         // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
         link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
@@ -366,7 +360,7 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?('User '+arr.map(d=>d.replace('user','')).join(',')):'No user';
+        return (arr&&arr.length)?('User '+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
     }
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
