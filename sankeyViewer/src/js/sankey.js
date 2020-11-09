@@ -121,6 +121,7 @@ let Sankey = function(){
         let keys = Layout.timespan//.slice(0,20);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
+
         let graph = (()=> {
             let index = -1;
             let nodes = [];
@@ -134,7 +135,7 @@ let Sankey = function(){
                     if(d[k]){
                         const text = getUserName(d[k]);
                         const key = JSON.stringify([k, text]);
-                        if (nodeByKey.has(key))
+                        if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
                             continue // return
                         const node = {name: text,time:k,layer:ki,relatedLinks:[],id:++index};
                         if (!nodeLabel.has(text)) {
@@ -156,10 +157,10 @@ let Sankey = function(){
                 const b = keys[i];
                 const prefix = keys.slice(0, i + 1);
                 const linkByKey = new Map;
-                for (const d of data) {
-                    if (d[a] && d[b]){
-                        const sourceName = JSON.stringify([a, getUserName(d[a])]);
-                        const targetName = JSON.stringify([b, getUserName(d[b])]);
+                for (const d of data){
+                    const sourceName = JSON.stringify([a, getUserName(d[a])]);
+                    const targetName = JSON.stringify([b, getUserName(d[b])]);
+                    if (d[a] && d[b] && nodeByKey.get(sourceName) && nodeByKey.get(targetName)){
                         const names = [sourceName,targetName];
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
@@ -433,19 +434,23 @@ let Sankey = function(){
             return graphicopt;
     };
     master.sankeyOpt = function(_data){
-        if (_data.nodeSort){
-            switch (_data.nodeSort) {
-                case '':
-                    nodeSort = undefined;
-                    break;
-                case 'size':
-                    nodeSort = function(a,b){return a.value-b.value};
-                    break;
+        if (arguments.length) {
+            if (_data.nodeSort) {
+                switch (_data.nodeSort) {
+                    case '':
+                        nodeSort = undefined;
+                        break;
+                    case 'size':
+                        nodeSort = function (a, b) {
+                            return a.value - b.value
+                        };
+                        break;
+                }
             }
-        }
-        if (_data.hideStable!==undefined)
-            graphicopt.hideStable = _data.hideStable;
-        return master;
+            d3.keys(_data).forEach(k => graphicopt[k] = _data[k]);
+            return master;
+        }else
+            return graphicopt
     }
     master.getRenderFunc = function(_data) {
         return arguments.length?(getRenderFunc=_data,master):getRenderFunc;

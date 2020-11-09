@@ -83,7 +83,11 @@ function initdraw(){
     userPie.init();
     d3.select('#hideStable').on('change',function(){
         subObject.sankeyOpt({hideStable:this.checked}).draw();
-    })
+    });
+
+    d3.select('#showShareUser').on('change',function(){
+        subObject.sankeyOpt({showShareUser:this.checked}).draw();
+    });
 }
 function userTable(d,type){
     highlight2Stack = [];
