@@ -160,7 +160,7 @@ function queryData(data) {
         // drawObject.draw();
         userPie.data(Layout.users).draw();
         d3.select('#RankingList tbody').selectAll('tr')
-            .data(drawObject.data().filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
+            .data(Layout.snapshot.filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
             .join('tr').selectAll('td')
             .data(d=>d).join('td').html(d=>d);
 
@@ -184,47 +184,10 @@ function createdata(){
         data.drawData  = getDrawData(data);
         dataviz.push(data);
     }));
+    Layout.snapshot = dataviz
     // dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
-    sortData(dataviz)
-}
-function sortData(data){
-    const dataviz =  data??drawObject.data();
-    // Layout.ranking
-    if (Layout.ranking.byMetric[vizservice[serviceSelected].text]){
-        const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][Math.max(request.index-1,0)];
-        dataviz.sort((a,b)=>rankIndex[a.key]-rankIndex[b.key])
-    }else
-        dataviz.sort((a,b)=>-b.value+a.value);
-    Layout.order.deltarank = [];
-    // dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
-    // let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-    //     .filter(d=>d.value>2);
-    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(getData_delta(d.data))})));
-    let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-        .filter(d=>d.value>0);
-    let dataObject = request.queryRange(Layout.currentTime,6,rankList.map(d=>d.data.key));
-    if (d3.keys(dataObject).length){
-        dataObject = handleSmalldata(dataObject);
-        let s = vizservice[serviceSelected];
-        if (s.idroot!==undefined){
-            rankList.forEach(d=> {
-                const c = d.data.key;
-                for (let i = 1;i<dataObject[c][serviceListattr[s.idroot]].length;i++)
-                {
-                    d.data.stackdelta.push(dataObject[c][serviceListattr[s.idroot]][i][s.id]-dataObject[c][serviceListattr[s.idroot]][i-1][s.id])
-                }
-            })
-        }
-    }
-    rankList.forEach(d=>{
-            d.data.highlight=true;
-        }); // highlight changed
-    Layout.order = dataviz.map(d=>d.key);
-    Layout.order.object = {};
-    Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
-    drawObject.data(dataviz);
 }
 function handleDataUser_old(users,jobs){
     let data = [];
