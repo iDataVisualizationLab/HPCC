@@ -165,7 +165,8 @@ let Sankey = function(){
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
                         const value = d[a].total;
-                        const arr = d.arr || [d.key];//just ad for testing
+                        // const arr = d.arr || [d.key];//just ad for testing
+                        const arr = [value];//just ad for testing
                         let link = linkByKey.get(key);
                         if (link) {
                             link.value += value;
@@ -332,7 +333,7 @@ let Sankey = function(){
         link_p.select('path')
             .each(function(d){d.dom=d3.select(this)});
         // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
-        link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
+        link_p.select('title').text(d => `${d.names[1]}\n${d.arr}`);
 
         function horizontalSource(d) {
             return [d.source.x1, d.y0];
