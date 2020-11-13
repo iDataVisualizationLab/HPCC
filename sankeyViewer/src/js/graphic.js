@@ -40,6 +40,7 @@ function initdraw(){
         const val = $(this).val();
         subObject.sankeyOpt({nodeSort:val}).draw();
     })
+
     serviceControl();
     userPie.init();
     d3.select('#hideStable').on('change',function(){
@@ -49,6 +50,13 @@ function initdraw(){
     d3.select('#showShareUser').on('change',function(){
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
     });
+
+    d3.select('#flowType').on('change',function(){
+        const val = $(this).val();
+        _handleDataComputeByUser.core=val
+        Layout.userTimeline = handleDataComputeByUser();
+        subObject.data(Layout.userTimeline).draw();
+    })
 }
 function userTable(d,type){
     highlight2Stack = [];
