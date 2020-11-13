@@ -77,10 +77,6 @@ function getData_delta(d){
 
 function data2tree(data,sampleS,computers){
     let serviceName = null;
-    if (cluster_info&&vizservice[serviceSelected].text==='Radar'){
-        cluster_info.forEach(d=>d.arr=[])
-        serviceName = vizservice[serviceSelected].text;
-    }
     const compute_layoutLink = {};
     const tree =  {name:"__main__",children:data.map(d=>{
             const el = {
@@ -101,10 +97,6 @@ function data2tree(data,sampleS,computers){
                             if (Layout.computers_old){
                                 serviceFullList.forEach(s=>item.metrics_delta[s.text] = item.metrics[s.text]-Layout.computers_old[c].metric[s.text]);
                             }
-                        }
-                        if (serviceName==='Radar'&&cluster_info)
-                        {
-                            getCluster(item)
                         }
                         compute_layoutLink[c] = d.key;
                         return item;
@@ -127,10 +119,6 @@ function data2tree(data,sampleS,computers){
             return el;
     })
     };
-    if (cluster_info&&vizservice[serviceSelected].text==='Radar') {
-        cluster_info.forEach(d => (d.total = d.arr.length));
-        cluster_map(cluster_info)
-    }
     return {tree,compute_layoutLink};
 }
 let currentDraw=()=>{};
@@ -146,21 +134,11 @@ function queryData(data) {
     Layout.jobs = jobs;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
-    if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){
-        group_opt.recall()
-        cluster_map(cluster_info);
-        handle_clusterinfo();
-        Layout.tree.children.forEach(d=>{
-            d.children.forEach(e=>{
-                getCluster(e);
-            })
-        });
-    }
     currentDraw = ()=>{
         // drawObject.draw();
         userPie.data(Layout.users).draw();
         d3.select('#RankingList tbody').selectAll('tr')
-            .data(drawObject.data().filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
+            .data(Layout.snapshot.filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
             .join('tr').selectAll('td')
             .data(d=>d).join('td').html(d=>d);
 
@@ -184,83 +162,61 @@ function createdata(){
         data.drawData  = getDrawData(data);
         dataviz.push(data);
     }));
+    Layout.snapshot = dataviz
     // dataviz.sort((a,b)=>-Layout.order.object[b.key]+Layout.order.object[a.key]);
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
-    sortData(dataviz)
 }
-function sortData(data){
-    const dataviz =  data??drawObject.data();
-    // Layout.ranking
-    if (Layout.ranking.byMetric[vizservice[serviceSelected].text]){
-        const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][Math.max(request.index-1,0)];
-        dataviz.sort((a,b)=>rankIndex[a.key]-rankIndex[b.key])
-    }else
-        dataviz.sort((a,b)=>-b.value+a.value);
-    Layout.order.deltarank = [];
-    // dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
-    // let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-    //     .filter(d=>d.value>2);
-    dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(getData_delta(d.data))})));
-    let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
-        .filter(d=>d.value>0);
-    let dataObject = request.queryRange(Layout.currentTime,6,rankList.map(d=>d.data.key));
-    if (d3.keys(dataObject).length){
-        dataObject = handleSmalldata(dataObject);
-        let s = vizservice[serviceSelected];
-        if (s.idroot!==undefined){
-            rankList.forEach(d=> {
-                const c = d.data.key;
-                for (let i = 1;i<dataObject[c][serviceListattr[s.idroot]].length;i++)
-                {
-                    d.data.stackdelta.push(dataObject[c][serviceListattr[s.idroot]][i][s.id]-dataObject[c][serviceListattr[s.idroot]][i-1][s.id])
-                }
-            })
-        }
-    }
-    rankList.forEach(d=>{
-            d.data.highlight=true;
-        }); // highlight changed
-    Layout.order = dataviz.map(d=>d.key);
-    Layout.order.object = {};
-    Layout.order.forEach((c,i)=>Layout.order.object[c]=i);
-    drawObject.data(dataviz);
-}
-function handleDataUser_old(users,jobs){
-    let data = [];
-
-    for (let user in users){
-        let item = {key:user,value:[],range:[Infinity,-Infinity],data:users[user]};
-        Layout.timespan.forEach((t,ti)=>{
-            item.value.push([]);
-            users[user].job.forEach(j=>{
-                if ((Math.max(jobs[j].start_time,Layout.timeRange[0]) <= +t) && ((jobs[j].finish_time||Layout.timeRange[1])>=+t))
-                    item.value[ti].push(jobs[j].node_list);
-            });
-            item.value[ti] = _.uniq(_.flatten(item.value[ti]));
-            item[t] = item.value[ti];
-        });
-        data.push(item);
-    }
-    data.sort((a,b)=>+a.range[0]-b.range[0])
-    return data;
-}
+// function handleDataComputeByUser(computers,jobs){
+//     debugger
+//     let data = [];
+//     for (let comp in computers){
+//         let condition = false;
+//         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+//         computers[comp].job_id.forEach((jIDs,i)=>{
+//             if (jIDs.length){
+//                 let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
+//                 if (jobArr.length){
+//                     let username = d3.nest().key(d=>d.user_name)
+//                         .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
+//                     username.total = d3.sum(username,e=>e.value)
+//                     item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+//                     condition = true;
+//                 }else
+//                     item.values.push(null);
+//             }else
+//                 item.values.push(null);
+//             item[Layout.timespan[i]] = item.values[i];
+//         });
+//         if (condition)
+//             data.push(item);
+//     }
+//     data.sort((a,b)=>+a.range[0]-b.range[0])
+//     return data;
+// }
 function handleDataComputeByUser(computers,jobs){
+    debugger
     let data = [];
     for (let comp in computers){
+        let condition = false;
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
-                let jobArr = jIDs.map(j=>jobs[j]);
-                let username = d3.nest().key(d=>d.user_name)
-                    .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
-                username.total = d3.sum(username,e=>e.value)
-                item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+                let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
+                if (jobArr.length){
+                    let username = d3.nest().key(d=>d.job_name)
+                        .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
+                    username.total = d3.sum(username,e=>e.value)
+                    item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+                    condition = true;
+                }else
+                    item.values.push(null);
             }else
                 item.values.push(null);
             item[Layout.timespan[i]] = item.values[i];
         });
-        data.push(item);
+        if (condition)
+            data.push(item);
     }
     data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;

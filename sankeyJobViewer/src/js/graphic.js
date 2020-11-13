@@ -8,7 +8,6 @@ d3.selection.prototype.moveToFront = function() {
 let vizservice=[];
 function serviceControl(){
     vizservice =serviceFullList.slice();
-    drawObject.graphicopt({range:vizservice[serviceSelected].range});
     vizservice.push({text:'User',range:[]});
     vizservice.push({text:'Radar',range:[]});
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
@@ -17,7 +16,6 @@ function serviceControl(){
             serviceSelected = +$(this).val();
             d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
             createdata();
-            drawObject.graphicopt({range:vizservice[serviceSelected].range})
             currentDraw();
         })
         .selectAll('option')
@@ -32,54 +30,17 @@ function serviceControl(){
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
-    d3.select('#trajectoryStyle').on('change',function(){
-        drawObject.trajectoryStyle($(this).val());
-    });
-    d3.select('#innerDisplay').on('change',function(){
-        d3.selectAll('.innerName').text(getInnerNodeAttr())
-        currentDraw(serviceSelected);
-    });
+
     d3.select('#sort_apply').on('click',function(){
         sortData();
         currentDraw()
     });
-    d3.select('#nodeColor').on('change',function(){
-        const val = $(this).val();
-        drawObject.graphicopt({colorMode:val});
-        if(val==='') {
-            d3.select('.MetricsLegend').classed('hide', false);
-            d3.select('.RackLegend').classed('hide', true);
-        }else {
-            d3.select('.MetricsLegend').classed('hide',true);
-            let svg = d3.select('.RackLegend').classed('hide',false)
-                .select('svg');
-            let g = svg.select('g.content');
-            let color = getColorScale();
-            let padding = 16;
-            let margin = {top:10,left:70,right:0,bottom:0};
-            let w = 280;
-            let h = (color.domain().length+1) * padding;
-            svg.attr('width',w+margin.left+margin.right).attr('height',h+margin.top+margin.bottom);
-            g.attr('transform',`translate(${margin.left},${margin.top})`)
-            let rackel = g.selectAll('.rackEl').data(color.domain().map((d,i)=>({key:d,value:color.range()[i]})))
-                .join('g')
-                .attr('class','rackEl').attr('transform',(d,i)=>`translate(0,${i*padding})`);
-            rackel.selectAll('circle.dot').data(d=>[d]).join('circle').attr('class','dot')
-                .style('r',3)
-                .style('fill',d=>d.value);
-            rackel.selectAll('text.dot').data(d=>[d]).join('text').attr('class','dot')
-                .attr('x',5).attr('dy',5)
-                .text(d=>d.key)
-                .style('fill',d=>d.value);
-        }
-        currentDraw()
-    })
+
     d3.select('#userSort').on('change',function(){
         const val = $(this).val();
         subObject.sankeyOpt({nodeSort:val}).draw();
     })
     serviceControl();
-    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
     userPie.init();
     d3.select('#hideStable').on('change',function(){
         subObject.sankeyOpt({hideStable:this.checked}).draw();
@@ -91,7 +52,7 @@ function initdraw(){
 }
 function userTable(d,type){
     highlight2Stack = [];
-    if (drawObject.isFreeze()) {
+    if (subObject.isFreeze()) {
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
         contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
@@ -183,12 +144,12 @@ function userTable(d,type){
                     const isSingle =  d3.select(event.target).classed('tableCompute')
                     if (row.data()) {
                         const currentData = row.data();
-                        drawObject.highlight2(isSingle? [d3.select(event.target).text()]:currentData.node_list);
+                        subObject.highlight2(isSingle? [d3.select(event.target).text()]:currentData.node_list);
                     }
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    drawObject.releasehighlight2();
+                    subObject.releasehighlight2();
                 });
             }
         } );
@@ -426,57 +387,46 @@ function getDrawData(e) {
     }
 }
 function openPopup(d,svg){
-    if (drawObject.isFreeze()) {
-        debugger
-        const cloned = svg.clone(true);
-        cloned.attr('id',null).attr('class','svgClone').style('position','relative');
-        const parent = d3.select(svg.node().parentNode).append('div');
-        parent.node().appendChild(cloned.node());
-        parent.append('span').style('position','absolute')
-            .style('top',0).style('left','50%').text(timelineControl.currentValue.toLocaleString()+" | "+vizservice[serviceSelected].text+' | '+d.key)
-            .style('text-align','center')
-            .style('transform','translateX(-50%)');
-        parent.append('div')
-            .attr('class','closeButton')
-            .style('position','absolute')
-            .style('top',0).style('right','0')
-            .html(' <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">\n' +
-            '                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z"></path>\n' +
-            '                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z"></path>\n' +
-            '                                </svg>')
-            .on('click',function(){
-                drawObject.removeSubgraph(parent);
-            });
-
-        drawObject.addSubgraph(parent);
-    }
+    // if (drawObject.isFreeze()) {
+    //     debugger
+    //     const cloned = svg.clone(true);
+    //     cloned.attr('id',null).attr('class','svgClone').style('position','relative');
+    //     const parent = d3.select(svg.node().parentNode).append('div');
+    //     parent.node().appendChild(cloned.node());
+    //     parent.append('span').style('position','absolute')
+    //         .style('top',0).style('left','50%').text(timelineControl.currentValue.toLocaleString()+" | "+vizservice[serviceSelected].text+' | '+d.key)
+    //         .style('text-align','center')
+    //         .style('transform','translateX(-50%)');
+    //     parent.append('div')
+    //         .attr('class','closeButton')
+    //         .style('position','absolute')
+    //         .style('top',0).style('right','0')
+    //         .html(' <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">\n' +
+    //         '                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z"></path>\n' +
+    //         '                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z"></path>\n' +
+    //         '                                </svg>')
+    //         .on('click',function(){
+    //             drawObject.removeSubgraph(parent);
+    //         });
+    //
+    //     drawObject.addSubgraph(parent);
+    // }
 }
 function drawUserList(){
     let user_info = d3.select('#UserList table tbody')
         .selectAll('tr').data(d3.entries(Layout.usersStatic).sort((a,b)=>b.value.node.length-a.value.node.length))
         .join('tr')
         .on('mouseover',function(d){
-            if(!drawObject.isFreeze()){
-                drawObject.drawTrajectory(d,d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).map(d=>{
-                    d.value.key = d.key;
-                    return d.value;
-                }));
+            if(!subObject.isFreeze()){
                 d3.select(this).classed('highlight',true);
-                drawObject.highlight(d3.entries(Layout.ranking.byUser[d.key][vizservice[serviceSelected].text]).filter(d=>d.value[request.index-1]!=undefined).map(d=>d.key))
                 subObject.highlight([d.key])
             }
         }).on('mouseout',function(d){
-            if(!drawObject.isFreeze()){
-                drawObject.g().selectAll('path.trajectory').remove();
-                drawObject.g().select('.TrajectoryLegend').remove();
-                drawObject.current_trajectory_data = undefined;
+            if(!subObject.isFreeze()){
                 d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
-                drawObject.releasehighlight();
                 subObject.releasehighlight();
             }
         }).on('click',function(d){
-            drawObject.freezeHandle.bind(this)();
-            // openPopup(d,drawObject.main_svg());
             subObject.freezeHandle.bind(this)();
         });
     user_info
@@ -485,10 +435,10 @@ function drawUserList(){
         .style('text-align',d=>(d.key==='job'||d.key==='compute'||d.key==='core')?'end':null)
         .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
         .text(d=>d.value);
-    drawObject.mouseoverAdd('userlist',function(d){
-        user_info.filter(u=>d.user.indexOf(u.key)!==-1).classed('highlight',true);
+    subObject.mouseoverAdd('userlist',function(d){
+        user_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
     });
-    drawObject.mouseoutAdd('userlist',function(d){
+    subObject.mouseoutAdd('userlist',function(d){
         user_info.classed('highlight',false);
     });
 }
@@ -530,6 +480,5 @@ function drawGantt(){
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
-let drawObject = new Beeswarm();
 // let subObject = new Gantt();
 let subObject = new Sankey();

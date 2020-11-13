@@ -460,8 +460,8 @@ function initdrawGantt(){
     subObject.mouseoutAdd('gantt',function(d){
         userPie.releasehighlight();
     });
-    subObject.clickAdd('gantt',function(d){
-        userPie.freezeHandle.bind(this)();
+    subObject.clickAdd('jobsankey',function(d){
+        window.open('../sankeyJobViewer/index.html?file='+'922020-932020-145000'+'&user='+d.source.element.map(e=>e.key), "_blank");
     });
     userPie.mouseoverAdd('gantt',function(d){
         subObject.highlight([d.data.key]);

@@ -317,6 +317,7 @@ let Sankey = function(){
                 }
             ).on("mouseover", function(d){mouseover.bind(this)(d)})
             .on("mouseout", function(d){mouseout.bind(this)(d)})
+            .on("click", function(d){master.click.forEach(f=>f(d));});
         link_p.each(function(d){
             d.node = d3.select(this);
         })

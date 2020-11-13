@@ -383,7 +383,7 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?('User '+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
+        return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No user';
     }
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
