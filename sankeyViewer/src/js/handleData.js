@@ -189,14 +189,13 @@ function createdata(){
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
 }
- let handleDataComputeByUser = function(){};
- let _handleDataComputeByUser = function(computers,jobs){
-     if (this.mode==='core')
+ let handleDataComputeByUser = function({computers,jobs}){
+     if (handleDataComputeByUser.mode==='core')
          return handleDataComputeByUser_core(computers,jobs);
      else
          return handleDataComputeByUser_compute(computers,jobs);
  };
-_handleDataComputeByUser.mode = 'core';
+handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(computers,jobs){
     let data = [];
@@ -276,7 +275,7 @@ function handleRankingData(data){
     Layout.ranking = ranking;
     Layout.timespan = sampleS.timespan;
 
-    handleDataComputeByUser = _.partial(_handleDataComputeByUser,computers,jobs)
-    Layout.userTimeline = handleDataComputeByUser();
+    handleDataComputeByUser.data = {computers,jobs};
+    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
     console.timeEnd('handleRankingData');
 }

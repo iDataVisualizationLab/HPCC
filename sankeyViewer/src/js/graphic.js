@@ -53,8 +53,8 @@ function initdraw(){
 
     d3.select('#flowType').on('change',function(){
         const val = $(this).val();
-        _handleDataComputeByUser.core=val
-        Layout.userTimeline = handleDataComputeByUser();
+        handleDataComputeByUser.mode=val
+        Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
         subObject.data(Layout.userTimeline).draw();
     })
 }
