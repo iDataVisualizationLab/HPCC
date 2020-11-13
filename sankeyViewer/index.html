@@ -114,18 +114,9 @@
                 </div>
                 <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 116px);width: 100%; margin: 0px">
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
-                    <svg id="circularLayout" class="hide">
-                        <defs>
-                            <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
-                                <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur"></feMergeNode>
-                                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                                </feMerge>
-                            </filter>
-                        </defs>
-                    </svg>
-                    <svg id="ganttLayout">
+
+                    <h5 class="text-center" style="width:100%" >Sankey by <span id="ganttLayoutLabel">#Cores</span></h5>
+                    <svg class="row-cols-12 text-center" id="ganttLayout">
                         <defs>
                             <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
                                 <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
