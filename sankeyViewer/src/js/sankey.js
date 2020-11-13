@@ -311,7 +311,7 @@ let Sankey = function(){
                         .attr("d", linkPath);
                     else
                         path.attr("d", linkPath);
-                    return e
+                    return update
                 },exit=>{
                     return exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime):exit).attr('opacity',0).remove())
                 }
