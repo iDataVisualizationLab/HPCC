@@ -144,7 +144,7 @@ function UserPie(){
             .classed('hide',d=>(d.data.key===emptyKey)||(d.endAngle-d.startAngle)<Math.PI/10)
             .attr("dy", ".35em")
             .text(function(d) {
-                return d.data.key;
+                return d.data.text;
             });
 
         function midAngle(d){
@@ -205,6 +205,10 @@ function UserPie(){
         g.classed('onhighlight', true);
         g.selectAll('.slice').filter(d=>listKey.find(e=>d&&(e===d.data.key)))
             .classed('highlight', true).style('stroke','black');
+        g.select(".lines").selectAll("polyline").filter(d=>listKey.find(e=>d&&(e===d.data.key)))
+            .style('display','block')
+        g.select(".labels").selectAll("text").filter(d=>listKey.find(e=>d&&(e===d.data.key)))
+            .style('display','block').style('font-weight','bold')
     };
     master.releasehighlight = function(){
         g.classed('onhighlight', false);
@@ -212,6 +216,8 @@ function UserPie(){
             .classed('highlight', false).style('stroke',null);
         g.selectAll('.vticks.highlight')
             .classed('highlight', false).style('stroke',null);
+        g.select(".lines").selectAll("polyline").style('display',null);
+        g.select(".labels").selectAll("text").style('display',null).style('font-weight',null);
     };
     master.data = function(_data) {
         if (arguments.length){
