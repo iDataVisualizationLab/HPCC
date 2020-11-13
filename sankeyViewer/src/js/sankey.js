@@ -505,12 +505,14 @@ let Sankey = function(){
         }
     }
     master.highlight = function(listKey){
+        let listobj = {};
+        listKey.forEach(k=>listobj[k]=true);
         g.classed('onhighlight', true);
         g.selectAll('.element').filter(d=>{
             let item = d;
             if (d.source)
                 item = d.source;
-            return listKey.find(e=>item.element.find(f=>e===f.key))
+            return item.element.find(f=>listobj[f.key])
         })
             .classed('highlight', true)
             .each(d=>{
