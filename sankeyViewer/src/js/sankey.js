@@ -118,7 +118,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan.slice(0,10);
+        let keys = Layout.timespan//.slice(0,10);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
 
@@ -223,6 +223,9 @@ let Sankey = function(){
         links.forEach((d,i)=>{
             d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
         });
+        let isAnimate = true;
+        if (links.length>400)
+            isAnimate = false;
         svg_paraset = drawArea;
         let node_g = svg_paraset.select('.nodes');
         if(node_g.empty()){
@@ -233,8 +236,8 @@ let Sankey = function(){
             .data(nodes.filter(d=>d.first),d=>d.name)
             .join(
                 enter => (e=enter.append("g").attr('class','outer_node element'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                update => update.call(update=>update.transition().duration(graphicopt.animationTime).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                exit => exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove()),
+                update => update.call(update=>(isAnimate?update.transition().duration(graphicopt.animationTime):update).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                exit => exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime).attr('opacity',0):exit).remove()),
             );
         node_p.select('text')
             .attr("x", - 6)
@@ -277,8 +280,9 @@ let Sankey = function(){
                         .attr("fill", d => `url(#${d._id})`)
                         .attr("stroke", d => `url(#${d._id})`)
                         .attr("stroke-width", 0.1)
-                        .attr("d", linkPath)
-                        .attr("opacity", 0)
+                        .attr("d", linkPath);
+                    if (isAnimate)
+                        path.attr("opacity", 0)
                         .transition().duration(graphicopt.animationTime)
                         .attr("opacity", 1);
                     path.each(function(d){d.dom=d3.select(this)});
@@ -298,14 +302,18 @@ let Sankey = function(){
                         .attr("offset", d=>`${d[0]}%`)
                         .attr("stop-color", d => d[1]);
                     // gradient ---end
-                    update.select('path').attr("fill", d => `url(#${d._id})`)
+                    const path = update.select('path').attr("fill", d => `url(#${d._id})`)
                         .attr("stroke", d => `url(#${d._id})`)
-                        .attr("stroke-width", 0.1).transition().duration(graphicopt.animationTime)
+                        .attr("stroke-width", 0.1);
+                    if (isAnimate)
+                        path
+                        .transition().duration(graphicopt.animationTime)
                         .attr("d", linkPath);
-
+                    else
+                        path.attr("d", linkPath);
                     return e
                 },exit=>{
-                    return exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove())
+                    return exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime):exit).attr('opacity',0).remove())
                 }
             ).on("mouseover", function(d){mouseover.bind(this)(d)})
             .on("mouseout", function(d){mouseout.bind(this)(d)})
