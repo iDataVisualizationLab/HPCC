@@ -54,7 +54,7 @@ function initdraw(){
     d3.select('#flowType').on('change',function(){
         const val = $(this).val();
         handleDataComputeByUser.mode=val;
-        d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#Nodes')
+        d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
         Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
         subObject.data(Layout.userTimeline).draw();
     })
