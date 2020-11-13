@@ -449,7 +449,7 @@ let Sankey = function(){
     };
     master.sankeyOpt = function(_data){
         if (arguments.length) {
-            if (_data.nodeSort) {
+            if (_data.nodeSort!==undefined) {
                 switch (_data.nodeSort) {
                     case '':
                         nodeSort = undefined;
