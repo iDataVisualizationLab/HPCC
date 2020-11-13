@@ -36,7 +36,39 @@ function UserPie(){
     let maxValue = 0;
     let main_svg,g;
     let emptyKey = "No User";
-    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return`<div class="card"><div class="card-body">${d}</div></div>`})
+    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return`<div class="card"><div class="card-body">${d}</div></div>`});
+
+    master.mouseover = [];
+    master.mouseover.dict={};
+    master.mouseout = [];
+    master.mouseout.dict={};
+    master.click = [];
+    master.click.dict={};
+    master.mouseoverAdd = function(id,func){
+        if (master.mouseover.dict[id]!==undefined)
+            master.mouseover[master.mouseover.dict[id]] = func;
+        else {
+            master.mouseover.push(func)
+            master.mouseover.dict[id] = master.mouseover.length-1;
+        }
+    }
+    master.mouseoutAdd = function(id,func){
+        if (master.mouseout.dict[id]!==undefined)
+            master.mouseout[master.mouseout.dict[id]] = func;
+        else {
+            master.mouseout.push(func)
+            master.mouseout.dict[id] = master.mouseout.length-1;
+        }
+    }
+    master.clickAdd = function(id,func){
+        if (master.click.dict[id]!==undefined)
+            master.click[master.click.dict[id]] = func;
+        else {
+            master.click.push(func)
+            master.click.dict[id] = master.click.length-1;
+        }
+    }
+
     master.init = function(){
         main_svg = d3.select(maindiv)
             .attr("width", graphicopt.width)
@@ -82,7 +114,7 @@ function UserPie(){
             }   );
         // slice.each(function(d){d.node=d3.select(this)});
         slice.select('path')
-            .style("fill", d=>color(d.data.key))
+            .style("fill", d=>color(d.data.text))
             .classed('hide',d=>d.data.key===emptyKey)
             .transition().duration(1000)
             .attrTween("d", function(d) {
@@ -94,11 +126,16 @@ function UserPie(){
                 };
             });
         slice.select('title').text(d=>d.data.key+' #Cores: '+d.value);
-        slice.on('mouseover',function(d){tooltip.show(`<h6>${d.data.key}</h6><br><span> #Cores: ${d.value}</span>
-<br><span> #Compute: ${d.data.value.node.length}</span>`);
-        d3.select(this).style('stroke','black');
+        slice.on('mouseover',function(d){
+            tooltip.show(`<h6>${d.data.key}</h6><br><span> #Cores: ${d.value}</span><br><span> #Compute: ${d.data.value.node.length}</span>`);
+            d3.select(this).style('stroke','black');
+            master.mouseover.forEach(f=>f(d));
         })
-            .on('mouseout',function(d){d3.select(this).style('stroke','none');tooltip.hide()})
+            .on('mouseout',function(d){
+                d3.select(this).style('stroke','none');
+                tooltip.hide();
+                master.mouseout.forEach(f=>f(d));
+            })
         /* ------- TEXT LABELS -------*/
 
         var text = g.select(".labels").selectAll("text")
@@ -163,11 +200,23 @@ function UserPie(){
             .style('font-weight','bold')
             .style('font-size','16px')
             .text(d3.format('.2f')(100-((sumlabel.endAngle-sumlabel.startAngle)/Math.PI/2)*100)+'%')
-    }
+    };
+    master.highlight = function(listKey){
+        g.classed('onhighlight', true);
+        g.selectAll('.slice').filter(d=>listKey.find(e=>d&&(e===d.data.key)))
+            .classed('highlight', true).style('stroke','black');
+    };
+    master.releasehighlight = function(){
+        g.classed('onhighlight', false);
+        g.selectAll('.slice.highlight')
+            .classed('highlight', false).style('stroke',null);
+        g.selectAll('.vticks.highlight')
+            .classed('highlight', false).style('stroke',null);
+    };
     master.data = function(_data) {
         if (arguments.length){
             data= d3.entries(_data);
-            data.forEach(d=>d.key = 'User '+d.key.replace('user',''))
+            data.forEach(d=>{d.text = 'User '+d.key.replace('user','')})
             data.sort((a,b)=>b.value.totalCore-a.value.totalCore)
             data.push({
                 key: emptyKey,

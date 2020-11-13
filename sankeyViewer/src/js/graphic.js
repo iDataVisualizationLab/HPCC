@@ -503,33 +503,22 @@ function getColorGant(){
 }
 function initdrawGantt(){
     subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange});
-    drawObject.mouseoverAdd('gantt',function(d){
-        subObject.highlight(d.user);
-    });
-    drawObject.mouseoutAdd('gantt',function(d){
-        subObject.releasehighlight();
-    });
-    drawObject.clickAdd('gantt',function(d){
-        subObject.freezeHandle.bind(this)();
-    });
-    drawObject.onBrushAdd('gantt',function(d){
-        subObject.freezeHandleTrigger.bind(this)(true);
-        // subObject.highlight2(d.user);
-    });
-    drawObject.offBrushAdd('gantt',function(d){
-        subObject.freezeHandleTrigger.bind(this)(false);
-        // subObject.releasehighlight2();
-    });
+
     subObject.mouseoverAdd('gantt',function(d){
-        drawObject.highlight((d.value2.find(e=>(e[1]>=Layout.currentTime)&&(e[0]<=Layout.currentTime))||{names:[]}).names);
+        userPie.highlight(d.source.element.map(e=>e.key));
     });
     subObject.mouseoutAdd('gantt',function(d){
-        drawObject.releasehighlight();
+        userPie.releasehighlight();
     });
     subObject.clickAdd('gantt',function(d){
-        drawObject.freezeHandle.bind(this)();
+        userPie.freezeHandle.bind(this)();
     });
-
+    userPie.mouseoverAdd('gantt',function(d){
+        subObject.highlight([d.data.key]);
+    });
+    userPie.mouseoutAdd('gantt',function(d){
+        subObject.releasehighlight();
+    });
 }
 function drawGantt(){
     subObject.data(Layout.userTimeline).draw();

@@ -118,7 +118,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,20);
+        let keys = Layout.timespan.slice(0,10);
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
 
@@ -137,7 +137,7 @@ let Sankey = function(){
                         const key = JSON.stringify([k, text]);
                         if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
                             continue // return
-                        const node = {name: text,time:k,layer:ki,relatedLinks:[],id:++index};
+                        const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
                         if (!nodeLabel.has(text)) {
                             node.first = true;
                             nodeLabel.set(text, node);
@@ -151,7 +151,7 @@ let Sankey = function(){
                     }
                 }
             })
-
+            // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
                 const b = keys[i];
@@ -230,9 +230,9 @@ let Sankey = function(){
         }
         let node_p = node_g
             .selectAll("g.outer_node")
-            .data(nodes,d=>d.name)
+            .data(nodes.filter(d=>d.first),d=>d.name)
             .join(
-                enter => (e=enter.append("g").attr('class','outer_node'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                enter => (e=enter.append("g").attr('class','outer_node element'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
                 update => update.call(update=>update.transition().duration(graphicopt.animationTime).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
                 exit => exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove()),
             );
@@ -245,20 +245,22 @@ let Sankey = function(){
             .attr("font-weight", "bold")
             .text(d => {
                 return d.first?d.name:''});
-
+        node_p.each(function(d){
+            d.node = d3.select(this);
+        });
         let link_g = svg_paraset.select('.links');
         if(link_g.empty()){
             link_g = svg_paraset.append('g').classed('links',true);
         }
-        debugger
+
         let link_p = link_g
             .attr("fill", "none")
             .attr("opacity", 0.5)
-            .selectAll("g")
+            .selectAll("g.outer_node")
             .data(links,(d,i)=>d._id)
             .join(
                 enter => {
-                    e=enter.append("g").style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                    e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                     // gradient
                     const gradient = e.append("linearGradient")
                         .attr("id", d => d._id)
@@ -305,8 +307,20 @@ let Sankey = function(){
                 },exit=>{
                     return exit.call(exit=>exit.transition().duration(graphicopt.animationTime).attr('opacity',0).remove())
                 }
-            );
-
+            ).on("mouseover", function(d){mouseover.bind(this)(d)})
+            .on("mouseout", function(d){mouseout.bind(this)(d)})
+        link_p.each(function(d){
+            d.node = d3.select(this);
+        })
+        link_p.each(function(d){
+            const nodematch = {};
+            const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+            match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+            debugger
+            d.relatedNode = match
+                .map(l=>l.node);
+            d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
+        })
         link_p.select('path')
             .each(function(d){d.dom=d3.select(this)});
         // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
@@ -492,7 +506,12 @@ let Sankey = function(){
     }
     master.highlight = function(listKey){
         g.classed('onhighlight', true);
-        g.selectAll('.element').filter(d=>listKey.find(e=>d&&(e===d.key)))
+        g.selectAll('.element').filter(d=>{
+            let item = d;
+            if (d.source)
+                item = d.source;
+            return listKey.find(e=>item.element.find(f=>e===f.key))
+        })
             .classed('highlight', true)
             .each(d=>{
                 (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});;
