@@ -220,6 +220,7 @@ let Sankey = function(){
             nodes: graph.nodes.map(d => Object.assign({}, d)),
             links: graph.links.map(d => Object.assign({}, d))
         });
+
         links.forEach((d,i)=>{
             d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
         });
@@ -324,7 +325,6 @@ let Sankey = function(){
             const nodematch = {};
             const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
             match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-            debugger
             d.relatedNode = match
                 .map(l=>l.node);
             d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));

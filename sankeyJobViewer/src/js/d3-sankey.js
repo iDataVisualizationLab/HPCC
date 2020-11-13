@@ -96,7 +96,6 @@ function Sankey() {
 
   function sankey() {
     const graph = {nodes: nodes.apply(null, arguments), links: links.apply(null, arguments)};
-    debugger
     computeNodeLinks(graph);
     computeNodeValues(graph);
     computeNodeDepths(graph);
@@ -223,7 +222,7 @@ function Sankey() {
   }
 
   function computeNodeLayers({nodes}) {
-    const x = d3Array.max(nodes, d => d.depth) + 1;
+    const x = d3Array.max(nodes, d => d.layer??d.depth) + 1;
     const kx = (x1 - x0 - dx) / (x - 1);
     const columns = new Array(x);
     for (const node of nodes) {
@@ -233,6 +232,10 @@ function Sankey() {
       node.x1 = node.x0 + dx;
       if (columns[i]) columns[i].push(node);
       else columns[i] = [node];
+    }
+    for (let i=0; i<columns.length;i++){
+      if(columns[i]===undefined)
+        columns[i]=[];
     }
     if (sort) for (const column of columns) {
       column.sort(sort);
@@ -323,10 +326,12 @@ function Sankey() {
   function resolveCollisions(nodes, alpha) {
     const i = nodes.length >> 1;
     const subject = nodes[i];
-    resolveCollisionsBottomToTop(nodes, subject.y0 - py, i - 1, alpha);
-    resolveCollisionsTopToBottom(nodes, subject.y1 + py, i + 1, alpha);
-    resolveCollisionsBottomToTop(nodes, y1, nodes.length - 1, alpha);
-    resolveCollisionsTopToBottom(nodes, y0, 0, alpha);
+    if (subject){
+      resolveCollisionsBottomToTop(nodes, subject.y0 - py, i - 1, alpha);
+      resolveCollisionsTopToBottom(nodes, subject.y1 + py, i + 1, alpha);
+      resolveCollisionsBottomToTop(nodes, y1, nodes.length - 1, alpha);
+      resolveCollisionsTopToBottom(nodes, y0, 0, alpha);
+    }
   }
 
   // Push any overlapping nodes down.
