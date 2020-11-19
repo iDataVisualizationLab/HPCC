@@ -321,7 +321,7 @@ function makedataworker(){
 }
 var vizMode = 'timeArc'; // 0 timeradar, 1 tsne, 2 pca, 3 umap
 let handle_data_TimeSpace;
-let timeArc = TimeArcSetting()
+let timeArc = ConnectedScatterPlot()
 let mainviz = timeArc;
 function initDataWorker(){
     getDataWorker.postMessage({action:"init",value:{
