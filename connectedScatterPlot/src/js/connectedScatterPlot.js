@@ -290,7 +290,7 @@ function handle_data_timeArc () {
                     normalizeData[e.plotID][1][ti] = -Infinity;
                 }else{
                     obj2[keys[ti]] = val2;
-                    normalizeData[e.plotID][0][ti] = val2;
+                    normalizeData[e.plotID][1][ti] = val2;
                 }
                 return [val1,val2,keys[ti]]
             });
