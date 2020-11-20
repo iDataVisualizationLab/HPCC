@@ -252,7 +252,6 @@ function handle_data_timeArc () {
                 })}
             })})
     });
-    debugger
     // format files
     const files = [[],[],[]];
     files[0].columns=['user','userid','Type'];
@@ -284,12 +283,12 @@ function handle_data_timeArc () {
     myData.read();
     let compute = new Visual_feature_2D({smooth:false,experiment:myData.experiment});
     compute.Loop();
-    debugger
+
     const index2instance = new Map();
     files[1].forEach((f,i)=>index2instance.set(i,f['code']));
     const index2dim = new Map();
     files[2].forEach((f,i)=>index2dim.set(i,f['code']));
     scheme.measure = calculateMeasure2D({data:normalizeData,index2instance,index2dim,experiment:compute.experiment})
-debugger
+
     subObject.scheme(scheme).draw();
 }
