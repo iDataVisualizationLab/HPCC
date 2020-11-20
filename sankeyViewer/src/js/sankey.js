@@ -229,40 +229,41 @@ let Sankey = function(){
             }
             return Object.assign({}, d);
         });
-        force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-12))
-            .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-            .force('x', d3.forceX(0).strength(0.015))
-            .force('y',  d3.forceY(0).strength(0.015))
-            .nodes( nodes)
-            .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
-            .alpha(1)
-            .on('tick',function () {
-                nodes.forEach(function (d,i) {
-
-                    d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
-                    if (d.parentNode >= 0) {
-                        d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
-                    }
-                    else if (d.childNodes && d.childNodes.length) {
-                        var yy = 0;
-                        for (var i = 0; i < d.childNodes.length; i++) {
-                            var child = d.childNodes[i];
-                            yy += nodeObj[child].y;
-                        }
-                        yy = yy / d.childNodes.length; // average y coordinate
-                        d.y += (yy - d.y) * 0.2;
-                    }
-                });
-            })
-            .on("end", function () {
-                graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
-                // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
-                // console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
-                nodeSort = function(a,b){debugger; return (a._forcey-b._forcey)};
-                // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
-                renderSankey();
-            })
+        renderSankey()
+        // force = d3.forceSimulation()
+        //     .force("charge", d3.forceManyBody().strength(-12))
+        //     .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+        //     .force('x', d3.forceX(0).strength(0.015))
+        //     .force('y',  d3.forceY(0).strength(0.015))
+        //     .nodes( nodes)
+        //     .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
+        //     .alpha(1)
+        //     .on('tick',function () {
+        //         nodes.forEach(function (d,i) {
+        //
+        //             d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
+        //             if (d.parentNode >= 0) {
+        //                 d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
+        //             }
+        //             else if (d.childNodes && d.childNodes.length) {
+        //                 var yy = 0;
+        //                 for (var i = 0; i < d.childNodes.length; i++) {
+        //                     var child = d.childNodes[i];
+        //                     yy += nodeObj[child].y;
+        //                 }
+        //                 yy = yy / d.childNodes.length; // average y coordinate
+        //                 d.y += (yy - d.y) * 0.2;
+        //             }
+        //         });
+        //     })
+        //     .on("end", function () {
+        //         graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+        //         // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
+        //         // console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
+        //         nodeSort = function(a,b){debugger; return (a._forcey-b._forcey)};
+        //         // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
+        //         renderSankey();
+        //     })
 
         function renderSankey(){
             sankey.nodeId(function(d){return d.id})
