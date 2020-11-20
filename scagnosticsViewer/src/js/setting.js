@@ -50,7 +50,7 @@ let colorScaleList = {
         {val: 'Greys',type:'d3',label: 'Greys'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 let scaleService;
-
+let measurmentObj = {"Outlying":0,"Clumpy":1,"Striated":2,"Trend":3,"Correlation":4,"Circular":5,"Length":6,"Intersections":7};
 function handleDataUrl(dataRaw) {
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
         return {

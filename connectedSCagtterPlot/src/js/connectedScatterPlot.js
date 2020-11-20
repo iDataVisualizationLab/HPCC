@@ -25,7 +25,7 @@ let ConnectedScatterPlot = function (){
                 'stroke-opacity': 0.5
             }
         },
-        selectedOpt: 7
+        selectedOpt: 0
     };
     let scheme={};
     let contain = d3.select(graphicopt.contain);
@@ -88,8 +88,44 @@ let ConnectedScatterPlot = function (){
             .curve(d3.curveCatmullRom.alpha(0.5))
             .defined(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])));
         contain.select('g.content').remove();
-        let svg = contain.attr('width',graphicopt.width).attr('height',graphicopt.height);
+        let svg = contain.style('border','1px solid gray')
+            .style('background-color',d=>color(d.measure)).attr('width',graphicopt.width).attr('height',graphicopt.height)
+            .style('width',graphicopt.width+'px').style('height',graphicopt.height+'px')
+            .style('overflow','visible');
         g = svg.append('g').attr('class','content').attr('transform',`translate(${[graphicopt.margin.left,graphicopt.margin.top]})`);
+        g.selectAll('path').data([data.value])
+            .join('path')
+            .attr('d',line)
+            .attr('fill','none').attr('stroke','#4c4c4c');
+        const pointdata = data.value.filter(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])))
+        g.selectAll('circle').data([pointdata[0],pointdata[pointdata.length-1]])
+            .join('circle')
+            .attr('r',2)
+            .attr('cx',d=>d[0]*graphicopt.widthG())
+            .attr('cy',d=>graphicopt.heightG()*(1-d[1]))
+            .attr('opacity',(d,i)=>i?1:0.2)
+            .attr('fill',(d,i)=>i?'green':'black');
+        g.append('text').attr('x',graphicopt.widthG()/2).attr('y',graphicopt.heightG()/2)
+            .attr('text-anchor','middle')
+            .text(d3.format('.2f')(data.measure))
+        g.append('title').text(d=>`node: ${data.key} /n ${d3.extent(pointdata,e=>e[2])}`)
+    }
+    function drawLargeElement(contain,data){
+        const width = graphicopt.width*4;
+        const height = graphicopt.height*4;
+        const w = graphicopt.widthG()*4;
+        const h = graphicopt.heightG()*4;
+        const margin = {};
+        d3.entries(graphicopt.margin).forEach(k=>margin[k]*4);
+        const line = d3.line().x(d=>d[0]*w).y(d=>h*(1-d[1]))
+            .curve(d3.curveCatmullRom.alpha(0.5))
+            .defined(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])));
+        contain.select('g.content').remove();
+        let svg = contain.datum(data).style('border','1px solid gray')
+            .style('background-color',d=>color(d.measure)).attr('width',width).attr('height',height)
+            .style('width',width+'px').style('height',height+'px')
+            .style('overflow','visible');
+        g = svg.append('g').attr('class','content').attr('transform',`translate(${[margin.left,margin.top]})`);
         g.selectAll('path').data([data.value])
             .join('path')
             .attr('d',line)
@@ -98,14 +134,13 @@ let ConnectedScatterPlot = function (){
         g.selectAll('circle').data(pointdata)
             .join('circle')
             .attr('r',2)
-            .attr('cx',d=>d[0]*graphicopt.widthG())
-            .attr('cy',d=>graphicopt.heightG()*(1-d[1]))
+            .attr('cx',d=>d[0]*w)
+            .attr('cy',d=>h*(1-d[1]))
             .attr('opacity',(d,i)=>i===(pointdata.length-1)?1:0.2)
             .attr('fill',(d,i)=>i===(pointdata.length-1)?'green':'black');
-        g.append('text').attr('x',graphicopt.widthG()/2).attr('y',graphicopt.heightG()/2)
+        g.append('text').attr('x',w/2).attr('y',h/2)
             .attr('text-anchor','middle')
-            .text(d3.format('.2f')(data.measure))
-        g.append('title').text(d=>`node: ${data.key} /n ${d3.extent(pointdata,e=>e[2])}`)
+            .text(d3.format('.2f')(data.measure));
     }
     function getMeasure(d){
         if (d.invalid)
@@ -135,8 +170,7 @@ let ConnectedScatterPlot = function (){
             .join('td');
         td.selectAll('svg').data(d=>d)
             .join('svg')
-            .style('border','1px solid gray')
-            .style('background-color',d=>color(d.measure))
+            .on('click',d=>drawLargeElement(d3.select('#mini_plot'),d))
             .each(function(d){
             drawElement(d3.select(this),d);
         });
@@ -199,7 +233,8 @@ function handle_data_timeArc () {
     scheme.data.timespan = keys;
     const selectedService = ['CPU1 Temp','Memory usage'];
     scheme.data.selectedService = selectedService;
-    let userlist = ['hge', 'presmcdo', 'adegbalo', 'juandomi'];
+    // let userlist = ['hge', 'presmcdo', 'adegbalo', 'juandomi'];
+    let userlist = Object.keys(Layout.usersStatic);
     scheme.range = [[Infinity,-Infinity],[Infinity,-Infinity]];
     userlist.forEach(u=>{
         scheme.data.push({key:u,value:d3.entries(Layout.ranking.byUser[u][selectedService[0]])

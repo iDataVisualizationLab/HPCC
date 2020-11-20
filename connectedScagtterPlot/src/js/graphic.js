@@ -51,13 +51,11 @@ function initdraw(){
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
     });
 
-    d3.select('#flowType').on('change',function(){
-        const val = $(this).val();
-        handleDataComputeByUser.mode=val;
-        d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
-        Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
-        subObject.data(Layout.userTimeline).draw();
-    })
+    d3.select('#measurement').on('change',function(){
+        subObject.graphicopt({selectedOpt:+$(this).val()}).draw();
+    });
+    d3.select('#measurement').selectAll('option').data(d3.entries(measurmentObj))
+        .join('option').attr('value',d=>d.value).text(d=>d.key);
 }
 function userTable(d,type){
     highlight2Stack = [];
