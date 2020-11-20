@@ -259,7 +259,9 @@ function handleRankingData(data){
             let sorteddata = hosts.map(h=>{
                 if(!ranking.byComputer[h][ser.text])
                     ranking.byComputer[h][ser.text] = [];
-                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
+                const user = {};
+                computers[h].job_id[ti].forEach(j=>user[jobs[j].user_name]=true)
+                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:Object.keys(user)};
             }).sort((a,b)=>-b.value+a.value);
             sorteddata.forEach((d,i)=>{
                 ranking.byMetric[ser.text][ti][d.key] = d.value;

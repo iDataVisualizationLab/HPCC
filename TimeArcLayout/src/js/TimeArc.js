@@ -210,7 +210,7 @@ d3.TimeArc = function () {
 
 //Set up the force layout
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-12))
+            .force("charge", d3.forceManyBody().strength(-50))
             .force("link", d3.forceLink().distance(0))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
@@ -219,7 +219,6 @@ d3.TimeArc = function () {
             detactTimeSeries();
             drawStreamLegend();
         }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
-            // .alphaTarget(0.9)
         force.stop();
         // .size([width, height]);
         catergogryList.forEach((d,i)=> d.order = i);
@@ -1044,6 +1043,7 @@ d3.TimeArc = function () {
             .attr('fill',d=>d.group==='user'?colorCatergory(d.group):'unset')
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
+            .style('pointer-events','all')
             .classed("SearchTerm", d=> d.isSearchTerm)
             .attr("dy", ".21em")
             // .attr("font-family", "sans-serif")

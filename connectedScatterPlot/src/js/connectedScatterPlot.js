@@ -255,7 +255,7 @@ function handle_data_timeArc () {
     // format files
     const files = [[],[],[]];
     files[0].columns=['user','userid','Type'];
-    keys.forEach(d=>files.push(''+d));
+    keys.forEach(d=>files[0].columns.push(''+d));
     files[1].columns= ["code", "name"];
     files[2].columns= ["code", "name"];
     selectedService.forEach(s=>{files[2].push({code:s,name:s})});
@@ -263,22 +263,43 @@ function handle_data_timeArc () {
     const normalizeData = [];
     scheme.data.forEach(u=>{
         u.value.forEach(e=>{
-            e.value= e.valueRaw.map((d,ti)=>[d[0]?selectedScale[0](d[0]):undefined,d[1]?selectedScale[1](d[1]):undefined,keys[ti]]);
-            e.invalid = e.value.filter(d=>(d[0]!==undefined)&&(d[1]!==undefined)).length<30;
             const obj1 = {'user':u.key+e.key,'userid':u.key+e.key, 'Type': selectedService[0]};
             const obj2 = {'user':u.key+e.key,'userid':u.key+e.key, 'Type': selectedService[1]};
-            keys.forEach((k,ki)=>{
-                obj1[k] = e.value[ki][0]??'';
-                obj2[k] = e.value[ki][1]??'';
-            });
             e.plotID = normalizeData.length;
-            normalizeData.push([e.value.map(d=>d[0]===undefined?-Infinity:d[0]),e.value.map(d=>d[1]===undefined?-Infinity:d[1])]);
+            e.invalid = true;
+            let count=0;
+            normalizeData[e.plotID] = [];
+            e.value= e.valueRaw.map((d,ti)=>{
+                const val1 = d[0]?selectedScale[0](d[0]):undefined;
+                const val2 = d[1]?selectedScale[1](d[1]):undefined;
+                if (count<30) {
+                    if (val1 !== undefined && val2 !== undefined)
+                        count++;
+                }else
+                    e.invalid= false;
+                normalizeData[e.plotID] = [[],[]];
+                if (val1===undefined){
+                    obj1[keys[ti]] = '';
+                    normalizeData[e.plotID][0][ti] = -Infinity;
+                }else{
+                    obj1[keys[ti]] = val1;
+                    normalizeData[e.plotID][0][ti] = val1;
+                }
+                if (val2===undefined) {
+                    obj2[keys[ti]] = '';
+                    normalizeData[e.plotID][1][ti] = -Infinity;
+                }else{
+                    obj2[keys[ti]] = val2;
+                    normalizeData[e.plotID][0][ti] = val2;
+                }
+                return [val1,val2,keys[ti]]
+            });
             files[0].push(obj1);
             files[0].push(obj2);
             files[1].push({code:u.key+e.key,name:u.key+e.key});
         });
     });
-
+    debugger
     let myData = new Data_processing(files);
     myData.read();
     let compute = new Visual_feature_2D({smooth:false,experiment:myData.experiment});
