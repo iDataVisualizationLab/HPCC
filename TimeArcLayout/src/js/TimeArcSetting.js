@@ -135,7 +135,7 @@ let TimeArcSetting = function (){
     };
     return master;
 };
-function handle_data_timeArc () {
+    function handle_data_timeArc () {
     debugger
     const graphicopt = subObject.graphicopt();
     const keys = Layout.timespan//.slice(0,10);

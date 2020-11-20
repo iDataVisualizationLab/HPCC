@@ -210,7 +210,7 @@ d3.TimeArc = function () {
 
 //Set up the force layout
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-50))
+            .force("charge", d3.forceManyBody().strength(-12))
             .force("link", d3.forceLink().distance(0))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
@@ -218,7 +218,8 @@ d3.TimeArc = function () {
             .on("end", function () {
             detactTimeSeries();
             drawStreamLegend();
-        }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
+        })
+            .on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
         force.stop();
         // .size([width, height]);
         catergogryList.forEach((d,i)=> d.order = i);
@@ -584,7 +585,7 @@ d3.TimeArc = function () {
 
     function computeConnectivity(a, num) {
         for (var i = 0; i < num; i++) {
-            a[i].isConnected = -100;
+            a[i].isConnected = 0;
             a[i].isConnectedmaxTimeIndex = a[i].maxTimeIndex;
         }
 
@@ -1350,9 +1351,8 @@ d3.TimeArc = function () {
             layerpath.enter().append('path')
                 .attr('class','layerpath')
                 .call(updatelayerpath);
+            linkArcs.attr("d", linkArc);
         }
-
-        linkArcs.attr("d", linkArc);
         // if (force.alpha()<0.03)
         //     force.stop();
 

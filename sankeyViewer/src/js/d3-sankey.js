@@ -96,7 +96,6 @@ function Sankey() {
 
   function sankey() {
     const graph = {nodes: nodes.apply(null, arguments), links: links.apply(null, arguments)};
-    debugger
     computeNodeLinks(graph);
     computeNodeValues(graph);
     computeNodeDepths(graph);
