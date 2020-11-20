@@ -268,7 +268,7 @@ function handle_data_timeArc () {
             e.plotID = normalizeData.length;
             e.invalid = true;
             let count=0;
-            normalizeData[e.plotID] = [];
+            normalizeData[e.plotID] = [[],[]];
             e.value= e.valueRaw.map((d,ti)=>{
                 const val1 = d[0]?selectedScale[0](d[0]):undefined;
                 const val2 = d[1]?selectedScale[1](d[1]):undefined;
@@ -277,7 +277,6 @@ function handle_data_timeArc () {
                         count++;
                 }else
                     e.invalid= false;
-                normalizeData[e.plotID] = [[],[]];
                 if (val1===undefined){
                     obj1[keys[ti]] = '';
                     normalizeData[e.plotID][0][ti] = -Infinity;
