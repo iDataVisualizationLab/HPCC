@@ -111,12 +111,13 @@ let ConnectedScatterPlot = function (){
         g.append('title').text(d=>`node: ${data.key} /n ${d3.extent(pointdata,e=>e[2])}`)
     }
     function drawLargeElement(contain,data){
-        const width = graphicopt.width*4;
-        const height = graphicopt.height*4;
-        const w = graphicopt.widthG()*4;
-        const h = graphicopt.heightG()*4;
+        const scale = 6;
+        const width = graphicopt.width*scale;
+        const height = graphicopt.height*scale;
+        const w = graphicopt.widthG()*scale;
+        const h = graphicopt.heightG()*scale;
         const margin = {};
-        d3.entries(graphicopt.margin).forEach(k=>margin[k]*4);
+        d3.entries(graphicopt.margin).forEach(k=>margin[k]*scale);
         const line = d3.line().x(d=>d[0]*w).y(d=>h*(1-d[1]))
             .curve(d3.curveCatmullRom.alpha(0.5))
             .defined(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])));
