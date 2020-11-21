@@ -171,7 +171,14 @@ let ConnectedScatterPlot = function (){
             .join('td');
         td.selectAll('svg').data(d=>d)
             .join('svg')
-            .on('click',d=>drawLargeElement(d3.select('#mini_plot'),d))
+            .on('click',d=>{
+                drawLargeElement(d3.select('#mini_plot'),d);
+                const tr = d3.select('#mini_plotDetail').selectAll('tr')
+                    .data([{key:'node',value:d.key},{key:'jobID',value:d.jobID}])
+                    .join('tr');
+                tr.selectAll('th').data(d=>[d.key]).join('th').text(d=>d);
+                tr.selectAll('td').data(d=>[d.value]).join('td').text(d=>d);
+            })
             .each(function(d){
             drawElement(d3.select(this),d);
         });
@@ -247,7 +254,7 @@ function handle_data_timeArc () {
                     const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
                     const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
                     datauser.value.push({
-                        key: comp, valueRaw: keys.map((t, i) => {
+                        key: comp, jobID:j,valueRaw: keys.map((t, i) => {
                             const val1 = value1[i] || undefined;
                             const val2 = value2[i] || undefined;
                             scheme.range[0][0] = (val1 < scheme.range[0][0]) ? val1 : scheme.range[0][0];
@@ -273,8 +280,8 @@ function handle_data_timeArc () {
     const normalizeData = [];
     scheme.data.forEach(u=>{
         u.value.forEach(e=>{
-            const obj1 = {'user':u.key+e.key,'userid':u.key+e.key, 'Type': selectedService[0]};
-            const obj2 = {'user':u.key+e.key,'userid':u.key+e.key, 'Type': selectedService[1]};
+            const obj1 = {'user':u.key+e.key+e.jobID,'userid':u.key+e.key+e.jobID, 'Type': selectedService[0]};
+            const obj2 = {'user':u.key+e.key+e.jobID,'userid':u.key+e.key+e.jobID, 'Type': selectedService[1]};
             e.plotID = normalizeData.length;
             e.invalid = true;
             let count=0;
@@ -305,7 +312,7 @@ function handle_data_timeArc () {
             });
             files[0].push(obj1);
             files[0].push(obj2);
-            files[1].push({code:u.key+e.key,name:u.key+e.key});
+            files[1].push({code:u.key+e.key+e.jobID,name:u.key+e.key+e.jobID});
         });
     });
     debugger
