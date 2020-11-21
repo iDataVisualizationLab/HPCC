@@ -235,32 +235,22 @@ function handle_data_timeArc () {
     const selectedService = ['CPU1 Temp','Memory usage'];
     scheme.data.selectedService = selectedService;
     // let userlist = ['hge', 'presmcdo', 'adegbalo', 'juandomi'];
-    // let userlist = ['hge'];
     let userlist = Object.keys(Layout.usersStatic);
-    debugger
     scheme.range = [[Infinity,-Infinity],[Infinity,-Infinity]];
     userlist.forEach(u=>{
-        const datauser = {key:u,value:[]}
-        Layout.usersStatic[u].job
-            .forEach(j=>{
-                Layout.jobsStatic[j].node_list.forEach(comp=> {
-                    const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
-                    const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
-                    datauser.value.push({
-                        key: comp, valueRaw: keys.map((t, i) => {
-                            const val1 = value1[i] || undefined;
-                            const val2 = value2[i] || undefined;
-                            scheme.range[0][0] = (val1 < scheme.range[0][0]) ? val1 : scheme.range[0][0];
-                            scheme.range[0][1] = (val1 > scheme.range[0][1]) ? val1 : scheme.range[0][1];
-                            scheme.range[1][0] = (val2 < scheme.range[1][0]) ? val2 : scheme.range[1][0];
-                            scheme.range[1][1] = (val2 > scheme.range[1][1]) ? val2 : scheme.range[1][1];
-                            return [val1, val2];
-                        })
-
-                    })
-                })
-            })
-        scheme.data.push(datauser);
+        scheme.data.push({key:u,value:d3.entries(Layout.ranking.byUser[u][selectedService[0]])
+            .map(comp=>{
+                return {key:comp.key,valueRaw:keys.map((t,i)=>{
+                    const v1 = comp.value[i];
+                    const val1 = v1||undefined;
+                    const val2 = Layout.ranking.byUser[u][selectedService[1]][comp.key][i]||undefined;
+                    scheme.range[0][0] = (val1<scheme.range[0][0])?val1:scheme.range[0][0];
+                    scheme.range[0][1] = (val1>scheme.range[0][1])?val1:scheme.range[0][1];
+                    scheme.range[1][0] = (val2<scheme.range[1][0])?val2:scheme.range[1][0];
+                    scheme.range[1][1] = (val2>scheme.range[1][1])?val2:scheme.range[1][1];
+                    return [val1,val2];
+                })}
+            })})
     });
     // format files
     const files = [[],[],[]];
