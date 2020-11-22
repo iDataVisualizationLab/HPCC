@@ -258,7 +258,7 @@ let ConnectedScatterPlot = function (){
             .attr("stroke-width", 10);
         nodeEnter.filter(d=>d.data.type==='user').append("svg")
             .attr("fill", d => d._children ? "#555" : "#999")
-            .html(d.children ?userIcon.open:userIcon.close);
+            .html(d=>d.children ?userIcon.open:userIcon.close);
         nodeEnter.filter(d=>d.data.svg)
             .selectAll('g.scatter')
             .data(d=> d.data.svg)
