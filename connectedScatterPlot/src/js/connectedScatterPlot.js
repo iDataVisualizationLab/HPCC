@@ -249,16 +249,22 @@ let ConnectedScatterPlot = function (){
             .attr("stroke-opacity", 0)
             .on("click", (d) => {
                 d.children = d.children ? null : d._children;
+                updateIcon(d)
                 update(d);
             });
-
+        function updateIcon(d){
+            if (d.data.type==='user')
+                d.icon.html(d=>d.children ?userIcon.open:userIcon.close);
+        }
         nodeEnter.filter(d=>!d.data.svg && d.data.type!=='user').append("circle")
             .attr("r", 2.5)
             .attr("fill", d => d._children ? "#555" : "#999")
             .attr("stroke-width", 10);
         nodeEnter.filter(d=>d.data.type==='user').append("svg")
+            .attr("y",-4)
             .attr("fill", d => d._children ? "#555" : "#999")
-            .html(d=>d.children ?userIcon.open:userIcon.close);
+            .html(d=>d.children ?userIcon.open:userIcon.close)
+            .each(function(d){d.icon=d3.select(this)});
         nodeEnter.filter(d=>d.data.svg)
             .selectAll('g.scatter')
             .data(d=> d.data.svg)
@@ -268,7 +274,6 @@ let ConnectedScatterPlot = function (){
                 .attr('transform',d=>`translate(${d.id*(graphicopt.scatterplot.width+3)},${-graphicopt.scatterplot.height/2})`)
                     .append('svg')
                     .each(function(d){
-                        debugger
                         drawElement(d3.select(this),d);
                     });
 
