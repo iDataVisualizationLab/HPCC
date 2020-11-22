@@ -4,7 +4,7 @@ let ConnectedScatterPlot = function (){
     let graphicopt = {
         contain: '#Chartcontent',
         offset: {top: 0},
-        margin: {top: 10, right: 120, bottom: 10, left: 40},
+        margin: {top: 30, right: 120, bottom: 30, left: 40},
         width: 1000,
         height: 800,
         scalezoom: 1,
@@ -22,8 +22,8 @@ let ConnectedScatterPlot = function (){
         },
         scatterplot:{
             margin: {top: 0, right: 0, bottom: 0, left: 0},
-            width: 20,
-            height: 20,
+            width: 36,
+            height: 36,
             scalezoom: 1,
             widthView: function () {
                 return this.width * this.scalezoom
@@ -118,8 +118,6 @@ let ConnectedScatterPlot = function (){
         return master;
     };
     function drawElement(contain,data){
-        graphicopt.scatterplot.width=graphicopt.dx;
-        graphicopt.scatterplot.height=graphicopt.dx;
         const line = d3.line().x(d=>d[0]*graphicopt.scatterplot.widthG()).y(d=>graphicopt.scatterplot.heightG()*(1-d[1]))
             .curve(d3.curveCatmullRom.alpha(0.5))
             .defined(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])));
@@ -138,7 +136,7 @@ let ConnectedScatterPlot = function (){
             g.selectAll('path').data([data.value])
                 .join('path')
                 .attr('d',line)
-                .attr('fill','none').attr('stroke','#4c4c4c');
+                .attr('fill','none').attr('stroke','rgba(0,0,0)').attr('opacity',0.8);
             const pointdata = data.value.filter(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])))
             g.selectAll('circle').data([pointdata[0],pointdata[pointdata.length-1]])
                 .join('circle')
@@ -215,6 +213,10 @@ let ConnectedScatterPlot = function (){
 
         // Compute the new tree layout.
         tree(root);
+        root.leaves().forEach(d=>{
+            if (d.data.svg)
+                d.y = d.y-graphicopt.dy+10
+        })
 
         let left = root;
         let right = root;
@@ -255,7 +257,7 @@ let ConnectedScatterPlot = function (){
             .enter()
                 .append('g')
                 .attr('class','scatter')
-                .attr('transform',d=>`translate(${d.id*graphicopt.scatterplot.width},${-graphicopt.scatterplot.height/2})`)
+                .attr('transform',d=>`translate(${d.id*(graphicopt.scatterplot.width+3)},${-graphicopt.scatterplot.height/2})`)
                     .append('svg')
                     .each(function(d){
                         debugger
