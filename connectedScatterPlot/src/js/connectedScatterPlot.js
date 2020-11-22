@@ -60,10 +60,17 @@ let ConnectedScatterPlot = function (){
     let colorP = d3.scaleLinear()
         .range(['black','green'])
         .interpolate(d3.interpolateHcl);
-    let userIcon = {close:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-plus-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    let userIcon = {close:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-plus-fill" xmlns="http://www.w3.org/2000/svg">
   <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.5-3a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
-</svg>`,open:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-dash-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+</svg>`,open:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-dash-fill"  xmlns="http://www.w3.org/2000/svg">
   <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm5-.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+</svg>`}
+    let jobIcon = {close:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-briefcase-fill" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z"/>
+  <path fill-rule="evenodd" d="M0 4.5A1.5 1.5 0 0 1 1.5 3h13A1.5 1.5 0 0 1 16 4.5v1.384l-7.614 2.03a1.5 1.5 0 0 1-.772 0L0 5.884V4.5zm5-2A1.5 1.5 0 0 1 6.5 1h3A1.5 1.5 0 0 1 11 2.5V3h-1v-.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5V3H5v-.5z"/>
+</svg>`,open:`<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-briefcase" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-6h-1v6a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-6H0v6z"/>
+  <path fill-rule="evenodd" d="M0 4.5A1.5 1.5 0 0 1 1.5 3h13A1.5 1.5 0 0 1 16 4.5v2.384l-7.614 2.03a1.5 1.5 0 0 1-.772 0L0 6.884V4.5zM1.5 4a.5.5 0 0 0-.5.5v1.616l6.871 1.832a.5.5 0 0 0 .258 0L15 6.116V4.5a.5.5 0 0 0-.5-.5h-13zM5 2.5A1.5 1.5 0 0 1 6.5 1h3A1.5 1.5 0 0 1 11 2.5V3h-1v-.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5V3H5v-.5z"/>
 </svg>`}
     let layout={};
     master.reset = function(){
@@ -253,8 +260,16 @@ let ConnectedScatterPlot = function (){
                 update(d);
             });
         function updateIcon(d){
-            if (d.data.type==='user')
-                d.icon.html(d=>d.children ?userIcon.open:userIcon.close);
+            switch (d.data.type) {
+                case 'user':
+                    d.icon.html(d => d.children ? userIcon.open : userIcon.close);
+                    break;
+                case 'job':
+                    d.icon.html(d => d.children ? jobIcon.open : jobIcon.close);
+                    break;
+                default:
+                    break
+            }
         }
         nodeEnter.filter(d=>!d.data.svg && d.data.type!=='user').append("circle")
             .attr("r", 2.5)
@@ -263,8 +278,8 @@ let ConnectedScatterPlot = function (){
         nodeEnter.filter(d=>d.data.type==='user').append("svg")
             .attr("y",-4)
             .attr("fill", d => d._children ? "#555" : "#999")
-            .html(d=>d.children ?userIcon.open:userIcon.close)
-            .each(function(d){d.icon=d3.select(this)});
+            .each(function(d){d.icon=d3.select(this);
+            updateIcon(d);});
         nodeEnter.filter(d=>d.data.svg)
             .selectAll('g.scatter')
             .data(d=> d.data.svg)
@@ -408,7 +423,7 @@ function handle_data_timeArc () {
                         if (Layout.jobsStatic[j])
                             return addComp(u,j);
                         else
-                            return {name: j, children: Layout.usersStatic[u].job.filter(js=>js.split('.')[0]===j).map(j=>addComp(u,j))};
+                            return {name: j, type: "job", children: Layout.usersStatic[u].job.filter(js=>js.split('.')[0]===j).map(j=>addComp(u,j))};
                     }
                     )
         };
@@ -416,7 +431,7 @@ function handle_data_timeArc () {
     });
     function addComp(u,j){
         return {
-            name: Layout.jobsStatic[j].job_name, children: [{jobID: j, user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
+            name: Layout.jobsStatic[j].job_name, children: [{jobID: j, type: "job", user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
             const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
             const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
             const item = {
