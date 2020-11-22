@@ -245,22 +245,18 @@ let ConnectedScatterPlot = function (){
                 update(d);
             });
 
-        nodeEnter.filter(d=>!d.data.svg).append("circle")
+        nodeEnter.filter(d=>!d.data.value).append("circle")
             .attr("r", 2.5)
             .attr("fill", d => d._children ? "#555" : "#999")
             .attr("stroke-width", 10);
-        nodeEnter.filter(d=>d.data.svg)
-            .selectAll('g.scatter')
-            .data(d=> d.data.svg)
-            .enter()
-                .append('g')
-                .attr('class','scatter')
-                .attr('transform',d=>`translate(${d.id*graphicopt.scatterplot.width},${-graphicopt.scatterplot.height/2})`)
-                    .append('svg')
-                    .each(function(d){
-                        debugger
-                        drawElement(d3.select(this),d);
-                    });
+        nodeEnter.filter(d=>d.data.value)
+            .append('g')
+            .attr('class','scatter')
+            .attr('transform',`translate(0,${-graphicopt.scatterplot.height/2})`)
+                .append('svg')
+                .each(function(d){
+                    drawElement(d3.select(this),d.data);
+                });
 
 
         nodeEnter.append("text")
@@ -343,8 +339,8 @@ let ConnectedScatterPlot = function (){
                 root.descendants().forEach((d, i) => {
                     d._children=d.children;
                     d.id = i;
-                    if (d.data.svg!==undefined)
-                        d.data.svg.forEach(e=>e.measure = getMeasure(e));
+                    if (d.data.plotID!==undefined)
+                        d.data.measure = getMeasure(d.data);
                     if (d.depth>0)
                         d.children = null;
                 });
@@ -400,12 +396,13 @@ function handle_data_timeArc () {
         scheme.data.children.push(datauser);
     });
     function addComp(u,j){
+
         return {
-            name: Layout.jobsStatic[j].job_name, children: [{jobID: j, user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
+            name: Layout.jobsStatic[j].job_name, children: Layout.jobsStatic[j].node_list.map(comp => {
             const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
             const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
             const item = {
-                id:i, name: comp, jobID: j, user:u, valueRaw: keys.map((t, i) => {
+                name: comp, jobID: j, user:u, valueRaw: keys.map((t, i) => {
                     const val1 = value1[i] || undefined;
                     const val2 = value2[i] || undefined;
                     scheme.range[0][0] = (val1 < scheme.range[0][0]) ? val1 : scheme.range[0][0];
@@ -417,7 +414,7 @@ function handle_data_timeArc () {
             };
             dataArray.push(item);
             return item
-        })}]
+        })
         }
     }
     // format files
