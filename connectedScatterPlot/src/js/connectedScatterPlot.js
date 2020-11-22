@@ -398,7 +398,7 @@ function handle_data_timeArc () {
     function addComp(u,j){
 
         return {
-            name: j, children: Layout.jobsStatic[j].node_list.map(comp => {
+            name: Layout.jobsStatic[j].job_name, children: Layout.jobsStatic[j].node_list.map(comp => {
             const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
             const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
             const item = {
