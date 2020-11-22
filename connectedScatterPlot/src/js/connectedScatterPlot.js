@@ -157,19 +157,19 @@ let ConnectedScatterPlot = function (){
                 .attr('cy',d=>graphicopt.scatterplot.heightG()*(1-d[1]))
                 .attr('opacity',(d,i)=>i?1:0.2)
                 .attr('fill',(d,i)=>i?'green':'black');
-            // g.append('text').attr('x',graphicopt.scatterplot.widthG()/2).attr('y',graphicopt.scatterplot.heightG()/2)
-            //     .attr('text-anchor','middle')
-            //     .text(d3.format('.2f')(data.measure));
+            g.append('text').attr('x',graphicopt.scatterplot.widthG()/2).attr('y',graphicopt.scatterplot.heightG()/2)
+                .attr('text-anchor','middle')
+                .text(d3.format('.2f')(data.measure));
         }
     }
     function drawLargeElement(contain,data){
-        const width = 300;
-        const height = 300;
-        const scale = 1;
-        const w = width*scale;
-        const h = width*scale;
+        const scale = 8;
+        const width = graphicopt.scatterplot.width*scale;
+        const height = graphicopt.scatterplot.height*scale;
+        const w = graphicopt.scatterplot.widthG()*scale;
+        const h = graphicopt.scatterplot.heightG()*scale;
         const margin = {};
-        d3.entries(graphicopt.margin).forEach(k=>margin[k]*scale);
+        d3.entries(graphicopt.scatterplot.margin).forEach(k=>margin[k]*scale);
         const line = d3.line().x(d=>d[0]*w).y(d=>h*(1-d[1]))
             .curve(d3.curveCatmullRom.alpha(0.5))
             .defined(d=>d&&(_.isNumber(d[0])&&_.isNumber(d[1])));
