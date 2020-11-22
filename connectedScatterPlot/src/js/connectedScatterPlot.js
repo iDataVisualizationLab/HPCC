@@ -163,11 +163,11 @@ let ConnectedScatterPlot = function (){
         }
     }
     function drawLargeElement(contain,data){
-        const scale = 6;
-        const width = graphicopt.width*scale;
-        const height = graphicopt.height*scale;
-        const w = graphicopt.widthG()*scale;
-        const h = graphicopt.heightG()*scale;
+        const width = 300;
+        const height = 300;
+        const scale = 1;
+        const w = width*scale;
+        const h = width*scale;
         const margin = {};
         d3.entries(graphicopt.margin).forEach(k=>margin[k]*scale);
         const line = d3.line().x(d=>d[0]*w).y(d=>h*(1-d[1]))
@@ -286,8 +286,9 @@ let ConnectedScatterPlot = function (){
             .enter()
                 .append('g')
                 .attr('class','scatter')
-                .attr('transform',d=>`translate(${d.id*(graphicopt.scatterplot.width+3)},${-graphicopt.scatterplot.height/2})`)
+                .attr('transform',d=>`translate(${d.id*(graphicopt.scatterplot.width+3)+5},${-graphicopt.scatterplot.height/2})`)
                     .append('svg')
+                    .on('click',d=>drawLargeElement(d3.select('#mini_plot'),d))
                     .each(function(d){
                         drawElement(d3.select(this),d);
                     });
