@@ -256,7 +256,7 @@ let ConnectedScatterPlot = function (){
             .attr("stroke-opacity", 0)
             .on("click", (d) => {
                 d.children = d.children ? null : d._children;
-                updateIcon(d)
+                updateIcon(d);
                 update(d);
             });
         function updateIcon(d){
@@ -271,12 +271,12 @@ let ConnectedScatterPlot = function (){
                     break
             }
         }
-        nodeEnter.filter(d=>!d.data.svg && d.data.type!=='user').append("circle")
+        nodeEnter.filter(d=>(!d.data.svg) && (!d.data.type)).append("circle")
             .attr("r", 2.5)
             .attr("fill", d => d._children ? "#555" : "#999")
             .attr("stroke-width", 10);
-        nodeEnter.filter(d=>d.data.type==='user').append("svg")
-            .attr("y",-4)
+        nodeEnter.filter(d=>d.data.type).append("svg")
+            .attr("y",-8)
             .attr("fill", d => d._children ? "#555" : "#999")
             .each(function(d){d.icon=d3.select(this);
             updateIcon(d);});
@@ -291,8 +291,6 @@ let ConnectedScatterPlot = function (){
                     .each(function(d){
                         drawElement(d3.select(this),d);
                     });
-
-
         nodeEnter.append("text")
             .attr("graphicopt.dy", "0.31em")
             .attr("x", d => d._children ? -6 : (d.data.value?(6+graphicopt.scatterplot.width):6))
@@ -423,7 +421,7 @@ function handle_data_timeArc () {
                         if (Layout.jobsStatic[j])
                             return addComp(u,j);
                         else
-                            return {name: j, type: "job", children: Layout.usersStatic[u].job.filter(js=>js.split('.')[0]===j).map(j=>addComp(u,j))};
+                            return {name: j, children: Layout.usersStatic[u].job.filter(js=>js.split('.')[0]===j).map(j=>addComp(u,j))};
                     }
                     )
         };
@@ -431,7 +429,7 @@ function handle_data_timeArc () {
     });
     function addComp(u,j){
         return {
-            name: Layout.jobsStatic[j].job_name, children: [{jobID: j, type: "job", user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
+            name: Layout.jobsStatic[j].job_name, type: "job", children: [{jobID: j, user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
             const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
             const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
             const item = {
