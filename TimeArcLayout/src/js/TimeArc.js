@@ -432,6 +432,8 @@ d3.TimeArc = function () {
             computeLinks();
             drawStreamLegend();
             if (!isSkipforce){
+                console.log(nodes)
+                console.log(links)
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
                     .force('link').links(links);
@@ -874,6 +876,7 @@ d3.TimeArc = function () {
     function computeLinks() {
         links = [];
         relationshipMaxMax2 = 1;
+        debugger
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
             for (var j = i + 1; j < numNode; j++) {

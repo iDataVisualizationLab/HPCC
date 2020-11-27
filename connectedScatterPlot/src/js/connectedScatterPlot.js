@@ -268,13 +268,17 @@ let ConnectedScatterPlot = function (){
                     d.icon.html(d => d.children ? jobIcon.open : jobIcon.close);
                     break;
                 default:
+                    d.icon.attr("fill", d => d._children ? (d.children?"#fff":"#555") : "#999")
+                        .attr("stroke", d => d._children&&d.children?"#000":null)
+                        .attr("stroke-width", d => 1)
                     break
             }
         }
         nodeEnter.filter(d=>(!d.data.svg) && (!d.data.type)).append("circle")
             .attr("r", 2.5)
-            .attr("fill", d => d._children ? "#555" : "#999")
-            .attr("stroke-width", 10);
+            .attr("fill", d => d._children ? (d.children?"#fff":"#555") : "#999")
+            // .attr("stroke-width", 10)
+            .each(function(d){d.icon=d3.select(this);})
         nodeEnter.filter(d=>d.data.type).append("svg")
             .attr("y",-8)
             .attr("fill", d => d._children ? "#555" : "#999")
@@ -430,7 +434,7 @@ function handle_data_timeArc () {
     });
     function addComp(u,j){
         return {
-            name: Layout.jobsStatic[j].job_name, type: "job", children: [{jobID: j, user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
+            name: Layout.jobsStatic[j].job_name, children: [{jobID: j, user:u,name:'', svg: Layout.jobsStatic[j].node_list.map((comp,i) => {
             const value1 = Layout.ranking.byComputer[comp][selectedService[0]];
             const value2 = Layout.ranking.byComputer[comp][selectedService[1]];
             const item = {

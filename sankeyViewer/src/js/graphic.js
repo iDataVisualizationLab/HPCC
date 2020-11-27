@@ -461,7 +461,12 @@ function getColorGant(){
     return _colorItem;
 }
 function initdrawGantt(){
-    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange});
+    timearc.init();
+    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange})
+        .onFinishDraw(()=>{
+            console.log(subObject.times())
+            timearc.times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
+        });
 
     subObject.mouseoverAdd('gantt',function(d){
         userPie.highlight(d.source.element.map(e=>e.key));
@@ -491,3 +496,4 @@ function drawGantt(){
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
 let subObject = new Sankey();
+let timearc = new TimeArc();

@@ -36,7 +36,7 @@ let Sankey = function(){
 
     let maindiv='#ganttLayout';
     let isFreeze= false;
-    let data=[],main_svg,g,r=0;
+    let data=[],times=[],nodes=[],_links=[],main_svg,g,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleOrdinal(d3.schemeCategory20);
@@ -119,6 +119,7 @@ let Sankey = function(){
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
         let keys = Layout.timespan//.slice(0,10);
+        times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
 
@@ -144,6 +145,9 @@ let Sankey = function(){
                             nodeLabel.set(text, node);
                             nodeList[text] = [];
                             color(text);
+                            node.maxIndex=ki;
+                            node.maxval = 0;
+                            node.drawData=[];
                         }else
                             node.parentNode = nodeLabel.get(text).id;
                         nodes.push(node);
@@ -152,7 +156,7 @@ let Sankey = function(){
                         nodeList[text].push(node);
                     }
                 }
-            })
+            });
             // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -173,6 +177,14 @@ let Sankey = function(){
                             link.value += value;
                             // link.arr = [...(link.arr??[]),...arr];
                             link.arr = [link.value];
+                            if (nodes[link.source].maxval<link.value) {
+                                nodes[link.source].maxval = link.value;
+                                nodes[link.source].maxIndex = i - 1;
+                            }
+                            if (nodes[link.target].maxval<link.value) {
+                                nodes[link.target].maxval = link.value;
+                                nodes[link.target].maxIndex = i;
+                            }
                             continue;
                         }
                         link = {
@@ -217,8 +229,9 @@ let Sankey = function(){
         })();
 
         const nodeObj = {};
-        const nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
-        const _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
+        nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
+        nodes.forEach(d=>d.color=color(d.name))
+        _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
             if (nodeObj[d.source].parentNode!==undefined){
                 nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
                 nodes.push(nodeObj[d.source]);
@@ -229,41 +242,42 @@ let Sankey = function(){
             }
             return Object.assign({}, d);
         });
-        renderSankey()
-        // force = d3.forceSimulation()
-        //     .force("charge", d3.forceManyBody().strength(-12))
-        //     .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-        //     .force('x', d3.forceX(0).strength(0.015))
-        //     .force('y',  d3.forceY(0).strength(0.015))
-        //     .nodes( nodes)
-        //     .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
-        //     .alpha(1)
-        //     .on('tick',function () {
-        //         nodes.forEach(function (d,i) {
-        //
-        //             d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
-        //             if (d.parentNode >= 0) {
-        //                 d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
-        //             }
-        //             else if (d.childNodes && d.childNodes.length) {
-        //                 var yy = 0;
-        //                 for (var i = 0; i < d.childNodes.length; i++) {
-        //                     var child = d.childNodes[i];
-        //                     yy += nodeObj[child].y;
-        //                 }
-        //                 yy = yy / d.childNodes.length; // average y coordinate
-        //                 d.y += (yy - d.y) * 0.2;
-        //             }
-        //         });
-        //     })
-        //     .on("end", function () {
-        //         graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
-        //         // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
-        //         // console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
-        //         nodeSort = function(a,b){debugger; return (a._forcey-b._forcey)};
-        //         // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
-        //         renderSankey();
-        //     })
+        debugger
+        // renderSankey()
+        force = d3.forceSimulation()
+            .force("charge", d3.forceManyBody().strength(-12))
+            .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+            .force('x', d3.forceX(0).strength(0.015))
+            .force('y',  d3.forceY(0).strength(0.015))
+            .nodes( nodes)
+            .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
+            .alpha(1)
+            .on('tick',function () {
+                nodes.forEach(function (d,i) {
+
+                    d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
+                    if (d.parentNode >= 0) {
+                        d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
+                    }
+                    else if (d.childNodes && d.childNodes.length) {
+                        var yy = 0;
+                        for (var i = 0; i < d.childNodes.length; i++) {
+                            var child = d.childNodes[i];
+                            yy += nodeObj[child].y;
+                        }
+                        yy = yy / d.childNodes.length; // average y coordinate
+                        d.y += (yy - d.y) * 0.2;
+                    }
+                });
+            })
+            .on("end", function () {
+                graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+                // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
+                console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
+                nodeSort = function(a,b){ return (a._forcey-b._forcey)};
+                // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
+                renderSankey();
+            })
 
         function renderSankey(){
             sankey.nodeId(function(d){return d.id})
@@ -309,7 +323,17 @@ let Sankey = function(){
             if(link_g.empty()){
                 link_g = svg_paraset.append('g').classed('links',true);
             }
-
+            links.forEach(l=>{
+                if (l.isSameNode){
+                    let parentNode = l.source;
+                    if (l.source.parentNode!==undefined){
+                        parentNode = graph.nodes[l.source.parentNode];
+                    }
+                    if (parentNode.drawData.length===0 || _.last(parentNode.drawData)[0]!==l.source.time)
+                        parentNode.drawData.push([l.source.time,l.value]);
+                    parentNode.drawData.push([l.target.time,l.value]);
+                }
+            });
             let link_p = link_g
                 .attr("fill", "none")
                 .attr("opacity", 0.5)
@@ -379,7 +403,6 @@ let Sankey = function(){
                 const nodematch = {};
                 const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
                 match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-                debugger
                 d.relatedNode = match
                     .map(l=>l.node);
                 d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
@@ -390,7 +413,8 @@ let Sankey = function(){
             link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
 
             g.select('.background').select('.drawArea').attr('clip-path',null)
-            g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
+            g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
+            debugger
             onFinishDraw.forEach(d=>d());}
 
         function horizontalSource(d) {
@@ -495,6 +519,9 @@ let Sankey = function(){
     master.data = function(_data) {
         return arguments.length?(data=_data,master):data;
     };
+    master.times = function(_data) {
+        return arguments.length?(times=_data,master):times;
+    };
     master.color = function(_data) {
         return arguments.length?(color=_data,master):color;
     };
@@ -529,6 +556,9 @@ let Sankey = function(){
     }
     master.getRenderFunc = function(_data) {
         return arguments.length?(getRenderFunc=_data,master):getRenderFunc;
+    };
+    master.graph = function() {
+        return {nodes,links:_links};
     };
     master.getDrawData = function(_data) {
         return arguments.length?(getDrawData=_data,master):getDrawData;
