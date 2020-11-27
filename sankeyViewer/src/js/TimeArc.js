@@ -115,7 +115,7 @@ let TimeArc = function(){
             })
             .y1(function (d) {
                 return yScale(d[1])/2;
-            });
+            }).defined(d=>d);
 
         // const nodes = data.nodes;
         // const links = data.links;
@@ -162,21 +162,55 @@ let TimeArc = function(){
                         return "translate(0," + d.y + ")"
                     })
                     .call(updatelayerpath);
-            let linkArcs = g.select("g.linkHolder").selectAll("path")
-                .data(links)
-                .join("path")
-                .attr("class", "linkArc")
-                // .style('fill','none')
-                .style('stroke','black')
-                .style('stroke-width',1)
-                // .style("stroke-width", function (d) {
-                //     return linkScale(d.value);
-                // }).attr("d", linkArc)
-                .attr("d", linkPath)
 
-            // .on('click',handleFreez)
-            // .on('mouseover', mouseovered_Link)
-            // .on("mouseout", mouseouted_Link);
+            let linkArcs = g.select("g.linkHolder").selectAll("g.outer_node")
+                .data(links,(d,i)=>(d._id='a'+d.names.join('').replace(/\[|-|"|:|\.|,| /g,''),d._id))
+                .join(
+                    enter => {
+                        e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        // gradient
+                        const gradient = e.append("linearGradient")
+                            .attr("id", d => d._id)
+                            .attr("gradientUnits", "userSpaceOnUse")
+                            .attr("x1", d => d.source.x)
+                            .attr("x2", d => d.target.x);
+                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                            .join('stop')
+                            .attr("offset", d=>`${d[0]}%`)
+                            .attr("stop-color", d => d[1]);
+                        // gradient ---end
+                        const path = e.append("path").attr('class',d=>'a'+d.nameIndex)
+                            .classed('hide',d=>d.arr===undefined)
+                            .attr("fill", d => `url(#${d._id})`)
+                            .attr("stroke", d => `url(#${d._id})`)
+                            .attr("stroke-width", 0.1)
+                            .attr("d", linkPath);
+                        path.each(function(d){d.dom=d3.select(this)});
+                        e.append("title");
+                        return e
+                    },update => {
+                        // gradient
+                        const gradient = update.select("linearGradient")
+                            .attr("id", d => d._id)
+                            .attr("gradientUnits", "userSpaceOnUse");
+                        gradient
+                            .attr("x1", d => d.source.x)
+                            .attr("x2", d => d.target.x);
+
+                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                            .join('stop')
+                            .attr("offset", d=>`${d[0]}%`)
+                            .attr("stop-color", d => d[1]);
+                        // gradient ---end
+                        const path = update.select('path').attr("fill", d => `url(#${d._id})`)
+                            .attr("stroke", d => `url(#${d._id})`)
+                            .attr("stroke-width", 0.1);
+                            path.attr("d", linkPath);
+                        return update
+                    },exit=>{
+                        return exit.call(exit=>(exit).attr('opacity',0).remove())
+                    }
+                );
 
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
             onFinishDraw.forEach(d=>d());
