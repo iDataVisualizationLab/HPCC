@@ -105,7 +105,7 @@ let Sankey = function(){
             freezeHandle();
         getColorScale = function(d){
             if (d.isShareUser)
-                return '#ddd';
+                return 'black';
             else
                 return color(d.name)
         }
@@ -320,7 +320,7 @@ let Sankey = function(){
                 .attr("dy", "0.35em")
                 .attr("text-anchor", "end")
                 .attr("fill", d=>d.first?getColorScale(d):'none')
-                .attr("font-weight", "bold")
+                .attr('font-weight',d=>d.isShareUser?null:'bold')
                 .text(d => {
                     return d.first?d.name:''});
             node_p.each(function(d){

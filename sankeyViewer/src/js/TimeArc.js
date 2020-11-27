@@ -149,7 +149,7 @@ let TimeArc = function(){
                 .join('text')
                 .attr('dy',6)
                 .style('text-anchor','end')
-                .style('font-weight','bold')
+                .attr('font-weight',d=>d.isShareUser?null:'bold')
                 .style('fill',d=>d.color||getColorScale(d))
                 .text(d=>d.name);
 
