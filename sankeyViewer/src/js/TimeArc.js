@@ -149,6 +149,8 @@ let TimeArc = function(){
                 .join('text')
                 .attr('dy',6)
                 .style('text-anchor','end')
+                .style('font-weight','bold')
+                .style('fill',d=>d.color||getColorScale(d))
                 .text(d=>d.name);
 
             let layerpath = g.select('g.nodeHolder')
@@ -158,12 +160,13 @@ let TimeArc = function(){
                     .selectAll('path.layerpath')
                     .data(d=>[{y:d.y,name:d.name,value:d.drawData,color:d.color}]).join('path')
                     .attr('class','layerpath')
+                    .style('opacity',0.5)
                     .attr("transform", function (d) {
                         return "translate(0," + d.y + ")"
                     })
                     .call(updatelayerpath);
 
-            let linkArcs = g.select("g.linkHolder").selectAll("g.outer_node")
+            let linkArcs = g.select("g.linkHolder").style('opacity',0.5).selectAll("g.outer_node")
                 .data(links,(d,i)=>(d._id='a'+d.names.join('').replace(/\[|-|"|:|\.|,| /g,''),d._id))
                 .join(
                     enter => {
