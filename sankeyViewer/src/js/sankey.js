@@ -103,6 +103,12 @@ let Sankey = function(){
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
+        getColorScale = function(d){
+            if (d.isShareUser)
+                return '#ddd';
+            else
+                return color(d)
+        }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')
             .select('.timeStick').attr('y2',graphicopt.heightG())
@@ -144,10 +150,11 @@ let Sankey = function(){
                             node.childNodes = [];
                             nodeLabel.set(text, node);
                             nodeList[text] = [];
-                            color(text);
+                            node.isShareUser = (d[k]&&d[k].length>1);
                             node.maxIndex=ki;
                             node.maxval = 0;
                             node.drawData=[];
+                            getColorScale(node);
                         }else
                             node.parentNode = nodeLabel.get(text).id;
                         nodes.push(node);
@@ -230,7 +237,7 @@ let Sankey = function(){
 
         const nodeObj = {};
         nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
-        nodes.forEach(d=>d.color=color(d.name))
+        nodes.forEach(d=>d.color=getColorScale(d))
         _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
             if (nodeObj[d.source].parentNode!==undefined){
                 nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
@@ -312,7 +319,7 @@ let Sankey = function(){
                 .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
                 .attr("dy", "0.35em")
                 .attr("text-anchor", "end")
-                .attr("fill", d=>d.first?color(d.name):'none')
+                .attr("fill", d=>d.first?getColorScale(d):'none')
                 .attr("font-weight", "bold")
                 .text(d => {
                     return d.first?d.name:''});
@@ -348,7 +355,7 @@ let Sankey = function(){
                             .attr("gradientUnits", "userSpaceOnUse")
                             .attr("x1", d => d.source.x1)
                             .attr("x2", d => d.target.x0);
-                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
@@ -375,7 +382,7 @@ let Sankey = function(){
                             .attr("x1", d => d.source.x1)
                             .attr("x2", d => d.target.x0);
 
-                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);

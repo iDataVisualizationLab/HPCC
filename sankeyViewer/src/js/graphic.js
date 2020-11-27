@@ -464,8 +464,7 @@ function initdrawGantt(){
     timearc.init();
     subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange})
         .onFinishDraw(()=>{
-            console.log(subObject.times())
-            timearc.times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
+            timearc.getColorScale(subObject.getColorScale()).times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
         });
 
     subObject.mouseoverAdd('gantt',function(d){

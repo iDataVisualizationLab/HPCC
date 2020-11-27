@@ -174,7 +174,7 @@ let TimeArc = function(){
                             .attr("gradientUnits", "userSpaceOnUse")
                             .attr("x1", d => d.source.x)
                             .attr("x2", d => d.target.x);
-                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
@@ -197,7 +197,7 @@ let TimeArc = function(){
                             .attr("x1", d => d.source.x)
                             .attr("x2", d => d.target.x);
 
-                        gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
