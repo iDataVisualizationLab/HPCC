@@ -214,6 +214,7 @@ function handleDataComputeByUser_compute(computers,jobs){
                         .rollup(d => d3.sum(d, e => e.node_list_obj[comp])).entries(jobArr);
                     username.total = 1;
                     item.values.push(username.sort((a, b) => d3.ascending(a.key, b.key)));
+                    condition = true;
                 }else
                     item.values.push(null);
             }else
