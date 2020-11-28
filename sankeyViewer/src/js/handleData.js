@@ -276,6 +276,7 @@ function handleRankingData(data){
     Layout.timespan = sampleS.timespan;
 
     handleDataComputeByUser.data = {computers,jobs};
+    userPie.data(Layout.usersStatic).draw();
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
     console.timeEnd('handleRankingData');
 }

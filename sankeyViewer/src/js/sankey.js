@@ -424,14 +424,6 @@ let Sankey = function(){
                 .each(function(d){d.dom=d3.select(this)});
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
-            link_p.on('mouseover',function(d){
-                debugger
-                tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
-            }).on('mouseleave',function(d){
-                tooltip.hide();
-            })
             g.select('.background').select('.drawArea').attr('clip-path',null)
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
             debugger
@@ -616,9 +608,9 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
-        if (d.tooltip) {
-            tooltip.show(d.tooltip)
-        }
+        tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
+<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
     master.highlight = function(listKey){
         let listobj = {};
@@ -672,9 +664,8 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', false));
         }
-        if (d.tooltip) {
-            tooltip.hide()
-        }
+        tooltip.hide()
+
     }
 
     return master;
