@@ -38,6 +38,7 @@ let Sankey = function(){
     let isFreeze= false;
     let data=[],times=[],nodes=[],_links=[],main_svg,g,r=0;
     let onFinishDraw = [];
+    let onLoadingFunc = ()=>{};
     // used to assign nodes color by group
     var color = d3.scaleOrdinal(d3.schemeCategory20);
     let getColorScale = function(){return color};
@@ -110,8 +111,8 @@ let Sankey = function(){
                 return color(d.name)
         }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
-        // g.select('.timeHandleHolder').attr('transform','translate(0,0)')
-        //     .select('.timeStick').attr('y2',graphicopt.heightG())
+        g.select('.timeHandleHolder').attr('transform','translate(0,0)')
+            .select('.timeStick').attr('y2',graphicopt.heightG())
         y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
         // x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
@@ -263,6 +264,7 @@ let Sankey = function(){
             .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
             .alpha(1)
             .on('tick',function () {
+                onLoadingFunc( {percentage:(1-this.alpha())*100,text:'TimeArc calculation'});
                 nodes.forEach(function (d,i) {
 
                     d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
@@ -281,6 +283,7 @@ let Sankey = function(){
                 });
             })
             .on("end", function () {
+                onLoadingFunc();
                 graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
                 // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
                 console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
@@ -481,8 +484,9 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No info';
+        return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No Info';
     }
+    master.loadingFunc = function(_){onLoadingFunc = _;};
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
     master.main_svg = function(){return main_svg};
@@ -527,7 +531,7 @@ let Sankey = function(){
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
             g.append('g').attr('class','timeHandleHolder')
-                .append('line').attr('class','timeStick hide')
+                .append('line').attr('class','timeStick')
                 .attr('y2',graphicopt.heightG())
                 .style('stroke','black')
                 .attr('stroke-dasharray','2 1');
