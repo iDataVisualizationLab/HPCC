@@ -110,8 +110,8 @@ let Sankey = function(){
                 return color(d.name)
         }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
-        g.select('.timeHandleHolder').attr('transform','translate(0,0)')
-            .select('.timeStick').attr('y2',graphicopt.heightG())
+        // g.select('.timeHandleHolder').attr('transform','translate(0,0)')
+        //     .select('.timeStick').attr('y2',graphicopt.heightG())
         y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
         // x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
         data.sort(master.sortFunc);
@@ -122,7 +122,7 @@ let Sankey = function(){
             d.order = i;
             d.relatedNode = [];
         });
-        let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
+        let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
         let keys = Layout.timespan//.slice(0,3*12);
         times = keys;
@@ -527,7 +527,7 @@ let Sankey = function(){
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
             g.append('g').attr('class','timeHandleHolder')
-                .append('line').attr('class','timeStick')
+                .append('line').attr('class','timeStick hide')
                 .attr('y2',graphicopt.heightG())
                 .style('stroke','black')
                 .attr('stroke-dasharray','2 1');

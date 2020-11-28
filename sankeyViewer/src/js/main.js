@@ -39,7 +39,7 @@ $(document).ready(function(){
             d3.select('#navMode').select('li.demo a').classed('active',true);
             // let url = '../HiperView/data/814_821_2020.json';
             let url = '../jobviewer/src/data/922020-932020-145000.json';
-            if (command.timeStart!==undefined&&command.timeEnd!==undefined){ `2020-02-14T12:00:00-05:00`
+            if (command.timeStart!==undefined&&command.timeEnd!==undefined){// `2020-02-14T12:00:00-05:00`
                 _start = new Date(command.timeStart);
                 _end = new Date(command.timeEnd);
                 const interval = '5m';
@@ -67,8 +67,6 @@ $(document).ready(function(){
     }
     updateProcess({percentage:5,text:'Load UI...'})
     initMenu();
-    updateProcess({percentage:10,text:'Load Cluster UI...'})
-    initClusterUI();
     updateProcess({percentage:15,text:'Init Graph...'});
     initdraw();
     initTimeElement();
@@ -76,27 +74,13 @@ $(document).ready(function(){
 });
 
 function initTimeElement(){
-    timelineControl = new Timeline('#timelineControl');
-    timelineControl.callbackPlay = request.start.bind(request);
-    timelineControl.callbackPause = request.pause.bind(request);
-    timelineControl.step = _.partial(request.request.bind(request),0);
-    request.callbackStop = timelineControl.pause.bind(timelineControl);
-
-    request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
-    // request.onDataChange.push(handleRankingData);
-    request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-    request.onUpdateTime.push(function(time){
-        subObject.updateTimeHandle(time)
-    });
     if (request.isRealTime) {
-        timelineControl.disableHandle(true);
-        request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');
-        request.onFinishQuery.push((d)=>(timelineControl.meassageHolder.setMessage(''),updateProcess(),d));
+        request.onFinishQuery.push((d)=>(updateProcess(),d));
         request.setInterval(120000);
         request.onFinishQuery.push((data)=> {handleRankingData(data);queryData(data);drawUserList();});
-        queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
+        //queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     }else{
-        request.setInterval(1000);
+       // request.setInterval(1000);
         request.onFinishQuery.push(queryData);
         request.onDataChange.push((data)=> queryLayout().then(()=>{
             updateProcess({percentage:50,text:'Preprocess data'})
@@ -106,7 +90,7 @@ function initTimeElement(){
                 drawUserList();
                 initdrawGantt();
                 drawGantt();
-                timelineControl.play.bind(timelineControl)();
+                // timelineControl.play.bind(timelineControl)();
                 updateProcess();
             },0);
         }));

@@ -74,18 +74,6 @@ $(document).ready(function(){
 });
 
 function initTimeElement(){
-    // timelineControl = new Timeline('#timelineControl');
-    // timelineControl.callbackPlay = request.start.bind(request);
-    // timelineControl.callbackPause = request.pause.bind(request);
-    // timelineControl.step = _.partial(request.request.bind(request),0);
-    // request.callbackStop = timelineControl.pause.bind(timelineControl);
-    //
-    // request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
-    // // request.onDataChange.push(handleRankingData);
-    // request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-    // request.onUpdateTime.push(function(time){
-    //     subObject.updateTimeHandle(time)
-    // });
     if (request.isRealTime) {
         // timelineControl.disableHandle(true);
         // request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');
