@@ -38,6 +38,7 @@ let Sankey = function(){
     let isFreeze= false;
     let data=[],times=[],nodes=[],_links=[],main_svg,g,r=0;
     let onFinishDraw = [];
+    let onLoadingFunc = ()=>{};
     // used to assign nodes color by group
     var color = d3.scaleOrdinal(d3.schemeCategory20);
     let getColorScale = function(){return color};
@@ -122,7 +123,7 @@ let Sankey = function(){
             d.order = i;
             d.relatedNode = [];
         });
-        let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
+        let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
         let keys = Layout.timespan//.slice(0,3*12);
         times = keys;
@@ -263,6 +264,7 @@ let Sankey = function(){
             .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
             .alpha(1)
             .on('tick',function () {
+                onLoadingFunc( {percentage:(1-this.alpha())*100,text:'TimeArc calculation'});
                 nodes.forEach(function (d,i) {
 
                     d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
@@ -281,6 +283,7 @@ let Sankey = function(){
                 });
             })
             .on("end", function () {
+                onLoadingFunc();
                 graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
                 // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
                 console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
@@ -483,6 +486,7 @@ let Sankey = function(){
     function getUserName(arr){
         return (arr&&arr.length)?('User '+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
     }
+    master.loadingFunc = function(_){onLoadingFunc = _;};
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
     master.main_svg = function(){return main_svg};

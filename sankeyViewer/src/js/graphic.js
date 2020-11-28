@@ -465,7 +465,7 @@ function initdrawGantt(){
         .onFinishDraw(()=>{
             timearc.getColorScale(subObject.getColorScale()).times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
         });
-
+    subObject.loadingFunc(updateProcess)
     subObject.mouseoverAdd('gantt',function(d){
         userPie.highlight(d.source.element.map(e=>e.key));
     });
