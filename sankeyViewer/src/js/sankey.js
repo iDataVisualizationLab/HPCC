@@ -2,7 +2,7 @@
 
 
 let Sankey = function(){
-    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
+    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `${d}`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 100},
         width: 1400,
@@ -124,7 +124,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan.slice(0,10);
+        let keys = Layout.timespan.slice(0,5);
         times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
@@ -155,8 +155,11 @@ let Sankey = function(){
                             node.maxval = 0;
                             node.drawData=[];
                             getColorScale(node);
-                        }else
+                        }else {
+                            node.isShareUser = (d[k]&&d[k].length>1);
                             node.parentNode = nodeLabel.get(text).id;
+                            getColorScale(node);
+                        }
                         nodes.push(node);
                         nodeByKey.set(key, node);
                         indexByKey.set(key, index);
@@ -178,12 +181,12 @@ let Sankey = function(){
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
                         const value = d[a].total;
-                        const arr = d.arr || [d.key];//just ad for testing
+                        const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
                         if (link) {
                             link.value += value;
                             // link.arr = [...(link.arr??[]),...arr];
-                            link.arr = [link.value];
+                            link.arr.push(arr[0]);
                             if (nodes[link.source].maxval<link.value) {
                                 nodes[link.source].maxval = link.value;
                                 nodes[link.source].maxIndex = i - 1;
@@ -234,7 +237,7 @@ let Sankey = function(){
             }
             return {nodes, links};
         })();
-
+        debugger
         const nodeObj = {};
         nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
         nodes.forEach(d=>d.color=getColorScale(d))
@@ -417,13 +420,23 @@ let Sankey = function(){
             link_p.select('path')
                 .each(function(d){d.dom=d3.select(this)});
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
-            link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
-
+            // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
+            link_p.on('mouseover',function(d){
+                debugger
+                tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+            }).on('mouseleave',function(d){
+                tooltip.hide();
+            })
             g.select('.background').select('.drawArea').attr('clip-path',null)
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
             debugger
             onFinishDraw.forEach(d=>d());}
-
+        function compressName(arr){
+            let limit = 5;
+            const arrn = arr.map(e=>e.replace('10.101.', ''));
+            return (arrn.length>limit?[...arrn.slice(0,limit),'+ '+(arrn.length-limit)+'nodes']:arrn).join(', ')
+        }
         function horizontalSource(d) {
             return [d.source.x1, d.y0];
         }

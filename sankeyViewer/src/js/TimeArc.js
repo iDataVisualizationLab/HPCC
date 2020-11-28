@@ -177,16 +177,16 @@ let TimeArc = function(){
                             .attr("gradientUnits", "userSpaceOnUse")
                             .attr("x1", d => d.source.x)
                             .attr("x2", d => d.target.x);
-                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
+                        gradient.selectAll("stop").data(d=>[[0,d.source.color||getColorScale(d.source)],[100,d.target.color||getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
                         // gradient ---end
-                        const path = e.append("path").attr('class',d=>'a'+d.nameIndex)
+                        const path = e.append("path").attr('class',d=>'a'+d._id)
                             .classed('hide',d=>d.arr===undefined)
                             .attr("fill", d => `url(#${d._id})`)
                             .attr("stroke", d => `url(#${d._id})`)
-                            .attr("stroke-width", 0.1)
+                            .attr("stroke-width", 0.5)
                             .attr("d", linkPath);
                         path.each(function(d){d.dom=d3.select(this)});
                         e.append("title");
@@ -200,7 +200,7 @@ let TimeArc = function(){
                             .attr("x1", d => d.source.x)
                             .attr("x2", d => d.target.x);
 
-                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
+                        gradient.selectAll("stop").data(d=>[[0,d.source.color||getColorScale(d.source)],[100,d.target.color||getColorScale(d.target)]])
                             .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
