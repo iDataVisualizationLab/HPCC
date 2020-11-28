@@ -461,19 +461,20 @@ function getColorGant(){
 }
 function initdrawGantt(){
     timearc.init();
-    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange})
+    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange}).loadingFunc(updateProcess)
         .onFinishDraw(()=>{
             timearc.getColorScale(subObject.getColorScale()).times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
         });
     subObject.loadingFunc(updateProcess)
+
     subObject.mouseoverAdd('gantt',function(d){
         userPie.highlight(d.source.element.map(e=>e.key));
     });
     subObject.mouseoutAdd('gantt',function(d){
         userPie.releasehighlight();
     });
-    subObject.clickAdd('jobsankey',function(d){
-        window.open('../sankeyJobViewer/index.html?file='+'922020-932020-145000'+'&user='+d.source.element.map(e=>e.key), "_blank");
+    subObject.clickAdd('jobsankey',function(d) {
+        window.open('../sankeyJobViewer/index.html?file=' + '922020-932020-145000' + '&user=' + d.source.element.map(e => e.key), "_blank");
     });
     userPie.mouseoverAdd('gantt',function(d){
         subObject.highlight([d.data.key]);

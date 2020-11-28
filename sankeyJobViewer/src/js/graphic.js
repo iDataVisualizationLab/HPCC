@@ -460,7 +460,7 @@ function getColorGant(){
     return _colorItem;
 }
 function initdrawGantt(){
-    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange});
+    subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange}).loadingFunc(updateProcess);
 
     subObject.mouseoverAdd('gantt',function(d){
         userPie.highlight(d.source.element.map(e=>e.key));

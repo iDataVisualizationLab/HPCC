@@ -486,7 +486,7 @@ let Sankey = function(){
     function getUserName(arr){
         return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No Info';
     }
-    master.loadingFunc = function(_){onLoadingFunc = _;};
+    master.loadingFunc = function(_){onLoadingFunc = _; return master;};
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
     master.main_svg = function(){return main_svg};
