@@ -426,7 +426,6 @@ let Sankey = function(){
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
             g.select('.background').select('.drawArea').attr('clip-path',null)
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
-            debugger
             onFinishDraw.forEach(d=>d());}
         function compressName(arr){
             let limit = 5;
@@ -476,7 +475,7 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?('User '+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
+        return (arr&&arr.length)?((arr.length===1?'User ':'')+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
     }
     master.loadingFunc = function(_){onLoadingFunc = _;return master;};
     master.freezeHandle = freezeHandle;
