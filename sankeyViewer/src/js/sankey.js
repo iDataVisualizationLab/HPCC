@@ -125,7 +125,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,3*12);
+        let keys = Layout.timespan//.slice(0,10);
         times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];

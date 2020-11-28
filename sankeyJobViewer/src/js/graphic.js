@@ -468,9 +468,6 @@ function initdrawGantt(){
     subObject.mouseoutAdd('gantt',function(d){
         userPie.releasehighlight();
     });
-    subObject.clickAdd('gantt',function(d){
-        userPie.freezeHandle.bind(this)();
-    });
     userPie.mouseoverAdd('gantt',function(d){
         subObject.highlight([d.data.key]);
     });
