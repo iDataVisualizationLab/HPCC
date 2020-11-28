@@ -66,7 +66,7 @@ $(document).ready(function(){
     }
     updateProcess({percentage:5,text:'Load UI...'})
     initMenu();
-    updateProcess({percentage:15,text:'Init Graph...'});
+    updateProcess({percentage:15,text:'Preprocess data...'});
     initdraw();
     initTimeElement();
     // queryLayout().then(()=>request.request());

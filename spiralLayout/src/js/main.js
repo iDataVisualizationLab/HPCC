@@ -69,7 +69,7 @@ $(document).ready(function(){
     initMenu();
     updateProcess({percentage:10,text:'Load Cluster UI...'})
     initClusterUI();
-    updateProcess({percentage:15,text:'Init Graph...'});
+    updateProcess({percentage:15,text:'Preprocess data...'});
     initdraw();
     initTimeElement();
     // queryLayout().then(()=>request.request());
