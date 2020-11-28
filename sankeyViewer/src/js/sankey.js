@@ -427,11 +427,6 @@ let Sankey = function(){
             g.select('.background').select('.drawArea').attr('clip-path',null)
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
             onFinishDraw.forEach(d=>d());}
-        function compressName(arr){
-            let limit = 5;
-            const arrn = arr.map(e=>e.replace('10.101.', ''));
-            return (arrn.length>limit?[...arrn.slice(0,limit),'+ '+(arrn.length-limit)+'nodes']:arrn).join(', ')
-        }
         function horizontalSource(d) {
             return [d.source.x1, d.y0];
         }
@@ -476,6 +471,11 @@ let Sankey = function(){
     }
     function getUserName(arr){
         return (arr&&arr.length)?((arr.length===1?'User ':'')+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
+    }
+    function compressName(arr){
+        let limit = 5;
+        const arrn = arr.map(e=>e.replace('10.101.', ''));
+        return (arrn.length>limit?[...arrn.slice(0,limit),'+ '+(arrn.length-limit)+'nodes']:arrn).join(', ')
     }
     master.loadingFunc = function(_){onLoadingFunc = _;return master;};
     master.freezeHandle = freezeHandle;
