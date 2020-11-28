@@ -2,7 +2,7 @@
 
 
 let Sankey = function(){
-    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
+    let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `${d}`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 100},
         width: 1400,
@@ -36,7 +36,7 @@ let Sankey = function(){
 
     let maindiv='#ganttLayout';
     let isFreeze= false;
-    let data=[],main_svg,g,r=0;
+    let data=[],times=[],nodes=[],_links=[],main_svg,g,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleOrdinal(d3.schemeCategory20);
@@ -103,6 +103,12 @@ let Sankey = function(){
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
+        getColorScale = function(d){
+            if (d.isShareUser)
+                return 'black';
+            else
+                return color(d.name)
+        }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')
             .select('.timeStick').attr('y2',graphicopt.heightG())
@@ -118,7 +124,8 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea').attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,10);
+        let keys = Layout.timespan//.slice(0,3*12);
+        times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
 
@@ -140,9 +147,18 @@ let Sankey = function(){
                         const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
                         if (!nodeLabel.has(text)) {
                             node.first = true;
+                            node.childNodes = [];
                             nodeLabel.set(text, node);
                             nodeList[text] = [];
-                            color(text)
+                            node.isShareUser = (d[k]&&d[k].length>1);
+                            node.maxIndex=ki;
+                            node.maxval = 0;
+                            node.drawData=[];
+                            getColorScale(node);
+                        }else {
+                            node.isShareUser = (d[k]&&d[k].length>1);
+                            node.parentNode = nodeLabel.get(text).id;
+                            getColorScale(node);
                         }
                         nodes.push(node);
                         nodeByKey.set(key, node);
@@ -150,7 +166,7 @@ let Sankey = function(){
                         nodeList[text].push(node);
                     }
                 }
-            })
+            });
             // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -165,13 +181,20 @@ let Sankey = function(){
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
                         const value = d[a].total;
-                        // const arr = d.arr || [d.key];//just ad for testing
-                        const arr = [value];//just ad for testing
+                        const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
                         if (link) {
                             link.value += value;
                             // link.arr = [...(link.arr??[]),...arr];
-                            link.arr = [link.value];
+                            link.arr.push(arr[0]);
+                            if (nodes[link.source].maxval<link.value) {
+                                nodes[link.source].maxval = link.value;
+                                nodes[link.source].maxIndex = i - 1;
+                            }
+                            if (nodes[link.target].maxval<link.value) {
+                                nodes[link.target].maxval = link.value;
+                                nodes[link.target].maxIndex = i;
+                            }
                             continue;
                         }
                         link = {
@@ -184,6 +207,8 @@ let Sankey = function(){
                         if (getUserName(d[a])!==getUserName(d[b])){
                             nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
                             nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
+                        }else{
+                            link.isSameNode = true;
                         }
                         links.push(link);
                         linkByKey.set(key, link);
@@ -212,129 +237,207 @@ let Sankey = function(){
             }
             return {nodes, links};
         })();
-
-        sankey.nodeId(function(d){return d.id})
-            .nodeSort(nodeSort)
-            // .linkSort(null)
-            .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
-        const {nodes, links} = sankey({
-            nodes: graph.nodes.map(d => Object.assign({}, d)),
-            links: graph.links.map(d => Object.assign({}, d))
+        debugger
+        const nodeObj = {};
+        nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
+        nodes.forEach(d=>d.color=getColorScale(d))
+        _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
+            if (nodeObj[d.source].parentNode!==undefined){
+                nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
+                nodes.push(nodeObj[d.source]);
+            }
+            if (nodeObj[d.target].parentNode!==undefined){
+                nodeObj[nodeObj[d.target].parentNode].childNodes.push(d.target);
+                nodes.push(nodeObj[d.target]);
+            }
+            return Object.assign({}, d);
         });
+        debugger
+        // renderSankey()
+        force = d3.forceSimulation()
+            .force("charge", d3.forceManyBody().strength(-12))
+            .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+            .force('x', d3.forceX(0).strength(0.015))
+            .force('y',  d3.forceY(0).strength(0.015))
+            .nodes( nodes)
+            .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
+            .alpha(1)
+            .on('tick',function () {
+                nodes.forEach(function (d,i) {
 
-        links.forEach((d,i)=>{
-            d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
-        });
-        let isAnimate = true;
-        if (links.length>400)
-            isAnimate = false;
-        svg_paraset = drawArea;
-        let node_g = svg_paraset.select('.nodes');
-        if(node_g.empty()){
-            node_g = svg_paraset.append('g').classed('nodes',true);
-        }
-        let node_p = node_g
-            .selectAll("g.outer_node")
-            .data(nodes.filter(d=>d.first),d=>d.name)
-            .join(
-                enter => (e=enter.append("g").attr('class','outer_node element'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                update => update.call(update=>(isAnimate?update.transition().duration(graphicopt.animationTime):update).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
-                exit => exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime).attr('opacity',0):exit).remove()),
-            );
-        node_p.select('text')
-            .attr("x", - 6)
-            .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "end")
-            .attr("fill", d=>d.first?color(d.name):'none')
-            .attr("font-weight", "bold")
-            .text(d => {
-                return d.first?d.name:''});
-        node_p.each(function(d){
-            d.node = d3.select(this);
-        });
-        let link_g = svg_paraset.select('.links');
-        if(link_g.empty()){
-            link_g = svg_paraset.append('g').classed('links',true);
-        }
+                    d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
+                    if (d.parentNode >= 0) {
+                        d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
+                    }
+                    else if (d.childNodes && d.childNodes.length) {
+                        var yy = 0;
+                        for (var i = 0; i < d.childNodes.length; i++) {
+                            var child = d.childNodes[i];
+                            yy += nodeObj[child].y;
+                        }
+                        yy = yy / d.childNodes.length; // average y coordinate
+                        d.y += (yy - d.y) * 0.2;
+                    }
+                });
+            })
+            .on("end", function () {
+                graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+                // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
+                console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
+                nodeSort = function(a,b){ return (a._forcey-b._forcey)};
+                // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
+                renderSankey();
+            })
 
-        let link_p = link_g
-            .attr("fill", "none")
-            .attr("opacity", 0.5)
-            .selectAll("g.outer_node")
-            .data(links,(d,i)=>d._id)
-            .join(
-                enter => {
-                    e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
-                    // gradient
-                    const gradient = e.append("linearGradient")
-                        .attr("id", d => d._id)
-                        .attr("gradientUnits", "userSpaceOnUse")
-                        .attr("x1", d => d.source.x1)
-                        .attr("x2", d => d.target.x0);
-                    gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
-                        .join('stop')
-                        .attr("offset", d=>`${d[0]}%`)
-                        .attr("stop-color", d => d[1]);
-                    // gradient ---end
-                    const path = e.append("path").attr('class',d=>'a'+d.nameIndex)
-                        .classed('hide',d=>d.arr===undefined)
-                        .attr("fill", d => `url(#${d._id})`)
-                        .attr("stroke", d => `url(#${d._id})`)
-                        .attr("stroke-width", 0.1)
-                        .attr("d", linkPath);
-                    if (isAnimate)
-                        path.attr("opacity", 0)
-                        .transition().duration(graphicopt.animationTime)
-                        .attr("opacity", 1);
-                    path.each(function(d){d.dom=d3.select(this)});
-                    e.append("title");
-                    return e
-                },update => {
-                    // gradient
-                    const gradient = update.select("linearGradient")
-                        .attr("id", d => d._id)
-                        .attr("gradientUnits", "userSpaceOnUse");
-                    gradient
-                        .attr("x1", d => d.source.x1)
-                        .attr("x2", d => d.target.x0);
-
-                    gradient.selectAll("stop").data(d=>[[0,color(d.source.name)],[100,color(d.target.name)]])
-                        .join('stop')
-                        .attr("offset", d=>`${d[0]}%`)
-                        .attr("stop-color", d => d[1]);
-                    // gradient ---end
-                    const path = update.select('path').attr("fill", d => `url(#${d._id})`)
-                        .attr("stroke", d => `url(#${d._id})`)
-                        .attr("stroke-width", 0.1);
-                    if (isAnimate)
-                        path
-                        .transition().duration(graphicopt.animationTime)
-                        .attr("d", linkPath);
-                    else
-                        path.attr("d", linkPath);
-                    return update;
-                },exit=>{
-                    return exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime):exit).attr('opacity',0).remove())
+        function renderSankey(){
+            sankey.nodeId(function(d){return d.id})
+                .nodeSort(nodeSort)
+                // .linkSort(function(a,b){return ((a.source._forcey+a.target._forcey)-(b.source._forcey+b.target._forcey))})
+                .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
+            const {nodes, links} = sankey({
+                nodes: graph.nodes.map(d => Object.assign({}, d)),
+                links: graph.links.map(d => Object.assign({}, d))
+            });
+            links.forEach((d,i)=>{
+                d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
+            });
+            let isAnimate = true;
+            if (links.length>400)
+                isAnimate = false;
+            svg_paraset = drawArea;
+            let node_g = svg_paraset.select('.nodes');
+            if(node_g.empty()){
+                node_g = svg_paraset.append('g').classed('nodes',true);
+            }
+            let node_p = node_g
+                .selectAll("g.outer_node")
+                .data(nodes.filter(d=>d.first),d=>d.name)
+                .join(
+                    enter => (e=enter.append("g").attr('class','outer_node element'),e.append("title"),/*e.append("rect"),*/e.append("text"),e.attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                    update => update.call(update=>(isAnimate?update.transition().duration(graphicopt.animationTime):update).attr('transform',d=>`translate(${d.x0},${d.y0})`)),
+                    exit => exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime).attr('opacity',0):exit).remove()),
+                );
+            node_p.select('text')
+                .attr("x", - 6)
+                .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", "end")
+                .attr("fill", d=>d.first?getColorScale(d):'none')
+                .attr('font-weight',d=>d.isShareUser?null:'bold')
+                .text(d => {
+                    return d.first?d.name:''});
+            node_p.each(function(d){
+                d.node = d3.select(this);
+            });
+            let link_g = svg_paraset.select('.links');
+            if(link_g.empty()){
+                link_g = svg_paraset.append('g').classed('links',true);
+            }
+            links.forEach(l=>{
+                if (l.isSameNode){
+                    let parentNode = l.source;
+                    if (l.source.parentNode!==undefined){
+                        parentNode = graph.nodes[l.source.parentNode];
+                    }
+                    if (parentNode.drawData.length===0 || _.last(parentNode.drawData)[0]!==l.source.time)
+                        parentNode.drawData.push([l.source.time,l.value]);
+                    parentNode.drawData.push([l.target.time,l.value]);
                 }
-            ).on("mouseover", function(d){mouseover.bind(this)(d)})
-            .on("mouseout", function(d){mouseout.bind(this)(d)})
-        link_p.each(function(d){
-            d.node = d3.select(this);
-        })
-        link_p.each(function(d){
-            const nodematch = {};
-            const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
-            match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-            d.relatedNode = match
-                .map(l=>l.node);
-            d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
-        })
-        link_p.select('path')
-            .each(function(d){d.dom=d3.select(this)});
-        // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
-        link_p.select('title').text(d => `${d.names[1]}\n${d.arr}`);
+            });
+            let link_p = link_g
+                .attr("fill", "none")
+                .attr("opacity", 0.5)
+                .selectAll("g.outer_node")
+                .data(links,(d,i)=>d._id)
+                .join(
+                    enter => {
+                        e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        // gradient
+                        const gradient = e.append("linearGradient")
+                            .attr("id", d => d._id)
+                            .attr("gradientUnits", "userSpaceOnUse")
+                            .attr("x1", d => d.source.x1)
+                            .attr("x2", d => d.target.x0);
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
+                            .join('stop')
+                            .attr("offset", d=>`${d[0]}%`)
+                            .attr("stop-color", d => d[1]);
+                        // gradient ---end
+                        const path = e.append("path").attr('class',d=>'a'+d.nameIndex)
+                            .classed('hide',d=>d.arr===undefined)
+                            .attr("fill", d => `url(#${d._id})`)
+                            .attr("stroke", d => `url(#${d._id})`)
+                            .attr("stroke-width", 0.1)
+                            .attr("d", linkPath);
+                        if (isAnimate)
+                            path.attr("opacity", 0)
+                                .transition().duration(graphicopt.animationTime)
+                                .attr("opacity", 1);
+                        path.each(function(d){d.dom=d3.select(this)});
+                        e.append("title");
+                        return e
+                    },update => {
+                        // gradient
+                        const gradient = update.select("linearGradient")
+                            .attr("id", d => d._id)
+                            .attr("gradientUnits", "userSpaceOnUse");
+                        gradient
+                            .attr("x1", d => d.source.x1)
+                            .attr("x2", d => d.target.x0);
 
+                        gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
+                            .join('stop')
+                            .attr("offset", d=>`${d[0]}%`)
+                            .attr("stop-color", d => d[1]);
+                        // gradient ---end
+                        const path = update.select('path').attr("fill", d => `url(#${d._id})`)
+                            .attr("stroke", d => `url(#${d._id})`)
+                            .attr("stroke-width", 0.1);
+                        if (isAnimate)
+                            path
+                                .transition().duration(graphicopt.animationTime)
+                                .attr("d", linkPath);
+                        else
+                            path.attr("d", linkPath);
+                        return update
+                    },exit=>{
+                        return exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime):exit).attr('opacity',0).remove())
+                    }
+                ).on("mouseover", function(d){mouseover.bind(this)(d)})
+                .on("mouseout", function(d){mouseout.bind(this)(d)})
+                .on("click", function(d){master.click.forEach(f=>f(d));});
+            link_p.each(function(d){
+                d.node = d3.select(this);
+            })
+            link_p.each(function(d){
+                const nodematch = {};
+                const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+                match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+                d.relatedNode = match
+                    .map(l=>l.node);
+                d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
+            });
+            link_p.select('path')
+                .each(function(d){d.dom=d3.select(this)});
+            // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+            // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
+            link_p.on('mouseover',function(d){
+                debugger
+                tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
+<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+            }).on('mouseleave',function(d){
+                tooltip.hide();
+            })
+            g.select('.background').select('.drawArea').attr('clip-path',null)
+            g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
+            debugger
+            onFinishDraw.forEach(d=>d());}
+        function compressName(arr){
+            let limit = 5;
+            const arrn = arr.map(e=>e.replace('10.101.', ''));
+            return (arrn.length>limit?[...arrn.slice(0,limit),'+ '+(arrn.length-limit)+'nodes']:arrn).join(', ')
+        }
         function horizontalSource(d) {
             return [d.source.x1, d.y0];
         }
@@ -353,14 +456,8 @@ let Sankey = function(){
             L ${target[0]} ${target[1]+thick} C ${target[0]-width} ${target[1]+thick}, ${source[0]+width} ${source[1]+thick}, ${source[0]} ${source[1]+thick} Z`;
         }
 
-        g.select('.background').select('.drawArea').attr('clip-path',null)
-        g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x))
-        onFinishDraw.forEach(d=>d());
-
     };
-    // let getRenderFunc = function(d){
-    //     return `M${d[0]} 0 L${d[1]} 0`;
-    // };
+
     let getRenderFunc = function(d){
         return `M${d[0][0]} ${d[0][1]} L${d[1][0]} ${d[1][1]}`;
     };
@@ -384,7 +481,7 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No user';
+        return (arr&&arr.length)?(arr.map(d=>d.key).join(',')):'No info';
     }
     master.freezeHandle = freezeHandle;
     master.freezeHandleTrigger = freezeHandleTrigger;
@@ -443,6 +540,9 @@ let Sankey = function(){
     master.data = function(_data) {
         return arguments.length?(data=_data,master):data;
     };
+    master.times = function(_data) {
+        return arguments.length?(times=_data,master):times;
+    };
     master.color = function(_data) {
         return arguments.length?(color=_data,master):color;
     };
@@ -477,6 +577,9 @@ let Sankey = function(){
     }
     master.getRenderFunc = function(_data) {
         return arguments.length?(getRenderFunc=_data,master):getRenderFunc;
+    };
+    master.graph = function() {
+        return {nodes,links:_links};
     };
     master.getDrawData = function(_data) {
         return arguments.length?(getDrawData=_data,master):getDrawData;

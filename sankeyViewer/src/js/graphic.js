@@ -40,7 +40,6 @@ function initdraw(){
         const val = $(this).val();
         subObject.sankeyOpt({nodeSort:val}).draw();
     })
-
     serviceControl();
     userPie.init();
     d3.select('#hideStable').on('change',function(){

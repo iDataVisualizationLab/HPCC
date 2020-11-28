@@ -167,34 +167,14 @@ function createdata(){
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
 }
-// function handleDataComputeByUser(computers,jobs){
-//     debugger
-//     let data = [];
-//     for (let comp in computers){
-//         let condition = false;
-//         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
-//         computers[comp].job_id.forEach((jIDs,i)=>{
-//             if (jIDs.length){
-//                 let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
-//                 if (jobArr.length){
-//                     let username = d3.nest().key(d=>d.user_name)
-//                         .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
-//                     username.total = d3.sum(username,e=>e.value)
-//                     item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
-//                     condition = true;
-//                 }else
-//                     item.values.push(null);
-//             }else
-//                 item.values.push(null);
-//             item[Layout.timespan[i]] = item.values[i];
-//         });
-//         if (condition)
-//             data.push(item);
-//     }
-//     data.sort((a,b)=>+a.range[0]-b.range[0])
-//     return data;
-// }
-function handleDataComputeByUser(computers,jobs){
+let handleDataComputeByUser = function({computers,jobs}){
+    if (handleDataComputeByUser.mode==='core')
+        return handleDataComputeByUser_core(computers,jobs);
+    else
+        return handleDataComputeByUser_compute(computers,jobs);
+};
+handleDataComputeByUser.mode = 'core';
+function handleDataComputeByUser_core(computers,jobs){
     debugger
     let data = [];
     for (let comp in computers){
@@ -209,6 +189,31 @@ function handleDataComputeByUser(computers,jobs){
                     username.total = d3.sum(username,e=>e.value)
                     item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
                     condition = true;
+                }else
+                    item.values.push(null);
+            }else
+                item.values.push(null);
+            item[Layout.timespan[i]] = item.values[i];
+        });
+        if (condition)
+            data.push(item);
+    }
+    data.sort((a,b)=>+a.range[0]-b.range[0])
+    return data;
+}
+function handleDataComputeByUser_compute(computers,jobs){
+    let data = [];
+    for (let comp in computers){
+        let condition = false;
+        let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        computers[comp].job_id.forEach((jIDs,i)=>{
+            if (jIDs.length){
+                let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
+                if (jobArr.length) {
+                    let username = d3.nest().key(d => d.job_name)
+                        .rollup(d => d3.sum(d, e => e.node_list_obj[comp])).entries(jobArr);
+                    username.total = 1;
+                    item.values.push(username.sort((a, b) => d3.ascending(a.key, b.key)));
                 }else
                     item.values.push(null);
             }else
@@ -280,6 +285,7 @@ function handleRankingData(data){
     Layout.ranking = ranking;
     Layout.timespan = sampleS.timespan;
 
-    Layout.userTimeline = handleDataComputeByUser(computers,jobs,Layout.timespan);
+    handleDataComputeByUser.data = {computers,jobs};
+    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
     console.timeEnd('handleRankingData');
 }
