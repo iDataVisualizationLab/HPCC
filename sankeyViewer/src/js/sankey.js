@@ -203,7 +203,8 @@ let Sankey = function(){
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
                             names,
                             arr,
-                            value
+                            value,
+                            _id: 'link_'+key.replace(/\.|\[|\]| |"|\\|:|-|,/g,'')
                         };
                         if (getUserName(d[a])!==getUserName(d[b])){
                             nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
@@ -254,7 +255,7 @@ let Sankey = function(){
             return Object.assign({}, d);
         });
 
-        // renderSankey()
+        renderSankey()
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-12))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
@@ -302,9 +303,6 @@ let Sankey = function(){
                 links: graph.links.map(d => Object.assign({}, d))
             });
             graph_ = {nodes, links};
-            links.forEach((d,i)=>{
-                d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
-            });
             let isAnimate = true;
             if (links.length>400)
                 isAnimate = false;
@@ -363,7 +361,7 @@ let Sankey = function(){
                             .attr("x1", d => d.source.x1)
                             .attr("x2", d => d.target.x0);
                         gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
-                            .join('stop')
+                            .enter().append('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
                         // gradient ---end
@@ -390,7 +388,6 @@ let Sankey = function(){
                             .attr("x2", d => d.target.x0);
 
                         gradient.selectAll("stop").data(d=>[[0,getColorScale(d.source)],[100,getColorScale(d.target)]])
-                            .join('stop')
                             .attr("offset", d=>`${d[0]}%`)
                             .attr("stop-color", d => d[1]);
                         // gradient ---end
