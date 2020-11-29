@@ -246,33 +246,33 @@ function handleRankingData(data){
     Layout.usersStatic = users;
     let hosts = d3.keys(sampleS);
     hosts.shift();
-    let ranking = {byComputer:{},byMetric:{},byUser:{}};
-    d3.keys(users).forEach(u=>{ranking.byUser[u]={};
-        serviceFullList.forEach(s=>ranking.byUser[u][s.text]=[])
-    });
-    hosts.forEach(h=>ranking.byComputer[h]={});
-    sampleS.timespan.forEach((t,ti)=>{
-        serviceFullList.forEach(ser=>{
-            if (!ranking.byMetric[ser.text])
-                ranking.byMetric[ser.text]=[];
-            ranking.byMetric[ser.text][ti]={};
-            let sorteddata = hosts.map(h=>{
-                if(!ranking.byComputer[h][ser.text])
-                    ranking.byComputer[h][ser.text] = [];
-                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
-            }).sort((a,b)=>-b.value+a.value);
-            sorteddata.forEach((d,i)=>{
-                ranking.byMetric[ser.text][ti][d.key] = d.value;
-                ranking.byComputer[d.key][ser.text][ti] = d.value;
-                d.user.forEach(u=>{
-                    if (!ranking.byUser[u][ser.text][d.key])
-                        ranking.byUser[u][ser.text][d.key] = [];
-                    ranking.byUser[u][ser.text][d.key][ti]=d.value;
-                });
-            });
-        });
-    });
-    Layout.ranking = ranking;
+    // let ranking = {byComputer:{},byMetric:{},byUser:{}};
+    // d3.keys(users).forEach(u=>{ranking.byUser[u]={};
+    //     serviceFullList.forEach(s=>ranking.byUser[u][s.text]=[])
+    // });
+    // hosts.forEach(h=>ranking.byComputer[h]={});
+    // sampleS.timespan.forEach((t,ti)=>{
+    //     serviceFullList.forEach(ser=>{
+    //         if (!ranking.byMetric[ser.text])
+    //             ranking.byMetric[ser.text]=[];
+    //         ranking.byMetric[ser.text][ti]={};
+    //         let sorteddata = hosts.map(h=>{
+    //             if(!ranking.byComputer[h][ser.text])
+    //                 ranking.byComputer[h][ser.text] = [];
+    //             return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
+    //         }).sort((a,b)=>-b.value+a.value);
+    //         sorteddata.forEach((d,i)=>{
+    //             ranking.byMetric[ser.text][ti][d.key] = d.value;
+    //             ranking.byComputer[d.key][ser.text][ti] = d.value;
+    //             d.user.forEach(u=>{
+    //                 if (!ranking.byUser[u][ser.text][d.key])
+    //                     ranking.byUser[u][ser.text][d.key] = [];
+    //                 ranking.byUser[u][ser.text][d.key][ti]=d.value;
+    //             });
+    //         });
+    //     });
+    // });
+    // Layout.ranking = ranking;
     Layout.timespan = sampleS.timespan;
 
     handleDataComputeByUser.data = {computers,jobs};

@@ -36,7 +36,7 @@ let Sankey = function(){
 
     let maindiv='#ganttLayout';
     let isFreeze= false;
-    let data=[],times=[],nodes=[],_links=[],main_svg,g,r=0;
+    let data=[],times=[],nodes=[],_links=[],graph_={},main_svg,g,r=0;
     let onFinishDraw = [];
     let onLoadingFunc = ()=>{};
     // used to assign nodes color by group
@@ -238,7 +238,7 @@ let Sankey = function(){
             }
             return {nodes, links};
         })();
-        debugger
+
         const nodeObj = {};
         nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
         nodes.forEach(d=>d.color=getColorScale(d))
@@ -253,7 +253,7 @@ let Sankey = function(){
             }
             return Object.assign({}, d);
         });
-        debugger
+
         // renderSankey()
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-12))
@@ -301,6 +301,7 @@ let Sankey = function(){
                 nodes: graph.nodes.map(d => Object.assign({}, d)),
                 links: graph.links.map(d => Object.assign({}, d))
             });
+            graph_ = {nodes, links};
             links.forEach((d,i)=>{
                 d._id = 'link_'+JSON.stringify(d.names).replace(/\.|\[|\]| |"|\\|:|-|,/g,'');
             });
@@ -412,14 +413,14 @@ let Sankey = function(){
             link_p.each(function(d){
                 d.node = d3.select(this);
             })
-            link_p.each(function(d){
-                const nodematch = {};
-                const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
-                match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-                d.relatedNode = match
-                    .map(l=>l.node);
-                d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
-            });
+            // link_p.each(function(d){
+            //     const nodematch = {};
+            //     const match = links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+            //     match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+            //     d.relatedNode = match
+            //         .map(l=>l.node);
+            //     d3.entries(nodematch).forEach(e=>d.relatedNode.push(e.value));
+            // });
             link_p.select('path')
                 .each(function(d){d.dom=d3.select(this)});
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
@@ -589,6 +590,13 @@ let Sankey = function(){
 
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
+            if (!d.relatedNode){
+                const nodematch = {};
+                const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+                match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+                d.relatedNode = match
+                    .map(l=>l.node);
+            }
             g.classed('onhighlight', true);
             d3.selectAll('.links .link').sort(function (a, b) {
                 return d.relatedLinks.indexOf(a.node);
