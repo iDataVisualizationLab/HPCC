@@ -255,7 +255,7 @@ let Sankey = function(){
             return Object.assign({}, d);
         });
 
-        renderSankey()
+        renderSankey();
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-12))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
@@ -324,6 +324,9 @@ let Sankey = function(){
                 .attr("y", d => (d.y1 + d.y0) / 2-d.y0)
                 .attr("dy", "0.35em")
                 .attr("text-anchor", "end")
+                .attr("paint-order", "stroke")
+                .attr("stroke", "white")
+                .attr("stroke-width", "3")
                 .attr("fill", d=>d.first?getColorScale(d):'none')
                 .attr('font-weight',d=>d.isShareUser?null:'bold')
                 .text(d => {
