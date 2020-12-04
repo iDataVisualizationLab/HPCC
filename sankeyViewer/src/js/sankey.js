@@ -125,7 +125,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan.slice(0,39);
+        let keys = Layout.timespan;
         times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
@@ -148,7 +148,6 @@ let Sankey = function(){
                         // if (text==='13,25,3')
                         //     debugger
                         const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
-
                         if (!nodeLabel.has(text)) {
                             node.first = true;
                             node.childNodes = [];
@@ -159,18 +158,25 @@ let Sankey = function(){
                             node.maxval = 0;
                             node.drawData=[];
                             getColorScale(node);
+
+                            nodes.push(node);
+                            nodeByKey.set(key, node);
+                            indexByKey.set(key, index);
+                            nodeList[text].push(node);
                         }else {
                             node.isShareUser = (d[k]&&d[k].length>1);
                             node.parentNode = nodeLabel.get(text).id;
                             getColorScale(node);
+                            nodes.push(node);
+                            if (nodeByKey.has(key)) continue;
+                            nodeByKey.set(key, node);
+                            indexByKey.set(key, index);
+                            nodeList[text].push(node);
                         }
-                        nodes.push(node);
-                        nodeByKey.set(key, node);
-                        indexByKey.set(key, index);
-                        nodeList[text].push(node);
                     }
                 }
             });
+
             // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -187,18 +193,13 @@ let Sankey = function(){
                         const value = d[a].total;
                         const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
-                        const sourceNode = nodeByKey.get(JSON.stringify([a, getUserName(d[a])]));
-                        const targetNode = nodeByKey.get(JSON.stringify([b, getUserName(d[b])]));
+
                         if (link) {
-                            console.log(link.value,value)
                             link.value += value;
-                            link._sourceArr.push(d[a])
                             d[a].forEach((n,i)=>{
                                 link._source[i].value+=n.value;
                                 link._source.total+=n.value;
                             });
-                            if (link._source.total!==link.value)
-                                debugger
                             d[b].forEach((n,i)=>{
                                 link._target[i].value+=n.value;
                                 link._target.total+=n.value;
@@ -215,15 +216,14 @@ let Sankey = function(){
                             }
                             continue;
                         }
-                        const _source = JSON.parse(JSON.stringify(sourceNode.element));
-                        _source.total=sourceNode.element.total;
-                        const _target = JSON.parse(JSON.stringify(targetNode.element));
-                        _target.total=targetNode.element.total;
+                        const _source = JSON.parse(JSON.stringify(d[a]));
+                        _source.total=d[a].total;
+                        const _target = JSON.parse(JSON.stringify(d[b]));
+                        _target.total=d[b].total;
 
                         link = {
                             source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
                             _source,
-                            _sourceArr:[d[a]],
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
                             _target,
                             names,
@@ -232,8 +232,8 @@ let Sankey = function(){
                             _id: 'link_'+key.replace(/\.|\[|\]| |"|\\|:|-|,/g,'')
                         };
                         if (getUserName(d[a])!==getUserName(d[b])){
-                            sourceNode.relatedLinks.push(link);
-                            targetNode.relatedLinks.push(link);
+                            nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
+                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
                         }else{
                             link.isSameNode = true;
                         }
