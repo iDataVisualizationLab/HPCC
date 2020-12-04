@@ -147,7 +147,7 @@ let Sankey = function(){
                             continue // return
                         // if (text==='13,25,3')
                         //     debugger
-                        const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
+                        const node = {name: text,time:k,layer:ki,_key:key,relatedLinks:[],element:d[k],id:++index};
                         if (!nodeLabel.has(text)) {
                             node.first = true;
                             node.childNodes = [];
@@ -242,6 +242,31 @@ let Sankey = function(){
                     }
                 }
             }
+            if (graphicopt.showOverLimitUser){
+                let keepNodes = {};
+                const listUser = {};
+                let nodeObj = {};
+                nodes.forEach(d=>{nodeObj[d.id] = d;});
+                links = links.filter(l=>{
+                    if (((l._source.total>l.arr.length*36) || (l._target.total>l.arr.length*36))){
+                        keepNodes[nodeObj[l.source].name]=true;
+                        keepNodes[nodeObj[l.target].name]=true;
+                        return true;
+                    }
+                    l.hide = true;
+                    return false;
+                });
+                nodes = nodes.filter((n,index)=>{
+                    if (keepNodes[n.name])
+                        return true;
+                    else{
+                        delete nodeObj[n.id];
+                        // listUser[n.name] = n;
+                        return false;
+                    }
+                });
+                links = links.filter(l=>nodeObj[l.source]&& nodeObj[l.target] && nodeObj[nodeObj[l.source].parentNode] && nodeObj[nodeObj[l.target].parentNode] )
+            }
             if (graphicopt.hideStable){
                 let removeNodes = {};
                 const listUser = {};
@@ -268,7 +293,7 @@ let Sankey = function(){
         const nodeObj = {};
         nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
         nodes.forEach(d=>d.color=getColorScale(d))
-        _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
+        _links = graph.links.filter(l=>!l.isSameNode && nodeObj[l.source]&& nodeObj[l.target]).map(d =>{
             if (nodeObj[d.source].parentNode!==undefined){
                 nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
                 nodes.push(nodeObj[d.source]);
@@ -319,6 +344,8 @@ let Sankey = function(){
             })
 
         function renderSankey(){
+            let nodeObj = {};
+            graph.nodes.forEach(d=>{nodeObj[d.id] = d;});
             sankey.nodeId(function(d){return d.id})
                 .nodeSort(nodeSort)
                 // .linkSort(function(a,b){return ((a.source._forcey+a.target._forcey)-(b.source._forcey+b.target._forcey))})
@@ -367,7 +394,7 @@ let Sankey = function(){
                 if (l.isSameNode){
                     let parentNode = l.source;
                     if (l.source.parentNode!==undefined){
-                        parentNode = graph.nodes[l.source.parentNode];
+                        parentNode = nodeObj[l.source.parentNode];
                     }
                     if (parentNode.drawData.length===0 || _.last(parentNode.drawData)[0]!==l.source.time)
                         parentNode.drawData.push([l.source.time,l.value]);
@@ -381,7 +408,9 @@ let Sankey = function(){
                 .data(links,(d,i)=>d._id)
                 .join(
                     enter => {
-                        e=enter.append("g").attr('class',d=>'outer_node element '+d._class).attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        e=enter.append("g").attr('class',d=>'outer_node element '+d._class)
+                            .classed('hide',d=>d.hide)
+                            .attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                         // gradient
                         const gradient = e.append("linearGradient")
                             .attr("id", d => d._id)
@@ -407,7 +436,7 @@ let Sankey = function(){
                         e.append("title");
                         return e
                     },update => {
-                        update.attr('class',d=>'outer_node element '+d._class);
+                        update.attr('class',d=>'outer_node element '+d._class).classed('hide',d=>d.hide);
                         // gradient
                         const gradient = update.select("linearGradient")
                             .attr("id", d => d._id)

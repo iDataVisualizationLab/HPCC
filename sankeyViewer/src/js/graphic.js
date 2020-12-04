@@ -43,11 +43,18 @@ function initdraw(){
     serviceControl();
     userPie.init();
     d3.select('#hideStable').on('change',function(){
+        updateProcess({percentage:5,text:'Recalculate Sankey...'})
         subObject.sankeyOpt({hideStable:this.checked}).draw();
     });
 
     d3.select('#showShareUser').on('change',function(){
+        updateProcess({percentage:5,text:'Recalculate Sankey...'})
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
+    });
+
+    d3.select('#showOverLimitUser').on('change',function(){
+        updateProcess({percentage:5,text:'Recalculate Sankey...'})
+        subObject.sankeyOpt({showOverLimitUser:this.checked}).draw();
     });
 
     d3.select('#flowType').on('change',function(){
