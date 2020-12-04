@@ -351,12 +351,11 @@ let Sankey = function(){
             });
             let link_p = link_g
                 .attr("fill", "none")
-                .attr("opacity", 0.5)
                 .selectAll("g.outer_node")
                 .data(links,(d,i)=>d._id)
                 .join(
                     enter => {
-                        e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        e=enter.append("g").attr('class','outer_node element').attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                         // gradient
                         const gradient = e.append("linearGradient")
                             .attr("id", d => d._id)
@@ -615,9 +614,9 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
-        tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+//         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
+// <tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+// <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
     master.highlight = function(listKey){
         let listobj = {};

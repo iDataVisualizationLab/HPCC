@@ -8,6 +8,6 @@
     pointer-events: all
 }
 .onhighlight2 .outer_node, .onhighlight2.onhighlight .outer_node.highlight, .onhighlight .outer_node{
-    opacity: 0.1;
+    opacity: 0.5;
     pointer-events: none;
 }
