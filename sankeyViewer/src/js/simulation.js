@@ -3,7 +3,7 @@ class Simulation {
     timer;
     interval=1000;
     index=0;
-    #currentTime;
+    currentTime;
     isRealTime; userDict={};
     query;
     callbackStop = ()=>{};
@@ -70,7 +70,7 @@ class Simulation {
                 updatePromise = updatePromise.then(listener);
             });
             this.onUpdateTime.forEach(function (listener) {
-                updatePromise = updatePromise.then(() => listener(self.#currentTime));
+                updatePromise = updatePromise.then(() => listener(self.currentTime));
             });
         }else{
             this.stop()
@@ -120,7 +120,7 @@ class Simulation {
                         })
                     });
                     const time_stamp = [currentTime];
-                    self.#currentTime = currentTime;
+                    self.currentTime = currentTime;
                     self.index ++;
                     resolve({jobs_info, nodes_info, time_stamp,currentTime})
 
@@ -156,7 +156,7 @@ class Simulation {
                         data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
             })
             data.currentTime = _.last(data.time_stamp);
-            self.#currentTime = data.currentTime;
+            self.currentTime = data.currentTime;
             self.data = data;
             console.timeEnd('request time: ')
             return data;

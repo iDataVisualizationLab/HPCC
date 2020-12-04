@@ -348,6 +348,7 @@ let Sankey = function(){
                         parentNode.drawData.push([l.source.time,l.value]);
                     parentNode.drawData.push([l.target.time,l.value]);
                 }
+                l._class = str2class(l.source.name)
             });
             let link_p = link_g
                 .attr("fill", "none")
@@ -355,7 +356,7 @@ let Sankey = function(){
                 .data(links,(d,i)=>d._id)
                 .join(
                     enter => {
-                        e=enter.append("g").attr('class','outer_node element').attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        e=enter.append("g").attr('class',d=>'outer_node element '+d._class).attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                         // gradient
                         const gradient = e.append("linearGradient")
                             .attr("id", d => d._id)
@@ -381,6 +382,7 @@ let Sankey = function(){
                         e.append("title");
                         return e
                     },update => {
+                        update.attr('class',d=>'outer_node element '+d._class);
                         // gradient
                         const gradient = update.select("linearGradient")
                             .attr("id", d => d._id)
@@ -446,7 +448,9 @@ let Sankey = function(){
         }
 
     };
-
+    function str2class(str){
+        return 'l'+str.replace(/ |,/g,'_');
+    }
     let getRenderFunc = function(d){
         return `M${d[0][0]} ${d[0][1]} L${d[1][0]} ${d[1][1]}`;
     };
@@ -593,18 +597,13 @@ let Sankey = function(){
                 const nodematch = {};
                 const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
                 match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-                d.relatedNode = match
-                    .map(l=>l.node);
+                // d.relatedNode = match
+                //     .map(l=>l.node);
+                d.relatedNode = match.map(l=>l.source.node);
             }
-            g.classed('onhighlight', true);
-            d3.selectAll('.links .link').sort(function (a, b) {
-                return d.relatedLinks.indexOf(a.node);
-            });
-            d3.select(this).classed('highlight', true);
-            if (d.node) {
-                d.node.classed('highlight', true);
-            }
-            d.relatedNode.forEach(e=>e.classed('highlight', true))
+
+            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
+            g.selectAll('.'+d._class).style('opacity',1);
             master.mouseover.forEach(f=>f(d));
         }else{
             g.classed('onhighlight2', true);
@@ -618,26 +617,16 @@ let Sankey = function(){
 // <tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
 // <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
+    let filterKey=[];
     master.highlight = function(listKey){
+        filterKey = listKey
         let listobj = {};
         listKey.forEach(k=>listobj[k]=true);
-        g.classed('onhighlight', true);
-        g.selectAll('.element').filter(d=>{
-            let item = d;
-            if (d.source)
-                item = d.source;
-            return item.element.find(f=>listobj[f.key])
-        })
-            .classed('highlight', true)
-            .each(d=>{
-                (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});;
+
+        g.selectAll('.'+filterKey.map(k=>str2class(getUserName([{key:k}]))).join(',.')).style('opacity',1);
     };
     master.releasehighlight = function(){
-        g.classed('onhighlight', false);
-        g.selectAll('.element.highlight')
-            .classed('highlight', false);
-        g.selectAll('.vticks.highlight')
-            .classed('highlight', false);
+        g.selectAll('.'+filterKey.map(k=>str2class(getUserName([{key:k}]))).join(',.')).style('opacity',null);
     };
     master.highlight2 = function(listKey){
         g.classed('onhighlight2', true);
@@ -652,15 +641,8 @@ let Sankey = function(){
     function mouseout(d){
         if(!isFreeze)
         {
-            g.classed('onhighlight',false);
-            d3.select(this).classed('highlight', false);
-            if(d.node){
-                d.node.classed('highlight', false).classed('highlightSummary', false);
-            }
-            d.relatedNode.forEach(e=>e.classed('highlight', false).classed('highlightSummary', false));
-            g.selectAll('path.trajectory').remove();
-            g.select('.TrajectoryLegend').remove();
-            master.current_trajectory_data = undefined;
+            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', false)});
+            g.selectAll('.'+d._class).style('opacity',null);
             master.mouseout.forEach(f=>f(d));
         }else{
             g.classed('onhighlight2', false);

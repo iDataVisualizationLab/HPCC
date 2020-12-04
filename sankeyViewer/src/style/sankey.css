@@ -10,3 +10,7 @@
 .onhighlight2 .outer_node, .onhighlight2.onhighlight .outer_node.highlight, .onhighlight .outer_node{
     pointer-events: none;
 }
+
+.highlightText {
+    font-size:20px
+}

@@ -141,7 +141,7 @@
         AOS.refresh();
     })
     function str2class(str){
-        return str.replace(/ /g,'_');
+        return str.replace(/ |,/g,'_');
     }
 
 
