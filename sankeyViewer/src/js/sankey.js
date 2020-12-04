@@ -146,6 +146,7 @@ let Sankey = function(){
                         if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
                             continue // return
                         const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
+
                         if (!nodeLabel.has(text)) {
                             node.first = true;
                             node.childNodes = [];
@@ -184,8 +185,18 @@ let Sankey = function(){
                         const value = d[a].total;
                         const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
+                        const sourceNode = nodeByKey.get(JSON.stringify([a, getUserName(d[a])]));
+                        const targetNode = nodeByKey.get(JSON.stringify([b, getUserName(d[b])]));
                         if (link) {
                             link.value += value;
+                            sourceNode.element.forEach((n,i)=>{
+                                link._source[i].value+=n.value;
+                                link._source.total+=n.value;
+                            });
+                            targetNode.element.forEach((n,i)=>{
+                                link._target[i].value+=n.value;
+                                link._target.total+=n.value;
+                            })
                             // link.arr = [...(link.arr??[]),...arr];
                             link.arr.push(arr[0]);
                             if (nodes[link.source].maxval<link.value) {
@@ -198,17 +209,23 @@ let Sankey = function(){
                             }
                             continue;
                         }
+                        const _source = JSON.parse(JSON.stringify(sourceNode.element));
+                        _source.total=sourceNode.element.total;
+                        const _target = JSON.parse(JSON.stringify(targetNode.element));
+                        _target.total=targetNode.element.total;
                         link = {
                             source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
+                            _source,
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
+                            _target,
                             names,
                             arr,
                             value,
                             _id: 'link_'+key.replace(/\.|\[|\]| |"|\\|:|-|,/g,'')
                         };
                         if (getUserName(d[a])!==getUserName(d[b])){
-                            nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
-                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
+                            sourceNode.relatedLinks.push(link);
+                            targetNode.relatedLinks.push(link);
                         }else{
                             link.isSameNode = true;
                         }
@@ -613,9 +630,9 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
-//         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-// <tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-// <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+        tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
+<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
     let filterKey=[];
     master.highlight = function(listKey){
