@@ -125,7 +125,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,10);
+        let keys = Layout.timespan.slice(0,39);
         times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
@@ -145,6 +145,8 @@ let Sankey = function(){
                         const key = JSON.stringify([k, text]);
                         if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
                             continue // return
+                        // if (text==='13,25,3')
+                        //     debugger
                         const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
 
                         if (!nodeLabel.has(text)) {
@@ -188,12 +190,16 @@ let Sankey = function(){
                         const sourceNode = nodeByKey.get(JSON.stringify([a, getUserName(d[a])]));
                         const targetNode = nodeByKey.get(JSON.stringify([b, getUserName(d[b])]));
                         if (link) {
+                            console.log(link.value,value)
                             link.value += value;
-                            sourceNode.element.forEach((n,i)=>{
+                            link._sourceArr.push(d[a])
+                            d[a].forEach((n,i)=>{
                                 link._source[i].value+=n.value;
                                 link._source.total+=n.value;
                             });
-                            targetNode.element.forEach((n,i)=>{
+                            if (link._source.total!==link.value)
+                                debugger
+                            d[b].forEach((n,i)=>{
                                 link._target[i].value+=n.value;
                                 link._target.total+=n.value;
                             })
@@ -213,9 +219,11 @@ let Sankey = function(){
                         _source.total=sourceNode.element.total;
                         const _target = JSON.parse(JSON.stringify(targetNode.element));
                         _target.total=targetNode.element.total;
+
                         link = {
                             source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
                             _source,
+                            _sourceArr:[d[a]],
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
                             _target,
                             names,

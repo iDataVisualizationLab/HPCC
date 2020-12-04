@@ -84,7 +84,7 @@ let TimeArc = function(){
         const nodes = data.nodes;
         const links = data.links;
         const pNodes = nodes.filter(d=>d.first);
-        debugger
+        
 
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')
             .select('.timeStick').attr('y2',graphicopt.heightG())
@@ -226,7 +226,7 @@ let TimeArc = function(){
                 .style('stroke-width',1)
                 .attr("d", function (d) {
                     if (d.name==='User 14,32')
-                        debugger
+                        
                     if (d.value[0])
                         return area([d.value[0],...d.value,d.value[d.value.length-1]]);
                 });
@@ -240,7 +240,7 @@ let TimeArc = function(){
         }
 
         function linkPath(d) {
-            debugger
+            
             let source = horizontalSource(d);
             let target = horizontalTarget(d);
             if (source[0]>target[0]){
