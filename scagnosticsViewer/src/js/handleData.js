@@ -67,6 +67,14 @@ function data2scag(sampleS,computers,scagdata){
                         out.data = d.name;
                         return out;
                     });
+                    if (!scagOpt.isNormalized){
+                        const x = d3.scaleLinear().domain(d3.extent(points,d=>d[0]));
+                        const y = d3.scaleLinear().domain(d3.extent(points,d=>d[1]));
+                        points.forEach(p=>{
+                            p[0] = x(p[0]);
+                            p[1] = y(p[1]);
+                        });
+                    }
                     scagdata[serviceFullList[i].text+"||"+serviceFullList[j].text].metrics.normalizedPoints = points;
                 }
             }

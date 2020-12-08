@@ -7,6 +7,7 @@ class Simulation {
     #currentTime;
     isRealTime; userDict={};
     query;
+    _url;
     callbackStop = ()=>{};
     onFinishQuery=[];
     onDataChange=[];
@@ -14,6 +15,7 @@ class Simulation {
     onScagChange=[];
     onStartQuery=()=>{};
     constructor(url,isOtherType) {
+        this._url = url;
         this.isRealTime = !url;
         let self = this;
         if (isOtherType) {
@@ -70,6 +72,18 @@ class Simulation {
                 }));
 
         }
+    }
+    updateScag(subfix){
+        let self = this;
+        return d3.json(this._url.replace('.csv','_scag'+subfix+'.json')).then(d=>this.scag=d)
+            .catch(err=>{console.log('not found scag preset!');
+            this.scag = calculateScag(self);
+            }).then(()=>{
+                this.onScagChange.forEach(function(listener) {
+                    listener(self.scag);
+                });
+                this.request();
+            })
     }
     load_csv(url){
         return d3.csv(url).then((_data)=>{

@@ -132,9 +132,9 @@ function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     scaterMatix = d3.scatterMatrix().canvasContainer($('d3fc-canvas')[0]).init();
 
-    d3.select('#scalePerStep').on('change',function(){
-       graphicopt.autoscale = this.checked;
-        currentDraw(serviceSelected);
+    d3.select('#scalePerStep').on('change',function(){scagOpt.isNormalized = !this.checked;
+        request.updateScag(scagOpt.isNormalized?'':'_normalize');
+        // currentDraw(serviceSelected);
     });
     // d3.select('#sort_apply').on('click',function(){
     //     sortData();
@@ -279,24 +279,6 @@ function draw(computers,jobs,users,sampleS,currentTime,serviceSelected){
     scaterMatix.update_size(graphicopt);
     let x_inside = d3.scaleLinear().range([5,X.bandwidth()-5]);
     let y_inside = d3.scaleLinear().range([Y.bandwidth()-5,5]);
-    if (graphicopt.autoscale){
-        debugger
-        let range = {x:[Infinity,-Infinity],y:[Infinity,-Infinity]};
-        datain.forEach(d=>{
-            d.value.metrics.normalizedPoints.forEach(e=>{
-                if (e[0]<range.x[0])
-                    range.x[0]=e[0];
-                if (e[0]>range.x[1])
-                    range.x[1]=e[0];
-                if (e[1]<range.y[0])
-                    range.y[0]=e[1];
-                if (e[1]>range.y[1])
-                    range.y[1]=e[1];
-            })
-        })
-        x_inside.domain(range.x);
-        y_inside.domain(range.y);
-    }
     let onode = onodesg.selectAll(".outer_node")
         .data(datain,d=>d.key);
     onode.call(updateOnode);
