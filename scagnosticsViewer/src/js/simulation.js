@@ -13,28 +13,28 @@ class Simulation {
     onUpdateTime=[];
     onScagChange=[];
     onStartQuery=()=>{};
-    constructor(url) {
+    constructor(url,isOtherType) {
         this.isRealTime = !url;
         let self = this;
-        if (!this.isRealTime) {
-            let updatePromise=d3.json(url.replace('.json','_scag.json')).then(d=>this.scag=d)
+        if (isOtherType) {
+            let updatePromise=d3.json(url.replace('.csv','_scag.json')).then(d=>this.scag=d)
                 .catch(err=>console.log('not found scag preset!')).then(()=>{
                     this.onScagChange.forEach(function(listener) {
                         listener(self.scag);
                     });
                 })
-                .then(()=>d3.json(url).then((data) => {
-                data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
-                        this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
-                    data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
-                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
-                    if(data.jobs_info[jID].start_time>9999999999999)
-                    {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
-                        data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
-                        if (data.jobs_info[jID].finish_time)
-                            data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
-                })
+                .then(()=>this.load_csv(url).then((data) => {
+                data.time_stamp = data.time_stamp.map(d=>new Date(d));
+                // d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
+                //         this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
+                //     data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                //     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                //     if(data.jobs_info[jID].start_time>9999999999999)
+                //     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
+                //         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
+                //         if (data.jobs_info[jID].finish_time)
+                //             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+                // })
                 this.data = data;
                 this.onDataChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
@@ -42,7 +42,50 @@ class Simulation {
                 return d3.extent(data.time_stamp);
             }));
 
+        }else if (!this.isRealTime) {
+            let updatePromise=d3.json(url.replace('.json','_scag.json')).then(d=>this.scag=d)
+                .catch(err=>console.log('not found scag preset!')).then(()=>{
+                    this.onScagChange.forEach(function(listener) {
+                        listener(self.scag);
+                    });
+                })
+                .then(()=>d3.json(url).then((data) => {
+                    debugger
+                    data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
+                    // d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name])
+                    //         this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
+                    //     data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                    //     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                    //     if(data.jobs_info[jID].start_time>9999999999999)
+                    //     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
+                    //         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
+                    //         if (data.jobs_info[jID].finish_time)
+                    //             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+                    // })
+                    this.data = data;
+                    this.onDataChange.forEach(function(listener) {
+                        listener(d3.extent(data.time_stamp));
+                    });
+                    return d3.extent(data.time_stamp);
+                }));
+
         }
+    }
+    load_csv(url){
+        return d3.csv(url).then((_data)=>{
+            window.db = 'csv';
+            newdatatoFormat_noSuggestion(_data)
+            const data = {jobs_info: {},nodes_info: {},time_stamp:sampleS.timespan};
+            d3.keys(sampleS).filter(d=>d!=='timespan').forEach(k=>{
+                data.nodes_info[k] = sampleS[k];
+            });
+
+            alternative_service = serviceListattr.slice();
+            alternative_scale = alternative_service.map(()=>1);
+            serviceListattr.push('time')
+            debugger
+            return data;
+        })
     }
     request(timesexlapse,index){
         if(index!=undefined && this.data)

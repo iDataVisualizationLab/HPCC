@@ -1,7 +1,10 @@
-let histodram ={
-    resolution: 20,
-    outlierMultiply: 3,
+if (histodram) {
+    window.histodram = {
+        resolution: 20,
+        outlierMultiply: 3,
+    }
 }
+
 function millisecondsToStr (milliseconds) {
     // TIP: to find current time in milliseconds, use:
     // var  current_time_milliseconds = new Date().getTime();

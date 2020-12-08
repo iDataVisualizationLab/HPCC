@@ -1,0 +1,21 @@
+.progress-bar-wrapper{
+    position: relative;
+}
+.progress-bar-wrapper.disabled{
+    pointer-events: none;
+}
+.progress-bar-wrapper:hover .progress-bar-handle{
+    opacity: 0.8;
+}
+.progress-bar-handle {
+    position: absolute;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--primary);
+    border: 2px solid var(--secondary);
+    transform: translateX(-50%);
+    transition: left .6s ease;
+    opacity: 0;
+    cursor: col-resize;
+}

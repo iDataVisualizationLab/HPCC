@@ -1,0 +1,126 @@
+svg {
+    font-size: 12px;
+    fill: currentcolor;
+}
+.outer_node .compute {
+    /*fill: #f1faee;*/
+    stroke: #1d3557;
+    stroke-width: 0.1;
+    pointer-events: all;
+}
+rect.scatterplot {
+    rx:4;
+    paint-order: stroke;
+}
+.outer_node text.highlight2.hide{
+    display: block;
+}
+.onhighlight .outer_node.highlight.highlightSummary .scatterplot{
+    opacity: 0.5;
+}
+.onhighlight2 .outer_node .scatterplot.highlight2,
+.onhighlight2.onhighlight .outer_node .scatterplot.highlight.highlight2,
+.onhighlight .outer_node .scatterplot.highlight,
+.onhighlight .outer_node.highlight .scatterplot,
+.onhighlight .outer_node.highlight.highlightSummary .scatterplot.highlight
+{
+    opacity: 1;
+}
+.onhighlight .focus rect.scatterplot{
+    stroke: black;
+    stroke-width: 3px;
+}
+
+.onhighlight2 .outer_node .scatterplot, .onhighlight2.onhighlight .outer_node .scatterplot.highlight, .onhighlight .outer_node .scatterplot{
+    opacity: 0.4;
+}
+.onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {
+    opacity: 0;
+}
+.onhighlight2 g.links .link.highlight2,.onhighlight2.onhighlight g.links .link.highlight.highlight2,.onhighlight g.links .link.highlight {
+    opacity: 1;
+}
+
+g.links .link {
+    opacity: 0.95;
+    stroke-width:0.3;
+}
+
+text {
+    /*font: 10px sans-serif;*/
+    /*text-anchor: middle;*/
+    pointer-events: none;
+
+}
+
+.outer_node.highlightSummary .summary{
+    display: block;
+}
+.outer_node.highlightSummary text{
+    /*stroke:#e63946;*/
+    font-weight: bold;
+}
+
+.outer_node .circle.invalid{
+    fill: black;
+}
+.link {
+    fill: none;
+    /*stroke: #a8dadc;*/
+}
+
+.hide {
+    display: none;
+}
+
+#informationTable .detailComp {
+    width: 500px;
+}
+#informationTable  .collapHeader{
+    min-width: 12px!important;
+}
+#informationTable  .details-control span{
+    height: 2rem;
+    overflow-y: hidden;
+}
+#informationTable .morebtn{
+    font-size: 0.8rem;
+    background-color: #c0c0c0;
+    color: black;
+    padding: 1px;
+}
+
+#informationTable .morebtn[value='close']{
+    display: none;
+}
+#informationTable tr.shown .morebtn[value='close']{
+    display: block;
+}
+#informationTable tr.shown .morebtn[value='open']{
+    display: none;
+}
+table td.number{
+    text-align: right;
+}
+.d3-tip span {
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
+}
+.d3-tip {
+    box-shadow: 12px 12px 16px 0 rgba(0, 0, 0, 0.25),
+    -8px -8px 12px 0 rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+}
+#circularLayoutHolder select{
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.legendView input{
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+.timelineMarker .scatterplot{
+    stroke: var(--primary);
+    stroke-width: 3;
+}

@@ -3,7 +3,7 @@ serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPo
 var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]}]},{"text":"Memory_usage","id":1,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]}]},{"text":"Fans_speed","id":2,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]}]},{"text":"Power_consum","id":3,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]}];
 var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
 var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
-var alternative_scale = [1,0.5,1,0.5];
+var alternative_scale = [1,1,1,0.5];
 
 let colorScaleList = {
     n: 7,
@@ -69,8 +69,6 @@ function handleDataUrl(dataRaw) {
     dataRaw.time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
     // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
     // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
-    var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
-    var alternative_scale = [1,1,1,0.5];
 
     var sampleh = {};
     var ser = serviceListattr.slice();
@@ -94,6 +92,8 @@ function handleDataUrl(dataRaw) {
                     value.push((data[h.ip][sa][ti][ii]==='' || data[h.ip][sa][ti][ii]===undefined)?null:data[h.ip][sa][ti][ii]*scale)
                 }
                 let arrID = serviceListattr[si];
+                if (sampleh[h.name][arrID]===undefined)
+                    debugger
                 let currentIndex =  sampleh[h.name][arrID].length;
                 sampleh[h.name][arrID][ti] = value;
                 if (tsnedata[h.name][currentIndex]===undefined){

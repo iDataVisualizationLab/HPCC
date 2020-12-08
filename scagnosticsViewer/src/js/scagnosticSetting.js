@@ -24,7 +24,7 @@ function scag2string(scag){
     return _.clone(temp)
 }
 function calculateScag(self){
-    JSON.stringify(self.data.time_stamp.map((d,index)=>{
+    return self.data.time_stamp.map((d,index)=>{
         const currentTime = self.data.time_stamp[index];
 
 
@@ -45,5 +45,5 @@ function calculateScag(self){
         adjustScag(sampleS,computers);
         return _.mapObject(Layout.scag,function(val,key){
             return {dim: val.dim.slice(),metrics:scag2string(val.metrics)};})
-    }))
+    })
 }
