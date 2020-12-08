@@ -1,6 +1,7 @@
 // Ngan Nguyen -IDVL 8/18/2020
 d3.scatterMatrix = function(){
-    let master = {};
+    let master = {},
+    autoscale=false;
     let canvasContainer,canvas,worker;
     // function
     let onMessageCalback =()=>{};
@@ -33,8 +34,12 @@ d3.scatterMatrix = function(){
         worker.postMessage({ width, height, transform });
     };
     master.draw = function(data){
+        debugger
         worker.postMessage({data});
         canvasContainer.requestRedraw();
+    };
+    master.scaleStep = function(enable){
+        autoscale = enable;
     };
     master.canvasContainer = function(_){
         return arguments.length?(canvasContainer=_,master):canvasContainer;
