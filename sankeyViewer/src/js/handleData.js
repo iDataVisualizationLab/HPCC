@@ -221,11 +221,12 @@ function handleDataComputeByUser_compute(computers,jobs){
     let data = [];
     for (let comp in computers){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        debugger
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]);
                 let username = d3.nest().key(d=>d.user_name)
-                    .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
+                    .rollup(d=>1).entries(jobArr);
                 username.total = 1;
                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
             }else

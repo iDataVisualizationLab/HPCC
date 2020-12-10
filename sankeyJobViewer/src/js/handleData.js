@@ -211,7 +211,7 @@ function handleDataComputeByUser_compute(computers,jobs){
                 let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
                 if (jobArr.length) {
                     let username = d3.nest().key(d => d.job_name)
-                        .rollup(d => d3.sum(d, e => e.node_list_obj[comp])).entries(jobArr);
+                        .rollup(d => 1).entries(jobArr);
                     username.total = 1;
                     item.values.push(username.sort((a, b) => d3.ascending(a.key, b.key)));
                     condition = true;
