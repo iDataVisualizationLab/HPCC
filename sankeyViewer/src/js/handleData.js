@@ -209,7 +209,7 @@ function handleDataComputeByUser_compute(_data){
                 let username = d3.nest().key(d=>d.user_name)
                     .rollup(d=>1).entries(jobArr);
                 username.total = d3.sum(username,e=>e.value);
-                username.jobs = jobArr;
+                username.jobs = [jIDs,jobArr];
                 item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
             }else
                 item[Layout.timespan[i]] = null;
