@@ -182,33 +182,31 @@
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                        <label class="col-4" for="flowType">Visualizing: </label>
-                                        <select class="col-6" id="flowType">
+                                        <label class="col-5" for="flowType">Visualizing: </label>
+                                        <select class="col-7" id="flowType">
                                             <option value="core">#Cores</option>
                                             <option value="compute">#Nodes</option>
                                         </select>
-                                        <div class="col-2"></div>
-                                        <label class="col-4" for="userSort">Sort user node by: </label>
-                                        <select class="col-6" id="userSort">
+                                        <label class="col-5" for="userSort">Sort user node by: </label>
+                                        <select class="col-7" id="userSort">
                                             <option value="size">size</option>
                                             <option selected value="">None</option>
                                         </select>
-                                        <div class="col-2"></div>
-
-                                        <label class="col-4" for="hideStable">Hide stable users: </label>
-                                        <label class="col-8 left-align">
+                                        <br>
+                                        <label class="col-9" for="hideStable">Hide stable users: </label>
+                                        <label class="col-3 left-align">
                                             <input id="hideStable" type="checkbox" class="filled-in">
                                             <span ></span>
                                         </label>
 
-                                        <label class="col-4" for="showShareUser">Show shared users: </label>
-                                        <label class="col-8 left-align">
+                                        <label class="col-9" for="showShareUser">Show shared users: </label>
+                                        <label class="col-3 left-align">
                                             <input id="showShareUser" type="checkbox" class="filled-in">
                                             <span ></span>
                                         </label>
 
-                                        <label class="col-4" for="showOverLimitUser">Show overuse 36 cores per node: </label>
-                                        <label class="col-8 left-align">
+                                        <label class="col-9" for="showOverLimitUser">Show nodes used more than 32 CPU-core: </label>
+                                        <label class="col-3 left-align">
                                             <input id="showOverLimitUser" type="checkbox" class="filled-in">
                                             <span ></span>
                                         </label>
