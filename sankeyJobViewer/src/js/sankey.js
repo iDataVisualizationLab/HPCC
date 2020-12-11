@@ -125,7 +125,7 @@ let Sankey = function(){
         });
         let drawArea = g.select('.drawArea')//.attr('clip-path','url(#timeClip)');
         //
-        let keys = Layout.timespan//.slice(0,10);
+        let keys = Layout.timespan;
         times = keys;
         x = d3.scaleTime().domain([keys[0],_.last(keys)]).range([0,graphicopt.widthG()]);
         let width = x.range()[1]-x.range()[0];
@@ -145,7 +145,9 @@ let Sankey = function(){
                         const key = JSON.stringify([k, text]);
                         if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
                             continue // return
-                        const node = {name: text,time:k,layer:ki,relatedLinks:[],element:d[k],id:++index};
+                        // if (text==='13,25,3')
+                        //     debugger
+                        const node = {name: text,time:k,layer:ki,_key:key,relatedLinks:[],element:d[k],id:++index};
                         if (!nodeLabel.has(text)) {
                             node.first = true;
                             node.childNodes = [];
@@ -156,18 +158,25 @@ let Sankey = function(){
                             node.maxval = 0;
                             node.drawData=[];
                             getColorScale(node);
+
+                            nodes.push(node);
+                            nodeByKey.set(key, node);
+                            indexByKey.set(key, index);
+                            nodeList[text].push(node);
                         }else {
                             node.isShareUser = (d[k]&&d[k].length>1);
                             node.parentNode = nodeLabel.get(text).id;
                             getColorScale(node);
+                            nodes.push(node);
+                            if (nodeByKey.has(key)) continue;
+                            nodeByKey.set(key, node);
+                            indexByKey.set(key, index);
+                            nodeList[text].push(node);
                         }
-                        nodes.push(node);
-                        nodeByKey.set(key, node);
-                        indexByKey.set(key, index);
-                        nodeList[text].push(node);
                     }
                 }
             });
+
             // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -184,8 +193,17 @@ let Sankey = function(){
                         const value = d[a].total;
                         const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
+
                         if (link) {
                             link.value += value;
+                            d[a].forEach((n,i)=>{
+                                link._source[i].value+=n.value;
+                                link._source.total+=n.value;
+                            });
+                            d[b].forEach((n,i)=>{
+                                link._target[i].value+=n.value;
+                                link._target.total+=n.value;
+                            })
                             // link.arr = [...(link.arr??[]),...arr];
                             link.arr.push(arr[0]);
                             if (nodes[link.source].maxval<link.value) {
@@ -198,9 +216,16 @@ let Sankey = function(){
                             }
                             continue;
                         }
+                        const _source = JSON.parse(JSON.stringify(d[a]));
+                        _source.total=d[a].total;
+                        const _target = JSON.parse(JSON.stringify(d[b]));
+                        _target.total=d[b].total;
+
                         link = {
                             source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
+                            _source,
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
+                            _target,
                             names,
                             arr,
                             value,
@@ -216,6 +241,31 @@ let Sankey = function(){
                         linkByKey.set(key, link);
                     }
                 }
+            }
+            if (graphicopt.showOverLimitUser){
+                let keepNodes = {};
+                const listUser = {};
+                let nodeObj = {};
+                nodes.forEach(d=>{nodeObj[d.id] = d;});
+                links = links.filter(l=>{
+                    if (((l._source.total>l.arr.length*36) || (l._target.total>l.arr.length*36))){
+                        keepNodes[nodeObj[l.source].name]=true;
+                        keepNodes[nodeObj[l.target].name]=true;
+                        return true;
+                    }
+                    l.hide = true;
+                    return false;
+                });
+                nodes = nodes.filter((n,index)=>{
+                    if (keepNodes[n.name])
+                        return true;
+                    else{
+                        delete nodeObj[n.id];
+                        // listUser[n.name] = n;
+                        return false;
+                    }
+                });
+                links = links.filter(l=>nodeObj[l.source]&& nodeObj[l.target] && nodeObj[nodeObj[l.source].parentNode] && nodeObj[nodeObj[l.target].parentNode] )
             }
             if (graphicopt.hideStable){
                 let removeNodes = {};
@@ -243,7 +293,7 @@ let Sankey = function(){
         const nodeObj = {};
         nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
         nodes.forEach(d=>d.color=getColorScale(d))
-        _links = graph.links.filter(l=>!l.isSameNode).map(d =>{
+        _links = graph.links.filter(l=>!l.isSameNode && nodeObj[l.source]&& nodeObj[l.target]).map(d =>{
             if (nodeObj[d.source].parentNode!==undefined){
                 nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
                 nodes.push(nodeObj[d.source]);
@@ -294,6 +344,8 @@ let Sankey = function(){
             })
 
         function renderSankey(){
+            let nodeObj = {};
+            graph.nodes.forEach(d=>{nodeObj[d.id] = d;});
             sankey.nodeId(function(d){return d.id})
                 .nodeSort(nodeSort)
                 // .linkSort(function(a,b){return ((a.source._forcey+a.target._forcey)-(b.source._forcey+b.target._forcey))})
@@ -342,21 +394,23 @@ let Sankey = function(){
                 if (l.isSameNode){
                     let parentNode = l.source;
                     if (l.source.parentNode!==undefined){
-                        parentNode = graph.nodes[l.source.parentNode];
+                        parentNode = nodeObj[l.source.parentNode];
                     }
                     if (parentNode.drawData.length===0 || _.last(parentNode.drawData)[0]!==l.source.time)
                         parentNode.drawData.push([l.source.time,l.value]);
                     parentNode.drawData.push([l.target.time,l.value]);
                 }
+                l._class = str2class(l.source.name)
             });
             let link_p = link_g
                 .attr("fill", "none")
-                .attr("opacity", 0.5)
                 .selectAll("g.outer_node")
                 .data(links,(d,i)=>d._id)
                 .join(
                     enter => {
-                        e=enter.append("g").attr('class','outer_node element').style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
+                        e=enter.append("g").attr('class',d=>'outer_node element '+d._class)
+                            .classed('hide',d=>d.hide)
+                            .attr("opacity", 0.5).style("mix-blend-mode", "multiply").attr('transform','scale(1,1)');
                         // gradient
                         const gradient = e.append("linearGradient")
                             .attr("id", d => d._id)
@@ -382,6 +436,7 @@ let Sankey = function(){
                         e.append("title");
                         return e
                     },update => {
+                        update.attr('class',d=>'outer_node element '+d._class).classed('hide',d=>d.hide);
                         // gradient
                         const gradient = update.select("linearGradient")
                             .attr("id", d => d._id)
@@ -447,7 +502,9 @@ let Sankey = function(){
         }
 
     };
-
+    function str2class(str){
+        return 'l'+str.replace(/ |,/g,'_');
+    }
     let getRenderFunc = function(d){
         return `M${d[0][0]} ${d[0][1]} L${d[1][0]} ${d[1][1]}`;
     };
@@ -594,18 +651,13 @@ let Sankey = function(){
                 const nodematch = {};
                 const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
                 match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-                d.relatedNode = match
-                    .map(l=>l.node);
+                // d.relatedNode = match
+                //     .map(l=>l.node);
+                d.relatedNode = match.map(l=>l.source.node);
             }
-            g.classed('onhighlight', true);
-            d3.selectAll('.links .link').sort(function (a, b) {
-                return d.relatedLinks.indexOf(a.node);
-            });
-            d3.select(this).classed('highlight', true);
-            if (d.node) {
-                d.node.classed('highlight', true);
-            }
-            d.relatedNode.forEach(e=>e.classed('highlight', true))
+
+            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
+            g.selectAll('.'+d._class).style('opacity',1);
             master.mouseover.forEach(f=>f(d));
         }else{
             g.classed('onhighlight2', true);
@@ -616,29 +668,19 @@ let Sankey = function(){
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d.source.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d.target.element.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
+    let filterKey=[];
     master.highlight = function(listKey){
+        filterKey = listKey
         let listobj = {};
         listKey.forEach(k=>listobj[k]=true);
-        g.classed('onhighlight', true);
-        g.selectAll('.element').filter(d=>{
-            let item = d;
-            if (d.source)
-                item = d.source;
-            return item.element.find(f=>listobj[f.key])
-        })
-            .classed('highlight', true)
-            .each(d=>{
-                (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});;
+
+        g.selectAll('.'+filterKey.map(k=>str2class(getUserName([{key:k}]))).join(',.')).style('opacity',1);
     };
     master.releasehighlight = function(){
-        g.classed('onhighlight', false);
-        g.selectAll('.element.highlight')
-            .classed('highlight', false);
-        g.selectAll('.vticks.highlight')
-            .classed('highlight', false);
+        g.selectAll('.'+filterKey.map(k=>str2class(getUserName([{key:k}]))).join(',.')).style('opacity',null);
     };
     master.highlight2 = function(listKey){
         g.classed('onhighlight2', true);
@@ -653,15 +695,8 @@ let Sankey = function(){
     function mouseout(d){
         if(!isFreeze)
         {
-            g.classed('onhighlight',false);
-            d3.select(this).classed('highlight', false);
-            if(d.node){
-                d.node.classed('highlight', false).classed('highlightSummary', false);
-            }
-            d.relatedNode.forEach(e=>e.classed('highlight', false).classed('highlightSummary', false));
-            g.selectAll('path.trajectory').remove();
-            g.select('.TrajectoryLegend').remove();
-            master.current_trajectory_data = undefined;
+            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', false)});
+            g.selectAll('.'+d._class).style('opacity',null);
             master.mouseout.forEach(f=>f(d));
         }else{
             g.classed('onhighlight2', false);
