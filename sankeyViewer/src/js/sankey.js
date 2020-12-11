@@ -519,7 +519,14 @@ let Sankey = function(){
         }
     }
     function getUserName(arr){
-        return (arr&&arr.length)?((arr.length===1?'User ':'')+arr.map(d=>d.key.replace('user','')).join(',')):'No user';
+        if (arr && arr.length)
+        {
+            if (arr.length===1)
+                return 'User '+arr[0].key.replace('user','');
+            else
+                return arr.map(d=>d.key.replace('user','')).join(',');
+        }else
+            return 'No user';
     }
     function compressName(arr){
         let limit = 5;
