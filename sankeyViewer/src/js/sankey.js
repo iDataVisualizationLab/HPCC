@@ -667,7 +667,7 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
-        const timeformat = d3.timeFormat('%m/%d/%Y %H:%M')(new Date());
+        const timeformat = d3.timeFormat('%m/%d/%Y %H:%M');
         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
 <tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
 <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
