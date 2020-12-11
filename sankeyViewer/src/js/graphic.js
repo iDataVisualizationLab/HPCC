@@ -475,9 +475,22 @@ function initdrawGantt(){
     subObject.loadingFunc(updateProcess)
 
     subObject.mouseoverAdd('gantt',function(d){
+        debugger
+        const time = d.source.time;
+        const _data = {};
+        _data[JOB] = {};
+        Layout.userTimeline.forEach(comp=>{
+            if (comp[time]){
+                comp[time].jobs[0].forEach((jid,ji)=>{
+                    _data[JOB][jid] = comp[time].jobs[1][ji];
+                })
+            }
+        });
+        userPie.data(getUsers(_data)).draw();
         userPie.highlight(d.source.element.map(e=>e.key));
     });
     subObject.mouseoutAdd('gantt',function(d){
+        userPie.data(Layout.usersStatic).draw();
         userPie.releasehighlight();
     });
     subObject.clickAdd('jobsankey',function(d) {

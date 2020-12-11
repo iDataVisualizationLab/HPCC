@@ -116,7 +116,7 @@ function UserPie(){
         slice.select('path')
             .style("fill", d=>color(d.data.text))
             .classed('hide',d=>d.data.key===emptyKey)
-            .transition().duration(1000)
+            .interrupt().transition().duration(1000)
             .attrTween("d", function(d) {
                 this._current = this._current || d;
                 var interpolate = d3.interpolate(this._current, d);
@@ -151,7 +151,7 @@ function UserPie(){
             return d.startAngle + (d.endAngle - d.startAngle)/2;
         }
 
-        text.transition().duration(1000)
+        text.interrupt().transition().duration(1000)
             .attrTween("transform", function(d) {
                 this._current = this._current || d;
                 var interpolate = d3.interpolate(this._current, d);
@@ -182,7 +182,7 @@ function UserPie(){
             .classed('hide',d=>(d.data.key===emptyKey)||(d.endAngle-d.startAngle)<Math.PI/10)
             .attr('stroke','black');
 
-        polyline.transition().duration(1000)
+        polyline.interrupt().transition().duration(1000)
             .attrTween("points", function(d){
                 this._current = this._current || d;
                 var interpolate = d3.interpolate(this._current, d);

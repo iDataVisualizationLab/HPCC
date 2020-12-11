@@ -188,7 +188,7 @@ function handleDataComputeByUser_core(_data){
                 let username = d3.nest().key(d=>d.user_name)
                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
                 username.total = d3.sum(username,e=>e.value);
-                username.jobs = jobArr;
+                username.jobs = [jIDs,jobArr];
                 item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
             }else
                 item[Layout.timespan[i]] = null;
@@ -197,25 +197,25 @@ function handleDataComputeByUser_core(_data){
     }
     return data;
 }
-function handleDataComputeByUser_compute(computers,jobs){
+function handleDataComputeByUser_compute(_data){
     let data = [];
+    const computers = _data[COMPUTE];
+    const jobs = _data[JOB];
     for (let comp in computers){
-        let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        let item = {key:comp,data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]);
                 let username = d3.nest().key(d=>d.user_name)
                     .rollup(d=>1).entries(jobArr);
-                username.total = 1;
+                username.total = d3.sum(username,e=>e.value);
                 username.jobs = jobArr;
-                item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+                item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
             }else
-                item.values.push(null);
-            item[Layout.timespan[i]] = item.values[i];
+                item[Layout.timespan[i]] = null;
         });
         data.push(item);
     }
-    data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
 function getUsers(_data){
