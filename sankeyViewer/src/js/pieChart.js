@@ -1,8 +1,8 @@
 function UserPie(){
     let graphicopt = {
-        margin: {top: 20, right: 50, bottom: 20, left: 50},
+        margin: {top: 0, right: 50, bottom: 0, left: 50},
         width: 300,
-        height: 200,
+        height: 250,
         'max-height': 500,
         scalezoom: 1,
         zoom:d3.zoom(),
