@@ -642,39 +642,46 @@ let Sankey = function(){
 
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
-
+//     function mouseover(d){
+//         console.time('mouseover')
+//         if (!isFreeze) {     // Bring to front
+//             console.time('calculate related node!')
+//             // if (!d.relatedNode){
+//             //     const nodematch = {};
+//             //     const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+//             //     match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+//             //     // d.relatedNode = match
+//             //     //     .map(l=>l.node);
+//             //     d.relatedNode = match.map(l=>l.source.node);
+//             // }
+//             //
+//             // d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
+//             console.timeEnd('calculate related node!')
+//             g.selectAll('.'+d._class).style('opacity',1);
+//             master.mouseover.forEach(f=>f(d));
+//             // master.updateTimeHandle(d.source.time)
+//         }else{
+//             g.classed('onhighlight2', true);
+//             d3.select(this).classed('highlight2', true);
+//             if (d.node) {
+//                 d.node.classed('highlight2', true);
+//             }
+//             d.relatedNode.forEach(e=>e.classed('highlight2', true));
+//         }
+//         const timeformat = d3.timeFormat('%m/%d/%Y %H:%M');
+//         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
+// <tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+// <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+//         console.timeEnd('mouseover')
+//     }
     function mouseover(d){
         console.time('mouseover')
-        if (!isFreeze) {     // Bring to front
-            console.time('calculate related node!')
-            // if (!d.relatedNode){
-            //     const nodematch = {};
-            //     const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
-            //     match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-            //     // d.relatedNode = match
-            //     //     .map(l=>l.node);
-            //     d.relatedNode = match.map(l=>l.source.node);
-            // }
-            //
-            // d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
-            console.timeEnd('calculate related node!')
-
-
-            g.selectAll('.'+d._class).style('opacity',1);
-            master.mouseover.forEach(f=>f(d));
-            // master.updateTimeHandle(d.source.time)
-        }else{
-            g.classed('onhighlight2', true);
-            d3.select(this).classed('highlight2', true);
-            if (d.node) {
-                d.node.classed('highlight2', true);
-            }
-            d.relatedNode.forEach(e=>e.classed('highlight2', true));
-        }
-        const timeformat = d3.timeFormat('%m/%d/%Y %H:%M');
+        g.selectAll('.'+d._class).style('opacity',1);
+        master.mouseover.forEach(f=>f(d));
+        let timeformat = d3.timeFormat('%m/%d/%Y %H:%M');
         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-<tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+        <tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+        <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
         console.timeEnd('mouseover')
     }
     let filterKey=[];
