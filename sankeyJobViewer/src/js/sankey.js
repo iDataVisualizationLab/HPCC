@@ -107,8 +107,10 @@ let Sankey = function(){
         getColorScale = function(d){
             if (d.isShareUser)
                 return 'black';
-            else
-                return color(d.user)
+            else{
+                debugger
+                return color(d.user.replace('user','User '));
+            }
         }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')

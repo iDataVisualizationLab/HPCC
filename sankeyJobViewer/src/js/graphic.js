@@ -444,7 +444,7 @@ function drawUserList(){
         .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
         .text(d=>d.value);
     subObject.mouseoverAdd('userlist',function(d){
-        user_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
+        user_info.filter(u=>(d.source.element.user[0]===u.key)||(d.target.element.user[0]===u.key)).classed('highlight',true);
     });
     subObject.mouseoutAdd('userlist',function(d){
         user_info.classed('highlight',false);
@@ -463,7 +463,7 @@ function initdrawGantt(){
     subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange}).loadingFunc(updateProcess);
 
     subObject.mouseoverAdd('gantt',function(d){
-        userPie.highlight(d.source.element.map(e=>e.key));
+        userPie.highlight(d.source.element.user);
     });
     subObject.mouseoutAdd('gantt',function(d){
         userPie.releasehighlight();
@@ -476,12 +476,12 @@ function initdrawGantt(){
     });
 }
 function drawGantt(){
-    subObject.data(Layout.userTimeline).draw();
     if (userPie){
-        userPie.color(subObject.color());
         if (userPie.data().length)
             userPie.draw();
+        subObject.color(userPie.color());
     }
+    subObject.data(Layout.userTimeline).draw();
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})

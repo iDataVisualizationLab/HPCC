@@ -491,12 +491,12 @@ function initdrawGantt(){
     });
 }
 function drawGantt(){
-    subObject.data(Layout.userTimeline).draw();
     if (userPie){
-        userPie.color(subObject.color());
         if (userPie.data().length)
             userPie.draw();
+        subObject.color(userPie.color());
     }
+    subObject.data(Layout.userTimeline).draw();
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
