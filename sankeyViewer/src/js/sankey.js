@@ -124,6 +124,7 @@ let Sankey = function(){
             const nodeLabel = new Map;
             let links = [];
             const nodeList = {};
+            console.time('create nodes');
             keys.forEach((k,ki)=>{
                 for (const d of data) {
                     if(d[k]){
@@ -154,7 +155,7 @@ let Sankey = function(){
                             node.parentNode = nodeLabel.get(text).id;
                             getColorScale(node);
                             nodes.push(node);
-                            if (nodeByKey.has(key)) continue;
+                            // if (nodeByKey.has(key)) continue;
                             nodeByKey.set(key, node);
                             indexByKey.set(key, index);
                             nodeList[text].push(node);
@@ -162,7 +163,8 @@ let Sankey = function(){
                     }
                 }
             });
-
+            console.timeEnd('create nodes');
+            console.time('create links');
             // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
@@ -271,6 +273,7 @@ let Sankey = function(){
                 // console.log(listUser)
                 links = links.filter(l=>!(removeNodes[l.source]||removeNodes[l.target]))
             }
+            console.timeEnd('create links');
             return {nodes, links};
         })();
 
