@@ -31,28 +31,7 @@ function handleData(data){
         .key(d=>d.value[JOBNAME].slice(0,3)) //user
         .key(d=>d.key.split('.')[0]) //job array
         .entries(d3.entries(jobs));
-    const jobByNames = {};
-    jobName_job.forEach((val,i)=>{
-        let d = val.values;
-        const job = [];
-        const jobName = [];
-
-        const node = _.uniq(_.flatten(d.map(d=>d.values.map(d=>{
-            job.push(d.key);
-            jobName.push(d.value[JOBNAME]);
-            return d.value.node_list}))));
-        let key = val.key;
-        let lengthK = _.uniq(jobName).length;
-        if(lengthK>1)
-            key +='...(+'+lengthK+')';
-        else
-            key = jobName[0];
-        d.map(d=>d.values.forEach(d=>d.value['job_name_short']= key))
-        node.forEach(c=> computers[c].jobName.push(key));
-        const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        jobByNames[key] =  {node,job,jobMain}
-    });
-    return {computers,jobs,jobByNames,users}
+    return {computers,jobs,users}
 }
 function adjustTree(sampleS,computers){
     let {tree,compute_layoutLink} = data2tree(Layout.data_flat,sampleS,computers);
@@ -189,18 +168,20 @@ function createdata(){
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
 }
- let handleDataComputeByUser = function({computers,jobs}){
+ let handleDataComputeByUser = function(data){
      if (handleDataComputeByUser.mode==='core')
-         return handleDataComputeByUser_core(computers,jobs);
+         return handleDataComputeByUser_core(data);
      else
-         return handleDataComputeByUser_compute(computers,jobs);
+         return handleDataComputeByUser_compute(data);
  };
 handleDataComputeByUser.mode = 'core';
 
-function handleDataComputeByUser_core(computers,jobs){
+function handleDataComputeByUser_core(_data){
     let data = [];
+    const computers = _data[COMPUTE];
+    const jobs = _data[JOB];
     for (let comp in computers){
-        let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        let item = {key:comp,data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]);
@@ -208,14 +189,12 @@ function handleDataComputeByUser_core(computers,jobs){
                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
                 username.total = d3.sum(username,e=>e.value);
                 username.jobs = jobArr;
-                item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+                item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
             }else
-                item.values.push(null);
-            item[Layout.timespan[i]] = item.values[i];
+                item[Layout.timespan[i]] = null;
         });
         data.push(item);
     }
-    data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
 function handleDataComputeByUser_compute(computers,jobs){
@@ -240,16 +219,28 @@ function handleDataComputeByUser_compute(computers,jobs){
     data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
+function getUsers(_data){
+    const jobs = _data[JOB]; // object
+    const user_job = d3.nest()
+        .key(d=>d.value[USER]) //user
+        .key(d=>d.key.split('.')[0]) //job array
+        .object(d3.entries(jobs));
+    const users = _.mapObject(user_job,(u,i)=>{
+        const job = [];
+        let totalCore = 0;
+        const node = _.uniq(_.flatten(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d.value.cpu_cores,d.value.node_list)))));
+        const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
+        debugger
+        return {node,job,jobMain,totalCore,text: 'User '+i.replace('user','')}
+    });
+    return users;
+}
 function handleRankingData(data){
     console.time('handleRankingData');
-    let sampleS = handleSmalldata(data);
-    let {computers,jobs,users,jobByNames} = handleData(data);
-    Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]];
-    Layout.jobsStatic = jobs;
-    Layout.usersStatic = users;
-    Layout.timespan = sampleS.timespan;
+    Layout.usersStatic = getUsers(data);
+    Layout.timespan = data.time_stamp;
 
-    handleDataComputeByUser.data = {computers,jobs};
+    handleDataComputeByUser.data = data;
     userPie.data(Layout.usersStatic).draw();
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
     console.timeEnd('handleRankingData');

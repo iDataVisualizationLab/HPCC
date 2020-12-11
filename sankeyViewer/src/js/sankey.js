@@ -81,25 +81,11 @@ let Sankey = function(){
     }
     master.sortFunc = function(a,b){return a.order-b.order};
     master.updateTimeHandle = function (time){
-        main_svg.select('#timeClip rect').interrupt();
-        main_svg.select('#timeClip rect').transition().duration(graphicopt.animationTime).attr('width',x(time)+graphicopt.margin.left);
-        g.select('.timeHandleHolder').interrupt();
-        g.select('.timeHandleHolder').transition().duration(graphicopt.animationTime).attr('transform',`translate(${x(time)},0)`);
-
-        if (data.length&&data[0].drawData)
-            g.select('.timeHandleHolder').selectAll('.vticks').data(data.filter(d=>d.value.find(e=>(e[0]<=time)&&(e[1]>=time))),d=>d.key)
-                .join(enter=>enter.append('text').attr('class','vticks').attr('y',d=>d.y).attr('dx',5).attr('dy',5).attr('x',d=>d.x).attr('opacity',0).text(d=>d.key)
-                        .call(enter => enter.transition().duration(graphicopt.animationTime).attr('opacity',1).style('font-weight','bold'))
-                        .each(function(d){
-                            d.relatedNode.push(d3.select(this));
-                        })
-                    ,update=>update.call(update => update.style('font-weight',null).transition().duration(graphicopt.animationTime).attr('y',d=>d.y).attr('x',d=>d.x))
-                    ,exit=>exit.call(exit => {
-                        exit.each(function(d){
-                            d.relatedNode = d.relatedNode.filter((e)=>e.datum().key!==d.key);
-                        });
-                        exit.transition().duration(graphicopt.animationTime).attr('x',d=>d.x+20).attr('opacity',0).remove()
-                    }));
+        if (time){
+            g.select('.timeHandleHolder').interrupt();
+            g.select('.timeHandleHolder').classed('hide',false).transition().duration(graphicopt.animationTime).attr('transform',`translate(${x(time)},0)`);
+        }else
+            g.select('.timeHandleHolder').classed('hide',true)
     }
     master.draw = function() {
         if (isFreeze)
@@ -111,7 +97,7 @@ let Sankey = function(){
                 return color(d.name)
         }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
-        g.select('.timeHandleHolder').attr('transform','translate(0,0)')
+        g.select('.timeHandleHolder').classed('hide',true).attr('transform','translate(0,0)')
             .select('.timeStick').attr('y2',graphicopt.heightG())
         y = d3.scalePoint().range([0,graphicopt.heightG()]).padding(graphicopt.padding);
         // x = d3.scaleTime().domain(graphicopt.range||[d3.min(data,d=>d.range[0]),d3.max(data,d=>d.range[1])]).range([0,graphicopt.widthG()]);
@@ -181,8 +167,7 @@ let Sankey = function(){
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
                 const b = keys[i];
-                const prefix = keys.slice(0, i + 1);
-                const linkByKey = new Map;
+                const linkByKey = new Map();
                 for (const d of data){
                     const sourceName = JSON.stringify([a, getUserName(d[a])]);
                     const targetName = JSON.stringify([b, getUserName(d[b])]);
@@ -203,8 +188,7 @@ let Sankey = function(){
                             d[b].forEach((n,i)=>{
                                 link._target[i].value+=n.value;
                                 link._target.total+=n.value;
-                            })
-                            // link.arr = [...(link.arr??[]),...arr];
+                            });
                             link.arr.push(arr[0]);
                             if (nodes[link.source].maxval<link.value) {
                                 nodes[link.source].maxval = link.value;
@@ -290,58 +274,59 @@ let Sankey = function(){
             return {nodes, links};
         })();
 
-        const nodeObj = {};
-        nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
-        nodes.forEach(d=>d.color=getColorScale(d))
-        _links = graph.links.filter(l=>!l.isSameNode && nodeObj[l.source]&& nodeObj[l.target]).map(d =>{
-            if (nodeObj[d.source].parentNode!==undefined){
-                nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
-                nodes.push(nodeObj[d.source]);
-            }
-            if (nodeObj[d.target].parentNode!==undefined){
-                nodeObj[nodeObj[d.target].parentNode].childNodes.push(d.target);
-                nodes.push(nodeObj[d.target]);
-            }
-            return Object.assign({}, d);
-        });
-
+        // TIME ARC
+        // const nodeObj = {};
+        // nodes = graph.nodes.filter(d=>{nodeObj[d.id] = d;return d.first});
+        // nodes.forEach(d=>d.color=getColorScale(d))
+        // _links = graph.links.filter(l=>!l.isSameNode && nodeObj[l.source]&& nodeObj[l.target]).map(d =>{
+        //     if (nodeObj[d.source].parentNode!==undefined){
+        //         nodeObj[nodeObj[d.source].parentNode].childNodes.push(d.source);
+        //         nodes.push(nodeObj[d.source]);
+        //     }
+        //     if (nodeObj[d.target].parentNode!==undefined){
+        //         nodeObj[nodeObj[d.target].parentNode].childNodes.push(d.target);
+        //         nodes.push(nodeObj[d.target]);
+        //     }
+        //     return Object.assign({}, d);
+        // });
         renderSankey();
-        force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-12))
-            .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-            .force('x', d3.forceX(0).strength(0.015))
-            .force('y',  d3.forceY(0).strength(0.015))
-            .nodes( nodes)
-            .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
-            .alpha(1)
-            .on('tick',function () {
-                onLoadingFunc( {percentage:(1-this.alpha())*100,text:'TimeArc calculation'});
-                nodes.forEach(function (d,i) {
-
-                    d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
-                    if (d.parentNode >= 0) {
-                        d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
-                    }
-                    else if (d.childNodes && d.childNodes.length) {
-                        var yy = 0;
-                        for (var i = 0; i < d.childNodes.length; i++) {
-                            var child = d.childNodes[i];
-                            yy += nodeObj[child].y;
-                        }
-                        yy = yy / d.childNodes.length; // average y coordinate
-                        d.y += (yy - d.y) * 0.2;
-                    }
-                });
-            })
-            .on("end", function () {
-                onLoadingFunc();
-                graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
-                // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
-                console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
-                nodeSort = function(a,b){ return (a._forcey-b._forcey)};
-                // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
-                renderSankey();
-            })
+        // TIME ARC
+        // force = d3.forceSimulation()
+        //     .force("charge", d3.forceManyBody().strength(-12))
+        //     .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
+        //     .force('x', d3.forceX(0).strength(0.015))
+        //     .force('y',  d3.forceY(0).strength(0.015))
+        //     .nodes( nodes)
+        //     .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
+        //     .alpha(1)
+        //     .on('tick',function () {
+        //         onLoadingFunc( {percentage:(1-this.alpha())*100,text:'TimeArc calculation'});
+        //         nodes.forEach(function (d,i) {
+        //
+        //             d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
+        //             if (d.parentNode >= 0) {
+        //                 d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
+        //             }
+        //             else if (d.childNodes && d.childNodes.length) {
+        //                 var yy = 0;
+        //                 for (var i = 0; i < d.childNodes.length; i++) {
+        //                     var child = d.childNodes[i];
+        //                     yy += nodeObj[child].y;
+        //                 }
+        //                 yy = yy / d.childNodes.length; // average y coordinate
+        //                 d.y += (yy - d.y) * 0.2;
+        //             }
+        //         });
+        //     })
+        //     .on("end", function () {
+        //         onLoadingFunc();
+        //         graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+        //         // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
+        //         console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
+        //         nodeSort = function(a,b){ return (a._forcey-b._forcey)};
+        //         // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
+        //         renderSankey();
+        //     })
 
         function renderSankey(){
             let nodeObj = {};
@@ -355,6 +340,7 @@ let Sankey = function(){
                 links: graph.links.map(d => Object.assign({}, d))
             });
             graph_ = {nodes, links};
+            console.log('#links: ',graph_.links.length);
             let isAnimate = true;
             if (links.length>400)
                 isAnimate = false;
@@ -462,7 +448,7 @@ let Sankey = function(){
                     },exit=>{
                         return exit.call(exit=>(isAnimate?exit.transition().duration(graphicopt.animationTime):exit).attr('opacity',0).remove())
                     }
-                ).on("mouseover", function(d){mouseover.bind(this)(d)})
+                ).on("mouseover", function(d){console.log('mouse start------------');console.time('------mouse end');  mouseover.bind(this)(d); console.timeEnd('------mouse end') })
                 .on("mouseout", function(d){mouseout.bind(this)(d)})
                 .on("click", function(d){master.click.forEach(f=>f(d));});
             link_p.each(function(d){
@@ -482,6 +468,7 @@ let Sankey = function(){
             // link_p.select('title').text(d => `${d.names.join(" → ")}\n${d.arr}`);
             g.select('.background').select('.drawArea').attr('clip-path',null)
             g.select('.axisx').attr('transform',`translate(0,${graphicopt.heightG()})`).call(d3.axisBottom(x));
+            onLoadingFunc();
             onFinishDraw.forEach(d=>d());}
         function horizontalSource(d) {
             return [d.source.x1, d.y0];
@@ -647,18 +634,26 @@ let Sankey = function(){
 
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
-            if (!d.relatedNode){
-                const nodematch = {};
-                const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
-                match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
-                // d.relatedNode = match
-                //     .map(l=>l.node);
-                d.relatedNode = match.map(l=>l.source.node);
-            }
+            console.time('mouseover')
+            console.time('calculate related node!')
+            // if (!d.relatedNode){
+            //     const nodematch = {};
+            //     const match = graph_.links.filter(l=>l.target.name===d.source.name || l.target.name===d.source.name);
+            //     match.forEach(d=>{if (d.source.node) nodematch[d.source.name] = d.source.node});
+            //     // d.relatedNode = match
+            //     //     .map(l=>l.node);
+            //     d.relatedNode = match.map(l=>l.source.node);
+            // }
+            //
+            // d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
+            console.timeEnd('calculate related node!')
 
-            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', true)});
-            g.selectAll('.'+d._class).style('opacity',1);
+
+            // g.selectAll('.'+d._class).style('opacity',1);
             master.mouseover.forEach(f=>f(d));
+
+            console.timeEnd('mouseover')
+            // master.updateTimeHandle(d.source.time)
         }else{
             g.classed('onhighlight2', true);
             d3.select(this).classed('highlight2', true);
@@ -696,9 +691,10 @@ let Sankey = function(){
     function mouseout(d){
         if(!isFreeze)
         {
-            d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', false)});
+            // d.relatedNode.forEach(e=>{if (e) e.classed('highlightText', false)});
             g.selectAll('.'+d._class).style('opacity',null);
             master.mouseout.forEach(f=>f(d));
+            // master.updateTimeHandle()
         }else{
             g.classed('onhighlight2', false);
             d3.select(this).classed('highlight2', false);

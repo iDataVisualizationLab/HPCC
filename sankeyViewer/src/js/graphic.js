@@ -467,11 +467,11 @@ function getColorGant(){
     return _colorItem;
 }
 function initdrawGantt(){
-    timearc.init();
+    // timearc.init();
     subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange}).loadingFunc(updateProcess)
-        .onFinishDraw(()=>{
-            timearc.getColorScale(subObject.getColorScale()).times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
-        });
+        // .onFinishDraw(()=>{
+        //     timearc.getColorScale(subObject.getColorScale()).times(subObject.times()).data(subObject.graph()).times(subObject.times()).draw();
+        // });
     subObject.loadingFunc(updateProcess)
 
     subObject.mouseoverAdd('gantt',function(d){
