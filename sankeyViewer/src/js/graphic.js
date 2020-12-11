@@ -486,10 +486,12 @@ function initdrawGantt(){
                 })
             }
         });
+        d3.select('#pieChartTime').text(time.toLocaleString());
         userPie.data(getUsers(_data)).draw();
         userPie.highlight(d.source.element.map(e=>e.key));
     });
     subObject.mouseoutAdd('gantt',function(d){
+        d3.select('#pieChartTime').text('');
         userPie.data(Layout.usersStatic).draw();
         userPie.releasehighlight();
     });
