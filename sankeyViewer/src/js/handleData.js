@@ -201,7 +201,6 @@ function handleDataComputeByUser_compute(computers,jobs){
     let data = [];
     for (let comp in computers){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
-        debugger
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]);
@@ -230,7 +229,7 @@ function getUsers(_data){
         let totalCore = 0;
         const node = _.uniq(_.flatten(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d.value.cpu_cores,d.value.node_list)))));
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        debugger
+
         return {node,job,jobMain,totalCore,text: 'User '+i.replace('user','')}
     });
     return users;

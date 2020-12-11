@@ -131,9 +131,8 @@ let Sankey = function(){
                         const text = getUserName(d[k]);
                         const key = JSON.stringify([k, text]);
                         if ((graphicopt.showShareUser && (!(d[k]&&d[k].length>1)))|| nodeByKey.has(key))
-                            continue // return
-                        // if (text==='13,25,3')
-                        //     debugger
+                            continue; // return
+
                         const node = {name: text,time:k,layer:ki,_key:key,relatedLinks:[],element:d[k],id:++index};
                         if (!nodeLabel.has(text)) {
                             node.first = true;
@@ -173,7 +172,7 @@ let Sankey = function(){
                 for (const d of data){
                     const sourceName = JSON.stringify([a, getUserName(d[a])]);
                     const targetName = JSON.stringify([b, getUserName(d[b])]);
-                    if (d[a] && d[b] && nodeByKey.get(sourceName) && nodeByKey.get(targetName)){
+                    if (d[a] && d[b] && nodeByKey.has(sourceName) && nodeByKey.has(targetName)){
                         const names = [sourceName,targetName];
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
@@ -218,8 +217,9 @@ let Sankey = function(){
                             _id: 'link_'+key.replace(/\.|\[|\]| |"|\\|:|-|,/g,'')
                         };
                         if (getUserName(d[a])!==getUserName(d[b])){
+                            if (graphicopt.hideStable){
                             nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
-                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);
+                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);}
                         }else{
                             link.isSameNode = true;
                         }
@@ -652,7 +652,7 @@ let Sankey = function(){
             console.timeEnd('calculate related node!')
 
 
-            // g.selectAll('.'+d._class).style('opacity',1);
+            g.selectAll('.'+d._class).style('opacity',1);
             master.mouseover.forEach(f=>f(d));
 
             console.timeEnd('mouseover')
