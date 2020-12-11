@@ -179,15 +179,17 @@ function handleDataComputeByUser_core(computers,jobs){
     let data = [];
     for (let comp in computers){
         let condition = false;
-        let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        let item = {key:comp,values:[],users:[],range:[Infinity,-Infinity],data:computers[comp]};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
                 if (jobArr.length){
-                    let username = d3.nest().key(d=>d.job_name)
-                        .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
-                    username.total = d3.sum(username,e=>e.value)
-                    item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+                    let user_name = {};
+                    let job_name = d3.nest().key(d=>d.job_name)
+                        .rollup(d=>d3.sum(d,e=>(user_name[e.user_name]=true,e.node_list_obj[comp]))).entries(jobArr);
+                    job_name.total = d3.sum(job_name,e=>e.value);
+                    job_name.user = Object.keys(user_name);
+                    item.values.push(job_name.sort((a,b)=>d3.ascending(a.key,b.key)));
                     condition = true;
                 }else
                     item.values.push(null);
@@ -210,10 +212,12 @@ function handleDataComputeByUser_compute(computers,jobs){
             if (jIDs.length){
                 let jobArr = jIDs.map(j=>jobs[j]).filter(d=>Layout.userSelected[d.user_name]);
                 if (jobArr.length) {
-                    let username = d3.nest().key(d => d.job_name)
-                        .rollup(d => 1).entries(jobArr);
-                    username.total = 1;
-                    item.values.push(username.sort((a, b) => d3.ascending(a.key, b.key)));
+                    let user_name = {};
+                    let job_name = d3.nest().key(d=>d.job_name)
+                        .rollup(d=>(d.forEach(e=>user_name[e.user_name]=true),1)).entries(jobArr);
+                    job_name.total = d3.sum(job_name,e=>e.value);
+                    job_name.user = Object.keys(user_name);
+                    item.values.push(job_name.sort((a, b) => d3.ascending(a.key, b.key)));
                     condition = true;
                 }else
                     item.values.push(null);

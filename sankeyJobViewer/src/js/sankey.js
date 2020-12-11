@@ -108,7 +108,7 @@ let Sankey = function(){
             if (d.isShareUser)
                 return 'black';
             else
-                return color(d.name)
+                return color(d.user)
         }
         main_svg.select('#timeClip rect').attr('height',graphicopt.heightG());
         g.select('.timeHandleHolder').attr('transform','translate(0,0)')
@@ -153,7 +153,9 @@ let Sankey = function(){
                             node.childNodes = [];
                             nodeLabel.set(text, node);
                             nodeList[text] = [];
-                            node.isShareUser = (d[k]&&d[k].length>1);
+                            node.isShareUser = d[k]&& d[k].user&& d[k].user.length>1;
+                            node.isShareJob = (d[k]&&d[k].length>1);
+                            node.user = d[k].user[0]
                             node.maxIndex=ki;
                             node.maxval = 0;
                             node.drawData=[];
@@ -164,8 +166,10 @@ let Sankey = function(){
                             indexByKey.set(key, index);
                             nodeList[text].push(node);
                         }else {
-                            node.isShareUser = (d[k]&&d[k].length>1);
+                            node.isShareUser = d[k]&& d[k].user&& d[k].user.length>1;
+                            node.isShareJob = (d[k]&&d[k].length>1);
                             node.parentNode = nodeLabel.get(text).id;
+                            node.user = d[k].user[0]
                             getColorScale(node);
                             nodes.push(node);
                             if (nodeByKey.has(key)) continue;
