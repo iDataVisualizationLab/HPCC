@@ -667,9 +667,10 @@ let Sankey = function(){
             }
             d.relatedNode.forEach(e=>e.classed('highlight2', true));
         }
+        const timeformat = d3.timeFormat('%m/%d/%Y %H:%M')(new Date());
         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
-<tr><th colspan="2">${d.source.time.toLocaleString()}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
-<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${d.target.time.toLocaleString()}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+<tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
+<div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
     }
     let filterKey=[];
     master.highlight = function(listKey){

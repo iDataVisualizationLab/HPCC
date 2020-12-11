@@ -206,7 +206,8 @@ function handleDataComputeByUser_core(computers,jobs){
                 let jobArr = jIDs.map(j=>jobs[j]);
                 let username = d3.nest().key(d=>d.user_name)
                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
-                username.total = d3.sum(username,e=>e.value)
+                username.total = d3.sum(username,e=>e.value);
+                username.jobs = jobArr;
                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
             }else
                 item.values.push(null);
@@ -228,6 +229,7 @@ function handleDataComputeByUser_compute(computers,jobs){
                 let username = d3.nest().key(d=>d.user_name)
                     .rollup(d=>1).entries(jobArr);
                 username.total = 1;
+                username.jobs = jobArr;
                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
             }else
                 item.values.push(null);
