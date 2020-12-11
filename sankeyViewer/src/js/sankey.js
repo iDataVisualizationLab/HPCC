@@ -644,8 +644,8 @@ let Sankey = function(){
     master.isFreeze = function(){return isFreeze};
 
     function mouseover(d){
+        console.time('mouseover')
         if (!isFreeze) {     // Bring to front
-            console.time('mouseover')
             console.time('calculate related node!')
             // if (!d.relatedNode){
             //     const nodematch = {};
@@ -662,8 +662,6 @@ let Sankey = function(){
 
             g.selectAll('.'+d._class).style('opacity',1);
             master.mouseover.forEach(f=>f(d));
-
-            console.timeEnd('mouseover')
             // master.updateTimeHandle(d.source.time)
         }else{
             g.classed('onhighlight2', true);
@@ -677,6 +675,7 @@ let Sankey = function(){
         tooltip.show(`<h5>10.101.${compressName(d.arr)}</h5><div class="container"><div class="row"><table class="col-5"><tbody>
 <tr><th colspan="2">${timeformat(d.source.time)}</th></tr>${d._source.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table>
 <div class="col-2">-></div><table class="col-5"><tbody><tr><th colspan="2">${timeformat(d.target.time)}</th></tr>${d._target.map(e=>`<tr><th>${e.key}</th><td>${e.value}</td></tr>`).join('')}</tbody></table></div></div>`);
+        console.timeEnd('mouseover')
     }
     let filterKey=[];
     master.highlight = function(listKey){
