@@ -191,14 +191,15 @@ let Sankey = function(){
                                 link._target.total+=n.value;
                             });
                             link.arr.push(arr[0]);
-                            if (nodes[link.source].maxval<link.value) {
-                                nodes[link.source].maxval = link.value;
-                                nodes[link.source].maxIndex = i - 1;
-                            }
-                            if (nodes[link.target].maxval<link.value) {
-                                nodes[link.target].maxval = link.value;
-                                nodes[link.target].maxIndex = i;
-                            }
+                            // TIME ARC
+                            // if (nodes[link.source].maxval<link.value) {
+                            //     nodes[link.source].maxval = link.value;
+                            //     nodes[link.source].maxIndex = i - 1;
+                            // }
+                            // if (nodes[link.target].maxval<link.value) {
+                            //     nodes[link.target].maxval = link.value;
+                            //     nodes[link.target].maxIndex = i;
+                            // }
                             continue;
                         }
                         const _source = JSON.parse(JSON.stringify(d[a]));
