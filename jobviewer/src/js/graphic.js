@@ -886,8 +886,11 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                                     return true;
                                 }
                             });
-                            if (currentData.highlight)
-                                currentData.highlight(true);
+                            if (currentData.highlight){
+                                const obj = {};
+                                currentData.node_list.forEach(n=>obj[n]=true)
+                                currentData.highlight(obj);
+                            }
                         }
                     }).on('mouseleave', 'tr, .tableCompute', function () {
                         let tr = $(this).closest('tr');
@@ -943,19 +946,19 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 const rootID = vizservice[serviceSelected].idroot;
                 const scale = alternative_scale[rootID];
                 const id = vizservice[serviceSelected].id;
-                const _data = nodes.map(nname=>request.data.nodes_info[nname][alternative_service[rootID]]);
+                const _data = nodes.map(nname=>({key:nname,value:request.data.nodes_info[nname][alternative_service[rootID]]}));
                 let arr = [];
-                if (_.isArray(_data[0][0])){
+                if (_.isArray(_data[0].value[0])){
                     if (scale!==1){
-                        arr = _data.map(e=>e.map(d=>d[id]*scale));
+                        arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d[id]*scale)}));
                     }else{
-                        arr = _data.map(e=>e.map(d=>d[id]));
+                        arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d[id])}));
                     }
                 }else{
                     if (scale!==1)
-                        arr = _data.map(e=>e.map(d=>d*scale));
+                        arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d*scale)}));
                     else
-                        arr = _data.map(e=>e.slice());
+                        arr = _data.map(e=>({key:e.key,value:e.value.slice()}));
                 }
                 let height = graphicopt.height+10*jobData.length;
                 let h = height-graphicopt.margin.top-graphicopt.margin.bottom;
@@ -978,29 +981,34 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .style('stroke','gray');
 
                 const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i]));
-                g.select('.lineChart')
+                debugger
+                const lines = g.select('.lineChart')
                     .selectAll('path.line')
                     .data(arr)
                     .join('path')
-                    .attr('class','line')
-                    .attr('d',path)
+                    .attr('class',d=>'line '+str2class(d.key))
+                    .attr('d',d=>path(d.value))
                     .style('stroke','black')
                     .style('fill','none');
                 jobData.forEach((d,i)=>{
                     d.highlight = (enable)=>{
                         if(enable){
-                        const x0 = Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time)));
-                        const x1 = d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width;
-                        g.select('rect.highlight')
-                            .classed('hide',false)
-                            .attr('x',x0)
-                            .attr('width',x1-x0)
-                            .attr('height',jobScale(i))
-                            .attr('fill','#ddd')
-                        }else
-                            g.select('rect.highlight').classed('hide',true)
+                            const x0 = Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time)));
+                            const x1 = d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width;
+                            g.select('rect.highlight')
+                                .classed('hide',false)
+                                .attr('x',x0)
+                                .attr('width',x1-x0)
+                                .attr('height',jobScale(i))
+                                .attr('fill','#ddd');
+                            lines.filter(d=>!enable[d.key])
+                                .classed('hide',true)
+                        }else{
+                            g.select('rect.highlight').classed('hide',true);
+                            lines.classed('hide',false);
+                        }
                     }
-                })
+                });
                 const jobScale = d3.scaleLinear().domain([0,1]).range([graphicopt.heightG()+graphicopt.margin.bottom,graphicopt.heightG()+graphicopt.margin.bottom+10])
                 g.select('g.jobs')
                     .selectAll('line.timelineJob')
@@ -1047,6 +1055,9 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             }
         }else
             d3.select('.informationHolder').classed('hide',true);
+        function str2class(str){
+            return str.replace(/ |,|./g,'_');
+        }
     }
     function makelegend(){
         if (vizservice[serviceSelected].text==='User'){
