@@ -130,7 +130,7 @@ angular.module('hpccApp')
     function loadPresetCluster(name,calback) {
         const fileName = name.includes('data:')?name:`${name}_cluster.csv`;
         return d3.csv(fileName, function (cluster) {
-            if (cluster==null||checkVliadClusterinfo(cluster)) {
+            if (cluster==null||checkValidClusterinfo(cluster)) {
                 if (cluster==null)
                     M.toast({html: 'Do not have preset major group information. Recalculate major groups'});
                 else
@@ -169,7 +169,7 @@ angular.module('hpccApp')
                 }
             }
         });
-        function checkVliadClusterinfo(cluster_input){
+        function checkValidClusterinfo(cluster_input){
             // check the axis
             cluster_input[0]
             let invalid = false;

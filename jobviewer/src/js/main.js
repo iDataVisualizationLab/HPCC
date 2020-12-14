@@ -65,8 +65,10 @@ $(document).ready(function(){
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
         // request = new Simulation('../HiperView/data/Tue Aug 04 2020 15_45_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
     }
+    updateProcess({percentage:5,text:'Load UI...'})
     initMenu();
     initClusterUI();
+    updateProcess({percentage:15,text:'Preprocess data...'});
     initdraw();
     initTimeElement();
     queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
@@ -81,7 +83,7 @@ function initTimeElement(){
     request.callbackStop = timelineControl.pause.bind(timelineControl);
 
     request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
-    // request.onDataChange.push(timelineControl.domain.bind(timelineControl));
+    // request.onDataChange.push((data)=>{Layout.sampleS = handleDataUrl(data)});
     request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
 
     if (request.isRealTime) {
@@ -93,4 +95,5 @@ function initTimeElement(){
         request.setInterval(1000);
 
     request.onFinishQuery.push(queryData);
+    request.onFinishQuery.push(()=>updateProcess());
 }

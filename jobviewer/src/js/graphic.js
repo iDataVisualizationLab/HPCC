@@ -776,13 +776,19 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                         <th>TaskID</th>
                     </tr>
                 </thead>
-            </table>`);
+            </table>
+            <svg id="tooltipLineChart" style="width:100%;background-color:white;">
+            <defs><marker id="arrow" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,-5L10,0L0,5" class="arrowHead" fill="black"></path></marker>
+            <marker id="endTick" viewBox="-5 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><circle r=5 fill="black"></circle></marker></defs>
+            <g class="content"><rect class="highlight hide"></rect><g class="timeMark"><line></line></g>
+            <g class="lineChart"></g><g class="xaxis"></g><g class="yaxis"></g><g class="jobs"></g></g></svg>`);
             let jobData = [];
             if (type==='user')
                 jobData = d.value.job.map(j=>{
                     const jobID = j.split('.');
                     const job=_.clone(jobs[j]);
                     job['id']=jobID[0];
+                    job['_id']=j;
                     job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
@@ -794,9 +800,9 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     if (job.node_list.indexOf(d.data.name)===-1)
                         return false;
                     job['id']=jobID[0];
+                    job['_id']=j;
                     job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
-                    debugger
                     return job}).filter(d=>d);
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
@@ -859,7 +865,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
 
                                         r.childrenNode[c].classed('highlight2', true);
                                         r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                            debugger
                                             if (d.datum().source===currentData[innerKey]){
                                                 highlight2Stack.push(d);
                                                 d.classed('highlight2',true);
@@ -876,6 +881,9 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                                     return true;
                                 }
                             });
+                            debugger
+                            if (currentData.highlight)
+                                currentData.highlight();
                         }
                     }).on('mouseleave', 'tr, .tableCompute', function () {
                         let tr = $(this).closest('tr');
@@ -903,6 +911,132 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                         .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
                 }
             });
+            debugger
+            drawLineChart();
+
+            function drawLineChart(){
+                let graphicopt = {
+                    margin: {top: 10, right: 20, bottom: 50, left: 50},
+                    width: $('#tooltipLineChart').width(),
+                    height: $('#tooltipLineChart').width()*0.5,
+                    scalezoom: 1,
+                    zoom: d3.zoom(),
+                    widthView: function () {
+                        return this.width * this.scalezoom
+                    },
+                    heightView: function () {
+                        return this.height * this.scalezoom
+                    },
+                    widthG: function () {
+                        return this.widthView() - this.margin.left - this.margin.right
+                    },
+                    heightG: function () {
+                        return this.heightView() - this.margin.top - this.margin.bottom
+                    },
+                }
+
+                const rootID = vizservice[serviceSelected].idroot;
+                const scale = alternative_scale[rootID];
+                const id = vizservice[serviceSelected].id;
+                const _data = request.data.nodes_info[d.data.name][alternative_service[rootID]];
+                let arr = [];
+                if (_.isArray(_data[0])){
+                    if (scale!==1){
+                        arr = _data.map(d=>d[id]*scale);
+                    }else{
+                        arr = _data.map(d=>d[id]);
+                    }
+                }else{
+                    if (scale!==1)
+                        arr = _data.map(d=>d*scale);
+                    else
+                        arr = _data.slice();
+                }
+                let height = graphicopt.height+10*jobData.length;
+                let h = height-graphicopt.margin.top-graphicopt.margin.bottom;
+                const svg = d3.select('#tooltipLineChart')
+                    .attr('width',graphicopt.width)
+                    .attr('height',height);
+                const g = svg.select('g.content')
+                    .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+
+                const timeScale = d3.scaleTime().domain([request.data.time_stamp[0],_.last(request.data.time_stamp)])
+                    .range([0,graphicopt.widthG()]);
+                const valueScale = d3.scaleLinear().domain(vizservice[serviceSelected].range)
+                    .range([graphicopt.heightG(),0]);
+
+                g.select('.timeMark')
+                    .attr('transform',`translate(${timeScale(currentTime)},0)`)
+                    .select('line')
+                    .attr('y2',height)
+                    .attr('stroke-dasharray','4 2')
+                    .style('stroke','gray');
+
+                const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i]));
+                g.select('.lineChart')
+                    .selectAll('path.line')
+                    .data([arr])
+                    .join('path')
+                    .attr('class','line')
+                    .attr('d',path)
+                    .style('stroke','black')
+                    .style('fill','none');
+                jobData.forEach((d,i)=>{
+                    d.highlight = ()=>{
+                        const x0 = Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time)));
+                        const x1 = d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width;
+                        g.select('rect.highlight')
+                            .classed('hide',false)
+                            .attr('x',x0)
+                            .attr('width',x1-x0)
+                            .attr('height',jobScale(i))
+                            .attr('fill','#ddd')
+                    }
+                })
+                const jobScale = d3.scaleLinear().domain([0,1]).range([graphicopt.heightG()+graphicopt.margin.bottom,graphicopt.heightG()+graphicopt.margin.bottom+10])
+                g.select('g.jobs')
+                    .selectAll('line.timelineJob')
+                    .data(jobData)
+                    .join('line')
+                    .attr('class','timelineJob '+d._id)
+                    .attr("marker-start","url(#arrow)")
+                    .attr("marker-end","url(#endTick)")
+                    .attr('x1',d=>timeScale(new Date(d.start_time)))
+                    .attr('x2',d=>d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width)
+                    .attr('y1',(d,i)=>jobScale(i))
+                    .attr('y2',(d,i)=>jobScale(i))
+                    .style('stroke','black');
+                g.select('g.jobs')
+                    .selectAll('text.timelineJob')
+                    .data(jobData)
+                    .join('text')
+                    .attr('class','timelineJob '+d._id)
+                    .attr('x',d=>Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time))))
+                    .attr('y',(d,i)=>jobScale(i))
+                    .attr('dy',-2)
+                    .attr('font-size',10)
+                    .attr('fill','black')
+                    .text(d=>d.id);
+
+                const xaxis = g.select('g.xaxis').attr('transform',`translate(0,${graphicopt.heightG()})`)
+                    .call(d3.axisBottom(timeScale));
+                xaxis
+                    .selectAll('line, path').style('stroke','black');
+                xaxis
+                    .selectAll('text').style('fill','black')
+                    .attr('text-anchor','start')
+                    .attr('transform','rotate(45)');
+                const yaxis = g.select('g.yaxis')
+                    .call(d3.axisLeft(valueScale));
+                yaxis
+                    .selectAll('line')
+                    .attr('x2',graphicopt.widthG())
+                    .attr('stroke-dasharray','2 1')
+                    .style('stroke-width',0.2)
+                    .style('stroke','black');
+                yaxis
+                    .selectAll('text').style('fill','black')
+            }
         }else
             d3.select('.informationHolder').classed('hide',true);
     }
@@ -1038,8 +1172,9 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 });
         }
     }
-
 }
+
+
 function textcolor(p){
     return p.style('fill',d=>{
         if(d.children)

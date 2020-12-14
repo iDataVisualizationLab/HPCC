@@ -14,13 +14,6 @@ function handleData(data){
     _.mapObject(computers,(d,i)=>(d.user=[],d.jobName=[]))
     const jobs = data[JOB]; // object
     const rack = Layout.data;
-    // console.log('totaljob: ',d3.keys(jobs).length);
-    // Object.keys(jobs).forEach(j=>{
-    //     const d = jobs[j];
-    //     if (!d.finish_time) {
-    //         delete jobs[j]
-    //     }tree
-    // }); // lastest job
     const user_job = d3.nest()
         .key(d=>d.value[USER]) //user
         .key(d=>d.key.split('.')[0]) //job array
@@ -190,7 +183,7 @@ $('#clusterInfo_input_file').on('input',(evt)=>{
 function loadPresetCluster(name,calback) {
     const fileName = name.includes('data:')?name:`${name}_cluster.csv`;
     return d3.csv(fileName).then(function (cluster) {
-        if (cluster==null||checkVliadClusterinfo(cluster)) {
+        if (cluster==null||checkValidClusterinfo(cluster)) {
             if (cluster==null){
                 d3.select('#toastHolder').append('div')
                     .attr('data-autohide',true)
@@ -251,7 +244,7 @@ function loadPresetCluster(name,calback) {
             }
         }
     });
-    function checkVliadClusterinfo(cluster_input){
+    function checkValidClusterinfo(cluster_input){
         // check the axis
         cluster_input[0]
         let invalid = false;
