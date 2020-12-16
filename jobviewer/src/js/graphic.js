@@ -127,7 +127,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     let getOutofRange_prim = ()=>{}
     if(serviceName==='User') {
         vizservice[serviceSelected].range = d3.keys(innerObj);
-        debugger
         _colorItem = userColor;
         getOutofRange = ()=>false
         getOutofRange_prim = ()=>false
@@ -236,6 +235,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             e.data.drawData = undefined;
             e.data.highlight = Math.abs(scale_prim(e.data.metrics_delta))>graphicopt.threshold;
             e.depth = 1;
+            e.scale = (e.data.isNew??[]).length?1.5:null;
         });
         d.drawData = [{startAngle: 0,endAngle:360,r:d.pack.r}];
         d.pack.x = 0;
@@ -268,6 +268,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         userIndex[d.key]=i;
         d.x = -(graphicopt.rect.width / 2);
         d.y = innerY(i);
+        d.border = (d.value.isNew??[]).length?2:null;
         d.relatedLinks = [];
         d.relatedNodes = [];
         return d;
@@ -312,7 +313,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     // Join target positions with links data by target nodes
     links.forEach(d=>{
         targetPos.find((v=>{
-
             if (d.target === v.target){
                 d.targetX = v.targetX_bundle;
                 d.targetY  = v.targetY_bundle;
@@ -324,6 +324,8 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
                 d.targetData.relatedNodes.push({data:d.sourceData});
                 d.target_prim = targetChildren;
+                d.border = targetChildren.scale;
+                debugger
                 return true
             }
             return false
@@ -459,7 +461,8 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         .attr("class", "link")
         .attr("fill", "none")
         // .attr("stroke", d=>{return d.sourceData.color||d.target_prim.color});
-        .attr("stroke", d=>{return '#aaa'});
+        .style("stroke-width", d=>d.border??null)
+        .attr("stroke", d=>{return d.border?'black':'#aaa'});
     nodeLink.interrupt().transition().duration(graphicopt.animationTime)
         .attr("d", link);
     nodeLink.each(function(d){
@@ -491,6 +494,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         p.select('rect').attr('width', graphicopt.rect.width)
             .style('fill',d=>d.color)
             .attr('height', graphicopt.rect.height)
+            .style('stroke-width',d=>d.border??null)
             .attr('id', d=>d.key);
         p.select('text')
             .style('fill',d=>d.color==='black'?'white':null)
@@ -503,6 +507,8 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         let view;
         // svg.append('g').attr('class', 'circleG');
         root = svg.datum().pack;
+        // if(root.data.name==='Rack 10')
+        //     console.log(root.children.map(e=>e.data.name))
         let label;
         svg.select("g.label")
             .style("font", "10px sans-serif")
@@ -609,6 +615,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 node
                     .attr('class','element')
                     .classed('compute', d => !d.children)
+                    .attr('data-name', d => d.data.name)
                     .attr("pointer-events", d => !d.children ? "none" : null)
                     .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
@@ -793,7 +800,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
-                debugger
                 nodelist = d.value.node
             }else{
                 jobData = _.flatten(d.data.relatedNodes
@@ -919,7 +925,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                         .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
                 }
             });
-            debugger
+
             drawLineChart(nodelist);
 
             function drawLineChart(nodes){
@@ -981,7 +987,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .style('stroke','gray');
 
                 const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i]));
-                debugger
+
                 const lines = g.select('.lineChart')
                     .selectAll('path.line')
                     .data(arr)

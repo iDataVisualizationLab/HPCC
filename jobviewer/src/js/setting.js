@@ -47,7 +47,7 @@ let colorScaleList = {
         {val: 'Greys',type:'d3',label: 'Greys'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 let scaleService;
-
+const timeMark = 5*60*1000;
 function handleDataUrl(dataRaw) {
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
         return {
@@ -62,8 +62,11 @@ function handleDataUrl(dataRaw) {
         dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
         if (dataRaw.jobs_info[jID].finish_time)
             dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
+        dataRaw.jobs_info[jID].isNew=((Layout.currentTime - dataRaw.jobs_info[jID].start_time)<=timeMark);
+
     })
-    dataRaw.time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
+    if (dataRaw.time_stamp[0]>9999999999999)
+        dataRaw.time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
     // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
     // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
 

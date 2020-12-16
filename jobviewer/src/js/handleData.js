@@ -11,20 +11,28 @@ function queryLayout() {
 
 function handleData(data){
     const computers = data[COMPUTE];
-    _.mapObject(computers,(d,i)=>(d.user=[],d.jobName=[]))
+    _.mapObject(computers,(d,i)=>(d.user=[],d.jobName=[],d.isNew=[]))
     const jobs = data[JOB]; // object
     const rack = Layout.data;
+    const jobmap = d3.entries(jobs);
     const user_job = d3.nest()
         .key(d=>d.value[USER]) //user
         .key(d=>d.key.split('.')[0]) //job array
-        .object(d3.entries(jobs));
+        .object(jobmap);
     const users = _.mapObject(user_job,(d,i)=>{
         const job = [];
-        const node = _.uniq(_.flatten(_.values(d).map(d=>d.map(d=>(job.push(d.key),d.value.node_list)))));
-
-        node.forEach(c=> computers[c].user.push(i))
+        const isNew = [];
+        const node = _.uniq(_.flatten(_.values(d).map(d=>d.map(d=>{
+            job.push(d.key);
+            if (d.value.isNew){
+                isNew.push(d.key);
+                d.value.node_list.forEach(c=>computers[c].isNew.push(d.key));
+            }
+            return d.value.node_list;
+        }))));
+        node.forEach(c=> computers[c].user.push(i));
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        return {node,job,jobMain}
+        return {node,job,jobMain,isNew}
     });
     const jobName_job = d3.nest()
         .key(d=>d.value[JOBNAME].slice(0,3)) //user
@@ -34,11 +42,15 @@ function handleData(data){
     jobName_job.forEach((val,i)=>{
         let d = val.values;
         const job = [];
+        const isNew = [];
         const jobName = [];
 
         const node = _.uniq(_.flatten(d.map(d=>d.values.map(d=>{
             job.push(d.key);
             jobName.push(d.value[JOBNAME]);
+            if (d.value.isNew){
+                isNew.push(d.key);
+            }
             return d.value.node_list}))));
         let key = val.key;
         let lengthK = _.uniq(jobName).length;
@@ -49,7 +61,7 @@ function handleData(data){
         d.map(d=>d.values.forEach(d=>d.value['job_name_short']= key))
         node.forEach(c=> computers[c].jobName.push(key));
         const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        jobByNames[key] =  {node,job,jobMain}
+        jobByNames[key] =  {node,job,jobMain,isNew}
     });
     return {computers,jobs,jobByNames,users}
 }
@@ -89,6 +101,7 @@ function data2tree(data,sampleS,computers){
                             value:1,
                             metrics:{},
                             metrics_delta:{},
+                            isNew:computers?computers[c].isNew:[],
                             user: computers?computers[c].user:[],
                             jobName: computers?computers[c].jobName:[]
                         };
@@ -134,12 +147,13 @@ function data2tree(data,sampleS,computers){
 let currentDraw=()=>{};
 let tsnedata = {};
 function queryData(data) {
+    const currentTime = data.currentTime;
+    Layout.currentTime =  data.currentTime;
     const data_ = handleDataUrl(data);
     let  sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;
     let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
-    const currentTime = data.currentTime;
     Layout.users = users;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
