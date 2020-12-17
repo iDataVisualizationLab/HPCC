@@ -324,7 +324,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 d.sourceData.relatedNodes.push({data:d.targetData,key:d.targetChildren});
                 d.targetData.relatedNodes.push({data:d.sourceData});
                 d.target_prim = targetChildren;
-                d.border = targetChildren.scale;
+                d.border = (targetChildren.scale && d.sourceData.border)?1.2:null;
                 debugger
                 return true
             }
