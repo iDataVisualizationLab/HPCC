@@ -203,8 +203,8 @@
     ]
   },
   "SankeyViewer": {
-    "title": "SankeyViewer",
-    "thumb": "SankeyViewer.PNG",
+    "title": "Job Stream",
+    "thumb": "JobStream.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/sankeyViewer/index.html",
     "tags": [
       "MONSTER API"
