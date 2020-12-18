@@ -54,7 +54,7 @@ class Timeline{
             .attr('class','progress-bar-wrapper align-self-center')
             .style("width", "calc(100% - 30px - 200px)");
         this.timelineHolder.append('div')
-            .attr('class','input-group')
+            .attr('class','input-group row justify-content-center')
             .html(`<span class="input-group-text" id="addon-wrapping">Current time</span><input type="text" class="timeInput" aria-label="Recipient's username with two button addons">
   <button class="btn btn-outline-secondary timeIncrease" type="button">+</button>
   <button class="btn btn-outline-secondary timeDecrease" type="button">-</button>`);
