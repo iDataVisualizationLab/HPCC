@@ -64,6 +64,7 @@ let graphicopt = {
 let isFreeze= false;
 let highlight2Stack = [];
 let vizservice=[];
+let selectedTarget = undefined;
 function serviceControl(){
     vizservice =serviceFullList.slice();
     vizservice.push({text:'User',range:[]});
@@ -325,7 +326,6 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 d.targetData.relatedNodes.push({data:d.sourceData});
                 d.target_prim = targetChildren;
                 d.border = (targetChildren.scale && d.sourceData.border)?1.2:null;
-                debugger
                 return true
             }
             return false
@@ -394,7 +394,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         .attr('class','groupLabel')
         .attr("dy", ".31em")
         .style('pointer-events','all')
-        .on('click',function(){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();})
+        .on('click',function(d){d3.select(this).dispatch('mouseover') ;freezeHandle.bind(this)();})
         .on("mouseover", function(d){
             if (!isFreeze) {
                 d.node.classed('highlightSummary', true);
@@ -474,7 +474,12 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     });
     makelegend();
     d3.select(self.frameElement).style("height", graphicopt.diameter() - 150 + "px");
-
+    if (selectedTarget){
+        if (selectedTarget.data)
+            onodesg.selectAll('.element.compute').filter(d=>d.data.name===selectedTarget.data.name).dispatch('click');
+        else
+            inodeg.selectAll(".inner_node").filter(d=>d.key===selectedTarget.key).dispatch('click');
+    }
     // if (serviceName!=="Radar" && serviceName!=="User"){
     //     makeRanking();
     // }
@@ -488,7 +493,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         p.each(function(d){
             d.node=d3.select(this);
         });
-        p.on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
+        p.on('click',function(d){d3.select(this).dispatch('mouseover');selectedTarget=d; freezeHandle.bind(this)();userTable(d,'user');})
             .on("mouseover", mouseover)
             .on("mouseout", mouseout)
         p.select('rect').attr('width', graphicopt.rect.width)
@@ -547,6 +552,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .style('text-anchor', 'middle');
             annotation.text(`mean=${Math.round(root.data.summary[serviceFullList[serviceSelected].text].mean)}`)
         }
+
         return updateNodes();
 
         function updateNodes(istransition) {
@@ -611,13 +617,13 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             zoomTo([root.x, root.y, root.r * 2], istransition)
             return childrenNode;
             function updateNode(node) {
-                node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
+                node.each(function(d){childrenNode[d.data.name] = d3.select(this);})
                 node
                     .attr('class','element')
                     .classed('compute', d => !d.children)
                     .attr('data-name', d => d.data.name)
                     .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
+                    .on('click',function(d){d3.select(this).dispatch('mouseover');selectedTarget =d; freezeHandle.bind(this)();userTable(d,'compute');})
                     .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
                     .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                     // .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
@@ -758,6 +764,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
         if (isFreeze){
             const func = isFreeze;
             isFreeze = false;
+            selectedTarget = undefined;
             func();
         }else{
             isFreeze = true;
