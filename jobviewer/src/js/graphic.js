@@ -795,7 +795,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             <svg id="tooltipLineChart" style="width:100%;background-color:white;">
             <defs><marker id="arrow" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,-5L10,0L0,5" class="arrowHead" fill="black"></path></marker>
             <marker id="endTick" viewBox="-5 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><circle r=5 fill="black"></circle></marker></defs>
-            <g class="content"><rect class="highlight hide"></rect><g class="timeMark"><line></line></g>
+            <g class="content"><rect class="background"></rect><rect class="highlight hide"></rect><g class="timeMark"><line></line></g>
             <g class="lineChart"></g><g class="xaxis"></g><g class="yaxis"></g><g class="jobs"></g></g></svg>`);
             let jobData = [];
             let nodelist=[];
@@ -984,7 +984,9 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .attr('height',height);
                 const g = svg.select('g.content')
                     .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
-
+                g.select('rect.background').attr('width',graphicopt.widthG())
+                    .attr('height',graphicopt.heightG())
+                    .attr('fill','#939393');
                 const timeScale = d3.scaleTime().domain([request.data.time_stamp[0],_.last(request.data.time_stamp)])
                     .range([0,graphicopt.widthG()]);
                 const valueScale = d3.scaleLinear().domain(vizservice[serviceSelected].range)

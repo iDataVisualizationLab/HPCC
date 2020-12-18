@@ -3,6 +3,7 @@ class Timeline{
     playbutton;
     timelineHolder;
     timelineClone;
+    timelineText;
     timeline;
     timelineHandler;
     meassage;
@@ -52,31 +53,49 @@ class Timeline{
         this.timelineHolder = this.el.append('div')
             .attr('class','progress-bar-wrapper align-self-center')
             .style("width", "calc(100% - 30px - 200px)");
-        const timediv = this.timelineHolder.append('div')
+        this.timelineHolder.append('div')
+            .attr('class','input-group')
+            .html(`<span class="input-group-text" id="addon-wrapping">Current time</span><input type="text" class="timeInput" aria-label="Recipient's username with two button addons">
+  <button class="btn btn-outline-secondary timeIncrease" type="button">+</button>
+  <button class="btn btn-outline-secondary timeDecrease" type="button">-</button>`);
+        this.timelineHolder.select('button.timeIncrease').on('click',()=>onChangeTimeByStep(1));
+        this.timelineHolder.select('button.timeDecrease').on('click',()=>onChangeTimeByStep(-1));
+        this.timelineText = this.timelineHolder.select('input.timeInput')
+            .on('change',function(){self.step(new Date(this.value))});
+
+
+        const timediv = this.timelineHolder
+            .append('div')
+            .attr('class',"timeprogress")
+            .style("width", "100%")
+            .style("position", "relative")
+        const timedivS = timediv
+            .append('div')
             .attr('class',"progress")
             .style("width", "100%")
-            .style("height", "2rem")
+            // .style("height", "2rem")
+            .style("height", "0.5rem")
             .style('position',"relative")
             .on('click',onClickTimeline);
-        this.timelineClone = timediv
-            .append('div')
-            .attr('class','progress-bar clone')
-            .style('color','var(--primary)')
-            .style('font-size','small')
-            .style('overflow','visible');
-        this.timeline = timediv
+        // this.timelineClone = timediv
+        //     .append('div')
+        //     .attr('class','progress-bar clone')
+        //     .style('color','var(--primary)')
+        //     .style('font-size','small')
+        //     .style('overflow','visible');
+        this.timeline = timedivS
             .append('div')
             .attr('class','progress-bar')
             .style('font-size','small')
             .attr('role',"progressbar")
-            .style('position',"absolute")
-            .style('top',0)
-            .style('bottom',0)
-            .style('height','2rem')
+            // .style('position',"absolute")
+            // .style('top',0)
+            // .style('bottom',0)
+            // .style('height','2rem')
             .attr('aria-valuenow',"0")
             .attr('aria-valuemin',"0")
             .attr('aria-valuemax',"100");
-        this.timelineHandler = this.timelineHolder
+        this.timelineHandler = timediv
             .append('div').attr('class','progress-bar-handle align-self-center');
         this.timelineTicks = this.timelineHolder
             .append('div').attr('class','ticksHandeler')
@@ -100,7 +119,7 @@ class Timeline{
 
         function dragstarted(d) {
             self.pause();
-            self.timelineClone.style('transition','unset')
+            // self.timelineClone.style('transition','unset')
             self.timeline.style('transition','unset')
             self.timelineHandler.style('transition','unset')
         }
@@ -114,15 +133,20 @@ class Timeline{
             //     .attr('aria-valuenow',self.timeConf.scale(self.currentValue))
             //     .text(self.currentValue.toLocaleString());
             // self.timelineHandler.style('left',`${percentage}%`);
+            console.log(self.timeConf.scale.invert(value))
             requestAnimationFrame(()=> self.step(self.timeConf.scale.invert(value)))
             // d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
         }
 
         function dragended(d) {
-            self.timelineClone.style('transition',null)
-            self.timeline.style('transition',null)
+            // self.timelineClone.style('transition',null)
+            self.timeline.style('transition',null);
             self.timelineHandler.style('transition',null)
             // d3.select(this).attr("stroke", null);
+        }
+
+        function onChangeTimeByStep(step){
+            self.step(new Date(+self.currentValue+step*5*60*1000));
         }
 
         function onClickTimeline(){
@@ -181,14 +205,15 @@ class Timeline{
         let percentage = 100;
         if (this.timeConf.scale.domain()[0]-this.timeConf.scale.domain()[1])
             percentage = this.timeConf.scale(this.currentValue);
-        this.timelineClone
-            .style("width", `${percentage}%`)
-            .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
-            .text(this.currentValue.toLocaleString());
+        // this.timelineClone
+        //     .style("width", `${percentage}%`)
+        //     .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
+        //     .text(this.currentValue.toLocaleString());
         this.timeline
             .style("width", `${percentage}%`)
             .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
-            .text(this.currentValue.toLocaleString());
+            // .text(this.currentValue.toLocaleString());
+        this.timelineText.node().value=this.currentValue.toLocaleString();
         this.timelineHandler.style('left',`${percentage}%`)
     }
 

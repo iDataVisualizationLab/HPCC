@@ -9,11 +9,11 @@
 }
 .progress-bar-handle {
     position: absolute;
-    top: -0.1rem;
-    width: 2.2rem;
-    height: 2.2rem;
+    top: -0.35rem;
+    width: 1.2rem;
+    height: 1.2rem;
     background-color: var(--primary);
-    border-radius: 1.1rem;
+    border-radius: 0.5rem;
     transform: translateX(-50%);
     transition: left .6s ease;
     opacity: 0;
