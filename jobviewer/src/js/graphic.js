@@ -979,6 +979,10 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                 }
                 let height = graphicopt.height+10*jobData.length;
                 let h = height-graphicopt.margin.top-graphicopt.margin.bottom;
+                if (arr.length===0){
+                    height = 10*jobData.length;
+                    h = height-graphicopt.margin.top-graphicopt.margin.bottom;
+                }
                 const svg = d3.select('#tooltipLineChart')
                     .attr('width',graphicopt.width)
                     .attr('height',height);
@@ -986,7 +990,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
                 g.select('rect.background').attr('width',graphicopt.widthG())
                     .attr('height',graphicopt.heightG())
-                    .attr('fill','#939393');
+                    .attr('fill','#9c9c9c');
                 const timeScale = d3.scaleTime().domain([request.data.time_stamp[0],_.last(request.data.time_stamp)])
                     .range([0,graphicopt.widthG()]);
                 const valueScale = d3.scaleLinear().domain(vizservice[serviceSelected].range)
@@ -997,7 +1001,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .select('line')
                     .attr('y2',height)
                     .attr('stroke-dasharray','4 2')
-                    .style('stroke','gray');
+                    .style('stroke','#444444');
 
                 const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i]));
 
@@ -1019,12 +1023,18 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                                 .attr('x',x0)
                                 .attr('width',x1-x0)
                                 .attr('height',jobScale(i))
-                                .attr('fill','#ddd');
+                                .attr('fill','#6b6b6b');
                             lines.filter(d=>!enable[d.key])
-                                .classed('hide',true)
+                                .classed('hide',true);
+                            g.select('g.jobs')
+                                .selectAll('.timelineJob').filter((_d,_i)=>_i!==i)
+                                .style('opacity',0.5)
                         }else{
                             g.select('rect.highlight').classed('hide',true);
                             lines.classed('hide',false);
+                            g.select('g.jobs')
+                                .selectAll('.timelineJob').filter((_d,_i)=>_i!==i)
+                                .style('opacity',null)
                         }
                     }
                 });
