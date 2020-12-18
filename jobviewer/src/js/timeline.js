@@ -2,6 +2,7 @@ class Timeline{
     el;
     playbutton;
     timelineHolder;
+    timelineClone;
     timeline;
     timelineHandler;
     meassage;
@@ -51,13 +52,27 @@ class Timeline{
         this.timelineHolder = this.el.append('div')
             .attr('class','progress-bar-wrapper align-self-center')
             .style("width", "calc(100% - 30px - 200px)");
-        this.timeline = this.timelineHolder.append('div')
+        const timediv = this.timelineHolder.append('div')
             .attr('class',"progress")
             .style("width", "100%")
-            .on('click',onClickTimeline)
+            .style("height", "2rem")
+            .style('position',"relative")
+            .on('click',onClickTimeline);
+        this.timelineClone = timediv
+            .append('div')
+            .attr('class','progress-bar clone')
+            .style('color','var(--primary)')
+            .style('font-size','small')
+            .style('overflow','visible');
+        this.timeline = timediv
             .append('div')
             .attr('class','progress-bar')
+            .style('font-size','small')
             .attr('role',"progressbar")
+            .style('position',"absolute")
+            .style('top',0)
+            .style('bottom',0)
+            .style('height','2rem')
             .attr('aria-valuenow',"0")
             .attr('aria-valuemin',"0")
             .attr('aria-valuemax',"100");
@@ -85,6 +100,7 @@ class Timeline{
 
         function dragstarted(d) {
             self.pause();
+            self.timelineClone.style('transition','unset')
             self.timeline.style('transition','unset')
             self.timelineHandler.style('transition','unset')
         }
@@ -103,6 +119,7 @@ class Timeline{
         }
 
         function dragended(d) {
+            self.timelineClone.style('transition',null)
             self.timeline.style('transition',null)
             self.timelineHandler.style('transition',null)
             // d3.select(this).attr("stroke", null);
@@ -164,6 +181,10 @@ class Timeline{
         let percentage = 100;
         if (this.timeConf.scale.domain()[0]-this.timeConf.scale.domain()[1])
             percentage = this.timeConf.scale(this.currentValue);
+        this.timelineClone
+            .style("width", `${percentage}%`)
+            .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
+            .text(this.currentValue.toLocaleString());
         this.timeline
             .style("width", `${percentage}%`)
             .attr('aria-valuenow',this.timeConf.scale(this.currentValue))
