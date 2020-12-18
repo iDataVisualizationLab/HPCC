@@ -490,7 +490,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             .html(d=>d);
     }
     function updateInode(p){
-        p.each(function(d){
+        p.classed('highlight',false).each(function(d){
             d.node=d3.select(this);
         });
         p.on('click',function(d){d3.select(this).dispatch('mouseover');selectedTarget=d; freezeHandle.bind(this)();userTable(d,'user');})
