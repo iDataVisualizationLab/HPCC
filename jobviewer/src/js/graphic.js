@@ -774,6 +774,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
     }
     function userTable(d,type){
         if (isFreeze) {
+            debugger
             d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
             contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
@@ -798,6 +799,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
             <g class="lineChart"></g><g class="xaxis"></g><g class="yaxis"></g><g class="jobs"></g></g></svg>`);
             let jobData = [];
             let nodelist=[];
+            let colorMap = {};
             if (type==='user'){
                 jobData = d.value.job.map(j=>{
                     const jobID = j.split('.');
@@ -807,7 +809,8 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     job['duration']=currentTime - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
-                nodelist = d.value.node
+                nodelist = d.value.node;
+                d.relatedNodes.forEach(e=>colorMap[e.key]=e.data.childrenNode[e.key].datum().color);
             }else{
                 jobData = _.flatten(d.data.relatedNodes
                     .map(e=>e.data.value.job)).map(j=>{
@@ -821,6 +824,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     job['task_id'] = jobID[1]||'n/a';
                     return job}).filter(d=>d);
                 nodelist = [d.data.name];
+                colorMap[d.data.name] = d.color
             }
             var table = $('#informationTable').DataTable( {
                 "data": jobData,
@@ -1001,7 +1005,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .join('path')
                     .attr('class',d=>'line '+str2class(d.key))
                     .attr('d',d=>path(d.value))
-                    .style('stroke','black')
+                    .style('stroke',d=>colorMap[d.key]??'black')
                     .style('fill','none');
                 jobData.forEach((d,i)=>{
                     d.highlight = (enable)=>{
