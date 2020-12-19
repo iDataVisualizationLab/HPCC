@@ -138,7 +138,7 @@ let TimeArcSetting = function (){
 function handle_data_timeArc () {
     debugger
     const graphicopt = subObject.graphicopt();
-    const keys = Layout.timespan.slice(0,10);
+    const keys = Layout.timespan//.slice(0,10);
     let scheme ={limitColums : [0,10],
         limitTime : [keys[0],keys[keys.length-1]],
         time: {rate:5,unit:'Minute'},
