@@ -10,7 +10,7 @@ class Timeline{
     timelineTicks;
     step = ()=>{};
     timeConf={scale:d3.scaleTime().range([0,100]).domain([0,0])};
-    #play=()=>{
+    play_in=()=>{
         const self = this;
         self.playbutton.datum().status=true;
         self.timeline.classed('progress-bar-animated',true)
@@ -18,7 +18,7 @@ class Timeline{
         self.playbutton.call(self.playbutton_icon)
     };
     callbackPlay=()=>{};
-    #pause=()=>{
+    pause_in=()=>{
         const self = this;
         self.playbutton.datum().status=false;
         self.timeline.classed('progress-bar-animated',false)
@@ -176,11 +176,11 @@ class Timeline{
     }
     play(){
 
-        this.#play();
+        this.play_in();
         this.callbackPlay();
     }
     pause(){
-        this.#pause();
+        this.pause_in();
         this.callbackPause();
     }
     playbutton_icon(p){
