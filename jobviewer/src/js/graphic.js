@@ -1003,7 +1003,7 @@ function draw({computers,jobs,users,jobByNames,sampleS},currentTime,serviceSelec
                     .attr('stroke-dasharray','4 2')
                     .style('stroke','#444444');
 
-                const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i]));
+                const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i])).defined(d=>d>0);
 
                 const lines = g.select('.lineChart')
                     .selectAll('path.line')
