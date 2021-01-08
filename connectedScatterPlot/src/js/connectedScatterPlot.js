@@ -307,11 +307,27 @@ let ConnectedScatterPlot = function (){
             .attr("stroke", "white");
 
         // Transition nodes to their new position.
-        const nodeUpdate = node.merge(nodeEnter).transition(transition)
+        const nodeUpdate = node.merge(nodeEnter);
+        nodeUpdate.transition(transition)
             .attr("transform", d => `translate(${d.y},${d.x})`)
             .attr("fill-opacity", 1)
             .attr("stroke-opacity", 1);
-
+        if (isNeedRender){
+            const svgG = nodeUpdate.filter(d=>d.data.svg)
+            .selectAll('g.scatter')
+            .data(d=> d.data.svg,d=>d.plotID)
+            .join('g')
+            .attr('class','scatter');
+            svgG.transition(transition)
+            .attr('transform',d=>`translate(${d.id*(graphicopt.scatterplot.width+3)+5},${-graphicopt.scatterplot.height/2})`)
+            svgG.selectAll('svg')
+            .data(d=>[d])
+            .join(svg)
+            .on('click',d=>drawLargeElement(d3.select('#mini_plot'),d))
+            .each(function(d){
+                drawElement(d3.select(this),d);
+            });
+        }
         // Transition exiting nodes to the parent's new position.
         const nodeExit = node.exit().transition(transition).remove()
             .attr("transform", d => `translate(${source.y},${source.x})`)
@@ -345,6 +361,7 @@ let ConnectedScatterPlot = function (){
             d.x0 = d.x;
             d.y0 = d.y;
         });
+        isNeedRender = false
     }
     master.graphicopt = function (__) {
         //Put all of the options into a variable called graphicopt
@@ -370,14 +387,18 @@ let ConnectedScatterPlot = function (){
                 }
             }
             if (__.data){
+                debugger
                 root = d3.hierarchy(scheme.data);
                 root.x0 = graphicopt.dy / 2;
                 root.y0 = 0;
                 root.descendants().forEach((d, i) => {
                     d._children=d.children;
                     d.id = i;
-                    if (d.data.svg!==undefined)
+                    if (d.data.svg!==undefined){
                         d.data.svg.forEach(e=>e.measure = getMeasure(e));
+                        d.data.svg.sort((a,b)=>b.measure-a.measure);
+                        d.data.svg.forEach((e,i)=>e.id=i);
+                    }
                     if (d.depth>0)
                         d.children = null;
                 });
@@ -388,12 +409,32 @@ let ConnectedScatterPlot = function (){
         }
 
     };
+    master.updateMeasure = function(_){
+       graphicopt.selectedOpt = _;
+        root.descendants().forEach((d, i) => {
+            if (d.data.svg!==undefined){
+                d.data.svg.forEach(e=>e.measure = getMeasure(e));
+            }
+        });
+        isNeedRender=true;
+        return master;
+    };
+    master.sortMeasure = function(_){
+        root.descendants().forEach((d, i) => {
+            if (d.data.svg!==undefined){
+                d.data.svg.sort((a,b)=>b.measure-a.measure);
+                d.data.svg.forEach((e,i)=>e.id=i);
+            }
+        });
+        isNeedRender=true;
+        return master;
+    };
     master.getColorScale = function(_data) {
         return arguments.length?(getColorScale=_data?_data:function(){return color},master):getColorScale;
     };
-    master.schema = function (){
-        isNeedRender = true;
-    };
+    // master.schema = function (){
+    //     isNeedRender = true;
+    // };
     master.layout = function(d){
         layout = {};
         d.forEach(k=>layout[k.Name]= _.flatten(k.value).filter(d=>d))

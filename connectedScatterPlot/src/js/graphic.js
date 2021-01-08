@@ -52,10 +52,11 @@ function initdraw(){
     });
 
     d3.select('#measurement').on('change',function(){
-        subObject.graphicopt({selectedOpt:+$(this).val()}).draw();
+            subObject.updateMeasure(+$(this).val()).draw();
     });
     d3.select('#measurement').selectAll('option').data(d3.entries(measurmentObj))
         .join('option').attr('value',d=>d.value).text(d=>d.key);
+    d3.select('#measurementSort').on('click',function(){subObject.sortMeasure().draw();})
 }
 function userTable(d,type){
     highlight2Stack = [];
