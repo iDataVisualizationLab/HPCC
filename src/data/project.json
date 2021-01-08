@@ -220,5 +220,24 @@
     "types": [
       "Sankey","Pie chart"
     ]
+  },
+  "ConnectedScatterplot": {
+    "title": "Connected Scatterplot",
+    "thumb": "ConnectedScatterplot.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/connectedScatterPlot/index.html",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Capture User status",
+      "User utilizing overtime",
+      "User , job and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "Connected Scatterplot","Congnostics"
+    ]
   }
 }
