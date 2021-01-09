@@ -174,9 +174,9 @@ let DynamicNet = function(){
             .join('line')
             .attr('class','links')
             .attr("stroke", "#000")
-            .attr("stroke-width", 1.5);
+            .attr("stroke-width", 0.2);
 
-        simulation.alphaTarget(0.1).alpha(0.3).restart();
+        simulation.alphaTarget(0.3).restart();
         onFinishDraw.forEach(d=>d());
 
         function updateOnode(p){
@@ -203,6 +203,7 @@ let DynamicNet = function(){
 
             function updateNodes(istransition) {
                 let childrenNode = {};
+                debugger
                 node = svg.select('g.circleG')
                     .selectAll("g.element")
                     .data(d=>[d], d => d.key)
@@ -268,6 +269,7 @@ let DynamicNet = function(){
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
+                            debugger
                                 d.color = color(d.value,d);
                                 return d.color;
                         })
@@ -357,7 +359,7 @@ let DynamicNet = function(){
                 }});
 
             simulation = d3.forceSimulation()
-                .force("charge", d3.forceManyBody().strength(-100))
+                .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
                 .force("x", d3.forceX())
                 .force("y", d3.forceY())

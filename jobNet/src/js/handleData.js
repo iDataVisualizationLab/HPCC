@@ -182,9 +182,11 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
     debugger
     let dataIn = {nodes:[],links:[]};
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
-        let data = {data:c,value:getData(c),key:c.name};
+        debugger
+        let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
-        dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
+        // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
+        dataIn.nodes.push(data);
         computers[c.name].user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
     }));
     Object.keys(users).forEach(u=>{
