@@ -1314,7 +1314,7 @@ d3.TimeSpace = function () {
                 updatelabelCluster();
                 // console.log(controll_metrics.zoom)
                 if(iscameraMove||onrendercalled) {
-                    setVizlevel(graphicopt.zoomLevels.getViz());
+                    // setVizlevel(graphicopt.zoomLevels.getViz());
                     onrendercalled = false;
                 }
             }
@@ -2846,7 +2846,8 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
             currentData.__minDist = axis_arr[i].minDist;
             let index = currentData.cluster;
             currentData.clusterName = cluster_info[index].name;
-            let appendCondition = !cluster_info[currentData.cluster].hide;
+            let appendCondition = !cluster_info[currentData.cluster].hide && (d3.sum(currentData)>2);
+
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
             appendCondition = appendCondition && (lastcluster === undefined ) || (isStrickCluster(axis_arr[i])&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
             // appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster));
@@ -2937,7 +2938,7 @@ function handle_data_model_full(tsnedata,isKeepUndefined,notblock) {
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
-            appendCondition = true;
+            appendCondition = d3.sum(currentData)>2;
             lastcluster = index;
             lastdataarr = currentData.slice();
             if (appendCondition) {
@@ -2994,7 +2995,7 @@ function handle_data_model_full(tsnedata,isKeepUndefined,notblock) {
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
-        lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
+        // lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
     });
     timeSpacedata = dataIn;
     return dataIn;
