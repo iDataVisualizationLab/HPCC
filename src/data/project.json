@@ -239,5 +239,25 @@
     "types": [
       "Connected Scatterplot","Congnostics"
     ]
+  },
+  "JobNet": {
+    "title": "Job Net",
+    "thumb": "JobNet.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/jobNet/index.html",
+    "tags": [
+      "MONSTER API","Realtime"
+    ],
+    "pros": [
+      "Capture User status",
+      "Snapshot of user utilizing",
+      "User , job and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information",
+      "Need more space if network is big"
+    ],
+    "types": [
+      "Network"
+    ]
   }
 }
