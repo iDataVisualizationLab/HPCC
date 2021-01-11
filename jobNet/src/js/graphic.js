@@ -75,7 +75,16 @@ function initdraw(){
         currentDraw()
     })
     serviceControl();
-    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend);
+    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
+}
+function updateNarration({removedLinks,enterLinks}){
+    debugger
+    d3.select('#narrationHolder .holder').selectAll('div.col-12.enter').data(enterLinks)
+        .join('div').attr('class','col-12 enter')
+        .text(d=>`${d.target.id} start a new job and use ${d.source.id}`);
+    d3.select('#narrationHolder .holder').selectAll('div.col-12.exit').data(removedLinks)
+        .join('div').attr('class','col-12 exit')
+        .text(d=>`${d.target.id} release ${d.source.id}`);
 }
 function userTable(d,type){
     highlight2Stack = [];

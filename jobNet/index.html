@@ -160,8 +160,13 @@
                                 <button id="sort_apply" type="button" class="btn btn-success btn-sm col-2">Sort</button>
                             </div>
                         </div>
-                        <div class="card-body row" id="analyticOnToolbarHolder">
-                            <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#narrationHolder">Narrations</a></li>
+                        </ul>
+                        <div class="card-body row">
+                            <div class="card-body row tab-content">
+                                <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
                                 <div class="row ranking col-12 hide">
                                     <span class="align-middle col-12">Top nodes:</span>
                                     <div class="col-12">
@@ -240,6 +245,11 @@
                                     </div>
                                     <div class="d-flex justify-content-center white row" id="clusterDisplay">
 
+                                    </div>
+                                </div>
+                            </div>
+                                <div id="narrationHolder" class="tab-pane fade col-12" role="tabpanel">
+                                    <div class="row holder">
                                     </div>
                                 </div>
                             </div>

@@ -53,7 +53,7 @@ let DynamicNet = function(){
     let getColorScale = function(){return color};
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
-    let simulation,node,link;
+    let simulation,node,link,removedLinks=[],enterLinks=[];
     let radius;
     createEventHandle('onBrush');
     createEventHandle('offBrush');
@@ -170,13 +170,18 @@ let DynamicNet = function(){
 
         link = g.selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
-            .join('line')
-            .attr('class','links')
-            .attr("stroke", "#000")
-            .attr("stroke-width", 0.2);
+            .join(enter=>{
+                enterLinks = enter.data()
+                return enter.append('line').attr('class','links')
+                .attr("stroke", "#000").attr('opacity',1)
+                .attr("stroke-width", 0.2)
+            },update=>update,exit=>{
+                removedLinks = exit.data();
+                exit.transition().attr('opacity',0).remove();
+            });
 
         simulation.alphaTarget(0.3).restart();
-        onFinishDraw.forEach(d=>d());
+        onFinishDraw.forEach(d=>d({removedLinks,enterLinks}));
 
         function updateOnode(p){
             p.each(function(d){
@@ -206,7 +211,6 @@ let DynamicNet = function(){
                     .selectAll("g.element")
                     .data(d=>[d], d => d.key)
                     .call(updateNode);
-
                 node.exit().remove();
                 node = node.enter().append("g")
                     .call(updateNode).merge(node);
@@ -294,7 +298,7 @@ let DynamicNet = function(){
                         .attr('class','circle')
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
-                        .attr('transform',d=>{if (d.scale){debugger; return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
+                        .attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
                         .attr('d',getRenderFunc).style('fill',d=>d.color);
                     path_n.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
                 }else{
@@ -318,7 +322,6 @@ let DynamicNet = function(){
     };
     let getRenderFunc = function(d){
         if (d.d){
-            debugger
             return d.d;
         }else
             return d3.arc()
