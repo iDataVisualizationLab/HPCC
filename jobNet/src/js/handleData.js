@@ -179,10 +179,8 @@ function queryData(data) {
     currentDraw();
 }
 function createdata({computers,jobs,users,jobByNames,sampleS}){
-    debugger
     let dataIn = {nodes:[],links:[]};
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
-        debugger
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
         // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
@@ -190,10 +188,10 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
         computers[c.name].user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
     }));
     Object.keys(users).forEach(u=>{
-        dataIn.nodes.push({id:u,type:'user',data:users[u],drawData:[{endAngle: 360,
+        dataIn.nodes.push({id:u,type:'user',data:users[u],drawData:[{
                 invalid: undefined,
-                r: undefined,
-                startAngle: 0}]})
+                scale:1,
+               d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}]})
     });
     drawObject.data(dataIn);
 }

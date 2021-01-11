@@ -85,7 +85,6 @@ let DynamicNet = function(){
         var miniradius = 3;
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
-        debugger
         let {nodes,links} = data;
         if (node&&link) // new
         {
@@ -203,7 +202,6 @@ let DynamicNet = function(){
 
             function updateNodes(istransition) {
                 let childrenNode = {};
-                debugger
                 node = svg.select('g.circleG')
                     .selectAll("g.element")
                     .data(d=>[d], d => d.key)
@@ -269,7 +267,6 @@ let DynamicNet = function(){
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
-                            debugger
                                 d.color = color(d.value,d);
                                 return d.color;
                         })
@@ -289,6 +286,7 @@ let DynamicNet = function(){
                 if (serviceName!=='Radar'){
                     let path = node.selectAll('path').data(d=>d.drawData)
                         .attr('d',getRenderFunc)
+                        .attr('transform',d=>d.scale?`translate(-8,-8) scale(${d.scale})`:null)
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
                         .style('fill',d=>d.color);
@@ -297,6 +295,7 @@ let DynamicNet = function(){
                         .attr('class','circle')
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
+                        .attr('transform',d=>d.scale?`scale(${d.scale})`:null)
                         .attr('d',getRenderFunc).style('fill',d=>d.color);
                 }else{
 
@@ -317,7 +316,12 @@ let DynamicNet = function(){
             }
         }
     };
-    let getRenderFunc = function(){ return d3.arc()
+    let getRenderFunc = function(d){
+        if (d.d){
+            debugger
+            return d.d;
+        }else
+            return d3.arc()
                 .innerRadius(0)
     };
     let getDrawData = function(){return[];}
@@ -615,7 +619,6 @@ let DynamicNet = function(){
             .attr("d", d3.geoPath())
             .style('stroke',null)
             .style("fill", d => color(d.value)).style('opacity',null);
-        debugger
         makeTrajectoryLegend(color)
     }
     function mouseout(d){

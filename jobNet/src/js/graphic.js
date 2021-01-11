@@ -366,6 +366,8 @@ function makelegend(){
 }
 
 function getRenderFunc(d){
+    if (d.d)
+        return d.d;
     let serviceName = vizservice[serviceSelected].text;
     if (serviceName!=='Radar'|| !d.isRadar)
         return d3.arc()
