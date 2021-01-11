@@ -284,19 +284,20 @@ let DynamicNet = function(){
                 label.interrupt().transition().ease(d3.easeQuadIn).duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
                 node.selectAll('g').remove();
                 if (serviceName!=='Radar'){
-                    let path = node.selectAll('path').data(d=>d.drawData)
+                    let path = node.selectAll('path').data(d=>d.drawData,d=>d.id)
                         .attr('d',getRenderFunc)
-                        .attr('transform',d=>d.scale?`translate(-8,-8) scale(${d.scale})`:null)
+                        .attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
                         .style('fill',d=>d.color);
                     path.exit().remove();
-                    path.enter().append('path')
+                    const path_n = path.enter().append('path')
                         .attr('class','circle')
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
-                        .attr('transform',d=>d.scale?`scale(${d.scale})`:null)
+                        .attr('transform',d=>{if (d.scale){debugger; return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
                         .attr('d',getRenderFunc).style('fill',d=>d.color);
+                    path_n.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
                 }else{
 
                     const radarNode = node;
