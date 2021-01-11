@@ -79,12 +79,18 @@ function initdraw(){
 }
 function updateNarration({removedLinks,enterLinks}){
     debugger
-    d3.select('#narrationHolder .holder').selectAll('div.col-12.enter').data(enterLinks)
-        .join('div').attr('class','col-12 enter')
-        .text(d=>`${d.target.id} start a new job and use ${d.source.id}`);
-    d3.select('#narrationHolder .holder').selectAll('div.col-12.exit').data(removedLinks)
-        .join('div').attr('class','col-12 exit')
-        .text(d=>`${d.target.id} release ${d.source.id}`);
+    d3.select('#narrationHolder tbody').selectAll('tr.enter').data(enterLinks)
+        .join('tr').attr('class','enter')
+        .selectAll('td')
+        .data(d=>[d.target.id,'start a new job and use',d.source.id])
+        .join('td')
+            .text(d=>d);
+    d3.select('#narrationHolder .holder').selectAll('tr.exit').data(removedLinks)
+        .join('tr').attr('class','exit')
+        .selectAll('td')
+        .data(d=>[d.target.id,'release',d.source.id])
+        .join('td')
+        .text(d=>d);
 }
 function userTable(d,type){
     highlight2Stack = [];
