@@ -286,7 +286,6 @@ let DynamicNet = function(){
                 if (serviceName!=='Radar'){
                     let path = node.selectAll('path').data(d=>d.drawData,d=>d.id)
                         .attr('d',getRenderFunc)
-                        .attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
                         .style('fill',d=>d.color);
