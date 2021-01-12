@@ -76,6 +76,7 @@ function initdraw(){
     })
     serviceControl();
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
+    PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
 }
 function updateNarration({removedLinks,enterLinks}){
     d3.select('#narrationHolder tbody').selectAll('tr.enter').data(d3.nest().key(d=>d.target.id).entries(enterLinks))
@@ -548,4 +549,4 @@ function drawGantt(){
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 let drawObject = new DynamicNet();
-// let subObject = new Gantt();
+let PCAmapObject = new PCAmap();

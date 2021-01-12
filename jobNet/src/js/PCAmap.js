@@ -1,11 +1,11 @@
-let DynamicNet = function(){
+let PCAmap = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 20},
         width: 1400,
         height: 800,
         scalezoom: 1,
-        zoom:d3.zoom(),
+        zoom: d3.zoom(),
         widthView: function () {
             return this.width * this.scalezoom
         },
@@ -19,10 +19,10 @@ let DynamicNet = function(){
             return this.heightView() - this.margin.top - this.margin.bottom
         },
         centerX: function () {
-            return this.margin.left+this.widthG()/2;
+            return this.margin.left + this.widthG() / 2;
         },
         centerY: function () {
-            return this.margin.top+this.heightG()/2;
+            return this.margin.top + this.heightG() / 2;
         },
         animationTime:1000,
         trajectoryNum:5,
@@ -43,19 +43,17 @@ let DynamicNet = function(){
         trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"},
         actionMode:'zoom'
     };
-
-    let maindiv='#circularLayout';
+    let maindiv='#pcaLayout';
     let isFreeze= false;
-    let data=[],quadtree=[],main_svg,g,brush,r=0;
+    let data=[],main_svg,g,brush,r=0;
     let onFinishDraw = [];
     // used to assign nodes color by group
     var color = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     let getColorScale = function(){return color};
     let master={};
-    let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
-    let simulation,node,link,label,removedLinks=[],enterLinks=[];
-    let radius;
+    let removedLinks=[],enterLinks=[];
+
     createEventHandle('onBrush');
     createEventHandle('offBrush');
     createEventHandle('mouseover');
@@ -77,6 +75,7 @@ let DynamicNet = function(){
     master.draw = function() {
         if (isFreeze)
             freezeHandle();
+        color = getColorScale();
         color=getColorScale();
         createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
         radius = d3.scaleLinear()
@@ -86,29 +85,12 @@ let DynamicNet = function(){
         var miniradius = 3;
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
-        let {nodes,links} = data;
-        if (node&&link) // new
-        {
-            const olds = new Map(node.data().map(d => [d.id, d]));
-            nodes = nodes.map(d => { const old = olds.get(d.id)||{};
-            d.vx = old.vx;
-            d.vy = old.vy;
-            d.x = old.x;
-            d.y = old.y;
-            d.dy = old.dy;
-            d.dx = old.dx;
-            return d});
-            links = links.map(d => Object.assign({}, d));
-        }
+        let nodes = data;
+
         //
         nodes.forEach(d=>{ d.r = d.r??miniradius;
-        d.drawData[0].r = d.r;})
+            d.drawData[0].r = d.r;});
 
-        quadtree = d3.quadtree()
-            .extent([[-1, -1], [graphicopt.widthG() + 1, graphicopt.heightG() + 1]])
-            .x(d=>d.x)
-            .y(d=>d.y)
-            .addAll(data);
         function switchMode(){
             if (graphicopt.actionMode==='zoom'){
                 d3.select(maindiv).select('.brushHolder').classed('hide',true);
@@ -155,6 +137,13 @@ let DynamicNet = function(){
                 return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
             });
         }
+        debugger
+        let {xscale,yscale,solution} = calculate({dataIn:nodes.map(d=>d.pca.map(d=>d?(d<0?0:d):0))});
+        nodes.forEach((n,i)=>{
+            n.x = xscale(solution[i][0]);
+            n.y = yscale(solution[i][1]);
+        });
+        debugger
         node = g.selectAll(".outer_node")
             .data(nodes,d=>d.id);
         node.call(updateOnode);
@@ -173,41 +162,7 @@ let DynamicNet = function(){
         node = node.merge(node_n);
 
         switchMode();
-        simulation.nodes(nodes);
-        simulation.force("link").links(links);
 
-        let labelsM = new Map(),labels = [];
-        link = g.selectAll(".links")
-            .data(links, d => [d.source.id, d.target.id])
-            .join(enter=>{
-                enterLinks = enter.data().filter(d=>{
-                    if (d.target.data.isNew.length){
-                        if (!labelsM.get(d.id))
-                            labels.push(d.source);
-                        else
-                            labelsM.set(d.id,d);
-                        if (!labelsM.get(d.id))
-                            labels.push(d.target);
-                        else
-                            labelsM.set(d.id,d);
-                        return true;
-                    }
-                    return false;
-                });
-
-                return enter.append('line').attr('class','links')
-                .attr("stroke", "#000").attr('opacity',1)
-                .attr("stroke-width", 0.2)
-            },update=>update,exit=>{
-                removedLinks = exit.data();
-                exit.transition().attr('opacity',0).remove();
-            });
-
-        label = g.selectAll('.labels')
-            .data(labels,d=>d.id)
-            .join('text').attr('class','labels').text(d=>d.id);
-
-        simulation.alphaTarget(0.3).restart();
         onFinishDraw.forEach(d=>d({removedLinks,enterLinks}));
 
         function updateOnode(p){
@@ -299,12 +254,12 @@ let DynamicNet = function(){
                         .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
-                                d.color = color(d.value,d);
-                                return d.color;
+                            d.color = color(d.value,d);
+                            return d.color;
                         })
-                        // .style('stroke-width',d=>{
-                        //     return circleStrokeScale(d.data.relatedNodes.length);
-                        // });
+                    // .style('stroke-width',d=>{
+                    //     return circleStrokeScale(d.data.relatedNodes.length);
+                    // });
                     return node;
                 }
             }
@@ -348,7 +303,7 @@ let DynamicNet = function(){
                 }
             }
         }
-    };
+    }
     let getRenderFunc = function(d){
         if (d.d){
             return d.d;
@@ -387,7 +342,7 @@ let DynamicNet = function(){
                 .attr("height", graphicopt.height)
                 .append("g")
                 .attr('class','Outcontent')
-                .attr("transform", "translate(" + (graphicopt.centerX()) + "," + graphicopt.centerY() + ")")
+                .attr("transform", "translate(" + (graphicopt.margin.left) + "," + graphicopt.margin.top + ")")
                 .append("g")
                 .attr('class','content')
                 .on('click',()=>{if (isFreeze){
@@ -395,14 +350,6 @@ let DynamicNet = function(){
                     isFreeze = false;
                     func();
                 }});
-
-            simulation = d3.forceSimulation()
-                .force("charge", d3.forceManyBody().strength(-30))
-                .force("link", d3.forceLink().id(d => d.id))
-                .force("x", d3.forceX().x(d=>d.isolate?-graphicopt.widthG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
-                .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
-                .on("tick", ticked);
-            simulation.stop();
 
             g.call(tooltip);
             let startZoom = d3.zoomIdentity;
@@ -416,16 +363,6 @@ let DynamicNet = function(){
         }
         return master
     };
-    function ticked() {
-        node.attr("transform", d=>`translate(${d.x},${d.y})`);
-
-        link.attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-        label.attr("transform", d=>`translate(${d.x},${d.y})`);
-    }
     master.data = function(_data) {
         if (arguments.length)
         {
@@ -478,99 +415,6 @@ let DynamicNet = function(){
     };
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
-    master.addSubgraph = function(subsvg){
-        subsvg.attr('class','subgraph')
-            .style('overflow','hidden').style('border','1px solid black')
-            .style('position','relative')
-            .style('border-radius','5px').style('background-color','white')
-        subgraph.el.push(subsvg);
-        while ( subgraph.el.length> subgraph.limit){
-            subgraph.el.shift().remove();
-        }
-        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
-    };
-    master.removeSubgraph = function(subsvg){
-        const index = subsvg.attr('id').replace('subgraph','');
-        subgraph.el.filter((s,i)=>i!==index);
-        subsvg.remove();
-        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
-    };
-    function makeTrajectoryLegend(color){
-        const marginTop = 10;
-        const marginBottom = 10;
-        const marginLeft = 40;
-        const marginRight = 20;
-        const width = 10;
-        const height = 200;
-        g.selectAll('.TrajectoryLegend').remove();
-        const svg = g.append('g').attr('class','TrajectoryLegend')
-            .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
-        svg.append('text').text('Trajectory heat map')
-        let legend = svg.append('g').attr('class', 'legend')
-            .attr('transform', `translate(${marginLeft},${marginTop})`);
-
-        if (color.interpolate) {
-            const n = Math.min(color.domain().length, color.range().length);
-
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
-        }// Sequential
-        else if (color.interpolator) {
-            let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
-                {
-                    range() {
-                        return [0, height];
-                    }
-                });
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
-
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!y.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
-                }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            } else {
-                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
-            }
-        }
-
-        function ramp(color, n = 256) {
-            const canvas = createContext(1, n);
-            const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
-            return canvas;
-        }
-
-        function createContext(width, height) {
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas;
-        }
-
-    }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
@@ -610,53 +454,6 @@ let DynamicNet = function(){
         g.selectAll('.element.highlight2')
             .classed('highlight2', false);
     };
-    master.drawTrajectory = function(d,data){
-        data = data||Layout.ranking.byComputer[d.name][serviceName]
-        master.current_trajectory_data = {g,d,data:data};
-        draw_trajectory(master.current_trajectory_data);
-    }
-    let draw_trajectory = empty;
-    master.current_trajectory_data = undefined;
-    function empty(){
-    }
-    function draw_trajectory_line({g,d,data}){
-        let dataDraw = data;
-        if (!_.isArray(data[0]))
-            dataDraw = [data];
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(dataDraw)
-            .join('path')
-            .attr('class','trajectory trajectoryPath')
-            .attr('transform',null)
-            .attr('d',d3.line()
-                .curve(d3.curveCatmullRom)
-                .defined(e => e !== undefined)
-                .x(e=>alignmentScale(e)))
-            .style('fill','none').style('stroke','black').style('opacity',0.3);
-    }
-    function draw_trajectory_contours({g,d,data}){
-        let dataDraw = data;
-        if (_.isArray(data[0]))
-            dataDraw = _.flatten(data);
-        dataDraw = dataDraw.filter(d=>d!=undefined);
-        const contours = d3.contourDensity()
-            .x(e=>alignmentScale(e))
-            .y(graphicopt.heightG())
-            .size( [graphicopt.widthG(), graphicopt.heightG()])
-            .bandwidth(graphicopt.trajectory.bandwidth)
-            (dataDraw);
-        const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
-            .domain(d3.extent(contours, d => d.value ));
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(contours)
-            .join('path')
-            // .attr('transform',`translate(0,${graphicopt.heightG()})`)
-            .attr('class','trajectory trajectoryPath')
-            .attr("d", d3.geoPath())
-            .style('stroke',null)
-            .style("fill", d => color(d.value)).style('opacity',null);
-        makeTrajectoryLegend(color)
-    }
     function mouseout(d){
         if(!isFreeze)
         {
@@ -674,5 +471,43 @@ let DynamicNet = function(){
             tooltip.hide()
         }
     }
+    var theta = function(r) {
+        return -(r-graphicopt.start)-graphicopt.start;
+    };
+
     return master;
-};
+    function calculate({dataIn,dim=2})
+    {
+        // pca - compute cluster position
+        let pca = new PCA();
+        // console.log(brand_names);
+        // let matrix = pca.scale(dataIn, true, true);
+        let matrix = pca.scale(dataIn, false, false);
+
+        let pc = pca.pca(matrix, dim);
+
+        let A = pc[0];  // this is the U matrix from SVD
+        // let B = pc[1];  // this is the dV matrix from SVD
+        let chosenPC = pc[2];   // this is the most value of PCA
+        debugger
+        let solution = dataIn.map((d, i) => d3.range(0, dim).map(dim => A[i][chosenPC[dim]]));
+        return render(solution);
+    }
+    function render(sol){
+        let xrange = d3.extent(sol, d => d[0]);
+        let yrange = d3.extent(sol, d => d[1]);
+        let xscale = d3.scaleLinear().range([0, graphicopt.widthG()]);
+        let yscale = d3.scaleLinear().range([0, graphicopt.heightG()]);
+        const ratio = graphicopt.heightG() / graphicopt.widthG();
+        if ((yrange[1] - yrange[0]) / (xrange[1] - xrange[0]) > graphicopt.heightG() / graphicopt.widthG()) {
+            yscale.domain(yrange);
+            let delta = ((yrange[1] - yrange[0]) / ratio - (xrange[1] - xrange[0])) / 2;
+            xscale.domain([xrange[0] - delta, xrange[1] + delta])
+        } else {
+            xscale.domain(xrange);
+            let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
+            yscale.domain([yrange[0] - delta, yrange[1] + delta])
+        }
+        return {xscale,yscale,solution:sol}
+    }
+}

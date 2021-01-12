@@ -125,6 +125,17 @@
                             </filter>
                         </defs>
                     </svg>
+                    <svg id="pcaLayout">
+                        <defs>
+                            <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
+                                <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                    </svg>
                     <div id="legendHolder" class="position-absolute card" style="top:0px;width: 350px; ;left: 70%">
                         <div class="card-header all-scroll ">
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -320,6 +331,7 @@
 <!--    <script src="src/lib/nouislider.js"></script>-->
 <!--    <script src="src/lib/d3.v4.min.js"></script>-->
     <script src="../HiperView/js/PCA.js"></script>
+    <script src="src/js/PCAmap.js"></script>
     <script src="src/lib/d3.v5.min.js"></script>
     <script src="src/js/color.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
