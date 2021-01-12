@@ -86,7 +86,12 @@ let DynamicNet = function(){
         var miniradius = 3;
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
-        let {nodes,links} = data;
+        let {nodes,links,datamap} = data;
+        let {xscale,yscale,solution} = calculate({dataIn:Object.values(datamap).map(d=>d[0].map(d=>d?(d<0?0:d):0))});
+        Object.keys(datamap).forEach((d,i)=>{
+            datamap[d].x = xscale(solution[i][0]);
+            datamap[d].y = yscale(solution[i][1]);
+        })
         if (node&&link) // new
         {
             const olds = new Map(node.data().map(d => [d.id, d]));
@@ -95,6 +100,10 @@ let DynamicNet = function(){
             d.vy = old.vy;
             d.x = old.x;
             d.y = old.y;
+            if (datamap[d.id]){
+                d._x = datamap[d.id].x;
+                d._y =datamap[d.id].y;
+            }
             d.dy = old.dy;
             d.dx = old.dx;
             return d});
@@ -420,7 +429,12 @@ let DynamicNet = function(){
         return master
     };
     function ticked() {
-        node.attr("transform", d=>`translate(${d.x},${d.y})`);
+        node.attr("transform", d=>{
+            if (d._x!==undefined && !d.isolate){
+                d.x+= (d._x-d.x)*0.01;
+                d.y+= (d._y-d.y)*0.01;
+            }
+            return `translate(${d.x},${d.y})`});
 
         link.attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -676,6 +690,40 @@ let DynamicNet = function(){
         if (d.tooltip) {
             tooltip.hide()
         }
+    }
+    function calculate({dataIn,dim=2})
+    {
+        // pca - compute cluster position
+        let pca = new PCA();
+        // console.log(brand_names);
+        // let matrix = pca.scale(dataIn, true, true);
+        let matrix = pca.scale(dataIn, false, false);
+
+        let pc = pca.pca(matrix, dim);
+
+        let A = pc[0];  // this is the U matrix from SVD
+        // let B = pc[1];  // this is the dV matrix from SVD
+        let chosenPC = pc[2];   // this is the most value of PCA
+        debugger
+        let solution = dataIn.map((d, i) => d3.range(0, dim).map(dim => A[i][chosenPC[dim]]));
+        return render(solution);
+    }
+    function render(sol){
+        let xrange = d3.extent(sol, d => d[0]);
+        let yrange = d3.extent(sol, d => d[1]);
+        let xscale = d3.scaleLinear().range([-graphicopt.widthG()/2, graphicopt.widthG()/2]);
+        let yscale = d3.scaleLinear().range([-graphicopt.heightG()/2, graphicopt.heightG()/2]);
+        const ratio = graphicopt.heightG() / graphicopt.widthG();
+        if ((yrange[1] - yrange[0]) / (xrange[1] - xrange[0]) > graphicopt.heightG() / graphicopt.widthG()) {
+            yscale.domain(yrange);
+            let delta = ((yrange[1] - yrange[0]) / ratio - (xrange[1] - xrange[0])) / 2;
+            xscale.domain([xrange[0] - delta, xrange[1] + delta])
+        } else {
+            xscale.domain(xrange);
+            let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
+            yscale.domain([yrange[0] - delta, yrange[1] + delta])
+        }
+        return {xscale,yscale,solution:sol}
     }
     return master;
 };

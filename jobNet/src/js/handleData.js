@@ -179,7 +179,7 @@ function queryData(data) {
     currentDraw();
 }
 function createdata({computers,jobs,users,jobByNames,sampleS}){
-    let dataIn = {nodes:[],links:[]},dataPCA=[];
+    let dataIn = {nodes:[],links:[],datamap:tsnedata},dataPCA=[];
     Layout.tree.children.forEach(r=>r.children.forEach(c=>{
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
