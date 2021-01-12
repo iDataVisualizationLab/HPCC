@@ -204,10 +204,13 @@ let DynamicNet = function(){
             });
 
         label = g.selectAll('.labels')
-            .data(labels,d=>d.id)
-            .join('text').attr('class','labels').text(d=>d.id);
+            .data(labels,d=>d.id);
+        label.exit().transition().duration(graphicopt.animationTime).attr('opacity',0).remove();
+        const label_n = label.enter()
+            .append('text').attr('class','labels').text(d=>d.id).attr('opacity',1);
+        label = label_n.merge(label);
 
-        simulation.alphaTarget(0.3).restart();
+        simulation.alphaTarget(0.02).restart();
         onFinishDraw.forEach(d=>d({removedLinks,enterLinks}));
 
         function updateOnode(p){
@@ -424,7 +427,7 @@ let DynamicNet = function(){
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
 
-        label.attr("transform", d=>`translate(${d.x},${d.y})`);
+        g.selectAll('.labels').attr("transform", d=>`translate(${d.x},${d.y})`);
     }
     master.data = function(_data) {
         if (arguments.length)
