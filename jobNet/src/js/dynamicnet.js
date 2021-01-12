@@ -40,7 +40,8 @@ let DynamicNet = function(){
             isNormalize:false,
             schema:serviceFullList
         },
-        trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"}
+        trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"},
+        actionMode:'zoom'
     };
 
     let maindiv='#circularLayout';
@@ -53,7 +54,7 @@ let DynamicNet = function(){
     let getColorScale = function(){return color};
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
-    let simulation,node,link,removedLinks=[],enterLinks=[];
+    let simulation,node,link,label,removedLinks=[],enterLinks=[];
     let radius;
     createEventHandle('onBrush');
     createEventHandle('offBrush');
@@ -175,10 +176,25 @@ let DynamicNet = function(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
 
+        let labelsM = new Map(),labels = [];
         link = g.selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
-                enterLinks = enter.data();
+                enterLinks = enter.data().filter(d=>{
+                    if (d.target.data.isNew.length){
+                        if (!labelsM.get(d.id))
+                            labels.push(d.source);
+                        else
+                            labelsM.set(d.id,d);
+                        if (!labelsM.get(d.id))
+                            labels.push(d.target);
+                        else
+                            labelsM.set(d.id,d);
+                        return true;
+                    }
+                    return false;
+                });
+
                 return enter.append('line').attr('class','links')
                 .attr("stroke", "#000").attr('opacity',1)
                 .attr("stroke-width", 0.2)
@@ -186,6 +202,10 @@ let DynamicNet = function(){
                 removedLinks = exit.data();
                 exit.transition().attr('opacity',0).remove();
             });
+
+        label = g.selectAll('.labels')
+            .data(labels,d=>d.id)
+            .join('text').attr('class','labels').text(d=>d.id);
 
         simulation.alphaTarget(0.3).restart();
         onFinishDraw.forEach(d=>d({removedLinks,enterLinks}));
@@ -305,9 +325,10 @@ let DynamicNet = function(){
                         .attr('class','circle')
                         .classed('invalid',d=>d.invalid)
                         .style('filter',d=>d.invalid?'url("#glow")':null)
-                        .attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
-                        .attr('d',getRenderFunc).style('fill',d=>d.color);
-                    path_n.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
+                        .attr('d',getRenderFunc).style('fill',d=>d.color)
+                        .attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null);
+                    const icon = node.filter(d=>d.isNew&&d.isNew.length).select('path.circle').attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
+                    icon.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
                 }else{
 
                     const radarNode = node;
@@ -364,8 +385,10 @@ let DynamicNet = function(){
                 .attr("width", graphicopt.width)
                 .attr("height", graphicopt.height)
                 .append("g")
-                .attr('class','content')
+                .attr('class','Outcontent')
                 .attr("transform", "translate(" + (graphicopt.centerX()) + "," + graphicopt.centerY() + ")")
+                .append("g")
+                .attr('class','content')
                 .on('click',()=>{if (isFreeze){
                     const func = isFreeze;
                     isFreeze = false;
@@ -399,6 +422,8 @@ let DynamicNet = function(){
             .attr("y1", d => d.source.y)
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
+
+        label.attr("transform", d=>`translate(${d.x},${d.y})`);
     }
     master.data = function(_data) {
         if (arguments.length)
