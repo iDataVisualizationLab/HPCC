@@ -98,11 +98,21 @@ let DynamicNet = function(){
             nodes = nodes.map(d => { const old = olds.get(d.id)||{};
             d.vx = old.vx;
             d.vy = old.vy;
-            d.x = old.x;
-            d.y = old.y;
             if (datamap[d.id]){
                 d._x = datamap[d.id].x;
                 d._y =datamap[d.id].y;
+                if (old.x===undefined)
+                {
+                    d.x = d._x;
+                    d.y = d._y;
+                }else
+                {
+                    d.x = old.x;
+                    d.y = old.y;
+                }
+            }else{
+                d.x = old.x;
+                d.y = old.y;
             }
             d.dy = old.dy;
             d.dx = old.dx;
@@ -429,10 +439,12 @@ let DynamicNet = function(){
         return master
     };
     function ticked() {
+        debugger
+        const alpha = simulation.alpha();
         node.attr("transform", d=>{
             if (d._x!==undefined && !d.isolate){
-                d.x+= (d._x-d.x)*0.01;
-                d.y+= (d._y-d.y)*0.01;
+                d.x+= (d._x-d.x)*alpha*0.1;
+                d.y+= (d._y-d.y)*alpha*0.1;
             }
             return `translate(${d.x},${d.y})`});
 
