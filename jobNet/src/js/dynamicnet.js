@@ -88,8 +88,15 @@ let DynamicNet = function(){
         let {nodes,links} = data;
         if (node&&link) // new
         {
-            const old = new Map(node.data().map(d => [d.id, d]));
-            nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d));
+            const olds = new Map(node.data().map(d => [d.id, d]));
+            nodes = nodes.map(d => { const old = olds.get(d.id)||{};
+            d.vx = old.vx;
+            d.vy = old.vy;
+            d.x = old.x;
+            d.y = old.y;
+            d.dy = old.dy;
+            d.dx = old.dx;
+            return d});
             links = links.map(d => Object.assign({}, d));
         }
         //
@@ -162,11 +169,15 @@ let DynamicNet = function(){
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle");
         node_n.call(updateOnode);
-        node = node.merge(node_n)
+        node = node.merge(node_n);
 
         switchMode();
         simulation.nodes(nodes);
-        simulation.force("link").links(links);
+        simulation.force("link").links(links)
+        simulation.force("x", d3.forceX().x(d=>{ if (d.isolate) debugger
+            return d.isolate?-graphicopt.widthG()*3/8:0
+        }).strength(d=>d.isolate?1:0.1))
+            .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?1:0.1));
 
         link = g.selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
@@ -368,8 +379,8 @@ let DynamicNet = function(){
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
-                .force("x", d3.forceX())
-                .force("y", d3.forceY())
+                .force("x", d3.forceX().x(d=>d.isolate?-graphicopt.widthG()*3/8:0).strength(d=>d.isolate?1:0.1))
+                .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?1:0.1))
                 .on("tick", ticked);
             simulation.stop();
 

@@ -184,8 +184,12 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
         // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
+
+        if (!c.user.length){
+            data.isolate = true;
+        }
         dataIn.nodes.push(data);
-        computers[c.name].user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
+        c.user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
     }));
     Object.keys(users).forEach(u=>{
         dataIn.nodes.push({id:u,type:'user',data:users[u],drawData:[{
