@@ -173,11 +173,7 @@ let DynamicNet = function(){
 
         switchMode();
         simulation.nodes(nodes);
-        simulation.force("link").links(links)
-        simulation.force("x", d3.forceX().x(d=>{ if (d.isolate) debugger
-            return d.isolate?-graphicopt.widthG()*3/8:0
-        }).strength(d=>d.isolate?1:0.1))
-            .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?1:0.1));
+        simulation.force("link").links(links);
 
         link = g.selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
@@ -379,8 +375,8 @@ let DynamicNet = function(){
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
-                .force("x", d3.forceX().x(d=>d.isolate?-graphicopt.widthG()*3/8:0).strength(d=>d.isolate?1:0.1))
-                .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?1:0.1))
+                .force("x", d3.forceX().x(d=>d.isolate?-graphicopt.widthG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
+                .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
                 .on("tick", ticked);
             simulation.stop();
 

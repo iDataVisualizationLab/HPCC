@@ -93,7 +93,7 @@ function updateNarration({removedLinks,enterLinks}){
     function renderCell(d,data){
         if (data.length>2)
             return `<span>${(d.isexpand?(data+'<button type="button" class="btn btn-block morebtn" value="close"><img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img></button>'): data.slice(0,2)).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
-                                        <a value="open">+${data.length-2} more</a>`;
+                                        <a value="open">+${data.length-2}</a>`;
         else
             return data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n');
     }
