@@ -171,7 +171,7 @@ let DynamicNet = function(){
         link = g.selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
-                enterLinks = enter.data()
+                enterLinks = enter.data();
                 return enter.append('line').attr('class','links')
                 .attr("stroke", "#000").attr('opacity',1)
                 .attr("stroke-width", 0.2)

@@ -78,19 +78,25 @@ function initdraw(){
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
 }
 function updateNarration({removedLinks,enterLinks}){
-    debugger
-    d3.select('#narrationHolder tbody').selectAll('tr.enter').data(enterLinks)
+    d3.select('#narrationHolder tbody').selectAll('tr.enter').data(d3.nest().key(d=>d.target.id).entries(enterLinks))
         .join('tr').attr('class','enter')
         .selectAll('td')
-        .data(d=>[d.target.id,'start a new job and use',d.source.id])
+        .data(d=>[d.key,'starts using',renderCell(d,d.values.map(e=>e.source.id))])
         .join('td')
-            .text(d=>d);
-    d3.select('#narrationHolder .holder').selectAll('tr.exit').data(removedLinks)
+            .html(d=>d);
+    d3.select('#narrationHolder tbody').selectAll('tr.exit').data(d3.nest().key(d=>d.target.id).entries(removedLinks))
         .join('tr').attr('class','exit')
         .selectAll('td')
-        .data(d=>[d.target.id,'release',d.source.id])
+        .data(d=>[d.key,'releases',renderCell(d,d.values.map(e=>e.source.id))])
         .join('td')
-        .text(d=>d);
+        .html(d=>d);
+    function renderCell(d,data){
+        if (data.length>2)
+            return `<span>${(d.isexpand?(data+'<button type="button" class="btn btn-block morebtn" value="close"><img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img></button>'): data.slice(0,2)).map(e=>`<span class="tableCompute">${e}</span>`).join('\n')}</span>
+                                        <a value="open">+${data.length-2} more</a>`;
+        else
+            return data.map(e=>`<span class="tableCompute">${e}</span>`).join('\n');
+    }
 }
 function userTable(d,type){
     highlight2Stack = [];
