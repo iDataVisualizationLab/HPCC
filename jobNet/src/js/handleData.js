@@ -189,7 +189,7 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
             data.isolate = true;
         }
         dataIn.nodes.push(data);
-        dataPCA.push({id:c.name,type:'compute',data:c,value:getData(c),pca:tsnedata[c.name][0],key:c.name,drawData:data.drawData });
+        // dataPCA.push({id:c.name,type:'compute',data:c,value:getData(c),pca:tsnedata[c.name][0],key:c.name,drawData:data.drawData });
         c.user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
     }));
     Object.keys(users).forEach(u=>{
@@ -200,7 +200,7 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
                d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}]})
     });
     drawObject.data(dataIn);
-    PCAmapObject.data(dataPCA).draw();
+    // PCAmapObject.data(dataPCA).draw();
 }
 function sortData(){
     const layout_array =  Layout.data_flat;

@@ -3,7 +3,7 @@ let DynamicNet = function(){
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 20},
         width: 1400,
-        height: 800,
+        height: 700,
         scalezoom: 1,
         zoom:d3.zoom(),
         widthView: function () {
