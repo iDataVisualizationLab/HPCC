@@ -120,8 +120,17 @@ let DynamicNet = function(){
             links = links.map(d => Object.assign({}, d));
         }
         //
-        nodes.forEach(d=>{ d.r = d.r??miniradius;
-        d.drawData[0].r = d.r;})
+        let labelsM = new Map(),labels = [];
+        nodes.forEach(d=>{
+            d.r = d.r??miniradius;
+            d.drawData[0].r = d.r;
+            if (d.isolate) {
+                if (!labelsM.get(d.id))
+                    labels.push(d);
+                else
+                    labelsM.set(d.id, d);
+            }
+        })
 
         quadtree = d3.quadtree()
             .extent([[-1, -1], [graphicopt.widthG() + 1, graphicopt.heightG() + 1]])
@@ -174,7 +183,7 @@ let DynamicNet = function(){
                 return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
             });
         }
-        node = g.selectAll(".outer_node")
+        node = g.select('g.nodeHolder').selectAll(".outer_node")
             .data(nodes,d=>d.id);
         node.call(updateOnode);
         node.exit().remove();
@@ -195,8 +204,8 @@ let DynamicNet = function(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
 
-        let labelsM = new Map(),labels = [];
-        link = g.selectAll(".links")
+
+        link = g.select('g.linkHolder').selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
@@ -204,11 +213,11 @@ let DynamicNet = function(){
                         if (!labelsM.get(d.id))
                             labels.push(d.source);
                         else
-                            labelsM.set(d.id,d);
+                            labelsM.set(d.id,d.source);
                         if (!labelsM.get(d.id))
                             labels.push(d.target);
                         else
-                            labelsM.set(d.id,d);
+                            labelsM.set(d.id,d.target);
                         return true;
                     }
                     return false;
@@ -417,7 +426,8 @@ let DynamicNet = function(){
                     isFreeze = false;
                     func();
                 }});
-
+            g.append('g').attr('class','linkHolder');
+            g.append('g').attr('class','nodeHolder');
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
