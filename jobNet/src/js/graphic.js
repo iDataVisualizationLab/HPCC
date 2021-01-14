@@ -75,6 +75,7 @@ function initdraw(){
         currentDraw()
     })
     serviceControl();
+    d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)})
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
     // PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
 }
