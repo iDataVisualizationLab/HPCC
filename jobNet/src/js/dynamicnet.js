@@ -143,22 +143,7 @@ let DynamicNet = function(){
             .x(d=>d.x)
             .y(d=>d.y)
             .addAll(data);
-        function switchMode(){
-            if (graphicopt.actionMode==='zoom'){
-                d3.select(maindiv).select('.brushHolder').classed('hide',true);
-                d3.select(maindiv)
-                    .call(graphicopt.zoom.on("zoom", zoomed))
-            }else{
-                brush = d3.brush()
-                    .extent([[graphicopt.margin.left,graphicopt.margin.top],[graphicopt.widthG(),graphicopt.heightG()]])
-                    .on("brush end", brushed);
-                d3.select(maindiv).select('.brushHolder').classed('hide',false)
-                    .call(brush)
-            }
-        }
-        function zoomed(){
-            g.attr("transform", d3.event.transform);
-        }
+
         function brushed() {
             let selection =d3.event.selection;
             data.forEach(d => {d.selected = false;
@@ -395,6 +380,23 @@ let DynamicNet = function(){
             }
         }
     };
+    function switchMode(){
+        if (graphicopt.actionMode==='zoom'){
+            d3.select(maindiv).select('.brushHolder').classed('hide',true);
+            debugger
+            main_svg
+                .call(graphicopt.zoom.on("zoom", zoomed))
+        }else{
+            brush = d3.brush()
+                .extent([[graphicopt.margin.left,graphicopt.margin.top],[graphicopt.widthG(),graphicopt.heightG()]])
+                .on("brush end", brushed);
+            d3.select(maindiv).select('.brushHolder').classed('hide',false)
+                .call(brush)
+        }
+    }
+    function zoomed(){
+        g.attr("transform", d3.event.transform);
+    }
     let getRenderFunc = function(d){
         if (d.d){
             return d.d;
@@ -453,10 +455,10 @@ let DynamicNet = function(){
             simulation.stop();
 
             g.call(tooltip);
-            let startZoom = d3.zoomIdentity;
-            startZoom.x = graphicopt.margin.left;
-            startZoom.y = graphicopt.margin.top;
-            g.call(graphicopt.zoom.transform, d3.zoomIdentity);
+            d3.zoomIdentity.x = graphicopt.margin.left;
+            d3.zoomIdentity.y = graphicopt.margin.top;
+            graphicopt.zoom.on("zoom", zoomed)
+            main_svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
 
 
@@ -465,7 +467,7 @@ let DynamicNet = function(){
         return master
     };
     master.resetZoom = function(){
-        g.call(graphicopt.zoom.transform, d3.zoomIdentity);
+        graphicopt.zoom.transform(main_svg, d3.zoomIdentity);
     };
     function drag4Force(){
         function dragstarted(d) {
