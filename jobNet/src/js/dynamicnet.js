@@ -25,7 +25,6 @@ let DynamicNet = function(){
             return this.margin.top+this.heightG()/2;
         },
         animationTime:1000,
-        trajectoryNum:5,
         color:{},
         // range:[0,1],
         radaropt : {
@@ -40,7 +39,6 @@ let DynamicNet = function(){
             isNormalize:false,
             schema:serviceFullList
         },
-        trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"},
         actionMode:'zoom',
         PCAlayout: false
     };
@@ -128,6 +126,8 @@ let DynamicNet = function(){
         nodes.forEach(d=>{
             d.r = d.r??miniradius;
             d.drawData[0].r = d.r;
+            d.relatedNodes =[];
+            d.relatedLinks =[];
             if (d.isolate) {
                 if (!labelsM.get(d.id))
                     labels.push(d);
@@ -156,20 +156,19 @@ let DynamicNet = function(){
         }
         function zoomed(){
             g.attr("transform", d3.event.transform);
-            // subgraph.el.forEach(svg=>svg.select('g.content').attr("transform", d3.event.transform))
         }
         function brushed() {
             let selection =d3.event.selection;
             data.forEach(d => {d.selected = false;
-                master.mouseout.forEach(f=>f(d.data));
+                master.mouseout.forEach(f=>f(d.value));
             });
             master.releasehighlight();
             if (selection) search(quadtree, selection);
             let listkey = data.filter(d=>d.selected);
             if (listkey.length){
                 master.highlight(listkey.map(d=>d.key));
-                master.mouseover.forEach(f=>listkey.forEach(d=>f(d.data)));
-                master.onBrush.forEach(f=>listkey.forEach(d=>f(d.data)));
+                master.mouseover.forEach(f=>listkey.forEach(d=>f(d.value)));
+                master.onBrush.forEach(f=>listkey.forEach(d=>f(d.value)));
             }else{
                 master.offBrush.forEach(f=>f());
             }
@@ -203,18 +202,21 @@ let DynamicNet = function(){
             .attr("text-anchor", "middle");
         node_n.call(updateOnode);
         node = node.merge(node_n);
+        node.each(function(d){
+            d.node = d3.select(this);
+        });
 
         switchMode();
         simulation.nodes(nodes);
         simulation.force("link").links(links);
 
-        let linkScale = d3.scaleLinear().range([0.2,2]).domain(d3.extent(links,d=>d.value||0));
+        let linkScale = d3.scaleSqrt().range([0.2,2]).domain(d3.extent(links,d=>d.value||0));
         debugger
-        link = g.select('g.linkHolder').selectAll(".links")
+        link = g.select('g.linkHolder').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
-                    if (d.target.data.isNew.length){
+                    if (d.target.value.isNew.length){
                         if (!labelsM.get(d.id))
                             labels.push(d.source);
                         else
@@ -228,14 +230,20 @@ let DynamicNet = function(){
                     return false;
                 });
 
-                return enter.append('line').attr('class','links')
+                return enter.append('line').attr('class','link')
                 .attr("stroke", "rgba(0,0,0,0.53)").attr('opacity',1)
                 .attr("stroke-width", d=>linkScale(d.value))
             },update=>update.attr("stroke-width", d=>linkScale(d.value)),exit=>{
                 removedLinks = exit.data();
                 exit.transition().attr('opacity',0).remove();
             });
-
+        link.each(function(d){
+            d.node = d3.select(this);
+            d.source.relatedNodes.push(d.target);
+            d.source.relatedLinks.push(d);
+            d.target.relatedNodes.push(d.source);
+            d.target.relatedLinks.push(d);
+        });
         label = g.selectAll('.labels')
             .data(labels,d=>d.id);
         label.exit().transition().duration(graphicopt.animationTime).attr('opacity',0).remove();
@@ -289,11 +297,11 @@ let DynamicNet = function(){
                     .text(d => d.key).merge(label);
                 label.each(function(d){
                     if (!d.children)
-                        d.data.tooltip = d3.select(this);
+                        d.value.tooltip = d3.select(this);
                 });
                 label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px');
 
-                glowEffect = svg.select('g.glowEffect')
+                const glowEffect = svg.select('g.glowEffect')
                     .selectAll("defs.glowElement")
                     .data(d=>[d], d => d.key)
                     .call(updateGlow);
@@ -310,7 +318,7 @@ let DynamicNet = function(){
                         .attr("x","-150%")
                         .attr("y","-150%")
                         .attr("height","400%")
-                        .attr('id',d=>'c'+d.data.currentID)
+                        .attr('id',d=>'c'+d.value.currentID)
                         .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
                         <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
                         <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
@@ -326,20 +334,20 @@ let DynamicNet = function(){
                 zoomTo(istransition);
                 return childrenNode;
                 function updateNode(node) {
-                    node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
+                    node.each(function(d){childrenNode[d.value.name] = d3.select(this)})
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');master.click.forEach(f=>f());openPopup(d,main_svg);})
-                        .on("mouseover", function(d){mouseover.bind(this)(d.data||d)})
-                        .on("mouseout", function(d){mouseout.bind(this)(d.data||d)})
-                        .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,d.type);master.click.forEach(f=>f());})
+                        .on("mouseover", function(d){mouseover.bind(this)(d)})
+                        .on("mouseout", function(d){mouseout.bind(this)(d)})
+                        .style('filter',d=>d.value.highlight?`url(#${'c'+d.value.currentID}`:null)
                         .attr("fill", d => {
                                 d.color = color(d.value,d);
                                 return d.color;
                         })
                         // .style('stroke-width',d=>{
-                        //     return circleStrokeScale(d.data.relatedNodes.length);
+                        //     return circleStrokeScale(d.value.relatedNodes.length);
                         // });
                     return node;
                 }
@@ -447,7 +455,7 @@ let DynamicNet = function(){
             startZoom.y = graphicopt.margin.top;
             g.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
-            g.append('g').attr('class','trajectoryHolder').attr('pointer-events','none');
+
 
             d3.select(maindiv).append('g').attr('class','brushHolder');
         }
@@ -500,137 +508,26 @@ let DynamicNet = function(){
         onFinishDraw.push(_data)
         return master;
     };
-    master.trajectoryStyle=function(_data) {
-        if (arguments.length){
-            switch (_data) {
-                case 'line':
-                    draw_trajectory = draw_trajectory_line;
-                    break;
-                case 'contour':
-                    draw_trajectory = draw_trajectory_contours;
-                    break;
-                default:
-                    draw_trajectory = empty;
-                    break;
-            }
-            if (master.current_trajectory_data)
-                draw_trajectory(master.current_trajectory_data);
-            return master;
-        }
-        return draw_trajectory;
-    };
+
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
-    master.addSubgraph = function(subsvg){
-        subsvg.attr('class','subgraph')
-            .style('overflow','hidden').style('border','1px solid black')
-            .style('position','relative')
-            .style('border-radius','5px').style('background-color','white')
-        subgraph.el.push(subsvg);
-        while ( subgraph.el.length> subgraph.limit){
-            subgraph.el.shift().remove();
-        }
-        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
-    };
-    master.removeSubgraph = function(subsvg){
-        const index = subsvg.attr('id').replace('subgraph','');
-        subgraph.el.filter((s,i)=>i!==index);
-        subsvg.remove();
-        subgraph.el.forEach((svg,i)=>svg.attr('id','subgraph'+i))
-    };
-    function makeTrajectoryLegend(color){
-        const marginTop = 10;
-        const marginBottom = 10;
-        const marginLeft = 40;
-        const marginRight = 20;
-        const width = 10;
-        const height = 200;
-        g.selectAll('.TrajectoryLegend').remove();
-        const svg = g.append('g').attr('class','TrajectoryLegend')
-            .attr('transform',`translate(${graphicopt.widthG()/2-(width + marginLeft + marginRight)},${-graphicopt.heightG()/2+50})`);
-        svg.append('text').text('Trajectory heat map')
-        let legend = svg.append('g').attr('class', 'legend')
-            .attr('transform', `translate(${marginLeft},${marginTop})`);
 
-        if (color.interpolate) {
-            const n = Math.min(color.domain().length, color.range().length);
-
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
-        }// Sequential
-        else if (color.interpolator) {
-            let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
-                {
-                    range() {
-                        return [0, height];
-                    }
-                });
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
-
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!y.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
-                }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            } else {
-                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
-            }
-        }
-
-        function ramp(color, n = 256) {
-            const canvas = createContext(1, n);
-            const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
-            return canvas;
-        }
-
-        function createContext(width, height) {
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas;
-        }
-
-    }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
-            d3.selectAll('.links .link').sort(function (a, b) {
-                return d.relatedLinks.indexOf(a.node);
-            });
+            d.relatedLinks.forEach(e=>e.node.classed('highlight', true))
+            d.relatedNodes.forEach(e=>e.node.classed('highlight', true))
             d3.select(this).classed('highlight', true);
             if (d.node) {
                 d.node.classed('highlight', true);
             }
-            master.drawTrajectory(d);
             master.mouseover.forEach(f=>f(d));
         }
         if (d.tooltip) {
             tooltip.show(d.name)
         }
     }
+
     master.highlight = function(listKey){
         g.classed('onhighlight', true);
         g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
@@ -654,64 +551,17 @@ let DynamicNet = function(){
             .classed('highlight2', false);
     };
     master.PCAlayout = function(d){graphicopt.PCAlayout = d};
-    master.drawTrajectory = function(d,data){
-        data = data||Layout.ranking.byComputer[d.name][serviceName]
-        master.current_trajectory_data = {g,d,data:data};
-        draw_trajectory(master.current_trajectory_data);
-    }
-    let draw_trajectory = empty;
-    master.current_trajectory_data = undefined;
-    function empty(){
-    }
-    function draw_trajectory_line({g,d,data}){
-        let dataDraw = data;
-        if (!_.isArray(data[0]))
-            dataDraw = [data];
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(dataDraw)
-            .join('path')
-            .attr('class','trajectory trajectoryPath')
-            .attr('transform',null)
-            .attr('d',d3.line()
-                .curve(d3.curveCatmullRom)
-                .defined(e => e !== undefined)
-                .x(e=>alignmentScale(e)))
-            .style('fill','none').style('stroke','black').style('opacity',0.3);
-    }
-    function draw_trajectory_contours({g,d,data}){
-        let dataDraw = data;
-        if (_.isArray(data[0]))
-            dataDraw = _.flatten(data);
-        dataDraw = dataDraw.filter(d=>d!=undefined);
-        const contours = d3.contourDensity()
-            .x(e=>alignmentScale(e))
-            .y(graphicopt.heightG())
-            .size( [graphicopt.widthG(), graphicopt.heightG()])
-            .bandwidth(graphicopt.trajectory.bandwidth)
-            (dataDraw);
-        const color = d3.scaleSequential(d3[graphicopt.trajectory.colorScheme])
-            .domain(d3.extent(contours, d => d.value ));
-        g.select('g.trajectoryHolder').selectAll('path.trajectory.trajectoryPath')
-            .data(contours)
-            .join('path')
-            // .attr('transform',`translate(0,${graphicopt.heightG()})`)
-            .attr('class','trajectory trajectoryPath')
-            .attr("d", d3.geoPath())
-            .style('stroke',null)
-            .style("fill", d => color(d.value)).style('opacity',null);
-        makeTrajectoryLegend(color)
-    }
+
     function mouseout(d){
         if(!isFreeze)
         {
             g.classed('onhighlight',false);
+            d.relatedLinks.forEach(e=>e.node.classed('highlight', false))
+            d.relatedNodes.forEach(e=>e.node.classed('highlight', false))
             d3.select(this).classed('highlight', false);
             if(d.node){
-                d.node.classed('highlight', false).classed('highlightSummary', false);
+                d.node.classed('highlight', false);
             }
-            g.selectAll('path.trajectory').remove();
-            g.select('.TrajectoryLegend').remove();
-            master.current_trajectory_data = undefined;
             master.mouseout.forEach(f=>f(d))
         }
         if (d.tooltip) {

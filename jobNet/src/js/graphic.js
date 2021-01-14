@@ -104,11 +104,11 @@ function updateNarration({removedLinks,enterLinks}){
     }
 }
 function userTable(d,type){
-    highlight2Stack = [];
-    if (drawObject.isFreeze()) {
+    if (drawObject.isFreeze) {
+        debugger
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
-        contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.key));
+        contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.id));
         contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
@@ -122,29 +122,39 @@ function userTable(d,type){
                         <th>TaskID</th>
                     </tr>
                 </thead>
-            </table>`);
+            </table>
+            <svg id="tooltipLineChart" style="width:100%;background-color:white;">
+            <defs><marker id="arrow" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,-5L10,0L0,5" class="arrowHead" fill="black"></path></marker>
+            <marker id="endTick" viewBox="-5 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto"><circle r=5 fill="black"></circle></marker></defs>
+            <g class="content"><rect class="background"></rect><rect class="highlight hide"></rect><g class="timeMark"><line></line></g>
+            <g class="lineChart"></g><g class="xaxis"></g><g class="yaxis"></g><g class="jobs"></g></g></svg>`);
         let jobData = [];
-        if (type==='user')
+        let nodelist=[];
+        let colorMap = {};
+        if (type==='user'){
             jobData = d.value.job.map(j=>{
                 const jobID = j.split('.');
-                const job=_.clone(jobs[j]);
+                const job=_.clone(Layout.jobs[j]);
                 job['id']=jobID[0];
+                job['_id']=j;
                 job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
                 return job});
-        else{
-            debugger
-            if(Layout.computers_old[d.key])
-                jobData = Layout.computers_old[d.key].job_id[0].map(j=>{
-                    const jobID = j.split('.');
-                    const job=_.clone(Layout.jobs[j]);
-                    if (job.node_list.indexOf(d.data.name)===-1)
-                        return false;
-                    job['id']=jobID[0];
-                    job['duration']=Layout.currentTime - job['start_time'];
-                    job['task_id'] = jobID[1]||'n/a';
-                    debugger
-                    return job}).filter(d=>d);
+            nodelist = d.value.node;
+            d.relatedNodes.forEach(e=>colorMap[e.key]=e.color);
+        }else{
+            jobData = d.data.jobId.map(j=>{
+                const jobID = j.split('.');
+                const job=_.clone(Layout.jobs[j]);
+                if (job.node_list.indexOf(d.data.name)===-1)
+                    return false;
+                job['id']=jobID[0];
+                job['_id']=j;
+                job['duration']=Layout.currentTime - job['start_time'];
+                job['task_id'] = jobID[1]||'n/a';
+                return job}).filter(d=>d);
+            nodelist = [d.data.name];
+            colorMap[d.data.name] = d.color
         }
         var table = $('#informationTable').DataTable( {
             "data": jobData,
@@ -197,12 +207,45 @@ function userTable(d,type){
                     const isSingle =  d3.select(event.target).classed('tableCompute')
                     if (row.data()) {
                         const currentData = row.data();
-                        drawObject.highlight2(isSingle? [d3.select(event.target).text()]:currentData.node_list);
+                        svg.classed('onhighlight2', true);
+                        (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
+                            rack_arr.find(r => {
+                                if (r.childrenNode[c]) {
+                                    highlight2Stack.push(r.childrenNode[c]);
+                                    highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
+                                    r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
+
+                                    r.childrenNode[c].classed('highlight2', true);
+                                    r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
+                                        if (d.datum().source===currentData[innerKey]){
+                                            highlight2Stack.push(d);
+                                            d.classed('highlight2',true);
+                                        }
+                                    });
+                                    return true;
+                                }
+                            });
+                        });
+                        users_arr.find(u => {
+                            if (u.key===currentData[innerKey]) {
+                                highlight2Stack.push(u.node);
+                                u.node.classed('highlight2', true);
+                                return true;
+                            }
+                        });
+                        if (currentData.highlight){
+                            const obj = {};
+                            currentData.node_list.forEach(n=>obj[n]=true)
+                            currentData.highlight(obj);
+                        }
                     }
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    drawObject.releasehighlight2();
+                    svg.classed('onhighlight2',false);
+                    highlight2Stack.forEach(n=>n.classed('highlight2',false));
+                    highlight2Stack = [];
+                    table.row( tr ).data().highlight();
                 });
             }
         } );
@@ -223,8 +266,157 @@ function userTable(d,type){
                     .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
             }
         });
+
+        drawLineChart(nodelist);
+
+        function drawLineChart(nodes){
+            let graphicopt = {
+                margin: {top: 10, right: 20, bottom: 50, left: 50},
+                width: $('#tooltipLineChart').width(),
+                height: $('#tooltipLineChart').width()*0.5,
+                scalezoom: 1,
+                zoom: d3.zoom(),
+                widthView: function () {
+                    return this.width * this.scalezoom
+                },
+                heightView: function () {
+                    return this.height * this.scalezoom
+                },
+                widthG: function () {
+                    return this.widthView() - this.margin.left - this.margin.right
+                },
+                heightG: function () {
+                    return this.heightView() - this.margin.top - this.margin.bottom
+                },
+            }
+
+            const rootID = vizservice[serviceSelected].idroot;
+            const scale = alternative_scale[rootID];
+            const id = vizservice[serviceSelected].id;
+            const _data = nodes.map(nname=>({key:nname,value:request.data.nodes_info[nname][alternative_service[rootID]]}));
+            let arr = [];
+            if (_.isArray(_data[0].value[0])){
+                if (scale!==1){
+                    arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d[id]*scale)}));
+                }else{
+                    arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d[id])}));
+                }
+            }else{
+                if (scale!==1)
+                    arr = _data.map(e=>({key:e.key,value:e.value.map(d=>d*scale)}));
+                else
+                    arr = _data.map(e=>({key:e.key,value:e.value.slice()}));
+            }
+            let height = graphicopt.height+10*jobData.length;
+            let h = height-graphicopt.margin.top-graphicopt.margin.bottom;
+            if (arr.length===0){
+                height = 10*jobData.length;
+                h = height-graphicopt.margin.top-graphicopt.margin.bottom;
+            }
+            const svg = d3.select('#tooltipLineChart')
+                .attr('width',graphicopt.width)
+                .attr('height',height);
+            const g = svg.select('g.content')
+                .attr('transform',`translate(${graphicopt.margin.left},${graphicopt.margin.top})`);
+            g.select('rect.background').attr('width',graphicopt.widthG())
+                .attr('height',graphicopt.heightG())
+                .attr('fill','#9c9c9c');
+            const timeScale = d3.scaleTime().domain([request.data.time_stamp[0],_.last(request.data.time_stamp)])
+                .range([0,graphicopt.widthG()]);
+            const valueScale = d3.scaleLinear().domain(vizservice[serviceSelected].range)
+                .range([graphicopt.heightG(),0]);
+
+            g.select('.timeMark')
+                .attr('transform',`translate(${timeScale(Layout.currentTime)},0)`)
+                .select('line')
+                .attr('y2',height)
+                .attr('stroke-dasharray','4 2')
+                .style('stroke','#444444');
+
+            const path = d3.line().y(d=>valueScale(d)).x((d,i)=>timeScale(request.data.time_stamp[i])).defined(d=>d>0);
+
+            const lines = g.select('.lineChart')
+                .selectAll('path.line')
+                .data(arr)
+                .join('path')
+                .attr('class',d=>'line '+str2class(d.key))
+                .attr('d',d=>path(d.value))
+                .style('stroke',d=>colorMap[d.key]??'black')
+                .style('fill','none');
+            jobData.forEach((d,i)=>{
+                d.highlight = (enable)=>{
+                    if(enable){
+                        const x0 = Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time)));
+                        const x1 = d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width;
+                        g.select('rect.highlight')
+                            .classed('hide',false)
+                            .attr('x',x0)
+                            .attr('width',x1-x0)
+                            .attr('height',jobScale(i))
+                            .attr('fill','#6b6b6b');
+                        lines.filter(d=>!enable[d.key])
+                            .classed('hide',true);
+                        g.select('g.jobs')
+                            .selectAll('.timelineJob').filter((_d,_i)=>_i!==i)
+                            .style('opacity',0.5)
+                    }else{
+                        g.select('rect.highlight').classed('hide',true);
+                        lines.classed('hide',false);
+                        g.select('g.jobs')
+                            .selectAll('.timelineJob').filter((_d,_i)=>_i!==i)
+                            .style('opacity',null)
+                    }
+                }
+            });
+            const jobScale = d3.scaleLinear().domain([0,1]).range([graphicopt.heightG()+graphicopt.margin.bottom,graphicopt.heightG()+graphicopt.margin.bottom+10])
+            g.select('g.jobs')
+                .selectAll('line.timelineJob')
+                .data(jobData)
+                .join('line')
+                .attr('class','timelineJob '+d._id)
+                .attr("marker-start","url(#arrow)")
+                .attr("marker-end","url(#endTick)")
+                .attr('x1',d=>timeScale(new Date(d.start_time)))
+                .attr('x2',d=>d.finish_time?timeScale(new Date(d.finish_time)):graphicopt.width)
+                .attr('y1',(d,i)=>jobScale(i))
+                .attr('y2',(d,i)=>jobScale(i))
+                .style('stroke','black');
+            g.select('g.jobs')
+                .selectAll('text.timelineJob')
+                .data(jobData)
+                .join('text')
+                .attr('class','timelineJob '+d._id)
+                .attr('x',d=>Math.max(-graphicopt.margin.left,timeScale(new Date(d.start_time))))
+                .attr('y',(d,i)=>jobScale(i))
+                .attr('dy',-2)
+                .attr('font-size',10)
+                .attr('fill','black')
+                .text(d=>d.id);
+
+            const xaxis = g.select('g.xaxis').attr('transform',`translate(0,${graphicopt.heightG()})`)
+                .call(d3.axisBottom(timeScale));
+            xaxis
+                .selectAll('line, path').style('stroke','black');
+            xaxis
+                .selectAll('text').style('fill','black')
+                .attr('text-anchor','start')
+                .attr('transform','rotate(45)');
+            const yaxis = g.select('g.yaxis')
+                .call(d3.axisLeft(valueScale));
+            yaxis
+                .selectAll('line')
+                .attr('x2',graphicopt.widthG())
+                .attr('stroke-dasharray','2 1')
+                .style('stroke-width',0.2)
+                .style('stroke','black');
+            yaxis
+                .selectAll('text').style('fill','black')
+        }
     }else
         d3.select('.informationHolder').classed('hide',true);
+    function str2class(str){
+        return str.replace(/ |,|./g,'_');
+    }
 }
 function getColorScale(){
     if (drawObject.graphicopt().colorMode!=='rack'){
@@ -437,7 +629,7 @@ function getDrawData(e) {
             color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
         }]
     }else{
-        const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.data.invalid}];
+        const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.value.invalid}];
         return dataout;
     }
 }

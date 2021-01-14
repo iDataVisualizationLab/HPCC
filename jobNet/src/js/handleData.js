@@ -156,6 +156,7 @@ function queryData(data) {
     let {computers,jobs,users,jobByNames} = handleData(data);
     adjustTree(sampleS,computers);
     Layout.users = users;
+    Layout.jobs = jobs;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
     if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){
@@ -194,6 +195,7 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 
         const userL = {};
         const jobL = {};
+        c.jobId = computers[c.name].job_id[0];
         computers[c.name].job_id[0].forEach(d=>{
             if (!jobL[d] && jobs[d]){
                 if (!userL[jobs[d].user_name])
@@ -205,7 +207,7 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         d3.entries(userL).forEach(u=>dataIn.links.push({source:c.name,target:u.key,value:u.value}));
     }));
     Object.keys(users).forEach(u=>{
-        dataIn.nodes.push({id:u,type:'user',data:users[u],drawData:[{
+        dataIn.nodes.push({id:u,type:'user',value:users[u],drawData:[{
                 invalid: undefined,
                 scale:1,
                 offset:-8,
