@@ -526,7 +526,9 @@ let DynamicNet = function(){
             .attr('height',d=>d.height)
             .call(drag4Force());
         force.html(posProp.outerHTML);
-        force.select('.forceDrag').attr('xmlns','http://www.w3.org/1999/xhtml').style('display','block').style('top',null).style('left',null)
+        force.select('.forceDrag').attr('xmlns','http://www.w3.org/1999/xhtml')
+            .classed('gu-transit',false)
+            .style('display','block').style('top',null).style('left',null)
 
         const getData = function(d,_pos,index){
             if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>0.8){
