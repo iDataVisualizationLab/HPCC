@@ -135,3 +135,14 @@ text {
     padding-right: 2px;
     padding-left: 2px;
 }
+
+#forceLayoutHolder .holder .forceDrag{
+    margin: 2px
+}
+.dropHolder {
+    position: relative;
+}
+.dropHolder .forceDrag{
+    position: absolute;
+    width: 100px;
+}

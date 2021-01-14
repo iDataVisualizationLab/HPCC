@@ -174,13 +174,16 @@ function queryData(data) {
     currentDraw = ()=>{
         drawObject.draw();
     };
-    createdata({tree:Layout.tree.children,computers,jobs,users,jobByNames,sampleS});
+    createdata = _.partial(_createdata,{tree:Layout.tree.children,computers,jobs,users,jobByNames,sampleS});
+    createdata();
+    // createdata({tree:Layout.tree.children,computers,jobs,users,jobByNames,sampleS});
     // _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     // currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     // currentDraw(serviceSelected);
     currentDraw();
 }
-function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
+let createdata =_createdata;
+function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
     let dataIn = {nodes:[],links:[],datamap:tsnedata},dataPCA=[];
     tree.forEach(r=>r.children.forEach(c=>{
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};

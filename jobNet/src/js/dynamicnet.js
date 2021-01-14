@@ -113,6 +113,8 @@ let DynamicNet = function(){
                     d.y = old.y;
                 }
             }else{
+                d._x = undefined;
+                d._y = undefined;
                 d.x = old.x;
                 d.y = old.y;
             }
@@ -439,6 +441,7 @@ let DynamicNet = function(){
                     isFreeze = false;
                     func();
                 }});
+            g.append('g').attr('class','forces');
             g.append('g').attr('class','linkHolder');
             g.append('g').attr('class','nodeHolder');
             simulation = d3.forceSimulation()
@@ -460,6 +463,69 @@ let DynamicNet = function(){
             d3.select(maindiv).append('g').attr('class','brushHolder');
         }
         return master
+    };
+    master.resetZoom = function(){
+        g.call(graphicopt.zoom.transform, d3.zoomIdentity);
+    };
+    function drag4Force(){
+        function dragstarted(d) {
+            d._x = d.x;
+            d._y = d.y;
+        }
+
+        function dragged(d) {
+            d._x = d3.event.x;
+            d._y = d3.event.y;
+            d3.select(this).attr('transform',d=>`translate(${d._x},${d._y})`)
+        }
+
+        function dragended(d) {
+            d.x = d._x;
+            d.y = d._y;
+            updateForce(d.key,[d.x,d.y])
+        }
+
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+    let getDataForce = {};
+    master.addForce = function ({key,pos,_index}){
+        let _pos = [pos[0]-graphicopt.centerX(),
+            pos[1]-graphicopt.centerY()
+        ];
+        const force = g.select('.forces').append('g')
+            .datum({key,x:_pos[0],y:_pos[1]})
+            .attr('transform',d=>`translate(${d.x},${d.y})`)
+            .attr('class','force')
+            .call(drag4Force());
+        force.append('circle').attr('r',4);
+        force.append('text').text(d=>d.key);
+        const getData = function(d,_pos,index){
+            if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>0.8){
+                d['force'+key] = true;
+                return _pos[index]
+            }
+            d['force'+key] = false;
+            return 0;
+        };
+        getDataForce[key] = getData;
+        debugger
+        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+    }
+    function updateForce(key,_pos){
+        const getData = getDataForce[key];
+        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.alphaTarget(0.02).restart();
+    }
+    master.removeForce = function (key){
+        g.select('.forces').filter(d=>d.key===key).remove();
+        node.data().forEach(d=>delete d['force'+key]);
+        simulation.force(key+"X",null);
+        simulation.force(key+"Y",null);
     };
     function ticked() {
         const alpha = simulation.alpha();

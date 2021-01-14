@@ -75,9 +75,32 @@ function initdraw(){
         currentDraw()
     })
     serviceControl();
-    d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)})
+    d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
+    dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#forceLayoutHolder .holder" )[0]])
+        .on('drop',function(el, target, source, sibling){
+            debugger
+            let svgProp = $('#circularLayout')[0].getBoundingClientRect()
+            let posProp = $('.gu-mirror')[0].getBoundingClientRect()
+            d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
+            drawObject.addForce({key:d3.select(el).datum().key,pos:[(posProp.x-svgProp.x),(posProp.y-svgProp.y)],_index:d3.select(el).datum()._index})
+        }).on('drag',function(	el, source){
+            if (d3.select(source).select('svg').empty())
+            drawObject.resetZoom();
+    })
+    initDragItems()
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
     // PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
+}
+function initDragItems(){
+    const data = serviceFullList.map(d=>({key:d.text,_index:d.id,active:false}));
+    d3.select('#forceLayoutHolder .holder')
+        .selectAll('div')
+        .data(data)
+        .join('div')
+        .attr('class','col-12 forceDrag btn btn-primary btn-sm ui-widget-content')
+        .attr('type','button')
+        .text(d=>d.key);
+    $( ".forceDrag" ).draggable({ revert: "invalid" });
 }
 function updateNarration({removedLinks,enterLinks}){
     d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
@@ -242,7 +265,7 @@ function userTable(d,type){
                 }).on('mouseleave', 'tr, .tableCompute', function () {
                     let tr = $(this).closest('tr');
                     d3.select(this).style('font-weight','unset');
-                    svg.classed('onhighlight2',false);
+                    // svg.classed('onhighlight2',false);
                     highlight2Stack.forEach(n=>n.classed('highlight2',false));
                     highlight2Stack = [];
                     table.row( tr ).data().highlight();

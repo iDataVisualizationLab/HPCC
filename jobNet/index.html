@@ -8,6 +8,7 @@
 <!--    <script src="src/lib/jquery-3.2.1.min.js"></script>-->
     <script src="bower_components/jquery-3.5.1.min/index.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="src/lib/dragula.js"></script>
 <!--    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>-->
     <script src="src/lib/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="src/DataTables/datatables.min.js"></script>
@@ -114,17 +115,19 @@
                 </div>
                 <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 116px);width: 100%; margin: 0px">
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
-                    <svg id="circularLayout">
-                        <defs>
-                            <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
-                                <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur"></feMergeNode>
-                                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                                </feMerge>
-                            </filter>
-                        </defs>
-                    </svg>
+                    <div class="dropHolder">
+                        <svg id="circularLayout">
+                            <defs>
+                                <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
+                                    <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur"></feMergeNode>
+                                        <feMergeNode in="SourceGraphic"></feMergeNode>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                        </svg>
+                    </div>
                     <svg id="pcaLayout">
                         <defs>
                             <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
@@ -178,6 +181,7 @@
                         <ul class="nav nav-tabs">
                             <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#narrationHolder">Narrations</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#forceLayoutHolder">Force Layout</a></li>
                         </ul>
                         <div class="card-body row">
                             <div class="card-body row tab-content">
@@ -283,6 +287,19 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div id="forceLayoutHolder" class="tab-pane fade col-12" role="tabpanel">
+                                    <div class="row">
+                                        <label for="forceType" class="col-4 radarcontroller_layout"> Force Layout:</label>
+                                        <select id="forceType" class="col-8 radarcontroller_layout">
+                                            <option value="metric" selected="selected">by Metrics</option>
+                                            <option value="rack">by Racks</option>
+                                        </select>
+                                        <div class="holder">
+
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -331,6 +348,7 @@
     </div>
     <link id="theme" rel="stylesheet" href="src/style/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="src/DataTables/DataTables-1.10.21/css/dataTables.bootstrap4.css"/>
+    <link rel="stylesheet" type="text/css" href="src/style/dragula.css"/>
     <link rel="stylesheet" href="src/style/main.css">
     <link rel="stylesheet" href="src/style/graph.css">
     <link rel="stylesheet" href="src/style/clusterMap.css">
