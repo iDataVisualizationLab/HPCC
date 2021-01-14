@@ -444,8 +444,9 @@ let DynamicNet = function(){
                     func();
                 }});
             g.append('g').attr('class','forces');
-            g.append('g').attr('class','linkHolder');
-            g.append('g').attr('class','nodeHolder');
+            const network = g.append('g').attr('class','network');
+            network.append('g').attr('class','linkHolder');
+            network.append('g').attr('class','nodeHolder');
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
@@ -473,18 +474,20 @@ let DynamicNet = function(){
         function dragstarted(d) {
             d._x = d.x;
             d._y = d.y;
+            g.select('.network').style('pointer-events','none');
         }
 
         function dragged(d) {
             d._x = d3.event.x;
             d._y = d3.event.y;
-            d3.select(this).attr('transform',d=>`translate(${d._x},${d._y})`)
+            d3.select(this).attr('transform',d=>`translate(${d._x-d.width/2},${d._y-d.height/2})`)
         }
 
         function dragended(d) {
             d.x = d._x;
             d.y = d._y;
             updateForce(d.key,[d.x,d.y])
+            g.select('.network').style('pointer-events','all');
         }
 
         return d3.drag()
@@ -493,17 +496,26 @@ let DynamicNet = function(){
             .on("end", dragended);
     }
     let getDataForce = {};
-    master.addForce = function ({key,pos,_index}){
-        let _pos = [pos[0]-graphicopt.centerX(),
-            pos[1]-graphicopt.centerY()
+    master.addForce = function ({key,posProp,_index}){
+        let _pos = [posProp.x-graphicopt.centerX()-graphicopt.margin.left+posProp.width/2,
+            posProp.y-graphicopt.centerY()-graphicopt.margin.top+posProp.height/2
         ];
         const force = g.select('.forces').append('g')
-            .datum({key,x:_pos[0],y:_pos[1]})
-            .attr('transform',d=>`translate(${d.x},${d.y})`)
-            .attr('class','force')
+            .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
+            .attr('transform',d=>`translate(${d.x-d.width/2},${d.y-d.height/2})`)
+            .attr('class','force btn')
             .call(drag4Force());
-        force.append('circle').attr('r',4);
-        force.append('text').text(d=>d.key);
+        debugger
+        force.append('rect')
+            .attr('class','forceDrag')
+            .attr('width',posProp.width)
+            .attr('height',posProp.height);
+        const text = force.append('text')
+            .attr('y',posProp.height/2)
+            .attr('x',posProp.width/2)
+            .attr('text-anchor','middle')
+            .attr('dy','0.5rem')
+            .text(d=>d.key);
         const getData = function(d,_pos,index){
             if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>0.8){
                 d['force'+key] = true;

@@ -78,11 +78,10 @@ function initdraw(){
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
     dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#forceLayoutHolder .holder" )[0]])
         .on('drop',function(el, target, source, sibling){
-            debugger
             let svgProp = $('#circularLayout')[0].getBoundingClientRect()
             let posProp = $('.gu-mirror')[0].getBoundingClientRect()
             d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-            drawObject.addForce({key:d3.select(el).datum().key,pos:[(posProp.x-svgProp.x),(posProp.y-svgProp.y)],_index:d3.select(el).datum()._index})
+            drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y)},_index:d3.select(el).datum()._index})
         }).on('drag',function(	el, source){
             if (d3.select(source).select('svg').empty())
             drawObject.resetZoom();
@@ -93,11 +92,11 @@ function initdraw(){
 }
 function initDragItems(){
     const data = serviceFullList.map(d=>({key:d.text,_index:d.id,active:false}));
-    d3.select('#forceLayoutHolder .holder')
+    d3.select('#ForceByMetrics')
         .selectAll('div')
         .data(data)
         .join('div')
-        .attr('class','col-12 forceDrag btn btn-primary btn-sm ui-widget-content')
+        .attr('class','col-12 forceDrag btn btn-sm ui-widget-content')
         .attr('type','button')
         .text(d=>d.key);
     $( ".forceDrag" ).draggable({ revert: "invalid" });
@@ -128,7 +127,6 @@ function updateNarration({removedLinks,enterLinks}){
 }
 function userTable(d,type){
     if (drawObject.isFreeze) {
-        debugger
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
         contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.id));
@@ -448,10 +446,8 @@ function getColorScale(){
             .interpolator(d3.interpolateSpectral);
         if(serviceName==='User') {
             vizservice[serviceSelected].range = d3.keys(innerObj);
-            debugger
             _colorItem = userColor;
         } else if (serviceName==='Radar') {
-            debugger
             _colorItem = colorCluster;
         }
         const range_cal = (vizservice[serviceSelected].filter||vizservice[serviceSelected].range).slice();
@@ -658,7 +654,6 @@ function getDrawData(e) {
 }
 function openPopup(d,svg){
     if (drawObject.isFreeze()) {
-        debugger
         const cloned = svg.clone(true);
         cloned.attr('id',null).attr('class','svgClone').style('position','relative');
         const parent = d3.select(svg.node().parentNode).append('div');

@@ -289,14 +289,17 @@
                                 </div>
                                 <div id="forceLayoutHolder" class="tab-pane fade col-12" role="tabpanel">
                                     <div class="row">
-                                        <label for="forceType" class="col-4 radarcontroller_layout"> Force Layout:</label>
-                                        <select id="forceType" class="col-8 radarcontroller_layout">
-                                            <option value="metric" selected="selected">by Metrics</option>
-                                            <option value="rack">by Racks</option>
-                                        </select>
-                                        <div class="holder">
-
-
+                                        <ul class="nav nav-tabs">
+                                            <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#ForceByMetrics">by Metrics</a></li>
+                                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#ForceByRacks">by Racks</a></li>
+                                        </ul>
+                                        <div class="card-body row">
+                                            <div class="card-body row tab-content justify-content-md-center">
+                                                <div id="ForceByMetrics" class="tab-pane fade show active col-8 holder" role="tabpanel">
+                                                </div>
+                                                <div id="ForceByRacks" class="tab-pane fade col-8 holder" role="tabpanel">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

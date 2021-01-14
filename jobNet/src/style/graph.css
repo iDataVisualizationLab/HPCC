@@ -137,12 +137,27 @@ text {
 }
 
 #forceLayoutHolder .holder .forceDrag{
-    margin: 2px
+    margin: 2px;
+}
+.forceDrag{
+    border-radius:10px;
+    border: 0.5px solid #888888;
+    background-color: #ddd;
+    color: black;
+    cursor: move;
+    width: 168px;
+
+    fill: #ddd;
+    rx: 10;
+    stroke: #888888;
+    stroke-width: 0.5;
+}
+.forceDrag:hover {
+    background-color: #b8b8b8;
 }
 .dropHolder {
     position: relative;
 }
 .dropHolder .forceDrag{
     position: absolute;
-    width: 100px;
 }
