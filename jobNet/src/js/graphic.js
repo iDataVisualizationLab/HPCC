@@ -78,14 +78,15 @@ function initdraw(){
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
     dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#forceLayoutHolder .holder" )[0]])
         .on('drop',function(el, target, source, sibling){
-            let svgProp = $('#circularLayout')[0].getBoundingClientRect()
-            let posProp = $('.gu-mirror')[0].getBoundingClientRect()
-            d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-            debugger
-            drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
+            if (!d3.select(target).select('svg').empty()){
+                let svgProp = $('#circularLayout')[0].getBoundingClientRect()
+                let posProp = $('.gu-mirror')[0].getBoundingClientRect()
+                d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
+                drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
+            }
         }).on('drag',function(	el, source){
             if (d3.select(source).select('svg').empty())
-            drawObject.resetZoom();
+                drawObject.resetZoom();
     })
     initDragItems()
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
