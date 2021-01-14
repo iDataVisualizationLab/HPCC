@@ -100,7 +100,7 @@ function initDragItems(){
         .join('div')
         .attr('class','col-12 forceDrag btn btn-sm ui-widget-content')
         .attr('type','button')
-        .text(d=>d.key);
+        .html(d=>`${d.key} <input type="number"/>`);
     $( ".forceDrag" ).draggable({ revert: "invalid" });
 }
 function updateNarration({removedLinks,enterLinks}){

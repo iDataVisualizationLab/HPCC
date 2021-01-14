@@ -116,7 +116,7 @@ class Timeline{
             self.step(self.timeConf.scale.invert(value));
         }
     }
-    #updateTick(){
+    updateTick(){
         if (this.timeConf.scale.domain()[0]-this.timeConf.scale.domain()[1])
        {
             const ticks = this.timeConf.scale.ticks()
