@@ -41,7 +41,8 @@ let DynamicNet = function(){
             schema:serviceFullList
         },
         trajectory:{bandwidth:10,thresholds:10,colorScheme:"interpolateViridis"},
-        actionMode:'zoom'
+        actionMode:'zoom',
+        PCAlayout: false
     };
 
     let maindiv='#circularLayout';
@@ -87,11 +88,14 @@ let DynamicNet = function(){
         graphicopt.radaropt.w = miniradius*2;
         graphicopt.radaropt.h = miniradius*2;
         let {nodes,links,datamap} = data;
-        let {xscale,yscale,solution} = calculate({dataIn:Object.values(datamap).map(d=>d[0].map(d=>d?(d<0?0:d):0))});
-        Object.keys(datamap).forEach((d,i)=>{
-            datamap[d].x = xscale(solution[i][0]);
-            datamap[d].y = yscale(solution[i][1]);
-        })
+        if (graphicopt.PCAlayout){
+            let {xscale,yscale,solution} = calculate({dataIn:Object.values(datamap).map(d=>d[0].map(d=>d?(d<0?0:d):0))});
+            Object.keys(datamap).forEach((d,i)=>{
+                datamap[d].x = xscale(solution[i][0]);
+                datamap[d].y = yscale(solution[i][1]);
+            })
+        }else
+            datamap={}
         if (node&&link) // new
         {
             const olds = new Map(node.data().map(d => [d.id, d]));
@@ -649,6 +653,7 @@ let DynamicNet = function(){
         g.selectAll('.element.highlight2')
             .classed('highlight2', false);
     };
+    master.PCAlayout = function(d){graphicopt.PCAlayout = d};
     master.drawTrajectory = function(d,data){
         data = data||Layout.ranking.byComputer[d.name][serviceName]
         master.current_trajectory_data = {g,d,data:data};
