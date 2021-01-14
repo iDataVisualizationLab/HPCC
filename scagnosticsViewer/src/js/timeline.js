@@ -81,7 +81,7 @@ class Timeline{
         this.timelineTicks = this.timelineHolder
             .append('div').attr('class','ticksHandeler')
             .style('position','relative').style('width','100%');
-        this.#updateTick();
+        this.updateTick();
         this.#updateViolin();
         this.meassageHolder = this.el.append('div')
             .attr('class','message align-items-center row')
@@ -193,7 +193,7 @@ class Timeline{
     }
     domain(domain){
         this.timeConf.scale.domain(domain);
-        this.#updateTick();
+        this.updateTick();
     }
     update(value){
         if (_.isDate(value))
