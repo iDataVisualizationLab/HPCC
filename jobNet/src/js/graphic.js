@@ -81,7 +81,8 @@ function initdraw(){
             let svgProp = $('#circularLayout')[0].getBoundingClientRect()
             let posProp = $('.gu-mirror')[0].getBoundingClientRect()
             d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-            drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y)},_index:d3.select(el).datum()._index})
+            debugger
+            drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
         }).on('drag',function(	el, source){
             if (d3.select(source).select('svg').empty())
             drawObject.resetZoom();

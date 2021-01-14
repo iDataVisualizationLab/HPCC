@@ -480,7 +480,9 @@ let DynamicNet = function(){
         function dragged(d) {
             d._x = d3.event.x;
             d._y = d3.event.y;
-            d3.select(this).attr('transform',d=>`translate(${d._x-d.width/2},${d._y-d.height/2})`)
+            // d3.select(this).attr('transform',d=>`translate(${d._x-d.width/2},${d._y-d.height/2})`)
+            d3.select(this).attr('x',d=>d._x-d.width/2)
+                .attr('y',d=>d._y-d.height/2)
         }
 
         function dragended(d) {
@@ -500,22 +502,32 @@ let DynamicNet = function(){
         let _pos = [posProp.x-graphicopt.centerX()-graphicopt.margin.left+posProp.width/2,
             posProp.y-graphicopt.centerY()-graphicopt.margin.top+posProp.height/2
         ];
-        const force = g.select('.forces').append('g')
+        // const force = g.select('.forces').append('g')
+        //     .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
+        //     .attr('transform',d=>`translate(${d.x-d.width/2},${d.y-d.height/2})`)
+        //     .attr('class','force btn')
+        //     .call(drag4Force());
+        // debugger
+        // force.append('rect')
+        //     .attr('class','forceDrag')
+        //     .attr('width',posProp.width)
+        //     .attr('height',posProp.height);
+        // force.append('text')
+        //     .attr('y',posProp.height/2)
+        //     .attr('x',posProp.width/2)
+        //     .attr('text-anchor','middle')
+        //     .attr('dy','0.5rem')
+        //     .text(d=>d.key);
+        const force = g.select('.forces').append('foreignObject')
             .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
-            .attr('transform',d=>`translate(${d.x-d.width/2},${d.y-d.height/2})`)
-            .attr('class','force btn')
+            .attr('x',d=>d.x-d.width/2)
+            .attr('y',d=>d.y-d.height/2)
+            .attr('width',d=>d.width)
+            .attr('height',d=>d.height)
             .call(drag4Force());
-        debugger
-        force.append('rect')
-            .attr('class','forceDrag')
-            .attr('width',posProp.width)
-            .attr('height',posProp.height);
-        const text = force.append('text')
-            .attr('y',posProp.height/2)
-            .attr('x',posProp.width/2)
-            .attr('text-anchor','middle')
-            .attr('dy','0.5rem')
-            .text(d=>d.key);
+        force.html(posProp.outerHTML);
+        force.select('.forceDrag').attr('xmlns','http://www.w3.org/1999/xhtml').style('display','block').style('top',null).style('left',null)
+
         const getData = function(d,_pos,index){
             if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>0.8){
                 d['force'+key] = true;

@@ -158,6 +158,7 @@ text {
 .dropHolder {
     position: relative;
 }
-.dropHolder .forceDrag{
+.dropHolder div.forceDrag{
     position: absolute;
+    display: none
 }
