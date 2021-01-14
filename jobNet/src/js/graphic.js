@@ -79,13 +79,16 @@ function initdraw(){
     // PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
 }
 function updateNarration({removedLinks,enterLinks}){
-    d3.select('#narrationHolder tbody').selectAll('tr.enter').data(d3.nest().key(d=>d.target.id).entries(enterLinks))
+    d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
+    d3.select('#narrationHolder .current h5').text(Layout.currentTime.toLocaleString())
+    d3.select('#narrationHolder .current tbody')
+        .selectAll('tr.enter').data(d3.nest().key(d=>d.target.id).entries(enterLinks))
         .join('tr').attr('class','enter')
         .selectAll('td')
         .data(d=>[d.key,'starts using',renderCell(d,d.values.map(e=>e.source.id))])
         .join('td')
             .html(d=>d);
-    d3.select('#narrationHolder tbody').selectAll('tr.exit').data(d3.nest().key(d=>d.target.id).entries(removedLinks))
+    d3.select('#narrationHolder .current tbody').selectAll('tr.exit').data(d3.nest().key(d=>d.target.id).entries(removedLinks))
         .join('tr').attr('class','exit')
         .selectAll('td')
         .data(d=>[d.key,'releases',renderCell(d,d.values.map(e=>e.source.id))])

@@ -103,7 +103,8 @@ function data2tree(data,sampleS,computers){
                             metrics_delta:{},
                             isNew:computers?computers[c].isNew:[],
                             user: computers?computers[c].user:[],
-                            jobName: computers?computers[c].jobName:[]
+                            jobName: computers?computers[c].jobName:[],
+                            // jobs: computers?computers[c].jobs:[],
                         };
                         if (sampleS){
                             serviceFullList.forEach(s=>item.metrics[s.text]=_.last(sampleS[c][serviceListattr[s.idroot]])[s.id]);
@@ -172,15 +173,15 @@ function queryData(data) {
     currentDraw = ()=>{
         drawObject.draw();
     };
-    createdata({computers,jobs,users,jobByNames,sampleS});
+    createdata({tree:Layout.tree.children,computers,jobs,users,jobByNames,sampleS});
     // _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     // currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     // currentDraw(serviceSelected);
     currentDraw();
 }
-function createdata({computers,jobs,users,jobByNames,sampleS}){
+function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
     let dataIn = {nodes:[],links:[],datamap:tsnedata},dataPCA=[];
-    Layout.tree.children.forEach(r=>r.children.forEach(c=>{
+    tree.forEach(r=>r.children.forEach(c=>{
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
         // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
@@ -190,7 +191,18 @@ function createdata({computers,jobs,users,jobByNames,sampleS}){
         }
         dataIn.nodes.push(data);
         // dataPCA.push({id:c.name,type:'compute',data:c,value:getData(c),pca:tsnedata[c.name][0],key:c.name,drawData:data.drawData });
-        c.user.forEach(u=>dataIn.links.push({source:c.name,target:u}));
+
+        const userL = {};
+        const jobL = {};
+        computers[c.name].job_id[0].forEach(d=>{
+            if (!jobL[d] && jobs[d]){
+                if (!userL[jobs[d].user_name])
+                    userL[jobs[d].user_name] = 0;
+                userL[jobs[d].user_name] ++;
+                jobL[d] = true;
+            }
+        });
+        d3.entries(userL).forEach(u=>dataIn.links.push({source:c.name,target:u.key,value:u.value}));
     }));
     Object.keys(users).forEach(u=>{
         dataIn.nodes.push({id:u,type:'user',data:users[u],drawData:[{

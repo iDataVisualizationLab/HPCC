@@ -204,7 +204,8 @@ let DynamicNet = function(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
 
-
+        let linkScale = d3.scaleLinear().range([0.2,2]).domain(d3.extent(links,d=>d.value||0));
+        debugger
         link = g.select('g.linkHolder').selectAll(".links")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
@@ -224,9 +225,9 @@ let DynamicNet = function(){
                 });
 
                 return enter.append('line').attr('class','links')
-                .attr("stroke", "#000").attr('opacity',1)
-                .attr("stroke-width", 0.2)
-            },update=>update,exit=>{
+                .attr("stroke", "rgba(0,0,0,0.53)").attr('opacity',1)
+                .attr("stroke-width", d=>linkScale(d.value))
+            },update=>update.attr("stroke-width", d=>linkScale(d.value)),exit=>{
                 removedLinks = exit.data();
                 exit.transition().attr('opacity',0).remove();
             });
@@ -449,7 +450,6 @@ let DynamicNet = function(){
         return master
     };
     function ticked() {
-        debugger
         const alpha = simulation.alpha();
         node.attr("transform", d=>{
             if (d._x!==undefined && !d.isolate){
