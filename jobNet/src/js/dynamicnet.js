@@ -525,27 +525,43 @@ let DynamicNet = function(){
             .attr('width',d=>d.width)
             .attr('height',d=>d.height)
             .call(drag4Force());
-        force.html(posProp.outerHTML);
+        force.node().appendChild(posProp.el)
+        // force.html(posProp.outerHTML);
         force.select('.forceDrag').attr('xmlns','http://www.w3.org/1999/xhtml')
             .classed('gu-transit',false)
             .classed('insvg',true)
-            .style('display','block').style('top',null).style('left',null)
+            .style('display','block').style('top',null).style('left',null);
+        const input = force.select('input.threshold');
+        const min = +input.attr('min');
+        const max = +input.attr('max');
+        input.on('change',function(){
+            if (getDataForce[key]){
+                const d = force.datum();
+                const val = value2thresh(+this.value,min, max);
+                getDataForce[key].threshold = val;
+                updateForce(key,[d.x,d.y]);
+            }
+        });
 
+        getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
         const getData = function(d,_pos,index){
-            if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>0.8){
+            if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>getDataForce[key].threshold){
                 d['force'+key] = true;
                 return _pos[index]
             }
             d['force'+key] = false;
             return 0;
         };
-        getDataForce[key] = getData;
-        debugger
+        getDataForce[key].getData=getData;
+
         simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
         simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
     }
+    function value2thresh(value,min,max){
+        return (value-min)/(max-min);
+    }
     function updateForce(key,_pos){
-        const getData = getDataForce[key];
+        const getData = getDataForce[key].getData;
         simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
         simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
         simulation.alphaTarget(0.02).restart();

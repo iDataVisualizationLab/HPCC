@@ -82,7 +82,8 @@ function initdraw(){
                 let svgProp = $('#circularLayout')[0].getBoundingClientRect()
                 let posProp = $('.gu-mirror')[0].getBoundingClientRect()
                 d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-                drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
+                drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),el:$(el).clone()[0]},_index:d3.select(el).datum()._index})
+                // drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
             }
         }).on('drag',function(	el, source){
             if (d3.select(source).select('svg').empty())
@@ -93,14 +94,14 @@ function initdraw(){
     // PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
 }
 function initDragItems(){
-    const data = serviceFullList.map(d=>({key:d.text,_index:d.id,active:false}));
+    const data = serviceFullList.map(d=>({key:d.text,_index:d.id,active:false,range:d.range}));
     d3.select('#ForceByMetrics')
         .selectAll('div')
         .data(data)
         .join('div')
         .attr('class','col-12 forceDrag btn btn-sm ui-widget-content')
         .attr('type','button')
-        .html(d=>`${d.key} <input type="number"/>`);
+        .html(d=>`${d.key} <input class="threshold" type="number" min="${d.range[0]}" max="${d.range[1]}" style="width:50px" value="${Math.round((d.range[1]-d.range[0])*0.8+d.range[0])}"/>`);
     $( ".forceDrag" ).draggable({ revert: "invalid" });
 }
 function updateNarration({removedLinks,enterLinks}){
