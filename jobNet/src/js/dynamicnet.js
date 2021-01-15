@@ -474,7 +474,13 @@ let DynamicNet = function(){
         function dragstarted(d) {
             d._x = d.x;
             d._y = d.y;
+            d._mirror = $(d._el).clone()[0];
+            document.body.appendChild(d._mirror)
             g.select('.network').style('pointer-events','none');
+            const pos = this.getBoundingClientRect();
+            d3.select(d._mirror).classed('gu-mirror',true).style('left',pos.left+'px').style('top',pos.top+'px');
+            _drake.start(d._mirror);
+            d3.select(this).attr('opacity',0)
         }
 
         function dragged(d) {
@@ -482,14 +488,26 @@ let DynamicNet = function(){
             d._y = d3.event.y;
             // d3.select(this).attr('transform',d=>`translate(${d._x-d.width/2},${d._y-d.height/2})`)
             d3.select(this).attr('x',d=>d._x-d.width/2)
-                .attr('y',d=>d._y-d.height/2)
+                .attr('y',d=>d._y-d.height/2);
+            const pos = this.getBoundingClientRect();
+            const sourcepos = d.source.getBoundingClientRect();
+            d3.select(d._mirror).style('left',pos.left+'px').style('top',pos.top+'px');
+            d.remove = (pos.left>=sourcepos.left)&&((pos.left)<=(sourcepos.left+sourcepos.width))&&(pos.top>=sourcepos.top)&&((pos.top)<=(sourcepos.top+sourcepos.height));
         }
 
         function dragended(d) {
-            d.x = d._x;
-            d.y = d._y;
-            updateForce(d.key,[d.x,d.y])
             g.select('.network').style('pointer-events','all');
+            d3.select(d._mirror).remove();
+            if (d.remove){
+                d.source.appendChild(d._el);
+                master.removeForce(d.key);
+            }else{
+                d.x = d._x;
+                d.y = d._y;
+                updateForce(d.key,[d.x,d.y]);
+                _drake.end();
+                d3.select(this).attr('opacity',1);
+            }
         }
 
         return d3.drag()
@@ -498,10 +516,12 @@ let DynamicNet = function(){
             .on("end", dragended);
     }
     let getDataForce = {};
-    master.addForce = function ({key,posProp,_index}){
+    let _drake = {};
+    master.addForce = function ({key,drake,posProp,_index}){
         let _pos = [posProp.x-graphicopt.centerX()-graphicopt.margin.left+posProp.width/2,
             posProp.y-graphicopt.centerY()-graphicopt.margin.top+posProp.height/2
         ];
+        _drake = drake;
         // const force = g.select('.forces').append('g')
         //     .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
         //     .attr('transform',d=>`translate(${d.x-d.width/2},${d.y-d.height/2})`)
@@ -519,7 +539,8 @@ let DynamicNet = function(){
         //     .attr('dy','0.5rem')
         //     .text(d=>d.key);
         const force = g.select('.forces').append('foreignObject')
-            .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
+            .attr('class','forceSvg')
+            .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height,_el:posProp._el,source:posProp.source})
             .attr('x',d=>d.x-d.width/2)
             .attr('y',d=>d.y-d.height/2)
             .attr('width',d=>d.width)
@@ -567,7 +588,7 @@ let DynamicNet = function(){
         simulation.alphaTarget(0.02).restart();
     }
     master.removeForce = function (key){
-        g.select('.forces').filter(d=>d.key===key).remove();
+        g.select('.forces').selectAll('.forceSvg').filter(d=>d.key===key).remove();
         node.data().forEach(d=>delete d['force'+key]);
         simulation.force(key+"X",null);
         simulation.force(key+"Y",null);
