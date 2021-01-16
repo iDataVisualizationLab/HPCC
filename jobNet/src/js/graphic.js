@@ -76,36 +76,60 @@ function initdraw(){
     })
     serviceControl();
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
-    const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#forceLayoutHolder .holder" )[0]])
+    const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0]])
         .on('drop',function(el, target, source, sibling){
             console.log('drop-------------->')
+            debugger
             if (!d3.select(target).select('svg').empty()){
                 let svgProp = $('#circularLayout')[0].getBoundingClientRect()
                 let posProp = $('.gu-mirror')[0].getBoundingClientRect()
                 d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-                drawObject.addForce({key:d3.select(el).datum().key,drake,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),source:source,_el:el,el:$(el).clone()[0]},_index:d3.select(el).datum()._index})
-                // drawObject.addForce({key:d3.select(el).datum().key,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),outerHTML:el.outerHTML},_index:d3.select(el).datum()._index})
+                const mode = source.id==='ForceByMetrics'?'metric':'rack';
+                drawObject.addForce({key:d3.select(el).datum().key,drake,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),source:source,_el:el,el:$(el).clone()[0],_index:d3.select(el).datum()._index},mode})
             }
-            debugger
         }).on('drag',function(	el, source){
             if (d3.select(source).select('svg').empty())
                 drawObject.resetZoom();
             console.log('drag-------------->')
+    });
+    $('#ForceByControl a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        e.target // newly activated tab
+        e.relatedTarget // previous active tab
+        debugger
+        if (d3.select(e.target).attr('href')==='#ForceByMetrics'){
+            // metrics
+            initDragItems(d3.select(e.target).attr('href'),'metric');
+        }else{
+            // racks
+            initDragItems(d3.select(e.target).attr('href'),'rack');
+        }
     })
-    initDragItems()
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend).onFinishDraw(updateNarration);
+    initDragItems('#ForceByMetrics','metric');
     // PCAmapObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
 }
-function initDragItems(){
-    const data = serviceFullList.map(d=>({key:d.text,_index:d.id,active:false,range:d.range}));
-    d3.select('#ForceByMetrics')
-        .selectAll('div')
-        .data(data)
-        .join('div')
-        .attr('class','col-12 forceDrag btn btn-sm')
-        .attr('type','button')
-        .html(d=>`${d.key} <input class="threshold" type="number" min="${d.range[0]}" max="${d.range[1]}" style="width:50px" value="${Math.round((d.range[1]-d.range[0])*0.8+d.range[0])}"/>`);
-    $( ".forceDrag" ).draggable({ revert: "invalid" });
+function initDragItems(id,mode){
+    d3.select('.dropHolder').selectAll('.forceDrag').remove();
+    drawObject.removeAllForce();
+    if (mode==='metric'){
+        const data = serviceFullList.map(d=>({key:d.text,_index:d.id,range:d.range}));
+        d3.select(id)
+            .selectAll('div')
+            .data(data)
+            .join('div')
+            .attr('class','col-12 forceDrag btn btn-sm')
+            .attr('type','button')
+            .html(d=>`${d.key} <input class="threshold" type="number" min="${d.range[0]}" max="${d.range[1]}" style="width:50px" value="${Math.round((d.range[1]-d.range[0])*0.8+d.range[0])}"/>`);
+    }else{
+        const data = Layout.data_flat.map(d=>({key:d.key}));
+        d3.select(id)
+            .selectAll('div')
+            .data(data)
+            .join('div')
+            .attr('class','col-12 forceDrag btn btn-sm')
+            .attr('type','button')
+            .html(d=>`${d.key}`);
+    }
 }
 function updateNarration({removedLinks,enterLinks}){
     d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());

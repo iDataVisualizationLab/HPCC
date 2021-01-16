@@ -517,27 +517,11 @@ let DynamicNet = function(){
     }
     let getDataForce = {};
     let _drake = {};
-    master.addForce = function ({key,drake,posProp,_index}){
+    master.addForce = function ({key,drake,posProp,mode}){
         let _pos = [posProp.x-graphicopt.centerX()-graphicopt.margin.left+posProp.width/2,
             posProp.y-graphicopt.centerY()-graphicopt.margin.top+posProp.height/2
         ];
         _drake = drake;
-        // const force = g.select('.forces').append('g')
-        //     .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height})
-        //     .attr('transform',d=>`translate(${d.x-d.width/2},${d.y-d.height/2})`)
-        //     .attr('class','force btn')
-        //     .call(drag4Force());
-        // debugger
-        // force.append('rect')
-        //     .attr('class','forceDrag')
-        //     .attr('width',posProp.width)
-        //     .attr('height',posProp.height);
-        // force.append('text')
-        //     .attr('y',posProp.height/2)
-        //     .attr('x',posProp.width/2)
-        //     .attr('text-anchor','middle')
-        //     .attr('dy','0.5rem')
-        //     .text(d=>d.key);
         const force = g.select('.forces').append('foreignObject')
             .attr('class','forceSvg')
             .datum({key,x:_pos[0],y:_pos[1],width:posProp.width,height:posProp.height,_el:posProp._el,source:posProp.source})
@@ -552,31 +536,44 @@ let DynamicNet = function(){
             .classed('gu-transit',false)
             .classed('insvg',true)
             .style('display','block').style('top',null).style('left',null);
-        const input = force.select('input.threshold');
-        const min = +input.attr('min');
-        const max = +input.attr('max');
-        input.on('change',function(){
-            if (getDataForce[key]){
-                const d = force.datum();
-                const val = value2thresh(+this.value,min, max);
-                getDataForce[key].threshold = val;
-                updateForce(key,[d.x,d.y]);
-            }
-        });
+        if (mode==='metric'){
+            const input = force.select('input.threshold');
+            const min = +input.attr('min');
+            const max = +input.attr('max');
+            input.on('change',function(){
+                if (getDataForce[key]){
+                    const d = force.datum();
+                    d3.select(d._el).select('input').node().value = this.value;
+                    const val = value2thresh(+this.value,min, max);
+                    getDataForce[key].threshold = val;
+                    updateForce(key,[d.x,d.y]);
+                }
+            });
 
-        getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
-        const getData = function(d,_pos,index){
-            if (data.datamap[d.id]&&data.datamap[d.id][0][_index]>getDataForce[key].threshold){
-                d['force'+key] = true;
-                return _pos[index]
-            }
-            d['force'+key] = false;
-            return 0;
-        };
-        getDataForce[key].getData=getData;
-
-        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
-        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+            getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
+            const getData = function(d,_pos,index){
+                if (data.datamap[d.id]&&data.datamap[d.id][0][posProp._index]>getDataForce[key].threshold){
+                    d['force'+key] = true;
+                    return _pos[index]
+                }
+                d['force'+key] = false;
+                return 0;
+            };
+            getDataForce[key].getData=getData;
+        }else{
+            getDataForce[key] = {};
+            const getData = function(d,_pos,index){
+                if (Layout.compute_layout[d.id]===key){
+                    d['force'+key] = true;
+                    return _pos[index]
+                }
+                d['force'+key] = false;
+                return 0;
+            };
+            getDataForce[key].getData=getData;
+        }
+        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
     }
     function value2thresh(value,min,max){
         return (value-min)/(max-min);
@@ -592,6 +589,10 @@ let DynamicNet = function(){
         node.data().forEach(d=>delete d['force'+key]);
         simulation.force(key+"X",null);
         simulation.force(key+"Y",null);
+        delete getDataForce[key];
+    };
+    master.removeAllForce = function(){
+        Object.keys(getDataForce).forEach(master.removeForce);
     };
     function ticked() {
         const alpha = simulation.alpha();
