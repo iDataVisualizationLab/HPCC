@@ -203,7 +203,7 @@ let DynamicNet = function(){
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
-                    if (d.target.value.isNew.length){
+                    if (d.target.data.isNew.length){
                         if (!labelsM.get(d.id))
                             labels.push(d.source);
                         else
@@ -284,7 +284,7 @@ let DynamicNet = function(){
                     .text(d => d.key).merge(label);
                 label.each(function(d){
                     if (!d.children)
-                        d.value.tooltip = d3.select(this);
+                        d.data.tooltip = d3.select(this);
                 });
                 label.style('fill','#000').style('text-shadow','#fff 1px 1px 0px');
 
@@ -305,7 +305,7 @@ let DynamicNet = function(){
                         .attr("x","-150%")
                         .attr("y","-150%")
                         .attr("height","400%")
-                        .attr('id',d=>'c'+d.value.currentID)
+                        .attr('id',d=>'c'+d.data.currentID)
                         .html(`<feGaussianBlur class="blur" stdDeviation="2" result="coloredBlur1"></feGaussianBlur>
                         <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur2"></feGaussianBlur>
                         <feGaussianBlur class="blur" stdDeviation="5" result="coloredBlur3"></feGaussianBlur>
@@ -321,20 +321,20 @@ let DynamicNet = function(){
                 zoomTo(istransition);
                 return childrenNode;
                 function updateNode(node) {
-                    node.each(function(d){childrenNode[d.value.name] = d3.select(this)})
+                    node.each(function(d){childrenNode[d.data.name] = d3.select(this)})
                     node
                         .attr('class','element')
                         .classed('compute', true)
                         .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,d.type);master.click.forEach(f=>f());})
                         .on("mouseover", function(d){mouseover.bind(this)(d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d)})
-                        .style('filter',d=>d.value.highlight?`url(#${'c'+d.value.currentID}`:null)
+                        .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
                         .attr("fill", d => {
                                 d.color = color(d.value,d);
                                 return d.color;
                         })
                         // .style('stroke-width',d=>{
-                        //     return circleStrokeScale(d.value.relatedNodes.length);
+                        //     return circleStrokeScale(d.data.relatedNodes.length);
                         // });
                     return node;
                 }

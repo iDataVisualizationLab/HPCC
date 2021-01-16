@@ -678,7 +678,7 @@ function getDrawData(e) {
             color: e.data.relatedNodes[0]?e.data.relatedNodes[0].data.color:'unset'
         }]
     }else{
-        const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.value.invalid}];
+        const dataout =  [{startAngle:0,endAngle:360,r:e.r,invalid: e.invalid}];
         return dataout;
     }
 }

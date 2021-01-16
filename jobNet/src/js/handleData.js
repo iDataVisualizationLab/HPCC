@@ -210,7 +210,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         d3.entries(userL).forEach(u=>dataIn.links.push({source:c.name,target:u.key,value:u.value}));
     }));
     Object.keys(users).forEach(u=>{
-        dataIn.nodes.push({id:u,type:'user',value:users[u],drawData:[{
+        dataIn.nodes.push({id:u,type:'user',data:users[u],value:u,drawData:[{
                 invalid: undefined,
                 scale:1,
                 offset:-8,
