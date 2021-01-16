@@ -111,7 +111,7 @@ function initDragItems(id,mode){
     d3.select('.dropHolder').selectAll('.forceDrag').remove();
     drawObject.removeAllForce();
     if (mode==='metric'){
-        const data = serviceFullList.map(d=>({key:d.text,_index:d.idroot,range:d.range}));
+        const data = serviceFullList.map((d,i)=>({key:d.text,_index:i,range:d.range}));
         debugger
         d3.select(id)
             .selectAll('div')
