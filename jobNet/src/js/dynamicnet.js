@@ -474,7 +474,7 @@ let DynamicNet = function(){
         function dragstarted(d) {
             d._x = d.x;
             d._y = d.y;
-            d._mirror = $(d._el).clone()[0];
+            d._mirror = $(d._el).clone(true)[0];
             document.body.appendChild(d._mirror)
             g.select('.network').style('pointer-events','none');
             const pos = this.getBoundingClientRect();
@@ -549,7 +549,7 @@ let DynamicNet = function(){
                     updateForce(key,[d.x,d.y]);
                 }
             });
-
+            debugger
             getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
             const getData = function(d,_pos,index){
                 if (data.datamap[d.id]&&data.datamap[d.id][0][posProp._index]>getDataForce[key].threshold){

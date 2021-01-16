@@ -79,7 +79,6 @@ function initdraw(){
     const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0]])
         .on('drop',function(el, target, source, sibling){
             console.log('drop-------------->')
-            debugger
             if (!d3.select(target).select('svg').empty()){
                 let svgProp = $('#circularLayout')[0].getBoundingClientRect()
                 let posProp = $('.gu-mirror')[0].getBoundingClientRect()
@@ -112,7 +111,8 @@ function initDragItems(id,mode){
     d3.select('.dropHolder').selectAll('.forceDrag').remove();
     drawObject.removeAllForce();
     if (mode==='metric'){
-        const data = serviceFullList.map(d=>({key:d.text,_index:d.id,range:d.range}));
+        const data = serviceFullList.map(d=>({key:d.text,_index:d.idroot,range:d.range}));
+        debugger
         d3.select(id)
             .selectAll('div')
             .data(data)
