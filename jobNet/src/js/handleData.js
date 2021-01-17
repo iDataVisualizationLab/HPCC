@@ -234,7 +234,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         data.drawData  = getDrawData(data);
         // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
 
-        if (!c.user.length){
+        if (!computers[c.name].job_id[0].length){
             data.isolate = true;
         }
         dataIn.nodes.push(data);
