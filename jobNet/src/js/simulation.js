@@ -2,7 +2,7 @@ class Simulation {
     data;
     timer;
     interval=1000;
-    integrate=1*60*1000;
+    integrate=1.5*60*1000;
     index=0;
     currentTime;
     isRealTime; userDict={};
@@ -102,17 +102,21 @@ class Simulation {
                     if (timer)
                         timer.stop();
                     const currentTime = self.data.time_stamp[index];
-                    const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
-                        return (val.start_time - self. integrate> currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
-                    });
 
+                    const runningjob = {};
                     const nodes_info = {};
                     d3.keys(self.data.nodes_info).forEach(c => {
                         nodes_info[c] = {};
                         d3.keys(self.data.nodes_info[c]).forEach(s => {
                             nodes_info[c][s] = [self.data.nodes_info[c][s][index]];
-                        })
+                        });
+                        nodes_info[c].job_id[0].forEach(jid=>runningjob[jid]=true);
                     });
+                    
+                    const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
+                        return !runningjob[key];
+                    });
+
                     const time_stamp = [currentTime];
                     self.currentTime = currentTime;
                     self.index ++;

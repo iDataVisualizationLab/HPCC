@@ -194,12 +194,12 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobL[_d]){
-                if ( !jobs[d])
-                    debugger
-                if (!userL[jobs[d].user_name])
-                    userL[jobs[d].user_name] = 0;
-                userL[jobs[d].user_name] ++;
-                jobL[_d] = true;
+                if ( jobs[d]){
+                    if (!userL[jobs[d].user_name])
+                        userL[jobs[d].user_name] = 0;
+                    userL[jobs[d].user_name] ++;
+                    jobL[_d] = true;
+                }
             }
         });
         d3.entries(userL).forEach(u => dataIn.links.push({source: c.name, target: u.key, value: u.value}));
