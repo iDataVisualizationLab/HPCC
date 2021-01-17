@@ -2,7 +2,7 @@ class Simulation {
     data;
     timer;
     interval=1000;
-    integrate=5*60*1000;
+    integrate=1*60*1000;
     index=0;
     currentTime;
     isRealTime; userDict={};
