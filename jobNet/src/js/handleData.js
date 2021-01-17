@@ -250,20 +250,25 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
                 offset:-8,
                d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}]})
     });
-    debugger
+
     if (Layout.jobShow){
         const jobMain = {};
         Object.keys(jobs).forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobMain[_d]){
-                jobMain[_d] = {node:{},job:[],isNew:false}
+                jobMain[_d] = {node:{},tooltip:{},job:[],isNew:false}
             }
             jobMain[_d].isNew = jobMain[_d].isNew||jobs[d].isNew;
             jobs[d].node_list.forEach(n=>jobMain[_d].node[n]=1);
-            jobMain[_d].job.push(d)
+            jobMain[_d].job.push(d);
+            jobMain[_d].tooltip[jobs[d].job_name_short]=true;
         });
         Object.keys(jobMain).forEach(d=>{
-            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job},value:d,drawData:[{
+            debugger
+            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job}
+                ,tooltip:Object.keys(jobMain[d].tooltip),
+                value:d,
+                drawData:[{
                     invalid: undefined,
                     scale:1,
                     offset:-8,
