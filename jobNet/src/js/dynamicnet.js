@@ -94,6 +94,7 @@ let DynamicNet = function(){
             })
         }else
             datamap={}
+        let jobArr = {};
         if (node&&link) // new
         {
             const olds = new Map(node.data().map(d => [d.id, d]));
@@ -118,6 +119,9 @@ let DynamicNet = function(){
                 d.x = old.x;
                 d.y = old.y;
             }
+            d.added = old.x===undefined;
+            if (d.type==='job')
+                jobArr[d.id] = d;
             d.dy = old.dy;
             d.dx = old.dx;
             return d});
@@ -227,6 +231,13 @@ let DynamicNet = function(){
             d.target.relatedNodes.push(d.source);
             d.target.relatedLinks.push(d);
         });
+        Object.keys(jobArr).forEach(jid=>{
+            if (jobArr[jid].added){ //new node{
+                const userNode = jobArr[jid].relatedNodes.filter(d=>d.type==='user')[0];
+                jobArr[jid].x = userNode.x;
+                jobArr[jid].y = userNode.y;
+            }
+        })
         label = g.selectAll('.labels')
             .data(labels,d=>d.id);
         label.exit().transition().duration(graphicopt.animationTime).attr('opacity',0).remove();
