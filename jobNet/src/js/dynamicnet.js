@@ -197,7 +197,6 @@ let DynamicNet = function(){
         simulation.force("link").links(links);
 
         let linkScale = d3.scaleSqrt().range([0.2,0.8]).domain(d3.extent(links,d=>d.value||0));
-        debugger
         link = g.select('g.linkHolder').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
@@ -232,7 +231,7 @@ let DynamicNet = function(){
             .data(labels,d=>d.id);
         label.exit().transition().duration(graphicopt.animationTime).attr('opacity',0).remove();
         const label_n = label.enter()
-            .append('text').attr('class','labels').text(d=>d.id).attr('opacity',1);
+            .append('text').attr('class','labels').text(d=>d.tooltip??d.id).attr('opacity',1);
         label = label_n.merge(label);
 
         simulation.alphaTarget(0.02).restart();
@@ -655,7 +654,7 @@ let DynamicNet = function(){
             master.mouseover.forEach(f=>f(d));
         }
         if (d.tooltip) {
-            tooltip.show(d.name)
+            tooltip.show(d.tooltip)
         }
     }
 

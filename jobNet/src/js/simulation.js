@@ -112,7 +112,7 @@ class Simulation {
                         });
                         nodes_info[c].job_id[0].forEach(jid=>runningjob[jid]=true);
                     });
-                    
+
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
                         return !runningjob[key];
                     });
