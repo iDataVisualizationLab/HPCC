@@ -265,7 +265,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         });
         Object.keys(jobMain).forEach(d=>{
             debugger
-            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job}
+            dataIn.nodes.push({id:d,type:'job',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job}
                 ,tooltip:Object.keys(jobMain[d].tooltip),
                 value:d,
                 drawData:[{

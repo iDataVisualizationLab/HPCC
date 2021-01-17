@@ -181,7 +181,7 @@ function userTable(d,type){
         let jobData = [];
         let nodelist=[];
         let colorMap = {};
-        if (type==='user'){
+        if (type==='user'||type==='job'){
             jobData = d.data.job.map(j=>{
                 const jobID = j.split('.');
                 const job=_.clone(Layout.jobs[j]);
