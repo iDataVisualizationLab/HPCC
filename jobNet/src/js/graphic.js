@@ -75,6 +75,7 @@ function initdraw(){
         currentDraw()
     })
     serviceControl();
+    d3.select('#jobShow').on('change',function(){Layout.jobShow = this.checked});
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
     const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0]])
         .on('drop',function(el, target, source, sibling){
@@ -183,7 +184,7 @@ function userTable(d,type){
         let nodelist=[];
         let colorMap = {};
         if (type==='user'){
-            jobData = d.value.job.map(j=>{
+            jobData = d.data.job.map(j=>{
                 const jobID = j.split('.');
                 const job=_.clone(Layout.jobs[j]);
                 job['id']=jobID[0];
@@ -191,7 +192,7 @@ function userTable(d,type){
                 job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
                 return job});
-            nodelist = d.value.node;
+            nodelist = d.data.node;
             d.relatedNodes.forEach(e=>colorMap[e.key]=e.color);
         }else{
             jobData = d.data.jobId.map(j=>{

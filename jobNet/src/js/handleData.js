@@ -185,6 +185,48 @@ function queryData(data) {
 let createdata =_createdata;
 function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
     let dataIn = {nodes:[],links:[],datamap:tsnedata},dataPCA=[];
+
+    function updateLinkCU(c) {
+        const userL = {};
+        const jobL = {};
+        c.jobId = computers[c.name].job_id[0];
+        computers[c.name].job_id[0].forEach(d=>{
+            const _d = d.split('.')[0];
+            if (!jobL[_d] && jobs[d]){
+                if (!userL[jobs[d].user_name])
+                    userL[jobs[d].user_name] = 0;
+                userL[jobs[d].user_name] ++;
+                jobL[_d] = true;
+            }
+        });
+        d3.entries(userL).forEach(u => dataIn.links.push({source: c.name, target: u.key, value: u.value}));
+    }
+    function updateLinkCJU(c) {
+        const userL = {};
+        const jobL = {};
+        const jobC = {};
+        c.jobId = computers[c.name].job_id[0];
+        computers[c.name].job_id[0].forEach(d=>{
+            const _d = d.split('.')[0];
+            if (!jobL[_d]){
+                jobL[_d] = [d];
+                if (jobs[d]){
+                if (!userL[jobs[d].user_name])
+                    userL[jobs[d].user_name] = 0;
+                userL[jobs[d].user_name] ++;
+                dataIn.links.push({source: _d, target: jobs[d].user_name, value: 1});
+                dataIn.links.push({source: c.name, target: _d, value: 1});
+            }}else
+                jobL[_d].push(d)
+        });
+        // d3.entries(userL).forEach(u => dataIn.links.push({source: c.name, target: u.key, value: u.value}));
+    }
+    let updateLink = ()=>{};
+    if (Layout.jobShow)
+        updateLink = updateLinkCJU;
+    else
+        updateLink = updateLinkCU;
+// Layout.jobShow
     tree.forEach(r=>r.children.forEach(c=>{
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name};
         data.drawData  = getDrawData(data);
@@ -196,18 +238,8 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         dataIn.nodes.push(data);
         // dataPCA.push({id:c.name,type:'compute',data:c,value:getData(c),pca:tsnedata[c.name][0],key:c.name,drawData:data.drawData });
 
-        const userL = {};
-        const jobL = {};
-        c.jobId = computers[c.name].job_id[0];
-        computers[c.name].job_id[0].forEach(d=>{
-            if (!jobL[d] && jobs[d]){
-                if (!userL[jobs[d].user_name])
-                    userL[jobs[d].user_name] = 0;
-                userL[jobs[d].user_name] ++;
-                jobL[d] = true;
-            }
-        });
-        d3.entries(userL).forEach(u=>dataIn.links.push({source:c.name,target:u.key,value:u.value}));
+
+        updateLink( c);
     }));
     Object.keys(users).forEach(u=>{
         dataIn.nodes.push({id:u,type:'user',data:users[u],value:u,drawData:[{
@@ -216,6 +248,26 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
                 offset:-8,
                d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}]})
     });
+    debugger
+    if (Layout.jobShow){
+        const jobMain = {};
+        Object.keys(jobs).forEach(d=>{
+            const _d = d.split('.')[0];
+            if (!jobMain[_d]){
+                jobMain[_d] = {node:{},job:[]}
+            }
+            jobs[d].node_list.forEach(n=>jobMain[_d].node[n]=1);
+            jobMain[_d].job.push(d)
+        });
+        Object.keys(jobMain).forEach(d=>{
+            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:[],node:jobMain[d].node,job:jobMain[d].job},value:d,drawData:[{
+                    invalid: undefined,
+                    scale:1,
+                    offset:-8,
+                    color:'black',
+                    d:'M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z'}]})
+        })
+    }
     drawObject.data(dataIn);
     // PCAmapObject.data(dataPCA).draw();
 }
