@@ -95,7 +95,6 @@ function initdraw(){
     $('#ForceByControl a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         e.target // newly activated tab
         e.relatedTarget // previous active tab
-        debugger
         if (d3.select(e.target).attr('href')==='#ForceByMetrics'){
             // metrics
             initDragItems(d3.select(e.target).attr('href'),'metric');
@@ -113,7 +112,6 @@ function initDragItems(id,mode){
     drawObject.removeAllForce();
     if (mode==='metric'){
         const data = serviceFullList.map((d,i)=>({key:d.text,_index:i,range:d.range}));
-        debugger
         d3.select(id)
             .selectAll('div')
             .data(data)

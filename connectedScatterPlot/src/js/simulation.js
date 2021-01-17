@@ -2,6 +2,7 @@ class Simulation {
     data;
     timer;
     interval=1000;
+    integrate=5*60*1000;
     index=0;
     #currentTime;
     isRealTime; userDict={};
@@ -110,7 +111,7 @@ class Simulation {
                         timer.stop();
                     const currentTime = self.data.time_stamp[index];
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
-                        return (val.start_time > currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
+                        return (val.start_time - self. integrate> currentTime) || ((val.finish_time!==null)&&(val.finish_time < currentTime));
                     });
 
                     const nodes_info = {};

@@ -148,6 +148,7 @@ function data2tree(data,sampleS,computers){
 let currentDraw=()=>{};
 let tsnedata = {};
 function queryData(data) {
+    debugger
     const currentTime = data.currentTime;
     Layout.currentTime =  data.currentTime;
     const data_ = handleDataUrl(data);
@@ -192,7 +193,9 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         c.jobId = computers[c.name].job_id[0];
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
-            if (!jobL[_d] && jobs[d]){
+            if (!jobL[_d]){
+                if ( !jobs[d])
+                    debugger
                 if (!userL[jobs[d].user_name])
                     userL[jobs[d].user_name] = 0;
                 userL[jobs[d].user_name] ++;
@@ -265,7 +268,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
                     scale:1,
                     offset:-8,
                     color:'black',
-                    d:'M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z'}]})
+                    d:'M8 4 L4 12 L12 12z'}]})
         })
     }
     drawObject.data(dataIn);

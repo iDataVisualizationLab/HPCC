@@ -131,10 +131,9 @@ let DynamicNet = function(){
             d.relatedNodes =[];
             d.relatedLinks =[];
             if (d.isolate) {
-                if (!labelsM.get(d.id))
+                if (!labelsM.get(d.id)){
                     labels.push(d);
-                else
-                    labelsM.set(d.id, d);
+                    labelsM.set(d.id, d);}
             }
         })
 
@@ -204,14 +203,12 @@ let DynamicNet = function(){
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
                     if (d.target.data.isNew.length){
-                        if (!labelsM.get(d.id))
+                        if (!labelsM.get(d.id)){
                             labels.push(d.source);
-                        else
-                            labelsM.set(d.id,d.source);
-                        if (!labelsM.get(d.id))
+                            labelsM.set(d.id,d.source);}
+                        if (!labelsM.get(d.id)){
                             labels.push(d.target);
-                        else
-                            labelsM.set(d.id,d.target);
+                            labelsM.set(d.id,d.target);}
                         return true;
                     }
                     return false;
@@ -499,6 +496,7 @@ let DynamicNet = function(){
             g.select('.network').style('pointer-events','all');
             d3.select(d._mirror).remove();
             if (d.remove){
+                d3.select(d._el).style('top',null).style('left',null)
                 d.source.appendChild(d._el);
                 master.removeForce(d.key);
             }else{
@@ -572,16 +570,16 @@ let DynamicNet = function(){
             };
             getDataForce[key].getData=getData;
         }
-        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
-        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
+        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
     }
     function value2thresh(value,min,max){
         return (value-min)/(max-min);
     }
     function updateForce(key,_pos){
         const getData = getDataForce[key].getData;
-        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
-        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.5));
+        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
+        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.alphaTarget(0.02).restart();
     }
     master.removeForce = function (key){
