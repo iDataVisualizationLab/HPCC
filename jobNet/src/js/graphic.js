@@ -75,7 +75,7 @@ function initdraw(){
         currentDraw()
     })
     serviceControl();
-    d3.select('#jobShow').on('change',function(){Layout.jobShow = this.checked});
+    d3.select('#jobShow').on('change',function(){Layout.jobShow = this.checked;createdata();currentDraw();});
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
     const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0]])
         .on('drop',function(el, target, source, sibling){

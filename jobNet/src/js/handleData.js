@@ -204,7 +204,6 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
     function updateLinkCJU(c) {
         const userL = {};
         const jobL = {};
-        const jobC = {};
         c.jobId = computers[c.name].job_id[0];
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
@@ -254,13 +253,14 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         Object.keys(jobs).forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobMain[_d]){
-                jobMain[_d] = {node:{},job:[]}
+                jobMain[_d] = {node:{},job:[],isNew:false}
             }
+            jobMain[_d].isNew = jobMain[_d].isNew||jobs[d].isNew;
             jobs[d].node_list.forEach(n=>jobMain[_d].node[n]=1);
             jobMain[_d].job.push(d)
         });
         Object.keys(jobMain).forEach(d=>{
-            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:[],node:jobMain[d].node,job:jobMain[d].job},value:d,drawData:[{
+            dataIn.nodes.push({id:d,type:'user',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job},value:d,drawData:[{
                     invalid: undefined,
                     scale:1,
                     offset:-8,
