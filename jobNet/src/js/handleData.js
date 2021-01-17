@@ -148,7 +148,6 @@ function data2tree(data,sampleS,computers){
 let currentDraw=()=>{};
 let tsnedata = {};
 function queryData(data) {
-    debugger
     const currentTime = data.currentTime;
     Layout.currentTime =  data.currentTime;
     const data_ = handleDataUrl(data);
@@ -264,7 +263,6 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
             jobMain[_d].tooltip[jobs[d].job_name_short]=true;
         });
         Object.keys(jobMain).forEach(d=>{
-            debugger
             dataIn.nodes.push({id:d,type:'job',data:{name:d,isNew:jobMain[d].isNew,node:jobMain[d].node,job:jobMain[d].job}
                 ,tooltip:Object.keys(jobMain[d].tooltip),
                 value:d,

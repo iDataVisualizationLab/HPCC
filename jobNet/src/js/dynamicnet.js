@@ -233,9 +233,12 @@ let DynamicNet = function(){
         });
         Object.keys(jobArr).forEach(jid=>{
             if (jobArr[jid].added){ //new node{
-                const userNode = jobArr[jid].relatedNodes.filter(d=>d.type==='user')[0];
-                jobArr[jid].x = userNode.x;
-                jobArr[jid].y = userNode.y;
+                let userNode = {};
+                const computeNode = jobArr[jid].relatedNodes.filter(d=>(d.type!=='user')?true:(userNode=d,false));
+                const computepos={x:d3.mean(computeNode,d=>d.x||0),y:d3.mean(computeNode,d=>d.y||0)};
+                debugger
+                jobArr[jid].x = ((userNode.x??0)+computepos.x)/2;
+                jobArr[jid].y =((userNode.y??0)+computepos.y)/2;
             }
         })
         label = g.selectAll('.labels')
