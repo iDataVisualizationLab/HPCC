@@ -655,12 +655,24 @@ let DynamicNet = function(){
 
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
-
+    function highlightItems(d,value){
+        if (d.relatedNodes && d.relatedNodes[0].type==='job'){
+            d.relatedNodes.forEach(e=> {
+                e.node.classed('highlight', value);
+                e.relatedLinks.forEach(e=>e.node.classed('highlight', value));
+                e.relatedNodes.forEach(e=>e.node.classed('highlight', value));
+            })
+        }else {
+            d.relatedLinks.forEach(e=>e.node.classed('highlight', value));
+            d.relatedNodes.forEach(e=>{
+                e.node.classed('highlight', value)
+            });
+        }
+    }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
             g.classed('onhighlight', true);
-            d.relatedLinks.forEach(e=>e.node.classed('highlight', true))
-            d.relatedNodes.forEach(e=>e.node.classed('highlight', true))
+            highlightItems(d,true)
             d3.select(this).classed('highlight', true);
             if (d.node) {
                 d.node.classed('highlight', true);
@@ -677,7 +689,8 @@ let DynamicNet = function(){
         g.selectAll('.element').filter(d=>listKey.find(e=>e===d.key))
             .classed('highlight', true)
             .each(d=>{
-                (d.relatedNode)?d.relatedNode.forEach(e=>e.classed('highlight',true)):''});
+                highlightItems(d,true)
+            });
     };
     master.releasehighlight = function(){
         g.classed('onhighlight', false);
@@ -700,8 +713,7 @@ let DynamicNet = function(){
         if(!isFreeze)
         {
             g.classed('onhighlight',false);
-            d.relatedLinks.forEach(e=>e.node.classed('highlight', false))
-            d.relatedNodes.forEach(e=>e.node.classed('highlight', false))
+            highlightItems(d,false)
             d3.select(this).classed('highlight', false);
             if(d.node){
                 d.node.classed('highlight', false);

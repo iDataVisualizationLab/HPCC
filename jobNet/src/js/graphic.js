@@ -182,6 +182,7 @@ function userTable(d,type){
         let nodelist=[];
         let colorMap = {};
         if (type==='user'||type==='job'){
+            debugger
             jobData = d.data.job.map(j=>{
                 const jobID = j.split('.');
                 const job=_.clone(Layout.jobs[j]);
@@ -190,8 +191,11 @@ function userTable(d,type){
                 job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
                 return job});
-            nodelist = d.data.node;
-            d.relatedNodes.forEach(e=>colorMap[e.key]=e.color);
+            nodelist = _.isArray(d.data.node)?d.data.node:Object.keys(d.data.node);
+            if (d.relatedNodes[0].type==='job')
+                d.relatedNodes.forEach(f=>f.relatedNodes.forEach(e=>colorMap[e.key]=e.color));
+            else
+                d.relatedNodes.forEach(e=>colorMap[e.key]=e.color);
         }else{
             jobData = d.data.jobId.map(j=>{
                 const jobID = j.split('.');
@@ -246,57 +250,57 @@ function userTable(d,type){
             "order": [[0, 'asc']],
             "drawCallback": function( settings ) {
                 // Add event listener for opening and closing details
-                $('#informationTable tbody').on('mouseover', 'tr, .tableCompute', function (event) {
-                    event.stopPropagation();
-                    highlight2Stack.forEach(n=>n.classed('highlight2',false))
-                    highlight2Stack = [];
-                    let tr = $(this).closest('tr');
-                    let row = table.row( tr );
-                    d3.select(tr[0]).style('font-weight','unset');
-                    d3.select(this).style('font-weight','bold');
-                    const isSingle =  d3.select(event.target).classed('tableCompute')
-                    if (row.data()) {
-                        const currentData = row.data();
-                        svg.classed('onhighlight2', true);
-                        (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
-                            rack_arr.find(r => {
-                                if (r.childrenNode[c]) {
-                                    highlight2Stack.push(r.childrenNode[c]);
-                                    highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
-                                    r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
-
-                                    r.childrenNode[c].classed('highlight2', true);
-                                    r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
-                                        if (d.datum().source===currentData[innerKey]){
-                                            highlight2Stack.push(d);
-                                            d.classed('highlight2',true);
-                                        }
-                                    });
-                                    return true;
-                                }
-                            });
-                        });
-                        users_arr.find(u => {
-                            if (u.key===currentData[innerKey]) {
-                                highlight2Stack.push(u.node);
-                                u.node.classed('highlight2', true);
-                                return true;
-                            }
-                        });
-                        if (currentData.highlight){
-                            const obj = {};
-                            currentData.node_list.forEach(n=>obj[n]=true)
-                            currentData.highlight(obj);
-                        }
-                    }
-                }).on('mouseleave', 'tr, .tableCompute', function () {
-                    let tr = $(this).closest('tr');
-                    d3.select(this).style('font-weight','unset');
-                    // svg.classed('onhighlight2',false);
-                    highlight2Stack.forEach(n=>n.classed('highlight2',false));
-                    highlight2Stack = [];
-                    table.row( tr ).data().highlight();
-                });
+                // $('#informationTable tbody').on('mouseover', 'tr, .tableCompute', function (event) {
+                //     event.stopPropagation();
+                //     highlight2Stack.forEach(n=>n.classed('highlight2',false))
+                //     highlight2Stack = [];
+                //     let tr = $(this).closest('tr');
+                //     let row = table.row( tr );
+                //     d3.select(tr[0]).style('font-weight','unset');
+                //     d3.select(this).style('font-weight','bold');
+                //     const isSingle =  d3.select(event.target).classed('tableCompute')
+                //     if (row.data()) {
+                //         const currentData = row.data();
+                //         svg.classed('onhighlight2', true);
+                //         (isSingle? [d3.select(event.target).text()]:currentData.node_list).forEach(c => {
+                //             rack_arr.find(r => {
+                //                 if (r.childrenNode[c]) {
+                //                     highlight2Stack.push(r.childrenNode[c]);
+                //                     highlight2Stack.push(r.childrenNode[c].datum().data.tooltip);
+                //                     r.childrenNode[c].datum().data.tooltip.classed('highlight2', true);
+                //
+                //                     r.childrenNode[c].classed('highlight2', true);
+                //                     r.childrenNode[c].datum().data.relatedLinks.forEach(d=>{
+                //                         if (d.datum().source===currentData[innerKey]){
+                //                             highlight2Stack.push(d);
+                //                             d.classed('highlight2',true);
+                //                         }
+                //                     });
+                //                     return true;
+                //                 }
+                //             });
+                //         });
+                //         users_arr.find(u => {
+                //             if (u.key===currentData[innerKey]) {
+                //                 highlight2Stack.push(u.node);
+                //                 u.node.classed('highlight2', true);
+                //                 return true;
+                //             }
+                //         });
+                //         if (currentData.highlight){
+                //             const obj = {};
+                //             currentData.node_list.forEach(n=>obj[n]=true)
+                //             currentData.highlight(obj);
+                //         }
+                //     }
+                // }).on('mouseleave', 'tr, .tableCompute', function () {
+                //     let tr = $(this).closest('tr');
+                //     d3.select(this).style('font-weight','unset');
+                //     // svg.classed('onhighlight2',false);
+                //     highlight2Stack.forEach(n=>n.classed('highlight2',false));
+                //     highlight2Stack = [];
+                //     table.row( tr ).data().highlight();
+                // });
             }
         } );
 
