@@ -5,7 +5,7 @@ class Simulation {
     integrate=1.5*60*1000;
     index=0;
     #currentTime;
-    isRealTime; userDict={};
+    isRealTime; userDict={}; userReverseDict={};
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];

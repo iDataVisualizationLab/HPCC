@@ -5,7 +5,7 @@ class Simulation {
     interval=1000;
     #index=0;
     #currentTime;
-    isRealTime; userDict={};
+    isRealTime; userDict={}; userReverseDict={};
     query;
     _url;
     callbackStop = ()=>{};

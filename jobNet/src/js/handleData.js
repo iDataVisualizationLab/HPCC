@@ -243,7 +243,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         updateLink( c);
     }));
     Object.keys(users).forEach(u=>{
-        dataIn.nodes.push({id:u,type:'user',data:users[u],value:u,drawData:[{
+        dataIn.nodes.push({id:u,type:'user',data:users[u],value:u,tooltip:u,drawData:[{
                 invalid: undefined,
                 scale:1,
                 offset:-8,
