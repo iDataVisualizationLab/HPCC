@@ -155,7 +155,7 @@ function updateNarration({removedLinks,enterLinks}){
     }
 }
 function userTable(d,type){
-    if (drawObject.isFreeze) {
+    if (drawObject.isFreeze()) {
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
         contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.id));

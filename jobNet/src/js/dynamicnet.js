@@ -455,7 +455,7 @@ let DynamicNet = function(){
                 }});
             g.append('g').attr('class','forces');
             const network = g.append('g').attr('class','network');
-            network.append('g').attr('class','linkHolder');
+            network.append('g').attr('class','linkHolder links');
             network.append('g').attr('class','nodeHolder');
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
