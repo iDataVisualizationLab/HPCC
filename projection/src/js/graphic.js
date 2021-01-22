@@ -46,7 +46,7 @@ let isFreeze= false;
 let highlight2Stack = [];
 let vizservice=[];
 function initdraw(){
-    $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
+    $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
     d3.select('#userSort').on('change',function(){
         currentDraw(serviceSelected);
     });

@@ -128,7 +128,7 @@ function serviceControl(){
         .text(d=>d)
 }
 function initdraw(){
-    $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
+    $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
     scaterMatix = d3.scatterMatrix().canvasContainer($('d3fc-canvas')[0]).init();
 
     // d3.select('#userSort').on('change',function(){

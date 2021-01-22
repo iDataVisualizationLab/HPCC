@@ -29,7 +29,7 @@ function serviceControl(){
         .text(d=>d.text)
 }
 function initdraw(){
-    $('.informationHolder').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
+    $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
 
     d3.select('#sort_apply').on('click',function(){
         sortData();
