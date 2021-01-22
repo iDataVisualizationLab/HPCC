@@ -131,6 +131,7 @@ function initDragItems(id,mode){
     }
 }
 function updateNarration({removedLinks,enterLinks}){
+    // enterLinks.filter(d=>d.target)
     d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
     d3.select('#narrationHolder .current h5').text(Layout.currentTime.toLocaleString())
     d3.select('#narrationHolder .current tbody')

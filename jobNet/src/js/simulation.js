@@ -2,7 +2,7 @@ class Simulation {
     data;
     timer;
     interval=1000;
-    integrate=1.5*60*1000;
+    integrate=5*60*1000;
     index=0;
     currentTime;
     isRealTime; userDict={}; userReverseDict={};
@@ -119,7 +119,12 @@ class Simulation {
                     });
 
                     const jobs_info = _.omit(self.data.jobs_info, function (val, key, object) {
-                        return !runningjob[key];
+                        if(!runningjob[key]){
+                            if (object.finish_time && (object.finish_time>=(+currentTime-self.integrate)) && (object.finish_time<=(+currentTime+self.integrate)))
+                                object.isJustFinished = true;
+                            return true;
+                        }
+                        return false
                     });
 
                     const time_stamp = [currentTime];
