@@ -268,6 +268,7 @@ d3.TimeArc = function () {
         term2class = {};
         d3.keys(class2term).forEach(k=>{
             class2term[k].forEach(t=>term2class[t] = {key:k,value:class2term[k]})
+            class2term[k].disable = true;
         });
     }
 
