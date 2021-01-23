@@ -12,7 +12,8 @@ function handleDataJie(dataRaw) {
     let jobd = [];
     for (let jobID in jobjson) {
         let d = jobjson[jobID];
-        d.node_list = JSON.parse(d.node_list.replace(/'/g,'"'));
+        // d.node_list = JSON.parse(d.node_list.replace(/'/g,'"'));
+        // d.node_list = JSON.parse(d.node_list);
         let temp = {
             "nodes": d.node_list.map(ip=>hosts.find(d=>d.ip===ip.split('-')[0]).name),
             "jobID": ""+jobID,
@@ -21,7 +22,7 @@ function handleDataJie(dataRaw) {
                             "submitTime": d.submit_time/1000000
         };
         if (d['finish_time'])
-            temp.endTime = d['finish_time']*1000;
+            temp.endTime = d['finish_time']/1000000;
         jobo[jobID] = temp;
         jobd.push(jobo[jobID]);
     }
@@ -37,7 +38,7 @@ function handleDataJie(dataRaw) {
     ser.pop();
 
     let data = dataRaw.nodes_info;
-    sampleh.timespan = dataRaw.time_stamp.map(d=>d*1000);
+    sampleh.timespan = dataRaw.time_stamp.map(d=>d/1000000);
     hosts.forEach(h => {
         sampleh[h.name] = {};
         ser.forEach(s => sampleh[h.name][s] = []);
