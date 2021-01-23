@@ -218,8 +218,7 @@ d3.TimeArc = function () {
             .on("end", function () {
             detactTimeSeries();
             drawStreamLegend();
-        })
-            .on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
+        }).on("tick", function(){setTimeout(()=>requestAnimationFrame(timeArc.update),0)});
         force.stop();
         // .size([width, height]);
         catergogryList.forEach((d,i)=> d.order = i);
@@ -339,7 +338,6 @@ d3.TimeArc = function () {
         updateTimeScale();
         arr.sort((a,b)=>a.date-b.date);
         terms = new Object();
-        debugger
         termMaxMax = 1;
         arr.forEach(function (d) {
             // Process date
@@ -601,7 +599,7 @@ d3.TimeArc = function () {
                         a[i].isConnectedmaxTimeIndex = relationship[term1 + "__" + term2].maxTimeIndex;
                     }
                     if (relationship[term1 + "__" + term2].max > a[j].isConnected) {
-                        a[j].isConnected = relationship[term1 + "__" + term2].max;relationship
+                        a[j].isConnected = relationship[term1 + "__" + term2].max;
                         a[j].isConnectedmaxTimeIndex = relationship[term1 + "__" + term2].maxTimeIndex;
                     }
                 }
@@ -1370,7 +1368,6 @@ d3.TimeArc = function () {
             }
             if (d.node.noneSymetric)
                 return area_compute(d.value);
-            debugger
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });
     }

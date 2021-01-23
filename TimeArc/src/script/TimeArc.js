@@ -806,7 +806,7 @@ d3.TimeArc = function () {
                         finishStep= m;
                     }else if(isStart) {
                         var mon = new Object();
-                        mon.value = current;
+                        mon.value = null//current;
                         mon.monthId = m;
                         mon.yNode = nodes[i].y;
                         nodes[i].monthly.push(mon);
@@ -1379,9 +1379,8 @@ d3.TimeArc = function () {
             layerpath.enter().append('path')
                 .attr('class','layerpath')
                 .call(updatelayerpath);
+            linkArcs.attr("d", linkArc);
         }
-
-        linkArcs.attr("d", linkArc);
         // if (force.alpha()<0.03)
         //     force.stop();
 
@@ -1396,7 +1395,7 @@ d3.TimeArc = function () {
             }
             if (d.node.noneSymetric)
                 return area_compute(d.value);
-            return area(d.value);
+            return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });
     }
     function updateTransition(durationTime) {

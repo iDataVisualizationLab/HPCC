@@ -1,3 +1,13 @@
+function cutoff(dataRaw,timeStep){
+    for (let c in dataRaw.nodes_info){
+        for (let k in dataRaw.nodes_info[c]){
+            dataRaw.nodes_info[c][k] = dataRaw.nodes_info[c][k].slice(0,timeStep);
+        }
+    }
+    dataRaw.time_stamp = dataRaw.time_stamp.slice(0,timeStep);
+    return dataRaw
+}
+
 function handleDataJie(dataRaw) {
     // DEBUGING
     // console.log(dataRaw)
@@ -85,6 +95,10 @@ function handleDataJie(dataRaw) {
     console.log(JSON.stringify(sampleh));
     console.log(JSON.stringify(jobd));
 }
+
+// 1/22/2021
+d3.json("../HiperView/data/814_821_2020.json",function(d){cutoff(d)})
+
 // // 2/13/2020
 // let timeQuery = ['2020-02-17T13:00:00Z','2020-02-18T13:00:00Z'];
 // fetch(`http://129.118.104.141:5000/api/v1/?starttime=${timeQuery[0]}&endtime=${timeQuery[1]}&interval=5m`).then(handleDataJie)
