@@ -1394,7 +1394,7 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric)
-                return area_compute(d.value);
+                return area_compute([d.value[0],...d.value,d.value[d.value.length-1]]);
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });
     }
