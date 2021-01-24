@@ -298,7 +298,9 @@ d3.TimeArc = function () {
 
     function handleByJob(e, arr, c, m) {
         let term = e.key;
-        arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        // arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        debugger
+        arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
         e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         upadateTerms(term, c, m, arr.userdata[term].current)
     }
@@ -343,7 +345,7 @@ d3.TimeArc = function () {
             arr.tsnedata[c].totalObj = {};
         });
         arr.userdata = {};
-
+        debugger
         const dataByTime = d3.nest().key(d=>{
             d.__timestep__ = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
             if (d.type !== 'endTime') {
@@ -1018,12 +1020,10 @@ d3.TimeArc = function () {
         //     .domain([Math.round(valueSlider) - 0.4, Math.max(relationshipMaxMax2, 10)]);
 
         // FIXME : need to turn this into dynamic
-        linkScale = d3.scaleLinear()
-            .range([0.1, 4])
-            .domain([1,relationshipMaxMax2]);
-        linkScale = d3.scaleSqrt()
-            .range([0.2, 0.8])
-            .domain([1,relationshipMaxMax2]);
+        // linkScale = d3.scaleLinear()
+        //     .range([0.1, 4])
+        //     .domain([1,relationshipMaxMax2]);
+        linkScale = d3.scaleSqrt().range([0.2,1]).domain([1,20])
 
         // .domain([1,15]);
         links.forEach(function (l) {

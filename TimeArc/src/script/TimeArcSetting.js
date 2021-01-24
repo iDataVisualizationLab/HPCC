@@ -111,7 +111,45 @@ function handle_data_timeArc () {
     scheme.data=[];
     scheme.data.timespan = sampleS.timespan.slice();
     debugger
+    const sampleJobObj = {};
     sampleJobdata.forEach(j=>{
+        const id = j.jobID.split('.')[0];
+        if (!sampleJobObj[id]){
+            sampleJobObj[id] = {
+                endTime: j.endTime,
+                jobID: "1934095",
+                nodeArr: scheme.data.timespan.map(d=>[]),
+                nodeObjArr: scheme.data.timespan.map(d=>({})),
+                nodes: [],
+                nodesObj: {},
+                startTime: j.startTime,
+                submitTime: j.submitTime,
+                user: j.user
+            }
+        }
+        if (sampleJobObj[id].endTime<j.endTime)
+            sampleJobObj[id].endTime = j.endTime;
+        if (sampleJobObj[id].startTime>j.startTime)
+            sampleJobObj[id].startTime = j.startTime;
+        if (sampleJobObj[id].submitTime>j.submitTime)
+            sampleJobObj[id].submitTime = j.submitTime;
+        j.nodeArr.forEach((arr,ci)=>{
+            arr.forEach(c=> {
+                if (!sampleJobObj[id].nodeObjArr[ci][c]) {
+                    sampleJobObj[id].nodeObjArr[ci][c] = [];
+                    sampleJobObj[id].nodeArr[ci].push(c);
+                }
+                sampleJobObj[id].nodeObjArr[ci][c].push(j.jobID);
+                if (!sampleJobObj[id].nodesObj[c]) {
+                    sampleJobObj[id].nodesObj[c] = [];
+                    sampleJobObj[id].nodes.push(c);
+                }
+                sampleJobObj[id].nodesObj[c].push(j.jobID);
+            })
+        })
+    });
+
+    Object.values(sampleJobObj).forEach(j=>{
         function linkData(key) {
             j.nodeArr.forEach((n,ti)=>{
                 const date = scheme.data.timespan[ti];
