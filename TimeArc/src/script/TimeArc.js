@@ -585,6 +585,8 @@ d3.TimeArc = function () {
         relationshipMaxMax = 0;
         data2.forEach(function (d) {
             var m = d.__timestep__;
+            if (m>10)
+                debugger
             for (var term1 in d.__terms__) {
                 if (selectedTerms[term1]) {   // if the term is in the selected 100 terms
                     for (var term2 in d.__terms__) {
@@ -620,7 +622,6 @@ d3.TimeArc = function () {
             a[i].isConnected = -100;
             a[i].isConnectedmaxTimeIndex = a[i].maxTimeIndex;
         }
-
         for (var i = 0; i < num; i++) {
             var term1 = a[i].term;
             for (var j = i + 1; j < num; j++) {
@@ -704,6 +705,8 @@ d3.TimeArc = function () {
             nod.name = termArray3[i].term;
             nod.max = termArray3[i].max;
             var maxTimeIndexRelationship = termArray3[i].maxTimeIndex;
+            // if (termArray3[i].isConnectedmaxTimeIndex>10)
+            //     debugger
             nod.isConnectedmaxTimeIndex = termArray3[i].isConnectedmaxTimeIndex;
             nod.maxTimeIndex = termArray3[i].isConnectedmaxTimeIndex;
             nod.month = termArray3[i].isConnectedmaxTimeIndex;

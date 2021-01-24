@@ -29,7 +29,8 @@ function handleDataJie(dataRaw) {
             "jobID": ""+jobID,
             "user": d.user_name,
             "startTime": d.start_time/1000000,
-                            "submitTime": d.submit_time/1000000
+            "submitTime": d.submit_time/1000000,
+            "nodeArr":  dataRaw.time_stamp.map(d=>[])
         };
         if (d['finish_time'])
             temp.endTime = d['finish_time']/1000000;
@@ -52,12 +53,18 @@ function handleDataJie(dataRaw) {
     hosts.forEach(h => {
         sampleh[h.name] = {};
         ser.forEach(s => sampleh[h.name][s] = []);
+        sampleh.timespan.forEach((dt, ti) => {
+            data[h.ip].job_id[ti].forEach(d => {
+                jobo[d].nodeArr[ti].push(h.name)
+            })
+        })
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
                 let value = _.isArray(data[h.ip][sa][ti])?data[h.ip][sa][ti].map(d=>d===""?null:((+d) * scale)):[(data[h.ip][sa][ti]===""?null:((+data[h.ip][sa][ti]) * scale))];
                 let arrID = serviceListattr[si];
                 sampleh[h.name][arrID][ti] = value;
+
                 // if (si===0) {
                 //     if (data[h.ip]['job_id'][ti].replace)
                 //         data[h.ip]['job_id'][ti] = JSON.parse(data[h.ip]['job_id'][ti].replace(/'|'/g, '"'));

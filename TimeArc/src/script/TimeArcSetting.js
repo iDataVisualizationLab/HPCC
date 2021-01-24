@@ -110,23 +110,43 @@ function handle_data_timeArc () {
     let dataObj = {};
     scheme.data=[];
     scheme.data.timespan = sampleS.timespan.slice();
+    debugger
     sampleJobdata.forEach(j=>{
         function linkData(key) {
-            let date = new Date(j[key]);
-            if (date < scheme.data.timespan[0])
-                date = scheme.data.timespan[0];
-            const data = {category: {user: {}, compute: {}}, date: date};
-            data.category.user[j.user] = 1;
-            j.nodes.forEach(comp=>data.category.compute[comp] = 1)
-            data.type = key;
-            data.id = j.jobID;
-            scheme.data.push(data);
+            j.nodeArr.forEach((n,ti)=>{
+                const date = scheme.data.timespan[ti];
+                if (n.length){
+                    const data = {category: {user: {}, compute: {}}, date: date};
+                    data.category.user[j.user] = 1;
+                    n.forEach(comp=>data.category.compute[comp] = 1)
+                    data.type = key;
+                    data.id = j.jobID;
+                    scheme.data.push(data);
+                }
+            });
         }
 
         linkData('startTime');
-        if (j.endTime)
-            linkData('endTime');
     });
+    // sampleJobdata.forEach(j=>{
+    //     function linkData(key) {
+    //         let date = new Date(j[key]);
+    //         if (date < scheme.data.timespan[0])
+    //             date = scheme.data.timespan[0];
+    //         if (date > scheme.data.timespan[1])
+    //             return
+    //         const data = {category: {user: {}, compute: {}}, date: date};
+    //         data.category.user[j.user] = 1;
+    //         j.nodes.forEach(comp=>data.category.compute[comp] = 1)
+    //         data.type = key;
+    //         data.id = j.jobID;
+    //         scheme.data.push(data);
+    //     }
+    //
+    //     linkData('startTime');
+    //     if (j.endTime)
+    //         linkData('endTime');
+    // });
     scheme.data.tsnedata = tsnedata;
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
