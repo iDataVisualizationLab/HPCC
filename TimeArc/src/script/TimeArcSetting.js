@@ -120,6 +120,8 @@ function handle_data_timeArc () {
                 jobID: "1934095",
                 nodeArr: scheme.data.timespan.map(d=>[]),
                 nodeObjArr: scheme.data.timespan.map(d=>({})),
+                startTimeObj:{},
+                endTimeObj:{},
                 nodes: [],
                 nodesObj: {},
                 startTime: j.startTime,
@@ -135,6 +137,9 @@ function handle_data_timeArc () {
             sampleJobObj[id].submitTime = j.submitTime;
         j.nodeArr.forEach((arr,ci)=>{
             arr.forEach(c=> {
+                if(!sampleJobObj[id].startTimeObj[c]){
+                    sampleJobObj[id].startTimeObj[c] = scheme.data.timespan[ci]
+                }
                 if (!sampleJobObj[id].nodeObjArr[ci][c]) {
                     sampleJobObj[id].nodeObjArr[ci][c] = [];
                     sampleJobObj[id].nodeArr[ci].push(c);
@@ -150,13 +155,31 @@ function handle_data_timeArc () {
     });
 
     Object.values(sampleJobObj).forEach(j=>{
+        for (let ti = 1;ti<j.nodeArr.length;ti++){
+            _.difference(j.nodeArr[ti-1],j.nodeArr[ti])
+                .forEach(n=>{
+                    j.endTimeObj[n]=scheme.data.timespan[ti]
+                })
+        }
         function linkData(key) {
-            j.nodeArr.forEach((n,ti)=>{
-                const date = scheme.data.timespan[ti];
+            // j.nodeArr.forEach((n,ti)=>{
+            //     const date = scheme.data.timespan[ti];
+            //     if (n.length){
+            //         const data = {category: {user: {}, compute: {}}, date: date};
+            //         data.category.user[j.user] = 1;
+            //         n.forEach(comp=>data.category.compute[comp] = 1)
+            //         data.type = key;
+            //         data.id = j.jobID;
+            //         scheme.data.push(data);
+            //     }
+            // });
+            d3.nest().key(d=>d.value).entries(d3.entries(j[key+'Obj'])).forEach((d)=>{
+                const n = d.values.map(e=>e.key);
+                const date = new Date(d.key);
                 if (n.length){
                     const data = {category: {user: {}, compute: {}}, date: date};
                     data.category.user[j.user] = 1;
-                    n.forEach(comp=>data.category.compute[comp] = 1)
+                    n.forEach(comp=>data.category.compute[comp] = 1);
                     data.type = key;
                     data.id = j.jobID;
                     scheme.data.push(data);
@@ -165,6 +188,7 @@ function handle_data_timeArc () {
         }
 
         linkData('startTime');
+        linkData('endTime');
     });
     // sampleJobdata.forEach(j=>{
     //     function linkData(key) {

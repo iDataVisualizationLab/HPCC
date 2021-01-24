@@ -298,9 +298,8 @@ d3.TimeArc = function () {
 
     function handleByJob(e, arr, c, m) {
         let term = e.key;
-        // arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
-        debugger
-        arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
+        arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        // arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
         e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         upadateTerms(term, c, m, arr.userdata[term].current)
     }
@@ -981,6 +980,7 @@ d3.TimeArc = function () {
                             if (runopt.timeLink){
                                 const ml = Math.floor(timeScaleIndex(runopt.timeLinkformat(timeScaleIndex.invert(m))));
                                 if (!linkstack[ml]) {
+                                    debugger
                                     l.__timestep__ = ml;
                                     l.__totalVal__ = 0;
                                     linkstack[ml] = [];
@@ -1039,11 +1039,12 @@ d3.TimeArc = function () {
 
         //Create all the line svgs but without locations yet
         svg.selectAll(".linkArc").remove();
-
+        debugger
         linkArcs = svg.select("g.linkHolder").selectAll("path")
             .data(links)
             .enter().append("path")
             .attr("class", "linkArc")
+            .style('stroke',d=>d.type==='endTime'?'red':null)
             .style("stroke-width", function (d) {
                 return d.value;
             })
