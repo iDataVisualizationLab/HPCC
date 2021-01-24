@@ -239,7 +239,7 @@ d3.TimeArc = function () {
             return d.yNode + yScale(d.value);
         })
         .defined(function(d){
-            return d.value!==undefined
+            return d.value
         });
     var area_compute = d3.area()
         .curve(d3.curveMonotoneX)
@@ -253,7 +253,7 @@ d3.TimeArc = function () {
             return d.yNode - yScale(d.value[1]);
         })
         .defined(function(d){
-            return d.value!==undefined
+            return d.value
         });
 
     var numberInputTerms = 0;
@@ -1533,6 +1533,8 @@ d3.TimeArc = function () {
             for (var i = 0; i < d.value.length; i++) {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
+            if (d.node.name=='xu95646')
+                debugger
             if (d.node.noneSymetric)
                 return area_compute([d.value[0],...d.value,d.value[d.value.length-1]]);
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
