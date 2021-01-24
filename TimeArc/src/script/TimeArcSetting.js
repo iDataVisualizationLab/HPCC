@@ -1,7 +1,7 @@
 let TimeArcSetting = function (){
     let graphicopt = {
         contain: '#Chartcontent',
-        margin: {top: 10, right: 10, bottom: 0, left: 200},
+        margin: {top: 10, right: 20, bottom: 0, left: 200},
         offset: {top: 0},
         width: 1500,
         height: 1000,

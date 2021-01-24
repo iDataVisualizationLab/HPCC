@@ -3,7 +3,7 @@ d3.TimeArc = function () {
 //Constants for the SVG
     let timeArc = {};
     let graphicopt = {
-        margin: {top: 15, right: 0, bottom: 5, left: 5},
+        margin: {top: 15, right: 20, bottom: 5, left: 5},
         width: 1000,
         height: 600,
         scalezoom: 10,
