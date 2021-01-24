@@ -345,7 +345,6 @@ d3.TimeArc = function () {
             arr.tsnedata[c].totalObj = {};
         });
         arr.userdata = {};
-        debugger
         const _dataByTime = d3.nest().key(d=>{
             d.__timestep__ = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
             if (d.type !== 'endTime') {
@@ -403,11 +402,6 @@ d3.TimeArc = function () {
             const nest_user_obj = {};
             nest_user.forEach(u=>nest_user_obj[u.key]=u);
             Object.keys(arr.userdata).forEach(u=>{
-                if(u==='ipandey'){
-                    console.log(m)
-                    console.log(nest_user_obj[u]??{key:u,values:[]})
-                    debugger
-                }
                 handleInfo(nest_user_obj[u]??{key:u,values:[]}, arr, c, m);
             })
         });
@@ -610,8 +604,6 @@ d3.TimeArc = function () {
         relationshipMaxMax = 0;
         data2.forEach(function (d) {
             var m = d.__timestep__;
-            if (m>10)
-                debugger
             for (var term1 in d.__terms__) {
                 if (selectedTerms[term1]) {   // if the term is in the selected 100 terms
                     for (var term2 in d.__terms__) {
@@ -934,6 +926,8 @@ d3.TimeArc = function () {
         relationshipMaxMax2 = 1;
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
+            if (term1=='ipandey')
+                debugger
             for (var j = i + 1; j < numNode; j++) {
                 var term2 = nodes[j].name;
                 if (relationship[term1 + "__" + term2] && relationship[term1 + "__" + term2].max >= Math.round(valueSlider)) {
