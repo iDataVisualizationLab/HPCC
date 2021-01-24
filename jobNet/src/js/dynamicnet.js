@@ -202,7 +202,7 @@ let DynamicNet = function(){
 
         // let linkScale = d3.scaleSqrt().range([0.2,0.8]).domain([1,d3.max(links,d=>d.value||0)]);
         console.log('maxlink = ',d3.max(links,d=>d.value||0))
-        let linkScale = d3.scaleLinear().range([0,1]).domain([0,1]);
+        let linkScale = d3.scaleLinear().range([0.5,1]).domain([1,2]);
         link = g.select('g.linkHolder').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
