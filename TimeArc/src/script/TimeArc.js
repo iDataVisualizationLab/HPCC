@@ -361,6 +361,7 @@ d3.TimeArc = function () {
             d.__terms__ = {};
             return d.__timestep__;
         }).entries(arr);
+
         dataByTime.forEach(function(month){
             const m = +month.key;
             // compute
@@ -381,10 +382,18 @@ d3.TimeArc = function () {
                 }
             });
             // user
+            // const nest_user = d3.nest().key(d=>d3.keys(d.category['user'])[0]).key(d=>d.type).entries(month.values);
+            // nest_user.forEach(e=>{
+            //     handleInfo(e, arr, c, m);
+            // })
             const nest_user = d3.nest().key(d=>d3.keys(d.category['user'])[0]).key(d=>d.type).entries(month.values);
             c = 'user';
-            nest_user.forEach(e=>{
-                handleInfo(e, arr, c, m);
+            debugger
+            // remain value
+            const nest_user_obj = {};
+            nest_user.forEach(u=>nest_user_obj[u.key]=u);
+            Object.keys(arr.userdata).forEach(u=>{
+                handleInfo(nest_user_obj[u]??{key:u,values:[]}, arr, c, m);
             })
         });
         //re calculate for user data

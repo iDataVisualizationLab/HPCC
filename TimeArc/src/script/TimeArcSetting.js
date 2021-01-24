@@ -187,11 +187,12 @@ function handle_data_timeArc () {
                 }
             });
         }
-        if(j.user==='jieyao')
-            console.log(key,j)
+        // if(j.user==='jieyao')
+        //     console.log(key,j)
         linkData('startTime');
         linkData('endTime');
     });
+    debugger
     // sampleJobdata.forEach(j=>{
     //     function linkData(key) {
     //         let date = new Date(j[key]);
