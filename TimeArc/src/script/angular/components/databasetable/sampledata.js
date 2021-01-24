@@ -126,12 +126,21 @@ angular.module('hpccApp').constant('SampleData', [
         group:"sample",
         formatType:'json'
     },{
+        id:"influxdb814_100timeStep_2020",
+        name:"HPC data - 14 August (100 time steps)",
+        url:"../HiperView/data/influxdb814_100timeStep_2020.json",
+        description:"",
+        category:'hpcc',
+        date:"14 August 2020",
+        group:"sample",
+        formatType:'json'
+    },{
         id:"influxdb814_10timeStep_2020",
-        name:"HPC data - 14 August-21 August 2020",
+        name:"HPC data - 14 August (10 time steps)",
         url:"../HiperView/data/influxdb814_10timeStep_2020.json",
         description:"",
         category:'hpcc',
-        date:"28 May 2020",
+        date:"14 August 2020",
         group:"sample",
         formatType:'json'
     },{
