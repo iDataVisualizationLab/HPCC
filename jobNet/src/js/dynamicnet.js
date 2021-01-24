@@ -201,7 +201,7 @@ let DynamicNet = function(){
         simulation.force("link").links(links);
 
         // let linkScale = d3.scaleSqrt().range([0.2,0.8]).domain([1,d3.max(links,d=>d.value||0)]);
-        let linkScale = d3.scaleSqrt().range([0.2,1]).domain([1,20]);
+        let linkScale = d3.scaleLinear().range([0,1]).domain([0,1]);
         link = g.select('g.linkHolder').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{

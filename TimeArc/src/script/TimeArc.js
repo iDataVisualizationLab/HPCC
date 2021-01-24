@@ -1023,8 +1023,8 @@ d3.TimeArc = function () {
         // linkScale = d3.scaleLinear()
         //     .range([0.1, 4])
         //     .domain([1,relationshipMaxMax2]);
-        linkScale = d3.scaleSqrt().range([0.2,1]).domain([1,20])
-
+        linkScale = d3.scaleLinear().range([0,1]).domain([0,1])
+        console.log('relationshipMaxMax2 = ',relationshipMaxMax2)
         // .domain([1,15]);
         links.forEach(function (l) {
             var term1 = nodes[l.source].name;
