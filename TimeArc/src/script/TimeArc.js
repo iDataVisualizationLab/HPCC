@@ -346,7 +346,7 @@ d3.TimeArc = function () {
         });
         arr.userdata = {};
         debugger
-        const dataByTime = d3.nest().key(d=>{
+        const _dataByTime = d3.nest().key(d=>{
             d.__timestep__ = Math.ceil(timeScaleIndex(runopt.timeformat(d.date)));
             if (d.type !== 'endTime') {
                 for (let term in d.category['user']){
@@ -354,15 +354,25 @@ d3.TimeArc = function () {
                         arr.userdata[term] = {job:{},current:0}
                     arr.userdata[term].job[d.id] = d.__timestep__;
                 }
-            }else{
-                for (let term in d.category['user'])
-                    if (arr.userdata[term].job[term]===d.__timestep__)
-                        d.__timestep__ ++;
             }
+            // else{
+            //     for (let term in d.category['user'])
+            //         if (arr.userdata[term].job[term]===d.__timestep__)
+            //             d.__timestep__ ++;
+            // }
             d.__terms__ = {};
             return d.__timestep__;
         }).entries(arr);
-
+        const dataByTime = [];
+        let count = 0;
+        for (var m = 0; m < totalTimeSteps; m++) {
+            if (+_dataByTime[count].key === m){
+                dataByTime.push(_dataByTime[count]);
+                count++;
+            }else{
+                dataByTime.push({key:''+m,values:[]});
+            }
+        }
         dataByTime.forEach(function(month){
             const m = +month.key;
             // compute
@@ -389,11 +399,15 @@ d3.TimeArc = function () {
             // })
             const nest_user = d3.nest().key(d=>d3.keys(d.category['user'])[0]).key(d=>d.type).entries(month.values);
             c = 'user';
-            debugger
             // remain value
             const nest_user_obj = {};
             nest_user.forEach(u=>nest_user_obj[u.key]=u);
             Object.keys(arr.userdata).forEach(u=>{
+                if(u==='ipandey'){
+                    console.log(m)
+                    console.log(nest_user_obj[u]??{key:u,values:[]})
+                    debugger
+                }
                 handleInfo(nest_user_obj[u]??{key:u,values:[]}, arr, c, m);
             })
         });
