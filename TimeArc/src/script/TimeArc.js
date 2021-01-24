@@ -230,7 +230,7 @@ d3.TimeArc = function () {
     };
 
     var area = d3.area()
-        .curve(d3.curveCatmullRomOpen)
+        .curve(d3.curveMonotoneX)
         .x(function (d) {
             return xStep + xScale(d.monthId);
         })
@@ -239,9 +239,12 @@ d3.TimeArc = function () {
         })
         .y1(function (d) {
             return d.yNode + yScale(d.value);
+        })
+        .defined(function(d){
+            return d.value!==undefined
         });
     var area_compute = d3.area()
-        .curve(d3.curveCatmullRomOpen)
+        .curve(d3.curveMonotoneX)
         .x(function (d) {
             return xStep + xScale(d.monthId);
         })
@@ -250,6 +253,9 @@ d3.TimeArc = function () {
         })
         .y1(function (d) {
             return d.yNode - yScale(d.value[1]);
+        })
+        .defined(function(d){
+            return d.value!==undefined
         });
 
     var numberInputTerms = 0;
@@ -827,6 +833,7 @@ d3.TimeArc = function () {
                 let startStep = 0;
                 let isStart = false;
                 let current = 0;
+                if ()
                 for (var m = 0; m < totalTimeSteps; m++) {
 
                     if (terms[nodes[i].name][m]!==undefined) {
@@ -850,7 +857,7 @@ d3.TimeArc = function () {
                         nodes[i].monthly.push(mon);
                     }
                 }
-                nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
+                    nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
                 // Add another item to first
                 if (nodes[i].monthly.length > 0) {
                     var firstObj = nodes[i].monthly[0];
@@ -876,7 +883,7 @@ d3.TimeArc = function () {
             }
         }
 
-
+        // compute
         for (var i = 0; i < numNode; i++) {
             if (data.tsnedata[nodes[i].name]){
                 const selected = data.selectedService;
@@ -1916,7 +1923,7 @@ d3.TimeArc = function () {
         let xScale = d3.scaleLinear().domain([0,1]).range([0,widthSlider]);
         console.log("drawStreamLegend");
         var area_min = d3.area()
-            .curve(d3.curveCardinalOpen)
+            .curve(d3.curveMonotoneX)
             .x(function (d,i) {
                 return xScale(d.x);
             })
