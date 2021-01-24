@@ -117,7 +117,7 @@ function handle_data_timeArc () {
         if (!sampleJobObj[id]){
             sampleJobObj[id] = {
                 endTime: j.endTime,
-                jobID: "1934095",
+                jobID: id,
                 nodeArr: scheme.data.timespan.map(d=>[]),
                 nodeObjArr: scheme.data.timespan.map(d=>({})),
                 startTimeObj:{},
@@ -154,7 +154,8 @@ function handle_data_timeArc () {
         })
     });
 
-    Object.values(sampleJobObj).forEach(j=>{
+    d3.entries(sampleJobObj).forEach(({key,value})=>{
+        const j = value;
         for (let ti = 1;ti<j.nodeArr.length;ti++){
             _.difference(j.nodeArr[ti-1],j.nodeArr[ti])
                 .forEach(n=>{
@@ -186,7 +187,8 @@ function handle_data_timeArc () {
                 }
             });
         }
-
+        if(j.user==='jieyao')
+            console.log(key,j)
         linkData('startTime');
         linkData('endTime');
     });
