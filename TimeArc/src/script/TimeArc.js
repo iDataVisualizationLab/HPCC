@@ -300,6 +300,7 @@ d3.TimeArc = function () {
         let term = e.key;
         arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
         // arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
+        // e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         upadateTerms(term, c, m, arr.userdata[term].current)
     }
