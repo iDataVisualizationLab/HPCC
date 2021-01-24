@@ -833,7 +833,6 @@ d3.TimeArc = function () {
                 let startStep = 0;
                 let isStart = false;
                 let current = 0;
-                if ()
                 for (var m = 0; m < totalTimeSteps; m++) {
 
                     if (terms[nodes[i].name][m]!==undefined) {
