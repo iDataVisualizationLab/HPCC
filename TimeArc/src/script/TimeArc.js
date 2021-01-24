@@ -316,7 +316,7 @@ d3.TimeArc = function () {
         arr.userdata[term].current += sum;
         // arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
         // e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
-        e.values.forEach(s => s  .values.forEach(d => d.__terms__[term] = 2)); //job
+        e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
         upadateTerms(term, c, m, arr.userdata[term].current);
         arr.userdata[term].current += subtract;
     }
@@ -405,12 +405,13 @@ d3.TimeArc = function () {
                         }
 
                     }
-                }else {
-                    for (let term in d.category[c]) {
-                        d.__terms__[term] = 1; //compute
-                        d.__terms__[term2class[term].key] = d.category[c][term];
-                    }
                 }
+                // else {
+                //     for (let term in d.category[c]) {
+                //         d.__terms__[term] = 1; //compute
+                //         d.__terms__[term2class[term].key] = d.category[c][term];
+                //     }
+                // }
             });
             // user
             // const nest_user = d3.nest().key(d=>d3.keys(d.category['user'])[0]).key(d=>d.type).entries(month.values);
@@ -1960,7 +1961,8 @@ d3.TimeArc = function () {
         let subscale = yScale.copy().domain([0,2]).range(yScale.domain().map((d,i)=>i?d/2:d));
         let streamdata = [{x:0,y:0}];
 
-        d3.range(1,ticknum*4+2).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
+        // d3.range(1,ticknum*4+2).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
+        d3.range(1,ticknum*4+1).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
 
         streamdata.push({x:1,y:0});
         streampath.datum(streamdata).attr('d',area_min).style('fill',colorCatergory('user'));
