@@ -156,8 +156,8 @@ function handle_data_timeArc () {
 
     d3.entries(sampleJobObj).forEach(({key,value})=>{
         const j = value;
-        for (let ti = 1;ti<j.nodeArr.length;ti++){
-            _.difference(j.nodeArr[ti-1],j.nodeArr[ti])
+        for (let ti = 0;ti<j.nodeArr.length-1;ti++){
+            _.difference(j.nodeArr[ti],j.nodeArr[ti+1])
                 .forEach(n=>{
                     j.endTimeObj[n]=scheme.data.timespan[ti]
                 })

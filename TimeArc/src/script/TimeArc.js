@@ -298,11 +298,21 @@ d3.TimeArc = function () {
 
     function handleByJob(e, arr, c, m) {
         let term = e.key;
-        arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        let sum = 0;
+        let subtract = 0;
+        e.values.forEach(it => {
+            if (it.key === "startTime")
+                sum+=it.values.length;
+            else
+                subtract+= -1* it.values.length
+        });
+        // arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+        arr.userdata[term].current += sum;
         // arr.userdata[term].current = d3.sum(e.values.map(it => it.values.length));
         // e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
-        e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
-        upadateTerms(term, c, m, arr.userdata[term].current)
+        e.values.forEach(s => s  .values.forEach(d => d.__terms__[term] = 2)); //job
+        upadateTerms(term, c, m, arr.userdata[term].current);
+        arr.userdata[term].current += subtract;
     }
 
     function handleByCompute(e, arr, c, m) {
@@ -365,7 +375,7 @@ d3.TimeArc = function () {
         const dataByTime = [];
         let count = 0;
         for (var m = 0; m < totalTimeSteps; m++) {
-            if (+_dataByTime[count].key === m){
+            if (_dataByTime[count] && (+_dataByTime[count].key === m)){
                 dataByTime.push(_dataByTime[count]);
                 count++;
             }else{
@@ -388,6 +398,11 @@ d3.TimeArc = function () {
                             arr.tsnedata[term2class[term].key].total.push(arr.tsnedata[term]);
                         }
 
+                    }
+                }else {
+                    for (let term in d.category[c]) {
+                        d.__terms__[term] = 1; //compute
+                        d.__terms__[term2class[term].key] = d.category[c][term];
                     }
                 }
             });
@@ -603,6 +618,8 @@ d3.TimeArc = function () {
         relationship = {};
         relationshipMaxMax = 0;
         data2.forEach(function (d) {
+            if(d.type==='endTime')
+                debugger
             var m = d.__timestep__;
             for (var term1 in d.__terms__) {
                 if (selectedTerms[term1]) {   // if the term is in the selected 100 terms
@@ -926,11 +943,11 @@ d3.TimeArc = function () {
         relationshipMaxMax2 = 1;
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
-            if (term1=='ipandey')
-                debugger
             for (var j = i + 1; j < numNode; j++) {
                 var term2 = nodes[j].name;
                 if (relationship[term1 + "__" + term2] && relationship[term1 + "__" + term2].max >= Math.round(valueSlider)) {
+                    if (term1 === 'ipandey' || term2 ==='ipandey')
+                        debugger
                     let linkstack={};
                     let currentLinkstack;
                     for (var m = 0; m < totalTimeSteps; m++) {
