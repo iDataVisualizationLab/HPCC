@@ -1,0 +1,214 @@
+svg {
+    font-size: 12px;
+    fill: currentcolor;
+}
+
+
+.inner_node {
+    pointer-events: all;
+}
+.inner_node text{
+    fill: black;
+}
+
+.inner_node rect {
+    pointer-events: all;
+    stroke: #000000;
+    stroke-width: 0.3;
+    fill: #f0f0f0;
+}
+
+.inner_node.highlight rect {
+    opacity: 1;
+    /*stroke-width: 2px;*/
+    /*fill: #f1faee;*/
+}
+.inner_node.highlight text{
+    fill: black;
+}
+.onhighlight2 .inner_node, .onhighlight2.onhighlight .inner_node.highlight, .onhighlight .inner_node {
+/*.onhighlight .inner_node {*/
+    opacity: 0.1;
+}
+
+.onhighlight2 .inner_node.highlight2, .onhighlight2.onhighlight .inner_node.highlight.highlight2, .onhighlight .inner_node.highlight {
+    opacity: 1;
+    pointer-events: all
+}
+.outer_node .compute {
+    /*fill: #f1faee;*/
+    stroke: #1d3557;
+    stroke-width: 0.1;
+    pointer-events: all;
+}
+.outer_node text.highlight2.hide{
+    display: block;
+}
+.onhighlight .outer_node.highlight.highlightSummary .circleG .element,
+.onhighlight .vticks{
+    opacity: 0;
+    pointer-events: none;
+}
+.onhighlight2 .outer_node .circleG .element.highlight.highlight2,
+.onhighlight2.onhighlight .outer_node .circleG .element.highlight.highlight2,
+.onhighlight .outer_node .circleG .element.highlight,
+.onhighlight .outer_node.highlight .circleG .element,
+.onhighlight .vticks.highlight,
+.onhighlight2 .vticks.highlight.highlight2,
+.onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
+{
+    opacity: 1;
+    pointer-events: all
+}
+.onhighlight2 .outer_node .circleG .element, .onhighlight2.onhighlight .outer_node .circleG .element.highlight, .onhighlight .outer_node .circleG .element{
+    opacity: 0.1;
+    pointer-events: none;
+}
+.onhighlight .outer_node .circleG .element{
+
+}
+
+.onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {
+    opacity: 0;
+}
+.onhighlight2 g.links .link.highlight2,.onhighlight2.onhighlight g.links .link.highlight.highlight2,.onhighlight g.links .link.highlight {
+    opacity: 1;
+    pointer-events: all;
+}
+
+g.links .link {
+    opacity: 0.95;
+    stroke-width:0.3;
+}
+
+text {
+    /*font: 10px sans-serif;*/
+    /*text-anchor: middle;*/
+    pointer-events: none;
+
+}
+
+.outer_node.highlightSummary .summary{
+    display: block;
+}
+.outer_node.highlightSummary text{
+    /*stroke:#e63946;*/
+    font-weight: bold;
+}
+
+.outer_node .circle.invalid{
+    fill: black;
+}
+.link {
+    fill: none;
+    /*stroke: #a8dadc;*/
+}
+
+.hide {
+    display: none;
+}
+
+#informationTable .detailComp {
+    width: 500px;
+}
+#informationTable  .collapHeader{
+    min-width: 12px!important;
+}
+#informationTable  .details-control span{
+    height: 2rem;
+    overflow-y: hidden;
+}
+#informationTable .morebtn{
+    font-size: 0.8rem;
+    background-color: #c0c0c0;
+    color: black;
+    padding: 1px;
+}
+
+#informationTable .morebtn[value='close']{
+    display: none;
+}
+#informationTable tr.shown .morebtn[value='close']{
+    display: block;
+}
+#informationTable tr.shown .morebtn[value='open']{
+    display: none;
+}
+
+.d3-tip span {
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
+}
+.d3-tip {
+    box-shadow: 12px 12px 16px 0 rgba(0, 0, 0, 0.25),
+    -8px -8px 12px 0 rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    background-color: #ddd;
+    border: 0.5px solid black;
+    width:300px;
+    padding:10px
+}.d3-tip table {
+    background-color: white;
+ }
+#circularLayoutHolder select{
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.legendView input{
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+.upsymbol::before{
+    content: "▲";
+    color: #43d63a;
+    padding: 2px;
+}
+.equalsymbol::before{
+    content: '-';
+    color: #acaab0;
+    padding: 4.5px;
+}
+.downsymbol::before{
+    content: "▼";
+    color: #d60000;
+    padding: 2px;
+}
+
+#RankingList table th:last-child,#RankingList table tr td:last-child{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.closeButton {
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+}
+div.subgraph:hover .closeButton {
+    background-color: var(--red);
+    color:white;
+}
+.closeButton svg{
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.subgraph {
+    height:fit-content;
+}
+
+#UserList tr.highlight {
+    font-weight: bolder;
+}
+
+.brushHolder rect.overlay {
+    opacity:0
+}
+
+.brushHolder .selection {
+    fill: none;
+    stroke: currentColor;
+    stroke-dasharray: 4 2;
+}
