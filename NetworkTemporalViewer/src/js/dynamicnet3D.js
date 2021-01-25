@@ -1,0 +1,1258 @@
+let DynamicNet3D = function () {
+    self.workerPath = 'src/js/worker/forceworker.js'
+    self.outputSelection = [];
+    let master = {};
+    let simulations;
+    let graphicopt = {
+            margin: {top: 20, right: 20, bottom: 20, left: 20},
+            width: 1500,
+            height: 1000,
+            scalezoom: 1,
+            zoom: d3.zoom(),
+            widthView: function () {
+                return this.width * this.scalezoom
+            },
+            heightView: function () {
+                return this.height * this.scalezoom
+            },
+            widthG: function () {
+                return this.widthView() - this.margin.left - this.margin.right
+            },
+            heightG: function () {
+                return this.heightView() - this.margin.top - this.margin.bottom
+            },
+            centerX: function () {
+                return this.margin.left + this.widthG() / 2;
+            },
+            centerY: function () {
+                return this.margin.top + this.heightG() / 2;
+            },
+            animationTime: 1000,
+            color: {},
+            // range:[0,1],
+            radaropt: {
+                // summary:{quantile:true},
+                mini: true,
+                levels: 6,
+                gradient: true,
+                w: 40,
+                h: 40,
+                showText: false,
+                margin: {top: 0, right: 0, bottom: 0, left: 0},
+                isNormalize: false,
+                schema: serviceFullList
+            },
+            curveSegment: 20,
+            linkConnect: false,
+            isSelectionMode: false,
+            isCurve: false,
+            filter: {distance: 0.5},
+            component: {
+                dot: {size: 5, opacity: 0.9, filter: {size: 5, opacity: 0.2}},
+                link: {size: 1, opacity: 0.2, highlight: {opacity: 1}},
+                label: {enable: 0}
+            },
+            opt: {
+                dim: 2.5
+            },
+            serviceIndex: 0,
+            tableLimit: 1500,
+            iscompareMode: false
+        },
+        controlPanelGeneral = {
+            linkConnect: {text: "Link type", type: "selection", variable: 'linkConnect',labels:['--none--','Straight'],values:[false,'straight'],
+                width: '100px',
+                callback:()=>{visiableLine(graphicopt.linkConnect); graphicopt.isCurve = graphicopt.linkConnect==='curve';toggleLine();render(!isBusy);isneedrender = true;}},
+            linkOpacity: {
+                text: "Link opacity",
+                range: [0.1, 1],
+                id: 'Link_opacity',
+                type: "slider",
+                variableRoot: graphicopt.component.link,
+                variable: 'opacity',
+                width: '100px',
+                step: 0.1,
+                callback: onlinkopacity
+            }
+        },
+        formatTable = {
+            'opacity': function (d) {
+                return d3.format('.1f')(d)
+            },
+            'radarRatio': function (d) {
+                return d3.format('.1f')(d)
+            },
+            'minDist': function (d) {
+                return d3.format('.1f')(d)
+            },
+            'time': function (d) {
+                return millisecondsToStr(d)
+            },
+            'totalTime': function (d) {
+                return millisecondsToStr(d)
+            },
+            'iteration': function (d) {
+                return d
+            },
+            'stopCondition': function (d) {
+                return '1e' + Math.round(d)
+            }
+        },
+        renderQueue_link = {line: false, curve: false},
+        isneedCompute = true,
+        runopt = {},
+        isBusy = false,
+        stop = false;
+    let modelWorker, workerList = [], colorscale, reset;
+    let solution, datain = [], filterbyClustername = [], visibledata, table_info, path, cluster = [], scaleTime;
+    let scaleNormalTimestep = d3.scaleLinear();
+    // grahic
+    let camera, isOrthographic = true, scene, axesHelper, axesTime, gridHelper, controls, raycaster, INTERSECTED = [],
+        mouse,
+        points, lines, linesGroup, curveLines, curveLinesGroup, straightLines, straightLinesGroup, curves, updateLine,
+        scatterPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx, front_canvas,
+        front_ctx, svg, clusterMarker;
+    let fov = 100,
+        near = 0.1,
+        far = 7000;
+    let animateTrigger = false;
+
+    //----------------------drag-----------------------
+    let allSelected_Data;
+    var lassoTool, mouseoverTrigger = true, iscameraMove = false;
+    let drag = () => {
+        function dragstarted(d) {
+            isneedrender = true;
+            mouseoverTrigger = false;
+            let coordinator = d3.mouse(this);
+            mouse.x = (coordinator[0] / graphicopt.width) * 2 - 1;
+            mouse.y = -(coordinator[1] / graphicopt.height) * 2 + 1;
+            lassoTool.lassoPolygon = [coordinator];
+            lassoTool.start();
+            lassoTool.isend = false;
+            lassoTool.needRender = true;
+        }
+
+        function dragged(d) {
+            let coordinator = d3.mouse(this);
+            mouse.x = (coordinator[0] / graphicopt.width) * 2 - 1;
+            mouse.y = -(coordinator[1] / graphicopt.height) * 2 + 1;
+            lassoTool.lassoPolygon.push(coordinator);
+            lassoTool.needRender = true;
+            isneedrender = true;
+
+        }
+
+        function dragended(d) {
+            disableMouseover = false;
+            mouseoverTrigger = true;
+            showMetricsArr_plotly(allSelected_Data);
+            lassoTool.end();
+        }
+
+        return d3.drag().touchable(navigator.maxTouchPoints)
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    };
+
+    function handle_selection_switch(trigger) {
+        controls.enabled = !trigger;
+        if (trigger) {
+            if (reset)
+                lassoTool = new THREE.LassoTool(camera, points, graphicopt, svg.select('#modelWorkerScreen_lassotool'));
+            reset = false;
+            disableMouseover = true;
+            d3.select('#modelWorkerScreen').call(drag());
+        } else {
+            if (lassoTool)
+                lassoTool.reset();
+            disableMouseover = false;
+            d3.select('#modelWorkerScreen').on('mousedown.drag', null);
+            d3.select('#modelWorkerScreen')
+                .on('mousedown', () => isMousemove = false)
+                .on('mouseover', () => {
+                    isneedrender = true;
+                    mouseoverTrigger = true
+                })
+                .on('mousemove', function () {
+                    let coordinator = d3.mouse(this);
+                    mouse.x = (coordinator[0] / graphicopt.width) * 2 - 1;
+                    mouse.y = -(coordinator[1] / graphicopt.height) * 2 + 1;
+                    mouseoverTrigger = true;
+                    isneedrender = true;
+                    isMousemove = true;
+                }).on('mouseleave', () => {
+                mouseoverTrigger = false;
+                isMousemove = false;
+            })
+                .on('click', onClick);
+        }
+    }
+
+    let isMousemove = false;
+
+    let obitTrigger = true;
+    let linkConnect_old;
+
+    function reduceRenderWeight(isResume) {
+        if (isResume) {
+            graphicopt.linkConnect = linkConnect_old;
+        } else {
+            linkConnect_old = graphicopt.linkConnect;
+            graphicopt.linkConnect = false;
+        }
+        controlPanelGeneral.linkConnect.callback();
+    }
+
+    let maindiv = '#dynamicHolder';
+    var color = d3.scaleSequential()
+        .interpolator(d3.interpolateSpectral);
+    let getColorScale = function () {
+        return color
+    };
+    let isFreeze = false;
+    let data = [], dynamicVizs = [];
+    let onFinishDraw = [];
+    let getRenderFunc = function (d) {
+        debugger
+        if (d.d) {
+            return d.d;
+        } else
+            return d3.arc()
+                .innerRadius(0)
+    };
+
+
+    function start(skipRecalculate) {
+        isneedCompute = true;
+        renderQueue_link = {line: false, curve: false};
+
+        axesHelper.toggleDimension(graphicopt.opt.dim);
+        gridHelper.parent.visible = (graphicopt.opt.dim === 2.5);
+
+        controls.enableRotate = true;
+        controls.screenSpacePanning = false;
+        controls.target.set(0, 0, 0);
+        controls.enableZoom = true;
+        controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+        controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+        // enableRadarView(false);
+        d3.select('#modelSetting').selectAll('.dim3').attr('disabled', null).select('select, input').attr('disabled', null);
+
+        if (obitTrigger) {
+            setUpZoom();
+            obitTrigger = false;
+        }
+        controll_metrics.zoom_or = controls.target.distanceTo(controls.object.position);
+        svg.select('#modelWorkerScreen_svg_g').selectAll('*').remove();
+        if (skipRecalculate) {
+            render(true);
+            reduceRenderWeight(true);
+            updateProcess()
+            return;
+        }
+        reduceRenderWeight();
+        mouseoverTrigger = false;
+        terminateWorker();
+        updateProcess({percentage:10,text:'Transfer data to projection function'})
+        let firstReturn = true;
+        modelWorker = new Worker(self.workerPath);
+        workerList[0] = modelWorker;
+        console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
+
+        modelWorker.postMessage({action: "initDataRaw", value: data.net});
+        modelWorker.addEventListener('message', ({data}) => {
+            switch (data.action) {
+                case "render":
+                    disableMouseover = true;
+                    if (firstReturn) {
+                        updateProcess();
+                        firstReturn = false;
+                    }
+                    if (!isBusy) {
+                        isBusy = true;
+                        solution = data.sol;
+                        updateTableOutput(data.value);
+                        isneedCompute = true;
+                        render();
+                        isBusy = false;
+                    }
+                    break;
+                case "stable":
+                    if (firstReturn) {
+                        updateProcess()
+                        firstReturn = false;
+                        if (data.value) {
+                            updateTableOutput(data.value);
+                        }
+                    }
+                    modelWorker.terminate();
+                    disableMouseover = false;
+                    solution = data.sol;
+                    isneedCompute = true;
+                    render(true);
+                    reduceRenderWeight(true);
+                    break;
+                default:
+                    updateProcess({percentage: data.value.percentage, text: data.value.message});
+                    break;
+            }
+        })
+    }
+
+    let controll_metrics = {old: {zoom: undefined}};
+    master.init = function (arr) {
+        updateProcess({percentage: 1, text: 'Prepare rendering ...'});
+
+        master.generateTable();
+
+        $('#search').on('input', searchHandler); // register for oninput
+        $('#search').on('propertychange', searchHandler); // for IE8
+        // makeDataTableFiltered()
+
+        // prepare data
+        needRecalculate = true;
+        reset = true;
+        mouseoverTrigger = false;
+        solution = [];
+
+        updateTableInput();
+        path = {};
+
+        scaleNormalTimestep.range([-graphicopt.widthG() / 2, graphicopt.widthG() / 2]);
+
+        // prepare screen
+        setTimeout(function () {
+            dynamicVizs = [];
+            simulations = [];
+            isneedrender = false;
+            // far = graphicopt.width / 2 / Math.tan(fov / 180 * Math.PI / 2) * 10;
+            // camera = new THREE.PerspectiveCamera(fov, graphicopt.width / graphicopt.height, near, far + 1);
+            far = graphicopt.width/2*100 ;
+            near = 1;
+            camera = new THREE.OrthographicCamera(graphicopt.width / - 2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / - 2, near, far + 1);
+            scene = new THREE.Scene();
+            axesHelper = createAxes(graphicopt.widthG() / 4);
+            axesTime = createTimeaxis();
+            scene.background = new THREE.Color(0xffffff);
+            scatterPlot = new THREE.Object3D();
+            scatterPlot.add(axesHelper);
+            scatterPlot.rotation.y = 0;
+
+            netPlot = new THREE.Object3D();
+            scatterPlot.add(netPlot);
+
+            gridHelper = new THREE.GridHelper(graphicopt.heightG(), 10);
+            gridHelper.position.z = scaleNormalTimestep.range()[0];
+            gridHelper.rotation.x = -Math.PI / 2;
+            scene.add(new THREE.Object3D().add(gridHelper));
+            scene.add(scatterPlot);
+
+            // Add canvas
+            renderer = new THREE.WebGLRenderer({canvas: document.getElementById("modelWorkerScreen")});
+            renderer.setSize(graphicopt.width, graphicopt.height);
+            renderer.render(scene, camera);
+            // zoom set up
+            view = d3.select(renderer.domElement);
+            axesHelper.toggleDimension(graphicopt.opt.dim);
+
+            raycaster = new THREE.Raycaster();
+            raycaster.params.Points.threshold = graphicopt.component.dot.size;
+            mouse = new THREE.Vector2();
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // disable the tabIndex to avoid jump element
+            view.attr('tabindex', null);
+            let mouseoverTrigger_time;
+            controls.addEventListener("change", function (d) {
+                controll_metrics.x = controls.target.x;
+                controll_metrics.y = controls.target.y;
+                controll_metrics.zoom = controls.target.distanceTo(controls.object.position);
+                controll_metrics.scale = controll_metrics.zoom_or / controll_metrics.zoom;
+                isneedrender = true;
+                iscameraMove = true;
+            });
+            setUpZoom();
+            stop = false;
+
+            svg = d3.select('#modelWorkerScreen_svg').attrs({width: graphicopt.width, height: graphicopt.height});
+            svg.select("#modelWorkerScreen_svg_g").selectAll("*").remove();
+
+            d3.select('.modelHeader .title').text(self.name);
+            handle_selection_switch(graphicopt.isSelectionMode);
+
+
+            animate();
+            needRecalculate = false;
+        }, 1);
+        return master;
+    };
+    function visiableLine(isvisiable){
+        dynamicVizs.forEach(d => {
+            d.links.forEach(lk => {
+                    lk.visible = isvisiable;
+                }
+            )
+        })
+        d3.select('#Link_opacity').classed('hide',!isvisiable);
+    }
+    function toggleLine() {
+        visiableLine(graphicopt.linkConnect);
+        isneedCompute = (!renderQueue_link.line);
+        renderQueue_link.line = true;
+    }
+
+    // zoom
+    function setUpZoom() {
+        let initial_scale = 1;
+        camera.position.set(0, 0, getZFromScale(initial_scale));
+    }
+
+    function getZFromScale(scale) {
+        let half_fov = fov / 2;
+        let half_fov_radians = toRadians(half_fov);
+        let scale_height = graphicopt.height / scale;
+        let camera_z_position = scale_height;
+        console.log('camera_z_position',camera_z_position)
+        return camera_z_position;
+    }
+
+    // function getZFromScale(scale) {
+    //     let half_fov = fov / 2;
+    //     let half_fov_radians = toRadians(half_fov);
+    //     let scale_height = graphicopt.height / scale;
+    //     let camera_z_position = scale_height / (2 * Math.tan(half_fov_radians));
+    //     return camera_z_position;
+    // }
+
+    function toRadians(angle) {
+        return angle * (Math.PI / 180);
+    }
+
+    //creat point
+    function createLines(g, links) {
+        return links.map(k => {
+            const el = createLine(k);
+            g.add(el);
+            return el;
+        });
+    }
+
+    function createLine(path) {
+        const points = [];
+        points.push(new THREE.Vector3(0, 0, 0));
+        points.push(new THREE.Vector3(0, 0, 0));
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+        var material = new THREE.LineBasicMaterial({
+            opacity: graphicopt.component.link.opacity,
+            linewidth: graphicopt.component.link.size,
+            color: path.color ? (new THREE.Color(d3.color(path.color) + '')) : 0xffffff,
+            transparent: true
+        });
+        let lineObj = new THREE.Line(geometry, material);
+        lineObj.frustumCulled = false;
+        return lineObj;
+    }
+
+    function createpoints(g, datafiltered) {
+        let pointsGeometry = new THREE.BufferGeometry();
+
+        let colors = new Float32Array(datafiltered.length * 3);
+        let pos = new Float32Array(datafiltered.length * 3);
+        let alpha = new Float32Array(datafiltered.length);
+        let sizes = new Float32Array(datafiltered.length);
+        for (let i = 0; i < datafiltered.length; i++) {
+            let target = datafiltered[i];
+            // Set vector coordinates from data
+            // let vertex = new THREE.Vector3(0, 0, 0);
+            pos[i * 3 + 0] = 0;
+            pos[i * 3 + 1] = 0;
+            pos[i * 3 + 2] = 0;
+            // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
+            let color = d3.color(target.drawData[0].color??'black');
+            colors[i * 3 + 0] = color.r / 255;
+            colors[i * 3 + 1] = color.g / 255;
+            colors[i * 3 + 2] = color.b / 255;
+            alpha[i] = target.filterd ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+            sizes[i] = graphicopt.component.dot.size;
+        }
+        pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        pointsGeometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+        pointsGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        pointsGeometry.setAttribute('alpha', new THREE.BufferAttribute(alpha, 1));
+        pointsGeometry.boundingBox = null;
+        pointsGeometry.computeBoundingSphere();
+
+        let pointsMaterial = new THREE.ShaderMaterial({
+
+            uniforms: {
+                color: {value: new THREE.Color(0xffffff)},
+                pointTexture: {value: new THREE.TextureLoader().load("src/images/circle.png")}
+
+            },
+            vertexShader: document.getElementById('vertexshader').textContent,
+            fragmentShader: document.getElementById('fragmentshader').textContent,
+            transparent: true
+
+        });
+
+        let p = new THREE.Points(pointsGeometry, pointsMaterial);
+        p.frustumCulled = false;
+        g.add(p);
+        return p;
+    }
+
+    function searchHandler(e) {
+        if (e.target.value !== "") {
+            let results = datain.filter(h => h.name.includes(e.target.value)).map(h => ({index: path[h.name][0].index}));
+            console.log(results)
+            if (results.length < graphicopt.tableLimit)
+                highlightNode([results[0]]);
+            else
+                highlightNode([])
+        } else {
+            highlightNode([]);
+        }
+    }
+
+    // Three.js render loop
+    let onrendercalled = false;
+
+    function render(islast) {
+        if (isneedCompute) {
+            try {
+                if (solution.length) {
+                    solution.forEach((sol,soli)=>{
+                        const points = dynamicVizs[soli].nodes;
+                        let p = points.geometry.attributes.position.array;
+                        onrendercalled = true;
+
+                            sol.nodes.forEach(function (d, pointIndex) {
+                                // mapIndex.forEach(function (i) {
+                                const target = data.net[soli].nodes[pointIndex];
+                                target.x = d.x;
+                                target.y = d.y;
+
+                                    p[pointIndex * 3] = d.x;
+                                    p[pointIndex * 3 + 1] = d.y;
+
+                                    // 3rd dimension as time step
+                                    // p[pointIndex*3+2] = xscale(d[2])||0;
+                                    p[pointIndex * 3 + 2] = scaleNormalTimestep(soli);
+                                    d.z = p[pointIndex * 3 + 2];
+                            });
+                            // if (islast) {
+                            //     let center = d3.nest().key(d => d.clusterName).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
+                            //     solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
+                            //         const target = datain[i];
+                            //         const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
+                            //         path[target.name][posPath].value = d;
+                            //         // updateStraightLine(target, posPath, d);
+                            //         updateLine(target, posPath, d, path[target.name].map(p => center[datain[p.index].clusterName]));
+                            //
+                            //     });
+                            //     let rangeDis = [+Infinity, 0];
+                            //     let customz = d3.scaleLinear().range(scaleNormalTimestep.range());
+                            //     let distance_data = [];
+                            //     for (let name in path) {
+                            //         let temp;
+                            //         path[name].forEach((p, i) => {
+                            //             if (!i) {
+                            //                 path[name].distance = 0;
+                            //                 temp = p.value;
+                            //                 return;
+                            //             } else {
+                            //                 path[name].distance += distance(path[name][i - 1].value, p.value)
+                            //             }
+                            //         });
+                            //         if (graphicopt.opt.dim === 2.5)
+                            //             path[name].distance /= (_.last(path[name]).__timestep);
+                            //         else
+                            //             path[name].distance /= path[name].length;
+                            //         if (path[name].distance < rangeDis[0])
+                            //             rangeDis[0] = path[name].distance;
+                            //         if (path[name].distance > rangeDis[1])
+                            //             rangeDis[1] = path[name].distance;
+                            //         distance_data.push(path[name].distance)
+                            //     }
+                            //     customz.domain(rangeDis);
+                            // }
+                            points.geometry.attributes.position.needsUpdate = true;
+                            points.geometry.boundingBox = null;
+                            points.geometry.computeBoundingSphere();
+
+                            isneedrender = true;
+
+                    })
+                }
+            } catch (e) {
+                console.log(e)
+            }
+            isneedCompute = false;
+        }
+    }
+
+    function handle_data() {
+        if (graphicopt.iscompareMode) {
+            for (let i = 1; i < data.net.length; i++) {
+                debugger
+                const linkMap = new Map();
+                data.net[i - 1].links.forEach(l => {
+                    linkMap.set(l.source + '|||' + l.target, l);
+                });
+                data.net[i].links.forEach(l => {
+                    const key = l.source + '|||' + l.target;
+                    if (!linkMap.has(key)) // new link
+                    {
+                        l.isNew = true;
+                        l.color = "green"
+                    } else {
+                        linkMap.delete(key);
+                    }
+                });
+                data.net[i].delectedLinks = [];
+                linkMap.forEach((value, key) => data.net[i].delectedLinks.push(value));
+            }
+        }
+        // let maxstep = sampleS.timespan.length - 1;
+        // scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
+        // scaleNormalTimestep.domain([0, maxstep]);
+    }
+
+    function createAxes(length) {
+        var material = new THREE.LineBasicMaterial({color: 0x000000});
+        var geometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0, 0), new THREE.Vector3(length, 0, 0),
+            new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, length, 0),
+            new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, length)]);
+        let axesHelper = new THREE.LineSegments(geometry, material);
+        axesHelper.toggleDimension = function (dim) {
+            axesTime.visible = false;
+            if (dim === 2.5) {
+                axesHelper.visible = false;
+                axesTime.visible = true;
+            } else if (dim === 3) {
+                axesHelper.visible = true;
+                axesHelper.geometry.dispose();
+                axesHelper.geometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, 0), new THREE.Vector3(length, 0, 0),
+                    new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, length, 0),
+                    new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, length)]);
+            } else if (dim === 2) {
+                // axesHelper.geometry.dispose();
+                axesHelper.visible = false;
+                // axesHelper.geometry = new THREE.BufferGeometry().setFromPoints( [
+                //     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( length, 0, 0),
+                //     new THREE.Vector3( 0, 0, 0), new THREE.Vector3( 0, length, 0)]);
+            }
+        };
+        return axesHelper;
+    }
+
+    function createTimeaxis() {
+        var dir = new THREE.Vector3(0, 0, 1);
+        dir.normalize();
+        var origin = new THREE.Vector3(0, 0, scaleNormalTimestep.range()[0]);
+        var length = scaleNormalTimestep.range()[1] - scaleNormalTimestep.range()[0];
+        var hex = 0x000000;
+        var arrowGroup = new THREE.Object3D();
+        var arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex, 30, 10);
+        arrowHelper.line.material.linewidth = 4;
+        arrowGroup.add(arrowHelper);
+        var loader = new THREE.FontLoader();
+
+        loader.load('../TimeRadar/src/fonts/optimer_regular.typeface.json', function (font) {
+
+            var textGeo = new THREE.TextGeometry('Time', {
+                font: font,
+                size: 30,
+                height: 1,
+                curveSegments: 12,
+                bevelEnabled: false
+            });
+            textGeo.computeBoundingBox();
+            textGeo.computeVertexNormals();
+            textGeo = new THREE.BufferGeometry().fromGeometry(textGeo);
+            let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color: 0xffffff, flatShading: true}));
+            textMesh1.name = 'TimeText';
+            textMesh1.rotation.x = 0;
+            textMesh1.rotation.y = Math.PI / 2;
+            textMesh1.lookAt(camera.position);
+            arrowGroup.add(textMesh1)
+        });
+        scene.add(arrowGroup);
+        arrowGroup.visible = false;
+        return arrowGroup;
+    }
+
+    //interacction
+    function highlightNode(intersects) { // INTERSECTED
+        var geometry = points.geometry;
+        var attributes = geometry.attributes;
+        var targetfilter;
+        if (intersects.length > 0 && (!visibledata || visibledata && (targetfilter = intersects.find(d => visibledata.indexOf(d.index) !== -1)))) {
+            linesGroup.visible = true;
+            let targetIndex = intersects[0].index;
+            if (visibledata)
+                targetIndex = targetfilter.index;
+            // if (INTERSECTED.indexOf(intersects[0].index) === -1) {
+            if (true) {
+                let target = datain[targetIndex];
+                INTERSECTED = [];
+                datain.forEach((d, i) => {
+                    if (d.name === target.name) {
+                        INTERSECTED.push(i);
+                        attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = target.timestep === d.timestep ? graphicopt.component.dot.size * 2 : (d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.size);
+                        lines[d.name].visible = true;
+                        lines[d.name].material.opacity = 1;
+                        lines[d.name].material.linewidth = graphicopt.component.link.highlight.opacity;
+                        if (d.__metrics.radar)
+                            d.__metrics.radar.dispatch('highlight')
+                    } else {
+                        if (!visibledata || (visibledata && visibledata.indexOf(i) !== -1)) {
+
+                            attributes.alpha.array[i] = 0.1;
+                            attributes.size.array[i] = graphicopt.component.dot.size;
+                            lines[d.name].visible = false;
+                            lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                            lines[d.name].material.linewidth = graphicopt.component.link.size;
+                            if (d.__metrics.radar)
+                                d.__metrics.radar.dispatch('fade')
+                        } else {
+                            attributes.alpha.array[i] = 0;
+                            lines[d.name].visible = false;
+                            lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                            lines[d.name].material.linewidth = graphicopt.component.link.size;
+                        }
+                    }
+                });
+
+                attributes.size.needsUpdate = true;
+                attributes.alpha.needsUpdate = true;
+            }
+        } else if (INTERSECTED.length || ishighlightUpdate) {
+            ishighlightUpdate = false;
+            tooltip_lib.hide(); // hide tooltip
+            linesGroup.visible = !!graphicopt.linkConnect;
+            if (visibledata) {
+                // if (visibledata.length<graphicopt.tableLimit*2)
+                linesGroup.visible = true;
+                datain.forEach((d, i) => {
+                    if (visibledata.indexOf(i) !== -1 || (filterGroupsetting.timestep !== undefined && filterGroupsetting.timestep === d.__timestep)) {
+                        INTERSECTED.push(i);
+                        attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+                        attributes.size.array[i] = d.filtered ? graphicopt.component.dot.filter.size : graphicopt.component.dot.size;
+                        lines[d.name].visible = filterGroupsetting.timestep === undefined;
+                        lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                        lines[d.name].material.linewidth = graphicopt.component.link.highlight.opacity;
+                        if (d.__metrics.radar)
+                            d.__metrics.radar.dispatch('highlight')
+                    } else {
+                        attributes.alpha.array[i] = 0;
+                        lines[d.name].visible = false;
+                        lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                        lines[d.name].material.linewidth = graphicopt.component.link.size;
+                    }
+                });
+            } else
+                datain.forEach((d, i) => {
+                    attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+                    attributes.size.array[i] = d.filtered ? graphicopt.component.dot.filter.size : graphicopt.component.dot.size;
+                    lines[d.name].visible = true;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth = graphicopt.component.link.size;
+                });
+
+            attributes.size.needsUpdate = true;
+            attributes.alpha.needsUpdate = true;
+            INTERSECTED = [];
+            scene.remove(scene.getObjectByName('boxhelper'));
+        }
+        isneedrender = true;
+    }
+
+    function highlightGroupNode(intersects, timestep) { // INTERSECTED
+        svgData = undefined;
+        d3.select('#modelWorkerScreen_svg_g').style('pointer-events', 'none').attr('transform', `translate(0,0) scale(1)`).selectAll('*').remove();
+        controll_metrics.old = {
+            x: controll_metrics.x,
+            y: controll_metrics.y,
+            zoom: controll_metrics.zoom,
+            scale: controll_metrics.scale || 1
+        };
+        if (intersects.length) {
+            if (intersects.length < graphicopt.tableLimit) {
+                // isdrawradar = true;
+                linesGroup.visible = true;
+                d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide', false);
+                // try {
+                //     updateDataTableFiltered(intersects);
+                // }catch(e){}
+                d3.select("p#filterList").classed('hide', true);
+            } else {
+                linesGroup.visible = !!graphicopt.linkConnect;
+                d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide', true);
+                d3.select("p#filterList").classed('hide', false);
+                d3.select("p#filterList").text(intersects.join(', '));
+                // d3.select("p#filterList+.copybtn").classed('hide', false);
+            }
+        } else {
+            d3.selectAll(".filterLimit, #filterTable_wrapper").classed('hide', true)
+            d3.select("p#filterList").text('');
+            d3.select("p#filterList").classed('hide', true);
+            // d3.select("p#filterList+.copybtn").classed('hide',true);
+        }
+        filterGroupsetting.timestep = timestep;
+        var geometry = points.geometry;
+        var attributes = geometry.attributes;
+        if (intersects.length > 0 || !(timestep === undefined)) {
+            let radarData = [];
+            let posArr = [];
+            visibledata = [];
+            datain.forEach((d, i) => {
+                if (intersects.indexOf(d.name) !== -1 || (timestep !== undefined && timestep === d.__timestep)) {
+                    attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+                    lines[d.name].visible = timestep === undefined;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth = graphicopt.component.link.highlight.opacity;
+                    visibledata.push(i);
+                    radarData.push(d);
+                    posArr.push(getpos(attributes.position.array[i * 3], attributes.position.array[i * 3 + 1], attributes.position.array[i * 3 + 2], i));
+                } else {
+                    attributes.alpha.array[i] = 0;
+                    lines[d.name].visible = false;
+                    lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                    lines[d.name].material.linewidth = graphicopt.component.link.size;
+                }
+            });
+
+            attributes.alpha.needsUpdate = true;
+        } else if (visibledata && visibledata.length || ishighlightUpdate) {
+            visibledata = undefined;
+            ishighlightUpdate = false;
+            linesGroup.visible = !!graphicopt.linkConnect;
+            tooltip_lib.hide(); // hide tooltip
+            datain.forEach((d, i) => {
+                attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
+                lines[d.name].visible = true;
+                lines[d.name].material.opacity = graphicopt.component.link.opacity;
+                lines[d.name].material.linewidth = graphicopt.component.link.size;
+            });
+            forceColider.stop();
+            attributes.alpha.needsUpdate = true;
+
+        }
+        isneedrender = true;
+    }
+
+    let disableMouseover = false, isneedrender = false;
+    let mouseclick = false;
+
+    function onClick() {
+        if (!isMousemove) {
+            mouseclick = true;
+            isneedrender = true;
+            console.log('click!')
+        }
+    }
+
+    function animate() {
+        if (!stop) {
+            animateTrigger = true;
+            if (isneedrender) {
+                // visiableLine(graphicopt.linkConnect);
+                //update raycaster with mouse movement
+                try {
+                    if (axesTime.visible) {
+                        axesTime.getObjectByName("TimeText").lookAt(camera.position);
+                    }
+                } catch (e) {
+                }
+                if (mouseoverTrigger && !iscameraMove && !disableMouseover || mouseclick) { // not have filter
+                    if (!svgData) {
+                        raycaster.setFromCamera(mouse, camera);
+                        if (!filterbyClustername.length) {
+                            var intersects = overwrite || raycaster.intersectObject(points);
+                            //count and look after all objects in the diamonds group
+                            highlightNode(intersects);
+                        } else { // mouse over group
+                            var geometry = points.geometry;
+                            var attributes = geometry.attributes;
+                            datain.forEach((d, i) => {
+                                if (filterbyClustername.indexOf(d.clusterName) !== -1) {
+                                    attributes.alpha.array[i] = 1;
+                                    // lines[d.name].visible = true;
+                                } else {
+                                    attributes.alpha.array[i] = 0.1;
+                                    // lines[d.name].visible = false;
+                                }
+                                lines[d.name].visible = false;
+                            });
+                            attributes.alpha.needsUpdate = true;
+                        }
+                    }
+                    if (mouseclick) {
+                        disableMouseover = !!(!disableMouseover && INTERSECTED.length);
+                        mouseclick = false;
+                        if (svgData && !disableMouseover && svgData.clickedOb) {
+                            svgData.clickedOb.dispatch('mouseleave')
+                        }
+                    }
+                } else if (lassoTool && lassoTool.needRender) {
+                    let newClustercolor = d3.color('#000000');
+                    try {
+                        for (var i = 0; i < lassoTool.collection.length; i++) {
+                            let currentIndex = lassoTool.collection[i];
+                            let currentData = datain[mapIndex[currentIndex]];
+                            let currentColor = d3.color(colorarr[currentData.cluster].value);
+                            points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
+                            points.geometry.attributes.customColor.needsUpdate = true;
+                        }
+
+
+                        var allSelected = lassoTool.select();
+                        allSelected_Data = [];
+                        for (var i = 0; i < allSelected.length; i++) {
+                            allSelected_Data.push(datain[mapIndex[allSelected[i]]]);
+                            let currentIndex = lassoTool.collection[i];
+                            points.geometry.attributes.customColor.array[currentIndex * 3] = newClustercolor.r / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = newClustercolor.g / 255;
+                            points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = newClustercolor.b / 255;
+                            points.geometry.attributes.customColor.needsUpdate = true;
+                        }
+
+                    } catch (e) {
+
+                    }
+                    lassoTool.needRender = false;
+                }
+                // visiableLine(graphicopt.linkConnect);
+                controls.update();
+                renderer.render(scene, camera);
+                var frustum = new THREE.Frustum();
+                frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+                datain.forEach((d, i) => d.inscreen = frustum.containsPoint(new THREE.Vector3(points.geometry.attributes.position.array[i * 3], points.geometry.attributes.position.array[i * 3 + 1], points.geometry.attributes.position.array[i * 3 + 2])));
+                if ((graphicopt.component.label.enable == 1 || graphicopt.component.label.enable == 3) && solution[Math.floor(graphicopt.opt.dim)] && solution[Math.floor(graphicopt.opt.dim)].length)
+                    cluster.forEach(c => {
+                        if (datain[c.__metrics.indexLeader]) {
+                            const pos = position2Vector(datain[c.__metrics.indexLeader].__metrics.position);
+                            c.__metrics.projection = getpos(pos.x, pos.y, pos.z);
+                        }
+                    });
+                // console.log(controll_metrics.zoom)
+                if (iscameraMove || onrendercalled) {
+                    onrendercalled = false;
+                }
+            }
+            iscameraMove = false;
+            isneedrender = false;
+            requestAnimationFrame(animate);
+        } else {
+            if (forceColider)
+                forceColider.stop();
+        }
+    }
+
+    let getDrawData = function () {
+        return [];
+    }
+
+    createEventHandle('onBrush');
+    createEventHandle('offBrush');
+    createEventHandle('mouseover');
+    createEventHandle('mouseout');
+    createEventHandle('click');
+
+    function createEventHandle(key) {
+        master[key] = [];
+        master[key].dict = {};
+        master[key + 'Add'] = function (id, func) {
+            if (master[key].dict[id] !== undefined)
+                master[key][master[key].dict[id]] = func;
+            else {
+                master[key].push(func)
+                master[key].dict[id] = master[key].length - 1;
+            }
+        }
+    }
+
+    const compareMode = true;
+    master.draw = function () {
+        debugger
+        handle_data();
+        // remove all timeslice
+        netPlot.remove(...netPlot.children);
+        scaleNormalTimestep.domain([0,data.net.length])
+        // create time slices
+        data.net.forEach(net => {
+            // time slice generate
+            let sliceHolder = new THREE.Object3D();
+            const netControl = {nodes: undefined, link: undefined};
+            netControl.nodes = createpoints(sliceHolder, net.nodes);
+            netControl.links = createLines(sliceHolder, net.links);
+
+            // add to the control
+            dynamicVizs.push(netControl);
+            netPlot.add(sliceHolder);
+        });
+        start();
+    };
+
+    function onlinkopacity() {
+        setTimeout(() => {
+            dynamicVizs.forEach(d => {
+                d.links.forEach(lk => {
+                        if (lines[lk].visible && lines[lk].material.opacity) {
+                            lines[lk].material.opacity = graphicopt.component.link.opacity;
+                        }
+                    }
+                )
+            })
+            isneedrender = true;
+        });
+    }
+    master.generateTable = function(){
+        $( "#modelWorkerInformation" ).draggable({ containment: "parent", scroll: false });
+        needRecalculate = true;
+        $('#modelSelectionInformation .tabs').tabs({
+            onShow: function(){
+                graphicopt.isSelectionMode = this.index===1;
+                handle_selection_switch(graphicopt.isSelectionMode);
+            }
+        });
+        d3.select('#modelWorkerInformation table').selectAll('*').remove();
+        table_info = d3.select('#modelWorkerInformation table')
+            .html(` <colgroup><col span="1" style="width: 40%;"><col span="1" style="width: 60%;"></colgroup>`);
+        // .styles({'width':tableWidth+'px'});
+        let tableData = [
+            [
+                {text:"Input",type:"title"},
+                {label:'#Radars',content:datain.length,variable: 'datain'}
+            ],
+            [
+                {text:"Settings",type:"title"},
+            ],
+            [
+                {text:"Output",type:"title"},
+            ]
+        ];
+        d3.values(self.controlPanel).forEach(d=>{
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,class:d.class})
+        });
+        d3.values(controlPanelGeneral).forEach(d=>{
+            tableData[1].push({label:d.text,type:d.type,content:d,variable: d.variable,variableRoot: d.variableRoot,id:d.id,class:d.class})
+        });
+        d3.keys(self.formatTable).forEach(k=>formatTable[k]=self.formatTable[k]);
+        tableData[2] = [...tableData[2],...self.outputSelection];
+        let tbodys = table_info.selectAll('tbody').data(tableData);
+        tbodys
+            .enter().append('tbody')
+            .selectAll('tr').data(d=>d)
+            .enter().append('tr')
+            .attr('id',d=>d.id?d.id:null)
+            .attr('class',d=>d.class?d.class:null)
+            .selectAll('td').data(d=>d.type==="title"?[d]:[{text:d.label},d.type?{content:d.content,variable:d.variable,variableRoor: d.variableRoot}:{text:d.content,variable:d.variable}])
+            .enter().append('td')
+            .attr('colspan',d=>d.type?"2":null)
+            .style('text-align',(d,i)=>d.type==="title"?"center":(i?"right":"left"))
+            .attr('class',d=>d.variable)
+            .each(function(d){
+                if (d.text!==undefined) // value display only
+                    d3.select(this).text(d.text);
+                else{ // other component display
+                    let formatvalue = formatTable[d.content.variable]||(e=>Math.round(e));
+                    if (d.content.type==="slider"){
+                        let div = d3.select(this).style('width',d.content.width).append('div').attr('class','valign-wrapper');
+                        noUiSlider.create(div.node(), {
+                            start: (graphicopt.opt[d.content.variable]|| (d.content.variableRoot?d.content.variableRoot[d.content.variable]:undefined))|| d.content.range[0],
+                            connect: 'lower',
+                            tooltips: {to: function(value){return formatvalue(value)}, from:function(value){return +value.split('1e')[1];}},
+                            step: d.content.step||1,
+                            orientation: 'horizontal', // 'horizontal' or 'vertical'
+                            range: {
+                                'min': d.content.range[0],
+                                'max': d.content.range[1],
+                            },
+                        });
+                        div.node().noUiSlider.on("change", function () { // control panel update method
+                            if (!d.content.variableRoot) {
+                                graphicopt.opt[d.content.variable] = +this.get();
+                            }else
+                                d.content.variableRoot[d.content.variable] = +this.get();
+                            if (d.content.callback)
+                                d.content.callback();
+                            else{
+                                obitTrigger=true;
+                                start();
+                            }
+                        });
+                    }else if (d.content.type === "checkbox") {
+                        let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
+                        div.append('input')
+                            .attrs({
+                                type: "checkbox",
+                                class: "filled-in"
+                            }).on('change',function(){
+                            graphicopt[d.content.variable]  =  this.checked;
+                            if (d.content.callback)
+                                d.content.callback();
+                        }).node().checked = graphicopt[d.content.variable];
+                        div.append('span')
+                    }else if (d.content.type === "switch") {
+                        let div = d3.select(this).style('width', d.content.width).classed('switch',true)
+                            .append('label').attr('class', 'valign-wrapper')
+                            .html(`${d.content.labels[0]}<input type="checkbox"><span class="lever"></span>${d.content.labels[1]}`)
+                        div.select('input').node().checked = (graphicopt.opt[d.content.variable]+"") ===d.content.labels[1];
+                        div.select('input').on('change',function(){
+                            graphicopt.opt[d.content.variable]  =  d.content.values[+this.checked];
+                            if (d.content.callback)
+                                d.content.callback();
+                            else {
+                                obitTrigger=true;
+                                start();
+                            }
+                        })
+                    }else if (d.content.type === "selection") {
+                        let label = _.isFunction(d.content.labels)?d.content.labels():d.content.labels;
+                        let values = _.isFunction(d.content.values)?d.content.values():d.content.values;
+                        let div = d3.select(this).style('width', d.content.width)
+                            .append('select')
+                            .on('change',function(){
+                                setValue(d.content,values[this.value])
+                                // if (!d.content.variableRoot) {
+                                //     graphicopt[d.content.variable]  =  d.content.values[this.value];
+                                // }else
+                                //     graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
+                                if (d.content.callback)
+                                    d.content.callback();
+                                else {
+                                    obitTrigger=true;
+                                    start();
+                                }
+                            });
+                        div
+                            .selectAll('option').data(label)
+                            .enter().append('option')
+                            .attr('value',(e,i)=>i).text((e,i)=>e);
+                        // let default_val = graphicopt[d.content.variable];
+                        // // if (d.content.variableRoot)
+                        // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
+                        // console.log(getValue(d.content))
+                        $(div.node()).val( values.indexOf( getValue(d.content)));
+                    }
+                }
+            });
+    };
+    function updateTableInput(){
+        table_info.select(`.datain`).text(e=>datain.length);
+        d3.select('#modelCompareMode').property('checked',graphicopt.iscompareMode)
+        d3.values(self.controlPanel).forEach((d)=>{
+            if (graphicopt.opt[d.variable]!==undefined) {
+                try {
+                    d3.select(`#modelWorkerInformation .${d.variable} div`).node().noUiSlider.set(graphicopt.opt[d.variable]);
+                }catch(e){
+                    switch (d.type) {
+                        case 'switch':
+                            d3.select(`#modelWorkerInformation .${d.variable} input`).node().checked = graphicopt.opt[d.variable];
+                            break;
+                        case "selection":
+                            // if (d.variable==='var1')
+                            //     values = _.isFunction(d.values)?d.values():d.values;
+                            $(d3.select(`#modelWorkerInformation .${d.variable} select`).node()).val( getValue(d));
+                            break;
+                    }
+                }
+            }
+        });
+    }
+    function setValue(content,value){
+        if (_.isString(content.variableRoot))
+            graphicopt[content.variableRoot][content.variable] = value;
+        else{
+            if (content.variableRoot===undefined)
+                graphicopt[content.variable] = value;
+            else
+                content.variableRoot[content.variable] = value;
+        }
+    }
+    function getValue(content){
+        if (_.isString(content.variableRoot))
+            return graphicopt[content.variableRoot][content.variable];
+        else{
+            if (content.variableRoot===undefined)
+                return graphicopt[content.variable];
+            else
+                return content.variableRoot[content.variable];
+        }
+    }
+    function updateTableOutput(output){
+        d3.entries(output).forEach(d=>{
+            table_info.select(`.${d.key}`).text(e=>d.value? formatTable[e.variable]? formatTable[e.variable](d.value):d3.format('.4s')(d.value) :'_');
+        });
+
+    }
+    master.main_svg = function () {
+        return main_svg
+    };
+
+    master.stop = function () {
+        terminateWorker();
+        stop = true;
+    };
+
+    function terminateWorker() {
+        workerList.forEach(w => {
+            w.terminate();
+        });
+        workerList.length = 0;
+    }
+
+
+    master.data = function (_data) {
+        if (arguments.length) {
+            data = _data;
+            return master
+        }
+        return data;
+    };
+    master.color = function (_data) {
+        return arguments.length ? (color = _data, master) : color;
+    };
+    master.getColorScale = function (_data) {
+        return arguments.length ? (getColorScale = _data ? _data : function () {
+            return color
+        }, master) : getColorScale;
+    };
+    master.graphicopt = function (_data) {
+        if (arguments.length) {
+            d3.keys(_data).forEach(k => graphicopt[k] = _data[k]);
+            return master;
+        } else
+            return graphicopt;
+    };
+    master.getRenderFunc = function (_data) {
+        return arguments.length ? (getRenderFunc = _data, master) : getRenderFunc;
+    };
+    master.getDrawData = function (_data) {
+        return arguments.length ? (getDrawData = _data, master) : getDrawData;
+    };
+    master.onFinishDraw = function (_data) {
+        onFinishDraw.push(_data)
+        return master;
+    };
+
+    master.g = function () {
+        return g
+    };
+    master.isFreeze = function () {
+        return isFreeze
+    };
+
+    return master;
+};

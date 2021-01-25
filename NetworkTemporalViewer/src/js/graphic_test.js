@@ -795,6 +795,6 @@ function drawGantt(){
 }
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
-let drawObject = new DynamicNet3D();
+let drawObject = new DynamicNet();
 // let drawObject = new DynamicNet();
 // let PCAmapObject = new PCAmap();

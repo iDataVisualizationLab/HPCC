@@ -118,8 +118,18 @@
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
 
 <!--                    <h5 class="text-center" style="width:100%" >Sankey by <span id="ganttLayoutLabel">#CPU Cores</span></h5>-->
-                    <div id="dynamicHolder"  style="width:100%;height:100%">
-                        <canvas id="modelWorkerScreen" style="width:100%;height:100%"></canvas>
+                    <div id="dynamicHolder">
+<!--                        <svg class="row-cols-12 text-center" id="circularLayout">-->
+<!--                            <defs>-->
+<!--                                <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">-->
+<!--                                    <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>-->
+<!--                                    <feMerge>-->
+<!--                                        <feMergeNode in="coloredBlur"></feMergeNode>-->
+<!--                                        <feMergeNode in="SourceGraphic"></feMergeNode>-->
+<!--                                    </feMerge>-->
+<!--                                </filter>-->
+<!--                            </defs>-->
+<!--                        </svg>-->
                     </div>
 
                     <div id="legendHolder" class="position-absolute card windown" style="top:0px;width: 320px; ;left: 70%">
@@ -166,12 +176,39 @@
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-<!--                                        <label class="col-5" for="flowType">Visualizing: </label>-->
-<!--                                        <select class="col-7" id="flowType">-->
-<!--                                            <option value="core">#Cores</option>-->
-<!--                                            <option value="compute">#Nodes</option>-->
-<!--                                        </select>-->
-<!--                                     -->
+                                        <label class="col-5" for="flowType">Visualizing: </label>
+                                        <select class="col-7" id="flowType">
+                                            <option value="core">#Cores</option>
+                                            <option value="compute">#Nodes</option>
+                                        </select>
+                                        <label class="col-5" for="userSort">Sort user node by: </label>
+                                        <select class="col-7" id="userSort">
+                                            <option value="size">size</option>
+                                            <option selected value="">None</option>
+                                        </select>
+                                        <br>
+                                        <label class="col-9" for="hideStable">Hide stable users: </label>
+                                        <label class="col-3 left-align">
+                                            <input id="hideStable" type="checkbox" class="filled-in">
+                                            <span ></span>
+                                        </label>
+
+                                        <label class="col-9" for="showShareUser">Show shared users: </label>
+                                        <label class="col-3 left-align">
+                                            <input id="showShareUser" type="checkbox" class="filled-in">
+                                            <span ></span>
+                                        </label>
+
+                                        <label class="col-9" for="showOverLimitUser">Show nodes used more than 36 CPU-core: </label>
+                                        <label class="col-3 left-align">
+                                            <input id="showOverLimitUser" type="checkbox" class="filled-in">
+                                            <span ></span>
+                                        </label>
+
+                                        <div class="row">
+                                            <span class="col-12 text-center" id="pieChartTime"></span>
+                                            <svg id="pieChart"></svg>
+                                        </div>
 <!--                                        <label class="col-4" for="nodeColor">Node color by: </label>-->
 <!--                                        <select class="col-6" id="nodeColor">-->
 <!--                                            <option value="">Current metric</option>-->
@@ -400,7 +437,7 @@
     <script src="src/js/setting.js"></script>
     <script src="src/js/handleData.js"></script>
     <script src="src/js/cluster.js"></script>
-    <script src="src/js/graphic.js"></script>
+    <script src="src/js/graphic_test.js"></script>
     <script src="src/js/menu.js"></script>
     <script src="src/js/main.js"></script>
 </body>
