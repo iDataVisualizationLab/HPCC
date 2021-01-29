@@ -214,7 +214,7 @@ let DynamicNetViz = function(){
             .data(_links, d => [d.source.id, d.target.id])
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
-                    if (d.target.data.isNew.length){
+                    if (d.target.data.isNew&&d.target.data.isNew.length){
                         if (!labelsM.get(d.id)){
                             labels.push(d.source);
                             labelsM.set(d.id,d.source);}

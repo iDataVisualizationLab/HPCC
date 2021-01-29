@@ -180,7 +180,7 @@ handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(_data){
     debugger
-    _data.time_stamp = _data.time_stamp.slice(0,10)
+    _data.time_stamp = _data.time_stamp.slice(0,5)
     let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata};
     // let data = [];
     const computers = _data[COMPUTE];

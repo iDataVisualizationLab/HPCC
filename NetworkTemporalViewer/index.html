@@ -251,15 +251,15 @@
                                                 <input type="text" id="search" class="search col s8" placeholder="Search host e.g AT1G34370">
                                                 <i class="material-icons col s1" style="margin: auto;">search</i>
                                             </div>
-                                            <ul class="tabs" style="margin-top: 10px">
-                                                <li class="tab col s3"><a class="active" href="#modelSetting">Setting</a></li>
-                                                <li class="tab col s3"><a href="#modelSelectionTool">Selection</a></li>
-                                                <li class="tab col s3"><a href="#modelRanking">Ranking</a></li>
-                                                <li class="tab col s3"><a href="#modelFilter">Filter</a></li>
+                                            <ul class="nav nav-tabs" style="margin-top: 10px">
+                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>
+                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>
                                             </ul>
-                                            <div id="modelSetting" class="tabHolder">
-                                                <table>
+                                            <div id="modelSetting" class="tabHolder tab-pane fade show active" role="tabpanel">
+                                                <table class="table">
                                                 </table>
+                                            </div>
+                                            <div id="modelSelectionTool" class="tabHolder tab-pane" role="tabpanel">
                                             </div>
                                         </div>
                                 </div>
@@ -321,10 +321,10 @@
 <!--    <script src="src/lib/nouislider.js"></script>-->
     <script src="src/lib/d3.v4.min.js"></script>
     <script src="src/lib/d3.v5.min.js"></script>
-    <script src="https://d3js.org/d3-color.v1.min.js"></script>
-    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+<!--    <script src="https://d3js.org/d3-color.v1.min.js"></script>-->
+<!--    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>-->
+<!--    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>-->
+<!--    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>-->
 <!--    <script src="src/lib/d3-color.v1.min.js"></script>-->
 <!--    <script src="src/lib/d3-interpolate.v1.min.js"></script>-->
 <!--    <script src="src/lib/d3-scale-chromatic.v1.min.js"></script>-->
@@ -344,15 +344,18 @@
         attribute float alpha;
         attribute float size;
         attribute vec3 customColor;
+        attribute float texIndex;
 
         varying float vAlpha;
         varying vec3 vColor;
+        varying float vTexIndex;
 
         void main() {
 
             vAlpha = alpha;
 
             vColor = customColor;
+            vTexIndex = texIndex;
 
             vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
@@ -367,17 +370,25 @@
     <script type="x-shader/x-fragment" id="fragmentshader">
 
         uniform vec3 color;
-        uniform sampler2D pointTexture;
+        uniform sampler2D textures[2];
 
         varying float vAlpha;
         varying vec3 vColor;
+        varying float vTexIndex;
 
         void main() {
 
             gl_FragColor = vec4( color * vColor, vAlpha );
 
-            gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+            vec4 finalColor;
 
+            if (vTexIndex < 0.5) {
+                finalColor = texture2D(textures[0], gl_PointCoord);
+            } else if (vTexIndex < 1.5) {
+                finalColor = texture2D(textures[1], gl_PointCoord);
+            }
+
+            gl_FragColor = gl_FragColor * finalColor;
         }
 
     </script>

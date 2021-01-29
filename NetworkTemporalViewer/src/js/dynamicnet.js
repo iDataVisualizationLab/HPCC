@@ -103,6 +103,7 @@ let DynamicNet = function(){
                 linkMap.forEach((value, key)=>data.net[i].delectedLinks.push(value));
             }
         }
+        const t0 = performance.now();
         d3.select(maindiv).selectAll('*').remove();
         d3.select(maindiv).selectAll('svg.dynamicSVg')
             .data(data.net)
@@ -118,12 +119,19 @@ let DynamicNet = function(){
                     .force("link", d3.forceLink().id(d => d.id))
                     .force("x", d3.forceX())
                     .force("y", d3.forceY())
-                    .on("tick", ticked);
+                    .on("tick", ticked)
+                    .on('end',()=>{
+                        console.timeLog('Force dynamic: ')
+                    });
                 netControl.init({div,force}).data({nodes:net.nodes,links:net.links,delectedLinks:net.delectedLinks,ti:net.ti});
+                // netControl.init({div,force}).data({nodes:net.nodes.map(d=>d.parent),links:net.links,delectedLinks:net.delectedLinks,ti:net.ti});
                 netControl.draw();
                 function ticked() {
-                    debugger
                     const alpha = force.alpha();
+                    if (alpha<0.05){
+                        d3.select('.navbar-brand').text(performance.now()-t0)
+                        force.stop();
+                    }
                     net.nodes.forEach(d=>{
                         d.x += (d3.mean(d.parent.timeArr,e=>e.x)-d.x)*alpha*0.8;
                         d.y += (d3.mean(d.parent.timeArr,e=>e.y)-d.y)*alpha*0.8;
