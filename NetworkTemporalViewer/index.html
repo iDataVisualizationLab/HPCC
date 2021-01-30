@@ -379,16 +379,19 @@
         void main() {
 
             gl_FragColor = vec4( color * vColor, vAlpha );
+            if (vAlpha<0.001){
+                gl_FragColor.a = 0.0;
+            }else {
+                vec4 finalColor;
 
-            vec4 finalColor;
+                if (vTexIndex < 0.5) {
+                    finalColor = texture2D(textures[0], gl_PointCoord);
+                } else if (vTexIndex < 1.5) {
+                    finalColor = texture2D(textures[1], gl_PointCoord);
+                }
 
-            if (vTexIndex < 0.5) {
-                finalColor = texture2D(textures[0], gl_PointCoord);
-            } else if (vTexIndex < 1.5) {
-                finalColor = texture2D(textures[1], gl_PointCoord);
+                gl_FragColor = gl_FragColor * finalColor;
             }
-
-            gl_FragColor = gl_FragColor * finalColor;
         }
 
     </script>

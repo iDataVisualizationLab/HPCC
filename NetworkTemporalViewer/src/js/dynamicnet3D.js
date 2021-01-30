@@ -604,6 +604,7 @@ let DynamicNet3D = function () {
                 color: {value: new THREE.Color(0xffffff)},
                 // pointTexture: {value: new THREE.TextureLoader().load("src/images/circle.png")}
                 textures: {
+                    type: "t",
                     value: [new THREE.TextureLoader().load("src/images/circle.png"),
                         new THREE.TextureLoader().load("src/images/user.png")]
                 }
@@ -611,10 +612,9 @@ let DynamicNet3D = function () {
             },
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
-            transparent: true
-
+            depthTest:false
         });
-
+        pointsMaterial.transparent =  true
         let p = new THREE.Points(pointsGeometry, pointsMaterial);
         p.frustumCulled = false;
         p._alpha = _alpha;
@@ -643,7 +643,6 @@ let DynamicNet3D = function () {
             try {
                 if (solution.length) {
                     solution.forEach((sol, soli) => {
-                        console.log(soli)
                         const points = dynamicVizs[soli].nodes;
                         let p = points.geometry.attributes.position.array;
                         onrendercalled = true;
