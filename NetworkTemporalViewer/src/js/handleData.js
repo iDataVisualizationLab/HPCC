@@ -179,13 +179,12 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(_data){
-    debugger
-    _data.time_stamp = _data.time_stamp.slice(0,5)
-    let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata};
+    _data.time_stamp = _data.time_stamp.slice(0,144)
+    let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata,time_stamp:_data.time_stamp};
     // let data = [];
     const computers = _data[COMPUTE];
     const jobs = _data[JOB];
-    const users = {}
+    const users = {};
     for (let comp in computers){
         let item = {id:comp,type:'compute',data:computers[comp],tooltip:comp.replace('10.101.',''),timeArr:[]};
         item.drawData  = getDrawData(item);
@@ -215,26 +214,31 @@ function handleDataComputeByUser_core(_data){
                                 invalid: undefined,
                                 scale:1,
                                 offset:-8,
-                                d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}]}
+                                color: '#007',
+                                d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'}],
+                                _index:dataIn.root_nodes.length}
                         users[u.key] = userObj;
                         dataIn.root_nodes.push(users[u.key]);
                     }
                     userObj = users[u.key];
                     if (!userObj.timeArr[i]){
-                    userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj};
+                        userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj};
+                    userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
                     dataIn.net[i].nodes.push(userObj.timeArr[i]);
 }
                     // link
-                    dataIn.net[i].links.push({source:comp,target:u.key,value:u.value})
+                    dataIn.net[i].links.push({source:comp,target:u.key,value:u.value,_index:dataIn.net[i].links.length})
                 })
 
                 // compute
                 item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
-                item.timeArr[i] = {drawData:item.drawData,id:comp,data:{name:comp,isNew:[]},parent:item};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},parent:item};
             }else
-                item.timeArr[i] = {drawData:item.drawData,id:comp,data:{name:comp,isNew:[]},isolate:true,parent:item};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},isolate:true,parent:item};
+            item.timeArr[i]._index = dataIn.net[i].nodes.length;
             dataIn.net[i].nodes.push(item.timeArr[i])
         });
+        item._index = dataIn.root_nodes.length;
         dataIn.root_nodes.push(item);
     }
     debugger
