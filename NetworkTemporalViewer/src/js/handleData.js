@@ -179,7 +179,7 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(_data){
-    _data.time_stamp = _data.time_stamp.slice(0,144)
+    _data.time_stamp = _data.time_stamp.slice(0,5)
     let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata,time_stamp:_data.time_stamp};
     // let data = [];
     const computers = _data[COMPUTE];
@@ -222,7 +222,7 @@ function handleDataComputeByUser_core(_data){
                     }
                     userObj = users[u.key];
                     if (!userObj.timeArr[i]){
-                        userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj};
+                        userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj,ti:i};
                     userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
                     dataIn.net[i].nodes.push(userObj.timeArr[i]);
 }
@@ -232,9 +232,9 @@ function handleDataComputeByUser_core(_data){
 
                 // compute
                 item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
-                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},parent:item};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},parent:item,ti:i};
             }else
-                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},isolate:true,parent:item};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},isolate:true,parent:item,ti:i};
             item.timeArr[i]._index = dataIn.net[i].nodes.length;
             dataIn.net[i].nodes.push(item.timeArr[i])
         });
