@@ -179,7 +179,7 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(_data){
-    _data.time_stamp = _data.time_stamp.slice(0,5)
+    _data.time_stamp = _data.time_stamp.slice(0,288)
     let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata,time_stamp:_data.time_stamp};
     // let data = [];
     const computers = _data[COMPUTE];

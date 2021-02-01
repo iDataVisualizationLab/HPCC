@@ -1014,7 +1014,7 @@ let DynamicNet3D = function () {
                         }
                     })
                 });
-                d3.select('#selectedItem').html(target.id);
+                d3.select('#selectedItem').html(`${target.id} at ${data.time_stamp[netIndex]}`);
                 // dynamicVizs.forEach((net,ni)=>{
                 //     data.net[ni].nodes.forEach((d, i) => {
                 //         debugger
