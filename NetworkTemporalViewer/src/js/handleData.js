@@ -223,9 +223,9 @@ function handleDataComputeByUser_core(_data){
                     userObj = users[u.key];
                     if (!userObj.timeArr[i]){
                         userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj,ti:i};
-                    userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
-                    dataIn.net[i].nodes.push(userObj.timeArr[i]);
-}
+                        userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
+                        dataIn.net[i].nodes.push(userObj.timeArr[i]);
+                    }
                     // link
                     dataIn.net[i].links.push({source:comp,target:u.key,value:u.value,_index:dataIn.net[i].links.length})
                 })

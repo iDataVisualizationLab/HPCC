@@ -987,7 +987,8 @@ let DynamicNet3D = function () {
                 let rootTarget = data.root_nodes.find(d=>d.id===target.id);
                 INTERSECTED = [target.id];
                 visibleNode();
-                rootTarget.timeArr.forEach((n,ni)=>{
+                data.net.forEach((net,ni)=>{
+                    const n =  rootTarget.timeArr[ni];
                     let attribute = dynamicVizs[ni].nodes.geometry.attributes;
                     attribute.alpha.array = attribute.alpha.array.map(d=>d?graphicopt.component.dot.filter.opacity:d);
                     if (n){
@@ -1209,7 +1210,7 @@ let DynamicNet3D = function () {
                                 let choice = {index:intersects[0][0].index,netIndex:intersects[0][0].object.data.index,ray:intersects[0][0]};
                                 intersects.forEach(d=>{
                                     d.forEach(e=>{
-                                        if (choice.ray.distance<e.distance){
+                                        if (choice.ray.distanceToRay<e.distanceToRay){
                                             choice = {index:e.index,netIndex:e.object.data.index,ray:e};
                                         }
                                     })
