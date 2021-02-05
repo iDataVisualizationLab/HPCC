@@ -105,11 +105,12 @@ function initdraw(){
     // initDragItems('#ForceByMetrics','metric');
 
     d3.select('#modelFilterToolBtn').on('click',function(){
+        debugger
         const choice = $('#modelFilterToolInput').val();
 
-        Layout.userTimeline = filterData(choice!==''?[ choice]:[],Layout.netFull);
+        Layout.userTimeline = filterData(choice,Layout.netFull);
         getChanged(Layout.userTimeline);
-        drawObject.graphicopt({plotMetric:choice!==''})
+        drawObject.graphicopt({plotMetric:choice.length!==0})
         drawGantt();
     })
 }

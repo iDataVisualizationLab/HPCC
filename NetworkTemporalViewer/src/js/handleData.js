@@ -283,7 +283,8 @@ function getUsers(_data){
 function filterData(nodeList,nets){
     if (nodeList.length){
     let fileterObject = {};
-    nodeList.forEach(n=>fileterObject[n] = {...nets.root_nodes.find(e=>e.id===n),timeArr:[]});
+    // nodeList.forEach(n=>fileterObject[n] = {...nets.root_nodes.find(e=>e.id===n),timeArr:[]});
+    nodeList.forEach(n=>fileterObject[n] = {...nets.root_nodes.find(e=>e.id===n)});
 
     let currentNets = {net:nets.net};
     let filteredNets = {net:nets.time_stamp.map(t=>({nodes:[],links:[]})),"root_nodes":[],time_stamp:nets.time_stamp,datamap:nets.datamap};
@@ -312,7 +313,7 @@ function filterData(nodeList,nets){
                     if (!fileterObject[n.id])
                         fileterObject[n.id] = {...n.parent};
                     const node = {...n,_index:filteredNets.net[ni].nodes.length,parent:fileterObject[n.id]};
-                    fileterObject[n.id].timeArr[ni] = node;
+                    // fileterObject[n.id].timeArr[ni] = node;
                     filteredNets.net[ni].nodes.push(node);
                 } else {
                     nextNets.net[ni].nodes.push(n)
@@ -379,7 +380,7 @@ function getChanged(data){
     // return maxNode.id;
 }
 function handleRankingData(data){
-    data.time_stamp = data.time_stamp.slice(0,288)
+    data.time_stamp = data.time_stamp.slice(0,144)
     console.time('handleRankingData');
     Layout.usersStatic = getUsers(data);
     Layout.timespan = data.time_stamp;
@@ -387,7 +388,17 @@ function handleRankingData(data){
     handleDataComputeByUser.data = data;
     // userPie.data(Layout.usersStatic).draw();
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
-    $('#modelFilterToolInput').autocomplete({source:Layout.netFull.root_nodes.map(d=>d.id)})
+    d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d=>d.type).entries(Layout.netFull.root_nodes.map(d=>({id:d.id,type:d.type}))))
+        .join('optgroup')
+        .attr('label',d=>d.key)
+        .selectAll('option').data(d=>d.values)
+        .join('option').attr('value',d=>d.id).text(d=>d.id);
+    $('#modelFilterToolInput').multiselect({
+        enableClickableOptGroups: true,
+        enableCollapsibleOptGroups: true,
+        enableFiltering: true,
+        includeSelectAllOption: true
+    });
     Layout.userTimeline = filterData([],Layout.netFull);
     getChanged(Layout.userTimeline);
     console.log(Layout.userTimeline)

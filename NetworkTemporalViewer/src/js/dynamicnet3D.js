@@ -830,7 +830,9 @@ let DynamicNet3D = function () {
                             points.geometry.attributes.position.needsUpdate = true;
                             points.geometry.boundingBox = null;
                             points.geometry.computeBoundingSphere();
-
+                            if(graphicopt.plotMetric){
+                                updatePlot();
+                            }
                             isneedrender = true;
 
                         })
@@ -1593,7 +1595,10 @@ let DynamicNet3D = function () {
                 metricPlot.add(lineChart(data.datamap[d.id].map(d=>d[service._id]),origin));
             }
         });
+        metricPlot.add(makeaxis(origin));
         scene.add(metricPlot);
+
+
         isneedrender = true;
         function lineChart(path,origin) {
             const points = path.map((d,i)=>new THREE.Vector3(origin[0], origin[1]+yscale(d), origin[2]+scaleNormalTimestep(i)));
@@ -1608,7 +1613,47 @@ let DynamicNet3D = function () {
             let lineObj = new THREE.Line(geometry, material);
             return lineObj;
         }
+        function makeaxis(origin) {
+            var dir = new THREE.Vector3(0, 1, 0);
+            dir.normalize();
+            var length = yscale.range()[1] - yscale.range()[0];
+            var hex = 0x000000;
+            var yaxisGroup = new THREE.Object3D();
+            var arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(origin[0],origin[1],origin[2]+scaleNormalTimestep(0)), length, hex, 30, 10);
+            arrowHelper.line.material.linewidth = 4;
+            yaxisGroup.add(arrowHelper);
+            let axis = yscale.copy();
+            axis.domain(service.range);
+            var loader = new THREE.FontLoader();
 
+            loader.load('../TimeRadar/src/fonts/optimer_regular.typeface.json', function (font) {
+                axis.ticks(5).forEach(t => {
+
+                    var textGeo = new THREE.TextGeometry(axis.tickFormat()(t), {
+                        font: font,
+                        size: 20,
+                        height: 1,
+                        curveSegments: 12,
+                        bevelEnabled: false
+                    });
+                    textGeo.computeBoundingBox();
+                    textGeo.computeVertexNormals();
+                    textGeo = new THREE.BufferGeometry().fromGeometry(textGeo);
+
+                    // let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color: 0x0000ff, flatShading: true}));
+                    let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({color: 0x000000}));
+                    textMesh1.tag = 'TimeText';
+                    textMesh1.position.x = origin[0]-Math.log10(axis.domain()[1])*20;
+                    textMesh1.position.y = origin[1]+axis(t);
+                    textMesh1.position.z = origin[2]+scaleNormalTimestep(0);
+                    // textMesh1.rotation.x = 0;
+                    // textMesh1.rotation.y = Math.PI / 2;
+                    textMesh1.quaternion.copy(camera.quaternion);
+                    yaxisGroup.add(textMesh1)
+                });
+            });
+           return yaxisGroup;
+        }
     }
 
     master.changeService = function (_data) {

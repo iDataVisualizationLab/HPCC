@@ -167,7 +167,9 @@
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                        <input type="text" id="modelFilterToolInput" class="search col-8" placeholder="Search host e.g user13">
+                                        <div class="col-8">
+                                        <select id="modelFilterToolInput" class="col-8"  multiple="multiple"></select>
+                                        </div>
                                         <button type="button" id="modelFilterToolBtn" class="btn btn-primary col-4">Apply</button>
                                         <label class="col-4" for="serviceSelection">Visualizing: </label>
                                         <select class="col-8" id="serviceSelection"></select>
@@ -330,6 +332,9 @@
     <link rel="stylesheet" href="src/style/timeline.css">
     <link rel="stylesheet" href="src/style/nouislider.css">
     <link rel="stylesheet" href="src/style/dashboard.css">
+
+    <script type="text/javascript" src="src/lib/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet" href="src/style/bootstrap-multiselect.css" type="text/css"/>
 
 <!--    <script src="src/lib/nouislider.js"></script>-->
     <script src="src/lib/d3.v4.min.js"></script>
