@@ -725,6 +725,7 @@ let DynamicNet3D = function () {
             try {
                 if (islast) {
                     if (solution.length) {
+                        console.log(solution);
                         solution.forEach((sol, soli) => {
                             const points = dynamicVizs[soli].nodes;
                             let p = points.geometry.attributes.position.array;
@@ -1327,7 +1328,7 @@ let DynamicNet3D = function () {
 
     const compareMode = true;
     master.draw = function () {
-        handle_data();
+        // handle_data();
         updateTableInput();
         // remove all timeslice
         netPlot.remove(...netPlot.children);

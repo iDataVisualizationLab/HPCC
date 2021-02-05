@@ -14,7 +14,6 @@ addEventListener('message',function ({data}){
 
             const net = data.value;
             const forces = [];
-            const root_nodes = {};
             net.forEach(function(n,ni){
                 const nodes = n.nodes;
                 const links = n.links;
@@ -33,10 +32,16 @@ addEventListener('message',function ({data}){
                             postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha}, status: "done", sol: net});
                     }
                     n.filtered_nodes.forEach(d=>{
+                        // if (d.type==='user'){
                         d.parent.x = d3.mean(d.parent.timeArr,e=>e?e.x:undefined)||0;
                         d.parent.y = d3.mean(d.parent.timeArr,e=>e?e.y:undefined)||0;
-                        d.x += (d.parent.x-d.x)*0.4;
-                        d.y += (d.parent.y-d.y)*0.4;
+                            d.x += (d.parent.x-d.x)*0.4;
+                            d.y += (d.parent.y-d.y)*0.4;
+                        // }
+                        // if (d.type==='user'){
+                        // d.x = d3.mean(d.parent.timeArr,e=>e.x);
+                        // d.y = d3.mean(d.parent.timeArr,e=>e.y);
+                        // }
                     });
                     if (canSend){
                         postMessage({action:'render',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha},source:ni, sol:[]});
@@ -63,14 +68,10 @@ addEventListener('message',function ({data}){
                             n.x=undefined;
                             n.y=undefined;
                         }
-                        root_nodes[n.id] = n.parent;
                     })
                 }else{
                     n.filtered_nodes = nodes;
                     n.filtered_links = links;
-                    nodes.forEach(n=> {
-                        root_nodes[n.id] = n.parent;
-                    });
                 }
                 if (n.delectedLinks) {
                     n.delectedLinks = n.delectedLinks.map(l => {
@@ -90,7 +91,7 @@ addEventListener('message',function ({data}){
                     force.nodes(n.filtered_nodes);
                     force.force("link").links(n.filtered_links);
                     force.stop();
-                    // force.on("tick", ticked)
+                    force.on("tick", ticked)
                     forces.push(force);
                 }else{
                     console.log('skip t=',ni);
@@ -100,23 +101,11 @@ addEventListener('message',function ({data}){
             postMessage({action:'updateHighlight', sol:net,totalForces:forces.length});
             setInterval(function(){ canSend = true; }, 1000/24);
 
-            while (minAlpha>0.001) {
-                forces.forEach(function (force) {
-                    force.tick();
-                    minAlpha = Math.min(minAlpha, force.alpha());
-                });
-                Object.values(root_nodes).forEach(n => {
-                    n.x = d3.mean(n.timeArr, e => e ? e.x : undefined);
-                    n.y = d3.mean(n.timeArr, e => e ? e.y : undefined);
-                });
-                forces.forEach(function (force) {
-                    force.nodes().forEach(d => {
-                        d.x += (d.parent.x - d.x) * 0.4;
-                        d.y += (d.parent.y - d.y) * 0.4;
-                    });
-                });
-            }
-                postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha}, status: "done", sol: net});
+            forces.forEach(function(force){
+                force.on('end',function(){
+                    postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker,alpha:alpha}, status: "done", sol: net});
+                }).restart();
+            });
             break;
     }
 });

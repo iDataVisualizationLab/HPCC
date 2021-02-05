@@ -281,6 +281,99 @@ function getUsers(_data){
     });
     return users;
 }
+function filterData(nodeList,nets){
+    debugger
+    let fileterObject = {};
+    nodeList.forEach(n=>fileterObject[n] = {...nets.root_nodes.find(e=>e.id===n),timeArr:[]});
+
+    let currentNets = {net:nets.net};
+    let filteredNets = {net:nets.time_stamp.map(t=>({nodes:[],links:[]})),"root_nodes":[],time_stamp:nets.time_stamp,datamap:nets.datamap};
+    let filterNodeList  = nets.time_stamp.map((t,ti)=>({...fileterObject})); // dict of each timestep
+    debugger
+    // runDeep(runDeep(runDeep({currentNets,filterNodeList})))
+    runDeep({currentNets,filterNodeList})
+    function runDeep({currentNets,filterNodeList}) {
+        let nextNets = {net: []};
+        let nextFilter  = nets.time_stamp.map((t,ti)=>({})); // dict of each timestep
+        currentNets.net.map((n, ni) => {
+            nextNets.net[ni] = {nodes: [], links: []};
+            n.links.forEach(l => {
+                if (filterNodeList[ni][l.source]) {
+                    filteredNets.net[ni].links.push({...l,_index:filteredNets.net[ni].links.length});
+                    nextFilter[ni][l.target] = true; // add node to next find
+                } else if (filterNodeList[ni][l.target]) {
+                    filteredNets.net[ni].links.push({...l,_index:filteredNets.net[ni].links.length});
+                    nextFilter[ni][l.source] = true; // add node to next find
+                } else {
+                    nextNets.net[ni].links.push(l);
+                }
+            });
+            n.nodes.forEach(n => {
+                if (filterNodeList[ni][n.id]||nextFilter[ni][n.id]) {
+                    if (!fileterObject[n.id])
+                        fileterObject[n.id] = {...n.parent};
+                    const node = {...n,_index:filteredNets.net[ni].nodes.length,parent:fileterObject[n.id]};
+                    fileterObject[n.id].timeArr[ni] = node;
+                    filteredNets.net[ni].nodes.push(node);
+                } else {
+                    nextNets.net[ni].nodes.push(n)
+                }
+            })
+        });
+        return {currentNets:nextNets,filterNodeList:nextFilter};
+    }
+    nets.root_nodes.forEach(n=>{
+        if (fileterObject[n.id]){
+            const node = fileterObject[n.id];
+            node._index = filteredNets.root_nodes.length;
+            filteredNets.root_nodes.push(node);
+        }
+    })
+    return filteredNets;
+}
+function getMostChange(data){
+    const nodeMap = {};
+    data.root_nodes.forEach(n=>{
+        nodeMap[n.id]=n;
+        n.ChangeCount = 0;
+    });
+    for (let i = 1; i < data.net.length; i++) {
+        data.net[i - 1].filtered_links = [];
+        const linkMap = new Map();
+        data.net[i - 1].links.forEach(l => {
+            linkMap.set(l.source + '|||' + l.target, l);
+        });
+        data.net[i].links.forEach(l => {
+            const key = l.source + '|||' + l.target;
+            if (!linkMap.has(key)) // new link
+            {
+                l.isNew = true;
+                l.color = "green";
+                data.net[i - 1].filtered_links.push(l);
+                nodeMap[l.source].ChangeCount++;
+                nodeMap[l.target].ChangeCount++;
+            } else {
+                linkMap.delete(key);
+            }
+        });
+        data.net[i].delectedLinks = [];
+        linkMap.forEach((value, key) => {
+            data.net[i].delectedLinks.push(value);
+            nodeMap[value.source].ChangeCount++;
+            nodeMap[value.target].ChangeCount++;
+        });
+    }
+
+    let maxChange=0;
+    let maxNode={};
+    data.root_nodes.forEach(n=>{
+        if (n.ChangeCount>maxChange){
+            maxChange = n.ChangeCount;
+            maxNode = n
+        }
+    })
+    return maxNode.id;
+}
 function handleRankingData(data){
     console.time('handleRankingData');
     Layout.usersStatic = getUsers(data);
@@ -289,5 +382,11 @@ function handleRankingData(data){
     handleDataComputeByUser.data = data;
     // userPie.data(Layout.usersStatic).draw();
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
+    const maxChange = getMostChange(Layout.userTimeline);
+    // Layout.userTimeline = filterData(['user13'],Layout.userTimeline)
+    // console.log(Layout.userTimeline)
+    debugger
+    // Layout.userTimeline = filterData(['user13'],Layout.userTimeline)
+    // console.log(Layout.userTimeline)
     console.timeEnd('handleRankingData');
 }
