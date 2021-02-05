@@ -105,6 +105,14 @@ function initdraw(){
     drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend)
         // .onFinishDraw(updateNarration);
     // initDragItems('#ForceByMetrics','metric');
+
+    d3.select('#modelFilterToolBtn').on('click',function(){
+        const choice = $('#modelFilterToolInput').val();
+        Layout.userTimeline = filterData(choice!==''?[ choice]:[],Layout.netFull);
+        getChanged(Layout.userTimeline);
+        debugger
+        drawGantt();
+    })
 }
 function initDragItems(id,mode){
     d3.select('.dropHolder').selectAll('.forceDrag').remove();

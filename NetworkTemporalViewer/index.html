@@ -248,21 +248,26 @@
                                 <div id="modelWorkerInformation" class="tab-pane fade show active col-12" role="tabpanel">
                                         <div id="modelSelectionInformation">
                                             <div class="row empty search-wrapper focused no_magrin ">
-                                                <input type="text" id="search" class="search col s8" placeholder="Search host e.g AT1G34370">
-                                                <i class="material-icons col s1" style="margin: auto;">search</i>
+                                                <input type="text" id="search" class="search col s8" placeholder="Search host e.g user13">
+<!--                                                <i class="material-icons col s1" style="margin: auto;">search</i>-->
                                             </div>
                                             <ul class="nav nav-tabs" style="margin-top: 10px">
                                                 <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>
-                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>
+<!--                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>-->
+                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelFilterTool">Filter</a></li>
                                             </ul>
-                                            <div id="modelSetting" class="tabHolder tab-pane fade show active" role="tabpanel">
+                                            <div id="modelSetting" class="tab-pane fade show active" role="tabpanel">
                                                 <table class="table">
                                                 </table>
                                                 <div id="selectedItem">
 
                                                 </div>
                                             </div>
-                                            <div id="modelSelectionTool" class="tabHolder tab-pane" role="tabpanel">
+<!--                                            <div id="modelSelectionTool" class="tabHolder tab-pane fade" role="tabpanel">-->
+<!--                                            </div> -->
+                                            <div id="modelFilterTool" class="tab-pane fade" role="tabpanel">
+                                                <input type="text" id="modelFilterToolInput" class="search col s8" placeholder="Search host e.g user13">
+                                                <button type="button" id="modelFilterToolBtn" class="btn btn-primary">Primary</button>
                                             </div>
                                         </div>
                                 </div>

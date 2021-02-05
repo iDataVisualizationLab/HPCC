@@ -752,6 +752,9 @@ let DynamicNet3D = function () {
                                 // apply full
                                 const net = dynamicVizs[soli];
                                 net._links.forEach((l, li) => {
+                                    if (!solution[soli].links[li]){
+                                        debugger
+                                    }
                                     data.net[soli].links[li].source = solution[soli].links[li].source;
                                     data.net[soli].links[li].target = solution[soli].links[li].target;
                                     const source = solution[soli].links[li].source;
@@ -867,33 +870,7 @@ let DynamicNet3D = function () {
         }
     }
 
-    function handle_data() {
-        if (graphicopt.iscompareMode) {
-            for (let i = 1; i < data.net.length; i++) {
-                data.net[i - 1].filtered_links = [];
-                const linkMap = new Map();
-                data.net[i - 1].links.forEach(l => {
-                    linkMap.set(l.source + '|||' + l.target, l);
-                });
-                data.net[i].links.forEach(l => {
-                    const key = l.source + '|||' + l.target;
-                    if (!linkMap.has(key)) // new link
-                    {
-                        l.isNew = true;
-                        l.color = "green";
-                        data.net[i - 1].filtered_links.push(l);
-                    } else {
-                        linkMap.delete(key);
-                    }
-                });
-                data.net[i].delectedLinks = [];
-                linkMap.forEach((value, key) => data.net[i].delectedLinks.push(value));
-            }
-        }
-        // let maxstep = sampleS.timespan.length - 1;
-        // scaleTime = d3.scaleTime().domain([sampleS.timespan[0], sampleS.timespan[maxstep]]).range([0, maxstep]);
-        // scaleNormalTimestep.domain([0, maxstep]);
-    }
+
 
     function createAxes(length) {
         var material = new THREE.LineBasicMaterial({color: 0x000000});
@@ -1328,6 +1305,8 @@ let DynamicNet3D = function () {
 
     const compareMode = true;
     master.draw = function () {
+        solution = undefined;
+        terminateWorker();
         // handle_data();
         updateTableInput();
         // remove all timeslice
@@ -1337,6 +1316,7 @@ let DynamicNet3D = function () {
             axesTime = createTimeaxis();
         // create time slices
         points = [];
+        dynamicVizs = [];
         dynamicVizs.links = {};
         data.net.forEach((net, ni) => {
             // time slice generate
@@ -1615,6 +1595,7 @@ let DynamicNet3D = function () {
 
     master.data = function (_data) {
         if (arguments.length) {
+            terminateWorker();
             data = _data;
             return master
         }
