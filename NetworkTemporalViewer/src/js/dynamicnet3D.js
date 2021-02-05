@@ -48,6 +48,8 @@ let DynamicNet3D = function () {
             },
             curveSegment: 20,
             linkConnect: true,
+            showUser: true,
+            showNode:true,
             showChanged: true,
             isSelectionMode: false,
             isCurve: false,
