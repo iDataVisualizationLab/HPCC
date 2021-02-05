@@ -158,25 +158,26 @@
 <!--                                </div>-->
                             </div>
                             <ul class="nav nav-tabs">
-                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>
+<!--                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
                                 <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelWorkerInformation">Control</a></li>
+                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Filter</a></li>
                                 <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
 <!--                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#RankingListHolder">Ranking</a></li>-->
                             </ul>
                             <div class="card-body row tab-content">
                                 <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-<!--                                        <label class="col-5" for="flowType">Visualizing: </label>-->
-<!--                                        <select class="col-7" id="flowType">-->
-<!--                                            <option value="core">#Cores</option>-->
-<!--                                            <option value="compute">#Nodes</option>-->
-<!--                                        </select>-->
+                                        <input type="text" id="modelFilterToolInput" class="search col-8" placeholder="Search host e.g user13">
+                                        <button type="button" id="modelFilterToolBtn" class="btn btn-primary col-4">Apply</button>
+                                        <label class="col-4" for="serviceSelection">Visualizing: </label>
+                                        <select class="col-8" id="serviceSelection"></select>
 <!--                                     -->
 <!--                                        <label class="col-4" for="nodeColor">Node color by: </label>-->
 <!--                                        <select class="col-6" id="nodeColor">-->
 <!--                                            <option value="">Current metric</option>-->
 <!--                                            <option value="rack">Rack</option>-->
 <!--                                        </select>-->
+
                                         <div class="MetricsLegend hide">
                                             <div class="row legendView hide">
                                                 <label class="col-4"></label>
@@ -251,12 +252,12 @@
                                                 <input type="text" id="search" class="search col s8" placeholder="Search host e.g user13">
 <!--                                                <i class="material-icons col s1" style="margin: auto;">search</i>-->
                                             </div>
-                                            <ul class="nav nav-tabs" style="margin-top: 10px">
-                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>
-<!--                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>-->
-                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelFilterTool">Filter</a></li>
-                                            </ul>
-                                            <div class="card-body row tab-content">
+<!--                                            <ul class="nav nav-tabs" style="margin-top: 10px">-->
+<!--                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>-->
+<!--&lt;!&ndash;                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>&ndash;&gt;-->
+<!--                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelFilterTool">Filter</a></li>-->
+<!--                                            </ul>-->
+<!--                                            <div class="card-body row tab-content">-->
                                             <div id="modelSetting" class="tab-pane fade show active col-12" role="tabpanel">
                                                 <table class="table">
                                                 </table>
@@ -266,11 +267,13 @@
                                             </div>
 <!--                                            <div id="modelSelectionTool" class="tabHolder tab-pane fade" role="tabpanel">-->
 <!--                                            </div> -->
-                                            <div id="modelFilterTool" class="tab-pane fade col-12" role="tabpanel">
-                                                <input type="text" id="modelFilterToolInput" class="search col-8" placeholder="Search host e.g user13">
-                                                <button type="button" id="modelFilterToolBtn" class="btn btn-primary col-4">Apply</button>
-                                            </div>
-                                            </div>
+<!--                                            <div id="modelFilterTool" class="tab-pane fade col-12" role="tabpanel">-->
+<!--                                                <div class="row">-->
+<!--                                                    <input type="text" id="modelFilterToolInput" class="search col-8" placeholder="Search host e.g user13">-->
+<!--                                                    <button type="button" id="modelFilterToolBtn" class="btn btn-primary col-4">Apply</button>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            </div>-->
                                         </div>
                                 </div>
                                 <div id="userOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">

@@ -206,7 +206,7 @@ let DynamicNet3D = function () {
     let camera, isOrthographic = true, scene, axesHelper, axesTime, gridHelper, controls, raycaster, INTERSECTED = [],
         mouse,
         points, lines,
-        scatterPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx, front_canvas,
+        scatterPlot, metricPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx, front_canvas,
         front_ctx, svg, clusterMarker;
     let fov = 100,
         near = 0.1,
@@ -309,7 +309,7 @@ let DynamicNet3D = function () {
     };
     let isFreeze = false;
     let data = [], dynamicVizs = [];
-    let onFinishDraw = [];
+    let onFinishDraw = [],service={};
     let getRenderFunc = function (d) {
         debugger
         if (d.d) {
@@ -478,6 +478,10 @@ let DynamicNet3D = function () {
             gridHelper.rotation.x = -Math.PI / 2;
             scene.add(new THREE.Object3D().add(gridHelper));
             scene.add(scatterPlot);
+
+            // Add plot
+            metricPlot = new THREE.Object3D();
+            scene.add(metricPlot);
 
             // Add canvas
             renderer = new THREE.WebGLRenderer({canvas: document.getElementById("modelWorkerScreen")});
@@ -1578,8 +1582,48 @@ let DynamicNet3D = function () {
 
     }
 
-    master.main_svg = function () {
-        return main_svg
+    function updatePlot(){
+        scene.remove(metricPlot);
+        metricPlot = new THREE.Object3D();
+        const origin = [graphicopt.heightG() / 2, graphicopt.heightG() / 2, 0];
+
+        const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3])
+        data.root_nodes.forEach(d=>{
+            if(d.type==='compute'){
+                metricPlot.add(lineChart(data.datamap[d.id].map(d=>d[service._id]),origin));
+            }
+        });
+        scene.add(metricPlot);
+        isneedrender = true;
+        function lineChart(path,origin) {
+            const points = path.map((d,i)=>new THREE.Vector3(origin[0], origin[1]+yscale(d), origin[2]+scaleNormalTimestep(i)));
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            var material = new THREE.LineBasicMaterial({
+                opacity: 1,
+                linewidth: 1,
+                color: 0x000000
+            });
+            let lineObj = new THREE.Line(geometry, material);
+            return lineObj;
+        }
+
+    }
+
+    master.changeService = function (_data) {
+        if (arguments.length) {
+            service = _data;
+            if (dynamicVizs.length){
+                // change color
+                // update plot
+                if(graphicopt.plotMetric){
+                    updatePlot();
+                }
+            }
+            return master
+        }
+        return data;
     };
 
     master.stop = function () {

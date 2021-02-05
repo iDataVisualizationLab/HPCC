@@ -179,7 +179,6 @@ function createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 handleDataComputeByUser.mode = 'core';
 
 function handleDataComputeByUser_core(_data){
-    _data.time_stamp = _data.time_stamp.slice(0,288)
     let dataIn = {root_nodes:[],net:_data.time_stamp.map((d,ti)=>({nodes:[],links:[],time:d,ti})),datamap:tsnedata,time_stamp:_data.time_stamp};
     // let data = [];
     const computers = _data[COMPUTE];
@@ -380,10 +379,11 @@ function getChanged(data){
     // return maxNode.id;
 }
 function handleRankingData(data){
+    data.time_stamp = data.time_stamp.slice(0,288)
     console.time('handleRankingData');
     Layout.usersStatic = getUsers(data);
     Layout.timespan = data.time_stamp;
-
+    tsnedata =  handleDataUrl(data).tsnedata;
     handleDataComputeByUser.data = data;
     // userPie.data(Layout.usersStatic).draw();
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);

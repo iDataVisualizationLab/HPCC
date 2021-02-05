@@ -8,17 +8,15 @@ d3.selection.prototype.moveToFront = function() {
 let vizservice=[];
 function serviceControl(){
     vizservice =serviceFullList.slice();
-    drawObject.graphicopt({range:vizservice[serviceSelected].range});
-    vizservice.push({text:'User',range:[]});
-    vizservice.push({text:'Radar',range:[]});
+    vizservice.forEach((s,si)=>s._id = si)
+    drawObject.changeService(vizservice[serviceSelected]);
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#serviceSelection')
         .on('change',function(){
             serviceSelected = +$(this).val();
             d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
-            createdata();
-            drawObject.graphicopt({range:vizservice[serviceSelected].range})
-            currentDraw();
+            drawObject.graphicopt({range:vizservice[serviceSelected].range});
+            drawObject.changeService(vizservice[serviceSelected])
         })
         .selectAll('option')
         .data(vizservice)
@@ -108,9 +106,10 @@ function initdraw(){
 
     d3.select('#modelFilterToolBtn').on('click',function(){
         const choice = $('#modelFilterToolInput').val();
+
         Layout.userTimeline = filterData(choice!==''?[ choice]:[],Layout.netFull);
         getChanged(Layout.userTimeline);
-        debugger
+        drawObject.graphicopt({plotMetric:choice!==''})
         drawGantt();
     })
 }
