@@ -16,7 +16,10 @@ function serviceControl(){
             serviceSelected = +$(this).val();
             d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
             drawObject.graphicopt({range:vizservice[serviceSelected].range});
-            drawObject.changeService(vizservice[serviceSelected])
+            drawObject.changeService(vizservice[serviceSelected]);
+            if (d3.select(this).attr('aria-pressed')==='true'){
+                onFilter();
+            }
         })
         .selectAll('option')
         .data(vizservice)
@@ -112,7 +115,29 @@ function initdraw(){
         getChanged(Layout.userTimeline);
         drawObject.graphicopt({plotMetric:choice.length!==0})
         drawGantt();
-    })
+    });
+    d3.select('#filter_apply').on('click',function(){
+        onFilter(d3.select('#filter_apply').attr('aria-pressed')==='false');
+    });
+}
+function onFilter(istoggle){
+    const nodes = $('#modelFilterToolInput').val();
+    const toggle = istoggle===undefined?d3.select('#filter_apply').attr('aria-pressed')==='true':istoggle;
+    if (toggle){
+        let nodeobj = {};
+        nodes.forEach(d=>nodeobj[d]);
+        Layout.userTimeline.root_nodes.forEach(d=>{
+            if (Layout.userTimeline.datamap[d.id]){
+                if (d3.max(Layout.userTimeline.datamap[d.id],e=>e[serviceSelected])>0.9 && !nodeobj[d.id]){
+                    nodes.push(d.id);
+                }
+            }
+        });
+    }
+    Layout.userTimeline = filterData(nodes,Layout.netFull);
+    getChanged(Layout.userTimeline);
+    drawObject.graphicopt({plotMetric:nodes.length!==0})
+    drawGantt();
 }
 function initDragItems(id,mode){
     d3.select('.dropHolder').selectAll('.forceDrag').remove();

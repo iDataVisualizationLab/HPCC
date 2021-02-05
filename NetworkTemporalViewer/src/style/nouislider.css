@@ -308,3 +308,7 @@
   top: auto;
   right: 28px;
 }
+
+.multiselect-native-select .btn-group {
+  width: 100%;
+}
