@@ -66,7 +66,7 @@ let DynamicNet3D = function () {
             opt: {
                 dim: 2.5
             },
-            serviceIndex: 0,
+            service: [],
             tableLimit: 1500,
             iscompareMode: true
         },
@@ -348,7 +348,7 @@ let DynamicNet3D = function () {
     };
     let isFreeze = false;
     let data = [], dynamicVizs = [];
-    let onFinishDraw = [],service={};
+    let onFinishDraw = [];
     let getRenderFunc = function (d) {
         debugger
         if (d.d) {
@@ -1638,7 +1638,7 @@ let DynamicNet3D = function () {
         const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3])
         data.root_nodes.forEach(d=>{
             if(d.type==='compute'){
-                metricPlot.add(lineChart(data.datamap[d.id].map(d=>d[service._id]),origin));
+                metricPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),origin));
             }
         });
         metricPlot.add(makeaxis(origin));
@@ -1669,7 +1669,7 @@ let DynamicNet3D = function () {
             arrowHelper.line.material.linewidth = 4;
             yaxisGroup.add(arrowHelper);
             let axis = yscale.copy();
-            axis.domain(service.range);
+            axis.domain(graphicopt.service[graphicopt.plotMetric].range);
             var loader = new THREE.FontLoader();
 
             loader.load('../TimeRadar/src/fonts/optimer_regular.typeface.json', function (font) {
@@ -1715,19 +1715,6 @@ let DynamicNet3D = function () {
         return controlPanelGeneral;
     };
 
-    master.changeService = function (_data) {
-        if (arguments.length) {
-            service = _data;
-            if (dynamicVizs.length){
-                // change color
-                // update plot
-                controlPanelGeneral.linePlot.callback();
-            }
-            return master
-        }
-        return service;
-    };
-
     master.stop = function () {
         terminateWorker();
         stop = true;
@@ -1751,6 +1738,9 @@ let DynamicNet3D = function () {
     };
     master.color = function (_data) {
         return arguments.length ? (color = _data, master) : color;
+    };
+    master.service = function (_data) {
+        return arguments.length ? (graphicopt.service = _data, master) : graphicopt.service;
     };
     master.getColorScale = function (_data) {
         return arguments.length ? (getColorScale = _data ? _data : function () {

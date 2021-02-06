@@ -398,7 +398,8 @@ function handleRankingData(data){
         enableCollapsibleOptGroups: true,
         enableFiltering: true,
         includeSelectAllOption: true,
-        nonSelectedText: 'Input name here'
+        nonSelectedText: 'Filter by name',
+        maxHeight: 200
     });
 
     Layout.userTimeline = filterData([],Layout.netFull);

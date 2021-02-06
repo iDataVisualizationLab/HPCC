@@ -187,17 +187,23 @@
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
 
                                             <div class="col-12" style="padding-left: 0;margin-bottom:5px;">
+                                                <label>By Name:</label>
                                                 <div class="input-group">
-                                            <select id="modelFilterToolInput"  multiple="multiple"></select>
+                                                    <select id="modelFilterToolInput"  multiple="multiple"></select>
                                                     <div class="input-group-append">
                                                         <button type="button" id="modelFilterToolBtn" class="btn btn-sm btn-primary input-group-text">Filter</button>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                        <label class="col-4" for="serviceSelection">Timeline: </label>
-                                        <select class="col-6" id="serviceSelection"></select>
-                                        <button id="filter_apply" data-toggle="button" aria-pressed="false" type="button" class="btn btn-success btn-sm col-2">Filter</button>
+                                        <div class="col-12" style="padding-left: 0;margin-bottom:5px;">
+                                            <label>By Metric:</label>
+                                            <div class="input-group">
+                                                <select id="serviceSelection"  multiple="multiple"></select>
+                                                <div class="input-group-append">
+                                                    <button type="button" id="filter_apply" class="btn btn-sm btn-primary input-group-text">Filter</button>
+                                                </div>
+                                            </div>
+                                        </div>
 <!--                                     -->
 <!--                                        <label class="col-4" for="nodeColor">Node color by: </label>-->
 <!--                                        <select class="col-6" id="nodeColor">-->
