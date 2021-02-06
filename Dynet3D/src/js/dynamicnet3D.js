@@ -8,9 +8,9 @@ let DynamicNet3D = function () {
     let master = {};
     let simulations;
     let graphicopt = {
-            margin: {top: 20, right: 20, bottom: 20, left: 20},
+            margin: {top: 0, right: 0, bottom: 0, left: 0},
             width: 1500,
-            height: 1000,
+            height: 800,
             scalezoom: 1,
             zoom: d3.zoom(),
             widthView: function () {
@@ -57,7 +57,7 @@ let DynamicNet3D = function () {
             component: {
                 dot: {size: 5, opacity: 0.5, filter: {size: 5, opacity: 0.1}, 'user': {size: 10}},
                 link: {size: 1, opacity: 0.5, highlight: {opacity: 1}},
-                label: {enable: 0}
+                label: {enable: false}
             },
             expand: {xy: 1},
             opt: {
@@ -159,6 +159,8 @@ let DynamicNet3D = function () {
                 step: 0.1,
                 callback: onlinkopacity
             },
+            labelMarker:{text: "Display label", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:false, width: '100px',
+                callback:updatelabelCluster},
             networkExpand: {
                 text: "Network Expand",
                 range: [0.1, 5],
@@ -435,6 +437,9 @@ let DynamicNet3D = function () {
     let controll_metrics = {old: {zoom: undefined}};
     master.init = function (arr) {
         updateProcess({percentage: 1, text: 'Prepare rendering ...'});
+
+        graphicopt.height = $('#dynamicHolder').height();
+        graphicopt.width = $('#dynamicHolder').width();
 
         master.generateTable();
 
@@ -722,7 +727,66 @@ let DynamicNet3D = function () {
         }
         return highlightNode([]);
     }
+    function updatelabelCluster() {
+        svg.select('#modelNodeLabel').selectAll('.name').remove();
+        if(dynamicVizs[0].nodes) {
+            if (graphicopt.label_enable) {
+                debugger
+                let orient = ({
+                    top: text => text.attr("text-anchor", "middle").attr("y", -3),
+                    right: text => text.attr("text-anchor", "start").attr("dy", "0.35em").attr("x", 3),
+                    bottom: text => text.attr("text-anchor", "middle").attr("dy", "0.71em").attr("y", 3),
+                    left: text => text.attr("text-anchor", "end").attr("dy", "0.35em").attr("x", -3)
+                });
+                let pointData = [];
+                dynamicVizs.forEach((net,ni)=> {
+                    net.nodes._alpha.forEach((d, i) => {
+                        if (data.net[ni].nodes[i].inscreen) {
+                            let temp = getpos(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]);
+                            temp = [temp.x, temp.y];
+                            temp.index = ''+ni+' '+i;
+                            temp.name = data.net[ni].nodes[i].id;
+                            pointData.push(temp);
+                        }
+                    })
+                });
+                let voronoi = d3.Delaunay.from(pointData)
+                    .voronoi([0, 0, graphicopt.widthG(), graphicopt.heightG()]);
 
+                let dataLabel = [];
+                pointData.forEach((d, i) => {
+                    const cell = voronoi.cellPolygon(i);
+                    if (cell && -d3.polygonArea(cell) > 2000)
+                        dataLabel.push([d, cell, d.name])
+                });
+                svg.select('#modelNodeLabel').selectAll('.name').data(dataLabel).enter()
+                    .append('text').attr('class', 'name')
+                    .each(function ([[x, y], cell]) {
+                        const [cx, cy] = d3.polygonCentroid(cell);
+                        const angle = (Math.round(Math.atan2(cy - y, cx - x) / Math.PI * 2) + 4) % 4;
+                        d3.select(this).call(angle === 0 ? orient.right
+                            : angle === 3 ? orient.top
+                                : angle === 1 ? orient.bottom
+                                    : orient.left);
+                    })
+                    .attr("transform", ([d]) => `translate(${d})`)
+                    .style('opacity', 0.6)
+                    .text(([, , name]) => name);
+            };
+        }
+    }
+    function getpos(x,y,z,index){
+        var width = graphicopt.widthG(), height = graphicopt.heightG();
+        var widthHalf = width / 2, heightHalf = height / 2;
+        camera.updateMatrixWorld();
+        var vector = new THREE.Vector3(x,y,z);
+        vector.project(camera);
+
+        vector.x = ( vector.x * widthHalf ) + widthHalf;
+        vector.y = - ( vector.y * heightHalf ) + heightHalf;
+        vector.index = index;
+        return vector;
+    }
     // Three.js render loop
     let onrendercalled = false;
 
@@ -1167,6 +1231,21 @@ let DynamicNet3D = function () {
     }
 
     let overwrite;
+
+    function checkInScreen() {
+        var frustum = new THREE.Frustum();
+        frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+        dynamicVizs.forEach((net,ni)=>{
+            net.nodes._alpha.forEach((d,i)=>{
+                if (d>0.1){
+                    data.net[ni].nodes[i].inscreen = frustum.containsPoint(new THREE.Vector3(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]))
+                }else{
+                    data.net[ni].nodes[i].inscreen = false;
+                }
+            })
+        });
+    }
+
     function animate() {
         if (!stop) {
             animateTrigger = true;
@@ -1264,16 +1343,15 @@ let DynamicNet3D = function () {
                 // visibleLine(graphicopt.linkConnect);
                 controls.update();
                 renderer.render(scene, camera);
-                var frustum = new THREE.Frustum();
-                frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-                datain.forEach((d, i) => d.inscreen = frustum.containsPoint(new THREE.Vector3(points.geometry.attributes.position.array[i * 3], points.geometry.attributes.position.array[i * 3 + 1], points.geometry.attributes.position.array[i * 3 + 2])));
-                if ((graphicopt.component.label.enable == 1 || graphicopt.component.label.enable == 3) && solution[Math.floor(graphicopt.opt.dim)] && solution[Math.floor(graphicopt.opt.dim)].length)
-                    cluster.forEach(c => {
-                        if (datain[c.__metrics.indexLeader]) {
-                            const pos = position2Vector(datain[c.__metrics.indexLeader].__metrics.position);
-                            c.__metrics.projection = getpos(pos.x, pos.y, pos.z);
-                        }
-                    });
+                checkInScreen();
+                // if ((graphicopt.component.label.enable == 1) && solution&& solution.length)
+                //     cluster.forEach(c => {
+                //         if (datain[c.__metrics.indexLeader]) {
+                //             const pos = position2Vector(datain[c.__metrics.indexLeader].__metrics.position);
+                //             c.__metrics.projection = getpos(pos.x, pos.y, pos.z);
+                //         }
+                //     });
+                updatelabelCluster();
                 // console.log(controll_metrics.zoom)
                 if (iscameraMove || onrendercalled) {
                     onrendercalled = false;

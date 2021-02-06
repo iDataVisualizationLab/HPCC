@@ -1957,18 +1957,7 @@ d3.TimeSpace = function () {
         }
     }
 
-    // function transition(){
-    //     interuptAnimation();
-    //     let count = 0 ;
-    //     animationtimer = new IntervalTimer(function(){
-    //         if (count>animationduration)
-    //             animationtimer.stop();
-    //         else{
-    //
-    //         }
-    //         count++;
-    //     },1000/60);
-    // }
+
     let distancerange = d3.scaleLinear();
     let euclideandistancerange = d3.scaleLinear();
     function createClusterLabel() {
