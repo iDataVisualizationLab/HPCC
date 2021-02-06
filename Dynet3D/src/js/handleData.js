@@ -397,8 +397,10 @@ function handleRankingData(data){
         enableClickableOptGroups: true,
         enableCollapsibleOptGroups: true,
         enableFiltering: true,
-        includeSelectAllOption: true
+        includeSelectAllOption: true,
+        nonSelectedText: 'Input name here'
     });
+
     Layout.userTimeline = filterData([],Layout.netFull);
     getChanged(Layout.userTimeline);
     console.log(Layout.userTimeline)
