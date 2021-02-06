@@ -47,12 +47,12 @@ let DynamicNet3D = function () {
                 schema: serviceFullList
             },
             curveSegment: 20,
-            linkConnect: true,
+            linkConnect: 'straight',
             showUser: true,
             showNode:true,
             showChanged: true,
             isSelectionMode: false,
-            isCurve: false,
+            label_enable: true,
             filter: {distance: 0.5},
             component: {
                 dot: {size: 5, opacity: 0.5, filter: {size: 5, opacity: 0.1}, 'user': {size: 10}},
@@ -69,7 +69,7 @@ let DynamicNet3D = function () {
         },
         controlPanelGeneral = {
             showChanged: {
-                text: "Show changed",
+                text: "Show Variations",
                 type: "checkbox",
                 variable: 'showChanged',
                 values: true,
@@ -134,7 +134,7 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
-            labelMarker:{text: "Show Labels", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:false, width: '100px',
+            labelMarker:{text: "Show Labels", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:true, width: '100px',
                 callback:updatelabelCluster},
             linkConnect: {
                 text: "Link type",
@@ -145,7 +145,6 @@ let DynamicNet3D = function () {
                 width: '100px',
                 callback: () => {
                     visibleLine(graphicopt.linkConnect);
-                    graphicopt.isCurve = graphicopt.linkConnect === 'curve';
                     toggleLine();
                     render(!isBusy);
                     isneedrender = true;
@@ -1605,6 +1604,7 @@ let DynamicNet3D = function () {
                         // // if (d.content.variableRoot)
                         // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
                         // console.log(getValue(d.content))
+                        debugger
                         $(div.node()).val(values.indexOf(getValue(d.content)));
                     }
                 }
