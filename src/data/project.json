@@ -242,7 +242,7 @@
   },
   "JobNet": {
     "title": "Job Net",
-    "thumb": "JobNet.png",
+    "thumb": "JobNet.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/jobNet/index.html",
     "tags": [
       "MONSTER API","Realtime"
