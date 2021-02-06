@@ -109,20 +109,6 @@ let DynamicNet3D = function () {
                     onShowChanged(v);
                     isneedrender = true;
                 }
-            }, linkConnect: {
-                text: "Link type",
-                type: "selection",
-                variable: 'linkConnect',
-                labels: ['--none--', 'Straight'],
-                values: [false, 'straight'],
-                width: '100px',
-                callback: () => {
-                    visibleLine(graphicopt.linkConnect);
-                    graphicopt.isCurve = graphicopt.linkConnect === 'curve';
-                    toggleLine();
-                    render(!isBusy);
-                    isneedrender = true;
-                }
             },
             showUserIcon: {
                 text: "Show Users",
@@ -148,6 +134,23 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
+            labelMarker:{text: "Show Labels", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:false, width: '100px',
+                callback:updatelabelCluster},
+            linkConnect: {
+                text: "Link type",
+                type: "selection",
+                variable: 'linkConnect',
+                labels: ['--none--', 'Straight'],
+                values: [false, 'straight'],
+                width: '100px',
+                callback: () => {
+                    visibleLine(graphicopt.linkConnect);
+                    graphicopt.isCurve = graphicopt.linkConnect === 'curve';
+                    toggleLine();
+                    render(!isBusy);
+                    isneedrender = true;
+                }
+            },
             linkOpacity: {
                 text: "Link opacity",
                 range: [0.1, 1],
@@ -159,8 +162,6 @@ let DynamicNet3D = function () {
                 step: 0.1,
                 callback: onlinkopacity
             },
-            labelMarker:{text: "Display label", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:false, width: '100px',
-                callback:updatelabelCluster},
             networkExpand: {
                 text: "Network Expand",
                 range: [0.1, 5],
