@@ -189,6 +189,20 @@ let DynamicNet3D = function () {
                 width: '100px',
                 step: 0.1,
                 callback: onNetworkExpandXY
+            },
+            linePlot: {
+                text: "Timeline",
+                type: "selection",
+                variable: 'linePlot',
+                labels: ['--none--'],
+                values: [false],
+                width: '100px',
+                callback: () => {
+                    scene.remove(metricPlot);
+                    if(graphicopt.plotMetric){
+                        updatePlot();
+                    }
+                }
             }
         },
         formatTable = {
@@ -870,16 +884,14 @@ let DynamicNet3D = function () {
                                     })
                                 }
                             }
-                            controlPanelGeneral.showLineConnect.callback();
                             points.geometry.attributes.position.needsUpdate = true;
                             points.geometry.boundingBox = null;
                             points.geometry.computeBoundingSphere();
-                            if(graphicopt.plotMetric){
-                                updatePlot();
-                            }
-                            isneedrender = true;
 
-                        })
+                        });
+                        controlPanelGeneral.showLineConnect.callback();
+                        controlPanelGeneral.linePlot.callback();
+                        isneedrender = true;
                         console.timeEnd('rendering last time: ');
                     }
                 } else {
@@ -1691,9 +1703,7 @@ let DynamicNet3D = function () {
             if (dynamicVizs.length){
                 // change color
                 // update plot
-                if(graphicopt.plotMetric){
-                    updatePlot();
-                }
+                controlPanelGeneral.linePlot.callback();
             }
             return master
         }
