@@ -1,9 +1,9 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iDataVisualizationLab/HPCC/master/LICENSE)
 # 2021
 
-JobNet: https://idatavisualizationlab.github.io/HPCC/Dynet3D/index.html
+Dynet3D: https://idatavisualizationlab.github.io/HPCC/Dynet3D/index.html
 
-![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/src/image/Dynet3D.PNG)
+![ScreenShot](https://github.com/iDataVisualizationLab/HPCC/blob/master/src/image/Dynet3D.gif)
 
 JobNet: https://idatavisualizationlab.github.io/HPCC/JobNet/index.html
 
