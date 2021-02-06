@@ -51,6 +51,7 @@ let DynamicNet3D = function () {
             showUser: true,
             showNode:true,
             showChanged: true,
+            showLineConnect: true,
             isSelectionMode: false,
             label_enable: true,
             filter: {distance: 0.5},
@@ -85,6 +86,27 @@ let DynamicNet3D = function () {
                                     l.visible = l._visible && l.visible;
                                 })
                             });
+                        } else {
+                            visibleNode();
+                            dynamicVizs.forEach(n => {
+                                n.links.forEach(l => l.visible = l._visible_old);
+                            });
+                        }
+                    };
+                    onShowChanged(v);
+                    isneedrender = true;
+                }
+            },
+            showLineConnect: {
+                text: "Show Time-step Connection",
+                type: "checkbox",
+                variable: 'showLineConnect',
+                values: true,
+                width: '100px',
+                callback: () => {
+                    const v = graphicopt.showLineConnect;
+                    onShowLineConnectChanged = (v) => {
+                        if (v) {
                             Object.keys(dynamicVizs.links).forEach(k => {
                                 const d = dynamicVizs.links[k];
                                 d.el.visible = d._visible;
@@ -99,14 +121,10 @@ let DynamicNet3D = function () {
                                 }
                             });
                         } else {
-                            visibleNode();
-                            dynamicVizs.forEach(n => {
-                                n.links.forEach(l => l.visible = l._visible_old);
-                            });
                             Object.keys(dynamicVizs.links).forEach(k => dynamicVizs.links[k].el.visible = false);
                         }
                     };
-                    onShowChanged(v);
+                    onShowLineConnectChanged(v);
                     isneedrender = true;
                 }
             },
@@ -795,12 +813,12 @@ let DynamicNet3D = function () {
             try {
                 if (islast) {
                     if (solution.length) {
-                        console.log(solution);
+                        console.time('rendering last time: ');
                         solution.forEach((sol, soli) => {
                             const points = dynamicVizs[soli].nodes;
                             let p = points.geometry.attributes.position.array;
                             onrendercalled = true;
-                            sol.nodes.forEach(function (d, pointIndex) {
+                            sol.nodes.forEach(function (d,pointIndex) {
                                 // mapIndex.forEach(function (i) {
                                 d.x = d.x ?? d.parent.x;
                                 d.y = d.y ?? d.parent.y;
@@ -822,16 +840,13 @@ let DynamicNet3D = function () {
                                 // apply full
                                 const net = dynamicVizs[soli];
                                 net._links.forEach((l, li) => {
-                                    if (!solution[soli].links[li]){
-                                        debugger
-                                    }
-                                    data.net[soli].links[li].source = solution[soli].links[li].source;
-                                    data.net[soli].links[li].target = solution[soli].links[li].target;
-                                    const source = solution[soli].links[li].source;
-                                    const target = solution[soli].links[li].target;
+                                    data.net[soli].links[li].source = data.net[soli].nodes[solution[soli].links[li].source._index];
+                                    data.net[soli].links[li].target = data.net[soli].nodes[solution[soli].links[li].target._index];
+                                    const source = data.net[soli].links[li].source;
+                                    const target = data.net[soli].links[li].target;
                                     const points = [];
-                                    points.push(new THREE.Vector3(graphicopt.expand.xy * source.x, graphicopt.expand.xy * source.y, source.z));
-                                    points.push(new THREE.Vector3(graphicopt.expand.xy * target.x, graphicopt.expand.xy * target.y, target.z));
+                                    points.push(new THREE.Vector3(source.x, source.y, source.z));
+                                    points.push(new THREE.Vector3(target.x, target.y, target.z));
                                     l.geometry.setFromPoints(points);
                                     l.geometry.attributes.position.needsUpdate = true;
                                     l.geometry.computeBoundingBox();
@@ -855,42 +870,7 @@ let DynamicNet3D = function () {
                                     })
                                 }
                             }
-                            // if (islast) {
-                            //     let center = d3.nest().key(d => d.clusterName).rollup(d => [d3.mean(d.map(e => e.__metrics.position[0])), d3.mean(d.map(e => e.__metrics.position[1])), d3.mean(d.map(e => e.__metrics.position[2]))]).object(datain);
-                            //     solution[Math.floor(graphicopt.opt.dim)].forEach(function (d, i) {
-                            //         const target = datain[i];
-                            //         const posPath = path[target.name].findIndex(e => e.timestep === target.timestep);
-                            //         path[target.name][posPath].value = d;
-                            //         // updateStraightLine(target, posPath, d);
-                            //         updateLine(target, posPath, d, path[target.name].map(p => center[datain[p.index].clusterName]));
-                            //
-                            //     });
-                            //     let rangeDis = [+Infinity, 0];
-                            //     let customz = d3.scaleLinear().range(scaleNormalTimestep.range());
-                            //     let distance_data = [];
-                            //     for (let name in path) {
-                            //         let temp;
-                            //         path[name].forEach((p, i) => {
-                            //             if (!i) {
-                            //                 path[name].distance = 0;
-                            //                 temp = p.value;
-                            //                 return;
-                            //             } else {
-                            //                 path[name].distance += distance(path[name][i - 1].value, p.value)
-                            //             }
-                            //         });
-                            //         if (graphicopt.opt.dim === 2.5)
-                            //             path[name].distance /= (_.last(path[name]).__timestep);
-                            //         else
-                            //             path[name].distance /= path[name].length;
-                            //         if (path[name].distance < rangeDis[0])
-                            //             rangeDis[0] = path[name].distance;
-                            //         if (path[name].distance > rangeDis[1])
-                            //             rangeDis[1] = path[name].distance;
-                            //         distance_data.push(path[name].distance)
-                            //     }
-                            //     customz.domain(rangeDis);
-                            // }
+                            controlPanelGeneral.showLineConnect.callback();
                             points.geometry.attributes.position.needsUpdate = true;
                             points.geometry.boundingBox = null;
                             points.geometry.computeBoundingSphere();
@@ -900,40 +880,10 @@ let DynamicNet3D = function () {
                             isneedrender = true;
 
                         })
+                        console.timeEnd('rendering last time: ');
                     }
                 } else {
-                    // if (solution.length) {
-                    //     // solution.forEach((sol, soli) => {
-                    //         sol = solution[0];
-                    //         soli = 0;
-                    //         const points = dynamicVizs[soli].nodes;
-                    //         let p = points.geometry.attributes.position.array;
-                    //         onrendercalled = true;
-                    //         sol.filtered_nodes.forEach(function (d, pi) {
-                    //             const pointIndex = d._index;
-                    //             // mapIndex.forEach(function (i) {
-                    //             d.x = d.x ?? d.parent.timeArr[0].x;
-                    //             d.y = d.y ?? d.parent.timeArr[0].y;
-                    //             const target = data.net[soli].nodes[pointIndex];
-                    //             target.x = d.x;
-                    //             target.y = d.y;
-                    //
-                    //             p[pointIndex * 3] = d.x;
-                    //             p[pointIndex * 3 + 1] = d.y;
-                    //
-                    //             // 3rd dimension as time step
-                    //             // p[pointIndex*3+2] = xscale(d[2])||0;
-                    //             p[pointIndex * 3 + 2] = scaleNormalTimestep(soli);
-                    //             d.z = p[pointIndex * 3 + 2];
-                    //             target.z = d.z;
-                    //         });
-                    //         points.geometry.attributes.position.needsUpdate = true;
-                    //         points.geometry.boundingBox = null;
-                    //         points.geometry.computeBoundingSphere();
-                    //
-                    //         isneedrender = true;
-                    //     // })
-                    // }
+
                 }
             } catch (e) {
                 console.log(e)
