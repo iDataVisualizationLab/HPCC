@@ -52,6 +52,8 @@ let DynamicNet3D = function () {
             showNode:true,
             showChanged: true,
             showLineConnect: true,
+            linePlot: false,
+            plotMetric: false,
             isSelectionMode: false,
             label_enable: true,
             filter: {distance: 0.5},
@@ -193,14 +195,17 @@ let DynamicNet3D = function () {
             linePlot: {
                 text: "Timeline",
                 type: "selection",
-                variable: 'linePlot',
+                variable: 'plotMetric',
                 labels: ['--none--'],
                 values: [false],
                 width: '100px',
                 callback: () => {
                     scene.remove(metricPlot);
-                    if(graphicopt.plotMetric){
+                    if(graphicopt.plotMetric!==false){
+                        debugger
                         updatePlot();
+                    }else{
+                        isneedrender = true;
                     }
                 }
             }
@@ -1479,100 +1484,100 @@ let DynamicNet3D = function () {
             .attr('colspan', d => d.type ? "2" : null)
             .style('text-align', (d, i) => d.type === "title" ? "center" : (i ? "right" : "left"))
             .attr('class', d => d.variable)
-            .each(function (d) {
-                if (d.text !== undefined) // value display only
-                    d3.select(this).text(d.text);
-                else { // other component display
-                    let formatvalue = formatTable[d.content.variable] || (e => Math.round(e));
-                    if (d.content.type === "slider") {
-                        let div = d3.select(this).style('width', d.content.width).append('div').attr('class', 'valign-wrapper');
-                        noUiSlider.create(div.node(), {
-                            start: (graphicopt.opt[d.content.variable] || (d.content.variableRoot ? d.content.variableRoot[d.content.variable] : undefined)) || d.content.range[0],
-                            connect: 'lower',
-                            tooltips: {
-                                to: function (value) {
-                                    return formatvalue(value)
-                                }, from: function (value) {
-                                    return +value.split('1e')[1];
-                                }
-                            },
-                            step: d.content.step || 1,
-                            orientation: 'horizontal', // 'horizontal' or 'vertical'
-                            range: {
-                                'min': d.content.range[0],
-                                'max': d.content.range[1],
-                            },
-                        });
-                        div.node().noUiSlider.on("change", function () { // control panel update method
-                            if (!d.content.variableRoot) {
-                                graphicopt.opt[d.content.variable] = +this.get();
-                            } else
-                                d.content.variableRoot[d.content.variable] = +this.get();
-                            if (d.content.callback)
-                                d.content.callback();
-                            else {
-                                obitTrigger = true;
-                                start();
-                            }
-                        });
-                    } else if (d.content.type === "checkbox") {
-                        let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
-                        div.append('input')
-                            .attr("type", "checkbox")
-                            .attr("class", "filled-in")
-                            .on('change', function () {
-                                graphicopt[d.content.variable] = this.checked;
-                                if (d.content.callback)
-                                    d.content.callback();
-                            }).node().checked = graphicopt[d.content.variable];
-                        div.append('span')
-                    } else if (d.content.type === "switch") {
-                        let div = d3.select(this).style('width', d.content.width).classed('switch', true)
-                            .append('label').attr('class', 'valign-wrapper')
-                            .html(`${d.content.labels[0]}<input type="checkbox"><span class="lever"></span>${d.content.labels[1]}`)
-                        div.select('input').node().checked = (graphicopt.opt[d.content.variable] + "") === d.content.labels[1];
-                        div.select('input').on('change', function () {
-                            graphicopt.opt[d.content.variable] = d.content.values[+this.checked];
-                            if (d.content.callback)
-                                d.content.callback();
-                            else {
-                                obitTrigger = true;
-                                start();
-                            }
-                        })
-                    } else if (d.content.type === "selection") {
-                        let label = _.isFunction(d.content.labels) ? d.content.labels() : d.content.labels;
-                        let values = _.isFunction(d.content.values) ? d.content.values() : d.content.values;
-                        let div = d3.select(this).style('width', d.content.width)
-                            .append('select')
-                            .on('change', function () {
-                                setValue(d.content, values[this.value])
-                                // if (!d.content.variableRoot) {
-                                //     graphicopt[d.content.variable]  =  d.content.values[this.value];
-                                // }else
-                                //     graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
-                                if (d.content.callback)
-                                    d.content.callback();
-                                else {
-                                    obitTrigger = true;
-                                    start();
-                                }
-                            });
-                        div
-                            .selectAll('option').data(label)
-                            .enter().append('option')
-                            .attr('value', (e, i) => i).text((e, i) => e);
-                        // let default_val = graphicopt[d.content.variable];
-                        // // if (d.content.variableRoot)
-                        // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
-                        // console.log(getValue(d.content))
-                        debugger
-                        $(div.node()).val(values.indexOf(getValue(d.content)));
-                    }
-                }
-            });
+            .each(updateTableControl);
     };
-
+    function updateTableControl(d) {
+        if (d.text !== undefined) // value display only
+            d3.select(this).text(d.text);
+        else { // other component display
+            let formatvalue = formatTable[d.content.variable] || (e => Math.round(e));
+            if (d.content.type === "slider") {
+                let div = d3.select(this).style('width', d.content.width).append('div').attr('class', 'valign-wrapper');
+                noUiSlider.create(div.node(), {
+                    start: (graphicopt.opt[d.content.variable] || (d.content.variableRoot ? d.content.variableRoot[d.content.variable] : undefined)) || d.content.range[0],
+                    connect: 'lower',
+                    tooltips: {
+                        to: function (value) {
+                            return formatvalue(value)
+                        }, from: function (value) {
+                            return +value.split('1e')[1];
+                        }
+                    },
+                    step: d.content.step || 1,
+                    orientation: 'horizontal', // 'horizontal' or 'vertical'
+                    range: {
+                        'min': d.content.range[0],
+                        'max': d.content.range[1],
+                    },
+                });
+                div.node().noUiSlider.on("change", function () { // control panel update method
+                    if (!d.content.variableRoot) {
+                        graphicopt.opt[d.content.variable] = +this.get();
+                    } else
+                        d.content.variableRoot[d.content.variable] = +this.get();
+                    if (d.content.callback)
+                        d.content.callback();
+                    else {
+                        obitTrigger = true;
+                        start();
+                    }
+                });
+            } else if (d.content.type === "checkbox") {
+                let div = d3.select(this).style('width', d.content.width).append('label').attr('class', 'valign-wrapper left-align');
+                div.append('input')
+                    .attr("type", "checkbox")
+                    .attr("class", "filled-in")
+                    .on('change', function () {
+                        graphicopt[d.content.variable] = this.checked;
+                        if (d.content.callback)
+                            d.content.callback();
+                    }).node().checked = graphicopt[d.content.variable];
+                div.append('span')
+            } else if (d.content.type === "switch") {
+                let div = d3.select(this).style('width', d.content.width).classed('switch', true)
+                    .append('label').attr('class', 'valign-wrapper')
+                    .html(`${d.content.labels[0]}<input type="checkbox"><span class="lever"></span>${d.content.labels[1]}`)
+                div.select('input').node().checked = (graphicopt.opt[d.content.variable] + "") === d.content.labels[1];
+                div.select('input').on('change', function () {
+                    graphicopt.opt[d.content.variable] = d.content.values[+this.checked];
+                    if (d.content.callback)
+                        d.content.callback();
+                    else {
+                        obitTrigger = true;
+                        start();
+                    }
+                })
+            } else if (d.content.type === "selection") {
+                let label = _.isFunction(d.content.labels) ? d.content.labels() : d.content.labels;
+                let values = _.isFunction(d.content.values) ? d.content.values() : d.content.values;
+                let div = d3.select(this).style('width', d.content.width)
+                    .append('select')
+                    .on('change', function () {
+                        setValue(d.content, values[this.value])
+                        // if (!d.content.variableRoot) {
+                        //     graphicopt[d.content.variable]  =  d.content.values[this.value];
+                        // }else
+                        //     graphicopt[d.content.variableRoot][d.content.variable] = d.content.values[this.value];
+                        if (d.content.callback)
+                            d.content.callback();
+                        else {
+                            obitTrigger = true;
+                            start();
+                        }
+                    });
+                div
+                    .selectAll('option').data(label)
+                    .enter().append('option')
+                    .attr('value', (e, i) => i).text((e, i) => e);
+                // let default_val = graphicopt[d.content.variable];
+                // // if (d.content.variableRoot)
+                // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
+                // console.log(getValue(d.content))
+                debugger
+                $(div.node()).val(values.indexOf(getValue(d.content)));
+            }
+        }
+    }
     function updateTableInput() {
         table_info.select(`.datain`).text(e => data.net.length);
         d3.select('#modelCompareMode').property('checked', graphicopt.iscompareMode)
@@ -1696,6 +1701,19 @@ let DynamicNet3D = function () {
            return yaxisGroup;
         }
     }
+    master.controlPanelGeneral = function(_data){
+        if (arguments.length) {
+                Object.keys(_data).forEach(k=>{
+                    Object.keys(_data[k]).forEach(conf=>{
+                        controlPanelGeneral[k][conf] = _data[k][conf];
+                    })
+                });
+                if(table_info)
+                    table_info.selectAll('tbody').selectAll('tr').selectAll('td').each(updateTableControl);
+            return master
+        }
+        return controlPanelGeneral;
+    };
 
     master.changeService = function (_data) {
         if (arguments.length) {
@@ -1707,7 +1725,7 @@ let DynamicNet3D = function () {
             }
             return master
         }
-        return data;
+        return service;
     };
 
     master.stop = function () {

@@ -1,4 +1,4 @@
-// plugin
+;// plugin
 d3.selection.prototype.moveToFront = function() {
     return this.each(function(){
         this.parentNode.appendChild(this);
@@ -8,28 +8,32 @@ d3.selection.prototype.moveToFront = function() {
 let vizservice=[];
 function serviceControl(){
     vizservice =serviceFullList.slice();
-    vizservice.forEach((s,si)=>s._id = si)
+    vizservice.forEach((s,si)=>s._id = si);
+    drawObject.controlPanelGeneral({linePlot:{
+        labels: ['--none--',...vizservice.map(d=>d.text)],
+            values: [false,...(vizservice.map(d=>d._id))]}}
+            );
     drawObject.changeService(vizservice[serviceSelected]);
-    d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
-    d3.select('#serviceSelection')
-        .on('change',function(){
-            serviceSelected = +$(this).val();
-            d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
-            drawObject.graphicopt({range:vizservice[serviceSelected].range});
-            drawObject.changeService(vizservice[serviceSelected]);
-            if (d3.select(this).attr('aria-pressed')==='true'){
-                onFilter();
-            }
-        })
-        .selectAll('option')
-        .data(vizservice)
-        .enter()
-        .append('option')
-        .attr('value',(d,i)=>i)
-        .attr('class',d=>d.text==='User'?'innerName':null)
-        .attr('data-value',(d,i)=>d)
-        .attr('selected',(d,i)=>i===serviceSelected?'':null)
-        .text(d=>d.text)
+    // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
+    // d3.select('#serviceSelection')
+    //     .on('change',function(){
+    //         serviceSelected = +$(this).val();
+    //         d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
+    //         drawObject.graphicopt({range:vizservice[serviceSelected].range});
+    //         drawObject.changeService(vizservice[serviceSelected]);
+    //         if (d3.select(this).attr('aria-pressed')==='true'){
+    //             onFilter();
+    //         }
+    //     })
+    //     .selectAll('option')
+    //     .data(vizservice)
+    //     .enter()
+    //     .append('option')
+    //     .attr('value',(d,i)=>i)
+    //     .attr('class',d=>d.text==='User'?'innerName':null)
+    //     .attr('data-value',(d,i)=>d)
+    //     .attr('selected',(d,i)=>i===serviceSelected?'':null)
+    //     .text(d=>d.text)
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
