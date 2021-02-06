@@ -259,5 +259,24 @@
     "types": [
       "Network"
     ]
+  },
+  "Dynet3D": {
+    "title": "Dynet3D",
+    "thumb": "Dynet3D.gif",
+    "url": "https://idatavisualizationlab.github.io/HPCC/Dynet3D/index.html",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Capture User status",
+      "Snapshot of user utilizing",
+      "User and compute relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "3DNetwork","Line chart"
+    ]
   }
 }
