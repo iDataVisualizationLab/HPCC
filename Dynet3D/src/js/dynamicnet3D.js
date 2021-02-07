@@ -1670,16 +1670,17 @@ let DynamicNet3D = function () {
                 color: 0xff0000,
                 linewidth: 1,
                 scale: 1,
-                dashSize: 20,
-                gapSize: 20,
+                gapSize: 1,
             } );
-            const points = [];
-            points.push( new THREE.Vector3( 0, yscale.range()[0], 0 ) );
-            points.push( new THREE.Vector3( 0, yscale.range()[1], 0 ) );
 
-            const geometry = new THREE.BufferGeometry().setFromPoints( points );
-            geometry.computeLineDistances();
-            holder.add(new THREE.Line( geometry, material));
+            const geometry = new THREE.Geometry();
+            geometry.vertices.push(
+                new THREE.Vector3( 0, yscale.range()[0], 0 ),
+                new THREE.Vector3( 0, yscale.range()[1], 0 )
+            );
+            const line = new THREE.Line( geometry, material);
+            line.computeLineDistances();
+            holder.add(line);
             return holder;
         }
         function makeaxis() {
