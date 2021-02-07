@@ -202,7 +202,6 @@ let DynamicNet3D = function () {
                 callback: () => {
                     scene.remove(metricPlot);
                     if(graphicopt.plotMetric!==false){
-                        debugger
                         updatePlot();
                     }else{
                         isneedrender = true;
@@ -281,7 +280,6 @@ let DynamicNet3D = function () {
         function dragended(d) {
             disableMouseover = false;
             mouseoverTrigger = true;
-            showMetricsArr_plotly(allSelected_Data);
             lassoTool.end();
         }
 
@@ -350,7 +348,6 @@ let DynamicNet3D = function () {
     let data = [], dynamicVizs = [];
     let onFinishDraw = [];
     let getRenderFunc = function (d) {
-        debugger
         if (d.d) {
             return d.d;
         } else
@@ -449,7 +446,6 @@ let DynamicNet3D = function () {
                     }
                     break;
                 case "stable":
-                    debugger
                     if (firstReturn) {
                         updateProcess()
                         firstReturn = false;
@@ -768,7 +764,6 @@ let DynamicNet3D = function () {
         svg.select('#modelNodeLabel').selectAll('.name').remove();
         if(dynamicVizs[0].nodes) {
             if (graphicopt.label_enable) {
-                debugger
                 let orient = ({
                     top: text => text.attr("text-anchor", "middle").attr("y", -3),
                     right: text => text.attr("text-anchor", "start").attr("dy", "0.35em").attr("x", 3),
@@ -1033,40 +1028,7 @@ let DynamicNet3D = function () {
                     })
                 });
                 d3.select('#selectedItem').html(`${target.id} at ${data.time_stamp[netIndex]}`);
-                // dynamicVizs.forEach((net,ni)=>{
-                //     data.net[ni].nodes.forEach((d, i) => {
-                //         debugger
-                //         if (d.id === target.id) {
-                //             INTERSECTED.push(i);
-                //             attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
-                //             attributes.size.array[i] = target.timestep === d.timestep ? graphicopt.component.dot.size * 2 : (d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.size);
-                //             lines[d.name].visible = true;
-                //             lines[d.name].material.opacity = 1;
-                //             lines[d.name].material.linewidth = graphicopt.component.link.highlight.opacity;
-                //             if (d.__metrics.radar)
-                //                 d.__metrics.radar.dispatch('highlight')
-                //         } else {
-                //             if (!visibledata || (visibledata && visibledata.indexOf(i) !== -1)) {
-                //
-                //                 attributes.alpha.array[i] = 0.1;
-                //                 attributes.size.array[i] = graphicopt.component.dot.size;
-                //                 lines[d.name].visible = false;
-                //                 lines[d.name].material.opacity = graphicopt.component.link.opacity;
-                //                 lines[d.name].material.linewidth = graphicopt.component.link.size;
-                //                 if (d.__metrics.radar)
-                //                     d.__metrics.radar.dispatch('fade')
-                //             } else {
-                //                 attributes.alpha.array[i] = 0;
-                //                 lines[d.name].visible = false;
-                //                 lines[d.name].material.opacity = graphicopt.component.link.opacity;
-                //                 lines[d.name].material.linewidth = graphicopt.component.link.size;
-                //             }
-                //         }
-                //     });
-                // })
-
-                // attributes.size.needsUpdate = true;
-                // attributes.alpha.needsUpdate = true;
+                onSelectLine(target.type==='compute'?target.id:undefined);
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
             // var geometry = points.geometry;
@@ -1109,7 +1071,7 @@ let DynamicNet3D = function () {
             // attributes.size.needsUpdate = true;
             // attributes.alpha.needsUpdate = true;
             INTERSECTED = [];
-            scene.remove(scene.getObjectByName('boxhelper'));
+            onSelectLine();
             d3.select('#selectedItem').html('');
         }
         isneedrender = true;
@@ -1229,6 +1191,7 @@ let DynamicNet3D = function () {
                 } catch (e) {
                 }
                 if (mouseoverTrigger && !iscameraMove && !disableMouseover || mouseclick) { // not have filter
+                    camera.updateMatrixWorld();
                     // if (!svgData) {
                     raycaster.setFromCamera(mouse, camera);
                     if (!filterbyClustername.length) {
@@ -1573,7 +1536,6 @@ let DynamicNet3D = function () {
                 // // if (d.content.variableRoot)
                 // //     default_val = graphicopt[d.content.variableRoot][d.content.variable];
                 // console.log(getValue(d.content))
-                debugger
                 $(div.node()).val(values.indexOf(getValue(d.content)));
             }
         }
@@ -1629,16 +1591,41 @@ let DynamicNet3D = function () {
         });
 
     }
-
+    function onSelectLine(id){
+        if (metricPlot) {
+            if (id!==undefined) {
+                const holder = metricPlot.getObjectByName('lineChartHolder');
+                console.log(holder)
+                if (holder) {
+                    debugger
+                    holder.children.forEach(c => {
+                        if (c.name === 'lineChart' + id) {
+                            c.visible = true;
+                        } else {
+                            c.visible = false;
+                        }
+                    });
+                }
+            }else{
+                const holder = metricPlot.getObjectByName('lineChartHolder');
+                if (holder) {
+                    holder.children.forEach(c => c.visible = true);
+                }
+            }
+        }
+    }
     function updatePlot(){
         scene.remove(metricPlot);
         metricPlot = new THREE.Object3D();
         const origin = [graphicopt.heightG() / 2, graphicopt.heightG() / 2, 0];
 
-        const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3])
+        const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3]);
+        const holderPlot = new THREE.Object3D();
+        holderPlot.name="lineChartHolder";
+        metricPlot.add(holderPlot);
         data.root_nodes.forEach(d=>{
             if(d.type==='compute'){
-                metricPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),origin));
+                holderPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),d.id,origin));
             }
         });
         metricPlot.add(makeaxis(origin));
@@ -1646,7 +1633,7 @@ let DynamicNet3D = function () {
 
 
         isneedrender = true;
-        function lineChart(path,origin) {
+        function lineChart(path,name,origin) {
             const points = path.map((d,i)=>new THREE.Vector3(origin[0], origin[1]+yscale(d), origin[2]+scaleNormalTimestep(i)));
 
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -1657,6 +1644,7 @@ let DynamicNet3D = function () {
                 color: 0x000000
             });
             let lineObj = new THREE.Line(geometry, material);
+            lineObj.name = 'lineChart'+name;
             return lineObj;
         }
         function makeaxis(origin) {
