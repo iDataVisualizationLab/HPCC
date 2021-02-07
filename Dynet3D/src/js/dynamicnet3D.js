@@ -1678,6 +1678,7 @@ let DynamicNet3D = function () {
             points.push( new THREE.Vector3( 0, yscale.range()[1], 0 ) );
 
             const geometry = new THREE.BufferGeometry().setFromPoints( points );
+            geometry.computeLineDistances();
             holder.add(new THREE.Line( geometry, material));
             return holder;
         }
