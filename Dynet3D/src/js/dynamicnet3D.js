@@ -968,7 +968,7 @@ let DynamicNet3D = function () {
 
                 // let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color: 0x0000ff, flatShading: true}));
                 let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({color: 0x0000ff}));
-                textMesh1.tag = 'TimeText';
+                textMesh1.name = 'TimeText';
                 textMesh1.position.x = graphicopt.heightG() / 2;
                 textMesh1.position.y = graphicopt.heightG() / 2;
                 textMesh1.position.z = timeScale(t);
@@ -1028,7 +1028,7 @@ let DynamicNet3D = function () {
                     })
                 });
                 d3.select('#selectedItem').html(`${target.id} at ${data.time_stamp[netIndex]}`);
-                onSelectLine(target.type==='compute'?target.id:undefined);
+                onSelectLine(target.type==='compute'?target.id:undefined,netIndex);
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
             // var geometry = points.geometry;
@@ -1184,6 +1184,12 @@ let DynamicNet3D = function () {
                 try {
                     if (axesTime.visible) {
                         axesTime.traverse(function(child) {
+                            if (child.name==="TimeText")
+                                child.quaternion.copy(camera.quaternion)
+                        });
+                    }
+                    if (metricPlot&&metricPlot.visible) {
+                        metricPlot.traverse(function(child) {
                             if (child.name==="TimeText")
                                 child.quaternion.copy(camera.quaternion)
                         });
@@ -1591,13 +1597,13 @@ let DynamicNet3D = function () {
         });
 
     }
-    function onSelectLine(id){
+    function onSelectLine(id,time){
         if (metricPlot) {
+            const holder = metricPlot.getObjectByName('lineChartHolder');
+            const timeMarker = metricPlot.getObjectByName('timeMarker');
             if (id!==undefined) {
-                const holder = metricPlot.getObjectByName('lineChartHolder');
                 console.log(holder)
                 if (holder) {
-                    debugger
                     holder.children.forEach(c => {
                         if (c.name === 'lineChart' + id) {
                             c.visible = true;
@@ -1606,18 +1612,26 @@ let DynamicNet3D = function () {
                         }
                     });
                 }
+                if (timeMarker) {
+                    timeMarker.visible = true;
+                    timeMarker.position.z = scaleNormalTimestep(time);
+                }
             }else{
-                const holder = metricPlot.getObjectByName('lineChartHolder');
                 if (holder) {
                     holder.children.forEach(c => c.visible = true);
                 }
+                if (timeMarker)
+                    timeMarker.visible = false;
             }
         }
     }
     function updatePlot(){
         scene.remove(metricPlot);
-        metricPlot = new THREE.Object3D();
         const origin = [graphicopt.heightG() / 2, graphicopt.heightG() / 2, 0];
+        metricPlot = new THREE.Object3D();
+        metricPlot.position.x = origin[0];
+        metricPlot.position.y = origin[1];
+        metricPlot.position.z = origin[2];
 
         const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3]);
         const holderPlot = new THREE.Object3D();
@@ -1625,16 +1639,17 @@ let DynamicNet3D = function () {
         metricPlot.add(holderPlot);
         data.root_nodes.forEach(d=>{
             if(d.type==='compute'){
-                holderPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),d.id,origin));
+                holderPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),d.id));
             }
         });
-        metricPlot.add(makeaxis(origin));
+        metricPlot.add(makeaxis());
+        metricPlot.add(makeMarker());
         scene.add(metricPlot);
 
 
         isneedrender = true;
-        function lineChart(path,name,origin) {
-            const points = path.map((d,i)=>new THREE.Vector3(origin[0], origin[1]+yscale(d), origin[2]+scaleNormalTimestep(i)));
+        function lineChart(path,name) {
+            const points = path.map((d,i)=>new THREE.Vector3(0, yscale(d), scaleNormalTimestep(i)));
 
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
@@ -1647,13 +1662,32 @@ let DynamicNet3D = function () {
             lineObj.name = 'lineChart'+name;
             return lineObj;
         }
-        function makeaxis(origin) {
+        function makeMarker(){
+            const holder = new THREE.Object3D();
+            holder.name = 'timeMarker';
+            holder.visible = false;
+            const material = new THREE.LineDashedMaterial( {
+                color: 0xff0000,
+                linewidth: 1,
+                scale: 1,
+                dashSize: 20,
+                gapSize: 20,
+            } );
+            const points = [];
+            points.push( new THREE.Vector3( 0, yscale.range()[0], 0 ) );
+            points.push( new THREE.Vector3( 0, yscale.range()[1], 0 ) );
+
+            const geometry = new THREE.BufferGeometry().setFromPoints( points );
+            holder.add(new THREE.Line( geometry, material));
+            return holder;
+        }
+        function makeaxis() {
             var dir = new THREE.Vector3(0, 1, 0);
             dir.normalize();
             var length = yscale.range()[1] - yscale.range()[0];
             var hex = 0x000000;
             var yaxisGroup = new THREE.Object3D();
-            var arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(origin[0],origin[1],origin[2]+scaleNormalTimestep(0)), length, hex, 30, 10);
+            var arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,scaleNormalTimestep(0)), length, hex, 30, 10);
             arrowHelper.line.material.linewidth = 4;
             yaxisGroup.add(arrowHelper);
             let axis = yscale.copy();
@@ -1676,10 +1710,10 @@ let DynamicNet3D = function () {
 
                     // let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color: 0x0000ff, flatShading: true}));
                     let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({color: 0x000000}));
-                    textMesh1.tag = 'TimeText';
-                    textMesh1.position.x = origin[0]-Math.log10(axis.domain()[1])*20;
-                    textMesh1.position.y = origin[1]+axis(t);
-                    textMesh1.position.z = origin[2]+scaleNormalTimestep(0);
+                    textMesh1.name = 'TimeText';
+                    textMesh1.position.x = -Math.log10(axis.domain()[1])*20;
+                    textMesh1.position.y = axis(t);
+                    textMesh1.position.z = scaleNormalTimestep(0);
                     // textMesh1.rotation.x = 0;
                     // textMesh1.rotation.y = Math.PI / 2;
                     textMesh1.quaternion.copy(camera.quaternion);
