@@ -136,12 +136,20 @@
       "title": "HiperJobViz: Visualizing Resource Allocations in High-Performance Computing Center via Multivariate Health-Status Data",
       "author": "Ngan Nguyen, Yong Chen, Jon Hass and Tommy Dang",
       "venue": "2019 IEEE/ACM Industry/University Joint International Workshop on Data-center Automation, Analytics, and Control (DAAC)",
+      "year": 2019,
       "DOI": "https://doi.org/10.1109/DAAC49578.2019.00009"
     },{
       "title": "RadarViewer: Visualizing the dynamics of multivariate data",
       "author": "Ngan Nguyen, Jon Hass, Yong Chen, Jie Li, Alan Sill and Tommy Dang",
       "venue": "PEARC '20: Practice and Experience in Advanced Research Computing",
+      "year": 2020,
       "DOI": "https://doi.org/10.1145/3311790.3404538"
+    },{
+      "title": "MonSTer: An Out-of-the-Box Monitoring Tool for High Performance Computing Systems",
+      "author": "Jie Li, Ghazanfar Ali, Ngan Nguyen, Jon Hass, Alan Sill, Tommy Dang and Yong Chen",
+      "venue": "2020 IEEE International Conference on Cluster Computing (CLUSTER)",
+      "year": 2020,
+      "DOI": "https://doi.ieeecomputersociety.org/10.1109/CLUSTER49012.2020.00022"
     }],
     "pros": [
       "System overview and time series information in one visualization",
