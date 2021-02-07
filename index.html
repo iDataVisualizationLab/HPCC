@@ -40,6 +40,9 @@
         .card-body {
             padding: .25rem;
         }
+        .jumbotron {
+            padding: 2rem 1rem;
+        }
     </style>
     <title>HPCC</title>
 </head>
@@ -47,14 +50,14 @@
 <header>
     <nav class="navbar navbar-light bg-light">
         <a class="navbar-brand" href="#">
-            <img src="HiperView/images/TTUlogo.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+            <img src="HiperView/images/TTUlogo.png" width="auto" height="50" class="d-inline-block align-top" alt="" loading="lazy">
         </a>
         <div class="align-middle">
 
             <h4 class="col-12">Integrated Visualizing, Monitoring, and Managing HPC Systems</h4>
             <span class="align-middle col-12">Supported by the NSF IUCRC grant #1939140 - CAC Dell Inc. membership contribution</span>
         </div>
-        <img src="src/image/iDVL.png" width="auto" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+        <img src="src/image/iDVL.png" width="auto" height="50" class="d-inline-block align-top" alt="" loading="lazy">
     </nav>
 </header>
 <main role="main">
@@ -140,6 +143,7 @@
     <a type="button" class="btn btn-success float-right" href="${d.value.url}" target="_blank">Demo</a></div><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
+    ${d.value.publication?'<li>Publication:<ul>'+d.value.publication.map(p=>`<li>${p.author},<strong>"${p.title}"</strong> <em>${p.venue}</em>. ${p.year}. DOI: <a href="${p.DOI}">${p.DOI}</a></li>`).join('')+'</ul></li>':''}
     <li>Visualization supported:${d.value.types.map(e=>`<span class="badge tag" >${e}</span>`).join('|')}</li>
 </ul>
  <img src="src/image/${d.value.thumb}" class="img-fluid" alt="...">

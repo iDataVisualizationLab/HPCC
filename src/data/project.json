@@ -6,6 +6,19 @@
     "tags": [
       "Real-time supported"
     ],
+    "publication": [{
+      "title": "Visualizing Multidimensional Health Status of Data Centers",
+      "author": "Tommy Dang",
+      "venue": "Lecture Notes in Computer Science book series (LNCS, volume 11027)",
+      "year": 2019,
+      "DOI": "https://doi.org/10.1007/978-3-030-17872-7_17"
+    }, {
+        "title": "HiperViz: Interactive visualization of CPU Temperatures in High Performance Computing Centers",
+        "author": "Ngan Nguyen and Tommy Dang",
+        "venue": "Proceedings of the Practice and Experience in Advanced Research Computing on Rise of the Machines (learning)",
+      "year": 2019,
+        "DOI": "https://doi.org/10.1145/3332186.3337959"
+      }],
     "pros": [
       "Display physical layout",
       "Time data is encoded in the sequence of heat map cell",
@@ -27,6 +40,13 @@
     "thumb": "HiperVR_2.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html",
     "tags": [],
+    "publication": [{
+      "title": "HiperVR: A Virtual Reality model for High Performance Computing Systems",
+      "author": "Ngan Nguyen, Lino Virgen and Tommy Dang",
+      "venue": "PEARC '19: Proceedings of the Practice and Experience in Advanced Research Computing on Rise of the Machines (learning)",
+      "year": 2019,
+      "DOI": "https://doi.org/10.1145/3332186.3337958"
+    }],
     "pros": [
       "Display physical layout"
     ],
@@ -60,6 +80,19 @@
     "tags": [
       "Real-time supported"
     ],
+    "publication": [{
+      "title": "SpacePhaser: Phase Space Embedding Visual Analytics",
+      "author": "Ngan Nguyen and Tommy Dang",
+      "venue": "2019 IEEE/ACM Industry/University Joint International Workshop on Data-center Automation, Analytics, and Control (DAAC)",
+      "year": 2019,
+      "DOI": "https://doi.org/10.1109/COMPSAC.2019.10213"
+    },{
+      "title": "Ant-SNE: Tracking Community Evolution of Multivariate Outliers via Animated t-SNE",
+      "author": "Ngan Nguyen and Tommy Dang",
+      "venue": "Bebis G. et al. (eds) Advances in Visual Computing. ISVC 2019. Lecture Notes in Computer Science, vol 11844. Springer, Cham",
+      "year": 2019,
+      "DOI": "https://doi.org/10.1007/978-3-030-33720-9_25"
+    }],
     "pros": [
       "Capture System status of single metric",
       "Focus on similarity of the trend"
@@ -99,6 +132,17 @@
     "tags": [
       "MONSTER API"
     ],
+    "publication": [{
+      "title": "HiperJobViz: Visualizing Resource Allocations in High-Performance Computing Center via Multivariate Health-Status Data",
+      "author": "Ngan Nguyen, Yong Chen, Jon Hass and Tommy Dang",
+      "venue": "2019 IEEE/ACM Industry/University Joint International Workshop on Data-center Automation, Analytics, and Control (DAAC)",
+      "DOI": "https://doi.org/10.1109/DAAC49578.2019.00009"
+    },{
+      "title": "RadarViewer: Visualizing the dynamics of multivariate data",
+      "author": "Ngan Nguyen, Jon Hass, Yong Chen, Jie Li, Alan Sill and Tommy Dang",
+      "venue": "PEARC '20: Practice and Experience in Advanced Research Computing",
+      "DOI": "https://doi.org/10.1145/3311790.3404538"
+    }],
     "pros": [
       "System overview and time series information in one visualization",
       "Provide simple and focus view (only display radar when group has changed)"
@@ -155,6 +199,13 @@
     "tags": [
       "Real-time supported","MONSTER API"
     ],
+    "publication": [{
+      "title": "ScagnosticsViewer: Tracking time series patterns via Scagnostics measures",
+      "author": "Ngan Nguyen, Bao Nguyen, Tommy Dang and Jon Hass",
+      "venue": "The 13th International Symposium on Visual Information Communication and Interaction",
+      "year": 2020,
+      "DOI": "https://doi.org/10.1145/3430036.3430072"
+    }],
     "pros": [
       "Capture System status","All metrics available"
     ],
