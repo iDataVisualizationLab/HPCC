@@ -185,7 +185,7 @@ function handleDataComputeByUser_core(_data){
     const jobs = _data[JOB];
     const users = {};
     for (let comp in computers){
-        let item = {id:comp,type:'compute',data:computers[comp],tooltip:comp.replace('10.101.',''),timeArr:[]};
+        let item = {id:comp,type:'compute',name:getComputeName(comp),data:computers[comp],tooltip:comp.replace('10.101.',''),timeArr:[]};
         item.drawData  = getDrawData(item);
         _data.time_stamp.forEach((t,i)=>{
             const jIDs = computers[comp].job_id[i];
@@ -209,7 +209,7 @@ function handleDataComputeByUser_core(_data){
                 username.forEach(u=>{
                     let userObj = {};
                     if (!users[u.key]){
-                        userObj = {id: u.key,type:'user',data:{},timeArr:[],drawData:[{
+                        userObj = {id: u.key,type:'user',name:getUserName(u.key),data:{},timeArr:[],drawData:[{
                                 invalid: undefined,
                                 scale:1,
                                 offset:-8,
@@ -221,7 +221,7 @@ function handleDataComputeByUser_core(_data){
                     }
                     userObj = users[u.key];
                     if (!userObj.timeArr[i]){
-                        userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,type:'user',data:{name:u.key,isNew:[]},parent:userObj,ti:i};
+                        userObj.timeArr[i] = {drawData:userObj.drawData,id: u.key,name:getUserName(u.key),type:'user',data:{name:u.key,isNew:[]},parent:userObj,ti:i};
                         userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
                         dataIn.net[i].nodes.push(userObj.timeArr[i]);
                     }
@@ -231,9 +231,9 @@ function handleDataComputeByUser_core(_data){
 
                 // compute
                 item[Layout.timespan[i]] = username.sort((a,b)=>d3.ascending(a.key,b.key));
-                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},parent:item,ti:i};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,name:getComputeName(comp),type:'compute',data:{name:comp,isNew:[]},parent:item,ti:i};
             }else
-                item.timeArr[i] = {drawData:item.drawData,id:comp,type:'compute',data:{name:comp,isNew:[]},isolate:true,parent:item,ti:i};
+                item.timeArr[i] = {drawData:item.drawData,id:comp,name:getComputeName(comp),type:'compute',data:{name:comp,isNew:[]},isolate:true,parent:item,ti:i};
             item.timeArr[i]._index = dataIn.net[i].nodes.length;
             dataIn.net[i].nodes.push(item.timeArr[i])
         });
@@ -242,6 +242,12 @@ function handleDataComputeByUser_core(_data){
     }
     debugger
     return dataIn;
+}
+function getUserName(u){
+    return u;
+}
+function getComputeName(c){
+    return request.computeDict[c];
 }
 function handleDataComputeByUser_compute(_data){
     let data = [];
@@ -392,14 +398,17 @@ function handleRankingData(data){
         .join('optgroup')
         .attr('label',d=>d.key)
         .selectAll('option').data(d=>d.values)
-        .join('option').attr('value',d=>d.id).text(d=>d.id);
+        .join('option').attr('value',d=>d.id).text(d=>d.type==='compute'?getComputeName(d.id):d.id);
     $('#modelFilterToolInput').multiselect({
         enableClickableOptGroups: true,
         enableCollapsibleOptGroups: true,
         enableFiltering: true,
         includeSelectAllOption: true,
         nonSelectedText: 'Filter by name',
-        maxHeight: 200
+        maxHeight: 100,
+        onChange: function(option,checked){
+            d3.select('#modelFilterToolBtn').text('Filter');
+        }
     });
 
     Layout.userTimeline = filterData([],Layout.netFull);

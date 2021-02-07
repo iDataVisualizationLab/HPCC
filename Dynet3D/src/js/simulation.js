@@ -6,6 +6,7 @@ class Simulation {
     index=0;
     currentTime;
     isRealTime; userDict={}; userReverseDict={};
+    computeDict={}; computeReverseDict={};
     query;
     callbackStop = ()=>{};
     onFinishQuery=[];
@@ -38,6 +39,12 @@ class Simulation {
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
                         if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
+                });
+                d3.keys(data.nodes_info).forEach(k=>{
+                    const ip = k.split('.');
+                    const name = ip[2]+'.'+ip[3];
+                    this.computeDict[k] = name;
+                    this.computeReverseDict[name] = k;
                 });
                 console.timeEnd('load data')
                 this.data = data;

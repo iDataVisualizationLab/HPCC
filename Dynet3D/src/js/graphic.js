@@ -29,14 +29,14 @@ function serviceControl(){
         .append('option')
         .attr('value',(d,i)=>i)
         .attr('class',d=>d.text==='User'?'innerName':null)
-        .attr('data-value',(d,i)=>d)
+        .attr('data-value',(d,i)=>d.text)
         .attr('selected',(d,i)=>i===serviceSelected?'':null)
         .text(d=>d.text);
     $('#serviceSelection').multiselect({
         enableFiltering: true,
         includeSelectAllOption: true,
         nonSelectedText: 'Filter by metrics',
-        maxHeight: 200
+        maxHeight: 100
     });
 }
 function initdraw(){
@@ -118,7 +118,7 @@ function initdraw(){
     d3.select('#modelFilterToolBtn').on('click',function(){
         debugger
         const choice = $('#modelFilterToolInput').val();
-
+        d3.select(this).text('Applied')
         Layout.userTimeline = filterData(choice,Layout.netFull);
         getChanged(Layout.userTimeline);
         drawObject.graphicopt({plotMetric:choice.length!==0})
@@ -132,6 +132,7 @@ function onFilter(istoggle){
     const nodes = $('#modelFilterToolInput').val();
     const toggle = istoggle===undefined?d3.select('#filter_apply').attr('aria-pressed')==='true':istoggle;
     if (toggle){
+        const lists = $('#serviceSelection').val();
         let nodeobj = {};
         nodes.forEach(d=>nodeobj[d]);
         Layout.userTimeline.root_nodes.forEach(d=>{

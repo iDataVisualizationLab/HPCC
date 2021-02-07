@@ -100,7 +100,7 @@ let DynamicNet3D = function () {
                 }
             },
             showLineConnect: {
-                text: "Show Time-step Connection",
+                text: "Show User timelines",
                 type: "checkbox",
                 variable: 'showLineConnect',
                 values: true,
@@ -193,7 +193,7 @@ let DynamicNet3D = function () {
                 callback: onNetworkExpandXY
             },
             linePlot: {
-                text: "Timeline",
+                text: "Show Line chart",
                 type: "selection",
                 variable: 'plotMetric',
                 labels: ['--none--'],
@@ -777,7 +777,7 @@ let DynamicNet3D = function () {
                             let temp = getpos(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]);
                             temp = [temp.x, temp.y];
                             temp.index = ''+ni+' '+i;
-                            temp.name = data.net[ni].nodes[i].id;
+                            temp.name = data.net[ni].nodes[i].name;
                             pointData.push(temp);
                         }
                     })
@@ -1364,7 +1364,7 @@ let DynamicNet3D = function () {
 
         let connectedLinks = new THREE.Object3D();
         Object.keys(dynamicVizs.links).forEach(k => {
-            const el = createLineSegment(dynamicVizs.links[k]);
+            const el = createLineSegment(dynamicVizs.links[k],'#007');
             dynamicVizs.links[k].el = el;
             connectedLinks.add(el);
         });
@@ -1668,9 +1668,7 @@ let DynamicNet3D = function () {
             holder.visible = false;
             const material = new THREE.LineDashedMaterial( {
                 color: 0xff0000,
-                linewidth: 1,
-                scale: 1,
-                gapSize: 1,
+                dashSize: 1, gapSize: 0.5
             } );
 
             const geometry = new THREE.Geometry();
