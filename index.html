@@ -144,7 +144,7 @@
     <a type="button" class="btn btn-success float-right" href="${d.value.url}" target="_blank">Demo</a></div><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
-    ${d.value.publication?'<li>Publication:<ul>'+d.value.publication.map(p=>`<li>${p.author},<strong>"${p.title}"</strong> <em>${p.venue}</em>. ${p.year}. DOI: <a href="${p.DOI}">${p.DOI}</a></li>`).join('')+'</ul></li>':''}
+    ${d.value.publication?'<li>Publications:<ul>'+d.value.publication.map(p=>`<li>${p.author},<strong>"${p.title}"</strong> <em>${p.venue}</em>. ${p.year}. DOI: <a href="${p.DOI}">${p.DOI}</a></li>`).join('')+'</ul></li>':''}
     <li>Visualization supported:${d.value.types.map(e=>`<span class="badge tag" >${e}</span>`).join('|')}</li>
 </ul>
  <img src="src/image/${d.value.thumb}" class="img-fluid" alt="...">

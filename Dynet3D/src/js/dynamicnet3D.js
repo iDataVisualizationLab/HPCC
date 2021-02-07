@@ -955,7 +955,7 @@ let DynamicNet3D = function () {
         loader.load('../TimeRadar/src/fonts/optimer_regular.typeface.json', function (font) {
             timeScale.ticks(5).forEach(t => {
 
-                var textGeo = new THREE.TextGeometry(timeScale.tickFormat()(t), {
+                var textGeo = new THREE.TextGeometry(timeScale.tickFormat()(t).replace(' AM',' am').replace(' PM',' pm'), {
                     font: font,
                     size: 20,
                     height: 1,

@@ -15,7 +15,7 @@ function serviceControl(){
             );
 
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
-    d3.select('#serviceSelection')
+    const tr = d3.select('#serviceSelection')
         // .on('change',function(){
         //     serviceSelected = +$(this).val();
         //     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
@@ -23,21 +23,18 @@ function serviceControl(){
         //         onFilter();
         //     }
         // })
-        .selectAll('option')
+        .selectAll('tr')
         .data(vizservice)
-        .enter()
-        .append('option')
-        .attr('value',(d,i)=>i)
-        .attr('class',d=>d.text==='User'?'innerName':null)
-        .attr('data-value',(d,i)=>d.text)
-        .attr('selected',(d,i)=>i===serviceSelected?'':null)
+        .join('tr');
+    tr.selectAll('td.input').data(d=>[d])
+        .join('td').attr('class','input')
+        .html(d=>`<div class="form-check"><input class="form-check-input" type="checkbox" value="${d._id}"><label class="form-check-label">${d.text}</label></div>`);
+    tr.selectAll('td.title').data(d=>[d])
+        .join('td').attr('class','title')
         .text(d=>d.text);
-    $('#serviceSelection').multiselect({
-        enableFiltering: true,
-        includeSelectAllOption: true,
-        nonSelectedText: 'Filter by metrics',
-        maxHeight: 100
-    });
+    tr.selectAll('td.range').data(d=>[d])
+        .join('td').attr('class','range')
+        .text(d=>d.text);
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
@@ -116,7 +113,6 @@ function initdraw(){
     // initDragItems('#ForceByMetrics','metric');
 
     d3.select('#modelFilterToolBtn').on('click',function(){
-        debugger
         const choice = $('#modelFilterToolInput').val();
         d3.select(this).text('Applied')
         Layout.userTimeline = filterData(choice,Layout.netFull);
