@@ -1198,7 +1198,7 @@ let DynamicNet3D = function () {
                         let intersects = overwrite;
                         if (!intersects){
                             intersects = dynamicVizs.map(net=>{
-                                return raycaster.intersectObject(net.nodes);
+                                return raycaster.intersectObject(net.nodes).filter(e=>e.object.geometry.attributes.alpha.array[e.index]);
                             });
                             intersects = intersects.filter(f=>f&&f.length);
                             if (intersects.length){
