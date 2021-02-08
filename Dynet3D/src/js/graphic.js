@@ -141,7 +141,7 @@ function initdraw() {
         d3.select(this).text('Applied')
         Layout.userTimeline = filterData(choice, Layout.netFull);
         getChanged(Layout.userTimeline);
-        drawObject.graphicopt({plotMetric: choice.length !== 0})
+        // drawObject.graphicopt({plotMetric: choice.length !== 0})
         drawGantt();
     });
     d3.select('#filter_apply').on('click', function () {
@@ -160,7 +160,11 @@ function onFilter() {
             if (Layout.userTimeline.datamap[d.id] && !nodeobj[d.id]) {
                 let condition = false;
                 Layout.userTimeline.datamap[d.id].find(e => {
-                    condition = lists.find(f => e[f._id] >= f.thresholdFilterNormalize) !== undefined;
+                    let con = true;
+                    lists.forEach(f =>{
+                        con = con && e[f._id] >= f.thresholdFilterNormalize
+                    });
+                    condition = con;
                     return condition;
                 });
                 if (condition)
@@ -174,7 +178,7 @@ function onFilter() {
         d3.select('#filter_results').text('');
     Layout.userTimeline = filterData(nodes, Layout.netFull);
     getChanged(Layout.userTimeline);
-    drawObject.graphicopt({plotMetric: nodes.length !== 0})
+    // drawObject.graphicopt({plotMetric: nodes.length !== 0})
     drawGantt();
 }
 
