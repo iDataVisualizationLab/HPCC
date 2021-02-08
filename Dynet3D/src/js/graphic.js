@@ -168,6 +168,10 @@ function onFilter() {
             }
         });
     }
+    if (!nodes.length)
+        d3.select('#filter_results').text('No results!');
+    else
+        d3.select('#filter_results').text('');
     Layout.userTimeline = filterData(nodes, Layout.netFull);
     getChanged(Layout.userTimeline);
     drawObject.graphicopt({plotMetric: nodes.length !== 0})
