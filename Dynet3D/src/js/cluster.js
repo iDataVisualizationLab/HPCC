@@ -135,17 +135,19 @@ function handle_dataRaw() {
 function onchangeCluster() {
     cluster_map(cluster_info);
     handle_clusterinfo();
-    Layout.tree.children.forEach(d=>{
-        d.children.forEach(e=>{
-            getCluster(e);
-        })
-    });
-    createdata();
-    currentDraw();
+    // Layout.tree.children.forEach(d=>{
+    //     d.children.forEach(e=>{
+    //         getCluster(e);
+    //     })
+    // }
+    udateClusterInfo();
+    // currentDraw();
 }
-function cluster_map (dataRaw) {
+function cluster_map (dataRaw,divId,customopt,callback) {
+    divId = divId??'#clusterDisplay';
+    const _radarChartclusteropt = {...radarChartclusteropt,...customopt};
     let isNameChangeable = false;
-    radarChartclusteropt.schema = serviceFullList;
+    _radarChartclusteropt.schema = serviceFullList;
     let data = dataRaw.map((c,i)=>{
         let temp = c.__metrics.slice();
         temp.name = c.labels;
@@ -155,13 +157,14 @@ function cluster_map (dataRaw) {
         let temp_b;
         if (temp[0].axis){
             temp_b = [temp];
-            radarChartclusteropt.fillin = 0.5;
+            _radarChartclusteropt.fillin = 0.5;
         }else{
             temp_b = temp;
-            radarChartclusteropt.fillin = 0
+            _radarChartclusteropt.fillin = 0
         }
         temp_b.id = c.name;
         temp_b.total = c.total;
+        temp_b.data = c;
         temp_b.order = i;
         return temp_b;
     });
@@ -179,7 +182,7 @@ function cluster_map (dataRaw) {
     });
     data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
     //--end
-    let dir = d3.select('#clusterDisplay');
+    let dir = d3.select(divId);
     setTimeout(()=>{
         let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id).order();
         r_old.exit().remove();
@@ -197,13 +200,11 @@ function cluster_map (dataRaw) {
             })
             .append('div')
             .attr('class','label')
-            .styles({'position':'absolute',
-                'color':'black',
-                'width': radarChartclusteropt.w+'px',
-                height: '1rem',
-                padding: '10px'
-                // overflow: 'hidden',
-            });
+            .style('position','absolute')
+            .style('color','black')
+            .style('width',_radarChartclusteropt.w+'px')
+            .style('height','1rem')
+            .style('padding', '10px');
         //
         if (isNameChangeable)
             r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
@@ -214,12 +215,16 @@ function cluster_map (dataRaw) {
                 parent.select('span.clusterlabel').classed('hide',active);
                 parent.select('input.clusterlabel').classed('hide',!active);
             });
-        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col '+(isNameChangeable?'s11':'s12'),'type':'text'})
+        r_new.append('span')
+            .attr('class','clusterlabel truncate left-align col '+(isNameChangeable?'s11':'s12'))
+            .attr('type','text')
             .style('padding',0)
             .style('display','block');
         if(isNameChangeable)
         {
-            r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'})
+            r_new.append('input')
+                .attr('class','clusterlabel browser-default hide truncate center-align col s11')
+                .attr('type','text')
                 .on('change',function(d){
                     clusterDescription[d.id].text = $(this).val();
                     d3.select(this).classed('hide',true);
@@ -247,15 +252,18 @@ function cluster_map (dataRaw) {
                 // datadraw[0].name = d[0].name;
                 // datadraw[0].text = d[0].text;
                 datadraw.id = d.id;
-                radarChartclusteropt.color = function(){return colorCluster(d.id)};
-                RadarChart(".radarh"+d.id, datadraw, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                _radarChartclusteropt.color = function(){return colorCluster(d.id)};
+                RadarChart(".radarh"+d.id, datadraw, _radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
         d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||d.total||0).toLocaleString());
         if(isNameChangeable){
             d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
-            d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+            d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!_radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+        }
+        if (callback){
+            callback();
         }
     }, 0);
     // outlier_map(outlyingList)
@@ -270,7 +278,7 @@ function updateclusterDescription (name,text){
 }
 function recalculateCluster (option,calback,customCluster) {
     // preloader(true,10,'Process grouping...','#clusterLoading');
-
+    updateProcess({percentage:5,text:'Process grouping...'})
 
     group_opt = option;
     distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
@@ -280,7 +288,7 @@ function recalculateCluster (option,calback,customCluster) {
     clustercalWorker.postMessage({
         binopt:group_opt,
         sampleS:tsnedata,
-        timeMax:1,
+        timeMax:Layout.timespan.length,
         hosts:d3.keys(tsnedata).map(h=>({name:h})),
         serviceFullList: serviceFullList,
         serviceLists:serviceLists,
@@ -293,6 +301,7 @@ function recalculateCluster (option,calback,customCluster) {
             $('.toast').toast('dispose')
             // data.result.forEach(c=>c.arr = c.arr.slice(0,lastIndex));
             cluster_info = data.result;
+            debugger
             if (!customCluster) {
                 clusterDescription = {};
                 recomendName(cluster_info);
@@ -314,6 +323,7 @@ function recalculateCluster (option,calback,customCluster) {
                 handle_clusterinfo();
             }
             // preloader(false, undefined, undefined, '#clusterLoading');
+            updateProcess();
             clustercalWorker.terminate();
             if (calback)
                 calback();
@@ -444,25 +454,37 @@ function handle_clusterinfo () {
 let getCluster = getMathCluster;
 function getMathCluster(e){
     // calculate cluster here
-    let axis_arr = tsnedata[e.name][0];
+    // let axis_arr = tsnedata[e.id][e.ti];
+    // let index = 0;
+    // let minval = Infinity;
+    // cluster_info.find((c, ci) => {
+    //     const val = distance(c.__metrics.normalize, axis_arr);
+    //     if(val===0&&c.leadername===undefined)
+    //         c.leadername = {name:e.name,timestep:0};
+    //     if (minval > val) {
+    //         index = ci;
+    //         minval = val;
+    //     }
+    //     return !val;
+    // });
+    // cluster_info[index].arr[e.ti].push(e.id);
+    // if (!e.metrics)
+    //     e.metrics = {};
+    // e.metrics.Radar = cluster_info[index].name;
+    // e.cluster = cluster_info[index];
     let index = 0;
-    let minval = Infinity;
-    cluster_info.find((c, ci) => {
-        const val = distance(c.__metrics.normalize, axis_arr);
-        if(val===0&&c.leadername===undefined)
-            c.leadername = {name:e.name,timestep:0};
-        if (minval > val) {
+    cluster_info.find((c,ci)=>{
+        if (c.arr[e.ti].find(n=>n===e.id))
+        {
             index = ci;
-            minval = val;
+            return true;
         }
-        return !val;
+        return false
     });
-    cluster_info[index].arr.push(e.name);
-    e.metrics.Radar = cluster_info[index].name;
-    e.cluster = cluster_info[index];
+    e.cluster = index;
 }
 function calJobNameCluster(){
-    groupbyProperty('jobByNames')
+    groupbyProperty('jobByNames');
     recomendColor(cluster_info)
 }
 

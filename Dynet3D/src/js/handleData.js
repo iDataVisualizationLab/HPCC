@@ -135,11 +135,11 @@ function queryData(data) {
         group_opt.recall()
         cluster_map(cluster_info);
         handle_clusterinfo();
-        Layout.tree.children.forEach(d => {
-            d.children.forEach(e => {
-                getCluster(e);
-            })
-        });
+        // Layout.tree.children.forEach(d => {
+        //     d.children.forEach(e => {
+        //         getCluster(e);
+        //     })
+        // });
     }
     currentDraw = () => {
         // drawObject.draw();
@@ -176,7 +176,17 @@ function createdata({tree, computers, jobs, users, jobByNames, sampleS}) {
     // dataviz.forEach((d,i)=>d.id=i);
     // drawObject.data(dataviz);
 }
+function udateClusterInfo(){
 
+    Layout.netFull.net.forEach(net=>{
+        net.nodes.forEach(n=>{
+            if(n.type==='compute'){
+                getCluster(n);
+            }
+        })
+    });
+    drawClusterFilter();
+}
 let handleDataComputeByUser = function (data) {
     if (handleDataComputeByUser.mode === 'core')
         return handleDataComputeByUser_core(data);
@@ -483,7 +493,7 @@ function handleRankingData(data) {
         enableFiltering: true,
         includeSelectAllOption: true,
         nonSelectedText: 'Filter by name',
-        maxHeight: 100,
+        maxHeight: 200,
         onChange: function (option, checked) {
             d3.select('#modelFilterToolBtn').text('Filter');
         }

@@ -216,3 +216,7 @@ div.subgraph:hover .closeButton {
     margin-top:auto;
     margin-bottom:auto;
 }
+
+.multiselect-container.dropdown-menu.show {
+    z-index:3;
+}

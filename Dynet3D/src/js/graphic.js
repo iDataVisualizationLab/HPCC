@@ -132,7 +132,8 @@ function initdraw() {
         currentDraw();
     });
 
-    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData).onFinishDraw(makelegend)
+    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData)
+        // .onFinishDraw(makelegend)
     // .onFinishDraw(updateNarration);
     // initDragItems('#ForceByMetrics','metric');
 
@@ -154,9 +155,9 @@ function onFilter() {
     let noFilter = !nodes.length;
     let hasResult = false;
     const lists = vizservice.filter(s => s._filter);
+    let nodeobj = {};
+    nodes.forEach(d => nodeobj[d]=true);
     if (lists.length) {
-        let nodeobj = {};
-        nodes.forEach(d => nodeobj[d]);
         Layout.userTimeline.root_nodes.forEach(d => {
             if (Layout.userTimeline.datamap[d.id] && !nodeobj[d.id]) {
                 let condition = false;
@@ -168,23 +169,48 @@ function onFilter() {
                     condition = con;
                     return condition;
                 });
-                if (condition)
+                if (condition){
                     nodes.push(d.id);
+                    nodeobj[d.id]=true;
+                }
             }
         });
-        if (nodes.length)
-            hasResult = true;
-    }else{
-        resultFromlist = true;
     }
-    if (noFilter&&!nodes.length)
+    const clusterLists = d3.select('#clusterFilterDisplay').selectAll('.radarCluster').select('.label').select('.filterCheck').filter(function(d){return this.checked}).data()
+        .map(d=>d.data);
+    if (clusterLists.length){
+        clusterLists.forEach(c=>c.arr.forEach(t=>{
+            t.forEach(n=>{
+                if (!nodeobj[n]){
+                    nodes.push(n);
+                    nodeobj[n]=true;
+                }
+            });
+        }))
+
+    }
+    const notFound = noFilter&&!nodes.length&&(lists.length||clusterLists.length);
+    if (notFound)
         d3.select('#filter_results').text('No results!');
     else
         d3.select('#filter_results').text('');
-    Layout.userTimeline = filterData(((noFilter) && (!nodes.length) && lists.length)?undefined:nodes, Layout.netFull);
+    Layout.userTimeline = filterData(notFound?undefined:nodes, Layout.netFull);
     getChanged(Layout.userTimeline);
     // drawObject.graphicopt({plotMetric: nodes.length !== 0})
     drawGantt();
+}
+
+function drawClusterFilter(){
+    cluster_map(cluster_info,'#clusterFilterDisplay',{w:88,h:88,events:undefined},()=>{
+        const holder =  d3.select('#clusterFilterDisplay').selectAll('.label');
+        holder.select('.clusternum').style('display','none');
+        holder.selectAll('input.filterCheck').data(d=>d)
+            .join(enter=>{
+                enter.insert("input",":first-child")
+                    .attr("class","filterCheck")
+                    .attr("type","checkbox");
+            })
+    });
 }
 
 function initDragItems(id, mode) {
