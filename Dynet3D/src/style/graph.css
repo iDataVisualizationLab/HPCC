@@ -212,3 +212,7 @@ div.subgraph:hover .closeButton {
     stroke: currentColor;
     stroke-dasharray: 4 2;
 }
+.noUi-target {
+    margin-top:auto;
+    margin-bottom:auto;
+}
