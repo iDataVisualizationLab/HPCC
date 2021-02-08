@@ -219,6 +219,9 @@ let DynamicNet3D = function () {
             'minDist': function (d) {
                 return d3.format('.1f')(d)
             },
+            'alpha': function (d) {
+                return d3.format('.3f')(d)
+            },
             'time': function (d) {
                 return millisecondsToStr(d)
             },

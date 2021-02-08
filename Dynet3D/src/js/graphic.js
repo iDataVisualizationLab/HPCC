@@ -28,13 +28,30 @@ function serviceControl(){
         .join('tr');
     tr.selectAll('td.input').data(d=>[d])
         .join('td').attr('class','input')
-        .html(d=>`<div class="form-check"><input class="form-check-input" type="checkbox" value="${d._id}"><label class="form-check-label">${d.text}</label></div>`);
+        .html(d=>`<div class="form-check"><input class="form-check-input" type="checkbox" value="${d._id}"></div>`);
     tr.selectAll('td.title').data(d=>[d])
         .join('td').attr('class','title')
         .text(d=>d.text);
     tr.selectAll('td.range').data(d=>[d])
-        .join('td').attr('class','range')
-        .text(d=>d.text);
+        .join('td').attr('class','range').each(function(d){
+        noUiSlider.create(this, {
+            start: (graphicopt.opt[d.content.variable] || (d.content.variableRoot ? d.content.variableRoot[d.content.variable] : undefined)) || d.content.range[0],
+            connect: 'lower',
+            tooltips: {
+                to: function (value) {
+                    return formatvalue(value)
+                }, from: function (value) {
+                    return +value.split('1e')[1];
+                }
+            },
+            step: d.content.step || 1,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': d.content.range[0],
+                'max': d.content.range[1],
+            },
+        });
+    });
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
