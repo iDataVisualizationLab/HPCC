@@ -15,6 +15,7 @@ addEventListener('message',function ({data}){
             const net = data.value;
             const forces = [];
             const root_nodes = {};
+            if (net.length){
             net.forEach(function(n,ni){
                 const nodes = n.nodes;
                 const links = n.links;
@@ -118,5 +119,8 @@ addEventListener('message',function ({data}){
             }
                 postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha}, status: "done", sol: net});
             break;
+            }else {
+                postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker}, status: "done", sol: undefined});
+            }
     }
 });

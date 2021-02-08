@@ -400,6 +400,7 @@ let DynamicNet3D = function () {
         modelWorker.addEventListener('message', ({data}) => {
             switch (data.action) {
                 case "updateHighlight":
+                    if (dynamicVizs[0]){
                     disableMouseover = true;
                     table_info.select(`.totalForce`).text(data.totalForces);
                     if (graphicopt.showChanged) {
@@ -430,7 +431,7 @@ let DynamicNet3D = function () {
                             dynamicVizs[i].nodes.geometry.attributes.alpha.array = dynamicVizs[i].nodes._alpha.slice();
                             dynamicVizs[i].nodes.geometry.attributes.alpha.needsUpdate = true;
                         }
-                    }
+                    }}
                     break;
                 case "render":
                     disableMouseover = true;
@@ -765,7 +766,7 @@ let DynamicNet3D = function () {
     }
     function updatelabelCluster() {
         svg.select('#modelNodeLabel').selectAll('.name').remove();
-        if(dynamicVizs[0].nodes) {
+        if(dynamicVizs[0]) {
             if (graphicopt.label_enable) {
                 let orient = ({
                     top: text => text.attr("text-anchor", "middle").attr("y", -3),
@@ -1362,9 +1363,10 @@ let DynamicNet3D = function () {
                 dynamicVizs.links[n.id].data.push(n);
             });
         });
+        if (dynamicVizs[0]){
         dynamicVizs[0].links.forEach(d => d._visible = true)
         dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
-
+}
         let connectedLinks = new THREE.Object3D();
         Object.keys(dynamicVizs.links).forEach(k => {
             const el = createLineSegment(dynamicVizs.links[k],'#007');

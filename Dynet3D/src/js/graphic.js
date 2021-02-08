@@ -151,7 +151,8 @@ function initdraw() {
 
 function onFilter() {
     const nodes = $('#modelFilterToolInput').val();
-
+    let noFilter = !nodes.length;
+    let hasResult = false;
     const lists = vizservice.filter(s => s._filter);
     if (lists.length) {
         let nodeobj = {};
@@ -171,12 +172,16 @@ function onFilter() {
                     nodes.push(d.id);
             }
         });
+        if (nodes.length)
+            hasResult = true;
+    }else{
+        resultFromlist = true;
     }
-    if (!nodes.length)
+    if (noFilter&&!nodes.length)
         d3.select('#filter_results').text('No results!');
     else
         d3.select('#filter_results').text('');
-    Layout.userTimeline = filterData(nodes, Layout.netFull);
+    Layout.userTimeline = filterData(((noFilter) && (!nodes.length) && lists.length)?undefined:nodes, Layout.netFull);
     getChanged(Layout.userTimeline);
     // drawObject.graphicopt({plotMetric: nodes.length !== 0})
     drawGantt();
