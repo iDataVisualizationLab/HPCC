@@ -68,7 +68,7 @@ $(document).ready(function(){
     }
     updateProcess({percentage:5,text:'Load UI...'})
     initMenu();
-    initClusterUi();
+    initClusterUI();
     updateProcess({percentage:15,text:'Preprocess data...'});
     initdraw();
     initTimeElement();

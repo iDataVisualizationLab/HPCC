@@ -49,7 +49,7 @@ let DynamicNet3D = function () {
             curveSegment: 20,
             linkConnect: 'straight',
             showUser: true,
-            showNode:true,
+            showNode: true,
             showChanged: true,
             showLineConnect: true,
             linePlot: false,
@@ -154,8 +154,15 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
-            labelMarker:{text: "Show Labels", type: "checkbox", variableRoot: graphicopt.component.label,variable: 'label_enable',values:true, width: '100px',
-                callback:updatelabelCluster},
+            labelMarker: {
+                text: "Show Labels",
+                type: "checkbox",
+                variableRoot: graphicopt.component.label,
+                variable: 'label_enable',
+                values: true,
+                width: '100px',
+                callback: updatelabelCluster
+            },
             linkConnect: {
                 text: "Link type",
                 type: "selection",
@@ -201,9 +208,9 @@ let DynamicNet3D = function () {
                 width: '100px',
                 callback: () => {
                     scene.remove(metricPlot);
-                    if(graphicopt.plotMetric!==false){
+                    if (graphicopt.plotMetric !== false) {
                         updatePlot();
-                    }else{
+                    } else {
                         isneedrender = true;
                     }
                 }
@@ -247,7 +254,8 @@ let DynamicNet3D = function () {
     let camera, isOrthographic = true, scene, axesHelper, axesTime, gridHelper, controls, raycaster, INTERSECTED = [],
         mouse,
         points, lines,
-        scatterPlot, metricPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx, front_canvas,
+        scatterPlot, metricPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx,
+        front_canvas,
         front_ctx, svg, clusterMarker;
     let fov = 100,
         near = 0.1,
@@ -396,42 +404,43 @@ let DynamicNet3D = function () {
         workerList[0] = modelWorker;
         console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
 
-        modelWorker.postMessage({action: "initDataRaw", value: data.net});
-        modelWorker.addEventListener('message', ({data}) => {
+        // modelWorker.postMessage({action: "initDataRaw", value: data.net});
+        forceFunc(data.net,(data) => {
             switch (data.action) {
                 case "updateHighlight":
-                    if (dynamicVizs[0]){
-                    disableMouseover = true;
-                    table_info.select(`.totalForce`).text(data.totalForces);
-                    if (graphicopt.showChanged) {
-                        dynamicVizs[0].nodes._array_old = dynamicVizs[0].nodes.geometry.attributes.alpha.array.slice();
-                    }
-                    for (let i = 1; i < data.sol.length; i++) {
-                        data.sol[i].links.forEach((l,li) => {
-                            if (l.isNew) {
+                    if (dynamicVizs[0]) {
+                        disableMouseover = true;
+                        table_info.select(`.totalForce`).text(data.totalForces);
+                        if (graphicopt.showChanged) {
+                            dynamicVizs[0].nodes._array_old = dynamicVizs[0].nodes.geometry.attributes.alpha.array.slice();
+                        }
+                        for (let i = 1; i < data.sol.length; i++) {
+                            data.sol[i].links.forEach((l, li) => {
+                                if (l.isNew) {
+                                    l.source.filtered = true;
+                                    l.target.filtered = true;
+                                    dynamicVizs.links[l.target.id]._visible = true;
+                                }
+                            });
+                            data.sol[i].delectedLinks.forEach(l => {
                                 l.source.filtered = true;
                                 l.target.filtered = true;
                                 dynamicVizs.links[l.target.id]._visible = true;
+                            });
+                            data.sol[i].nodes.forEach((n, ni) => {
+                                if (n.filtered) {
+                                    dynamicVizs[i].nodes._alpha[ni] = graphicopt.component.dot.opacity;
+                                    // dynamicVizs.links[n.id]._visible = true;
+                                } else
+                                    dynamicVizs[i].nodes._alpha[ni] = 0;
+                            })
+                            if (graphicopt.showChanged) {
+                                dynamicVizs[i].nodes._array_old = dynamicVizs[i].nodes.geometry.attributes.alpha.array.slice();
+                                dynamicVizs[i].nodes.geometry.attributes.alpha.array = dynamicVizs[i].nodes._alpha.slice();
+                                dynamicVizs[i].nodes.geometry.attributes.alpha.needsUpdate = true;
                             }
-                        });
-                        data.sol[i].delectedLinks.forEach(l => {
-                            l.source.filtered = true;
-                            l.target.filtered = true;
-                            dynamicVizs.links[l.target.id]._visible = true;
-                        });
-                        data.sol[i].nodes.forEach((n, ni) => {
-                            if (n.filtered) {
-                                dynamicVizs[i].nodes._alpha[ni] = graphicopt.component.dot.opacity;
-                                // dynamicVizs.links[n.id]._visible = true;
-                            } else
-                                dynamicVizs[i].nodes._alpha[ni] = 0;
-                        })
-                        if (graphicopt.showChanged) {
-                            dynamicVizs[i].nodes._array_old = dynamicVizs[i].nodes.geometry.attributes.alpha.array.slice();
-                            dynamicVizs[i].nodes.geometry.attributes.alpha.array = dynamicVizs[i].nodes._alpha.slice();
-                            dynamicVizs[i].nodes.geometry.attributes.alpha.needsUpdate = true;
                         }
-                    }}
+                    }
                     break;
                 case "render":
                     disableMouseover = true;
@@ -692,7 +701,7 @@ let DynamicNet3D = function () {
         return lineObj;
     }
 
-    function createpoints(g, datafiltered,ti) {
+    function createpoints(g, datafiltered, ti) {
         let pointsGeometry = new THREE.BufferGeometry();
 
         let colors = new Float32Array(datafiltered.length * 3);
@@ -746,7 +755,7 @@ let DynamicNet3D = function () {
         let p = new THREE.Points(pointsGeometry, pointsMaterial);
         p.frustumCulled = false;
         p._alpha = _alpha;
-        p.data = {arr:datafiltered,index:ti};
+        p.data = {arr: datafiltered, index: ti};
         g.add(p);
         return p;
     }
@@ -754,19 +763,20 @@ let DynamicNet3D = function () {
     function searchHandler(e) {
         if (e.target.value !== "") {
             // let results = datain.filter(h => h.name.includes(e.target.value)).map(h => ({index: path[h.name][0].index}));
-            let target = data.root_nodes.find(d=>d.id.includes(e.target.value));
-            if (target){
-                let resultIndex = target.timeArr.findIndex(d=>d);
-                if (resultIndex!==-1){
-                    return highlightNode([{index:target.timeArr[resultIndex]._index,netIndex:resultIndex}]);
+            let target = data.root_nodes.find(d => d.id.includes(e.target.value));
+            if (target) {
+                let resultIndex = target.timeArr.findIndex(d => d);
+                if (resultIndex !== -1) {
+                    return highlightNode([{index: target.timeArr[resultIndex]._index, netIndex: resultIndex}]);
                 }
             }
         }
         return highlightNode([]);
     }
+
     function updatelabelCluster() {
         svg.select('#modelNodeLabel').selectAll('.name').remove();
-        if(dynamicVizs[0]) {
+        if (dynamicVizs[0]) {
             if (graphicopt.label_enable) {
                 let orient = ({
                     top: text => text.attr("text-anchor", "middle").attr("y", -3),
@@ -775,12 +785,12 @@ let DynamicNet3D = function () {
                     left: text => text.attr("text-anchor", "end").attr("dy", "0.35em").attr("x", -3)
                 });
                 let pointData = [];
-                dynamicVizs.forEach((net,ni)=> {
+                dynamicVizs.forEach((net, ni) => {
                     net.nodes._alpha.forEach((d, i) => {
                         if (data.net[ni].nodes[i].inscreen) {
                             let temp = getpos(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]);
                             temp = [temp.x, temp.y];
-                            temp.index = ''+ni+' '+i;
+                            temp.index = '' + ni + ' ' + i;
                             temp.name = data.net[ni].nodes[i].name;
                             pointData.push(temp);
                         }
@@ -808,21 +818,24 @@ let DynamicNet3D = function () {
                     .attr("transform", ([d]) => `translate(${d})`)
                     .style('opacity', 0.6)
                     .text(([, , name]) => name);
-            };
+            }
+            ;
         }
     }
-    function getpos(x,y,z,index){
+
+    function getpos(x, y, z, index) {
         var width = graphicopt.widthG(), height = graphicopt.heightG();
         var widthHalf = width / 2, heightHalf = height / 2;
         camera.updateMatrixWorld();
-        var vector = new THREE.Vector3(x,y,z);
+        var vector = new THREE.Vector3(x, y, z);
         vector.project(camera);
 
-        vector.x = ( vector.x * widthHalf ) + widthHalf;
-        vector.y = - ( vector.y * heightHalf ) + heightHalf;
+        vector.x = (vector.x * widthHalf) + widthHalf;
+        vector.y = -(vector.y * heightHalf) + heightHalf;
         vector.index = index;
         return vector;
     }
+
     // Three.js render loop
     let onrendercalled = false;
 
@@ -836,7 +849,7 @@ let DynamicNet3D = function () {
                             const points = dynamicVizs[soli].nodes;
                             let p = points.geometry.attributes.position.array;
                             onrendercalled = true;
-                            sol.nodes.forEach(function (d,pointIndex) {
+                            sol.nodes.forEach(function (d, pointIndex) {
                                 // mapIndex.forEach(function (i) {
                                 d.x = d.x ?? d.parent.x;
                                 d.y = d.y ?? d.parent.y;
@@ -909,7 +922,6 @@ let DynamicNet3D = function () {
     }
 
 
-
     function createAxes(length) {
         var material = new THREE.LineBasicMaterial({color: 0x000000});
         var geometry = new THREE.BufferGeometry().setFromPoints([
@@ -919,11 +931,11 @@ let DynamicNet3D = function () {
         let axesHelper = new THREE.LineSegments(geometry, material);
         axesHelper.toggleDimension = function (dim) {
             if (axesTime)
-            axesTime.visible = false;
+                axesTime.visible = false;
             if (dim === 2.5) {
                 axesHelper.visible = false;
                 if (axesTime)
-                axesTime.visible = true;
+                    axesTime.visible = true;
             } else if (dim === 3) {
                 axesHelper.visible = true;
                 axesHelper.geometry.dispose();
@@ -959,7 +971,7 @@ let DynamicNet3D = function () {
         loader.load('../TimeRadar/src/fonts/optimer_regular.typeface.json', function (font) {
             timeScale.ticks(5).forEach(t => {
 
-                var textGeo = new THREE.TextGeometry(timeScale.tickFormat()(t).replace(' AM',' am').replace(' PM',' pm'), {
+                var textGeo = new THREE.TextGeometry(timeScale.tickFormat()(t).replace(' AM', ' am').replace(' PM', ' pm'), {
                     font: font,
                     size: 20,
                     height: 1,
@@ -986,7 +998,9 @@ let DynamicNet3D = function () {
         arrowGroup.visible = false;
         return arrowGroup;
     }
+
     let ishighlightUpdate = false;
+
     //interacction
     function highlightNode(intersects) { // INTERSECTED
         var targetfilter;
@@ -1000,26 +1014,26 @@ let DynamicNet3D = function () {
             // if (INTERSECTED.indexOf(intersects[0].index) === -1) {
             if (true) {
                 let target = data.net[netIndex].nodes[targetIndex];
-                let rootTarget = data.root_nodes.find(d=>d.id===target.id);
+                let rootTarget = data.root_nodes.find(d => d.id === target.id);
                 INTERSECTED = [target.id];
                 visibleNode();
-                data.net.forEach((net,ni)=>{
-                    const n =  rootTarget.timeArr[ni];
+                data.net.forEach((net, ni) => {
+                    const n = rootTarget.timeArr[ni];
                     let attribute = dynamicVizs[ni].nodes.geometry.attributes;
-                    attribute.alpha.array = attribute.alpha.array.map(d=>d?graphicopt.component.dot.filter.opacity:d);
-                    if (n){
-                        attribute.alpha.array[n._index] = attribute.alpha.array[n._index]?graphicopt.component.dot.opacity:attribute.alpha.array[n._index];
+                    attribute.alpha.array = attribute.alpha.array.map(d => d ? graphicopt.component.dot.filter.opacity : d);
+                    if (n) {
+                        attribute.alpha.array[n._index] = attribute.alpha.array[n._index] ? graphicopt.component.dot.opacity : attribute.alpha.array[n._index];
                     }
                     attribute.alpha.needsUpdate = true;
                 });
                 dynamicVizs.forEach(d => {
-                    d.links.forEach((lk,li) => {
+                    d.links.forEach((lk, li) => {
                         let isvisiable = false;
                         let connected = {};
-                        if (lk.data.source.id === target.id){
+                        if (lk.data.source.id === target.id) {
                             isvisiable = true;
                             connected = lk.data.target;
-                        }else if (lk.data.target.id === target.id){
+                        } else if (lk.data.target.id === target.id) {
                             isvisiable = true;
                             connected = lk.data.source;
                         }
@@ -1027,12 +1041,12 @@ let DynamicNet3D = function () {
                         lk.visible = graphicopt.showChanged ? (lk._visible && isvisiable) : isvisiable;
                         if (lk.visible) {
                             const old = dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index];
-                            dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index] = old?graphicopt.component.dot.opacity:old;
+                            dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index] = old ? graphicopt.component.dot.opacity : old;
                         }
                     })
                 });
                 d3.select('#selectedItem').html(`${target.id} at ${data.time_stamp[netIndex]}`);
-                onSelectLine(target.type==='compute'?target.id:undefined,netIndex);
+                onSelectLine(target.type === 'compute' ? target.id : undefined, netIndex);
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
             // var geometry = points.geometry;
@@ -1058,7 +1072,7 @@ let DynamicNet3D = function () {
                         lines[d.name].material.linewidth = graphicopt.component.link.size;
                     }
                 });
-            } else{
+            } else {
                 // datain.forEach((d, i) => {
                 //     attributes.alpha.array[i] = d.filtered ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
                 //     attributes.size.array[i] = d.filtered ? graphicopt.component.dot.filter.size : graphicopt.component.dot.size;
@@ -1068,7 +1082,7 @@ let DynamicNet3D = function () {
                 // });
                 visibleNode();
                 visibleLine(graphicopt.linkConnect);
-                dynamicVizs.forEach(net=>{
+                dynamicVizs.forEach(net => {
                     net.nodes.geometry.attributes.alpha.needsUpdate = true;
                 })
             }
@@ -1168,11 +1182,11 @@ let DynamicNet3D = function () {
     function checkInScreen() {
         var frustum = new THREE.Frustum();
         frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-        dynamicVizs.forEach((net,ni)=>{
-            net.nodes._alpha.forEach((d,i)=>{
-                if (d>0.1){
+        dynamicVizs.forEach((net, ni) => {
+            net.nodes._alpha.forEach((d, i) => {
+                if (d > 0.1) {
                     data.net[ni].nodes[i].inscreen = frustum.containsPoint(new THREE.Vector3(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]))
-                }else{
+                } else {
                     data.net[ni].nodes[i].inscreen = false;
                 }
             })
@@ -1187,14 +1201,14 @@ let DynamicNet3D = function () {
                 //update raycaster with mouse movement
                 try {
                     if (axesTime.visible) {
-                        axesTime.traverse(function(child) {
-                            if (child.name==="TimeText")
+                        axesTime.traverse(function (child) {
+                            if (child.name === "TimeText")
                                 child.quaternion.copy(camera.quaternion)
                         });
                     }
-                    if (metricPlot&&metricPlot.visible) {
-                        metricPlot.traverse(function(child) {
-                            if (child.name==="TimeText")
+                    if (metricPlot && metricPlot.visible) {
+                        metricPlot.traverse(function (child) {
+                            if (child.name === "TimeText")
                                 child.quaternion.copy(camera.quaternion)
                         });
                     }
@@ -1206,22 +1220,26 @@ let DynamicNet3D = function () {
                     raycaster.setFromCamera(mouse, camera);
                     if (!filterbyClustername.length) {
                         let intersects = overwrite;
-                        if (!intersects){
-                            intersects = dynamicVizs.map(net=>{
-                                return raycaster.intersectObject(net.nodes).filter(e=>e.object.geometry.attributes.alpha.array[e.index]);
+                        if (!intersects) {
+                            intersects = dynamicVizs.map(net => {
+                                return raycaster.intersectObject(net.nodes).filter(e => e.object.geometry.attributes.alpha.array[e.index]);
                             });
-                            intersects = intersects.filter(f=>f&&f.length);
-                            if (intersects.length){
-                                let choice = {index:intersects[0][0].index,netIndex:intersects[0][0].object.data.index,ray:intersects[0][0]};
-                                intersects.forEach(d=>{
-                                    d.forEach(e=>{
-                                        if (choice.ray.distanceToRay<e.distanceToRay){
-                                            choice = {index:e.index,netIndex:e.object.data.index,ray:e};
+                            intersects = intersects.filter(f => f && f.length);
+                            if (intersects.length) {
+                                let choice = {
+                                    index: intersects[0][0].index,
+                                    netIndex: intersects[0][0].object.data.index,
+                                    ray: intersects[0][0]
+                                };
+                                intersects.forEach(d => {
+                                    d.forEach(e => {
+                                        if (choice.ray.distanceToRay < e.distanceToRay) {
+                                            choice = {index: e.index, netIndex: e.object.data.index, ray: e};
                                         }
                                     })
                                 })
                                 intersects = [choice]
-                            }else
+                            } else
                                 intersects = [];
                         }
                         // // //count and look after all objects in the diamonds group
@@ -1348,7 +1366,7 @@ let DynamicNet3D = function () {
             // time slice generate
             let sliceHolder = new THREE.Object3D();
             const netControl = {nodes: undefined, links: undefined, delectedLinks: undefined};
-            netControl.nodes = createpoints(sliceHolder, net.nodes,ni);
+            netControl.nodes = createpoints(sliceHolder, net.nodes, ni);
             netControl._links = createLines(sliceHolder, net.links);
             netControl.delectedLinks = createLines(sliceHolder, net.delectedLinks ?? [], 'rgb(255,0,0)');
             netControl.links = [...netControl._links, ...netControl.delectedLinks];
@@ -1363,13 +1381,13 @@ let DynamicNet3D = function () {
                 dynamicVizs.links[n.id].data.push(n);
             });
         });
-        if (dynamicVizs[0]){
-        dynamicVizs[0].links.forEach(d => d._visible = true)
-        dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
-}
+        if (dynamicVizs[0]) {
+            dynamicVizs[0].links.forEach(d => d._visible = true)
+            dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
+        }
         let connectedLinks = new THREE.Object3D();
         Object.keys(dynamicVizs.links).forEach(k => {
-            const el = createLineSegment(dynamicVizs.links[k],'#007');
+            const el = createLineSegment(dynamicVizs.links[k], '#007');
             dynamicVizs.links[k].el = el;
             connectedLinks.add(el);
         });
@@ -1460,13 +1478,14 @@ let DynamicNet3D = function () {
             .attr('class', d => d.variable)
             .each(updateTableControl);
     };
+
     function updateTableControl(d) {
         if (d.text !== undefined) // value display only
             d3.select(this).text(d.text);
         else { // other component display
             let formatvalue = formatTable[d.content.variable] || (e => Math.round(e));
             if (d.content.type === "slider") {
-                let div = d3.select(this).append('div').attr('class', 'valign-wrapper').style('width', ''+d.content.width+'px');
+                let div = d3.select(this).append('div').attr('class', 'valign-wrapper').style('width', '' + d.content.width + 'px');
                 noUiSlider.create(div.node(), {
                     start: (graphicopt.opt[d.content.variable] || (d.content.variableRoot ? d.content.variableRoot[d.content.variable] : undefined)) || d.content.range[0],
                     connect: 'lower',
@@ -1551,6 +1570,7 @@ let DynamicNet3D = function () {
             }
         }
     }
+
     function updateTableInput() {
         table_info.select(`.datain`).text(e => data.net.length);
         d3.select('#modelCompareMode').property('checked', graphicopt.iscompareMode)
@@ -1602,11 +1622,12 @@ let DynamicNet3D = function () {
         });
 
     }
-    function onSelectLine(id,time){
+
+    function onSelectLine(id, time) {
         if (metricPlot) {
             const holder = metricPlot.getObjectByName('lineChartHolder');
             const timeMarker = metricPlot.getObjectByName('timeMarker');
-            if (id!==undefined) {
+            if (id !== undefined) {
                 console.log(holder)
                 if (holder) {
                     holder.children.forEach(c => {
@@ -1621,7 +1642,7 @@ let DynamicNet3D = function () {
                     timeMarker.visible = true;
                     timeMarker.position.z = scaleNormalTimestep(time);
                 }
-            }else{
+            } else {
                 if (holder) {
                     holder.children.forEach(c => c.visible = true);
                 }
@@ -1630,7 +1651,8 @@ let DynamicNet3D = function () {
             }
         }
     }
-    function updatePlot(){
+
+    function updatePlot() {
         scene.remove(metricPlot);
         const origin = [graphicopt.heightG() / 2, graphicopt.heightG() / 2, 0];
         metricPlot = new THREE.Object3D();
@@ -1638,13 +1660,13 @@ let DynamicNet3D = function () {
         metricPlot.position.y = origin[1];
         metricPlot.position.z = origin[2];
 
-        const yscale = d3.scaleLinear().domain([0,1]).range([0,graphicopt.heightG()/3]);
+        const yscale = d3.scaleLinear().domain([0, 1]).range([0, graphicopt.heightG() / 3]);
         const holderPlot = new THREE.Object3D();
-        holderPlot.name="lineChartHolder";
+        holderPlot.name = "lineChartHolder";
         metricPlot.add(holderPlot);
-        data.root_nodes.forEach(d=>{
-            if(d.type==='compute'){
-                holderPlot.add(lineChart(data.datamap[d.id].map(d=>d[graphicopt.plotMetric]),d.id));
+        data.root_nodes.forEach(d => {
+            if (d.type === 'compute') {
+                holderPlot.add(lineChart(data.datamap[d.id].map(d => d[graphicopt.plotMetric]), d.id));
             }
         });
         metricPlot.add(makeaxis());
@@ -1653,8 +1675,9 @@ let DynamicNet3D = function () {
 
 
         isneedrender = true;
-        function lineChart(path,name) {
-            const points = path.map((d,i)=>new THREE.Vector3(0, yscale(d), scaleNormalTimestep(i)));
+
+        function lineChart(path, name) {
+            const points = path.map((d, i) => new THREE.Vector3(0, yscale(d), scaleNormalTimestep(i)));
 
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
@@ -1664,35 +1687,37 @@ let DynamicNet3D = function () {
                 color: 0x000000
             });
             let lineObj = new THREE.Line(geometry, material);
-            lineObj.name = 'lineChart'+name;
+            lineObj.name = 'lineChart' + name;
             return lineObj;
         }
-        function makeMarker(){
+
+        function makeMarker() {
             const holder = new THREE.Object3D();
             holder.name = 'timeMarker';
             holder.visible = false;
-            const material = new THREE.LineDashedMaterial( {
+            const material = new THREE.LineDashedMaterial({
                 color: 0xff0000,
                 dashSize: 1, gapSize: 0.5
-            } );
+            });
 
             const geometry = new THREE.Geometry();
             geometry.vertices.push(
-                new THREE.Vector3( 0, yscale.range()[0], 0 ),
-                new THREE.Vector3( 0, yscale.range()[1], 0 )
+                new THREE.Vector3(0, yscale.range()[0], 0),
+                new THREE.Vector3(0, yscale.range()[1], 0)
             );
-            const line = new THREE.Line( geometry, material);
+            const line = new THREE.Line(geometry, material);
             line.computeLineDistances();
             holder.add(line);
             return holder;
         }
+
         function makeaxis() {
             var dir = new THREE.Vector3(0, 1, 0);
             dir.normalize();
             var length = yscale.range()[1] - yscale.range()[0];
             var hex = 0x000000;
             var yaxisGroup = new THREE.Object3D();
-            var arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,scaleNormalTimestep(0)), length, hex, 30, 10);
+            var arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(0, 0, scaleNormalTimestep(0)), length, hex, 30, 10);
             arrowHelper.line.material.linewidth = 4;
             yaxisGroup.add(arrowHelper);
             let axis = yscale.copy();
@@ -1716,7 +1741,7 @@ let DynamicNet3D = function () {
                     // let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color: 0x0000ff, flatShading: true}));
                     let textMesh1 = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({color: 0x000000}));
                     textMesh1.name = 'TimeText';
-                    textMesh1.position.x = -Math.log10(axis.domain()[1])*20;
+                    textMesh1.position.x = -Math.log10(axis.domain()[1]) * 20;
                     textMesh1.position.y = axis(t);
                     textMesh1.position.z = scaleNormalTimestep(0);
                     // textMesh1.rotation.x = 0;
@@ -1725,18 +1750,19 @@ let DynamicNet3D = function () {
                     yaxisGroup.add(textMesh1)
                 });
             });
-           return yaxisGroup;
+            return yaxisGroup;
         }
     }
-    master.controlPanelGeneral = function(_data){
+
+    master.controlPanelGeneral = function (_data) {
         if (arguments.length) {
-                Object.keys(_data).forEach(k=>{
-                    Object.keys(_data[k]).forEach(conf=>{
-                        controlPanelGeneral[k][conf] = _data[k][conf];
-                    })
-                });
-                if(table_info)
-                    table_info.selectAll('tbody').selectAll('tr').selectAll('td').each(updateTableControl);
+            Object.keys(_data).forEach(k => {
+                Object.keys(_data[k]).forEach(conf => {
+                    controlPanelGeneral[k][conf] = _data[k][conf];
+                })
+            });
+            if (table_info)
+                table_info.selectAll('tbody').selectAll('tr').selectAll('td').each(updateTableControl);
             return master
         }
         return controlPanelGeneral;
@@ -1801,3 +1827,146 @@ let DynamicNet3D = function () {
 
     return master;
 };
+
+function forceFunc(data,postMessage) {
+    let canSend = false;
+    let minAlpha = 1;
+    let totalTime_marker;
+    postMessage({action: 'message', value: {'percentage': 20, 'message': 'Data received. Process data...'}});
+    totalTime_marker = performance.now();
+
+    const net = data;
+    const forces = [];
+    const root_nodes = {};
+    if (net.length) {
+        net.forEach(function (n, ni) {
+            const nodes = n.nodes;
+            const links = n.links;
+            const force = d3.forceSimulation()
+                .force("charge", d3.forceManyBody().strength(-10))
+                .force("link", d3.forceLink().id(d => d.id))
+            // .force("x", d3.forceX())
+            // .force("y", d3.forceY())
+            // .on("tick", ticked);
+            force.stop();
+
+            function ticked() {
+                const alpha = force.alpha();
+                minAlpha = Math.min(minAlpha, alpha);
+                if (minAlpha < 0.001) {
+                    force.stop();
+                    postMessage({
+                        action: 'stable',
+                        value: {totalTime: performance.now() - totalTime_marker, alpha: minAlpha},
+                        status: "done",
+                        sol: net
+                    });
+                }
+                n.filtered_nodes.forEach(d => {
+                    d.parent.x = d3.mean(d.parent.timeArr, e => e ? e.x : undefined) || 0;
+                    d.parent.y = d3.mean(d.parent.timeArr, e => e ? e.y : undefined) || 0;
+                    d.x += (d.parent.x - d.x) * 0.4;
+                    d.y += (d.parent.y - d.y) * 0.4;
+                });
+                if (canSend) {
+                    postMessage({
+                        action: 'render',
+                        value: {totalTime: performance.now() - totalTime_marker, alpha: minAlpha},
+                        source: ni,
+                        sol: []
+                    });
+                    canSend = false;
+                }
+            }
+
+            force.nodes(nodes);
+            force.force("link").links(n.links);
+            force.stop();
+            if (ni) {
+                const filtered_nodes = {};
+                n.filtered_links = [];
+                links.forEach(l => {
+                        if (l.isNew) {
+                            n.filtered_links.push(l);
+                            filtered_nodes[l.source.id] = l.source;
+                            filtered_nodes[l.target.id] = l.target;
+                        }
+                    }
+                );
+                n.filtered_nodes = Object.values(filtered_nodes);
+                nodes.forEach(n => {
+                    if (!filtered_nodes[n.id]) {
+                        n.x = undefined;
+                        n.y = undefined;
+                    }
+                    root_nodes[n.id] = n.parent;
+                })
+            } else {
+                n.filtered_nodes = nodes;
+                n.filtered_links = links;
+                nodes.forEach(n => {
+                    root_nodes[n.id] = n.parent;
+                });
+            }
+            if (n.delectedLinks) {
+                n.delectedLinks = n.delectedLinks.map(l => {
+                    return {
+                        source: l.source.parent.timeArr[n.ti] ?? l.source,
+                        target: l.target.parent.timeArr[n.ti] ?? l.target,
+                        value: l.value,
+                        color: 'rgb(255,0,0)',
+                        isDelete: true
+                    };
+                });
+            }
+            if (n.filtered_nodes.length) {
+                console.log('Net t=', ni);
+                console.log('#nodes :', n.filtered_nodes.length);
+                console.log('#links :', n.filtered_links.length);
+                force.nodes(n.filtered_nodes);
+                force.force("link").links(n.filtered_links);
+                force.stop();
+                // force.on("tick", ticked)
+                forces.push(force);
+            } else {
+                console.log('skip t=', ni);
+            }
+        });
+        console.log('#skip: ', net.length - forces.length);
+        postMessage({action: 'updateHighlight', sol: net, totalForces: forces.length});
+        setInterval(function () {
+            canSend = true;
+        }, 1000 / 24);
+
+        while (minAlpha > 0.001) {
+            forces.forEach(function (force) {
+                force.tick();
+                minAlpha = Math.min(minAlpha, force.alpha());
+            });
+            Object.values(root_nodes).forEach(n => {
+                n.x = d3.mean(n.timeArr, e => e ? e.x : undefined);
+                n.y = d3.mean(n.timeArr, e => e ? e.y : undefined);
+            });
+            forces.forEach(function (force) {
+                force.nodes().forEach(d => {
+                    d.x += (d.parent.x - d.x) * 0.4;
+                    d.y += (d.parent.y - d.y) * 0.4;
+                });
+            });
+        }
+        postMessage({
+            action: 'stable',
+            value: {totalTime: performance.now() - totalTime_marker, alpha: minAlpha},
+            status: "done",
+            sol: net
+        });
+
+    } else {
+        postMessage({
+            action: 'stable',
+            value: {totalTime: performance.now() - totalTime_marker},
+            status: "done",
+            sol: undefined
+        });
+    }
+}
