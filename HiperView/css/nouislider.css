@@ -310,7 +310,7 @@
     background-color: #8a001a;
     border: none;
     left: -5px;
-    top: -6px;
+    top: -5px;
     transition: width .2s cubic-bezier(0.215, 0.610, 0.355, 1.000),
     height .2s cubic-bezier(0.215, 0.610, 0.355, 1.000),
     left .2s cubic-bezier(0.215, 0.610, 0.355, 1.000),

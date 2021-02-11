@@ -1466,7 +1466,7 @@ let DynamicNet3D = function () {
         else { // other component display
             let formatvalue = formatTable[d.content.variable] || (e => Math.round(e));
             if (d.content.type === "slider") {
-                let div = d3.select(this).append('div').attr('class', 'valign-wrapper').style('width', ''+d.content.width+'px');
+                let div = d3.select(this).append('div').attr('class', 'valign-wrapper').style('width', ''+d.content.width).style('margin-top', '7px');
                 noUiSlider.create(div.node(), {
                     start: (graphicopt.opt[d.content.variable] || (d.content.variableRoot ? d.content.variableRoot[d.content.variable] : undefined)) || d.content.range[0],
                     connect: 'lower',
