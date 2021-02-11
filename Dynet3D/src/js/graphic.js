@@ -41,6 +41,7 @@ function serviceControl() {
             d3.select(this).select('input')
                 .on('change', function () {
                     d._filter = this.checked;
+                    d3.select(this.parentNode.parentNode).select('.silderHolder').attr('disabled',this.checked?null:'')
                 })
         });
     tr.selectAll('td.title').data(d => [d])
@@ -53,7 +54,7 @@ function serviceControl() {
     tr.selectAll('td.range').data(d => [d])
         .join('td').attr('class', 'range')
         .html(d => `<div class="silderHolder" style="width:60px"></div>`).each(function (d) {
-        const div = d3.select(this).select('.silderHolder').node();
+        const div = d3.select(this).select('.silderHolder').attr('disabled','').node();
         noUiSlider.create(div, {
             start: d.thresholdFilter,
             tooltips: {

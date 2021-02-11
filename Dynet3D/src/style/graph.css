@@ -216,7 +216,12 @@ div.subgraph:hover .closeButton {
     margin-top:auto;
     margin-bottom:auto;
 }
-
+[disabled].noUi-target .noUi-handle{
+    background-color: #8e8e8e;
+}
+[disabled].noUi-target.noUi-horizontal .noUi-tooltip{
+    background-color: #8e8e8e;
+}
 .multiselect-container.dropdown-menu.show {
     z-index:3;
 }
