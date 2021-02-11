@@ -159,10 +159,10 @@ function onFilter() {
     let nodeobj = {};
     nodes.forEach(d => nodeobj[d]=true);
     if (lists.length) {
-        Layout.userTimeline.root_nodes.forEach(d => {
-            if (Layout.userTimeline.datamap[d.id] && !nodeobj[d.id]) {
+        Layout.netFull.root_nodes.forEach(d => {
+            if (Layout.netFull.datamap[d.id] && !nodeobj[d.id]) {
                 let condition = false;
-                Layout.userTimeline.datamap[d.id].find(e => {
+                Layout.netFull.datamap[d.id].find(e => {
                     let con = true;
                     lists.forEach(f =>{
                         con = con && e[f._id] >= f.thresholdFilterNormalize
