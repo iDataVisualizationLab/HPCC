@@ -146,6 +146,7 @@ function onchangeCluster() {
 function cluster_map (dataRaw,divId,customopt,callback) {
     divId = divId??'#clusterDisplay';
     const _radarChartclusteropt = {...radarChartclusteropt,...customopt};
+    const className = customopt?(customopt.className?customopt.className:'radarh'):'radarh';
     let isNameChangeable = false;
     _radarChartclusteropt.schema = serviceFullList;
     let data = dataRaw.map((c,i)=>{
@@ -237,7 +238,7 @@ function cluster_map (dataRaw,divId,customopt,callback) {
         r_new.append('span').attr('class','clusternum center-align col s12').style('display','block');;
         // r_new.append('span').attr('class','clusterMSE center-align col s12');
         dir.selectAll('.radarCluster')
-            .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
+            .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster '+className+d.id)
             .attr('data-toggle',"tooltip")
             .attr('data-placement',"top")
             .attr('title',d=>d[0].text)
@@ -253,7 +254,7 @@ function cluster_map (dataRaw,divId,customopt,callback) {
                 // datadraw[0].text = d[0].text;
                 datadraw.id = d.id;
                 _radarChartclusteropt.color = function(){return colorCluster(d.id)};
-                RadarChart(".radarh"+d.id, datadraw, _radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+                RadarChart("."+className+d.id, datadraw, _radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
             });
         d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
         d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
@@ -318,6 +319,7 @@ function recalculateCluster (option,calback,customCluster) {
             }
             recomendColor (cluster_info);
             if (!calback) {
+                debugger
                 cluster_map(cluster_info);
                 jobMap.clusterData(cluster_info).colorCluster(colorCluster).data(undefined,undefined,undefined,true).draw().drawComp();
                 handle_clusterinfo();

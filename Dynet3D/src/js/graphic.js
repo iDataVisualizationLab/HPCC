@@ -201,7 +201,7 @@ function onFilter() {
 }
 
 function drawClusterFilter(){
-    cluster_map(cluster_info,'#clusterFilterDisplay',{w:88,h:88,events:undefined},()=>{
+    cluster_map(cluster_info,'#clusterFilterDisplay',{w:88,h:88,events:undefined,className:'radarhMini'},()=>{
         const holder =  d3.select('#clusterFilterDisplay').selectAll('.label');
         holder.select('.clusternum').style('display','none');
         holder.selectAll('input.filterCheck').data(d=>d)
