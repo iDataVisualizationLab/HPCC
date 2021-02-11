@@ -170,6 +170,22 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
+            linePlot: {
+                text: "Show Line chart",
+                type: "selection",
+                variable: 'plotMetric',
+                labels: ['--none--'],
+                values: [false],
+                width: '100px',
+                callback: () => {
+                    scene.remove(metricPlot);
+                    if(graphicopt.plotMetric!==false){
+                        updatePlot();
+                    }else{
+                        isneedrender = true;
+                    }
+                }
+            },
             linkOpacity: {
                 text: "Link opacity",
                 range: [0.1, 1],
@@ -191,22 +207,6 @@ let DynamicNet3D = function () {
                 width: '100px',
                 step: 0.1,
                 callback: onNetworkExpandXY
-            },
-            linePlot: {
-                text: "Show Line chart",
-                type: "selection",
-                variable: 'plotMetric',
-                labels: ['--none--'],
-                values: [false],
-                width: '100px',
-                callback: () => {
-                    scene.remove(metricPlot);
-                    if(graphicopt.plotMetric!==false){
-                        updatePlot();
-                    }else{
-                        isneedrender = true;
-                    }
-                }
             }
         },
         formatTable = {
@@ -1411,7 +1411,7 @@ let DynamicNet3D = function () {
         });
         d3.select('#modelWorkerInformation table').selectAll('*').remove();
         table_info = d3.select('#modelWorkerInformation table')
-            .html(` <colgroup><col span="1" style="width: 40%;"><col span="1" style="width: 60%;"></colgroup>`);
+            .html(` <colgroup><col span="1"><col span="1" style="width: 100px;"></colgroup>`);
         // .styles({'width':tableWidth+'px'});
         let tableData = [
             [
@@ -1524,8 +1524,9 @@ let DynamicNet3D = function () {
             } else if (d.content.type === "selection") {
                 let label = _.isFunction(d.content.labels) ? d.content.labels() : d.content.labels;
                 let values = _.isFunction(d.content.values) ? d.content.values() : d.content.values;
-                let div = d3.select(this).style('width', d.content.width)
+                let div = d3.select(this)
                     .append('select')
+                    .style('width', d.content.width)
                     .on('change', function () {
                         setValue(d.content, values[this.value])
                         // if (!d.content.variableRoot) {
