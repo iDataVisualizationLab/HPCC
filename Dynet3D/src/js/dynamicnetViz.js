@@ -201,8 +201,8 @@ let DynamicNetViz = function(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
         const _links = links.slice();
-        if (data.delectedLinks){
-            data.delectedLinks.forEach(l=>{
+        if (data.deletedLinks){
+            data.deletedLinks.forEach(l=>{
                 _links.push({source:l.source.parent.timeArr[data.ti]??l.source,target:l.target.parent.timeArr[data.ti]??l.target,value:l.value,color:'rgb(255,0,0)',isDelete:true});
             });
         }

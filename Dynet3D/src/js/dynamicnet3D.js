@@ -422,7 +422,7 @@ let DynamicNet3D = function () {
                                     dynamicVizs.links[l.target.id]._visible = true;
                                 }
                             });
-                            data.sol[i].delectedLinks.forEach(l => {
+                            data.sol[i].deletedLinks.forEach(l => {
                                 l.source.filtered = true;
                                 l.target.filtered = true;
                                 dynamicVizs.links[l.target.id]._visible = true;
@@ -884,12 +884,12 @@ let DynamicNet3D = function () {
                                     // lines[target.name].geometry.verticesNeedUpdate = true;
                                     //  lines[target.name].geometry.computeBoundingBox();
                                 })
-                                if (net.delectedLinks) {
-                                    net.delectedLinks.forEach((l, li) => {
-                                        data.net[soli].delectedLinks[li].source = solution[soli].delectedLinks[li].source;
-                                        data.net[soli].delectedLinks[li].target = solution[soli].delectedLinks[li].target;
-                                        const source = solution[soli].delectedLinks[li].source;
-                                        const target = solution[soli].delectedLinks[li].target;
+                                if (net.deletedLinks) {
+                                    net.deletedLinks.forEach((l, li) => {
+                                        data.net[soli].deletedLinks[li].source = solution[soli].deletedLinks[li].source;
+                                        data.net[soli].deletedLinks[li].target = solution[soli].deletedLinks[li].target;
+                                        const source = solution[soli].deletedLinks[li].source;
+                                        const target = solution[soli].deletedLinks[li].target;
                                         const points = [];
                                         points.push(new THREE.Vector3(graphicopt.expand.xy * source.x, graphicopt.expand.xy * source.y, source.z));
                                         points.push(new THREE.Vector3(graphicopt.expand.xy * target.x, graphicopt.expand.xy * target.y, target.z));
@@ -1365,11 +1365,11 @@ let DynamicNet3D = function () {
         data.net.forEach((net, ni) => {
             // time slice generate
             let sliceHolder = new THREE.Object3D();
-            const netControl = {nodes: undefined, links: undefined, delectedLinks: undefined};
+            const netControl = {nodes: undefined, links: undefined, deletedLinks: undefined};
             netControl.nodes = createpoints(sliceHolder, net.nodes, ni);
             netControl._links = createLines(sliceHolder, net.links);
-            netControl.delectedLinks = createLines(sliceHolder, net.delectedLinks ?? [], 'rgb(255,0,0)');
-            netControl.links = [...netControl._links, ...netControl.delectedLinks];
+            netControl.deletedLinks = createLines(sliceHolder, net.deletedLinks ?? [], 'rgb(255,0,0)');
+            netControl.links = [...netControl._links, ...netControl.deletedLinks];
             // add to the control
             dynamicVizs.push(netControl);
             netPlot.add(sliceHolder);
@@ -1908,8 +1908,8 @@ function forceFunc(data,postMessage) {
                     root_nodes[n.id] = n.parent;
                 });
             }
-            if (n.delectedLinks) {
-                n.delectedLinks = n.delectedLinks.map(l => {
+            if (n.deletedLinks) {
+                n.deletedLinks = n.deletedLinks.map(l => {
                     return {
                         source: l.source.parent.timeArr[n.ti] ?? l.source,
                         target: l.target.parent.timeArr[n.ti] ?? l.target,

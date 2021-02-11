@@ -451,9 +451,9 @@ function getChanged(data) {
                 linkMap.delete(key);
             }
         });
-        data.net[i].delectedLinks = [];
+        data.net[i].deletedLinks = [];
         linkMap.forEach((value, key) => {
-            data.net[i].delectedLinks.push(value);
+            data.net[i].deletedLinks.push(value);
             nodeMap[value.source].ChangeCount++;
             nodeMap[value.target].ChangeCount++;
         });

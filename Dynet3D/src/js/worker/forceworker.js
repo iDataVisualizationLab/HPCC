@@ -73,8 +73,8 @@ addEventListener('message',function ({data}){
                         root_nodes[n.id] = n.parent;
                     });
                 }
-                if (n.delectedLinks) {
-                    n.delectedLinks = n.delectedLinks.map(l => {
+                if (n.deletedLinks) {
+                    n.deletedLinks = n.deletedLinks.map(l => {
                         return {
                             source: l.source.parent.timeArr[n.ti] ?? l.source,
                             target: l.target.parent.timeArr[n.ti] ?? l.target,

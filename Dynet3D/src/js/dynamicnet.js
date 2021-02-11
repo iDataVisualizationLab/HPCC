@@ -99,8 +99,8 @@ let DynamicNet = function(){
                         linkMap.delete(key);
                     }
                 });
-                data.net[i].delectedLinks = [];
-                linkMap.forEach((value, key)=>data.net[i].delectedLinks.push(value));
+                data.net[i].deletedLinks = [];
+                linkMap.forEach((value, key)=>data.net[i].deletedLinks.push(value));
             }
         }
         const t0 = performance.now();
@@ -123,8 +123,8 @@ let DynamicNet = function(){
                     .on('end',()=>{
                         console.timeLog('Force dynamic: ')
                     });
-                netControl.init({div,force}).data({nodes:net.nodes,links:net.links,delectedLinks:net.delectedLinks,ti:net.ti});
-                // netControl.init({div,force}).data({nodes:net.nodes.map(d=>d.parent),links:net.links,delectedLinks:net.delectedLinks,ti:net.ti});
+                netControl.init({div,force}).data({nodes:net.nodes,links:net.links,deletedLinks:net.deletedLinks,ti:net.ti});
+                // netControl.init({div,force}).data({nodes:net.nodes.map(d=>d.parent),links:net.links,deletedLinks:net.deletedLinks,ti:net.ti});
                 netControl.draw();
                 function ticked() {
                     const alpha = force.alpha();
