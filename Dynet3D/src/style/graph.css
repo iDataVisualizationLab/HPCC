@@ -225,3 +225,34 @@ div.subgraph:hover .closeButton {
 .multiselect-container.dropdown-menu.show {
     z-index:3;
 }
+
+tr .noUi-horizontal .noUi-handle,
+tr .noUi-vertical .noUi-handle {
+    width: 9px;
+    height: 9px;
+    left: -3px;
+    top: -3px;
+}
+tr .noUi-target.noUi-horizontal .noUi-tooltip{
+    height: 18px;
+    width: 18px;
+    top: -4.5px;
+    left: -4.5px;
+    transform: scale(.25);
+}
+ tr .noUi-target.noUi-horizontal .noUi-active .noUi-tooltip {
+     border-radius: 15px;
+     transform: scale(1.5) translate(-4px,-4px)
+     /*transform: rotate(-45deg) translate(23px, -25px);*/
+
+ }
+tr .noUi-target .noUi-active.noUi-handle {
+    width: 1px;
+    height: 1px;
+    left: 0;
+    top: 0;
+}
+
+tr .noUi-tooltip span{
+    top:1px;
+}
