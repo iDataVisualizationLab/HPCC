@@ -26,24 +26,6 @@ addEventListener('message',function ({data}){
                     // .force("y", d3.forceY())
                     // .on("tick", ticked);
                 force.stop();
-                function ticked() {
-                    const alpha = force.alpha();
-                    minAlpha = Math.min(minAlpha,alpha);
-                    if(minAlpha<0.001) {
-                        force.stop();
-                            postMessage({action: 'stable',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha}, status: "done", sol: net});
-                    }
-                    n.filtered_nodes.forEach(d=>{
-                        d.parent.x = d3.mean(d.parent.timeArr,e=>e?e.x:undefined)||0;
-                        d.parent.y = d3.mean(d.parent.timeArr,e=>e?e.y:undefined)||0;
-                        d.x += (d.parent.x-d.x)*0.4;
-                        d.y += (d.parent.y-d.y)*0.4;
-                    });
-                    if (canSend){
-                        postMessage({action:'render',value:{totalTime:performance.now()-totalTime_marker,alpha:minAlpha},source:ni, sol:[]});
-                        canSend = false;
-                    }
-                }
                 force.nodes(nodes);
                 force.force("link").links(n.links);
                 force.stop();
@@ -61,23 +43,25 @@ addEventListener('message',function ({data}){
                     n.filtered_nodes = Object.values(filtered_nodes);
                     nodes.forEach(n=>{
                         if (!filtered_nodes[n.id]){
-                            n.x=undefined;
-                            n.y=undefined;
+                            n.x = undefined
+                            n.y = undefined
                         }else{
-                            n.x=undefined;
-                            n.y=undefined;
+                            // delete n.x;
+                            // delete n.y;
                         }
                         root_nodes[n.id] = n.parent;
-                        n.parent.x = undefined
-                        n.parent.y = undefined
+                        // delete n.parent.x;
+                        // delete n.parent.y;
                     })
                 }else{
                     n.filtered_nodes = nodes;
                     n.filtered_links = links;
                     nodes.forEach(n=> {
                         root_nodes[n.id] = n.parent;
-                        n.x=undefined;
-                        n.y=undefined;
+                        // delete n.x;
+                        // delete n.y;
+                        // delete n.parent.x;
+                        // delete n.parent.y;
                     });
                 }
                 if (n.deletedLinks) {
@@ -107,7 +91,9 @@ addEventListener('message',function ({data}){
             console.log('#skip: ',net.length-forces.length);
             postMessage({action:'updateHighlight', sol:net,totalForces:forces.length});
             setInterval(function(){ canSend = true; }, 1000/24);
-
+                forces.forEach(function (force) {
+                    force.alpha(1);
+                });
             while (minAlpha>0.001) {
                 forces.forEach(function (force) {
                     force.tick();
