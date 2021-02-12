@@ -870,7 +870,7 @@ let DynamicNet3D = function () {
                                     l.geometry.computeBoundingBox();
                                     // lines[target.name].geometry.verticesNeedUpdate = true;
                                     //  lines[target.name].geometry.computeBoundingBox();
-                                })
+                                });
                                 if (net.deletedLinks) {
                                     net.deletedLinks.forEach((l, li) => {
                                         data.net[soli].deletedLinks[li].source = solution[soli].deletedLinks[li].source;
