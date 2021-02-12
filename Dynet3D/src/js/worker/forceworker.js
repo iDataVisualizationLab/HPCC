@@ -68,6 +68,8 @@ addEventListener('message',function ({data}){
                             n.y=undefined;
                         }
                         root_nodes[n.id] = n.parent;
+                        n.parent.x = undefined
+                        n.parent.y = undefined
                     })
                 }else{
                     n.filtered_nodes = nodes;
