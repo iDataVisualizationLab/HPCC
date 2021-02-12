@@ -14,13 +14,14 @@ function serviceControl() {
         s.thresholdFilter = Math.round((s.range[1] - s.range[0]) * 0.9 + s.range[0]);
         s.thresholdFilterNormalize = 0.9;
     });
-    drawObject.service(vizservice).controlPanelGeneral({
-            linePlot: {
-                labels: ['--none--', ...vizservice.map(d => d.text)],
-                values: [false, ...(vizservice.map(d => d._id))]
-            }
-        }
-    );
+    drawObject.service(vizservice)
+    // .controlPanelGeneral({
+    //         linePlot: {
+    //             labels: ['--none--', ...vizservice.map(d => d.text)],
+    //             values: [false, ...(vizservice.map(d => d._id))]
+    //         }
+    //     }
+    // );
 
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     const tr = d3.select('#serviceSelection')
@@ -80,6 +81,16 @@ function serviceControl() {
         .join('td').attr('class', 'rangeHigh')
         .style('text-align', 'left')
         .text(d => d.range[1]);
+
+    const dataLine = [{text:'--none--',_index:false},...vizservice];
+    d3.select('#lineChartOption').selectAll('option')
+        .data([{text:'--none--',_id:false},...vizservice])
+        .join('option')
+        .attr('value',d=>d._id)
+        .text(d=>d.text)
+    d3.select('#lineChartOption').on('change',function(){
+           drawObject.onShowLineChart(dataLine[this.selectedIndex]._id)
+        })
 }
 
 function initdraw() {

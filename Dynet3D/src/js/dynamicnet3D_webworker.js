@@ -170,22 +170,22 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
-            linePlot: {
-                text: "Show Line chart",
-                type: "selection",
-                variable: 'plotMetric',
-                labels: ['--none--'],
-                values: [false],
-                width: '100px',
-                callback: () => {
-                    scene.remove(metricPlot);
-                    if(graphicopt.plotMetric!==false){
-                        updatePlot();
-                    }else{
-                        isneedrender = true;
-                    }
-                }
-            },
+            // linePlot: {
+            //     text: "Show Line chart",
+            //     type: "selection",
+            //     variable: 'plotMetric',
+            //     labels: ['--none--'],
+            //     values: [false],
+            //     width: '100px',
+            //     callback: () => {
+            //         scene.remove(metricPlot);
+            //         if(graphicopt.plotMetric!==false){
+            //             updatePlot();
+            //         }else{
+            //             isneedrender = true;
+            //         }
+            //     }
+            // },
             linkOpacity: {
                 text: "Link opacity",
                 range: [0.1, 1],
@@ -331,6 +331,14 @@ let DynamicNet3D = function () {
     let obitTrigger = true;
     let linkConnect_old;
 
+    function onShowLineChart () {
+            scene.remove(metricPlot);
+            if(graphicopt.plotMetric!==false){
+                updatePlot();
+            }else{
+                isneedrender = true;
+            }
+        }
     function reduceRenderWeight(isResume) {
         if (isResume) {
             graphicopt.linkConnect = linkConnect_old;
@@ -894,7 +902,7 @@ let DynamicNet3D = function () {
 
                         });
                         controlPanelGeneral.showLineConnect.callback();
-                        controlPanelGeneral.linePlot.callback();
+                        onShowLineChart();
                         isneedrender = true;
                         console.timeEnd('rendering last time: ');
                     }
@@ -1755,7 +1763,10 @@ let DynamicNet3D = function () {
         workerList.length = 0;
     }
 
-
+    master.onShowLineChart = function(choice){
+        graphicopt.plotMetric = choice;
+        onShowLineChart();
+    }
     master.data = function (_data) {
         if (arguments.length) {
             terminateWorker();
