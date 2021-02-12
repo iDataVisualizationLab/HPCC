@@ -873,13 +873,13 @@ let DynamicNet3D = function () {
                                 });
                                 if (net.deletedLinks) {
                                     net.deletedLinks.forEach((l, li) => {
-                                        data.net[soli].deletedLinks[li].source = solution[soli].deletedLinks[li].source;
-                                        data.net[soli].deletedLinks[li].target = solution[soli].deletedLinks[li].target;
+                                        data.net[soli].deletedLinks[li].source = data.net[soli].nodes[solution[soli].deletedLinks[li].source._index];
+                                        data.net[soli].deletedLinks[li].target = data.net[soli].nodes[solution[soli].deletedLinks[li].target._index];
                                         const source = solution[soli].deletedLinks[li].source;
                                         const target = solution[soli].deletedLinks[li].target;
                                         const points = [];
-                                        points.push(new THREE.Vector3(graphicopt.expand.xy * source.x, graphicopt.expand.xy * source.y, source.z));
-                                        points.push(new THREE.Vector3(graphicopt.expand.xy * target.x, graphicopt.expand.xy * target.y, target.z));
+                                        points.push(new THREE.Vector3(source.x, source.y, source.z));
+                                        points.push(new THREE.Vector3(target.x, target.y, target.z));
                                         l.geometry.setFromPoints(points);
                                         l.geometry.attributes.position.needsUpdate = true;
                                         l.geometry.computeBoundingBox();

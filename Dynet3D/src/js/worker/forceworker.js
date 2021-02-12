@@ -76,8 +76,8 @@ addEventListener('message',function ({data}){
                 if (n.deletedLinks) {
                     n.deletedLinks = n.deletedLinks.map(l => {
                         return {
-                            source: l.source.parent.timeArr[n.ti] ?? l.source,
-                            target: l.target.parent.timeArr[n.ti] ?? l.target,
+                            source: l.source.parent.timeArr[ni] ?? l.source,
+                            target: l.target.parent.timeArr[ni] ?? l.target,
                             value: l.value,
                             color: 'rgb(255,0,0)',
                             isDelete: true
