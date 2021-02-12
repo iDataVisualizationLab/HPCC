@@ -57,6 +57,7 @@ let DynamicNet3D = function () {
             isSelectionMode: false,
             label_enable: true,
             filter: {distance: 0.5},
+            timeResolution: 1,
             component: {
                 dot: {size: 5, opacity: 0.5, filter: {size: 5, opacity: 0.1}, 'user': {size: 10}},
                 link: {size: 1, opacity: 0.5, highlight: {opacity: 1}},
@@ -207,6 +208,20 @@ let DynamicNet3D = function () {
                 width: '100px',
                 step: 0.1,
                 callback: onNetworkExpandXY
+            },
+            timeResolution: {
+                text: "Time Resolution",
+                type: "selection",
+                variable: 'timeResolution',
+                labels: ['5 minutes','30 minutes', '1 hour', '2 hours', '3 hours'],
+                values: [1, 30/5,60/5,120/5,180/5],
+                width: '100px',
+                callback: () => {
+                    debugger
+                    isneedCompute = true;
+                    render(!isBusy);
+                    isneedrender = true;
+                }
             }
         },
         formatTable = {
@@ -858,7 +873,7 @@ let DynamicNet3D = function () {
 
                                 // 3rd dimension as time step
                                 // p[pointIndex*3+2] = xscale(d[2])||0;
-                                p[pointIndex * 3 + 2] = scaleNormalTimestep(soli);
+                                p[pointIndex * 3 + 2] = scaleNormalTimestep(Math.ceil(soli/graphicopt.timeResolution)*graphicopt.timeResolution);
                                 d.z = p[pointIndex * 3 + 2];
                                 target.z = d.z;
                             });

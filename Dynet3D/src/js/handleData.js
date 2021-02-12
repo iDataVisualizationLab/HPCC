@@ -188,14 +188,16 @@ function udateClusterInfo(){
     drawClusterFilter();
 }
 let handleDataComputeByUser = function (data) {
-    if (handleDataComputeByUser.mode === 'core')
-        return handleDataComputeByUser_core(data);
+    if (handleDataComputeByUser.mode === 'user')
+        return handleDataComputeByUser_user(data);
     else
-        return handleDataComputeByUser_compute(data);
+        return handleDataComputeByUser_job(data);
 };
-handleDataComputeByUser.mode = 'core';
+handleDataComputeByUser.mode = 'user';
+handleDataComputeByUser.disableArrayjob = false;
+// handleDataComputeByUser.mode = 'job';
 
-function handleDataComputeByUser_core(_data) {
+function handleDataComputeByUser_user(_data) {
     let dataIn = {
         root_nodes: [],
         net: _data.time_stamp.map((d, ti) => ({nodes: [], links: [], time: d, ti})),
@@ -222,8 +224,9 @@ function handleDataComputeByUser_core(_data) {
                 let jobArr = [];
                 let jobMain = {};
                 jIDs.forEach(j => {
-                    const job = j.split('.')[0];
-                    if (!jobMain[job]) {
+                    const jobSplit = j.split('.');
+                    const job = jobSplit[0];
+                    if (!jobMain[job] && (!handleDataComputeByUser.disableArrayjob||(handleDataComputeByUser.disableArrayjob && !jobSplit[1]))) {
                         jobArr.push(jobs[j]);
                         jobMain[job] = jobs[j];
                     }
@@ -302,7 +305,6 @@ function handleDataComputeByUser_core(_data) {
         item._index = dataIn.root_nodes.length;
         dataIn.root_nodes.push(item);
     }
-    debugger
     return dataIn;
 }
 
@@ -314,26 +316,117 @@ function getComputeName(c) {
     return request.computeDict[c];
 }
 
-function handleDataComputeByUser_compute(_data) {
-    let data = [];
+function handleDataComputeByUser_job(_data) {
+    let dataIn = {
+        root_nodes: [],
+        net: _data.time_stamp.map((d, ti) => ({nodes: [], links: [], time: d, ti})),
+        datamap: tsnedata,
+        time_stamp: _data.time_stamp
+    };
+    // let data = [];
     const computers = _data[COMPUTE];
     const jobs = _data[JOB];
+    const users = {};
     for (let comp in computers) {
-        let item = {key: comp, data: computers[comp]};
-        computers[comp].job_id.forEach((jIDs, i) => {
+        let item = {
+            id: comp,
+            type: 'compute',
+            name: getComputeName(comp),
+            data: computers[comp],
+            tooltip: comp.replace('10.101.', ''),
+            timeArr: []
+        };
+        item.drawData = getDrawData(item);
+        _data.time_stamp.forEach((t, i) => {
+            const jIDs = computers[comp].job_id[i];
             if (jIDs.length) {
-                let jobArr = jIDs.map(j => jobs[j]);
-                let username = d3.nest().key(d => d.user_name)
-                    .rollup(d => 1).entries(jobArr);
-                username.total = d3.sum(username, e => e.value);
-                username.jobs = [jIDs, jobArr];
+                let jobArr = [];
+                let jobMain = {};
+                jIDs.forEach(j => {
+                    const jobSplit = j.split('.');
+                    const job = jobSplit[0];
+                    if (!jobMain[job] && (!handleDataComputeByUser.disableArrayjob||(handleDataComputeByUser.disableArrayjob && !jobSplit[1]))) {
+                        jobs[j].mainJob = job;
+                        jobArr.push(jobs[j]);
+                        jobMain[job] = jobs[j];
+                    }
+                });
+                // user
+                debugger
+                let username = d3.nest().key(d => d.mainJob)
+                    // .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp]))
+                    .rollup(d => d.length)
+                    .entries(jobArr);
+                // username.total = d3.sum(username, e => e.value);
+                // username.jobs = [jIDs, jobArr];
+                username.forEach(u => {
+                    let userObj = {};
+                    if (!users[u.key]) {
+                        userObj = {
+                            id: u.key, type: 'user', name: u.key, data: {}, timeArr: [], drawData: [{
+                                invalid: undefined,
+                                scale: 1,
+                                offset: -8,
+                                color: '#007',
+                                d: 'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'
+                            }],
+                            _index: dataIn.root_nodes.length
+                        }
+                        users[u.key] = userObj;
+                        dataIn.root_nodes.push(users[u.key]);
+                    }
+                    userObj = users[u.key];
+                    if (!userObj.timeArr[i]) {
+                        userObj.timeArr[i] = {
+                            drawData: userObj.drawData,
+                            id: u.key,
+                            name: getUserName(u.key),
+                            type: 'user',
+                            data: {name: u.key, isNew: []},
+                            parent: userObj,
+                            ti: i
+                        };
+                        userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
+                        dataIn.net[i].nodes.push(userObj.timeArr[i]);
+                    }
+                    // link
+                    dataIn.net[i].links.push({
+                        source: comp,
+                        target: u.key,
+                        value: u.value,
+                        _index: dataIn.net[i].links.length
+                    })
+                })
+
+                // compute
                 item[Layout.timespan[i]] = username.sort((a, b) => d3.ascending(a.key, b.key));
+                item.timeArr[i] = {
+                    drawData: item.drawData,
+                    id: comp,
+                    name: getComputeName(comp),
+                    type: 'compute',
+                    data: {name: comp, isNew: []},
+                    parent: item,
+                    ti: i
+                };
             } else
-                item[Layout.timespan[i]] = null;
+                item.timeArr[i] = {
+                    drawData: item.drawData,
+                    id: comp,
+                    name: getComputeName(comp),
+                    type: 'compute',
+                    data: {name: comp, isNew: []},
+                    isolate: true,
+                    parent: item,
+                    ti: i
+                };
+            item.timeArr[i]._index = dataIn.net[i].nodes.length;
+            dataIn.net[i].nodes.push(item.timeArr[i])
         });
-        data.push(item);
+        item._index = dataIn.root_nodes.length;
+        dataIn.root_nodes.push(item);
     }
-    return data;
+    return dataIn;
 }
 
 function getUsers(_data) {
@@ -501,11 +594,33 @@ function handleRankingData(data) {
 
     Layout.userTimeline = filterData([], Layout.netFull);
     getChanged(Layout.userTimeline);
-    console.log(Layout.userTimeline)
     debugger
     // Layout.userTimeline = filterData(['user13'],Layout.userTimeline)
     // console.log(Layout.userTimeline)
     console.timeEnd('handleRankingData');
+}
+function regenerateFullData(){
+    Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
+    d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d => d.type).entries(Layout.netFull.root_nodes.map(d => ({
+        id: d.id,
+        type: d.type
+    }))))
+        .join('optgroup')
+        .attr('label', d => d.key)
+        .selectAll('option').data(d => d.values)
+        .join('option').attr('value', d => d.id).text(d => d.type === 'compute' ? getComputeName(d.id) : d.id);
+    $('#modelFilterToolInput').multiselect({
+        enableClickableOptGroups: true,
+        enableCollapsibleOptGroups: true,
+        enableFiltering: true,
+        includeSelectAllOption: true,
+        nonSelectedText: 'Filter by name',
+        maxHeight: 200,
+        onChange: function (option, checked) {
+            d3.select('#modelFilterToolBtn').text('Filter');
+        }
+    });
+    onFilter();
 }
 
 // cluster

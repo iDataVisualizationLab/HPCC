@@ -227,7 +227,10 @@
                             <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
                                 <div id="analyticOnToolbar" class="card-body row"
                                      data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-
+                                    <div class="col-12" style="padding-left: 0;margin-bottom:5px;">
+                                        <label>Filter Job Array:</label>
+                                        <input id="disableJobArray" type="checkbox" class="filled-in">
+                                    </div>
                                     <div class="col-12" style="padding-left: 0;margin-bottom:5px;">
                                         <label>Nodes:</label>
                                         <div class="input-group">
@@ -373,6 +376,13 @@
                                     <!--                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelFilterTool">Filter</a></li>-->
                                     <!--                                            </ul>-->
                                     <!--                                            <div class="card-body row tab-content">-->
+                                    <div class="row">
+                                        <label class="col-5" for="flowType">Visualizing: </label>
+                                        <select class="col-7" id="flowType">
+                                            <option value="user">User</option>
+                                            <option value="job">Job</option>
+                                        </select>
+                                    </div>
                                     <div id="modelSetting" class="tab-pane fade show active col-12" role="tabpanel">
                                         <table class="table">
                                         </table>

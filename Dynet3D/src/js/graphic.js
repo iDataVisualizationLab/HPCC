@@ -160,6 +160,17 @@ function initdraw() {
     d3.select('#filter_apply').on('click', function () {
         onFilter();
     });
+    d3.select('#flowType').on('change',function(){
+        const val = $(this).val();
+        handleDataComputeByUser.mode=val;
+        // d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
+        regenerateFullData();
+    })
+
+    d3.select('#disableJobArray').on('change',function(){
+        handleDataComputeByUser.disableArrayjob =this.checked;
+        regenerateFullData();
+    })
 }
 
 function onFilter() {
