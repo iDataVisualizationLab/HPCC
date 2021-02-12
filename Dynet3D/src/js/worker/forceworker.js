@@ -63,6 +63,9 @@ addEventListener('message',function ({data}){
                         if (!filtered_nodes[n.id]){
                             n.x=undefined;
                             n.y=undefined;
+                        }else{
+                            n.x=undefined;
+                            n.y=undefined;
                         }
                         root_nodes[n.id] = n.parent;
                     })
@@ -71,6 +74,8 @@ addEventListener('message',function ({data}){
                     n.filtered_links = links;
                     nodes.forEach(n=> {
                         root_nodes[n.id] = n.parent;
+                        n.x=undefined;
+                        n.y=undefined;
                     });
                 }
                 if (n.deletedLinks) {
