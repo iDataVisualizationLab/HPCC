@@ -1024,18 +1024,22 @@ let DynamicNet3D = function () {
                     d.links.forEach((lk,li) => {
                         let isvisiable = false;
                         let connected = {};
-                        if (lk.data.source.id === target.id){
-                            isvisiable = true;
-                            connected = lk.data.target;
-                        }else if (lk.data.target.id === target.id){
-                            isvisiable = true;
-                            connected = lk.data.source;
-                        }
+                        if (lk.data.source!==undefined && lk.data.target!==undefined){
+                            if (lk.data.source.id === target.id){
+                                isvisiable = true;
+                                connected = lk.data.target;
+                            }else if (lk.data.target.id === target.id){
+                                isvisiable = true;
+                                connected = lk.data.source;
+                            }
 
-                        lk.visible = graphicopt.showChanged ? (lk._visible && isvisiable) : isvisiable;
-                        if (lk.visible) {
-                            const old = dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index];
-                            dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index] = old?graphicopt.component.dot.opacity:old;
+                            lk.visible = graphicopt.showChanged ? (lk._visible && isvisiable) : isvisiable;
+                            if (lk.visible) {
+                                const old = dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index];
+                                dynamicVizs[connected.ti].nodes.geometry.attributes.alpha.array[connected._index] = old?graphicopt.component.dot.opacity:old;
+                            }
+                        }else{
+                            debugger
                         }
                     })
                 });

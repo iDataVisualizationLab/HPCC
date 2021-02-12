@@ -391,9 +391,9 @@ function filterData(nodeList, nets) {
                 n.nodes.forEach(n => {
                     if (filterNodeList[n.id] || nextFilter[n.id]) {
                         if (!fileterObject[n.id])
-                            fileterObject[n.id] = {...n.parent};
+                            fileterObject[n.id] = {...n.parent,timeArr:n.parent.timeArr.map(d=>d)};
                         const node = {...n, _index: filteredNets.net[ni].nodes.length, parent: fileterObject[n.id]};
-                        // fileterObject[n.id].timeArr[ni] = node;
+                        fileterObject[n.id].timeArr[ni] = node;
                         filteredNets.net[ni].nodes.push(node);
                     } else {
                         nextNets.net[ni].nodes.push(n)
