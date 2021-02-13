@@ -1,6 +1,6 @@
 
 d3.csv('src/data/all_bios_info.csv').then(data=>{
-    const width = 4075, height = 720;
+    const width = 3075, height = 720;
     const {columns} = getColumnData(data);
 
     const keys = columns.map((d,i)=>{
@@ -122,11 +122,11 @@ function drawSankey (divID,{width,height}){
             .join("title")
             .text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
         paths
-            .attr("d", d3.sankeyLinkHorizontal())
+            .attr("d", linkPath)
             // .style('display',d=>((d.source.name==='')||(d.target.name===''))?'none':null)
-            .attr("stroke", d => color(d.names[0]))
-            .attr("stroke-opacity", 0.5)
-            .attr("stroke-width", d => d.width)
+            .attr("fill", d => color(d.names[0]))
+            .attr("fill-opacity", 0.5)
+            .attr("stroke-width", 0.1)
             .style("mix-blend-mode", "multiply");
         texts.selectAll("text")
             .data(nodes)
@@ -142,6 +142,23 @@ function drawSankey (divID,{width,height}){
             .attr("x", 0)
             .attr("y", 14)
             .text(d => `${d.value.toLocaleString()}`);
+        function horizontalSource(d) {
+            return [d.source.x1, d.y0];
+        }
+
+        function horizontalTarget(d) {
+            return [d.target.x0, d.y1];
+        }
+
+        function linkPath(d) {
+            const source = horizontalSource(d);
+            const target = horizontalTarget(d);
+            const thick = d.width/2;
+            const width = (target[0]-source[0])/2;
+            // return d3.line().curve(d3.curveBasis)([source,[source[0]+width,source[1]],[target[0]-width,target[1]],target]);
+            return `M ${source[0]} ${source[1]-thick} C ${source[0]+width} ${source[1]-thick}, ${target[0]-width} ${target[1]-thick}, ${target[0]} ${target[1]-thick} 
+            L ${target[0]} ${target[1]+thick} C ${target[0]-width} ${target[1]+thick}, ${source[0]+width} ${source[1]+thick}, ${source[0]} ${source[1]+thick} Z`;
+        }
     };
     return master;
 }
