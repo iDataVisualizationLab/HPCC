@@ -100,28 +100,34 @@ function drawSankey (divID,{width,height}){
         const color = d3.scaleOrdinal()
             .domain(columns[0].values.map(d=>d.key))
             .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"]).unknown("#ccc");
-        reactNode
+
+        const rect = reactNode
             .selectAll("rect")
-            .data(nodes)
-            .join("rect")
+            .data(nodes,d=>d.layer)
+            .join("rect");
+        rect
             .attr("x", d => d.x0)
             .attr("y", d => d.y0)
             .attr("height", d => d.y1 - d.y0)
-            .attr("width", d => d.x1 - d.x0)
-            .append("title")
+            .attr("width", d => d.x1 - d.x0);
+        rect.selectAll('title').data(d=>[d])
+            .join("title")
             .text(d => `${d.name}\n${d.value.toLocaleString()}`);
-        linksPath
+        debugger
+        const paths = linksPath
             .selectAll("path")
-            .data(links)
-            .join("path")
+            .data(links,d=>d.source.name+d.target.name)
+            .join("path");
+        paths.selectAll('title').data(d=>[d])
+            .join("title")
+            .text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+        paths
             .attr("d", d3.sankeyLinkHorizontal())
             // .style('display',d=>((d.source.name==='')||(d.target.name===''))?'none':null)
             .attr("stroke", d => color(d.names[0]))
             .attr("stroke-opacity", 0.5)
             .attr("stroke-width", d => d.width)
-            .style("mix-blend-mode", "multiply")
-            .append("title")
-            .text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+            .style("mix-blend-mode", "multiply");
         texts.selectAll("text")
             .data(nodes)
             .join("text")
