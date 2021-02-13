@@ -1,10 +1,20 @@
 
-
 d3.csv('src/data/all_bios_info.csv').then(data=>{
     const width = 4075, height = 720;
-    const {columns,color} = stackChart('#bar_chart',data,{width,height});
-    const graph = handleData(data,columns.map(k=>k.key));
-    drawSankey('#svg_main',graph,{width,height,color})
+    const {columns} = getColumnData(data);
+
+    const keys = columns.map((d,i)=>{
+        return d.key});
+    d3.select('#colorBy').selectAll('option').data(keys)
+        .join('option')
+        .attr('value',(d,i)=>i)
+        .text(d=>d);
+    d3.select('#colorBy').on('change',function(){
+        const choice = this.selectedIndex;
+        Sankey.draw(data,[columns[choice],...columns.slice(0,choice),...columns.slice(choice+1)]);
+    });
+    const Sankey = drawSankey('#svg_main',{width,height})
+    Sankey.draw(data,[columns[0],...columns.slice(1)])
 })
 
 
@@ -53,17 +63,13 @@ function handleData(data,keys){
     return {nodes, links, keys};
 }
 
-function drawSankey (divID,graph,{width,height,color}){
+function drawSankey (divID,{width,height}){
     sankey = d3.sankey()
         .nodeSort(null)
         .linkSort(null)
         .nodeWidth(4)
         .nodePadding(20)
         .extent([[0, 5], [width, height - 5]])
-    const {nodes, links} =  sankey({
-        nodes: graph.nodes.map(d => Object.assign({}, d)),
-        links: graph.links.map(d => Object.assign({}, d))
-    });
 
     // const color = d3.scaleOrdinal(graph.keys, d3.schemeCategory10).unknown("#ccc")
 
@@ -72,51 +78,67 @@ function drawSankey (divID,graph,{width,height,color}){
     .attr("width", width)
     .attr("height", height);
 
+    const reactNode = svg.append("g")
+        .attr('class','rectNodes');
 
-    svg.append("g")
-        .selectAll("rect")
-        .data(nodes)
-        .join("rect")
-        .attr("x", d => d.x0)
-        .attr("y", d => d.y0)
-        .attr("height", d => d.y1 - d.y0)
-        .attr("width", d => d.x1 - d.x0)
-        // .style('display',d=>d.name===''?'none':null)
-        // .style('fill',d=>color[d.name])
-        .append("title")
-        .text(d => `${d.name}\n${d.value.toLocaleString()}`);
+    const linksPath = svg.append("g")
+        .attr("class", "links")
+        .attr("fill", "none");
 
-    svg.append("g")
-        .attr("fill", "none")
-        .selectAll("g")
-        .data(links)
-        .join("path")
-        .attr("d", d3.sankeyLinkHorizontal())
-        // .style('display',d=>((d.source.name==='')||(d.target.name===''))?'none':null)
-        .attr("stroke", d => color[d.names[1]])
-        .attr("stroke-opacity", 0.5)
-        .attr("stroke-width", d => d.width)
-        .style("mix-blend-mode", "multiply")
-        .append("title")
-        .text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+    const texts = svg.append("g")
+        .attr('class','texts')
+        .style("font", "10px sans-serif");
 
-    svg.append("g")
-        .style("font", "10px sans-serif")
-        .selectAll("text")
-        .data(nodes)
-        .join("text")
-        .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
-        .attr("y", d => (d.y1 + d.y0) / 2)
-        .attr("dy", "0.35em")
-        .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
-        // .style('display',d=>d.name===''?'none':null)
-        .text(d => d.name)
-        .append("tspan")
-        .attr("fill-opacity", 0.7)
-        .text(d => ` ${d.value.toLocaleString()}`);
+    const master = {};
+    master.draw=(data,columns)=>{
+        const keys = columns.map(k=>k.key);
+        const graph = handleData(data,keys);
+        const {nodes, links} =  sankey({
+            nodes: graph.nodes.map(d => Object.assign({}, d)),
+            links: graph.links.map(d => Object.assign({}, d))
+        });
+        const color = d3.scaleOrdinal()
+            .domain(columns[0].values.map(d=>d.key))
+            .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"]).unknown("#ccc");
+        reactNode
+            .selectAll("rect")
+            .data(nodes)
+            .join("rect")
+            .attr("x", d => d.x0)
+            .attr("y", d => d.y0)
+            .attr("height", d => d.y1 - d.y0)
+            .attr("width", d => d.x1 - d.x0)
+            .append("title")
+            .text(d => `${d.name}\n${d.value.toLocaleString()}`);
+        linksPath
+            .selectAll("path")
+            .data(links)
+            .join("path")
+            .attr("d", d3.sankeyLinkHorizontal())
+            // .style('display',d=>((d.source.name==='')||(d.target.name===''))?'none':null)
+            .attr("stroke", d => color(d.names[0]))
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke-width", d => d.width)
+            .style("mix-blend-mode", "multiply")
+            .append("title")
+            .text(d => `${d.names.join(" → ")}\n${d.value.toLocaleString()}`);
+        texts.selectAll("text")
+            .data(nodes)
+            .join("text")
+            .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
+            .attr("y", d => (d.y1 + d.y0) / 2)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
+            // .style('display',d=>d.name===''?'none':null)
+            .text(d => d.name)
+            .append("tspan")
+            .attr("fill-opacity", 0.7)
+            .text(d => ` ${d.value.toLocaleString()}`);
+    };
+    return master;
 }
 
-function stackChart(divID,data,{width,height}){
+function getColumnData(data){
 
     const keys = data.columns;//.slice(2,40).filter(d=>d!=='SystemServiceTag');
     const keysObject = {};
@@ -127,8 +149,8 @@ function stackChart(divID,data,{width,height}){
         keys.forEach(k=>keysObject[k].values[d[k]]=(keysObject[k].values[d[k]]??0)+1)
     });
 
-    const svg = d3.select(divID)
-        .attr("viewBox", [0, 0, width, height]);
+    // const svg = d3.select(divID)
+    //     .attr("viewBox", [0, 0, width, height]);
 
     let dataViz = Object.values(keysObject);
     dataViz.forEach(d=>{
@@ -140,24 +162,24 @@ function stackChart(divID,data,{width,height}){
             return item;
         })
     });
-    const color = {};
+    // const color = {};
     dataViz=dataViz.filter(d=>{
         d.values=d.values.filter(e=>e.key!=='');
         if (d.values.length<=2 || d.values.length>=data.length/2)
             return false;
-        const colorIn = d3.scaleOrdinal()
-            .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"]);
+        // const colorIn = d3.scaleOrdinal()
+        //     .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"]);
         let count = 0;
         d.values.sort((a,b)=>b.value-a.value)
         d.values.forEach(e=>{
             e.start = count;
             count+=e.value;
             e.end = count;
-            color[e.key] = colorIn(e.key);
+            // color[e.key] = colorIn(e.key);
         });
         return true;
     });
-    color[""]="#7f7f7f";
+    // color[""]="#7f7f7f";
     // let xscale = d3.scaleBand().domain(dataViz.map(d => d.key)).range([0,width]).padding(0.1);
     // let yscale = d3.scaleLinear().domain([0,data.length]).range([height,0]);
     //
@@ -170,5 +192,6 @@ function stackChart(divID,data,{width,height}){
     //     .attr('height',d=>-yscale(d.end)+yscale(d.start))
     //     .attr("width", xscale.bandwidth())
     //     .style('fill',d=>color[d.key]);
-    return {columns:dataViz,color};
+    // return {columns:dataViz,color};
+    return {columns:dataViz};
 }
