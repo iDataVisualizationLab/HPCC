@@ -125,15 +125,17 @@ function drawSankey (divID,{width,height}){
         texts.selectAll("text")
             .data(nodes)
             .join("text")
-            .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
-            .attr("y", d => (d.y1 + d.y0) / 2)
+            .attr("transform", d => `translate(${d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6},${(d.y1 + d.y0) / 2})`)
             .attr("dy", "0.35em")
             .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
             // .style('display',d=>d.name===''?'none':null)
-            .text(d => d.name)
-            .append("tspan")
+            .text(d => `"${d.name}"`)
+            .selectAll('tspan').data(d=>[d])
+            .join("tspan")
             .attr("fill-opacity", 0.7)
-            .text(d => ` ${d.value.toLocaleString()}`);
+            .attr("x", 0)
+            .attr("y", 14)
+            .text(d => `${d.value.toLocaleString()}`);
     };
     return master;
 }
