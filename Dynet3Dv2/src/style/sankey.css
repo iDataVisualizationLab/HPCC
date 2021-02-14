@@ -1,0 +1,16 @@
+.onhighlight2 .outer_node.highlight.highlight2,
+.onhighlight2.onhighlight .outer_node.highlight.highlight2,
+.onhighlight .outer_node.highlight,
+.onhighlight .vticks.highlight,
+.onhighlight2 .vticks.highlight.highlight2
+{
+    opacity: 1;
+    pointer-events: all;
+}
+.onhighlight2 .outer_node, .onhighlight2.onhighlight .outer_node.highlight, .onhighlight .outer_node{
+    pointer-events: none;
+}
+
+.highlightText {
+    font-size:20px
+}
