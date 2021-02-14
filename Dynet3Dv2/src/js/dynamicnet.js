@@ -2,8 +2,8 @@ let DynamicNet = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 20},
-        width: 450,
-        height: 450,
+        width: 1050,
+        height: 650,
         scalezoom: 1,
         zoom:d3.zoom(),
         widthView: function () {
@@ -82,31 +82,32 @@ let DynamicNet = function(){
     master.draw = function() {
         debugger
         // compare net
-        if (compareMode){
-            for (let i=1;i<data.net.length;i++){
-                debugger
-                const linkMap = new Map();
-                data.net[i-1].links.forEach(l=>{
-                    linkMap.set(l.source+'|||'+l.target,l);
-                });
-                data.net[i].links.forEach(l=>{
-                    const key = l.source+'|||'+l.target;
-                    if (!linkMap.has(key)) // new link
-                    {
-                        l.isNew = true;
-                        l.color = "green"
-                    }else{
-                        linkMap.delete(key);
-                    }
-                });
-                data.net[i].deletedLinks = [];
-                linkMap.forEach((value, key)=>data.net[i].deletedLinks.push(value));
-            }
-        }
+
         const t0 = performance.now();
         d3.select(maindiv).selectAll('*').remove();
+        debugger
+        const nodeObjs = data.root_nodes;
+        const linkObjs = {};
+        const deletedLinksObjs = {};
+        data.net.forEach(n=>{
+            n.nodes.forEach(n=>{
+                nodeObjs[n.id]=n.parent;
+                nodeObjs[n.id].tooltip = n.id
+            });
+            n.links.forEach(l=> {
+                if ((!linkObjs[l.source + l.target])||l.isNew)
+                    linkObjs[l.source + l.target] = l;
+            });
+            (n.deletedLinks??[]).forEach(l=> {
+                deletedLinksObjs[l.source + l.target] = l;
+            });
+        });
+        // const nodes = data.root_nodes;
+        const nodes = Object.values(nodeObjs);
+        const links = Object.values(linkObjs);
+        const dataTotal = {nodes,links,deletedLinks:Object.values(deletedLinksObjs),ti:0}
         d3.select(maindiv).selectAll('svg.dynamicSVg')
-            .data(data.net)
+            .data([dataTotal])
             .join('svg')
             .attr('class','dynamicSVg')
             .style('border','1px solid black')
@@ -117,8 +118,6 @@ let DynamicNet = function(){
                 const force = d3.forceSimulation()
                     .force("charge", d3.forceManyBody().strength(-10))
                     .force("link", d3.forceLink().id(d => d.id))
-                    .force("x", d3.forceX())
-                    .force("y", d3.forceY())
                     .on("tick", ticked)
                     .on('end',()=>{
                         console.timeLog('Force dynamic: ')
@@ -128,19 +127,19 @@ let DynamicNet = function(){
                 netControl.draw();
                 function ticked() {
                     const alpha = force.alpha();
-                    if (alpha<0.05){
-                        d3.select('.navbar-brand').text(performance.now()-t0)
-                        force.stop();
-                    }
-                    net.nodes.forEach(d=>{
-                        d.x += (d3.mean(d.parent.timeArr,e=>e.x)-d.x)*alpha*0.8;
-                        d.y += (d3.mean(d.parent.timeArr,e=>e.y)-d.y)*alpha*0.8;
-                    })
+                    // console.log(alpha)
+                    // if (alpha<0.001){
+                    //     d3.select('.navbar-brand').text(performance.now()-t0)
+                    //     force.stop();
+                    // }
                     netControl.ticked();
                 }
             });
 
-        onFinishDraw.forEach(d=>d({}));
+
+
+
+            onFinishDraw.forEach(d=>d({}));
     };
 
     master.main_svg = function(){return main_svg};
@@ -267,7 +266,7 @@ let DynamicNet = function(){
         const getData = getDataForce[key].getData;
         simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
-        simulation.alphaTarget(0.02).restart();
+        simulation.restart();
     }
     master.removeForce = function (key){
         g.select('.forces').selectAll('.forceSvg').filter(d=>d.key===key).remove();

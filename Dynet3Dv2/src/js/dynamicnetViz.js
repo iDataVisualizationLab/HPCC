@@ -201,9 +201,14 @@ let DynamicNetViz = function(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
         const _links = links.slice();
+
+        obj={};
+        data.nodes.forEach(d=>obj[d.id]=d);
+        debugger
         if (data.deletedLinks){
             data.deletedLinks.forEach(l=>{
-                _links.push({source:l.source.parent.timeArr[data.ti]??l.source,target:l.target.parent.timeArr[data.ti]??l.target,value:l.value,color:'rgb(255,0,0)',isDelete:true});
+                if (!l.source.id)
+                    _links.push({source:obj[l.source],target:obj[l.target],value:l.value,color:'rgb(255,0,0)',isDelete:true});
             });
         }
         console.log(_links.filter(l=>l.isDelete))
@@ -214,7 +219,7 @@ let DynamicNetViz = function(){
             .data(_links, d => [d.source.id, d.target.id])
             .join(enter=>{
                 enterLinks = enter.data().filter(d=>{
-                    if (d.target.data.isNew&&d.target.data.isNew.length){
+                    if (d.target.isNew&&d.target.isNew.length){
                         if (!labelsM.get(d.id)){
                             labels.push(d.source);
                             labelsM.set(d.id,d.source);}
@@ -235,6 +240,9 @@ let DynamicNetViz = function(){
             });
         link.each(function(d){
             d.node = d3.select(this);
+            if (!d.source.relatedNodes){
+                debugger
+            }
             d.source.relatedNodes.push(d.target);
             d.source.relatedLinks.push(d);
             d.target.relatedNodes.push(d.source);
@@ -257,7 +265,7 @@ let DynamicNetViz = function(){
             .append('text').attr('class','labels').text(d=>d.tooltip??d.id).attr('opacity',1);
         label = label_n.merge(label);
 
-        simulation.alphaTarget(0.02).restart();
+        simulation.restart();
         onFinishDraw.forEach(d=>d({removedLinks,enterLinks}));
 
         function updateOnode(p){
@@ -604,7 +612,7 @@ let DynamicNetViz = function(){
         const getData = getDataForce[key].getData;
         simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
-        simulation.alphaTarget(0.02).restart();
+        simulation.restart();
     }
     master.removeForce = function (key){
         g.select('.forces').selectAll('.forceSvg').filter(d=>d.key===key).remove();

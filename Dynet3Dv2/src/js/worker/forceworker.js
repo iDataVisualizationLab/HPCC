@@ -14,11 +14,10 @@ addEventListener('message', function ({data}) {
 
             const net = data.value;
             const root_nodes = {};
-            const links=[];
+            const linksObjs={};
             if (net.length) {
                 net.forEach(function (n, ni) {
                     const nodes = n.nodes;
-                    n.links.forEach(l=>links.push(l));
                     if (ni) {
                         nodes.forEach(n => {
                             root_nodes[n.id] = n.parent;
@@ -33,14 +32,19 @@ addEventListener('message', function ({data}) {
                     if (n.deletedLinks) {
                         n.deletedLinks = n.deletedLinks.map(l => {
                             return {
-                                source: root_nodes[l.source],
-                                target: root_nodes[l.target],
+                                source: root_nodes[l.source.id??l.source],
+                                target: root_nodes[l.target.id??l.target],
                                 value: l.value,
                                 color: 'rgb(255,0,0)',
                                 isDelete: true
                             };
                         });
                     }
+                    n.links.forEach(l=>{
+                        linksObjs[l.source+l.target] = l;
+                        l.source = root_nodes[l.source];
+                        l.target = root_nodes[l.target];
+                    });
                 });
 
 
@@ -68,7 +72,7 @@ addEventListener('message', function ({data}) {
                     });
 
                 force.nodes(nodes);
-                force.force("link").links(links);
+                force.force("link").links(Object.values(linksObjs));
                 postMessage({action: 'updateHighlight', sol: net});
 
 

@@ -893,8 +893,15 @@ let DynamicNet3D = function () {
                                 });
                                 if (net.deletedLinks) {
                                     net.deletedLinks.forEach((l, li) => {
-                                        const source = data.net[soli].nodes[(solution[soli].deletedLinks[li].source.timeArr[soli]??solution[soli].deletedLinks[li].source.timeArr[soli-1])._index];
-                                        const target = data.net[soli].nodes[(solution[soli].deletedLinks[li].target.timeArr[soli]??solution[soli].deletedLinks[li].target.timeArr[soli-1])._index];
+                                        let source,target;
+                                        if (solution[soli].deletedLinks[li].source.timeArr[soli])
+                                            source = data.net[soli].nodes[solution[soli].deletedLinks[li].source.timeArr[soli]._index];
+                                        else
+                                            source = data.net[soli-1].nodes[solution[soli].deletedLinks[li].source.timeArr[soli-1]._index];
+                                        if (solution[soli].deletedLinks[li].target.timeArr[soli])
+                                            target = data.net[soli].nodes[solution[soli].deletedLinks[li].target.timeArr[soli]._index];
+                                        else
+                                            target = data.net[soli-1].nodes[solution[soli].deletedLinks[li].target.timeArr[soli-1]._index];
                                         data.net[soli].deletedLinks[li].source = source;
                                         data.net[soli].deletedLinks[li].target = target;
                                         const points = [];
