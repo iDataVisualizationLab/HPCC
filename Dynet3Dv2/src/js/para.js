@@ -183,7 +183,7 @@ d3.parallelCoordinate = function () {
     };
     master.selectedID = ()=>selectedID;
     function updateVar(input, variable) {
-        if (input) {
+        if (input!==undefined) {
             runopt[variable] = input;
             return master;
         } else
@@ -205,11 +205,13 @@ function outlier(data,keys){
     debugger
     let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
     console.log('estimateSize:',estimateSize);
-    let maxBins = Math.sqrt(dataSpider3.length);
-    let minBins = Math.min(20,dataSpider3.length/4);
-    if (maxBins<minBins){
-        maxBins = Math.min(dataSpider3.length,minBins*2);
-    }
+    // let maxBins = Math.sqrt(dataSpider3.length);
+    // let minBins = Math.min(20,dataSpider3.length/4);
+    // if (maxBins<minBins){
+    //     maxBins = dataSpider3.length;
+    // }
+    let minBins = dataSpider3.length-1;
+    let maxBins = dataSpider3.length;
     let scagOptions ={
         startBinGridSize: estimateSize,
         minBins,
