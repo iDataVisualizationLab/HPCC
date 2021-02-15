@@ -9,11 +9,14 @@ let vizservice = [];
 
 function serviceControl() {
     vizservice = serviceFullList.slice();
+    const customAxis ={};
     vizservice.forEach((s, si) => {
         s._id = si;
         s.thresholdFilter = Math.round((s.range[1] - s.range[0]) * 0.9 + s.range[0]);
         s.thresholdFilterNormalize = 0.9;
+        customAxis[s.text]={range:[0,1],displayRange:s.range}
     });
+    parallelCoordinate.customAxis(customAxis)
     drawObject.service(vizservice)
     // .controlPanelGeneral({
     //         linePlot: {
@@ -90,7 +93,9 @@ function serviceControl() {
         .text(d=>d.text)
     d3.select('#lineChartOption').on('change',function(){
            drawObject.onShowLineChart(dataLine[this.selectedIndex]._id)
-        })
+        });
+
+
 }
 
 function initdraw() {

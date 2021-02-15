@@ -2,7 +2,8 @@ d3.parallelCoordinate = function () {
     const master = {};
     const runopt = {
         getRange: (data,key)=>d3.extent(data,runopt.getVal(key)),
-        getVal: (key)=>((d)=>d[key])
+        getVal: (key)=>((d)=>d[key]),
+        customAxis:{}
     };
     const graphicopt = {
         margin: {top: 20, right: 10, bottom: 20, left: 100},
@@ -61,14 +62,18 @@ d3.parallelCoordinate = function () {
         const {data,dimensionKey, getRange, getVal} = runopt;
         dimensions = dimensionKey.map((dim,order)=>{
             let range = getRange(data,dim);
+            const customAxis = runopt.customAxis[dim];
             if (!runopt.minmax)
-                if (range[0]>=0 && range[1]<=1)
-                    range = [0,1];
+                if (customAxis && customAxis.range)
+                    range = customAxis.range;
             const scale = d3.scaleLinear().domain(range).range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
             const brush = d3.brushX()
                 .extent([[scale.range()[0], -5], [scale.range()[1], 5]])
                 .on("brush end", brushed);
-            const axis = d3.axisBottom(scale).ticks(3);
+            let axis = d3.axisBottom(scale).ticks(5);
+            if (customAxis && customAxis.displayRange){
+                axis = d3.axisBottom(scale.copy().domain(customAxis.displayRange)).ticks(5);
+            }
             const dimControl = {range,scale,brush,order,axis,key:dim,el:{}};
             return dimControl;
             function brushed() {
@@ -171,6 +176,7 @@ d3.parallelCoordinate = function () {
         // end draw line
         filterData()
     };
+    master.customAxis = (input) => updateVar(input, 'customAxis');
     master.minmax = (input) => updateVar(input, 'minmax');
     master.dimensionKey = (input) => updateVar(input, 'dimensionKey');
     master.data = (input) => updateVar(input, 'data');
