@@ -435,6 +435,7 @@ function getUsers(_data) {
         .key(d => d.value[USER]) //user
         .key(d => d.key.split('.')[0]) //job array
         .object(d3.entries(jobs));
+    debugger
     const users = _.mapObject(user_job, (u, i) => {
         const job = [];
         let totalCore = 0;
@@ -562,14 +563,49 @@ function getChanged(data) {
     // });
     // return maxNode.id;
 }
-
+function summaryByUser(data){
+    const users = {};
+    Object.keys(data[COMPUTE]).forEach(comp=>{
+        data.time_stamp.forEach((t,ti)=>{
+            data[COMPUTE][comp].job_id[ti].forEach(jid=>{
+                const user_name = data[JOB][jid].user_name;
+                if (!users[user_name]){
+                    users[user_name] = {id:user_name,comps:{},time:{},values:[]}
+                }
+                if (!users[user_name].comps[comp]){
+                    users[user_name].comps[comp]=[];
+                }
+                if(!users[user_name].comps[comp][ti]){
+                    users[user_name].values.push(tsnedata[comp][ti])
+                    users[user_name].comps[comp][ti] = tsnedata[comp][ti];
+                    users[user_name].time[ti] = true;
+                }
+            });
+        });
+    });
+    const dataViz = [];
+    Object.values(users).forEach(u=>{
+        const el = {id:u.id};
+        u.mean = serviceFullList.map((s,si)=>{
+            el[s.text] = d3.mean(u.values,v=>v[si]<0?undefined:v[si]);
+            return {key:s.text,value:el[s.text]};
+        });
+        u.totalTime = Object.keys(u.time).length*5*60*1000;
+        u.totalNode = Object.keys(u.comps).length;
+        el['Duration'] = u.totalTime;
+        el['#Computes'] = u.totalNode;
+        dataViz.push(el)
+    });
+    return dataViz;
+}
 function handleRankingData(data) {
     data.time_stamp = data.time_stamp.slice(0, 144)
     console.time('handleRankingData');
-    Layout.usersStatic = getUsers(data);
     Layout.timespan = data.time_stamp;
     tsnedata = handleDataUrl(data).tsnedata;
+    Layout.usersStatic = getUsers(data);
     handleDataComputeByUser.data = data;
+    parallelCoordinate.data(summaryByUser(data));
     // userPie.data(Layout.usersStatic).draw();
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
     d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d => d.type).entries(Layout.netFull.root_nodes.map(d => ({

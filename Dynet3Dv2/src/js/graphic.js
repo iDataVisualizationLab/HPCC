@@ -144,11 +144,11 @@ function initdraw() {
         currentDraw();
     });
 
-    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData)
+    drawObject.init().getColorScale(getColorScale).getRenderFunc(getRenderFunc).getDrawData(getDrawData);
         // .onFinishDraw(makelegend)
     // .onFinishDraw(updateNarration);
     // initDragItems('#ForceByMetrics','metric');
-
+    parallelCoordinate.init('#paralell');
     d3.select('#modelFilterToolBtn').on('click', function () {
         const choice = $('#modelFilterToolInput').val();
         d3.select(this).text('Applied')
@@ -170,6 +170,30 @@ function initdraw() {
     d3.select('#disableJobArray').on('change',function(){
         handleDataComputeByUser.disableArrayjob =this.checked;
         regenerateFullData();
+    });
+
+    d3.select('#filter_apply_para').on('click',function(){
+        Layout.userTimeline = filterData(parallelCoordinate.selectedID(), Layout.netFull);
+        getChanged(Layout.userTimeline);
+        // drawObject.graphicopt({plotMetric: nodes.length !== 0})
+        drawGantt();
+    });
+
+    d3.select('#paraDimColtrol').selectAll('option')
+        .data([...serviceFullList.map(s=>s.text),'Duration','#Computes'])
+        .join('option')
+        .attr('value',d=>d)
+        .attr('selected','selected')
+        .text(d=>d);
+    $('#paraDimColtrol').multiselect({
+        enableFiltering: true,
+        includeSelectAllOption: true,
+        nonSelectedText: 'Select Dimensions',
+        maxHeight: 200
+    });
+    $('#paraDimColtrol').on('change',function(){
+        parallelCoordinate.dimensionKey($('#paraDimColtrol').val())
+            .draw();
     })
 }
 
@@ -951,11 +975,15 @@ function getColorGant() {
 function drawGantt() {
     drawObject.data(Layout.userTimeline).draw()
 }
-
+function drawPara(){
+    parallelCoordinate.graphicopt({width: 280}).dimensionKey($('#paraDimColtrol').val())
+        .draw();
+}
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d) {
     return `<span>${d}</span>`
 })
 let drawObject = new DynamicNet3D();
+let parallelCoordinate = d3.parallelCoordinate();
 // let drawObject = new DynamicNet();
 // let PCAmapObject = new PCAmap();

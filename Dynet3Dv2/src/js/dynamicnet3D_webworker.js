@@ -426,6 +426,10 @@ let DynamicNet3D = function () {
                                     l.source.timeArr[i].filtered = true;
                                     l.target.timeArr[i].filtered = true;
                                     dynamicVizs.links[l.target.id]._visible = true;
+                                }else{
+                                    l.source.filtered = false;
+                                    l.target.filtered = false;
+                                    dynamicVizs.links[l.target.id]._visible = false;
                                 }
                             });
                             data.sol[i].deletedLinks.forEach(l => {
@@ -439,9 +443,9 @@ let DynamicNet3D = function () {
                                     // dynamicVizs.links[n.id]._visible = true;
                                 } else
                                     dynamicVizs[i].nodes._alpha[ni] = 0;
-                            })
+                            });
                             if (graphicopt.showChanged) {
-                                dynamicVizs[i].nodes._array_old = dynamicVizs[i].nodes.geometry.attributes.alpha.array.slice();
+                                // dynamicVizs[i].nodes._array_old = dynamicVizs[i].nodes.geometry.attributes.alpha.array.slice();
                                 dynamicVizs[i].nodes.geometry.attributes.alpha.array = dynamicVizs[i].nodes._alpha.slice();
                                 dynamicVizs[i].nodes.geometry.attributes.alpha.needsUpdate = true;
                             }
@@ -465,7 +469,6 @@ let DynamicNet3D = function () {
                     }
                     break;
                 case "stable":
-                    debugger
                     if (firstReturn) {
                         updateProcess()
                         firstReturn = false;
@@ -849,7 +852,6 @@ let DynamicNet3D = function () {
         if (isneedCompute) {
             try {
                 if (islast) {
-                    debugger
                     if (solution&&solution.length) {
                         console.time('rendering last time: ');
                         solution.forEach((sol, soli) => {
@@ -888,8 +890,6 @@ let DynamicNet3D = function () {
                                     l.geometry.setFromPoints(points);
                                     l.geometry.attributes.position.needsUpdate = true;
                                     l.geometry.computeBoundingBox();
-                                    // lines[target.name].geometry.verticesNeedUpdate = true;
-                                    //  lines[target.name].geometry.computeBoundingBox();
                                 });
                                 if (net.deletedLinks) {
                                     net.deletedLinks.forEach((l, li) => {
@@ -910,8 +910,6 @@ let DynamicNet3D = function () {
                                         l.geometry.setFromPoints(points);
                                         l.geometry.attributes.position.needsUpdate = true;
                                         l.geometry.computeBoundingBox();
-                                        // lines[target.name].geometry.verticesNeedUpdate = true;
-                                        //  lines[target.name].geometry.computeBoundingBox();
                                     })
                                 }
                             }
@@ -1646,7 +1644,6 @@ let DynamicNet3D = function () {
             const holder = metricPlot.getObjectByName('lineChartHolder');
             const timeMarker = metricPlot.getObjectByName('timeMarker');
             if (id !== undefined) {
-                console.log(holder)
                 if (holder) {
                     holder.children.forEach(c => {
                         if (c.name === 'lineChart' + id) {

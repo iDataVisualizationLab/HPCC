@@ -417,15 +417,14 @@ let DynamicNet3D = function () {
                 case "updateHighlight":
                     if (dynamicVizs[0]) {
                         disableMouseover = true;
-                        table_info.select(`.totalForce`).text(data.totalForces);
                         // if (graphicopt.showChanged) {
                         //     dynamicVizs[0].nodes._array_old = dynamicVizs[0].nodes.geometry.attributes.alpha.array.slice();
                         // }
                         for (let i = 1; i < data.sol.length; i++) {
                             data.sol[i].links.forEach((l, li) => {
                                 if (l.isNew) {
-                                    l.source.filtered = true;
-                                    l.target.filtered = true;
+                                    l.source.timeArr[i].filtered = true;
+                                    l.target.timeArr[i].filtered = true;
                                     dynamicVizs.links[l.target.id]._visible = true;
                                 }else{
                                     l.source.filtered = false;
@@ -434,8 +433,8 @@ let DynamicNet3D = function () {
                                 }
                             });
                             data.sol[i].deletedLinks.forEach(l => {
-                                l.source.filtered = true;
-                                l.target.filtered = true;
+                                (l.source.timeArr[i]??l.source.timeArr[i-1]).filtered = true;
+                                (l.target.timeArr[i]??l.target.timeArr[i-1]).filtered = true;
                                 dynamicVizs.links[l.target.id]._visible = true;
                             });
                             data.sol[i].nodes.forEach((n, ni) => {
@@ -855,15 +854,16 @@ let DynamicNet3D = function () {
         if (isneedCompute) {
             try {
                 if (islast) {
-                    if (solution.length) {
+                    if (solution&&solution.length) {
                         console.time('rendering last time: ');
                         solution.forEach((sol, soli) => {
                             const points = dynamicVizs[soli].nodes;
                             let p = points.geometry.attributes.position.array;
                             onrendercalled = true;
-                            sol.nodes.forEach(function (d, pointIndex) {
+                            sol.nodes.forEach(function (target, pointIndex) {
                                 // mapIndex.forEach(function (i) {
-                                const target = data.net[soli].nodes[pointIndex];
+                                target._x = target.parent.x;
+                                target._y = target.parent.y;
                                 target.x = graphicopt.expand.xy * target._x;
                                 target.y = graphicopt.expand.xy * target._y;
                                 p[pointIndex * 3] = target.x;
@@ -872,15 +872,12 @@ let DynamicNet3D = function () {
                                 // 3rd dimension as time step
                                 // p[pointIndex*3+2] = xscale(d[2])||0;
                                 p[pointIndex * 3 + 2] = scaleNormalTimestep(Math.ceil(soli / graphicopt.timeResolution) * graphicopt.timeResolution);
-                                d.z = p[pointIndex * 3 + 2];
-                                target.z = d.z;
+                                target.z = p[pointIndex * 3 + 2];
                             });
                             if (islast) {
                                 // apply full
                                 const net = dynamicVizs[soli];
                                 net._links.forEach((l, li) => {
-                                    data.net[soli].links[li].source = data.net[soli].nodes[solution[soli].links[li].source._index];
-                                    data.net[soli].links[li].target = data.net[soli].nodes[solution[soli].links[li].target._index];
                                     const source = data.net[soli].links[li].source;
                                     const target = data.net[soli].links[li].target;
                                     const points = [];
@@ -889,23 +886,26 @@ let DynamicNet3D = function () {
                                     l.geometry.setFromPoints(points);
                                     l.geometry.attributes.position.needsUpdate = true;
                                     l.geometry.computeBoundingBox();
-                                    // lines[target.name].geometry.verticesNeedUpdate = true;
-                                    //  lines[target.name].geometry.computeBoundingBox();
                                 });
                                 if (net.deletedLinks) {
                                     net.deletedLinks.forEach((l, li) => {
-                                        const source = solution[soli].deletedLinks[li].source;
-                                        const target = solution[soli].deletedLinks[li].target;
+                                        let source,target;
+                                        if (solution[soli].deletedLinks[li].source.timeArr[soli])
+                                            source = data.net[soli].nodes[solution[soli].deletedLinks[li].source.timeArr[soli]._index];
+                                        else
+                                            source = data.net[soli-1].nodes[solution[soli].deletedLinks[li].source.timeArr[soli-1]._index];
+                                        if (solution[soli].deletedLinks[li].target.timeArr[soli])
+                                            target = data.net[soli].nodes[solution[soli].deletedLinks[li].target.timeArr[soli]._index];
+                                        else
+                                            target = data.net[soli-1].nodes[solution[soli].deletedLinks[li].target.timeArr[soli-1]._index];
                                         data.net[soli].deletedLinks[li].source = source;
                                         data.net[soli].deletedLinks[li].target = target;
                                         const points = [];
-                                        points.push(new THREE.Vector3(source.x, source.y, source.z));
-                                        points.push(new THREE.Vector3(target.x, target.y, target.z));
+                                        points.push(new THREE.Vector3(source.x * graphicopt.expand.xy, source.y * graphicopt.expand.xy, source.z));
+                                        points.push(new THREE.Vector3(target.x * graphicopt.expand.xy, target.y * graphicopt.expand.xy, target.z));
                                         l.geometry.setFromPoints(points);
                                         l.geometry.attributes.position.needsUpdate = true;
                                         l.geometry.computeBoundingBox();
-                                        // lines[target.name].geometry.verticesNeedUpdate = true;
-                                        //  lines[target.name].geometry.computeBoundingBox();
                                     })
                                 }
                             }
@@ -1447,7 +1447,6 @@ let DynamicNet3D = function () {
             [
                 {text: "Input", type: "title"},
                 {label: '#Time-steps', content: (data.net ?? []).length, variable: 'datain'},
-                {label: '#Projected steps', content: 0, variable: 'totalForce'},
             ],
             [
                 {text: "Settings", type: "title"},

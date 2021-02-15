@@ -213,12 +213,14 @@
                         </div>
                         <ul class="nav nav-tabs">
                             <!--                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab"
+                            <li class="nav-item"><a class="nav-link " data-toggle="tab" role="tab"
                                                     href="#modelWorkerInformation">Control</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#analyticOnToolbarHolder">Filter</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#clusterViewOnToolbarHolder">Group</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab"
+                                                    href="#paralellOnToolbarHolder">User P.C.</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#userOnToolbarHolder">User list</a></li>
                             <!--                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#RankingListHolder">Ranking</a></li>-->
@@ -368,7 +370,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="modelWorkerInformation" class="tab-pane fade show active col-12" role="tabpanel">
+                            <div id="modelWorkerInformation" class="tab-pane fade col-12" role="tabpanel">
                                 <div id="modelSelectionInformation">
                                     <!--                                            <ul class="nav nav-tabs" style="margin-top: 10px">-->
                                     <!--                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>-->
@@ -405,6 +407,16 @@
                                     <!--                                                </div>-->
                                     <!--                                            </div>-->
                                     <!--                                            </div>-->
+                                </div>
+                            </div>
+                            <div id="paralellOnToolbarHolder" class="tab-pane fade show active col-12" role="tabpanel">
+                                <div class="input-group">
+                                    <select id="paraDimColtrol" multiple="multiple"></select>
+                                </div>
+                                <div id="paralell"></div>
+                                <div class="col-12 justify-content-md-center">
+                                    <button type="button" id="filter_apply_para" class="btn btn-sm btn-primary input-group-text">Filter
+                                    </button>
                                 </div>
                             </div>
                             <div id="userOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
@@ -570,13 +582,14 @@
 <script src="src/js/dynamicnet3D_webworker.js"></script>
 <link rel="stylesheet" href="../HiperView/css/nouislider.css"/>
 <script src="../HiperView/js/nouislider.js"></script>
-
+<!--<script src="../HiperView/js/outliagnostics.min.js"></script>-->
+<script src="../HiperView/js/scagnosticsnd.min.js"></script>
 <script src="src/js/sidebar.js"></script>
 
 <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
 <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
 <script src="src/js/ulti.js"></script>
-<script src="src/lib/radarChart.js"></script>
+<script src="src/js/para.js"></script>
 <!--    <script src="src/js/timeline.js"></script>-->
 <script src="src/js/simulation.js"></script>
 <script src="src/js/setting.js"></script>

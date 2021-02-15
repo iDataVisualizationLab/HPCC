@@ -83,7 +83,6 @@ function initTimeElement(){
         //queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
     }else{
        // request.setInterval(1000);
-        debugger
         request.onFinishQuery.push(queryData);
         request.onDataChange.push((data)=> queryLayout().then(()=>{
             updateProcess({percentage:50,text:'Preprocess data'})
@@ -91,6 +90,7 @@ function initTimeElement(){
                 handleRankingData(data);
                 updateProcess({percentage:80,text:'Preprocess data'})
                 drawUserList();
+                drawPara();
                 // initdrawGantt();
                 drawGantt();
                 // timelineControl.play.bind(timelineControl)();
