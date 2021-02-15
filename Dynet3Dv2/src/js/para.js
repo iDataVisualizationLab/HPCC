@@ -61,8 +61,9 @@ d3.parallelCoordinate = function () {
         const {data,dimensionKey, getRange, getVal} = runopt;
         dimensions = dimensionKey.map((dim,order)=>{
             let range = getRange(data,dim);
-            if (range[0]>=0 && range[1]<=1)
-                range = [0,1];
+            if (!runopt.minmax)
+                if (range[0]>=0 && range[1]<=1)
+                    range = [0,1];
             const scale = d3.scaleLinear().domain(range).range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
             const brush = d3.brushX()
                 .extent([[scale.range()[0], -5], [scale.range()[1], 5]])
@@ -96,6 +97,7 @@ d3.parallelCoordinate = function () {
                     .style('stroke','white')
                     .style('paint-order','stroke')
             });
+        svg.selectAll('g.brush').remove();
         svg.selectAll('g.brush').data(dimensions)
             .join('g')
             .attr('class','brush')
@@ -169,6 +171,7 @@ d3.parallelCoordinate = function () {
         // end draw line
         filterData()
     };
+    master.minmax = (input) => updateVar(input, 'minmax');
     master.dimensionKey = (input) => updateVar(input, 'dimensionKey');
     master.data = (input) => updateVar(input, 'data');
     master.graphicopt = function (_data) {

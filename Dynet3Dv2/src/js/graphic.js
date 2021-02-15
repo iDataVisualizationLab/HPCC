@@ -195,6 +195,10 @@ function initdraw() {
         parallelCoordinate.dimensionKey($('#paraDimColtrol').val())
             .draw();
     })
+    d3.select('#minMaxScale').on('change',function(){
+        parallelCoordinate.minmax(this.checked)
+            .draw();
+    })
 }
 
 function onFilter() {
