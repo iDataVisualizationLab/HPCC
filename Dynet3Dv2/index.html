@@ -136,19 +136,12 @@
                     </ul>
                 </form>
             </nav>
-            <div class="container">
-                <div class="row align-items-center" style="margin-bottom: 20px">
-                    <div class="row col-12" id="timelineControl">
-
-                    </div>
-                </div>
-            </div>
             <div class="row" id="circularLayoutHolder"
-                 style="position: relative;height: calc(100vh - 116px);width: 100%; margin: 0px">
+                 style="position: relative;height: calc(100vh - 50px);width: 100%; margin: 0px">
                 <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
 
                 <!--                    <h5 class="text-center" style="width:100%" >Sankey by <span id="ganttLayoutLabel">#CPU Cores</span></h5>-->
-                <div id="dynamicHolder" style="width:100%;height:100%">
+                <div id="dynamicHolder" style="width:100%;height:100%; position: relative">
                     <canvas id="modelWorkerScreen" style="width:100%;height:100%"></canvas>
                     <svg id="modelWorkerScreen_svg" style="position:absolute;top:0;left:0; pointer-events: none">
                         <defs>
@@ -168,6 +161,10 @@
 
                         </g>
                     </svg>
+                    <div id ="sceneControl" style="position:absolute;top:0;left:0;width:200px;height:200px">
+<!--                        <button id="sceneControlTop">Top</button>-->
+                        <button id="sceneControlFront">Front</button>
+                    </div>
                 </div>
 
                 <div id="legendHolder" class="position-absolute card windown" style="top:0px;width: 320px; ;left: 70%">
@@ -213,13 +210,13 @@
                         </div>
                         <ul class="nav nav-tabs">
                             <!--                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
-                            <li class="nav-item"><a class="nav-link " data-toggle="tab" role="tab"
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab"
                                                     href="#modelWorkerInformation">Control</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#analyticOnToolbarHolder">Filter</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#clusterViewOnToolbarHolder">Group</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab"
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#paralellOnToolbarHolder">User P.C.</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
                                                     href="#userOnToolbarHolder">User list</a></li>
@@ -370,7 +367,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="modelWorkerInformation" class="tab-pane fade col-12" role="tabpanel">
+                            <div id="modelWorkerInformation" class="tab-pane fade show active col-12" role="tabpanel">
                                 <div id="modelSelectionInformation">
                                     <!--                                            <ul class="nav nav-tabs" style="margin-top: 10px">-->
                                     <!--                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>-->
@@ -409,7 +406,7 @@
                                     <!--                                            </div>-->
                                 </div>
                             </div>
-                            <div id="paralellOnToolbarHolder" class="tab-pane fade show active col-12" role="tabpanel">
+                            <div id="paralellOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="paraDimColtrol">Dimensions</label>

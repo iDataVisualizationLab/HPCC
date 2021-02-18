@@ -252,10 +252,11 @@ let DynamicNet3D = function () {
     // grahic
     let camera, isOrthographic = true, scene, axesHelper, axesTime, gridHelper, controls, raycaster, INTERSECTED = [],
         mouse,
+        coordinator,
         points, lines,
         scatterPlot, metricPlot, netPlot, colorarr, renderer, view, zoom, background_canvas, background_ctx,
         front_canvas,
-        front_ctx, svg, clusterMarker;
+        front_ctx, svg, clusterMarker,screenControlInfo;
     let fov = 100,
         near = 0.1,
         far = 7000;
@@ -319,9 +320,11 @@ let DynamicNet3D = function () {
                     mouseoverTrigger = true
                 })
                 .on('mousemove', function () {
-                    let coordinator = d3.mouse(this);
-                    mouse.x = (coordinator[0] / graphicopt.width) * 2 - 1;
-                    mouse.y = -(coordinator[1] / graphicopt.height) * 2 + 1;
+                    const _coordinator = d3.mouse(this);
+                    coordinator.x = _coordinator[0];
+                    coordinator.y = _coordinator[1];
+                    mouse.x = (_coordinator[0] / graphicopt.width) * 2 - 1;
+                    mouse.y = -(_coordinator[1] / graphicopt.height) * 2 + 1;
                     mouseoverTrigger = true;
                     isneedrender = true;
                     isMousemove = true;
@@ -425,17 +428,17 @@ let DynamicNet3D = function () {
                                 if (l.isNew) {
                                     l.source.timeArr[i].filtered = true;
                                     l.target.timeArr[i].filtered = true;
-                                    dynamicVizs.links[l.target.id]._visible = true;
+                                    // dynamicVizs.links[l.target.id]._visible = true;
                                 }else{
                                     l.source.filtered = false;
                                     l.target.filtered = false;
-                                    dynamicVizs.links[l.target.id]._visible = false;
+                                    // dynamicVizs.links[l.target.id]._visible = false;
                                 }
                             });
                             data.sol[i].deletedLinks.forEach(l => {
                                 (l.source.timeArr[i]??l.source.timeArr[i-1]).filtered = true;
                                 (l.target.timeArr[i]??l.target.timeArr[i-1]).filtered = true;
-                                dynamicVizs.links[l.target.id]._visible = true;
+                                // dynamicVizs.links[l.target.id]._visible = true;
                             });
                             data.sol[i].nodes.forEach((n, ni) => {
                                 if (n.filtered) {
@@ -491,6 +494,101 @@ let DynamicNet3D = function () {
     }
 
     let controll_metrics = {old: {zoom: undefined}};
+    function setupSceneControl(elem) {
+        let {width, height} = elem.getBoundingClientRect();
+        const scene = new THREE.Scene();
+        // const fov = 45;
+        // const aspect = 2;  // the canvas default
+        // const near = 0.1;
+        // const far = 5;
+        const camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, -700, 700 + 1);
+        // const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        // camera.position.set(0, 0, 2);
+        // camera.position.set(0, 0, getZFromScale(1));
+        scene.background = new THREE.Color(0xffffff);
+        camera.position.set(0, 0, width);
+        camera.lookAt(0, 0, 0);
+        let mouse = new THREE.Vector2();
+        d3.select(elem).on('mousemove',function(){
+            const _coordinator = d3.mouse(this);
+            mouse.x = (_coordinator[0] / width) * 2 - 1;
+            mouse.y = -(_coordinator[1] / height) * 2 + 1;
+            mouseoverTrigger = true;
+            isneedrender = true;
+            isMousemove = true;
+        }).on('mouseleave', () => {
+            mouseoverTrigger = false;
+            isMousemove = false;
+        });
+        const sceneInfo = {scene, camera, mouse, elem};
+
+
+        // const geometry = new THREE.BoxGeometry(30, 30, 30);
+        // const material = new THREE.MeshPhongMaterial({color: 'red'});
+        // const mesh = new THREE.Mesh(geometry, material);
+
+        var materialArray = [];
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/xpos.png' ) }));
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/xneg.png' ) }));
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/ypos.png' ) }));
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/yneg.png' ) }));
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/zneg.png' ) }));
+        materialArray.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'src/images/zpos.png' ) }));
+        const material = new THREE.MeshFaceMaterial(materialArray);
+        const geometry = new THREE.CubeGeometry( width/2*0.8, width/2*0.8, width/2*0.8, 1, 1, 1, materialArray );
+        const mesh = new THREE.Mesh(geometry, material);
+
+        sceneInfo.scene.add(mesh);
+        sceneInfo.mesh = mesh;
+        return sceneInfo;
+    }
+    function renderSceneInfo(sceneInfo,checkRay) {
+        const {scene, camera, elem, mouse} = sceneInfo;
+
+        // get the viewport relative position of this element
+        let {left, right, top, bottom, width, height} =
+            elem.getBoundingClientRect();
+        const parentSize = elem.parentElement.getBoundingClientRect();
+        right = right-parentSize.left;
+        bottom = bottom-parentSize.top;
+        left = left-parentSize.left;
+        top = top-parentSize.top;
+        const isOffscreen =
+            bottom < 0 ||
+            top > renderer.domElement.clientHeight ||
+            right < 0 ||
+            left > renderer.domElement.clientWidth;
+
+        if (isOffscreen) {
+            return;
+        }
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        const positiveYUpBottom = renderer.domElement.clientHeight - bottom;
+        renderer.setScissor(left, positiveYUpBottom, width, height);
+        renderer.setViewport(left, positiveYUpBottom, width, height);
+
+        if (checkRay){
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects( scene.children ,true);
+            if ( intersects.length > 0 ) {
+
+                const intersection = intersects[0];
+
+                const faceIndex = intersection.faceIndex;
+                console.log(faceIndex)
+                const object = intersection.object;
+
+                object.geometry.faces[ faceIndex ].color.set( Math.random() * 0xffffff );
+                object.geometry.colorsNeedUpdate = true;
+
+            }
+        }
+        renderer.render(scene, camera);
+    }
+
     master.init = function (arr) {
         updateProcess({percentage: 1, text: 'Prepare rendering ...'});
 
@@ -522,7 +620,7 @@ let DynamicNet3D = function () {
             // far = graphicopt.width / 2 / Math.tan(fov / 180 * Math.PI / 2) * 10;
             // camera = new THREE.PerspectiveCamera(fov, graphicopt.width / graphicopt.height, near, far + 1);
             far = graphicopt.width / 2 * 100;
-            near = 1;
+            near = -far;
             camera = new THREE.OrthographicCamera(graphicopt.width / -2, graphicopt.width / 2, graphicopt.height / 2, graphicopt.height / -2, near, far + 1);
             scene = new THREE.Scene();
             axesHelper = createAxes(graphicopt.widthG() / 4);
@@ -555,6 +653,7 @@ let DynamicNet3D = function () {
             raycaster = new THREE.Raycaster();
             raycaster.params.Points.threshold = graphicopt.component.dot.size;
             mouse = new THREE.Vector2();
+            coordinator = new THREE.Vector2();
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             // disable the tabIndex to avoid jump element
@@ -579,6 +678,9 @@ let DynamicNet3D = function () {
             d3.select('.modelHeader .title').text(self.name);
             handle_selection_switch(graphicopt.isSelectionMode);
 
+            screenControlInfo = setupSceneControl(document.querySelector('#sceneControl'));
+
+            d3.select('#sceneControlFront').on('click',()=>{setUpZoom(); isneedrender=true;});
 
             animate();
             needRecalculate = false;
@@ -1316,7 +1418,19 @@ let DynamicNet3D = function () {
                 }
                 // visibleLine(graphicopt.linkConnect);
                 controls.update();
+                camera.aspect = graphicopt.width / graphicopt.height;
+                camera.updateProjectionMatrix();
+                renderer.setScissor(0, 0, graphicopt.width, graphicopt.height);
+                renderer.setViewport(0, 0, graphicopt.width, graphicopt.height);
                 renderer.render(scene, camera);
+
+                renderer.clearDepth(); // important!
+                renderer.setScissorTest(true);
+                screenControlInfo.camera.position.copy(camera.position.clone().normalize().multiplyScalar(30));
+                screenControlInfo.camera.quaternion.copy(camera.quaternion);
+                renderSceneInfo(screenControlInfo,true);
+
+                renderer.setScissorTest(false);
                 checkInScreen();
                 // if ((graphicopt.component.label.enable == 1) && solution&& solution.length)
                 //     cluster.forEach(c => {
@@ -1391,7 +1505,7 @@ let DynamicNet3D = function () {
             netPlot.add(sliceHolder);
             net.nodes.forEach(n => {
                 if (!dynamicVizs.links[n.id]) {
-                    dynamicVizs.links[n.id] = {data: [], _visible: false};
+                    dynamicVizs.links[n.id] = {data: [], _visible: n.type==='user'};
                     dynamicVizs.links[n.id].id = n.id;
                 }
                 dynamicVizs.links[n.id].data.push(n);

@@ -63,16 +63,25 @@ d3.parallelCoordinate = function () {
         dimensions = dimensionKey.map((dim,order)=>{
             let range = getRange(data,dim);
             const customAxis = runopt.customAxis[dim];
-            if (!runopt.minmax)
+            let displayRange
+            if (!runopt.minmax){
                 if (customAxis && customAxis.range)
                     range = customAxis.range;
+                if (customAxis && customAxis.displayRange)
+                    displayRange = customAxis.displayRange;
+            }else{
+                if (customAxis && customAxis.range && customAxis.displayRange){
+                    const customscale = d3.scaleLinear().domain(customAxis.range).range(customAxis.displayRange)
+                    displayRange = range.map(r=>customscale(r));
+                }
+            }
             const scale = d3.scaleLinear().domain(range).range([graphicopt.margin.left,graphicopt.width-graphicopt.margin.right]);
             const brush = d3.brushX()
                 .extent([[scale.range()[0], -5], [scale.range()[1], 5]])
                 .on("brush end", brushed);
             let axis = d3.axisBottom(scale).ticks(5);
-            if (customAxis && customAxis.displayRange){
-                axis = d3.axisBottom(scale.copy().domain(customAxis.displayRange)).ticks(5);
+            if (displayRange){
+                axis = d3.axisBottom(scale.copy().domain(displayRange)).ticks(5);
             }
             const dimControl = {range,scale,brush,order,axis,key:dim,el:{}};
             return dimControl;
@@ -162,14 +171,14 @@ d3.parallelCoordinate = function () {
                 context.beginPath();
                 line(dimensions.map(dim=> getVal(dim.key)(d)));
                 context.lineWidth = 1;
-                context.strokeStyle = "rgba(0,0,119,0.5)";
+                context.strokeStyle = "rgba(0,0,119,0.2)";
                 context.stroke();
             });
             filterList.forEach(d=>{
                 context.beginPath();
                 line(dimensions.map(dim=> getVal(dim.key)(d)));
                 context.lineWidth = 1;
-                context.strokeStyle = "red";
+                context.strokeStyle = "#f0f";
                 context.stroke();
             });
         }
