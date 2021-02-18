@@ -675,7 +675,7 @@ function handleRankingData(data) {
 function regenerateFullData(){
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
     if (summaryInTime.changed)
-        parallelCoordinate.data(summaryInTime());
+        parallelCoordinate.data(summaryInTime()).draw();
     d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d => d.type).entries(Layout.netFull.root_nodes.map(d => ({
         id: d.id,
         type: d.type

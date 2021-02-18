@@ -227,13 +227,12 @@ function outlier(data,keys){
     // if (maxBins<minBins){
     //     maxBins = dataSpider3.length;
     // }
-    let minBins = dataSpider3.length-1;
+    let minBins = Math.min(100,dataSpider3.length-1);
     let maxBins = dataSpider3.length;
     let scagOptions ={
         startBinGridSize: estimateSize,
         minBins,
         maxBins,
-        // isBinned:true,
         outlyingCoefficient: 1.5,
         incrementA:2,
         incrementB:0,
@@ -249,8 +248,18 @@ function outlier(data,keys){
         dd.data = d;
         return dd;
     }), scagOptions);
+    debugger
     console.timeEnd('outline:');
-    console.log('Total bin=' + scag.bins.length);
+    // console.log('Total bin=' + scag.bins.length);
+    // console.log('Outlying bin=' +scag.outlyingPoints.length);
+    //
+    //
+    // const lists = {};
+    // scag.outlyingPoints.map((o)=>{
+    //     let d = o.data;
+    //     d.origin.outlier = 1;
+    //     lists[d.origin.id] = '#f0f';
+    // });
     console.log('Outlying bin=' +scag.outlyingBins.length);
 
 
