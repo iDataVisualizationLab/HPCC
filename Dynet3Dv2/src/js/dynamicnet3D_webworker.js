@@ -46,6 +46,7 @@ let DynamicNet3D = function () {
                 isNormalize: false,
                 schema: serviceFullList
             },
+            mainType:'user',
             curveSegment: 20,
             linkConnect: 'straight',
             showUser: true,
@@ -1517,7 +1518,7 @@ let DynamicNet3D = function () {
         }
         let connectedLinks = new THREE.Object3D();
         Object.keys(dynamicVizs.links).forEach(k => {
-            const el = createLineSegment(dynamicVizs.links[k], '#007');
+            const el = createLineSegment(dynamicVizs.links[k],  (colorMap[graphicopt.mainType]?colorMap[graphicopt.mainType][k]:undefined)??'#007');
             dynamicVizs.links[k].el = el;
             connectedLinks.add(el);
         });
@@ -1559,11 +1560,13 @@ let DynamicNet3D = function () {
                         colors[i * 3 + 0] = color.r / 255;
                         colors[i * 3 + 1] = color.g / 255;
                         colors[i * 3 + 2] = color.b / 255;
+                        dynamicVizs.links[n.id].el.material.color = new THREE.Color(color);
                     }else if (oldList[n.type] && oldList[n.type][n.id]){
                         let color = d3.color(n.drawData[0].color ?? 'black');
                         colors[i * 3 + 0] = color.r / 255;
                         colors[i * 3 + 1] = color.g / 255;
                         colors[i * 3 + 2] = color.b / 255;
+                        dynamicVizs.links[n.id].el.material.color = new THREE.Color(color);
                     }
                 });
                 net.nodes.geometry.attributes.customColor.needsUpdate = true;
@@ -1968,6 +1971,9 @@ let DynamicNet3D = function () {
     };
     master.getDrawData = function (_data) {
         return arguments.length ? (getDrawData = _data, master) : getDrawData;
+    };
+    master.mainType = function (_data) {
+        return arguments.length ? (graphicopt.mainType = _data, master) : graphicopt.mainType;
     };
     master.onFinishDraw = function (_data) {
         onFinishDraw.push(_data)

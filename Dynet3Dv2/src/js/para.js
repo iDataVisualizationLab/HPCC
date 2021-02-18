@@ -97,7 +97,9 @@ d3.parallelCoordinate = function () {
         });
         const outlierList = outlier(data,dimensionKey);
         runopt.updateOutlier(outlierList);
-        const outlierNum = Object.keys(outlierList).length;
+        debugger
+        const outlierNum = Object.values(outlierList).filter(d=>d==='#f0f').length;
+        const undefinedNum = Object.keys(outlierList).length - outlierNum;
         d3.select('#filter_result_para').text(data.length+' instances, '+outlierNum+' outlier'+(outlierNum>1?'s':''))
         graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom + graphicopt.elHeight*dimensions.length;
         updateSize();
@@ -164,7 +166,9 @@ d3.parallelCoordinate = function () {
                 .x(function(d,i) { return dimensions[i].scale(d);})
                 .y(function(d,i) { return dimPositionScale(i); })
                 .curve(d3.curveMonotoneY)
+                .defined(d=>(d>=0)||(d!==undefined))
                 .context(context);
+            const undefinedList = [];
             const filterList = [];
             data.forEach(d=>{
                 if (d.outlier){
@@ -174,7 +178,7 @@ d3.parallelCoordinate = function () {
                 context.beginPath();
                 line(dimensions.map(dim=> getVal(dim.key)(d)));
                 context.lineWidth = 1;
-                context.strokeStyle = "rgba(0,0,119,0.2)";
+                context.strokeStyle = outlierList[d.id]??"rgba(0,0,119,0.2)";
                 context.stroke();
             });
             filterList.forEach(d=>{
@@ -214,12 +218,27 @@ d3.parallelCoordinate = function () {
 function outlier(data,keys){
     console.time('outline:');
     let dataSpider3 = [];
+    const lists = {};
 
-    dataSpider3 = data.map(d=>{
-        const item = keys.map(k=>d[k]??0);
-        item.origin = d;
+    data.forEach(d=>{
+        let condition = true;
+        const item = [];
+        keys.find(k=>{
+            if ((d[k]===undefined) || (d[k]<0)){
+                condition = false;
+            }else{
+                item.push(d[k]);
+            }
+            return !condition;
+        });
         delete d.outlier;
-        return item
+        if (condition){
+            item.origin = d;
+            dataSpider3.push(item);
+        }else{
+            d.undefined = true;
+            lists[d.id] = 'rgba(200,200,200,0.8)'
+        }
     });
     debugger
     let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
@@ -266,7 +285,7 @@ function outlier(data,keys){
 
 
     debugger
-    const lists = {};
+
     scag.outlyingBins.map((ob,i)=>{
         ob.map(o=>{
             debugger
@@ -275,5 +294,6 @@ function outlier(data,keys){
             lists[d.origin.id] = '#f0f';
         });
     });
+    console.timeEnd('outline:');
     return lists;
 }
