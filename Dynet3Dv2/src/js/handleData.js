@@ -352,7 +352,6 @@ function handleDataComputeByUser_job(_data) {
                     }
                 });
                 // user
-                debugger
                 let username = d3.nest().key(d => d.mainJob)
                     // .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp]))
                     .rollup(d => d.length)
@@ -552,17 +551,19 @@ function getChanged(data) {
             nodeMap[value.target].ChangeCount++;
         });
     }
-
-    // let maxChange=0;
-    // let maxNode={};
-    // data.root_nodes.forEach(n=>{
-    //     if (n.ChangeCount>maxChange){
-    //         maxChange = n.ChangeCount;
-    //         maxNode = n
-    //     }
-    // });
-    // return maxNode.id;
 }
+const summaryInTime = function(){
+    if (summaryInTime.mode==='user'){
+        summaryInTime.changed = false;
+        return summaryByUser(summaryInTime.data);
+    }else{
+        summaryInTime.changed = false;
+        return summaryByJob(summaryInTime.data);
+    }
+};
+summaryInTime.mode='user';
+summaryInTime.changed = true;
+summaryInTime.data={};
 function summaryByUser(data){
     const users = {};
     Object.keys(data[COMPUTE]).forEach(comp=>{
@@ -598,6 +599,41 @@ function summaryByUser(data){
     });
     return dataViz;
 }
+function summaryByJob(data){
+    const jobs = {};
+    Object.keys(data[COMPUTE]).forEach(comp=>{
+        data.time_stamp.forEach((t,ti)=>{
+            data[COMPUTE][comp].job_id[ti].forEach(jid=>{
+                const jobID_Main = jid.split('.')[0];
+                if (!jobs[jobID_Main]){
+                    jobs[jobID_Main] = {id:jobID_Main,comps:{},time:{},values:[]}
+                }
+                if (!jobs[jobID_Main].comps[comp]){
+                    jobs[jobID_Main].comps[comp]=[];
+                }
+                if(!jobs[jobID_Main].comps[comp][ti]){
+                    jobs[jobID_Main].values.push(tsnedata[comp][ti])
+                    jobs[jobID_Main].comps[comp][ti] = tsnedata[comp][ti];
+                    jobs[jobID_Main].time[ti] = true;
+                }
+            });
+        });
+    });
+    const dataViz = [];
+    Object.values(jobs).forEach(u=>{
+        const el = {id:u.id};
+        u.mean = serviceFullList.map((s,si)=>{
+            el[s.text] = d3.mean(u.values,v=>v[si]<0?undefined:v[si]);
+            return {key:s.text,value:el[s.text]};
+        });
+        u.totalTime = Object.keys(u.time).length*5*60*1000;
+        u.totalNode = Object.keys(u.comps).length;
+        el['Duration'] = u.totalTime;
+        el['#Computes'] = u.totalNode;
+        dataViz.push(el)
+    });
+    return dataViz;
+}
 function handleRankingData(data) {
     data.time_stamp = data.time_stamp.slice(0, 144)
     console.time('handleRankingData');
@@ -605,7 +641,8 @@ function handleRankingData(data) {
     tsnedata = handleDataUrl(data).tsnedata;
     Layout.usersStatic = getUsers(data);
     handleDataComputeByUser.data = data;
-    parallelCoordinate.data(summaryByUser(data));
+    summaryInTime.data =data;
+    parallelCoordinate.data(summaryInTime());
     // userPie.data(Layout.usersStatic).draw();
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
     d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d => d.type).entries(Layout.netFull.root_nodes.map(d => ({
@@ -637,6 +674,8 @@ function handleRankingData(data) {
 }
 function regenerateFullData(){
     Layout.netFull = handleDataComputeByUser(handleDataComputeByUser.data);
+    if (summaryInTime.changed)
+        parallelCoordinate.data(summaryInTime());
     d3.select('#modelFilterToolInput').selectAll('optgroup').data(d3.nest().key(d => d.type).entries(Layout.netFull.root_nodes.map(d => ({
         id: d.id,
         type: d.type

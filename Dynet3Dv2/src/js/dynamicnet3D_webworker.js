@@ -366,7 +366,7 @@ let DynamicNet3D = function () {
         return color
     };
     let isFreeze = false;
-    let data = [], dynamicVizs = [];
+    let data = [], dynamicVizs = [], colorMap = {};
     let onFinishDraw = [];
     let getRenderFunc = function (d) {
         if (d.d) {
@@ -830,7 +830,7 @@ let DynamicNet3D = function () {
             pos[i * 3 + 1] = 0;
             pos[i * 3 + 2] = 0;
             // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            let color = d3.color(target.drawData[0].color ?? 'black');
+            let color = d3.color((colorMap[target.type]?colorMap[target.type][target.id]:undefined)?? target.drawData[0].color ?? 'black');
             colors[i * 3 + 0] = color.r / 255;
             colors[i * 3 + 1] = color.g / 255;
             colors[i * 3 + 2] = color.b / 255;
@@ -1547,7 +1547,31 @@ let DynamicNet3D = function () {
             isneedrender = true;
         });
     }
-
+    master.changeColor = function(list,type){
+        const oldList = JSON.parse(JSON.stringify(colorMap));
+        colorMap[type] = list;
+        if(dynamicVizs.length){
+            dynamicVizs.forEach((net,ni)=>{
+                const colors = net.nodes.geometry.attributes.customColor.array;
+                data.net[ni].nodes.forEach((n,i)=>{
+                    if (colorMap[n.type] && colorMap[n.type][n.id]){
+                        let color = d3.color(colorMap[n.type][n.id]);
+                        colors[i * 3 + 0] = color.r / 255;
+                        colors[i * 3 + 1] = color.g / 255;
+                        colors[i * 3 + 2] = color.b / 255;
+                    }else if (oldList[n.type] && oldList[n.type][n.id]){
+                        let color = d3.color(n.drawData[0].color ?? 'black');
+                        colors[i * 3 + 0] = color.r / 255;
+                        colors[i * 3 + 1] = color.g / 255;
+                        colors[i * 3 + 2] = color.b / 255;
+                    }
+                });
+                net.nodes.geometry.attributes.customColor.needsUpdate = true;
+            });
+            isneedrender = true;
+        }
+        return master;
+    };
     master.generateTable = function () {
         $("#modelWorkerInformation").draggable({containment: "parent", scroll: false});
         needRecalculate = true;

@@ -154,6 +154,8 @@ function initdraw() {
     // .onFinishDraw(updateNarration);
     // initDragItems('#ForceByMetrics','metric');
     parallelCoordinate.init('#paralell');
+    parallelCoordinate.updateOutlier((list)=>drawObject.changeColor(list,'user'))
+
     d3.select('#modelFilterToolBtn').on('click', function () {
         const choice = $('#modelFilterToolInput').val();
         d3.select(this).text('Applied')
@@ -168,6 +170,8 @@ function initdraw() {
     d3.select('#flowType').on('change',function(){
         const val = $(this).val();
         handleDataComputeByUser.mode=val;
+        summaryInTime.mode=val;
+        summaryInTime.changed = true;
         // d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
         regenerateFullData();
     })

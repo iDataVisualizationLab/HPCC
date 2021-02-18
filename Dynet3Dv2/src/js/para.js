@@ -3,6 +3,7 @@ d3.parallelCoordinate = function () {
     const runopt = {
         getRange: (data,key)=>d3.extent(data,runopt.getVal(key)),
         getVal: (key)=>((d)=>d[key]),
+        updateOutlier:()=>{},
         customAxis:{}
     };
     const graphicopt = {
@@ -94,8 +95,8 @@ d3.parallelCoordinate = function () {
                 filterData();
             }
         });
-        outlier(data,dimensionKey);
-        debugger
+        const outlierList = outlier(data,dimensionKey);
+        runopt.updateOutlier(outlierList)
         graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom + graphicopt.elHeight*dimensions.length;
         updateSize();
         //<axis>
@@ -189,6 +190,7 @@ d3.parallelCoordinate = function () {
     master.minmax = (input) => updateVar(input, 'minmax');
     master.dimensionKey = (input) => updateVar(input, 'dimensionKey');
     master.data = (input) => updateVar(input, 'data');
+    master.updateOutlier = (input) => updateVar(input, 'updateOutlier');
     master.graphicopt = function (_data) {
         if (arguments.length) {
             d3.keys(_data).forEach(k => graphicopt[k] = _data[k]);
@@ -231,6 +233,7 @@ function outlier(data,keys){
         startBinGridSize: estimateSize,
         minBins,
         maxBins,
+        // isBinned:true,
         outlyingCoefficient: 1.5,
         incrementA:2,
         incrementB:0,
@@ -252,11 +255,14 @@ function outlier(data,keys){
 
 
     debugger
+    const lists = {};
     scag.outlyingBins.map((ob,i)=>{
         ob.map(o=>{
             debugger
             let d = o.data;
             d.origin.outlier = 1;
+            lists[d.origin.id] = '#f0f';
         });
     });
+    return lists;
 }
