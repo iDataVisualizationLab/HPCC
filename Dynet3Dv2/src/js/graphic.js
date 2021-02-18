@@ -95,7 +95,26 @@ function serviceControl() {
            drawObject.onShowLineChart(dataLine[this.selectedIndex]._id)
         });
 
-
+    const outlyingCoefficient = d3.select('#outlyingCoefficient').node();
+    noUiSlider.create(outlyingCoefficient, {
+        start: 1.5,
+        tooltips: {
+            to: function (value) {
+                return d3.format('.1f')(value)
+            }, from: function (value) {
+                return +value.split('1e')[1];
+            }
+        },
+        step: 0.1,
+        orientation: 'horizontal', // 'horizontal' or 'vertical'
+        range: {
+            'min': 1.1,
+            'max': 4,
+        },
+    });
+    outlyingCoefficient.noUiSlider.on("change", function () { // control panel update method
+        parallelCoordinate.outlyingCoefficient(+this.get()).reRender();
+    });
 }
 
 function initdraw() {

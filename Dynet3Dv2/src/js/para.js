@@ -95,12 +95,18 @@ d3.parallelCoordinate = function () {
                 filterData();
             }
         });
-        const outlierList = outlier(data,dimensionKey);
-        runopt.updateOutlier(outlierList);
-        debugger
-        const outlierNum = Object.values(outlierList).filter(d=>d==='#f0f').length;
-        const undefinedNum = Object.keys(outlierList).length - outlierNum;
-        d3.select('#filter_result_para').text(data.length+' instances, '+outlierNum+' outlier'+(outlierNum>1?'s':''))
+
+        function getOutlier() {
+            const outlierList = outlier(data, dimensionKey, {outlyingCoefficient: runopt.outlyingCoefficient});
+            runopt.updateOutlier(outlierList);
+            debugger
+            const outlierNum = Object.values(outlierList).filter(d => d === '#f0f').length;
+            const undefinedNum = Object.keys(outlierList).length - outlierNum;
+            d3.select('#filter_result_para').text(data.length + ' instances, ' + outlierNum + ' outlier' + (outlierNum > 1 ? 's' : ''))
+            return outlierList;
+        }
+
+        let outlierList = getOutlier();
         graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom + graphicopt.elHeight*dimensions.length;
         updateSize();
         //<axis>
@@ -140,7 +146,6 @@ d3.parallelCoordinate = function () {
 
         // draw line
         function filterData(){
-            debugger
             let _data = data;
             selectedID = undefined;
             let actives = dimensions.filter(d=>d.active);
@@ -190,13 +195,19 @@ d3.parallelCoordinate = function () {
             });
         }
         // end draw line
+        master.reRender = ()=>{
+            outlierList = getOutlier();
+            filterData();
+        };
         filterData()
     };
+    master.reRender = ()=>{};
     master.customAxis = (input) => updateVar(input, 'customAxis');
     master.minmax = (input) => updateVar(input, 'minmax');
     master.dimensionKey = (input) => updateVar(input, 'dimensionKey');
     master.data = (input) => updateVar(input, 'data');
     master.updateOutlier = (input) => updateVar(input, 'updateOutlier');
+    master.outlyingCoefficient = (input) => updateVar(input, 'outlyingCoefficient');
     master.graphicopt = function (_data) {
         if (arguments.length) {
             d3.keys(_data).forEach(k => graphicopt[k] = _data[k]);
@@ -215,7 +226,7 @@ d3.parallelCoordinate = function () {
     return master
 };
 
-function outlier(data,keys){
+function outlier(data,keys,{outlyingCoefficient}){
     console.time('outline:');
     let dataSpider3 = [];
     const lists = {};
@@ -251,10 +262,11 @@ function outlier(data,keys){
     let minBins = Math.min(100,dataSpider3.length-1);
     let maxBins = dataSpider3.length;
     let scagOptions ={
-        // startBinGridSize: estimateSize,
+        startBinGridSize: estimateSize,
         // minBins,
         // maxBins,
-        outlyingCoefficient: 1.5,
+        // outlyingCoefficient: 1.5,
+        outlyingCoefficient: outlyingCoefficient??1.5,
         // incrementA:2,
         // incrementB:0,
         // decrementA:1 / 3,
