@@ -59,7 +59,7 @@ let DynamicNet3D = function () {
             filter: {distance: 0.5},
             timeResolution: 1,
             component: {
-                dot: {size: 5, opacity: 0.5, filter: {size: 5, opacity: 0.1}, 'user': {size: 10}},
+                dot: {size: 5, opacity: 0.5, filter: {size: 5, opacity: 0.1}, 'user': {size: 10}, 'job': {size: 10}},
                 link: {size: 1, opacity: 0.5, highlight: {opacity: 1}},
                 label: {enable: false}
             },
@@ -101,7 +101,7 @@ let DynamicNet3D = function () {
                 }
             },
             showLineConnect: {
-                text: "Show User timelines",
+                text: "Show <span class='instanceStyle'>User</span> timelines",
                 type: "checkbox",
                 variable: 'showLineConnect',
                 values: true,
@@ -1634,7 +1634,7 @@ let DynamicNet3D = function () {
 
     function updateTableControl(d) {
         if (d.text !== undefined) // value display only
-            d3.select(this).text(d.text);
+            d3.select(this).html(d.text);
         else { // other component display
             let formatvalue = formatTable[d.content.variable] || (e => Math.round(e));
             if (d.content.type === "slider") {
