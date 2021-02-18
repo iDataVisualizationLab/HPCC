@@ -362,7 +362,7 @@ function handleDataComputeByUser_job(_data) {
                     let userObj = {};
                     if (!users[u.key]) {
                         userObj = {
-                            id: u.key, type: 'user', name: u.key, data: {}, timeArr: [], drawData: [{
+                            id: u.key, type: 'job', name: u.key, data: {}, timeArr: [], drawData: [{
                                 invalid: undefined,
                                 scale: 1,
                                 offset: -8,
@@ -380,7 +380,7 @@ function handleDataComputeByUser_job(_data) {
                             drawData: userObj.drawData,
                             id: u.key,
                             name: getUserName(u.key),
-                            type: 'user',
+                            type: 'job',
                             data: {name: u.key, isNew: []},
                             parent: userObj,
                             ti: i

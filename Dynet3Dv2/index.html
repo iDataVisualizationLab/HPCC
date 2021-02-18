@@ -553,7 +553,7 @@
 <script type="x-shader/x-fragment" id="fragmentshader">
 
         uniform vec3 color;
-        uniform sampler2D textures[2];
+        uniform sampler2D textures[3];
 
         varying float vAlpha;
         varying vec3 vColor;
@@ -571,6 +571,8 @@
                     finalColor = texture2D(textures[0], gl_PointCoord);
                 } else if (vTexIndex < 1.5) {
                     finalColor = texture2D(textures[1], gl_PointCoord);
+                } else {
+                    finalColor = texture2D(textures[2], gl_PointCoord);
                 }
 
                 gl_FragColor = gl_FragColor * finalColor;

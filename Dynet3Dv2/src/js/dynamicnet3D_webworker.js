@@ -133,7 +133,7 @@ let DynamicNet3D = function () {
                 }
             },
             showUserIcon: {
-                text: "Show Users",
+                text: "Show "+graphicopt.mainType+"s",
                 type: "checkbox",
                 variable: 'showUser',
                 values: true,
@@ -697,7 +697,7 @@ let DynamicNet3D = function () {
                 n.nodes.geometry.attributes.alpha.array = n.nodes.geometry.attributes.alpha.array.map(d => true)
             if (!graphicopt.showUser)
                 data.net[ni].nodes.forEach((d, i) => {
-                    if (d.type === 'user') {
+                    if (d.type === graphicopt.mainType) {
                         n.nodes.geometry.attributes.alpha.array[i] = false;
                     }
                 });
@@ -816,7 +816,7 @@ let DynamicNet3D = function () {
 
     function createpoints(g, datafiltered, ti) {
         let pointsGeometry = new THREE.BufferGeometry();
-
+        const mapType ={'compute':0,'user':1,'job':2}
         let colors = new Float32Array(datafiltered.length * 3);
         let pos = new Float32Array(datafiltered.length * 3);
         let alpha = new Float32Array(datafiltered.length);
@@ -837,7 +837,7 @@ let DynamicNet3D = function () {
             colors[i * 3 + 2] = color.b / 255;
             alpha[i] = target.filterd ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
             _alpha[i] = 0;
-            texIndex[i] = target.type === 'user' ? 1 : 0;
+            texIndex[i] = mapType[target.type];
             sizes[i] = (graphicopt.component.dot[target.type] ?? graphicopt.component.dot).size;
         }
         pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -856,7 +856,9 @@ let DynamicNet3D = function () {
                 textures: {
                     type: "t",
                     value: [new THREE.TextureLoader().load("src/images/circle.png"),
-                        new THREE.TextureLoader().load("src/images/user.png")]
+                        new THREE.TextureLoader().load("src/images/user.png"),
+                        new THREE.TextureLoader().load("src/images/job.png"),
+                    ]
                 }
 
             },
@@ -1506,7 +1508,7 @@ let DynamicNet3D = function () {
             netPlot.add(sliceHolder);
             net.nodes.forEach(n => {
                 if (!dynamicVizs.links[n.id]) {
-                    dynamicVizs.links[n.id] = {data: [], _visible: n.type==='user'};
+                    dynamicVizs.links[n.id] = {data: [], _visible: n.type===graphicopt.mainType};
                     dynamicVizs.links[n.id].id = n.id;
                 }
                 dynamicVizs.links[n.id].data.push(n);

@@ -154,7 +154,7 @@ function initdraw() {
     // .onFinishDraw(updateNarration);
     // initDragItems('#ForceByMetrics','metric');
     parallelCoordinate.init('#paralell');
-    parallelCoordinate.updateOutlier((list)=>drawObject.changeColor(list,'user'))
+    parallelCoordinate.updateOutlier((list)=>drawObject.changeColor(list,summaryInTime.mode))
 
     d3.select('#modelFilterToolBtn').on('click', function () {
         const choice = $('#modelFilterToolInput').val();
