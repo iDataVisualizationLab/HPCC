@@ -172,7 +172,7 @@ function initdraw() {
         handleDataComputeByUser.mode=val;
         summaryInTime.mode=val;
         summaryInTime.changed = true;
-        d3.selectAll('.instanceStyle').text(val)
+        d3.selectAll('.instanceStyle').text(val);
         // d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
         regenerateFullData();
     })
