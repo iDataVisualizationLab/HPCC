@@ -230,14 +230,14 @@ function outlier(data,keys){
     let minBins = Math.min(100,dataSpider3.length-1);
     let maxBins = dataSpider3.length;
     let scagOptions ={
-        startBinGridSize: estimateSize,
-        minBins,
-        maxBins,
+        // startBinGridSize: estimateSize,
+        // minBins,
+        // maxBins,
         outlyingCoefficient: 1.5,
-        incrementA:2,
-        incrementB:0,
-        decrementA:1 / 3,
-        decrementB:0,
+        // incrementA:2,
+        // incrementB:0,
+        // decrementA:1 / 3,
+        // decrementB:0,
     };
     // scag = scagnosticsnd(handledata(index), scagOptions);
     let outlyingBins = [];
