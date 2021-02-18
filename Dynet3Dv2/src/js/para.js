@@ -96,7 +96,9 @@ d3.parallelCoordinate = function () {
             }
         });
         const outlierList = outlier(data,dimensionKey);
-        runopt.updateOutlier(outlierList)
+        runopt.updateOutlier(outlierList);
+        const outlierNum = Object.keys(outlierList).length;
+        d3.select('#filter_result_para').text(data.length+' instances, '+outlierNum+' outlier'+(outlierNum>1?'s':''))
         graphicopt.height = graphicopt.margin.top+graphicopt.margin.bottom + graphicopt.elHeight*dimensions.length;
         updateSize();
         //<axis>

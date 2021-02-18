@@ -256,3 +256,6 @@ tr .noUi-target .noUi-active.noUi-handle {
 tr .noUi-tooltip span{
     top:1px;
 }
+.instanceStyle{
+    text-transform: capitalize;
+}
