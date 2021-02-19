@@ -4,7 +4,8 @@ d3.parallelCoordinate = function () {
         getRange: (data,key)=>d3.extent(data,runopt.getVal(key)),
         getVal: (key)=>((d)=>d[key]),
         updateOutlier:()=>{},
-        customAxis:{}
+        customAxis:{},
+        outlyingCoefficient:1.5,
     };
     const graphicopt = {
         margin: {top: 20, right: 10, bottom: 20, left: 100},
@@ -243,6 +244,7 @@ function outlier(data,keys,{outlyingCoefficient}){
             return !condition;
         });
         delete d.outlier;
+        delete d.undefined;
         if (condition){
             item.origin = d;
             dataSpider3.push(item);
@@ -296,11 +298,9 @@ function outlier(data,keys,{outlyingCoefficient}){
     console.log('Outlying bin=' +scag.outlyingBins.length);
 
 
-    debugger
 
     scag.outlyingBins.map((ob,i)=>{
         ob.map(o=>{
-            debugger
             let d = o.data;
             d.origin.outlier = 1;
             lists[d.origin.id] = '#f0f';

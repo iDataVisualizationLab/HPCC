@@ -827,6 +827,10 @@ let DynamicNet3D = function () {
             let target = datafiltered[i];
             // Set vector coordinates from data
             // let vertex = new THREE.Vector3(0, 0, 0);
+            delete target.x;
+            delete target.vx;
+            delete target.y;
+            delete target.vy;
             pos[i * 3 + 0] = 0;
             pos[i * 3 + 1] = 0;
             pos[i * 3 + 2] = 0;
@@ -1488,6 +1492,9 @@ let DynamicNet3D = function () {
         updateTableInput();
         // remove all timeslice
         netPlot.remove(...netPlot.children);
+        // netPlot.clear();
+        isneedrender = true;
+
         scaleNormalTimestep.domain([0, data.net.length]);
         if (!axesTime)
             axesTime = createTimeaxis();
@@ -1495,6 +1502,7 @@ let DynamicNet3D = function () {
         points = [];
         dynamicVizs = [];
         dynamicVizs.links = {};
+        debugger
         data.net.forEach((net, ni) => {
             // time slice generate
             let sliceHolder = new THREE.Object3D();

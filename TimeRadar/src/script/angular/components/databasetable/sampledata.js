@@ -22,6 +22,16 @@ angular.module('hpccApp').constant('SampleData', [
         formatType:'json'
     },
     {
+        id:"influxdbWed24Apr_removemetric",
+        name:"HPC data - 24-26 April 2019",
+        url:"../HiperView/data/influxdbWed24Apr_removemetric.json",
+        description:"",
+        category:'hpcc',
+        date:"24 Apr 2019",
+        group:"sample",
+        formatType:'json'
+    },
+    {
         id:"influxdbSun23June2019",
         name:"HPC data - 23 Jun 2019 (overheat compute-6-2)",
         url:"../HiperView/data/influxdbSun23June2019.json",
@@ -114,6 +124,24 @@ angular.module('hpccApp').constant('SampleData', [
         description:"",
         category:'hpcc',
         date:"24 Apr 2020",
+        group:"sample",
+        formatType:'json'
+    },{
+        id:"influxdb814_821_2020",
+        name:"HPC data - 14-21 Aug 2020",
+        url:"../HiperView/data/influxdb814_821_2020.json",
+        description:"",
+        category:'hpcc',
+        date:"14 August 2020",
+        group:"sample",
+        formatType:'json'
+    },{
+        id:"influxdb814_100timeStep_2020",
+        name:"HPC data - 14 Aug 2020 (100 timesteps)",
+        url:"../HiperView/data/influxdb814_100timeStep_2020.json",
+        description:"",
+        category:'hpcc',
+        date:"14 Aug 2020",
         group:"sample",
         formatType:'json'
     },

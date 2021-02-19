@@ -482,6 +482,9 @@ function filterData(nodeList, nets) {
                     }
                 });
                 n.nodes.forEach(n => {
+                    delete n.x;
+                    delete n.y;
+                    delete n.z;
                     if (filterNodeList[n.id] || nextFilter[n.id]) {
                         if (!fileterObject[n.id])
                             fileterObject[n.id] = {...n.parent,timeArr:n.parent.timeArr.map(d=>d)};
@@ -505,9 +508,20 @@ function filterData(nodeList, nets) {
         })
         return filteredNets;
     } else {
+        nets.root_nodes.forEach((n, ni) => {
+            delete n.x;
+            delete n.y;
+            n._index = ni;
+        });
+
         return {
-            net: nets.net.map((n, ni) => {
-                return {nodes: n.nodes, links: n.links.map(l => JSON.parse(JSON.stringify(l)))}
+            net: nets.nets.net.map((n, ni) => {
+                return {nodes: n.nodes.map((n,i)=>{
+                        delete n.x;
+                        delete n.y;
+                        delete n.z;
+                        n._index = i; return n;
+                    }), links: n.links.map(l => JSON.parse(JSON.stringify(l)))}
             }), "root_nodes": nets.root_nodes, time_stamp: nets.time_stamp, datamap: nets.datamap
         };
     }

@@ -504,11 +504,25 @@ function filterData(nodeList, nets) {
             }
         })
         return filteredNets;
-    } else {
+    }  else {
+        const net = nets.net.map((n, ni) => {
+            return {nodes: n.nodes.map((n,i)=>{
+                    delete n.x;
+                    delete n.y;
+                    delete n.z;
+                    n.parent.timeArr[ni] = n;
+                    n._index = i; return n;
+                }), links: n.links.map(l => JSON.parse(JSON.stringify(l)))}
+        });
+
+        nets.root_nodes.forEach((n, ni) => {
+            delete n.x;
+            delete n.y;
+            n._index = ni;
+        });
+
         return {
-            net: nets.net.map((n, ni) => {
-                return {nodes: n.nodes, links: n.links.map(l => JSON.parse(JSON.stringify(l)))}
-            }), "root_nodes": nets.root_nodes, time_stamp: nets.time_stamp, datamap: nets.datamap
+            net: net, "root_nodes": nets.root_nodes, time_stamp: nets.time_stamp, datamap: nets.datamap
         };
     }
     }

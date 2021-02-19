@@ -21,8 +21,10 @@ addEventListener('message', function ({data}) {
                     if (ni) {
                         nodes.forEach(n => {
                             root_nodes[n.id] = n.parent;
-                            // delete n.parent.x;
-                            // delete n.parent.y;
+                            delete n.parent.x;
+                            delete n.parent.vx;
+                            delete n.parent.y;
+                            delete n.parent.vy;
                         })
                     } else {
                         nodes.forEach(n => {
