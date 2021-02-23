@@ -873,17 +873,18 @@ function regenerateFullData() {
         .attr('label', d => d.key)
         .selectAll('option').data(d => d.values)
         .join('option').attr('value', d => d.id).text(d => d.type === 'compute' ? getComputeName(d.id) : d.id);
-    $('#modelFilterToolInput').multiselect({
-        enableClickableOptGroups: true,
-        enableCollapsibleOptGroups: true,
-        enableFiltering: true,
-        includeSelectAllOption: true,
-        nonSelectedText: 'Filter by name',
-        maxHeight: 200,
-        onChange: function (option, checked) {
-            d3.select('#modelFilterToolBtn').text('Filter');
-        }
-    });
+    // $('#modelFilterToolInput').multiselect({
+    //     enableClickableOptGroups: true,
+    //     enableCollapsibleOptGroups: true,
+    //     enableFiltering: true,
+    //     includeSelectAllOption: true,
+    //     nonSelectedText: 'Filter by name',
+    //     maxHeight: 200,
+    //     onChange: function (option, checked) {
+    //         d3.select('#modelFilterToolBtn').text('Filter');
+    //     }
+    // });
+    $('#modelFilterToolInput').multiselect('rebuild')
     onFilter();
 }
 
