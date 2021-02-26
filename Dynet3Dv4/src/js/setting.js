@@ -315,6 +315,7 @@ function onChangeData(){
         request.updateData(new Promise((resolve, reject) => {resolve({jobs_info,nodes_info,time_stamp})}));
         _tempData = {};
         debugger;
+        $('#datasetSelection').modal('hide');
     }else{
         // throw error
         throw 'Load fail!';

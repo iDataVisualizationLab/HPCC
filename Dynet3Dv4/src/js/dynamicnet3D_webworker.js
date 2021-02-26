@@ -964,6 +964,7 @@ let DynamicNet3D = function () {
                     if (solution&&solution.length) {
                         console.time('rendering last time: ');
                         solution.forEach((sol, soli) => {
+                            const z = scaleNormalTimestep(Math.ceil(soli / graphicopt.timeResolution) * graphicopt.timeResolution);
                             const points = dynamicVizs[soli].nodes;
                             let p = points.geometry.attributes.position.array;
                             onrendercalled = true;
@@ -981,7 +982,7 @@ let DynamicNet3D = function () {
 
                                 // 3rd dimension as time step
                                 // p[pointIndex*3+2] = xscale(d[2])||0;
-                                p[pointIndex * 3 + 2] = scaleNormalTimestep(Math.ceil(soli / graphicopt.timeResolution) * graphicopt.timeResolution);
+                                p[pointIndex * 3 + 2] = z;
                                 d.z = p[pointIndex * 3 + 2];
                                 target.z = d.z;
                             });
@@ -1007,15 +1008,19 @@ let DynamicNet3D = function () {
                                             source = data.net[soli].nodes[solution[soli].deletedLinks[li].source.timeArr[soli]._index];
                                         else
                                             source = data.net[soli-1].nodes[solution[soli].deletedLinks[li].source.timeArr[soli-1]._index];
+                                            // source = solution[soli].deletedLinks[li].source;
                                         if (solution[soli].deletedLinks[li].target.timeArr[soli])
                                             target = data.net[soli].nodes[solution[soli].deletedLinks[li].target.timeArr[soli]._index];
                                         else
                                             target = data.net[soli-1].nodes[solution[soli].deletedLinks[li].target.timeArr[soli-1]._index];
+                                            // target = solution[soli].deletedLinks[li].target;
                                         data.net[soli].deletedLinks[li].source = source;
                                         data.net[soli].deletedLinks[li].target = target;
                                         const points = [];
                                         points.push(new THREE.Vector3(source.x * graphicopt.expand.xy, source.y * graphicopt.expand.xy, source.z));
                                         points.push(new THREE.Vector3(target.x * graphicopt.expand.xy, target.y * graphicopt.expand.xy, target.z));
+                                        // points.push(new THREE.Vector3(source.x * graphicopt.expand.xy, source.y * graphicopt.expand.xy, z));
+                                        // points.push(new THREE.Vector3(target.x * graphicopt.expand.xy, target.y * graphicopt.expand.xy, z));
                                         l.geometry.setFromPoints(points);
                                         l.geometry.attributes.position.needsUpdate = true;
                                         l.geometry.computeBoundingBox();

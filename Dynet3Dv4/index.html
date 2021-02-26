@@ -42,16 +42,14 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">
-                            <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-book"
-                                 fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd"
-                                      d="M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869zM1 2.82v9.908c.846-.343 1.944-.672 3.074-.788 1.143-.118 2.387-.023 3.426.56V2.718c-1.063-.929-2.631-.956-4.09-.664A11.958 11.958 0 0 0 1 2.82z"/>
-                                <path fill-rule="evenodd"
-                                      d="M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-server" viewBox="0 0 16 16">
+                                <path d="M1.333 2.667C1.333 1.194 4.318 0 8 0s6.667 1.194 6.667 2.667V4c0 1.473-2.985 2.667-6.667 2.667S1.333 5.473 1.333 4V2.667z"/>
+                                <path d="M1.333 6.334v3C1.333 10.805 4.318 12 8 12s6.667-1.194 6.667-2.667V6.334c-.43.32-.931.58-1.458.79C11.81 7.684 9.967 8 8 8c-1.967 0-3.81-.317-5.21-.876a6.508 6.508 0 0 1-1.457-.79z"/>
+                                <path d="M14.667 11.668c-.43.319-.931.578-1.458.789-1.4.56-3.242.876-5.209.876-1.967 0-3.81-.316-5.21-.876a6.51 6.51 0 0 1-1.457-.79v1.666C1.333 14.806 4.318 16 8 16s6.667-1.194 6.667-2.667v-1.665z"/>
                             </svg>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#datasetSelection" >
+                            <span><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#datasetSelection" >
                                 Change dataset
-                            </button>
+                            </button></span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -503,19 +501,29 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Change data</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="metricCSV" aria-describedby="inputmetricCSV">
-                                <label class="custom-file-label" for="metricCSV">Choose file</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Metric file (csv)</label>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="metricCSV" aria-describedby="inputmetricCSV">
+                                    <label class="custom-file-label" for="metricCSV">Choose file</label>
+                                </div>
                             </div>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="jobJson" aria-describedby="inputjobJson">
-                                <label class="custom-file-label" for="jobJson">Choose file</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Job file (json)</label>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="jobJson" aria-describedby="inputjobJson">
+                                    <label class="custom-file-label" for="jobJson">Choose file</label>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
