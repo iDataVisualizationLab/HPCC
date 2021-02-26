@@ -19,7 +19,7 @@ function serviceControl() {
     parallelCoordinate.customAxis(customAxis)
     drawObject.service(vizservice);
 
-    d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
+    d3.selectAll('.serviceName').text(vizservice[serviceSelected]?vizservice[serviceSelected].text:'')
     const tr = d3.select('#serviceSelection')
         .selectAll('tr')
         .data(vizservice)
@@ -96,6 +96,7 @@ function serviceControl() {
         nonSelectedText: 'Select Dimensions',
         maxHeight: 200
     });
+    $('#paraDimColtrol').multiselect('rebuild')
     $('#paraDimColtrol').on('change',function(){
         parallelCoordinate.dimensionKey($('#paraDimColtrol').val())
             .draw();
@@ -309,33 +310,6 @@ function initDragItems(id, mode) {
     }
 }
 
-function updateNarration({removedLinks, enterLinks}) {
-    // enterLinks.filter(d=>d.target)
-    d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
-    d3.select('#narrationHolder .current h5').text(Layout.currentTime.toLocaleString())
-    d3.select('#narrationHolder .current tbody')
-        .selectAll('tr.enter').data(d3.nest().key(d => d.target.id).entries(enterLinks))
-        .join('tr').attr('class', 'enter')
-        .selectAll('td')
-        .data(d => [d.key, 'starts using', renderCell(d, d.values.map(e => e.source.id))])
-        .join('td')
-        .html(d => d);
-    d3.select('#narrationHolder .current tbody').selectAll('tr.exit').data(d3.nest().key(d => d.target.id).entries(removedLinks))
-        .join('tr').attr('class', 'exit')
-        .selectAll('td')
-        .data(d => [d.key, 'releases', renderCell(d, d.values.map(e => e.source.id))])
-        .join('td')
-        .html(d => d);
-
-    function renderCell(d, data) {
-        if (data.length > 2)
-            return `<span>${(d.isexpand ? (data + '<button type="button" class="btn btn-block morebtn" value="close"><img src="src/style/icon/caret-up-fill.svg" style="height: 10px"></img></button>') : data.slice(0, 2)).map(e => `<span class="tableCompute">${e}</span>`).join('\n')}</span>
-                                        <a value="open">+${data.length - 2}</a>`;
-        else
-            return data.map(e => `<span class="tableCompute">${e}</span>`).join('\n');
-    }
-}
-
 function userTable(d, type) {
     if (drawObject.isFreeze()) {
         d3.select('.informationHolder').classed('hide', false);
@@ -510,7 +484,8 @@ function userTable(d, type) {
             }
         });
 
-        drawLineChart(nodelist);
+        if (vizservice[serviceSelected])
+            drawLineChart(nodelist);
 
         function drawLineChart(nodes) {
             let graphicopt = {
@@ -834,7 +809,7 @@ function makelegend() {
 function getRenderFunc(d) {
     if (d.d)
         return d.d;
-    let serviceName = vizservice[serviceSelected].text;
+    let serviceName = vizservice[serviceSelected]?vizservice[serviceSelected].text:'';
     if (serviceName !== 'Radar' || !d.isRadar)
         return d3.arc()
             .innerRadius(0)
@@ -844,7 +819,7 @@ function getRenderFunc(d) {
 }
 
 function getDrawData(e) {
-    let serviceName = vizservice[serviceSelected].text;
+    let serviceName = vizservice[serviceSelected]?vizservice[serviceSelected].text:'';
     if (serviceName === 'Radar') {
         if (!e.children) {
             let radarvalue = [serviceFullList.map(d => ({

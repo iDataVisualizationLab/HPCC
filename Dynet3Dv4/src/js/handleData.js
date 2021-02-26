@@ -709,12 +709,18 @@ function getChanged(data) {
     data.root_nodes.forEach(n => {
         nodeMap[n.id] = n;
     });
+    const nodesObjArr=[{}];
+    data.net[0].nodes.forEach(n=>{
+        nodesObjArr[0][n.id] = n;
+    });
     for (let i = 1; i < data.net.length; i++) {
         data.net[i - 1].filtered_links = [];
         const linkMap = new Map();
         data.net[i - 1].links.forEach(l => {
             linkMap.set(l.source + '|||' + l.target, l);
         });
+        nodesObjArr[i]= {};
+        const nodesObj = nodesObjArr[i];
         data.net[i].links.forEach(l => {
             const key = l.source + '|||' + l.target;
             if (!linkMap.has(key)) // new link
@@ -722,6 +728,9 @@ function getChanged(data) {
                 l.isNew = true;
                 l.color = "green";
                 data.net[i - 1].filtered_links.push(l);
+                nodesObj[l.source] = nodeMap[l.source].timeArr[i];
+                nodesObj[l.target] = nodeMap[l.target].timeArr[i];
+                return true;
             } else {
                 linkMap.delete(key);
             }
@@ -729,7 +738,22 @@ function getChanged(data) {
         data.net[i].deletedLinks = [];
         linkMap.forEach((value, key) => {
             data.net[i].deletedLinks.push(value);
+            if (!nodeMap[value.source].timeArr[i])
+                nodesObjArr[i-1][value.source] = nodeMap[value.source].timeArr[i-1];
+            else
+                nodesObj[value.source] = nodeMap[value.source].timeArr[i];
+            if (!nodeMap[value.target].timeArr[i])
+                nodesObjArr[i-1][value.target] = nodeMap[value.target].timeArr[i-1];
+            else
+                nodesObj[value.target] = nodeMap[value.target].timeArr[i];
         });
+    }
+    for (let i = 1; i < data.net.length; i++) {
+        data.net[i].links = data.net[i].links.filter(l=>l.isNew);
+        data.net[i].nodes = Object.values(nodesObjArr[i]).map((d,i)=>{
+            d._index = i;
+            return d;
+        })
     }
 }
 
@@ -751,8 +775,6 @@ function summaryByUser(data) {
     Object.keys(data[COMPUTE]).forEach(comp => {
         data.time_stamp.forEach((t, ti) => {
             data[COMPUTE][comp].job_id[ti].forEach(jid => {
-                if (!data[JOB][jid])
-                    debugger
                 const user_name = data[JOB][jid].user_name;
                 if (!users[user_name]) {
                     users[user_name] = {id: user_name, comps: {}, time: {}, values: []}

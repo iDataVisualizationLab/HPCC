@@ -1019,6 +1019,7 @@ let DynamicNet3D = function () {
                                         l.geometry.setFromPoints(points);
                                         l.geometry.attributes.position.needsUpdate = true;
                                         l.geometry.computeBoundingBox();
+                                        debugger
                                     })
                                 }
                             }
@@ -1496,8 +1497,10 @@ let DynamicNet3D = function () {
         isneedrender = true;
 
         scaleNormalTimestep.domain([0, data.net.length]);
-        if (!axesTime)
-            axesTime = createTimeaxis();
+        if (axesTime){
+            scene.remove(axesTime);
+        }
+        axesTime = createTimeaxis();
         // create time slices
         points = [];
         dynamicVizs = [];

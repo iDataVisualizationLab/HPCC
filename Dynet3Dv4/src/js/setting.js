@@ -190,10 +190,14 @@ let _tempData={};
 function handleMetricCSV(){
     readFromInput(event,(_data)=>{
         d3.csv(_data).then(data=>{
-            let{nodes_info,time_stamp}= newdatatoFormat_noSuggestion(data,"|");
-            _tempData.nodes_info = nodes_info;
-            _tempData.time_stamp = time_stamp;
+            let results = newdatatoFormat_noSuggestion(data,"|");
+            Object.keys(results).forEach(k=>{
+                _tempData[k] = results[k];
+            });
         })
+    },()=>{
+        ["nodes_info","time_stamp","serviceList_selected","serviceLists","serviceListattr","alternative_service","alternative_scale","serviceFullList"]
+            .forEach(k=> delete _tempData[k])
     })
 }
 
@@ -213,10 +217,25 @@ function handlejobJson(){
 
 function onChangeData(){
     if (_tempData.jobs_info){
-        debugger
+
+        if (!_tempData.serviceFullList){
+            serviceFullList = [];
+            serviceListattr = [];
+            serviceLists = [];
+            serviceList_selected = [];
+            alternative_service = [];
+            alternative_scale = [];
+        }else{
+            serviceFullList = _tempData.serviceFullList;
+            serviceListattr = _tempData.serviceListattr;
+            serviceLists = _tempData.serviceLists;
+            serviceList_selected = _tempData.serviceList_selected;
+            alternative_service = _tempData.alternative_service;
+            alternative_scale = _tempData.alternative_scale;
+        }
         const nodes_info = {..._tempData.nodes_info};
         let timeRange = [Infinity,-Infinity];
-        let timeInterval = 60*60000;
+        let timeInterval = 5*60000;
         const time2Index = d3.scaleLinear();
         if (_tempData.time_stamp){
             timeRange = [_tempData.time_stamp[0]/1000000,_tempData.time_stamp[_tempData.time_stamp.length-1]/1000000];
@@ -312,12 +331,12 @@ function serviceLists2serviceFullList (serviceLists){
 }
 function newdatatoFormat_noSuggestion (data,separate){
     separate = separate||"-";
-    serviceList = [];
-    serviceLists = [];
-    serviceListattr = [];
-    alternative_service = [];
-    alternative_scale = [];
-    serviceAttr={};
+    const serviceList = [];
+    const serviceLists = [];
+    const serviceListattr = [];
+    const alternative_service = [];
+    const alternative_scale = [];
+    const serviceAttr={};
     let nodes_info ={};
     let singleDataAxis = [];
     // FIXME detect format
@@ -376,8 +395,8 @@ function newdatatoFormat_noSuggestion (data,separate){
         alternative_service.push(k);
         alternative_scale.push(1);
     });
-    serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
-    serviceFullList = serviceLists2serviceFullList(serviceLists);
+    const serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
+    const serviceFullList = serviceLists2serviceFullList(serviceLists);
 
     debugger
     const time_stamp = data.map(d=>+new Date(d.time||d.timestamp)*1000000);
@@ -390,21 +409,25 @@ function newdatatoFormat_noSuggestion (data,separate){
             });
         })
     });
-    return {nodes_info,time_stamp}
+    return {nodes_info,time_stamp,serviceList_selected,serviceLists,serviceListattr,alternative_service,alternative_scale,serviceFullList}
 }
 
-function readFromInput(event,load_d3){
-    if (window.File && window.FileReader && window.FileList && window.Blob) {
-        // Great success! All the File APIs are supported.
-    } else {
-        alert('The File APIs are not fully supported in this browser.');
-    }
-    var f = event.target.files[0]; // FileList object
-    var reader = new FileReader();
+function readFromInput(event,load_d3,failHandle=(()=>{})){
+    try {
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            // Great success! All the File APIs are supported.
+        } else {
+            alert('The File APIs are not fully supported in this browser.');
+        }
+        var f = event.target.files[0]; // FileList object
+        var reader = new FileReader();
 
-    reader.onload = function(event) {
-        load_d3(event.target.result)
-    };
-    // Read in the file as a data URL.
-    reader.readAsDataURL(f);
+        reader.onload = function (event) {
+            load_d3(event.target.result)
+        };
+        // Read in the file as a data URL.
+        reader.readAsDataURL(f);
+    }catch(e){
+        failHandle();
+    }
 }
