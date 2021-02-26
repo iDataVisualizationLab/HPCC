@@ -17,24 +17,10 @@ function serviceControl() {
         customAxis[s.text]={range:[0,1],displayRange:s.range}
     });
     parallelCoordinate.customAxis(customAxis)
-    drawObject.service(vizservice)
-    // .controlPanelGeneral({
-    //         linePlot: {
-    //             labels: ['--none--', ...vizservice.map(d => d.text)],
-    //             values: [false, ...(vizservice.map(d => d._id))]
-    //         }
-    //     }
-    // );
+    drawObject.service(vizservice);
 
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     const tr = d3.select('#serviceSelection')
-        // .on('change',function(){
-        //     serviceSelected = +$(this).val();
-        //     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
-        //     if (d3.select(this).attr('aria-pressed')==='true'){
-        //         onFilter();
-        //     }
-        // })
         .selectAll('tr')
         .data(vizservice)
         .join('tr');
@@ -59,26 +45,28 @@ function serviceControl() {
         .join('td').attr('class', 'range')
         .html(d => `<div class="silderHolder" style="width:60px"></div>`).each(function (d) {
         const div = d3.select(this).select('.silderHolder').attr('disabled','').node();
-        noUiSlider.create(div, {
-            start: d.thresholdFilter,
-            tooltips: {
-                to: function (value) {
-                    return d3.format('.1f')(value)
-                }, from: function (value) {
-                    return +value.split('1e')[1];
-                }
-            },
-            step: 0.5,
-            orientation: 'horizontal', // 'horizontal' or 'vertical'
-            range: {
-                'min': d.range[0],
-                'max': d.range[1],
-            },
-        });
-        div.noUiSlider.on("change", function () { // control panel update method
-            d.thresholdFilter = +this.get();
-            d.thresholdFilterNormalize = (+this.get() - d.range[0]) / (d.range[1] - d.range[0]);
-        });
+        try {
+            noUiSlider.create(div, {
+                start: d.thresholdFilter,
+                tooltips: {
+                    to: function (value) {
+                        return d3.format('.1f')(value)
+                    }, from: function (value) {
+                        return +value.split('1e')[1];
+                    }
+                },
+                step: 0.5,
+                orientation: 'horizontal', // 'horizontal' or 'vertical'
+                range: {
+                    'min': d.range[0],
+                    'max': d.range[1],
+                },
+            });
+            div.noUiSlider.on("change", function () { // control panel update method
+                d.thresholdFilter = +this.get();
+                d.thresholdFilterNormalize = (+this.get() - d.range[0]) / (d.range[1] - d.range[0]);
+            });
+        }catch(e){}
     });
     tr.selectAll('td.rangeHigh').data(d => [d])
         .join('td').attr('class', 'rangeHigh')
@@ -95,33 +83,28 @@ function serviceControl() {
            drawObject.onShowLineChart(dataLine[this.selectedIndex]._id)
         });
 
-    const outlyingCoefficient = d3.select('#outlyingCoefficient').node();
-    noUiSlider.create(outlyingCoefficient, {
-        start: 1.5,
-        tooltips: {
-            to: function (value) {
-                return d3.format('.1f')(value)
-            }, from: function (value) {
-                return +value.split('1e')[1];
-            }
-        },
-        step: 0.1,
-        orientation: 'horizontal', // 'horizontal' or 'vertical'
-        range: {
-            'min': 1.1,
-            'max': 4,
-        },
+
+    d3.select('#paraDimColtrol').selectAll('option')
+        .data([...serviceFullList.map(s=>s.text),'Duration','#Computes'])
+        .join('option')
+        .attr('value',d=>d)
+        .attr('selected','selected')
+        .text(d=>d);
+    $('#paraDimColtrol').multiselect({
+        enableFiltering: true,
+        includeSelectAllOption: true,
+        nonSelectedText: 'Select Dimensions',
+        maxHeight: 200
     });
-    outlyingCoefficient.noUiSlider.on("change", function () { // control panel update method
-        parallelCoordinate.outlyingCoefficient(+this.get()).reRender();
-    });
+    $('#paraDimColtrol').on('change',function(){
+        parallelCoordinate.dimensionKey($('#paraDimColtrol').val())
+            .draw();
+    })
 }
 
 function initdraw() {
     $('.informationHolder').draggable({handle: ".card-header", scroll: false});
-    d3.select('#trajectoryStyle').on('change', function () {
-        drawObject.trajectoryStyle($(this).val());
-    });
+
     d3.select('#innerDisplay').on('change', function () {
         d3.selectAll('.innerName').text(getInnerNodeAttr())
         currentDraw(serviceSelected);
@@ -160,8 +143,29 @@ function initdraw() {
                 .style('fill', d => d.value);
         }
         currentDraw()
-    })
+    });
     serviceControl();
+    const outlyingCoefficient = d3.select('#outlyingCoefficient').node();
+    noUiSlider.create(outlyingCoefficient, {
+        start: 1.5,
+        tooltips: {
+            to: function (value) {
+                return d3.format('.1f')(value)
+            }, from: function (value) {
+                return +value.split('1e')[1];
+            }
+        },
+        step: 0.1,
+        orientation: 'horizontal', // 'horizontal' or 'vertical'
+        range: {
+            'min': 1.1,
+            'max': 4,
+        },
+    });
+    outlyingCoefficient.noUiSlider.on("change", function () { // control panel update method
+        parallelCoordinate.outlyingCoefficient(+this.get()).reRender();
+    });
+
     d3.select('#jobShow').on('change', function () {
         Layout.jobShow = this.checked;
         createdata();
@@ -212,22 +216,6 @@ function initdraw() {
         drawGantt();
     });
 
-    d3.select('#paraDimColtrol').selectAll('option')
-        .data([...serviceFullList.map(s=>s.text),'Duration','#Computes'])
-        .join('option')
-        .attr('value',d=>d)
-        .attr('selected','selected')
-        .text(d=>d);
-    $('#paraDimColtrol').multiselect({
-        enableFiltering: true,
-        includeSelectAllOption: true,
-        nonSelectedText: 'Select Dimensions',
-        maxHeight: 200
-    });
-    $('#paraDimColtrol').on('change',function(){
-        parallelCoordinate.dimensionKey($('#paraDimColtrol').val())
-            .draw();
-    })
     d3.select('#minMaxScale').on('change',function(){
         parallelCoordinate.minmax(this.checked)
             .draw();

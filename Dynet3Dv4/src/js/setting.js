@@ -212,34 +212,88 @@ function handlejobJson(){
 }
 
 function onChangeData(){
-    if (_tempData.nodes_info&& _tempData.jobs_info && _tempData.time_stamp){
+    if (_tempData.jobs_info){
         debugger
-        // map node and job
-        const time2Index = d3.scaleLinear().domain([_tempData.time_stamp[0]/1000000,_tempData.time_stamp[_tempData.time_stamp.length-1]/1000000])
-            .range([0,_tempData.time_stamp.length-1]);
+        const nodes_info = {..._tempData.nodes_info};
+        let timeRange = [Infinity,-Infinity];
+        let timeInterval = 60*60000;
+        const time2Index = d3.scaleLinear();
+        if (_tempData.time_stamp){
+            timeRange = [_tempData.time_stamp[0]/1000000,_tempData.time_stamp[_tempData.time_stamp.length-1]/1000000];
+            timeInterval = (_tempData.time_stamp[1]-_tempData.time_stamp[0])/1000000;
+        }
         const jobs_info = {};
-        Object.values(_tempData.nodes_info).forEach(comp=>comp.job_id = _tempData.time_stamp.map(d=>[]));
-        Object.values(_tempData.jobs_info).forEach(j=>{
-            let valid = true;
-            j.jobID = j.jobID.replace('.','|');
-            const startIndex = Math.max(0,Math.ceil(time2Index(j.start_time)));
-            const endIndex = j.finish_time?Math.ceil(time2Index(j.finish_time)):time2Index.range()[1];
-            valid = startIndex<=time2Index.range()[1];
-            if (valid){
-                valid = 0;
-                j.node_list.forEach(comp=>{
-                    if ( !_tempData.nodes_info[comp])
-                        return;
-                    valid++;
-                    for (let i = startIndex;i<=endIndex;i++)
-                        _tempData.nodes_info[comp].job_id[i].push(j.jobID);
-                });
-                if (valid){
-                    jobs_info[j.jobID] = j;
-                }
+        Object.values(_tempData.jobs_info).forEach(j=> {
+            j.jobID = j.jobID.replace('.', '|');
+            jobs_info[j.jobID] = j;
+            if (j.start_time<timeRange[0]){
+                timeRange[0] = j.start_time;
+            }
+            if (j.finish_time)
+            {
+                if (j.finish_time>timeRange[1])
+                    timeRange[1] = j.finish_time;
+            }else {
+                if (j.start_time>timeRange[1])
+                    timeRange[1] = j.start_time;
             }
         });
-        request.updateData(new Promise((resolve, reject) => {resolve({jobs_info,nodes_info:_tempData.nodes_info,time_stamp:_tempData.time_stamp})}));
+        const time_stamp = d3.range(0,Math.ceil((timeRange[1]-timeRange[0])/timeInterval)).map(d=>(d*timeInterval+timeRange[0])*1000000);
+        time2Index.domain(timeRange).range([0,time_stamp.length-1]);
+        if (Object.keys(nodes_info).length){
+            const startIndex = Math.floor(time2Index(_tempData.time_stamp[0]/1000000));
+            const endIndex = Math.ceil(time2Index(_tempData.time_stamp[_tempData.time_stamp.length-1]/1000000));
+            Object.values(nodes_info).forEach(d=>{
+                alternative_service.forEach(s=>{
+                    d[s] = [...d3.range(0,startIndex),...d[s],...d3.range(endIndex+1,time_stamp.length-1)]
+                });
+                d.job_id = time_stamp.map(d=>[]);
+            });
+        }
+
+        Object.values(jobs_info).forEach(j=>{
+            const startIndex = Math.max(0,Math.ceil(time2Index(j.start_time)));
+            const endIndex = j.finish_time?Math.ceil(time2Index(j.finish_time)):time2Index.range()[1];
+
+                j.node_list.forEach(comp=>{
+                    if ( !nodes_info[comp]) // new node
+                    {
+                        nodes_info[comp] = {};
+                        alternative_service.forEach(s=>nodes_info[comp][s]=new Array(time_stamp.length));
+                        nodes_info[comp].job_id = time_stamp.map(d=>[]);
+                    }
+                    for (let i = startIndex;i<=endIndex;i++)
+                        nodes_info[comp].job_id[i].push(j.jobID);
+                });
+        });
+
+
+        // map node and job
+        // const time2Index = d3.scaleLinear().domain([_tempData.time_stamp[0]/1000000,_tempData.time_stamp[_tempData.time_stamp.length-1]/1000000])
+        //     .range([0,_tempData.time_stamp.length-1]);
+        // const jobs_info = {};
+        // Object.values(_tempData.nodes_info).forEach(comp=>comp.job_id = _tempData.time_stamp.map(d=>[]));
+        // Object.values(_tempData.jobs_info).forEach(j=>{
+        //     let valid = true;
+        //     j.jobID = j.jobID.replace('.','|');
+        //     const startIndex = Math.max(0,Math.ceil(time2Index(j.start_time)));
+        //     const endIndex = j.finish_time?Math.ceil(time2Index(j.finish_time)):time2Index.range()[1];
+        //     valid = startIndex<=time2Index.range()[1];
+        //     if (valid){
+        //         valid = 0;
+        //         j.node_list.forEach(comp=>{
+        //             if ( !_tempData.nodes_info[comp])
+        //                 return;
+        //             valid++;
+        //             for (let i = startIndex;i<=endIndex;i++)
+        //                 _tempData.nodes_info[comp].job_id[i].push(j.jobID);
+        //         });
+        //         if (valid){
+        //             jobs_info[j.jobID] = j;
+        //         }
+        //     }
+        // });
+        request.updateData(new Promise((resolve, reject) => {resolve({jobs_info,nodes_info,time_stamp})}));
         _tempData = {};
         debugger;
     }else{

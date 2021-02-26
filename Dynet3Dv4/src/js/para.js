@@ -231,81 +231,84 @@ function outlier(data,keys,{outlyingCoefficient}){
     console.time('outline:');
     let dataSpider3 = [];
     const lists = {};
+    try {
 
-    data.forEach(d=>{
-        let condition = true;
-        const item = [];
-        keys.find(k=>{
-            if ((d[k]===undefined) || (d[k]<0)){
-                condition = false;
-            }else{
-                item.push(d[k]);
+        data.forEach(d => {
+            let condition = true;
+            const item = [];
+            keys.find(k => {
+                if ((d[k] === undefined) || (d[k] < 0)) {
+                    condition = false;
+                } else {
+                    item.push(d[k]);
+                }
+                return !condition;
+            });
+            delete d.outlier;
+            delete d.undefined;
+            if (condition) {
+                item.origin = d;
+                dataSpider3.push(item);
+            } else {
+                d.undefined = true;
+                lists[d.id] = 'rgba(200,200,200,0.8)'
             }
-            return !condition;
         });
-        delete d.outlier;
-        delete d.undefined;
-        if (condition){
-            item.origin = d;
-            dataSpider3.push(item);
-        }else{
-            d.undefined = true;
-            lists[d.id] = 'rgba(200,200,200,0.8)'
-        }
-    });
-    debugger
-    let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
-    console.log('estimateSize:',estimateSize);
-    // let maxBins = Math.sqrt(dataSpider3.length);
-    // let minBins = Math.min(20,dataSpider3.length/4);
-    // if (maxBins<minBins){
-    //     maxBins = dataSpider3.length;
-    // }
-    let minBins = Math.min(100,dataSpider3.length-1);
-    let maxBins = dataSpider3.length;
-    let scagOptions ={
-        startBinGridSize: estimateSize,
-        // minBins,
-        // maxBins,
-        // outlyingCoefficient: 1.5,
-        outlyingCoefficient: outlyingCoefficient??1.5,
-        // incrementA:2,
-        // incrementB:0,
-        // decrementA:1 / 3,
-        // decrementB:0,
-    };
-    // scag = scagnosticsnd(handledata(index), scagOptions);
-    let outlyingBins = [];
-    outlyingBins.pointObject = {};
-    // remove outlying
-    let scag = scagnosticsnd(dataSpider3.map((d, i) => {
-        var dd = d.slice();
-        dd.data = d;
-        return dd;
-    }), scagOptions);
-    debugger
-    console.timeEnd('outline:');
-    // console.log('Total bin=' + scag.bins.length);
-    // console.log('Outlying bin=' +scag.outlyingPoints.length);
-    //
-    //
-    // const lists = {};
-    // scag.outlyingPoints.map((o)=>{
-    //     let d = o.data;
-    //     d.origin.outlier = 1;
-    //     lists[d.origin.id] = '#f0f';
-    // });
-    console.log('Outlying bin=' +scag.outlyingBins.length);
+        debugger
+        let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
+        console.log('estimateSize:', estimateSize);
+        // let maxBins = Math.sqrt(dataSpider3.length);
+        // let minBins = Math.min(20,dataSpider3.length/4);
+        // if (maxBins<minBins){
+        //     maxBins = dataSpider3.length;
+        // }
+        let minBins = Math.min(100, dataSpider3.length - 1);
+        let maxBins = dataSpider3.length;
+        let scagOptions = {
+            startBinGridSize: estimateSize,
+            // minBins,
+            // maxBins,
+            // outlyingCoefficient: 1.5,
+            outlyingCoefficient: outlyingCoefficient ?? 1.5,
+            // incrementA:2,
+            // incrementB:0,
+            // decrementA:1 / 3,
+            // decrementB:0,
+        };
+        // scag = scagnosticsnd(handledata(index), scagOptions);
+        let outlyingBins = [];
+        outlyingBins.pointObject = {};
+        // remove outlying
+        let scag = scagnosticsnd(dataSpider3.map((d, i) => {
+            var dd = d.slice();
+            dd.data = d;
+            return dd;
+        }), scagOptions);
+        debugger
+        console.timeEnd('outline:');
+        // console.log('Total bin=' + scag.bins.length);
+        // console.log('Outlying bin=' +scag.outlyingPoints.length);
+        //
+        //
+        // const lists = {};
+        // scag.outlyingPoints.map((o)=>{
+        //     let d = o.data;
+        //     d.origin.outlier = 1;
+        //     lists[d.origin.id] = '#f0f';
+        // });
+        console.log('Outlying bin=' + scag.outlyingBins.length);
 
 
-
-    scag.outlyingBins.map((ob,i)=>{
-        ob.map(o=>{
-            let d = o.data;
-            d.origin.outlier = 1;
-            lists[d.origin.id] = '#f0f';
+        scag.outlyingBins.map((ob, i) => {
+            ob.map(o => {
+                let d = o.data;
+                d.origin.outlier = 1;
+                lists[d.origin.id] = '#f0f';
+            });
         });
-    });
-    console.timeEnd('outline:');
+        console.timeEnd('outline:');
+    }catch(e){
+
+    }
     return lists;
 }

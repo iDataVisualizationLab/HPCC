@@ -120,7 +120,6 @@ let currentDraw = () => {
 let tsnedata = {};
 
 function queryData(data) {
-    debugger
     const data_ = handleDataUrl(data);
     let sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;
@@ -158,7 +157,6 @@ function queryData(data) {
 }
 
 function createdata({tree, computers, jobs, users, jobByNames, sampleS}) {
-    debugger
     if (!Layout.order) { // init order
         Layout.order = _.flatten(Layout.data_flat.map(d => d.value));
         Layout.order.object = {};
@@ -380,6 +378,8 @@ function handleDataComputeByUser_user(_data) {
     const jobs = _data[JOB];
     const users = {};
     for (let comp in computers) {
+        if (comp==="10.150.48.75#9MBTXK2")
+            debugger
         let item = {
             id: comp,
             type: 'compute',
@@ -605,7 +605,6 @@ function getUsers(_data) {
         .key(d => d.value[USER]) //user
         .key(d => d.key.split('.')[0]) //job array
         .object(d3.entries(jobs));
-    debugger
     const users = _.mapObject(user_job, (u, i) => {
         const job = [];
         let totalCore = 0;
@@ -632,7 +631,6 @@ function filterData(nodeList, nets) {
                 datamap: nets.datamap
             };
             let filterNodeList = {...fileterObject}; // dict of each timestep
-            debugger
             // runDeep(runDeep(runDeep({currentNets,filterNodeList})))
             runDeep({currentNets, filterNodeList})
 
@@ -753,6 +751,8 @@ function summaryByUser(data) {
     Object.keys(data[COMPUTE]).forEach(comp => {
         data.time_stamp.forEach((t, ti) => {
             data[COMPUTE][comp].job_id[ti].forEach(jid => {
+                if (!data[JOB][jid])
+                    debugger
                 const user_name = data[JOB][jid].user_name;
                 if (!users[user_name]) {
                     users[user_name] = {id: user_name, comps: {}, time: {}, values: []}
@@ -821,7 +821,7 @@ function summaryByJob(data) {
 }
 
 function handleRankingData(data) {
-    data.time_stamp = data.time_stamp.slice(0, 144)
+    data.time_stamp = data.time_stamp
     console.time('handleRankingData');
     Layout.timespan = data.time_stamp;
     tsnedata = handleDataUrl(data).tsnedata;
@@ -853,7 +853,6 @@ function handleRankingData(data) {
 
     Layout.userTimeline = filterData([], Layout.netFull);
     getChanged(Layout.userTimeline);
-    debugger
     // Layout.userTimeline = filterData(['user13'],Layout.userTimeline)
     // console.log(Layout.userTimeline)
     console.timeEnd('handleRankingData');
