@@ -125,7 +125,7 @@ angular.module('hpccApp')
             inithostResults();
             // make normalize data
             initTsnedata();
-            if(job){
+            if(job&&Object.keys(job).length){
                 sampleJobdata = handleJobData(job);
             }else
                 sampleJobdata = [{

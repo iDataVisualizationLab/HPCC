@@ -40,9 +40,9 @@ function handleDataJie(dataRaw) {
 
 
     // var alternative_service = ["CPU1_Temp", "CPU2_Temp", "Inlet_Temp", "Memory_Usage", "Fan_1_Speed", "Fan_2_Speed", "Fan_3_Speed", "Fan_4_Speed", "Power_Usage"];
-    // var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
-    var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
-    var alternative_scale = [1,0.5,1,0.5];
+    var alternative_service = ["cpu_inl_temp","cpu_usage", "memory_usage", "fan_speed", "power_usage"];
+    // var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
+        var alternative_scale = [1,1,1,1,0.5];
 
     var sampleh = {};
     var ser = serviceListattr.slice();
@@ -54,9 +54,10 @@ function handleDataJie(dataRaw) {
         sampleh[h.name] = {};
         ser.forEach(s => sampleh[h.name][s] = []);
         sampleh.timespan.forEach((dt, ti) => {
-            data[h.ip].job_id[ti].forEach(d => {
-                jobo[d].nodeArr[ti].push(h.name)
-            })
+            if (data[h.ip].job_id[ti])
+                data[h.ip].job_id[ti].forEach(d => {
+                    jobo[d].nodeArr[ti].push(h.name)
+                })
         })
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];

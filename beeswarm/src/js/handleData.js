@@ -300,7 +300,7 @@ function handleRankingData(data){
             let sorteddata = hosts.map(h=>{
                 if(!ranking.byComputer[h][ser.text])
                     ranking.byComputer[h][ser.text] = [];
-                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
+                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:computers[h].job_id[ti]?_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name)):[]};
             }).sort((a,b)=>-b.value+a.value);
             sorteddata.forEach((d,i)=>{
                 ranking.byMetric[ser.text][ti][d.key] = d.value;
