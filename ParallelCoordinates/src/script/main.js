@@ -1244,11 +1244,17 @@ function brush(isreview) {
 
     // Get lines within extents
     var selected = [];
-    data
-        .forEach(function(d) {
+    // data
+    //     .forEach(function(d) {
+    //         if(!excluded_groups.find(e=>e===d.group))
+    //             !actives.find(function(p, dimension) {
+    //                 return (extents[dimension][0] > d[p]) || (d[p] > extents[dimension][1]);
+    //             }) ? selected.push(d) : null;
+    //     });
+    data.forEach(function(d) {
             if(!excluded_groups.find(e=>e===d.group))
                 !actives.find(function(p, dimension) {
-                    return extents[dimension][0] > d[p] || d[p] > extents[dimension][1];
+                    return (d[p]===undefined) || (d[p]===null) || (extents[dimension][0] > d[p]) || (d[p] > extents[dimension][1]);
                 }) ? selected.push(d) : null;
         });
     // free text search

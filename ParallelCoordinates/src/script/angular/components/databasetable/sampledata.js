@@ -99,12 +99,12 @@ angular.module('hpccApp').constant('SampleData', [
         group:"sample",
         formatType:'json'
     },{
-        id:"influxdb0302-0303",
-        name:"HPC data - 02 Mar 2021 (without job)",
-        url:"../HiperView/data/influxdb0302-0303.json",
+        id:"influxdb0225-0303",
+        name:"HPC data - 25 Feb - 03 Mar 2021 (without job)",
+        url:"../HiperView/data/influxdb0225-03032021.json",
         description:"",
         category:'hpcc',
-        date:"3 Mar  2020",
+        date:"2 Feb  2020",
         group:"sample",
         formatType:'json'
     },
