@@ -566,7 +566,7 @@ let DynamicNet3D = function () {
 
         path = {};
 
-        scaleNormalTimestep.range([-graphicopt.widthG() / 2, graphicopt.widthG() / 2]);
+        scaleNormalTimestep.range([-graphicopt.widthG(), graphicopt.widthG()]);
 
         // prepare screen
         setTimeout(function () {
@@ -1986,6 +1986,8 @@ function forceFunc(data,postMessage) {
         const nodes = Object.values(root_nodes);
         const force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-10))
+            // .force("y",d3.forceY().y(0))
+            // .force('collision', d3.forceCollide().radius(20))
             .force("link", d3.forceLink().id(d => d.id))
             .on('tick',function(){
                 minAlpha = force.alpha();
