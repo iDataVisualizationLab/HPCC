@@ -157,15 +157,15 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
-            labelMarker: {
-                text: "Show Labels",
-                type: "checkbox",
-                variableRoot: graphicopt.component.label,
-                variable: 'label_enable',
-                values: true,
-                width: '100px',
-                callback: updatelabelCluster
-            },
+            // labelMarker: {
+            //     text: "Show Labels",
+            //     type: "checkbox",
+            //     variableRoot: graphicopt.component.label,
+            //     variable: 'label_enable',
+            //     values: true,
+            //     width: '100px',
+            //     callback: updatelabelCluster
+            // },
             linkConnect: {
                 text: "Link type",
                 type: "selection",
@@ -411,92 +411,42 @@ let DynamicNet3D = function () {
         mouseoverTrigger = false;
         // terminateWorker();
         updateProcess({percentage: 10, text: 'Transfer data to projection function'})
+        forceFunc(data.net,(data) => {
+                    switch (data.action) {
+                        case "stable":
+                            debugger
+                            disableMouseover = false;
+                            if (data.value) {
+                                updateTableOutput(data.value);
+                            }
+                            // solution = data.sol;
+                            const type1list = [];
+                            const type2list = [];
+                            Object.values(data.sol).forEach(n=>{
+                                if (n.type===graphicopt.type1){
+                                    type1list.push(n);
+                                }else{
+                                    type2list.push(n);
+                                }
+                            });
+                            type1list.sort((a,b)=>a.x-b.x);
+                            type2list.sort((a,b)=>a.x-b.x);
+                            xScale.domain(type1list.map(d=>d.id));
+                            yScale.domain(type2list.map(d=>d.id));
+                            isneedCompute = true;
+                            render(true);
+                            // reduceRenderWeight(true);
+                            updateProcess();
+                            break;
+                        default:
+                            updateProcess({percentage: data.value.percentage, text: data.value.message});
+                            break;
+                    }
+                })
+        // updateProcess();
+        // isneedCompute = true;
+        // render(true);
 
-        updateProcess()
-        isneedCompute = true;
-        render(true);
-        // reduceRenderWeight(true);
-        // modelWorker = new Worker(self.workerPath);
-        // workerList[0] = modelWorker;
-        // console.log(`----inint ${self.workerPath} with: `, graphicopt.opt)
-        //
-        // modelWorker.postMessage({action: "initDataRaw", value: data.net});
-        // modelWorker.addEventListener('message', ({data}) => {
-        //     switch (data.action) {
-        //         case "updateHighlight":
-        //             if (dynamicVizs[0]) {
-        //                 disableMouseover = true;
-        //                 if (graphicopt.showChanged) {
-        //                     dynamicVizs[0].nodes._array_old = dynamicVizs[0].nodes.geometry.attributes.alpha.array.slice();
-        //                 }
-        //                 for (let i = 1; i < data.sol.length; i++) {
-        //                     data.sol[i].links.forEach((l, li) => {
-        //                         if (l.isNew) {
-        //                             l.source.timeArr[i].filtered = true;
-        //                             l.target.timeArr[i].filtered = true;
-        //                             // dynamicVizs.links[l.target.id]._visible = true;
-        //                         }else{
-        //                             l.source.filtered = false;
-        //                             l.target.filtered = false;
-        //                             // dynamicVizs.links[l.target.id]._visible = false;
-        //                         }
-        //                     });
-        //                     data.sol[i].deletedLinks.forEach(l => {
-        //                         (l.source.timeArr[i]??l.source.timeArr[i-1]).filtered = true;
-        //                         (l.target.timeArr[i]??l.target.timeArr[i-1]).filtered = true;
-        //                         // dynamicVizs.links[l.target.id]._visible = true;
-        //                     });
-        //                     data.sol[i].nodes.forEach((n, ni) => {
-        //                         if (n.filtered) {
-        //                             dynamicVizs[i].nodes._alpha[ni] = graphicopt.component.dot.opacity;
-        //                             // dynamicVizs.links[n.id]._visible = true;
-        //                         } else
-        //                             dynamicVizs[i].nodes._alpha[ni] = 0;
-        //                     });
-        //                     if (graphicopt.showChanged) {
-        //                         // dynamicVizs[i].nodes._array_old = dynamicVizs[i].nodes.geometry.attributes.alpha.array.slice();
-        //                         dynamicVizs[i].nodes.geometry.attributes.alpha.array = dynamicVizs[i].nodes._alpha.slice();
-        //                         dynamicVizs[i].nodes.geometry.attributes.alpha.needsUpdate = true;
-        //                     }
-        //                 }
-        //             }
-        //             break;
-        //         case "render":
-        //             disableMouseover = true;
-        //             if (firstReturn) {
-        //                 updateProcess();
-        //                 firstReturn = false;
-        //             }
-        //             if (!isBusy) {
-        //                 isBusy = true;
-        //                 solution = data.sol;
-        //                 updateTableOutput(data.value);
-        //                 // console.log('From:', data.source," alpha: ",data.value.alpha)
-        //                 isneedCompute = true;
-        //                 render();
-        //                 isBusy = false;
-        //             }
-        //             break;
-        //         case "stable":
-        //             if (firstReturn) {
-        //                 updateProcess()
-        //                 firstReturn = false;
-        //             }
-        //             modelWorker.terminate();
-        //             disableMouseover = false;
-        //             if (data.value) {
-        //                 updateTableOutput(data.value);
-        //             }
-        //             solution = data.sol;
-        //             isneedCompute = true;
-        //             render(true);
-        //             reduceRenderWeight(true);
-        //             break;
-        //         default:
-        //             updateProcess({percentage: data.value.percentage, text: data.value.message});
-        //             break;
-        //     }
-        // })
     }
 
     let controll_metrics = {old: {zoom: undefined}};
@@ -842,11 +792,12 @@ let DynamicNet3D = function () {
             // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
             // let color = d3.color((colorMap[target.type]?colorMap[target.type][target.id]:undefined)?? target.drawData[0].color ?? 'black');
             let color = d3.color(colorIn??(target.color ?? 'black'));
+            // let color = d3.color( 'black');
             colors[i * 3 + 0] = color.r / 255;
             colors[i * 3 + 1] = color.g / 255;
             colors[i * 3 + 2] = color.b / 255;
             alpha[i] = target.filterd ? graphicopt.component.dot.filter.opacity : graphicopt.component.dot.opacity;
-            _alpha[i] = 0;
+            _alpha[i] = (target.color || colorIn)?graphicopt.component.dot.opacity:0;
             texIndex[i] = mapType[target.type];
             sizes[i] = (graphicopt.component.dot[target.type] ?? graphicopt.component.dot).size;
         }
@@ -910,17 +861,23 @@ let DynamicNet3D = function () {
                     left: text => text.attr("text-anchor", "end").attr("dy", "0.35em").attr("x", -3)
                 });
                 let pointData = [];
-                dynamicVizs.forEach((net, ni) => {
-                    net.nodes._alpha.forEach((d, i) => {
-                        if (data.net[ni].nodes[i].inscreen) {
-                            let temp = getpos(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]);
-                            temp = [temp.x, temp.y];
-                            temp.index = '' + ni + ' ' + i;
-                            temp.name = data.net[ni].nodes[i].name;
-                            pointData.push(temp);
-                        }
-                    })
-                });
+                xScale.domain().forEach((x)=>{
+                    let temp = getpos(xScale(x), yScale.range()[0], scaleNormalTimestep.range()[0]);
+                    temp = [temp.x, temp.y];
+                    temp.rotate=-45;
+                    temp.type='x'
+                    // temp.index = '' + ni + ' ' + i;
+                    temp.name = x;
+                    pointData.push(temp);
+                })
+                yScale.domain().forEach((y)=>{
+                    let temp = getpos(xScale.range()[0],yScale(y), scaleNormalTimestep.range()[0]);
+                    temp = [temp.x, temp.y];
+                    temp.type='y'
+                    // temp.index = '' + ni + ' ' + i;
+                    temp.name = y;
+                    pointData.push(temp);
+                })
                 let voronoi = d3.Delaunay.from(pointData)
                     .voronoi([0, 0, graphicopt.widthG(), graphicopt.heightG()]);
 
@@ -932,15 +889,20 @@ let DynamicNet3D = function () {
                 });
                 svg.select('#modelNodeLabel').selectAll('.name').data(dataLabel).enter()
                     .append('text').attr('class', 'name')
-                    .each(function ([[x, y], cell]) {
-                        const [cx, cy] = d3.polygonCentroid(cell);
-                        const angle = (Math.round(Math.atan2(cy - y, cx - x) / Math.PI * 2) + 4) % 4;
-                        d3.select(this).call(angle === 0 ? orient.right
-                            : angle === 3 ? orient.top
-                                : angle === 1 ? orient.bottom
-                                    : orient.left);
+                    // .each(function ([[x, y], cell]) {
+                    .each(function ([d]) {
+                        // const [cx, cy] = d3.polygonCentroid(cell);
+                        // const angle = (Math.round(Math.atan2(cy - y, cx - x) / Math.PI * 2) + 4) % 4;
+                        // d3.select(this).call(angle === 0 ? orient.right
+                        //     : angle === 3 ? orient.top
+                        //         : angle === 1 ? orient.bottom
+                        //             : orient.left);
+                        if (d.type==='x')
+                            d3.select(this).call( orient.right);
+                        else
+                            d3.select(this).call( orient.left);
                     })
-                    .attr("transform", ([d]) => `translate(${d})`)
+                    .attr("transform", ([d]) => `translate(${d})`+(d.rotate?` rotate(${d.rotate})`:''))
                     .style('opacity', 0.6)
                     .text(([, , name]) => name);
             };
@@ -965,7 +927,7 @@ let DynamicNet3D = function () {
 
     function render(islast) {
         function updateNodes(ti, nodes, links,z) {
-            const points = dynamicVizs[ti].nodes;
+            const points = nodes;
             let p = points.geometry.attributes.position.array;
             nodes.data.arr.forEach((d, pointIndex) => {
                 const target = data.net[ti][links][pointIndex];
@@ -991,85 +953,8 @@ let DynamicNet3D = function () {
                         const z = scaleNormalTimestep(Math.ceil(ti / graphicopt.timeResolution) * graphicopt.timeResolution);
                         updateNodes(ti, net.nodes, 'links', z);
                         updateNodes(ti, net.deletedNodes, 'deletedLinks', z);
+                        isneedrender = true;
                     });
-                    isneedrender = true;
-                    // if (solution&&solution.length) {
-                    //     console.time('rendering last time: ');
-                    //     solution.forEach((sol, soli) => {
-                    //         const z = scaleNormalTimestep(Math.ceil(soli / graphicopt.timeResolution) * graphicopt.timeResolution);
-                    //         const points = dynamicVizs[soli].nodes;
-                    //         let p = points.geometry.attributes.position.array;
-                    //         onrendercalled = true;
-                    //         sol.nodes.forEach(function (d, pointIndex) {
-                    //             // mapIndex.forEach(function (i) {
-                    //             d.x = d.parent.x;
-                    //             d.y = d.parent.y;
-                    //             const target = data.net[soli].nodes[pointIndex];
-                    //             target._x = d.x;
-                    //             target._y = d.y;
-                    //             target.x = graphicopt.expand.xy * target._x;
-                    //             target.y = graphicopt.expand.xy * target._y;
-                    //             p[pointIndex * 3] = target.x;
-                    //             p[pointIndex * 3 + 1] = target.y;
-                    //
-                    //             // 3rd dimension as time step
-                    //             // p[pointIndex*3+2] = xscale(d[2])||0;
-                    //             p[pointIndex * 3 + 2] = z;
-                    //             d.z = p[pointIndex * 3 + 2];
-                    //             target.z = d.z;
-                    //         });
-                    //         if (islast) {
-                    //             // apply full
-                    //             const net = dynamicVizs[soli];
-                    //             net._links.forEach((l, li) => {
-                    //                 const source = data.net[soli].nodes[solution[soli].links[li].source.timeArr[soli]._index];
-                    //                 const target = data.net[soli].nodes[solution[soli].links[li].target.timeArr[soli]._index];
-                    //                 data.net[soli].links[li].source = source;
-                    //                 data.net[soli].links[li].target = target;
-                    //                 const points = [];
-                    //                 points.push(new THREE.Vector3(source.x, source.y, source.z));
-                    //                 points.push(new THREE.Vector3(target.x, target.y, target.z));
-                    //                 l.geometry.setFromPoints(points);
-                    //                 l.geometry.attributes.position.needsUpdate = true;
-                    //                 l.geometry.computeBoundingBox();
-                    //             });
-                    //             if (net.deletedLinks) {
-                    //                 net.deletedLinks.forEach((l, li) => {
-                    //                     let source,target;
-                    //                     if (solution[soli].deletedLinks[li].source.timeArr[soli])
-                    //                         source = data.net[soli].nodes[solution[soli].deletedLinks[li].source.timeArr[soli]._index];
-                    //                     else
-                    //                         source = data.net[soli-1].nodes[solution[soli].deletedLinks[li].source.timeArr[soli-1]._index];
-                    //                         // source = solution[soli].deletedLinks[li].source;
-                    //                     if (solution[soli].deletedLinks[li].target.timeArr[soli])
-                    //                         target = data.net[soli].nodes[solution[soli].deletedLinks[li].target.timeArr[soli]._index];
-                    //                     else
-                    //                         target = data.net[soli-1].nodes[solution[soli].deletedLinks[li].target.timeArr[soli-1]._index];
-                    //                         // target = solution[soli].deletedLinks[li].target;
-                    //                     data.net[soli].deletedLinks[li].source = source;
-                    //                     data.net[soli].deletedLinks[li].target = target;
-                    //                     const points = [];
-                    //                     points.push(new THREE.Vector3(source.x * graphicopt.expand.xy, source.y * graphicopt.expand.xy, source.z));
-                    //                     points.push(new THREE.Vector3(target.x * graphicopt.expand.xy, target.y * graphicopt.expand.xy, target.z));
-                    //                     // points.push(new THREE.Vector3(source.x * graphicopt.expand.xy, source.y * graphicopt.expand.xy, z));
-                    //                     // points.push(new THREE.Vector3(target.x * graphicopt.expand.xy, target.y * graphicopt.expand.xy, z));
-                    //                     l.geometry.setFromPoints(points);
-                    //                     l.geometry.attributes.position.needsUpdate = true;
-                    //                     l.geometry.computeBoundingBox();
-                    //                     debugger
-                    //                 })
-                    //             }
-                    //         }
-                    //         points.geometry.attributes.position.needsUpdate = true;
-                    //         points.geometry.boundingBox = null;
-                    //         points.geometry.computeBoundingSphere();
-                    //
-                    //     });
-                    //     controlPanelGeneral.showLineConnect.callback();
-                    //     onShowLineChart();
-                    //     isneedrender = true;
-                    //     console.timeEnd('rendering last time: ');
-                    // }
                 } else {
 
                 }
@@ -1166,23 +1051,32 @@ let DynamicNet3D = function () {
         if (intersects.length > 0 && (!visibledata || visibledata && (targetfilter = intersects.find(d => visibledata.indexOf(d.index) !== -1)))) {
             // var geometry = points.geometry;
             // var attributes = geometry.attributes;
+            debugger
             let targetIndex = intersects[0].index;
             let netIndex = intersects[0].netIndex;
             if (visibledata)
                 targetIndex = targetfilter.index;
             // if (INTERSECTED.indexOf(intersects[0].index) === -1) {
             if (true) {
-                let target = data.net[netIndex].nodes[targetIndex];
-                let rootTarget = data.root_nodes.find(d => d.id === target.id);
-                INTERSECTED = [target.id];
+                let target = data.net[netIndex].links[targetIndex];
+                INTERSECTED = [target.source,target.target];
+                // let rootTarget = INTERSECTED.map(id=>data.root_nodes.find(d => d.id === id));
                 visibleNode();
                 data.net.forEach((net, ni) => {
-                    const n = rootTarget.timeArr[ni];
                     let attribute = dynamicVizs[ni].nodes.geometry.attributes;
+                    // const n = rootTarget.timeArr[ni];
                     attribute.alpha.array = attribute.alpha.array.map(d => d ? graphicopt.component.dot.filter.opacity : d);
-                    if (n) {
-                        attribute.alpha.array[n._index] = attribute.alpha.array[n._index] ? graphicopt.component.dot.opacity : attribute.alpha.array[n._index];
-                    }
+                    dynamicVizs[ni].nodes.data.arr.forEach((d,i)=>{
+                        if((d.source===INTERSECTED[0])||(d.target===INTERSECTED[0])||(d.source===INTERSECTED[1])||(d.target===INTERSECTED[1]))
+                            attribute.alpha.array[i] = attribute.alpha.array[i] ? graphicopt.component.dot.opacity : attribute.alpha.array[i];
+                    });
+                    dynamicVizs[ni].deletedNodes.data.arr.forEach((d,i)=>{
+                        if((d.source===INTERSECTED[0])||(d.target===INTERSECTED[0])||(d.source===INTERSECTED[1])||(d.target===INTERSECTED[1]))
+                            attribute.alpha.array[i] = attribute.alpha.array[i] ? graphicopt.component.dot.opacity : attribute.alpha.array[i];
+                    });
+                    // if (n) {
+                    //     attribute.alpha.array[n._index] = attribute.alpha.array[n._index] ? graphicopt.component.dot.opacity : attribute.alpha.array[n._index];
+                    // }
                     attribute.alpha.needsUpdate = true;
                 });
                 // dynamicVizs.forEach(d => {
@@ -1407,7 +1301,7 @@ let DynamicNet3D = function () {
                         }
                         // // //count and look after all objects in the diamonds group
                         // debugger
-                        highlightNode(intersects);
+                        // highlightNode(intersects);
                     } else { // mouse over group
                         var geometry = points.geometry;
                         var attributes = geometry.attributes;
@@ -1554,15 +1448,17 @@ let DynamicNet3D = function () {
         const bandwidth = graphicopt.heightG()/Math.max(type1List.length,type2List.length);
 
         xScale = d3.scaleBand().domain(type1List.map(d=>d.id)).range([-(bandwidth*type1List.length)/2,(bandwidth*type1List.length)/2]);
-        yScale = d3.scalePoint().domain(type2List.map(d=>d.id)).range([-(bandwidth*type2List.length)/2,(bandwidth*type2List.length)/2]);
+        yScale = d3.scalePoint().domain(type2List.map(d=>d.id)).range([(bandwidth*type2List.length)/2,-(bandwidth*type2List.length)/2]);
         data.net.forEach((net, ni) => {
             // time slice generate
+            net.links.forEach(l=>l.id=`${l.target} in ${l.source}`);
+
             let sliceHolder = new THREE.Object3D();
             const netControl = {nodes: undefined, links: undefined, deletedLinks: undefined};
-            netControl.nodes = createpoints(sliceHolder, net.links, ni);
+            netControl.nodes = createpoints(sliceHolder, net.links, ni,undefined);
             // netControl._links = createLines(sliceHolder, net.links);
             net.deletedLinks = net.deletedLinks??[];
-            netControl.deletedNodes = createpoints(sliceHolder, net.deletedLinks ?? [],ni, 'rgb(255,0,0)');
+            netControl.deletedNodes = createpoints(sliceHolder, net.deletedLinks ?? [],ni, 'rgb(255,0,0)',graphicopt.component.dot.opacity);
             // netControl.links = [...netControl._links, ...netControl.deletedLinks];
             // add to the control
             dynamicVizs.push(netControl);
@@ -1575,10 +1471,10 @@ let DynamicNet3D = function () {
             //     dynamicVizs.links[n.id].data.push(n);
             // });
         });
-        // if (dynamicVizs[0]) {
-        //     dynamicVizs[0].links.forEach(d => d._visible = true)
-        //     dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
-        // }
+        if (dynamicVizs[0]) {
+            // dynamicVizs[0].links.forEach(d => d._visible = true)
+            dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
+        }
         // let connectedLinks = new THREE.Object3D();
         // Object.keys(dynamicVizs.links).forEach(k => {
         //     const el = createLineSegment(dynamicVizs.links[k],  (colorMap[graphicopt.mainType]?colorMap[graphicopt.mainType][k]:undefined)??'#007');
@@ -2052,3 +1948,64 @@ let DynamicNet3D = function () {
 
     return master;
 };
+
+function forceFunc(data,postMessage) {
+    let minAlpha = 1;
+    let totalTime_marker;
+    postMessage({action: 'message', value: {'percentage': 20, 'message': 'Data received. Process data...'}});
+    totalTime_marker = performance.now();
+
+    const net = data;
+    const root_nodes = {};
+    const linksObjs={};
+    if (net.length) {
+        net.forEach(function (n, ni) {
+            const nodes = n.nodes;
+            if (ni) {
+                nodes.forEach(n => {
+                    root_nodes[n.id] = n.parent;
+                    delete n.parent.x;
+                    delete n.parent.vx;
+                    delete n.parent.y;
+                    delete n.parent.vy;
+                })
+            } else {
+                nodes.forEach(n => {
+                    root_nodes[n.id] = n.parent;
+                    n.parent.fy=0;
+                });
+            }
+            n.links.forEach(l=>{
+                linksObjs[l.source+l.target] = {source: root_nodes[l.source],
+                target: root_nodes[l.target]};
+            });
+        });
+
+
+
+        const nodes = Object.values(root_nodes);
+        const force = d3.forceSimulation()
+            .force("charge", d3.forceManyBody().strength(-10))
+            .force("link", d3.forceLink().id(d => d.id))
+            .on('tick',function(){
+                minAlpha = force.alpha();
+            }).on('end',function(){
+                postMessage({
+                    action: 'stable',
+                    value: {totalTime: performance.now() - totalTime_marker, alpha: minAlpha},
+                    status: "done",
+                    sol: root_nodes
+                });
+            });
+
+        force.nodes(nodes);
+        force.force("link").links(Object.values(linksObjs));
+    } else {
+        postMessage({
+            action: 'stable',
+            value: {totalTime: performance.now() - totalTime_marker},
+            status: "done",
+            sol: undefined
+        });
+    }
+}

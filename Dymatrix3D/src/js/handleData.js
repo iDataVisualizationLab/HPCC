@@ -315,7 +315,8 @@ function handleDataComputeByUser_user_job(_data) {
                                 source: key,
                                 target: u.key,
                                 value: u.values.length,
-                                _index: dataIn.net[i].links.length
+                                _index: dataIn.net[i].links.length,
+                                id: [key,u.key]
                             };
                             dataIn.net[i].links.push(current_link)
                             user_job_obj[i].set(u.key + '|||' + key, current_link)
@@ -328,7 +329,8 @@ function handleDataComputeByUser_user_job(_data) {
                             source: comp,
                             target: key,
                             value: j.values.length,
-                            _index: dataIn.net[i].links.length
+                            _index: dataIn.net[i].links.length,
+                            id: [comp,key]
                         });
 
                     });
@@ -494,6 +496,7 @@ function handleDataComputeByUser_job(_data) {
         datamap: tsnedata,
         time_stamp: _data.time_stamp
     };
+    let userColor = d3.scaleOrdinal(d3.schemeCategory20);
     // let data = [];
     const computers = _data[COMPUTE];
     const jobs = _data[JOB];
@@ -525,7 +528,8 @@ function handleDataComputeByUser_job(_data) {
                 // user
                 let username = d3.nest().key(d => d.mainJob)
                     // .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp]))
-                    .rollup(d => d.length)
+                    // .rollup(d => d.length)
+                    .rollup(d => d[0].user_name)
                     .entries(jobArr);
                 // username.total = d3.sum(username, e => e.value);
                 // username.jobs = [jIDs, jobArr];
@@ -564,6 +568,7 @@ function handleDataComputeByUser_job(_data) {
                         source: comp,
                         target: u.key,
                         value: u.value,
+                        color: userColor(u.value),
                         _index: dataIn.net[i].links.length
                     })
                 })
@@ -843,7 +848,7 @@ function summaryByJob(data) {
 }
 
 function handleRankingData(data) {
-    data.time_stamp = data.time_stamp//.slice(0,5)
+    data.time_stamp = data.time_stamp.slice(0,288)
     console.time('handleRankingData');
     Layout.timespan = data.time_stamp;
     tsnedata = handleDataUrl(data).tsnedata;
@@ -874,7 +879,8 @@ function handleRankingData(data) {
     });
 
     Layout.userTimeline = filterData([], Layout.netFull);
-    getChanged(Layout.userTimeline);
+    // getChanged(Layout.userTimeline);
+
     // Layout.userTimeline = filterData(['user13'],Layout.userTimeline)
     // console.log(Layout.userTimeline)
     console.timeEnd('handleRankingData');
