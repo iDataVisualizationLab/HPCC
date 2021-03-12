@@ -411,41 +411,41 @@ let DynamicNet3D = function () {
         mouseoverTrigger = false;
         // terminateWorker();
         updateProcess({percentage: 10, text: 'Transfer data to projection function'})
-        forceFunc(data.net,(data) => {
-                    switch (data.action) {
-                        case "stable":
-                            debugger
-                            disableMouseover = false;
-                            if (data.value) {
-                                updateTableOutput(data.value);
-                            }
-                            // solution = data.sol;
-                            const type1list = [];
-                            const type2list = [];
-                            Object.values(data.sol).forEach(n=>{
-                                if (n.type===graphicopt.type1){
-                                    type1list.push(n);
-                                }else{
-                                    type2list.push(n);
-                                }
-                            });
-                            type1list.sort((a,b)=>a.x-b.x);
-                            type2list.sort((a,b)=>a.x-b.x);
-                            xScale.domain(type1list.map(d=>d.id));
-                            yScale.domain(type2list.map(d=>d.id));
-                            isneedCompute = true;
-                            render(true);
-                            // reduceRenderWeight(true);
-                            updateProcess();
-                            break;
-                        default:
-                            updateProcess({percentage: data.value.percentage, text: data.value.message});
-                            break;
-                    }
-                })
-        // updateProcess();
-        // isneedCompute = true;
-        // render(true);
+        // forceFunc(data.net,(data) => {
+        //             switch (data.action) {
+        //                 case "stable":
+        //                     debugger
+        //                     disableMouseover = false;
+        //                     if (data.value) {
+        //                         updateTableOutput(data.value);
+        //                     }
+        //                     // solution = data.sol;
+        //                     const type1list = [];
+        //                     const type2list = [];
+        //                     Object.values(data.sol).forEach(n=>{
+        //                         if (n.type===graphicopt.type1){
+        //                             type1list.push(n);
+        //                         }else{
+        //                             type2list.push(n);
+        //                         }
+        //                     });
+        //                     type1list.sort((a,b)=>a.x-b.x);
+        //                     type2list.sort((a,b)=>a.x-b.x);
+        //                     xScale.domain(type1list.map(d=>d.id));
+        //                     yScale.domain(type2list.map(d=>d.id));
+        //                     isneedCompute = true;
+        //                     render(true);
+        //                     // reduceRenderWeight(true);
+        //                     updateProcess();
+        //                     break;
+        //                 default:
+        //                     updateProcess({percentage: data.value.percentage, text: data.value.message});
+        //                     break;
+        //             }
+        //         })
+        updateProcess();
+        isneedCompute = true;
+        render(true);
 
     }
 
@@ -566,7 +566,7 @@ let DynamicNet3D = function () {
 
         path = {};
 
-        scaleNormalTimestep.range([-graphicopt.widthG(), graphicopt.widthG()]);
+        scaleNormalTimestep.range([-graphicopt.widthG()/2, graphicopt.widthG()/2]);
 
         // prepare screen
         setTimeout(function () {

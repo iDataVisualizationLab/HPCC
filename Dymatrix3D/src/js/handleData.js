@@ -550,19 +550,19 @@ function handleDataComputeByUser_job(_data) {
                         dataIn.root_nodes.push(users[u.key]);
                     }
                     userObj = users[u.key];
-                    if (!userObj.timeArr[i]) {
-                        userObj.timeArr[i] = {
-                            drawData: userObj.drawData,
-                            id: u.key,
-                            name: getUserName(u.key),
-                            type: 'job',
-                            data: {name: u.key, isNew: []},
-                            parent: userObj,
-                            ti: i
-                        };
-                        userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
-                        dataIn.net[i].nodes.push(userObj.timeArr[i]);
-                    }
+                        if (!userObj.timeArr[i]) {
+                            userObj.timeArr[i] = {
+                                drawData: userObj.drawData,
+                                id: u.key,
+                                name: getUserName(u.key),
+                                type: 'job',
+                                data: {name: u.key, isNew: []},
+                                parent: userObj,
+                                ti: i
+                            };
+                            userObj.timeArr[i]._index = dataIn.net[i].nodes.length;
+                            dataIn.net[i].nodes.push(userObj.timeArr[i]);
+                        }
                     // link
                     dataIn.net[i].links.push({
                         source: comp,

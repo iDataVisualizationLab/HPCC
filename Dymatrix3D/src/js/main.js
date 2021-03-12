@@ -37,8 +37,8 @@ $(document).ready(function(){
             // set up ui
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
-            // let url = '../HiperView/data/814_100timeStep_2020.json';
-            let url = '../HiperView/data/814_821_2020.json';
+            let url = '../HiperView/data/814_100timeStep_2020.json';
+            // let url = '../HiperView/data/814_821_2020.json';
             // let url = '../jobviewer/src/data/922020-932020-145000.json';
             if (command.timeStart!==undefined&&command.timeEnd!==undefined){// `2020-02-14T12:00:00-05:00`
                 _start = new Date(command.timeStart);
