@@ -47,12 +47,13 @@ let DynamicNet3D = function () {
                 schema: serviceFullList
             },
             type1: 'compute',
+            type2: 'job',
             mainType:'user',
             curveSegment: 20,
             linkConnect: 'straight',
             showUser: true,
             showNode: true,
-            showChanged: true,
+            // showChanged: true,
             showLineConnect: true,
             linePlot: false,
             plotMetric: false,
@@ -74,36 +75,36 @@ let DynamicNet3D = function () {
             iscompareMode: true
         },
         controlPanelGeneral = {
-            showChanged: {
-                text: "Show Variations",
-                type: "checkbox",
-                variable: 'showChanged',
-                values: true,
-                width: '100px',
-                callback: () => {
-                    const v = graphicopt.showChanged;
-                    onShowChanged = (v) => {
-                        if (v) {
-                            visibleNode();
-                            // dynamicVizs.forEach(n => {
-                            //     n.links.forEach(l => {
-                            //         l._visible_old = l.visible;
-                            //         l.visible = l._visible && l.visible;
-                            //     })
-                            // });
-                        } else {
-                            visibleNode();
-                            // dynamicVizs.forEach(n => {
-                            //     n.links.forEach(l => l.visible = l._visible_old);
-                            // });
-                        }
-                    };
-                    onShowChanged(v);
-                    isneedrender = true;
-                }
-            },
+            // showChanged: {
+            //     text: "Show Variations",
+            //     type: "checkbox",
+            //     variable: 'showChanged',
+            //     values: true,
+            //     width: '100px',
+            //     callback: () => {
+            //         const v = graphicopt.showChanged;
+            //         onShowChanged = (v) => {
+            //             if (v) {
+            //                 visibleNode();
+            //                 // dynamicVizs.forEach(n => {
+            //                 //     n.links.forEach(l => {
+            //                 //         l._visible_old = l.visible;
+            //                 //         l.visible = l._visible && l.visible;
+            //                 //     })
+            //                 // });
+            //             } else {
+            //                 visibleNode();
+            //                 // dynamicVizs.forEach(n => {
+            //                 //     n.links.forEach(l => l.visible = l._visible_old);
+            //                 // });
+            //             }
+            //         };
+            //         onShowChanged(v);
+            //         isneedrender = true;
+            //     }
+            // },
             showLineConnect: {
-                text: "Show <span class='instanceStyle'>User</span> timelines",
+                text: "Show timelines",
                 type: "checkbox",
                 variable: 'showLineConnect',
                 values: true,
@@ -133,18 +134,18 @@ let DynamicNet3D = function () {
                     isneedrender = true;
                 }
             },
-            showUserIcon: {
-                text: "Show "+graphicopt.mainType+"s",
-                type: "checkbox",
-                variable: 'showUser',
-                values: true,
-                width: '100px',
-                callback: () => {
-                    visibleNode();
-                    render(!isBusy);
-                    isneedrender = true;
-                }
-            },
+            // showUserIcon: {
+            //     text: "Show "+graphicopt.mainType+"s",
+            //     type: "checkbox",
+            //     variable: 'showUser',
+            //     values: true,
+            //     width: '100px',
+            //     callback: () => {
+            //         visibleNode();
+            //         render(!isBusy);
+            //         isneedrender = true;
+            //     }
+            // },
             showNodeIcon: {
                 text: "Show Nodes",
                 type: "checkbox",
@@ -166,31 +167,31 @@ let DynamicNet3D = function () {
             //     width: '100px',
             //     callback: updatelabelCluster
             // },
-            linkConnect: {
-                text: "Link type",
-                type: "selection",
-                variable: 'linkConnect',
-                labels: ['--none--', 'Straight'],
-                values: [false, 'straight'],
-                width: '100px',
-                callback: () => {
-                    visibleLine(graphicopt.linkConnect);
-                    toggleLine();
-                    render(!isBusy);
-                    isneedrender = true;
-                }
-            },
-            linkOpacity: {
-                text: "Link opacity",
-                range: [0.1, 1],
-                id: 'Link_opacity',
-                type: "slider",
-                variableRoot: graphicopt.component.link,
-                variable: 'opacity',
-                width: '100px',
-                step: 0.1,
-                callback: onlinkopacity
-            },
+            // linkConnect: {
+            //     text: "Link type",
+            //     type: "selection",
+            //     variable: 'linkConnect',
+            //     labels: ['--none--', 'Straight'],
+            //     values: [false, 'straight'],
+            //     width: '100px',
+            //     callback: () => {
+            //         visibleLine(graphicopt.linkConnect);
+            //         toggleLine();
+            //         render(!isBusy);
+            //         isneedrender = true;
+            //     }
+            // },
+            // linkOpacity: {
+            //     text: "Link opacity",
+            //     range: [0.1, 1],
+            //     id: 'Link_opacity',
+            //     type: "slider",
+            //     variableRoot: graphicopt.component.link,
+            //     variable: 'opacity',
+            //     width: '100px',
+            //     step: 0.1,
+            //     callback: onlinkopacity
+            // },
             networkExpand: {
                 text: "Network Expand",
                 range: [0.1, 5],
@@ -411,41 +412,42 @@ let DynamicNet3D = function () {
         mouseoverTrigger = false;
         // terminateWorker();
         updateProcess({percentage: 10, text: 'Transfer data to projection function'})
-        // forceFunc(data.net,(data) => {
-        //             switch (data.action) {
-        //                 case "stable":
-        //                     debugger
-        //                     disableMouseover = false;
-        //                     if (data.value) {
-        //                         updateTableOutput(data.value);
-        //                     }
-        //                     // solution = data.sol;
-        //                     const type1list = [];
-        //                     const type2list = [];
-        //                     Object.values(data.sol).forEach(n=>{
-        //                         if (n.type===graphicopt.type1){
-        //                             type1list.push(n);
-        //                         }else{
-        //                             type2list.push(n);
-        //                         }
-        //                     });
-        //                     type1list.sort((a,b)=>a.x-b.x);
-        //                     type2list.sort((a,b)=>a.x-b.x);
-        //                     xScale.domain(type1list.map(d=>d.id));
-        //                     yScale.domain(type2list.map(d=>d.id));
-        //                     isneedCompute = true;
-        //                     render(true);
-        //                     // reduceRenderWeight(true);
-        //                     updateProcess();
-        //                     break;
-        //                 default:
-        //                     updateProcess({percentage: data.value.percentage, text: data.value.message});
-        //                     break;
-        //             }
-        //         })
-        updateProcess();
-        isneedCompute = true;
-        render(true);
+        forceFunc(data.net,(data) => {
+                    switch (data.action) {
+                        case "stable":
+                            debugger
+                            disableMouseover = false;
+                            if (data.value) {
+                                updateTableOutput(data.value);
+                            }
+                            // solution = data.sol;
+                            const type1list = [];
+                            const type2list = [];
+                            Object.values(data.sol).forEach(n=>{
+                                if (n.type===graphicopt.type1) {
+                                    type1list.push(n);
+                                }
+                                if (n.type===graphicopt.type2) {
+                                    type2list.push(n);
+                                }
+                            });
+                            type1list.sort((a,b)=>a.x-b.x);
+                            type2list.sort((a,b)=>a.x-b.x);
+                            xScale.domain(type1list.map(d=>d.id));
+                            yScale.domain(type2list.map(d=>d.id));
+                            isneedCompute = true;
+                            render(true);
+                            // reduceRenderWeight(true);
+                            updateProcess();
+                            break;
+                        default:
+                            updateProcess({percentage: data.value.percentage, text: data.value.message});
+                            break;
+                    }
+                })
+        // updateProcess();
+        // isneedCompute = true;
+        // render(true);
 
     }
 
@@ -646,21 +648,19 @@ let DynamicNet3D = function () {
 
     function visibleNode() {
         dynamicVizs.forEach((n, ni) => {
-            if (graphicopt.showChanged)
-                n.nodes.geometry.attributes.alpha.array = n.nodes._alpha.slice();
-            else
-                n.nodes.geometry.attributes.alpha.array = n.nodes.geometry.attributes.alpha.array.map(d => true)
-            if (!graphicopt.showUser)
-                data.net[ni].nodes.forEach((d, i) => {
-                    if (d.type === graphicopt.mainType) {
-                        n.nodes.geometry.attributes.alpha.array[i] = false;
-                    }
-                });
-            if (!graphicopt.showNode)
-                data.net[ni].nodes.forEach((d, i) => {
-                    if (d.type === 'compute') {
-                        n.nodes.geometry.attributes.alpha.array[i] = false;
-                    }
+            // if (graphicopt.showChanged)
+            //     n.nodes.geometry.attributes.alpha.array = n.nodes._alpha.slice();
+            // else
+            //     n.nodes.geometry.attributes.alpha.array = n.nodes.geometry.attributes.alpha.array.map(d => true);
+            // if (!graphicopt.showUser)
+            //     data.net[ni].nodes.forEach((d, i) => {
+            //         if (d.type === graphicopt.mainType) {
+            //             n.nodes.geometry.attributes.alpha.array[i] = false;
+            //         }
+            //     });
+            // if (!graphicopt.showNode)
+            data.net[ni].links.forEach((d, i) => {
+                n.nodes.geometry.attributes.alpha.array[i] = graphicopt.showNode;
                 });
             n.nodes.geometry.attributes.alpha.needsUpdate = true;
             // n.links.forEach(l => {
@@ -749,23 +749,47 @@ let DynamicNet3D = function () {
         return lineObj;
     }
 
-    function createLineSegment(path, color) {
-        const points = path.data.map(d => new THREE.Vector3(0, 0, 0));
+    function createLineSegment(path) {
+        const data = [];
+        const points = [];
+        const color_ = [];
+        let current = undefined;
+        path.forEach((l,li)=>{
+            const key = l.id+l.color;
+            if (key!==current){
+                data.push(l);
+                points.push(new THREE.Vector3(0, 0, 0));
+                color_.push(l.color ? (new THREE.Color(d3.color(l.color) + '')) : 0x000000);
+                if (li){
+                    points.push(new THREE.Vector3(0, 0, 0));
+                    color_.push(l.color ? (new THREE.Color(d3.color(l.color) + '')) : 0x000000);
+                }
+                current = key;
+            }
+        });
+
+        if(path[path.length-1].ti!==data[data.length-1]){
+            data.push(path[path.length-1]);
+            points.push(new THREE.Vector3(0, 0, 0));
+            color_.push(path[path.length-1].color ? (new THREE.Color(d3.color(path[path.length-1].color) + '')) : 0x000000);
+        }
+        // const points = path.data.map(d => new THREE.Vector3(0, 0, 0));
 
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        let color_ = path.color ?? color;
+
         var material = new THREE.LineBasicMaterial({
             opacity: graphicopt.component.link.opacity,
             linewidth: graphicopt.component.link.size,
-            color: color_ ? (new THREE.Color(d3.color(color_) + '')) : 0x000000,
+            vertexColors: color_,
             transparent: true
         });
-        let lineObj = new THREE.Line(geometry, material);
+        let lineObj = new THREE.LineSegments(geometry, material);
         // lineObj.frustumCulled = false;
-        lineObj.data = path;
+        lineObj.arr = path;
+        lineObj.data = data;
         lineObj.name = 'connected ' + path.id;
         lineObj.id = 'connected ' + path.id;
-        lineObj.visible = false;
+        lineObj.visible = true;
         return lineObj;
     }
 
@@ -948,13 +972,31 @@ let DynamicNet3D = function () {
         if (isneedCompute) {
             try {
                 if (islast) {
-                    debugger
                     dynamicVizs.forEach((net,ti)=>{
                         const z = scaleNormalTimestep(Math.ceil(ti / graphicopt.timeResolution) * graphicopt.timeResolution);
                         updateNodes(ti, net.nodes, 'links', z);
                         updateNodes(ti, net.deletedNodes, 'deletedLinks', z);
                         isneedrender = true;
                     });
+
+                    Object.values(dynamicVizs.links).forEach(l=>{
+                        l.el.data.forEach((d,i)=>{
+                            let j = 2*i-1;
+                            if (j>-1){
+                                l.el.geometry.attributes.position.array[j*3] = d.x;
+                                l.el.geometry.attributes.position.array[j*3+1] = d.y;
+                                l.el.geometry.attributes.position.array[j*3+2] = d.z;
+                            }
+                            j = 2*i;
+                            if (j<l.el.data.length){
+                                l.el.geometry.attributes.position.array[j*3] = d.x;
+                                l.el.geometry.attributes.position.array[j*3+1] = d.y;
+                                l.el.geometry.attributes.position.array[j*3+2] = d.z;
+                            }
+                        });
+                        l.el.geometry.attributes.position.needsUpdate = true;
+                    })
+
                 } else {
 
                 }
@@ -1242,9 +1284,9 @@ let DynamicNet3D = function () {
         dynamicVizs.forEach((net, ni) => {
             net.nodes._alpha.forEach((d, i) => {
                 if (d > 0.1) {
-                    data.net[ni].nodes[i].inscreen = frustum.containsPoint(new THREE.Vector3(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]))
+                    data.net[ni].links[i].inscreen = frustum.containsPoint(new THREE.Vector3(net.nodes.geometry.attributes.position.array[i * 3], net.nodes.geometry.attributes.position.array[i * 3 + 1], net.nodes.geometry.attributes.position.array[i * 3 + 2]))
                 } else {
-                    data.net[ni].nodes[i].inscreen = false;
+                    data.net[ni].links[i].inscreen = false;
                 }
             })
         });
@@ -1301,7 +1343,7 @@ let DynamicNet3D = function () {
                         }
                         // // //count and look after all objects in the diamonds group
                         // debugger
-                        // highlightNode(intersects);
+                        highlightNode(intersects);
                     } else { // mouse over group
                         var geometry = points.geometry;
                         var attributes = geometry.attributes;
@@ -1438,20 +1480,28 @@ let DynamicNet3D = function () {
         dynamicVizs.links = {};
         debugger
         const type2List = [];
-        const type1List = data.root_nodes.filter(d=>{
+        const type1List = [];
+        data.root_nodes.forEach(d=>{
             if (d.type===graphicopt.type1)
-                return true;
-            type2List.push(d);
-            return false;
+                type1List.push(d);
+            if (d.type===graphicopt.type2)
+                type2List.push(d);
         });
 
         const bandwidth = graphicopt.heightG()/Math.max(type1List.length,type2List.length);
 
         xScale = d3.scaleBand().domain(type1List.map(d=>d.id)).range([-(bandwidth*type1List.length)/2,(bandwidth*type1List.length)/2]);
         yScale = d3.scalePoint().domain(type2List.map(d=>d.id)).range([(bandwidth*type2List.length)/2,-(bandwidth*type2List.length)/2]);
+        dynamicVizs.links = {};
         data.net.forEach((net, ni) => {
             // time slice generate
-            net.links.forEach(l=>l.id=`${l.target} in ${l.source}`);
+            net.links.forEach(l=>{
+                l.id=`${l.target} in ${l.source}`;
+                l.ti=ni;
+                if (!dynamicVizs.links[l.id])
+                    dynamicVizs.links[l.id] = {timeArr:[]};
+                dynamicVizs.links[l.id].timeArr[ni]=l;
+            });
 
             let sliceHolder = new THREE.Object3D();
             const netControl = {nodes: undefined, links: undefined, deletedLinks: undefined};
@@ -1475,13 +1525,14 @@ let DynamicNet3D = function () {
             // dynamicVizs[0].links.forEach(d => d._visible = true)
             dynamicVizs[0].nodes._alpha = dynamicVizs[0].nodes._alpha.map(d => graphicopt.component.dot.opacity);
         }
-        // let connectedLinks = new THREE.Object3D();
-        // Object.keys(dynamicVizs.links).forEach(k => {
-        //     const el = createLineSegment(dynamicVizs.links[k],  (colorMap[graphicopt.mainType]?colorMap[graphicopt.mainType][k]:undefined)??'#007');
-        //     dynamicVizs.links[k].el = el;
-        //     connectedLinks.add(el);
-        // });
-        // netPlot.add(connectedLinks);
+        let connectedLinks = new THREE.Object3D();
+        Object.keys(dynamicVizs.links).forEach(k => {
+            const n = dynamicVizs.links[k];
+            const el = createLineSegment(n.timeArr);
+            dynamicVizs.links[k].el = el;
+            connectedLinks.add(el);
+        });
+        netPlot.add(connectedLinks);
 
         start();
     };

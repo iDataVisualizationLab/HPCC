@@ -58,6 +58,7 @@ d3.json('../HiperView/data/17Feb2020_cluster_info.json',function(e,cluster){
         let matrix = [];
         comp.forEach(c=>{
             dim.forEach((d,di)=>{
+                debugger
                 let temp = cluster.map(cl=>{
                     let value = shap[c][di].value[cl.index]||0;
                     if (globalMax<value)
@@ -160,7 +161,6 @@ function similarityCal(data){
                 maxI = d;
             }
         });
-        debugger
         orderIndex.push(simMatrix[maxI].index);
         current_index = maxI;
         mapIndex = mapIndex.filter(d=>d!=maxI);} while(mapIndex.length);

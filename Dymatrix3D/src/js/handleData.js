@@ -568,7 +568,7 @@ function handleDataComputeByUser_job(_data) {
                         source: comp,
                         target: u.key,
                         value: u.value,
-                        color: userColor(u.value),
+                        // color: userColor(u.value),
                         _index: dataIn.net[i].links.length
                     })
                 })

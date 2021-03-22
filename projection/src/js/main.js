@@ -20,11 +20,21 @@ $(document).ready(function(){
     // request = new LoadShap('src/data/9214_9314_2020_v2.csv_1000_fast.csv');
     // request = new LoadShap('src/data/9214_9314_2020_v3.csv_2000_fast.csv');
     // request = new LoadShap('src/data/9214_9314_2020_v2.csv_5000_fast.csv');
-    request = new LoadShap('src/data/shap_username.csv');
+    // request = new LoadShap('src/data/shap_username.csv');
 
-    initMenu();
-    initClusterUI();
-    initdraw();
-    request.onFinishQuery.push(queryData);
-    request.onDataChange.push(request.request.bind(request))
+    handleDatabyUser('../HiperView/data/814_821_2020.json',(data)=>{
+        request = new LoadShap(new Promise((resolutionFunc)=>resolutionFunc(data)));
+        initMenu();
+        initClusterUI();
+        initdraw();
+        request.onFinishQuery.push(queryData);
+        request.onDataChange.push(request.request.bind(request))
+    })
+    debugger
+
+    // initMenu();
+    // initClusterUI();
+    // initdraw();
+    // request.onFinishQuery.push(queryData);
+    // request.onDataChange.push(request.request.bind(request))
 });

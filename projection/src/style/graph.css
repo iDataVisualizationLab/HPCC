@@ -29,7 +29,7 @@ svg {
 .onhighlight .item{
     opacity: 0.1;
 }
-.onhighlight .highlight{
+.onhighlight .highlight, .onhighlight .highlight .item{
     opacity: 1;
 }
 g.links .link {

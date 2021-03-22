@@ -10,7 +10,8 @@ class LoadShap {
         this.isRealTime = !url;
         let self = this;
         if (!this.isRealTime) {
-            let updatePromise=d3.csv(url).then((data) => {
+            let updatePromise=(_.isString(url)?d3.csv(url):url).then((data) => {
+                debugger
                 // preprocess data
                 let classIndex = data.columns.slice();
                 let keyFeature = classIndex.shift();

@@ -69,26 +69,7 @@ function getInnerNodeAttr(){
     return $('#innerDisplay').val()
 }
 let userColor = d3.scaleOrdinal(d3.schemeCategory20);
-function draw(_result){
-    debugger
-    let _solution = _result.solution;
-    let feature = _result.feature;
-
-    const job_user = {};
-    Object.keys(user_job).forEach(u=>{
-        Object.keys(user_job[u]).forEach(j=>{
-            job_user[j] = u;
-        })
-    });
-    let solution_extra = [];
-    let solution = _solution.filter(d=>{
-        d.user = user_job[d.name];
-        if (!d.user){
-            user_job[job_user[d.name]][d.name] = d;
-            solution_extra.push(d)
-        }
-        return d.user;
-    });
+function draw({solution,feature}){
     graphicopt.radaropt.schema = feature;
     isFreeze= false;
     graphicopt.width = document.getElementById('circularLayoutHolder').getBoundingClientRect().width;
@@ -220,12 +201,6 @@ function draw(_result){
         temp.name = d.name;
         return temp}))
         .voronoi([-graphicopt.widthG()/2, -graphicopt.heightG()/2, graphicopt.widthG()/2, graphicopt.heightG()/2]);
-
-    solution_extra.forEach(d=>{
-        d.x = xscale(d[0]);
-        d.y = yscale(d[1]);
-    })
-
     const arr = solution.map(function(d, i) {
         d.label = {};
         d.label.scaleThreshold = Math.sqrt(graphicopt.displayThreshold / Math.abs(d3.polygonArea(cellsLabel.cellPolygon(i))));
@@ -255,14 +230,11 @@ function draw(_result){
         svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
     }
 
-    let extranodesg = svg.select("g.extra_nodes");
-    if(extranodesg.empty()){
-        extranodesg = svg.append("g").attr("class", "extra_nodes");
-    }
+
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
     if(onodesg.empty()){
-        onodesg = svg.append("g").attr("class", "outer_nodes");
+        onodesg = svg.append("g").attr("class", "outer_nodes")
     }
     let onode = onodesg.selectAll(".outer_node")
         .data(arr,d=>d.name);
@@ -643,33 +615,6 @@ function pack (data){
 function mouseover(d){
     if (!isFreeze)
    {     // Bring to front
-       debugger
-       const extra  =Object.values(d.user).filter(d=>typeof d !=="boolean")
-       graphicopt.el.select('.extra_nodes').append('defs')
-           .selectAll('radialGradient')
-           .data(extra)
-           .join('radialGradient')
-           .attr('id',e=>'grad'+d.name+e.name)
-           .attr("gradientUnits","userSpaceOnUse")
-           .attr('r',e=>Math.sqrt((d.x-e.x)*(d.x-e.x)+(d.y-e.y)*(d.y-e.y)))
-           .attr('cx',d.x)
-           .attr('cy',d.y)
-           .attr('fx',d.x)
-           .attr('fy',d.y)
-           .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
-<stop offset="0.25" style="stop-color:black;stop-opacity:0.5"></stop>
-            <stop offset="1" style="stop-color:black;stop-opacity:0"></stop>`);
-
-       graphicopt.el.select('.extra_nodes').selectAll('line.connect')
-           .data(extra)
-           .join('line')
-           .attr('x1',d.x)
-           .attr('y1',d.y)
-           .attr('x2',e=>e.x)
-           .attr('y2',e=>e.y)
-           .attr('stroke',e=>`url(#grad${d.name+e.name})`)
-       ;
-
         graphicopt.el.classed('onhighlight',true);
         d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
         d3.select(this).classed('highlight', true);
@@ -728,7 +673,6 @@ function getScale(sol){
 function mouseout(d){
     if(!isFreeze)
         {
-            graphicopt.el.select('.extra_nodes').selectAll('*').remove();
             graphicopt.el.classed('onhighlight',false);
             d3.select(this).classed('highlight', false);
             if(d.node){
