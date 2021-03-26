@@ -21,7 +21,9 @@ function handleDatabyUser(url,callBack){
         const jobData = jobResult.data;
         user_job = jobResult.net;
         summaryInTime.mode = 'user';
-        const userData = summaryInTime().data;
+        const userResult = summaryInTime();
+        debugger
+        const userData = userResult.data;
         userData.forEach(u=>{
             if (user_job[u.id])
                 jobData.push(u)
@@ -33,11 +35,13 @@ function revertData(data){
     const dataOut = [];
     dataOut.columns = ["feature_name",...data.map(d=>d.id)];
     serviceFullList.forEach(s=>{
-        const item = {feature_name:s.text};
-        data.forEach(d=>{
-            item[d.id]=d[s.text];
-        })
-        dataOut.push(item)
+        // if (s.text!=='Inlet Temp'){
+            const item = {feature_name:s.text};
+            data.forEach(d=>{
+                item[d.id]=d[s.text];
+            })
+            dataOut.push(item)
+        // }
     })
     return dataOut
 }
@@ -76,7 +80,7 @@ function summaryByUser(data) {
         el['#Computes'] = u.totalNode;
         dataViz.push(el)
     });
-    return {data:dataViz};
+    return {data:dataViz,raw:users};
 }
 function summaryByJob(data) {
     const jobs = {};
@@ -129,5 +133,5 @@ function summaryByJob(data) {
             dataViz.push(el)
         }
     });
-    return {data:dataViz,net:user};
+    return {data:dataViz,net:user,raw:jobs};
 }

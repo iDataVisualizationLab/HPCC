@@ -57,7 +57,19 @@ function initdraw(){
     d3.select('#sort_apply').on('click',function(){
         sortData();
         currentDraw(serviceSelected)
-    })
+    });
+
+    try {
+        noUiSlider.create(d3.select('.filterView').node(), {
+            start: 0,
+            step: 0.1,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': 0,
+                'max': 1,
+            },
+        });
+    }catch(e){}
 }
 function closeToolTip(){
     d3.select('.informationHolder').classed('hide',true);
@@ -70,7 +82,7 @@ function getInnerNodeAttr(){
 }
 let userColor = d3.scaleOrdinal(d3.schemeCategory20);
 function draw(_result){
-    debugger
+
     let _solution = _result.solution;
     let feature = _result.feature;
 
@@ -85,6 +97,7 @@ function draw(_result){
         d.user = user_job[d.name];
         if (!d.user){
             user_job[job_user[d.name]][d.name] = d;
+            d.parent = user_job[job_user[d.name]];
             solution_extra.push(d)
         }
         return d.user;
@@ -159,7 +172,7 @@ function draw(_result){
     // scale
     let {xscale,yscale} =  getScale(solution)
     let {renderFunc,innerscale} = getRenderFunc(feature);
-    gaxis.select('g.axisXg').attr('transform',`translate(0,${yscale.range()[1]})`).select('g.axisX').call(d3.axisBottom(xscale));
+    gaxis.select('g.axisXg').attr('transform',`translate(0,${yscale.range()[0]})`).select('g.axisX').call(d3.axisBottom(xscale));
     gaxis.select('g.axisXg').select('text.axisX').text('PC1')
         .style('font-weight','bold').style('text-anchor','middle')
         .attr('transform',`translate(0,${30})`);
@@ -224,8 +237,11 @@ function draw(_result){
     solution_extra.forEach(d=>{
         d.x = xscale(d[0]);
         d.y = yscale(d[1]);
-    })
+    });
+    // <editorFold desc="select filter">
 
+    const disScale = d3.scaleLinear();
+    let rangeDis = [Infinity,-Infinity];
     const arr = solution.map(function(d, i) {
         d.label = {};
         d.label.scaleThreshold = Math.sqrt(graphicopt.displayThreshold / Math.abs(d3.polygonArea(cellsLabel.cellPolygon(i))));
@@ -243,10 +259,29 @@ function draw(_result){
         d.relatedNodes = [];
         d.maxRadius = d3.max(d.metrics,e=> innerscale(e.value));
         d.data={};
-        d.tooltip = ''
+        d.tooltip = '';
+        d.maxDistance = 0
+        Object.values(d.user).forEach(e=>{
+            e.distance = Math.sqrt((e.x-d.x)*(e.x-d.x) + (e.y-d.y)*(e.y-d.y));
+            if (e.distance>d.maxDistance)
+                d.maxDistance = e.distance;
+        });
+        if ( d.maxDistance<rangeDis[0]){
+            rangeDis[0] =  d.maxDistance;
+        }
+        if ( d.maxDistance>rangeDis[1]){
+            rangeDis[1] =  d.maxDistance;
+        }
         return d;
     });
-
+    disScale.range(rangeDis);
+    d3.select('.filterView').node().noUiSlider.on("change", function () { // control panel update method
+        const threshold = disScale(+this.get());
+        solution.forEach(d=>{
+            d.opacity =  (d.maxDistance>=threshold) ? 1 :0.1
+        });
+        svg.select("g.outer_nodes").selectAll(".outer_node").attr('opacity',d=>d.opacity)
+    });
     if(isFirst){
         let startZoom = d3.zoomIdentity;
         startZoom.x = graphicopt.centerX();
@@ -657,8 +692,8 @@ function mouseover(d){
            .attr('fx',d.x)
            .attr('fy',d.y)
            .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
-<stop offset="0.25" style="stop-color:black;stop-opacity:0.5"></stop>
-            <stop offset="1" style="stop-color:black;stop-opacity:0"></stop>`);
+<stop offset="0.2" style="stop-color:black;stop-opacity:0.5"></stop>
+            <stop offset="0.25" style="stop-color:black;stop-opacity:0"></stop>`);
 
        graphicopt.el.select('.extra_nodes').selectAll('line.connect')
            .data(extra)
@@ -703,7 +738,7 @@ function getScale(sol){
     let xrange = d3.extent(sol, d => d[0]);
     let yrange = d3.extent(sol, d => d[1]);
     let xscale = d3.scaleLinear().range([-graphicopt.widthG()/2, graphicopt.widthG()/2]);
-    let yscale = d3.scaleLinear().range([-graphicopt.heightG()/2, graphicopt.heightG()/2]);
+    let yscale = d3.scaleLinear().range([graphicopt.heightG()/2, -graphicopt.heightG()/2]);
     const ratio = graphicopt.heightG() / graphicopt.widthG();
     if ((yrange[1] - yrange[0]) / (xrange[1] - xrange[0]) > graphicopt.heightG() / graphicopt.widthG()) {
         yscale.domain(yrange);

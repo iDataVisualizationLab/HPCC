@@ -138,9 +138,18 @@
                         </div>
                         <div class="card-body row" id="analyticOnToolbarHolder">
                             <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                <div class="row legendView hide">
-                                    <label class="col-4"></label>
-                                    <div class="col-8 justify-content-center " style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                <div class="row col-12">
+                                    <div class="col-6">
+                                        User-Job distance
+                                    </div>
+                                    <div class="filterView col-6" style="margin:auto; padding:inherit">
+
+                                    </div>
+                                </div>
+
+                                <div class="row legendView hide" style="margin-top: 10px">
+                                    <label class="col-12" style="margin-bottom:0"><div class="col-6">Dimension</div></label>
+                                    <div class="col-12 justify-content-center " style="padding-right: 0;padding-left: 0;">
                                         <svg class="legend" ></svg>
                                     </div>
                                 </div>
@@ -220,6 +229,9 @@
     <link rel="stylesheet" href="src/style/dashboard.css">
 
 <!--    <script src="src/lib/nouislider.js"></script>-->
+    <link rel="stylesheet" href="../HiperView/css/nouislider.css"/>
+    <script src="../HiperView/js/nouislider.js"></script>
+
     <script src="src/lib/d3.v4.min.js"></script>
     <script src="src/lib/d3.v5.min.js"></script>
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
