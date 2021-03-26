@@ -37,7 +37,7 @@ let graphicopt = {
     animationTime:500,
     displayThreshold: 4000,
     radaropt : {
-        r:10,
+        r:20,
         padding:0.1
     }
 };
@@ -93,12 +93,14 @@ function draw(_result){
         })
     });
     let solution_extra = [];
+    let userObj = {};
     let solution = _solution.filter(d=>{
         d.user = user_job[d.name];
         if (!d.user){
             user_job[job_user[d.name]][d.name] = d;
-            d.parent = user_job[job_user[d.name]];
             solution_extra.push(d)
+        }else{
+            userObj[d.name] = d;
         }
         return d.user;
     });
@@ -136,7 +138,7 @@ function draw(_result){
             .attr('transform',`scale(${1/d3.event.transform.k})`)
             .attr('opacity', function(d) {
                     if (d3.event.transform.k > d.label.scaleThreshold) {
-                    return d.label.opacityScale(d3.event.transform.k);
+                        return d.label.opacityScale(d3.event.transform.k);
                 }
                 return 0;
             });
@@ -237,6 +239,7 @@ function draw(_result){
     solution_extra.forEach(d=>{
         d.x = xscale(d[0]);
         d.y = yscale(d[1]);
+        d.parent = userObj[job_user[d.name]];
     });
     // <editorFold desc="select filter">
 
@@ -280,7 +283,8 @@ function draw(_result){
         solution.forEach(d=>{
             d.opacity =  (d.maxDistance>=threshold) ? 1 :0.1
         });
-        svg.select("g.outer_nodes").selectAll(".outer_node").attr('opacity',d=>d.opacity)
+        svg.select("g.outer_nodes").selectAll(".outer_node").attr('opacity',d=>d.opacity);
+        drawLine();
     });
     if(isFirst){
         let startZoom = d3.zoomIdentity;
@@ -327,6 +331,12 @@ function draw(_result){
 
     makelegend();
     startCollide();
+
+    d3.select('#drawline').on('change',function (){
+        graphicopt.drawLine = this.checked;
+        drawLine();
+    })
+
     function startCollide() {
         forceColider.alpha(0.1).force('collide').radius(function(d){return d.maxRadius}).iterations(10);
         forceColider.nodes(arr);
@@ -617,6 +627,40 @@ function draw(_result){
         d3.select('.legendView').classed('onhighlight',false);
         d3.selectAll('.highlight').classed('highlight',false);
     }
+
+    function drawLine(){
+        extranodesg.selectAll('*').remove();
+        if (graphicopt.drawLine){
+            const extra  =solution_extra
+            extranodesg.append('defs')
+                .selectAll('radialGradient')
+                .data(extra)
+                .join('radialGradient')
+                .attr('id',e=>'grad'+e.parent.name+e.name)
+                .attr("gradientUnits","userSpaceOnUse")
+                .attr('r',e=>{const d = e.parent; return Math.sqrt((d.x-e.x)*(d.x-e.x)+(d.y-e.y)*(d.y-e.y))})
+                .attr('cx',e=>e.parent.x)
+                .attr('cy',e=>e.parent.y)
+                .attr('fx',e=>e.parent.x)
+                .attr('fy',e=>e.parent.y)
+                .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
+    <stop offset="0.15" style="stop-color:black;stop-opacity:0.5"></stop>
+                <stop offset="0.2" style="stop-color:black;stop-opacity:0"></stop>`);
+
+            graphicopt.el.select('.extra_nodes').selectAll('line.connect')
+                .data(extra)
+                .join('line')
+                .attr('id',e=>'line'+e.parent.name+e.name)
+                .attr('x1',e=>e.parent.x)
+                .attr('y1',e=>e.parent.y)
+                .attr('x2',e=>e.x)
+                .attr('y2',e=>e.y)
+                .style('opacity',e=>e.parent.opacity)
+                .attr('stroke',e=>`url(#grad${e.parent.name+e.name})`)
+                .each(function(e){e.el=d3.select(this)})
+            ;
+        }
+    }
 }
 function textcolor(p){
     return p.style('fill',d=>{
@@ -678,33 +722,13 @@ function pack (data){
 function mouseover(d){
     if (!isFreeze)
    {     // Bring to front
-       debugger
-       const extra  =Object.values(d.user).filter(d=>typeof d !=="boolean")
-       graphicopt.el.select('.extra_nodes').append('defs')
-           .selectAll('radialGradient')
-           .data(extra)
-           .join('radialGradient')
-           .attr('id',e=>'grad'+d.name+e.name)
-           .attr("gradientUnits","userSpaceOnUse")
-           .attr('r',e=>Math.sqrt((d.x-e.x)*(d.x-e.x)+(d.y-e.y)*(d.y-e.y)))
-           .attr('cx',d.x)
-           .attr('cy',d.y)
-           .attr('fx',d.x)
-           .attr('fy',d.y)
-           .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
-<stop offset="0.2" style="stop-color:black;stop-opacity:0.5"></stop>
-            <stop offset="0.25" style="stop-color:black;stop-opacity:0"></stop>`);
+       try {
+           Object.values(d.user).forEach(e => {
+               e.el.classed('highlight', true);
+           });
+       }catch (e) {
 
-       graphicopt.el.select('.extra_nodes').selectAll('line.connect')
-           .data(extra)
-           .join('line')
-           .attr('x1',d.x)
-           .attr('y1',d.y)
-           .attr('x2',e=>e.x)
-           .attr('y2',e=>e.y)
-           .attr('stroke',e=>`url(#grad${d.name+e.name})`)
-       ;
-
+       }
         graphicopt.el.classed('onhighlight',true);
         d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
         d3.select(this).classed('highlight', true);
@@ -763,9 +787,10 @@ function getScale(sol){
 function mouseout(d){
     if(!isFreeze)
         {
-            graphicopt.el.select('.extra_nodes').selectAll('*').remove();
+            // graphicopt.el.select('.extra_nodes').selectAll('*').remove();
             graphicopt.el.classed('onhighlight',false);
             d3.select(this).classed('highlight', false);
+            graphicopt.el.selectAll('.highlight').classed('highlight', false);
             if(d.node){
                 d.node.classed('highlight', false).classed('highlightSummary', false);
             }
