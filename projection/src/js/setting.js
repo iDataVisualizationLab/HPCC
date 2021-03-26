@@ -79,7 +79,8 @@ function handleDataUrl(dataRaw) {
     hosts.forEach(h => {
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
-        ser.forEach(s => sampleh[h.name][s] = []);
+        // ser.forEach(s => sampleh[h.name][s] = []);
+        sampleh[h.name] = [];
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
@@ -91,10 +92,17 @@ function handleDataUrl(dataRaw) {
                     value.push((data[h.ip][sa][ti][ii]==='' || data[h.ip][sa][ti][ii]===undefined)?null:data[h.ip][sa][ti][ii]*scale)
                 }
                 let arrID = serviceListattr[si];
-                if (sampleh[h.name][arrID]===undefined)
-                    debugger
-                let currentIndex =  sampleh[h.name][arrID].length;
-                sampleh[h.name][arrID][ti] = value;
+                // if (sampleh[h.name][arrID]===undefined)
+                //     debugger
+                let currentIndex = ti;
+                // sampleh[h.name][arrID][ti] = value;
+
+                if (sampleh[h.name][currentIndex]===undefined){
+                    sampleh[h.name][currentIndex] = [];
+                    sampleh[h.name][currentIndex].name = h.name;
+                    sampleh[h.name][currentIndex].timestep =currentIndex;
+                }
+                value.forEach(v=>sampleh[h.name][currentIndex].push(v));
 
                 if (tsnedata[h.name][currentIndex]===undefined){
                     tsnedata[h.name][currentIndex] = [];

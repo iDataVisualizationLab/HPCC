@@ -11,10 +11,15 @@ summaryInTime.mode = 'job';
 summaryInTime.changed = true;
 summaryInTime.data = {};
 let user_job;
+let sampleS;
 function handleDatabyUser(url,callBack){
     d3.json(url).then(_data=>{
         debugger
-        tsnedata = handleDataUrl(_data).tsnedata;
+        const dataurl = handleDataUrl(_data);
+        tsnedata = dataurl.tsnedata;
+        sampleS = dataurl.sampleS;
+        Layout.jobs = _data[JOB];
+        Layout.timespan = _data.time_stamp.map(d=>d/1000000);
         summaryInTime.data=_data;
         summaryInTime.mode = 'job';
         const jobResult = summaryInTime();
@@ -36,11 +41,11 @@ function revertData(data){
     dataOut.columns = ["feature_name",...data.map(d=>d.id)];
     serviceFullList.forEach(s=>{
         // if (s.text!=='Inlet Temp'){
-            const item = {feature_name:s.text};
-            data.forEach(d=>{
-                item[d.id]=d[s.text];
-            })
-            dataOut.push(item)
+        const item = {feature_name:s.text};
+        data.forEach(d=>{
+            item[d.id]=d[s.text];
+        })
+        dataOut.push(item)
         // }
     })
     return dataOut
@@ -53,8 +58,9 @@ function summaryByUser(data) {
                 if (data[JOB][jid].finish_time && (data[JOB][jid].start_time>=(data.time_stamp[0]/1000000))){
                     const user_name = data[JOB][jid].user_name;
                     if (!users[user_name]) {
-                        users[user_name] = {id: user_name, comps: {}, time: {}, values: []}
+                        users[user_name] = {id: user_name, comps: {}, time: {},value:{job:{}}, values: []}
                     }
+                    users[user_name].value.job[jid]=data[JOB][jid];
                     if (!users[user_name].comps[comp]) {
                         users[user_name].comps[comp] = [];
                     }
@@ -93,7 +99,9 @@ function summaryByJob(data) {
                     const jobID_Main = data[JOB][jid].job_name.split('batch')[0]+'||'+data[JOB][jid].user_name;
                     if (!user[data[JOB][jid].user_name])
                         user[data[JOB][jid].user_name] = {};
-                    user[data[JOB][jid].user_name][jobID_Main] = true;
+                    if (!user[data[JOB][jid].user_name][jobID_Main])
+                        user[data[JOB][jid].user_name][jobID_Main] = {job:{}};
+                    user[data[JOB][jid].user_name][jobID_Main].job[jid] = data[JOB][jid];
                     if (!jobs[jobID_Main]) {
                         jobs[jobID_Main] = {id: jobID_Main, comps: {}, time: {}, values: []}
                     }

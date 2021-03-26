@@ -97,6 +97,7 @@ function draw(_result){
     let solution = _solution.filter(d=>{
         d.user = user_job[d.name];
         if (!d.user){
+            d.job = user_job[job_user[d.name]][d.name].job;
             user_job[job_user[d.name]][d.name] = d;
             solution_extra.push(d)
         }else{
@@ -262,6 +263,12 @@ function draw(_result){
         d.relatedNodes = [];
         d.maxRadius = d3.max(d.metrics,e=> innerscale(e.value));
         d.data={};
+        d.value={job:[]};
+        Object.values(user_job[d.name]).forEach(e=>{
+            Object.keys(e.job).forEach(k=>{
+                d.value.job.push(k)
+            })
+        });
         d.tooltip = '';
         d.maxDistance = 0
         Object.values(d.user).forEach(e=>{
@@ -387,7 +394,7 @@ function draw(_result){
             function updateNode(node) {
                 node
                     // .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'compute');})
+                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
                     .on("mouseover", function(d){mouseover.bind(this)(d)})
                     .on("mouseout", function(d){mouseout.bind(this)(d)})
                     .style('filter',d=>d.highlight?`url(#${'c'+d.currentID}`:null)
@@ -448,14 +455,17 @@ function draw(_result){
                         <th>TaskID</th>
                     </tr>
                 </thead>
-            </table>`);
+            </table>
+            <div class="row"><label for="tooltipService" class="col-2">Metric: </label><select id="tooltipService">${serviceFullList.map((s,si)=>`<option value="${si}">${s.text}</option>`)}</select></div>
+            <div id="tooltipSVG"></div>`);
             let jobData = [];
+            const timescale = d3.scaleLinear().domain([Layout.timespan[0],Layout.timespan[1]]);
             if (type==='user')
                 jobData = d.value.job.map(j=>{
                     const jobID = j.split('.');
-                    const job=_.clone(jobs[j]);
+                    const job=_.clone(Layout.jobs[j]);
                     job['id']=jobID[0];
-                    job['duration']=currentTime - job['start_time'];
+                    job['duration']=job['finish_time'] - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
             else
@@ -573,6 +583,72 @@ function draw(_result){
                         .select('span').html(row.data().node_list.slice(0,2).map(e=>`<span class="tableCompute">${e}</span>`).join('\n'));
                 }
             });
+            $('#tooltipService').val(serviceSelected)
+            d3.select('#tooltipService').on('change',function(){
+                serviceSelected = +$(this).val();
+                draw(jobData)
+            })
+            draw(jobData);
+
+            function draw(jobData){
+                let maxLength = 0;
+                jobData.forEach(job=> {
+                    job.drawData = job.node_list.map(comp => {
+                        let startIndex = Math.max(0, Math.round(timescale(job.start_time)));
+                        let endIndex = Math.min(Layout.timespan.length - 1, Math.round(timescale(job.finish_time)));
+                        if ((endIndex-startIndex+1)>maxLength)
+                            maxLength = endIndex-startIndex+1;
+                        return {
+                            key: comp,
+                            value: sampleS[comp].slice(startIndex, endIndex + 1).map(d => d[serviceSelected]),
+                            time: Layout.timespan.slice(startIndex, endIndex + 1)
+                        }
+                    });
+                })
+                const w = 450;
+                const h = 100;
+                const margin = {top:15,left:30,bottom:20,right:5};
+                const wg = w - margin.left-margin.right;
+                const hg = h - margin.top-margin.bottom;
+                const xScale = d3.scaleLinear().domain([0,maxLength-1]).range([margin.left,wg+margin.left]);
+                const yScale = d3.scaleLinear().domain(serviceFullList[serviceSelected].range).range([margin.top+hg,margin.top]);
+                d3.select('#tooltipSVG').selectAll('svg')
+                    .data(jobData)
+                    .join('svg')
+                    .attr('width',w)
+                    .attr('height',h)
+                    .style('background-color','white')
+                    .style('margin-bottom','5px')
+                    .each(function(d){drawSVG(d,d3.select(this))});
+                function drawSVG(d,svg){
+                    setTimeout(()=> {
+                        svg.selectAll('text.title').data([d.id])
+                            .join('text')
+                            .attr('class', 'title')
+                            .attr('transform', `translate(${margin.left + wg / 2},13)`)
+                            .attr('text-anchor', 'middle')
+                            .attr('color', 'blue')
+                            .text(d => d);
+                        svg.selectAll('path').data(d => d.drawData)
+                            .join('path')
+                            .attr('fill', 'none')
+                            .attr('stroke', 'black')
+                            .attr('d', d => d3.line().y(e => yScale(e)).x((e, i) => xScale(i))(d.value));
+                        svg.selectAll('g.axisY').data(['y'])
+                            .join('g')
+                            .attr('class', 'axisY')
+                            .style('color', 'black')
+                            .attr('transform', `translate(${margin.left},0)`)
+                            .call(d3.axisLeft(yScale).ticks(5))
+                        svg.selectAll('g.axisX').data(['x'])
+                            .join('g')
+                            .attr('class', 'axisX')
+                            .style('color', 'black')
+                            .attr('transform', `translate(0,${margin.top + hg})`)
+                            .call(d3.axisBottom(xScale).tickFormat(d=>d*5))
+                    });
+                }
+            }
         }else
             d3.select('.informationHolder').classed('hide',true);
     }
@@ -755,7 +831,8 @@ function mouseover(d){
         // }
        }
     if (d.tooltip) {
-        tooltip.show(`(${d3.format('.2f')(d[0])},${d3.format('.2f')(d[1])})`)
+        // tooltip.show(`(${d3.format('.2f')(d[0])},${d3.format('.2f')(d[1])})`)
+        tooltip.show(d.name)
     }
 }
 function getScale(sol){

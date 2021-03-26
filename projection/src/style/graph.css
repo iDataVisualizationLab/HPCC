@@ -29,6 +29,12 @@ svg {
 .onhighlight .item{
     opacity: 0.1;
 }
+.onhighlight .outer_node .label{
+    opacity: 0;
+}
+.onhighlight .outer_node .highlight .label{
+    opacity: 1;
+}
 .onhighlight .highlight, .onhighlight .highlight .item{
     opacity: 1;
 }

@@ -15,6 +15,7 @@ function handleDatabyUser(url,callBack){
     d3.json(url).then(_data=>{
         debugger
         tsnedata = handleDataUrl(_data).tsnedata;
+        Layout.jobs = data[JOB];
         summaryInTime.data=_data;
         summaryInTime.mode = 'job';
         const jobResult = summaryInTime();
@@ -53,8 +54,9 @@ function summaryByUser(data) {
                 if (data[JOB][jid].finish_time && (data[JOB][jid].start_time>=(data.time_stamp[0]/1000000))){
                     const user_name = data[JOB][jid].user_name;
                     if (!users[user_name]) {
-                        users[user_name] = {id: user_name, comps: {}, time: {}, values: []}
+                        users[user_name] = {id: user_name, comps: {}, time: {},value:{job:{}}, values: []}
                     }
+                    users[user_name].value.job[jid]=data[JOB][jid];
                     if (!users[user_name].comps[comp]) {
                         users[user_name].comps[comp] = [];
                     }
