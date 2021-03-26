@@ -773,12 +773,15 @@ function getScale(sol){
         let delta = ((xrange[1] - xrange[0]) * ratio - (yrange[1] - yrange[0])) / 2;
         yscale.domain([yrange[0] - delta, yrange[1] + delta])
     }
+
     const extentX =  xrange.map(xscale);
     extentX[0] = extentX[0]-graphicopt.radaropt.r/2;
     extentX[1] = extentX[1]+graphicopt.radaropt.r/2;
     const extentY =  yrange.map(yscale);
-    extentY[0] = extentY[0]-graphicopt.radaropt.r/2;
-    extentY[1] = extentY[1]+graphicopt.radaropt.r/2;
+    extentY[0] = extentY[0]+graphicopt.radaropt.r/2;
+    extentY[1] = extentY[1]-graphicopt.radaropt.r/2;
+    console.log(yrange,extentY )
+    console.log(yrange,extentY.map(yscale.invert) )
     xscale = xscale.copy().domain(extentX.map(xscale.invert)).range(extentX)
     yscale = yscale.copy().domain(extentY.map(yscale.invert)).range(extentY)
     return {xscale,yscale}
