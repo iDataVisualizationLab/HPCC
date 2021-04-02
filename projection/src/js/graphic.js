@@ -305,36 +305,52 @@ function draw(_result){
     if(extranodesg.empty()){
         extranodesg = svg.append("g").attr("class", "extra_nodes");
     }
+    let layer2g = svg.select("g.layer2");
+    if(layer2g.empty()){
+        layer2g = svg.append("g").attr("class", "layer2");
+    }
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
     if(onodesg.empty()){
         onodesg = svg.append("g").attr("class", "outer_nodes");
     }
-    let onode = onodesg.selectAll(".outer_node")
-        .data(arr,d=>d.name);
-    onode.call(updateOnode);
-    onode.exit().remove();
-    let onode_n = onode.enter().append("g")
-        .attr("class", "outer_node");
-    onode_n.append('g').attr('class','circleG');
-    onode_n.append('g').attr('class','glowEffect');
-    onode_n.append('g').attr('class','label')
-        .attr('class','label')
-        .style("font", "10px sans-serif")
-        .attr("pointer-events", "none")
-        .attr("text-anchor", "middle");
 
-    onode_n.attr("transform", function(d) { return `translate(${d.x},${d.y})`; }).call(updateOnode);
-    function updateOnode(p){
+    function drawRoseChart(onodesg,arr) {
+        let onode = onodesg.selectAll(".outer_node")
+            .data(arr, d => d.name);
+        onode.call(updateOnode);
+        onode.exit().remove();
+        let onode_n = onode.enter().append("g")
+            .attr("class", "outer_node");
+        onode_n.append('g').attr('class', 'circleG');
+        onode_n.append('g').attr('class', 'glowEffect');
+        onode_n.append('g').attr('class', 'label')
+            .attr('class', 'label')
+            .style("font", "10px sans-serif")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle");
 
-        p.each(function(d){
-          d.node=d3.select(this);
-          d.childrenNode = makecirclepacking(d.node);
-        });
-        p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
-        return p;
+        onode_n.attr("transform", function (d) {
+            return `translate(${d.x},${d.y})`;
+        }).call(updateOnode);
+
+        function updateOnode(p) {
+
+            p.each(function (d) {
+                d.node = d3.select(this);
+                d.childrenNode = makecirclepacking(d.node);
+            });
+            p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function (d) {
+                return `translate(${d.x},${d.y})`;
+            });
+            return p;
+        }
+
+        onode = onode_n.merge(onode)
+        return onode;
     }
-    onode = onode_n.merge(onode)
+
+    let onode = drawRoseChart(onodesg,arr);
 
     makelegend();
     startCollide();
@@ -381,7 +397,7 @@ function draw(_result){
                 .text(d => d.name).merge(label)
                 .attr('transform',`scale(${1/1})`)
                 .attr('opacity', function(d) {
-                    return d.label.opacityScale(1);
+                    return d.label?d.label.opacityScale(1):1;
                 });
             label.each(function(d){
                 d.tooltip = d3.select(this);
@@ -395,8 +411,8 @@ function draw(_result){
                 node
                     // .attr("pointer-events", d => !d.children ? "none" : null)
                     .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
-                    .on("mouseover", function(d){mouseover.bind(this)(d)})
-                    .on("mouseout", function(d){mouseout.bind(this)(d)})
+                    .on("mouseover", function(d){mouseover.bind(this)(d,_.partial(drawRoseChart,layer2g))})
+                    .on("mouseout", function(d){layer2g.selectAll('*').remove();mouseout.bind(this)(d)})
                     .style('filter',d=>d.highlight?`url(#${'c'+d.currentID}`:null)
 
                 return node;
@@ -441,7 +457,7 @@ function draw(_result){
         if (isFreeze) {
             d3.select('.informationHolder').classed('hide',false);
             const contain = d3.select('.informationHolder').datum(d);
-            contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.name:d.key));
+            contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (d.name));
             contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
@@ -460,7 +476,7 @@ function draw(_result){
             <div id="tooltipSVG"></div>`);
             let jobData = [];
             const timescale = d3.scaleLinear().domain([Layout.timespan[0],Layout.timespan[1]]);
-            if (type==='user')
+            if (type==='user'){
                 jobData = d.value.job.map(j=>{
                     const jobID = j.split('.');
                     const job=_.clone(Layout.jobs[j]);
@@ -468,7 +484,8 @@ function draw(_result){
                     job['duration']=job['finish_time'] - job['start_time'];
                     job['task_id'] = jobID[1]||'n/a';
                     return job});
-            else
+                jobData.sort((a,b)=>a.id-b.id);
+            }else
                 jobData = _.flatten(d.relatedNodes
                     .map(e=>e.value.job)).map(j=>{
                     const jobID = j.split('.');
@@ -795,7 +812,7 @@ function pack (data){
             .sort((a, b) => b.value - a.value))
 }
 
-function mouseover(d){
+function mouseover(d,renderFunc){
     if (!isFreeze)
    {     // Bring to front
        try {
@@ -808,6 +825,7 @@ function mouseover(d){
         graphicopt.el.classed('onhighlight',true);
         d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
         d3.select(this).classed('highlight', true);
+        renderFunc(Object.values(d.user)).classed('highlight',true);
         if (d.node){
             d.node.classed('highlight', true);
         }
