@@ -11,6 +11,8 @@ summaryInTime.mode = 'job';
 summaryInTime.changed = true;
 summaryInTime.data = {};
 let user_job;
+let job_node;
+let node_jobs;
 let sampleS;
 function handleDatabyUser(url,callBack){
     d3.json(url).then(_data=>{
@@ -24,6 +26,8 @@ function handleDatabyUser(url,callBack){
         summaryInTime.mode = 'job';
         const jobResult = summaryInTime();
         const jobData = jobResult.data;
+        job_node = jobResult.job_node;
+        node_jobs = jobResult.node_jobs;
         user_job = jobResult.net;
         summaryInTime.mode = 'user';
         const userResult = summaryInTime();
@@ -90,7 +94,9 @@ function summaryByUser(data) {
 }
 function summaryByJob(data) {
     const jobs = {};
+    const nodes = {};
     const user = {};
+    const node_jobs = {};
     Object.keys(data[COMPUTE]).forEach(comp => {
         data.time_stamp.forEach((t, ti) => {
             data[COMPUTE][comp].job_id[ti].forEach(jid => {
@@ -107,11 +113,17 @@ function summaryByJob(data) {
                     }
                     if (!jobs[jobID_Main].comps[comp]) {
                         jobs[jobID_Main].comps[comp] = [];
+                        nodes[comp+'||'+jobID_Main] = {id: comp+'||'+jobID_Main, job:jobID_Main,time: {}, values: []};
+                        node_jobs[comp+'||'+jobID_Main]={};
                     }
+                    node_jobs[comp+'||'+jobID_Main][jid.split('.')[0]] = 1;
                     if (!jobs[jobID_Main].comps[comp][ti]) {
-                        jobs[jobID_Main].values.push(tsnedata[comp][ti])
+                        jobs[jobID_Main].values.push(tsnedata[comp][ti]);
                         jobs[jobID_Main].comps[comp][ti] = tsnedata[comp][ti];
                         jobs[jobID_Main].time[ti] = true;
+
+                        nodes[comp+'||'+jobID_Main].values.push(tsnedata[comp][ti]);
+                        nodes[comp+'||'+jobID_Main].time[ti] = true;
                     }
                 }
             });
@@ -127,19 +139,39 @@ function summaryByJob(data) {
         });
 
     const dataViz = [];
+
+    function getEl(u) {
+        const el = {id: u.id};
+        u.mean = serviceFullList.map((s, si) => {
+            // if(tsnedata[comp][ti]==undefined || tsnedata[comp][ti]==null)
+            //     debugger
+            el[s.text] = d3.mean(u.values, v => v[si] < 0 ? undefined : v[si]);
+            if (_.isNaN(el[s.text]))
+                debugger
+            return {key: s.text, value: el[s.text]};
+        });
+        u.totalTime = Object.keys(u.time).length * 5 * 60 * 1000;
+        // u.totalNode = Object.keys(u.comps).length;
+        // el['Duration'] = u.totalTime;
+        // el['#Computes'] = u.totalNode;
+        return el;
+    }
+
+// const nodeViz = [];
+    const job_node = {};
     Object.values(jobs).forEach(u => {
         if (!blackList[u.id]){
-            const el = {id: u.id};
-            u.mean = serviceFullList.map((s, si) => {
-                el[s.text] = d3.mean(u.values, v => v[si] < 0 ? undefined : v[si]);
-                return {key: s.text, value: el[s.text]};
-            });
-            u.totalTime = Object.keys(u.time).length * 5 * 60 * 1000;
-            u.totalNode = Object.keys(u.comps).length;
-            el['Duration'] = u.totalTime;
-            el['#Computes'] = u.totalNode;
-            dataViz.push(el)
+            const el = getEl(u);
+            dataViz.push(el);
+            job_node[u.id] = {};
+
+            Object.keys(u.comps).forEach(comp=>{
+                const el = getEl(nodes[comp+'||'+u.id]);
+                dataViz.push(el);
+                job_node[u.id][comp+'||'+u.id] = true;
+            })
+
         }
     });
-    return {data:dataViz,net:user,raw:jobs};
+    return {data:dataViz,net:user,job_node,node_jobs,raw:jobs};
 }

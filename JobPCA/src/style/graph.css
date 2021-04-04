@@ -28,6 +28,7 @@ svg {
 }
 .onhighlight .item{
     opacity: 0.1;
+    pointer-events:none
 }
 .onhighlight .outer_node .label{
     opacity: 0;
@@ -37,12 +38,13 @@ svg {
 }
 .onhighlight .highlight, .onhighlight .highlight .item{
     opacity: 1;
+    pointer-events:all
 }
-.onhighlight .extra_nodes line.highlight{
+.onhighlight .extra_nodes .line.highlight,.onhighlight .extra_nodes2 .line.highlight{
     stroke:black;
     display: unset;
 }
-.onhighlight .extra_nodes line{
+.onhighlight .extra_nodes .line, .onhighlight .extra_nodes2 .line{
     display:none;
 }
 g.links .link {

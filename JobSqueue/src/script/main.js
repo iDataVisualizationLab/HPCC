@@ -1,3 +1,5 @@
+const netControl = new DynamicNetViz();
+
 var width, height;
 
 var m = [40, 60, 10, 10],
@@ -700,6 +702,28 @@ function initFunc() {
     // Convert quantitative scales to floats
     data = object2DataPrallel(sampleS);
 
+    // network
+    debugger
+    const graphicopt={};
+    graphicopt.width = $("#network").width()-10;
+    graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
+    d3.select('#network').style('height',graphicopt.height+'px').style('position','relative')
+
+    netControl.graphicopt(graphicopt);
+    const force = d3.forceSimulation()
+        .force("charge", d3.forceManyBody().strength(-20))
+        .force("chargeX", d3.forceX())
+        .force("chargeY", d3.forceY())
+        .force("link", d3.forceLink().id(d => d.id))
+        .on("tick", ticked)
+        .on('end',()=>{
+            console.timeLog('Force dynamic: ')
+        });
+    netControl.init({div:d3.select('#svgNetwork').node(),force}).data(data2net(data)).draw();
+    function ticked() {
+        netControl.ticked();
+    }
+
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions =serviceFullList_withExtra.filter(function (s) {
         let k = s.text;
@@ -740,12 +764,9 @@ function initFunc() {
 
 
 
-    // network
-    debugger
-    const graphicopt={};
-    graphicopt.width = $("#network").width()-10;
-    graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
-    d3.select('#network').style('height',graphicopt.height+'px').style('position','relative')
+
+}
+function data2net(data){
     const userDIm = serviceFullList.find(d=>d.text==='USER');
     const nodeDIm = serviceFullList.find(d=>d.text==='NODELIST');
     const partitionDIm = serviceFullList.find(d=>d.text==='PARTITION');
@@ -800,23 +821,8 @@ function initFunc() {
             });
         })
     });
-    const netControl = new DynamicNetViz().graphicopt(graphicopt);
-    const force = d3.forceSimulation()
-        .force("charge", d3.forceManyBody().strength(-20))
-        .force("chargeX", d3.forceX())
-        .force("chargeY", d3.forceY())
-        .force("link", d3.forceLink().id(d => d.id))
-        .on("tick", ticked)
-        .on('end',()=>{
-            console.timeLog('Force dynamic: ')
-        });
-    netControl.init({div:d3.select('#svgNetwork').node(),force}).data({nodes:Object.values(nodes),links:Object.values(links),ti:0});
-    netControl.draw();
-    function ticked() {
-        netControl.ticked();
-    }
+    return {nodes:Object.values(nodes),links:Object.values(links)};
 }
-
 function resetRequest() {
     // Convert quantitative scales to floats
     // animationtime = false;
@@ -1293,6 +1299,8 @@ function redraw(selected) {
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
+
+    netControl.data(data2net(selected)).draw();
 }
 
 // TODO refactor

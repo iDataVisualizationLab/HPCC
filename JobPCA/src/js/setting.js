@@ -109,7 +109,7 @@ function handleDataUrl(dataRaw) {
                     tsnedata[h.name][currentIndex].name = h.name;
                     tsnedata[h.name][currentIndex].timestep =currentIndex;
                 }
-                value.forEach(v=>tsnedata[h.name][currentIndex].push(v === null ? 0 : scaleService[si](v) || 0))
+                value.forEach(v=>tsnedata[h.name][currentIndex].push(v === null ? 0 : (scaleService[si](v) ?? 0)))
             })
         })
     });

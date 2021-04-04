@@ -66,8 +66,25 @@ class LoadShap {
                     if (timer)
                         timer.stop();
                     let pca = new PCA();
-                    let datain = d3.values(self.data._class).map(d=>d3.values(d));
-                    let classKey = d3.keys(self.data._class);
+                    debugger
+                    let _datain = d3.values(self.data._class).map(d=>d3.values(d));
+                    let _classKey = d3.keys(self.data._class);
+                    // temporal remove undefined
+                    let dataUndefined = [];
+                    let classKey = [];
+                    let classKeyUndefined = [];
+                    let datain = _datain.filter((d,i)=>{
+                        const condition = d.findIndex(e=>!e);
+                        if(condition>-1){
+                            dataUndefined.push(d);
+                            classKeyUndefined.push(_classKey[i]);
+                            return false;
+                        }else{
+                            classKey.push(_classKey[i]);
+                            return true;
+                        }
+                    })
+                    debugger
                     let matrix = pca.scale(datain, true, false);
 
                     let std = ss.sampleStandardDeviation(_.flatten(datain))
@@ -82,6 +99,13 @@ class LoadShap {
                         temp.name = classKey[i];
                         return temp;
                     });
+                    dataUndefined.forEach((d,i)=>{
+                        let temp = d3.range(0,self.#dim).map(dim=>undefined);
+                        temp.metrics = d3.entries(self.data._class[classKeyUndefined[i]]);
+                        temp.name = classKeyUndefined[i];
+                        solution.push(temp)
+                    });
+
                     self.feature.map(function (key, i) {
                         let brand = d3.range(0,self.#dim).map(dim=>B[i][chosenPC[dim]]);
                         brand.name = key.text;

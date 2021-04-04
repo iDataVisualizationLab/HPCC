@@ -92,14 +92,31 @@ function draw(_result){
             job_user[j] = u;
         })
     });
+    const node_job = {};
+    Object.keys(job_node).forEach(u=>{
+        Object.keys(job_node[u]).forEach(j=>{
+            node_job[j] = u;
+        })
+    });
     let solution_extra = [];
+    let solution_extra2 = [];
     let userObj = {};
+    let jobObj = {};
     let solution = _solution.filter(d=>{
         d.user = user_job[d.name];
         if (!d.user){
-            d.job = user_job[job_user[d.name]][d.name].job;
-            user_job[job_user[d.name]][d.name] = d;
-            solution_extra.push(d)
+            if (!job_node[d.name]){ // node
+                d.comp = job_node[node_job[d.name]][d.name];
+                job_node[node_job[d.name]][d.name] = d;
+                solution_extra2.push(d)
+            }else
+            {
+                d.job = user_job[job_user[d.name]][d.name].job;
+                user_job[job_user[d.name]][d.name] = d;
+                solution_extra.push(d);
+                jobObj[d.name] = d;
+                d.comp = job_node[d.name];
+            }
         }else{
             userObj[d.name] = d;
         }
@@ -117,7 +134,11 @@ function draw(_result){
         .force("link", d3.forceLink())
         .force('collide', d3.forceCollide().radius(d=>d.maxRadius).iterations(10))
         .on('tick', function () {
-            onode.attr("transform", function(d) { return `translate(${d.x},${d.y})`; })
+            onode.attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+
+            setTimeout(()=>{
+                drawLine();
+            },0)
         });
     forceColider.stop();
     //color
@@ -237,11 +258,29 @@ function draw(_result){
         return temp}))
         .voronoi([-graphicopt.widthG()/2, -graphicopt.heightG()/2, graphicopt.widthG()/2, graphicopt.heightG()/2]);
 
+
+    const rscale = d3.scaleSqrt().domain(d3.extent(Object.values(node_jobs),d=>Object.keys(d).length)).range([2,15]);
+    makelegendRadius(rscale)
+    debugger
+    solution_extra2.forEach(d=>{
+        d.x = xscale(d[0]);
+        d.y = yscale(d[1]);
+        d.r = rscale(Object.keys(node_jobs[d.name]).length);
+        d.parent = jobObj[node_job[d.name]];
+    });
+
     solution_extra.forEach(d=>{
         d.x = xscale(d[0]);
         d.y = yscale(d[1]);
+        // d.meanx = (d3.mean(Object.values(d.comp),e=>e.x)+d.x)/2;
+        // d.meany = (d3.mean(Object.values(d.comp),e=>e.y)+d.y)/2;
         d.parent = userObj[job_user[d.name]];
     });
+    // solution.forEach(d=>{
+    //     d.meanx = d3.mean(Object.values(d.user),e=>(e.x-d.x)/2);
+    //     d.meany = d3.mean(Object.values(d.user),e=>(e.y-d.y)/2);
+    // })
+
     // <editorFold desc="select filter">
 
     const disScale = d3.scaleLinear();
@@ -305,9 +344,17 @@ function draw(_result){
     if(extranodesg.empty()){
         extranodesg = svg.append("g").attr("class", "extra_nodes");
     }
+    let extranodesg2 = svg.select("g.extra_nodes2");
+    if(extranodesg2.empty()){
+        extranodesg2 = svg.append("g").attr("class", "extra_nodes2");
+    }
     let layer2g = svg.select("g.layer2");
     if(layer2g.empty()){
         layer2g = svg.append("g").attr("class", "layer2");
+    }
+    let layer3g = svg.select("g.layer3");
+    if(layer3g.empty()){
+        layer3g = svg.append("g").attr("class", "layer3");
     }
     // Append outer nodes (circles)
     let onodesg = svg.select("g.outer_nodes");
@@ -315,7 +362,7 @@ function draw(_result){
         onodesg = svg.append("g").attr("class", "outer_nodes");
     }
 
-    function drawRoseChart(onodesg,arr) {
+    function drawRoseChart(onodesg,isdisableMouseover,arr) {
         let onode = onodesg.selectAll(".outer_node")
             .data(arr, d => d.name);
         onode.call(updateOnode);
@@ -338,7 +385,7 @@ function draw(_result){
 
             p.each(function (d) {
                 d.node = d3.select(this);
-                d.childrenNode = makecirclepacking(d.node);
+                d.childrenNode = makecirclepacking(d.node,isdisableMouseover);
             });
             p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function (d) {
                 return `translate(${d.x},${d.y})`;
@@ -349,8 +396,51 @@ function draw(_result){
         onode = onode_n.merge(onode)
         return onode;
     }
+    function drawCircle(onodesg,arr) {
+        let onode = onodesg.selectAll(".lock_node")
+            .data(arr, d => d.name);
+        onode.call(updateOnode);
+        onode.exit().remove();
+        let onode_n = onode.enter().append("g")
+            .attr("class", "lock_node");
+        onode_n.append('circle').attr('class', 'circleG').attr('opacity',0.8);
+        onode_n.append('g').attr('class', 'label')
+            .attr('class', 'label')
+            .style("font", "10px sans-serif")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle");
 
-    let onode = drawRoseChart(onodesg,arr);
+        onode_n.attr("transform", function (d) {
+            return `translate(${d.x},${d.y})`;
+        }).call(updateOnode);
+
+        function updateOnode(p) {
+
+            p.each(function (d) {
+                d.node = d3.select(this);
+            });
+            p.select('circle')
+                .attr('r',d=>d.r)
+                .on('mouseover',d=>{
+                    if (d.tooltip) {
+                        tooltip.show(d.name)
+                    }
+                }).on('mouseout',d=>{
+                if (d.tooltip) {
+                    tooltip.hide()
+                }
+            });;
+            p.interrupt().transition().duration(graphicopt.animationTime).attr("transform", function (d) {
+                return `translate(${d.x},${d.y})`;
+            });
+            return p;
+        }
+
+        onode = onode_n.merge(onode);
+        return onode;
+    }
+
+    let onode = drawRoseChart(onodesg,undefined,arr);
 
     makelegend();
     startCollide();
@@ -360,6 +450,8 @@ function draw(_result){
         drawLine();
     })
 
+    const drawLine = _.partial(_drawLine,extranodesg,solution_extra);
+    const drawLine2 = _.partial(_drawLine,extranodesg2);
     function startCollide() {
         forceColider.alpha(0.1).force('collide').radius(function(d){return d.maxRadius}).iterations(10);
         forceColider.nodes(arr);
@@ -384,7 +476,7 @@ function draw(_result){
             count++;
         });
     }
-    function makecirclepacking(svg) {
+    function makecirclepacking(svg,isdisableMouseover) {
             let childrenNode = {};
             node = svg.call(updateNode);
 
@@ -409,11 +501,38 @@ function draw(_result){
             return childrenNode;
             function updateNode(node) {
                 node
-                    // .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
-                    .on("mouseover", function(d){mouseover.bind(this)(d,_.partial(drawRoseChart,layer2g))})
-                    .on("mouseout", function(d){layer2g.selectAll('*').remove();mouseout.bind(this)(d)})
                     .style('filter',d=>d.highlight?`url(#${'c'+d.currentID}`:null)
+                    .on('mouseover',d=>{
+                        if (d.tooltip) {
+                            tooltip.show(d.name)
+                        }
+                    }).on('mouseout',d=>{
+                    if (d.tooltip) {
+                        tooltip.hide()
+                    }
+                    });
+                if (!isdisableMouseover)
+                    node
+                        // .attr("pointer-events", d => !d.children ? "none" : null)
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,'user');})
+                        .on("mouseover", function(d){
+                            mouseover.bind(this)(d,(data)=>{
+                            if (d.comp){
+                                // _.partial(drawRoseChart,layer3g,true)(Object.values(d.comp)).classed('highlight',true);;
+                                // drawLine2(Object.values(d.comp)).attr("stroke",'gray').classed('highlight',true);;
+                            }else{
+                                const obj = Object.values(d.user);
+                                _.partial(drawRoseChart,layer2g,true)(obj).classed('highlight',true);
+                                const comp = [];
+                                obj.forEach(d=>Object.values(d.comp).forEach(e=>comp.push(e)));
+                                drawLine2(comp).style("stroke",'gray').classed('highlight',true);
+                                drawCircle(layer3g,comp);
+                            }
+                        })})
+                        .on("mouseout", function(d){mouseout.bind(this)(d,()=>{
+                            layer2g.selectAll('*').remove();
+                            layer3g.selectAll('*').remove();
+                            extranodesg2.selectAll('*').remove();})});
 
                 return node;
 
@@ -669,6 +788,7 @@ function draw(_result){
         }else
             d3.select('.informationHolder').classed('hide',true);
     }
+
     function makelegend(){
 
         d3.select('.clusterView').classed('hide',true);
@@ -720,39 +840,88 @@ function draw(_result){
         d3.select('.legendView').classed('onhighlight',false);
         d3.selectAll('.highlight').classed('highlight',false);
     }
+    function makelegendRadius(rscale){
+        const color = colorItem;
+        const marginTop = 5;
+        const marginBottom = 5;
+        const marginLeft = 0;
+        const marginRight = 40;
+        const width = rscale.range()[1]*2;
+        const height = rscale.range()[1]*2;
+        const centerx = width/2;
+        const legendHolder = d3.select('.legendRadiusView').classed('hide',false);
 
-    function drawLine(){
-        extranodesg.selectAll('*').remove();
-        if (graphicopt.drawLine){
-            const extra  =solution_extra
-            extranodesg.append('defs')
-                .selectAll('radialGradient')
-                .data(extra)
-                .join('radialGradient')
-                .attr('id',e=>'grad'+e.parent.name+e.name)
-                .attr("gradientUnits","userSpaceOnUse")
-                .attr('r',e=>{const d = e.parent; return Math.sqrt((d.x-e.x)*(d.x-e.x)+(d.y-e.y)*(d.y-e.y))})
-                .attr('cx',e=>e.parent.x)
-                .attr('cy',e=>e.parent.y)
-                .attr('fx',e=>e.parent.x)
-                .attr('fy',e=>e.parent.y)
-                .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
+        const svg = legendHolder.select('svg.legend')
+            .attr('width', width + marginLeft + marginRight)
+            .attr('height', height + marginTop + marginBottom);
+        svg.select('g.legend').remove();
+        let legend = svg.append('g').attr('class', 'legend')
+            .attr('transform', `translate(${marginLeft},${marginTop})`);
+
+        let axticks = [rscale.ticks(10)[1],rscale.ticks(10)[10]];
+        legend.selectAll('circle').data(axticks).join('circle')
+            .attr('cx',centerx)
+            .attr('cy',d=>height-rscale(d))
+            .attr('r',d=>rscale(d))
+            .attr('stroke-dasharray',"1 2")
+            .attr('fill',"none")
+            .attr('stroke',"black")
+            // .style('pointer-events','all')
+            // .on('mouseover',function(d){hightlight(d.text)})
+            // .on('mouseout',function(d){unhightlight()});
+        legend.selectAll('line.ticks').data(axticks).join('line')
+            .attr('class','ticks')
+            .attr('x1',d=>centerx+rscale(d))
+            .attr('x2',width+2)
+            .attr('y1',d=>height-rscale(d))
+            .attr('y2',d=>height-rscale(d))
+            .attr('stroke','black');
+        legend.selectAll('text.legendLabel').data(axticks).join('text')
+            .attr('class',d=>'legendLabel')
+            .attr('x',d=>width+2)
+            .style('font-size',10)
+            .attr('y',d=>height-rscale(d))
+            .attr('dy','0.25rem')
+            .text(d=>d);
+
+    }
+    function _drawLine(extranodesg,extra){
+        // extranodesg.selectAll('*').remove();
+        // const extra  =solution_extra
+        extranodesg.selectAll('defs').data([0]).join('defs')
+            .selectAll('radialGradient')
+            .data(extra)
+            .join('radialGradient')
+            .attr('id',e=>'grad'+e.parent.name+e.name)
+            .attr("gradientUnits","userSpaceOnUse")
+            .attr('r',e=>{const d = e.parent; return Math.sqrt((d.x-e.x)*(d.x-e.x)+(d.y-e.y)*(d.y-e.y))})
+            .attr('cx',e=>e.parent.x)
+            .attr('cy',e=>e.parent.y)
+            .attr('fx',e=>e.parent.x)
+            .attr('fy',e=>e.parent.y)
+            .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
     <stop offset="0.15" style="stop-color:black;stop-opacity:0.5"></stop>
                 <stop offset="0.2" style="stop-color:black;stop-opacity:0"></stop>`);
+        const line = d3.line().curve(d3.curveCardinal);
 
-            graphicopt.el.select('.extra_nodes').selectAll('line.connect')
-                .data(extra)
-                .join('line')
-                .attr('id',e=>'line'+e.parent.name+e.name)
-                .attr('x1',e=>e.parent.x)
-                .attr('y1',e=>e.parent.y)
-                .attr('x2',e=>e.x)
-                .attr('y2',e=>e.y)
-                .style('opacity',e=>e.parent.opacity)
-                .attr('stroke',e=>`url(#grad${e.parent.name+e.name})`)
-                .each(function(e){e.el=d3.select(this)})
-            ;
-        }
+        extranodesg.selectAll('path.line.connect')
+            .data(extra)
+            .join('path')
+            .attr('class','line connect')
+            .attr('id',e=>'line'+e.parent.name+e.name)
+            // .attr('x1',e=>e.parent.x)
+            // .attr('y1',e=>e.parent.y)
+            // .attr('x2',e=>e.x)
+            // .attr('y2',e=>e.y)
+            // .attr('d',e=>line(e.parent.parent?[[e.parent.parent.x,e.parent.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.x,e.y]]:[[e.parent.x,e.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.meanx,e.meany]]))
+            .attr('d',e=>line([[e.parent.x,e.parent.y],[e.x,e.y]]))
+            .style('opacity',e=>0.8)
+            .attr('fill','none')
+            .attr('stroke-size',0.5)
+            .attr('stroke',e=>graphicopt.drawLine?`url(#grad${e.parent.name+e.name})`:'none')
+            .each(function(e){e.el=d3.select(this)})
+        ;
+        return extranodesg.selectAll('.line.connect');
     }
 }
 function textcolor(p){
@@ -813,8 +982,9 @@ function pack (data){
 }
 
 function mouseover(d,renderFunc){
+    renderFunc();
     if (!isFreeze)
-   {     // Bring to front
+    {     // Bring to front
        try {
            Object.values(d.user).forEach(e => {
                e.el.classed('highlight', true);
@@ -825,7 +995,7 @@ function mouseover(d,renderFunc){
         graphicopt.el.classed('onhighlight',true);
         d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
         d3.select(this).classed('highlight', true);
-        renderFunc(Object.values(d.user)).classed('highlight',true);
+        // renderFunc();
         if (d.node){
             d.node.classed('highlight', true);
         }
@@ -847,7 +1017,10 @@ function mouseover(d,renderFunc){
         // for (let i = 0; i < d.relatedLinks.length; i++){
         //     d.relatedLinks[i].moveToFront().classed('highlight', true);
         // }
-       }
+       }else{
+        // if (d.comp)
+        //     renderFunc(Object.values(d.comp)).classed('highlight',true);
+    }
     if (d.tooltip) {
         // tooltip.show(`(${d3.format('.2f')(d[0])},${d3.format('.2f')(d[1])})`)
         tooltip.show(d.name)
@@ -882,9 +1055,10 @@ function getScale(sol){
     return {xscale,yscale}
 }
 
-function mouseout(d){
+function mouseout(d,extra){
     if(!isFreeze)
         {
+            extra();
             // graphicopt.el.select('.extra_nodes').selectAll('*').remove();
             graphicopt.el.classed('onhighlight',false);
             d3.select(this).classed('highlight', false);
@@ -908,7 +1082,10 @@ function mouseout(d){
         // for (let i = 0; i < d.relatedLinks.length; i++){
         //     d.relatedLinks[i].classed("highlight", false );
         // }
-        }
+        }else{
+        if (d.comp)
+            extra();
+    }
     if (d.tooltip) {
         tooltip.hide()
     }
