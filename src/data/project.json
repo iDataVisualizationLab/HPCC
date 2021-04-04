@@ -337,5 +337,22 @@
     "types": [
       "3DNetwork","Line chart"
     ]
+  },
+  "JobPCA": {
+    "title": "JobPCA",
+    "thumb": "JobPCA.png",
+    "url": "https://idatavisualizationlab.github.io/HPCC/JobPCA/index.html",
+    "tags": [
+      "MONSTER API"
+    ],
+    "pros": [
+      "Users, Jobs, and Computes relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "PCA","Rose chart"
+    ]
   }
 }
