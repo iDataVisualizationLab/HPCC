@@ -2,7 +2,7 @@ const netControl = new DynamicNetViz();
 
 var width, height;
 
-var m = [40, 60, 10, 10],
+var m = [40, 60, 10, 0],
     w,
     h,
     xscale,
@@ -705,7 +705,7 @@ function initFunc() {
     // network
     debugger
     let graphicopt={};
-    graphicopt.width = $("#network").width()-10;
+    graphicopt.width = $("#network").width();
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
     d3.select('#network').style('height',graphicopt.height+'px').style('position','relative');
     const linkcanvas = d3.select('#networkconnect')
@@ -731,15 +731,12 @@ function initFunc() {
         netControl.ticked();
     }
     function drawNetParallelLInk(data) {
-        debugger
-        console.log('-----------')
         linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
         data.forEach(d=>{
             if (d.type==='user'){
                 const netx = d.x+graphicopt.centerX()+graphicopt.margin.left;
                 const nety = d.y+graphicopt.centerY()+graphicopt.margin.top;
                 d.data.root.forEach(d=>{
-                    console.log(d)
                     const yp = yscale[dimensions[0]](d[dimensions[0]])+m[0];
                     const xp = graphicopt.width;
                     linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],0.5);
@@ -1228,7 +1225,8 @@ function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.setLineDash([]);
-    var x0 = xscale(dimensions[0])-m[1],
+    // var x0 = xscale(dimensions[0])-m[1],
+    var x0 = 0,
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0,y0);
     let valid = true;
