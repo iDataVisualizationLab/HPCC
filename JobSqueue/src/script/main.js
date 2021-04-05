@@ -651,7 +651,7 @@ function initFunc() {
     handle_clusterinfo ();
     if(timel)
         timel.stop();
-    width = $("#chart").width()-10;
+    width = $("#chart").width();
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
@@ -2190,6 +2190,10 @@ function makeDataTableFiltered () {
             }
             return data % 1 === 0 ? data : d3.format('.2f')(data);
         }else
+        if (type === 'display') {
+            const string = data.toString();
+            return string.length>100?(string.slice(0,100)+'...'):data;
+        }else
             return data;
     }
 }
@@ -2210,9 +2214,14 @@ function updateDataTableFiltered(data){
         serviceFullList.forEach((s,si)=>{
             newDataArray.forEach((d,i)=>{
                 newDataArray[i].__map = data[i];
-                if (s.isString)
-                // newDataArray[i][s.text] = sampleS[d.name][s.text][0];
-                        newDataArray[i][s.text] = s.collection[d[s.text]];;
+                // if (s.isString){
+                //     debugger
+                // // newDataArray[i][s.text] = sampleS[d.name][s.text][0];
+                //         newDataArray[i][s.text] = s.collection[d[s.text]];;
+
+                if (s.axisCustom){
+                    newDataArray[i][s.text] = s.axisCustom.tickFormat(d[s.text])
+                }
             })
         });
         dataTableFiltered.clear();
