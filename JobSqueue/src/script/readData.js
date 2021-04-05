@@ -326,7 +326,7 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
                 const timeScale = d3.scaleTime().domain([new Date(s.collection[0]),new Date(s.collection[s.collection.length-1])]).range(s.range);
                 s.axisCustom = {
                     ticks: 0, tickFormat: function (d) {
-                        return timeScale.invert(d).toLocaleString()
+                        return multiFormat(timeScale.invert(d))
                     }, tickInvert: d => timeScale(d)
                 };
             }
