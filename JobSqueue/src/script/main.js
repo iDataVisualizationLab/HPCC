@@ -704,15 +704,16 @@ function initFunc() {
 
     // network
     debugger
-    let graphicopt={};
-    graphicopt.width = $("#network").width();
+    let graphicopt={margin: {top: 20, right: 100, bottom: 20, left: 20}};
+    graphicopt.width = Math.round($("#network").width());
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
     d3.select('#network').style('height',graphicopt.height+'px').style('position','relative');
     const linkcanvas = d3.select('#networkconnect')
         .attr('height',graphicopt.height)
         .attr('width',graphicopt.width)
         .style('height',graphicopt.height+'px').node().getContext('2d');
-
+    linkcanvas.strokeStyle = "rgba(0,100,160,0.1)";
+    linkcanvas.lineWidth = 1.7;
     netControl.graphicopt(graphicopt);
     const force = d3.forceSimulation()
         .force("charge", d3.forceManyBody().strength(-20))
@@ -1704,7 +1705,7 @@ function resetSize() {
 // Background canvas
     background.lineWidth = 1.7;
 
-    xscale = d3.scalePoint().range([0, w]).padding(0.3).domain(dimensions);
+    xscale = d3.scalePoint().range([0, w]).padding(0.5).domain(dimensions);
     dimensions.forEach(function (d) {
         yscale[d].range([h, 0]);
     });
