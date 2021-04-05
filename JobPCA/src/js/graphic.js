@@ -272,8 +272,8 @@ function draw(_result){
     solution_extra.forEach(d=>{
         d.x = xscale(d[0]);
         d.y = yscale(d[1]);
-        // d.meanx = (d3.mean(Object.values(d.comp),e=>e.x)+d.x)/2;
-        // d.meany = (d3.mean(Object.values(d.comp),e=>e.y)+d.y)/2;
+        d.meanx = (d3.mean(Object.values(d.comp),e=>e.x)+d.x)/2;
+        d.meany = (d3.mean(Object.values(d.comp),e=>e.y)+d.y)/2;
         d.parent = userObj[job_user[d.name]];
     });
     // solution.forEach(d=>{
@@ -902,7 +902,7 @@ function draw(_result){
             .html(`<stop offset="0" style="stop-color:black;stop-opacity:1"></stop>
     <stop offset="0.15" style="stop-color:black;stop-opacity:0.5"></stop>
                 <stop offset="0.2" style="stop-color:black;stop-opacity:0"></stop>`);
-        const line = d3.line().curve(d3.curveCardinal);
+        const line = d3.line().curve(d3.curveCardinalOpen);
 
         extranodesg.selectAll('path.line.connect')
             .data(extra)
@@ -913,8 +913,8 @@ function draw(_result){
             // .attr('y1',e=>e.parent.y)
             // .attr('x2',e=>e.x)
             // .attr('y2',e=>e.y)
-            // .attr('d',e=>line(e.parent.parent?[[e.parent.parent.x,e.parent.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.x,e.y]]:[[e.parent.x,e.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.meanx,e.meany]]))
-            .attr('d',e=>line([[e.parent.x,e.parent.y],[e.x,e.y]]))
+            .attr('d',e=>line(e.parent.parent?[[e.parent.parent.x,e.parent.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.x,e.y]]:[[e.parent.x,e.parent.y],[e.parent.x,e.parent.y],[e.x,e.y],[e.meanx,e.meany]]))
+            // .attr('d',e=>line([[e.parent.x,e.parent.y],[e.x,e.y]]))
             .style('opacity',e=>0.8)
             .attr('fill','none')
             .attr('stroke-size',0.5)

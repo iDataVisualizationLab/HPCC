@@ -651,7 +651,7 @@ function initFunc() {
     handle_clusterinfo ();
     if(timel)
         timel.stop();
-    width = $("#Maincontent").width()-10;
+    width = $("#chart").width()-10;
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
@@ -708,6 +708,10 @@ function initFunc() {
     graphicopt.width = $("#network").width()-10;
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
     d3.select('#network').style('height',graphicopt.height+'px').style('position','relative')
+    d3.select('#networkconnect')
+        .attr('height',graphicopt.height)
+        .attr('width',graphicopt.width)
+        .style('height',graphicopt.height+'px')
 
     netControl.graphicopt(graphicopt);
     const force = d3.forceSimulation()
@@ -1647,7 +1651,7 @@ function export_csv() {
 }
 
 function resetSize() {
-    width = $("#Maincontent").width();
+    width = $("#chart").width();
     height = d3.max([document.body.clientHeight-150, 300]);
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
