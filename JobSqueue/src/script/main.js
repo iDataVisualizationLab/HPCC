@@ -704,14 +704,14 @@ function initFunc() {
 
     // network
     debugger
-    const graphicopt={};
+    let graphicopt={};
     graphicopt.width = $("#network").width()-10;
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
-    d3.select('#network').style('height',graphicopt.height+'px').style('position','relative')
-    d3.select('#networkconnect')
+    d3.select('#network').style('height',graphicopt.height+'px').style('position','relative');
+    const linkcanvas = d3.select('#networkconnect')
         .attr('height',graphicopt.height)
         .attr('width',graphicopt.width)
-        .style('height',graphicopt.height+'px')
+        .style('height',graphicopt.height+'px').node().getContext('2d');
 
     netControl.graphicopt(graphicopt);
     const force = d3.forceSimulation()
@@ -723,9 +723,33 @@ function initFunc() {
         .on('end',()=>{
             console.timeLog('Force dynamic: ')
         });
-    netControl.init({div:d3.select('#svgNetwork').node(),force}).data(data2net(data)).draw();
+    netControl.init({div:d3.select('#svgNetwork').node(),force}).data(data2net(data))
+        .ondraw(drawNetParallelLInk)
+        .draw();
+    graphicopt = netControl.graphicopt();
     function ticked() {
         netControl.ticked();
+    }
+    function drawNetParallelLInk(data) {
+        debugger
+        console.log('-----------')
+        linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
+        data.forEach(d=>{
+            if (d.type==='user'){
+                const netx = d.x+graphicopt.centerX()+graphicopt.margin.left;
+                const nety = d.y+graphicopt.centerY()+graphicopt.margin.top;
+                d.data.root.forEach(d=>{
+                    console.log(d)
+                    const yp = yscale[dimensions[0]](d[dimensions[0]])+m[0];
+                    const xp = graphicopt.width;
+                    linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],0.5);
+                    linkcanvas.beginPath();
+                    linkcanvas.moveTo(netx,nety);
+                    linkcanvas.lineTo(xp, yp);
+                    linkcanvas.stroke();
+                })
+            }
+        })
     }
 
     // Extract the list of numerical dimensions and create a scale for each.
@@ -766,10 +790,8 @@ function initFunc() {
     // brush();
     console.log('---init---');
 
-
-
-
 }
+
 function data2net(data){
     const userDIm = serviceFullList.find(d=>d.text==='USER');
     const nodeDIm = serviceFullList.find(d=>d.text==='NODELIST');
@@ -808,6 +830,7 @@ function data2net(data){
             __n.forEach(n=> {
                 if (!nodes[n])
                     nodes[n] = {
+                        type:'compute',
                         id: n, data: {name: n, root:[d]}, drawData: [{
                             offset: 0,
                             d: `
@@ -1205,7 +1228,7 @@ function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.setLineDash([]);
-    var x0 = xscale(dimensions[0])-15,
+    var x0 = xscale(dimensions[0])-m[1],
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0,y0);
     let valid = true;
@@ -1305,6 +1328,7 @@ function redraw(selected) {
     paths(selected, foreground, brush_count, true);
 
     netControl.data(data2net(selected)).draw();
+
 }
 
 // TODO refactor

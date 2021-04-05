@@ -42,7 +42,7 @@ let DynamicNetViz = function(){
         actionMode:'zoom',
         PCAlayout: false
     };
-
+    let ondraw = ()=>{};
     let maindiv='#circularLayout';
     let isFreeze= false;
     let data=[],quadtree=[],main_svg,g,brush,r=0;
@@ -197,7 +197,7 @@ let DynamicNetViz = function(){
         });
 
         switchMode();
-        debugger
+
         simulation.nodes(nodes);
         simulation.force("link").links(links);
         const _links = links.slice();
@@ -245,7 +245,7 @@ let DynamicNetViz = function(){
                 let userNode = {};
                 const computeNode = jobArr[jid].relatedNodes.filter(d=>(d.type!=='user')?true:(userNode=d,false));
                 const computepos={x:d3.mean(computeNode,d=>d.x||0),y:d3.mean(computeNode,d=>d.y||0)};
-                debugger
+
                 jobArr[jid].x = ((userNode.x??0)+computepos.x)/2;
                 jobArr[jid].y =((userNode.y??0)+computepos.y)/2;
             }
@@ -418,7 +418,6 @@ let DynamicNetViz = function(){
         g.attr("transform", d3.event.transform);
     }
     let getRenderFunc = function(d){
-        debugger
         if (d.d){
             return d.d;
         }else
@@ -633,6 +632,7 @@ let DynamicNetViz = function(){
             .attr("y2", d => d.target.y);
 
         g.selectAll('.labels').attr("transform", d=>`translate(${d.x},${d.y})`);
+        ondraw(node.data())
     }
     master.data = function(_data) {
         if (arguments.length)
@@ -644,6 +644,9 @@ let DynamicNetViz = function(){
     };
     master.color = function(_data) {
         return arguments.length?(color=_data,master):color;
+    };
+    master.ondraw = function(_data) {
+        return arguments.length?(ondraw=_data,master):ondraw;
     };
     master.getColorScale = function(_data) {
         return arguments.length?(getColorScale=_data?_data:function(){return color},master):getColorScale;
@@ -750,7 +753,7 @@ let DynamicNetViz = function(){
         let A = pc[0];  // this is the U matrix from SVD
         // let B = pc[1];  // this is the dV matrix from SVD
         let chosenPC = pc[2];   // this is the most value of PCA
-        debugger
+
         let solution = dataIn.map((d, i) => d3.range(0, dim).map(dim => A[i][chosenPC[dim]]));
         return render(solution);
     }
