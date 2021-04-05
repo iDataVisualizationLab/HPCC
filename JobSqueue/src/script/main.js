@@ -737,12 +737,16 @@ function initFunc() {
                 const netx = d.x+graphicopt.centerX()+graphicopt.margin.left;
                 const nety = d.y+graphicopt.centerY()+graphicopt.margin.top;
                 d.data.root.forEach(d=>{
-                    const yp = yscale[dimensions[0]](d[dimensions[0]])+m[0];
-                    const xp = graphicopt.width;
-                    linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],0.5);
+                    const y = yscale[dimensions[0]](d[dimensions[0]])+m[0];
+                    const x = graphicopt.width;
+                    linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],lineopacity);
                     linkcanvas.beginPath();
                     linkcanvas.moveTo(netx,nety);
-                    linkcanvas.lineTo(xp, yp);
+                    var cp1x = x - 0.5 * (x - netx);
+                    var cp1y = nety;
+                    var cp2x = x - 0.5 * (x - netx);
+                    var cp2y = y;
+                    linkcanvas.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
                     linkcanvas.stroke();
                 })
             }
@@ -1503,13 +1507,14 @@ function plotViolin() {
 }
 
 // parallel
+let lineopacity = 1;
 function paths(selected, ctx, count) {
 
     var n = selected.length,
         i = 0,
         opacity = d3.min([2/Math.pow(n,0.3),1]),
         timer = (new Date()).getTime();
-
+    lineopacity=opacity;
     selection_stats(opacity, n, data.length);
 
     //shuffled_data = _.shuffle(selected);
