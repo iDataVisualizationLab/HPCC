@@ -340,7 +340,7 @@
   },
   "JobPCA": {
     "title": "JobPCA",
-    "thumb": "JobPCA.png",
+    "thumb": "JobPCA.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobPCA/index.html",
     "tags": [
       "MONSTER API"
@@ -353,6 +353,23 @@
     ],
     "types": [
       "PCA","Rose chart"
+    ]
+  },
+  "JobPCA": {
+    "title": "Job Squeue",
+    "thumb": "JobSqueue.PNG",
+    "url": "https://idatavisualizationlab.github.io/HPCC/JobSqueue/index.html",
+    "tags": [
+      "job queue"
+    ],
+    "pros": [
+      "Users, Jobs, and Computes relationship"
+    ],
+    "cons": [
+      "Lack of physical information"
+    ],
+    "types": [
+      "Parallel Coordinate","Network"
     ]
   }
 }
