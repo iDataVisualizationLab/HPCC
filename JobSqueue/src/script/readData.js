@@ -153,7 +153,23 @@ function colorbyValue(order) {
     var listcolor= order.map(d=>color(d.value));
     colors.domain(order.map(d=>d.text)).range(listcolor);
 }
-function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,initAxis}){
+function durationstring2Milisecond(s){
+    let miliseconds = 0;
+    const _days = s.split('-');
+    let _time = '';
+    if (_days.length>1){
+        miliseconds+= (+_days[0])*24*3600*1000;
+        _time = _days[1].split(':').reverse();
+    }else{
+        _time = _days[0].split(':').reverse();
+    }
+    miliseconds+= (_time[0]??0)*1000;
+    miliseconds+= (_time[1]??0)*60*1000;
+    miliseconds+= (_time[2]??0)*3600*1000;
+    return miliseconds
+}
+
+function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,initAxis,axisOrder,customAxis},currentTimestamp){
     definedType = definedType??{};
     preprocess = preprocess??{};
     preloader(true, 0, 'reading file...');
@@ -163,6 +179,16 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
     serviceListattr = [];
     serviceAttr={};
     hosts =[];
+
+    if (customAxis){
+        data.forEach(d=>{
+            Object.keys(customAxis).forEach(k=>{
+                d[k] = customAxis[k](d,currentTimestamp);
+            })
+        })
+    }
+
+
     let variables = Object.keys(data[0]);
     if (variables.find(v=>v==='GUID')) {
         IDkey = 'GUID';
@@ -242,7 +268,9 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
     }else if (definedType[k]&&definedType[k]==='duration'){ // millisecond
         isString = false;
         isTime = true;
-        const scaleTime = d3.scaleTime().domain(d3.extent(data,d=>{d[k]=moment.duration(d[k].replace('-',' '))._milliseconds; return d[k]}));
+        const scaleTime = d3.scaleTime().domain(d3.extent(data,d=>{
+            d[k] = durationstring2Milisecond(d[k]);
+        return d[k]}));
         // stringKey = scaleTime.ticks().map(d=>moment.duration(+d)
         //     .format('dd hh:mm:ss', { trim: false }));
         // stringObject = {};
@@ -289,7 +317,7 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
             stringObject = undefined;
         }
     }
-        let temp = {"text":k,"id":i,"enable":true,"sub":[{"text":k,"id":0,"enable":disableAxis&&(!disableAxis[k]),"idroot":i,"angle":i*2*Math.PI/(variables.length),"range":range,"isTime":isTime,"isString":isString,isSingle:isSingle,collection:stringKey,collectionObj:stringObject}]};
+        let temp = {"text":k,"id":axisOrder[k]??i,"enable":true,"sub":[{"text":k,"id":0,"enable":disableAxis&&(!disableAxis[k]),"idroot":i,"angle":i*2*Math.PI/(variables.length),"range":range,"isTime":isTime,"isString":isString,isSingle:isSingle,collection:stringKey,collectionObj:stringObject}]};
         if (isString) {
             temp.sub[0].color = d3.scaleOrdinal().range(d3.schemeCategory10);
         }
@@ -299,6 +327,8 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
         serviceLists.push(temp);
     });
 
+
+    serviceLists.sort((a,b)=>a.id-b.id).forEach((s,i)=>s.id=i)
 
     serviceList_selected = serviceList.map((d,i)=>{return{text:d,index:i}});
     serviceFullList = serviceLists2serviceFullList(serviceLists);
