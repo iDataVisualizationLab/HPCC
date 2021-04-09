@@ -22,7 +22,7 @@ $(document).ready(function(){
     // request = new LoadShap('src/data/9214_9314_2020_v2.csv_5000_fast.csv');
     // request = new LoadShap('src/data/shap_username.csv');
 
-    handleDatabyUser('../HiperView/data/814_821_2020.json',(data)=>{
+    handleDatabyUser('src/data/dataset_jieyao.json',(data)=>{
         request = new LoadShap(new Promise((resolutionFunc)=>resolutionFunc(data)));
         initMenu();
         initClusterUI();

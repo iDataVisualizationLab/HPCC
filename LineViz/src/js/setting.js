@@ -68,13 +68,13 @@ function handleDataUrl(dataRaw) {
             if (dataRaw.jobs_info[jID].finish_time && dataRaw.jobs_info[jID].finish_time>9999999999999)
                 dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
     })
-    let time_stamp = dataRaw.time_stamp.map(d=>d/1000000)
+    let time_stamp = dataRaw.time_stamp.map(d=>d*1000)
 
     var sampleh = {};
     var ser = serviceListattr.slice();
     let tsnedata = {};
     let data = dataRaw.nodes_info;
-    sampleh.timespan = time_stamp.map(d=>d*1000);
+    sampleh.timespan = time_stamp.map(d=>d);
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
     hosts.forEach(h => {
         sampleh[h.name] = {};

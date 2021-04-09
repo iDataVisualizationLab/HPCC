@@ -355,7 +355,7 @@
       "PCA","Rose chart"
     ]
   },
-  "JobPCA": {
+  "Job Squeue": {
     "title": "Job Squeue",
     "thumb": "JobSqueue.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobSqueue/index.html",
