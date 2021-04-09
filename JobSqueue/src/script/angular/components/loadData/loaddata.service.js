@@ -184,7 +184,7 @@ angular.module('hpccApp')
 
         function loadcsv(data,customformat) {
             db = "csv";
-            newdatatoFormat(data, separate,customformat);
+            newdatatoFormat(data.queue_status?data.queue_status:data, separate,customformat);
             if (object.customTime){
                 stickKey = object.customTime.label;
                 stickKeyFormat = object.customTime.format;
