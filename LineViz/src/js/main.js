@@ -23,12 +23,11 @@ $(document).ready(function(){
     // request = new LoadShap('src/data/shap_username.csv');
 
     handleDatabyUser('src/data/dataset_jieyao.json',(data)=>{
-        request = new LoadShap(new Promise((resolutionFunc)=>resolutionFunc(data)));
         initMenu();
         initClusterUI();
         initdraw();
-        request.onFinishQuery.push(queryData);
-        request.onDataChange.push(request.request.bind(request))
+        draw();
+        debugger
     })
     debugger
 

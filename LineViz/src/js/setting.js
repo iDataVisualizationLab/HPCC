@@ -74,13 +74,35 @@ function handleDataUrl(dataRaw) {
     var ser = serviceListattr.slice();
     let tsnedata = {};
     let data = dataRaw.nodes_info;
+    alternative_service = Object.keys(data[hosts[0].name]).filter(d=>d!=='node_jobs');
+    serviceListattr = alternative_service;
+    alternative_scale = alternative_service.map(d=>1);
+    serviceLists = serviceListattr.map((d,i)=>({"text":d,"id":i,"enable":true,"sub":[{"text":d,"id":0,"enable":true,"idroot":i,"angle":i/(Math.PI*2),"range":[Infinity,-Infinity]}]}));
+    serviceFullList=serviceLists2serviceFullList(serviceLists);
+    serviceList_selected = serviceLists.map((s,i)=>({text:s.text,index:i}));
+    hosts.forEach(h => {
+        serviceLists.forEach(s=>{
+            data[h.name][s.text].forEach(d=>{
+                if(d<s.sub[0].range[0])
+                    s.sub[0].range[0] = d;
+                if(d>s.sub[0].range[1])
+                    s.sub[0].range[1] = d;
+            })
+        })
+    });
+
+
     sampleh.timespan = time_stamp.map(d=>d);
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
+    let jobs = {};
+
     hosts.forEach(h => {
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
         // ser.forEach(s => sampleh[h.name][s] = []);
         sampleh[h.name] = [];
+        sampleh[h.name].jobs = {};
+
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
@@ -111,10 +133,25 @@ function handleDataUrl(dataRaw) {
                 }
                 value.forEach(v=>tsnedata[h.name][currentIndex].push(v === null ? 0 : (scaleService[si](v) ?? 0)))
             })
-        })
+        });
+        sampleh.timespan.forEach((dt, ti) => {
+            // jobs
+            data[h.ip].node_jobs.forEach(jid => {
+                if (!jid)
+                    debugger
+                if (!jobs[jid])
+                    jobs[jid] = {};
+                if (!jobs[jid][h.name])
+                    jobs[jid][h.name] = [];
+                jobs[jid][h.name][ti] = {key:dt,values:sampleh[h.name][ti]};
+                if (!sampleh[h.name].jobs[jid]){
+                    sampleh[h.name].jobs[jid]= jobs[jid][h.name];
+                }
+            })
+        });
     });
 
-    return{sampleS:sampleh,tsnedata:tsnedata};
+    return{sampleS:sampleh,tsnedata:tsnedata,jobs};
 }
 function handleSmalldata(dataRaw){
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{

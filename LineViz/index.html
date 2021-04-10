@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>JobPCA</title>
+    <title>LineViz</title>
     <link rel="icon" href="src/favicon.png" type="image/gif">
 <!--    <script src="src/lib/jquery-3.2.1.min.js"></script>-->
     <script src="bower_components/jquery-3.5.1.min/index.js"></script>
@@ -82,7 +82,7 @@
             <main>
                 <nav class="navbar navbar-light bg-light ">
                     <a class="navbar-brand" href="#">
-                        JobPCA
+                        LineViz
                     </a>
                     <form class="form-inline">
                         <ul class="nav" style="padding-right: 10px">
@@ -105,17 +105,17 @@
                 </nav>
                 <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 48px);width: 100%; margin: 0px">
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
-                    <svg id="circularLayout">
-                        <defs>
-                            <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">
-                                <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur"></feMergeNode>
-                                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                                </feMerge>
-                            </filter>
-                        </defs>
-                    </svg>
+<!--                    <svg id="circularLayout">-->
+<!--                        <defs>-->
+<!--                            <filter id="glow" width="300%" x="-100%" height="300%" y="-100%">-->
+<!--                                <feGaussianBlur class="blur" stdDeviation="3" result="coloredBlur"></feGaussianBlur>-->
+<!--                                <feMerge>-->
+<!--                                    <feMergeNode in="coloredBlur"></feMergeNode>-->
+<!--                                    <feMergeNode in="SourceGraphic"></feMergeNode>-->
+<!--                                </feMerge>-->
+<!--                            </filter>-->
+<!--                        </defs>-->
+<!--                    </svg>-->
                     <div id="legendHolder" class="position-absolute card" style="top:0px;width: 300px; ;left: 70%">
                         <div class="card-header all-scroll ">
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

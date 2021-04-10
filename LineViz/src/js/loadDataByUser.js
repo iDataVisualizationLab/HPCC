@@ -14,30 +14,15 @@ let user_job;
 let job_node;
 let node_jobs;
 let sampleS;
+let jobs;
 function handleDatabyUser(url,callBack){
     d3.json(url).then(_data=>{
         debugger
         const dataurl = handleDataUrl(_data);
         tsnedata = dataurl.tsnedata;
         sampleS = dataurl.sampleS;
-        Layout.jobs = _data[JOB];
-        Layout.timespan = _data.time_stamp.map(d=>d/1000000);
-        summaryInTime.data=_data;
-        summaryInTime.mode = 'job';
-        const jobResult = summaryInTime();
-        const jobData = jobResult.data;
-        job_node = jobResult.job_node;
-        node_jobs = jobResult.node_jobs;
-        user_job = jobResult.net;
-        summaryInTime.mode = 'user';
-        const userResult = summaryInTime();
-        debugger
-        const userData = userResult.data;
-        userData.forEach(u=>{
-            if (user_job[u.id])
-                jobData.push(u)
-        });
-        callBack(revertData(jobData))
+        jobs = dataurl.jobs;
+        callBack()
     })
 }
 function revertData(data){
