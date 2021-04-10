@@ -11,6 +11,7 @@ var m = [40, 60, 10, 0],
     line =  d3.line(),
     axis,
     data,
+    userfilter,
     foreground,
     background,
     highlighted,
@@ -725,6 +726,22 @@ function initFunc() {
             console.timeLog('Force dynamic: ')
         });
     netControl.init({div:d3.select('#svgNetwork').node(),force}).data(data2net(data))
+        .mouseoverAdd('pp',function(d){
+            d.data.root.forEach(e=>
+            highlight(e))
+        })
+        .mouseoutAdd('pp',function(d){
+            d.data.root.forEach(e=>
+                unhighlight(e))
+        }).clickAdd('pp',function(d,isFreeze){
+            debugger
+            if (userfilter)
+                userfilter = undefined;
+            else
+                userfilter = d.data.root[0].USER;
+            brush()
+        });
+    netControl
         .ondraw(drawNetParallelLInk)
         .draw();
     graphicopt = netControl.graphicopt();
@@ -1386,7 +1403,7 @@ function brush(isreview) {
 
     // Get lines within extents
     var selected = [];
-    data
+    (userfilter?data.filter(d=>d.USER===userfilter):data)
         .forEach(function(d) {
             if(!excluded_groups.find(e=>e===d.group))
                 !actives.find(function(p, dimension) {

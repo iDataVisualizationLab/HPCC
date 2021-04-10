@@ -71,6 +71,7 @@ let DynamicNetViz = function(){
                 master[key].push(func)
                 master[key].dict[id] = master[key].length-1;
             }
+            return master;
         }
     }
 
@@ -148,22 +149,7 @@ let DynamicNetViz = function(){
             .y(d=>d.y)
             .addAll(data);
 
-        function brushed() {
-            let selection =d3.event.selection;
-            data.forEach(d => {d.selected = false;
-                master.mouseout.forEach(f=>f(d.value));
-            });
-            master.releasehighlight();
-            if (selection) search(quadtree, selection);
-            let listkey = data.filter(d=>d.selected);
-            if (listkey.length){
-                master.highlight(listkey.map(d=>d.key));
-                master.mouseover.forEach(f=>listkey.forEach(d=>f(d.value)));
-                master.onBrush.forEach(f=>listkey.forEach(d=>f(d.value)));
-            }else{
-                master.offBrush.forEach(f=>f());
-            }
-        }
+
         function search(quadtree, [[x0, y0], [x3, y3]]) {
             quadtree.visit((node, x1, y1, x2, y2) => {
                 if (!node.length) {
@@ -343,7 +329,7 @@ let DynamicNetViz = function(){
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();master.click.forEach(f=>f());})
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();master.click.forEach(f=>f(d));})
                         .on("mouseover", function(d){mouseover.bind(this)(d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
@@ -402,7 +388,6 @@ let DynamicNetViz = function(){
     function switchMode(){
         if (graphicopt.actionMode==='zoom'){
             d3.select(maindiv).select('.brushHolder').classed('hide',true);
-            debugger
             main_svg
                 .call(graphicopt.zoom.on("zoom", zoomed))
         }else{
@@ -573,7 +558,6 @@ let DynamicNetViz = function(){
                     updateForce(key,[d.x,d.y]);
                 }
             });
-            debugger
             getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
             const getData = function(d,_pos,index){
                 if (data.datamap[d.id]&&data.datamap[d.id][0][posProp._index]>getDataForce[key].threshold){
@@ -674,7 +658,7 @@ let DynamicNetViz = function(){
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
     function highlightItems(d,value){
-        if (d.relatedNodes && d.relatedNodes[0].type==='job'){
+        if (d.relatedNodes &&d.relatedNodes.length && d.relatedNodes[0].type==='job'){
             d.relatedNodes.forEach(e=> {
                 e.node.classed('highlight', value);
                 e.relatedLinks.forEach(e=>e.node.classed('highlight', value));
@@ -689,7 +673,6 @@ let DynamicNetViz = function(){
     }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
-            debugger
             g.classed('onhighlight', true);
             highlightItems(d,true)
             d3.select(this).classed('highlight', true);
@@ -777,5 +760,6 @@ let DynamicNetViz = function(){
         }
         return {xscale,yscale,solution:sol}
     }
+
     return master;
 };
