@@ -125,7 +125,7 @@ angular.module('hpccApp')
             }
             if (dataset.repeat){
                 updatePromise = requestUpdate();
-                Dataset.timer = setInterval(requestUpdate,dataset.repeat)
+                Dataset.timer = d3.interval(requestUpdate,dataset.repeat)
             }else{
                 updatePromise = requestUpdate();
             }

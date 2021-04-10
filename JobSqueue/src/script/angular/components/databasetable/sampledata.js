@@ -26,7 +26,7 @@ const squeue = {
         "WAITING_TIME": (d,currentTimestamp) => {
             try {
                 let start = +new Date(d["START_TIME"]*1000);
-                let delta = (_.isNaN(start)?(+(currentTimestamp)):start) - d["SUBMIT_TIME"];
+                let delta = (_.isNaN(start)?(+(currentTimestamp)):(start/1000)) - d["SUBMIT_TIME"];
                 if(_.isNaN(delta))
                     debugger
                 let string = '';
