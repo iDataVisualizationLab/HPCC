@@ -55,6 +55,7 @@ let DynamicNetViz = function(){
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
     let simulation,node,link,label,removedLinks=[],enterLinks=[];
     let radius;
+    let transform={k:1,x:0,y:0}
     createEventHandle('onBrush');
     createEventHandle('offBrush');
     createEventHandle('mouseover');
@@ -206,9 +207,7 @@ let DynamicNetViz = function(){
                 _links.push({source:l.source.parent.timeArr[data.ti]??l.source,target:l.target.parent.timeArr[data.ti]??l.target,value:l.value,color:'rgb(255,0,0)',isDelete:true});
             });
         }
-        console.log(_links.filter(l=>l.isDelete))
-        // let linkScale = d3.scaleSqrt().range([0.2,0.8]).domain([1,d3.max(links,d=>d.value||0)]);
-        console.log('maxlink = ',d3.max(links,d=>d.value||0))
+
         let linkScale = d3.scaleLinear().range([0.5,1]).domain([1,2]);
         link = g.select('g.linkHolder').selectAll(".link")
             .data(_links, d => [d.source.id, d.target.id])
@@ -344,7 +343,7 @@ let DynamicNetViz = function(){
                     node
                         .attr('class','element')
                         .classed('compute', true)
-                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();userTable(d,d.type);master.click.forEach(f=>f());})
+                        .on('click',function(d){d3.select(this).dispatch('mouseover'); freezeHandle.bind(this)();master.click.forEach(f=>f());})
                         .on("mouseover", function(d){mouseover.bind(this)(d)})
                         .on("mouseout", function(d){mouseout.bind(this)(d)})
                         .style('filter',d=>d.data.highlight?`url(#${'c'+d.data.currentID}`:null)
@@ -415,7 +414,10 @@ let DynamicNetViz = function(){
         }
     }
     function zoomed(){
-        g.attr("transform", d3.event.transform);
+        transform = d3.event.transform;
+        g.attr("transform", transform);
+        if (node)
+            ondraw(node.data(),d3.transform);
     }
     let getRenderFunc = function(d){
         if (d.d){
@@ -632,7 +634,7 @@ let DynamicNetViz = function(){
             .attr("y2", d => d.target.y);
 
         g.selectAll('.labels').attr("transform", d=>`translate(${d.x},${d.y})`);
-        ondraw(node.data())
+        ondraw(node.data(),transform)
     }
     master.data = function(_data) {
         if (arguments.length)
@@ -687,6 +689,7 @@ let DynamicNetViz = function(){
     }
     function mouseover(d){
         if (!isFreeze) {     // Bring to front
+            debugger
             g.classed('onhighlight', true);
             highlightItems(d,true)
             d3.select(this).classed('highlight', true);

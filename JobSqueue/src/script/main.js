@@ -731,12 +731,13 @@ function initFunc() {
     function ticked() {
         netControl.ticked();
     }
-    function drawNetParallelLInk(data) {
+    function drawNetParallelLInk(data,transform) {
+        transform = transform??{k:1,x:0,y:0};
         linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
         data.forEach(d=>{
             if (d.type==='user'){
-                const netx = d.x+graphicopt.centerX()+graphicopt.margin.left;
-                const nety = d.y+graphicopt.centerY()+graphicopt.margin.top;
+                const netx = transform.k*(d.x)+transform.x+graphicopt.centerX();
+                const nety = transform.k*(d.y)+transform.y+graphicopt.centerY();
                 d.data.root.forEach(d=>{
                     const y = yscale[dimensions[0]](d[dimensions[0]])+m[0];
                     const x = graphicopt.width;
