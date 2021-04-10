@@ -101,6 +101,21 @@ function draw() {
 
     //color
     const colorItem = d3.scaleOrdinal(d3.schemeCategory10).domain(Object.keys(jobs));
+    const legend = d3.select('#joblegend').selectAll('div.legendI').data(colorItem.domain())
+        .join('div')
+        .attr('class','legendI col-12 row');
+    legend.selectAll('div.line').data(d=>[d])
+        .join('div')
+        .attr('class','line col-4')
+        .style('border-top',d=>`1px solid ${colorItem(d)}`)
+        .style('width','100px')
+        .style('margin','auto')
+        .style('height',0);
+    legend.selectAll('span').data(d=>[d])
+        .join('span')
+        .attr('class','line col-8')
+        .text(d=>d);
+
     //symbol
     debugger
 

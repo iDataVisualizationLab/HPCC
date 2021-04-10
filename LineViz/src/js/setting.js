@@ -136,8 +136,8 @@ function handleDataUrl(dataRaw) {
         });
         sampleh.timespan.forEach((dt, ti) => {
             // jobs
-            data[h.ip].node_jobs.forEach(jid => {
-                if (!jid)
+            data[h.ip].node_jobs[ti].forEach(jid => {
+
                     debugger
                 if (!jobs[jid])
                     jobs[jid] = {};
