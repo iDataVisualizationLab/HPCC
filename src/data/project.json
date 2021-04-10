@@ -360,7 +360,7 @@
     "thumb": "JobSqueue.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobSqueue/index.html",
     "tags": [
-      "job queue"
+      "squeue","slurm"
     ],
     "pros": [
       "Users, Jobs, and Computes relationship"
