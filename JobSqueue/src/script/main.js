@@ -2274,7 +2274,7 @@ function updateDataTableFiltered(data){
                 //         newDataArray[i][s.text] = s.collection[d[s.text]];;
 
                 if (s.axisCustom){
-                    newDataArray[i][s.text] = s.axisCustom.tickFormat(d[s.text])
+                    newDataArray[i][s.text] = (s.axisCustom.tickFormatFull??s.axisCustom.tickFormat)(d[s.text])
                 }
             })
         });
