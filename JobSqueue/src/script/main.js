@@ -814,7 +814,7 @@ function drawNetParallelLInk(data,transform,_linkcanvas,_lineopacity) {
     nettransform = transform;
     _linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
     data.forEach(d=>{
-        // if (d.type==='user'){
+        if (d.type==='user'){
             const netx = transform.k*(d.x)+transform.x+graphicopt.centerX();
             const nety = transform.k*(d.y)+transform.y+graphicopt.centerY();
             d.data.root.forEach(d=>{
@@ -830,7 +830,7 @@ function drawNetParallelLInk(data,transform,_linkcanvas,_lineopacity) {
                 _linkcanvas.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
                 _linkcanvas.stroke();
             })
-        // }
+        }
     })
 }
 // Highlight single polyline
