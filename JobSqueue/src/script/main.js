@@ -706,7 +706,6 @@ function initFunc() {
     data = object2DataPrallel(sampleS);
 
     // network
-    debugger
     graphicopt={margin: {top: 20, right: 100, bottom: 20, left: 20}};
     graphicopt.width = Math.round($("#network").width());
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
@@ -716,6 +715,7 @@ function initFunc() {
         .attr('width',graphicopt.width)
         .style('height',graphicopt.height+'px').node().getContext('2d');
     linkcanvas.strokeStyle = "rgba(0,100,160,0.1)";
+    linkcanvas.globalCompositeOperation = "destination-over";
     linkcanvas.lineWidth = 1.7;
 
     linkcanvas_highlight = d3.select('#networkconnect_highlight')
@@ -724,8 +724,6 @@ function initFunc() {
         .style('height',graphicopt.height+'px').node().getContext('2d');
     linkcanvas_highlight.strokeStyle = "rgba(0,100,160,0.1)";
     linkcanvas_highlight.lineWidth = 4;
-
-
 
     netControl.graphicopt(graphicopt);
     const force = d3.forceSimulation()
@@ -747,12 +745,13 @@ function initFunc() {
             d.data.root.forEach(e=>
                 unhighlight(e))
             net_unhighlight()
-        }).clickAdd('pp',function(d,isFreeze){
+        }).clickAdd('pp',function(d){
             debugger
-            if (userfilter)
+            if (userfilter){
                 userfilter = undefined;
-            else
+            }else{
                 userfilter = d.data.root[0].USER;
+            }
             brush()
         });
     netControl
@@ -934,6 +933,9 @@ function resetRequest() {
         .selectAll('tr')
         .filter(d=>d.arr==selectedService).select('input[type="radio"]').property("checked", true);
     _.bind(selecteds.on("change"),selecteds.node())();
+
+    netControl.data(data2net(data))
+    netControl.draw();
 }
 let coloraxis ={};
 let opaaxis ={};
@@ -1751,7 +1753,7 @@ function resetSize() {
 // Background canvas
     background.lineWidth = 1.7;
 
-    xscale = d3.scalePoint().range([0, w]).padding(0.5).domain(dimensions);
+    xscale = d3.scalePoint().range([0, w]).padding(0).domain(dimensions);
     dimensions.forEach(function (d) {
         yscale[d].range([h, 0]);
     });

@@ -55,7 +55,9 @@ let DynamicNetViz = function(){
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
     let simulation,node,link,label,removedLinks=[],enterLinks=[];
     let radius;
-    let transform={k:1,x:0,y:0}
+    let transform={k:1,x:0,y:0};
+    let mapPosById={};
+    let updatePos = true;
     createEventHandle('onBrush');
     createEventHandle('offBrush');
     createEventHandle('mouseover');
@@ -99,8 +101,11 @@ let DynamicNetViz = function(){
         let jobArr = {};
         if (node&&link) // new
         {
-            const olds = new Map(node.data().map(d => [d.id, d]));
-            nodes = nodes.map(d => { const old = olds.get(d.id)||{};
+            if (updatePos)
+                node.data().forEach(d =>{
+                    mapPosById[d.id] = d;
+                });
+            nodes = nodes.map(d => { const old = mapPosById[d.id]||{};
                 d.vx = old.vx;
                 d.vy = old.vy;
                 if (datamap[d.id]){
@@ -649,6 +654,9 @@ let DynamicNetViz = function(){
     };
     master.getDrawData = function(_data) {
         return arguments.length?(getDrawData=_data,master):getDrawData;
+    };
+    master.updatePos = function(_data) {
+        return arguments.length?(updatePos=_data,master):updatePos;
     };
     master.onFinishDraw = function(_data) {
         onFinishDraw.push(_data)
