@@ -646,7 +646,7 @@ function updateDimension() {
             },exit => exit.remove());
 }
 
-let linkcanvas,linkcanvas_highlight,nettransform,graphicopt;
+let linkcanvas,linkcanvas_highlight,nettransform={k:1,x:0,y:0},graphicopt;
 function initFunc() {
     if(timel)
         timel.stop();
@@ -659,7 +659,7 @@ function initFunc() {
     w = width - m[1] - m[3];
     h = height - m[0] - m[2];
     sankey.extent([[m[1], m[0]], [w+m[1], h+m[0]]]);
-    xscale = d3.scalePoint().range([0, w]).padding(0.3);
+    xscale = d3.scalePoint().range([0, w]).padding(0);
     axis = d3.axisLeft().ticks(1+height/50);
     // Scale chart and canvas height
     let chart = d3.select("#chart")
@@ -730,6 +730,12 @@ function initFunc() {
         .force("charge", d3.forceManyBody().strength(-20))
         .force("chargeX", d3.forceX())
         .force("chargeY", d3.forceY())
+        .force("chargeY-fix", d3.forceY().y(d=>{
+            if (dimensions.length)
+           {     const y = d3.mean(d.data.root,d=>yscale[dimensions[0]](d[dimensions[0]])+m[0]);
+                return (y - nettransform.y - graphicopt.centerY())/nettransform.k;}
+            return 0;
+        }))
         .force("link", d3.forceLink().id(d => d.id))
         .on("tick", ticked)
         .on('end',()=>{
@@ -974,8 +980,7 @@ function setColorsAndThresholds_full() {
             //     opaaxis[s.text]=()=>1;
         }
         if(s.color) {
-            coloraxis[s.text] = s.color.copy();
-            coloraxis[s.text].domain(s.color.domain().map(c=>s.axisCustom.tickInvert(c)))
+            coloraxis[s.text] = s.color
         }else
             coloraxis[s.text] = d3.scaleLinear()
                 .domain(arrThresholds)
@@ -1045,53 +1050,53 @@ function grayscale(pixels, args) {
     return pixels;
 };
 
-function create_legend(colors,brush) {
-    if (selectedService) {
-        colorbyValue(orderLegend);
-    }else{
-        colorbyCategory(data,"group");
-    }
-    barScale.range([0,Math.max(svgLengend.node().parentElement.offsetWidth,400)]);
-    // create legend
-    var legend_data = d3.select("#legend")
-        .html("")
-        .selectAll(".row")
-        .data( colors.domain() );
-    var legendAll = legend_data.join(
-        enter=>{
-            let legend = enter.append("div")
-                .attr("title", "Hide group");
-            legend
-                .append("span")
-                .attr("class","col s3")
-                .text(function(d,i) { return " " + d});
-            legend
-                .append("span")
-                .style("opacity",0.85)
-                .attr("class", "color-bar");
-
-            legend
-                .append("span")
-                .attr("class", "tally")
-                .text(function(d,i) { return 0});
-
-            return legend;
-        }
-    ).on("click", function(d) {
-        // toggle food group
-        if (_.contains(excluded_groups, d)) {
-            d3.select(this).attr("title", "Hide group")
-            excluded_groups = _.difference(excluded_groups,[d]);
-            brush();
-        } else {
-            d3.select(this).attr("title", "Show group")
-            excluded_groups.push(d);
-            brush();
-        }
-    });
-    legendAll.selectAll(".color-bar").style("background", function(d,i) { return colors(d)});
-    return legendAll;
-}
+// function create_legend(colors,brush) {
+//     if (selectedService) {
+//         colorbyValue(orderLegend);
+//     }else{
+//         colorbyCategory(data,"group");
+//     }
+//     barScale.range([0,Math.max(svgLengend.node().parentElement.offsetWidth,400)]);
+//     // create legend
+//     var legend_data = d3.select("#legend")
+//         .html("")
+//         .selectAll(".row")
+//         .data( colors.domain() );
+//     var legendAll = legend_data.join(
+//         enter=>{
+//             let legend = enter.append("div")
+//                 .attr("title", "Hide group");
+//             legend
+//                 .append("span")
+//                 .attr("class","col s3")
+//                 .text(function(d,i) { return " " + d});
+//             legend
+//                 .append("span")
+//                 .style("opacity",0.85)
+//                 .attr("class", "color-bar");
+//
+//             legend
+//                 .append("span")
+//                 .attr("class", "tally")
+//                 .text(function(d,i) { return 0});
+//
+//             return legend;
+//         }
+//     ).on("click", function(d) {
+//         // toggle food group
+//         if (_.contains(excluded_groups, d)) {
+//             d3.select(this).attr("title", "Hide group")
+//             excluded_groups = _.difference(excluded_groups,[d]);
+//             brush();
+//         } else {
+//             d3.select(this).attr("title", "Show group")
+//             excluded_groups.push(d);
+//             brush();
+//         }
+//     });
+//     legendAll.selectAll(".color-bar").style("background", function(d,i) { return colors(d)});
+//     return legendAll;
+// }
 
 // render polylines i to i+render_speed
 function render_range(selection, i, max, opacity) {

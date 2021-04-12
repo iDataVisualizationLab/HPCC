@@ -57,32 +57,35 @@ const squeue = {
                 return 'N/A'
             }
         },
-        "EXECUTION_TIME": d => {
-            let delta = (durationstring2Milisecond(d["TIME"]) +durationstring2Milisecond(d["TIME_LEFT"]))/1000;
-            let string = '';
-            const day = Math.floor(delta  / 24 / 3600);
-            if (day) {
-                string += '' + day + '-';
-            }
-            delta -= day * 3600 * 24;
-            const h = Math.floor(delta / 3600);
-            if (h > 9)
-                string += '' + h;
-            else
-                string += '0' + h;
-            delta -= h * 3600;
-            const m = Math.floor(delta / 60);
-            if (m > 9)
-                string += ':' + m;
-            else
-                string += ':0' + m;
-            delta = Math.round(delta - m * 60);
-            if (delta > 9)
-                string += ':' + delta;
-            else
-                string += ':0' + delta;
-            return string;
-        }
+        // "EXECUTION_TIME": d => {
+        //     let delta = (durationstring2Milisecond(d["TIME"]) +durationstring2Milisecond(d["TIME_LEFT"]))/1000;
+        //     let string = '';
+        //     const day = Math.floor(delta  / 24 / 3600);
+        //     if (day) {
+        //         string += '' + day + '-';
+        //     }
+        //     delta -= day * 3600 * 24;
+        //     const h = Math.floor(delta / 3600);
+        //     if (h > 9)
+        //         string += '' + h;
+        //     else
+        //         string += '0' + h;
+        //     delta -= h * 3600;
+        //     const m = Math.floor(delta / 60);
+        //     if (m > 9)
+        //         string += ':' + m;
+        //     else
+        //         string += ':0' + m;
+        //     delta = Math.round(delta - m * 60);
+        //     if (delta > 9)
+        //         string += ':' + delta;
+        //     else
+        //         string += ':0' + delta;
+        //     return string;
+        // }
+    },
+    color:{
+        "STATE": d3.scaleOrdinal().domain(["RUNNING","PENDING","COMPLETING"]).range(["#2ca02c","#ff7f0e","#d62728"])
     },
     disableAxis: {"NODELIST": true, "JOBID": true, "ARRAY_JOB_ID": true, "USER": true,
         "SUBMIT_TIME": true,

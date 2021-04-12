@@ -169,7 +169,7 @@ function durationstring2Milisecond(s){
     return miliseconds
 }
 
-function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,initAxis,axisOrder,customAxis},currentTimestamp){
+function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,initAxis,axisOrder,customAxis,color},currentTimestamp){
     definedType = definedType??{};
     preprocess = preprocess??{};
     preloader(true, 0, 'reading file...');
@@ -318,11 +318,15 @@ function newdatatoFormat (dataR,notSplit,{definedType,preprocess,disableAxis,ini
         }
     }
         let temp = {"text":k,"id":axisOrder[k]??i,"enable":true,"sub":[{"text":k,"id":0,"enable":disableAxis&&(!disableAxis[k]),"idroot":i,"angle":i*2*Math.PI/(variables.length),"range":range,"isTime":isTime,"isString":isString,isSingle:isSingle,collection:stringKey,collectionObj:stringObject}]};
-        if (isString) {
-            temp.sub[0].color = d3.scaleOrdinal().range(d3.schemeCategory10);
+        if (color[k]){
+            temp.sub[0].color = color[k].copy().domain(color[k].domain().map(d=>temp.sub[0].collectionObj[d]));
+        }else{
+            if (isString) {
+                temp.sub[0].color = d3.scaleOrdinal().range(d3.schemeCategory10);
+            }
+            if (temp.sub[0].isSingle)
+                temp.sub[0].color = d3.scaleOrdinal().range(['#ddd']);
         }
-        if (temp.sub[0].isSingle)
-            temp.sub[0].color = d3.scaleOrdinal().range(['#ddd']);
         thresholds.push([0,1]);
         serviceLists.push(temp);
     });
