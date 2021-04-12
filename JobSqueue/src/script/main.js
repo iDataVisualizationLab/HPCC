@@ -645,6 +645,8 @@ function updateDimension() {
                 return "translate(" + xscale(d) + ")";});
             },exit => exit.remove());
 }
+
+let linkcanvas,linkcanvas_highlight,nettransform,graphicopt;
 function initFunc() {
     if(timel)
         timel.stop();
@@ -705,16 +707,26 @@ function initFunc() {
 
     // network
     debugger
-    let graphicopt={margin: {top: 20, right: 100, bottom: 20, left: 20}};
+    graphicopt={margin: {top: 20, right: 100, bottom: 20, left: 20}};
     graphicopt.width = Math.round($("#network").width());
     graphicopt.height = d3.max([document.body.clientHeight-150, 300]);
     d3.select('#network').style('height',graphicopt.height+'px').style('position','relative');
-    const linkcanvas = d3.select('#networkconnect')
+    linkcanvas = d3.select('#networkconnect_foreground')
         .attr('height',graphicopt.height)
         .attr('width',graphicopt.width)
         .style('height',graphicopt.height+'px').node().getContext('2d');
     linkcanvas.strokeStyle = "rgba(0,100,160,0.1)";
     linkcanvas.lineWidth = 1.7;
+
+    linkcanvas_highlight = d3.select('#networkconnect_highlight')
+        .attr('height',graphicopt.height)
+        .attr('width',graphicopt.width)
+        .style('height',graphicopt.height+'px').node().getContext('2d');
+    linkcanvas_highlight.strokeStyle = "rgba(0,100,160,0.1)";
+    linkcanvas_highlight.lineWidth = 4;
+
+
+
     netControl.graphicopt(graphicopt);
     const force = d3.forceSimulation()
         .force("charge", d3.forceManyBody().strength(-20))
@@ -729,10 +741,12 @@ function initFunc() {
         .mouseoverAdd('pp',function(d){
             d.data.root.forEach(e=>
             highlight(e))
+            net_highlight([d]);
         })
         .mouseoutAdd('pp',function(d){
             d.data.root.forEach(e=>
                 unhighlight(e))
+            net_unhighlight()
         }).clickAdd('pp',function(d,isFreeze){
             debugger
             if (userfilter)
@@ -747,29 +761,6 @@ function initFunc() {
     graphicopt = netControl.graphicopt();
     function ticked() {
         netControl.ticked();
-    }
-    function drawNetParallelLInk(data,transform) {
-        transform = transform??{k:1,x:0,y:0};
-        linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
-        data.forEach(d=>{
-            if (d.type==='user'){
-                const netx = transform.k*(d.x)+transform.x+graphicopt.centerX();
-                const nety = transform.k*(d.y)+transform.y+graphicopt.centerY();
-                d.data.root.forEach(d=>{
-                    const y = yscale[dimensions[0]](d[dimensions[0]])+m[0];
-                    const x = graphicopt.width;
-                    linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],lineopacity);
-                    linkcanvas.beginPath();
-                    linkcanvas.moveTo(netx,nety);
-                    var cp1x = x - 0.5 * (x - netx);
-                    var cp1y = nety;
-                    var cp2x = x - 0.5 * (x - netx);
-                    var cp2y = y;
-                    linkcanvas.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-                    linkcanvas.stroke();
-                })
-            }
-        })
     }
 
     // Extract the list of numerical dimensions and create a scale for each.
@@ -810,6 +801,43 @@ function initFunc() {
     // brush();
     console.log('---init---');
 
+}
+function drawNetParallelLInk(data,transform,_linkcanvas) {
+    let _lineopacity = _linkcanvas?1:lineopacity
+    _linkcanvas= _linkcanvas??linkcanvas;
+    transform = transform??nettransform??{k:1,x:0,y:0};
+    nettransform = transform;
+    _linkcanvas.clearRect(0,0,graphicopt.width,graphicopt.height);
+    data.forEach(d=>{
+        // if (d.type==='user'){
+            const netx = transform.k*(d.x)+transform.x+graphicopt.centerX();
+            const nety = transform.k*(d.y)+transform.y+graphicopt.centerY();
+            d.data.root.forEach(d=>{
+                const y = yscale[dimensions[0]](d[dimensions[0]])+m[0];
+                const x = graphicopt.width;
+                _linkcanvas.strokeStyle = colorCanvas(selectedService==null?d.group:d[selectedService],_lineopacity);
+                _linkcanvas.beginPath();
+                _linkcanvas.moveTo(netx,nety);
+                var cp1x = x - 0.5 * (x - netx);
+                var cp1y = nety;
+                var cp2x = x - 0.5 * (x - netx);
+                var cp2y = y;
+                _linkcanvas.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+                _linkcanvas.stroke();
+            })
+        // }
+    })
+}
+// Highlight single polyline
+function net_highlight(d) {
+    d3.select("#networkconnect_foreground").style("opacity", "0.25");
+    drawNetParallelLInk(d,undefined,linkcanvas_highlight);
+}
+
+// Remove highlight
+function net_unhighlight() {
+    d3.select("#networkconnect_foreground").style("opacity", null);
+    linkcanvas_highlight.clearRect(0,0,w,h);
 }
 
 function data2net(data){
