@@ -802,8 +802,8 @@ function initFunc() {
     console.log('---init---');
 
 }
-function drawNetParallelLInk(data,transform,_linkcanvas) {
-    let _lineopacity = _linkcanvas?1:lineopacity
+function drawNetParallelLInk(data,transform,_linkcanvas,_lineopacity) {
+    _lineopacity = _lineopacity??lineopacity;
     _linkcanvas= _linkcanvas??linkcanvas;
     transform = transform??nettransform??{k:1,x:0,y:0};
     nettransform = transform;
@@ -831,7 +831,7 @@ function drawNetParallelLInk(data,transform,_linkcanvas) {
 // Highlight single polyline
 function net_highlight(d) {
     d3.select("#networkconnect_foreground").style("opacity", "0.25");
-    drawNetParallelLInk(d,undefined,linkcanvas_highlight);
+    drawNetParallelLInk(d,undefined,linkcanvas_highlight,1);
 }
 
 // Remove highlight
