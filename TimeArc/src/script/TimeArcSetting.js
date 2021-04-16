@@ -216,5 +216,7 @@ function handle_data_timeArc () {
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    timeArc.graphicopt(timeArcopt).scheme(scheme).draw();
+    timeArc.graphicopt(timeArcopt).scheme(scheme).layout().draw();
+
+    // jobObject
 }

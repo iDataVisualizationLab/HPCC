@@ -152,7 +152,7 @@ let TimeArc = function(){
                 .attr('font-weight',d=>d.isShareUser?null:'bold')
                 .style('fill',d=>d.color||getColorScale(d))
                 .text(d=>d.name);
-
+debugger
             let layerpath = g.select('g.nodeHolder')
                 .selectAll(".layer")
                 .data(pNodes).join("g")
@@ -225,7 +225,7 @@ let TimeArc = function(){
                 .style('stroke',d=>d.color||null)
                 .style('stroke-width',1)
                 .attr("d", function (d) {
-                    if (d.name==='User 14,32')
+                    // if (d.name==='User 14,32')
                         
                     if (d.value[0])
                         return area([d.value[0],...d.value,d.value[d.value.length-1]]);

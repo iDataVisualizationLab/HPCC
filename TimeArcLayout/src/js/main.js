@@ -37,25 +37,59 @@ $(document).ready(function(){
             // set up ui
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
-            let url = '../HiperView/data/814_821_2020.json';
+            // let url = '../HiperView/data/814_821_2020.json';
             // let url = '../jobviewer/src/data/922020-932020-145000.json';
-            if (command.timeStart!==undefined&&command.timeEnd!==undefined){ `2020-02-14T12:00:00-05:00`
-                _start = new Date(command.timeStart);
-                _end = new Date(command.timeEnd);
-                const interval = '5m';
-                const value = 'max';
-                const compress = false;
-                debugger
-                if (!(_.isNaN(_start.getDate())||_.isNaN(_end.getDate()))){
-                    url= d3.json(getUrl({_start,_end,interval,value,compress}));
-                }
-            }
+            let url = 'src/data/nocona_aggregated.csv';
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
             // request = new Simulation('../HiperView/data/8122020.json');
             // request = new Simulation('../HiperView/data/814_821_2020.json');
-            request = new Simulation(url);
+            request = new Simulation(d3.csv(url).then(d=>{
+                d=d.slice(0,1920)
+                const data = {jobs_info:{},nodes_info:{},time_stamp:[]};
+                Object.keys(d[0]).filter(k=>k!=='time').forEach(e=>{
+                    data.nodes_info[e.split('_')[0]] = {"power_usage":[],"job_id":[]};
+                });
+                serviceFullList = [{"text":"Power","id":0,"enable":true,"idroot":0,"angle":0,"range":[0,800]}]
+                serviceListattr = ["Power"];
+                serviceLists = [{"text":"Power","id":0,"enable":true,"sub":[{"text":"Power","id":0,"enable":true,"idroot":0,"angle":0,"range":[0,800]}]}];
+                serviceList_selected = [{"text":"Power","index":0}];
+                alternative_service = ["power_usage"];
+                alternative_scale = [1];
+                debugger
+                d.forEach(e=>{
+                    data.time_stamp.push(+e.time*1000000000);
+                    Object.keys(data.nodes_info).forEach(comp=>{
+                        let cpus = JSON.parse(e[comp+'_cpus']);
+                        let jobs = JSON.parse(e[comp+'_jobs']);
+                        data.nodes_info[comp].job_id.push(jobs);
+                        data.nodes_info[comp].power_usage.push(+e[comp+'_power']);
+                        jobs.forEach((j,ji)=>{
+                            if (!data.jobs_info[j])
+                                data.jobs_info[j] = {
+                                        "cpu_cores": cpus[ji],
+                                        "finish_time": null,
+                                        "job_name": ''+j,
+                                        "node_list": [],
+                                        "node_list_obj": {},
+                                    "start_time": +e.time*1000000000,
+                                    "submit_time": +e.time*1000000000,
+                                    "total_nodes": 0,
+                                    "user_name": "unknown"
+                                }
+                            if (!data.jobs_info[j].node_list_obj[comp]){
+                                data.jobs_info[j].node_list_obj[comp] = cpus[ji];
+                                data.jobs_info[j].node_list.push(comp);
+                                data.jobs_info[j].total_nodes ++;
+                            }
+                            data.jobs_info[j].finish_time = +e.time*1000000000;
+                        })
+                    })
+                })
+                debugger
+                return data;
+            }));
         }
     }catch(e){
         // request = new Simulation('../HiperView/data/8122020.json');
@@ -74,30 +108,9 @@ $(document).ready(function(){
 });
 
 function initTimeElement(){
-    // timelineControl = new Timeline('#timelineControl');
-    // timelineControl.callbackPlay = request.start.bind(request);
-    // timelineControl.callbackPause = request.pause.bind(request);
-    // timelineControl.step = _.partial(request.request.bind(request),0);
-    // request.callbackStop = timelineControl.pause.bind(timelineControl);
-    //
-    // request.onTimeChange.push(timelineControl.domain.bind(timelineControl));
-    // // request.onDataChange.push(handleRankingData);
-    // request.onUpdateTime.push(timelineControl.update.bind(timelineControl));
-    // request.onUpdateTime.push(function(time){
-    //     subObject.updateTimeHandle(time)
-    // });
-    if (request.isRealTime) {
-        // timelineControl.disableHandle(true);
-        // request.onStartQuery=()=>timelineControl.meassageHolder.setMessage('query data....');
-        // request.onFinishQuery.push((d)=>(timelineControl.meassageHolder.setMessage(''),updateProcess(),d));
-        request.onFinishQuery.push((d)=>(updateProcess(),d));
-        request.setInterval(120000);
-        request.onFinishQuery.push((data)=> {handleRankingData(data);queryData(data);drawUserList();});
-        // queryLayout().then(()=>timelineControl.play.bind(timelineControl)());
-    }else{
-        // request.setInterval(1000);
-        request.onFinishQuery.push(queryData);
-        request.onDataChange.push((data)=> queryLayout().then(()=>{
+
+        // request.onFinishQuery.push(queryData);
+        request.onDataChange.push((data)=> {
             updateProcess({percentage:50,text:'Preprocess data'})
             setTimeout(()=>{
                 handleRankingData(data);
@@ -108,7 +121,5 @@ function initTimeElement(){
                 // timelineControl.play.bind(timelineControl)();
                 updateProcess();
             },0);
-        }));
-    }
-    // request.onDataChange.push((data)=> queryLayout().then(()=>handleRankingData(data)).then(drawUserList).then(()=>timelineControl.play.bind(timelineControl)()));
+        });
 }

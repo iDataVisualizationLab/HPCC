@@ -1,5 +1,7 @@
 var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},
     offset: {top: 0}};
+var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
+    offset: {top: 0}};
 let TimeArcSetting = function (){
     let graphicopt = {
         contain: '#Chartcontent',
@@ -23,6 +25,9 @@ let TimeArcSetting = function (){
         display: {
             links: {
                 'stroke-opacity': 0.5
+            },
+            stream:{
+                yScale: d3.scaleLinear().range([0,15])
             }
         }
     };
@@ -84,6 +89,7 @@ let TimeArcSetting = function (){
 
     master.draw = function () {
         if (isFirst) {
+            debugger
             master.init();
             isFirst = false;
         }
@@ -100,6 +106,7 @@ let TimeArcSetting = function (){
                     graphicopt[i] = __[i];
                 }
             }
+            contain = d3.select(graphicopt.contain);
             TimeArc.graphicopt(graphicopt);
             return master;
         }else {
@@ -135,9 +142,7 @@ let TimeArcSetting = function (){
     };
     return master;
 };
-    function handle_data_timeArc () {
-    debugger
-    const graphicopt = subObject.graphicopt();
+function handle_data_timeArc () {
     const keys = Layout.timespan//.slice(0,10);
     let scheme ={limitColums : [0,10],
         limitTime : [keys[0],keys[keys.length-1]],
@@ -155,14 +160,14 @@ let TimeArcSetting = function (){
     keys.forEach((k,ki)=>{
         data.forEach(d=>{
             if (d[k]){
-                const category = {user:{}};
-                d[k].forEach(e=>category.user[e.key]=e.value);
+                const category = {compute:{}};
+                d[k].forEach(e=>category.compute[e.key]=e.value);
                 const value = d[k].total;
                 const date = k;
                 scheme.data.push({
                     category,
                     date,
-                    id: d3.keys(category.user).join('_'),
+                    id: d3.keys(category.compute).join('_'),
                     value,
                     data:d[k],
                 });
@@ -170,9 +175,50 @@ let TimeArcSetting = function (){
         })
     });
 
-    scheme.data.tsnedata = {};
+    scheme.data.timespan = keys;
+    scheme.data.tsnedata = tsnedata;
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
     subObject.graphicopt(timeArcopt).scheme(scheme).draw();
+}
+function handle_data_timeArc_job () {
+    const keys = Layout.timespan//.slice(0,10);
+    let scheme ={limitColums : [0,10],
+        limitTime : [keys[0],keys[keys.length-1]],
+        time: {rate:5,unit:'Minute'},
+        // timeLink: {rate:5,unit:'Minute'},
+        timeformat: d3.timeDay.every(1),
+    };
+    let dataObj = {};
+    scheme.data=[];
+    scheme.data.timespan = keys;
+
+    let data = Layout.jobTimeline;
+    debugger
+    scheme.data = [];
+    keys.forEach((k,ki)=>{
+        data.forEach(d=>{
+            if (d[k]){
+                const category = {compute:{}};
+                d[k].forEach(e=>category.compute[e.key]=e.value);
+                const value = d[k].total;
+                const date = k;
+                scheme.data.push({
+                    category,
+                    date,
+                    id: d3.keys(category.compute).join('_'),
+                    value,
+                    data:d[k],
+                });
+            }
+        })
+    });
+
+    scheme.data.timespan = keys;
+    scheme.data.tsnedata = Layout.jobarrdata;
+    scheme.data.selectedService = 0;
+    // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
+    // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
+    jobObject.graphicopt(timeArJobcopt).scheme(scheme).draw();
 }

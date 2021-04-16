@@ -146,19 +146,8 @@ function queryData(data) {
     Layout.jobs = jobs;
     Layout.jobByNames = jobByNames;
     Layout.computers_old = computers;
-    // if (vizservice.length&&vizservice[serviceSelected].text==='Radar' && group_opt.recall){
-    //     group_opt.recall()
-    //     cluster_map(cluster_info);
-    //     handle_clusterinfo();
-    //     Layout.tree.children.forEach(d=>{
-    //         d.children.forEach(e=>{
-    //             getCluster(e);
-    //         })
-    //     });
-    // }
+
     currentDraw = ()=>{
-        // drawObject.draw();
-        // userPie.data(Layout.users).draw();
         d3.select('#RankingList tbody').selectAll('tr')
             .data(Layout.snapshot.filter(d=>d.highlight).sort((a,b)=>Math.abs(_.last(b.stackdelta))-Math.abs(_.last(a.stackdelta))).map(d=>[d.key,d.value,d.stackdelta.map(e=>`<span class="${e>0?'upsymbol':(e===0?'equalsymbol':'downsymbol')}"></span>`).join(''),`${_.last(d.stackdelta)>0?'+':''}${_.last(d.stackdelta)}`]),d=>d[0])
             .join('tr').selectAll('td')
@@ -197,14 +186,58 @@ function createdata(){
  };
 handleDataComputeByUser.mode = 'core';
 
-function handleDataComputeByUser_core(computers,jobs){
+// function handleDataComputeByUser_core(computers,jobs){
+//     let data = [];
+//     for (let comp in computers){
+//         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+//         computers[comp].job_id.forEach((jIDs,i)=>{
+//             if (jIDs.length){
+//                 let jobArr = jIDs.map(j=>jobs[j]);
+//                 let username = d3.nest().key(d=>d.user_name)
+//                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
+//                 username.total = d3.sum(username,e=>e.value)
+//                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
+//             }else
+//                 item.values.push(null);
+//             item[Layout.timespan[i]] = item.values[i];
+//         });
+//         data.push(item);
+//     }
+//     data.sort((a,b)=>+a.range[0]-b.range[0])
+//     return data;
+// }
+function handleDataComputeByJob({computers,jobs:_jobs}){
+    const jobs = {};
+    Layout.jobarrdata = {};
+    Object.keys(_jobs).forEach(k=>{
+        // if (_jobs[k].total_nodes>1){
+            jobs[k] = _jobs[k];
+            Layout.jobarrdata[k] = [];
+        // }
+    });
+
     let data = [];
     for (let comp in computers){
         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
+        let job = {};
         computers[comp].job_id.forEach((jIDs,i)=>{
-            if (jIDs.length){
-                let jobArr = jIDs.map(j=>jobs[j]);
-                let username = d3.nest().key(d=>d.user_name)
+            let jobArr = jIDs.map(j=>jobs[j]).filter(d=>{
+                if (d){
+                    if (!Layout.jobarrdata[d.job_name][i])
+                        Layout.jobarrdata[d.job_name][i]=[];
+                    Layout.jobarrdata[d.job_name][i].push(tsnedata[comp][i]);
+                    return true;
+                }
+                return false
+            });
+            const key = jobArr.map(d=>d.job_name);
+            if (!job[key])
+                job[key]=true;
+            else
+                jobArr=[];
+
+            if (jobArr.length){
+                let username = d3.nest().key(d=>d.job_name)
                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
                 username.total = d3.sum(username,e=>e.value)
                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
@@ -214,7 +247,80 @@ function handleDataComputeByUser_core(computers,jobs){
         });
         data.push(item);
     }
+    debugger
+    Object.keys(Layout.jobarrdata).forEach(k=>{
+        Layout.jobarrdata[k].forEach((d,i)=>{
+            const timestep = Layout.jobarrdata[k][i][0].timestep;
+            let value = Layout.jobarrdata[k][i][0].map((d,si)=>{
+                return  d3.mean(Layout.jobarrdata[k][i],d=>d[si]);
+            });
+            value.name = k;
+            value.timestep = timestep;
+            Layout.jobarrdata[k][i] = value;
+        })
+    })
+
     data.sort((a,b)=>+a.range[0]-b.range[0])
+    return data;
+}
+// function handleDataComputeByUser_core(computers,jobs){
+//    // full
+//     debugger
+//     let data = [];
+//     let obj = {};
+//     for (let j in jobs){
+//         obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j]};
+//         data.push(obj[j]);
+//     }
+//     for (let comp in computers){
+//         computers[comp].job_id.forEach((jIDs,i)=>{
+//             if (jIDs.length){
+//                 jIDs.forEach(j=>{
+//                     let item = obj[j];
+//                     if (!item.values[i]) {
+//                         item.values[i] = [];
+//                         item.values[i].total = 0;
+//                     }
+//                     item.values[i].push({key:comp,value:jobs[j].node_list_obj[comp]});
+//                     item.values[i].total += jobs[j].node_list_obj[comp];
+//                     item[Layout.timespan[i]] = item.values[i];
+//                 });
+//             }
+//         });
+//     }
+//     // data.sort((a,b)=>+a.range[0]-b.range[0])
+//     return data;
+// }
+function handleDataComputeByUser_core(computers,jobs){
+    //start
+    debugger
+    let data = [];
+    let obj = {};
+    for (let j in jobs){
+        obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j]};
+        data.push(obj[j]);
+    }
+    for (let comp in computers){
+        let jonj = {}
+        computers[comp].job_id.forEach((jIDs,i)=>{
+            if (jIDs.length){
+                jIDs.forEach(j=>{
+                    if (!jonj[j]){
+                        let item = obj[j];
+                        if (!item.values[i]) {
+                            item.values[i] = [];
+                            item.values[i].total = 0;
+                        }
+                        item.values[i].push({key:comp,value:jobs[j].node_list_obj[comp]});
+                        item.values[i].total += jobs[j].node_list_obj[comp];
+                        item[Layout.timespan[i]] = item.values[i];
+                        jonj[j]=true;
+                    }
+                });
+            }
+        });
+    }
+    // data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
 function handleDataComputeByUser_compute(computers,jobs){
@@ -239,7 +345,9 @@ function handleDataComputeByUser_compute(computers,jobs){
 }
 function handleRankingData(data){
     console.time('handleRankingData');
-    let sampleS = handleSmalldata(data);
+    let r = handleSmalldata(data);
+    let sampleS = r.sampleh;
+    tsnedata = r.tsnedata;
     let {computers,jobs,users,jobByNames} = handleData(data);
     Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]];
     Layout.jobsStatic = jobs;
@@ -277,5 +385,6 @@ function handleRankingData(data){
 
     handleDataComputeByUser.data = {computers,jobs};
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
+    Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
     console.timeEnd('handleRankingData');
 }

@@ -236,6 +236,12 @@ function getUsers(_data){
 }
 function handleRankingData(data){
     console.time('handleRankingData');
+    debugger
+    data.time_stamp = data.time_stamp.slice(0,50);
+    const _nodes_info = data.nodes_info;
+    data.nodes_info = {};
+    Object.keys(_nodes_info).slice(0,20).forEach(j=>data.nodes_info[j]=_nodes_info[j]);
+
     Layout.usersStatic = getUsers(data);
     Layout.timespan = data.time_stamp;
 

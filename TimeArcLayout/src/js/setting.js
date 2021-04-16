@@ -1,5 +1,5 @@
 serviceFullList = [{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]},{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]},{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]},{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]
-serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPower_usage", "arrJob_scheduling"];
+serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPower_usage"];
 var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]}]},{"text":"Memory_usage","id":1,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]}]},{"text":"Fans_speed","id":2,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]}]},{"text":"Power_consum","id":3,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]}];
 var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
 var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
@@ -69,7 +69,7 @@ function handleDataUrl(dataRaw) {
 
     var sampleh = {};
     var ser = serviceListattr.slice();
-    ser.pop();
+    // ser.pop();
     let tsnedata = {};
     let data = dataRaw.nodes_info;
     sampleh.timespan = time_stamp.map(d=>d*1000);
@@ -114,12 +114,14 @@ function handleSmalldata(dataRaw){
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
     let time_stamp = dataRaw.time_stamp.map(d=>d>9999999999999?(d/1000000):d)
     let sampleh = {};
+
     var ser = serviceListattr.slice();
-    ser.pop();
     sampleh.timespan = time_stamp.map(d=>d);
+    let tsnedata = {};
     let data = dataRaw.nodes_info;
     hosts.forEach(h => {
         sampleh[h.name] = {};
+        tsnedata[h.name] = [];
         ser.forEach(s => sampleh[h.name][s] = []);
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
@@ -133,10 +135,16 @@ function handleSmalldata(dataRaw){
                 }
                 let arrID = serviceListattr[si];
                 sampleh[h.name][arrID][ti] = value;
+                if (tsnedata[h.name][ti]===undefined){
+                    tsnedata[h.name][ti] = [];
+                    tsnedata[h.name][ti].name = h.name;
+                    tsnedata[h.name][ti].timestep =ti;
+                }
+                value.forEach(v=>tsnedata[h.name][ti].push(v === null ? 0 : scaleService[si](v) || 0))
             })
         })
     });
-    return sampleh;
+    return {sampleh,tsnedata};
 }
 function handleAllData(dataRaw){
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
@@ -157,7 +165,7 @@ function handleAllData(dataRaw){
     let time_stamp = dataRaw.time_stamp.map(d=>d/1000000);
     let sampleh = {};
     var ser = serviceListattr.slice();
-    ser.pop();
+    // ser.pop();
     sampleh.timespan = time_stamp.map(d=>d*1000);
     let data = dataRaw.nodes_info;
     hosts.forEach(h => {

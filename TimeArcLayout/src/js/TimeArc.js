@@ -109,7 +109,7 @@ d3.TimeArc = function () {
     var coordinate = [0, 0];
     var XGAP_ = 12; // gap between months on xAxis
 
-    let minYdis = 12;
+    let minYdis = 10;
 
     let mouseover_dispath = ()=>{};
     let mouseout_dispath = ()=>{};
@@ -240,7 +240,7 @@ d3.TimeArc = function () {
             return d.yNode + yScale(d.value);
         }).defined(d=>d.value!==null);
     var area_compute = d3.area()
-        .curve(d3.curveCatmullRomOpen)
+        .curve(d3.curveCatmullRom)
         .x(function (d) {
             return xStep + xScale(d.monthId);
         })
@@ -369,7 +369,6 @@ d3.TimeArc = function () {
             }
 
         });
-        debugger
         data = arr;
         console.log("DONE reading the input file = " + data.length);
     }
@@ -444,7 +443,6 @@ d3.TimeArc = function () {
     }
 
     function readTermsAndRelationships() {
-        debugger
         data2 = data.filter(function (d, i) {
             if (!searchTerm || searchTerm == "") {
                 return d;
@@ -751,97 +749,113 @@ d3.TimeArc = function () {
         // compute the monthly data
         termMaxMax2 = 0;
 
+        // for (var i = 0; i < numNode; i++) {
+        //     nodes[i].monthly = [];
+        //     // if (!data.tsnedata[nodes[i].name]){
+        //         let finishStep = 0;
+        //         let startStep = 0;
+        //         let isStart = false;
+        //         let current = 0;
+        //         for (var m = 0; m < totalTimeSteps; m++) {
+        //
+        //             if (terms[nodes[i].name][m]!==undefined) {
+        //                 if(!isStart)
+        //                     startStep = m;
+        //                 isStart = true;
+        //                 var mon = new Object();
+        //                 mon.value = terms[nodes[i].name][m];
+        //                 current = mon.value;
+        //                 if (mon.value > termMaxMax2)
+        //                     termMaxMax2 = mon.value;
+        //                 mon.monthId = m;
+        //                 mon.yNode = nodes[i].y;
+        //                 nodes[i].monthly.push(mon);
+        //                 finishStep= m;
+        //             }else if(isStart) {
+        //                 var mon = new Object();
+        //                 mon.value = null//current;
+        //                 mon.monthId = m;
+        //                 mon.yNode = nodes[i].y;
+        //                 nodes[i].monthly.push(mon);
+        //             }
+        //         }
+        //         nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
+        //         // Add another item to first
+        //         if (nodes[i].monthly.length > 0) {
+        //             var firstObj = nodes[i].monthly[0];
+        //             if (firstObj.monthId > 0) {
+        //                 var mon = new Object();
+        //                 mon.value = 0;
+        //                 mon.monthId = firstObj.monthId - 1;
+        //                 mon.yNode = firstObj.yNode;
+        //                 nodes[i].monthly.unshift(mon);
+        //             }
+        //
+        //             // Add another item
+        //             var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
+        //             if (lastObj.monthId < totalTimeSteps - 1) {
+        //                 var mon = new Object();
+        //                 mon.value = 0;
+        //                 mon.monthId = lastObj.monthId + 1;
+        //                 mon.yNode = lastObj.yNode;
+        //                 nodes[i].monthly.push(mon);
+        //             }
+        //         }
+        //         nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}];
+        //     // }
+        // }
+
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
-            if(nodes[i].name==='user8')
-                debugger
-            // if (!data.tsnedata[nodes[i].name]){
-                let finishStep = 0;
-                let startStep = 0;
-                let isStart = false;
-                let current = 0;
-                for (var m = 0; m < totalTimeSteps; m++) {
-
-                    if (terms[nodes[i].name][m]!==undefined) {
-                        if(!isStart)
-                            startStep = m;
-                        isStart = true;
-                        var mon = new Object();
-                        mon.value = terms[nodes[i].name][m];
-                        current = mon.value;
-                        if (mon.value > termMaxMax2)
-                            termMaxMax2 = mon.value;
-                        mon.monthId = m;
-                        mon.yNode = nodes[i].y;
-                        nodes[i].monthly.push(mon);
-                        finishStep= m;
-                    }else if(isStart) {
-                        var mon = new Object();
-                        mon.value = null//current;
-                        mon.monthId = m;
-                        mon.yNode = nodes[i].y;
-                        nodes[i].monthly.push(mon);
-                    }
-                }
-                nodes[i].monthly = nodes[i].monthly.slice(0,finishStep-startStep+1);
+            if (data.tsnedata[nodes[i].name]){
+                const selected = data.selectedService;
+                data.tsnedata[nodes[i].name].forEach((d,ti)=>{
+                    var mon = new Object();
+                    // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
+                    // mon.value = [0, (d[selected]-0.75)].sort((a,b)=>a-b);
+                    mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
+                    debugger
+                    // mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
+                    mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
+                    mon.yNode = nodes[i].y;
+                    nodes[i].monthly.push(mon);
+                });
                 // Add another item to first
                 if (nodes[i].monthly.length > 0) {
-                    var firstObj = nodes[i].monthly[0];
-                    if (firstObj.monthId > 0) {
-                        var mon = new Object();
-                        mon.value = 0;
-                        mon.monthId = firstObj.monthId - 1;
-                        mon.yNode = firstObj.yNode;
-                        nodes[i].monthly.unshift(mon);
-                    }
-
+                   debugger
                     // Add another item
                     var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
                     if (lastObj.monthId < totalTimeSteps - 1) {
                         var mon = new Object();
-                        mon.value = 0;
+                        mon.value = lastObj.value;
                         mon.monthId = lastObj.monthId + 1;
                         mon.yNode = lastObj.yNode;
                         nodes[i].monthly.push(mon);
                     }
                 }
-                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly}];
-            // }
+                nodes[i].noneSymetric = true;
+                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly.map(d=>{
+                    if(d.value[1]>0){
+                        d.value[1] = d.value[1]*10;
+                        return d;
+                    }
+                    const mon = new Object();
+                        mon.value = [0, 0];
+                        mon.monthId = d.monthId;
+                        mon.yNode = d.y;
+                    return mon;
+                }),color:"rgb(252, 141, 89)"},
+                    {node:nodes[i],value:nodes[i].monthly.map(d=>{
+                            if(d.value[0]<0)
+                                return d;
+                            const mon = new Object();
+                            mon.value = [0, 0];
+                            mon.monthId = d.monthId;
+                            mon.yNode = d.y;
+                            return mon;
+                        }),color:"steelblue"}];
+            }
         }
-
-
-        // for (var i = 0; i < numNode; i++) {
-        //     if (data.tsnedata[nodes[i].name]){
-        //         const selected = data.selectedService;
-        //         data.tsnedata[nodes[i].name].forEach(d=>{
-        //             var mon = new Object();
-        //             // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
-        //             mon.value = [0, (d[selected]-0.6)*termMaxMax2/0.4].sort((a,b)=>a-b);
-        //             mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
-        //             mon.yNode = nodes[i].y;
-        //             nodes[i].monthly.push(mon);
-        //         })
-        //         nodes[i].noneSymetric = true;
-        //         nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly.map(d=>{
-        //             if(d.value[1]>0)
-        //                 return d;
-        //             const mon = new Object();
-        //                 mon.value = [0, 0];
-        //                 mon.monthId = d.monthId;
-        //                 mon.yNode = d.y;
-        //             return mon;
-        //         }),color:"rgb(252, 141, 89)"},
-        //             {node:nodes[i],value:nodes[i].monthly.map(d=>{
-        //                     if(d.value[0]<0)
-        //                         return d;
-        //                     const mon = new Object();
-        //                     mon.value = [0, 0];
-        //                     mon.monthId = d.monthId;
-        //                     mon.yNode = d.y;
-        //                     return mon;
-        //                 }),color:"steelblue"}];
-        //     }
-        // }
         debugger
         // Construct an array of only parent nodes
         pNodes = new Array(numNode); //nodes;
@@ -1052,6 +1066,7 @@ d3.TimeArc = function () {
             // .attr("font-size", function (d) {
             //     return d.isSearchTerm ? "12px" : "11px";
             // })
+            .attr("font-size", '10px')
             .text(function (d) {
                 return d.name
             });
@@ -1366,8 +1381,9 @@ d3.TimeArc = function () {
             for (var i = 0; i < d.value.length; i++) {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
-            if (d.node.noneSymetric)
+            if (d.node.noneSymetric){
                 return area_compute(d.value);
+            }
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });
     }

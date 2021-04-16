@@ -27,12 +27,12 @@ class Simulation {
                }else if (!this.userReverseDict[data.jobs_info[jID].user_name]){
                          data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
                }
-                    data.jobs_info[jID].node_list_obj = {};
-                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>{
-                        let split = c.split('-');
-                        data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
-                        return split[0];
-                    });
+                    // data.jobs_info[jID].node_list_obj = {};
+                    // data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>{
+                    //     let split = c.split('-');
+                    //     data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
+                    //     return split[0];
+                    // });
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
