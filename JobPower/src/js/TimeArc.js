@@ -450,7 +450,7 @@ d3.TimeArc = function () {
             else if (d.__terms__[searchTerm]||runopt.stickyTerms.find(e=>d.__terms__[e]))
                 return d;
         });
-
+        debugger
         var selected = {};
         if (searchTerm && searchTerm != "") {
             data2.forEach(function (d) {

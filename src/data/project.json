@@ -373,11 +373,11 @@
     ]
   },
   "TimeArc": {
-    "title": "TimeArc",
+    "title": "JobPower",
     "thumb": "TimeArc.png",
-    "url": "https://idatavisualizationlab.github.io/HPCC/TimeArcLayout/index.html",
+    "url": "https://idatavisualizationlab.github.io/HPCC/JobPower/index.html",
     "tags": [
-      "TimeArc","slurm"
+      "TimeArcs","slurm"
     ],
     "pros": [
       "Jobs, and Computes relationship"
@@ -386,7 +386,7 @@
       "Complex view"
     ],
     "types": [
-      "TimeArc"
+      "TimeArcs"
     ]
   }
 }

@@ -457,6 +457,10 @@ function drawJobList(){
     const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value[_jobValueType]-a.value[_jobValueType]);
     let data = _data;
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    d3.select('#JobListFilter').on('click',()=>{
+        drawJobList();
+        jobObject.draw();
+    });
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
     }else{
@@ -493,6 +497,7 @@ function drawJobList(){
     // subObject.mouseoutAdd('userlist',function(d){
     //     job_info.classed('highlight',false);
     // });
+    jobObject.filterTerms(data.map(d=>d.key));
 }
 function getColorGant(){
 

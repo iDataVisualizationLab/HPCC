@@ -31,7 +31,7 @@ let TimeArcSetting = function (){
             }
         }
     };
-    let scheme={};
+    let scheme={},stickyTerms=[];
     let contain = d3.select(graphicopt.contain);
     let master = {};
     let TimeArc  = d3.TimeArc();
@@ -93,11 +93,17 @@ let TimeArcSetting = function (){
             master.init();
             isFirst = false;
         }
-
+        scheme.stickyTerms = stickyTerms
         TimeArc.runopt(scheme).data(scheme.data).draw();
 
         updateProcess();
     };
+
+    master.filterTerms = function(_) {
+        stickyTerms = _??[];
+        return master
+    };
+
     master.graphicopt = function (__) {
         //Put all of the options into a variable called graphicopt
         if (arguments.length) {
