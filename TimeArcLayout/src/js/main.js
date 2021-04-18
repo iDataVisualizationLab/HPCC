@@ -117,8 +117,8 @@ function initTimeElement(){
                 updateProcess({percentage:80,text:'Preprocess data'})
                 drawUserList();
                 drawJobList();
-                // initdrawGantt();
-                // drawGantt();
+                initdrawGantt();
+                drawGantt();
                 // timelineControl.play.bind(timelineControl)();
                 updateProcess();
             },0);

@@ -374,7 +374,7 @@
   },
   "TimeArc": {
     "title": "TimeArc",
-    "thumb": "TimeArc.PNG",
+    "thumb": "TimeArc.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/TimeArcLayout/index.html",
     "tags": [
       "TimeArc","slurm"
