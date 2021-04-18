@@ -451,6 +451,49 @@ function drawUserList(){
         user_info.classed('highlight',false);
     });
 }
+function drawJobList(){
+    const _jobValueType= $(d3.select('#jobValueType').node()).val();
+    const _jobFilterType= $(d3.select('#jobFilterType').node()).val();
+    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value[_jobValueType]-a.value[_jobValueType]);
+    let data = _data;
+    const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    if (_jobFilterType==='top'){
+        data = _data.slice(0,_JobFilterThreshold);
+    }else{
+        data = _data.filter(d=>d.value[_jobValueType]>_JobFilterThreshold)
+    }
+    d3.select('#currentJobNum').text(data.length);
+    d3.select('#jobNumTotal').text(_data.length);
+
+    let job_info = d3.select('#JobList table tbody')
+        .selectAll('tr').data(data)
+        .join('tr')
+        // .on('mouseover',function(d){
+        //     if(!subObject.isFreeze()){
+        //         d3.select(this).classed('highlight',true);
+        //         subObject.highlight([d.key])
+        //     }
+        // }).on('mouseout',function(d){
+        //     if(!subObject.isFreeze()){
+        //         d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
+        //         subObject.releasehighlight();
+        //     }
+        // }).on('click',function(d){
+        //     subObject.freezeHandle.bind(this)();
+        // });
+    job_info
+        .selectAll('td').data(d=>[{key:'jobid',value:d.key},{key:'averagePower',value:Math.round(d.value[_jobValueType]*800*100)/100},{key:'compute',value:d.value.total_nodes},{key:'core',value:d.value.cpu_cores}])
+        .join('td')
+        .style('text-align',d=>(d.key==='averagePower'||d.key==='compute'||d.key==='core')?'end':null)
+        // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
+        .text(d=>d.value);
+    // subObject.mouseoverAdd('userlist',function(d){
+    //     job_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
+    // });
+    // subObject.mouseoutAdd('userlist',function(d){
+    //     job_info.classed('highlight',false);
+    // });
+}
 function getColorGant(){
 
     let colorGantt =d3.scaleSequential()

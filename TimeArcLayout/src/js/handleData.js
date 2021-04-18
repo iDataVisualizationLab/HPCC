@@ -386,5 +386,14 @@ function handleRankingData(data){
     handleDataComputeByUser.data = {computers,jobs};
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
+
+    Object.values(Layout.jobsStatic).forEach(d=>{
+        d.mean = Layout.jobarrdata[d.job_name]?d3.mean(Layout.jobarrdata[d.job_name],d=>d?d[0]:undefined):null;
+        d.range = Layout.jobarrdata[d.job_name]?d3.extent(Layout.jobarrdata[d.job_name],d=>d?d[0]:undefined):[null,null];
+        d.min = d.range[0];
+        d.max = d.range[1];
+    });
+
+
     console.timeEnd('handleRankingData');
 }

@@ -371,5 +371,22 @@
     "types": [
       "Parallel Coordinate","Network"
     ]
+  },
+  "TimeArc": {
+    "title": "TimeArc",
+    "thumb": "TimeArc.PNG",
+    "url": "https://idatavisualizationlab.github.io/HPCC/TimeArcLayout/index.html",
+    "tags": [
+      "TimeArc","slurm"
+    ],
+    "pros": [
+      "Jobs, and Computes relationship"
+    ],
+    "cons": [
+      "Complex view"
+    ],
+    "types": [
+      "TimeArc"
+    ]
   }
 }
