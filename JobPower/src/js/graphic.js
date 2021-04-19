@@ -459,6 +459,8 @@ function drawJobList(){
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     d3.select('#JobListFilter').on('click',()=>{
         drawJobList();
+        subObject._filter = subObject.filterTerms();
+        jobObject.selectedComp = jobObject.filterTerms();
         jobObject.draw();
         subObject.draw();
     });
