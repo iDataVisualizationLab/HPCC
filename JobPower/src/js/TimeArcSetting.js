@@ -1,7 +1,7 @@
 var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},
     offset: {top: 0}};
 var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
-    containHolder:'chart__job_holder',
+    containHolder:'#chart__job_holder',
     offset: {top: 0}};
 let TimeArcSetting = function (){
     let graphicopt = {

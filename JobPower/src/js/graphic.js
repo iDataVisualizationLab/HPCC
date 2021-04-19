@@ -460,6 +460,7 @@ function drawJobList(){
     d3.select('#JobListFilter').on('click',()=>{
         drawJobList();
         jobObject.draw();
+        subObject.draw();
     });
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
@@ -497,7 +498,15 @@ function drawJobList(){
     // subObject.mouseoutAdd('userlist',function(d){
     //     job_info.classed('highlight',false);
     // });
-    jobObject.filterTerms(data.map(d=>d.key));
+    const jobList = [];
+    const compObj = {};
+    data.forEach(d=>{
+       jobList.push(d=>d.key);
+        d.value.node_list.forEach(c=>compObj[c]=true);
+    });
+    const compList = Object.keys(compObj);
+    jobObject.filterTerms(jobList);
+    subObject.filterTerms(compList)
 }
 function getColorGant(){
 
