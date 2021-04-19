@@ -96,7 +96,7 @@ d3.TimeArc = function () {
     var relationship;
     var termMaxMax, termMaxMax2;
     var terms;
-    var NodeG;
+    var nodeG;
     var xStep = 100;
 //var xScale = d3.time.scale().range([0, (width-xStep-100)/totalTimeSteps]);
     var yScale;
