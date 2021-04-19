@@ -1268,7 +1268,7 @@ d3.TimeArc = function () {
     }
 
     function mouseouted_Layer(d) {
-        if (force.alpha() === 0 && !isFreez) {
+        if (!isFreez) {
             if (force.alpha() == 0) {
                 nodeG.style("fill-opacity", 1);
                 svg.selectAll(".layer")
@@ -1764,13 +1764,13 @@ d3.TimeArc = function () {
             .attr("width", XGAP_* listX.length)
             .attr("height", 25)
             .on("mouseout", function(){
-                isLensing = false;
+                // isLensing = false;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0]-xStep)/XGAP_);
                 updateTransition(250);
             })
             .on("mousemove", function(){
-                isLensing = true;
+                // isLensing = true;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0]-xStep)/XGAP_);
                 updateTransition(250);
