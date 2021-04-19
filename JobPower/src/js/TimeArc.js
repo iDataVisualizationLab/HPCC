@@ -1304,7 +1304,7 @@ d3.TimeArc = function () {
         if(searchTerm==='')
             valueSlider = 10;
         slider.call(brush.move, [0, valueSlider].map(xScaleSlider));
-        svg.select('.sliderText').html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> CPU score(s)`);
+        svg.select('.sliderText').html(`${graphicopt.preLinkText}  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> ${graphicopt.postLinkText}`);
         recompute();
     }
 
@@ -2145,7 +2145,7 @@ d3.TimeArc = function () {
             .attr('dy','0.8em');
 
         grang.select("text.sliderText")
-            .html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
+            .html(`${graphicopt.preLinkText}  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> ${graphicopt.postLinkText}`);
 
 
 
@@ -2165,7 +2165,7 @@ d3.TimeArc = function () {
             valueSlider = d3.max(d3.event.selection.map(xScaleSlider.invert));
             valueSlider = Math.min(valueSlider, valueMax);
             handle.attr("cx", xScaleSlider(valueSlider));
-            svg.select('.sliderText').html(`User dispatch  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> job(s)`);
+            svg.select('.sliderText').html(`${graphicopt.preLinkText}  ${'\u2265'} <tspan> ${Math.round(valueSlider)} </tspan> ${graphicopt.postLinkText}`);
             d3.select(this).call(d3.event.target.move, [0,valueSlider].map(xScaleSlider));
         }
     }
