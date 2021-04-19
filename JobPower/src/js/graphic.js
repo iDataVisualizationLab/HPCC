@@ -462,10 +462,15 @@ function drawJobList(){
         jobObject.draw();
         subObject.draw();
     });
+    d3.select('#jobValueType').on('change',()=>{
+        drawJobList();
+        jobObject.draw();
+        subObject.draw();
+    });
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
     }else{
-        data = _data.filter(d=>d.value[_jobValueType]>_JobFilterThreshold)
+        data = _data.filter(d=>d.value[_jobValueType]>=_JobFilterThreshold)
     }
     d3.select('#currentJobNum').text(data.length);
     d3.select('#jobNumTotal').text(_data.length);
@@ -501,7 +506,7 @@ function drawJobList(){
     const jobList = [];
     const compObj = {};
     data.forEach(d=>{
-       jobList.push(d=>d.key);
+       jobList.push(d.key);
         d.value.node_list.forEach(c=>compObj[c]=true);
     });
     const compList = Object.keys(compObj);
@@ -541,4 +546,19 @@ function drawGantt(){
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
 let subObject = new TimeArcSetting();
-let jobObject = new TimeArcSetting().graphicopt(timeArJobcopt);
+let jobObject = new TimeArcSetting().onmouseOver((d)=>{
+    const comp = {};
+    d[1].forEach(e=>Layout.jobsStatic[e.text].node_list.forEach(c=>comp[c]=true));
+    jobObject.selectedComp = Object.keys(comp);
+}).onmouseLeave((d)=>{
+    jobObject.selectedComp = [];
+}).onmouseClick((isClick)=>{
+    let data = jobObject.selectedComp;
+    if (isClick){
+        subObject._filter = subObject.filterTerms().slice();
+    }else{
+        data = subObject._filter;
+    }
+    subObject.filterTerms(data).draw();
+})
+    .graphicopt(timeArJobcopt);

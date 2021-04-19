@@ -115,6 +115,7 @@ d3.TimeArc = function () {
 
     let mouseover_dispath = ()=>{};
     let mouseout_dispath = ()=>{};
+    let mouseclick_dispath = ()=>{};
     // let mouseover_dispath = ()=>{};
     // let mouseout_dispath = ()=>{};
 
@@ -510,7 +511,7 @@ d3.TimeArc = function () {
                 e.isSearchTerm = 1;
             }
 
-            else if (searchTerm && searchTerm != "" && selected[e.term] && selected[e.term].isSelected) {
+            else if ((Object.keys(selected).length && selected[e.term])  && selected[e.term].isSelected) {
                 e.max = 5000 + selected[e.term].isSelected;
                 //   console.log("e.term = "+e.term+" e.max =" +e.max );
             }
@@ -1102,6 +1103,7 @@ d3.TimeArc = function () {
     }
     function handleFreez(){
         isFreez = !isFreez;
+        mouseclick_dispath(isFreez);
     }
 
 
@@ -1249,7 +1251,7 @@ d3.TimeArc = function () {
     }
     let isFreez = false;
     function mouseovered_Layer(d) {
-        if (force.alpha() == 0 && !isFreez) {
+        if (force.alpha() === 0 && !isFreez) {
             nodeG.style("fill-opacity", 0.1);
             nodeG.filter(n=>n.name===d.name).style("fill-opacity", 1);
             svg.selectAll(".layer")
@@ -1266,7 +1268,7 @@ d3.TimeArc = function () {
     }
 
     function mouseouted_Layer(d) {
-        if (!isFreez) {
+        if (force.alpha() === 0 && !isFreez) {
             if (force.alpha() == 0) {
                 nodeG.style("fill-opacity", 1);
                 svg.selectAll(".layer")
@@ -1548,6 +1550,9 @@ d3.TimeArc = function () {
     };
     timeArc.mouseover = function (_) {
         return arguments.length ? (mouseover_dispath = _, timeArc) : mouseover_dispath;
+    };
+    timeArc.mouseclick = function (_) {
+        return arguments.length ? (mouseclick_dispath = _, timeArc) : mouseclick_dispath;
     };
     timeArc.mouseout = function (_) {
         return arguments.length ? (mouseout_dispath = _, timeArc) : mouseout_dispath;

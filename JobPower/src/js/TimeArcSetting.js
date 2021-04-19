@@ -40,6 +40,7 @@ let TimeArcSetting = function (){
     let isFirst = true;
     let catergogryList=[{key: 'user', value: {colororder: 0}},{key: 'compute', value: {colororder: 1}},{key: 'rack', value: {colororder: 2}}];
     let layout={};
+    let onmouseOver=()=>{},onmouseLeave=()=>{},onmouseClick=()=>{};
     master.timearc = TimeArc;
     master.reset = function(){
 
@@ -79,7 +80,8 @@ let TimeArcSetting = function (){
         TimeArc
             .svg(contain)
             .graphicopt(graphicopt)
-            // .mouseover(onmouseoverRadar).mouseout(onmouseleaveRadar)
+            .mouseover(onmouseOver).mouseout(onmouseLeave)
+            .mouseclick(onmouseClick)
             .catergogryList(catergogryList)
             .init();
 
@@ -140,6 +142,16 @@ let TimeArcSetting = function (){
     master.getColorScale = function(_data) {
         return arguments.length?(getColorScale=_data?_data:function(){return color},master):getColorScale;
     };
+    master.onmouseOver = function(_data) {
+        return arguments.length?(onmouseOver=_data,master):onmouseOver;
+    };
+    master.onmouseLeave = function(_data) {
+        return arguments.length?(onmouseLeave=_data,master):onmouseLeave;
+    };
+    master.onmouseClick = function(_data) {
+        return arguments.length?(onmouseClick=_data,master):onmouseClick;
+    };
+
     master.schema = function (){
         isNeedRender = true;
     };
