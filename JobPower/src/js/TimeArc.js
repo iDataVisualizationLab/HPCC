@@ -829,6 +829,8 @@ d3.TimeArc = function () {
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (data.tsnedata[nodes[i].name]){
+                if (nodes[i].name==="657658")
+                    debugger
                 const selected = data.selectedService;
                 data.tsnedata[nodes[i].name].forEach((d,ti)=>{
                     var mon = new Object();
@@ -846,7 +848,7 @@ d3.TimeArc = function () {
                     var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
                     if (lastObj.monthId < totalTimeSteps - 1) {
                         var mon = new Object();
-                        mon.value = lastObj.value;
+                        mon.value = lastObj.value.slice();
                         mon.monthId = lastObj.monthId + 1;
                         mon.yNode = lastObj.yNode;
                         nodes[i].monthly.push(mon);
@@ -1400,6 +1402,8 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric){
+                if (d.node.name==="657658")
+                    debugger
                 return area_compute(d.value);
             }
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
@@ -1609,7 +1613,7 @@ d3.TimeArc = function () {
         // var y2 = 34;
         // var y3 = 48;
         // var y4 = 62;
-        debugger
+
         var rr = 6;
         var yoffset = ySlider+60;
         let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
