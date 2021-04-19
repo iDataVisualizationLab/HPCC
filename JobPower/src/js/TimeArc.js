@@ -194,21 +194,21 @@ d3.TimeArc = function () {
             }
             recompute();
         });
-        d3.select('#userDisplay_control').on('change',function(){
-            d3.select(this).dispatch('changeVal');
-            handledata(data);
-            timeArc.draw();
-        }).on('changeVal',()=>{
-            runopt.userStreamMode =  $('#userDisplay_control').val();
-            switch (runopt.userStreamMode){
-                case 'job':
-                    handleInfo = handleByJob;
-                    break;
-                case 'compute':
-                    handleInfo = handleByCompute;
-                    break
-            }
-        }).dispatch('changeVal')
+        // d3.select('#userDisplay_control').on('change',function(){
+        //     d3.select(this).dispatch('changeVal');
+        //     handledata(data);
+        //     timeArc.draw();
+        // }).on('changeVal',()=>{
+        //     runopt.userStreamMode =  $('#userDisplay_control').val();
+        //     switch (runopt.userStreamMode){
+        //         case 'job':
+        //             handleInfo = handleByJob;
+        //             break;
+        //         case 'compute':
+        //             handleInfo = handleByCompute;
+        //             break
+        //     }
+        // }).dispatch('changeVal')
 //******************* Forced-directed layout
 
 //Set up the force layout
@@ -263,6 +263,8 @@ d3.TimeArc = function () {
     var nodes2List = {};
     var links2List = {};
     let summary = {user:0,compute:0,rack:0}; // todo auto detect group
+    let catergogryObject = {};
+    let catergogryList = [];
     let class2term = {};
     let term2class = {};
     function handleclassMap(classes){
@@ -294,51 +296,52 @@ d3.TimeArc = function () {
                 termMaxMax = terms[term].frequency;
         }
     }
-    let handleInfo = handleByUser;
-
-    function handleByUser(e, arr, c, m) {
-        let term = e.key;
-        arr.userdata[term].current = d3.sum(e.values.map(it => d3.sum(it.values,e=>e.value)));
-        e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = d.value)); //job
-        upadateTerms(term, c, m, arr.userdata[term].current)
-    }
-
-    function handleByJob(e, arr, c, m) {
-        let term = e.key;
-        arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
-        e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
-        upadateTerms(term, c, m, arr.userdata[term].current)
-    }
-
-    function handleByCompute(e, arr, c, m) {
-        let term = e.key;
-        arr.userdata[term].current = arr.userdata[term].current||{};
-
-        e.values.forEach(s=>{
-            if(s.key==='startTime'){
-                s.values.forEach(d=>{
-                    d.__terms__[term] = 2;
-                    Object.keys(d.category['compute']).forEach(c=>{
-                        if (!arr.userdata[term].current[c]){
-                            arr.userdata[term].current[c] = 1;
-                        }else
-                            arr.userdata[term].current[c]++;
-                    });
-                })
-            }else{
-                s.values.forEach(d=>{
-                    Object.keys(d.category['compute']).forEach(c=>{
-                        arr.userdata[term].current[c] --;
-                        if (arr.userdata[term][c]===0) // no job using this
-                            delete arr.userdata[term][c];
-                    });
-                })
-            }
-        });
-        upadateTerms(term, c, m, Object.keys(arr.userdata[term].current).length)
-    }
+    // let handleInfo = handleByUser;
+    //
+    // function handleByUser(e, arr, c, m) {
+    //     let term = e.key;
+    //     arr.userdata[term].current = d3.sum(e.values.map(it => d3.sum(it.values,e=>e.value)));
+    //     e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = d.value)); //job
+    //     upadateTerms(term, c, m, arr.userdata[term].current)
+    // }
+    //
+    // function handleByJob(e, arr, c, m) {
+    //     let term = e.key;
+    //     arr.userdata[term].current += d3.sum(e.values.map(it => (it.key === "startTime" ? 1 : -1) * it.values.length));
+    //     e.values.filter(s=>s.key==='startTime').forEach(s => s.values.forEach(d => d.__terms__[term] = 2)); //job
+    //     upadateTerms(term, c, m, arr.userdata[term].current)
+    // }
+    //
+    // function handleByCompute(e, arr, c, m) {
+    //     let term = e.key;
+    //     arr.userdata[term].current = arr.userdata[term].current||{};
+    //
+    //     e.values.forEach(s=>{
+    //         if(s.key==='startTime'){
+    //             s.values.forEach(d=>{
+    //                 d.__terms__[term] = 2;
+    //                 Object.keys(d.category['compute']).forEach(c=>{
+    //                     if (!arr.userdata[term].current[c]){
+    //                         arr.userdata[term].current[c] = 1;
+    //                     }else
+    //                         arr.userdata[term].current[c]++;
+    //                 });
+    //             })
+    //         }else{
+    //             s.values.forEach(d=>{
+    //                 Object.keys(d.category['compute']).forEach(c=>{
+    //                     arr.userdata[term].current[c] --;
+    //                     if (arr.userdata[term][c]===0) // no job using this
+    //                         delete arr.userdata[term][c];
+    //                 });
+    //             })
+    //         }
+    //     });
+    //     upadateTerms(term, c, m, Object.keys(arr.userdata[term].current).length)
+    // }
     function handledata (arr) {
         updateTimeScale();
+        Object.keys(summary).forEach(k=>summary[k]=0);
         arr.sort((a,b)=>a.date-b.date);
         terms = new Object();
         termMaxMax = 1;
@@ -356,6 +359,7 @@ d3.TimeArc = function () {
                         terms[term].frequency = 0;
                         terms[term].maxTimeIndex = -100;   // initialized negative
                         terms[term].category = c;
+                        summary[c]++;
                     }
                     if (!terms[term][m])
                         terms[term][m] = d.__terms__[term];
@@ -446,6 +450,10 @@ d3.TimeArc = function () {
     }
 
     function readTermsAndRelationships() {
+        const strickFilter = {};
+        if (runopt.filterTerm.length){
+            runopt.filterTerm.forEach(t=>strickFilter[t]={isSelected:1});
+        }
         data2 = (runopt.filterTerm.length?data.filter(d=>runopt.filterTerm.find(e=>d.__terms__[e])):data).filter(function (d, i) {
             if (!searchTerm || searchTerm == "") {
                 return d;
@@ -453,9 +461,10 @@ d3.TimeArc = function () {
             else if (d.__terms__[searchTerm]||runopt.stickyTerms.find(e=>d.__terms__[e]))
                 return d;
         });
-        debugger
+
         var selected = {};
-        if ((searchTerm && searchTerm != "")||runopt.filterTerm.length) {
+
+        if ((searchTerm && searchTerm != "")|| !runopt.filterTerm.length) {
             data2.forEach(function (d) {
                 for (var term1 in d.__terms__) {
                     if (!selected[term1])
@@ -466,6 +475,14 @@ d3.TimeArc = function () {
                         else
                             selected[term1].isSelected++;
                     }
+                }
+            });
+        }else if ((searchTerm && searchTerm != "")||runopt.filterTerm.length){
+            selected = strickFilter;
+            data2.forEach(function (d) {
+                for (var term1 in d.__terms__) {
+                    if (selected[term1])
+                        selected[term1].isSelected++;
                 }
             });
         }
@@ -715,7 +732,7 @@ d3.TimeArc = function () {
              }
 
         }
-        catergogryObject['rack'].current=Object.keys(availableRack).length;
+        // catergogryObject['rack'].current=Object.keys(availableRack).length;
         // rack calculate
         if (runopt.groupTimeLineMode==='onDisplay'){
             Object.keys(activeRack).forEach(k=>{
@@ -818,7 +835,6 @@ d3.TimeArc = function () {
                     // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
                     // mon.value = [0, (d[selected]-0.75)].sort((a,b)=>a-b);
                     mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
-                    debugger
                     // mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
                     mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
                     mon.yNode = nodes[i].y;
@@ -826,7 +842,6 @@ d3.TimeArc = function () {
                 });
                 // Add another item to first
                 if (nodes[i].monthly.length > 0) {
-                   debugger
                     // Add another item
                     var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
                     if (lastObj.monthId < totalTimeSteps - 1) {
@@ -860,7 +875,6 @@ d3.TimeArc = function () {
                         }),color:"steelblue"}];
             }
         }
-        debugger
         // Construct an array of only parent nodes
         pNodes = new Array(numNode); //nodes;
         for (var i = 0; i < numNode; i++) {
@@ -892,7 +906,6 @@ d3.TimeArc = function () {
     function computeLinks() {
         links = [];
         relationshipMaxMax2 = 1;
-        debugger
         for (var i = 0; i < numNode; i++) {
             var term1 = nodes[i].name;
             for (var j = i + 1; j < numNode; j++) {
@@ -1570,7 +1583,7 @@ d3.TimeArc = function () {
     //     return arguments.length ? (mouseout_dispath = _, timeArc) : mouseout_dispath;
     // };
     timeArc.catergogryList = function (_) {
-        return arguments.length ? (catergogryList = _,catergogryObject = {},catergogryList.forEach(c=>catergogryObject[c.key]=c.value), timeArc) : catergogryList;
+        return arguments.length ? (catergogryList = _,catergogryObject = {},summary={},catergogryList.forEach(c=>{catergogryObject[c.key]=c.value;summary[c.key]=0}), timeArc) : catergogryList;
     };
     timeArc.firstLink = function(node,nodes){return d3.min(node.childNodes.map(d=>nodes[d].month))};
     timeArc.graphicopt = function (_) {
@@ -1596,6 +1609,7 @@ d3.TimeArc = function () {
         // var y2 = 34;
         // var y3 = 48;
         // var y4 = 62;
+        debugger
         var rr = 6;
         var yoffset = ySlider+60;
         let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
@@ -1862,85 +1876,85 @@ d3.TimeArc = function () {
 
     function drawStreamLegend () {
         drawColorLegend();
-        let yoffset = ySlider+60+90;
-        let yStreamoffset = 20;
-        let xoffset = xSlider;
-        let ticknum = 3;
-        let xScale = d3.scaleLinear().domain([0,1]).range([0,widthSlider]);
-        console.log("drawStreamLegend");
-        var area_min = d3.area()
-            .curve(d3.curveCardinalOpen)
-            .x(function (d,i) {
-                return xScale(d.x);
-            })
-            .y0(function (d) {
-                return yStreamoffset - yScale(d.y);
-            })
-            .y1(function (d) {
-                return yStreamoffset + yScale(d.y);
-            });
-
-        // let measagelegendg = svg.select('g.measagelegendg');
-        // if (measagelegendg.empty()) {
-        //     measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-        //     measagelegendg
-        //         .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
-        //         .enter()
-        //         .append('text')
-        //         .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
+        // let yoffset = ySlider+60+90;
+        // let yStreamoffset = 20;
+        // let xoffset = xSlider;
+        // let ticknum = 3;
+        // let xScale = d3.scaleLinear().domain([0,1]).range([0,widthSlider]);
+        // console.log("drawStreamLegend");
+        // var area_min = d3.area()
+        //     .curve(d3.curveCardinalOpen)
+        //     .x(function (d,i) {
+        //         return xScale(d.x);
+        //     })
+        //     .y0(function (d) {
+        //         return yStreamoffset - yScale(d.y);
+        //     })
+        //     .y1(function (d) {
+        //         return yStreamoffset + yScale(d.y);
+        //     });
+        //
+        // // let measagelegendg = svg.select('g.measagelegendg');
+        // // if (measagelegendg.empty()) {
+        // //     measagelegendg = svg.append('g').attr('class', 'measagelegendg').attr('transform', `translate(${xoffset},${yoffset})`);
+        // //     measagelegendg
+        // //         .selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
+        // //         .enter()
+        // //         .append('text')
+        // //         .attr('y',(d,i)=>i*20).html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
+        // // }
+        // // measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
+        // //     .html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
+        // // yoffset += 60;
+        // let streamlegendg = svg.select('g.streamlegendg');
+        // if (streamlegendg.empty()) {
+        //     streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
+        //     streamlegendg.append('text').attr('class','legendText')
         // }
-        // measagelegendg.selectAll('text').data(Object.keys(summary).map(k=>({current:nodes[k+'Num'],type:k+'s',total:summary[k]})))
-        //     .html(d=>`<tspan>${d.current}</tspan>/${d.total} ${d.type}`);
-        // yoffset += 60;
-        let streamlegendg = svg.select('g.streamlegendg');
-        if (streamlegendg.empty()) {
-            streamlegendg = svg.append('g').attr('class', 'streamlegendg').attr('transform', `translate(${xoffset},${yoffset})`);
-            streamlegendg.append('text').attr('class','legendText')
-        }
-        streamlegendg.select('text.legendText').text(`User stream height (by # ${runopt.userStreamMode}):`);
-        let streampath = streamlegendg.select('path.pathlegend');
-        if (streampath.empty())
-            streampath = streamlegendg.append('path')
-                .attr('class','pathlegend');
-
-        // let subscale = yScale.copy().domain([0,ticknum/2]).range(yScale.domain().map((d,i)=>i?d/2:d));
-        let subscale = yScale.copy().domain([0,2]).range(yScale.domain().map((d,i)=>i?d/2:d));
-        let streamdata = [{x:0,y:0}];
-
-        d3.range(1,ticknum*4+2).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
-
-        streamdata.push({x:1,y:0});
-        streampath.datum(streamdata).attr('d',area_min).style('fill',colorCatergory('user'));
-
-        let lineold = streamlegendg.selectAll('line.arrow').data(streamdata.filter(d=>d.tick));
-        lineold.exit().remove();
-        lineold.enter().append('line').attr('class','arrow')
-            .merge(lineold)
-            .attrs({
-                "marker-start":"url(#arrowHeadstart)",
-                "marker-end":"url(#arrowHeadend)",
-                "x1":d=>xScale(d.x),
-                "y1":d=>yStreamoffset - yScale(d.y)+2,
-                "x2":d=>xScale(d.x),
-                "y2":d=>yStreamoffset +yScale(d.y)-2
-            }).styles({
-            'stroke-width':1,
-            'stroke': '#000'
-        });
-        let textold =streamlegendg.selectAll('text.tick').data(streamdata.filter(d=>d.tick));
-        textold.exit().remove();
-        textold.enter().append('text').attr('class','tick')
-            .merge(textold)
-            .attrs({
-                "text-anchor":'start',
-                "x":d=>xScale(d.x),
-                "y":d=>yStreamoffset +yScale(0),
-                "dy":'0.25rem',
-                "dx":'2px',
-            }).style('text-shadow', 'rgba(255, 255, 255, 0.6) 1px 1px 0px').text(d=>Math.round(d.y));
-
-        yoffset += yStreamoffset + step*2+20;
-        // yoffset = drawClassCollection(yoffset, xoffset);
+        // streamlegendg.select('text.legendText').text(`Stream height (by ${graphicopt.userStreamMode}):`);
+        // let streampath = streamlegendg.select('path.pathlegend');
+        // if (streampath.empty())
+        //     streampath = streamlegendg.append('path')
+        //         .attr('class','pathlegend');
+        //
+        // // let subscale = yScale.copy().domain([0,ticknum/2]).range(yScale.domain().map((d,i)=>i?d/2:d));
+        // let subscale = yScale.copy().domain([0,2]).range(yScale.domain().map((d,i)=>i?d/2:d));
+        // let streamdata = [{x:0,y:0}];
+        //
+        // d3.range(1,ticknum*4+2).forEach(d=>streamdata.push(d%4===0?{x:d/(ticknum*4),y:subscale(Math.ceil(d/4)+1),tick:true}:{x:d/(ticknum*4),y:subscale(Math.random()*1.5)}));
+        //
+        // streamdata.push({x:1,y:0});
+        // streampath.datum(streamdata).attr('d',area_min).style('fill',colorCatergory('user'));
+        //
+        // let lineold = streamlegendg.selectAll('line.arrow').data(streamdata.filter(d=>d.tick));
+        // lineold.exit().remove();
+        // lineold.enter().append('line').attr('class','arrow')
+        //     .merge(lineold)
+        //     .attrs({
+        //         "marker-start":"url(#arrowHeadstart)",
+        //         "marker-end":"url(#arrowHeadend)",
+        //         "x1":d=>xScale(d.x),
+        //         "y1":d=>yStreamoffset - yScale(d.y)+2,
+        //         "x2":d=>xScale(d.x),
+        //         "y2":d=>yStreamoffset +yScale(d.y)-2
+        //     }).styles({
+        //     'stroke-width':1,
+        //     'stroke': '#000'
+        // });
+        // let textold =streamlegendg.selectAll('text.tick').data(streamdata.filter(d=>d.tick));
+        // textold.exit().remove();
+        // textold.enter().append('text').attr('class','tick')
+        //     .merge(textold)
+        //     .attrs({
+        //         "text-anchor":'start',
+        //         "x":d=>xScale(d.x),
+        //         "y":d=>yStreamoffset +yScale(0),
+        //         "dy":'0.25rem',
+        //         "dx":'2px',
+        //     }).style('text-shadow', 'rgba(255, 255, 255, 0.6) 1px 1px 0px').text(d=>Math.round(d.y));
+        //
+        // yoffset += yStreamoffset + step*2+20;
+        // // yoffset = drawClassCollection(yoffset, xoffset);
     }
     var buttonLensingWidth =80;
     var buttonheight =15;

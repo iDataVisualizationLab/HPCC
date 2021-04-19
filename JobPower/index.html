@@ -207,12 +207,12 @@
 <!--                                </div>-->
                             </div>
                             <ul class="nav nav-tabs">
-                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>
+<!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
 <!--                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>-->
-                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#jobOnToolbarHolder">Job list</a></li>
+                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#jobOnToolbarHolder">Job list</a></li>
                             </ul>
                             <div class="card-body row tab-content">
-                                <div id="analyticOnToolbarHolder" class="tab-pane fade show active" role="tabpanel">
+                                <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
                                     <div id="analyticOnToolbar" class="card-body row" data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
                                         <label class="col-4" for="flowType">Visualizing: </label>
                                         <select class="col-6" id="flowType">
@@ -340,7 +340,7 @@
                                     </div>
                                     <div id="JobList" class="row table-responsive" data-maximize="RankingListHolder" data-minimize="controlHolderMenu">
                                         <table class="table">
-                                            <thead><tr><th>Job ID</th><th>Avg. Power</th><th>#Nodes</th><th>#Cores</th></tr></thead>
+                                            <thead><tr><th>Job ID</th><th><span class="JobFilterType">mean</span> Power</th><th>#Nodes</th><th>#Cores</th></tr></thead>
                                             <tbody></tbody>
                                         </table>
                                     </div>

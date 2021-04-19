@@ -465,6 +465,7 @@ function drawJobList(){
         subObject.draw();
     });
     d3.select('#jobValueType').on('change',()=>{
+        d3.select('.JobFilterType').text(()=>$(d3.select('#jobValueType').node()).val())
         drawJobList();
         jobObject.draw();
         subObject.draw();

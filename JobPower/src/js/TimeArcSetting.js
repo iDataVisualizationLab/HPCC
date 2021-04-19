@@ -31,7 +31,8 @@ let TimeArcSetting = function (){
             stream:{
                 yScale: d3.scaleLinear().range([0,15])
             }
-        }
+        },
+        userStreamMode:'Power'
     };
     let scheme={},filterTerm=[];
     let contain = d3.select(graphicopt.contain);
@@ -151,6 +152,9 @@ let TimeArcSetting = function (){
     master.onmouseClick = function(_data) {
         return arguments.length?(onmouseClick=_data,master):onmouseClick;
     };
+    master.catergogryList = function(_data) {
+        return arguments.length?(catergogryList=_data,master):catergogryList;
+    };
 
     master.schema = function (){
         isNeedRender = true;
@@ -200,7 +204,8 @@ function handle_data_timeArc () {
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    subObject.graphicopt(timeArcopt).scheme(scheme).draw();
+    const catergogryList=[{key: 'compute', value: {colororder: 1}}];
+    subObject.graphicopt(timeArcopt).scheme(scheme).catergogryList(catergogryList).draw();
 }
 function handle_data_timeArc_job () {
     const keys = Layout.timespan//.slice(0,10);
@@ -220,14 +225,14 @@ function handle_data_timeArc_job () {
     keys.forEach((k,ki)=>{
         data.forEach(d=>{
             if (d[k]){
-                const category = {compute:{}};
-                d[k].forEach(e=>category.compute[e.key]=e.value);
+                const category = {job:{}};
+                d[k].forEach(e=>category.job[e.key]=e.value);
                 const value = d[k].total;
                 const date = k;
                 scheme.data.push({
                     category,
                     date,
-                    id: d3.keys(category.compute).join('_'),
+                    id: d3.keys(category.job).join('_'),
                     value,
                     data:d[k],
                 });
@@ -238,7 +243,8 @@ function handle_data_timeArc_job () {
     scheme.data.timespan = keys;
     scheme.data.tsnedata = Layout.jobarrdata;
     scheme.data.selectedService = 0;
+    const catergogryList=[{key: 'job', value: {colororder: 0}}];
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    jobObject.graphicopt(timeArJobcopt).scheme(scheme).draw();
+    jobObject.graphicopt(timeArJobcopt).scheme(scheme).catergogryList(catergogryList).draw();
 }
