@@ -1,10 +1,12 @@
 var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},
     offset: {top: 0}};
 var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
+    containHolder:'chart__job_holder',
     offset: {top: 0}};
 let TimeArcSetting = function (){
     let graphicopt = {
         contain: '#Chartcontent',
+        containHolder: '#chart_holder',
         margin: {top: 10, right: 10, bottom: 0, left: 200},
         offset: {top: 0},
         width: 1500,
@@ -31,7 +33,7 @@ let TimeArcSetting = function (){
             }
         }
     };
-    let scheme={},stickyTerms=[];
+    let scheme={},filterTerm=[];
     let contain = d3.select(graphicopt.contain);
     let master = {};
     let TimeArc  = d3.TimeArc();
@@ -74,7 +76,8 @@ let TimeArcSetting = function (){
         }
     }
     master.init = function () {
-        TimeArc.svg(contain)
+        TimeArc
+            .svg(contain)
             .graphicopt(graphicopt)
             // .mouseover(onmouseoverRadar).mouseout(onmouseleaveRadar)
             .catergogryList(catergogryList)
@@ -93,15 +96,14 @@ let TimeArcSetting = function (){
             master.init();
             isFirst = false;
         }
-        scheme.stickyTerms = stickyTerms
+        scheme.filterTerm = filterTerm
         TimeArc.runopt(scheme).data(scheme.data).draw();
 
         updateProcess();
     };
 
     master.filterTerms = function(_) {
-        stickyTerms = _??[];
-        return master
+        return arguments.length?(filterTerm=_,master):filterTerm;
     };
 
     master.graphicopt = function (__) {

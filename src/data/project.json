@@ -372,7 +372,7 @@
       "Parallel Coordinate","Network"
     ]
   },
-  "TimeArc": {
+  "JobPower": {
     "title": "JobPower",
     "thumb": "TimeArc.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobPower/index.html",

@@ -13,6 +13,7 @@ d3.TimeArc = function () {
         heightG: function(){return this.heightView()-this.margin.top-this.margin.bottom},
         min_height: 100,
         dotRadius: 2,
+        containHolder:'',
         summary: {size:30}
     };
     let arr;
@@ -23,6 +24,7 @@ d3.TimeArc = function () {
         time: {rate:1,unit:'Year'},
         timeformat: d3.timeYear.every(1),
         stickyTerms:[],
+        filterTerm:[],
         termGroup:{},
         groupTimeLineMode:'onDisplay'//'onDisplay', //'summary'
     };
@@ -386,7 +388,7 @@ d3.TimeArc = function () {
         drawLensingButton();
 
         $(function () {
-            $("#search").autocomplete({
+            $(graphicopt.containHolder+" #search").autocomplete({
                 data: Array2Object(termArray)
             });
         });
@@ -399,8 +401,8 @@ d3.TimeArc = function () {
         return temp;
     }
     function recompute(isSkipforce) {
-        var bar = document.getElementById('progBar'),
-            fallback = document.getElementById('downloadProgress'),
+        var bar = d3.select(graphicopt.containHolder+' #progBar').node(),
+            fallback = d3.select(graphicopt.containHolder+' #downloadProgress').node(),
             loaded = 0;
 
         var load = function () {
@@ -409,11 +411,11 @@ d3.TimeArc = function () {
 
             /* The below will be visible if the progress tag is not supported */
             $(fallback).empty().append("HTML5 progress tag not supported: ");
-            $('#progUpdate').empty().append(loaded + "% loaded");
+            $(graphicopt.containHolder+' #progUpdate').empty().append(loaded + "% loaded");
 
             if (loaded == 90) {
                 clearInterval(beginLoad);
-                $('#progUpdate').empty().append("Compute position");
+                $(graphicopt.containHolder+' #progUpdate').empty().append("Compute position");
             }
         };
 
@@ -443,7 +445,7 @@ d3.TimeArc = function () {
     }
 
     function readTermsAndRelationships() {
-        data2 = data.filter(function (d, i) {
+        data2 = (runopt.filterTerm.length?data.filter(d=>runopt.filterTerm.find(e=>d.__terms__[e])):data).filter(function (d, i) {
             if (!searchTerm || searchTerm == "") {
                 return d;
             }
@@ -452,7 +454,7 @@ d3.TimeArc = function () {
         });
         debugger
         var selected = {};
-        if (searchTerm && searchTerm != "") {
+        if ((searchTerm && searchTerm != "")||runopt.filterTerm.length) {
             data2.forEach(function (d) {
                 for (var term1 in d.__terms__) {
                     if (!selected[term1])
@@ -479,7 +481,8 @@ d3.TimeArc = function () {
             terms[att].sudden ={};
             var e = {};
             e.term = att;
-            if (catergogryObjectReject[terms[att].category]||removeList[e.term] || (searchTerm && searchTerm !== "" && !selected[e.term])) // remove list **************
+            // if (catergogryObjectReject[terms[att].category]||removeList[e.term] || (searchTerm && searchTerm !== "" && !selected[e.term])) // remove list **************
+            if (catergogryObjectReject[terms[att].category]||removeList[e.term] || (Object.keys(selected).length && !selected[e.term])) // remove list **************
                 continue;
 
             var maxNet = 0;
