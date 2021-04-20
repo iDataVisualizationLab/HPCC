@@ -1617,7 +1617,7 @@ d3.TimeArc = function () {
         var rr = 6;
         var yoffset = ySlider+60;
         let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
-        if (svg.select('.colorlegendtext').empty())
+        if (catergogryList&& (catergogryList.length>1) && svg.select('.colorlegendtext').empty())
             svg.append('text').text('Color legend: ').attrs({
                 class: 'colorlegendtext legendText',
                 x: xx,
