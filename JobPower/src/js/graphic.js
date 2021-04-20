@@ -473,7 +473,7 @@ function drawJobList(){
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
     }else{
-        data = _data.filter(d=>d.value[_jobValueType]>=_JobFilterThreshold)
+        data = _data.filter(d=>d.value[_jobValueType]>=_JobFilterThreshold/800)
     }
     d3.select('#currentJobNum').text(data.length);
     d3.select('#jobNumTotal').text(_data.length);
