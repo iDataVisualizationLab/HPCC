@@ -29,7 +29,8 @@ let TimeArcSetting = function (){
                 'stroke-opacity': 0.5
             },
             stream:{
-                yScale: d3.scaleLinear().range([0,15])
+                yScaleUp: d3.scaleLinear().domain([0,1-650/800]).range([0,20]),
+                yScaleDown: d3.scaleLinear().domain([-650/800,0]).range([-15,0]),
             }
         },
         userStreamMode:'Power'

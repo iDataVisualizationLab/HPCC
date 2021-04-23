@@ -30,6 +30,7 @@ d3.TimeArc = function () {
     };
     let svg,force;
     let UnitArray = ['Minute','Hour','Day','Month','Year'];
+    let drawThreshold =650/800;
     var node_drag = d3.drag()
         .on("start", dragstart)
         .on("drag", dragmove)
@@ -242,18 +243,29 @@ d3.TimeArc = function () {
         .y1(function (d) {
             return d.yNode + yScale(d.value);
         }).defined(d=>d.value!==null);
-    var area_compute = d3.area()
+    let yUpperScale,yDownerScale;
+    var area_compute_up = d3.area()
         .curve(d3.curveCatmullRom)
         .x(function (d) {
             return xStep + xScale(d.monthId);
         })
         .y0(function (d) {
-            return d.yNode - yScale(d.value[0]);
+            return d.yNode - yUpperScale(d.value[0]);
         })
         .y1(function (d) {
-            return d.yNode - yScale(d.value[1]);
+            return d.yNode - yUpperScale(d.value[1]);
         });
-
+    var area_compute_down = d3.area()
+        .curve(d3.curveCatmullRom)
+        .x(function (d) {
+            return xStep + xScale(d.monthId);
+        })
+        .y0(function (d) {
+            return d.yNode - yDownerScale(d.value[0]);
+        })
+        .y1(function (d) {
+            return d.yNode - yDownerScale(d.value[1]);
+        });
     var numberInputTerms = 0;
     var listMonth;
 
@@ -644,6 +656,47 @@ d3.TimeArc = function () {
 
     }
     let offsetYStream = 0;
+    timeArc.updateDrawData = ()=>{
+        pNodes.forEach(d=>{
+            d.drawData = getDrawData(d);
+        });
+        let layerpath = svg.selectAll(".layer")
+            .selectAll('path.layerpath')
+            .data(d=>d.drawData);
+        layerpath.call(updatelayerpath);
+        layerpath.exit().remove();
+        layerpath.enter().append('path')
+            .attr('class','layerpath')
+            .call(updatelayerpath);
+    }
+    function getDrawData(n) {
+        return [{
+            node: n, value: n.monthly.map(d => {
+                if ((d.value[1]-drawThreshold) > 0) {
+                    return {...d,value:[0,d.value[1]-drawThreshold]};
+                }
+                const mon = new Object();
+                mon.value = [0, 0];
+                mon.monthId = d.monthId;
+                mon.yNode = d.y;
+                return mon;
+            }), color: catergogryObject[n.group].upperColor ?? "rgb(252, 141, 89)",
+            up:true
+        },
+            {
+                node: n, value: n.monthly.map(d => {
+                    if ((d.value[1]-drawThreshold) < 0)
+                        return {...d,value:[d.value[1]-drawThreshold,0]};
+                    const mon = new Object();
+                    mon.value = [0, 0];
+                    mon.monthId = d.monthId;
+                    mon.yNode = d.y;
+                    return mon;
+                }), color: "steelblue",
+                up:false
+            }];
+    }
+
     function computeNodes() {
         Object.keys(class2term).forEach(c=>{
             class2term[c].obj=[];
@@ -840,7 +893,8 @@ d3.TimeArc = function () {
                     var mon = new Object();
                     // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
                     // mon.value = [0, (d[selected]-0.75)].sort((a,b)=>a-b);
-                    mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
+                    // mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
+                    mon.value = [0, d[selected]].sort((a,b)=>a-b);
                     // mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
                     mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
                     mon.yNode = nodes[i].y;
@@ -859,26 +913,7 @@ d3.TimeArc = function () {
                     }
                 }
                 nodes[i].noneSymetric = true;
-                nodes[i].drawData =[{node:nodes[i],value:nodes[i].monthly.map(d=>{
-                    if(d.value[1]>0){
-                        d.value[1] = d.value[1]*10;
-                        return d;
-                    }
-                    const mon = new Object();
-                        mon.value = [0, 0];
-                        mon.monthId = d.monthId;
-                        mon.yNode = d.y;
-                    return mon;
-                }),color: catergogryObject[nodes[i].group].upperColor??"rgb(252, 141, 89)"},
-                    {node:nodes[i],value:nodes[i].monthly.map(d=>{
-                            if(d.value[0]<0)
-                                return d;
-                            const mon = new Object();
-                            mon.value = [0, 0];
-                            mon.monthId = d.monthId;
-                            mon.yNode = d.y;
-                            return mon;
-                        }),color:"steelblue"}];
+                nodes[i].drawData =getDrawData(nodes[i]);
             }
         }
         // Construct an array of only parent nodes
@@ -1013,6 +1048,14 @@ d3.TimeArc = function () {
         var hhh = graphicopt.height / numNode;
         if (graphicopt.display&&graphicopt.display.stream&&graphicopt.display.stream.yScale){
             yScale = graphicopt.display.stream.yScale;
+            yUpperScale = yScale;
+            yDownerScale = yScale;
+        }if (graphicopt.display&&graphicopt.display.stream&&graphicopt.display.stream.yScaleUp&&graphicopt.display.stream.yScaleDown){
+            yScale = d3.scaleLinear()
+                .range([0, hhh * 0.6])
+                .domain([0, termMaxMax2]);
+            yUpperScale = graphicopt.display.stream.yScaleUp;
+            yDownerScale = graphicopt.display.stream.yScaleDown;
         }else {
             yScale = d3.scaleLinear()
                 .range([0, hhh * 0.6])
@@ -1407,7 +1450,7 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric){
-                return area_compute(d.value);
+                return d.up?area_compute_up(d.value):area_compute_down(d.value);
             }
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });
@@ -1537,11 +1580,14 @@ d3.TimeArc = function () {
 
     timeArc.stickyTerms = function (_) {
         return arguments.length ? (runopt.stickyTerms = _, timeArc) : runopt.stickyTerms;
-
     };
 
     timeArc.termGroup = function (_) {
         return arguments.length ? (runopt.termGroup = _, timeArc) : runopt.termGroup;
+    };
+
+    timeArc.drawThreshold = function (_) {
+        return arguments.length ? (drawThreshold = _, timeArc.updateDrawData(),timeArc) : drawThreshold;
     };
 
     timeArc.classMap = function (_){
@@ -1601,6 +1647,10 @@ d3.TimeArc = function () {
         if (arguments.length) {
             for(var i in _){
                 if('undefined' !== typeof _[i]){ graphicopt[i] = _[i]; }
+            }
+            if(_.display&&_.display.stream&&_.display.stream.yScaleUp&&_.display.stream.yScaleDown){
+                yUpperScale = graphicopt.display.stream.yScaleUp;
+                yDownerScale = graphicopt.display.stream.yScaleDown;
             }
             return timeArc
         }else

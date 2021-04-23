@@ -513,7 +513,9 @@ function drawJobList(){
     subObject.filterTerms(jobList)
 }
 function drawColorLegend() {
-    const svg = d3.select('#legendTimeArc');
+    let width=300;
+    const contain =  d3.select('#legendTimeArc');
+    const svg = contain.select('svg').attr('width',width);
     const catergogryList = subObject.timearc.catergogryList();
     const catergogryObject = {};
     const summary = subObject.timearc.summary();
@@ -560,8 +562,55 @@ function drawColorLegend() {
     legendg.merge(legendg_o).select('text')
         .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
 
-    svg.select('.streamlegendtext').attr('y',yscale(catergogryList.length)+20)
+    // stream legend
+    svg.select('.streamlegendtext').attr('y',yscale(catergogryList.length)+20);
+    let upScale= subObject.timearc.graphicopt().display.stream.yScaleUp;
+    let downScale= subObject.timearc.graphicopt().display.stream.yScaleDown;
+    let streamPos = yscale(catergogryList.length)+20+10+upScale.range()[1];
+    let streamxOffset = 60;
+    contain.select('#thresholdTimeArc').style('top',''+(streamPos-27)+'px').style('width',`${streamxOffset-20}px`);
+    let streamxScale = d3.scaleLinear().range([streamxOffset,width]);
 
+    let area_up = d3.area()
+        .curve(d3.curveCatmullRom)
+        .x(function (d) {
+            return streamxScale(d.x);
+        })
+        .y0(function (d) {
+            return -upScale(d.y[0]);
+        })
+        .y1(function (d) {
+            return -upScale(d.y[1]);
+        });
+    let area_down = d3.area()
+        .curve(d3.curveCatmullRom)
+        .x(function (d) {
+            return streamxScale(d.x);
+        })
+        .y0(function (d) {
+            return -downScale(d.y[0]);
+        })
+        .y1(function (d) {
+            return -downScale(d.y[1]);
+        });
+    let threshold = subObject.timearc.drawThreshold();
+    svg.selectAll('path.stream').data([{values:[{x:0,y:[0,1-threshold]},{x:0,y:[0,1-threshold]},{x:0.4,y:[0,1-threshold]},{x:0.5,y:[0,0]},{x:0.5,y:[0,0]}],render:area_up,color:'rgb(252, 141, 89)'},
+            {values:[{x:0.5,y:[0,0]},{x:0.5,y:[0,0]},{x:0.6,y:[-threshold,0]},{x:1,y:[-threshold,0]}],render:area_down,color:'steelblue'}])
+        .join('path')
+        .attr('class','stream')
+        .attr('fill',d=>d.color)
+        .attr('transform',`translate(0,${streamPos})`)
+        .attr('d',d=>d.render(d.values));
+    if (svg.select('line.streamMid').empty())
+        svg.append('line').attr('class','streamMid').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
+            .attr('x2',20)
+            .attr('stroke','black')
+            .attr('marker-end',"url(#arrowhead)")
+
+    contain.select('#thresholdTimeArc input').node().value = threshold*800;
+    contain.select('#thresholdTimeArc input').on('change',function(){
+        subObject.timearc.drawThreshold(+this.value/800)
+    })
     function getColor(category, count) {
         if (catergogryObject[category].customcolor)
             return catergogryObject[category].customcolor;
