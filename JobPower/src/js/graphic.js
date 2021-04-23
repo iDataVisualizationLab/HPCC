@@ -504,11 +504,11 @@ function drawJobList(){
     //     job_info.classed('highlight',false);
     // });
     const jobList = [];
-    // const compObj = {};
-    // data.forEach(d=>{
-    //    jobList.push(d.key);
-    //     d.value.node_list.forEach(c=>compObj[c]=true);
-    // });
+    const compObj = {};
+    data.forEach(d=>{
+       jobList.push(d.key);
+        d.value.node_list.forEach(c=>compObj[c]=true);
+    });
     // const compList = Object.keys(compObj);
     subObject.filterTerms(jobList)
 }
