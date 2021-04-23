@@ -1,8 +1,8 @@
 var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},
     offset: {top: 0},preLinkText:'Computes have',postLinkText:' same job(s)'};
-var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
-    containHolder:'#chart__job_holder',
-    offset: {top: 0},preLinkText:'Jobs run on',postLinkText:' same compute(s)'};
+// var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
+//     containHolder:'#chart__job_holder',
+//     offset: {top: 0},preLinkText:'Jobs run on',postLinkText:' same compute(s)'};
 let TimeArcSetting = function (){
     let graphicopt = {
         contain: '#Chartcontent',
@@ -174,77 +174,37 @@ function handle_data_timeArc () {
         // timeLink: {rate:5,unit:'Minute'},
         timeformat: d3.timeDay.every(1),
     };
-    let dataObj = {};
     scheme.data=[];
     scheme.data.timespan = keys;
 
     let data = Layout.userTimeline;
     debugger
     scheme.data = [];
-    keys.forEach((k,ki)=>{
-        data.forEach(d=>{
-            if (d[k]){
-                const category = {compute:{}};
-                d[k].forEach(e=>category.compute[e.key]=e.value);
-                const value = d[k].total;
-                const date = k;
-                scheme.data.push({
-                    category,
-                    date,
-                    id: d3.keys(category.compute).join('_'),
-                    value,
-                    data:d[k],
-                });
-            }
-        })
+    data.forEach(d=>{
+        d.arr.forEach(e=>{
+            const category = {compute:{},job:{}};
+            let key = '' ;
+            e.value.forEach(e=>{
+                category[e.type][e.key]=e.value
+                key+=('_'+e.key);
+            });
+            const value = 1;
+            const date = e.time;
+            scheme.data.push({
+                category,
+                date,
+                id: key,
+                value,
+                data:e.value,
+            });
+        });
     });
 
     scheme.data.timespan = keys;
-    scheme.data.tsnedata = tsnedata;
+    scheme.data.tsnedata = {...tsnedata,...Layout.jobarrdata};
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    const catergogryList=[{key: 'compute', value: {colororder: 1}}];
+    const catergogryList=[{key: 'compute', value: {colororder: 1}},{key: 'job', value: {colororder: 2}}];
     subObject.graphicopt(timeArcopt).scheme(scheme).catergogryList(catergogryList).draw();
-}
-function handle_data_timeArc_job () {
-    const keys = Layout.timespan//.slice(0,10);
-    let scheme ={limitColums : [0,10],
-        limitTime : [keys[0],keys[keys.length-1]],
-        time: {rate:5,unit:'Minute'},
-        // timeLink: {rate:5,unit:'Minute'},
-        timeformat: d3.timeDay.every(1),
-    };
-    let dataObj = {};
-    scheme.data=[];
-    scheme.data.timespan = keys;
-
-    let data = Layout.jobTimeline;
-    debugger
-    scheme.data = [];
-    keys.forEach((k,ki)=>{
-        data.forEach(d=>{
-            if (d[k]){
-                const category = {job:{}};
-                d[k].forEach(e=>category.job[e.key]=e.value);
-                const value = d[k].total;
-                const date = k;
-                scheme.data.push({
-                    category,
-                    date,
-                    id: d3.keys(category.job).join('_'),
-                    value,
-                    data:d[k],
-                });
-            }
-        })
-    });
-
-    scheme.data.timespan = keys;
-    scheme.data.tsnedata = Layout.jobarrdata;
-    scheme.data.selectedService = 0;
-    const catergogryList=[{key: 'job', value: {colororder: 0}}];
-    // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
-    // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    jobObject.graphicopt(timeArJobcopt).scheme(scheme).catergogryList(catergogryList).draw();
 }

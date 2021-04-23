@@ -460,14 +460,11 @@ function drawJobList(){
     d3.select('#JobListFilter').on('click',()=>{
         drawJobList();
         subObject._filter = subObject.filterTerms();
-        jobObject.selectedComp = jobObject.filterTerms();
-        jobObject.draw();
         subObject.draw();
     });
     d3.select('#jobValueType').on('change',()=>{
         d3.select('.JobFilterType').text(()=>$(d3.select('#jobValueType').node()).val())
         drawJobList();
-        jobObject.draw();
         subObject.draw();
     });
     if (_jobFilterType==='top'){
@@ -507,14 +504,13 @@ function drawJobList(){
     //     job_info.classed('highlight',false);
     // });
     const jobList = [];
-    const compObj = {};
-    data.forEach(d=>{
-       jobList.push(d.key);
-        d.value.node_list.forEach(c=>compObj[c]=true);
-    });
-    const compList = Object.keys(compObj);
-    jobObject.filterTerms(jobList);
-    subObject.filterTerms(compList)
+    // const compObj = {};
+    // data.forEach(d=>{
+    //    jobList.push(d.key);
+    //     d.value.node_list.forEach(c=>compObj[c]=true);
+    // });
+    // const compList = Object.keys(compObj);
+    subObject.filterTerms(jobList)
 }
 function getColorGant(){
 
@@ -537,7 +533,7 @@ function initdrawGantt(){
 }
 function drawGantt(){
     handle_data_timeArc();
-    handle_data_timeArc_job();
+    // handle_data_timeArc_job();
     // subObject.data(Layout.userTimeline).draw();
     // if (userPie){
     //     userPie.color(subObject.color());
@@ -549,19 +545,3 @@ function drawGantt(){
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
 let subObject = new TimeArcSetting();
-let jobObject = new TimeArcSetting().onmouseOver((d)=>{
-    const comp = {};
-    d[1].forEach(e=>Layout.jobsStatic[e.text].node_list.forEach(c=>comp[c]=true));
-    jobObject.selectedComp = Object.keys(comp);
-}).onmouseLeave((d)=>{
-    jobObject.selectedComp = [];
-}).onmouseClick((isClick)=>{
-    let data = jobObject.selectedComp;
-    if (isClick){
-        subObject._filter = subObject.filterTerms().slice();
-    }else{
-        data = subObject._filter;
-    }
-    subObject.filterTerms(data).draw();
-})
-    .graphicopt(timeArJobcopt);

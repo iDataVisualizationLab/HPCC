@@ -297,11 +297,11 @@ function handleDataComputeByUser_core(computers,jobs){
     let data = [];
     let obj = {};
     for (let j in jobs){
-        obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j]};
+        obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j],arr:[]};
         data.push(obj[j]);
     }
     for (let comp in computers){
-        let jonj = {}
+        let jonj = {};
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 jIDs.forEach(j=>{
@@ -311,15 +311,17 @@ function handleDataComputeByUser_core(computers,jobs){
                             item.values[i] = [];
                             item.values[i].total = 0;
                         }
-                        item.values[i].push({key:comp,value:jobs[j].node_list_obj[comp]});
+                        const compData = {key:comp,type:'compute',value:1}
+                        item.values[i].push(compData);
                         item.values[i].total += jobs[j].node_list_obj[comp];
-                        item[Layout.timespan[i]] = item.values[i];
+                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1}]});
                         jonj[j]=true;
                     }
                 });
             }
         });
     }
+    debugger
     // data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }

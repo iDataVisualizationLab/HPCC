@@ -345,6 +345,7 @@ d3.TimeArc = function () {
         arr.sort((a,b)=>a.date-b.date);
         terms = new Object();
         termMaxMax = 1;
+        debugger
         arr.forEach(function (d) {
             // Process date
             // d.date = new Date(d["time"]);
@@ -464,7 +465,8 @@ d3.TimeArc = function () {
 
         var selected = {};
 
-        if ((searchTerm && searchTerm != "")|| !runopt.filterTerm.length) {
+        // if ((searchTerm && searchTerm != "")|| !runopt.filterTerm.length) {
+        if ((searchTerm && searchTerm != "")|| runopt.filterTerm.length) {
             data2.forEach(function (d) {
                 for (var term1 in d.__terms__) {
                     if (!selected[term1])
@@ -477,15 +479,16 @@ d3.TimeArc = function () {
                     }
                 }
             });
-        }else if ((searchTerm && searchTerm != "")||runopt.filterTerm.length){
-            selected = strickFilter;
-            data2.forEach(function (d) {
-                for (var term1 in d.__terms__) {
-                    if (selected[term1])
-                        selected[term1].isSelected++;
-                }
-            });
         }
+        // else if ((searchTerm && searchTerm != "")||runopt.filterTerm.length){
+        //     selected = strickFilter;
+        //     data2.forEach(function (d) {
+        //         for (var term1 in d.__terms__) {
+        //             if (selected[term1])
+        //                 selected[term1].isSelected++;
+        //         }
+        //     });
+        // }
 
         var removeList = {};   // remove list **************
 

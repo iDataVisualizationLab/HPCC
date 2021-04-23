@@ -116,31 +116,6 @@
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
 
 <!--                    <h5 class="text-center" style="width:100%" >TimeArcs by <span id="ganttLayoutLabel">Power</span></h5>-->
-                    <div id="chart__job_holder" style="position: relative;height: calc(100vh - 60px);background-color: white;overflow:auto">
-                        <div class = 'row s12 valign-wrapper' style="margin: 0;">
-
-                                <div class="input-field" style="margin: 0px 5px;padding-left: 0px;">
-                                    <input type="text"  id="search" class="autocomplete inputHolder" placeholder="input here">
-                                </div>
-                                <div>
-                                    <button type="button" onclick="jobObject.timearc.searchNode($('#search').val())">Search</button>
-                                </div>
-                                <div>
-                                    <progress  value="0" max="100" id="progBar">
-                                                <span id="downloadProgress">
-                                                    <!-- Your fallback goes here -->
-                                                </span>
-                                    </progress>
-                                    <label id="progUpdate">
-                                        <!-- Success Message -->
-                                    </label>
-                                </div>
-                                <button style="width: fit-content;float:right" id = "lensingbtn">lensing</button>
-
-
-                        </div>
-                        <svg id="Jobcontent" class="active"></svg>
-                    </div>
                     <div id="chart_holder" style="position: relative;height: calc(100vh - 60px);background-color: white;overflow:auto">
                         <div class = 'row s12 valign-wrapper' style="margin: 0;">
 
