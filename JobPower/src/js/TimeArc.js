@@ -97,7 +97,7 @@ d3.TimeArc = function () {
     var termMaxMax, termMaxMax2;
     var terms;
     var nodeG;
-    var xStep = 100;
+    var xStep = 0;//100;
 //var xScale = d3.time.scale().range([0, (width-xStep-100)/totalTimeSteps]);
     var yScale;
     var linkScale;
@@ -214,7 +214,7 @@ d3.TimeArc = function () {
 //Set up the force layout
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-12))
-            .force("link", d3.forceLink().distance(0))
+            .force("link", d3.forceLink().distance(d=>d.__timestep__/100))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
             .force('y',  d3.forceY(0).strength(0.015))
@@ -383,7 +383,7 @@ d3.TimeArc = function () {
     let first = true;
     timeArc.draw = function(){
         first = true;
-        setupSliderScale(svg);
+        // setupSliderScale(svg);
 
         readTermsAndRelationships();
 
@@ -407,8 +407,8 @@ d3.TimeArc = function () {
         return temp;
     }
     function recompute(isSkipforce) {
-        var bar = d3.select(graphicopt.containHolder+' #progBar').node(),
-            fallback = d3.select(graphicopt.containHolder+' #downloadProgress').node(),
+        var bar = d3.select('#progBar').node(),
+            fallback = d3.select('#downloadProgress').node(),
             loaded = 0;
 
         var load = function () {
@@ -417,11 +417,11 @@ d3.TimeArc = function () {
 
             /* The below will be visible if the progress tag is not supported */
             $(fallback).empty().append("HTML5 progress tag not supported: ");
-            $(graphicopt.containHolder+' #progUpdate').empty().append(loaded + "% loaded");
+            $('#progUpdate').empty().append(loaded + "% loaded");
 
             if (loaded == 90) {
                 clearInterval(beginLoad);
-                $(graphicopt.containHolder+' #progUpdate').empty().append("Compute position");
+                $('#progUpdate').empty().append("Compute position");
             }
         };
 
@@ -441,7 +441,8 @@ d3.TimeArc = function () {
                 console.log(links)
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force('link').links(links);
+                    .force("link", d3.forceLink(links).distance(d=>d.__timestep__/100))
+                    // .force('link').links(links);
                 force.alpha(1);
                 force.restart();
             }else{
@@ -868,7 +869,7 @@ d3.TimeArc = function () {
                         mon.monthId = d.monthId;
                         mon.yNode = d.y;
                     return mon;
-                }),color:"rgb(252, 141, 89)"},
+                }),color: catergogryObject[nodes[i].group].upperColor??"rgb(252, 141, 89)"},
                     {node:nodes[i],value:nodes[i].monthly.map(d=>{
                             if(d.value[0]<0)
                                 return d;
@@ -1078,7 +1079,8 @@ d3.TimeArc = function () {
             .attr("class", "nodeText")
             .attr("dy", ".35em")
             // .attr('fill',d=>d.group==='user'?d3.color(colorCatergory(d.group)).darker(1):'unset')
-            .attr('fill',d=>d.group==='user'?colorCatergory(d.group):'unset')
+            // .attr('fill',d=>d.group==='user'?colorCatergory(d.group):'unset')
+            .attr('fill',d=>getColor(d.group))
             .style("text-anchor", "end")
             .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
             .style('pointer-events','all')
@@ -1405,8 +1407,6 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric){
-                if (d.node.name==="657658")
-                    debugger
                 return area_compute(d.value);
             }
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
@@ -1532,6 +1532,7 @@ d3.TimeArc = function () {
         return arguments.length ? (svg = _, timeArc) : svg;
 
     };
+    timeArc.summary = ()=>summary
     timeArc.totalTimeSteps = totalTimeSteps
 
     timeArc.stickyTerms = function (_) {
@@ -1592,6 +1593,9 @@ d3.TimeArc = function () {
     timeArc.catergogryList = function (_) {
         return arguments.length ? (catergogryList = _,catergogryObject = {},summary={},catergogryList.forEach(c=>{catergogryObject[c.key]=c.value;summary[c.key]=0}), timeArc) : catergogryList;
     };
+    timeArc.drawColorLegend = function (_) {
+        return arguments.length ? (drawColorLegend = _, timeArc) : drawColorLegend;
+    };
     timeArc.firstLink = function(node,nodes){return d3.min(node.childNodes.map(d=>nodes[d].month))};
     timeArc.graphicopt = function (_) {
         if (arguments.length) {
@@ -1610,7 +1614,8 @@ d3.TimeArc = function () {
         innerRadius = radius - 120;
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     // Add color legend
-    function drawColorLegend() {
+    let drawColorLegend = _drawColorLegend;
+    function _drawColorLegend() {
         var xx = 10;
         // var y1 = 20;
         // var y2 = 34;

@@ -1,4 +1,4 @@
-var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},
+var timeArcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 50},
     offset: {top: 0},preLinkText:'Computes have',postLinkText:' same job(s)'};
 // var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
 //     containHolder:'#chart__job_holder',
@@ -205,6 +205,6 @@ function handle_data_timeArc () {
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    const catergogryList=[{key: 'compute', value: {colororder: 1}},{key: 'job', value: {colororder: 2}}];
+    const catergogryList=[{key: 'job', value: {customcolor: 'red',upperColor:'red'}},{key: 'compute', value: {customcolor: 'black'}}];
     subObject.graphicopt(timeArcopt).scheme(scheme).catergogryList(catergogryList).draw();
 }

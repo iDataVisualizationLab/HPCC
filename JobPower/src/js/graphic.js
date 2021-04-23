@@ -512,6 +512,63 @@ function drawJobList(){
     // const compList = Object.keys(compObj);
     subObject.filterTerms(jobList)
 }
+function drawColorLegend() {
+    const svg = d3.select('#legendTimeArc');
+    const catergogryList = subObject.timearc.catergogryList();
+    const catergogryObject = {};
+    const summary = subObject.timearc.summary();
+    catergogryList.forEach(d=>catergogryObject[d.key]=d.value)
+    var xx = 10;
+    var rr = 6;
+    var yoffset = 10;
+    let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
+    let colorCatergory = d3.scaleOrdinal().range(["#080","steelblue","#828282"]);
+    if (catergogryList&& (catergogryList.length>1) && svg.select('.colorlegendtext').empty()){
+        svg.append('text').text('Color legend: ').attrs({
+            class: 'colorlegendtext legendText',
+            x: xx,
+            y: yoffset
+        });
+        svg.append('text').text('Stream legend: ').attrs({
+            class: 'streamlegendtext legendText',
+            x: xx,
+            y: yoffset
+        });
+    }
+    let legendg_o = svg.selectAll('g.nodeLegend')
+        .data(catergogryList);
+    legendg_o.exit().remove();
+    const legendg = legendg_o.enter()
+        .append('g')
+        .attr('class','nodeLegend')
+        .attr('transform',(d,i)=>'translate('+xx+','+yscale(i)+')')
+        // .on('click',onclickcategory);
+
+    legendg.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", rr)
+        .style("fill",d=>getColor(d.key));
+
+    legendg.append("text")
+        .attr("x", xx+10)
+        .attr("y", 0)
+        .attr("dy", ".21em")
+        .style("text-anchor", "left")
+        .style("fill",d=>getColor(d.key));
+
+    legendg.merge(legendg_o).select('text')
+        .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
+
+    svg.select('.streamlegendtext').attr('y',yscale(catergogryList.length)+20)
+
+    function getColor(category, count) {
+        if (catergogryObject[category].customcolor)
+            return catergogryObject[category].customcolor;
+        return  colorCatergory(category)
+
+    }
+}
 function getColorGant(){
 
     let colorGantt =d3.scaleSequential()
@@ -532,6 +589,7 @@ function initdrawGantt(){
     });
 }
 function drawGantt(){
+    subObject.timearc.drawColorLegend(drawColorLegend);
     handle_data_timeArc();
     // handle_data_timeArc_job();
     // subObject.data(Layout.userTimeline).draw();
