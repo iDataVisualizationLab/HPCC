@@ -610,7 +610,7 @@ function drawColorLegend() {
         .attr('x2',streamxScale(1));
     marker.selectAll('text').data(d=>[d]).join('text')
         .attr('x',streamxScale(0.5))
-        .attr('dy',d=>d<0?'-1rem':0)
+        .attr('dy',d=>d<0?'1rem':0)
         .text(d=>(d+threshold)*800)
     svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
             {values:downStream,render:area_down,color:'steelblue'}])
