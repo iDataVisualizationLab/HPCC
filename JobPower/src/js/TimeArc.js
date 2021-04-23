@@ -1024,7 +1024,7 @@ d3.TimeArc = function () {
 
         // FIXME : need to turn this into dynamic
         linkScale = d3.scaleLinear()
-            .range([0.1, 4])
+            .range([0.1, Math.min(4,relationshipMaxMax2*1)])
             .domain([1,relationshipMaxMax2]);
         // .domain([1,15]);
         links.forEach(function (l) {
