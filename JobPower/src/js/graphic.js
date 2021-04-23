@@ -594,8 +594,26 @@ function drawColorLegend() {
             return -downScale(d.y[1]);
         });
     let threshold = subObject.timearc.drawThreshold();
-    svg.selectAll('path.stream').data([{values:[{x:0,y:[0,1-threshold]},{x:0,y:[0,1-threshold]},{x:0.4,y:[0,1-threshold]},{x:0.5,y:[0,0]},{x:0.5,y:[0,0]}],render:area_up,color:'rgb(252, 141, 89)'},
-            {values:[{x:0.5,y:[0,0]},{x:0.5,y:[0,0]},{x:0.6,y:[-threshold,0]},{x:1,y:[-threshold,0]}],render:area_down,color:'steelblue'}])
+    let upStream = d3.range(0,10).map(d=>({x:d/20,y:[0,Math.random()*(1-threshold)]}));
+    upStream.push({x:0.5,y:[0,0]});
+    upStream[0].y[1] =1-threshold;
+    upStream[1].y[1] =1-threshold;
+    let downStream = d3.range(10,20).map(d=>({x:d/20,y:[Math.random()*(-threshold),0]}));
+    downStream.push({x:1,y:[-threshold,0]});
+    downStream[downStream.length-2].y[0] =-threshold;
+    let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker')
+        .attr('transform',d=>`translate(0,${streamPos-(d>0?upScale:downScale)(d)})`);
+    marker.selectAll('line').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
+        .attr('stroke','black')
+        .attr('stroke-width',0.5)
+        .attr('x1',streamxScale(0))
+        .attr('x2',streamxScale(1));
+    marker.selectAll('text').data(d=>[d]).join('text')
+        .attr('x',streamxScale(0.5))
+        .attr('dy',d=>d<0?'-1rem':0)
+        .text(d=>(d+threshold)*800)
+    svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
+            {values:downStream,render:area_down,color:'steelblue'}])
         .join('path')
         .attr('class','stream')
         .attr('fill',d=>d.color)

@@ -46,7 +46,7 @@ $(document).ready(function(){
             // request = new Simulation('../HiperView/data/8122020.json');
             // request = new Simulation('../HiperView/data/814_821_2020.json');
             request = new Simulation(d3.csv(url).then(d=>{
-                d=d.slice(0,1920)
+                // d=d.slice(0,1920)
                 const data = {jobs_info:{},nodes_info:{},time_stamp:[]};
                 Object.keys(d[0]).filter(k=>k!=='time').forEach(e=>{
                     data.nodes_info[e.split('_')[0]] = {"power_usage":[],"job_id":[]};
