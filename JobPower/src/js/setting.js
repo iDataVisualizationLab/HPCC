@@ -140,7 +140,7 @@ function handleSmalldata(dataRaw){
                     tsnedata[h.name][ti].name = h.name;
                     tsnedata[h.name][ti].timestep =ti;
                 }
-                value.forEach(v=>tsnedata[h.name][ti].push(v === null ? 0 : scaleService[si](v) || 0))
+                value.forEach(v=>tsnedata[h.name][ti].push(v === null ? undefined : scaleService[si](v)))
             })
         })
     });

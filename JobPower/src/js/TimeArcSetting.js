@@ -26,7 +26,7 @@ let TimeArcSetting = function (){
         },
         display: {
             links: {
-                'stroke-opacity': 0.5
+                'stroke-opacity': 0.7
             },
             stream:{
                 yScaleUp: d3.scaleLinear().domain([0,1-650/800]).range([0,20]),
@@ -203,6 +203,7 @@ function handle_data_timeArc () {
 
     scheme.data.timespan = keys;
     scheme.data.tsnedata = {...tsnedata,...Layout.jobarrdata};
+    scheme.data.emptyMap=Layout.noJobMap
     scheme.data.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]

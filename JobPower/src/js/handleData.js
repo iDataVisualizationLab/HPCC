@@ -296,12 +296,14 @@ function handleDataComputeByUser_core(computers,jobs){
     debugger
     let data = [];
     let obj = {};
+    let noJobMap = {};
     for (let j in jobs){
         obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j],arr:[]};
         data.push(obj[j]);
     }
     for (let comp in computers){
         let jonj = {};
+        noJobMap[comp] = [];
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 jIDs.forEach(j=>{
@@ -318,12 +320,14 @@ function handleDataComputeByUser_core(computers,jobs){
                         jonj[j]=true;
                     }
                 });
+            }else{
+                noJobMap[comp][i] = 1;
             }
         });
     }
     debugger
     // data.sort((a,b)=>+a.range[0]-b.range[0])
-    return data;
+    return {data,noJobMap};
 }
 function handleDataComputeByUser_compute(computers,jobs){
     let data = [];
@@ -386,7 +390,9 @@ function handleRankingData(data){
     Layout.timespan = sampleS.timespan;
 
     handleDataComputeByUser.data = {computers,jobs};
-    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
+    const result = handleDataComputeByUser(handleDataComputeByUser.data);
+    Layout.userTimeline = result.data;
+    Layout.noJobMap = result.noJobMap;
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
 
     Object.values(Layout.jobsStatic).forEach(d=>{

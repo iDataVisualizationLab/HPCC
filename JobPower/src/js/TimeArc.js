@@ -254,7 +254,8 @@ d3.TimeArc = function () {
         })
         .y1(function (d) {
             return d.yNode - yUpperScale(d.value[1]);
-        });
+        })
+        .defined(function(d){return d.value[0]!==undefined});
     var area_compute_down = d3.area()
         .curve(d3.curveCatmullRom)
         .x(function (d) {
@@ -265,7 +266,8 @@ d3.TimeArc = function () {
         })
         .y1(function (d) {
             return d.yNode - yDownerScale(d.value[1]);
-        });
+        })
+        .defined(function(d){return d.value[0]!==undefined});
     var numberInputTerms = 0;
     var listMonth;
 
@@ -670,8 +672,10 @@ d3.TimeArc = function () {
             .call(updatelayerpath);
     }
     function getDrawData(n) {
-        return [{
-            node: n, value: n.monthly.map(d => {
+        const drawData = [{
+            node: n, value: n.monthly.map((d,ti) => {
+                if (data.emptyMap[n.name]&&data.emptyMap[n.name][ti])
+                    return {...d,value:[undefined,undefined]}
                 if ((d.value[1]-drawThreshold) > 0) {
                     return {...d,value:[0,d.value[1]-drawThreshold]};
                 }
@@ -684,7 +688,9 @@ d3.TimeArc = function () {
             up:true
         },
             {
-                node: n, value: n.monthly.map(d => {
+                node: n, value: n.monthly.map((d,ti) => {
+                    if (data.emptyMap[n.name]&&data.emptyMap[n.name][ti])
+                        return {...d,value:[undefined,undefined]}
                     if ((d.value[1]-drawThreshold) < 0)
                         return {...d,value:[d.value[1]-drawThreshold,0]};
                     const mon = new Object();
@@ -695,6 +701,38 @@ d3.TimeArc = function () {
                 }), color: "steelblue",
                 up:false
             }];
+        if (data.emptyMap[n.name]){
+            drawData.push({
+                    node: n, value: n.monthly.map((d,ti) => {
+                        if (!data.emptyMap[n.name][ti])
+                            return {...d,value:[undefined,undefined]}
+                        if ((d.value[1]-drawThreshold) > 0) {
+                            return {...d,value:[0,d.value[1]-drawThreshold]};
+                        }
+                        const mon = new Object();
+                        mon.value = [0, 0];
+                        mon.monthId = d.monthId;
+                        mon.yNode = d.y;
+                        return mon;
+                    }), color: "rgb(221,221,221)",
+                    up:true
+                },
+                {
+                    node: n, value: n.monthly.map((d,ti) => {
+                        if (!data.emptyMap[n.name][ti])
+                            return {...d,value:[undefined,undefined]}
+                        if ((d.value[1]-drawThreshold) < 0)
+                            return {...d,value:[d.value[1]-drawThreshold,0]};
+                        const mon = new Object();
+                        mon.value = [0, 0];
+                        mon.monthId = d.monthId;
+                        mon.yNode = d.y;
+                        return mon;
+                    }), color: "rgb(221,221,221)",
+                    up:false
+                })
+        }
+        return drawData;
     }
 
     function computeNodes() {
@@ -886,8 +924,6 @@ d3.TimeArc = function () {
         for (var i = 0; i < numNode; i++) {
             nodes[i].monthly = [];
             if (data.tsnedata[nodes[i].name]){
-                if (nodes[i].name==="657658")
-                    debugger
                 const selected = data.selectedService;
                 data.tsnedata[nodes[i].name].forEach((d,ti)=>{
                     var mon = new Object();
@@ -905,11 +941,7 @@ d3.TimeArc = function () {
                     // Add another item
                     var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
                     if (lastObj.monthId < totalTimeSteps - 1) {
-                        var mon = new Object();
-                        mon.value = lastObj.value.slice();
-                        mon.monthId = lastObj.monthId + 1;
-                        mon.yNode = lastObj.yNode;
-                        nodes[i].monthly.push(mon);
+                        nodes[i].monthly.push(lastObj);
                     }
                 }
                 nodes[i].noneSymetric = true;
@@ -939,8 +971,8 @@ d3.TimeArc = function () {
                 return getColor(d.group, d.max);
             })
             .on('click',handleFreez)
-            .on('mouseover', mouseovered_Layer)
-            .on("mouseout", mouseouted_Layer);
+            // .on('mouseover', mouseovered_Layer)
+            // .on("mouseout", mouseouted_Layer);
 
     }
 
