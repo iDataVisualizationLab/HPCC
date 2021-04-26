@@ -105,6 +105,7 @@ function handleDataUrl(dataRaw) {
     return{sampleS:sampleh,tsnedata:tsnedata};
 }
 function handleSmalldata(dataRaw){
+    debugger
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
         return {
             ip: ip,
@@ -140,6 +141,8 @@ function handleSmalldata(dataRaw){
                     tsnedata[h.name][ti].name = h.name;
                     tsnedata[h.name][ti].timestep =ti;
                 }
+                if(ti>1300 && h.name==='cpu-25-59')
+                    debugger
                 value.forEach(v=>tsnedata[h.name][ti].push(v === null ? undefined : scaleService[si](v)))
             })
         })

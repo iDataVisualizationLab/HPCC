@@ -660,7 +660,7 @@ d3.TimeArc = function () {
     let offsetYStream = 0;
     timeArc.updateDrawData = ()=>{
         pNodes.forEach(d=>{
-            d.drawData = getDrawData(d);
+            getDrawData(d);
         });
         let layerpath = svg.selectAll(".layer")
             .selectAll('path.layerpath')
@@ -672,67 +672,169 @@ d3.TimeArc = function () {
             .call(updatelayerpath);
     }
     function getDrawData(n) {
-        const drawData = [{
-            node: n, value: n.monthly.map((d,ti) => {
-                if (data.emptyMap[n.name]&&data.emptyMap[n.name][ti])
-                    return {...d,value:[undefined,undefined]}
-                if ((d.value[1]-drawThreshold) > 0) {
-                    return {...d,value:[0,d.value[1]-drawThreshold]};
+        if (graphicopt.minMaxStream){
+            //
+            n.monthly = [];
+            if (data.minMaxData[n.name]&& data.tsneData[n.name]){
+                const selected = data.selectedService;
+                data.tsneData[n.name].forEach((d,ti)=>{
+                    var mon = new Object();
+                    mon.value = [data.minMaxData[n.name][ti][selected][0], d[selected], data.minMaxData[n.name][ti][selected][1]];
+                    mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
+                    mon.yNode = n.y;
+                    n.monthly.push(mon);
+                });
+                // Add another item to first
+                if (n.monthly.length > 0) {
+                    // Add another item
+                    var lastObj = n.monthly[n.monthly.length - 1];
+                    if (lastObj.monthId < totalTimeSteps - 1) {
+                        n.monthly.push(lastObj);
+                    }
                 }
-                const mon = new Object();
-                mon.value = [0, 0];
-                mon.monthId = d.monthId;
-                mon.yNode = d.y;
-                return mon;
-            }), color: catergogryObject[n.group].upperColor ?? "rgb(252, 141, 89)",
-            up:true
-        },
-            {
-                node: n, value: n.monthly.map((d,ti) => {
-                    if (data.emptyMap[n.name]&&data.emptyMap[n.name][ti])
-                        return {...d,value:[undefined,undefined]}
-                    if ((d.value[1]-drawThreshold) < 0)
-                        return {...d,value:[d.value[1]-drawThreshold,0]};
-                    const mon = new Object();
-                    mon.value = [0, 0];
-                    mon.monthId = d.monthId;
-                    mon.yNode = d.y;
-                    return mon;
-                }), color: "steelblue",
-                up:false
-            }];
-        if (data.emptyMap[n.name]){
-            drawData.push({
-                    node: n, value: n.monthly.map((d,ti) => {
-                        if (!data.emptyMap[n.name][ti])
-                            return {...d,value:[undefined,undefined]}
-                        if ((d.value[1]-drawThreshold) > 0) {
-                            return {...d,value:[0,d.value[1]-drawThreshold]};
+                n.noneSymetric = true;
+                const drawData = [{
+                    node: n, value: n.monthly.map((d, ti) => {
+                        if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                            return {...d, value: [undefined, undefined]};
+                        return {...d, value: [0, d.value[1] - drawThreshold]};
+                    }), color: catergogryObject[n.group].upperColor ?? "rgb(252, 141, 89)",
+                    up: true
+                },
+                    {
+                        node: n, value: n.monthly.map((d, ti) => {
+                            if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                return {...d, value: [undefined, undefined]}
+                            if ((d.value[1] - drawThreshold) < 0)
+                                return {...d, value: [d.value[1] - drawThreshold, 0]};
+                            const mon = new Object();
+                            mon.value = [0, 0];
+                            mon.monthId = d.monthId;
+                            mon.yNode = d.y;
+                            return mon;
+                        }), color: "steelblue",
+                        up: false
+                    }];
+                if (data.emptyMap[n.name]) {
+                    drawData.push({
+                            node: n, value: n.monthly.map((d, ti) => {
+                                if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                    return {...d, value: [undefined, undefined]}
+                                if ((d.value[1] - drawThreshold) > 0) {
+                                    return {...d, value: [0, d.value[1] - drawThreshold]};
+                                }
+                                const mon = new Object();
+                                mon.value = [0, 0];
+                                mon.monthId = d.monthId;
+                                mon.yNode = d.y;
+                                return mon;
+                            }), color: "rgb(221,221,221)",
+                            up: true
+                        },
+                        {
+                            node: n, value: n.monthly.map((d, ti) => {
+                                if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                    return {...d, value: [undefined, undefined]}
+                                if ((d.value[1] - drawThreshold) < 0)
+                                    return {...d, value: [d.value[1] - drawThreshold, 0]};
+                                const mon = new Object();
+                                mon.value = [0, 0];
+                                mon.monthId = d.monthId;
+                                mon.yNode = d.y;
+                                return mon;
+                            }), color: "rgb(221,221,221)",
+                            up: false
+                        })
+                }
+                n.drawData =drawData;
+            }
+        }else {
+            n.monthly = [];
+            if (data.tsnedata[n.name]){
+                const selected = data.selectedService;
+                data.tsnedata[n.name].forEach((d,ti)=>{
+                    var mon = new Object();
+                    // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
+                    // mon.value = [0, (d[selected]-0.75)].sort((a,b)=>a-b);
+                    // mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
+                    mon.value = [0, d[selected]].sort((a,b)=>a-b);
+                    // mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
+                    mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
+                    mon.yNode = n.y;
+                    n.monthly.push(mon);
+                });
+                // Add another item to first
+                if (n.monthly.length > 0) {
+                    // Add another item
+                    var lastObj = n.monthly[n.monthly.length - 1];
+                    if (lastObj.monthId < totalTimeSteps - 1) {
+                        n.monthly.push(lastObj);
+                    }
+                }
+                n.noneSymetric = true;
+                const drawData = [{
+                    node: n, value: n.monthly.map((d, ti) => {
+                        if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                            return {...d, value: [undefined, undefined]}
+                        if ((d.value[1] - drawThreshold) > 0) {
+                            return {...d, value: [0, d.value[1] - drawThreshold]};
                         }
                         const mon = new Object();
                         mon.value = [0, 0];
                         mon.monthId = d.monthId;
                         mon.yNode = d.y;
                         return mon;
-                    }), color: "rgb(221,221,221)",
-                    up:true
+                    }), color: catergogryObject[n.group].upperColor ?? "rgb(252, 141, 89)",
+                    up: true
                 },
-                {
-                    node: n, value: n.monthly.map((d,ti) => {
-                        if (!data.emptyMap[n.name][ti])
-                            return {...d,value:[undefined,undefined]}
-                        if ((d.value[1]-drawThreshold) < 0)
-                            return {...d,value:[d.value[1]-drawThreshold,0]};
-                        const mon = new Object();
-                        mon.value = [0, 0];
-                        mon.monthId = d.monthId;
-                        mon.yNode = d.y;
-                        return mon;
-                    }), color: "rgb(221,221,221)",
-                    up:false
-                })
+                    {
+                        node: n, value: n.monthly.map((d, ti) => {
+                            if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                return {...d, value: [undefined, undefined]}
+                            if ((d.value[1] - drawThreshold) < 0)
+                                return {...d, value: [d.value[1] - drawThreshold, 0]};
+                            const mon = new Object();
+                            mon.value = [0, 0];
+                            mon.monthId = d.monthId;
+                            mon.yNode = d.y;
+                            return mon;
+                        }), color: "steelblue",
+                        up: false
+                    }];
+                if (data.emptyMap[n.name]) {
+                    drawData.push({
+                            node: n, value: n.monthly.map((d, ti) => {
+                                if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                    return {...d, value: [undefined, undefined]}
+                                if ((d.value[1] - drawThreshold) > 0) {
+                                    return {...d, value: [0, d.value[1] - drawThreshold]};
+                                }
+                                const mon = new Object();
+                                mon.value = [0, 0];
+                                mon.monthId = d.monthId;
+                                mon.yNode = d.y;
+                                return mon;
+                            }), color: "rgb(221,221,221)",
+                            up: true
+                        },
+                        {
+                            node: n, value: n.monthly.map((d, ti) => {
+                                if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
+                                    return {...d, value: [undefined, undefined]}
+                                if ((d.value[1] - drawThreshold) < 0)
+                                    return {...d, value: [d.value[1] - drawThreshold, 0]};
+                                const mon = new Object();
+                                mon.value = [0, 0];
+                                mon.monthId = d.monthId;
+                                mon.yNode = d.y;
+                                return mon;
+                            }), color: "rgb(221,221,221)",
+                            up: false
+                        })
+                }
+                n.drawData =drawData;
+            }
         }
-        return drawData;
     }
 
     function computeNodes() {
@@ -922,31 +1024,7 @@ d3.TimeArc = function () {
         // }
 
         for (var i = 0; i < numNode; i++) {
-            nodes[i].monthly = [];
-            if (data.tsnedata[nodes[i].name]){
-                const selected = data.selectedService;
-                data.tsnedata[nodes[i].name].forEach((d,ti)=>{
-                    var mon = new Object();
-                    // mon.value = [0, (d[selected]-0.6)*termMaxMax2*0.6/0.4].sort((a,b)=>a-b);
-                    // mon.value = [0, (d[selected]-0.75)].sort((a,b)=>a-b);
-                    // mon.value = [0, (d[selected]-(670/800))].sort((a,b)=>a-b);
-                    mon.value = [0, d[selected]].sort((a,b)=>a-b);
-                    // mon.monthId = timeScaleIndex(runopt.timeformat(data.timespan[d.timestep]));
-                    mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
-                    mon.yNode = nodes[i].y;
-                    nodes[i].monthly.push(mon);
-                });
-                // Add another item to first
-                if (nodes[i].monthly.length > 0) {
-                    // Add another item
-                    var lastObj = nodes[i].monthly[nodes[i].monthly.length - 1];
-                    if (lastObj.monthId < totalTimeSteps - 1) {
-                        nodes[i].monthly.push(lastObj);
-                    }
-                }
-                nodes[i].noneSymetric = true;
-                nodes[i].drawData =getDrawData(nodes[i]);
-            }
+            getDrawData(nodes[i])
         }
         // Construct an array of only parent nodes
         pNodes = new Array(numNode); //nodes;

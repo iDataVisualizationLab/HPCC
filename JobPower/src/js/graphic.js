@@ -53,10 +53,8 @@ function initdraw(){
 
     d3.select('#flowType').on('change',function(){
         const val = $(this).val();
-        handleDataComputeByUser.mode=val;
-        d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
-        Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
-        subObject.data(Layout.userTimeline).draw();
+        timeArcopt.minMaxStream = (val==='minmax');
+        subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream}).updateDrawData();
     })
 }
 function userTable(d,type){
@@ -562,74 +560,79 @@ function drawColorLegend() {
     legendg.merge(legendg_o).select('text')
         .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
 
-    // stream legend
-    svg.select('.streamlegendtext').attr('y',yscale(catergogryList.length)+20);
-    let upScale= subObject.timearc.graphicopt().display.stream.yScaleUp;
-    let downScale= subObject.timearc.graphicopt().display.stream.yScaleDown;
-    let streamPos = yscale(catergogryList.length)+20+10+upScale.range()[1];
-    let streamxOffset = 60;
-    contain.select('#thresholdTimeArc').style('top',''+(streamPos-27)+'px').style('width',`${streamxOffset-20}px`);
-    let streamxScale = d3.scaleLinear().range([streamxOffset,width]);
+    if (!timeArcopt.minMaxStream){
+        // stream legend
+        svg.select('.streamlegendtext').classed('hide',false).attr('y',yscale(catergogryList.length)+20);
+        let upScale= subObject.timearc.graphicopt().display.stream.yScaleUp;
+        let downScale= subObject.timearc.graphicopt().display.stream.yScaleDown;
+        let streamPos = yscale(catergogryList.length)+20+10+upScale.range()[1];
+        let streamxOffset = 60;
+        contain.select('#thresholdTimeArc').classed('hide',false).style('top',''+(streamPos-27)+'px').style('width',`${streamxOffset-20}px`);
+        let streamxScale = d3.scaleLinear().range([streamxOffset,width]);
 
-    let area_up = d3.area()
-        .curve(d3.curveCatmullRom)
-        .x(function (d) {
-            return streamxScale(d.x);
-        })
-        .y0(function (d) {
-            return -upScale(d.y[0]);
-        })
-        .y1(function (d) {
-            return -upScale(d.y[1]);
-        });
-    let area_down = d3.area()
-        .curve(d3.curveCatmullRom)
-        .x(function (d) {
-            return streamxScale(d.x);
-        })
-        .y0(function (d) {
-            return -downScale(d.y[0]);
-        })
-        .y1(function (d) {
-            return -downScale(d.y[1]);
-        });
-    let threshold = subObject.timearc.drawThreshold();
-    let upStream = d3.range(0,10).map(d=>({x:d/20,y:[0,Math.random()*(1-threshold)]}));
-    upStream.push({x:0.5,y:[0,0]});
-    upStream[0].y[1] =1-threshold;
-    upStream[1].y[1] =1-threshold;
-    let downStream = d3.range(10,20).map(d=>({x:d/20,y:[Math.random()*(-threshold),0]}));
-    downStream.push({x:1,y:[-threshold,0]});
-    downStream[downStream.length-2].y[0] =-threshold;
-    let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker')
-        .attr('transform',d=>`translate(0,${streamPos-(d>0?upScale:downScale)(d)})`);
-    marker.selectAll('line').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
-        .attr('stroke','black')
-        .attr('stroke-width',0.5)
-        .attr('x1',streamxScale(0))
-        .attr('x2',streamxScale(1));
-    marker.selectAll('text').data(d=>[d]).join('text')
-        .attr('x',streamxScale(0.5))
-        .attr('dy',d=>d<0?'1rem':0)
-        .attr('text-anchor','middle')
-        .text(d=>(d+threshold)*800)
-    svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
-            {values:downStream,render:area_down,color:'steelblue'}])
-        .join('path')
-        .attr('class','stream')
-        .attr('fill',d=>d.color)
-        .attr('transform',`translate(0,${streamPos})`)
-        .attr('d',d=>d.render(d.values));
-    if (svg.select('line.streamMid').empty())
-        svg.append('line').attr('class','streamMid').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
-            .attr('x2',20)
+        let area_up = d3.area()
+            .curve(d3.curveCatmullRom)
+            .x(function (d) {
+                return streamxScale(d.x);
+            })
+            .y0(function (d) {
+                return -upScale(d.y[0]);
+            })
+            .y1(function (d) {
+                return -upScale(d.y[1]);
+            });
+        let area_down = d3.area()
+            .curve(d3.curveCatmullRom)
+            .x(function (d) {
+                return streamxScale(d.x);
+            })
+            .y0(function (d) {
+                return -downScale(d.y[0]);
+            })
+            .y1(function (d) {
+                return -downScale(d.y[1]);
+            });
+        let threshold = subObject.timearc.drawThreshold();
+        let upStream = d3.range(0,10).map(d=>({x:d/20,y:[0,Math.random()*(1-threshold)]}));
+        upStream.push({x:0.5,y:[0,0]});
+        upStream[0].y[1] =1-threshold;
+        upStream[1].y[1] =1-threshold;
+        let downStream = d3.range(10,20).map(d=>({x:d/20,y:[Math.random()*(-threshold),0]}));
+        downStream.push({x:1,y:[-threshold,0]});
+        downStream[downStream.length-2].y[0] =-threshold;
+        let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker')
+            .attr('transform',d=>`translate(0,${streamPos-(d>0?upScale:downScale)(d)})`);
+        marker.selectAll('line').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
             .attr('stroke','black')
-            .attr('marker-end',"url(#arrowhead)")
+            .attr('stroke-width',0.5)
+            .attr('x1',streamxScale(0))
+            .attr('x2',streamxScale(1));
+        marker.selectAll('text').data(d=>[d]).join('text')
+            .attr('x',streamxScale(0.5))
+            .attr('dy',d=>d<0?'1rem':0)
+            .attr('text-anchor','middle')
+            .text(d=>(d+threshold)*800)
+        svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
+                {values:downStream,render:area_down,color:'steelblue'}])
+            .join('path')
+            .attr('class','stream')
+            .attr('fill',d=>d.color)
+            .attr('transform',`translate(0,${streamPos})`)
+            .attr('d',d=>d.render(d.values));
+        if (svg.select('line.streamMid').empty())
+            svg.append('line').attr('class','streamMid').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
+                .attr('x2',20)
+                .attr('stroke','black')
+                .attr('marker-end',"url(#arrowhead)")
 
-    contain.select('#thresholdTimeArc input').node().value = threshold*800;
-    contain.select('#thresholdTimeArc input').on('change',function(){
-        subObject.timearc.drawThreshold(+this.value/800)
-    })
+        contain.select('#thresholdTimeArc input').node().value = threshold*800;
+        contain.select('#thresholdTimeArc input').on('change',function(){
+            subObject.timearc.drawThreshold(+this.value/800)
+        })
+    }else{
+        contain.select('#thresholdTimeArc').classed('hide',true);
+        svg.select('.streamlegendtext').classed('hide',false);
+    }
     function getColor(category, count) {
         if (catergogryObject[category].customcolor)
             return catergogryObject[category].customcolor;

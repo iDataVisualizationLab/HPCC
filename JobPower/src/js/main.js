@@ -64,7 +64,7 @@ $(document).ready(function(){
                         let cpus = JSON.parse(e[comp+'_cpus']);
                         let jobs = JSON.parse(e[comp+'_jobs']);
                         data.nodes_info[comp].job_id.push(jobs);
-                        data.nodes_info[comp].power_usage.push(+e[comp+'_power']);
+                        data.nodes_info[comp].power_usage.push(e[comp+'_power']!==''?(+e[comp+'_power']):undefined);
                         jobs.forEach((j,ji)=>{
                             if (!data.jobs_info[j])
                                 data.jobs_info[j] = {

@@ -206,6 +206,13 @@
                                         <!-- Success Message -->
                                     </label>
                                 </div>
+                                <div>
+                                    <label class="col-4" for="flowType">Visualizing: </label>
+                                    <select class="col-6" id="flowType">
+                                        <option value="threshold">Threshold</option>
+                                        <option value="minmax">Min-max</option>
+                                    </select>
+                                </div>
                                 <div style="position:relative" id="legendTimeArc">
                                     <svg>
                                         <defs>
@@ -233,11 +240,11 @@
                         <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
                             <div id="analyticOnToolbar" class="card-body row"
                                  data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-                                <label class="col-4" for="flowType">Visualizing: </label>
-                                <select class="col-6" id="flowType">
-                                    <option value="core">#Cores</option>
-                                    <option value="compute">#Nodes</option>
-                                </select>
+<!--                                <label class="col-4" for="flowType">Visualizing: </label>-->
+<!--                                <select class="col-6" id="flowType">-->
+<!--                                    <option value="core">#Cores</option>-->
+<!--                                    <option value="compute">#Nodes</option>-->
+<!--                                </select>-->
                                 <div class="col-2"></div>
 
                                 <label class="col-4" for="userSort">Sort user node by: </label>
