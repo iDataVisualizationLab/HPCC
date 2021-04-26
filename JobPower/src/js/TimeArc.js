@@ -244,6 +244,18 @@ d3.TimeArc = function () {
             return d.yNode + yScale(d.value);
         }).defined(d=>d.value!==null);
     let yUpperScale,yDownerScale;
+    var area_compute = d3.area()
+        .curve(d3.curveCatmullRom)
+        .x(function (d) {
+            return xStep + xScale(d.monthId);
+        })
+        .y0(function (d) {
+            return d.yNode - yScale(d.value[0]);
+        })
+        .y1(function (d) {
+            return d.yNode - yScale(d.value[1]);
+        })
+        .defined(function(d){return d.value[0]!==undefined});
     var area_compute_up = d3.area()
         .curve(d3.curveCatmullRom)
         .x(function (d) {
@@ -675,11 +687,14 @@ d3.TimeArc = function () {
         if (graphicopt.minMaxStream){
             //
             n.monthly = [];
-            if (data.minMaxData[n.name]&& data.tsneData[n.name]){
+            if (data.minMaxData[n.name]&& data.tsnedata[n.name]){
                 const selected = data.selectedService;
-                data.tsneData[n.name].forEach((d,ti)=>{
+                data.tsnedata[n.name].forEach((d,ti)=>{
                     var mon = new Object();
-                    mon.value = [data.minMaxData[n.name][ti][selected][0], d[selected], data.minMaxData[n.name][ti][selected][1]];
+                    if (data.minMaxData[n.name][ti][1])
+                        mon.value = [data.minMaxData[n.name][ti][0][selected], d[selected], data.minMaxData[n.name][ti][1][selected]];
+                    else
+                        mon.value=[undefined,undefined,undefined]
                     mon.monthId =  timeScaleIndex(data.timespan[d.timestep]);
                     mon.yNode = n.y;
                     n.monthly.push(mon);
@@ -697,7 +712,7 @@ d3.TimeArc = function () {
                     node: n, value: n.monthly.map((d, ti) => {
                         if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
                             return {...d, value: [undefined, undefined]};
-                        return {...d, value: [0, d.value[1] - drawThreshold]};
+                        return {...d, value: [d.value[1], d.value[2]]};
                     }), color: catergogryObject[n.group].upperColor ?? "rgb(252, 141, 89)",
                     up: true
                 },
@@ -705,13 +720,7 @@ d3.TimeArc = function () {
                         node: n, value: n.monthly.map((d, ti) => {
                             if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
                                 return {...d, value: [undefined, undefined]}
-                            if ((d.value[1] - drawThreshold) < 0)
-                                return {...d, value: [d.value[1] - drawThreshold, 0]};
-                            const mon = new Object();
-                            mon.value = [0, 0];
-                            mon.monthId = d.monthId;
-                            mon.yNode = d.y;
-                            return mon;
+                            return {...d, value: [d.value[0], d.value[1]]};
                         }), color: "steelblue",
                         up: false
                     }];
@@ -720,14 +729,7 @@ d3.TimeArc = function () {
                             node: n, value: n.monthly.map((d, ti) => {
                                 if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
                                     return {...d, value: [undefined, undefined]}
-                                if ((d.value[1] - drawThreshold) > 0) {
-                                    return {...d, value: [0, d.value[1] - drawThreshold]};
-                                }
-                                const mon = new Object();
-                                mon.value = [0, 0];
-                                mon.monthId = d.monthId;
-                                mon.yNode = d.y;
-                                return mon;
+                                return {...d, value: [d.value[1], d.value[2]]};
                             }), color: "rgb(221,221,221)",
                             up: true
                         },
@@ -735,13 +737,7 @@ d3.TimeArc = function () {
                             node: n, value: n.monthly.map((d, ti) => {
                                 if (!data.emptyMap[n.name][ti] || d.value[1] === undefined)
                                     return {...d, value: [undefined, undefined]}
-                                if ((d.value[1] - drawThreshold) < 0)
-                                    return {...d, value: [d.value[1] - drawThreshold, 0]};
-                                const mon = new Object();
-                                mon.value = [0, 0];
-                                mon.monthId = d.monthId;
-                                mon.yNode = d.y;
-                                return mon;
+                                return {...d, value: [d.value[0], d.value[1]]};
                             }), color: "rgb(221,221,221)",
                             up: false
                         })
@@ -1171,6 +1167,9 @@ d3.TimeArc = function () {
                 .range([0, hhh * 0.6])
                 .domain([0, termMaxMax2]);
         }
+        if (graphicopt.display&&graphicopt.display.stream&&graphicopt.display.stream.yScale){
+            yScale = graphicopt.display.stream.yScale;
+        }
         // linkScale = d3.scaleLinear()
         //     .range([0.5, 2])
         //     .domain([Math.round(valueSlider) - 0.4, Math.max(relationshipMaxMax2, 10)]);
@@ -1560,7 +1559,10 @@ d3.TimeArc = function () {
                 d.value[i].yNode = d.node.y;     // Copy node y coordinate
             }
             if (d.node.noneSymetric){
-                return d.up?area_compute_up(d.value):area_compute_down(d.value);
+                if(graphicopt.minMaxStream)
+                    return area_compute(d.value);
+                else
+                    return d.up?area_compute_up(d.value):area_compute_down(d.value);
             }
             return area([d.value[0],...d.value,d.value[d.value.length-1]]);
         });

@@ -209,10 +209,12 @@ handleDataComputeByUser.mode = 'core';
 function handleDataComputeByJob({computers,jobs:_jobs}){
     const jobs = {};
     Layout.jobarrdata = {};
+    Layout.minMaxDataCompJob = {};
     Object.keys(_jobs).forEach(k=>{
         // if (_jobs[k].total_nodes>1){
             jobs[k] = _jobs[k];
             Layout.jobarrdata[k] = [];
+            Layout.minMaxDataCompJob[k] = [];
         // }
     });
 
@@ -251,11 +253,21 @@ function handleDataComputeByJob({computers,jobs:_jobs}){
     Object.keys(Layout.jobarrdata).forEach(k=>{
         Layout.jobarrdata[k].forEach((d,i)=>{
             const timestep = Layout.jobarrdata[k][i][0].timestep;
+            let valueMin = [];
+            let valueMax = [];
             let value = Layout.jobarrdata[k][i][0].map((d,si)=>{
-                return  d3.mean(Layout.jobarrdata[k][i],d=>d[si]);
+                const vals = Layout.jobarrdata[k][i].map(d=>d[si]);
+                valueMin.push(d3.min(vals));
+                valueMax.push(d3.max(vals));
+                return  d3.mean(vals);
             });
             value.name = k;
+            valueMin.name = k;
+            valueMax.name = k;
             value.timestep = timestep;
+            valueMin.timestep = timestep;
+            valueMax.timestep = timestep;
+            Layout.minMaxDataCompJob[k][i] = [valueMin,valueMax]
             Layout.jobarrdata[k][i] = value;
         })
     })
@@ -354,6 +366,7 @@ function handleRankingData(data){
     let r = handleSmalldata(data);
     let sampleS = r.sampleh;
     tsnedata = r.tsnedata;
+    Layout.minMaxDataComp = r.minMaxData;
     let {computers,jobs,users,jobByNames} = handleData(data);
     Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]];
     Layout.jobsStatic = jobs;

@@ -119,10 +119,12 @@ function handleSmalldata(dataRaw){
     var ser = serviceListattr.slice();
     sampleh.timespan = time_stamp.map(d=>d);
     let tsnedata = {};
+    let minMaxData = {};
     let data = dataRaw.nodes_info;
     hosts.forEach(h => {
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
+        minMaxData[h.name] = [];
         ser.forEach(s => sampleh[h.name][s] = []);
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
@@ -140,14 +142,22 @@ function handleSmalldata(dataRaw){
                     tsnedata[h.name][ti] = [];
                     tsnedata[h.name][ti].name = h.name;
                     tsnedata[h.name][ti].timestep =ti;
+                    minMaxData[h.name][ti] = [[],[]];
+                    minMaxData[h.name][ti].name = h.name;
+                    minMaxData[h.name][ti].timestep =ti;
                 }
                 if(ti>1300 && h.name==='cpu-25-59')
                     debugger
-                value.forEach(v=>tsnedata[h.name][ti].push(v === null ? undefined : scaleService[si](v)))
+                value.forEach(v=>{
+                    const val = v === null ? undefined : scaleService[si](v);
+                    tsnedata[h.name][ti].push(val);
+                    minMaxData[h.name][ti][0].push(val);
+                    minMaxData[h.name][ti][1].push(val);
+                });
             })
         })
     });
-    return {sampleh,tsnedata};
+    return {sampleh,tsnedata,minMaxData};
 }
 function handleAllData(dataRaw){
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{

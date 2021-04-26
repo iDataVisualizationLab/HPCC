@@ -600,14 +600,16 @@ function drawColorLegend() {
         let downStream = d3.range(10,20).map(d=>({x:d/20,y:[Math.random()*(-threshold),0]}));
         downStream.push({x:1,y:[-threshold,0]});
         downStream[downStream.length-2].y[0] =-threshold;
-        let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker')
+        let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker streamlegendItem')
             .attr('transform',d=>`translate(0,${streamPos-(d>0?upScale:downScale)(d)})`);
         marker.selectAll('line').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
+            .attr('class','streamlegendItem')
             .attr('stroke','black')
             .attr('stroke-width',0.5)
             .attr('x1',streamxScale(0))
             .attr('x2',streamxScale(1));
         marker.selectAll('text').data(d=>[d]).join('text')
+            .attr('class','streamlegendItem')
             .attr('x',streamxScale(0.5))
             .attr('dy',d=>d<0?'1rem':0)
             .attr('text-anchor','middle')
@@ -615,12 +617,12 @@ function drawColorLegend() {
         svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
                 {values:downStream,render:area_down,color:'steelblue'}])
             .join('path')
-            .attr('class','stream')
+            .attr('class','stream streamlegendItem')
             .attr('fill',d=>d.color)
             .attr('transform',`translate(0,${streamPos})`)
             .attr('d',d=>d.render(d.values));
         if (svg.select('line.streamMid').empty())
-            svg.append('line').attr('class','streamMid').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
+            svg.append('line').attr('class','streamMid streamlegendItem').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
                 .attr('x2',20)
                 .attr('stroke','black')
                 .attr('marker-end',"url(#arrowhead)")
@@ -632,6 +634,7 @@ function drawColorLegend() {
     }else{
         contain.select('#thresholdTimeArc').classed('hide',true);
         svg.select('.streamlegendtext').classed('hide',false);
+        svg.selectAll('.streamlegendItem').remove();
     }
     function getColor(category, count) {
         if (catergogryObject[category].customcolor)
