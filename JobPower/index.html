@@ -185,30 +185,33 @@
                         <div class="card-body row" id="controlOnToolbarHolder">
                             <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder"
                                  data-minimize="controlHolderMenu">
-                                <div>
-                                    <div class="input-field" style="margin: 0px 5px;padding-left: 0px;">
-                                        <input type="text" id="search" class="autocomplete inputHolder"
-                                               placeholder="input here">
+                                <div class="row col-12">
+                                    <div>
+                                        <div class="input-field" style="margin: 0px 5px;padding-left: 0px;">
+                                            <input type="text" id="search" class="autocomplete inputHolder"
+                                                   placeholder="input here">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button"
+                                                onclick="subObject.timearc.searchNode($('#search').val())">Search
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <progress value="0" max="100" id="progBar">
+                                                <span id="downloadProgress">
+                                                    <!-- Your fallback goes here -->
+                                                </span>
+                                        </progress>
+                                        <label id="progUpdate">
+                                            <!-- Success Message -->
+                                        </label>
+
                                     </div>
                                 </div>
-                                <div>
-                                    <button type="button"
-                                            onclick="subObject.timearc.searchNode($('#search').val())">Search
-                                    </button>
-                                </div>
-                                <div>
-                                    <progress value="0" max="100" id="progBar">
-                                            <span id="downloadProgress">
-                                                <!-- Your fallback goes here -->
-                                            </span>
-                                    </progress>
-                                    <label id="progUpdate">
-                                        <!-- Success Message -->
-                                    </label>
-                                </div>
-                                <div class="row">
+                                <div class="row col-12">
                                     <label class="col-4" for="flowType">Visualizing: </label>
-                                    <select class="col-6" id="flowType">
+                                    <select class="col-8" id="flowType">
                                         <option value="threshold">Threshold</option>
                                         <option value="minmax">Min-max</option>
                                     </select>
