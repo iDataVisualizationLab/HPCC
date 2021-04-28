@@ -451,7 +451,7 @@ function drawUserList(){
 }
 function drawJobList(){
     const _jobValueType= $(d3.select('#jobValueType').node()).val();
-    const _jobFilterType= $(d3.select('#jobFilterType').node()).val();
+    const _jobFilterType= 'top'//$(d3.select('#jobFilterType').node()).val();
     const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value[_jobValueType]-a.value[_jobValueType]);
     let data = _data;
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
@@ -566,9 +566,9 @@ function drawColorLegend() {
         let upScale= subObject.timearc.graphicopt().display.stream.yScaleUp;
         let downScale= subObject.timearc.graphicopt().display.stream.yScaleDown;
         let streamPos = yscale(catergogryList.length)+20+10+upScale.range()[1];
-        let streamxOffset = 60;
+        let streamxOffset = 80;
         contain.select('#thresholdTimeArc').classed('hide',false).style('top',''+(streamPos-27)+'px').style('width',`${streamxOffset-20}px`);
-        let streamxScale = d3.scaleLinear().range([streamxOffset,width]);
+        let streamxScale = d3.scaleLinear().range([streamxOffset,width-30]);
 
         let area_up = d3.area()
             .curve(d3.curveCatmullRom)
@@ -593,17 +593,23 @@ function drawColorLegend() {
                 return -downScale(d.y[1]);
             });
         let threshold = subObject.timearc.drawThreshold();
-        let upStream = d3.range(0,10).map(d=>({x:d/20,y:[0,Math.random()*(1-threshold)]}));
-        upStream.push({x:0.5,y:[0,0]});
-        upStream[0].y[1] =1-threshold;
-        upStream[1].y[1] =1-threshold;
-        let downStream = d3.range(10,20).map(d=>({x:d/20,y:[Math.random()*(-threshold),0]}));
-        downStream.push({x:1,y:[-threshold,0]});
-        downStream[downStream.length-2].y[0] =-threshold;
+        function getUpdtream(range) {
+            let upStream = range.map(d => ({x: d , y: [0, Math.random() * (1 - threshold)]}));
+            upStream.push({x: range[range.length-1], y: [0, 0]});
+            upStream[0].y[1] = 1 - threshold;
+            upStream[1].y[1] = 1 - threshold;
+            return upStream;
+        }
+        function getDowndtream(range) {
+            let downStream = range.map(d=>({x:d,y:[Math.random()*(-threshold),0]}));
+            downStream.push({x:range[range.length-1],y:[-threshold,0]});
+            downStream[downStream.length-2].y[0] =-threshold;
+            return downStream;
+        }
         let marker = svg.selectAll('g.streamMarker').data([1-threshold,-threshold]).join('g').attr('class','streamMarker streamlegendItem')
             .attr('transform',d=>`translate(0,${streamPos-(d>0?upScale:downScale)(d)})`);
-        marker.selectAll('line').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
-            .attr('class','streamlegendItem')
+        marker.selectAll('line.threshold').data(d=>[d]).join('line').attr('stroke-dasharray','2 1')
+            .attr('class','threshold streamlegendItem')
             .attr('stroke','black')
             .attr('stroke-width',0.5)
             .attr('x1',streamxScale(0))
@@ -614,18 +620,48 @@ function drawColorLegend() {
             .attr('dy',d=>d<0?'1rem':0)
             .attr('text-anchor','middle')
             .text(d=>(d+threshold)*800)
-        svg.selectAll('path.stream').data([{values:upStream,render:area_up,color:'rgb(252, 141, 89)'},
-                {values:downStream,render:area_down,color:'steelblue'}])
+        svg.selectAll('path.stream').data([{values:getUpdtream(d3.range(0,21).map(d=>d/50)),render:area_up,color:'rgb(252, 141, 89)'},
+                {values:getDowndtream(d3.range(20,41).map(d=>d/50)),render:area_down,color:'steelblue'},
+            {values:getUpdtream(d3.range(40,46).map(d=>d/50)),render:area_up,color:'rgb(221,221,221)'},
+            {values:getDowndtream(d3.range(45,51).map(d=>d/50)),render:area_down,color:'rgb(221,221,221)'}
+                ])
             .join('path')
             .attr('class','stream streamlegendItem')
             .attr('fill',d=>d.color)
             .attr('transform',`translate(0,${streamPos})`)
             .attr('d',d=>d.render(d.values));
-        if (svg.select('line.streamMid').empty())
+        if (svg.select('line.streamMid').empty()){
             svg.append('line').attr('class','streamMid streamlegendItem').attr('transform',`translate(${streamxOffset-20},${streamPos})`)
                 .attr('x2',20)
                 .attr('stroke','black')
-                .attr('marker-end',"url(#arrowhead)")
+                .attr('marker-end',"url(#arrowhead)");
+            svg.append('line').attr('class','nojob streamlegendItem').attr('transform',`translate(0,${streamPos})`)
+                .attr('x1',streamxScale(40/50))
+                .attr('x2',streamxScale(40/50))
+                .attr('y1', downScale(0))
+                .attr('y2', downScale(1)+12)
+                .attr('stroke-dasharray','2 1')
+                .attr('stroke','black');
+            svg.append('line').attr('class','nojob streamlegendItem').attr('transform',`translate(0,${streamPos})`)
+                .attr('x1',streamxScale(1))
+                .attr('x2',streamxScale(1))
+                .attr('y1', downScale(0))
+                .attr('y2', downScale(1)+12)
+                .attr('stroke-dasharray','2 1')
+                .attr('stroke','black');
+            svg.append('line').attr('class','nojob streamlegendItem').attr('transform',`translate(0,${streamPos+downScale(1)+5})`)
+                .attr('x1',streamxScale(40/50))
+                .attr('x2',streamxScale(1))
+                .attr('stroke','black')
+                .attr('marker-start',"url(#arrowhead)")
+                .attr('marker-end',"url(#arrowhead)");
+            svg.append('text').attr('class','nojob streamlegendItem').attr('transform',`translate(0,${streamPos+downScale(1)+5})`)
+                .attr('dy',12)
+                .attr('x',streamxScale(45/50))
+                .attr('stroke','black')
+                .attr('text-anchor','middle')
+                .text('no running jobs');
+        }
 
         contain.select('#thresholdTimeArc input').node().value = threshold*800;
         contain.select('#thresholdTimeArc input').on('change',function(){

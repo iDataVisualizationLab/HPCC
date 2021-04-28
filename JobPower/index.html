@@ -220,7 +220,7 @@
                                     <svg>
                                         <defs>
                                             <marker id="arrowhead" markerWidth="10" markerHeight="7"
-                                                    refX="10" refY="3.5" orient="auto">
+                                                    refX="10" refY="3.5" orient="auto-start-reverse">
                                                 <polygon points="0 0, 10 3.5, 0 7" />
                                             </marker>
                                         </defs>
@@ -389,15 +389,16 @@
                         <div id="jobOnToolbarHolder" class="tab-pane fade col-12  show active" role="tabpanel">
                             <div class="row input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <select class="custom-select" id="jobValueType">
+                                    <select class="custom-select" id="jobValueType" style="width:60px">
                                         <option selected value="mean">Mean</option>
                                         <option value="min">Min</option>
                                         <option value="max">Max</option>
                                     </select>
-                                    <select class="custom-select" id="jobFilterType">
-                                        <option selected value="top">Top</option>
-                                        <option value="morethan">Greater than</option>
-                                    </select>
+                                    <span class="input-group-text">Top</span>
+<!--                                    <select class="custom-select" id="jobFilterType">-->
+<!--                                        <option selected value="top">Top</option>-->
+<!--                                        <option value="morethan">Greater than</option>-->
+<!--                                    </select>-->
                                 </div>
                                 <input type="number" class="form-control" id="JobFilterThreshold" value="100">
                                 <div class="input-group-append" id="button-addon4">
