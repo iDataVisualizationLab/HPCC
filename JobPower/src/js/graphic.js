@@ -677,7 +677,10 @@ function drawColorLegend() {
         contain.select('#thresholdTimeArc input').on('change',function(){
             updateProcess({percentage:50,text:'render streams'});
             setTimeout(()=>{
-                subObject.timearc.drawThreshold(+this.value/800);
+                const newThreshold = +this.value/800;
+                subObject.graphicopt().display.stream.yScaleUp.domain([0,1-newThreshold]);
+                subObject.graphicopt().display.stream.yScaleDown.domain([-newThreshold,0]);
+                subObject.timearc.drawThreshold(newThreshold);
                 drawColorLegend();
                 updateProcess();
             },1);
