@@ -143,7 +143,7 @@
             .attr('data-aos',(d,i)=>(i%2)?'fade-left':'fade-right')
             .attr('id',d=>str2class(d.key))
             .html((d,i)=>`${i?'<hr>':''}<div class="row justify-content-between"><h3>${d.key}</h3>
-    <a type="button" class="btn btn-success float-right" href="${d.value.url}" target="_blank">Demo</a></div><ul>
+    <div >${(d.value.url_stable??[]).map((u,i)=>`<a type="button" class="btn btn-primary m-1" href="${u}" target="_blank">Stable v${i+1}</a>`).join('')}<a type="button" class="btn btn-success m-1" href="${d.value.url}" target="_blank">Demo</a></div></div><ul>
     <li>Pros:<ul>${d.value.pros.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     <li>Cons:<ul>${d.value.cons.map(e=>`<li>${e}</li>`).join('')}</ul></li>
     ${d.value.publication?'<li>Publications:<ul>'+d.value.publication.map(p=>`<li>${p.author},<strong>"${p.title}"</strong> <em>${p.venue}</em>. ${p.year}. DOI: <a href="${p.DOI}">${p.DOI}</a></li>`).join('')+'</ul></li>':''}
