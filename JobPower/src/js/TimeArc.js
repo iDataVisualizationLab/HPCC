@@ -1988,7 +1988,7 @@ d3.TimeArc = function () {
             .attr("x", xStep)
             // .attr("y", graphicopt.heightG()-25)
             .attr("width", XGAP_ * listX.length)
-            .attr("height", 25)
+            .attr("height", 17)
             .on("mouseout", function () {
                 // isLensing = false;
                 coordinate = d3.mouse(this);

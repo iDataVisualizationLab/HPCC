@@ -678,6 +678,7 @@ function drawColorLegend() {
             updateProcess({percentage:50,text:'render streams'});
             setTimeout(()=>{
                 subObject.timearc.drawThreshold(+this.value/800);
+                drawColorLegend();
                 updateProcess();
             },1);
         })
