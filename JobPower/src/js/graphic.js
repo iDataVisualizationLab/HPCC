@@ -666,7 +666,7 @@ function drawColorLegend() {
                 .attr('marker-start',"url(#arrowhead)")
                 .attr('marker-end',"url(#arrowhead)");
             svg.append('text').attr('class','nojob streamlegendItem').attr('transform',`translate(0,${streamPos+downScale(1)+5})`)
-                .attr('dy',12)
+                .attr('dy',14)
                 .attr('x',streamxScale(45/50))
                 .attr('stroke','black')
                 .attr('text-anchor','middle')
