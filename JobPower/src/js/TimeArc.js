@@ -1501,40 +1501,40 @@ d3.TimeArc = function () {
     }
 
     timeArc.update = (isforce) => {
-        let marker;
-        nodes.forEach(function (d, i) {
-
-            d.x += (graphicopt.widthG() / 2 - d.x || 0) * 0.05;
-            if (d.parentNode >= 0) {
-                d.y += (nodes[d.parentNode].y - d.y || 0) * 0.5;
-                // d.y = nodes[d.parentNode].y;
-            } else if (d.childNodes) {
-                var yy = 0;
-                for (var i = 0; i < d.childNodes.length; i++) {
-                    var child = d.childNodes[i];
-                    yy += nodes[child].y;
+            if (force.alpha()!==0){
+            let marker;
+            nodes.forEach(function (d, i) {
+                d.x += (graphicopt.widthG() / 2 - d.x || 0) * 0.05;
+                if (d.parentNode >= 0) {
+                    d.y += (nodes[d.parentNode].y - d.y || 0) * 0.5;
+                    // d.y = nodes[d.parentNode].y;
+                } else if (d.childNodes) {
+                    var yy = 0;
+                    for (var i = 0; i < d.childNodes.length; i++) {
+                        var child = d.childNodes[i];
+                        yy += nodes[child].y;
+                    }
+                    if (d.childNodes.length > 0) {
+                        yy = yy / d.childNodes.length; // average y coordinate
+                        d.y += (yy - d.y) * 0.2;
+                    }
                 }
-                if (d.childNodes.length > 0) {
-                    yy = yy / d.childNodes.length; // average y coordinate
-                    d.y += (yy - d.y) * 0.2;
+
+                if (runopt.termGroup[d.name]) {
+                    if (marker)
+                        d.y = marker
+                    else
+                        marker = d.y
                 }
-            }
+            });
 
-            if (runopt.termGroup[d.name]) {
-                if (marker)
-                    d.y = marker
-                else
-                    marker = d.y
-            }
-        });
-
-        nodeG.attr("transform", function (d) {
-            return "translate(" + d.x + "," + d.y + ")"
-        })
-        linkArcs.style("stroke-width", function (d) {
-            return d.value;
-        });
-
+            nodeG.attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")"
+            })
+            linkArcs.style("stroke-width", function (d) {
+                return d.value;
+            });
+}
         if (!isforce) {
             let layerpath = svg.selectAll(".layer")
                 .selectAll('path.layerpath')
@@ -1577,7 +1577,6 @@ d3.TimeArc = function () {
             }
             nodeY_byName[d.name] = d.y;
         });
-
 
         nodeG.transition().duration(durationTime).attr("transform", function (d) {
             d.xConnected = xStep + xScale(d.isConnectedmaxTimeIndex);
