@@ -441,8 +441,9 @@ d3.TimeArc = function () {
         drawLensingButton();
 
         $(function () {
-            $(graphicopt.containHolder + " #search").autocomplete({
-                data: Array2Object(termArray)
+            $("#search").autocomplete({
+            // $(graphicopt.containHolder + " #search").autocomplete({
+                source : Array2Object(termArray)
             });
         });
         recompute();
