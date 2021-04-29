@@ -209,10 +209,12 @@ handleDataComputeByUser.mode = 'core';
 function handleDataComputeByJob({computers,jobs:_jobs}){
     const jobs = {};
     Layout.jobarrdata = {};
+    Layout.minMaxDataCompJob = {};
     Object.keys(_jobs).forEach(k=>{
         // if (_jobs[k].total_nodes>1){
             jobs[k] = _jobs[k];
             Layout.jobarrdata[k] = [];
+            Layout.minMaxDataCompJob[k] = [];
         // }
     });
 
@@ -251,11 +253,21 @@ function handleDataComputeByJob({computers,jobs:_jobs}){
     Object.keys(Layout.jobarrdata).forEach(k=>{
         Layout.jobarrdata[k].forEach((d,i)=>{
             const timestep = Layout.jobarrdata[k][i][0].timestep;
+            let valueMin = [];
+            let valueMax = [];
             let value = Layout.jobarrdata[k][i][0].map((d,si)=>{
-                return  d3.mean(Layout.jobarrdata[k][i],d=>d[si]);
+                const vals = Layout.jobarrdata[k][i].map(d=>d[si]);
+                valueMin.push(d3.min(vals));
+                valueMax.push(d3.max(vals));
+                return  d3.mean(vals);
             });
             value.name = k;
+            valueMin.name = k;
+            valueMax.name = k;
             value.timestep = timestep;
+            valueMin.timestep = timestep;
+            valueMax.timestep = timestep;
+            Layout.minMaxDataCompJob[k][i] = [valueMin,valueMax]
             Layout.jobarrdata[k][i] = value;
         })
     })
@@ -296,12 +308,14 @@ function handleDataComputeByUser_core(computers,jobs){
     debugger
     let data = [];
     let obj = {};
+    let noJobMap = {};
     for (let j in jobs){
-        obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j]};
+        obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j],arr:[]};
         data.push(obj[j]);
     }
     for (let comp in computers){
-        let jonj = {}
+        let jonj = {};
+        noJobMap[comp] = [];
         computers[comp].job_id.forEach((jIDs,i)=>{
             if (jIDs.length){
                 jIDs.forEach(j=>{
@@ -311,17 +325,21 @@ function handleDataComputeByUser_core(computers,jobs){
                             item.values[i] = [];
                             item.values[i].total = 0;
                         }
-                        item.values[i].push({key:comp,value:jobs[j].node_list_obj[comp]});
+                        const compData = {key:comp,type:'compute',value:1}
+                        item.values[i].push(compData);
                         item.values[i].total += jobs[j].node_list_obj[comp];
-                        item[Layout.timespan[i]] = item.values[i];
+                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1}]});
                         jonj[j]=true;
                     }
                 });
+            }else{
+                noJobMap[comp][i] = 1;
             }
         });
     }
+    debugger
     // data.sort((a,b)=>+a.range[0]-b.range[0])
-    return data;
+    return {data,noJobMap};
 }
 function handleDataComputeByUser_compute(computers,jobs){
     let data = [];
@@ -348,6 +366,7 @@ function handleRankingData(data){
     let r = handleSmalldata(data);
     let sampleS = r.sampleh;
     tsnedata = r.tsnedata;
+    Layout.minMaxDataComp = r.minMaxData;
     let {computers,jobs,users,jobByNames} = handleData(data);
     Layout.timeRange = [sampleS.timespan[0],sampleS.timespan[sampleS.timespan.length-1]];
     Layout.jobsStatic = jobs;
@@ -384,7 +403,9 @@ function handleRankingData(data){
     Layout.timespan = sampleS.timespan;
 
     handleDataComputeByUser.data = {computers,jobs};
-    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
+    const result = handleDataComputeByUser(handleDataComputeByUser.data);
+    Layout.userTimeline = result.data;
+    Layout.noJobMap = result.noJobMap;
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
 
     Object.values(Layout.jobsStatic).forEach(d=>{
