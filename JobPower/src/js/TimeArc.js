@@ -457,27 +457,27 @@ d3.TimeArc = function () {
     }
 
     function recompute(isSkipforce) {
-        var bar = d3.select('#progBar').node(),
-            fallback = d3.select('#downloadProgress').node(),
-            loaded = 0;
-
-        var load = function () {
-            loaded += 1;
-            bar.value = loaded;
-
-            /* The below will be visible if the progress tag is not supported */
-            $(fallback).empty().append("HTML5 progress tag not supported: ");
-            $('#progUpdate').empty().append(loaded + "% loaded");
-
-            if (loaded == 90) {
-                clearInterval(beginLoad);
-                $('#progUpdate').empty().append("Compute position");
-            }
-        };
-
-        var beginLoad = setInterval(function () {
-            load();
-        }, 10);
+        // var bar = d3.select('#progBar').node(),
+        //     fallback = d3.select('#downloadProgress').node(),
+        //     loaded = 0;
+        //
+        // var load = function () {
+        //     loaded += 1;
+        //     bar.value = loaded;
+        //
+        //     /* The below will be visible if the progress tag is not supported */
+        //     $(fallback).empty().append("HTML5 progress tag not supported: ");
+        //     $('#progUpdate').empty().append(loaded + "% loaded");
+        //
+        //     if (loaded == 90) {
+        //         clearInterval(beginLoad);
+        //         $('#progUpdate').empty().append("Compute position");
+        //     }
+        // };
+        //
+        // var beginLoad = setInterval(function () {
+        //     load();
+        // }, 10);
         setTimeout(alertFunc, 333);
 
         function alertFunc() {
@@ -694,17 +694,19 @@ d3.TimeArc = function () {
 
     let offsetYStream = 0;
     timeArc.updateDrawData = () => {
-        pNodes.forEach(d => {
-            getDrawData(d);
-        });
-        let layerpath = svg.selectAll(".layer")
-            .selectAll('path.layerpath')
-            .data(d => d.drawData);
-        layerpath.call(updatelayerpath);
-        layerpath.exit().remove();
-        layerpath.enter().append('path')
-            .attr('class', 'layerpath')
-            .call(updatelayerpath);
+        if(force.alpha()===0){
+            pNodes.forEach(d => {
+                getDrawData(d);
+            });
+            let layerpath = svg.selectAll(".layer")
+                .selectAll('path.layerpath')
+                .data(d => d.drawData);
+            layerpath.call(updatelayerpath);
+            layerpath.exit().remove();
+            layerpath.enter().append('path')
+                .attr('class', 'layerpath')
+                .call(updatelayerpath);
+        }
     }
 
     function getDrawData(n) {
@@ -1635,8 +1637,8 @@ d3.TimeArc = function () {
     let step;
 
     function detactTimeSeries() {
-        document.getElementById('progBar').value = 100;
-        $('#progUpdate').empty().append("Done");
+        // document.getElementById('progBar').value = 100;
+        // $('#progUpdate').empty().append("Done");
         // console.log("DetactTimeSeries ************************************" +data);
         var termArray = [];
         var markedTerm = Object.keys(runopt.termGroup)[0];
@@ -1991,13 +1993,15 @@ d3.TimeArc = function () {
                 // isLensing = false;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0] - xStep) / XGAP_);
-                updateTransition(250);
+                if(isLensing)
+                    updateTransition(250);
             })
             .on("mousemove", function () {
                 // isLensing = true;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0] - xStep) / XGAP_);
-                updateTransition(250);
+                if(isLensing)
+                    updateTransition(250);
             });
     }
 

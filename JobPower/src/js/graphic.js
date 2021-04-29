@@ -54,7 +54,11 @@ function initdraw(){
     d3.select('#flowType').on('change',function(){
         const val = $(this).val();
         timeArcopt.minMaxStream = (val==='minmax');
-        subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream}).updateDrawData();
+        updateProcess({percentage:50,text:'render streams'});
+        setTimeout(()=>{
+            subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream}).updateDrawData();
+            updateProcess();
+        },0)
     })
 }
 function userTable(d,type){
@@ -457,13 +461,19 @@ function drawJobList(){
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     d3.select('#JobListFilter').on('click',()=>{
         drawJobList();
-        subObject._filter = subObject.filterTerms();
-        subObject.draw();
+        updateProcess({percentage:50,text:'render streams'});
+        setTimeout(()=>{
+            subObject._filter = subObject.filterTerms();
+            subObject.draw();
+        },0)
     });
     d3.select('#jobValueType').on('change',()=>{
         d3.select('.JobFilterType').text(()=>$(d3.select('#jobValueType').node()).val())
         drawJobList();
-        subObject.draw();
+        updateProcess({percentage:50,text:'render streams'});
+        setTimeout(()=>{
+            subObject.draw();
+        },0)
     });
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
@@ -665,7 +675,11 @@ function drawColorLegend() {
 
         contain.select('#thresholdTimeArc input').node().value = threshold*800;
         contain.select('#thresholdTimeArc input').on('change',function(){
-            subObject.timearc.drawThreshold(+this.value/800)
+            updateProcess({percentage:50,text:'render streams'});
+            setTimeout(()=>{
+                subObject.timearc.drawThreshold(+this.value/800);
+                updateProcess();
+            },1);
         })
     }else{
         contain.select('#thresholdTimeArc').classed('hide',true);
