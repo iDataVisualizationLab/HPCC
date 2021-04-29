@@ -744,6 +744,7 @@ d3.TimeArc = function () {
                         up: false
                     })
             }
+            n.drawData = drawData;
         } else {
             n.noneSymetric = true;
             const drawData = [{
