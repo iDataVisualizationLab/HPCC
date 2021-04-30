@@ -201,3 +201,15 @@ div.subgraph:hover .closeButton {
     stroke: currentColor;
     stroke-dasharray: 4 2;
 }
+
+table thead th {
+    text-align: center;
+    vertical-align: middle !important;
+}
+
+table tbody td {
+    text-align: right;
+}
+table td.selected {
+    font-weight: bold;
+}

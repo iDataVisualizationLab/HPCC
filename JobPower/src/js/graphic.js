@@ -53,7 +53,13 @@ function serviceControl(){
         .attr('class',d=>d.text==='User'?'innerName':null)
         .attr('data-value',(d,i)=>d)
         .attr('selected',(d,i)=>i===serviceSelected?'':null)
-        .text(d=>d.text+' '+d.mode)
+        .text(d=>d.text+' '+d.mode);
+    d3.select('#jobValueName')
+        .selectAll('option')
+        .data(serviceFullList)
+        .join('option')
+        .attr('value',d=>d.idroot)
+        .text(d=>d.text);
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
@@ -474,7 +480,8 @@ function drawUserList(){
 function drawJobList(){
     const _jobValueType= $(d3.select('#jobValueType').node()).val();
     const _jobFilterType= 'top'//$(d3.select('#jobFilterType').node()).val();
-    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value.summary[serviceSelected][_jobValueType]-a.value.summary[serviceSelected][_jobValueType]);
+    const _jobValueName=  $(d3.select('#jobValueName').node()).val();
+    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value.summary[_jobValueName][_jobValueType]-a.value.summary[_jobValueName][_jobValueType]);
     let data = _data;
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     d3.select('#JobListFilter').on('click',()=>{
@@ -493,6 +500,13 @@ function drawJobList(){
             subObject.draw();
         },0)
     });
+    d3.select('#jobValueName').on('change',()=>{
+        drawJobList();
+        updateProcess({percentage:50,text:'render streams'});
+        setTimeout(()=>{
+            subObject.draw();
+        },0)
+    });
     if (_jobFilterType==='top'){
         data = _data.slice(0,_JobFilterThreshold);
     }else{
@@ -504,14 +518,19 @@ function drawJobList(){
     let job_info = d3.select('#JobList table tbody')
         .selectAll('tr').data(data)
         .join('tr');
-    d3.select('#JobList table .header').selectAll('th').data(['Job ID',...serviceFullList.map(s=>_jobValueType+' '+s.text),'#Nodes','#Cores'])
+    const column = serviceFullList.map(s=>s.text);
+
+    d3.select('#JobList table .jobValType').attr('colspan',serviceFullList.length).text(_jobValueType);
+    d3.select('#JobList table .header').selectAll('th').data(column)
         .join('th')
+        .style('background-color',d=>d===serviceFullList[_jobValueName].text?'#b0ff6b':null)
         .text(d=>d);
     debugger
     job_info
-        .selectAll('td').data(d=>[{key:'jobid',value:d.key},...serviceFullList.map(s=>({key:s.text,value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType])*100)/100})),{key:'compute',value:d.value.total_nodes},{key:'core',value:d.value.cpu_cores}])
+        .selectAll('td').data(d=>[{key:'jobid',value:d.key},...serviceFullList.map(s=>({key:s.text,value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType])*100)/100})),{key:'compute',value:d.value.total_nodes},{key:'user',value:d.value.user_name}])
         .join('td')
         .style('text-align',d=>(d.key==='averagePower'||d.key==='compute'||d.key==='core')?'end':null)
+    .style('min-width','50px')
         // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
         .text(d=>d.value);
     // subObject.mouseoverAdd('userlist',function(d){

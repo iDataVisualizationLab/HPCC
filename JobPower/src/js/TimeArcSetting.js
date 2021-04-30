@@ -172,7 +172,7 @@ function handle_data_timeArc () {
     const keys = Layout.timespan//.slice(0,10);
     let scheme ={limitColums : [0,10],
         limitTime : [keys[0],keys[keys.length-1]],
-        time: {rate:5,unit:'Minute'},
+        time: {rate:1,unit:'Minute'},
         // timeLink: {rate:5,unit:'Minute'},
         timeformat: d3.timeDay.every(1),
     };

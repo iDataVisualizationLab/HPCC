@@ -395,6 +395,9 @@
                                         <option value="min">Min</option>
                                         <option value="max">Max</option>
                                     </select>
+                                    <select class="custom-select" id="jobValueName" style="width:90px; background-color: #b0ff6b">
+
+                                    </select>
                                     <span class="input-group-text">Top</span>
 <!--                                    <select class="custom-select" id="jobFilterType">-->
 <!--                                        <option selected value="top">Top</option>-->
@@ -418,11 +421,14 @@
                                  data-minimize="controlHolderMenu" style="max-height: 300px;">
                                 <table class="table">
                                     <thead>
+                                    <tr>
+                                        <th rowspan="2">Job ID</th>
+                                        <th class="jobValType">mean</th>
+                                        <th rowspan="2">#Nodes</th>
+<!--                                        <th rowspan="2">#Cores</th>-->
+                                        <th rowspan="2">user</th>
+                                    </tr>
                                     <tr class="header">
-                                        <th>Job ID</th>
-                                        <th>Power</th>
-                                        <th>#Nodes</th>
-                                        <th>#Cores</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>

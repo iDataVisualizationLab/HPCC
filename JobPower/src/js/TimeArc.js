@@ -225,8 +225,8 @@ d3.TimeArc = function () {
 
 //Set up the force layout
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-12))
-            .force("link", d3.forceLink().distance(d => d.__timestep__ / 100))
+            .force("charge", d3.forceManyBody().strength(-100))
+            .force("link", d3.forceLink().distance(d => d.__timestep__/10).strength(0.9))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
             .force('y', d3.forceY(0).strength(0.015))
@@ -492,7 +492,7 @@ d3.TimeArc = function () {
                 console.log(links)
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force("link", d3.forceLink(links).distance(d => d.__timestep__ / 100))
+                    .force("link", d3.forceLink(links).distance(d => d.__timestep__/2).strength(0.3))
                 // .force('link').links(links);
                 force.alpha(1);
                 force.restart();
@@ -1149,6 +1149,7 @@ d3.TimeArc = function () {
                     }
                 }
             }
+            debugger
         }
 
         // var linear = (150+numNode)/200;
@@ -1782,7 +1783,6 @@ d3.TimeArc = function () {
                 yDownerScale = graphicopt.display.stream.yScaleDown;
             }
             if(changeService&& pNodes){
-                debugger
                 pNodes.forEach(n=>{
                     n.monthly = [];
                     if (data.minMaxData[n.name] && data.tsnedata[n.name]) {
