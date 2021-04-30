@@ -74,7 +74,7 @@ function handleDataUrl(dataRaw) {
     let data = dataRaw.nodes_info;
     sampleh.timespan = time_stamp.map(d=>d*1000);
     scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
-    debugger
+
     hosts.forEach(h => {
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
@@ -106,7 +106,6 @@ function handleDataUrl(dataRaw) {
     return{sampleS:sampleh,tsnedata:tsnedata};
 }
 function handleSmalldata(dataRaw){
-    debugger
     let hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
         return {
             ip: ip,
@@ -128,7 +127,6 @@ function handleSmalldata(dataRaw){
         minMaxData[h.name] = [];
         ser.forEach(s => sampleh[h.name][s] = []);
         alternative_service.forEach((sa, si) => {
-            debugger
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
                 let value = [];

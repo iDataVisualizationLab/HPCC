@@ -418,10 +418,18 @@ function handleRankingData(data){
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
 
     Object.values(Layout.jobsStatic).forEach(d=>{
-        d.mean = Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):null;
-        d.range = Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):[null,null];
-        d.min = d.range[0];
-        d.max = d.range[1];
+        d.summary = serviceFullList.map((s,si)=>{
+            const val = {mean: Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):null,
+            range: Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):[null,null]}
+            val.min = val.range[0];
+            val.max = val.range[1];
+            return val
+        })
+
+        // d.mean = Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):null;
+        // d.range = Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):[null,null];
+        // d.min = d.range[0];
+        // d.max = d.range[1];
     });
 
 

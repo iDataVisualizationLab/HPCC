@@ -29,7 +29,6 @@ let vizservice=[];
 //         .text(d=>d.text)
 // }
 function serviceControl(){
-    debugger
     vizservice = [];
     serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'});vizservice.push({...s,mode:'minmax'}); });
     // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
@@ -475,7 +474,7 @@ function drawUserList(){
 function drawJobList(){
     const _jobValueType= $(d3.select('#jobValueType').node()).val();
     const _jobFilterType= 'top'//$(d3.select('#jobFilterType').node()).val();
-    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value[_jobValueType]-a.value[_jobValueType]);
+    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value.summary[serviceSelected][_jobValueType]-a.value.summary[serviceSelected][_jobValueType]);
     let data = _data;
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     d3.select('#JobListFilter').on('click',()=>{
@@ -504,22 +503,13 @@ function drawJobList(){
 
     let job_info = d3.select('#JobList table tbody')
         .selectAll('tr').data(data)
-        .join('tr')
-        // .on('mouseover',function(d){
-        //     if(!subObject.isFreeze()){
-        //         d3.select(this).classed('highlight',true);
-        //         subObject.highlight([d.key])
-        //     }
-        // }).on('mouseout',function(d){
-        //     if(!subObject.isFreeze()){
-        //         d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
-        //         subObject.releasehighlight();
-        //     }
-        // }).on('click',function(d){
-        //     subObject.freezeHandle.bind(this)();
-        // });
+        .join('tr');
+    d3.select('#JobList table .header').selectAll('th').data(['Job ID',...serviceFullList.map(s=>_jobValueType+' '+s.text),'#Nodes','#Cores'])
+        .join('th')
+        .text(d=>d);
+    debugger
     job_info
-        .selectAll('td').data(d=>[{key:'jobid',value:d.key},{key:'averagePower',value:Math.round(d.value[_jobValueType]*800*100)/100},{key:'compute',value:d.value.total_nodes},{key:'core',value:d.value.cpu_cores}])
+        .selectAll('td').data(d=>[{key:'jobid',value:d.key},...serviceFullList.map(s=>({key:s.text,value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType])*100)/100})),{key:'compute',value:d.value.total_nodes},{key:'core',value:d.value.cpu_cores}])
         .join('td')
         .style('text-align',d=>(d.key==='averagePower'||d.key==='compute'||d.key==='core')?'end':null)
         // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
