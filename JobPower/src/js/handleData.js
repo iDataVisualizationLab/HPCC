@@ -225,21 +225,21 @@ function handleDataComputeByJob({computers,jobs:_jobs}){
         computers[comp].job_id.forEach((jIDs,i)=>{
             let jobArr = jIDs.map(j=>jobs[j]).filter(d=>{
                 if (d){
-                    if (!Layout.jobarrdata[d.job_name][i])
-                        Layout.jobarrdata[d.job_name][i]=[];
-                    Layout.jobarrdata[d.job_name][i].push(tsnedata[comp][i]);
+                    if (!Layout.jobarrdata[d.job_id][i])
+                        Layout.jobarrdata[d.job_id][i]=[];
+                    Layout.jobarrdata[d.job_id][i].push(tsnedata[comp][i]);
                     return true;
                 }
                 return false
             });
-            const key = jobArr.map(d=>d.job_name);
+            const key = jobArr.map(d=>d.job_id);
             if (!job[key])
                 job[key]=true;
             else
                 jobArr=[];
 
             if (jobArr.length){
-                let username = d3.nest().key(d=>d.job_name)
+                let username = d3.nest().key(d=>d.job_id)
                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
                 username.total = d3.sum(username,e=>e.value)
                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
@@ -386,7 +386,16 @@ function handleRankingData(data){
             let sorteddata = hosts.map(h=>{
                 if(!ranking.byComputer[h][ser.text])
                     ranking.byComputer[h][ser.text] = [];
-                return {key:h,value:sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],user:_.uniq(computers[h].job_id[ti].map(j=>jobs[j].user_name))};
+                try {
+                    return {
+                        key: h,
+                        value: sampleS[h][serviceListattr[ser.idroot]][ti][ser.id],
+                        user: _.uniq(computers[h].job_id[ti].map(j => jobs[j].user_name))
+                    };
+                }catch(e){
+                    debugger
+                    console.log(h,ti,job_id[ti])
+                }
             }).sort((a,b)=>-b.value+a.value);
             sorteddata.forEach((d,i)=>{
                 ranking.byMetric[ser.text][ti][d.key] = d.value;
@@ -409,8 +418,8 @@ function handleRankingData(data){
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
 
     Object.values(Layout.jobsStatic).forEach(d=>{
-        d.mean = Layout.jobarrdata[d.job_name]?d3.mean(Layout.jobarrdata[d.job_name],d=>d?d[0]:undefined):null;
-        d.range = Layout.jobarrdata[d.job_name]?d3.extent(Layout.jobarrdata[d.job_name],d=>d?d[0]:undefined):[null,null];
+        d.mean = Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):null;
+        d.range = Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):[null,null];
         d.min = d.range[0];
         d.max = d.range[1];
     });

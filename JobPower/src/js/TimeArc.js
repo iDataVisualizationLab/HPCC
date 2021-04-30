@@ -38,6 +38,7 @@ d3.TimeArc = function () {
     let svg, force;
     let UnitArray = ['Minute', 'Hour', 'Day', 'Month', 'Year'];
     let drawThreshold = 650 / 800;
+    let pNodes;
     var node_drag = d3.drag()
         .on("start", dragstart)
         .on("drag", dragmove)
@@ -1003,7 +1004,7 @@ d3.TimeArc = function () {
             const n = nodes[i];
             n.monthly = [];
             if (data.minMaxData[n.name] && data.tsnedata[n.name]) {
-                const selected = data.selectedService;
+                const selected = graphicopt.selectedService;
                 data.tsnedata[n.name].forEach((d, ti) => {
                     var mon = new Object();
                     if (data.minMaxData[n.name][ti][1])
@@ -1770,6 +1771,7 @@ d3.TimeArc = function () {
     };
     timeArc.graphicopt = function (_) {
         if (arguments.length) {
+            const changeService = (_.selectedService!==graphicopt.selectedService);
             for (var i in _) {
                 if ('undefined' !== typeof _[i]) {
                     graphicopt[i] = _[i];
@@ -1778,6 +1780,33 @@ d3.TimeArc = function () {
             if (_.display && _.display.stream && _.display.stream.yScaleUp && _.display.stream.yScaleDown) {
                 yUpperScale = graphicopt.display.stream.yScaleUp;
                 yDownerScale = graphicopt.display.stream.yScaleDown;
+            }
+            if(changeService&& pNodes){
+                debugger
+                pNodes.forEach(n=>{
+                    n.monthly = [];
+                    if (data.minMaxData[n.name] && data.tsnedata[n.name]) {
+                        const selected = graphicopt.selectedService;
+                        data.tsnedata[n.name].forEach((d, ti) => {
+                            var mon = new Object();
+                            if (data.minMaxData[n.name][ti][1])
+                                mon.value = [data.minMaxData[n.name][ti][0][selected], d[selected], data.minMaxData[n.name][ti][1][selected]];
+                            else
+                                mon.value = [undefined, undefined, undefined]
+                            mon.monthId = timeScaleIndex(data.timespan[d.timestep]);
+                            mon.yNode = n.y;
+                            n.monthly.push(mon);
+                        });
+                        // Add another item to first
+                        if (n.monthly.length > 0) {
+                            // Add another item
+                            var lastObj = n.monthly[n.monthly.length - 1];
+                            if (lastObj.monthId < totalTimeSteps - 1) {
+                                n.monthly.push(lastObj);
+                            }
+                        }
+                    }
+                });
             }
             return timeArc
         } else

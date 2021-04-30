@@ -206,7 +206,7 @@ function handle_data_timeArc () {
     scheme.data.tsnedata = {...tsnedata,...Layout.jobarrdata};
     scheme.data.minMaxData = {...Layout.minMaxDataComp,...Layout.minMaxDataCompJob};
     scheme.data.emptyMap=Layout.noJobMap
-    scheme.data.selectedService = 0;
+    timeArcopt.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
     const catergogryList=[{key: 'job', value: {customcolor: 'red',upperColor:'red'}},{key: 'compute', value: {customcolor: 'black'}}];

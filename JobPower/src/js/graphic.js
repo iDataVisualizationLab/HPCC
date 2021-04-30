@@ -6,27 +6,55 @@ d3.selection.prototype.moveToFront = function() {
 };
 //general function
 let vizservice=[];
+// function serviceControl(){
+//     vizservice =serviceFullList.slice();
+//     vizservice.push({text:'User',range:[]});
+//     vizservice.push({text:'Radar',range:[]});
+//     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
+//     d3.select('#serviceSelection')
+//         .on('change',function(){
+//             serviceSelected = +$(this).val();
+//             d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
+//             createdata();
+//             currentDraw();
+//         })
+//         .selectAll('option')
+//         .data(vizservice)
+//         .enter()
+//         .append('option')
+//         .attr('value',(d,i)=>i)
+//         .attr('class',d=>d.text==='User'?'innerName':null)
+//         .attr('data-value',(d,i)=>d)
+//         .attr('selected',(d,i)=>i===serviceSelected?'':null)
+//         .text(d=>d.text)
+// }
 function serviceControl(){
-    vizservice =serviceFullList.slice();
-    vizservice.push({text:'User',range:[]});
-    vizservice.push({text:'Radar',range:[]});
-    d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
-    d3.select('#serviceSelection')
+    debugger
+    vizservice = [];
+    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'});vizservice.push({...s,mode:'minmax'}); });
+    // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
+    d3.select('#flowType')
         .on('change',function(){
-            serviceSelected = +$(this).val();
-            d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
-            createdata();
-            currentDraw();
+            const selectedSers = $(this).val().split('|');
+            serviceSelected = +selectedSers[1];
+
+            const val = selectedSers[0];
+            timeArcopt.minMaxStream = (val==='minmax');
+            updateProcess({percentage:50,text:'render streams'});
+            setTimeout(()=>{
+                subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                drawColorLegend();
+                updateProcess();
+            },0)
         })
         .selectAll('option')
         .data(vizservice)
-        .enter()
-        .append('option')
-        .attr('value',(d,i)=>i)
+        .join('option')
+        .attr('value',(d,i)=>d.mode+'|'+d.idroot)
         .attr('class',d=>d.text==='User'?'innerName':null)
         .attr('data-value',(d,i)=>d)
         .attr('selected',(d,i)=>i===serviceSelected?'':null)
-        .text(d=>d.text)
+        .text(d=>d.text+' '+d.mode)
 }
 function initdraw(){
     $('.informationHolder').draggable({ handle: ".card-header" ,scroll: false });
@@ -51,15 +79,6 @@ function initdraw(){
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
     });
 
-    d3.select('#flowType').on('change',function(){
-        const val = $(this).val();
-        timeArcopt.minMaxStream = (val==='minmax');
-        updateProcess({percentage:50,text:'render streams'});
-        setTimeout(()=>{
-            subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream}).updateDrawData();
-            updateProcess();
-        },0)
-    })
 }
 function userTable(d,type){
     highlight2Stack = [];
@@ -629,7 +648,7 @@ function drawColorLegend() {
             .attr('x',streamxScale(0.5))
             .attr('dy',d=>d<0?'1rem':0)
             .attr('text-anchor','middle')
-            .text(d=>(d+threshold)*800)
+            .text(d=>scaleService[serviceSelected].invert(d+threshold))
         svg.selectAll('path.stream').data([{values:getUpdtream(d3.range(0,21).map(d=>d/50)),render:area_up,color:'rgb(252, 141, 89)'},
                 {values:getDowndtream(d3.range(20,41).map(d=>d/50)),render:area_down,color:'steelblue'},
             {values:getUpdtream(d3.range(40,46).map(d=>d/50)),render:area_up,color:'rgb(221,221,221)'},
@@ -673,11 +692,11 @@ function drawColorLegend() {
                 .text('no running jobs');
         }
 
-        contain.select('#thresholdTimeArc input').node().value = threshold*800;
+        contain.select('#thresholdTimeArc input').node().value = scaleService[serviceSelected].invert(threshold);
         contain.select('#thresholdTimeArc input').on('change',function(){
             updateProcess({percentage:50,text:'render streams'});
             setTimeout(()=>{
-                const newThreshold = +this.value/800;
+                const newThreshold = scaleService[serviceSelected](+this.value);
                 subObject.graphicopt().display.stream.yScaleUp.domain([0,1-newThreshold]);
                 subObject.graphicopt().display.stream.yScaleDown.domain([-newThreshold,0]);
                 subObject.timearc.drawThreshold(newThreshold);
