@@ -206,15 +206,22 @@ handleDataComputeByUser.mode = 'core';
 //     data.sort((a,b)=>+a.range[0]-b.range[0])
 //     return data;
 // }
-function handleDataComputeByJob({computers,jobs:_jobs}){
+function handleDataComputeByJob({computers,jobs:_jobs,users:_users}){
     const jobs = {};
+    const users = {};
     Layout.jobarrdata = {};
+    Layout.userarrdata = {};
     Layout.minMaxDataCompJob = {};
+    Layout.minMaxDataUser = {};
     Object.keys(_jobs).forEach(k=>{
         // if (_jobs[k].total_nodes>1){
-            jobs[k] = _jobs[k];
-            Layout.jobarrdata[k] = [];
-            Layout.minMaxDataCompJob[k] = [];
+        jobs[k] = _jobs[k];
+        Layout.jobarrdata[k] = [];
+        Layout.minMaxDataCompJob[k] = [];
+
+        users[_jobs[k].user_name] = _users[_jobs[k].user_name];
+        Layout.userarrdata[_jobs[k].user_name] = [];
+        Layout.minMaxDataUser[_jobs[k].user_name] = [];
         // }
     });
 
@@ -225,9 +232,14 @@ function handleDataComputeByJob({computers,jobs:_jobs}){
         computers[comp].job_id.forEach((jIDs,i)=>{
             let jobArr = jIDs.map(j=>jobs[j]).filter(d=>{
                 if (d){
-                    if (!Layout.jobarrdata[d.job_id][i])
+                    if (!Layout.jobarrdata[d.job_id][i]){
                         Layout.jobarrdata[d.job_id][i]=[];
+                    }
                     Layout.jobarrdata[d.job_id][i].push(tsnedata[comp][i]);
+                    if (!Layout.userarrdata[d.user_name][i]){
+                        Layout.userarrdata[d.user_name][i] = [];
+                    }
+                    Layout.userarrdata[d.user_name][i].push(tsnedata[comp][i]);
                     return true;
                 }
                 return false
@@ -269,6 +281,28 @@ function handleDataComputeByJob({computers,jobs:_jobs}){
             valueMax.timestep = timestep;
             Layout.minMaxDataCompJob[k][i] = [valueMin,valueMax]
             Layout.jobarrdata[k][i] = value;
+        })
+    })
+
+    Object.keys(Layout.userarrdata).forEach(k=>{
+        Layout.userarrdata[k].forEach((d,i)=>{
+            const timestep = Layout.userarrdata[k][i][0].timestep;
+            let valueMin = [];
+            let valueMax = [];
+            let value = Layout.userarrdata[k][i][0].map((d,si)=>{
+                const vals = Layout.userarrdata[k][i].map(d=>d[si]);
+                valueMin.push(d3.min(vals));
+                valueMax.push(d3.max(vals));
+                return  d3.mean(vals);
+            });
+            value.name = k;
+            valueMin.name = k;
+            valueMax.name = k;
+            value.timestep = timestep;
+            valueMin.timestep = timestep;
+            valueMax.timestep = timestep;
+            Layout.minMaxDataUser[k][i] = [valueMin,valueMax]
+            Layout.userarrdata[k][i] = value;
         })
     })
 
@@ -325,10 +359,12 @@ function handleDataComputeByUser_core(computers,jobs){
                             item.values[i] = [];
                             item.values[i].total = 0;
                         }
-                        const compData = {key:comp,type:'compute',value:1}
+                        const compData = {key:comp,type:'compute',value:1};
+                        const userData = {key:jobs[j].user_name,type:'user',value:1}
                         item.values[i].push(compData);
+                        // item.values[i].push(userData);
                         item.values[i].total += jobs[j].node_list_obj[comp];
-                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1}]});
+                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1},userData]});
                         jonj[j]=true;
                     }
                 });
@@ -337,7 +373,6 @@ function handleDataComputeByUser_core(computers,jobs){
             }
         });
     }
-    debugger
     // data.sort((a,b)=>+a.range[0]-b.range[0])
     return {data,noJobMap};
 }
@@ -413,23 +448,17 @@ function handleRankingData(data){
 
     handleDataComputeByUser.data = {computers,jobs};
     const result = handleDataComputeByUser(handleDataComputeByUser.data);
-    Layout.userTimeline = result.data;
+    Layout.jobCompTimeline = result.data;
     Layout.noJobMap = result.noJobMap;
-    Layout.jobTimeline = handleDataComputeByJob({computers,jobs});
+    Layout.jobTimeline = handleDataComputeByJob({computers,jobs,users});
 
     Object.values(Layout.jobsStatic).forEach(d=>{
         d.summary = serviceFullList.map((s,si)=>{
-            const val = {mean: Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):null,
-            range: Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):[null,null]}
-            val.min = val.range[0];
-            val.max = val.range[1];
+            const val = {mean: Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):null}
+            val.min = Layout.minMaxDataCompJob[d.job_id]?d3.min(Layout.minMaxDataCompJob[d.job_id],d=>d?d[0][s.idroot]:undefined):null;
+            val.max = Layout.minMaxDataCompJob[d.job_id]?d3.max(Layout.minMaxDataCompJob[d.job_id],d=>d?d[1][s.idroot]:undefined):null;
             return val
         })
-
-        // d.mean = Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):null;
-        // d.range = Layout.jobarrdata[d.job_id]?d3.extent(Layout.jobarrdata[d.job_id],d=>d?d[0]:undefined):[null,null];
-        // d.min = d.range[0];
-        // d.max = d.range[1];
     });
 
 

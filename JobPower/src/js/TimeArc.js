@@ -158,12 +158,8 @@ d3.TimeArc = function () {
 //---End Insert------
 //Append a SVG to the body of the html page. Assign this SVG as an object to svg
         svg.classed('timearc', true)
-            .attrs({
-                width: graphicopt.width,
-                height: graphicopt.height,
-                // overflow: "visible",
-
-            });
+            .attr('width',graphicopt.width)
+            .attr('height',graphicopt.height);
         if (svg.select('g.linkHolder').empty())
             svg.append('g').attr('class', 'linkHolder').style('fill', 'none').style('stroke', 'currentColor');
         if (svg.select('g.nodeHolder').empty())
@@ -171,28 +167,24 @@ d3.TimeArc = function () {
         let defs = svg.append("defs");
 
         defs.append("marker")
-            .attrs({
-                "id": "arrowHeadend",
-                "viewBox": "0 -5 10 10",
-                "refX": 5,
-                "refY": 0,
-                "markerWidth": 4,
-                "markerHeight": 4,
-                "orient": "auto"
-            })
+            .attr("id","arrowHeadend")
+            .attr("viewBox","0 -5 10 10")
+            .attr("refX",5)
+            .attr("refY",0)
+            .attr("markerWidth",4)
+            .attr("markerHeight",4)
+            .attr("orient","auto")
             .append("path")
             .attr("d", "M0,-5L10,0L0,5")
             .attr("class", "arrowHead");
         defs.append("marker")
-            .attrs({
-                "id": "arrowHeadstart",
-                "viewBox": "0 -5 10 10",
-                "refX": 5,
-                "refY": 0,
-                "markerWidth": 4,
-                "markerHeight": 4,
-                "orient": "auto"
-            })
+            .attr("id","arrowHeadstart")
+            .attr("viewBox","0 -5 10 10")
+            .attr("refX",5)
+            .attr("refY",0)
+            .attr("markerWidth",4)
+            .attr("markerHeight",4)
+            .attr("orient","auto")
             .append("path")
             .attr("d", "M10,-5L0,0L10,5")
             .attr("class", "arrowHead");
@@ -1208,7 +1200,8 @@ d3.TimeArc = function () {
             .on('mouseover', mouseovered_Link)
             .on("mouseout", mouseouted_Link);
         if (graphicopt.display && graphicopt.display.links) {
-            linkArcs.styles(graphicopt.display.links)
+            Object.keys(graphicopt.display.links)
+                .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
         }
 
         svg.selectAll(".nodeG").remove();
@@ -1363,7 +1356,8 @@ d3.TimeArc = function () {
                     .style("stroke-opacity", 0.5);
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
-                    linkArcs.styles(graphicopt.display.links)
+                    Object.keys(graphicopt.display.links)
+                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
                 }
                 nodeG.transition().duration(500).attr("transform", function (n) {
                     return "translate(" + n.xConnected + "," + n.y + ")"
@@ -1415,7 +1409,8 @@ d3.TimeArc = function () {
                     .style("stroke-opacity", 0.5);
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
-                    linkArcs.styles(graphicopt.display.links)
+                    Object.keys(graphicopt.display.links)
+                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
                 }
                 nodeG.transition().duration(500).attr("transform", function (n) {
                     return "translate(" + n.xConnected + "," + n.y + ")"
@@ -1453,7 +1448,8 @@ d3.TimeArc = function () {
                     .style("stroke-opacity", 0.5);
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
-                    linkArcs.styles(graphicopt.display.links)
+                    Object.keys(graphicopt.display.links)
+                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
                 }
             }
             mouseout_dispath(d);
@@ -1833,11 +1829,10 @@ d3.TimeArc = function () {
         var yoffset = ySlider + 60;
         let yscale = d3.scaleLinear().range([yoffset + 13, yoffset + 30]);
         if (catergogryList && (catergogryList.length > 1) && svg.select('.colorlegendtext').empty())
-            svg.append('text').text('Color legend: ').attrs({
-                class: 'colorlegendtext legendText',
-                x: xx,
-                y: yoffset
-            });
+            svg.append('text').text('Color legend: ')
+                .attr('class','colorlegendtext legendText')
+                .attr('x',xx)
+                .attr('y',yoffset);
 
         let legendg_o = svg.selectAll('g.nodeLegend')
             .data(catergogryList);

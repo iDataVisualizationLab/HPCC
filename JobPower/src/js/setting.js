@@ -134,7 +134,7 @@ function handleSmalldata(dataRaw){
                     data[h.ip][sa][ti] = [data[h.ip][sa][ti]]
                 }
                 for (let ii = 0;ii<serviceLists[si].sub.length;ii++){
-                    value.push((data[h.ip][sa][ti][ii]==='' || data[h.ip][sa][ti][ii]===undefined)?null:data[h.ip][sa][ti][ii]*scale)
+                    value.push((data[h.ip][sa][ti][ii]==='' || (data[h.ip][sa][ti][ii]===undefined||data[h.ip][sa][ti][ii]===null))?null:data[h.ip][sa][ti][ii]*scale)
                 }
                 let arrID = serviceListattr[si];
                 sampleh[h.name][arrID][ti] = value;

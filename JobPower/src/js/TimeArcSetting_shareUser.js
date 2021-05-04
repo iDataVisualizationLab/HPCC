@@ -149,7 +149,7 @@ function handle_data_timeArc () {
     scheme.data=[];
     scheme.data.timespan = keys;
 
-    let data = Layout.userTimeline;
+    let data = Layout.jobCompTimeline;
 
     let graph = (()=> {
         let index = -1;

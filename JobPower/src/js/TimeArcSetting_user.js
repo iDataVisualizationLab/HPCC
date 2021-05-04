@@ -149,7 +149,7 @@ let TimeArcSetting = function (){
     scheme.data=[];
     scheme.data.timespan = keys;
 
-    let data = Layout.userTimeline;
+    let data = Layout.jobCompTimeline;
     debugger
     scheme.data = [];
     keys.forEach((k,ki)=>{

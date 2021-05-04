@@ -179,12 +179,12 @@ function handle_data_timeArc () {
     scheme.data=[];
     scheme.data.timespan = keys;
 
-    let data = Layout.userTimeline;
+    let data = Layout.jobCompTimeline;
     debugger
     scheme.data = [];
     data.forEach(d=>{
         d.arr.forEach(e=>{
-            const category = {compute:{},job:{}};
+            const category = {compute:{},job:{},user:{}};
             let key = '' ;
             e.value.forEach(e=>{
                 category[e.type][e.key]=e.value
@@ -203,12 +203,12 @@ function handle_data_timeArc () {
     });
 
     scheme.data.timespan = keys;
-    scheme.data.tsnedata = {...tsnedata,...Layout.jobarrdata};
-    scheme.data.minMaxData = {...Layout.minMaxDataComp,...Layout.minMaxDataCompJob};
+    scheme.data.tsnedata = {...tsnedata,...Layout.jobarrdata, ...Layout.userarrdata};
+    scheme.data.minMaxData = {...Layout.minMaxDataComp,...Layout.minMaxDataCompJob, ...Layout.minMaxDataUser};
     scheme.data.emptyMap=Layout.noJobMap
     timeArcopt.selectedService = 0;
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
-    const catergogryList=[{key: 'job', value: {customcolor: 'red',upperColor:'red'}},{key: 'compute', value: {customcolor: 'black'}}];
+    const catergogryList=[{key: 'job', value: {customcolor: 'red',upperColor:'red'}},{key: 'compute', value: {customcolor: 'black'}},{key: 'user', value: {customcolor: 'purple',upperColor:'purple'}}];
     subObject.graphicopt(timeArcopt).scheme(scheme).catergogryList(catergogryList).draw();
 }

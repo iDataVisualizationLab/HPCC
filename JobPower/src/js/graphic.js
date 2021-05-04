@@ -30,7 +30,9 @@ let vizservice=[];
 // }
 function serviceControl(){
     vizservice = [];
-    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'});vizservice.push({...s,mode:'minmax'}); });
+    // serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'});vizservice.push({...s,mode:'minmax'}); });
+    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'}); });
+    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'minmax'}); });
     // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#flowType')
         .on('change',function(){
@@ -562,16 +564,14 @@ function drawColorLegend() {
     let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
     let colorCatergory = d3.scaleOrdinal().range(["#080","steelblue","#828282"]);
     if (catergogryList&& (catergogryList.length>1) && svg.select('.colorlegendtext').empty()){
-        svg.append('text').text('Color legend: ').attrs({
-            class: 'colorlegendtext legendText',
-            x: xx,
-            y: yoffset
-        });
-        svg.append('text').text('Stream legend: ').attrs({
-            class: 'streamlegendtext legendText',
-            x: xx,
-            y: yoffset
-        });
+        svg.append('text').text('Color legend: ')
+            .attr('class','colorlegendtext legendText')
+            .attr('x',xx)
+            .attr('y',yoffset);
+        svg.append('text').text('Stream legend: ')
+            .attr('class','streamlegendtext legendText')
+            .attr('x',xx)
+            .attr('y',yoffset);
     }
     let legendg_o = svg.selectAll('g.nodeLegend')
         .data(catergogryList);
@@ -748,7 +748,7 @@ function drawGantt(){
     subObject.timearc.drawColorLegend(drawColorLegend);
     handle_data_timeArc();
     // handle_data_timeArc_job();
-    // subObject.data(Layout.userTimeline).draw();
+    // subObject.data(Layout.jobCompTimeline).draw();
     // if (userPie){
     //     userPie.color(subObject.color());
     //     if (userPie.data().length)
