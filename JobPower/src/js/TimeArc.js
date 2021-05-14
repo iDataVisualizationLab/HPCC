@@ -498,6 +498,7 @@ d3.TimeArc = function () {
     function readTermsAndRelationships() {
         const strickFilter = {};
         if (runopt.filterTerm.length) {
+            debugger
             runopt.filterTerm.forEach(t => strickFilter[t] = {isSelected: 1});
         }
         data2 = (runopt.filterTerm.length ? data.filter(d => runopt.filterTerm.find(e => d.__terms__[e])) : data).filter(function (d, i) {
@@ -718,7 +719,7 @@ d3.TimeArc = function () {
                         if (data.emptyMap[n.name] && data.emptyMap[n.name][ti] || d.value[1] === undefined)
                             return {...d, value: [undefined, undefined]}
                         return {...d, value: [d.value[0], d.value[1]]};
-                    }), color: "steelblue",
+                    }), color: "#4682b482",
                     up: false
                 }];
             if (data.emptyMap[n.name]) {
@@ -768,7 +769,7 @@ d3.TimeArc = function () {
                         mon.monthId = d.monthId;
                         mon.yNode = d.y;
                         return mon;
-                    }), color: "steelblue",
+                    }), color: "#4682b482",
                     up: false
                 }];
             if (data.emptyMap[n.name]) {

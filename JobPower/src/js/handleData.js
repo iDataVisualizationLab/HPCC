@@ -334,9 +334,13 @@ function handleDataComputeByUser_core(computers,jobs){
                         item.values[i].push(compData);
                         // item.values[i].push(userData);
                         item.values[i].total += jobs[j].node_list_obj[comp];
-                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1},userData]});
+                        // item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1},userData]});
+                        item.arr.push({time:Layout.timespan[i],value:[{key:j,type:'job',value:1},userData]});
+                        item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1}]});
                         if(jobs[j].job_array_id){
-                            item.arr.push({time:Layout.timespan[i],value:[compData,{key:jobs[j].job_array_id,type:'job',value:1},userData]});
+                            // item.arr.push({time:Layout.timespan[i],value:[compData,{key:jobs[j].job_array_id,type:'job',value:1},userData]});
+                            item.arr.push({time:Layout.timespan[i],value:[compData,{key:jobs[j].job_array_id,type:'job',value:1}]});
+                            item.arr.push({time:Layout.timespan[i],value:[{key:jobs[j].job_array_id,type:'job',value:1},userData]});
                         }
                         jonj[j]=true;
                     }
