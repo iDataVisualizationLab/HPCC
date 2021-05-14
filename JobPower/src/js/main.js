@@ -39,7 +39,8 @@ $(document).ready(function () {
             // let url = '../jobviewer/src/data/922020-932020-145000.json';
             // let url = 'src/data/nocona_aggregated.csv';
             // let url = 'src/data/aggregated_metrics_6h.json';
-            let url = 'src/data/aggregated_metrics_04_28.json';
+            // let url = 'src/data/aggregated_metrics_04_28.json';
+            let url = 'src/data/aggregated_metrics_05_12.json';
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
