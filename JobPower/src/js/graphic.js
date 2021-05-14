@@ -6,28 +6,6 @@ d3.selection.prototype.moveToFront = function() {
 };
 //general function
 let vizservice=[];
-// function serviceControl(){
-//     vizservice =serviceFullList.slice();
-//     vizservice.push({text:'User',range:[]});
-//     vizservice.push({text:'Radar',range:[]});
-//     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
-//     d3.select('#serviceSelection')
-//         .on('change',function(){
-//             serviceSelected = +$(this).val();
-//             d3.selectAll('.serviceName').text(vizservice[serviceSelected].text);
-//             createdata();
-//             currentDraw();
-//         })
-//         .selectAll('option')
-//         .data(vizservice)
-//         .enter()
-//         .append('option')
-//         .attr('value',(d,i)=>i)
-//         .attr('class',d=>d.text==='User'?'innerName':null)
-//         .attr('data-value',(d,i)=>d)
-//         .attr('selected',(d,i)=>i===serviceSelected?'':null)
-//         .text(d=>d.text)
-// }
 function serviceControl(){
     vizservice = [];
     const groupvizservice = [{key:'threshold',value:[]},{key:'minmax',value:[]}];
@@ -40,7 +18,6 @@ function serviceControl(){
         });
     });
 
-    // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#flowType')
         .on('change',function(){
             const selectedSers = $(this).val().split('|');
@@ -50,7 +27,11 @@ function serviceControl(){
             timeArcopt.minMaxStream = (val==='minmax');
             updateProcess({percentage:50,text:'render streams'});
             setTimeout(()=>{
-                subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                let catergogryList = subObject.timearc.catergogryList();
+                catergogryList.find(d=>d.key==="compute").disable = timeArcopt.minMaxStream;
+
+                // subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).draw();
                 drawColorLegend();
                 updateProcess();
             },0)
