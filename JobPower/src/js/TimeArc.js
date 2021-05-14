@@ -21,7 +21,8 @@ d3.TimeArc = function () {
         min_height: 100,
         dotRadius: 2,
         containHolder: '',
-        summary: {size: 30}
+        summary: {size: 30},
+        removeList:{},
     };
     let arr;
     let runopt = {
@@ -533,9 +534,8 @@ d3.TimeArc = function () {
         //     });
         // }
 
-        var removeList = {};   // remove list **************
+        var removeList = graphicopt.removeList;   // remove list **************
 
-        removeList["<Location with-held due to contract>"] = 1;
         catergogryObjectReject = {}
         catergogryList.filter(e => e.disable).forEach(e => {
             catergogryObjectReject[e.key] = 1

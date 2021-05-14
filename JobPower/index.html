@@ -213,8 +213,8 @@
                                 <div class="row col-12">
                                     <label class="col-4" for="flowType">Visualizing: </label>
                                     <select class="col-8" id="flowType">
-                                        <option value="threshold">Power threshold</option>
-                                        <option value="minmax">Min-max</option>
+<!--                                        <option value="threshold">Power threshold</option>-->
+<!--                                        <option value="minmax">Min-max</option>-->
                                     </select>
                                 </div>
                                 <div style="position:relative" id="legendTimeArc">
@@ -236,7 +236,7 @@
                     </div>
                     <ul class="nav nav-tabs">
                         <!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
-                        <!--                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>-->
+                                                        <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
                         <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab"
                                                        href="#jobOnToolbarHolder">Job list</a></li>
                     </ul>
@@ -373,14 +373,14 @@
                         </div>
                         <div id="userOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
                             <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder"
-                                 data-minimize="controlHolderMenu">
+                                 data-minimize="controlHolderMenu" style="max-height: 300px;">
                                 <table class="table">
                                     <thead>
                                     <tr class="header">
                                         <th>User name</th>
                                         <th>#Jobs</th>
                                         <th>#Nodes</th>
-                                        <th>#Cores</th>
+                                        <th>Name</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>

@@ -207,6 +207,11 @@ function handle_data_timeArc () {
     scheme.data.minMaxData = {...Layout.minMaxDataComp,...Layout.minMaxDataCompJob, ...Layout.minMaxDataUser};
     scheme.data.emptyMap=Layout.noJobMap
     timeArcopt.selectedService = 0;
+    timeArcopt.removeList = {};
+    Object.keys(Layout.jobsStatic).forEach(j=>{
+        if(Layout.jobsStatic[j].job_array_id)
+            timeArcopt.removeList[j]=1;
+    })
     // scheme.limitTime = d3.extent(scheme.data,d=>d.date)
     // scheme.limitTime = [sampleS.timespan[0],_.last(sampleS.timespan)]
     const catergogryList=[{key: 'job', value: {customcolor: 'red',upperColor:'red'}},{key: 'compute', value: {customcolor: 'black'}},{key: 'user', value: {customcolor: 'purple',upperColor:'purple'}}];

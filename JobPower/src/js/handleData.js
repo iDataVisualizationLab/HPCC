@@ -186,26 +186,7 @@ function createdata(){
  };
 handleDataComputeByUser.mode = 'core';
 
-// function handleDataComputeByUser_core(computers,jobs){
-//     let data = [];
-//     for (let comp in computers){
-//         let item = {key:comp,values:[],range:[Infinity,-Infinity],data:computers[comp]};
-//         computers[comp].job_id.forEach((jIDs,i)=>{
-//             if (jIDs.length){
-//                 let jobArr = jIDs.map(j=>jobs[j]);
-//                 let username = d3.nest().key(d=>d.user_name)
-//                     .rollup(d=>d3.sum(d,e=>e.node_list_obj[comp])).entries(jobArr);
-//                 username.total = d3.sum(username,e=>e.value)
-//                 item.values.push(username.sort((a,b)=>d3.ascending(a.key,b.key)));
-//             }else
-//                 item.values.push(null);
-//             item[Layout.timespan[i]] = item.values[i];
-//         });
-//         data.push(item);
-//     }
-//     data.sort((a,b)=>+a.range[0]-b.range[0])
-//     return data;
-// }
+
 function handleDataComputeByJob({computers,jobs:_jobs,users:_users}){
     const jobs = {};
     const users = {};
@@ -219,9 +200,13 @@ function handleDataComputeByJob({computers,jobs:_jobs,users:_users}){
         Layout.jobarrdata[k] = [];
         Layout.minMaxDataCompJob[k] = [];
 
-        users[_jobs[k].user_name] = _users[_jobs[k].user_name];
-        Layout.userarrdata[_jobs[k].user_name] = [];
-        Layout.minMaxDataUser[_jobs[k].user_name] = [];
+        if (!jobs[k].isJobarray){
+            users[_jobs[k].user_name] = _users[_jobs[k].user_name];
+            Layout.userarrdata[_jobs[k].user_name] = [];
+            Layout.minMaxDataUser[_jobs[k].user_name] = [];
+        }else{
+            jobs[k].comp = {};
+        }
         // }
     });
 
@@ -240,6 +225,18 @@ function handleDataComputeByJob({computers,jobs:_jobs,users:_users}){
                         Layout.userarrdata[d.user_name][i] = [];
                     }
                     Layout.userarrdata[d.user_name][i].push(tsnedata[comp][i]);
+
+                    if(d.job_array_id){
+                        if (!Layout.jobarrdata[d.job_array_id][i]){
+                            Layout.jobarrdata[d.job_array_id][i]=[];
+                        }
+                        if (!jobs[d.job_array_id].comp[i])
+                            jobs[d.job_array_id].comp[i] = {};
+                        if (!jobs[d.job_array_id].comp[i][comp]){
+                            jobs[d.job_array_id].comp[i][comp] = 1;
+                            Layout.jobarrdata[d.job_array_id][i].push(tsnedata[comp][i]);
+                        }
+                    }
                     return true;
                 }
                 return false
@@ -309,34 +306,7 @@ function handleDataComputeByJob({computers,jobs:_jobs,users:_users}){
     data.sort((a,b)=>+a.range[0]-b.range[0])
     return data;
 }
-// function handleDataComputeByUser_core(computers,jobs){
-//    // full
-//     debugger
-//     let data = [];
-//     let obj = {};
-//     for (let j in jobs){
-//         obj[j] = {key:j,values:Layout.timespan.map(t=>null),range:[Infinity,-Infinity],data:jobs[j]};
-//         data.push(obj[j]);
-//     }
-//     for (let comp in computers){
-//         computers[comp].job_id.forEach((jIDs,i)=>{
-//             if (jIDs.length){
-//                 jIDs.forEach(j=>{
-//                     let item = obj[j];
-//                     if (!item.values[i]) {
-//                         item.values[i] = [];
-//                         item.values[i].total = 0;
-//                     }
-//                     item.values[i].push({key:comp,value:jobs[j].node_list_obj[comp]});
-//                     item.values[i].total += jobs[j].node_list_obj[comp];
-//                     item[Layout.timespan[i]] = item.values[i];
-//                 });
-//             }
-//         });
-//     }
-//     // data.sort((a,b)=>+a.range[0]-b.range[0])
-//     return data;
-// }
+
 function handleDataComputeByUser_core(computers,jobs){
     //start
     debugger
@@ -365,6 +335,9 @@ function handleDataComputeByUser_core(computers,jobs){
                         // item.values[i].push(userData);
                         item.values[i].total += jobs[j].node_list_obj[comp];
                         item.arr.push({time:Layout.timespan[i],value:[compData,{key:j,type:'job',value:1},userData]});
+                        if(jobs[j].job_array_id){
+                            item.arr.push({time:Layout.timespan[i],value:[compData,{key:jobs[j].job_array_id,type:'job',value:1},userData]});
+                        }
                         jonj[j]=true;
                     }
                 });

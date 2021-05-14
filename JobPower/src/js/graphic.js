@@ -30,9 +30,16 @@ let vizservice=[];
 // }
 function serviceControl(){
     vizservice = [];
-    // serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'});vizservice.push({...s,mode:'minmax'}); });
-    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'threshold'}); });
-    serviceFullList.forEach(s=>{vizservice.push({...s,mode:'minmax'}); });
+    const groupvizservice = [{key:'threshold',value:[]},{key:'minmax',value:[]}];
+    const num = serviceFullList.length;
+    groupvizservice.forEach((d,di)=>{
+        serviceFullList.forEach((s,i)=>{
+            const _s = {...s,mode:d.key,_inListid:i+num*di};
+            vizservice.push(_s);
+            d.value.push(_s)
+        });
+    });
+
     // d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#flowType')
         .on('change',function(){
@@ -48,14 +55,18 @@ function serviceControl(){
                 updateProcess();
             },0)
         })
-        .selectAll('option')
-        .data(vizservice)
-        .join('option')
-        .attr('value',(d,i)=>d.mode+'|'+d.idroot)
-        .attr('class',d=>d.text==='User'?'innerName':null)
-        .attr('data-value',(d,i)=>d)
-        .attr('selected',(d,i)=>i===serviceSelected?'':null)
-        .text(d=>d.text+' '+d.mode);
+        .selectAll('optgroup')
+        .data(groupvizservice)
+        .join('optgroup')
+        .attr('label',d=>d.key)
+            .selectAll('option')
+            .data(d=>d.value)
+            .join('option')
+            .attr('value',(d)=>d.mode+'|'+d.idroot)
+            .attr('class',d=>d.text==='User'?'innerName':null)
+            .attr('data-value',(d)=>d)
+            .attr('selected',(d)=>d._inListid===serviceSelected?'':null)
+            .text(d=>d.text+' '+d.mode);
     d3.select('#jobValueName')
         .selectAll('option')
         .data(serviceFullList)
@@ -467,7 +478,7 @@ function drawUserList(){
             subObject.freezeHandle.bind(this)();
         });
     user_info
-        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length},{key:'core',value:d.value.totalCore}])
+        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length},{key:'name',value:request.userReverseDict[d.key]}])
         .join('td')
         .style('text-align',d=>(d.key==='job'||d.key==='compute'||d.key==='core')?'end':null)
         .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
@@ -480,10 +491,11 @@ function drawUserList(){
     });
 }
 function drawJobList(){
+    debugger
     const _jobValueType= $(d3.select('#jobValueType').node()).val();
     const _jobFilterType= 'top'//$(d3.select('#jobFilterType').node()).val();
     const _jobValueName=  $(d3.select('#jobValueName').node()).val();
-    const _data = d3.entries(Layout.jobsStatic).sort((a,b)=>b.value.summary[_jobValueName][_jobValueType]-a.value.summary[_jobValueName][_jobValueType]);
+    const _data = d3.entries(Layout.jobsStatic).filter(j=>!j.value.job_array_id).sort((a,b)=>b.value.summary[_jobValueName][_jobValueType]-a.value.summary[_jobValueName][_jobValueType]);
     let data = _data;
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     d3.select('#JobListFilter').on('click',()=>{
