@@ -486,6 +486,40 @@ function resetFilter(from) {
         filterMode = from;
     }
 }
+
+function renderTable(data, _data, _jobValueType, _jobValueName) {
+    d3.select('#currentJobNum').text(data.length);
+    d3.select('#jobNumTotal').text(_data.length);
+
+    let job_info = d3.select('#JobList table tbody')
+        .selectAll('tr').data(data)
+        .join('tr');
+    const column = serviceFullList.map(s => s.text);
+
+    d3.select('#JobList table .jobValType').attr('colspan', serviceFullList.length).text(_jobValueType);
+    d3.select('#JobList table .header').selectAll('th').data(column)
+        .join('th')
+        .style('background-color', d => d === serviceFullList[_jobValueName].text ? '#b0ff6b' : null)
+        .text(d => d);
+
+    job_info
+        .selectAll('td').data(d => [{key: 'jobid', value: d.key}, ...serviceFullList.map(s => ({
+        key: s.text,
+        value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]) * 100) / 100
+    })), {key: 'compute', value: d.value.total_nodes}, {key: 'user', value: d.value.user_name}])
+        .join('td')
+        .style('text-align', d => (d.key === 'averagePower' || d.key === 'compute' || d.key === 'core') ? 'end' : null)
+        .style('min-width', '50px')
+        // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
+        .text(d => d.value);
+    // subObject.mouseoverAdd('userlist',function(d){
+    //     job_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
+    // });
+    // subObject.mouseoutAdd('userlist',function(d){
+    //     job_info.classed('highlight',false);
+    // });
+}
+
 function drawJobList(){
     if (filterMode!=='jobList')
     {
@@ -526,36 +560,7 @@ function drawJobList(){
         } else {
             data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
         }
-        d3.select('#currentJobNum').text(data.length);
-        d3.select('#jobNumTotal').text(_data.length);
-
-        let job_info = d3.select('#JobList table tbody')
-            .selectAll('tr').data(data)
-            .join('tr');
-        const column = serviceFullList.map(s => s.text);
-
-        d3.select('#JobList table .jobValType').attr('colspan', serviceFullList.length).text(_jobValueType);
-        d3.select('#JobList table .header').selectAll('th').data(column)
-            .join('th')
-            .style('background-color', d => d === serviceFullList[_jobValueName].text ? '#b0ff6b' : null)
-            .text(d => d);
-        debugger
-        job_info
-            .selectAll('td').data(d => [{key: 'jobid', value: d.key}, ...serviceFullList.map(s => ({
-            key: s.text,
-            value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]) * 100) / 100
-        })), {key: 'compute', value: d.value.total_nodes}, {key: 'user', value: d.value.user_name}])
-            .join('td')
-            .style('text-align', d => (d.key === 'averagePower' || d.key === 'compute' || d.key === 'core') ? 'end' : null)
-            .style('min-width', '50px')
-            // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
-            .text(d => d.value);
-        // subObject.mouseoverAdd('userlist',function(d){
-        //     job_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
-        // });
-        // subObject.mouseoutAdd('userlist',function(d){
-        //     job_info.classed('highlight',false);
-        // });
+        renderTable(data, _data, _jobValueType, _jobValueName);
         const jobList = [];
         const compObj = {};
         data.forEach(d => {
