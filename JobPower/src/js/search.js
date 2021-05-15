@@ -11,7 +11,7 @@ let SearchControl = function() {
             .attr('value',d=>d)
             .text(d=>d);
         d3.select('#searchInput').on('change',function(){
-            searchInput = this.trim();
+            searchInput = this.value.trim();
         }).node().value = ''
 
     }
@@ -22,9 +22,11 @@ let SearchControl = function() {
             renderSelection();
         }).node()).val();
         d3.select('#searchBtn').on('click',function(){
-            if (searchInput && searchInput!=='')
+            if (searchInput && searchInput!==''){
+                filterMode = 'searchBox';
                 onSearch(searchInput,searchType)
-            else{
+            }else{
+                filterMode = 'jobList';
                 drawJobList();
                 updateProcess({percentage:50,text:'render streams'});
                 setTimeout(()=>{
@@ -36,6 +38,9 @@ let SearchControl = function() {
         renderSelection();
 
     };
+    master.reset = function(){
+        d3.select('#searchInput').node().value = '';
+    }
     master.data=function(_){
         data = _;
         renderSelection()
