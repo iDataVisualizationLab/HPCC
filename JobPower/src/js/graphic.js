@@ -599,10 +599,18 @@ function drawColorLegend() {
     legendg_o.exit().remove();
     const legendg = legendg_o.enter()
         .append('g')
-        .attr('class','nodeLegend')
+        .attr('class','nodeLegend show')
         .attr('transform',(d,i)=>'translate('+xx+','+yscale(i)+')')
-        // .on('click',onclickcategory);
-
+        .on('click',onclickcategory);
+    function onclickcategory(d) {
+        if (d.disable) {
+            d.disable = false;
+        } else {
+            d.disable = true;
+        }
+        d3.select(this).classed('fade', d.disable);
+        subObject.draw()
+    }
     legendg.append("circle")
         .attr("cx", 0)
         .attr("cy", 0)

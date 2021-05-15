@@ -2321,7 +2321,7 @@ d3.TimeArc = function () {
     var xSlider = 10;
     var widthSlider = 180;
     var ySlider = 30;
-    var valueSlider = 1;
+    var valueSlider = 0;
     var valueMax = 11;
 
     function setupSliderScale(svg) {

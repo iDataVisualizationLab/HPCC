@@ -213,3 +213,7 @@ table tbody td {
 table td.selected {
     font-weight: bold;
 }
+
+.nodeLegend.fade{
+    opacity: 0.4;
+}
