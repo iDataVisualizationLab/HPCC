@@ -485,7 +485,7 @@ d3.TimeArc = function () {
                 console.log(links)
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force("link", d3.forceLink(links).distance(d => d.__timestep__/2).strength(0.3))
+                    .force("link", d3.forceLink(links).distance(d => d.__timestep__).strength(0.9))
                 // .force('link').links(links);
                 force.alpha(1);
                 force.restart();

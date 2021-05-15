@@ -512,10 +512,10 @@ function renderTable(data, _data, _jobValueType, _jobValueName) {
         .style('min-width', '50px')
         // .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
         .text(d => d.value);
-    // subObject.mouseoverAdd('userlist',function(d){
+    // subObject.mouseoverAdd('joblist',function(d){
     //     job_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
     // });
-    // subObject.mouseoutAdd('userlist',function(d){
+    // subObject.mouseoutAdd('joblist',function(d){
     //     job_info.classed('highlight',false);
     // });
 }
