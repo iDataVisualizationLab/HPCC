@@ -12,7 +12,8 @@ let SearchControl = function() {
             .text(d=>d);
         d3.select('#searchInput').on('change',function(){
             searchInput = this.value
-        })
+        }).node().value = ''
+
     }
 
     master.init=function(){
@@ -24,7 +25,12 @@ let SearchControl = function() {
             if (searchInput && searchInput!=='')
                 onSearch(searchInput,searchType)
             else{
-                console.log('not using search box');
+                drawJobList();
+                updateProcess({percentage:50,text:'render streams'});
+                setTimeout(()=>{
+                    subObject._filter = subObject.filterTerms();
+                    subObject.draw();
+                },0)
             }
         });
         renderSelection();
