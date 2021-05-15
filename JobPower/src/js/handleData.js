@@ -439,7 +439,25 @@ function handleRankingData(data){
             return val
         })
     });
-
-
+    Object.keys(Layout.usersStatic).forEach(k=>{
+        const d = Layout.usersStatic[k];
+        d.total_nodes = d.node.length;
+        d.summary = serviceFullList.map((s,si)=>{
+            const val = {mean: Layout.userarrdata[k]?d3.mean(Layout.userarrdata[k],d=>d?d[s.idroot]:undefined):null}
+            val.min = Layout.minMaxDataUser[k]?d3.min(Layout.minMaxDataUser[k],d=>d?d[0][s.idroot]:undefined):null;
+            val.max = Layout.minMaxDataUser[k]?d3.max(Layout.minMaxDataUser[k],d=>d?d[1][s.idroot]:undefined):null;
+            return val
+        })
+    });
+    Layout.computesStatic = computers;
+    Object.keys(Layout.computesStatic).forEach(k=>{
+        const d = Layout.computesStatic[k];
+        d.summary = serviceFullList.map((s,si)=>{
+            const val = {mean: tsnedata[k]?d3.mean(tsnedata[k],d=>d?d[s.idroot]:undefined):null}
+            val.min = Layout.minMaxDataComp[k]?d3.min(Layout.minMaxDataComp[k],d=>d?d[0][s.idroot]:undefined):null;
+            val.max = Layout.minMaxDataComp[k]?d3.max(Layout.minMaxDataComp[k],d=>d?d[1][s.idroot]:undefined):null;
+            return val
+        })
+    });
     console.timeEnd('handleRankingData');
 }

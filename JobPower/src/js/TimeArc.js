@@ -218,12 +218,12 @@ d3.TimeArc = function () {
 
 //Set up the force layout
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-100).distanceMax(300))
-            .force("link", d3.forceLink().distance(d => d.__maxLinkIndex__).strength(1))
+            .force("charge", d3.forceManyBody().strength(-100))
+            .force("link", d3.forceLink().distance(d => d.__maxLinkIndex__??0).strength(1))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             // .force('x', d3.forceX(0).strength(0.3))
             // .force('y', d3.forceY(0).strength(0.015))
-            .force('x', d3.forceX(0).strength(0.3))
+            .force('x', d3.forceX().x(d=>d.__maxLinkIndex__??0).strength(0.3))
             .on("end", function () {
                 detactTimeSeries();
                 drawStreamLegend();
@@ -483,8 +483,8 @@ d3.TimeArc = function () {
             if (!isSkipforce) {
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force('x', d3.forceX().x(d=>d.__maxLinkIndex__).strength(0.3))
-                    .force("link", d3.forceLink(links).distance(d => d.__maxLinkIndex__).strength(0.9))
+                    .force('x', d3.forceX().x(d=>d.__maxLinkIndex__??0).strength(0.3))
+                    .force("link", d3.forceLink(links).distance(d => d.__maxLinkIndex__).strength(1))
                 // .force('link').links(links);
                 force.alpha(1);
                 force.restart();

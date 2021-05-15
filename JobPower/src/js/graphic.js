@@ -85,7 +85,7 @@ function initdraw(){
 
 
     searchControl.init();
-
+    initFilterMode();
 }
 
 function userTable(d,type){
@@ -450,63 +450,51 @@ function openPopup(d,svg){
     //     drawObject.addSubgraph(parent);
     // }
 }
-function drawUserList(){
-    let user_info = d3.select('#UserList table tbody')
-        .selectAll('tr').data(d3.entries(Layout.usersStatic).sort((a,b)=>b.value.node.length-a.value.node.length))
-        .join('tr')
-        .on('mouseover',function(d){
-            if(!subObject.isFreeze()){
-                d3.select(this).classed('highlight',true);
-                subObject.highlight([d.key])
-            }
-        }).on('mouseout',function(d){
-            if(!subObject.isFreeze()){
-                d3.select('#UserList table tbody').selectAll('.highlight').classed('highlight',false);
-                subObject.releasehighlight();
-            }
-        }).on('click',function(d){
-            subObject.freezeHandle.bind(this)();
-        });
-    user_info
-        .selectAll('td').data(d=>[{key:'username',value:d.key},{key:'job',value:d.value.job.length},{key:'compute',value:d.value.node.length},{key:'name',value:request.userReverseDict[d.key]}])
-        .join('td')
-        .style('text-align',d=>(d.key==='job'||d.key==='compute'||d.key==='core')?'end':null)
-        .style('background-color',d=>d.key==='job'?'rgba(166,86,40,0.5)': (d.key ==='compute'?'rgba(55,126,184,0.5)':null))
-        .text(d=>d.value);
-    subObject.mouseoverAdd('userlist',function(d){
-        user_info.filter(u=>d.source.element.find(e=>e.key===u.key)||d.target.element.find(e=>e.key===u.key)).classed('highlight',true);
-    });
-    subObject.mouseoutAdd('userlist',function(d){
-        user_info.classed('highlight',false);
-    });
-}
-function resetFilter(from) {
-    if (from==='jobList'){
+
+
+function resetFilter(to) {
+    if (to!=='search'){
         searchControl.reset();
-        filterMode = from;
+        filterMode = to;
     }
+    drawJobList();
+    drawUserList();
+    drawComputeList();
 }
+let renderTable = {
+    job:_.partial(_renderTable,{numTotal:'#jobNumTotal',currentNum:'#currentJobNum',holder:'#JobList',mainKey:'jobid',subInfo:[{key:'compute',value:'total_nodes'},{key:'user',value:'user_name'}]}),
+    user:_.partial(_renderTable,{numTotal:'#userNumTotal',currentNum:'#currentUserNum',holder:'#UserList',mainKey:'username',subInfo:[{key:'compute',value:'total_nodes'},{key:'name',func:(d)=>request.userReverseDict[d.key]}]}),
+    compute:_.partial(_renderTable,{numTotal:'#xomputeNumTotal',currentNum:'#currentComputeNum',holder:'#ComputeList',mainKey:'compute',subInfo:[{key:'jobs',func:(d)=>d.job_id.length}]})}
+function _renderTable({numTotal,currentNum,holder,mainKey,subInfo},data, _data, _jobValueType, _jobValueName) {
+    d3.select(currentNum).text(data.length);
+    d3.select(numTotal).text(_data.length);
 
-function renderTable(data, _data, _jobValueType, _jobValueName) {
-    d3.select('#currentJobNum').text(data.length);
-    d3.select('#jobNumTotal').text(_data.length);
-
-    let job_info = d3.select('#JobList table tbody')
+    let job_info = d3.select(holder+' table tbody')
         .selectAll('tr').data(data)
         .join('tr');
     const column = serviceFullList.map(s => s.text);
 
-    d3.select('#JobList table .jobValType').attr('colspan', serviceFullList.length).text(_jobValueType);
-    d3.select('#JobList table .header').selectAll('th').data(column)
+    d3.select(holder+' table .jobValType').attr('colspan', serviceFullList.length).text(_jobValueType);
+    d3.select(holder+' table .header').selectAll('th').data(column)
         .join('th')
         .style('background-color', d => d === serviceFullList[_jobValueName].text ? '#b0ff6b' : null)
         .text(d => d);
-
+    function rendercell(d){
+        const _cell = [{key: mainKey, value: d.key}];
+        serviceFullList.forEach(s => {
+            _cell.push({
+                key: s.text,
+                value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]) * 100) / 100
+            })
+        });
+        subInfo.forEach(s=>{
+            let value = s.value?d.value[s.value]:s.func(d);
+            _cell.push({key:s.key,value})
+        });
+        return _cell;
+    }
     job_info
-        .selectAll('td').data(d => [{key: 'jobid', value: d.key}, ...serviceFullList.map(s => ({
-        key: s.text,
-        value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]) * 100) / 100
-    })), {key: 'compute', value: d.value.total_nodes}, {key: 'user', value: d.value.user_name}])
+        .selectAll('td').data(rendercell)
         .join('td')
         .style('text-align', d => (d.key === 'averagePower' || d.key === 'compute' || d.key === 'core') ? 'end' : null)
         .style('min-width', '50px')
@@ -520,54 +508,109 @@ function renderTable(data, _data, _jobValueType, _jobValueName) {
     // });
 }
 
-function drawJobList(){
-    if (filterMode!=='jobList')
+
+function initFilterMode(){
+    d3.select('#JobListFilter').on('click', () => {
+        const mode = d3.select('.filterTab.active').attr('data');
+        resetFilter(mode)
+        updateProcess({percentage: 50, text: 'render streams'});
+        setTimeout(() => {
+            subObject._filter = subObject.filterTerms();
+            subObject.draw();
+        }, 0)
+    });
+    d3.select('#jobValueType').on('change', () => {
+        d3.select('.JobFilterType').text(() => $(d3.select('#jobValueType').node()).val())
+        const mode = d3.select('.filterTab.active').attr('data');
+        resetFilter(mode)
+        updateProcess({percentage: 50, text: 'render streams'});
+        setTimeout(() => {
+            subObject.draw();
+        }, 0)
+    });
+    d3.select('#jobValueName').on('change', () => {
+        const mode = d3.select('.filterTab.active').attr('data');
+        resetFilter(mode)
+        updateProcess({percentage: 50, text: 'render streams'});
+        setTimeout(() => {
+            subObject.draw();
+        }, 0)
+    });
+}
+function drawUserList(){
+    const _jobValueType = $(d3.select('#jobValueType').node()).val();
+    const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
+    const _jobValueName = $(d3.select('#jobValueName').node()).val();
+    const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    if (filterMode!=='userList')
     {
-        resetFilter('jobList');
-        drawJobList();
+        // resetFilter('userList');
+        // drawUserList();
     }else {
-        const _jobValueType = $(d3.select('#jobValueType').node()).val();
-        const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
-        const _jobValueName = $(d3.select('#jobValueName').node()).val();
-        const _data = d3.entries(Layout.jobsStatic).filter(j => !j.value.job_array_id).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]);
-        let data = _data;
-        const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
-        d3.select('#JobListFilter').on('click', () => {
-            drawJobList();
-            updateProcess({percentage: 50, text: 'render streams'});
-            setTimeout(() => {
-                subObject._filter = subObject.filterTerms();
-                subObject.draw();
-            }, 0)
-        });
-        d3.select('#jobValueType').on('change', () => {
-            d3.select('.JobFilterType').text(() => $(d3.select('#jobValueType').node()).val())
-            drawJobList();
-            updateProcess({percentage: 50, text: 'render streams'});
-            setTimeout(() => {
-                subObject.draw();
-            }, 0)
-        });
-        d3.select('#jobValueName').on('change', () => {
-            drawJobList();
-            updateProcess({percentage: 50, text: 'render streams'});
-            setTimeout(() => {
-                subObject.draw();
-            }, 0)
-        });
+        const _data = d3.entries(Layout.usersStatic).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]);
+        let data = [];
         if (_jobFilterType === 'top') {
             data = _data.slice(0, _JobFilterThreshold);
         } else {
             data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
         }
-        renderTable(data, _data, _jobValueType, _jobValueName);
+        renderTable['user'](data, _data, _jobValueType, _jobValueName);
         const jobList = [];
-        const compObj = {};
+        data.forEach(d => {
+            d.value.job.forEach(j=>{
+                jobList.push(j);
+            })
+        });
+        subObject.filterTerms(jobList)
+    }
+}
+function drawJobList(){
+    const _jobValueType = $(d3.select('#jobValueType').node()).val();
+    const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
+    const _jobValueName = $(d3.select('#jobValueName').node()).val();
+    const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    if (filterMode!=='jobList')
+    {
+        // resetFilter('jobList');
+        // drawJobList();
+    }else {
+        const _data = d3.entries(Layout.jobsStatic).filter(j => !j.value.job_array_id).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]);
+        let data = [];
+        if (_jobFilterType === 'top') {
+            data = _data.slice(0, _JobFilterThreshold);
+        } else {
+            data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
+        }
+        renderTable['job'](data, _data, _jobValueType, _jobValueName);
+        const jobList = [];
         data.forEach(d => {
             jobList.push(d.key);
-            d.value.node_list.forEach(c => compObj[c] = true);
         });
-        // const compList = Object.keys(compObj);
+        subObject.filterTerms(jobList)
+    }
+}
+function drawComputeList(){
+    const _jobValueType = $(d3.select('#jobValueType').node()).val();
+    const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
+    const _jobValueName = $(d3.select('#jobValueName').node()).val();
+    const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    if (filterMode!=='jobList')
+    {
+        // resetFilter('jobList');
+        // drawJobList();
+    }else {
+        const _data = d3.entries(Layout.computesStatic);
+        let data = [];
+        if (_jobFilterType === 'top') {
+            data = _data.slice(0, _JobFilterThreshold);
+        } else {
+            data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
+        }
+        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
+        const jobList = [];
+        data.forEach(d => {
+            d.job_id.forEach(j=>jobList.push(j));
+        });
         subObject.filterTerms(jobList)
     }
 }

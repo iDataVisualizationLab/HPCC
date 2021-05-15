@@ -232,8 +232,8 @@
                     <ul class="nav nav-tabs">
                         <!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
                                                         <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
-                        <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab"
-                                                       href="#jobOnToolbarHolder">Job list</a></li>
+                        <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#jobOnToolbarHolder">Job list</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#computeOnToolbarHolder">Compute list</a></li>
                     </ul>
                     <div class="card-body row tab-content">
                         <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
@@ -366,46 +366,54 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="userOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
+                        <div class="row input-group mb-3">
+                            <div class="input-group-prepend">
+                                <select class="custom-select" id="jobValueType" style="width:60px">
+                                    <option selected value="mean">Mean</option>
+                                    <option value="min">Min</option>
+                                    <option value="max">Max</option>
+                                </select>
+                                <select class="custom-select" id="jobValueName" style="width:90px; background-color: #b0ff6b">
+
+                                </select>
+                                <span class="input-group-text">Top</span>
+                                <!--                                    <select class="custom-select" id="jobFilterType">-->
+                                <!--                                        <option selected value="top">Top</option>-->
+                                <!--                                        <option value="morethan">Greater than</option>-->
+                                <!--                                    </select>-->
+                            </div>
+                            <input type="number" class="form-control" id="JobFilterThreshold" value="50">
+                            <div class="input-group-append" id="button-addon4">
+                                <button class="btn btn-outline-secondary" type="button" id="JobListFilter">
+                                    Filter
+                                </button>
+                            </div>
+                        </div>
+                        <div id="userOnToolbarHolder" data="userList" class="tab-pane fade col-12 filterTab" role="tabpanel">
+                            <div class="row">
+                                <span style="margin-right: 5px"><strong>Showing </strong></span>
+                                <span id="currentUserNum"></span>
+                                / <span id="userNumTotal">10</span>
+                                <span style="margin-left: 5px"> users</span>
+                            </div>
                             <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder"
                                  data-minimize="controlHolderMenu" style="max-height: 300px;">
                                 <table class="table">
                                     <thead>
+                                    <tr>
+                                        <th rowspan="2">User ID</th>
+                                        <th class="jobValType">mean</th>
+                                        <th rowspan="2">#Nodes</th>
+                                        <th rowspan="2">user_name</th>
+                                    </tr>
                                     <tr class="header">
-                                        <th>User name</th>
-                                        <th>#Jobs</th>
-                                        <th>#Nodes</th>
-                                        <th>Name</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
                         </div>
-                        <div id="jobOnToolbarHolder" class="tab-pane fade col-12  show active" role="tabpanel">
-                            <div class="row input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <select class="custom-select" id="jobValueType" style="width:60px">
-                                        <option selected value="mean">Mean</option>
-                                        <option value="min">Min</option>
-                                        <option value="max">Max</option>
-                                    </select>
-                                    <select class="custom-select" id="jobValueName" style="width:90px; background-color: #b0ff6b">
-
-                                    </select>
-                                    <span class="input-group-text">Top</span>
-<!--                                    <select class="custom-select" id="jobFilterType">-->
-<!--                                        <option selected value="top">Top</option>-->
-<!--                                        <option value="morethan">Greater than</option>-->
-<!--                                    </select>-->
-                                </div>
-                                <input type="number" class="form-control" id="JobFilterThreshold" value="50">
-                                <div class="input-group-append" id="button-addon4">
-                                    <button class="btn btn-outline-secondary" type="button" id="JobListFilter">
-                                        Filter
-                                    </button>
-                                </div>
-                            </div>
+                        <div id="jobOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab  show active" role="tabpanel">
                             <div class="row">
                                 <span style="margin-right: 5px"><strong>Showing </strong></span>
                                 <span id="currentJobNum"></span>
@@ -422,6 +430,29 @@
                                         <th rowspan="2">#Nodes</th>
 <!--                                        <th rowspan="2">#Cores</th>-->
                                         <th rowspan="2">user</th>
+                                    </tr>
+                                    <tr class="header">
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="computeOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab" role="tabpanel">
+                            <div class="row">
+                                <span style="margin-right: 5px"><strong>Showing </strong></span>
+                                <span id="currentComputeNum"></span>
+                                / <span id="computeNumTotal">10</span>
+                                <span style="margin-left: 5px"> jobs</span>
+                            </div>
+                            <div id="ComputeList" class="row table-responsive" data-maximize="RankingListHolder"
+                                 data-minimize="controlHolderMenu" style="max-height: 300px;">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th rowspan="2">Node</th>
+                                        <th class="jobValType">mean</th>
+                                        <th rowspan="2">#Jobs</th>
                                     </tr>
                                     <tr class="header">
                                     </tr>

@@ -26,13 +26,13 @@ let SearchControl = function() {
                 filterMode = 'searchBox';
                 onSearch(searchInput,searchType)
             }else{
-                filterMode = 'jobList';
-                drawJobList();
-                updateProcess({percentage:50,text:'render streams'});
-                setTimeout(()=>{
-                    subObject._filter = subObject.filterTerms();
-                    subObject.draw();
-                },0)
+                resetFilter('jobList');
+                // drawJobList();
+                // updateProcess({percentage:50,text:'render streams'});
+                // setTimeout(()=>{
+                //     subObject._filter = subObject.filterTerms();
+                //     subObject.draw();
+                // },0)
             }
         });
         renderSelection();
