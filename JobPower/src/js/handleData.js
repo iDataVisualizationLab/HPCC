@@ -429,6 +429,8 @@ function handleRankingData(data){
     Layout.noJobMap = result.noJobMap;
     Layout.jobTimeline = handleDataComputeByJob({computers,jobs,users});
 
+    searchControl.data({compute:Object.keys(computers),user:Object.keys(Layout.usersStatic),job:Object.keys(Layout.jobsStatic)});
+
     Object.values(Layout.jobsStatic).forEach(d=>{
         d.summary = serviceFullList.map((s,si)=>{
             const val = {mean: Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):null}

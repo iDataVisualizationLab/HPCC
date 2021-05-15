@@ -187,28 +187,23 @@
                             <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder"
                                  data-minimize="controlHolderMenu">
                                 <div class="row col-12">
-<!--                                    <div>-->
-<!--                                        <div class="input-field" style="margin: 0px 5px;padding-left: 0px;">-->
-<!--                                            <input type="text" id="search" class="autocomplete inputHolder"-->
-<!--                                                   placeholder="input here">-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                    <div>-->
-<!--                                        <button type="button"-->
-<!--                                                onclick="subObject.timearc.searchNode($('#search').val())">Search-->
-<!--                                        </button>-->
-<!--                                    </div>-->
-<!--                                    <div>-->
-<!--                                        <progress value="0" max="100" id="progBar">-->
-<!--                                                <span id="downloadProgress">-->
-<!--                                                    &lt;!&ndash; Your fallback goes here &ndash;&gt;-->
-<!--                                                </span>-->
-<!--                                        </progress>-->
-<!--                                        <label id="progUpdate">-->
-<!--                                            &lt;!&ndash; Success Message &ndash;&gt;-->
-<!--                                        </label>-->
-
-<!--                                    </div>-->
+                                    <div class="row input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="custom-select" id="searchType" style="width:60px">
+                                                <option selected value="job">Job ID</option>
+                                                <option value="user">User</option>
+                                                <option value="compute">Compute</option>
+                                            </select>
+                                        </div>
+                                        <input class="form-control" type="text" id="searchInput" list="searchInputOptions" placeholder="search here">
+                                        <datalist id="searchInputOptions">
+                                        </datalist>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row col-12">
                                     <label class="col-4" for="flowType">Visualizing: </label>
@@ -499,8 +494,8 @@
 <script src="src/js/sankey.js"></script>
 <script src="src/js/TimeArc.js"></script>
 <script src="src/js/TimeArcSetting.js"></script>
+<script src="src/js/search.js"></script>
 <!--    <script src="src/js/TimeArcSetting_shareUser.js"></script>-->
-
 <script src="src/js/sidebar.js"></script>
 
 <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>

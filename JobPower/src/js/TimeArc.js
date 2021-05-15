@@ -32,7 +32,7 @@ d3.TimeArc = function () {
         time: {rate: 1, unit: 'Year'},
         timeformat: d3.timeYear.every(1),
         stickyTerms: [],
-        filterTerm: [],
+        filterTerm: undefined,
         termGroup: {},
         groupTimeLineMode: 'onDisplay'//'onDisplay', //'summary'
     };
@@ -219,7 +219,7 @@ d3.TimeArc = function () {
 //Set up the force layout
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-100))
-            .force("link", d3.forceLink().distance(d => d.__timestep__/10).strength(0.9))
+            .force("link", d3.forceLink().distance(d => d.__timestep__).strength(0.9))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
             .force('y', d3.forceY(0).strength(0.015))
@@ -497,11 +497,10 @@ d3.TimeArc = function () {
 
     function readTermsAndRelationships() {
         const strickFilter = {};
-        if (runopt.filterTerm.length) {
-            debugger
+        if (runopt.filterTerm) {
             runopt.filterTerm.forEach(t => strickFilter[t] = {isSelected: 1});
         }
-        data2 = (runopt.filterTerm.length ? data.filter(d => runopt.filterTerm.find(e => d.__terms__[e])) : data).filter(function (d, i) {
+        data2 = (runopt.filterTerm ? data.filter(d => runopt.filterTerm.find(e => d.__terms__[e])) : data).filter(function (d, i) {
             if (!searchTerm || searchTerm == "") {
                 return d;
             } else if (d.__terms__[searchTerm] || runopt.stickyTerms.find(e => d.__terms__[e]))
@@ -511,7 +510,7 @@ d3.TimeArc = function () {
         var selected = {};
 
         // if ((searchTerm && searchTerm != "")|| !runopt.filterTerm.length) {
-        if ((searchTerm && searchTerm != "") || runopt.filterTerm.length) {
+        if ((searchTerm && searchTerm != "") || (runopt.filterTerm&&runopt.filterTerm.length)) {
             data2.forEach(function (d) {
                 for (var term1 in d.__terms__) {
                     if (!selected[term1])

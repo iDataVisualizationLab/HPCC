@@ -78,7 +78,11 @@ function initdraw(){
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
     });
 
+
+    searchControl.init();
+
 }
+
 function userTable(d,type){
     highlight2Stack = [];
     if (subObject.isFreeze()) {
@@ -752,3 +756,21 @@ function drawGantt(){
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
 let subObject = new TimeArcSetting();
+
+let searchControl = SearchControl();
+
+searchControl.onSearch(function(searchInput,searchType){
+    setTimeout(()=>{
+        if(searchType==='job') {
+            subObject.filterTerms([searchInput]);
+        }
+        if(searchType==='compute') {
+            subObject.filterTerms([searchInput]);
+        }
+        if(searchType==='user') {
+            subObject.filterTerms((Layout.usersStatic[searchInput]??{job:[]}).job);
+        }
+        subObject._filter = subObject.filterTerms();
+        subObject.draw();
+    },0)
+})
