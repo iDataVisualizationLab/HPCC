@@ -24,14 +24,19 @@ function serviceControl(){
             serviceSelected = +selectedSers[1];
 
             const val = selectedSers[0];
+            const oldVal = timeArcopt.minMaxStream;
             timeArcopt.minMaxStream = (val==='minmax');
             updateProcess({percentage:50,text:'render streams'});
             setTimeout(()=>{
-                let catergogryList = subObject.timearc.catergogryList();
-                catergogryList.find(d=>d.key==="compute").disable = timeArcopt.minMaxStream;
+                if(oldVal===timeArcopt.minMaxStream){
+                    subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                }else{
+                    let catergogryList = subObject.timearc.catergogryList();
+                    catergogryList.find(d=>d.key==="compute").disable = timeArcopt.minMaxStream;
 
-                // subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
-                subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).draw();
+                    // subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                    subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).draw();
+                }
                 drawColorLegend();
                 updateProcess();
             },0)
