@@ -218,11 +218,12 @@ d3.TimeArc = function () {
 
 //Set up the force layout
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-100))
-            .force("link", d3.forceLink().distance(d => d.__timestep__).strength(0.9))
+            .force("charge", d3.forceManyBody().strength(-100).distanceMax(300))
+            .force("link", d3.forceLink().distance(d => d.__maxLinkIndex__).strength(1))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
-            .force('x', d3.forceX(0).strength(0.015))
-            .force('y', d3.forceY(0).strength(0.015))
+            // .force('x', d3.forceX(0).strength(0.3))
+            // .force('y', d3.forceY(0).strength(0.015))
+            .force('x', d3.forceX(0).strength(0.3))
             .on("end", function () {
                 detactTimeSeries();
                 drawStreamLegend();
@@ -385,7 +386,6 @@ d3.TimeArc = function () {
         arr.sort((a, b) => a.date - b.date);
         terms = new Object();
         termMaxMax = 1;
-        debugger
         arr.forEach(function (d) {
             // Process date
             // d.date = new Date(d["time"]);
@@ -481,11 +481,10 @@ d3.TimeArc = function () {
             computeLinks();
             drawStreamLegend();
             if (!isSkipforce) {
-                console.log(nodes)
-                console.log(links)
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force("link", d3.forceLink(links).distance(d => d.__timestep__).strength(0.9))
+                    .force('x', d3.forceX().x(d=>d.__maxLinkIndex__).strength(0.3))
+                    .force("link", d3.forceLink(links).distance(d => d.__maxLinkIndex__).strength(0.9))
                 // .force('link').links(links);
                 force.alpha(1);
                 force.restart();
@@ -1114,6 +1113,8 @@ d3.TimeArc = function () {
                             var l = new Object();
                             l.source = sourceNodeId;
                             l.target = targetNodeId;
+                            l.__maxLinkIndex__ = Math.max(nodes[i].monthly.findIndex(d=>d.monthId>=m),nodes[j].monthly.findIndex(d=>d.monthId>=m))
+
                             l.__timestep__ = m;
                             //l.value = linkScale(relationship[term1+"__"+term2][m]);
                             if (runopt.timeLink) {
@@ -1504,11 +1505,12 @@ d3.TimeArc = function () {
             if (force.alpha()!==0){
             let marker;
             nodes.forEach(function (d, i) {
-                d.x += (graphicopt.widthG() / 2 - d.x || 0) * 0.05;
+                // d.x += (graphicopt.widthG() / 2 - d.x || 0) * 0.05;
                 if (d.parentNode >= 0) {
-                    d.y += (nodes[d.parentNode].y - d.y || 0) * 0.5;
+                    d.y += (nodes[d.parentNode].y - d.y || 0) * 0.2;
                     // d.y = nodes[d.parentNode].y;
-                } else if (d.childNodes) {
+                }
+                else if (d.childNodes) {
                     var yy = 0;
                     for (var i = 0; i < d.childNodes.length; i++) {
                         var child = d.childNodes[i];
@@ -1516,7 +1518,7 @@ d3.TimeArc = function () {
                     }
                     if (d.childNodes.length > 0) {
                         yy = yy / d.childNodes.length; // average y coordinate
-                        d.y += (yy - d.y) * 0.2;
+                        d.y += (yy - d.y) * 0.5;
                     }
                 }
 
@@ -1534,6 +1536,7 @@ d3.TimeArc = function () {
             linkArcs.style("stroke-width", function (d) {
                 return d.value;
             });
+            linkArcs.attr("d", linkArc);
 }
         if (!isforce) {
             let layerpath = svg.selectAll(".layer")
@@ -1544,7 +1547,7 @@ d3.TimeArc = function () {
             layerpath.enter().append('path')
                 .attr('class', 'layerpath')
                 .call(updatelayerpath);
-            linkArcs.attr("d", linkArc);
+            // linkArcs.attr("d", linkArc);
         }
         // if (force.alpha()<0.03)
         //     force.stop();
