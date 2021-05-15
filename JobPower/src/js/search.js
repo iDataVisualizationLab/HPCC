@@ -11,7 +11,7 @@ let SearchControl = function() {
             .attr('value',d=>d)
             .text(d=>d);
         d3.select('#searchInput').on('change',function(){
-            searchInput = this.value
+            searchInput = this.trim();
         }).node().value = ''
 
     }
