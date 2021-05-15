@@ -595,11 +595,13 @@ function drawColorLegend() {
             .attr('y',yoffset);
     }
     let legendg_o = svg.selectAll('g.nodeLegend')
-        .data(catergogryList);
+        .data(catergogryList)
+        .classed('fade',d=> d.disable);
     legendg_o.exit().remove();
     const legendg = legendg_o.enter()
         .append('g')
         .attr('class','nodeLegend show')
+        .classed('fade',d=> d.disable)
         .attr('transform',(d,i)=>'translate('+xx+','+yscale(i)+')')
         .on('click',onclickcategory);
     function onclickcategory(d) {
