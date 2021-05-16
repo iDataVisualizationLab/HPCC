@@ -542,12 +542,17 @@ function drawUserList(){
     const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
     const _jobValueName = $(d3.select('#jobValueName').node()).val();
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    const _data = d3.entries(Layout.usersStatic);
     if (filterMode!=='userList')
     {
-        // resetFilter('userList');
-        // drawUserList();
+        const data = [];
+        subObject.timearc.currentSelected().filter(d=>d.category==='user')
+            .forEach(d=>{
+                data.push({key:d.term,value:Layout.usersStatic[d.term]})
+            });
+        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
     }else {
-        const _data = d3.entries(Layout.usersStatic).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]);
+        _data.sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType])
         let data = [];
         if (_jobFilterType === 'top') {
             data = _data.slice(0, _JobFilterThreshold);
@@ -569,18 +574,18 @@ function drawJobList(){
     const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
     const _jobValueName = $(d3.select('#jobValueName').node()).val();
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    const _data = d3.entries(Layout.jobsStatic);
     if (filterMode!=='jobList')
     {
-        // resetFilter('jobList');
-        // drawJobList();
+        const data = [];
+        subObject.timearc.currentSelected().filter(d=>d.category==='job')
+            .forEach(d=>{
+                data.push({key:d.term,value:Layout.jobsStatic[d.term]})
+            });
+        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
     }else {
-        const _data = d3.entries(Layout.jobsStatic).filter(j => !j.value.job_array_id).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]);
-        let data = [];
-        if (_jobFilterType === 'top') {
-            data = _data.slice(0, _JobFilterThreshold);
-        } else {
-            data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
-        }
+        let data = _data.filter(j => !j.value.job_array_id).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]).slice(0, _JobFilterThreshold);
+
         renderTable['job'](data, _data, _jobValueType, _jobValueName);
         const jobList = [];
         data.forEach(d => {
@@ -594,18 +599,17 @@ function drawComputeList(){
     const _jobFilterType = 'top'//$(d3.select('#jobFilterType').node()).val();
     const _jobValueName = $(d3.select('#jobValueName').node()).val();
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
+    const _data = d3.entries(Layout.computesStatic);
     if (filterMode!=='jobList')
     {
-        // resetFilter('jobList');
-        // drawJobList();
+        const data = [];
+        subObject.timearc.currentSelected().filter(d=>d.category==='compute')
+            .forEach(d=>{
+                data.push({key:d.term,value:Layout.computesStatic[d.term]})
+            });
+        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
     }else {
-        const _data = d3.entries(Layout.computesStatic);
-        let data = [];
-        if (_jobFilterType === 'top') {
-            data = _data.slice(0, _JobFilterThreshold);
-        } else {
-            data = _data.filter(d => d.value[_jobValueType] >= _JobFilterThreshold / 800)
-        }
+        let data = _data.sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]).slice(0, _JobFilterThreshold);
         renderTable['compute'](data, _data, _jobValueType, _jobValueName);
         const jobList = [];
         data.forEach(d => {

@@ -700,7 +700,9 @@ d3.TimeArc = function () {
                 .call(updatelayerpath);
         }
     }
-
+    timeArc.currentSelected = function(){
+        return termArray;
+    }
     function getDrawData(n) {
         if (graphicopt.minMaxStream) {
             n.noneSymetric = true;
