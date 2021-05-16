@@ -464,7 +464,7 @@ function resetFilter(to) {
 let renderTable = {
     job:_.partial(_renderTable,{numTotal:'#jobNumTotal',currentNum:'#currentJobNum',holder:'#JobList',mainKey:'jobid',subInfo:[{key:'compute',value:'total_nodes'},{key:'user',value:'user_name'}]}),
     user:_.partial(_renderTable,{numTotal:'#userNumTotal',currentNum:'#currentUserNum',holder:'#UserList',mainKey:'username',subInfo:[{key:'compute',value:'total_nodes'},{key:'name',func:(d)=>request.userReverseDict[d.key]}]}),
-    compute:_.partial(_renderTable,{numTotal:'#xomputeNumTotal',currentNum:'#currentComputeNum',holder:'#ComputeList',mainKey:'compute',subInfo:[{key:'jobs',func:(d)=>d.job_id.length}]})}
+    compute:_.partial(_renderTable,{numTotal:'#xomputeNumTotal',currentNum:'#currentComputeNum',holder:'#ComputeList',mainKey:'compute',subInfo:[{key:'jobs',func:(d)=>d.value.job_id.length}]})}
 function _renderTable({numTotal,currentNum,holder,mainKey,subInfo},data, _data, _jobValueType, _jobValueName) {
     d3.select(currentNum).text(data.length);
     d3.select(numTotal).text(_data.length);
@@ -609,7 +609,7 @@ function drawComputeList(){
         renderTable['compute'](data, _data, _jobValueType, _jobValueName);
         const jobList = [];
         data.forEach(d => {
-            d.job_id.forEach(j=>jobList.push(j));
+            d.value.job_id.forEach(j=>jobList.push(j));
         });
         subObject.filterTerms(jobList)
     }
