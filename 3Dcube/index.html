@@ -36,6 +36,43 @@
         init();
         animate();
 
+        function addText(texts){
+            const loader = new THREE.FontLoader();
+            loader.load( './src/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                const color = 0xDDCB21;
+                texts.forEach(t=>{
+
+                    const matLite = new THREE.MeshBasicMaterial({
+                        color: color,
+                        side: THREE.DoubleSide
+                    });
+
+                    const message = t.text;
+
+                    const shapes = font.generateShapes(message, 1);
+
+                    const geometry = new THREE.ShapeGeometry(shapes);
+
+                    geometry.computeBoundingBox();
+
+                    const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+
+                    geometry.translate(xMid, 0, 0);
+
+                    // make shape ( N.B. edge view not visible )
+
+                    const text = new THREE.Mesh(geometry, matLite);
+                    text.position.x = t.x;
+                    text.position.y = t.y;
+                    text.position.z = t.z;
+                    text.rotation.x = t.rx??0;
+                    text.rotation.y = t.ry??0;
+                    text.rotation.z = t.rz??0;
+                    scene.add(text);
+                })
+            })
+        }
         function generatePointCloudGeometry(data) {
 
             const geometry = new THREE.BufferGeometry();
@@ -93,6 +130,9 @@
             pcBuffer.scale.set(10, 10, 10);
             pcBuffer.position.set(-5, -5, -5);
             scene.add(pcBuffer);
+
+
+            addText([{text:'mem_power',x:0,y:-5,z:-5},{text:'mem_usage',x:-5,y:0,z:-5,rx:Math.PI/2,ry:Math.PI/2},{text:'time',x:5,y:5,z:0,rx:-Math.PI/2,rz:-Math.PI/2,ry:-Math.PI/2}])
 
             let geo = new THREE.BoxGeometry( 10, 10 , 10 );
             const object = new THREE.Mesh( geo, new THREE.MeshBasicMaterial( 0xff0000 ) );
