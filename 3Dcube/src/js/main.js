@@ -1,3 +1,6 @@
+
+let colorUserScale = d3.scaleOrdinal(d3.schemePaired);
+
 let url = 'src/data/aggregated_metrics_05_12.json';
 
 serviceListattr = ["power","mem_power","mem_usage"];
@@ -126,12 +129,30 @@ function handleData(data){
     let r = handleSmalldata(data);
     let sampleS = r.sampleh;
     let tsnedata = r.tsnedata;
-    
+
     const dataViz = [];
     const numTime = data.time_stamp.length-1;
     data.time_stamp.forEach((t,ti)=>{
         Object.keys(tsnedata).forEach(k=>{
             const item = {x:tsnedata[k][ti][1],y:tsnedata[k][ti][2],z:ti/numTime,data:data.nodes_info[k]};
+            debugger
+            const userList = [];
+            let color = 'gray';
+            data.nodes_info[k].job_id[ti].forEach(j=>{
+                if ( data.jobs_info[j])
+                    userList.push('user '+data.jobs_info[j].user_id);
+                else
+                    userList.push('unknown');
+            });
+            if(!data.nodes_info[k].user_id)
+                data.nodes_info[k].user_id = [];
+            data.nodes_info[k].user_id[ti] = userList;
+            if(userList.length>1){
+                color='white'
+            }else if(userList.length===1){
+                color = colorUserScale(userList[0]);
+            }
+            item.color = color;
             dataViz.push(item);
         })
     })
