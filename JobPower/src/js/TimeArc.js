@@ -103,7 +103,7 @@ d3.TimeArc = function () {
     var link;
     var links;
     var linkArcs;
-    var termArray, termArray2, termArray3;
+    var termArray=[], termArray2, termArray3;
     var relationship;
     var termMaxMax, termMaxMax2;
     var terms;

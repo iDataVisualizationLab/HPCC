@@ -550,7 +550,7 @@ function drawUserList(){
             .forEach(d=>{
                 data.push({key:d.term,value:Layout.usersStatic[d.term]})
             });
-        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
+        renderTable['user'](data, _data, _jobValueType, _jobValueName);
     }else {
         _data.sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType])
         let data = [];

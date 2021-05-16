@@ -230,11 +230,12 @@ function initTimeElement() {
         setTimeout(() => {
             handleRankingData(data);
             updateProcess({percentage: 80, text: 'Preprocess data'})
-            drawUserList();
             drawJobList();
             initdrawGantt();
             drawGantt();
             // timelineControl.play.bind(timelineControl)();
+            drawUserList();
+            drawComputeList();
             updateProcess();
         }, 0);
     });
