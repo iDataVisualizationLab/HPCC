@@ -13,13 +13,53 @@
 
 <body>
 <div id="container"></div>
-<div id="info"><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - interactive - raycasting - points </div>
+<div id="info"><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - interactive -
+    raycasting - points
+</div>
+<script type="x-shader/x-vertex" id="vertexshader">
 
+			attribute float size;
+			attribute vec3 customColor;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				vColor = customColor;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				gl_PointSize = size ;
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+
+			uniform vec3 color;
+			uniform sampler2D pointTexture;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				gl_FragColor = vec4( color * vColor, 1.0 );
+
+				gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
+			}
+
+
+</script>
 <script>
 
     function draw(data) {
         let renderer, scene, camera, stats;
-        let pointclouds,boundary_o,boundary;
+        let pointclouds, boundary_o, boundary;
         let raycaster;
         let intersection = null;
         let spheresIndex = 0;
@@ -29,30 +69,46 @@
             'x': 0,
             'y': 2,
             'z': -1,
-            'Time scale': 1,
+            'size': -2,
+            'Point size':2,
+            'Time scale': 2,
         };
-        const listAxis = {'Time':-1};
-        serviceLists.forEach(s=>listAxis[s.text]=s.id);
-        let axisData = [{text:'mem_power',x:-2.5,y:-5,z:-5*settings['Time scale']},{text:'mem_usage',x:-5,y:-2.5,z:-5*settings['Time scale'],rx:Math.PI/2,ry:Math.PI/2},{text:'time',x:-5,y:-5,z:-2.5*settings['Time scale'],rx:-Math.PI/2,rz:-Math.PI/2,ry:-Math.PI/2}];
+        const listAxis = {'Time': -1};
+        serviceLists.forEach(s => listAxis[s.text] = s.id);
+        let axisData = [{text: 'mem_power', x: -2.5, y: -5, z: -5 * settings['Time scale']}, {
+            text: 'mem_usage',
+            x: -5,
+            y: -2.5,
+            z: -5 * settings['Time scale'],
+            rx: Math.PI / 2,
+            ry: Math.PI / 2
+        }, {
+            text: 'time',
+            x: -5,
+            y: -5,
+            z: -2.5 * settings['Time scale'],
+            rx: -Math.PI / 2,
+            rz: -Math.PI / 2,
+            ry: -Math.PI / 2
+        }];
 
         const pointer = new THREE.Vector2();
         const spheres = [];
 
         const threshold = 0.1;
-        const pointSize = 0.05;
 
         const rotateY = new THREE.Matrix4().makeRotationY(0.005);
 
         init();
         animate();
 
-        function addText(texts){
+        function addText(texts) {
             const loader = new THREE.FontLoader();
-            loader.load( './src/fonts/helvetiker_regular.typeface.json', function ( font ) {
+            loader.load('./src/fonts/helvetiker_regular.typeface.json', function (font) {
 
                 const color = 0xDDCB21;
-                texts.forEach(t=>{
-                    if(t.el)
+                texts.forEach(t => {
+                    if (t.el)
                         scene.remove(t.el);
                     const matLite = new THREE.MeshBasicMaterial({
                         color: color,
@@ -77,15 +133,16 @@
                     text.position.x = t.x;
                     text.position.y = t.y;
                     text.position.z = t.z;
-                    text.rotation.x = t.rx??0;
-                    text.rotation.y = t.ry??0;
-                    text.rotation.z = t.rz??0;
+                    text.rotation.x = t.rx ?? 0;
+                    text.rotation.y = t.ry ?? 0;
+                    text.rotation.z = t.rz ?? 0;
                     text.name = t.text;
                     t.el = text;
                     scene.add(text);
                 })
             })
         }
+
         function generatePointCloudGeometry(data) {
 
             const geometry = new THREE.BufferGeometry();
@@ -93,22 +150,24 @@
 
             const positions = new Float32Array(numPoints * 3);
             const colors = new Float32Array(numPoints * 3);
+            const sizes = new Float32Array(numPoints);
 
-            data.forEach((d,k)=>{
+            data.forEach((d, k) => {
 
                 positions[3 * k] = d.x;
                 positions[3 * k + 1] = d.y;
                 positions[3 * k + 2] = d.z;
 
-                const color = new THREE.Color(d3.color(d.color??'white') + '');
+                const color = new THREE.Color(d3.color(d.color ?? 'white') + '');
                 colors[3 * k] = color.r;
                 colors[3 * k + 1] = color.g;
                 colors[3 * k + 2] = color.b;
-
+                sizes[k] = d.size??settings['Point size'];
             });
 
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
             geometry.computeBoundingBox();
 
             return geometry;
@@ -118,34 +177,50 @@
         function generatePointcloud(data) {
 
             const geometry = generatePointCloudGeometry(data);
-            const material = new THREE.PointsMaterial({size: pointSize, vertexColors: true});
+            // const materialPoint = new THREE.PointsMaterial({size: settings['Point size'], vertexColors: true});
+            const materialPoint = new THREE.ShaderMaterial( {
+                uniforms: {
+                    color: {value: new THREE.Color(0xffffff)},
+                    pointTexture: { value: new THREE.TextureLoader().load( './src/texture/circle.png' ) }
+                },
+                vertexShader: document.getElementById( 'vertexshader' ).textContent,
+                fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+                depthTest: false
 
-            return new THREE.Points(geometry, material);
+            } );
+
+            return new THREE.Points(geometry, materialPoint);
 
         }
 
         function createPanel() {
 
-            const panel = new dat.GUI( { width: 310 } );
+            const panel = new dat.GUI({width: 310});
 
-            const folder1 = panel.addFolder( 'Axis' );
+            const folder1 = panel.addFolder('Axis');
+            const folder2 = panel.addFolder('Graphic');
+            const folder3 = panel.addFolder('Filter');
 
-            folder1.add( settings, 'x',listAxis).onChange( updateModelRender );
-            folder1.add( settings, 'y',listAxis).onChange( updateModelRender );
-            folder1.add( settings, 'z',listAxis).onChange( updateModelRender );
-            folder1.add( settings, 'Time scale',0.2, 10, 0.1 ).onChange( updateModelScale );
+            folder1.add(settings, 'x', listAxis).onChange(updateModelRender({updateAxis: true}));
+            folder1.add(settings, 'y', listAxis).onChange(updateModelRender({updateAxis: true}));
+            folder1.add(settings, 'z', listAxis).onChange(updateModelRender({updateAxis: true}));
+            folder1.add(settings, 'size', {'none': -2, ...listAxis}).onChange(updateModelRender({updateAxis: true}));
+
+            folder2.add(settings, 'Point size', 0.5, 5, 0.5).onChange(updateModelRender());
+            folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
 
             folder1.open();
+            folder2.open();
 
         }
 
-        function handleData(){
+        function handleData() {
             const listremap = {};
-            Object.keys(listAxis).forEach(k=>listremap[listAxis[k]]=k);
+            Object.keys(listAxis).forEach(k => listremap[listAxis[k]] = k);
             axisData[0].text = listremap[settings.x];
             axisData[1].text = listremap[settings.y];
             axisData[2].text = listremap[settings.z];
-            data.forEach(d=>{
+            data.forEach(d => {
                 d.x = d.data[settings.x];
                 d.y = d.data[settings.y];
                 d.z = d.data[settings.z];
@@ -169,8 +244,8 @@
             handleData();
 
             const dataBuffer = generatePointcloud(data);
-            dataBuffer.scale.set(10, 10, 10*settings['Time scale']);
-            dataBuffer.position.set(-5, -5, -5*settings['Time scale']);
+            dataBuffer.scale.set(10, 10, 10 * settings['Time scale']);
+            dataBuffer.position.set(-5, -5, -5 * settings['Time scale']);
             scene.add(dataBuffer);
 
             //
@@ -179,11 +254,12 @@
 
             //
 
-            let geo = new THREE.BoxGeometry( 10, 10 , 10 );
-            boundary_o = new THREE.Mesh( geo, new THREE.MeshBasicMaterial( 0xff0000 ) );
-            boundary = new THREE.BoxHelper( boundary_o, 0xffff00 );
+            let geo = new THREE.BoxGeometry(10, 10, 10);
+            boundary_o = new THREE.Mesh(geo, new THREE.MeshBasicMaterial(0xff0000));
+            boundary_o.scale.set(1, 1, settings['Time scale'])
+            boundary = new THREE.BoxHelper(boundary_o, 0xffff00);
             boundary.name = 'boundary'
-            scene.add( boundary );
+            scene.add(boundary);
 
 
             pointclouds = [dataBuffer];
@@ -229,31 +305,49 @@
 
         }
 
-        function updateModelRender() {
-            handleData();
-            const position = pointclouds[0].geometry.attributes.position.array;
-            data.forEach((d,i)=>{
-                position[3*i] = d.x;
-                position[3*i+1] = d.y;
-                position[3*i+2] = d.z;
-            })
-            pointclouds[0].geometry.attributes.position.needsUpdate = true;
-            pointclouds[0].geometry.boundingBox = null;
-            pointclouds[0].geometry.computeBoundingSphere();
-            addText(axisData)
+        function updateModelRender(opt) {
+            if (opt && opt.updateAxis) {
+                return () => {
+                    update();
+                    addText(axisData)
+                }
+            } else {
+                return () => {
+                    update();
+                }
+            }
+
+            function update() {
+                handleData();
+                const position = pointclouds[0].geometry.attributes.position.array;
+                let scaleSize = d3.scaleLinear().domain([0.1,1]);
+                if ((+settings.size)===-2)
+                    scaleSize=()=>1;
+                data.forEach((d, i) => {
+                    position[3 * i] = d.x;
+                    position[3 * i + 1] = d.y;
+                    position[3 * i + 2] = d.z;
+                    pointclouds[0].geometry.attributes.size.array[i] = scaleSize(d.data[settings.size])*settings['Point size'];
+                });
+
+                pointclouds[0].geometry.attributes.position.needsUpdate = true;
+                pointclouds[0].geometry.attributes.size.needsUpdate = true;
+                pointclouds[0].geometry.boundingBox = null;
+                pointclouds[0].geometry.computeBoundingSphere();
+            }
         }
 
-        function updateModelScale(){
-            axisData[0].z = -5*settings['Time scale'];
-            axisData[1].z = -5*settings['Time scale'];
-            axisData[2].z = -2.5*settings['Time scale'];
-            axisData.forEach(a=>{
-                if(a.el)
+        function updateModelScale() {
+            axisData[0].z = -5 * settings['Time scale'];
+            axisData[1].z = -5 * settings['Time scale'];
+            axisData[2].z = -2.5 * settings['Time scale'];
+            axisData.forEach(a => {
+                if (a.el)
                     a.el.position.z = a.z
             });
-            pointclouds[0].scale.set(10, 10, 10*settings['Time scale']);
-            pointclouds[0].position.set(-5, -5, -5*settings['Time scale']);
-            boundary_o.scale.set(1,1,settings['Time scale']);
+            pointclouds[0].scale.set(10, 10, 10 * settings['Time scale']);
+            pointclouds[0].position.set(-5, -5, -5 * settings['Time scale']);
+            boundary_o.scale.set(1, 1, settings['Time scale']);
             boundary.update();
         }
 
