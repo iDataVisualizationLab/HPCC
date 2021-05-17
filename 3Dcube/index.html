@@ -172,7 +172,8 @@
                 colors[3 * k] = color.r;
                 colors[3 * k + 1] = color.g;
                 colors[3 * k + 2] = color.b;
-                sizes[k] = d.size??settings['Point size'];
+                d.size = d.size??settings['Point size'];
+                sizes[k] = d.size;
                 d.alpha = d.alpha??1;
                 alphas[k] = d.alpha;
             });
