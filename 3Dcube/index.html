@@ -81,6 +81,7 @@
             'Time scale': 2,
             'User ID': '',
             'Auto rotate':true,
+            'Show shared compute nodes': true,
         };
         const listAxis = {'Time': -1};
         serviceLists.forEach(s => listAxis[s.text] = s.id);
@@ -229,6 +230,7 @@
             folder2.add(settings, 'Auto rotate').onChange(resetRotate);
 
             folder3.add(settings, 'User ID').onChange(updateData);
+            folder3.add(settings, 'Show shared compute nodes').onChange(updateData);
             filter_el = d3.select(folder3.__ul.childNodes[1])
                 .select('.c');
             filter_el.selectAll('datalist')
@@ -346,15 +348,31 @@
             document.addEventListener('pointermove', onPointerMove);
 
         }
-        function updateData(name){
+        function updateData(){
+            const name = settings['User ID'];
+            const isShare = settings['Show shared compute nodes'];
+            debugger
             if (name===''){
                 data.forEach(d=>{
-                    d.alpha = 1;
+                    if(isShare)
+                        d.alpha = 1;
+                    else
+                        if (Object.keys(d.user).length<2){
+                            d.alpha = 1;
+                        }else
+                            d.alpha = 0;
                 })
             }else
                 data.forEach(d=>{
                     if (d.user[name])
-                        d.alpha = 1;
+                        if(isShare)
+                            d.alpha = 1;
+                        else{
+                            if (Object.keys(d.user).length<2){
+                                d.alpha = 1;
+                            }else
+                                d.alpha = 0;
+                        }
                     else
                         d.alpha = 0;
                 })
