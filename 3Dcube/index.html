@@ -320,13 +320,13 @@
             function update() {
                 handleData();
                 const position = pointclouds[0].geometry.attributes.position.array;
-                let scaleSize = d3.scaleLinear().domain([0.1,1]);
+                let scaleSize = d3.scaleSqrt().domain([0.1,1]);
                 if ((+settings.size)===-2)
                     scaleSize=()=>1;
                 data.forEach((d, i) => {
-                    position[3 * i] = d.x;
-                    position[3 * i + 1] = d.y;
-                    position[3 * i + 2] = d.z;
+                    position[3 * i] = d.x??-0.5;
+                    position[3 * i + 1] = d.y??-0.5;
+                    position[3 * i + 2] = d.z??-0.5;
                     pointclouds[0].geometry.attributes.size.array[i] = scaleSize(d.data[settings.size])*settings['Point size'];
                 });
 
