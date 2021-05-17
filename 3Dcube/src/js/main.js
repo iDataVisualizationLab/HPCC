@@ -132,16 +132,19 @@ function handleData(data){
 
     const dataViz = [];
     const numTime = data.time_stamp.length-1;
+    const userMap = {};
     data.time_stamp.forEach((t,ti)=>{
         Object.keys(tsnedata).forEach(k=>{
-            const item = {x:tsnedata[k][ti][1],y:tsnedata[k][ti][2],z:ti/numTime,data:data.nodes_info[k]};
-            debugger
+            const item = {x:tsnedata[k][ti][1]??-0.5,y:tsnedata[k][ti][2]??-0.5,z:ti/numTime,
+                data:{'-1':ti/numTime,...tsnedata[k][ti]},
+                _data:data.nodes_info[k]};
             const userList = [];
             let color = 'gray';
             data.nodes_info[k].job_id[ti].forEach(j=>{
-                if ( data.jobs_info[j])
+                if ( data.jobs_info[j]){
                     userList.push('user '+data.jobs_info[j].user_id);
-                else
+                    userMap['user '+data.jobs_info[j].user_id] = data.jobs_info[j].user_name
+                }else
                     userList.push('unknown');
             });
             if(!data.nodes_info[k].user_id)
@@ -153,7 +156,8 @@ function handleData(data){
                 color = colorUserScale(userList[0]);
             }
             item.color = color;
-            dataViz.push(item);
+            // if (userList.find(u=>u==='user 98858'))
+                dataViz.push(item);
         })
     })
     return dataViz;
