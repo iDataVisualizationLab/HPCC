@@ -18,12 +18,15 @@
 </div>
 <script type="x-shader/x-vertex" id="vertexshader">
 
+            attribute float alpha;
 			attribute float size;
 			attribute vec3 customColor;
 
 			varying vec3 vColor;
+			varying float vAlpha;
 
 			void main() {
+                vAlpha = alpha;
 
 				vColor = customColor;
 
@@ -43,21 +46,24 @@
 			uniform vec3 color;
 			uniform sampler2D pointTexture;
 
+            varying float vAlpha;
 			varying vec3 vColor;
 
 			void main() {
+                if (vAlpha<0.001){
+                    gl_FragColor.a = 0.0;
+                }else {
+                    gl_FragColor = vec4( color * vColor, vAlpha );
 
-				gl_FragColor = vec4( color * vColor, 1.0 );
-
-				gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
-
+                    gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+                }
 			}
 
 
 </script>
 <script>
 
-    function draw(data) {
+    function draw(data,listSearch=[]) {
         let renderer, scene, camera, stats;
         let pointclouds, boundary_o, boundary;
         let raycaster;
@@ -72,6 +78,7 @@
             'size': -2,
             'Point size':2,
             'Time scale': 2,
+            'User ID': ''
         };
         const listAxis = {'Time': -1};
         serviceLists.forEach(s => listAxis[s.text] = s.id);
@@ -98,6 +105,8 @@
         const threshold = 0.1;
 
         const rotateY = new THREE.Matrix4().makeRotationY(0.005);
+
+        let filter_el;
 
         init();
         animate();
@@ -151,6 +160,7 @@
             const positions = new Float32Array(numPoints * 3);
             const colors = new Float32Array(numPoints * 3);
             const sizes = new Float32Array(numPoints);
+            const alphas = new Float32Array(numPoints);
 
             data.forEach((d, k) => {
 
@@ -163,10 +173,13 @@
                 colors[3 * k + 1] = color.g;
                 colors[3 * k + 2] = color.b;
                 sizes[k] = d.size??settings['Point size'];
+                d.alpha = d.alpha??1;
+                alphas[k] = d.alpha;
             });
 
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
             geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
             geometry.computeBoundingBox();
 
@@ -185,6 +198,7 @@
                 },
                 vertexShader: document.getElementById( 'vertexshader' ).textContent,
                 fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+                transparent:    true,
                 depthTest: false
 
             } );
@@ -209,9 +223,30 @@
             folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
 
+            folder3.add(settings, 'User ID').onChange(updateData);
+            filter_el = d3.select(folder3.__ul.childNodes[1])
+                .select('.c');
+            filter_el.selectAll('datalist')
+                .data([0])
+                .join('datalist')
+                .attr('id','searchInputOptions');
+            filter_el.select('input')
+                .attr('list','searchInputOptions');
+
             folder1.open();
             folder2.open();
+            folder3.open();
 
+            updateList(listSearch);
+        }
+
+        function updateList(list){
+            filter_el.select('datalist')
+                .selectAll('option')
+                .data(list)
+                .join('option')
+                .attr('value',d=>d)
+                .text(d=>d);
         }
 
         function handleData() {
@@ -304,7 +339,20 @@
             document.addEventListener('pointermove', onPointerMove);
 
         }
-
+        function updateData(name){
+            if (name===''){
+                data.forEach(d=>{
+                    d.alpha = 1;
+                })
+            }else
+                data.forEach(d=>{
+                    if (d.user[name])
+                        d.alpha = 1;
+                    else
+                        d.alpha = 0;
+                })
+            updateModelRender()();
+        }
         function updateModelRender(opt) {
             if (opt && opt.updateAxis) {
                 return () => {
@@ -328,10 +376,12 @@
                     position[3 * i + 1] = d.y??-0.5;
                     position[3 * i + 2] = d.z??-0.5;
                     pointclouds[0].geometry.attributes.size.array[i] = scaleSize(d.data[settings.size])*settings['Point size'];
+                    pointclouds[0].geometry.attributes.alpha.array[i] =d.alpha;
                 });
 
                 pointclouds[0].geometry.attributes.position.needsUpdate = true;
                 pointclouds[0].geometry.attributes.size.needsUpdate = true;
+                pointclouds[0].geometry.attributes.alpha.needsUpdate = true;
                 pointclouds[0].geometry.boundingBox = null;
                 pointclouds[0].geometry.computeBoundingSphere();
             }
