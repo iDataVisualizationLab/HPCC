@@ -9,6 +9,7 @@
     <script src="src/lib/three.min.js"></script>
     <script src="src/lib/stats.min.js"></script>
     <script src="src/lib/dat.gui.min.js"></script>
+    <script src="src/lib/OrbitControls.js"></script>
 </head>
 
 <body>
@@ -78,7 +79,8 @@
             'size': -2,
             'Point size':2,
             'Time scale': 2,
-            'User ID': ''
+            'User ID': '',
+            'Auto rotate':true,
         };
         const listAxis = {'Time': -1};
         serviceLists.forEach(s => listAxis[s.text] = s.id);
@@ -101,6 +103,7 @@
 
         const pointer = new THREE.Vector2();
         const spheres = [];
+        let controls;
 
         const threshold = 0.1;
 
@@ -223,6 +226,7 @@
 
             folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
+            folder2.add(settings, 'Auto rotate').onChange(resetRotate);
 
             folder3.add(settings, 'User ID').onChange(updateData);
             filter_el = d3.select(folder3.__ul.childNodes[1])
@@ -320,6 +324,8 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
+            //
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             //
 
             raycaster = new THREE.Raycaster();
@@ -427,10 +433,20 @@
 
         }
 
-        function render() {
+        function resetRotate(autorotate){
+            if (autorotate){
+                camera.position.set(10, 10, 10);
+                camera.lookAt(scene.position);
+            }
+        }
 
-            camera.applyMatrix4(rotateY);
-            camera.updateMatrixWorld();
+        function render() {
+            if (settings['Auto rotate']){
+                camera.applyMatrix4(rotateY);
+                camera.updateMatrixWorld();
+            }else{
+                controls.update();
+            }
 
             raycaster.setFromCamera(pointer, camera);
 
