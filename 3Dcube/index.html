@@ -206,7 +206,7 @@
             folder1.add(settings, 'z', listAxis).onChange(updateModelRender({updateAxis: true}));
             folder1.add(settings, 'size', {'none': -2, ...listAxis}).onChange(updateModelRender({updateAxis: true}));
 
-            folder2.add(settings, 'Point size', 0.5, 5, 0.5).onChange(updateModelRender());
+            folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
 
             folder1.open();
