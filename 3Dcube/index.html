@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>three.js webgl - interactive - raycasting - points</title>
+    <title>3D Power visualization</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link type="text/css" rel="stylesheet" href="src/style/main.css">
     <script src="src/lib/d3.v5.min.js"></script>
+    <script src="src/lib/d3.tip.js"></script>
     <script src="src/lib/three.min.js"></script>
     <script src="src/lib/stats.min.js"></script>
     <script src="src/lib/dat.gui.min.js"></script>
@@ -13,9 +14,8 @@
 </head>
 
 <body>
-<div id="container"></div>
-<div id="info"><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - interactive -
-    raycasting - points
+<div id="container" style="position:relative"></div>
+<div id="info"><a href="https://idatavisualizationlab.github.io/HPCC" target="_blank" rel="noopener">HPCC</a> 3D Power visualization
 </div>
 <script type="x-shader/x-vertex" id="vertexshader">
 
@@ -153,6 +153,8 @@
         const rotateY = new THREE.Matrix4().makeRotationY(0.005);
 
         let filter_el;
+
+        let tool_tip;
 
         init();
         animate();
@@ -457,7 +459,26 @@
 
             stats = new Stats();
             container.appendChild(stats.dom);
-            container.addEventListener('click',()=> freeze=!freeze)
+            renderer.domElement.addEventListener('click',()=> intersection?freeze=!freeze:'');
+            //
+
+            tool_tip = d3.select(container).append('div')
+                .attr('class','tooltip');
+            tool_tip.show = function(d){
+                tool_tip.style('left', pointer.client.x+'px');
+                tool_tip.style('top', pointer.client.y+'px');
+                tool_tip.html(`<ul>
+<li>Compute  : ${d.data.name}</li>
+<li>Time     : ${d.data.time.toLocaleString()}</li>
+${serviceLists.map(s=>`<li>${s.text}: ${d._data[s.text][d.data.timestep][0]}</li>`).join('')}
+<li>User list: ${Object.keys(d.user)}</li>
+<li>Job list : ${d._data.job_id[d.data.timestep]}</li>
+</ul>`);
+                tool_tip.classed('active',true);
+            };
+            tool_tip.hide = function(){
+                tool_tip.classed('active',false);
+            }
             //
 
             createPanel();
@@ -598,7 +619,7 @@
         }
 
         function onPointerMove(event) {
-
+            pointer.client = {x:event.clientX,y:event.clientY};
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -639,22 +660,27 @@
 
             raycaster.setFromCamera(pointer, camera);
 
+            const intersections = raycaster.intersectObject(pointclouds);
+            let isChange = false;
+            if ((intersections.length) > 0 ){
+                let alpha = intersections[0].object.geometry.attributes.alpha.array;
+                _intersection = intersections.find(intersection=>alpha[intersection.index]>0)??null;
+            }else
+                _intersection = null;
             if(!freeze){
-                const intersections = raycaster.intersectObject(pointclouds);
-                let isChange = false;
-                let _intersection = intersection;
-                if ((intersections.length) > 0 ){
-                    let alpha = intersections[0].object.geometry.attributes.alpha.array;
-                    intersection = intersections.find(intersection=>alpha[intersection.index]>0)??null;
-                }else
-                    intersection = null;
                 isChange = intersection!==_intersection;
-                if (isChange)
+                intersection = _intersection;
+                if (isChange){
                     updateData();
+                }
             }
+            if (_intersection)
+                tool_tip.show(data[_intersection.index]);
+            else
+                tool_tip.hide();
 
-            if (toggle > 0.02 && intersection !== null) {
-                spheres[spheresIndex].position.copy(intersection.point);
+            if (toggle > 0.02 && _intersection !== null) {
+                spheres[spheresIndex].position.copy(_intersection.point);
                 spheres[spheresIndex].scale.set(1, 1, 1);
                 spheresIndex = (spheresIndex + 1) % spheres.length;
 

@@ -138,13 +138,15 @@ function handleData(data){
     data.time_stamp.forEach((t,ti)=>{
         Object.keys(tsnedata).forEach(k=>{
             const item = {x:tsnedata[k][ti][1]??-0.5,y:tsnedata[k][ti][2]??-0.5,z:ti/numTime,
-                data:{'-1':ti/numTime,...tsnedata[k][ti]},
+                data:{'-1':ti/numTime,...tsnedata[k][ti],time:new Date(t/1000000)},
                 user:{},
                 _data:data.nodes_info[k]};
             const userList = [];
             let color = 'gray';
             data.nodes_info[k].job_id[ti].forEach(j=>{
                 if ( data.jobs_info[j]){
+                    if (!data.jobs_info[j].user_id)
+                        debugger
                     userList.push('user '+data.jobs_info[j].user_id);
                     item.user['user '+data.jobs_info[j].user_id] = 1;
                     userMap['user '+data.jobs_info[j].user_id] = data.jobs_info[j].user_name

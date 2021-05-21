@@ -82,3 +82,25 @@ a, button, input, select {
     margin-top: 20px;
     padding: 10px;
 }
+div.tooltip {
+    position: absolute;
+    display: none;
+    padding: 10px;
+    font-family: 'Open Sans' sans-serif;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #999;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 1;
+    top: 0;
+    left:0;
+}
+div.tooltip.active {
+    display: block;
+}
+div.tooltip ul {
+    list-style-type: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margins */
+}
