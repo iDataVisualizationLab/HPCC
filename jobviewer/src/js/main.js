@@ -38,10 +38,10 @@ $(document).ready(function(){
             d3.select('#navMode').selectAll('li').classed('active',false);
             d3.select('#navMode').select('li.demo a').classed('active',true);
             // let url = 'src/data/922020-932020-145000.json';
-            // let url = '../HiperView/data/814_821_2020.json';
+            let url = '../HiperView/data/814_821_2020.json';
             // let url = '../HiperView/data/1127_1128_2020.json';
             // let url = '../HiperView/data/1207_1213_2020.json'; // high CPU! temperature although no job info
-            let url = '../HiperView/data/1120_1126_2020.json';
+            // let url = '../HiperView/data/1120_1126_2020.json';
             if (command.timeStart!==undefined&&command.timeEnd!==undefined){ `2020-02-14T12:00:00-05:00`
                 _start = new Date(command.timeStart);
                 _end = new Date(command.timeEnd);
