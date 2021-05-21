@@ -62,6 +62,46 @@
 
 
 </script>
+<script type="x-shader/x-vertex" id="vertexLineshader">
+
+            attribute float alpha;
+			attribute float size;
+			attribute vec3 color;
+
+			varying vec3 vColor;
+			varying float vAlpha;
+
+			void main() {
+                vAlpha = alpha;
+
+				vColor = color;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentLineshader">
+
+			uniform vec3 color;
+
+            varying float vAlpha;
+			varying vec3 vColor;
+
+			void main() {
+                if (vAlpha<0.001){
+                    gl_FragColor.a = 0.0;
+                }else {
+                    gl_FragColor = vec4( color * vColor, vAlpha );
+                }
+			}
+
+
+</script>
 <script>
 
     function draw(data,linedata,listSearch=[]) {
@@ -247,12 +287,16 @@
             let group = new THREE.Object3D();
             Object.values(linedataObj).forEach(data=>{
                 const geometry = generateLineGeometry(data.values);
-                const materialPoint = new THREE.LineBasicMaterial( {
-                    opacity:1,
+                const materialPoint = new THREE.ShaderMaterial( {
+                    uniforms: {
+                        color: {value: new THREE.Color(0xffffff)},
+                    },
+                    vertexShader: document.getElementById( 'vertexLineshader' ).textContent,
+                    fragmentShader: document.getElementById( 'fragmentLineshader' ).textContent,
                     linewidth:1,
-                    color: 0xffffff,
-                    vertexColors: THREE.VertexColors,
-                    transparent: true
+                    transparent:    true,
+                    depthTest: false
+
                 } );
                 let lineObj = new THREE.Line(geometry, materialPoint);
                 lineObj.id = data.key;
