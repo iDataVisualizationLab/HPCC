@@ -209,9 +209,9 @@
 
             data.forEach((d, k) => {
 
-                positions[3 * k] = d.x;
-                positions[3 * k + 1] = d.y;
-                positions[3 * k + 2] = d.z;
+                positions[3 * k] = d.x??-0.5;
+                positions[3 * k + 1] = d.y??-0.5;
+                positions[3 * k + 2] = d.z??-0.5;
 
                 const color = new THREE.Color(d3.color(d.color ?? 'white') + '');
                 colors[3 * k] = color.r;
@@ -243,9 +243,9 @@
 
             data.forEach((d, k) => {
 
-                positions[3 * k] = d.x;
-                positions[3 * k + 1] = d.y;
-                positions[3 * k + 2] = d.z;
+                positions[3 * k] = d.x??-0.5;
+                positions[3 * k + 1] = d.y??-0.5;
+                positions[3 * k + 2] = d.z??-0.5;
 
                 const color = new THREE.Color(d3.color(d.color ?? 'white') + '');
                 colors[3 * k] = color.r;
@@ -529,7 +529,6 @@
 
         function updateLineData(){
             lineGroup.children.forEach(buffer=>{
-                debugger
                 const position = buffer.geometry.attributes.position.array;
                 const alpha = buffer.geometry.attributes.alpha.array;
 
@@ -539,9 +538,11 @@
                     position[3 * i + 2] = d.z??-0.5;
                     alpha[i] =d.alpha;
                 });
-
+                if (position.find(p=>_.isNaN(p)))
+                    debugger
                 buffer.geometry.attributes.position.needsUpdate = true;
                 buffer.geometry.attributes.alpha.needsUpdate = true;
+                buffer.geometry.boundingBox = null;
                 buffer.geometry.computeBoundingSphere();
             })
         }
@@ -614,7 +615,6 @@
             intersection = (intersections.length) > 0 ? intersections[0] : null;
 
             if (toggle > 0.02 && intersection !== null) {
-                debugger
                 spheres[spheresIndex].position.copy(intersection.point);
                 spheres[spheresIndex].scale.set(1, 1, 1);
                 spheresIndex = (spheresIndex + 1) % spheres.length;
