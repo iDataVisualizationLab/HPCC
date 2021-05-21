@@ -252,7 +252,7 @@
                 colors[3 * k + 1] = color.g;
                 colors[3 * k + 2] = color.b;
                 d.alpha = d.alpha??1;
-                alphas[k] = d.alpha;
+                alphas[k] = (d.x===undefined || d.y===undefined || d.z===undefined)? 0 : d.alpha;
             });
 
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -536,7 +536,7 @@
                     position[3 * i] = d.x??-0.5;
                     position[3 * i + 1] = d.y??-0.5;
                     position[3 * i + 2] = d.z??-0.5;
-                    alpha[i] =d.alpha;
+                    alpha[i] = (d.x===undefined || d.y===undefined || d.z===undefined)? 0 : d.alpha;
                 });
                 if (position.find(p=>_.isNaN(p)))
                     debugger
