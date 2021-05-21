@@ -121,8 +121,8 @@ d3.json(url).then(d => {
     console.log(Object.keys(data.jobs_info).length,Object.keys(jobs_info).length);
     data.jobs_info = jobs_info;
 
-    const {dataViz,listSearch} = handleData(data);
-    draw(dataViz,listSearch);
+    const {dataViz,lineViz,listSearch} = handleData(data);
+    draw(dataViz,lineViz,listSearch);
 });
 
 function handleData(data){
@@ -131,6 +131,8 @@ function handleData(data){
     let tsnedata = r.tsnedata;
 
     const dataViz = [];
+    const lineViz = {};
+    Object.keys(tsnedata).forEach(k=>{lineViz[k] = {key:k, values: []}});
     const numTime = data.time_stamp.length-1;
     const userMap = {};
     data.time_stamp.forEach((t,ti)=>{
@@ -160,7 +162,8 @@ function handleData(data){
             item.color = color;
             // if (userList.find(u=>u==='user 98858'))
             dataViz.push(item);
+            lineViz[k].values.push(item);
         })
-    })
-    return {dataViz,listSearch:Object.keys(userMap)};
+    });
+    return {dataViz,lineViz,listSearch:Object.keys(userMap)};
 }

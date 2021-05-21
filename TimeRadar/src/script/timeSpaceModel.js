@@ -2168,6 +2168,7 @@ d3.TimeSpace = function () {
             .context(ctx)(path);
         return ctx.toShapes(true);
     }
+
     function createLine(path){
         let pointsGeometry = new THREE.Geometry();
         for (let i=0;i <path.length-1;i++){
@@ -2193,6 +2194,7 @@ d3.TimeSpace = function () {
         lineObj.frustumCulled = false;
         return lineObj;
     }
+
     // function createCurveLine(path,curves){
     //     //QuadraticBezierCurve3
     //     let lineObj = new THREE.Object3D();

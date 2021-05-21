@@ -64,9 +64,9 @@
 </script>
 <script>
 
-    function draw(data,listSearch=[]) {
+    function draw(data,linedata,listSearch=[]) {
         let renderer, scene, camera, stats;
-        let pointclouds, boundary_o, boundary;
+        let pointclouds, lineGroup, boundary_o, boundary;
         let raycaster;
         let intersection = null;
         let spheresIndex = 0;
@@ -81,6 +81,7 @@
             'Time scale': 2,
             'User ID': '',
             'Auto rotate':true,
+            'Show line chart':true,
             'Show shared compute nodes': true,
         };
         const listAxis = {'Time': -1};
@@ -192,6 +193,36 @@
 
         }
 
+        function generateLineGeometry(data) {
+            const geometry = new THREE.BufferGeometry();
+            const numPoints = data.length;
+
+            const positions = new Float32Array(numPoints * 3);
+            const colors = new Float32Array(numPoints * 3);
+            const alphas = new Float32Array(numPoints);
+
+            data.forEach((d, k) => {
+
+                positions[3 * k] = d.x;
+                positions[3 * k + 1] = d.y;
+                positions[3 * k + 2] = d.z;
+
+                const color = new THREE.Color(d3.color(d.color ?? 'white') + '');
+                colors[3 * k] = color.r;
+                colors[3 * k + 1] = color.g;
+                colors[3 * k + 2] = color.b;
+                d.alpha = d.alpha??1;
+                alphas[k] = d.alpha;
+            });
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+            geometry.computeBoundingSphere();
+
+            return geometry;
+        }
+
         function generatePointcloud(data) {
 
             const geometry = generatePointCloudGeometry(data);
@@ -212,6 +243,25 @@
 
         }
 
+        function generateLine(linedataObj) { // {key: , values: []}
+            let group = new THREE.Object3D();
+            Object.values(linedataObj).forEach(data=>{
+                const geometry = generateLineGeometry(data.values);
+                const materialPoint = new THREE.LineBasicMaterial( {
+                    opacity:1,
+                    linewidth:1,
+                    color: 0xffffff,
+                    vertexColors: THREE.VertexColors,
+                    transparent: true
+                } );
+                let lineObj = new THREE.Line(geometry, materialPoint);
+                lineObj.id = data.key;
+                lineObj.data = data;
+                group.add ( lineObj );
+            });
+            return group;
+        }
+
         function createPanel() {
 
             const panel = new dat.GUI({width: 310});
@@ -225,8 +275,9 @@
             folder1.add(settings, 'z', listAxis).onChange(updateModelRender({updateAxis: true}));
             folder1.add(settings, 'size', {'none': -2, ...listAxis}).onChange(updateModelRender({updateAxis: true}));
 
-            folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
+            folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
+            folder2.add(settings, 'Show line chart').onChange(toggleLineChart);
             folder2.add(settings, 'Auto rotate').onChange(resetRotate);
 
             folder3.add(settings, 'User ID').onChange(updateData);
@@ -269,6 +320,23 @@
             })
         }
 
+        function pointDataRender() {
+            const dataBuffer = generatePointcloud(data);
+            dataBuffer.scale.set(10, 10, 10 * settings['Time scale']);
+            dataBuffer.position.set(-5, -5, -5 * settings['Time scale']);
+            scene.add(dataBuffer);
+            return dataBuffer;
+        }
+
+        function lineDataRender() {
+            const dataBuffer = generateLine(linedata);
+            dataBuffer.scale.set(10, 10, 10 * settings['Time scale']);
+            dataBuffer.position.set(-5, -5, -5 * settings['Time scale']);
+            dataBuffer.visible = true;
+            scene.add(dataBuffer);
+            return dataBuffer;
+        }
+
         function init() {
 
             const container = document.getElementById('container');
@@ -284,11 +352,11 @@
 
             //
             handleData();
+            pointclouds = [pointDataRender()];
 
-            const dataBuffer = generatePointcloud(data);
-            dataBuffer.scale.set(10, 10, 10 * settings['Time scale']);
-            dataBuffer.position.set(-5, -5, -5 * settings['Time scale']);
-            scene.add(dataBuffer);
+            //
+
+            lineGroup = lineDataRender();
 
             //
 
@@ -302,9 +370,6 @@
             boundary = new THREE.BoxHelper(boundary_o, 0xffff00);
             boundary.name = 'boundary'
             scene.add(boundary);
-
-
-            pointclouds = [dataBuffer];
 
             //
 
@@ -392,6 +457,7 @@
 
             function update() {
                 handleData();
+
                 const position = pointclouds[0].geometry.attributes.position.array;
                 let scaleSize = d3.scaleSqrt().domain([0.1,1]);
                 if ((+settings.size)===-2)
@@ -409,7 +475,31 @@
                 pointclouds[0].geometry.attributes.alpha.needsUpdate = true;
                 pointclouds[0].geometry.boundingBox = null;
                 pointclouds[0].geometry.computeBoundingSphere();
+
+                //
+
+                if (lineGroup.visible)
+                    updateLineData();
             }
+        }
+
+        function updateLineData(){
+            lineGroup.children.forEach(buffer=>{
+                debugger
+                const position = buffer.geometry.attributes.position.array;
+                const alpha = buffer.geometry.attributes.alpha.array;
+
+                buffer.data.values.forEach((d, i) => {
+                    position[3 * i] = d.x??-0.5;
+                    position[3 * i + 1] = d.y??-0.5;
+                    position[3 * i + 2] = d.z??-0.5;
+                    alpha[i] =d.alpha;
+                });
+
+                buffer.geometry.attributes.position.needsUpdate = true;
+                buffer.geometry.attributes.alpha.needsUpdate = true;
+                buffer.geometry.computeBoundingSphere();
+            })
         }
 
         function updateModelScale() {
@@ -422,8 +512,16 @@
             });
             pointclouds[0].scale.set(10, 10, 10 * settings['Time scale']);
             pointclouds[0].position.set(-5, -5, -5 * settings['Time scale']);
+
+            lineGroup.scale.set(10, 10, 10 * settings['Time scale']);
+            lineGroup.position.set(-5, -5, -5 * settings['Time scale']);
+
             boundary_o.scale.set(1, 1, settings['Time scale']);
             boundary.update();
+        }
+
+        function toggleLineChart(toggle) {
+            lineGroup.visible = toggle;
         }
 
         function onPointerMove(event) {
