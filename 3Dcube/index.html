@@ -122,6 +122,7 @@
             'User ID': '',
             'Auto rotate':true,
             'Show line chart':true,
+            'Show points':false,
             'Show shared compute nodes': true,
         };
         const listAxis = {'Time': -1};
@@ -320,8 +321,9 @@
             folder1.add(settings, 'size', {'none': -2, ...listAxis}).onChange(updateModelRender({updateAxis: true}));
 
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
-            folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Show line chart').onChange(toggleLineChart);
+            folder2.add(settings, 'Show points').onChange(togglePointChart);
+            folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
             folder2.add(settings, 'Auto rotate').onChange(resetRotate);
 
             folder3.add(settings, 'User ID').onChange(updateData);
@@ -396,11 +398,13 @@
 
             //
             handleData();
-            pointclouds = [pointDataRender()];
+            pointclouds = pointDataRender();
+            pointclouds.visible = settings['Show line chart'];
 
             //
 
             lineGroup = lineDataRender();
+            lineGroup.visible = settings['Show points'];
 
             //
 
@@ -502,29 +506,34 @@
             function update() {
                 handleData();
 
-                const position = pointclouds[0].geometry.attributes.position.array;
-                let scaleSize = d3.scaleSqrt().domain([0.1,1]);
-                if ((+settings.size)===-2)
-                    scaleSize=()=>1;
-                data.forEach((d, i) => {
-                    position[3 * i] = d.x??-0.5;
-                    position[3 * i + 1] = d.y??-0.5;
-                    position[3 * i + 2] = d.z??-0.5;
-                    pointclouds[0].geometry.attributes.size.array[i] = scaleSize(d.data[settings.size])*settings['Point size'];
-                    pointclouds[0].geometry.attributes.alpha.array[i] =d.alpha;
-                });
-
-                pointclouds[0].geometry.attributes.position.needsUpdate = true;
-                pointclouds[0].geometry.attributes.size.needsUpdate = true;
-                pointclouds[0].geometry.attributes.alpha.needsUpdate = true;
-                pointclouds[0].geometry.boundingBox = null;
-                pointclouds[0].geometry.computeBoundingSphere();
+                if (pointclouds.visible)
+                    updatePointData()
 
                 //
 
                 if (lineGroup.visible)
                     updateLineData();
             }
+        }
+
+        function updatePointData(){
+            const position = pointclouds.geometry.attributes.position.array;
+            let scaleSize = d3.scaleSqrt().domain([0.1,1]);
+            if ((+settings.size)===-2)
+                scaleSize=()=>1;
+            data.forEach((d, i) => {
+                position[3 * i] = d.x??-0.5;
+                position[3 * i + 1] = d.y??-0.5;
+                position[3 * i + 2] = d.z??-0.5;
+                pointclouds.geometry.attributes.size.array[i] = scaleSize(d.data[settings.size])*settings['Point size'];
+                pointclouds.geometry.attributes.alpha.array[i] =d.alpha;
+            });
+
+            pointclouds.geometry.attributes.position.needsUpdate = true;
+            pointclouds.geometry.attributes.size.needsUpdate = true;
+            pointclouds.geometry.attributes.alpha.needsUpdate = true;
+            pointclouds.geometry.boundingBox = null;
+            pointclouds.geometry.computeBoundingSphere();
         }
 
         function updateLineData(){
@@ -555,14 +564,20 @@
                 if (a.el)
                     a.el.position.z = a.z
             });
-            pointclouds[0].scale.set(10, 10, 10 * settings['Time scale']);
-            pointclouds[0].position.set(-5, -5, -5 * settings['Time scale']);
+            pointclouds.scale.set(10, 10, 10 * settings['Time scale']);
+            pointclouds.position.set(-5, -5, -5 * settings['Time scale']);
 
             lineGroup.scale.set(10, 10, 10 * settings['Time scale']);
             lineGroup.position.set(-5, -5, -5 * settings['Time scale']);
 
             boundary_o.scale.set(1, 1, settings['Time scale']);
             boundary.update();
+        }
+
+        function togglePointChart(toggle) {
+            pointclouds.visible = toggle;
+            if (toggle)
+                updatePointData();
         }
 
         function toggleLineChart(toggle) {
@@ -613,8 +628,11 @@
 
             raycaster.setFromCamera(pointer, camera);
 
-            const intersections = raycaster.intersectObjects(pointclouds);
-            intersection = (intersections.length) > 0 ? intersections[0] : null;
+            const intersections = raycaster.intersectObject(pointclouds);
+            if ((intersections.length) > 0 ){
+                intersection = intersections[0];
+            }else
+                intersection = null;
 
             if (toggle > 0.02 && intersection !== null) {
                 spheres[spheresIndex].position.copy(intersection.point);
