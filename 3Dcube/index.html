@@ -147,7 +147,7 @@
         const pointer = new THREE.Vector2();
         const spheres = [];
         let controls;
-
+        let freeze = false;
         const threshold = 0.1;
 
         const rotateY = new THREE.Matrix4().makeRotationY(0.005);
@@ -457,7 +457,7 @@
 
             stats = new Stats();
             container.appendChild(stats.dom);
-
+            container.addEventListener('click',()=> freeze=!freeze)
             //
 
             createPanel();
@@ -468,17 +468,18 @@
             document.addEventListener('pointermove', onPointerMove);
 
         }
+
         function updateData(){
             const name = settings['User ID'];
             const isShare = settings['Show shared compute nodes'];
-            debugger
+            const targetLine = intersection?data[intersection.index].data.name:null;
             if (name===''){
                 data.forEach(d=>{
                     if(isShare)
-                        d.alpha = 1;
+                        d.alpha = checkInteraction(d);
                     else
                         if (Object.keys(d.user).length<2){
-                            d.alpha = 1;
+                            d.alpha = checkInteraction(d);
                         }else
                             d.alpha = 0;
                 })
@@ -486,10 +487,10 @@
                 data.forEach(d=>{
                     if (d.user[name])
                         if(isShare)
-                            d.alpha = 1;
+                            d.alpha = checkInteraction(d);
                         else{
                             if (Object.keys(d.user).length<2){
-                                d.alpha = 1;
+                                d.alpha = checkInteraction(d);
                             }else
                                 d.alpha = 0;
                         }
@@ -497,6 +498,9 @@
                         d.alpha = 0;
                 })
             updateModelRender()();
+            function checkInteraction(d) {
+                return targetLine&&(targetLine!==d.data.name)?0:1;
+            }
         }
         function updateModelRender(opt) {
             if (opt && opt.updateAxis) {
@@ -635,12 +639,19 @@
 
             raycaster.setFromCamera(pointer, camera);
 
-            const intersections = raycaster.intersectObject(pointclouds);
-            if ((intersections.length) > 0 ){
-                let alpha = intersections[0].object.geometry.attributes.alpha.array;
-                intersection = intersections.find(intersection=>alpha[intersection.index]>0)??null;
-            }else
-                intersection = null;
+            if(!freeze){
+                const intersections = raycaster.intersectObject(pointclouds);
+                let isChange = false;
+                let _intersection = intersection;
+                if ((intersections.length) > 0 ){
+                    let alpha = intersections[0].object.geometry.attributes.alpha.array;
+                    intersection = intersections.find(intersection=>alpha[intersection.index]>0)??null;
+                }else
+                    intersection = null;
+                isChange = intersection!==_intersection;
+                if (isChange)
+                    updateData();
+            }
 
             if (toggle > 0.02 && intersection !== null) {
                 spheres[spheresIndex].position.copy(intersection.point);
@@ -648,7 +659,6 @@
                 spheresIndex = (spheresIndex + 1) % spheres.length;
 
                 toggle = 0;
-
             }
 
             for (let i = 0; i < spheres.length; i++) {
