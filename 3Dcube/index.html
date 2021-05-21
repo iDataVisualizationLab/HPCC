@@ -567,6 +567,8 @@
 
         function toggleLineChart(toggle) {
             lineGroup.visible = toggle;
+            if (toggle)
+                updateLineData();
         }
 
         function onPointerMove(event) {
