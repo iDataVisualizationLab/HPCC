@@ -387,9 +387,9 @@
                 Object.values(linedata).forEach(data=>{
                   data.values.forEach((d,i)=>{
                       let array = data.values.slice(Math.max(0,i-settings['Moving average']),i+settings['Moving average']+1);
-                      d.x =  d3.mean(array,d=>d.data[settings.x]);
-                      d.y = d3.mean(array,d=>d.data[settings.y]);
-                      d.z = d3.mean(array,d=>d.data[settings.z]);
+                      d.x =  (settings.x!==-1)?d3.mean(array,d=>d.data[settings.x]):d.data[settings.x];
+                      d.y = (settings.x!==-1)?d3.mean(array,d=>d.data[settings.y]):d.data[settings.y];
+                      d.z = (settings.x!==-1)?d3.mean(array,d=>d.data[settings.z]):d.data[settings.z];
                       d.isNull = (d.x === undefined || d.y === undefined || d.z === undefined);
                   })
                 })
