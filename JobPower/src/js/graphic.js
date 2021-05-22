@@ -464,7 +464,7 @@ function resetFilter(to) {
 let renderTable = {
     job:_.partial(_renderTable,{numTotal:'#jobNumTotal',currentNum:'#currentJobNum',holder:'#JobList',mainKey:'jobid',subInfo:[{key:'compute',value:'total_nodes'},{key:'user',value:'user_name'}]}),
     user:_.partial(_renderTable,{numTotal:'#userNumTotal',currentNum:'#currentUserNum',holder:'#UserList',mainKey:'username',subInfo:[{key:'compute',value:'total_nodes'},{key:'name',func:(d)=>request.userReverseDict[d.key]}]}),
-    compute:_.partial(_renderTable,{numTotal:'#xomputeNumTotal',currentNum:'#currentComputeNum',holder:'#ComputeList',mainKey:'compute',subInfo:[{key:'jobs',func:(d)=>d.value.job_id.length}]})}
+    compute:_.partial(_renderTable,{numTotal:'#computeNumTotal',currentNum:'#currentComputeNum',holder:'#ComputeList',mainKey:'compute',subInfo:[{key:'jobs',func:(d)=>d.value.job_id.length}]})}
 function _renderTable({numTotal,currentNum,holder,mainKey,subInfo},data, _data, _jobValueType, _jobValueName) {
     d3.select(currentNum).text(data.length);
     d3.select(numTotal).text(_data.length);
@@ -582,7 +582,7 @@ function drawJobList(){
             .forEach(d=>{
                 data.push({key:d.term,value:Layout.jobsStatic[d.term]})
             });
-        renderTable['compute'](data, _data, _jobValueType, _jobValueName);
+        renderTable['job'](data, _data, _jobValueType, _jobValueName);
     }else {
         let data = _data.filter(j => !j.value.job_array_id).sort((a, b) => b.value.summary[_jobValueName][_jobValueType] - a.value.summary[_jobValueName][_jobValueType]).slice(0, _JobFilterThreshold);
 
@@ -854,5 +854,6 @@ searchControl.onSearch(function(searchInput,searchType){
         }
         subObject._filter = subObject.filterTerms();
         subObject.draw();
+        resetFilter('search');
     },0)
 });

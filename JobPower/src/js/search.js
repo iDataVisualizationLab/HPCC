@@ -24,7 +24,7 @@ let SearchControl = function() {
         d3.select('#searchBtn').on('click',function(){
             if (searchInput && searchInput!==''){
                 filterMode = 'searchBox';
-                onSearch(searchInput,searchType)
+                onSearch(searchInput,searchType);
             }else{
                 resetFilter('jobList');
                 // drawJobList();
