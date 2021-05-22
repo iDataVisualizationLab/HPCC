@@ -88,6 +88,7 @@
 <script type="x-shader/x-fragment" id="fragmentLineshader">
 
 			uniform vec3 color;
+			uniform float opacity;
 
             varying float vAlpha;
 			varying vec3 vColor;
@@ -96,7 +97,7 @@
                 if (vAlpha<0.001){
                     gl_FragColor.a = 0.0;
                 }else {
-                    gl_FragColor = vec4( color * vColor, vAlpha );
+                    gl_FragColor = vec4( color * vColor, vAlpha*opacity );
                 }
 			}
 
@@ -121,9 +122,11 @@
             'Time scale': 2,
             'User ID': '',
             'Auto rotate':true,
-            'Show line chart':true,
+            'Show lines':true,
             'Show points':false,
+            'Line opacity':0.8,
             'Show shared compute nodes': true,
+            'Moving average': 0,
         };
         const listAxis = {'Time': -1};
         serviceLists.forEach(s => listAxis[s.text] = s.id);
@@ -255,7 +258,10 @@
                 colors[3 * k + 1] = color.g;
                 colors[3 * k + 2] = color.b;
                 d.alpha = d.alpha??1;
-                alphas[k] = (d.x===undefined || d.y===undefined || d.z===undefined)? 0 : d.alpha;
+                if((d.isNull) || (data[k-1] && data[k-1].isNull)||(data[k+1] && data[k+1].isNull))
+                    alphas[k] = 0;
+                else
+                    alphas[k] = d.alpha;
             });
 
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -293,6 +299,7 @@
                 const materialPoint = new THREE.ShaderMaterial( {
                     uniforms: {
                         color: {value: new THREE.Color(0xffffff)},
+                        opacity: {value: settings['Line opacity']}
                     },
                     vertexShader: document.getElementById( 'vertexLineshader' ).textContent,
                     fragmentShader: document.getElementById( 'fragmentLineshader' ).textContent,
@@ -315,6 +322,7 @@
 
             const folder1 = panel.addFolder('Axis');
             const folder2 = panel.addFolder('Graphic');
+            const folder4 = panel.addFolder('Analysis');
             const folder3 = panel.addFolder('Filter');
 
             folder1.add(settings, 'x', listAxis).onChange(updateModelRender({updateAxis: true}));
@@ -323,13 +331,17 @@
             const size = folder1.add(settings, 'size', {'none': -2, ...listAxis}).onChange(updateModelRender({updateAxis: true}));
 
             folder2.add(settings, 'Time scale', 0.2, 10, 0.1).onChange(updateModelScale);
-            folder2.add(settings, 'Show line chart').onChange(toggleLineChart);
+            folder2.add(settings, 'Show lines').onChange(v=>{
+                d3.select(lineopacity.__li).style("display", v?'block':'none');
+                toggleLineChart(v);
+            });
             folder2.add(settings, 'Show points').onChange(v=>{
                 d3.select(size.__li).style("display", v?'block':'none');
                 d3.select(pointSize.__li).style("display", v?'block':'none');
                 togglePointChart(v);
             });
             const pointSize = folder2.add(settings, 'Point size', 0.5, 10, 0.5).onChange(updateModelRender());
+            const lineopacity = folder2.add(settings, 'Line opacity', 0.1, 1, 0.1).onChange(updateLineOpacity);
             folder2.add(settings, 'Auto rotate').onChange(resetRotate);
 
             folder3.add(settings, 'User ID').onChange(updateData);
@@ -343,6 +355,8 @@
             filter_el.select('input')
                 .attr('list','searchInputOptions');
 
+            folder4.add(settings, 'Moving average', 0, 60, 1).onChange(updateModelRender())
+
             folder1.open();
             folder2.open();
             folder3.open();
@@ -351,6 +365,7 @@
 
             d3.select(size.__li).style("display", settings['Show points']?'block':'none');
             d3.select(pointSize.__li).style("display", settings['Show points']?'block':'none');
+            d3.select(lineopacity.__li).style("display", settings['Show lines']?'block':'none');
         }
 
         function updateList(list){
@@ -368,11 +383,24 @@
             axisData[0].text = listremap[settings.x];
             axisData[1].text = listremap[settings.y];
             axisData[2].text = listremap[settings.z];
-            data.forEach(d => {
-                d.x = d.data[settings.x];
-                d.y = d.data[settings.y];
-                d.z = d.data[settings.z];
-            })
+            if (settings['Moving average']){
+                Object.values(linedata).forEach(data=>{
+                  data.values.forEach((d,i)=>{
+                      let array = data.values.slice(Math.max(0,i-settings['Moving average']),i+settings['Moving average']+1);
+                      d.x =  d3.mean(array,d=>d.data[settings.x]);
+                      d.y = d3.mean(array,d=>d.data[settings.y]);
+                      d.z = d3.mean(array,d=>d.data[settings.z]);
+                      d.isNull = (d.x === undefined || d.y === undefined || d.z === undefined);
+                  })
+                })
+            }else {
+                data.forEach(d => {
+                    d.x = d.data[settings.x];
+                    d.y = d.data[settings.y];
+                    d.z = d.data[settings.z];
+                    d.isNull = (d.x === undefined || d.y === undefined || d.z === undefined);
+                })
+            }
         }
 
         function pointDataRender() {
@@ -413,7 +441,7 @@
             //
 
             lineGroup = lineDataRender();
-            lineGroup.visible = settings['Show line chart'];
+            lineGroup.visible = settings['Show lines'];
 
             //
 
@@ -465,6 +493,7 @@
             tool_tip = d3.select(container).append('div')
                 .attr('class','tooltip');
             tool_tip.show = function(d){
+                if (pointer.client){
                 tool_tip.style('left', pointer.client.x+'px');
                 tool_tip.style('top', pointer.client.y+'px');
                 tool_tip.html(`<ul>
@@ -475,6 +504,7 @@ ${serviceLists.map(s=>`<li>${s.text}: ${d._data[s.text][d.data.timestep][0]}</li
 <li>Job list : ${d._data.job_id[d.data.timestep]}</li>
 </ul>`);
                 tool_tip.classed('active',true);
+                }
             };
             tool_tip.hide = function(){
                 tool_tip.classed('active',false);
@@ -523,6 +553,7 @@ ${serviceLists.map(s=>`<li>${s.text}: ${d._data[s.text][d.data.timestep][0]}</li
                 return targetLine&&(targetLine!==d.data.name)?0:1;
             }
         }
+
         function updateModelRender(opt) {
             if (opt && opt.updateAxis) {
                 return () => {
@@ -568,16 +599,26 @@ ${serviceLists.map(s=>`<li>${s.text}: ${d._data[s.text][d.data.timestep][0]}</li
             pointclouds.geometry.computeBoundingSphere();
         }
 
+        function updateLineOpacity(v){
+            lineGroup.children.forEach(buffer=>{
+                buffer.material.uniforms.opacity.value = v;
+            })
+        }
+
         function updateLineData(){
             lineGroup.children.forEach(buffer=>{
                 const position = buffer.geometry.attributes.position.array;
                 const alpha = buffer.geometry.attributes.alpha.array;
+                const values = buffer.data.values;
 
-                buffer.data.values.forEach((d, i) => {
+                values.forEach((d, i) => {
                     position[3 * i] = d.x??-0.5;
                     position[3 * i + 1] = d.y??-0.5;
                     position[3 * i + 2] = d.z??-0.5;
-                    alpha[i] = (d.x===undefined || d.y===undefined || d.z===undefined)? 0 : d.alpha;
+                    if((d.isNull) || (values[i-1] && values[i-1].isNull)||(values[i+1] && (values[i+1].isNull)))
+                        alpha[i] = 0;
+                    else
+                        alpha[i] = d.alpha;
                 });
                 if (position.find(p=>_.isNaN(p)))
                     debugger
