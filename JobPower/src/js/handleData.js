@@ -23,9 +23,10 @@ function handleData(data){
         const job = [];
         let totalCore = 0;
         const node = _.uniq(_.flatten(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d.value.cpu_cores,d.value.node_list)))));
-        node.forEach(c=> computers[c].user.push(i))
-        const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        return {node,job,jobMain,totalCore}
+        node.forEach(c=> computers[c].user.push(i));
+        // const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
+        // return {node,job,jobMain,totalCore}
+        return {node,job,totalCore}
     });
     const jobName_job = d3.nest()
         .key(d=>d.value[JOBNAME].slice(0,3)) //user
@@ -49,8 +50,9 @@ function handleData(data){
             key = jobName[0];
         d.map(d=>d.values.forEach(d=>d.value['job_name_short']= key))
         node.forEach(c=> computers[c].jobName.push(key));
-        const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
-        jobByNames[key] =  {node,job,jobMain}
+        // const jobMain = _.uniq(job.map(j=>j.split('.')[0]));
+        // jobByNames[key] =  {node,job,jobMain}
+        jobByNames[key] =  {node,job}
     });
     return {computers,jobs,jobByNames,users}
 }
