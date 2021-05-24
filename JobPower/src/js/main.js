@@ -164,7 +164,6 @@ $(document).ready(function () {
                 });
                 console.log(Object.keys(data.jobs_info).length,Object.keys(jobs_info).length)
                 data.jobs_info = jobs_info;
-                debugger
                 return data;
             }));
             // request = new Simulation(d3.csv(url).then(d=>{

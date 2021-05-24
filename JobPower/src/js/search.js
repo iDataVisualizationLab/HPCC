@@ -4,12 +4,16 @@ let SearchControl = function() {
     let searchType,searchInput,onSearch=()=>{};
 
     function renderSelection() {
-        d3.select('#searchInputOptions')
-            .selectAll('option')
-            .data(data[searchType]??[])
-            .join('option')
-            .attr('value',d=>d)
-            .text(d=>d);
+        // d3.select('#searchInputOptions')
+        //     .selectAll('option')
+        //     .data(data[searchType]??[])
+        //     .join('option')
+        //     .attr('value',d=>d)
+        //     .text(d=>d);
+        $( "#searchInput" ).autocomplete({
+            source: data[searchType]??[],
+            minLength: 2
+        });
         d3.select('#searchInput').on('change',function(){
             searchInput = this.value.trim();
         }).node().value = ''

@@ -1144,7 +1144,6 @@ d3.TimeArc = function () {
                     }
                 }
             }
-            debugger
         }
 
         // var linear = (150+numNode)/200;
