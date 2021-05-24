@@ -22,7 +22,7 @@ d3.TimeArc = function () {
         dotRadius: 2,
         containHolder: '',
         summary: {size: 30},
-        removeList:{},
+        removeList: {},
     };
     let arr;
     let runopt = {
@@ -103,7 +103,7 @@ d3.TimeArc = function () {
     var link;
     var links;
     var linkArcs;
-    var termArray=[], termArray2, termArray3;
+    var termArray = [], termArray2, termArray3;
     var relationship;
     var termMaxMax, termMaxMax2;
     var terms;
@@ -159,8 +159,8 @@ d3.TimeArc = function () {
 //---End Insert------
 //Append a SVG to the body of the html page. Assign this SVG as an object to svg
         svg.classed('timearc', true)
-            .attr('width',graphicopt.width)
-            .attr('height',graphicopt.height);
+            .attr('width', graphicopt.width)
+            .attr('height', graphicopt.height);
         if (svg.select('g.linkHolder').empty())
             svg.append('g').attr('class', 'linkHolder').style('fill', 'none').style('stroke', 'currentColor');
         if (svg.select('g.nodeHolder').empty())
@@ -168,24 +168,24 @@ d3.TimeArc = function () {
         let defs = svg.append("defs");
 
         defs.append("marker")
-            .attr("id","arrowHeadend")
-            .attr("viewBox","0 -5 10 10")
-            .attr("refX",5)
-            .attr("refY",0)
-            .attr("markerWidth",4)
-            .attr("markerHeight",4)
-            .attr("orient","auto")
+            .attr("id", "arrowHeadend")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 5)
+            .attr("refY", 0)
+            .attr("markerWidth", 4)
+            .attr("markerHeight", 4)
+            .attr("orient", "auto")
             .append("path")
             .attr("d", "M0,-5L10,0L0,5")
             .attr("class", "arrowHead");
         defs.append("marker")
-            .attr("id","arrowHeadstart")
-            .attr("viewBox","0 -5 10 10")
-            .attr("refX",5)
-            .attr("refY",0)
-            .attr("markerWidth",4)
-            .attr("markerHeight",4)
-            .attr("orient","auto")
+            .attr("id", "arrowHeadstart")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 5)
+            .attr("refY", 0)
+            .attr("markerWidth", 4)
+            .attr("markerHeight", 4)
+            .attr("orient", "auto")
             .append("path")
             .attr("d", "M10,-5L0,0L10,5")
             .attr("class", "arrowHead");
@@ -219,11 +219,11 @@ d3.TimeArc = function () {
 //Set up the force layout
         force = d3.forceSimulation()
             .force("charge", d3.forceManyBody().strength(-100))
-            .force("link", d3.forceLink().distance(d => d.__maxLinkIndex__??0).strength(1))
+            .force("link", d3.forceLink().distance(d => d.__maxLinkIndex__ ?? 0).strength(1))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             // .force('x', d3.forceX(0).strength(0.3))
             // .force('y', d3.forceY(0).strength(0.015))
-            .force('x', d3.forceX().x(d=>d.__maxLinkIndex__??0).strength(0.3))
+            .force('x', d3.forceX().x(d => d.__maxLinkIndex__ ?? 0).strength(0.3))
             .on("end", function () {
                 detactTimeSeries();
                 drawStreamLegend();
@@ -425,7 +425,7 @@ d3.TimeArc = function () {
     timeArc.draw = function () {
         first = true;
         // setupSliderScale(svg);
-
+        updateProcess({percentage: 70, text: 'TimeArc: compute relationship'});
         readTermsAndRelationships();
 
         drawColorLegend();
@@ -440,7 +440,7 @@ d3.TimeArc = function () {
         //         source : Array2Object(termArray)
         //     });
         // });
-        recompute();
+        recompute(undefined,true);
         first = false;
     };
 
@@ -450,7 +450,7 @@ d3.TimeArc = function () {
         return temp;
     }
 
-    function recompute(isSkipforce) {
+    function recompute(isSkipforce,skipreadrelationship) {
         // var bar = d3.select('#progBar').node(),
         //     fallback = d3.select('#downloadProgress').node(),
         //     loaded = 0;
@@ -475,21 +475,27 @@ d3.TimeArc = function () {
         setTimeout(alertFunc, 333);
 
         function alertFunc() {
-            readTermsAndRelationships();
+            if (!skipreadrelationship){
+                updateProcess({percentage: 70, text: 'TimeArc: compute relationship'});
+                readTermsAndRelationships();
+            }
+            updateProcess({percentage: 75, text: 'TimeArc: compute Node and Link'});
             computeNodes();
             adjustStreamheight();
             computeLinks();
+            updateProcess({percentage: 90, text: 'TimeArc: render with force'});
             drawStreamLegend();
             if (!isSkipforce) {
                 force.force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
                     .nodes(nodes)
-                    .force('x', d3.forceX().x(d=>d.__maxLinkIndex__??0).strength(0.3))
+                    .force('x', d3.forceX().x(d => d.__maxLinkIndex__ ?? 0).strength(0.3))
                     .force("link", d3.forceLink(links).distance(d => d.__maxLinkIndex__).strength(1))
                 // .force('link').links(links);
                 force.alpha(1);
                 force.restart();
             } else {
-                timeArc.update()
+                timeArc.update();
+                updateProcess();
             }
         }
     }
@@ -509,7 +515,7 @@ d3.TimeArc = function () {
         var selected = {};
 
         // if ((searchTerm && searchTerm != "")|| !runopt.filterTerm.length) {
-        if ((searchTerm && searchTerm != "") || (runopt.filterTerm&&runopt.filterTerm.length)) {
+        if ((searchTerm && searchTerm != "") || (runopt.filterTerm && runopt.filterTerm.length)) {
             data2.forEach(function (d) {
                 for (var term1 in d.__terms__) {
                     if (!selected[term1])
@@ -686,7 +692,7 @@ d3.TimeArc = function () {
 
     let offsetYStream = 0;
     timeArc.updateDrawData = () => {
-        if(force.alpha()===0){
+        if (force.alpha() === 0) {
             pNodes.forEach(d => {
                 getDrawData(d);
             });
@@ -700,9 +706,10 @@ d3.TimeArc = function () {
                 .call(updatelayerpath);
         }
     }
-    timeArc.currentSelected = function(){
+    timeArc.currentSelected = function () {
         return termArray;
     }
+
     function getDrawData(n) {
         if (graphicopt.minMaxStream) {
             n.noneSymetric = true;
@@ -1115,7 +1122,7 @@ d3.TimeArc = function () {
                             var l = new Object();
                             l.source = sourceNodeId;
                             l.target = targetNodeId;
-                            l.__maxLinkIndex__ = Math.max(nodes[i].monthly.findIndex(d=>d.monthId>=m),nodes[j].monthly.findIndex(d=>d.monthId>=m))
+                            l.__maxLinkIndex__ = Math.max(nodes[i].monthly.findIndex(d => d.monthId >= m), nodes[j].monthly.findIndex(d => d.monthId >= m))
 
                             l.__timestep__ = m;
                             //l.value = linkScale(relationship[term1+"__"+term2][m]);
@@ -1203,7 +1210,7 @@ d3.TimeArc = function () {
             .on("mouseout", mouseouted_Link);
         if (graphicopt.display && graphicopt.display.links) {
             Object.keys(graphicopt.display.links)
-                .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
+                .forEach(k => linkArcs.style(k, graphicopt.display.links[k]))
         }
 
         svg.selectAll(".nodeG").remove();
@@ -1359,7 +1366,7 @@ d3.TimeArc = function () {
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
                     Object.keys(graphicopt.display.links)
-                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
+                        .forEach(k => linkArcs.style(k, graphicopt.display.links[k]))
                 }
                 nodeG.transition().duration(500).attr("transform", function (n) {
                     return "translate(" + n.xConnected + "," + n.y + ")"
@@ -1412,7 +1419,7 @@ d3.TimeArc = function () {
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
                     Object.keys(graphicopt.display.links)
-                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
+                        .forEach(k => linkArcs.style(k, graphicopt.display.links[k]))
                 }
                 nodeG.transition().duration(500).attr("transform", function (n) {
                     return "translate(" + n.xConnected + "," + n.y + ")"
@@ -1451,7 +1458,7 @@ d3.TimeArc = function () {
                 linkArcs.style("stroke-opacity", 1);
                 if (graphicopt.display && graphicopt.display.links) {
                     Object.keys(graphicopt.display.links)
-                        .forEach(k=>linkArcs.style(k,graphicopt.display.links[k]))
+                        .forEach(k => linkArcs.style(k, graphicopt.display.links[k]))
                 }
             }
             mouseout_dispath(d);
@@ -1503,15 +1510,14 @@ d3.TimeArc = function () {
     }
 
     timeArc.update = (isforce) => {
-            if (force.alpha()!==0){
+        if (force.alpha() !== 0) {
             let marker;
             nodes.forEach(function (d, i) {
                 // d.x += (graphicopt.widthG() / 2 - d.x || 0) * 0.05;
                 if (d.parentNode >= 0) {
                     d.y += (nodes[d.parentNode].y - d.y || 0) * 0.2;
                     // d.y = nodes[d.parentNode].y;
-                }
-                else if (d.childNodes) {
+                } else if (d.childNodes) {
                     var yy = 0;
                     for (var i = 0; i < d.childNodes.length; i++) {
                         var child = d.childNodes[i];
@@ -1538,7 +1544,7 @@ d3.TimeArc = function () {
                 return d.value;
             });
             linkArcs.attr("d", linkArc);
-}
+        }
         if (!isforce) {
             let layerpath = svg.selectAll(".layer")
                 .selectAll('path.layerpath')
@@ -1639,6 +1645,7 @@ d3.TimeArc = function () {
     let step;
 
     function detactTimeSeries() {
+        updateProcess({percentage: 99, text: 'TimeArc: detact TimeSeries'});
         // document.getElementById('progBar').value = 100;
         // $('#progUpdate').empty().append("Done");
         // console.log("DetactTimeSeries ************************************" +data);
@@ -1687,6 +1694,7 @@ d3.TimeArc = function () {
         force.alpha(0);
         force.stop();
         updateTransition(1000);
+        updateProcess();
     }
 
     timeArc.searchNode = searchNode;
@@ -1772,7 +1780,7 @@ d3.TimeArc = function () {
     };
     timeArc.graphicopt = function (_) {
         if (arguments.length) {
-            const changeService = (_.selectedService!==graphicopt.selectedService);
+            const changeService = (_.selectedService !== graphicopt.selectedService);
             for (var i in _) {
                 if ('undefined' !== typeof _[i]) {
                     graphicopt[i] = _[i];
@@ -1782,8 +1790,8 @@ d3.TimeArc = function () {
                 yUpperScale = graphicopt.display.stream.yScaleUp;
                 yDownerScale = graphicopt.display.stream.yScaleDown;
             }
-            if(changeService&& pNodes){
-                pNodes.forEach(n=>{
+            if (changeService && pNodes) {
+                pNodes.forEach(n => {
                     n.monthly = [];
                     if (data.minMaxData[n.name] && data.tsnedata[n.name]) {
                         const selected = graphicopt.selectedService;
@@ -1834,9 +1842,9 @@ d3.TimeArc = function () {
         let yscale = d3.scaleLinear().range([yoffset + 13, yoffset + 30]);
         if (catergogryList && (catergogryList.length > 1) && svg.select('.colorlegendtext').empty())
             svg.append('text').text('Color legend: ')
-                .attr('class','colorlegendtext legendText')
-                .attr('x',xx)
-                .attr('y',yoffset);
+                .attr('class', 'colorlegendtext legendText')
+                .attr('x', xx)
+                .attr('y', yoffset);
 
         let legendg_o = svg.selectAll('g.nodeLegend')
             .data(catergogryList);
@@ -2021,14 +2029,14 @@ d3.TimeArc = function () {
                 // isLensing = false;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0] - xStep) / XGAP_);
-                if(isLensing)
+                if (isLensing)
                     updateTransition(250);
             })
             .on("mousemove", function () {
                 // isLensing = true;
                 coordinate = d3.mouse(this);
                 lMonth = Math.floor((coordinate[0] - xStep) / XGAP_);
-                if(isLensing)
+                if (isLensing)
                     updateTransition(250);
             });
     }

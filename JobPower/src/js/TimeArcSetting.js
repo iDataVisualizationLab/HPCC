@@ -103,8 +103,6 @@ let TimeArcSetting = function (){
         }
         scheme.filterTerm = filterTerm
         TimeArc.runopt(scheme).data(scheme.data).draw();
-
-        updateProcess();
     };
 
     master.filterTerms = function(_) {

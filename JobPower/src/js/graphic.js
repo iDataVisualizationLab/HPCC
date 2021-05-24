@@ -26,7 +26,7 @@ function serviceControl(){
             const val = selectedSers[0];
             const oldVal = timeArcopt.minMaxStream;
             timeArcopt.minMaxStream = (val==='minmax');
-            updateProcess({percentage:50,text:'render streams'});
+            updateProcess({percentage:50,text:'filtering...'});
             setTimeout(()=>{
                 if(oldVal===timeArcopt.minMaxStream){
                     subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
@@ -38,7 +38,6 @@ function serviceControl(){
                     subObject.timearc.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).draw();
                 }
                 drawColorLegend();
-                updateProcess();
             },0)
         })
         .selectAll('optgroup')
@@ -513,7 +512,8 @@ function initFilterMode(){
     d3.select('#JobListFilter').on('click', () => {
         const mode = d3.select('.filterTab.active').attr('data');
         resetFilter(mode)
-        updateProcess({percentage: 50, text: 'render streams'});
+        updateProcess({percentage: 50, text: 'filtering...'});
+        debugger
         setTimeout(() => {
             subObject._filter = subObject.filterTerms();
             subObject.draw();
@@ -523,7 +523,7 @@ function initFilterMode(){
         d3.select('.JobFilterType').text(() => $(d3.select('#jobValueType').node()).val())
         const mode = d3.select('.filterTab.active').attr('data');
         resetFilter(mode)
-        updateProcess({percentage: 50, text: 'render streams'});
+        updateProcess({percentage: 50, text: 'filtering...'});
         setTimeout(() => {
             subObject.draw();
         }, 0)
@@ -531,7 +531,7 @@ function initFilterMode(){
     d3.select('#jobValueName').on('change', () => {
         const mode = d3.select('.filterTab.active').attr('data');
         resetFilter(mode)
-        updateProcess({percentage: 50, text: 'render streams'});
+        updateProcess({percentage: 50, text: 'filtering...'});
         setTimeout(() => {
             subObject.draw();
         }, 0)
@@ -784,7 +784,7 @@ function drawColorLegend() {
 
         contain.select('#thresholdTimeArc input').node().value = scaleService[serviceSelected].invert(threshold);
         contain.select('#thresholdTimeArc input').on('change',function(){
-            updateProcess({percentage:50,text:'render streams'});
+            updateProcess({percentage:50,text:'filtering...'});
             setTimeout(()=>{
                 const newThreshold = scaleService[serviceSelected](+this.value);
                 subObject.graphicopt().display.stream.yScaleUp.domain([0,1-newThreshold]);
