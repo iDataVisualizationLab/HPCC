@@ -101,8 +101,15 @@ let TimeArcSetting = function (){
             master.init();
             isFirst = false;
         }
-        scheme.filterTerm = filterTerm
-        TimeArc.runopt(scheme).data(scheme.data).draw();
+
+        if (filterTerm.length<4000 || confirm(`It will take long time to process ${filterTerm.length} jobs. Continue?`)) {
+            scheme.filterTerm = filterTerm;
+            TimeArc.runopt(scheme).data(scheme.data).draw();
+        } else {
+            updateProcess()
+            // Do nothing!
+            // console.log('Thing was not saved to the database.');
+        }
     };
 
     master.filterTerms = function(_) {
