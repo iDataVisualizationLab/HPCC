@@ -672,7 +672,9 @@ function drawColorLegend() {
         .attr("y", 0)
         .attr("dy", ".21em")
         .style("text-anchor", "left")
-        .style("fill",d=>getColor(d.key));
+        .style("fill",d=>getColor(d.key))
+        .style('pointer-events','auto')
+        .style('cursor','pointer');
 
     legendg.merge(legendg_o).select('text')
         .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
