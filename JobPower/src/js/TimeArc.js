@@ -434,12 +434,12 @@ d3.TimeArc = function () {
         updateTimeLegend();
         drawLensingButton();
 
-        $(function () {
-            $("#search").autocomplete({
-            // $(graphicopt.containHolder + " #search").autocomplete({
-                source : Array2Object(termArray)
-            });
-        });
+        // $(function () {
+        //     $("#search").autocomplete({
+        //     // $(graphicopt.containHolder + " #search").autocomplete({
+        //         source : Array2Object(termArray)
+        //     });
+        // });
         recompute();
         first = false;
     };

@@ -591,6 +591,7 @@ function drawJobList(){
         data.forEach(d => {
             jobList.push(d.key);
         });
+        debugger
         subObject.filterTerms(jobList)
     }
 }
@@ -600,7 +601,7 @@ function drawComputeList(){
     const _jobValueName = $(d3.select('#jobValueName').node()).val();
     const _JobFilterThreshold = +d3.select('#JobFilterThreshold').node().value;
     const _data = d3.entries(Layout.computesStatic);
-    if (filterMode!=='jobList')
+    if (filterMode!=='computeList')
     {
         const data = [];
         subObject.timearc.currentSelected().filter(d=>d.category==='compute')
