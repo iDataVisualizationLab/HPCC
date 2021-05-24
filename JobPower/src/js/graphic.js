@@ -484,7 +484,7 @@ function _renderTable({numTotal,currentNum,holder,mainKey,subInfo},data, _data, 
         serviceFullList.forEach(s => {
             _cell.push({
                 key: s.text,
-                value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]) * 100) / 100
+                value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]))
             })
         });
         subInfo.forEach(s=>{

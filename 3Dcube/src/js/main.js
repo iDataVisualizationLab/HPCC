@@ -124,7 +124,12 @@ d3.json(url).then(d => {
     const {dataViz,lineViz,listSearch} = handleData(data);
     draw(dataViz,lineViz,listSearch);
 });
+function scanServies(){
+    Object.keys(data.nodes_info).forEach(comp => {
+        const d = data.nodes_info[comp]
 
+    });
+}
 function handleData(data){
     let r = handleSmalldata(data);
     let sampleS = r.sampleh;
