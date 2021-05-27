@@ -49,7 +49,7 @@ let TreeLayout = function (){
             }
         },
         userStreamMode:'Power',
-        dx:20,
+        dx:12,
         dy:159,
         // display: {
         //     links: {
@@ -179,14 +179,14 @@ let TreeLayout = function (){
                 .attr("fill", "none")
                 .attr("stroke", "#555")
                 .attr("stroke-opacity", 0.4)
-                .attr("stroke-width", 1.5);
+                .attr("stroke-width", 0.5);
 
             gNode = svg.append("g")
                 .attr("cursor", "pointer")
                 .attr("pointer-events", "all");
         }
         graphicopt.dy = graphicopt.widthG()/6;
-        tree = d3.tree().nodeSize([graphicopt.dx, graphicopt.dy]);
+        tree = d3.tree().nodeSize([graphicopt.dx, graphicopt.dy]).separation((a,b)=>a.parent == b.parent ? 1 : 1.5);
         return master;
     };
     function updatelayerpath(p) {
@@ -552,7 +552,7 @@ let TreeLayout = function (){
                     if (d.depth>0)
                         d.children = null;
                 });
-                xScale = d3.scaleLinear().domain(__.data.timeRange).range([0,graphicopt.widthG()*2/3]);
+                xScale = d3.scaleLinear().domain(__.data.timeRange).range([0,graphicopt.widthG()-graphicopt.dy*2.2]);
             }
             return master;
         }else {
