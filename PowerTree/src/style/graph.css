@@ -82,7 +82,7 @@ g.links .link {
 }
 
 text {
-    /*font: 10px sans-serif;*/
+    font: 8px sans-serif;
     /*text-anchor: middle;*/
     pointer-events: none;
 

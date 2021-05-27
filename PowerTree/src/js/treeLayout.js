@@ -199,12 +199,11 @@ let TreeLayout = function (){
                     return d.up ? area_compute_up(d.value) : area_compute_down(d.value);
             });
     }
-    function getDrawData(n) {
-
+    function getDrawData(n,keyValue='valueRaw') {
         if (graphicopt.minMaxStream) {
             n.noneSymetric = true;
             const drawData = [{
-                node: n, value: n.monthly.map((d, ti) => {
+                node: n, value: n[keyValue].map((d, ti) => {
                     if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                         return {...d, value: [undefined, undefined]};
                     return {...d, value: [d[serviceSelected], d.value[2]]};
@@ -212,7 +211,7 @@ let TreeLayout = function (){
                 up: true
             },
                 {
-                    node: n, value: n.monthly.map((d, ti) => {
+                    node: n, value: n[keyValue].map((d, ti) => {
                         if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                             return {...d, value: [undefined, undefined]}
                         return {...d, value: [d.value[0], d[serviceSelected]]};
@@ -221,7 +220,7 @@ let TreeLayout = function (){
                 }];
             if (scheme.data.emptyMap[n.name]) {
                 drawData.push({
-                        node: n, value: n.monthly.map((d, ti) => {
+                        node: n, value: n[keyValue].map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             return {...d, value: [d[serviceSelected], d.value[2]]};
@@ -229,7 +228,7 @@ let TreeLayout = function (){
                         up: true
                     },
                     {
-                        node: n, value: n.monthly.map((d, ti) => {
+                        node: n, value: n[keyValue].map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             return {...d, value: [d.value[0], d[serviceSelected]]};
@@ -237,12 +236,13 @@ let TreeLayout = function (){
                         up: false
                     })
             }
-            n.drawData = drawData;
+            // n.drawData = drawData;
+            return drawData;
         } else {
             debugger
             n.noneSymetric = true;
             const drawData = [{
-                node: n, value: n.valueRaw.map((d, ti) => {
+                node: n, value: n[keyValue].map((d, ti) => {
                     if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                         return {...d, value: [undefined, undefined]}
                     if ((d[serviceSelected] - drawThreshold) > 0) {
@@ -256,7 +256,7 @@ let TreeLayout = function (){
                 up: true
             },
                 {
-                    node: n, value: n.valueRaw.map((d, ti) => {
+                    node: n, value: n[keyValue].map((d, ti) => {
                         if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                             return {...d, value: [undefined, undefined]}
                         if ((d[serviceSelected] - drawThreshold) < 0)
@@ -270,7 +270,7 @@ let TreeLayout = function (){
                 }];
             if (scheme.data.emptyMap[n.name]) {
                 drawData.push({
-                        node: n, value: n.valueRaw.map((d, ti) => {
+                        node: n, value: n[keyValue].map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             if ((d[serviceSelected] - drawThreshold) > 0) {
@@ -284,7 +284,7 @@ let TreeLayout = function (){
                         up: true
                     },
                     {
-                        node: n, value: n.valueRaw.map((d, ti) => {
+                        node: n, value: n[keyValue].map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             if ((d[serviceSelected] - drawThreshold) < 0)
@@ -297,12 +297,24 @@ let TreeLayout = function (){
                         up: false
                     })
             }
-            n.drawData = drawData;
+            // n.drawData = drawData;
+            return drawData;
         }
     }
     function drawElement(svg,data){
         debugger
-        getDrawData(data);
+        data.drawData = getDrawData(data);
+        data.drawDataBack = getDrawData(data,'valueBackground');
+        let layerpathBack = svg.selectAll('path.layerBackpath')
+            .data(data.drawDataBack)
+            .join('path')
+            .attr('class', 'layerBackpath')
+            .call(updatelayerpath)
+            .style('fill','none')
+            .style('stroke','gray')
+            .style('stroke-width','0.5')
+            .style('stroke-opacity','0.5')
+        ;
         let layerpath = svg.selectAll('path.layerpath')
             .data(data.drawData)
             .join('path')
@@ -621,7 +633,7 @@ function handle_data_timeArc () {
             name: Layout.jobsStatic[j].job_name, children: Layout.jobsStatic[j].node_list.map((comp,i) => {
                 return {name: comp, svg: [ {
                         // id:i, name: comp, jobID: j, user:u, group:'compute', valueRaw: tsnedata[comp]
-                        id:i, name: comp, jobID: j, user:u, group:'compute', valueRaw: Layout.jobarrdata[j].map((d,i)=>d?tsnedata[comp][i]:undefined)
+                        id:i, name: comp, jobID: j, user:u, group:'compute', valueRaw: Layout.jobarrdata[j].map((d,i)=>d?tsnedata[comp][i]:undefined), valueBackground: tsnedata[comp]
                     }]}
             })
         }
