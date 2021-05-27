@@ -363,11 +363,11 @@ let TreeLayout = function (){
         debugger
         const filteredData = {...scheme.data};
         filteredData.children = [];
-        scheme.data.children.forEach(u=>{
-            u.  
-        })
-
-        root
+        // scheme.data.children.forEach(u=>{
+        //     u.
+        // })
+        //
+        // root
     }
     function update(source){
         const duration = d3.event && d3.event.altKey ? 2500 : 250;
@@ -599,6 +599,7 @@ function handle_data_timeArc () {
     // let userlist = ['hge', 'presmcdo', 'adegbalo', 'juandomi'];
     // let userlist = ['hge'];
     let userlist = Object.keys(Layout.usersStatic);
+    userlist.sort((a,b)=>Layout.usersStatic[b].summary[serviceSelected].mean-Layout.usersStatic[a].summary[serviceSelected].mean)
     scheme.range = [[Infinity,-Infinity],[Infinity,-Infinity]];
     const dataArray = [];
     userlist.forEach(u=>{
