@@ -217,3 +217,25 @@ table td.selected {
 .nodeLegend.fade{
     opacity: 0.4;
 }
+
+.computeNode.highlight,.links.highlight {
+    opacity: 1;
+}
+.userNode.highlight {
+    opacity: 1;
+}
+.node .label {
+    opacity: 0;
+    pointer-events: none;
+}
+.node.highlight .label {
+    display: unset;
+    opacity: 1;
+}
+
+.links.highlight text{
+    display: unset;
+}
+.links text{
+    display: none;
+}

@@ -44,6 +44,7 @@ let MapSetting = function () {
         },
         userStreamMode: 'Power'
     };
+    let runopt = {mouse:{}};
     let scheme = {}, filterTerm = [];
     let animation_time = 2000;
     let svg = d3.select(graphicopt.svg), g, zoomFunc, linkg, nodeg, table_headerNode, freezing = false, textWarp = 200;
@@ -324,7 +325,6 @@ let MapSetting = function () {
         computersNode_n.append('g').attrs(
             {
                 'class': 'computeSig',
-                'stroke': 'black',
             });
         computersNode_n.append('text').attrs(
             {
@@ -549,7 +549,7 @@ let MapSetting = function () {
             ]));
         g.selectAll('.computeNode')
             .call(path => freezinghandle(path, [function (d) {
-                d3.select(this).classed('highlight', true).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key)).call(wrap, false);
+                d3.select(this).classed('highlight', true).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, false);
                 const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight', true).data();
                 const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).data();
                 g.selectAll('.jobNode').filter(f => samesource.find(e => e.target === f)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).selectAll('.label').classed('hide', !jobEmpty);
@@ -562,14 +562,12 @@ let MapSetting = function () {
                 // table_footerNode.classed('fade', true);
                 callback.mouseover(d.values_name)
             }, null], [function (d) {
-                if (runopt.compute.type !== 'timeline') {
-                    d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key)).call(wrap, true);
+                    d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, true);
                     g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
                     g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
                     g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
                     link.classed('hide', false).classed('highlight', false);
                     // table_footerNode.classed('fade', false);
-                }
                 callback.mouseleave()
             }, null]));
         g.selectAll('.jobNode')
