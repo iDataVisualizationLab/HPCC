@@ -619,7 +619,7 @@ function drawComputeList(){
 function drawColorLegend() {
     let width=300;
     const contain =  d3.select('#legendTimeArc');
-    const svg = contain.select('svg').attr('width',width);
+    const svg = contain.select('svg').attr('width',width).attr('height',100);
 
 
     if (!subObject.graphicopt().minMaxStream){
