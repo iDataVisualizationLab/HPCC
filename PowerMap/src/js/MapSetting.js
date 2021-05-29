@@ -399,7 +399,6 @@ let MapSetting = function () {
         computersNode_n.append('text').attrs(
             {
                 'class': 'computeSig_label',
-                'opacity': 0,
                 'text-anchor': 'end',
                 'dx': -10,
                 'dy': '0.5rem',
