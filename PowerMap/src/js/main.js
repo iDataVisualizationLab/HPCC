@@ -16,6 +16,7 @@ let serviceSelected = 0;
 let request, timelineControl;
 
 $(document).ready(function () {
+
     try {
         // let mode = window.location.search.substring(1).split("mode=")[1].split('&')[0].replace(/%20/g,' '); // get data name after app=
         let command = window.location.search.substring(1).split("&").map(d => d.split('=')); // get data name after app=
@@ -222,7 +223,7 @@ $(document).ready(function () {
 });
 
 function initTimeElement() {
-
+    toggleControlpanel();
     // request.onFinishQuery.push(queryData);
     request.onDataChange.push((data) => {
         updateProcess({percentage: 50, text: 'Preprocess data'})

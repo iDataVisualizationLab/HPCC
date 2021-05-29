@@ -226,242 +226,243 @@
                                         <input type="number" style="width:100%"/>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <ul class="nav nav-tabs">
-                        <!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
-                                                        <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
-                        <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#jobOnToolbarHolder">Job list</a></li>
-                        <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#computeOnToolbarHolder">Compute list</a></li>
-                    </ul>
-                    <div class="card-body row tab-content">
-                        <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
-                            <div id="analyticOnToolbar" class="card-body row"
-                                 data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
-<!--                                <label class="col-4" for="flowType">Visualizing: </label>-->
-<!--                                <select class="col-6" id="flowType">-->
-<!--                                    <option value="core">#Cores</option>-->
-<!--                                    <option value="compute">#Nodes</option>-->
-<!--                                </select>-->
-                                <div class="col-2"></div>
+                                <ul class="nav nav-tabs">
+                                    <!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
+                                    <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
+                                    <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#jobOnToolbarHolder">Job list</a></li>
+                                    <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#computeOnToolbarHolder">Compute list</a></li>
+                                </ul>
+                                <div class="card-body row tab-content">
+                                    <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">
+                                        <div id="analyticOnToolbar" class="card-body row"
+                                             data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">
+                                            <!--                                <label class="col-4" for="flowType">Visualizing: </label>-->
+                                            <!--                                <select class="col-6" id="flowType">-->
+                                            <!--                                    <option value="core">#Cores</option>-->
+                                            <!--                                    <option value="compute">#Nodes</option>-->
+                                            <!--                                </select>-->
+                                            <div class="col-2"></div>
 
-                                <label class="col-4" for="userSort">Sort user node by: </label>
-                                <select class="col-6" id="userSort">
-                                    <option value="size">size</option>
-                                    <option selected value="">None</option>
-                                </select>
-                                <div class="col-2"></div>
+                                            <label class="col-4" for="userSort">Sort user node by: </label>
+                                            <select class="col-6" id="userSort">
+                                                <option value="size">size</option>
+                                                <option selected value="">None</option>
+                                            </select>
+                                            <div class="col-2"></div>
 
-                                <label class="col-4" for="hideStable">Hide stable users: </label>
-                                <label class="col-8 left-align">
-                                    <input id="hideStable" type="checkbox" class="filled-in">
-                                    <span></span>
-                                </label>
+                                            <label class="col-4" for="hideStable">Hide stable users: </label>
+                                            <label class="col-8 left-align">
+                                                <input id="hideStable" type="checkbox" class="filled-in">
+                                                <span></span>
+                                            </label>
 
-                                <label class="col-4" for="showShareUser">Show shared users: </label>
-                                <label class="col-8 left-align">
-                                    <input id="showShareUser" type="checkbox" class="filled-in">
-                                    <span></span>
-                                </label>
+                                            <label class="col-4" for="showShareUser">Show shared users: </label>
+                                            <label class="col-8 left-align">
+                                                <input id="showShareUser" type="checkbox" class="filled-in">
+                                                <span></span>
+                                            </label>
 
-                                <div class="MetricsLegend hide">
-                                    <div class="row legendView hide">
-                                        <label class="col-4"></label>
-                                        <div class="col-8 justify-content-center "
-                                             style="padding-right: 0;padding-left: 0; margin-top: 10px">
-                                            <div class="input-group flex-nowrap">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="addon-max">max</span>
+                                            <div class="MetricsLegend hide">
+                                                <div class="row legendView hide">
+                                                    <label class="col-4"></label>
+                                                    <div class="col-8 justify-content-center "
+                                                         style="padding-right: 0;padding-left: 0; margin-top: 10px">
+                                                        <div class="input-group flex-nowrap">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="addon-max">max</span>
+                                                            </div>
+                                                            <input type="number" id="range_max" class="form-control range"
+                                                                   aria-label="range_max" aria-describedby="addon-max">
+                                                        </div>
+                                                        <svg class="legend" style="transform: translateX(50px)"></svg>
+                                                        <div class="input-group flex-nowrap">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="addon-min">min</span>
+                                                            </div>
+                                                            <input type="number" id="range_min" class="form-control range"
+                                                                   aria-label="range_min" aria-describedby="addon-min">
+                                                        </div>
+                                                        <div class="btn-group hide" role="group">
+                                                            <button id="range_apply" type="button" class="btn btn-success">
+                                                                Apply
+                                                            </button>
+                                                            <button id="range_reset" type="button" class="btn btn-secondary">
+                                                                reset
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <input type="number" id="range_max" class="form-control range"
-                                                       aria-label="range_max" aria-describedby="addon-max">
-                                            </div>
-                                            <svg class="legend" style="transform: translateX(50px)"></svg>
-                                            <div class="input-group flex-nowrap">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="addon-min">min</span>
+                                                <div class="card-body row clusterView hide">
+                                                    <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping
+                                                        Method:</label>
+                                                    <select id="clusterMethod" class="col-8 radarcontroller_layout">
+                                                        <option value="leaderbin" selected="selected">Leader Bin</option>
+                                                        <option value="kmean">K-means</option>
+                                                        <option value="jobName" distanceFunc="none"
+                                                                cluster-function="calJobNameCluster"
+                                                                assign-function="getJobNameCluster">Job Name
+                                                        </option>
+                                                        <option value="user" distanceFunc="none"
+                                                                cluster-function="calUserNameCluster"
+                                                                assign-function="getJobNameCluster">User
+                                                        </option>
+                                                        <!--<option value="binarybin">Binary bin</option>-->
+                                                    </select>
+                                                    <label for="normMethod" class="col-4 radarcontroller_layout"> Distance
+                                                        Function:</label>
+                                                    <select id="normMethod" class="col-8 radarcontroller_layout">
+                                                        <option value="l1">L1 norm - Manhattan Distance</option>
+                                                        <option value="l2" selected="selected">L2 norm - Euclidean Distance
+                                                        </option>
+                                                    </select>
+                                                    <form action="#" class='clusterProfile row no-padding' id="leaderbinprofile"
+                                                          onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+                                                        <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+                                                        <!--                                <div  class="col-6 hide">-->
+                                                        <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+                                                        <!--                                </div>-->
+                                                        <label for="lowrange" class="col-4 radarcontroller_layout">#Groups
+                                                            from </label>
+                                                        <input type="number" id="lowrange"
+                                                               class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                                        <span class="col-2 no_leftmagrin">to</span>
+                                                        <input type="number" id="highrange"
+                                                               class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+
+                                                        <button type="submit"
+                                                                class="btn btn-success animatIcon col-8 offset-4 no-padding">
+                                                            <div>Submit</div>
+                                                        </button>
+
+                                                    </form>
+                                                    <form action="#" class='clusterProfile row hide no-padding'
+                                                          id="kmeanprofile"
+                                                          onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                                        <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+                                                        <input type="number" id="knum"
+                                                               class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                                                        <label for="knum"
+                                                               class="col-4 radarcontroller_layout">#Iterations</label>
+                                                        <input type="number" id="kiteration"
+                                                               class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+
+                                                        <button type="submit"
+                                                                class="btn btn-success animatIcon col-8 offset-4 no-padding">
+                                                            <div>Submit</div>
+                                                        </button>
+                                                    </form>
+                                                    <div class="d-flex justify-content-center white row" id="clusterDisplay">
+                                                    </div>
                                                 </div>
-                                                <input type="number" id="range_min" class="form-control range"
-                                                       aria-label="range_min" aria-describedby="addon-min">
                                             </div>
-                                            <div class="btn-group hide" role="group">
-                                                <button id="range_apply" type="button" class="btn btn-success">
-                                                    Apply
-                                                </button>
-                                                <button id="range_reset" type="button" class="btn btn-secondary">
-                                                    reset
-                                                </button>
+                                            <div class="RackLegend row-cols-6 hide">
+                                                <svg width="290">
+                                                    <g class="content"></g>
+                                                </svg>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-body row clusterView hide">
-                                        <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping
-                                            Method:</label>
-                                        <select id="clusterMethod" class="col-8 radarcontroller_layout">
-                                            <option value="leaderbin" selected="selected">Leader Bin</option>
-                                            <option value="kmean">K-means</option>
-                                            <option value="jobName" distanceFunc="none"
-                                                    cluster-function="calJobNameCluster"
-                                                    assign-function="getJobNameCluster">Job Name
-                                            </option>
-                                            <option value="user" distanceFunc="none"
-                                                    cluster-function="calUserNameCluster"
-                                                    assign-function="getJobNameCluster">User
-                                            </option>
-                                            <!--<option value="binarybin">Binary bin</option>-->
-                                        </select>
-                                        <label for="normMethod" class="col-4 radarcontroller_layout"> Distance
-                                            Function:</label>
-                                        <select id="normMethod" class="col-8 radarcontroller_layout">
-                                            <option value="l1">L1 norm - Manhattan Distance</option>
-                                            <option value="l2" selected="selected">L2 norm - Euclidean Distance
-                                            </option>
-                                        </select>
-                                        <form action="#" class='clusterProfile row no-padding' id="leaderbinprofile"
-                                              onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
-                                            <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
-                                            <!--                                <div  class="col-6 hide">-->
-                                            <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
-                                            <!--                                </div>-->
-                                            <label for="lowrange" class="col-4 radarcontroller_layout">#Groups
-                                                from </label>
-                                            <input type="number" id="lowrange"
-                                                   class="col-3 radarcontroller_layout browser-default no_leftmagrin">
-                                            <span class="col-2 no_leftmagrin">to</span>
-                                            <input type="number" id="highrange"
-                                                   class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                    <div class="row input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="custom-select" id="jobValueType" style="width:60px">
+                                                <option selected value="mean">Mean</option>
+                                                <option value="min">Min</option>
+                                                <option value="max">Max</option>
+                                            </select>
+                                            <select class="custom-select" id="jobValueName" style="width:90px; background-color: #b0ff6b">
 
-                                            <button type="submit"
-                                                    class="btn btn-success animatIcon col-8 offset-4 no-padding">
-                                                <div>Submit</div>
+                                            </select>
+                                            <span class="input-group-text">Top</span>
+                                            <!--                                    <select class="custom-select" id="jobFilterType">-->
+                                            <!--                                        <option selected value="top">Top</option>-->
+                                            <!--                                        <option value="morethan">Greater than</option>-->
+                                            <!--                                    </select>-->
+                                        </div>
+                                        <input type="number" class="form-control" id="JobFilterThreshold" value="50">
+                                        <div class="input-group-append" id="button-addon4">
+                                            <button class="btn btn-outline-secondary" type="button" id="JobListFilter">
+                                                Filter
                                             </button>
-
-                                        </form>
-                                        <form action="#" class='clusterProfile row hide no-padding'
-                                              id="kmeanprofile"
-                                              onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
-                                            <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
-
-                                            <input type="number" id="knum"
-                                                   class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-                                            <label for="knum"
-                                                   class="col-4 radarcontroller_layout">#Iterations</label>
-                                            <input type="number" id="kiteration"
-                                                   class="col-2 radarcontroller_layout browser-default no_leftmagrin">
-
-                                            <button type="submit"
-                                                    class="btn btn-success animatIcon col-8 offset-4 no-padding">
-                                                <div>Submit</div>
-                                            </button>
-                                        </form>
-                                        <div class="d-flex justify-content-center white row" id="clusterDisplay">
+                                        </div>
+                                    </div>
+                                    <div id="userOnToolbarHolder" data="userList" class="tab-pane fade col-12 filterTab" role="tabpanel">
+                                        <div class="row">
+                                            <span style="margin-right: 5px"><strong>Showing </strong></span>
+                                            <span id="currentUserNum"></span>
+                                            / <span id="userNumTotal">10</span>
+                                            <span style="margin-left: 5px"> users</span>
+                                        </div>
+                                        <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder"
+                                             data-minimize="controlHolderMenu" style="max-height: 300px;">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th rowspan="2">User ID</th>
+                                                    <th class="jobValType">mean</th>
+                                                    <th rowspan="2">#Nodes</th>
+                                                    <th rowspan="2">user_name</th>
+                                                </tr>
+                                                <tr class="header">
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="jobOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab  show active" role="tabpanel">
+                                        <div class="row">
+                                            <span style="margin-right: 5px"><strong>Showing </strong></span>
+                                            <span id="currentJobNum"></span>
+                                            / <span id="jobNumTotal">10</span>
+                                            <span style="margin-left: 5px"> jobs</span>
+                                        </div>
+                                        <div id="JobList" class="row table-responsive" data-maximize="RankingListHolder"
+                                             data-minimize="controlHolderMenu" style="max-height: 300px;">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th rowspan="2">Job ID</th>
+                                                    <th class="jobValType">mean</th>
+                                                    <th rowspan="2">#Nodes</th>
+                                                    <!--                                        <th rowspan="2">#Cores</th>-->
+                                                    <th rowspan="2">user</th>
+                                                </tr>
+                                                <tr class="header">
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="computeOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab" role="tabpanel">
+                                        <div class="row">
+                                            <span style="margin-right: 5px"><strong>Showing </strong></span>
+                                            <span id="currentComputeNum"></span>
+                                            / <span id="computeNumTotal">10</span>
+                                            <span style="margin-left: 5px"> computes</span>
+                                        </div>
+                                        <div id="ComputeList" class="row table-responsive" data-maximize="RankingListHolder"
+                                             data-minimize="controlHolderMenu" style="max-height: 300px;">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th rowspan="2" style="min-width:70px">Node</th>
+                                                    <th class="jobValType">mean</th>
+                                                    <th rowspan="2">#Jobs</th>
+                                                </tr>
+                                                <tr class="header">
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="RackLegend row-cols-6 hide">
-                                    <svg width="290">
-                                        <g class="content"></g>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row input-group mb-3">
-                            <div class="input-group-prepend">
-                                <select class="custom-select" id="jobValueType" style="width:60px">
-                                    <option selected value="mean">Mean</option>
-                                    <option value="min">Min</option>
-                                    <option value="max">Max</option>
-                                </select>
-                                <select class="custom-select" id="jobValueName" style="width:90px; background-color: #b0ff6b">
-
-                                </select>
-                                <span class="input-group-text">Top</span>
-                                <!--                                    <select class="custom-select" id="jobFilterType">-->
-                                <!--                                        <option selected value="top">Top</option>-->
-                                <!--                                        <option value="morethan">Greater than</option>-->
-                                <!--                                    </select>-->
-                            </div>
-                            <input type="number" class="form-control" id="JobFilterThreshold" value="50">
-                            <div class="input-group-append" id="button-addon4">
-                                <button class="btn btn-outline-secondary" type="button" id="JobListFilter">
-                                    Filter
-                                </button>
-                            </div>
-                        </div>
-                        <div id="userOnToolbarHolder" data="userList" class="tab-pane fade col-12 filterTab" role="tabpanel">
-                            <div class="row">
-                                <span style="margin-right: 5px"><strong>Showing </strong></span>
-                                <span id="currentUserNum"></span>
-                                / <span id="userNumTotal">10</span>
-                                <span style="margin-left: 5px"> users</span>
-                            </div>
-                            <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder"
-                                 data-minimize="controlHolderMenu" style="max-height: 300px;">
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th rowspan="2">User ID</th>
-                                        <th class="jobValType">mean</th>
-                                        <th rowspan="2">#Nodes</th>
-                                        <th rowspan="2">user_name</th>
-                                    </tr>
-                                    <tr class="header">
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div id="jobOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab  show active" role="tabpanel">
-                            <div class="row">
-                                <span style="margin-right: 5px"><strong>Showing </strong></span>
-                                <span id="currentJobNum"></span>
-                                / <span id="jobNumTotal">10</span>
-                                <span style="margin-left: 5px"> jobs</span>
-                            </div>
-                            <div id="JobList" class="row table-responsive" data-maximize="RankingListHolder"
-                                 data-minimize="controlHolderMenu" style="max-height: 300px;">
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th rowspan="2">Job ID</th>
-                                        <th class="jobValType">mean</th>
-                                        <th rowspan="2">#Nodes</th>
-<!--                                        <th rowspan="2">#Cores</th>-->
-                                        <th rowspan="2">user</th>
-                                    </tr>
-                                    <tr class="header">
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div id="computeOnToolbarHolder" data="jobList" class="tab-pane fade col-12 filterTab" role="tabpanel">
-                            <div class="row">
-                                <span style="margin-right: 5px"><strong>Showing </strong></span>
-                                <span id="currentComputeNum"></span>
-                                / <span id="computeNumTotal">10</span>
-                                <span style="margin-left: 5px"> computes</span>
-                            </div>
-                            <div id="ComputeList" class="row table-responsive" data-maximize="RankingListHolder"
-                                 data-minimize="controlHolderMenu" style="max-height: 300px;">
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th rowspan="2" style="min-width:70px">Node</th>
-                                        <th class="jobValType">mean</th>
-                                        <th rowspan="2">#Jobs</th>
-                                    </tr>
-                                    <tr class="header">
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
