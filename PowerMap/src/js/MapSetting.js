@@ -1033,7 +1033,7 @@ let MapSetting = function () {
                     mon.value = [0, 0];
                     mon.timestep = d.timestep;
                     return mon;
-                }), color: "rgb(252, 141, 89)",
+                }), color: "rgba(252, 141, 89, 0.7)",
                 up: true
             },
                 {
