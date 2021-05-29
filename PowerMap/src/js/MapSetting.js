@@ -1,5 +1,4 @@
 var Mapopt = {
-    width: 1400, height: 700, margin: {top: 10, right: 10, bottom: 0, left: 50},
     offset: {top: 0}, preLinkText: 'Computes have', postLinkText: ' same job(s)'
 };
 // var timeArJobcopt = {width:1400,height:700, margin: {top: 10, right: 10, bottom: 0, left: 350},contain: '#Jobcontent',
@@ -8,10 +7,10 @@ var Mapopt = {
 let MapSetting = function () {
     let graphicopt = {
         svg: '#Chartcontent',
-        margin: {top: 10, right: 10, bottom: 0, left: 200},
+        margin: {top: 40, right: 10, bottom: 0, left: 20},
         offset: {top: 0},
         width: 1500,
-        height: 1000,
+        height: 700,
         scalezoom: 1,
         widthView: function () {
             return this.width * this.scalezoom
@@ -24,6 +23,15 @@ let MapSetting = function () {
         },
         heightG: function () {
             return this.heightView() - this.margin.top - this.margin.bottom
+        },
+        userPos: function(){
+            return this.widthG() - 420;
+        },
+        jobPos: function(){
+            return this.userPos() - 120;
+        },
+        computePos: function(){
+            return this.jobPos() - 120;
         },
         display: {
             links: {
@@ -164,12 +172,12 @@ let MapSetting = function () {
         svg.select('.pantarget').call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left, graphicopt.margin.top));
         g.append('text').attr('class', 'job_title hide').style('font-weight', 'bold').attrs({
             'text-anchor': "middle",
-            'x': 430,
+            'x': graphicopt.jobPos(),
             'dy': -20
         }).datum('Jobs').text(d => d);
         g.append('text').attr('class', 'host_title').style('font-weight', 'bold').attrs({
             'text-anchor': "middle",
-            'x': 300,
+            'x': graphicopt.computePos(),
             'dy': -20
         }).text('Hosts');
 
@@ -194,7 +202,7 @@ let MapSetting = function () {
         //     .style('opacity',0)
         //     .style('pointer-events', runopt.mouse.lensing?'auto':'none');
 
-        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(600,${-15})`);
+        table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(${graphicopt.userPos()},${-15})`);
         table_headerNode.append('g').attr('class', 'back').append('path').styles({'fill': '#ddd'});
 
         registEvent(zoomFunc);
@@ -562,7 +570,7 @@ let MapSetting = function () {
         //     table_footerNode = nodeg.append('g').attr('class', 'table footer');
         // table_footerNode.append('g').attr('class', 'back').append('path').styles({'fill': '#ddd'});
         //
-        // table_footerNode.attr('transform', `translate(600,${yscale(Object.keys(scheme.data.users).length + 1)})`);
+        // table_footerNode.attr('transform', `translate(${graphicopt.userPos()},${yscale(Object.keys(scheme.data.users).length + 1)})`);
         // table_footer(table_footerNode);
 
 
@@ -674,7 +682,7 @@ let MapSetting = function () {
 
         master.drawComp();
         isFirst = false;
-
+        updateProcess();
         return master;
     }
 
@@ -711,12 +719,12 @@ let MapSetting = function () {
         // else
         jobNode.data().sort((a, b) => scheme.data.users[a.user_name].order - scheme.data.users[b.user_name].order).forEach((d, i) => d.order = i);
         g.selectAll('.jobNode.new').classed('new', false).attr('transform', d => {
-            d.x2 = 430;
+            d.x2 = graphicopt.jobPos();
             d.y = scaleJob(d.order);
             return `translate(${d.x2},${d.y})`
         }).style('opacity', 0);
         jobNode.transition().duration(animation_time).attr('transform', d => {
-            d.x2 = 430;
+            d.x2 = graphicopt.jobPos();
             d.y = scaleJob(d.order);
             return `translate(${d.x2},${d.y})`
         }).style('opacity', undefined);
@@ -729,17 +737,17 @@ let MapSetting = function () {
                     computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
 
 
-            g.select('.host_title').attrs({'text-anchor': "end", 'x': 300, 'dy': -20}).text("Hosts's timeline");
+            g.select('.host_title').attrs({'text-anchor': "end", 'x':  graphicopt.computePos(), 'dy': -20}).text("Hosts's timeline");
             scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
 
             g.selectAll('.computeNode.new').classed('new', false).attr('transform', d => {
-                d.x2 = 300;
+                d.x2 =  graphicopt.computePos();
                 d.y2 = scaleNode_y_middle(d.order);
                 // return `translate(${d.x2},${d.y2 || d.y})`
                 return `translate(${d.x2},0)`
             }).style('opacity', 0);
             computers.transition().duration(animation_time).attr('transform', d => {
-                d.x2 = 300;
+                d.x2 =  graphicopt.computePos();
                 d.y2 = scaleNode_y_middle(d.order);
                 // return `translate(${d.x2},${d.y2 || d.y})`
                 return `translate(${d.x2},0)`
@@ -917,7 +925,7 @@ let MapSetting = function () {
         }
         g.selectAll('.userNode.new').classed('new',false).attr('transform',d=>{
             d.fy=yscale(d.order);
-            d.fx=600;
+            d.fx=graphicopt.userPos();
             d.y=d.fy;
             d.x=d.fx;
             return `translate(${d.fx},${d.fy})`
@@ -925,7 +933,7 @@ let MapSetting = function () {
         g.selectAll('.userNode').transition().duration(animation_time)
             .attr('transform',d=>{
                 d.fy=yscale(d.order);
-                d.fx=600;
+                d.fx=graphicopt.userPos();
                 d.y=d.fy;
                 d.x=d.fx;
                 return `translate(${d.fx},${d.fy})`
@@ -1081,6 +1089,7 @@ let MapSetting = function () {
             .join('path')
             .attr('class', 'linegg')
             .call(updatelayerpath);
+        svg.selectAll('.computeSig_label.label').attr('transform', d=>{ debugger; return `translate(0,${scaleNode_y_middle(d.order)})`})
     }
     function updatelayerpath(p) {
         return p
@@ -1093,7 +1102,7 @@ let MapSetting = function () {
             });
     }
     master.currentSelected = function (){
-        return {computers,users,jobs}
+        return {computers,users,jobs:filterTerm.map(j=>scheme.data.jobs[j])}
     }
     function computeUsermetric() {
         // let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
@@ -1207,8 +1216,8 @@ let MapSetting = function () {
         tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'#Computes'}, {key:'Jobs',value: '#Jobs'}];
         tableLayout.column={
             'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
-            'Hosts': {id:'Hosts',text:'#Computes',type:'num',x: 120,y:20,width:60},
-            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 170,y:20,width:52},
+            'Hosts': {id:'Hosts',text:'#Computes',type:'num',x: 60,y:20,width:60},
+            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 135,y:20,width:30},
         }
         let offset = tableLayout.column['Jobs'].x+tableLayout.column['Jobs'].width;
         let padding = 15;
@@ -1256,7 +1265,7 @@ let MapSetting = function () {
                     scheme[i] = __[i];
                 }
             }
-            xScale = d3.scaleLinear().domain([0,__.data.timespan.length-1]).range([0,graphicopt.widthG()-450]);
+            xScale = d3.scaleLinear().domain([0,__.data.timespan.length-1]).range([0,graphicopt.computePos()]);
             updateLayout();
             return master;
         } else {

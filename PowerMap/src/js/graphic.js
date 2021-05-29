@@ -479,6 +479,8 @@ function _renderTable({numTotal,currentNum,holder,mainKey,subInfo},data, _data, 
     function rendercell(d){
         const _cell = [{key: mainKey, value: d.key}];
         serviceFullList.forEach(s => {
+            if (d.value===undefined)
+                debugger
             _cell.push({
                 key: s.text,
                 value: Math.round(scaleService[s.idroot].invert(d.value.summary[s.idroot][_jobValueType]))
