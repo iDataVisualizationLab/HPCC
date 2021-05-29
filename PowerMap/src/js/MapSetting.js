@@ -1217,9 +1217,9 @@ let MapSetting = function () {
         let cells = rows_n.merge(rows).selectAll('.cell').data(d => d);
         cells.exit().remove();
 
-        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+tableLayout.column[d.key].width/2},20)`);
+        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+(d.key!=='UserID'?tableLayout.column[d.key].width/2:0)},20)`);
         cells_n.append('text')
-            .styles({'font-weight': 'bold','text-anchor':'middle'}).attrs(d => {
+            .styles({'font-weight': 'bold','text-anchor': d=>d.key !=='UserID'?'middle':'start'}).attrs(d => {
             return {width: tableLayout.column[d.key].width}
         });
         cells = cells_n.merge(cells);
