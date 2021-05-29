@@ -682,6 +682,7 @@ let MapSetting = function () {
 
         master.drawComp();
         isFirst = false;
+        drawColorLegend();
         updateProcess();
         return master;
     }

@@ -24,18 +24,15 @@ function serviceControl(){
             serviceSelected = +selectedSers[1];
 
             const val = selectedSers[0];
-            const oldVal = timeArcopt.minMaxStream;
-            timeArcopt.minMaxStream = (val==='minmax');
+            const oldVal = subObject.graphicopt().minMaxStream;
+            subObject.graphicopt().minMaxStream = (val==='minmax');
             updateProcess({percentage:50,text:'filtering...'});
             setTimeout(()=>{
-                if(oldVal===timeArcopt.minMaxStream){
-                    subObject.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                if(oldVal===subObject.graphicopt().minMaxStream){
+                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).updateDrawData();
                 }else{
-                    let catergogryList = subObject.catergogryList();
-                    catergogryList.find(d=>d.key==="compute").disable = timeArcopt.minMaxStream;
-
-                    // subObject.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).updateDrawData();
-                    subObject.graphicopt({minMaxStream:timeArcopt.minMaxStream,selectedService:serviceSelected}).draw();
+                    // subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).draw();
                 }
                 drawColorLegend();
             },0)
@@ -623,68 +620,14 @@ function drawColorLegend() {
     let width=300;
     const contain =  d3.select('#legendTimeArc');
     const svg = contain.select('svg').attr('width',width);
-    const catergogryList = subObject.catergogryList();
-    const catergogryObject = {};
-    const summary = subObject.summary();
-    catergogryList.forEach(d=>catergogryObject[d.key]=d.value)
-    var xx = 10;
-    var rr = 6;
-    var yoffset = 10;
-    let yscale = d3.scaleLinear().range([yoffset+13,yoffset+30]);
-    let colorCatergory = d3.scaleOrdinal().range(["#080","steelblue","#828282"]);
-    if (catergogryList&& (catergogryList.length>1) && svg.select('.colorlegendtext').empty()){
-        svg.append('text').text('Color legend: ')
-            .attr('class','colorlegendtext legendText')
-            .attr('x',xx)
-            .attr('y',yoffset);
-        svg.append('text').text('Stream legend: ')
-            .attr('class','streamlegendtext legendText')
-            .attr('x',xx)
-            .attr('y',yoffset);
-    }
-    let legendg_o = svg.selectAll('g.nodeLegend')
-        .data(catergogryList)
-        .classed('fade',d=> d.disable);
-    legendg_o.exit().remove();
-    const legendg = legendg_o.enter()
-        .append('g')
-        .attr('class','nodeLegend show')
-        .classed('fade',d=> d.disable)
-        .attr('transform',(d,i)=>'translate('+xx+','+yscale(i)+')')
-        .on('click',onclickcategory);
-    function onclickcategory(d) {
-        if (d.disable) {
-            d.disable = false;
-        } else {
-            d.disable = true;
-        }
-        d3.select(this).classed('fade', d.disable);
-        subObject.draw()
-    }
-    legendg.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", rr)
-        .style("fill",d=>getColor(d.key));
 
-    legendg.append("text")
-        .attr("x", xx+10)
-        .attr("y", 0)
-        .attr("dy", ".21em")
-        .style("text-anchor", "left")
-        .style("fill",d=>getColor(d.key))
-        .style('pointer-events','auto')
-        .style('cursor','pointer');
 
-    legendg.merge(legendg_o).select('text')
-        .text(d=>`${d.value.text||d.key} (${d.value.current!==undefined?`showing ${d.value.current}/`:''}${summary[d.key]})`);
-
-    if (!timeArcopt.minMaxStream){
+    if (!subObject.graphicopt().minMaxStream){
         // stream legend
-        svg.select('.streamlegendtext').classed('hide',false).attr('y',yscale(catergogryList.length)+20);
+        svg.select('.streamlegendtext').classed('hide',false).attr('y',20);
         let upScale= subObject.graphicopt().display.stream.yScaleUp;
         let downScale= subObject.graphicopt().display.stream.yScaleDown;
-        let streamPos = yscale(catergogryList.length)+20+10+upScale.range()[1];
+        let streamPos =+20+10+upScale.range()[1];
         let streamxOffset = 80;
         contain.select('#thresholdTimeArc').classed('hide',false).style('top',''+(streamPos-27)+'px').style('width',`${streamxOffset-20}px`);
         let streamxScale = d3.scaleLinear().range([streamxOffset,width-30]);
@@ -816,7 +759,7 @@ function getColorGant(){
     return _colorItem;
 }
 function initdrawGantt(){
-    // subObject.init().getColorScale(getColorGant).graphicopt({range:Layout.timeRange});
+    subObject.graphicopt({width:$('#chart_holder').width(),height:$('#chart_holder').height()}).init();
 
     subObject.mouseoverAdd('gantt',function(d){
         // userPie.highlight(d.source.element.map(e=>e.key));
@@ -839,7 +782,7 @@ function drawGantt(){
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
-let subObject = new MapSetting().init();
+let subObject = new MapSetting();
 
 let filterMode = 'jobList'; // joblist | searchBox
 let searchControl = SearchControl();
