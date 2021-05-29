@@ -819,9 +819,10 @@ let MapSetting = function () {
         cells.exit().remove();
 
         let cellsText = cells
-        let cells_n = cells.enter().append('g').attr('class', d =>'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x},${tableLayout.column[d.key].y})`);
+        let cells_n = cells.enter().append('g').attr('class', d =>'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+(d.key!=='UserID'?tableLayout.column[d.key].width:0)},${tableLayout.column[d.key].y})`);
         let cellsText_n = cells_n//.filter(d => tableLayout.column[d.key].type !== 'graph');
-        cellsText_n.append('text');
+        cellsText_n.append('text')
+            .style('text-anchor',d=>d.key!=='UserID'?'end':'start');
         cellsText = cellsText_n.merge(cellsText).select('text').text(d => {
             let custom = tableLayout.column[d.key].format;
             if (custom)
@@ -1216,8 +1217,9 @@ let MapSetting = function () {
         let cells = rows_n.merge(rows).selectAll('.cell').data(d => d);
         cells.exit().remove();
 
-        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x},20)`);
-        cells_n.append('text').styles({'font-weight': 'bold'}).attrs(d => {
+        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+tableLayout.column[d.key].width/2},20)`);
+        cells_n.append('text')
+            .styles({'font-weight': 'bold','text-anchor':'middle'}).attrs(d => {
             return {width: tableLayout.column[d.key].width}
         });
         cells = cells_n.merge(cells);
