@@ -837,7 +837,7 @@ function drawGantt(){
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
-let subObject = new MapSetting();
+let subObject = new MapSetting().init();
 
 let filterMode = 'jobList'; // joblist | searchBox
 let searchControl = SearchControl();
