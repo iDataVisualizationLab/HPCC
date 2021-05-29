@@ -29,7 +29,7 @@ function serviceControl(){
             updateProcess({percentage:50,text:'filtering...'});
             setTimeout(()=>{
                 if(oldVal===subObject.graphicopt().minMaxStream){
-                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).updateDrawData();
+                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).draw()//.updateDrawData();
                 }else{
                     // subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).updateDrawData();
                     subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).draw();

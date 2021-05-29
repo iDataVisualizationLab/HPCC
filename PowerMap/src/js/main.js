@@ -229,7 +229,8 @@ function initTimeElement() {
         updateProcess({percentage: 50, text: 'Preprocess data'})
         setTimeout(() => {
             handleRankingData(data);
-            updateProcess({percentage: 80, text: 'Preprocess data'})
+            updateProcess({percentage: 80, text: 'Preprocess data'});
+            $('#JobFilterThreshold').val(Object.keys(Layout.jobsStatic).length)
             drawJobList();
             initdrawGantt();
             drawGantt();
