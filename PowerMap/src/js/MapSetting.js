@@ -70,7 +70,7 @@ let MapSetting = function () {
         row: {
             width: 500,
             height: 20,//deltey,
-            'graph-width': 70,
+            'graph-width': 75,
         },
         column: {
             'UserID': {id: 'UserID', type: 'text', x: 10, y: 20, width: 60},
@@ -1089,7 +1089,51 @@ let MapSetting = function () {
             .join('path')
             .attr('class', 'linegg')
             .call(updatelayerpath);
-        svg.selectAll('.computeSig_label.label').attr('transform', d=>{ debugger; return `translate(0,${scaleNode_y_middle(d.order)})`})
+        svg.selectAll('.computeSig_label.label').attr('transform', d=>{ debugger; return `translate(0,${scaleNode_y_middle(d.order)})`});
+        updateaxis();
+    }
+    function updateaxis() {
+        let bg = svg.selectAll('.computeSig');
+        let rangey = d3.extent(bg.data(),d=>d.y2===undefined?d.y:d.y2);
+        let scale = d3.scaleTime().range(xScale.domain()).domain(scheme.limitTime);
+
+        let axis = svg.select('.gNodeaxis')
+            .classed('hide',false)
+            .attr('transform',`translate(${(bg.datum().x2||bg.datum().x )-graphicopt.computePos() },${rangey[0]})`);
+        let Maxis = axis.select('.gMainaxis')
+            .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
+        Maxis.select('.domain').remove();
+        let mticks =Maxis.selectAll('.tick');
+        mticks
+            // .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
+            .transition().duration(animation_time).attr('transform',d=>`translate(${xScale(scale(d))},0)`);
+        mticks.select('text').attr('dy','-0.5rem');
+        mticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
+
+        let Saxis = axis.select('.gSubaxis').classed('hide',true);
+        // if (fisheye_scale.x.focus) {
+        //     const timearray = scale.ticks();
+        //     Saxis.classed('hide',false);
+        //     let pos2time = scale.invert(fisheye_scale.x.focus());
+        //     let timesubarray = [new Date(+pos2time - (timearray[1] - timearray[0])), new Date(+pos2time + (timearray[1] - timearray[0]))];
+        //     if (timesubarray[0]<first__timestep){
+        //         timesubarray[0] = first__timestep;
+        //         timesubarray[1] = new Date(+timesubarray[0] + (timearray[1] - timearray[0])*2)
+        //     }else if(timesubarray[1]>last_timestep) {
+        //         timesubarray[1] = last_timestep;
+        //         timesubarray[0] = new Date(+timesubarray[1] - (timearray[1] - timearray[0])*2)
+        //     }
+        //     let subaxis = d3.scaleTime().range(timesubarray.map(t=>scale(t))).domain(timesubarray);
+        //
+        //     let timearray_sub = _.differenceBy(subaxis.ticks(),timearray,multiFormat)
+        //
+        //     Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat).tickValues(timearray_sub));
+        //     Saxis.select('.domain').remove();
+        //     // let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
+        //     let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${xScale(subaxis(d))},0)`);
+        //     sticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).style('stroke-dasharray','1 3')
+        //     sticks.select('text').style('font-size',8)
+        // }
     }
     function updatelayerpath(p) {
         return p
