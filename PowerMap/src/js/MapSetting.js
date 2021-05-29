@@ -7,7 +7,7 @@ var Mapopt = {
 let MapSetting = function () {
     let graphicopt = {
         svg: '#Chartcontent',
-        margin: {top: 40, right: 10, bottom: 0, left: 20},
+        margin: {top: 40, right: 10, bottom: 0, left: 100},
         offset: {top: 0},
         width: 1500,
         height: 700,
@@ -398,7 +398,7 @@ let MapSetting = function () {
             });
         computersNode_n.append('text').attrs(
             {
-                'class': 'computeSig_label label',
+                'class': 'computeSig_label',
                 'opacity': 0,
                 'text-anchor': 'end',
                 'dx': -10,
@@ -1091,7 +1091,7 @@ let MapSetting = function () {
             .join('path')
             .attr('class', 'linegg')
             .call(updatelayerpath);
-        svg.selectAll('.computeSig_label.label').attr('transform', d=>{ debugger; return `translate(0,${scaleNode_y_middle(d.order)})`});
+        svg.selectAll('.computeSig_label').attr('transform', d=>{ debugger; return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`});
         updateaxis();
     }
     function updateaxis() {
