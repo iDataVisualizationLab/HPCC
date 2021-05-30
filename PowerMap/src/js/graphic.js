@@ -733,6 +733,7 @@ function drawColorLegend() {
                 subObject.graphicopt().display.stream.yScaleUp.domain([0,1-newThreshold]);
                 subObject.graphicopt().display.stream.yScaleDown.domain([-newThreshold,0]);
                 subObject.drawThreshold(newThreshold);
+                subObject.drawComp();
                 drawColorLegend();
                 updateProcess();
             },1);
