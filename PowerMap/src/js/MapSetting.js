@@ -137,7 +137,7 @@ let MapSetting = function () {
         let svdefs = svg.select('defsmain');
         if (svdefs.empty())
             svdefs = svg.append('defs').attr('id', 'defsmain');
-        if (svdefs.select('#userpic').empty())
+        if (svdefs.select('#userpic').empty()){
             svdefs.append('pattern')
                 .attrs({'id': 'userpic', width: '100%', height: '100%', 'patternContentUnits': 'objectBoundingBox'})
                 .append('image')
@@ -145,6 +145,14 @@ let MapSetting = function () {
                     'height': 1, width: 1, preserveAspectRatio: 'none',
                     'xmlns:xlink': 'http://www.w3.org/1999/xlink', 'xlink:href': 'src/images/u.png'
                 });
+            svdefs.append('pattern')
+                .attrs({'id': 'userpicNoBorder', width: '100%', height: '100%', 'patternContentUnits': 'objectBoundingBox'})
+                .append('image')
+                .attrs({
+                    'height': 1, width: 1, preserveAspectRatio: 'none',
+                    'xmlns:xlink': 'http://www.w3.org/1999/xlink', 'xlink:href': 'src/images/uNoBorder.png'
+                });
+        }
         zoomFunc = d3.zoom().on("zoom", () => {
             g.attr("transform", d3.event.transform);
         });
@@ -374,6 +382,7 @@ let MapSetting = function () {
     }
 
     function draw() {
+        updateProcess({percentage: 50, text: 'Rendering...'})
         yUpperScale = graphicopt.display.stream.yScaleUp;
         yDownerScale = graphicopt.display.stream.yScaleDown;
         yscale = d3.scaleLinear().domain([-1, Object.keys(scheme.data.users).length]).range([0, graphicopt.heightG()]);
@@ -520,7 +529,7 @@ let MapSetting = function () {
             {
                 'class': 'userNodeImg',
                 'r': graphicopt.user.r,
-                'fill': d => "url(#userpic)"
+                'fill': "url(#userpic)"
             });
 
         userNode_n.append('text').attrs(
@@ -529,14 +538,14 @@ let MapSetting = function () {
                 'dy': '0.25rem',
                 'x': graphicopt.user.r + 4,
                 // 'text-anchor':'middle',
-            });
-        userNode_n.append('text').attrs(
-            {
-                'class': 'userNodeSig_CollapseMode',
-                'dy': '0.25rem',
-                'x': -graphicopt.user.r - 10,
-                // 'text-anchor':'middle',
-            });
+            }) .style('pointer-events', 'all');
+        // userNode_n.append('text').attrs(
+        //     {
+        //         'class': 'userNodeSig_CollapseMode',
+        //         'dy': '0.25rem',
+        //         'x': -graphicopt.user.r - 10,
+        //         // 'text-anchor':'middle',
+        //     });
 
 
         userNode = nodeg.selectAll('.userNode');
@@ -552,10 +561,11 @@ let MapSetting = function () {
         userNode.select('.userNodeSig_label')
             .text(d => d.key);
 
-        userNode.select('.userNodeSig_CollapseMode')
-            .text(d => d.isOpen ? '-' : '+')
+        userNode.select('.userNodeImg')
+            .attr( 'fill', d=>d.isOpen?"url(#userpicNoBorder)":"url(#userpic)")
             .style('pointer-events', 'all')
             .on('click', (u) => {
+                event.stopPropagation();
                 if (u._currentjobs.length > 1) {
                     u.isOpen = !u.isOpen;
                     handleCollapseJobs(u);
@@ -864,7 +874,7 @@ let MapSetting = function () {
                         y: d.source.y2 === undefined ? d.source.y : d.source.y2,
                     },
                     target: {
-                        x: (d.target.x2 === undefined ? d.target.x : d.target.x2) - ((d.target.type === 'job') ? graphicopt.job.r : ((d.source.type === 'job') ? (graphicopt.user.r + 12) : 0)),
+                        x: (d.target.x2 === undefined ? d.target.x : d.target.x2) - ((d.target.type === 'job'||(d.source.type === 'job')) ? graphicopt.job.r : 0),
                         y: d.target.y2 === undefined ? d.target.y : d.target.y2,
                     }
                 });
@@ -1210,7 +1220,8 @@ let MapSetting = function () {
         let mticks = Maxis.selectAll('.tick');
         mticks
             // .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
-            .transition().duration(animation_time).attr('transform', d => `translate(${xScale(scale(d))},0)`);
+            // .transition().duration(animation_time)
+            .attr('transform', d => `translate(${xScale(scale(d))},0)`);
         mticks.select('text').attr('dy', '-0.5rem');
         mticks.select('line').attr("vector-effect", "non-scaling-stroke").style('stroke-width', 0.1).styles({
             'stroke': 'black',
