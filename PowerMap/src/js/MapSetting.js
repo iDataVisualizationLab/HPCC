@@ -778,8 +778,6 @@ let MapSetting = function () {
                 count ++;
                 console.log(j)
                 while(count < j.node_list.length){
-                    if (current.key==='cpu-23-33')
-                        console.log(current.key,nodeo[current.key].mse)
                     // find the lowest mse
                     let min = {value: Infinity,key:undefined};
                     Object.values(nodeo[current.key].mse).forEach(d=>{
@@ -788,8 +786,8 @@ let MapSetting = function () {
                         }
                         delete nodeo[d.key.key].mse[current.key];
                     });
-                    if (min.key.key==='cpu-24-1')
-                        debugger
+                    if (min.key ===undefined)
+                        min = {...Object.values(nodeo[current.key].mse)[0]}
                     current = min.key;
                     current.order = orders[count];
                     count ++;
