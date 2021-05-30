@@ -24,13 +24,13 @@ let MapSetting = function () {
         heightG: function () {
             return this.heightView() - this.margin.top - this.margin.bottom
         },
-        userPos: function(){
+        userPos: function () {
             return this.widthG() - 420;
         },
-        jobPos: function(){
+        jobPos: function () {
             return this.userPos() - 120;
         },
-        computePos: function(){
+        computePos: function () {
             return this.jobPos() - 120;
         },
         display: {
@@ -52,14 +52,14 @@ let MapSetting = function () {
         },
         userStreamMode: 'Power'
     };
-    let runopt = {mouse:{}};
+    let runopt = {mouse: {}};
     let scheme = {}, filterTerm = [];
     let animation_time = 2000;
     let svg = d3.select(graphicopt.svg), g, zoomFunc, linkg, nodeg, table_headerNode, freezing = false, textWarp = 200;
     ;
     let yscale = d3.scaleLinear().range([0, graphicopt.heightG()]), linkscale = d3.scaleSqrt().range([0.3, 2]);
     let xScale = d3.scaleLinear();
-    let drawThreshold = 650/800;
+    let drawThreshold = 650 / 800;
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
@@ -78,10 +78,10 @@ let MapSetting = function () {
             'Jobs': {id: 'Jobs', text: '#Jobs', type: 'num', x: 170, y: 20, width: 52},
         }
     };
-    let computers = [], users = [], jobs = [],jobsObj = {},
-    computersObj = {},
-    usersObj = {},
-    linkob = {},jobEmpty =false;
+    let computers = [], users = [], jobs = [], jobsObj = {},
+        computersObj = {},
+        usersObj = {},
+        linkob = {}, jobEmpty = false;
     let master = {};
     let isFirst = true;
     let catergogryList = [{key: 'user', value: {colororder: 0}}, {key: 'compute', value: {colororder: 1}}, {
@@ -273,9 +273,9 @@ let MapSetting = function () {
         tableData = {};
         if (scheme.filterTerm && scheme.filterTerm.length) {
             scheme.filterTerm.forEach(j => {
-                if (scheme.data.jobs[j]&&!scheme.data.jobs[j].isJobarray) {
+                if (scheme.data.jobs[j] && !scheme.data.jobs[j].isJobarray) {
                     const user_name = scheme.data.jobs[j].user_name;
-                    if (!usersObj[user_name]){
+                    if (!usersObj[user_name]) {
                         usersObj[user_name] = scheme.data.users[scheme.data.jobs[j].user_name];
                         usersObj[user_name].key = user_name;
                         usersObj[user_name].type = 'user';
@@ -298,11 +298,11 @@ let MapSetting = function () {
         debugger
         //group jobs
         users = d3.values(usersObj);
-        users.forEach(u=>{
-            if (u._currentjobs.length>10){
+        users.forEach(u => {
+            if (u._currentjobs.length > 10) {
                 u.isOpen = false;
                 handleCollapseJobs(u);
-            }else{
+            } else {
                 u.isOpen = true;
             }
         });
@@ -311,23 +311,26 @@ let MapSetting = function () {
         computers = d3.values(computersObj);
 
         linkdata = d3.values(linkob);
-        users.forEach((d,i) => {
+        users.forEach((d, i) => {
             tableData[d.key] = tableData[d.key] || [{key: 'Hosts', value: 0},
                 {key: 'Jobs', value: 0}];
             tableData[d.key][0].value = d.node.length;
             tableData[d.key][1].value = d.job.length;
             d.summary.forEach((s, i) => {
-                tableData[d.key][i+2] = {key: serviceFullList[i].text, value: Math.round((serviceFullList[i].range[1]-serviceFullList[i].range[0]) * s.mean+serviceFullList[i].range[0])};
+                tableData[d.key][i + 2] = {
+                    key: serviceFullList[i].text,
+                    value: Math.round((serviceFullList[i].range[1] - serviceFullList[i].range[0]) * s.mean + serviceFullList[i].range[0])
+                };
             });
             tableData[d.key].id = d.key;
             d.order = i
         })
     }
 
-    function handleCollapseJobs(u){
+    function handleCollapseJobs(u) {
         let user_name = u.key;
-        if (u.isOpen){
-            u._currentjobs.forEach(j=>{
+        if (u.isOpen) {
+            u._currentjobs.forEach(j => {
                 jobsObj[j] = scheme.data.jobs[j];
                 jobsObj[j].key = j;
                 jobsObj[j].type = 'job';
@@ -336,25 +339,25 @@ let MapSetting = function () {
                     linkob[comp + '|' + j] = {source: computersObj[comp], target: jobsObj[j]};
                 });
             });
-            const jobKey = u.key+'jobColapse';
+            const jobKey = u.key + 'jobColapse';
 
-            jobsObj[jobKey].node_list.forEach(comp=>{
-                delete linkob[comp + '|' + jobKey] ;
+            jobsObj[jobKey].node_list.forEach(comp => {
+                delete linkob[comp + '|' + jobKey];
             });
             delete jobsObj[jobKey];
             delete linkob[jobKey + '|' + user_name];
 
-        }else{
+        } else {
             let node_listO = {};
-            u._currentjobs.forEach(j=> {
+            u._currentjobs.forEach(j => {
                 delete jobsObj[j];
                 delete linkob[j + '|' + user_name];
-                scheme.data.jobs[j].node_list.forEach(comp=>{
+                scheme.data.jobs[j].node_list.forEach(comp => {
                     node_listO[comp] = true;
-                    delete linkob[comp + '|' + j] ;
+                    delete linkob[comp + '|' + j];
                 });
             });
-            const jobKey = u.key+'jobColapse';
+            const jobKey = u.key + 'jobColapse';
             jobsObj[jobKey] = {};
             jobsObj[jobKey].user_name = u.key;
             jobsObj[jobKey].node_list = Object.keys(node_listO);
@@ -362,7 +365,7 @@ let MapSetting = function () {
             jobsObj[jobKey].type = 'job';
             jobsObj[jobKey].isjobColapse = true;
             linkob[jobKey + '|' + user_name] = {source: jobsObj[jobKey], target: usersObj[u.key]};
-            jobsObj[jobKey].node_list.forEach(comp=>{
+            jobsObj[jobKey].node_list.forEach(comp => {
                 linkob[comp + '|' + jobKey] = {source: computersObj[comp], target: jobsObj[jobKey]};
             })
         }
@@ -424,12 +427,12 @@ let MapSetting = function () {
         //job node
         if (jobs.length) {
             g.select('.job_title').classed('hide', false);
-            let timerange = [d3.min(jobs, d => d.submit_time?new Date(d.submit_time):undefined), new Date(+scheme.limitTime[1])];
+            let timerange = [d3.min(jobs, d => d.submit_time ? new Date(d.submit_time) : undefined), new Date(+scheme.limitTime[1])];
             timerange[0] = new Date(timerange[0].toDateString());
             timerange[1].setDate(timerange[1].getDate() + 1);
             timerange[1] = new Date(timerange[1].toDateString());
             let time_daynum = d3.timeDay.every(1).range(timerange[0], timerange[1]).length;
-            console.log(timerange,time_daynum)
+            console.log(timerange, time_daynum)
             var radius = d3.scaleTime()
                 .domain(timerange)
                 .range([graphicopt.job.r_inside, graphicopt.job.r]);
@@ -482,11 +485,12 @@ let MapSetting = function () {
         jobNode = nodeg.selectAll('.jobNode');
         jobNode.select('.computeSig_b').attr('r', graphicopt.job.r);
         jobNode.select('.computeSig_sub.submitTime').attr('d', function (d) {
-            if (!d.isjobColapse){
-            let temp = d3.timeHour.every(1).range(new Date(d.submit_time), new Date(d.start_time));
-            temp.pop();
-            temp.push(new Date(d.start_time));
-            return spiral(temp);}
+            if (!d.isjobColapse) {
+                let temp = d3.timeHour.every(1).range(new Date(d.submit_time), new Date(d.start_time));
+                temp.pop();
+                temp.push(new Date(d.start_time));
+                return spiral(temp);
+            }
             return '';
         })
         ;
@@ -500,7 +504,7 @@ let MapSetting = function () {
         jobNode.select('.lelftext').text(d => `#Computes: ${d.node_list.length}`)
         jobNode.select('.righttext').text(d => d.values ? `#Jobs: ${d.values.length}` : '')
 
-        jobNode.selectAll('path').style('stroke','black').style('stroke-width', d => d.values ? Jobscale(d.values.length) : 1.5);
+        jobNode.selectAll('path').style('stroke', 'black').style('stroke-width', d => d.values ? Jobscale(d.values.length) : 1.5);
 
         // user node
         let userNode = nodeg.selectAll('.userNode').data(users, d => d.key);
@@ -549,10 +553,10 @@ let MapSetting = function () {
             .text(d => d.key);
 
         userNode.select('.userNodeSig_CollapseMode')
-            .text(d => d.isOpen? '-':'+')
-            .style('pointer-events','all')
-            .on('click',(u)=>{
-                if (u._currentjobs.length>1){
+            .text(d => d.isOpen ? '-' : '+')
+            .style('pointer-events', 'all')
+            .on('click', (u) => {
+                if (u._currentjobs.length > 1) {
                     u.isOpen = !u.isOpen;
                     handleCollapseJobs(u);
                     draw();
@@ -590,8 +594,8 @@ let MapSetting = function () {
         let link_n = link.enter()
             .append('g')
             .attr("class", "links")
-            .attr('stroke','black')
-            .attr('fill','none');
+            .attr('stroke', 'black')
+            .attr('fill', 'none');
         link_n
             .append('path');
         link_n
@@ -646,15 +650,15 @@ let MapSetting = function () {
                 g.selectAll('.jobNode:not(.highlight)').classed('hide', true);
                 g.selectAll('.userNode:not(.highlight)').classed('fade', true);
                 // table_footerNode.classed('fade', true);
-                master.mouseover.forEach(f=>f(d.values_name));
+                master.mouseover.forEach(f => f(d.values_name));
             }, null], [function (d) {
-                    d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, true);
-                    g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                    g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
-                    g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
-                    link.classed('hide', false).classed('highlight', false);
-                    // table_footerNode.classed('fade', false);
-                master.mouseout.forEach(f=>f(d.values_name));
+                d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, true);
+                g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
+                g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                link.classed('hide', false).classed('highlight', false);
+                // table_footerNode.classed('fade', false);
+                master.mouseout.forEach(f => f(d.values_name));
             }, null]));
         g.selectAll('.jobNode')
             .call(path => freezinghandle(path, [function (d) {
@@ -686,28 +690,28 @@ let MapSetting = function () {
         return master;
     }
 
-    function freezinghandle(path,mouseOver,mouseLeave){
-        path.on('click',function(d){
-            if(runopt.mouse.disable){
-                if(!freezing)
-                    _.bind(mouseOver[0],this)(d);
+    function freezinghandle(path, mouseOver, mouseLeave) {
+        path.on('click', function (d) {
+            if (runopt.mouse.disable) {
+                if (!freezing)
+                    _.bind(mouseOver[0], this)(d);
                 else
-                    _.bind(mouseLeave[0],this)(d);
+                    _.bind(mouseLeave[0], this)(d);
             }
             freezing = !freezing;
             if (freezing)
-                g.selectAll('.node:not(.highlight)').style('pointer-events','none'); // disable all click event
+                g.selectAll('.node:not(.highlight)').style('pointer-events', 'none'); // disable all click event
             else
-                g.selectAll('.node:not(.highlight)').style('pointer-events','auto');
-            d3.select('.tippannel').select('.freezing').text(freezing?'unfreeze':'freeze')
+                g.selectAll('.node:not(.highlight)').style('pointer-events', 'auto');
+            d3.select('.tippannel').select('.freezing').text(freezing ? 'unfreeze' : 'freeze')
         });
         if (!freezing) {
-            path.on('mouseover', function(d){
-                if(!freezing && !runopt.mouse.disable)
-                    _.bind(mouseOver[0],this)(d);
-            }).on('mouseleave',function(d){
-                if(!freezing && !runopt.mouse.disable)
-                    _.bind(mouseLeave[0],this)(d);
+            path.on('mouseover', function (d) {
+                if (!freezing && !runopt.mouse.disable)
+                    _.bind(mouseOver[0], this)(d);
+            }).on('mouseleave', function (d) {
+                if (!freezing && !runopt.mouse.disable)
+                    _.bind(mouseLeave[0], this)(d);
             });
         }
         return path;
@@ -717,7 +721,7 @@ let MapSetting = function () {
         // if (runopt.compute.type==='timeline' &&  !runopt.compute.bundle && runopt.overlayjob)
         //     jobNode.data().sort((a, b) => new Date(a.startTime) - new Date(b.startTime)).forEach((d, i) => d.order = i);
         // else
-        jobNode.data().sort((a, b) => scheme.data.users[a.user_name].order - scheme.data.users[b.user_name].order).forEach((d, i) => d.order = i);
+        jobs.sort((a, b) => usersObj[a.user_name].order - usersObj[b.user_name].order).forEach((d, i) => d.order = i);
         g.selectAll('.jobNode.new').classed('new', false).attr('transform', d => {
             d.x2 = graphicopt.jobPos();
             d.y = scaleJob(d.order);
@@ -730,58 +734,119 @@ let MapSetting = function () {
         }).style('opacity', undefined);
 
 
+        let temp_link = link.data().filter(d => d.target.type === 'job');
 
-            let temp_link = link.data().filter(d => d.target.type === 'job');
+        debugger
+        computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.key === d.key), f => f.target.y));
+        computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+        jobs.forEach(j=>{
+            if (j.node_list.length>2){
+                let nodeo = {};
+                let min = {value: Infinity,key:undefined};
+                let orders = [];
+                for (let i=0; i<j.node_list.length; i++){
+                    orders.push(computersObj[j.node_list[i]].order);
+                    nodeo[j.node_list[i]] = {el:computersObj[j.node_list[i]],mse:{},min:{value: Infinity,key:undefined}};
+                }
+                orders.sort((a,b)=>a-b);
+                for (let i=0; i<j.node_list.length-1; i++){
+                    for (let z=i+1; z<j.node_list.length; z++){
+                        let mse = d3.mean(scheme.data.tsnedata[j.node_list[i]].map((d,ti)=>(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])*(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])));
+                        nodeo[j.node_list[i]].mse[j.node_list[z]] = {key: computersObj[j.node_list[z]], value: mse};
+                        if (mse< nodeo[j.node_list[i]].min.value){
+                            nodeo[j.node_list[i]].min.value = mse;
+                            nodeo[j.node_list[i]].min.key = computersObj[j.node_list[z]];
+                            if (mse< min.value){
+                                min.value = mse;
+                                min.key = computersObj[j.node_list[i]];
+                            }
+                        }
+                        nodeo[j.node_list[z]].mse[j.node_list[i]] = {key: computersObj[j.node_list[i]], value: mse};
+                        if (mse< nodeo[j.node_list[i]].min.value){
+                            nodeo[j.node_list[z]].min.value = mse;
+                            nodeo[j.node_list[z]].min.key = computersObj[j.node_list[i]];
+                            if (mse< min.value){
+                                min.value = mse;
+                                min.key = computersObj[j.node_list[z]];
+                            }
+                        }
+                    }
+                }
+                let current = min.key;
+                let count = 0;
+                current.order = orders[count];
+                count ++;
+                console.log(j)
+                while(count < j.node_list.length-1){
+                    console.log(current.key,current.order)
+                    // find the lowest mse
+                    let min = {value: Infinity,key:undefined};
+                    Object.values(nodeo[current.key].mse).forEach(d=>{
+                        if (d.value< min.value){
+                            min = {...d};
+                        }
+                        delete nodeo[d.key.key].mse[current.key];
+                    });
 
-                computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.key === d.key), f => f.target.y));
-                    computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
+                    current = min.key;
+                    current.order = orders[count];
+                    count ++;
+                }
+
+            }
+        });
 
 
-            g.select('.host_title').attrs({'text-anchor': "end", 'x':  graphicopt.computePos(), 'dy': -20}).text("Hosts's timeline");
-            scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
+        g.select('.host_title').attrs({
+            'text-anchor': "end",
+            'x': graphicopt.computePos(),
+            'dy': -20
+        }).text("Hosts's timeline");
+        scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
 
-            g.selectAll('.computeNode.new').classed('new', false).attr('transform', d => {
-                d.x2 =  graphicopt.computePos();
-                d.y2 = scaleNode_y_middle(d.order);
-                // return `translate(${d.x2},${d.y2 || d.y})`
-                return `translate(${d.x2},0)`
-            }).style('opacity', 0);
-            computers.transition().duration(animation_time).attr('transform', d => {
-                d.x2 =  graphicopt.computePos();
-                d.y2 = scaleNode_y_middle(d.order);
-                // return `translate(${d.x2},${d.y2 || d.y})`
-                return `translate(${d.x2},0)`
-            }).style('opacity', undefined);
+        g.selectAll('.computeNode.new').classed('new', false).attr('transform', d => {
+            d.x2 = graphicopt.computePos();
+            d.y2 = scaleNode_y_middle(d.order);
+            // return `translate(${d.x2},${d.y2 || d.y})`
+            return `translate(${d.x2},0)`
+        }).style('opacity', 0);
+        computers.transition().duration(animation_time).attr('transform', d => {
+            d.x2 = graphicopt.computePos();
+            d.y2 = scaleNode_y_middle(d.order);
+            // return `translate(${d.x2},${d.y2 || d.y})`
+            return `translate(${d.x2},0)`
+        }).style('opacity', undefined);
 
         link.transition().duration(animation_time)
             .call(updatelink);
     }
 
     let linkHorizontal = d3.linkHorizontal()
-        .x(function(d) {
+        .x(function (d) {
             return d.x;
         })
-        .y(function(d) {
+        .y(function (d) {
             return d.y;
         });
 
-    function updatelink (path,transition){
-        (transition?path.select('path').transition().duration(animation_time):path.select('path'))
-            .attr("d", d=>{
+    function updatelink(path, transition) {
+        (transition ? path.select('path').transition().duration(animation_time) : path.select('path'))
+            .attr("d", d => {
                 return linkHorizontal({
                     source: {
-                        x: (d.source.x2===undefined?d.source.y: d.source.x2)+ (d.source.type==='job'?graphicopt.job.r:0),
-                        y: d.source.y2===undefined?d.source.y: d.source.y2,
+                        x: (d.source.x2 === undefined ? d.source.y : d.source.x2) + (d.source.type === 'job' ? graphicopt.job.r : 0),
+                        y: d.source.y2 === undefined ? d.source.y : d.source.y2,
                     },
                     target: {
-                        x: (d.target.x2===undefined?d.target.x: d.target.x2) - ((d.target.type==='job')?graphicopt.job.r:((d.source.type==='job')?(graphicopt.user.r+12):0)),
-                        y: d.target.y2===undefined?d.target.y: d.target.y2,
-                    }});
+                        x: (d.target.x2 === undefined ? d.target.x : d.target.x2) - ((d.target.type === 'job') ? graphicopt.job.r : ((d.source.type === 'job') ? (graphicopt.user.r + 12) : 0)),
+                        y: d.target.y2 === undefined ? d.target.y : d.target.y2,
+                    }
+                });
             });
-        path.select('text').attr("transform", function(d) {
+        path.select('text').attr("transform", function (d) {
             return "translate(" +
-                (((d.source.x2 || d.source.x) + (d.target.x2 || d.target.x))/2) + "," +
-                (((d.source.y2===undefined?d.source.y: d.source.y2) + (d.target.y2===undefined?d.target.y: d.target.y2))/2) + ")";
+                (((d.source.x2 || d.source.x) + (d.target.x2 || d.target.x)) / 2) + "," +
+                (((d.source.y2 === undefined ? d.source.y : d.source.y2) + (d.target.y2 === undefined ? d.target.y : d.target.y2)) / 2) + ")";
         })
         return path;
     }
@@ -819,10 +884,10 @@ let MapSetting = function () {
         cells.exit().remove();
 
         let cellsText = cells
-        let cells_n = cells.enter().append('g').attr('class', d =>'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+(d.key!=='UserID'?tableLayout.column[d.key].width:0)},${tableLayout.column[d.key].y})`);
+        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x + (d.key !== 'UserID' ? tableLayout.column[d.key].width : 0)},${tableLayout.column[d.key].y})`);
         let cellsText_n = cells_n//.filter(d => tableLayout.column[d.key].type !== 'graph');
         cellsText_n.append('text')
-            .style('text-anchor',d=>d.key!=='UserID'?'end':'start');
+            .style('text-anchor', d => d.key !== 'UserID' ? 'end' : 'start');
         cellsText = cellsText_n.merge(cellsText).select('text').text(d => {
             let custom = tableLayout.column[d.key].format;
             if (custom)
@@ -868,42 +933,43 @@ let MapSetting = function () {
         //     table_footer(nodeg.select('.table.footer'));
         // }
     }
-    function handle_sort(disableLinkSort,skiprender) {
-        if(tableHeader.currentsort!==undefined)
-        //     users.sort((a, b) => b.values.length - a.values.length);
-        // else
+
+    function handle_sort(disableLinkSort, skiprender) {
+        if (tableHeader.currentsort !== undefined)
+            //     users.sort((a, b) => b.values.length - a.values.length);
+            // else
             switch (tableHeader.currentsort) {
                 case 'Job_startTime':
-                    user.forEach(u=>u.jobStart_order=[]);
+                    user.forEach(u => u.jobStart_order = []);
                     let temp_link = linkdata.filter(d => d.target.type === 'job');
                     g.selectAll('.computeNode').data().forEach(d => {
                         let temp = temp_link.filter(e => e.source.key === d.key);
-                        d.order = d3.max(temp,e=>+new Date(e.target.startTime))||0;
-                        if (temp.length){
-                            temp.forEach(t=>user.find(u=>u.key===t.target.user).jobStart_order.push(d.order));
+                        d.order = d3.max(temp, e => +new Date(e.target.startTime)) || 0;
+                        if (temp.length) {
+                            temp.forEach(t => user.find(u => u.key === t.target.user).jobStart_order.push(d.order));
                         }
                     });
-                    g.selectAll('.computeNode').data().sort((a, b) => a.order - b.order).forEach((d, i) => (d.order = i,d.values_name.forEach(h=>hostOb[h].order=i)));
+                    g.selectAll('.computeNode').data().sort((a, b) => a.order - b.order).forEach((d, i) => (d.order = i, d.values_name.forEach(h => hostOb[h].order = i)));
                     // user.sort((a, b) => );
-                    user.forEach(u=>u.jobStart_order=_.mean(u.jobStart_order));
-                    user.sort((a,b)=>a.jobStart_order-b.jobStart_order);
+                    user.forEach(u => u.jobStart_order = _.mean(u.jobStart_order));
+                    user.sort((a, b) => a.jobStart_order - b.jobStart_order);
                     break;
                 case 'UserID':
-                    user.sort((a, b) => a.key.localeCompare(b.key)*(-1+2*tableHeader.direction));
+                    user.sort((a, b) => a.key.localeCompare(b.key) * (-1 + 2 * tableHeader.direction));
                     break;
                 case 'Hosts':
-                    user.sort((a, b) => (b.unqinode.length - a.unqinode.length)*(-1+2*tableHeader.direction));
+                    user.sort((a, b) => (b.unqinode.length - a.unqinode.length) * (-1 + 2 * tableHeader.direction));
                     break;
                 case 'Jobs':
-                    user.sort((a, b) => (b.values.length - a.values.length)*(-1+2*tableHeader.direction));
+                    user.sort((a, b) => (b.values.length - a.values.length) * (-1 + 2 * tableHeader.direction));
                     break;
                 case 'PowerUsage':
-                    var indexf = tableHeader.findIndex(d=>d.key===tableHeader.currentsort)-1;
-                    user.sort((a, b) => ((tableData[b.key][indexf]||{value:-Infinity}).value - (tableData[a.key][indexf]||{value:-Infinity}).value)*(-1+2*tableHeader.direction));
+                    var indexf = tableHeader.findIndex(d => d.key === tableHeader.currentsort) - 1;
+                    user.sort((a, b) => ((tableData[b.key][indexf] || {value: -Infinity}).value - (tableData[a.key][indexf] || {value: -Infinity}).value) * (-1 + 2 * tableHeader.direction));
                     break;
                 default:
-                    var indexf = tableHeader.findIndex(d=>d.key===tableHeader.currentsort)-1;
-                    user.sort((a, b) => ((tableData[b.key][indexf]||{value:{median:-Infinity}}).value.median - (tableData[a.key][indexf]||{value:{median:-Infinity}}).value.median)*(-1+2*tableHeader.direction));
+                    var indexf = tableHeader.findIndex(d => d.key === tableHeader.currentsort) - 1;
+                    user.sort((a, b) => ((tableData[b.key][indexf] || {value: {median: -Infinity}}).value.median - (tableData[a.key][indexf] || {value: {median: -Infinity}}).value.median) * (-1 + 2 * tableHeader.direction));
                     break;
             }
         users.forEach((d, i) => {
@@ -924,19 +990,19 @@ let MapSetting = function () {
             // order by links
             users.sort((a, b) => a.orderlink - b.orderlink).forEach((d, i) => d.order = i);
         }
-        g.selectAll('.userNode.new').classed('new',false).attr('transform',d=>{
-            d.fy=yscale(d.order);
-            d.fx=graphicopt.userPos();
-            d.y=d.fy;
-            d.x=d.fx;
+        g.selectAll('.userNode.new').classed('new', false).attr('transform', d => {
+            d.fy = yscale(d.order);
+            d.fx = graphicopt.userPos();
+            d.y = d.fy;
+            d.x = d.fx;
             return `translate(${d.fx},${d.fy})`
         });
         g.selectAll('.userNode').transition().duration(animation_time)
-            .attr('transform',d=>{
-                d.fy=yscale(d.order);
-                d.fx=graphicopt.userPos();
-                d.y=d.fy;
-                d.x=d.fx;
+            .attr('transform', d => {
+                d.fy = yscale(d.order);
+                d.fx = graphicopt.userPos();
+                d.y = d.fy;
+                d.x = d.fx;
                 return `translate(${d.fx},${d.fy})`
             });
         if (!skiprender) {
@@ -944,12 +1010,15 @@ let MapSetting = function () {
             master.drawComp();
         }
     }
+
     master.drawThreshold = function (_) {
         // return arguments.length ? (drawThreshold = _, timeArc.updateDrawData(), timeArc) : drawThreshold;
-        return arguments.length ? (drawThreshold = _,  master) : drawThreshold;
+        return arguments.length ? (drawThreshold = _, master) : drawThreshold;
     };
-    master.drawComp = function(){
-        computers.map(d=>{d.drawData = getDrawData(scheme.data.tsnedata[d.key])});
+    master.drawComp = function () {
+        computers.map(d => {
+            d.drawData = getDrawData(scheme.data.tsnedata[d.key])
+        });
         drawEmbedding_timeline();
         return master;
     }
@@ -959,10 +1028,10 @@ let MapSetting = function () {
             return xScale(d.timestep);
         })
         .y0(function (d) {
-            return - yUpperScale(d.value[0]);
+            return -yUpperScale(d.value[0]);
         })
         .y1(function (d) {
-            return - yUpperScale(d.value[1]);
+            return -yUpperScale(d.value[1]);
         })
         .defined(function (d) {
             return d && d.value[0] !== undefined
@@ -973,14 +1042,15 @@ let MapSetting = function () {
             return xScale(d.timestep);
         })
         .y0(function (d) {
-            return - yDownerScale(d.value[0]);
+            return -yDownerScale(d.value[0]);
         })
         .y1(function (d) {
-            return - yDownerScale(d.value[1]);
+            return -yDownerScale(d.value[1]);
         })
         .defined(function (d) {
             return d && d.value[0] !== undefined
         });
+
     function getDrawData(n) {
         if (graphicopt.minMaxStream) {
             n.noneSymetric = true;
@@ -989,7 +1059,7 @@ let MapSetting = function () {
                     if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                         return {...d, value: [undefined, undefined]};
                     return {...d, value: [d[serviceSelected], d.value[2]]};
-                }), color:  "rgb(252, 141, 89)",
+                }), color: "rgb(252, 141, 89)",
                 up: true
             },
                 {
@@ -1082,36 +1152,47 @@ let MapSetting = function () {
             return drawData;
         }
     }
+
     function drawEmbedding_timeline() {
-        debugger
-        let bg = svg.selectAll('.computeSig').attr('transform', d=>{ debugger; return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`});
+        let bg = svg.selectAll('.computeSig').attr('transform', d => {
+            if(d.key==="cpu-23-30")
+                console.log(d.key,d.order,scaleNode_y_middle(d.order))
+            return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
+        });
         let layerpath = bg.selectAll('path.linegg')
-            .data(d=>d.drawData)
+            .data(d => d.drawData)
             .join('path')
             .attr('class', 'linegg')
             .call(updatelayerpath);
-        svg.selectAll('.computeSig_label').attr('transform', d=>{ debugger; return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`});
+        svg.selectAll('.computeSig_label').attr('transform', d => {
+            return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
+        });
         updateaxis();
     }
+
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
-        let rangey = d3.extent(bg.data(),d=>d.y2===undefined?d.y:d.y2);
+        let rangey = d3.extent(bg.data(), d => d.y2 === undefined ? d.y : d.y2);
         let scale = d3.scaleTime().range(xScale.domain()).domain(scheme.limitTime);
 
         let axis = svg.select('.gNodeaxis')
-            .classed('hide',false)
-            .attr('transform',`translate(${(bg.datum().x2||bg.datum().x )-graphicopt.computePos() },${rangey[0]})`);
+            .classed('hide', false)
+            .attr('transform', `translate(${(bg.datum().x2 || bg.datum().x) - graphicopt.computePos()},${rangey[0]})`);
         let Maxis = axis.select('.gMainaxis')
-            .call(d3.axisTop(scale).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat));
+            .call(d3.axisTop(scale).tickSize(rangey[0] - rangey[1]).tickFormat(multiFormat));
         Maxis.select('.domain').remove();
-        let mticks =Maxis.selectAll('.tick');
+        let mticks = Maxis.selectAll('.tick');
         mticks
             // .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
-            .transition().duration(animation_time).attr('transform',d=>`translate(${xScale(scale(d))},0)`);
-        mticks.select('text').attr('dy','-0.5rem');
-        mticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).styles({'stroke':'black','stroke-width':0.2,'stroke-dasharray':'1'})
+            .transition().duration(animation_time).attr('transform', d => `translate(${xScale(scale(d))},0)`);
+        mticks.select('text').attr('dy', '-0.5rem');
+        mticks.select('line').attr("vector-effect", "non-scaling-stroke").style('stroke-width', 0.1).styles({
+            'stroke': 'black',
+            'stroke-width': 0.2,
+            'stroke-dasharray': '1'
+        })
 
-        let Saxis = axis.select('.gSubaxis').classed('hide',true);
+        let Saxis = axis.select('.gSubaxis').classed('hide', true);
         // if (fisheye_scale.x.focus) {
         //     const timearray = scale.ticks();
         //     Saxis.classed('hide',false);
@@ -1136,6 +1217,7 @@ let MapSetting = function () {
         //     sticks.select('text').style('font-size',8)
         // }
     }
+
     function updatelayerpath(p) {
         return p
             .style('fill', d => d.color || 'unset')
@@ -1146,9 +1228,11 @@ let MapSetting = function () {
                     return d.up ? area_compute_up(d.value) : area_compute_down(d.value);
             });
     }
-    master.currentSelected = function (){
-        return {computers,users,jobs:filterTerm.map(j=>scheme.data.jobs[j])}
+
+    master.currentSelected = function () {
+        return {computers, users, jobs: filterTerm.map(j => scheme.data.jobs[j])}
     }
+
     function computeUsermetric() {
         // let timescale = d3.scaleTime().range([0,maxTimestep-1]).domain([first__timestep,last_timestep]);
         // let index_power = schema.indexOf(schema.find(d=>d.text==="Power consumption"));
@@ -1217,9 +1301,9 @@ let MapSetting = function () {
         let cells = rows_n.merge(rows).selectAll('.cell').data(d => d);
         cells.exit().remove();
 
-        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x+(d.key!=='UserID'?tableLayout.column[d.key].width/2:0)},20)`);
+        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x + (d.key !== 'UserID' ? tableLayout.column[d.key].width / 2 : 0)},20)`);
         cells_n.append('text')
-            .styles({'font-weight': 'bold','text-anchor': d=>d.key !=='UserID'?'middle':'start'}).attrs(d => {
+            .styles({'font-weight': 'bold', 'text-anchor': d => d.key !== 'UserID' ? 'middle' : 'start'}).attrs(d => {
             return {width: tableLayout.column[d.key].width}
         });
         cells = cells_n.merge(cells);
@@ -1256,26 +1340,36 @@ let MapSetting = function () {
         // })
 
     }
-    function updateLayout(data){
+
+    function updateLayout(data) {
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
-        tableHeader = [{key:'UserID', value:'UserID'},{key:'Hosts', value:'#Computes'}, {key:'Jobs',value: '#Jobs'}];
-        tableLayout.column={
-            'UserID': {id:'UserID',type:'text',x: 10,y:20,width:60},
-            'Hosts': {id:'Hosts',text:'#Computes',type:'num',x: 60,y:20,width:60},
-            'Jobs': {id:'Jobs',text:'#Jobs',type:'num',x: 135,y:20,width:30},
+        tableHeader = [{key: 'UserID', value: 'UserID'}, {key: 'Hosts', value: '#Computes'}, {
+            key: 'Jobs',
+            value: '#Jobs'
+        }];
+        tableLayout.column = {
+            'UserID': {id: 'UserID', type: 'text', x: 10, y: 20, width: 60},
+            'Hosts': {id: 'Hosts', text: '#Computes', type: 'num', x: 60, y: 20, width: 60},
+            'Jobs': {id: 'Jobs', text: '#Jobs', type: 'num', x: 135, y: 20, width: 30},
         }
-        let offset = tableLayout.column['Jobs'].x+tableLayout.column['Jobs'].width;
+        let offset = tableLayout.column['Jobs'].x + tableLayout.column['Jobs'].width;
         let padding = 15;
         // if (showtable)
-        serviceFullList.forEach((d,i)=>{
-                tableLayout.column[d.text] = {id:d.text,type: 'graph' ,x: offset+(i)*tableLayout.row["graph-width"]+padding,y:20,width:tableLayout.row["graph-width"]};
-                tableLayout.row.width = offset+(i)*(tableLayout.row["graph-width"]+padding);
-                tableHeader.push({key:d.text, value:d.text});
-            });
+        serviceFullList.forEach((d, i) => {
+            tableLayout.column[d.text] = {
+                id: d.text,
+                type: 'graph',
+                x: offset + (i) * tableLayout.row["graph-width"] + padding,
+                y: 20,
+                width: tableLayout.row["graph-width"]
+            };
+            tableLayout.row.width = offset + (i) * (tableLayout.row["graph-width"] + padding);
+            tableHeader.push({key: d.text, value: d.text});
+        });
         // else
         //     tableLayout.row.width = offset+tableLayout.row["graph-width"]+padding;
-        tableLayout.row.width +=tableLayout.row["graph-width"];
+        tableLayout.row.width += tableLayout.row["graph-width"];
         // tableLayout.column['PowerUsage'] = {id:'PowerUsage',type: 'num',format:'.1f' ,x: tableLayout.row.width,y:20,width:70};
         // tableHeader.push({key:'PowerUsage', value:'power'});
         tableHeader.currentsort = currentsort;
@@ -1283,6 +1377,7 @@ let MapSetting = function () {
 
         table_header(table_headerNode);
     }
+
     master.filterTerms = function (_) {
         return arguments.length ? (filterTerm = _, master) : filterTerm;
     };
@@ -1311,7 +1406,7 @@ let MapSetting = function () {
                     scheme[i] = __[i];
                 }
             }
-            xScale = d3.scaleLinear().domain([0,__.data.timespan.length-1]).range([0,graphicopt.computePos()]);
+            xScale = d3.scaleLinear().domain([0, __.data.timespan.length - 1]).range([0, graphicopt.computePos()]);
             updateLayout();
             return master;
         } else {
