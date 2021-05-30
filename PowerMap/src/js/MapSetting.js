@@ -609,8 +609,11 @@ let MapSetting = function () {
         link.select('path')
             // .attr("stroke", d => colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
-                return d.links === undefined ? 1 : linkscale(d.links);
-            });
+                return .3;
+            }).style("stroke-opacity",0.7)
+            // .style("stroke-width", function (d) {
+            //     return d.links === undefined ? 1 : linkscale(d.links);
+            // });
 
         // reset freezing action
         freezing = false;
@@ -762,14 +765,14 @@ let MapSetting = function () {
             if (node_list.length>2){
                 let nodeo = {};
                 let min = {value: Infinity,key:undefined};
-                let orders = [];
+
                 for (let i=0; i<node_list.length; i++){
-                    orders.push(computersObj[node_list[i]].order);
+
                     nodeo[node_list[i]] = {el:computersObj[node_list[i]],mse:{},min:{value: Infinity,key:undefined}};
                     checkComp[node_list[i]] = true;
                     checkCompNum++;
                 }
-                orders.sort((a,b)=>a-b);
+
                 for (let i=0; i<node_list.length-1; i++){
                     for (let z=i+1; z<node_list.length; z++){
                         let mse = d3.mean(scheme.data.tsnedata[node_list[i]].map((d,ti)=>Math.pow(d[serviceSelected]-scheme.data.tsnedata[node_list[z]][ti][serviceSelected],2)));
@@ -795,7 +798,8 @@ let MapSetting = function () {
                 }
                 let current = min.key;
                 let count = 0;
-                current.order = orders[count];
+                current.order = computeCount;
+                computeCount+=0.5;
                 count ++;
                 while(count < node_list.length){
                     // find the lowest mse
@@ -809,10 +813,11 @@ let MapSetting = function () {
                     if (min.key ===undefined)
                         min = {...Object.values(nodeo[current.key].mse)[0]}
                     current = min.key;
-                    current.order = orders[count];
+                    current.order = computeCount;
+                    computeCount+=0.5;
                     count ++;
                 }
-
+                computeCount+=1;
             }
             return checkCompNum===computerNum;
         });
