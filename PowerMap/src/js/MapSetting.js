@@ -721,7 +721,18 @@ let MapSetting = function () {
         // if (runopt.compute.type==='timeline' &&  !runopt.compute.bundle && runopt.overlayjob)
         //     jobNode.data().sort((a, b) => new Date(a.startTime) - new Date(b.startTime)).forEach((d, i) => d.order = i);
         // else
-        jobs.sort((a, b) => usersObj[a.user_name].order - usersObj[b.user_name].order).forEach((d, i) => d.order = i);
+        jobs.sort((a, b) => usersObj[a.user_name].order - usersObj[b.user_name].order);
+        let jobCount = 0;
+        let jobNum = jobs.length;
+        jobs.forEach((d,i) => {
+            d.order = jobCount;
+            jobCount+=0.5;
+            if (i<jobNum-2){
+                if (jobs[i+1].user_name!==d.user_name)
+                    jobCount+=1;
+            }
+        });
+        scaleJob.domain([0,jobCount])
         g.selectAll('.jobNode.new').classed('new', false).attr('transform', d => {
             d.x2 = graphicopt.jobPos();
             d.y = scaleJob(d.order);
@@ -737,37 +748,47 @@ let MapSetting = function () {
         let temp_link = link.data().filter(d => d.target.type === 'job');
 
         debugger
-        computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.key === d.key), f => f.target.y));
-        computers.data().sort((a, b) => a.y - b.y).forEach((d, i) => d.order = i);
-        jobs.forEach(j=>{
-            if (j.node_list.length>2){
+        // computers.data().forEach(d => d.y = d3.mean(temp_link.filter(e => e.source.key === d.key), f => f.target.y));
+        computers.data().forEach(d => d.y = d3.min(temp_link.filter(e => e.source.key === d.key), f => f.target.y));
+        let comps = computers.data().sort((a, b) => a.y - b.y);
+        comps.forEach((d, i) => d.order = i);
+
+        let checkComp = {};
+        let checkCompNum= 0;
+        let computerNum = comps.length;
+        let computeCount = 0;
+        jobs.find(j=>{
+            let node_list = j.node_list.filter(comp=>!checkComp[comp]);
+            if (node_list.length>2){
                 let nodeo = {};
                 let min = {value: Infinity,key:undefined};
                 let orders = [];
-                for (let i=0; i<j.node_list.length; i++){
-                    orders.push(computersObj[j.node_list[i]].order);
-                    nodeo[j.node_list[i]] = {el:computersObj[j.node_list[i]],mse:{},min:{value: Infinity,key:undefined}};
+                for (let i=0; i<node_list.length; i++){
+                    orders.push(computersObj[node_list[i]].order);
+                    nodeo[node_list[i]] = {el:computersObj[node_list[i]],mse:{},min:{value: Infinity,key:undefined}};
+                    checkComp[node_list[i]] = true;
+                    checkCompNum++;
                 }
                 orders.sort((a,b)=>a-b);
-                for (let i=0; i<j.node_list.length-1; i++){
-                    for (let z=i+1; z<j.node_list.length; z++){
-                        let mse = d3.mean(scheme.data.tsnedata[j.node_list[i]].map((d,ti)=>Math.abs(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])));
-                        nodeo[j.node_list[i]].mse[j.node_list[z]] = {key: computersObj[j.node_list[z]], value: mse};
-                        if (mse< nodeo[j.node_list[i]].min.value){
-                            nodeo[j.node_list[i]].min.value = mse;
-                            nodeo[j.node_list[i]].min.key = computersObj[j.node_list[z]];
+                for (let i=0; i<node_list.length-1; i++){
+                    for (let z=i+1; z<node_list.length; z++){
+                        let mse = d3.mean(scheme.data.tsnedata[node_list[i]].map((d,ti)=>Math.pow(d[serviceSelected]-scheme.data.tsnedata[node_list[z]][ti][serviceSelected],2)));
+                        nodeo[node_list[i]].mse[node_list[z]] = {key: computersObj[node_list[z]], value: mse};
+                        if (mse< nodeo[node_list[i]].min.value){
+                            nodeo[node_list[i]].min.value = mse;
+                            nodeo[node_list[i]].min.key = computersObj[node_list[z]];
                             if (mse< min.value){
                                 min.value = mse;
-                                min.key = computersObj[j.node_list[i]];
+                                min.key = computersObj[node_list[i]];
                             }
                         }
-                        nodeo[j.node_list[z]].mse[j.node_list[i]] = {key: computersObj[j.node_list[i]], value: mse};
-                        if (mse< nodeo[j.node_list[i]].min.value){
-                            nodeo[j.node_list[z]].min.value = mse;
-                            nodeo[j.node_list[z]].min.key = computersObj[j.node_list[i]];
+                        nodeo[node_list[z]].mse[node_list[i]] = {key: computersObj[node_list[i]], value: mse};
+                        if (mse< nodeo[node_list[i]].min.value){
+                            nodeo[node_list[z]].min.value = mse;
+                            nodeo[node_list[z]].min.key = computersObj[node_list[i]];
                             if (mse< min.value){
                                 min.value = mse;
-                                min.key = computersObj[j.node_list[z]];
+                                min.key = computersObj[node_list[z]];
                             }
                         }
                     }
@@ -776,8 +797,7 @@ let MapSetting = function () {
                 let count = 0;
                 current.order = orders[count];
                 count ++;
-                console.log(j)
-                while(count < j.node_list.length){
+                while(count < node_list.length){
                     // find the lowest mse
                     let min = {value: Infinity,key:undefined};
                     Object.values(nodeo[current.key].mse).forEach(d=>{
@@ -794,6 +814,7 @@ let MapSetting = function () {
                 }
 
             }
+            return checkCompNum===computerNum;
         });
 
 
@@ -802,7 +823,7 @@ let MapSetting = function () {
             'x': graphicopt.computePos(),
             'dy': -20
         }).text("Hosts's timeline");
-        scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computers.data().length - 1]);
+        scaleNode_y_middle = d3.scaleLinear().range(yscale.range()).domain([0, computeCount]);
 
         g.selectAll('.computeNode.new').classed('new', false).attr('transform', d => {
             d.x2 = graphicopt.computePos();
