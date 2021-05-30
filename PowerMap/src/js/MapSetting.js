@@ -751,7 +751,7 @@ let MapSetting = function () {
                 orders.sort((a,b)=>a-b);
                 for (let i=0; i<j.node_list.length-1; i++){
                     for (let z=i+1; z<j.node_list.length; z++){
-                        let mse = d3.mean(scheme.data.tsnedata[j.node_list[i]].map((d,ti)=>(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])*(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])));
+                        let mse = d3.mean(scheme.data.tsnedata[j.node_list[i]].map((d,ti)=>Math.abs(d[serviceSelected]-scheme.data.tsnedata[j.node_list[z]][ti][serviceSelected])));
                         nodeo[j.node_list[i]].mse[j.node_list[z]] = {key: computersObj[j.node_list[z]], value: mse};
                         if (mse< nodeo[j.node_list[i]].min.value){
                             nodeo[j.node_list[i]].min.value = mse;
@@ -777,8 +777,9 @@ let MapSetting = function () {
                 current.order = orders[count];
                 count ++;
                 console.log(j)
-                while(count < j.node_list.length-1){
-                    console.log(current.key,current.order)
+                while(count < j.node_list.length){
+                    if (current.key==='cpu-23-33')
+                        console.log(current.key,nodeo[current.key].mse)
                     // find the lowest mse
                     let min = {value: Infinity,key:undefined};
                     Object.values(nodeo[current.key].mse).forEach(d=>{
@@ -787,7 +788,8 @@ let MapSetting = function () {
                         }
                         delete nodeo[d.key.key].mse[current.key];
                     });
-
+                    if (min.key.key==='cpu-24-1')
+                        debugger
                     current = min.key;
                     current.order = orders[count];
                     count ++;
