@@ -8,47 +8,30 @@ d3.selection.prototype.moveToFront = function() {
 let vizservice=[];
 function serviceControl(){
     vizservice = [];
-    const groupvizservice = [{key:'threshold',value:[]},{key:'minmax',value:[]}];
-    const num = serviceFullList.length;
-    groupvizservice.forEach((d,di)=>{
-        serviceFullList.forEach((s,i)=>{
-            const _s = {...s,mode:d.key,_inListid:i+num*di};
-            vizservice.push(_s);
-            d.value.push(_s)
-        });
+    serviceFullList.forEach((s,i)=>{
+        vizservice.push(s);
     });
+
 
     d3.select('#flowType')
         .on('change',function(){
-            const selectedSers = $(this).val().split('|');
-            serviceSelected = +selectedSers[1];
+            const selectedSers = $(this).val();
+            serviceSelected = +selectedSers;
 
-            const val = selectedSers[0];
-            const oldVal = subObject.graphicopt().minMaxStream;
-            subObject.graphicopt().minMaxStream = (val==='minmax');
             updateProcess({percentage:50,text:'filtering...'});
             setTimeout(()=>{
-                if(oldVal===subObject.graphicopt().minMaxStream){
-                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).draw()//.updateDrawData();
-                }else{
-                    // subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).updateDrawData();
-                    subObject.graphicopt({minMaxStream:subObject.graphicopt().minMaxStream,selectedService:serviceSelected}).draw();
-                }
+                subObject.graphicopt({selectedService:serviceSelected}).draw();
                 drawColorLegend();
             },0)
         })
-        .selectAll('optgroup')
-        .data(groupvizservice)
-        .join('optgroup')
-        .attr('label',d=>d.key)
             .selectAll('option')
-            .data(d=>d.value)
+            .data(vizservice)
             .join('option')
-            .attr('value',(d)=>d.mode+'|'+d.idroot)
+            .attr('value',(d)=>d.idroot)
             .attr('class',d=>d.text==='User'?'innerName':null)
             .attr('data-value',(d)=>d)
-            .attr('selected',(d)=>d._inListid===serviceSelected?'':null)
-            .text(d=>d.text+' '+d.mode);
+            .attr('selected',(d)=>d.idroot===serviceSelected?'':null)
+            .text(d=>d.text);
     d3.select('#jobValueName')
         .selectAll('option')
         .data(serviceFullList)
@@ -79,6 +62,9 @@ function initdraw(){
         subObject.sankeyOpt({showShareUser:this.checked}).draw();
     });
 
+    d3.select('#highlightType').on('change',function(){
+        subObject.highlightStream($(this).val());
+    })
 
     searchControl.init();
     initFilterMode();

@@ -52,7 +52,7 @@ let MapSetting = function () {
         },
         userStreamMode: 'Power'
     };
-    let runopt = {mouse: {}};
+    let runopt = {mouse: {},highlightStream:'none'};
     let scheme = {}, filterTerm = [];
     let animation_time = 2000;
     let svg = d3.select(graphicopt.svg), g, zoomFunc, linkg, nodeg, table_headerNode, freezing = false, textWarp = 200;
@@ -1054,6 +1054,11 @@ let MapSetting = function () {
             master.drawComp();
         }
     }
+    master.highlightStream = function(__) {
+        runopt.highlightStream = __;
+        handleHightlight();
+        drawEmbedding_timeline()
+    }
 
     master.drawThreshold = function (_) {
         // return arguments.length ? (drawThreshold = _, timeArc.updateDrawData(), timeArc) : drawThreshold;
@@ -1096,48 +1101,9 @@ let MapSetting = function () {
         });
 
     function getDrawData(n) {
-        if (graphicopt.minMaxStream) {
             n.noneSymetric = true;
             const drawData = [{
-                node: n, value: n.map((d, ti) => {
-                    if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                        return {...d, value: [undefined, undefined]};
-                    return {...d, value: [d[serviceSelected], d.value[2]]};
-                }), color: "rgb(252, 141, 89)",
-                up: true
-            },
-                {
-                    node: n, value: n.map((d, ti) => {
-                        if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                            return {...d, value: [undefined, undefined]}
-                        return {...d, value: [d.value[0], d[serviceSelected]]};
-                    }), color: "#4682b482",
-                    up: false
-                }];
-            if (scheme.data.emptyMap[n.name]) {
-                drawData.push({
-                        node: n, value: n.map((d, ti) => {
-                            if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                                return {...d, value: [undefined, undefined]}
-                            return {...d, value: [d[serviceSelected], d.value[2]]};
-                        }), color: "rgb(221,221,221)",
-                        up: true
-                    },
-                    {
-                        node: n, value: n.map((d, ti) => {
-                            if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                                return {...d, value: [undefined, undefined]}
-                            return {...d, value: [d.value[0], d[serviceSelected]]};
-                        }), color: "rgb(221,221,221)",
-                        up: false
-                    })
-            }
-            // n.drawData = drawData;
-            return drawData;
-        } else {
-            n.noneSymetric = true;
-            const drawData = [{
-                node: n, value: n.map((d, ti) => {
+                value: n.map((d, ti) => {
                     if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                         return {...d, value: [undefined, undefined]}
                     if ((d[serviceSelected] - drawThreshold) > 0) {
@@ -1151,7 +1117,7 @@ let MapSetting = function () {
                 up: true
             },
                 {
-                    node: n, value: n.map((d, ti) => {
+                    value: n.map((d, ti) => {
                         if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                             return {...d, value: [undefined, undefined]}
                         if ((d[serviceSelected] - drawThreshold) < 0)
@@ -1165,7 +1131,7 @@ let MapSetting = function () {
                 }];
             if (scheme.data.emptyMap[n.name]) {
                 drawData.push({
-                        node: n, value: n.map((d, ti) => {
+                        value: n.map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             if ((d[serviceSelected] - drawThreshold) > 0) {
@@ -1179,7 +1145,7 @@ let MapSetting = function () {
                         up: true
                     },
                     {
-                        node: n, value: n.map((d, ti) => {
+                        value: n.map((d, ti) => {
                             if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                                 return {...d, value: [undefined, undefined]}
                             if ((d[serviceSelected] - drawThreshold) < 0)
@@ -1194,19 +1160,54 @@ let MapSetting = function () {
             }
             // n.drawData = drawData;
             return drawData;
+    }
+    function handleHightlight() {
+        if (runopt.highlightStream==='highValue'){
+            // find top 10
+            let alldataPoint = [];
+            computers.forEach(d=>{
+                d.highlightData = d.drawData.map(d=>{
+                    return {value:[],color:d.color,up:d.up}
+                });
+                scheme.data.tsnedata[d.key].forEach(e=>{alldataPoint.push(e)})
+            });
+            alldataPoint.sort((a,b)=>b[serviceSelected]-a[serviceSelected]);
+            for (let i =0; i<10;i++){
+                const step = alldataPoint[i].timestep;
+                console.log(alldataPoint[i])
+                computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
+                        d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
+                    d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
+                        d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
+                });
+            }
+        }else {
+            computers.forEach(d=>d.highlightData = undefined);
         }
     }
-
     function drawEmbedding_timeline() {
         let bg = svg.selectAll('.computeSig').attr('transform', d => {
-            if(d.key==="cpu-23-30")
-                console.log(d.key,d.order,scaleNode_y_middle(d.order))
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
-        let layerpath = bg.selectAll('path.linegg')
+
+        bg.selectAll('path.linegg')
             .data(d => d.drawData)
             .join('path')
             .attr('class', 'linegg')
+            .style('opacity',1)
+            .call(updatelayerpath);
+        let highighted = bg.filter(d=>d.highlightData);
+        bg.selectAll('path.highightedLinegg')
+            .style('display','none');
+        highighted.selectAll('path.linegg').style('opacity',0.3);
+
+        highighted.selectAll('path.highightedLinegg')
+            .data(d => d.highlightData)
+            .join('path')
+            .style('stroke','black')
+            .attr('class', 'highightedLinegg')
             .call(updatelayerpath);
         svg.selectAll('.computeSig_label').attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
