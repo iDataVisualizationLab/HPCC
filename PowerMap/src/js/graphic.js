@@ -69,7 +69,7 @@ function initdraw(){
         subObject.sankeyOpt({nodeSort:val}).draw();
     })
 
-    serviceControl();
+    // serviceControl();
     // userPie.init();
     d3.select('#hideStable').on('change',function(){
         subObject.sankeyOpt({hideStable:this.checked}).draw();

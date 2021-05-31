@@ -42,13 +42,14 @@ $(document).ready(function () {
             // let url = 'src/data/aggregated_metrics_6h.json';
             // let url = 'src/data/aggregated_metrics_04_28.json';
             let url = 'src/data/aggregated_metrics_05_12.json';
+            // let url = 'src/data/aggregated_metrics_05_23.json';
             // let url = 'src/data/aggregated_metrics_05_12_L.json';
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
             // request = new Simulation('../HiperView/data/8122020.json');
             // request = new Simulation('../HiperView/data/814_821_2020.json');
-
+            debugger
             serviceListattr = ["power","mem_power","mem_usage"];
             serviceLists = [{
                 "text": "power",
@@ -75,6 +76,8 @@ $(document).ready(function () {
             request = new Simulation(d3.json(url).then(d => {
                 // d=d.slice(0,1920)
                 const data = d;
+                // getServiceSet(data.nodes_info);
+                serviceControl();
                 data.time_stamp = data.time_stamp.map(d => d * 1000000000);
                 const jobObjArr = {};
                 Object.values(data.jobs_info).forEach(d => {

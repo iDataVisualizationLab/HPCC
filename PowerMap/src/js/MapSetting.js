@@ -806,6 +806,8 @@ let MapSetting = function () {
                         }
                     }
                 }
+                if (!min.key)
+                    min.key=computersObj[node_list[0]]
                 let current = min.key;
                 let count = 0;
                 current.order = computeCount;
@@ -827,6 +829,12 @@ let MapSetting = function () {
                     computeCount+=0.5;
                     count ++;
                 }
+                computeCount+=1;
+            }else if(node_list.length){
+                node_list.forEach(n=>{
+                    computersObj[n].order = computeCount;
+                    computeCount+=0.5
+                });
                 computeCount+=1;
             }
             return checkCompNum===computerNum;
