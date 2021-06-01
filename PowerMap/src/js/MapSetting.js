@@ -1173,6 +1173,7 @@ let MapSetting = function () {
             alldataPoint.sort((a,b)=>b[serviceSelected]-a[serviceSelected]);
             for (let i =0; i<10;i++){
                 const step = alldataPoint[i].timestep;
+                computersObj[alldataPoint[i].name].highlightData.notEmpty = true;
                 computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
                     // if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
                     //     d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
@@ -1190,14 +1191,16 @@ let MapSetting = function () {
                 });
                 const arr = scheme.data.tsnedata[d.key];
                 for (let i=1; i<arr.length; i++){
-                    const pre = arr[i-1][serviceSelected]==0?0:(arr[i-1][serviceSelected]-1);
+                    const pre = arr[i-1][serviceSelected]===0?0:(arr[i-1][serviceSelected]-1);
                     const sudden  = (arr[i][serviceSelected]+1)/(pre+1);
                     alldataPoint.push({name:d.key,timestep:i,value:sudden})
                 }
             });
+            console.log(alldataPoint)
             alldataPoint.sort((a,b)=>b.value-a.value);
             for (let i =0; i<10;i++){
                 const step = alldataPoint[i].timestep;
+                computersObj[alldataPoint[i].name].highlightData.notEmpty = true;
                 computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
                     if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
                         d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
@@ -1211,9 +1214,7 @@ let MapSetting = function () {
         }
     }
     function drawEmbedding_timeline() {
-        if (runopt.highlightStream!=='none'){
-            handleHightlight();
-        }
+        handleHightlight();
         let bg = svg.selectAll('.computeSig').attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
@@ -1227,7 +1228,8 @@ let MapSetting = function () {
         let highighted = bg.filter(d=>d.highlightData);
         bg.selectAll('path.highightedLinegg')
             .style('display','none');
-        highighted.selectAll('path.linegg').style('opacity',0.3);
+        highighted.selectAll('path.linegg').style('opacity',0.1);
+        highighted.filter(d=>d.highlightData.notEmpty).selectAll('path.linegg').style('opacity',0.3);
 
         highighted.selectAll('path.highightedLinegg')
             .data(d => d.highlightData)
