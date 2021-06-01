@@ -1056,7 +1056,6 @@ let MapSetting = function () {
     }
     master.highlightStream = function(__) {
         runopt.highlightStream = __;
-        handleHightlight();
         drawEmbedding_timeline()
     }
 
@@ -1174,13 +1173,12 @@ let MapSetting = function () {
             alldataPoint.sort((a,b)=>b[serviceSelected]-a[serviceSelected]);
             for (let i =0; i<10;i++){
                 const step = alldataPoint[i].timestep;
-                console.log(alldataPoint[i])
                 computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
-                    if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
-                        d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
+                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
+                    //     d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
                     d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
-                    if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
-                        d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
+                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
+                    //     d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
                 });
             }
         }else if (runopt.highlightStream==='suddenChange'){
@@ -1190,18 +1188,22 @@ let MapSetting = function () {
                 d.highlightData = d.drawData.map(d=>{
                     return {value:[],color:d.color,up:d.up}
                 });
-                scheme.data.tsnedata[d.key].forEach(e=>{alldataPoint.push(e)})
+                const arr = scheme.data.tsnedata[d.key];
+                for (let i=1; i<arr.length; i++){
+                    const pre = arr[i-1][serviceSelected]==0?0:(arr[i-1][serviceSelected]-1);
+                    const sudden  = (arr[i][serviceSelected]+1)/(pre+1);
+                    alldataPoint.push({name:d.key,timestep:i,value:sudden})
+                }
             });
-            alldataPoint.sort((a,b)=>b[serviceSelected]-a[serviceSelected]);
+            alldataPoint.sort((a,b)=>b.value-a.value);
             for (let i =0; i<10;i++){
                 const step = alldataPoint[i].timestep;
-                console.log(alldataPoint[i])
                 computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
                     if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
                         d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
                     d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
-                    if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
-                        d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
+                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
+                    //     d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
                 });
             }
         }else {
@@ -1209,6 +1211,9 @@ let MapSetting = function () {
         }
     }
     function drawEmbedding_timeline() {
+        if (runopt.highlightStream!=='none'){
+            handleHightlight();
+        }
         let bg = svg.selectAll('.computeSig').attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
