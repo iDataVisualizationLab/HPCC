@@ -211,7 +211,7 @@ function getServiceSet(compObj){
         "text": s,
         "id": si,
         "enable": true,
-        "sub": [{"text": s, "id": 0, "enable": true, "idroot": si, "angle": 0, "range": [Infinity, -Infinity]}]
+        "sub": [{"text": s, "id": 0, "enable": true, "idroot": si, "angle": 0, "range": [0, 0]}]
     }));
     serviceFullList = [];
     serviceLists.forEach(s=>s.sub.forEach(ss=>serviceFullList.push(ss)));

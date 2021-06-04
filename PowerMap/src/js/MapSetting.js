@@ -1294,7 +1294,7 @@ let MapSetting = function () {
                 .classed('highlight2', true)
                 .each(function(d){
                     d3.select(this).moveToFront();
-                    const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight2', true).data();
+                    const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight2', !jobEmpty).data();
                     const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight2', !jobEmpty).data();
                     samesource.forEach(l=>{
                         listJobHighlight[l.target.key]=true;
