@@ -239,3 +239,20 @@ table td.selected {
 .links text{
     display: none;
 }
+
+.onhighlight2 .linkg .links {
+    opacity: 0.1;
+}
+
+.onhighlight2 .nodeg .node {
+    opacity: 0.1;
+}
+
+.onhighlight2 .linkg .links.highlight2 {
+    opacity: 1;
+}
+
+.onhighlight2 .nodeg .node.highlight2 {
+    opacity: 1;
+}
+

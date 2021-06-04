@@ -52,7 +52,7 @@ let MapSetting = function () {
         },
         userStreamMode: 'Power'
     };
-    let runopt = {mouse: {},highlightStream:'none'};
+    let runopt = {mouse: {}, highlightStream: 'none'};
     let scheme = {}, filterTerm = [];
     let animation_time = 2000;
     let svg = d3.select(graphicopt.svg), g, zoomFunc, linkg, nodeg, table_headerNode, freezing = false, textWarp = 200;
@@ -137,7 +137,7 @@ let MapSetting = function () {
         let svdefs = svg.select('defsmain');
         if (svdefs.empty())
             svdefs = svg.append('defs').attr('id', 'defsmain');
-        if (svdefs.select('#userpic').empty()){
+        if (svdefs.select('#userpic').empty()) {
             svdefs.append('pattern')
                 .attrs({'id': 'userpic', width: '100%', height: '100%', 'patternContentUnits': 'objectBoundingBox'})
                 .append('image')
@@ -146,7 +146,12 @@ let MapSetting = function () {
                     'xmlns:xlink': 'http://www.w3.org/1999/xlink', 'xlink:href': 'src/images/u.png'
                 });
             svdefs.append('pattern')
-                .attrs({'id': 'userpicNoBorder', width: '100%', height: '100%', 'patternContentUnits': 'objectBoundingBox'})
+                .attrs({
+                    'id': 'userpicNoBorder',
+                    width: '100%',
+                    height: '100%',
+                    'patternContentUnits': 'objectBoundingBox'
+                })
                 .append('image')
                 .attrs({
                     'height': 1, width: 1, preserveAspectRatio: 'none',
@@ -538,7 +543,7 @@ let MapSetting = function () {
                 'dy': '0.25rem',
                 'x': graphicopt.user.r + 4,
                 // 'text-anchor':'middle',
-            }) .style('pointer-events', 'all');
+            }).style('pointer-events', 'all');
         // userNode_n.append('text').attrs(
         //     {
         //         'class': 'userNodeSig_CollapseMode',
@@ -562,7 +567,7 @@ let MapSetting = function () {
             .text(d => d.key);
 
         userNode.select('.userNodeImg')
-            .attr( 'fill', d=>d.isOpen?"url(#userpicNoBorder)":"url(#userpic)")
+            .attr('fill', d => d.isOpen ? "url(#userpicNoBorder)" : "url(#userpic)")
             .style('pointer-events', 'all')
             .on('click', (u) => {
                 event.stopPropagation();
@@ -620,10 +625,10 @@ let MapSetting = function () {
             // .attr("stroke", d => colorFunc(getLinkKeyColor(d)))
             .style("stroke-width", function (d) {
                 return .3;
-            }).style("stroke-opacity",0.7)
-            // .style("stroke-width", function (d) {
-            //     return d.links === undefined ? 1 : linkscale(d.links);
-            // });
+            }).style("stroke-opacity", 0.7)
+        // .style("stroke-width", function (d) {
+        //     return d.links === undefined ? 1 : linkscale(d.links);
+        // });
 
         // reset freezing action
         freezing = false;
@@ -737,15 +742,15 @@ let MapSetting = function () {
         jobs.sort((a, b) => usersObj[a.user_name].order - usersObj[b.user_name].order);
         let jobCount = 0;
         let jobNum = jobs.length;
-        jobs.forEach((d,i) => {
+        jobs.forEach((d, i) => {
             d.order = jobCount;
-            jobCount+=0.5;
-            if (i<jobNum-2){
-                if (jobs[i+1].user_name!==d.user_name)
-                    jobCount+=1;
+            jobCount += 0.5;
+            if (i < jobNum - 2) {
+                if (jobs[i + 1].user_name !== d.user_name)
+                    jobCount += 1;
             }
         });
-        scaleJob.domain([0,jobCount])
+        scaleJob.domain([0, jobCount])
         g.selectAll('.jobNode.new').classed('new', false).attr('transform', d => {
             d.x2 = graphicopt.jobPos();
             d.y = scaleJob(d.order);
@@ -767,39 +772,43 @@ let MapSetting = function () {
         comps.forEach((d, i) => d.order = i);
 
         let checkComp = {};
-        let checkCompNum= 0;
+        let checkCompNum = 0;
         let computerNum = comps.length;
         let computeCount = 0;
-        jobs.find(j=>{
-            let node_list = j.node_list.filter(comp=>!checkComp[comp]);
-            if (node_list.length>2){
+        jobs.find(j => {
+            let node_list = j.node_list.filter(comp => !checkComp[comp]);
+            if (node_list.length > 2) {
                 let nodeo = {};
-                let min = {value: Infinity,key:undefined};
+                let min = {value: Infinity, key: undefined};
 
-                for (let i=0; i<node_list.length; i++){
+                for (let i = 0; i < node_list.length; i++) {
 
-                    nodeo[node_list[i]] = {el:computersObj[node_list[i]],mse:{},min:{value: Infinity,key:undefined}};
+                    nodeo[node_list[i]] = {
+                        el: computersObj[node_list[i]],
+                        mse: {},
+                        min: {value: Infinity, key: undefined}
+                    };
                     checkComp[node_list[i]] = true;
                     checkCompNum++;
                 }
 
-                for (let i=0; i<node_list.length-1; i++){
-                    for (let z=i+1; z<node_list.length; z++){
-                        let mse = d3.mean(scheme.data.tsnedata[node_list[i]].map((d,ti)=>Math.pow(d[serviceSelected]-scheme.data.tsnedata[node_list[z]][ti][serviceSelected],2)));
+                for (let i = 0; i < node_list.length - 1; i++) {
+                    for (let z = i + 1; z < node_list.length; z++) {
+                        let mse = d3.mean(scheme.data.tsnedata[node_list[i]].map((d, ti) => Math.pow(d[serviceSelected] - scheme.data.tsnedata[node_list[z]][ti][serviceSelected], 2)));
                         nodeo[node_list[i]].mse[node_list[z]] = {key: computersObj[node_list[z]], value: mse};
-                        if (mse< nodeo[node_list[i]].min.value){
+                        if (mse < nodeo[node_list[i]].min.value) {
                             nodeo[node_list[i]].min.value = mse;
                             nodeo[node_list[i]].min.key = computersObj[node_list[z]];
-                            if (mse< min.value){
+                            if (mse < min.value) {
                                 min.value = mse;
                                 min.key = computersObj[node_list[i]];
                             }
                         }
                         nodeo[node_list[z]].mse[node_list[i]] = {key: computersObj[node_list[i]], value: mse};
-                        if (mse< nodeo[node_list[i]].min.value){
+                        if (mse < nodeo[node_list[i]].min.value) {
                             nodeo[node_list[z]].min.value = mse;
                             nodeo[node_list[z]].min.key = computersObj[node_list[i]];
-                            if (mse< min.value){
+                            if (mse < min.value) {
                                 min.value = mse;
                                 min.key = computersObj[node_list[z]];
                             }
@@ -807,37 +816,37 @@ let MapSetting = function () {
                     }
                 }
                 if (!min.key)
-                    min.key=computersObj[node_list[0]]
+                    min.key = computersObj[node_list[0]]
                 let current = min.key;
                 let count = 0;
                 current.order = computeCount;
-                computeCount+=0.5;
-                count ++;
-                while(count < node_list.length){
+                computeCount += 0.5;
+                count++;
+                while (count < node_list.length) {
                     // find the lowest mse
-                    let min = {value: Infinity,key:undefined};
-                    Object.values(nodeo[current.key].mse).forEach(d=>{
-                        if (d.value< min.value){
+                    let min = {value: Infinity, key: undefined};
+                    Object.values(nodeo[current.key].mse).forEach(d => {
+                        if (d.value < min.value) {
                             min = {...d};
                         }
                         delete nodeo[d.key.key].mse[current.key];
                     });
-                    if (min.key ===undefined)
+                    if (min.key === undefined)
                         min = {...Object.values(nodeo[current.key].mse)[0]}
                     current = min.key;
                     current.order = computeCount;
-                    computeCount+=0.5;
-                    count ++;
+                    computeCount += 0.5;
+                    count++;
                 }
-                computeCount+=1;
-            }else if(node_list.length){
-                node_list.forEach(n=>{
+                computeCount += 1;
+            } else if (node_list.length) {
+                node_list.forEach(n => {
                     computersObj[n].order = computeCount;
-                    computeCount+=0.5
+                    computeCount += 0.5
                 });
-                computeCount+=1;
+                computeCount += 1;
             }
-            return checkCompNum===computerNum;
+            return checkCompNum === computerNum;
         });
 
 
@@ -882,7 +891,7 @@ let MapSetting = function () {
                         y: d.source.y2 === undefined ? d.source.y : d.source.y2,
                     },
                     target: {
-                        x: (d.target.x2 === undefined ? d.target.x : d.target.x2) - ((d.target.type === 'job'||(d.source.type === 'job')) ? graphicopt.job.r : 0),
+                        x: (d.target.x2 === undefined ? d.target.x : d.target.x2) - ((d.target.type === 'job' || (d.source.type === 'job')) ? graphicopt.job.r : 0),
                         y: d.target.y2 === undefined ? d.target.y : d.target.y2,
                     }
                 });
@@ -1054,7 +1063,8 @@ let MapSetting = function () {
             master.drawComp();
         }
     }
-    master.highlightStream = function(__) {
+
+    master.highlightStream = function (__) {
         runopt.highlightStream = __;
         drawEmbedding_timeline()
     }
@@ -1100,24 +1110,52 @@ let MapSetting = function () {
         });
 
     function getDrawData(n) {
-            n.noneSymetric = true;
-            const drawData = [{
+        n.noneSymetric = true;
+        const drawData = [{
+            value: n.map((d, ti) => {
+                if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
+                    return {...d, value: [undefined, undefined]}
+                if ((d[serviceSelected] - drawThreshold) > 0) {
+                    return {...d, value: [0, d[serviceSelected] - drawThreshold]};
+                }
+                const mon = new Object();
+                mon.value = [0, 0];
+                mon.timestep = d.timestep;
+                return mon;
+            }), color: "rgba(252, 141, 89, 0.7)",
+            up: true
+        },
+            {
                 value: n.map((d, ti) => {
                     if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                         return {...d, value: [undefined, undefined]}
-                    if ((d[serviceSelected] - drawThreshold) > 0) {
-                        return {...d, value: [0, d[serviceSelected] - drawThreshold]};
-                    }
+                    if ((d[serviceSelected] - drawThreshold) < 0)
+                        return {...d, value: [d[serviceSelected] - drawThreshold, 0]};
                     const mon = new Object();
                     mon.value = [0, 0];
                     mon.timestep = d.timestep;
                     return mon;
-                }), color: "rgba(252, 141, 89, 0.7)",
-                up: true
-            },
+                }), color: "#4682b482",
+                up: false
+            }];
+        if (scheme.data.emptyMap[n.name]) {
+            drawData.push({
+                    value: n.map((d, ti) => {
+                        if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
+                            return {...d, value: [undefined, undefined]}
+                        if ((d[serviceSelected] - drawThreshold) > 0) {
+                            return {...d, value: [0, d[serviceSelected] - drawThreshold]};
+                        }
+                        const mon = new Object();
+                        mon.value = [0, 0];
+                        mon.timestep = d.timestep;
+                        return mon;
+                    }), color: "rgb(221,221,221)",
+                    up: true
+                },
                 {
                     value: n.map((d, ti) => {
-                        if (scheme.data.emptyMap[n.name] && scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
+                        if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
                             return {...d, value: [undefined, undefined]}
                         if ((d[serviceSelected] - drawThreshold) < 0)
                             return {...d, value: [d[serviceSelected] - drawThreshold, 0]};
@@ -1125,94 +1163,160 @@ let MapSetting = function () {
                         mon.value = [0, 0];
                         mon.timestep = d.timestep;
                         return mon;
-                    }), color: "#4682b482",
+                    }), color: "rgb(221,221,221)",
                     up: false
-                }];
-            if (scheme.data.emptyMap[n.name]) {
-                drawData.push({
-                        value: n.map((d, ti) => {
-                            if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                                return {...d, value: [undefined, undefined]}
-                            if ((d[serviceSelected] - drawThreshold) > 0) {
-                                return {...d, value: [0, d[serviceSelected] - drawThreshold]};
-                            }
-                            const mon = new Object();
-                            mon.value = [0, 0];
-                            mon.timestep = d.timestep;
-                            return mon;
-                        }), color: "rgb(221,221,221)",
-                        up: true
-                    },
-                    {
-                        value: n.map((d, ti) => {
-                            if (!scheme.data.emptyMap[n.name][ti] || d[serviceSelected] === undefined)
-                                return {...d, value: [undefined, undefined]}
-                            if ((d[serviceSelected] - drawThreshold) < 0)
-                                return {...d, value: [d[serviceSelected] - drawThreshold, 0]};
-                            const mon = new Object();
-                            mon.value = [0, 0];
-                            mon.timestep = d.timestep;
-                            return mon;
-                        }), color: "rgb(221,221,221)",
-                        up: false
-                    })
-            }
-            // n.drawData = drawData;
-            return drawData;
+                })
+        }
+        // n.drawData = drawData;
+        return drawData;
     }
+
     function handleHightlight() {
-        if (runopt.highlightStream==='highValue'){
+        let listCompHighlight = {};
+        if (runopt.highlightStream === 'highValue') {
             // find top 10
             let alldataPoint = [];
-            computers.forEach(d=>{
-                d.highlightData = d.drawData.map(d=>{
-                    return {value:[],color:d.color,up:d.up}
+            computers.forEach(d => {
+                d.highlightData = d.drawData.map(d => {
+                    const color = d3.color(d.color);
+                    color.opacity = 1;
+                    return {value: [], color: color.toString(), up: d.up}
                 });
-                scheme.data.tsnedata[d.key].forEach(e=>{alldataPoint.push(e)})
+                d.highlightData.displayText = [];
+                d.highlightData.displayLine = [];
+                scheme.data.tsnedata[d.key].forEach(e => {
+                    alldataPoint.push(e)
+                })
             });
-            alldataPoint.sort((a,b)=>b[serviceSelected]-a[serviceSelected]);
-            for (let i =0; i<10;i++){
+            alldataPoint.sort((a, b) => b[serviceSelected] - a[serviceSelected]);
+            for (let i = 0; i < 10; i++) {
                 const step = alldataPoint[i].timestep;
                 computersObj[alldataPoint[i].name].highlightData.notEmpty = true;
-                computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
-                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
-                    //     d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
-                    d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
-                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
-                    //     d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
+                listCompHighlight[alldataPoint[i].name] = true;
+                computersObj[alldataPoint[i].name].highlightData.forEach((d, j) => {
+                    const up = computersObj[alldataPoint[i].name].drawData[j].up;
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step - 1]) {
+                        d.value[step - 1] = computersObj[alldataPoint[i].name].drawData[j].value[step - 1];
+                        if (computersObj[alldataPoint[i].name].drawData[j].value[step - 1][serviceSelected] !== undefined) {
+                            computersObj[alldataPoint[i].name].highlightData.displayLine[step - 1] = {
+                                ...d.value[step - 1],
+                                up
+                            };
+                        }
+                    }
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step][serviceSelected] !== undefined) {
+                        d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
+                        computersObj[alldataPoint[i].name].highlightData.displayLine[step] = {
+                            ...d.value[step],
+                            up
+                        };
+                        computersObj[alldataPoint[i].name].highlightData.displayText.push({
+                            ...computersObj[alldataPoint[i].name].drawData[j].value[step],
+                            up: computersObj[alldataPoint[i].name].drawData[j].up,
+                            text: Math.round(scaleService[serviceSelected].invert(d.value[step][serviceSelected]))
+                        });
+                    }
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step + 1]) {
+                        d.value[step + 1] = computersObj[alldataPoint[i].name].drawData[j].value[step + 1];
+                        if (computersObj[alldataPoint[i].name].drawData[j].value[step + 1][serviceSelected] !== undefined) {
+                            computersObj[alldataPoint[i].name].highlightData.displayLine[step + 1] = {
+                                ...d.value[step + 1],
+                                up
+                            };
+                        }
+                    }
                 });
+                // computersObj[alldataPoint[i].name].highlightData.displayLine.sort((a,b)=>a.timestep-b.timestep)
             }
-        }else if (runopt.highlightStream==='suddenChange'){
+        } else if (runopt.highlightStream === 'suddenChange') {
             // find top 10
             let alldataPoint = [];
-            computers.forEach(d=>{
-                d.highlightData = d.drawData.map(d=>{
-                    return {value:[],color:d.color,up:d.up}
+            computers.forEach(d => {
+                d.highlightData = d.drawData.map(d => {
+                    const color = d3.color(d.color);
+                    color.opacity = 1;
+                    return {value: [], color: color.toString(), up: d.up}
                 });
+                d.highlightData.displayText = [];
+                d.highlightData.displayLine = [];
                 const arr = scheme.data.tsnedata[d.key];
-                for (let i=1; i<arr.length; i++){
-                    const pre = arr[i-1][serviceSelected]===0?0:(arr[i-1][serviceSelected]-1);
-                    const sudden  = (arr[i][serviceSelected]+1)/(pre+1);
-                    alldataPoint.push({name:d.key,timestep:i,value:sudden})
+                for (let i = 1; i < arr.length; i++) {
+                    const pre = arr[i - 1][serviceSelected] === 0 ? 0 : (arr[i - 1][serviceSelected] - 1);
+                    const sudden = (arr[i][serviceSelected] + 1) / (pre + 1);
+                    alldataPoint.push({name: d.key, timestep: i, value: sudden, valueRaw: arr[i][serviceSelected]-arr[i - 1][serviceSelected]})
                 }
             });
-            console.log(alldataPoint)
-            alldataPoint.sort((a,b)=>b.value-a.value);
-            for (let i =0; i<10;i++){
+            alldataPoint.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+            for (let i = 0; i < 10; i++) {
                 const step = alldataPoint[i].timestep;
                 computersObj[alldataPoint[i].name].highlightData.notEmpty = true;
-                computersObj[alldataPoint[i].name].highlightData.forEach((d,j)=>{
-                    if (computersObj[alldataPoint[i].name].drawData[j].value[step-1])
-                        d.value[step-1] = computersObj[alldataPoint[i].name].drawData[j].value[step-1];
-                    d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
-                    // if (computersObj[alldataPoint[i].name].drawData[j].value[step+1])
-                    //     d.value[step+1] = computersObj[alldataPoint[i].name].drawData[j].value[step+1];
+                listCompHighlight[alldataPoint[i].name] = true;
+                computersObj[alldataPoint[i].name].highlightData.forEach((d, j) => {
+
+                    const up = computersObj[alldataPoint[i].name].drawData[j].up;
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step - 1]) {
+                        d.value[step - 1] = computersObj[alldataPoint[i].name].drawData[j].value[step - 1];
+                        if (computersObj[alldataPoint[i].name].drawData[j].value[step - 1][serviceSelected] !== undefined) {
+                            computersObj[alldataPoint[i].name].highlightData.displayLine[step - 1] = {
+                                ...d.value[step - 1],
+                                up
+                            };
+                        }
+                    }
+                    if (computersObj[alldataPoint[i].name].drawData[j].value[step][serviceSelected] !== undefined) {
+                        d.value[step] = computersObj[alldataPoint[i].name].drawData[j].value[step];
+                        computersObj[alldataPoint[i].name].highlightData.displayLine[step] = {
+                            ...d.value[step],
+                            up
+                        };
+                        computersObj[alldataPoint[i].name].highlightData.displayText.push({
+                            ...computersObj[alldataPoint[i].name].drawData[j].value[step],
+                            up: computersObj[alldataPoint[i].name].drawData[j].up,
+                            text: Math.round(scaleService[serviceSelected].invert(alldataPoint[i].valueRaw))
+                        });
+                    }
+
                 });
+                // computersObj[alldataPoint[i].name].highlightData.displayLine.sort((a,b)=>a.timestep-b.timestep)
             }
-        }else {
-            computers.forEach(d=>d.highlightData = undefined);
+        } else {
+            computers.forEach(d => d.highlightData = undefined);
+        }
+        if (runopt.highlightStream !== 'none') {
+            let listUserHighlight = {};
+            let listJobHighlight = {};
+            let link = linkg.selectAll('.links');
+            g.classed('onhighlight2',true);
+            g.selectAll('.computeNode').filter(d=>!listCompHighlight[d.key])
+                .classed('highlight2',false)
+
+            g.selectAll('.computeNode').filter(d=>listCompHighlight[d.key])
+                .classed('highlight2', true)
+                .each(function(d){
+                    const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight2', true).data();
+                    const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight2', !jobEmpty).data();
+                    samesource.forEach(l=>{
+                        listJobHighlight[l.target.key]=true;
+                    });
+                    sametarget.forEach(l=>{
+                        listUserHighlight[l.target.key]=true;
+                    });
+                    g.selectAll('.jobNode').filter(f => samesource.find(e => e.target === f)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).selectAll('.label').classed('hide', !jobEmpty);
+                    g.selectAll('.userNode').filter(f => sametarget.find(e => e.target === f)).classed('highlight', !jobEmpty);
+
+                    g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
+                    linkg.selectAll('.links:not(.highlight)').classed('hide', true);
+                    g.selectAll('.jobNode:not(.highlight)').classed('hide', true);
+                    g.selectAll('.userNode:not(.highlight)').classed('fade', true);
+                });
+            g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight2', d=>listJobHighlight[d.key]?(!jobEmpty):false);
+            g.selectAll('.userNode').classed('highlight2', d=>listUserHighlight[d.key]?(!jobEmpty):false);
+        }else{
+            g.classed('onhighlight2',false);
+            g.selectAll('.highlight2').classed('highlight2',false);
         }
     }
+
     function drawEmbedding_timeline() {
         handleHightlight();
         let bg = svg.selectAll('.computeSig').attr('transform', d => {
@@ -1223,23 +1327,42 @@ let MapSetting = function () {
             .data(d => d.drawData)
             .join('path')
             .attr('class', 'linegg')
-            .style('opacity',1)
             .call(updatelayerpath);
-        let highighted = bg.filter(d=>d.highlightData);
-        bg.selectAll('path.highightedLinegg')
-            .style('display','none');
-        highighted.selectAll('path.linegg').style('opacity',0.1);
-        highighted.filter(d=>d.highlightData.notEmpty).selectAll('path.linegg').style('opacity',0.3);
+        let nothighlight = bg.filter(d => !d.highlightData);
+        nothighlight.selectAll('path.highightedLinegg').remove();
+        nothighlight.selectAll('text.highightedText').remove();
+        nothighlight.selectAll('path.highightedLine').remove();
+        nothighlight.selectAll('path.linegg').transition().duration(animation_time).style('opacity', 1);
+
+        let highighted = bg.filter(d => d.highlightData);
+        highighted.filter(d => d.highlightData.notEmpty).selectAll('path.linegg').transition().duration(animation_time).style('opacity', 1);
+
+        nothighlight = highighted.filter(d => !d.highlightData.notEmpty);
+        nothighlight.selectAll('path.highightedLinegg').remove();
+        nothighlight.selectAll('path.highightedLine').remove();
+        nothighlight.selectAll('text.highightedText').remove();
+        nothighlight.selectAll('path.linegg').transition().duration(animation_time).style('opacity', 0.1);
 
         highighted.selectAll('path.highightedLinegg')
             .data(d => d.highlightData)
             .join('path')
-            .style('stroke','black')
             .attr('class', 'highightedLinegg')
             .call(updatelayerpath);
+        highighted.selectAll('path.highightedLine')
+            .data(d => [d.highlightData.displayLine])
+            .join('path')
+            .attr('class', 'highightedLine')
+            .call(updatelayerline);
+        highighted.selectAll('text.highightedText')
+            .data(d => d.highlightData.displayText)
+            .join('text')
+            .attr('class', 'highightedText')
+            .call(updatelayerText);
+
         svg.selectAll('.computeSig_label').attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
+
         updateaxis();
     }
 
@@ -1296,11 +1419,37 @@ let MapSetting = function () {
         return p
             .style('fill', d => d.color || 'unset')
             .attr("d", function (d) {
-                if (graphicopt.minMaxStream)
-                    return area_compute(d.value);
-                else
-                    return d.up ? area_compute_up(d.value) : area_compute_down(d.value);
+                return d.up ? area_compute_up(d.value) : area_compute_down(d.value);
             });
+    }
+
+    function updatelayerline(p) {
+        return p
+            .style('stroke', 'black')
+            .style('fill', 'none')
+            .attr("d", function (v) {
+                var linecompute = d3.line()
+                    .curve(d3.curveCatmullRom)
+                    .x(function (d) {
+                        return xScale(d.timestep);
+                    }).y(function (d) {
+                        return d.up ? -yUpperScale(d.value[1]) : -yDownerScale(d.value[0]);
+                    })
+                    .defined(function (d) {
+                        return d && ((d.up ? d.value[0] : d.value[1]) !== undefined)
+                    });
+                return linecompute(v);
+            });
+    }
+
+    function updatelayerText(p) {
+        return p
+            .style('fill', 'black')
+            .style('text-anchor', 'middle')
+            .attr('x', d => xScale(d.timestep))
+            .attr('y', d => d.up ? -yUpperScale(d.value[1]) : -yDownerScale(d.value[0]))
+            .attr('dy', d => d.up ? -3 : 3)
+            .text(d => d.text);
     }
 
     master.currentSelected = function () {
