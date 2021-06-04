@@ -463,8 +463,10 @@ let MapSetting = function () {
             if (d.summary && !d.radarData)
                 d.radarData = getradarData(d.summary.map(d=>d.mean),d.key);
             if (d.radarData){
-                d.radarData.color = d.job_ids? 'black': 'gray'
-                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d.radarData, {colorfill:'gray'});
+                d.radarData.color = d.job_ids? 'black': 'gray';
+                setTimeout(()=>{
+                    createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d.radarData, {colorfill:'gray'});
+                },1);
             }
         });
         jobNode.select('.lelftext').text(d => `#Computes: ${d.node_list.length}`)
