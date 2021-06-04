@@ -77,6 +77,7 @@ $(document).ready(function () {
             request = new Simulation(d3.json(url).then(d => {
                 // d=d.slice(0,1920)
                 const data = d;
+                d3.select('#dataTime').text(new Date(data.time_stamp[0]* 1000).toDateString());
                 getServiceSet(data.nodes_info);
                 serviceControl();
                 data.time_stamp = data.time_stamp.map(d => d * 1000000000);
