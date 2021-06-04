@@ -39,8 +39,8 @@ let MapSetting = function () {
             },
             stream: {
                 yScale: d3.scaleLinear().range([0, 20]),
-                yScaleUp: d3.scaleLinear().domain([0, 1 - 650 / 700]).range([0, 20]),
-                yScaleDown: d3.scaleLinear().domain([-650 / 700, 0]).range([-15, 0]),
+                yScaleUp: d3.scaleLinear().domain([0, 1 - 650 / 800]).range([0, 20]),
+                yScaleDown: d3.scaleLinear().domain([-650 / 800, 0]).range([-15, 0]),
             }
         },
         user: {
@@ -69,7 +69,7 @@ let MapSetting = function () {
     ;
     let yscale = d3.scaleLinear().range([0, graphicopt.heightG()]), linkscale = d3.scaleSqrt().range([0.3, 2]);
     let xScale = d3.scaleLinear();
-    let drawThreshold = 650 / 800;
+    let drawThreshold = 650 / 700;
     let scaleNode = d3.scaleLinear();
     let scaleNode_y = d3.scaleLinear();
     let scaleJob = d3.scaleLinear();
