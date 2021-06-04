@@ -436,6 +436,7 @@ function handleRankingData(data){
             const val = {mean: Layout.jobarrdata[d.job_id]?d3.mean(Layout.jobarrdata[d.job_id],d=>d?d[s.idroot]:undefined):null}
             val.min = Layout.minMaxDataCompJob[d.job_id]?d3.min(Layout.minMaxDataCompJob[d.job_id],d=>d?d[0][s.idroot]:undefined):null;
             val.max = Layout.minMaxDataCompJob[d.job_id]?d3.max(Layout.minMaxDataCompJob[d.job_id],d=>d?d[1][s.idroot]:undefined):null;
+            val.num = Layout.jobarrdata[d.job_id].filter(d=>((d?d[s.idroot]:undefined) !==undefined)).length;
             return val
         })
     });
@@ -446,6 +447,7 @@ function handleRankingData(data){
             const val = {mean: Layout.userarrdata[k]?d3.mean(Layout.userarrdata[k],d=>d?d[s.idroot]:undefined):null}
             val.min = Layout.minMaxDataUser[k]?d3.min(Layout.minMaxDataUser[k],d=>d?d[0][s.idroot]:undefined):null;
             val.max = Layout.minMaxDataUser[k]?d3.max(Layout.minMaxDataUser[k],d=>d?d[1][s.idroot]:undefined):null;
+            val.num = Layout.userarrdata[k].filter(d=>((d?d[s.idroot]:undefined) !==undefined)).length;
             return val
         })
     });
@@ -456,6 +458,7 @@ function handleRankingData(data){
             const val = {mean: tsnedata[k]?d3.mean(tsnedata[k],d=>d?d[s.idroot]:undefined):null}
             val.min = Layout.minMaxDataComp[k]?d3.min(Layout.minMaxDataComp[k],d=>d?d[0][s.idroot]:undefined):null;
             val.max = Layout.minMaxDataComp[k]?d3.max(Layout.minMaxDataComp[k],d=>d?d[1][s.idroot]:undefined):null;
+            val.num = tsnedata[k].filter(d=>((d?d[s.idroot]:undefined) !==undefined)).length;
             return val
         })
     });

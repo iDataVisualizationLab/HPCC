@@ -50,6 +50,16 @@ let MapSetting = function () {
             r: 10,
             r_inside: 2,
         },
+        radaropt : {
+            // summary:{quantile:true},
+            mini:true,
+            levels:6,
+            gradient:true,
+            w:20,
+            h:20,
+            showText:false,
+            margin: {top: 0, right: 0, bottom: 0, left: 0},
+        },
         userStreamMode: 'Power'
     };
     let runopt = {mouse: {}, highlightStream: 'none'};
@@ -376,6 +386,22 @@ let MapSetting = function () {
                     delete linkob[comp + '|' + j];
                 });
             });
+            let summary = serviceFullList.map((s,si)=>{
+                let min = Infinity;
+                let max = -Infinity;
+                let mean = 0;
+                let num = 0;
+                Object.values(job_ids).forEach(j=>{
+                    min = Math.min(j.summary[si].min,min);
+                    max = Math.max(j.summary[si].min,max);
+                    if (j.summary[si].mean){
+                        mean += (j.summary[si].mean*j.summary[si].num);
+                        num += j.summary[si].num;
+                    }
+                });
+                return {min,max,mean:mean/num,num};
+            });
+            debugger
             const jobKey = u.key + 'jobColapse';
             jobsObj[jobKey] = {};
             jobsObj[jobKey].user_name = u.key;
@@ -383,6 +409,7 @@ let MapSetting = function () {
             jobsObj[jobKey].key = jobKey;
             jobsObj[jobKey].type = 'job';
             jobsObj[jobKey].job_ids = job_ids;
+            jobsObj[jobKey].summary = summary;
             jobsObj[jobKey].isjobColapse = true;
             linkob[jobKey + '|' + user_name] = {source: jobsObj[jobKey], target: usersObj[u.key]};
             jobsObj[jobKey].node_list.forEach(comp => {
@@ -392,30 +419,16 @@ let MapSetting = function () {
         jobs = d3.values(jobsObj);
         linkdata = d3.values(linkob);
     }
-
+    let createRadar = (datapoint, bg, data, customopt)=>createRadar_func(datapoint, bg, data, customopt,undefined,graphicopt.radaropt,()=>'gray');
+    function getradarData(a,name){
+        let temp = a.map((d,i)=>{return {axis: serviceFullList[i].text, value: d, enable: serviceFullList[i].enable, angle: serviceFullList[i].angle};});
+        temp.sort((a,b)=>a.angle-b.angle);
+        temp.name = name;
+        return temp;
+    }
     function drawJobNode() {
         if (jobs.length) {
             g.select('.job_title').classed('hide', false);
-            let timerange = [d3.min(jobs, d => d.submit_time ? new Date(d.submit_time) : undefined), new Date(+scheme.limitTime[1])];
-            timerange[0] = new Date(timerange[0].toDateString());
-            timerange[1].setDate(timerange[1].getDate() + 1);
-            timerange[1] = new Date(timerange[1].toDateString());
-            let time_daynum = d3.timeDay.every(1).range(timerange[0], timerange[1]).length;
-            console.log(timerange, time_daynum)
-            var radius = d3.scaleTime()
-                .domain(timerange)
-                .range([graphicopt.job.r_inside, graphicopt.job.r]);
-
-            var theta = d3.scaleTime()
-                .domain(timerange)
-                .range([0, Math.PI * 2 * (time_daynum - 1)]);
-
-            var spiral = d3.radialLine()
-                .curve(d3.curveCardinal)
-                .angle(theta)
-                .radius(radius);
-
-            let backdround_spiral = d3.timeHour.every(1).range(timerange[0], timerange[1]);
         } else {
             g.select('.job_title').classed('hide', true);
         }
@@ -431,45 +444,30 @@ let MapSetting = function () {
                     'class': 'computeSig_b',
                     // 'd': d=>spiral([new Date(d.submitTime),new Date(d.start_time),timeStep]),
                     // 'd': d=>spiral(backdround_spiral),
-                    'r': graphicopt.job.r,
+                    'r': graphicopt.radaropt.w/2,
                     'fill': '#dddddd',
                     'opacity': 0.2,
                     'stroke-width': 0,
                 });
-        jobNode_n.append('path')
+        jobNode_n.append('g')
             .attrs(
                 {
-                    'class': 'computeSig_sub submitTime',
+                    'class': 'jobradar',
                     'fill': 'none'
                 });
-        jobNode_n.append('path')
-            .attrs(
-                {
-                    'class': 'computeSig_start timeBoxRunning',
-                    'fill': 'none'
-                })
-        ;
+
         jobNode_n.append('text').attr('class', 'lelftext label').attrs({'x': -graphicopt.job.r}).style('text-anchor', 'end');
         jobNode_n.append('text').attr('class', 'righttext label').attrs({'x': graphicopt.job.r});
         jobNode = nodeg.selectAll('.jobNode');
-        jobNode.select('.computeSig_b').attr('r', graphicopt.job.r);
-        jobNode.select('.computeSig_sub.submitTime').attr('d', function (d) {
-            if (!d.isjobColapse) {
-                let temp = d3.timeHour.every(1).range(new Date(d.submit_time), new Date(d.start_time));
-                temp.pop();
-                temp.push(new Date(d.start_time));
-                return spiral(temp);
+        jobNode.select('.computeSig_b').attr('r', graphicopt.radaropt.w/2);
+        jobNode.select('.jobradar').each(function(d){
+            if (d.summary && !d.radarData)
+                d.radarData = getradarData(d.summary.map(d=>d.mean),d.key);
+            if (d.radarData){
+                d.radarData.color = d.job_ids? 'black': 'gray'
+                createRadar(d3.select(this).select('.linkLineg'), d3.select(this), d.radarData, {colorfill:'gray'});
             }
-            return '';
-        })
-        ;
-        jobNode.select('.computeSig_start.timeBoxRunning').attr('d', function (d) {
-            let temp = d3.timeHour.every(1).range(new Date(d.start_time), scheme.limitTime[1]);
-            temp.pop();
-            temp.push(scheme.limitTime[1]);
-            return spiral(temp);
         });
-        debugger
         jobNode.select('.lelftext').text(d => `#Computes: ${d.node_list.length}`)
         jobNode.select('.righttext').text(d => d.values ? `#Jobs: ${d.values.length}` : '')
 

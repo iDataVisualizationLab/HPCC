@@ -207,11 +207,12 @@ function getServiceSet(compObj){
     serviceListattr =Object.keys(comps[0]).filter(s=>{
         return _.isArray(sample[s]) && !notService[s]
     });
+    const angle = Math.PI*2/serviceListattr.length;
     serviceLists = serviceListattr.map((s,si)=>({
         "text": s,
         "id": si,
         "enable": true,
-        "sub": [{"text": s, "id": 0, "enable": true, "idroot": si, "angle": 0, "range": [0, 0]}]
+        "sub": [{"text": s, "id": 0, "enable": true, "idroot": si, "angle": si*angle, "range": [0, 0]}]
     }));
     serviceFullList = [];
     serviceLists.forEach(s=>s.sub.forEach(ss=>serviceFullList.push(ss)));
