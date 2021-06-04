@@ -1301,13 +1301,6 @@ let MapSetting = function () {
                     sametarget.forEach(l=>{
                         listUserHighlight[l.target.key]=true;
                     });
-                    g.selectAll('.jobNode').filter(f => samesource.find(e => e.target === f)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).selectAll('.label').classed('hide', !jobEmpty);
-                    g.selectAll('.userNode').filter(f => sametarget.find(e => e.target === f)).classed('highlight', !jobEmpty);
-
-                    g.selectAll('.computeNode:not(.highlight)').classed('fade', true);
-                    linkg.selectAll('.links:not(.highlight)').classed('hide', true);
-                    g.selectAll('.jobNode:not(.highlight)').classed('hide', true);
-                    g.selectAll('.userNode:not(.highlight)').classed('fade', true);
                 });
             g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight2', d=>listJobHighlight[d.key]?(!jobEmpty):false);
             g.selectAll('.userNode').classed('highlight2', d=>listUserHighlight[d.key]?(!jobEmpty):false);
@@ -1332,7 +1325,7 @@ let MapSetting = function () {
         nothighlight.selectAll('path.highightedLinegg').remove();
         nothighlight.selectAll('text.highightedText').remove();
         nothighlight.selectAll('path.highightedLine').remove();
-        nothighlight.selectAll('path.linegg').transition().duration(animation_time).style('opacity', 1);
+        nothighlight.selectAll('path.linegg');
 
         let highighted = bg.filter(d => d.highlightData);
         highighted.filter(d => d.highlightData.notEmpty).selectAll('path.linegg').transition().duration(animation_time).style('opacity', 1);
@@ -1341,7 +1334,7 @@ let MapSetting = function () {
         nothighlight.selectAll('path.highightedLinegg').remove();
         nothighlight.selectAll('path.highightedLine').remove();
         nothighlight.selectAll('text.highightedText').remove();
-        nothighlight.selectAll('path.linegg').transition().duration(animation_time).style('opacity', 0.1);
+        nothighlight.selectAll('path.linegg');
 
         highighted.selectAll('path.highightedLinegg')
             .data(d => d.highlightData)
