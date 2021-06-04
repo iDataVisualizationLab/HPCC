@@ -937,10 +937,10 @@ let MapSetting = function () {
         cells.exit().remove();
 
         let cellsText = cells
-        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x + (d.key !== 'UserID' ? tableLayout.column[d.key].width : 0)},${tableLayout.column[d.key].y})`);
+        let cells_n = cells.enter().append('g').attr('class', d => 'cell ' + tableLayout.column[d.key].type).attr('transform', d => `translate(${tableLayout.column[d.key].x + (d.key !== 'UserID' ? tableLayout.column[d.key].width/2 : 0)},${tableLayout.column[d.key].y})`);
         let cellsText_n = cells_n//.filter(d => tableLayout.column[d.key].type !== 'graph');
         cellsText_n.append('text')
-            .style('text-anchor', d => d.key !== 'UserID' ? 'end' : 'start');
+            .style('text-anchor', d => d.key !== 'UserID' ? 'middle' : 'start');
         cellsText = cellsText_n.merge(cellsText).select('text').text(d => {
             let custom = tableLayout.column[d.key].format;
             if (custom)
@@ -1293,6 +1293,7 @@ let MapSetting = function () {
             g.selectAll('.computeNode').filter(d=>listCompHighlight[d.key])
                 .classed('highlight2', true)
                 .each(function(d){
+                    d3.select(this).moveToFront();
                     const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight2', true).data();
                     const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight2', !jobEmpty).data();
                     samesource.forEach(l=>{
@@ -1309,7 +1310,11 @@ let MapSetting = function () {
             g.selectAll('.highlight2').classed('highlight2',false);
         }
     }
-
+    d3.selection.prototype.moveToFront = function() {
+        return this.each(function(){
+            this.parentNode.appendChild(this);
+        });
+    };
     function drawEmbedding_timeline() {
         handleHightlight();
         let bg = svg.selectAll('.computeSig').attr('transform', d => {

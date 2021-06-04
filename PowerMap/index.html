@@ -183,9 +183,10 @@
                         </nav>
                     </div>
                     <div style="max-height: 80vh; overflow-y: auto">
-                        <div class="card-body row" id="controlOnToolbarHolder">
-                            <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder"
+                        <div class="card-body" id="controlOnToolbarHolder">
+                            <div id="controlOnToolbar" data-maximize="controlOnToolbarHolder"
                                  data-minimize="controlHolderMenu">
+                                <div class="row">
                                 <div class="row col-12">
                                     <div class="row input-group mb-3">
                                         <div class="input-group-prepend">
@@ -216,8 +217,8 @@
                                     <label class="col-4" for="highlightType">Highlight: </label>
                                     <select class="col-8" id="highlightType">
                                         <option value="none">None</option>
-                                        <option value="highValue">10 highest peak</option>
-                                        <option value="suddenChange">10 highest sudden change</option>
+                                        <option value="highValue">10 highest peaks</option>
+                                        <option value="suddenChange">10 highest sudden changes</option>
                                     </select>
                                 </div>
                                 <div style="position:relative" id="legendTimeArc">
@@ -234,6 +235,8 @@
                                         <input type="number" style="width:100%"/>
                                     </div>
                                 </div>
+                                </div>
+
                                 <ul class="nav nav-tabs">
                                     <!--                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
                                     <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#userOnToolbarHolder">User list</a></li>
@@ -467,12 +470,11 @@
                                         </div>
                                     </div>
                                 </div>
+                              
                             </div>
                         </div>
+                        </div>
                     </div>
-
-                </div>
-            </div>
 
     </div>
     <div class="floatRight card bg-secondary mb-3 informationHolder hide">

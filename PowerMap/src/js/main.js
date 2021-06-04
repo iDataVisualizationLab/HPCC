@@ -41,7 +41,8 @@ $(document).ready(function () {
             // let url = 'src/data/nocona_aggregated.csv';
             // let url = 'src/data/aggregated_metrics_6h.json';
             // let url = 'src/data/aggregated_metrics_04_28.json';
-            let url = 'src/data/aggregated_metrics_05_12.json';
+            // let url = 'src/data/aggregated_metrics_05_12.json';
+            let url = 'src/data/aggregated_metrics_04-28_L.json';
             // let url = 'src/data/aggregated_metrics_05_23.json';
             // let url = 'src/data/aggregated_metrics_05_12_L.json';
             //---------
@@ -76,7 +77,7 @@ $(document).ready(function () {
             request = new Simulation(d3.json(url).then(d => {
                 // d=d.slice(0,1920)
                 const data = d;
-                // getServiceSet(data.nodes_info);
+                getServiceSet(data.nodes_info);
                 serviceControl();
                 data.time_stamp = data.time_stamp.map(d => d * 1000000000);
                 const jobObjArr = {};
@@ -94,6 +95,7 @@ $(document).ready(function () {
                                 job_id: d.job_array_id,
                                 job_ids:{},
                                 "finish_time": null,
+                                "end_time": null,
                                 "job_name": d.name,
                                 "node_list": [],
                                 "node_list_obj": {},
@@ -132,6 +134,7 @@ $(document).ready(function () {
                                     "job_id": j,
                                     "cpu_cores": d.cpus[ti][i],
                                     "finish_time": null,
+                                    "end_time": null,
                                     "job_name": '' + j,
                                     "node_list": [],
                                     "node_list_obj": {},
