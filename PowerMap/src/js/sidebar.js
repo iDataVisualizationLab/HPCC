@@ -10,10 +10,11 @@ function initSideBar(){
 }
 function hoverSidebarIn() {
     $(this).toggleClass( "active", true);
+    $('#controls').show();
     document.documentElement.style.setProperty('--sideNavwidth', 330 + "px");
 }
 function hoverSidebarOut(){
     $(this).toggleClass( "active", false);
-    $(this).find('.collapse').collapse('hide');
+    $(this).find('.collapse').hide();
     document.documentElement.style.setProperty('--sideNavwidth', 52 + "px");
 }
