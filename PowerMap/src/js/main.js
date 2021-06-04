@@ -41,8 +41,8 @@ $(document).ready(function () {
             // let url = 'src/data/nocona_aggregated.csv';
             // let url = 'src/data/aggregated_metrics_6h.json';
             // let url = 'src/data/aggregated_metrics_04_28.json';
-            let url = 'src/data/aggregated_metrics_05_12.json';
-            // let url = 'src/data/aggregated_metrics_04-28_L.json';
+            // let url = 'src/data/aggregated_metrics_05_12.json';
+            let url = 'src/data/aggregated_metrics_04-28_L.json';
             // let url = 'src/data/aggregated_metrics_05_23.json';
             // let url = 'src/data/aggregated_metrics_05_12_L.json';
             //---------
