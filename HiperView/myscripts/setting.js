@@ -242,7 +242,7 @@ function newdatatoFormat (data,separate){
                  let retievedData = processResult_csv(d[h+separate+attr],attr);
                 sampleS[h][attr].push(retievedData);
                 retievedData.forEach((r,sub_index)=> {
-                    tsnedata[h][currentIndex].push(r === null ? 0 : scaleService[i][sub_index](r) || 0);
+                    tsnedata[h][currentIndex].push(r === null ? 0 : Math.max(scaleService[i][sub_index](r),0) || 0);
                 });
             });
         })
