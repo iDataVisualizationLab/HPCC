@@ -408,7 +408,7 @@ let MapSetting = function () {
             delete jobsObj[jobKey];
             delete linkob[jobKey + '|' + user_name];
 
-            const compKey = u.key + 'computeColapse';
+            const compKey = u.key + ' summary';
             delete computersObj[compKey];
             delete linkob[compKey + '|' + jobKey];
 
@@ -417,6 +417,7 @@ let MapSetting = function () {
             let job_ids = {};
             let timePoints = {};
             let compute_ids = {};
+            let compute_tsnedata = [];
             u._currentjobs.forEach(j => {
                 delete jobsObj[j];
                 delete linkob[j + '|' + user_name];
@@ -433,15 +434,19 @@ let MapSetting = function () {
                     compute_ids[comp] = scheme.data.computers[comp];
                     delete computersObj[comp].links[j];
                     if(!Object.keys(computersObj[comp].links).length){
-                        console.log('deleted ',comp)
                         delete  computersObj[comp];
                     }
+                    scheme.data.jobArr[j].forEach((d,ti)=>{
+                        if (d){
+                            timePoints[ti] = 1;
+                            if (scheme.data.tsnedata[comp][ti]){
+                                if (!compute_tsnedata[ti])
+                                    compute_tsnedata[ti]= [];
+                                compute_tsnedata[ti].push(scheme.data.tsnedata[comp][ti])
+                            }
+                        }
+                    });
 
-                });
-                scheme.data.jobArr[j].forEach((d,ti)=>{
-                    if (d){
-                        timePoints[ti] = 1;
-                    }
                 });
             });
             let summary = serviceFullList.map((s,si)=>{
@@ -479,16 +484,16 @@ let MapSetting = function () {
             //     linkob[comp + '|' + jobKey] = {source: computersObj[comp], target: jobsObj[jobKey]};
             // })
 
-            const compKey = u.key + 'computeColapse';
-            let comptsnedata = scheme.data.timespan.map((t,ti)=>{
+            const compKey = u.key + ' summary';
+            let comptsnedata = compute_tsnedata.map((t,ti)=>{
                 const d =  serviceFullList.map((s,si)=>{
-                  return d3.mean(Object.keys(compute_ids),comp=>scheme.data.tsnedata[comp][ti][si]);
+                  return d3.mean(t,f=>f[si]);
                 });
                 d.name = compKey;
                 d.timestep = ti;
                 return d;
             });
-            console.log(comptsnedata)
+
             let compSummary = serviceFullList.map((s,si)=>{
                 let min = Infinity;
                 let max = -Infinity;
@@ -511,7 +516,7 @@ let MapSetting = function () {
             computersObj[compKey].compute_ids = compute_ids;
             computersObj[compKey].summary = compSummary;
             computersObj[compKey].tsnedata = comptsnedata;
-            computersObj[compKey].iscomputeColapse = true;
+            computersObj[compKey].iscomputeCollapse = true;
             computersObj[compKey].links = {};
             linkob[compKey + '|' + jobKey] = {source: computersObj[compKey], target: jobsObj[jobKey]};
             computersObj[compKey].links[jobKey] = compKey + '|' + jobKey;
