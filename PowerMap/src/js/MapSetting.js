@@ -304,12 +304,20 @@ let MapSetting = function () {
                         usersObj[user_name].type = 'user';
                         usersObj[user_name]._currentjobs = [];
                         usersObj[user_name].links = {};
+                        usersObj[user_name].timePoints = {};
                     }
                     usersObj[user_name]._currentjobs.push(j);
 
                     jobsObj[j] = scheme.data.jobs[j];
                     jobsObj[j].key = j;
                     jobsObj[j].type = 'job';
+                    jobsObj[j].timePoints = {};
+                    scheme.data.jobArr[j].forEach((d,ti)=>{
+                        if (d){
+                            usersObj[user_name].timePoints[ti] = 1;
+                            jobsObj[j].timePoints[ti] = 1;
+                        }
+                    });
                     linkob[j + '|' + user_name] = {source: jobsObj[j], target: usersObj[user_name]};
 
                     if (!jobsObj[j].links)
@@ -360,10 +368,6 @@ let MapSetting = function () {
             d.order = i
         })
     }
-    function handleCleanCompute(comp){
-        linkdata.forEach()
-    }
-
 
     function handleCollapseJobs(u) {
         let user_name = u.key;
@@ -411,6 +415,7 @@ let MapSetting = function () {
         } else {
             let node_listO = {};
             let job_ids = {};
+            let timePoints = {};
             let compute_ids = {};
             u._currentjobs.forEach(j => {
                 delete jobsObj[j];
@@ -432,6 +437,11 @@ let MapSetting = function () {
                         delete  computersObj[comp];
                     }
 
+                });
+                scheme.data.jobArr[j].forEach((d,ti)=>{
+                    if (d){
+                        timePoints[ti] = 1;
+                    }
                 });
             });
             let summary = serviceFullList.map((s,si)=>{
@@ -459,6 +469,8 @@ let MapSetting = function () {
             jobsObj[jobKey].summary = summary;
             jobsObj[jobKey].isjobColapse = true;
             jobsObj[jobKey].links = {};
+            jobsObj[jobKey].timePoints = timePoints;
+
             linkob[jobKey + '|' + user_name] = {source: jobsObj[jobKey], target: usersObj[u.key]};
             jobsObj[jobKey].links[user_name] = linkob[jobKey + '|' + user_name];
 
@@ -748,7 +760,21 @@ let MapSetting = function () {
                 g.selectAll('.jobNode').classed('hide', true);
                 g.selectAll('.jobNode').filter(f => sametarget.find(e => e.source === f)).classed('hide', false).classed('highlight', true).selectAll('.label').classed('hide', true);
                 g.selectAll('.computeNode').classed('fade', true);
-                g.selectAll('.computeNode').filter(f => samesource.find(e => e.source === f)).classed('highlight', true);
+                g.selectAll('.computeNode').filter(f => {
+                    let link = samesource.filter(e => e.source === f);
+                    if (link.length)
+                    {
+                        f.timePoints={};
+                        link.forEach(l=>{
+                            Object.keys(l.target.timePoints).forEach(t=>f.timePoints[t] = 1);
+                        });
+                        return true;
+                    }
+                    return false;
+                }).classed('highlight', true)
+                .each(function(d){
+                    onFilterComputeHighlight(d3.select(this).select('g.computeSig'),Object.keys(d.timePoints))
+                });
                 // table_footerNode.classed('fade', true);
             }, null
             ], [function (d) {
@@ -757,6 +783,8 @@ let MapSetting = function () {
                 g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide', false);
                 g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
                 link.classed('hide', false).classed('highlight', false);
+
+                g.selectAll('.computeNode').selectAll('path.durationHighlight').remove();
                 // table_footerNode.classed('fade', false);
             }, null
             ]));
@@ -793,7 +821,22 @@ let MapSetting = function () {
                 d3.selectAll('.userNode').classed('fade', true);
                 d3.selectAll('.userNode').filter(f => samesource.find(e => e.target === f)).classed('highlight', true);
                 d3.selectAll('.computeNode').classed('fade', true);
-                d3.selectAll('.computeNode').filter(f => sametarget.find(e => e.source === f)).classed('highlight', true);
+                d3.selectAll('.computeNode')
+                g.selectAll('.computeNode').filter(f => {
+                    let link = sametarget.filter(e => e.source === f);
+                    if (link.length)
+                    {
+                        f.timePoints={};
+                        link.forEach(l=>{
+                            Object.keys(l.target.timePoints).forEach(t=>f.timePoints[t] = 1);
+                        });
+                        return true;
+                    }
+                    return false;
+                }).classed('highlight', true)
+                    .each(function(d){
+                        onFilterComputeHighlight(d3.select(this).select('g.computeSig'),Object.keys(d.timePoints))
+                    });
                 // table_footerNode.classed('fade', true);
             }, null], [function (d) {
                 releaseSelection();
@@ -1012,7 +1055,8 @@ let MapSetting = function () {
     function releaseSelection() {
         g.selectAll('.jobNode').classed('hide', false).classed('highlight', false);
         g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
-        g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+        g.selectAll('.computeNode').classed('fade', false).classed('highlight', false)
+            .selectAll('path.durationHighlight').remove();
         linkg.selectAll('.links').classed('hide', false).classed('highlight', false);
         nodeg.select('.table.footer').classed('fade', false);
     }
@@ -1275,7 +1319,32 @@ let MapSetting = function () {
         // n.drawData = drawData;
         return drawData;
     }
-
+    function onFilterComputeHighlight(compute,timePoint) {
+        if (timePoint){
+            const d = compute.datum();
+            d.highlightRange = d.drawData.map(d => {
+                const color = d3.color(d.color);
+                color.opacity = 1;
+                return {value: [], color: color.toString(), up: d.up}
+            });
+            d.highlightRange.timesteps = [];
+            timePoint.forEach(t=>{
+                d.highlightRange.forEach((h,i)=>{
+                    if (d.drawData[i].value[t][serviceSelected] !== undefined) {
+                        h.value[t] = d.drawData[i].value[t];
+                    }
+                })
+            });
+            compute.selectAll('path.durationHighlight')
+                .data(d=>d.highlightRange)
+                .join('path')
+                .attr('class', 'durationHighlight')
+                .call(updatelayerpath);
+        }else{
+            delete compute.datum().highlightRange;
+            compute.selectAll('path.durationHighlight').remove();
+        }
+    }
     function handleHightlight() {
         let listCompHighlight = {};
         if (runopt.highlightStream === 'highValue') {
@@ -1428,6 +1497,7 @@ let MapSetting = function () {
             this.parentNode.appendChild(this);
         });
     };
+
     function drawEmbedding_timeline() {
         handleHightlight();
         let bg = svg.selectAll('.computeSig').attr('transform', d => {
@@ -1793,6 +1863,8 @@ function handle_data_timeArc() {
     scheme.data.users = Layout.usersStatic;
     scheme.data.jobs = Layout.jobsStatic;
     scheme.data.computers = Layout.computesStatic;
+    scheme.data.userArr = Layout.userarrdata;
+    scheme.data.jobArr = Layout.jobarrdata;
     scheme.data.tsnedata = tsnedata;
     scheme.data.minMaxData = Layout.minMaxDataComp;
     scheme.data.emptyMap = Layout.noJobMap
