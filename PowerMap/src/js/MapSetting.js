@@ -783,13 +783,14 @@ let MapSetting = function () {
                 // table_footerNode.classed('fade', true);
             }, null
             ], [function (d) {
-                g.selectAll('.userNode').classed('fade', false);
-                d3.select(this).classed('highlight', false);
-                g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide', false);
-                g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                link.classed('hide', false).classed('highlight', false);
-
-                g.selectAll('.computeNode').selectAll('path.durationHighlight').remove();
+                // g.selectAll('.userNode').classed('fade', false);
+                // d3.select(this).classed('highlight', false);
+                // g.selectAll('.jobNode').classed('hide', false).classed('highlight', false).selectAll('.label').classed('hide', false);
+                // g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                // link.classed('hide', false).classed('highlight', false);
+                //
+                // g.selectAll('.computeNode').selectAll('path.durationHighlight').remove();
+                releaseSelection();
                 // table_footerNode.classed('fade', false);
             }, null
             ]));
@@ -808,11 +809,12 @@ let MapSetting = function () {
                 // table_footerNode.classed('fade', true);
                 master.mouseover.forEach(f => f(d.values_name));
             }, null], [function (d) {
-                d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, true);
-                g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
-                g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
-                g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
-                link.classed('hide', false).classed('highlight', false);
+                // d3.select(this).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, true);
+                // g.selectAll('.computeNode').classed('fade', false).classed('highlight', false);
+                // g.selectAll('.jobNode').classed('hide', jobEmpty).classed('highlight', false).selectAll('.label').classed('hide', jobEmpty);
+                // g.selectAll('.userNode').classed('fade', false).classed('highlight', false);
+                // link.classed('hide', false).classed('highlight', false);
+                releaseSelection();
                 // table_footerNode.classed('fade', false);
                 master.mouseout.forEach(f => f(d.values_name));
             }, null]));
