@@ -303,6 +303,7 @@ let MapSetting = function () {
                         usersObj[user_name].key = user_name;
                         usersObj[user_name].type = 'user';
                         usersObj[user_name]._currentjobs = [];
+                        usersObj[user_name].links = {};
                     }
                     usersObj[user_name]._currentjobs.push(j);
 
@@ -310,10 +311,20 @@ let MapSetting = function () {
                     jobsObj[j].key = j;
                     jobsObj[j].type = 'job';
                     linkob[j + '|' + user_name] = {source: jobsObj[j], target: usersObj[user_name]};
+
+                    if (!jobsObj[j].links)
+                        jobsObj[j].links = {};
+                    jobsObj[j].links[user_name] = j + '|' + user_name;
+                    usersObj[user_name].links[j] = j + '|' + user_name;
+
                     scheme.data.jobs[j].node_list.forEach(comp => {
                         computersObj[comp] = scheme.data.computers[comp];
                         computersObj[comp].key = comp;
                         linkob[comp + '|' + j] = {source: computersObj[comp], target: jobsObj[j]};
+                        if (!computersObj[comp].links)
+                            computersObj[comp].links = {};
+                        computersObj[comp].links[j] = comp + '|' + j;
+                        jobsObj[j].links[comp] = comp + '|' + j;
                     })
                 }
             })
@@ -349,6 +360,10 @@ let MapSetting = function () {
             d.order = i
         })
     }
+    function handleCleanCompute(comp){
+        linkdata.forEach()
+    }
+
 
     function handleCollapseJobs(u) {
         let user_name = u.key;
@@ -357,9 +372,28 @@ let MapSetting = function () {
                 jobsObj[j] = scheme.data.jobs[j];
                 jobsObj[j].key = j;
                 jobsObj[j].type = 'job';
+                if (!jobsObj[j].links)
+                    jobsObj[j].links = {};
+                jobsObj[j].type = 'job';
                 linkob[j + '|' + user_name] = {source: jobsObj[j], target: usersObj[user_name]};
+                jobsObj[j].links[user_name] = j + '|' + user_name;
+                u.links[j] = j + '|' + user_name;
+
                 scheme.data.jobs[j].node_list.forEach(comp => {
+                    // if compute collapse
+                    if (!computersObj[comp]){
+                        computersObj[comp] = scheme.data.computers[comp];
+                        computersObj[comp].key = comp;
+                        computersObj[comp].links = {};
+                    }else{
+                        if(! computersObj[comp].links)
+                            computersObj[comp].links = {};
+                    }
+                    computersObj[comp].links[j] = comp + '|' + j;
+
                     linkob[comp + '|' + j] = {source: computersObj[comp], target: jobsObj[j]};
+                    jobsObj[j].links[comp] = comp + '|' + j;
+
                 });
             });
             const jobKey = u.key + 'jobColapse';
@@ -370,9 +404,14 @@ let MapSetting = function () {
             delete jobsObj[jobKey];
             delete linkob[jobKey + '|' + user_name];
 
+            const compKey = u.key + 'computeColapse';
+            delete computersObj[compKey];
+            delete linkob[compKey + '|' + jobKey];
+
         } else {
             let node_listO = {};
             let job_ids = {};
+            let compute_ids = {};
             u._currentjobs.forEach(j => {
                 delete jobsObj[j];
                 delete linkob[j + '|' + user_name];
@@ -384,6 +423,15 @@ let MapSetting = function () {
                 scheme.data.jobs[j].node_list.forEach(comp => {
                     node_listO[comp] = true;
                     delete linkob[comp + '|' + j];
+
+                    // handle for compute collapse
+                    compute_ids[comp] = scheme.data.computers[comp];
+                    delete computersObj[comp].links[j];
+                    if(!Object.keys(computersObj[comp].links).length){
+                        console.log('deleted ',comp)
+                        delete  computersObj[comp];
+                    }
+
                 });
             });
             let summary = serviceFullList.map((s,si)=>{
@@ -410,12 +458,58 @@ let MapSetting = function () {
             jobsObj[jobKey].job_ids = job_ids;
             jobsObj[jobKey].summary = summary;
             jobsObj[jobKey].isjobColapse = true;
+            jobsObj[jobKey].links = {};
             linkob[jobKey + '|' + user_name] = {source: jobsObj[jobKey], target: usersObj[u.key]};
-            jobsObj[jobKey].node_list.forEach(comp => {
-                linkob[comp + '|' + jobKey] = {source: computersObj[comp], target: jobsObj[jobKey]};
-            })
+            jobsObj[jobKey].links[user_name] = linkob[jobKey + '|' + user_name];
+
+            // if compute not collapse
+            // jobsObj[jobKey].node_list.forEach(comp => {
+            //     linkob[comp + '|' + jobKey] = {source: computersObj[comp], target: jobsObj[jobKey]};
+            // })
+
+            const compKey = u.key + 'computeColapse';
+            let comptsnedata = scheme.data.timespan.map((t,ti)=>{
+                const d =  serviceFullList.map((s,si)=>{
+                  return d3.mean(Object.keys(compute_ids),comp=>scheme.data.tsnedata[comp][ti][si]);
+                });
+                d.name = compKey;
+                d.timestep = ti;
+                return d;
+            });
+            console.log(comptsnedata)
+            let compSummary = serviceFullList.map((s,si)=>{
+                let min = Infinity;
+                let max = -Infinity;
+                let mean = 0;
+                let num = 0;
+                Object.values(compute_ids).forEach(j=>{
+                    min = Math.min(j.summary[si].min,min);
+                    max = Math.max(j.summary[si].min,max);
+                    if (j.summary[si].mean){
+                        mean += (j.summary[si].mean*j.summary[si].num);
+                        num += j.summary[si].num;
+                    }
+                });
+                return {min,max,mean:mean/num,num};
+            });
+
+            computersObj[compKey] = {};
+            computersObj[compKey].user = [u.key];
+            computersObj[compKey].key = compKey;
+            computersObj[compKey].compute_ids = compute_ids;
+            computersObj[compKey].summary = compSummary;
+            computersObj[compKey].tsnedata = comptsnedata;
+            computersObj[compKey].iscomputeColapse = true;
+            computersObj[compKey].links = {};
+            linkob[compKey + '|' + jobKey] = {source: computersObj[compKey], target: jobsObj[jobKey]};
+            computersObj[compKey].links[jobKey] = compKey + '|' + jobKey;
+            // add link to job
+            jobsObj[jobKey]._node_list = jobsObj[jobKey].node_list.slice();
+            jobsObj[jobKey].node_list = [compKey];
+            jobsObj[jobKey].links[compKey] = compKey + '|' + jobKey;
         }
         jobs = d3.values(jobsObj);
+        computers = d3.values(computersObj);
         linkdata = d3.values(linkob);
     }
     let createRadar = (datapoint, bg, data, customopt)=>createRadar_func(datapoint, bg, data, customopt,undefined,graphicopt.radaropt,()=>'gray');
@@ -1086,7 +1180,7 @@ let MapSetting = function () {
     };
     master.drawComp = function () {
         computers.map(d => {
-            d.drawData = getDrawData(scheme.data.tsnedata[d.key])
+            d.drawData = getDrawData(d.tsnedata?? scheme.data.tsnedata[d.key])
         });
         drawEmbedding_timeline();
         return master;
