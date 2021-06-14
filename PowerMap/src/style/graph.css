@@ -233,6 +233,10 @@ table td.selected {
     opacity: 1;
 }
 
+.node.highlight .linegg {
+    opacity:0.2;
+}
+
 .links.highlight text{
     display: unset;
 }
