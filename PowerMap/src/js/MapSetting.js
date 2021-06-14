@@ -796,6 +796,10 @@ let MapSetting = function () {
             ]));
         g.selectAll('.computeNode')
             .call(path => freezinghandle(path, [function (d) {
+                d3.select(this) .each(function(d){
+
+                    onFilterComputeHighlight(d3.select(this).select('g.computeSig'),undefined, true);
+                });
                 d3.select(this).classed('highlight', true).select('.computeSig_label').text(d => d.orderG !== undefined ? `Group ${d.orderG + 1}${d.text !== '' ? `: ${d.text}` : ''}` : trimNameArray(d.key))//.call(wrap, false);
                 const samesource = link.filter(f => d === f.source).classed('hide', jobEmpty).classed('highlight', true).data();
                 const sametarget = link.filter(f => samesource.find(e => e.target === f.source)).classed('hide', jobEmpty).classed('highlight', !jobEmpty).data();
@@ -1084,7 +1088,6 @@ let MapSetting = function () {
     }
 
     function updaterow(path) {
-        debugger
         var delta_h = Math.max(tableLayout.row.height / 2, 15)
         let rows = path.selectAll('.row').data(d => [tableData[d.key]]).join('g').attr('class', 'row')
             .attr('transform', `translate(0,${-delta_h})`);
@@ -1164,21 +1167,21 @@ let MapSetting = function () {
                     user.sort((a, b) => a.jobStart_order - b.jobStart_order);
                     break;
                 case 'UserID':
-                    user.sort((a, b) => a.key.localeCompare(b.key) * (-1 + 2 * tableHeader.direction));
+                    users.sort((a, b) => a.key.localeCompare(b.key) * (-1 + 2 * tableHeader.direction));
                     break;
-                case 'Hosts':
-                    user.sort((a, b) => (b.unqinode.length - a.unqinode.length) * (-1 + 2 * tableHeader.direction));
-                    break;
-                case 'Jobs':
-                    user.sort((a, b) => (b.values.length - a.values.length) * (-1 + 2 * tableHeader.direction));
-                    break;
-                case 'PowerUsage':
-                    var indexf = tableHeader.findIndex(d => d.key === tableHeader.currentsort) - 1;
-                    user.sort((a, b) => ((tableData[b.key][indexf] || {value: -Infinity}).value - (tableData[a.key][indexf] || {value: -Infinity}).value) * (-1 + 2 * tableHeader.direction));
-                    break;
+                // case 'Hosts':
+                //     users.sort((a, b) => (b.unqinode.length - a.unqinode.length) * (-1 + 2 * tableHeader.direction));
+                //     break;
+                // case 'Jobs':
+                //     users.sort((a, b) => (b.values.length - a.values.length) * (-1 + 2 * tableHeader.direction));
+                //     break;
+                // case 'PowerUsage':
+                //     var indexf = tableHeader.findIndex(d => d.key === tableHeader.currentsort) - 1;
+                //     user.sort((a, b) => ((tableData[b.key][indexf] || {value: -Infinity}).value - (tableData[a.key][indexf] || {value: -Infinity}).value) * (-1 + 2 * tableHeader.direction));
+                //     break;
                 default:
                     var indexf = tableHeader.findIndex(d => d.key === tableHeader.currentsort) - 1;
-                    user.sort((a, b) => ((tableData[b.key][indexf] || {value: {median: -Infinity}}).value.median - (tableData[a.key][indexf] || {value: {median: -Infinity}}).value.median) * (-1 + 2 * tableHeader.direction));
+                    users.sort((a, b) => (tableData[b.key][indexf].value - tableData[a.key][indexf].value) * (-1 + 2 * tableHeader.direction));
                     break;
             }
         users.forEach((d, i) => {
@@ -1229,9 +1232,12 @@ let MapSetting = function () {
         // return arguments.length ? (drawThreshold = _, timeArc.updateDrawData(), timeArc) : drawThreshold;
         return arguments.length ? (drawThreshold = _, master) : drawThreshold;
     };
+    function gettsnedata(d){
+        return d.tsnedata?? scheme.data.tsnedata[d.key];
+    }
     master.drawComp = function () {
         computers.map(d => {
-            d.drawData = getDrawData(d.tsnedata?? scheme.data.tsnedata[d.key])
+            d.drawData = getDrawData(gettsnedata(d))
         });
         drawEmbedding_timeline();
         return master;
@@ -1326,30 +1332,43 @@ let MapSetting = function () {
         // n.drawData = drawData;
         return drawData;
     }
-    function onFilterComputeHighlight(compute,timePoint) {
-        if (timePoint){
+    function onFilterComputeHighlight(compute,timePoint,isall) {
+        if(isall){
             const d = compute.datum();
             d.highlightRange = d.drawData.map(d => {
                 const color = d3.color(d.color);
                 color.opacity = 1;
-                return {value: [], color: color.toString(), up: d.up}
-            });
-            d.highlightRange.timesteps = [];
-            timePoint.forEach(t=>{
-                d.highlightRange.forEach((h,i)=>{
-                    if (d.drawData[i].value[t][serviceSelected] !== undefined) {
-                        h.value[t] = d.drawData[i].value[t];
-                    }
-                })
+                return {value: d.value, color: color.toString(), up: d.up}
             });
             compute.selectAll('path.durationHighlight')
-                .data(d=>d.highlightRange)
+                .data(d => d.highlightRange)
                 .join('path')
                 .attr('class', 'durationHighlight')
                 .call(updatelayerpath);
-        }else{
-            delete compute.datum().highlightRange;
-            compute.selectAll('path.durationHighlight').remove();
+        }else {
+            if (timePoint) {
+                const d = compute.datum();
+                d.highlightRange = d.drawData.map(d => {
+                    const color = d3.color(d.color);
+                    color.opacity = 1;
+                    return {value: [], color: color.toString(), up: d.up}
+                });
+                timePoint.forEach(t => {
+                    d.highlightRange.forEach((h, i) => {
+                        if (d.drawData[i].value[t][serviceSelected] !== undefined) {
+                            h.value[t] = d.drawData[i].value[t];
+                        }
+                    })
+                });
+                compute.selectAll('path.durationHighlight')
+                    .data(d => d.highlightRange)
+                    .join('path')
+                    .attr('class', 'durationHighlight')
+                    .call(updatelayerpath);
+            } else {
+                delete compute.datum().highlightRange;
+                compute.selectAll('path.durationHighlight').remove();
+            }
         }
     }
     function handleHightlight() {
@@ -1366,7 +1385,7 @@ let MapSetting = function () {
                 d.highlightData.displayText = [];
                 d.highlightData.displayLine = [];
                 d.highlightData.timesteps = [];
-                scheme.data.tsnedata[d.key].forEach(e => {
+                gettsnedata(d).forEach(e => {
                     alldataPoint.push(e)
                 })
             });
@@ -1423,7 +1442,7 @@ let MapSetting = function () {
                 d.highlightData.displayText = [];
                 d.highlightData.displayLine = [];
                 d.highlightData.timesteps = [];
-                const arr = scheme.data.tsnedata[d.key];
+                const arr = gettsnedata(d);
                 for (let i = 1; i < arr.length; i++) {
                     const pre = arr[i - 1][serviceSelected] === 0 ? 0 : (arr[i - 1][serviceSelected] - 1);
                     const sudden = (arr[i][serviceSelected] + 1) / (pre + 1);
@@ -1718,41 +1737,41 @@ let MapSetting = function () {
             return {width: tableLayout.column[d.key].width}
         });
         cells = cells_n.merge(cells);
-        cells.select('text').text(d => d.value)
-        //     .call(d=>{
-        //     const dir = d.datum().direction;
-        //     if (dir)
-        //         truncate(d,'▲');
-        //     else if (dir===undefined)
-        //         truncate(d,'↕');
-        //     else
-        //         truncate(d,'▼');
-        // });
-        // cells.on('click',function(d){
-        //     tableHeader.el = this;
-        //     if (d.key!==tableHeader.currentsort)
-        //         cells.filter(e=>e.key===tableHeader.currentsort)
-        //             .each(function(e){
-        //                 e.direction=undefined;
-        //                 d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'↕'));
-        //             });
-        //     tableHeader.currentsort = d.key;
-        //     tableHeader.direction = (d.direction=!d.direction);
-        //     handle_sort(true);
-        //     d3.select(this).select('text').text(d=>d.value).call(d=>{
-        //         const dir = d.datum().direction;
-        //         if (dir)
-        //             truncate(d,'▲');
-        //         else if (dir===undefined)
-        //             truncate(d,'↕');
-        //         else
-        //             truncate(d,'▼');
-        //     });
-        // })
+        cells.select('text').style('pointer-events','all').text(d => d.value)
+            .call(d=>{
+            const dir = d.datum().direction;
+            if (dir)
+                truncate(d,'▲');
+            else if (dir===undefined)
+                truncate(d,'↕');
+            else
+                truncate(d,'▼');
+        });
+        cells.on('click',function(d){
+            tableHeader.el = this;
+            if (d.key!==tableHeader.currentsort)
+                cells.filter(e=>e.key===tableHeader.currentsort)
+                    .each(function(e){
+                        e.direction=undefined;
+                        d3.select(this).select('text').text(d=>d.value).call(d=>truncate(d,'↕'));
+                    });
+            tableHeader.currentsort = d.key;
+            tableHeader.direction = (d.direction=!d.direction);
+            handle_sort(true);
+            d3.select(this).select('text').text(d=>d.value).call(d=>{
+                const dir = d.datum().direction;
+                if (dir)
+                    truncate(d,'▲');
+                else if (dir===undefined)
+                    truncate(d,'↕');
+                else
+                    truncate(d,'▼');
+            });
+        })
 
     }
 
-    function updateLayout(data) {
+    function updateLayout() {
         let currentsort = tableHeader.currentsort;
         let currentdirection = tableHeader.direction;
         tableHeader = [{key: 'UserID', value: 'UserID'}, {key: 'Hosts', value: '#Computes'}, {

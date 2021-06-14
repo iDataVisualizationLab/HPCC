@@ -314,3 +314,65 @@ function createRadar_func(datapoint, bg, data, customopt,className,radaropt,colo
     });
     return datapoint;
 }
+
+function truncate (text,endsymbol) {
+    text.each(function() {
+        var text = d3.select(this);
+        var words = text.text().trim().split(/\s+/);
+        var ellipsis = text.text('').append('tspan').attr('class', 'elip').text('...'+(endsymbol||''));
+        var width = parseFloat(text.attr('width')) - ellipsis.node().getComputedTextLength();
+        var numWords = words.length;
+
+        var tspan = text.insert('tspan', ':first-child').text(words.join(' '));
+
+        // Try the whole line
+        // While it's too long, and we have words left, keep removing words
+        let old_words ='';
+        while (tspan.node().getComputedTextLength() > width && words.length) {
+            old_words = words.pop();
+            tspan.text(words.join(' '));
+        }
+
+        if (words.length === numWords) {
+            ellipsis.remove();
+            tspan.text(tspan.text()+endsymbol||'')
+        }else{
+            if (old_words!=='')
+                old_words = old_words.split('');
+            tspan.text(words.join(' ')+' '+old_words.join(''));
+            while (tspan.node().getComputedTextLength() > width && old_words.length) {
+                old_words.pop();
+                tspan.text(words.join(' ')+' '+old_words.join(''));
+            }
+        }
+    });
+}//wrap
+function wrap(text, istruncate,width) {
+    if (istruncate){
+        truncate(text,'');
+    }else {
+        text.each(function () {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1, // ems
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+            width = width || parseFloat(text.attr('width'));
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }
+    return text;
+}
