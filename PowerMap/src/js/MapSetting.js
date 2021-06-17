@@ -1355,9 +1355,9 @@ let MapSetting = function () {
                 });
                 timePoint.forEach(t => {
                     d.highlightRange.forEach((h, i) => {
-                        if (d.drawData[i].value[t][serviceSelected] !== undefined) {
+                        // if (d.drawData[i].value[t][serviceSelected] !== undefined) {
                             h.value[t] = d.drawData[i].value[t];
-                        }
+                        // }
                     })
                 });
                 d.highlightRange.forEach((h,i)=>{
