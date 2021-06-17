@@ -122,6 +122,7 @@ function handleSmalldata(dataRaw){
     let minMaxData = {};
     let data = dataRaw.nodes_info;
     hosts.forEach(h => {
+        // console.time(h.name)
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
         minMaxData[h.name] = [];
@@ -154,6 +155,7 @@ function handleSmalldata(dataRaw){
                 });
             })
         })
+        // console.timeEnd(h.name)
     });
     return {sampleh,tsnedata,minMaxData};
 }

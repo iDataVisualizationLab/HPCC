@@ -1360,6 +1360,25 @@ let MapSetting = function () {
                         }
                     })
                 });
+                d.highlightRange.forEach((h,i)=>{
+                    if(h.value.length){
+                        let last = h.value[h.value.length-1];
+                        if (!last.sub) {
+                            if (!h.value[h.value.length-2]){
+                                debugger
+                                const t = last.timestep + 1;
+                                if (d.drawData[i].value[t]) {
+                                    const sub = {...d.drawData[i].value[t]};
+                                    sub.name = d.drawData[i].value[t].name;
+                                    sub.timestep = d.drawData[i].value[t].timestep-0.5;
+                                    sub.value = sub.value.map((v,j)=>(d.drawData[i].value[t-1].value[j]+v)/2);
+                                    sub.sub = true;
+                                    h.value.push(sub)
+                                }
+                            }
+                        }
+                    }
+                })
                 compute.selectAll('path.durationHighlight')
                     .data(d => d.highlightRange)
                     .join('path')
@@ -1575,51 +1594,53 @@ let MapSetting = function () {
 
     function updateaxis() {
         let bg = svg.selectAll('.computeSig');
-        let rangey = d3.extent(bg.data(), d => d.y2 === undefined ? d.y : d.y2);
-        let scale = d3.scaleTime().range(xScale.domain()).domain(scheme.limitTime);
+        if(bg.data().length) {
+            let rangey = d3.extent(bg.data(), d => d.y2 === undefined ? d.y : d.y2);
+            let scale = d3.scaleTime().range(xScale.domain()).domain(scheme.limitTime);
 
-        let axis = svg.select('.gNodeaxis')
-            .classed('hide', false)
-            .attr('transform', `translate(${(bg.datum().x2 || bg.datum().x) - graphicopt.computePos()},${rangey[0]})`);
-        let Maxis = axis.select('.gMainaxis')
-            .call(d3.axisTop(scale).tickSize(rangey[0] - rangey[1]).tickFormat(multiFormat));
-        Maxis.select('.domain').remove();
-        let mticks = Maxis.selectAll('.tick');
-        mticks
-            // .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
-            // .transition().duration(animation_time)
-            .attr('transform', d => `translate(${xScale(scale(d))},0)`);
-        mticks.select('text').attr('dy', '-0.5rem');
-        mticks.select('line').attr("vector-effect", "non-scaling-stroke").style('stroke-width', 0.1).styles({
-            'stroke': 'black',
-            'stroke-width': 0.2,
-            'stroke-dasharray': '1'
-        })
+            let axis = svg.select('.gNodeaxis')
+                .classed('hide', false)
+                .attr('transform', `translate(${(bg.datum().x2 || bg.datum().x) - graphicopt.computePos()},${rangey[0]})`);
+            let Maxis = axis.select('.gMainaxis')
+                .call(d3.axisTop(scale).tickSize(rangey[0] - rangey[1]).tickFormat(multiFormat));
+            Maxis.select('.domain').remove();
+            let mticks = Maxis.selectAll('.tick');
+            mticks
+                // .transition().duration(animation_time).attr('transform',d=>`translate(${fisheye_scale.x(scale(d))},0)`);
+                // .transition().duration(animation_time)
+                .attr('transform', d => `translate(${xScale(scale(d))},0)`);
+            mticks.select('text').attr('dy', '-0.5rem');
+            mticks.select('line').attr("vector-effect", "non-scaling-stroke").style('stroke-width', 0.1).styles({
+                'stroke': 'black',
+                'stroke-width': 0.2,
+                'stroke-dasharray': '1'
+            })
 
-        let Saxis = axis.select('.gSubaxis').classed('hide', true);
-        // if (fisheye_scale.x.focus) {
-        //     const timearray = scale.ticks();
-        //     Saxis.classed('hide',false);
-        //     let pos2time = scale.invert(fisheye_scale.x.focus());
-        //     let timesubarray = [new Date(+pos2time - (timearray[1] - timearray[0])), new Date(+pos2time + (timearray[1] - timearray[0]))];
-        //     if (timesubarray[0]<first__timestep){
-        //         timesubarray[0] = first__timestep;
-        //         timesubarray[1] = new Date(+timesubarray[0] + (timearray[1] - timearray[0])*2)
-        //     }else if(timesubarray[1]>last_timestep) {
-        //         timesubarray[1] = last_timestep;
-        //         timesubarray[0] = new Date(+timesubarray[1] - (timearray[1] - timearray[0])*2)
-        //     }
-        //     let subaxis = d3.scaleTime().range(timesubarray.map(t=>scale(t))).domain(timesubarray);
-        //
-        //     let timearray_sub = _.differenceBy(subaxis.ticks(),timearray,multiFormat)
-        //
-        //     Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat).tickValues(timearray_sub));
-        //     Saxis.select('.domain').remove();
-        //     // let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
-        //     let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${xScale(subaxis(d))},0)`);
-        //     sticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).style('stroke-dasharray','1 3')
-        //     sticks.select('text').style('font-size',8)
-        // }
+            let Saxis = axis.select('.gSubaxis').classed('hide', true);
+            // if (fisheye_scale.x.focus) {
+            //     const timearray = scale.ticks();
+            //     Saxis.classed('hide',false);
+            //     let pos2time = scale.invert(fisheye_scale.x.focus());
+            //     let timesubarray = [new Date(+pos2time - (timearray[1] - timearray[0])), new Date(+pos2time + (timearray[1] - timearray[0]))];
+            //     if (timesubarray[0]<first__timestep){
+            //         timesubarray[0] = first__timestep;
+            //         timesubarray[1] = new Date(+timesubarray[0] + (timearray[1] - timearray[0])*2)
+            //     }else if(timesubarray[1]>last_timestep) {
+            //         timesubarray[1] = last_timestep;
+            //         timesubarray[0] = new Date(+timesubarray[1] - (timearray[1] - timearray[0])*2)
+            //     }
+            //     let subaxis = d3.scaleTime().range(timesubarray.map(t=>scale(t))).domain(timesubarray);
+            //
+            //     let timearray_sub = _.differenceBy(subaxis.ticks(),timearray,multiFormat)
+            //
+            //     Saxis.call(d3.axisTop(subaxis).tickSize(rangey[0]-rangey[1]).tickFormat(multiFormat).tickValues(timearray_sub));
+            //     Saxis.select('.domain').remove();
+            //     // let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${fisheye_scale.x(subaxis(d))},0)`);
+            //     let sticks = Saxis.selectAll('.tick').attr('transform',d=>`translate(${xScale(subaxis(d))},0)`);
+            //     sticks.select('line').attr("vector-effect","non-scaling-stroke").style('stroke-width',0.1).style('stroke-dasharray','1 3')
+            //     sticks.select('text').style('font-size',8)
+            // }
+        }
     }
 
     function updatelayerpath(p) {

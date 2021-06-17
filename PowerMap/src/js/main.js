@@ -41,10 +41,9 @@ $(document).ready(function () {
             // let url = 'src/data/nocona_aggregated.csv';
             // let url = 'src/data/aggregated_metrics_6h.json';
             // let url = 'src/data/aggregated_metrics_04_28.json';
-            let url = 'src/data/aggregated_metrics_05_12.json';
+            // let url = 'src/data/aggregated_metrics_05_12.json'; // demoable
             // let url = 'src/data/aggregated_metrics_04-28_L.json';
-            // let url = 'src/data/aggregated_metrics_05_23.json';
-            // let url = 'src/data/aggregated_metrics_05_12_L.json';
+            let url = '../HiperView/data/aggregated_metrics_2021-06-17T06_2021-06-17T12_node.json';
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
@@ -82,13 +81,15 @@ $(document).ready(function () {
                 serviceControl();
                 data.time_stamp = data.time_stamp.map(d => d * 1000000000);
                 const jobObjArr = {};
-                Object.values(data.jobs_info).forEach(d => {
+                Object.keys(data.jobs_info).forEach(key => {
+                    const d = data.jobs_info[key];
+                    d.job_id = d.job_id||key
                     d["submit_time"] = d["submit_time"] * 1000000000;
                     d["start_time"] = d["start_time"] * 1000000000;
                     d["end_time"] = d["end_time"] * 1000000000;
                     d.node_list = d.nodes.slice();
                     d.job_name = d.name;
-                    if (d.array_task_id!==null){
+                    if (d.array_task_id!==null && d.array_job_id){
                         d.job_array_id = 'array'+d.array_job_id;
                         if(!jobObjArr[d.job_array_id]){
                             jobObjArr[d.job_array_id] = {
@@ -124,6 +125,10 @@ $(document).ready(function () {
                     d.job_id = d.jobs;
                     delete d.jobs;
                     d.job_id.forEach((js, ti) => {
+                        if (!js){
+                            d.job_id[ti] = [];
+                            js = d.job_id[ti];
+                        }
                         js.forEach((j, i) => {
                             if (data.jobs_info[j] && (!jobs_info[j])){
                                 jobs_info[j] = data.jobs_info[j];
@@ -142,7 +147,8 @@ $(document).ready(function () {
                                     "start_time": data.time_stamp[i],
                                     "submit_time": data.time_stamp[i],
                                     "total_nodes": 0,
-                                    "user_name": "unknown"
+                                    "user_name": "unknown",
+                                    user_id:-1
                                 }
                             }
                             const job_array_id = jobs_info[j].job_array_id;
@@ -153,7 +159,7 @@ $(document).ready(function () {
                                 jobs_info[job_array_id].total_nodes = 0;
                             }
                             if (!jobs_info[j].node_list_obj[comp]) {
-                                jobs_info[j].node_list_obj[comp] = d.cpus[ti][i];
+                                jobs_info[j].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
                                 jobs_info[j].node_list.push(comp);
                                 jobs_info[j].total_nodes++;
                             }
@@ -161,7 +167,7 @@ $(document).ready(function () {
                             jobs_info[j].finish_time = data.time_stamp[i];
                             if(job_array_id){
                                 if (!jobs_info[job_array_id].node_list_obj[comp]) {
-                                    jobs_info[job_array_id].node_list_obj[comp] = d.cpus[ti][i];
+                                    jobs_info[job_array_id].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
                                     jobs_info[job_array_id].node_list.push(comp);
                                     jobs_info[job_array_id].total_nodes++;
                                 }

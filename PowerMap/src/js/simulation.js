@@ -19,26 +19,49 @@ class Simulation {
             console.time('load data')
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name] && !this.userReverseDict[data.jobs_info[jID].user_name]){
-                         const encoded =  'user'+d3.keys(this.userDict).length;
-                        this.userDict[data.jobs_info[jID].user_name] = encoded;
-                        this.userReverseDict[encoded] = data.jobs_info[jID].user_name;
-                        data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
-               }else if (!this.userReverseDict[data.jobs_info[jID].user_name]){
-                         data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
-               }
-                    // data.jobs_info[jID].node_list_obj = {};
-                    // data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>{
-                    //     let split = c.split('-');
-                    //     data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
-                    //     return split[0];
-                    // });
-                    if(data.jobs_info[jID].start_time>9999999999999)
-                    {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
-                        data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
-                        if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
-                            data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
-                });
+                let isuseUserid = false;
+                if(data.jobs_info && d3.keys(data.jobs_info).length){
+                    const user_id = d3.values(data.jobs_info)[0].user_id;
+                    if(user_id!==null || user_id!==undefined)
+                        isuseUserid = true;
+                }
+                if (isuseUserid){
+                    d3.keys(data.jobs_info).forEach(jID => {
+                        if (!this.userDict[data.jobs_info[jID].user_name] && !this.userReverseDict[data.jobs_info[jID].user_name]) {
+                            const encoded = 'user' + data.jobs_info[jID].user_id;
+                            this.userDict[data.jobs_info[jID].user_name] = encoded;
+                            this.userReverseDict[encoded] = data.jobs_info[jID].user_name;
+                            data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                        } else if (!this.userReverseDict[data.jobs_info[jID].user_name]) {
+                            data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                        }
+
+                        if (data.jobs_info[jID].start_time > 9999999999999) {
+                            data.jobs_info[jID].start_time = data.jobs_info[jID].start_time / 1000000
+                            data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time / 1000000
+                            if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time > 9999999999999)
+                                data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time / 1000000
+                        }
+                    });
+                }else {
+                    d3.keys(data.jobs_info).forEach(jID => {
+                        if (!this.userDict[data.jobs_info[jID].user_name] && !this.userReverseDict[data.jobs_info[jID].user_name]) {
+                            const encoded = 'user' + d3.keys(this.userDict).length;
+                            this.userDict[data.jobs_info[jID].user_name] = encoded;
+                            this.userReverseDict[encoded] = data.jobs_info[jID].user_name;
+                            data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                        } else if (!this.userReverseDict[data.jobs_info[jID].user_name]) {
+                            data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                        }
+
+                        if (data.jobs_info[jID].start_time > 9999999999999) {
+                            data.jobs_info[jID].start_time = data.jobs_info[jID].start_time / 1000000
+                            data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time / 1000000
+                            if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time > 9999999999999)
+                                data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time / 1000000
+                        }
+                    });
+                }
                 console.timeEnd('load data')
                 this.data = data;
                 this.onTimeChange.forEach(function(listener) {
