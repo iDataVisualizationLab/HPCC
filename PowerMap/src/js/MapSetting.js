@@ -1817,8 +1817,8 @@ let MapSetting = function () {
         }];
         tableLayout.column = {
             'UserID': {id: 'UserID', type: 'text', x: 10, y: 20, width: 60},
-            'Hosts': {id: 'Hosts', text: '#Computes', type: 'num', x: 60, y: 20, width: 60},
-            'Jobs': {id: 'Jobs', text: '#Jobs', type: 'num', x: 135, y: 20, width: 30},
+            'Hosts': {id: 'Hosts', text: '#Computes', type: 'num', x: 60, y: 20, width: 90},
+            'Jobs': {id: 'Jobs', text: '#Jobs', type: 'num', x: 165, y: 20, width: 60},
         }
         let offset = tableLayout.column['Jobs'].x + tableLayout.column['Jobs'].width;
         let padding = 15;

@@ -1,7 +1,8 @@
 
 let colorUserScale = d3.scaleOrdinal(d3.schemePaired);
 
-let url = 'src/data/aggregated_metrics_05_12.json';
+// let url = 'src/data/aggregated_metrics_05_12.json';
+let url = '../HiperView/data/aggregated_metrics_2021-06-17T06_00_00_2021-06-17T12_00_00.json';
 
 serviceListattr = ["power","mem_power","mem_usage"];
 serviceLists = [{
@@ -30,6 +31,7 @@ alternative_scale = [1,1,1];
 d3.json(url).then(d => {
     // d=d.slice(0,1920)
     const data = d;
+    getServiceSet(data.nodes_info,true);
     data.time_stamp = data.time_stamp.map(d => d * 1000000000);
     const jobObjArr = {};
     Object.values(data.jobs_info).forEach(d => {
@@ -73,6 +75,10 @@ d3.json(url).then(d => {
         d.job_id = d.jobs;
         delete d.jobs;
         d.job_id.forEach((js, ti) => {
+            if (!js){
+                d.job_id[ti] = [];
+                js = d.job_id[ti];
+            }
             js.forEach((j, i) => {
                 if (data.jobs_info[j] && (!jobs_info[j])){
                     jobs_info[j] = data.jobs_info[j];
@@ -101,7 +107,7 @@ d3.json(url).then(d => {
                     jobs_info[job_array_id].total_nodes = 0;
                 }
                 if (!jobs_info[j].node_list_obj[comp]) {
-                    jobs_info[j].node_list_obj[comp] = d.cpus[ti][i];
+                    jobs_info[j].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
                     jobs_info[j].node_list.push(comp);
                     jobs_info[j].total_nodes++;
                 }
@@ -109,7 +115,7 @@ d3.json(url).then(d => {
                 jobs_info[j].finish_time = data.time_stamp[i];
                 if(job_array_id){
                     if (!jobs_info[job_array_id].node_list_obj[comp]) {
-                        jobs_info[job_array_id].node_list_obj[comp] = d.cpus[ti][i];
+                        jobs_info[job_array_id].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
                         jobs_info[job_array_id].node_list.push(comp);
                         jobs_info[job_array_id].total_nodes++;
                     }

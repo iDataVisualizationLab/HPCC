@@ -50,3 +50,35 @@ function handleSmalldata(dataRaw){
     });
     return {sampleh,tsnedata,minMaxData};
 }
+function getServiceSet(compObj,getminmax){
+    let notService = {'jobs':true,'cpus':true}
+    let comps = d3.values(compObj);
+    let sample =comps[0];
+    serviceListattr =Object.keys(comps[0]).filter(s=>{
+        return _.isArray(sample[s]) && !notService[s]
+    });
+    const angle = Math.PI*2/serviceListattr.length;
+    serviceLists = serviceListattr.map((s,si)=>({
+        "text": s,
+        "id": si,
+        "enable": true,
+        "sub": [{"text": s, "id": 0, "enable": true, "idroot": si, "angle": si*angle, "range": getminmax?[Infinity,-Infinity]:[0, 0]}]
+    }));
+    serviceFullList = [];
+    serviceLists.forEach(s=>s.sub.forEach(ss=>serviceFullList.push(ss)));
+
+    serviceList_selected = serviceListattr.map((s,si)=>({"text": s, "index": si}));
+    alternative_service = serviceListattr.slice();
+    alternative_scale = serviceListattr.map(d=>1);
+
+    comps.forEach(c=>{
+        serviceFullList.forEach(s=>{
+            const range = d3.extent(c[s.text]);
+            if (range[0]<s.range[0])
+                s.range[0] = range[0];
+            if (range[1]>s.range[1])
+                s.range[1] = range[1];
+        })
+    })
+
+}

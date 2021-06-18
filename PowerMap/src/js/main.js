@@ -180,44 +180,6 @@ $(document).ready(function () {
                 data.jobs_info = jobs_info;
                 return data;
             }));
-            // request = new Simulation(d3.csv(url).then(d=>{
-            //     // d=d.slice(0,1920)
-            //     const data = {jobs_info:{},nodes_info:{},time_stamp:[]};
-            //     Object.keys(d[0]).filter(k=>k!=='time').forEach(e=>{
-            //         data.nodes_info[e.split('_')[0]] = {"power_usage":[],"job_id":[]};
-            //     });
-            //     d.forEach(e=>{
-            //         data.time_stamp.push(+e.time*1000000000);
-            //         Object.keys(data.nodes_info).forEach(comp=>{
-            //             let cpus = JSON.parse(e[comp+'_cpus']);
-            //             let jobs = JSON.parse(e[comp+'_jobs']);
-            //             data.nodes_info[comp].job_id.push(jobs);
-            //             data.nodes_info[comp].power_usage.push(e[comp+'_power']!==''?(+e[comp+'_power']):undefined);
-            //             jobs.forEach((j,ji)=>{
-            //                 if (!data.jobs_info[j])
-            //                     data.jobs_info[j] = {
-            //                             "cpu_cores": cpus[ji],
-            //                             "finish_time": null,
-            //                             "job_name": ''+j,
-            //                             "node_list": [],
-            //                             "node_list_obj": {},
-            //                         "start_time": +e.time*1000000000,
-            //                         "submit_time": +e.time*1000000000,
-            //                         "total_nodes": 0,
-            //                         "user_name": "unknown"
-            //                     }
-            //                 if (!data.jobs_info[j].node_list_obj[comp]){
-            //                     data.jobs_info[j].node_list_obj[comp] = cpus[ji];
-            //                     data.jobs_info[j].node_list.push(comp);
-            //                     data.jobs_info[j].total_nodes ++;
-            //                 }
-            //                 data.jobs_info[j].finish_time = +e.time*1000000000;
-            //             })
-            //         })
-            //     })
-            //     debugger
-            //     return data;
-            // }));
         }
     } catch (e) {
         // request = new Simulation('../HiperView/data/8122020.json');
