@@ -1466,12 +1466,21 @@ let MapSetting = function () {
                 d.highlightData.timesteps = [];
                 const arr = gettsnedata(d);
                 for (let i = 1; i < arr.length; i++) {
-                    const pre = arr[i - 1][serviceSelected] === 0 ? 0 : (arr[i - 1][serviceSelected] - 1);
-                    const sudden = (arr[i][serviceSelected] + 1) / (pre + 1);
-                    alldataPoint.push({name: d.key, timestep: i, value: sudden, valueRaw: arr[i][serviceSelected]-arr[i - 1][serviceSelected]})
+                    if ( (arr[i - 1]!==undefined) && (arr[i]!==undefined)) {
+                        const pre = (arr[i - 1][serviceSelected] === 0) ? 0 : (arr[i - 1][serviceSelected] - 1);
+                        const current = (arr[i][serviceSelected] === 0) ? 0 : (arr[i][serviceSelected] - 1);
+                        const sudden = (current + 1) / (pre + 1);
+                        alldataPoint.push({
+                            name: d.key,
+                            timestep: i,
+                            value: sudden,
+                            valueRaw: arr[i][serviceSelected] - arr[i - 1][serviceSelected]
+                        })
+                    }
                 }
             });
             alldataPoint.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+            console.log(alldataPoint)
             for (let i = 0; i < 10; i++) {
                 const step = alldataPoint[i].timestep;
                 computersObj[alldataPoint[i].name].highlightData.notEmpty = true;
@@ -1548,7 +1557,8 @@ let MapSetting = function () {
 
     function drawEmbedding_timeline() {
         handleHightlight();
-        let bg = svg.selectAll('.computeSig').attr('transform', d => {
+        let bg = svg.selectAll('.computeSig');
+        bg.transition().duration(animation_time).attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
 
@@ -1588,7 +1598,7 @@ let MapSetting = function () {
             .attr('class', 'highightedText')
             .call(updatelayerText);
 
-        svg.selectAll('.computeSig_label').attr('transform', d => {
+        svg.selectAll('.computeSig_label').transition().duration(animation_time).attr('transform', d => {
             return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
         });
 

@@ -43,7 +43,7 @@ $(document).ready(function () {
             // let url = 'src/data/aggregated_metrics_04_28.json';
             // let url = 'src/data/aggregated_metrics_05_12.json'; // demoable
             // let url = 'src/data/aggregated_metrics_04-28_L.json';
-            let url = '../HiperView/data/aggregated_metrics_2021-06-17T06_2021-06-17T12_node.json';
+            let url = '../HiperView/data/aggregated_metrics_2021-06-17T06_00_00_2021-06-17T12_00_00.json';
             //---------
             // request = new Simulation('../HiperView/data/7222020.json');
             // request = new Simulation('../HiperView/data/Tue Aug 04 2020 16_00_00 GMT-0500 (Central Daylight Time) Thu Aug 06 2020 16_00_00 GMT-0500 (Central Daylight Time).json');
