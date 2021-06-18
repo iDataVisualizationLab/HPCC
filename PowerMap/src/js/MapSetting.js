@@ -979,10 +979,6 @@ let MapSetting = function () {
                     min.key = computersObj[node_list[0]]
                 let current = min.key;
                 let count = 0;
-                if (!seperatemark[current.key]) {
-                    computeCount += 1;
-                    seperatemark[current.key] = true;
-                }
                 current.order = computeCount;
                 computeCount += 0.5;
                 count++;
@@ -1002,16 +998,15 @@ let MapSetting = function () {
                     computeCount += 0.5;
                     count++;
                 }
+                computeCount += 1;
             } else if (node_list.length) {
-                if (!seperatemark[node_list[0].key]) {
-                    computeCount += 1;
-                    seperatemark[node_list[0].key] = true;
-                }
                 node_list.forEach(n => {
                     computersObj[n].order = computeCount;
-                    computeCount += 0.5
+                    computeCount += 0.5;
+                    checkComp[n] = true;
+                    checkCompNum++;
                 });
-                // computeCount += 1;
+                computeCount += 1;
             }
             return checkCompNum === computerNum;
         });
