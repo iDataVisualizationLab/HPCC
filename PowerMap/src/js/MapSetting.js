@@ -88,7 +88,9 @@ let MapSetting = function () {
             'Jobs': {id: 'Jobs', text: '#Jobs', type: 'num', x: 170, y: 20, width: 52},
         }
     };
-    let computers = [], users = [], jobs = [], jobsObj = {},
+    let computers = [],
+        _computers = [],
+        users = [], jobs = [], jobsObj = {},
         computersObj = {},
         usersObj = {},
         linkob = {}, jobEmpty = false;
@@ -337,6 +339,7 @@ let MapSetting = function () {
                 }
             })
         }
+        _computers = d3.keys(computersObj);
         debugger
         //group jobs
         users = d3.values(usersObj);
@@ -1694,7 +1697,7 @@ let MapSetting = function () {
     }
 
     master.currentSelected = function () {
-        return {computers, users, jobs: filterTerm.map(j => scheme.data.jobs[j])}
+        return {computers:_computers, users, jobs: filterTerm.map(j => scheme.data.jobs[j])}
     }
 
     function computeUsermetric() {

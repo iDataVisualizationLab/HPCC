@@ -589,7 +589,7 @@ function drawComputeList(){
         const data = [];
         subObject.currentSelected().computers
             .forEach(d=>{
-                data.push({key:d.key,value:Layout.computesStatic[d.key]})
+                data.push({key:d,value:Layout.computesStatic[d]})
             });
         renderTable['compute'](data, _data, _jobValueType, _jobValueName);
     }else {
