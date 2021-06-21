@@ -14,6 +14,9 @@ class Simulation {
     onUpdateTime=[];
     onStartQuery=()=>{};
     constructor(url) {
+        this.updateData.bind(this)(url);
+    }
+    updateData(url){
         this.isRealTime = !url;
         if (!this.isRealTime) {
             console.time('load data')

@@ -1,6 +1,13 @@
 function initMenu(){
     $('.windown').draggable({ handle: ".card-header" ,containment: "parent", scroll: false });
     $('[data-toggle="tooltip"]').tooltip();
+    d3.select('#metricCSV').on('change',handleMetricCSV);
+    d3.select('#jobJson').on('change',handlejobJson);
+    $('#datasetSelection').on('shown.bs.modal', function () {
+        // do something…
+        _tempData = {};
+    });
+    d3.select('#changeDatasetBtn').on('click',onChangeData)
     initSideBar()
 }
 function minimizeToolbar(){

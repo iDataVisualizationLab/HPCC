@@ -15,6 +15,108 @@ let serviceSelected = 0;
 // let request = new Simulation('../HiperView/data/742020.json');
 let request, timelineControl;
 
+function handleInputSlumrData(data) {
+    const jobObjArr = {};
+    Object.keys(data.jobs_info).forEach(key => {
+        const d = data.jobs_info[key];
+        d.job_id = d.job_id || key;
+        d["submit_time"] = d["submit_time"] * 1000000000;
+        d["start_time"] = d["start_time"] * 1000000000;
+        d["end_time"] = d["end_time"] * 1000000000;
+        d.node_list = d.nodes.slice();
+        d.job_name = d.name;
+        if (d.array_task_id !== null && d.array_job_id) {
+            d.job_array_id = 'array' + d.array_job_id;
+            if (!jobObjArr[d.job_array_id]) {
+                jobObjArr[d.job_array_id] = {
+                    isJobarray: true,
+                    job_id: d.job_array_id,
+                    job_ids: {},
+                    "finish_time": null,
+                    "end_time": null,
+                    "job_name": d.name,
+                    "node_list": [],
+                    "node_list_obj": {},
+                    "total_nodes": 0,
+                    "user_name": d.user_name,
+                    start_time: d.start_time,
+                    submit_time: d.submit_time
+                }
+                jobObjArr[d.job_array_id].job_ids[d.job_id] = d;
+            } else {
+                jobObjArr[d.job_array_id].job_ids[d.job_id] = d;
+                if (d.start_time < jobObjArr[d.job_array_id].start_time)
+                    jobObjArr[d.job_array_id].start_time = d.start_time;
+                if (d.submit_time < jobObjArr[d.job_array_id].submit_time)
+                    jobObjArr[d.job_array_id].submit_time = d.submit_time;
+            }
+        }
+    });
+    Object.keys(jobObjArr).forEach(j => {
+        data.jobs_info[j] = jobObjArr[j];
+    })
+    const jobs_info = {};
+    Object.keys(data.nodes_info).forEach(comp => {
+        const d = data.nodes_info[comp]
+        d.job_id = d.jobs;
+        delete d.jobs;
+        d.job_id.forEach((js, ti) => {
+            if (!js) {
+                d.job_id[ti] = [];
+                js = d.job_id[ti];
+            }
+            js.forEach((j, i) => {
+                if (data.jobs_info[j] && (!jobs_info[j])) {
+                    jobs_info[j] = data.jobs_info[j];
+                    jobs_info[j].node_list_obj = {};
+                    jobs_info[j].node_list = [];
+                    jobs_info[j].total_nodes = 0;
+                } else if (!jobs_info[j]) {
+                    jobs_info[j] = {
+                        "job_id": j,
+                        "cpu_cores": d.cpus[ti][i],
+                        "finish_time": null,
+                        "end_time": null,
+                        "job_name": '' + j,
+                        "node_list": [],
+                        "node_list_obj": {},
+                        "start_time": data.time_stamp[i],
+                        "submit_time": data.time_stamp[i],
+                        "total_nodes": 0,
+                        "user_name": "unknown",
+                        user_id: -1
+                    }
+                }
+                const job_array_id = jobs_info[j].job_array_id;
+                if (job_array_id && (!jobs_info[job_array_id])) {
+                    jobs_info[job_array_id] = data.jobs_info[job_array_id];
+                    jobs_info[job_array_id].node_list_obj = {};
+                    jobs_info[job_array_id].node_list = [];
+                    jobs_info[job_array_id].total_nodes = 0;
+                }
+                if (!jobs_info[j].node_list_obj[comp]) {
+                    jobs_info[j].node_list_obj[comp] = (d.cpus && d.cpus[ti]) ? d.cpus[ti][i] : 1;
+                    jobs_info[j].node_list.push(comp);
+                    jobs_info[j].total_nodes++;
+                }
+
+                jobs_info[j].finish_time = data.time_stamp[i];
+                if (job_array_id) {
+                    if (!jobs_info[job_array_id].node_list_obj[comp]) {
+                        jobs_info[job_array_id].node_list_obj[comp] = (d.cpus && d.cpus[ti]) ? d.cpus[ti][i] : 1;
+                        jobs_info[job_array_id].node_list.push(comp);
+                        jobs_info[job_array_id].total_nodes++;
+                    }
+                    jobs_info[job_array_id].finish_time = data.time_stamp[i];
+                }
+            })
+        })
+    });
+    console.log(Object.keys(data.jobs_info).length, Object.keys(jobs_info).length)
+    data.jobs_info = jobs_info;
+    return data;
+}
+
 $(document).ready(function () {
 
     try {
@@ -76,109 +178,11 @@ $(document).ready(function () {
             request = new Simulation(d3.json(url).then(d => {
                 // d=d.slice(0,1920)
                 const data = d;
-                d3.select('#dataTime').text(new Date(data.time_stamp[0]* 1000).toDateString());
+                // d3.select('#dataTime').text(new Date(data.time_stamp[0]* 1000).toDateString());
                 getServiceSet(data.nodes_info);
-                serviceControl();
+                // serviceControl();
                 data.time_stamp = data.time_stamp.map(d => d * 1000000000);
-                const jobObjArr = {};
-                Object.keys(data.jobs_info).forEach(key => {
-                    const d = data.jobs_info[key];
-                    d.job_id = d.job_id||key
-                    d["submit_time"] = d["submit_time"] * 1000000000;
-                    d["start_time"] = d["start_time"] * 1000000000;
-                    d["end_time"] = d["end_time"] * 1000000000;
-                    d.node_list = d.nodes.slice();
-                    d.job_name = d.name;
-                    if (d.array_task_id!==null && d.array_job_id){
-                        d.job_array_id = 'array'+d.array_job_id;
-                        if(!jobObjArr[d.job_array_id]){
-                            jobObjArr[d.job_array_id] = {
-                                isJobarray: true,
-                                job_id: d.job_array_id,
-                                job_ids:{},
-                                "finish_time": null,
-                                "end_time": null,
-                                "job_name": d.name,
-                                "node_list": [],
-                                "node_list_obj": {},
-                                "total_nodes": 0,
-                                "user_name": d.user_name,
-                                start_time:d.start_time,
-                                submit_time:d.submit_time
-                            }
-                            jobObjArr[d.job_array_id].job_ids[d.job_id] = d;
-                        }else{
-                            jobObjArr[d.job_array_id].job_ids[d.job_id] = d;
-                            if(d.start_time<jobObjArr[d.job_array_id].start_time)
-                                jobObjArr[d.job_array_id].start_time = d.start_time;
-                            if(d.submit_time<jobObjArr[d.job_array_id].submit_time)
-                                jobObjArr[d.job_array_id].submit_time = d.submit_time;
-                        }
-                    }
-                });
-                Object.keys(jobObjArr).forEach(j=>{
-                    data.jobs_info[j] = jobObjArr[j];
-                })
-                const jobs_info = {};
-                Object.keys(data.nodes_info).forEach(comp => {
-                    const d = data.nodes_info[comp]
-                    d.job_id = d.jobs;
-                    delete d.jobs;
-                    d.job_id.forEach((js, ti) => {
-                        if (!js){
-                            d.job_id[ti] = [];
-                            js = d.job_id[ti];
-                        }
-                        js.forEach((j, i) => {
-                            if (data.jobs_info[j] && (!jobs_info[j])){
-                                jobs_info[j] = data.jobs_info[j];
-                                jobs_info[j].node_list_obj = {};
-                                jobs_info[j].node_list = [];
-                                jobs_info[j].total_nodes = 0;
-                            }else if (!jobs_info[j]) {
-                                jobs_info[j] = {
-                                    "job_id": j,
-                                    "cpu_cores": d.cpus[ti][i],
-                                    "finish_time": null,
-                                    "end_time": null,
-                                    "job_name": '' + j,
-                                    "node_list": [],
-                                    "node_list_obj": {},
-                                    "start_time": data.time_stamp[i],
-                                    "submit_time": data.time_stamp[i],
-                                    "total_nodes": 0,
-                                    "user_name": "unknown",
-                                    user_id:-1
-                                }
-                            }
-                            const job_array_id = jobs_info[j].job_array_id;
-                            if (job_array_id && (!jobs_info[job_array_id])){
-                                jobs_info[job_array_id] = data.jobs_info[job_array_id];
-                                jobs_info[job_array_id].node_list_obj = {};
-                                jobs_info[job_array_id].node_list = [];
-                                jobs_info[job_array_id].total_nodes = 0;
-                            }
-                            if (!jobs_info[j].node_list_obj[comp]) {
-                                jobs_info[j].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
-                                jobs_info[j].node_list.push(comp);
-                                jobs_info[j].total_nodes++;
-                            }
-
-                            jobs_info[j].finish_time = data.time_stamp[i];
-                            if(job_array_id){
-                                if (!jobs_info[job_array_id].node_list_obj[comp]) {
-                                    jobs_info[job_array_id].node_list_obj[comp] = (d.cpus&&d.cpus[ti])?d.cpus[ti][i]:1;
-                                    jobs_info[job_array_id].node_list.push(comp);
-                                    jobs_info[job_array_id].total_nodes++;
-                                }
-                                jobs_info[job_array_id].finish_time = data.time_stamp[i];
-                            }
-                        })
-                    })
-                });
-                console.log(Object.keys(data.jobs_info).length,Object.keys(jobs_info).length)
-                data.jobs_info = jobs_info;
-                return data;
+                return handleInputSlumrData(data);
             }));
         }
     } catch (e) {
@@ -203,9 +207,11 @@ function initTimeElement() {
     request.onDataChange.push((data) => {
         updateProcess({percentage: 50, text: 'Preprocess data'})
         setTimeout(() => {
+            d3.select('#dataTime').text(new Date(data.time_stamp[0]).toDateString());
+            serviceControl();
             handleRankingData(data);
             updateProcess({percentage: 80, text: 'Preprocess data'});
-            $('#JobFilterThreshold').val(Object.keys(Layout.jobsStatic).length)
+            $('#JobFilterThreshold').val(Object.keys(Layout.jobsStatic).length);
             drawJobList();
             initdrawGantt();
             drawGantt();
