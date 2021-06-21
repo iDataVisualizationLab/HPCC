@@ -66,12 +66,11 @@ let MapSetting = function () {
     let scheme = {}, filterTerm = [];
     let animation_time = 2000;
     let svg = d3.select(graphicopt.svg), g, zoomFunc, linkg, nodeg, table_headerNode, freezing = false, textWarp = 200;
-    ;
+
     let yscale = d3.scaleLinear().range([0, graphicopt.heightG()]), linkscale = d3.scaleSqrt().range([0.3, 2]);
     let xScale = d3.scaleLinear();
     let drawThreshold = 650 / 700;
-    let scaleNode = d3.scaleLinear();
-    let scaleNode_y = d3.scaleLinear();
+    let fisheye_scale = {x:fisheye.scale(d3.scaleLinear),y:fisheye.scale(d3.scaleLinear)};
     let scaleJob = d3.scaleLinear();
     let scaleNode_y_middle;
     let Jobscale = d3.scaleSqrt().range([0.5, 3]);
@@ -230,6 +229,44 @@ let MapSetting = function () {
         table_headerNode = g.append('g').attr('class', 'table header').attr('transform', `translate(${graphicopt.userPos()},${-15})`);
         table_headerNode.append('g').attr('class', 'back').append('path').styles({'fill': '#ddd'});
 
+        g.append('rect')
+            .attr('class','fisheyeLayer')
+            .style('display' , 'none' )
+            .style('opacity' , 0 );
+        fisheye_scale.y = d => d;
+        d3.select('#jobMapLensing').on('click',function(){
+            runopt.lensing = !runopt.lensing;
+            let lensingLayer=  d3.select('rect.fisheyeLayer')
+               .style('display', runopt.lensing ? 'block' : 'none' );
+            if(!runopt.lensing){
+                fisheye_scale.y = d => d;
+            }
+            if (!lensingLayer.on("mousemove"))
+                lensingLayer.on("mousemove", function() {
+                    let mouse = d3.mouse(this);
+                    requestAnimationFrame(()=>{
+                        animation_time = 0;
+                        svg.selectAll('.computeSig').transition().selectAll("*").transition();
+                        fisheye_scale.y= fisheye.scale(d3.scaleIdentity).domain([scaleNode_y_middle.range()[0],scaleNode_y_middle.range()[1]]).focus(mouse[1]);
+                        computers.forEach(d=>{
+                            d.y2 = fisheye_scale.y(scaleNode_y_middle(d.order));
+                        });
+                        linkg.selectAll('.links').transition().duration(animation_time)
+                            .call(updatelink);
+                        drawEmbedding_timeline();
+                    });
+                }).on("mouseleave",function () {
+                    animation_time = 2000;
+                    fisheye_scale.y = d=>d;
+                    computers.forEach(d=>{
+                        d.y2 = scaleNode_y_middle(d.order);
+                    });
+                    linkg.selectAll('.links').transition().duration(animation_time)
+                        .call(updatelink);
+                    drawEmbedding_timeline();
+                });
+        });
+
         registEvent(zoomFunc);
 
 
@@ -242,26 +279,26 @@ let MapSetting = function () {
     };
 
     function registEvent() {
-        d3.select('#mouseAction').on("change", function () {
-            const selected_value = $("input[name='mouseAction']:checked").val();
-            if (selected_value === "auto" || selected_value === "disable") {
-                runopt.mouse.auto = selected_value === "auto";
-                runopt.mouse.disable = selected_value === "disable";
-                runopt.mouse.lensing = false;
-            } else {
-                runopt.mouse.auto = false;
-                runopt.mouse.disable = false;
-                runopt.mouse.lensing = selected_value === "lensing";
-                runopt.mouse.showseries = selected_value === "showseries";
-                runopt.mouse.showmetric = selected_value === "showmetric";
-            }
-            if (runopt.mouse.lensing) {
-                g.select('.fisheyeLayer').style('pointer-events', 'auto');
-            } else {
-                g.select('.fisheyeLayer').style('pointer-events', 'none');
-                fisheye_scale.x = d => d;
-            }
-        });
+        // d3.select('#mouseAction').on("change", function () {
+        //     const selected_value = $("input[name='mouseAction']:checked").val();
+        //     if (selected_value === "auto" || selected_value === "disable") {
+        //         runopt.mouse.auto = selected_value === "auto";
+        //         runopt.mouse.disable = selected_value === "disable";
+        //         runopt.mouse.lensing = false;
+        //     } else {
+        //         runopt.mouse.auto = false;
+        //         runopt.mouse.disable = false;
+        //         runopt.mouse.lensing = selected_value === "lensing";
+        //         runopt.mouse.showseries = selected_value === "showseries";
+        //         runopt.mouse.showmetric = selected_value === "showmetric";
+        //     }
+        //     if (runopt.mouse.lensing) {
+        //         g.select('.fisheyeLayer').style('pointer-events', 'auto');
+        //     } else {
+        //         g.select('.fisheyeLayer').style('pointer-events', 'none');
+        //         fisheye_scale.x = d => d;
+        //     }
+        // });
         d3.select('#resetScreen').on('click', () => {
             svg.select('.pantarget').transition().duration(750)
                 .call(zoomFunc.transform, d3.zoomIdentity.translate(graphicopt.margin.left, graphicopt.margin.top).scale(1)); // updated for d3 v4
@@ -1561,8 +1598,9 @@ let MapSetting = function () {
     function drawEmbedding_timeline() {
         handleHightlight();
         let bg = svg.selectAll('.computeSig');
+
         bg.transition().duration(animation_time).attr('transform', d => {
-            return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
+            return `translate(${-xScale.range()[1]},${d.y2})`
         });
 
         bg.selectAll('path.linegg')
@@ -1602,10 +1640,15 @@ let MapSetting = function () {
             .call(updatelayerText);
 
         svg.selectAll('.computeSig_label').transition().duration(animation_time).attr('transform', d => {
-            return `translate(${-xScale.range()[1]},${scaleNode_y_middle(d.order)})`
+            return `translate(${-xScale.range()[1]},${fisheye_scale.y(scaleNode_y_middle(d.order))})`
         });
 
         updateaxis();
+        let lensingLayer=  g.select('.fisheyeLayer');
+        lensingLayer.attrs({
+            'width':xScale.range()[1]-xScale.range()[0],
+        }).attr('height',yscale.range()[1]-yscale.range()[0]);
+        lensingLayer.attr('transform',`translate(${ -graphicopt.computePos()+(+lensingLayer.attr('width'))},${yscale.range()[0]})`)
     }
 
     function updateaxis() {
