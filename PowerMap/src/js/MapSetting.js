@@ -245,6 +245,9 @@ let MapSetting = function () {
                     .style('display', runopt.lensing ? 'block' : 'none');
                 if (!runopt.lensing) {
                     fisheye_scale.y = d => d;
+                    d3.select(this).classed('btn-secondary',true).classed('btn-primary',false);
+                }else{
+                    d3.select(this).classed('btn-secondary',false).classed('btn-primary',true);
                 }
                 if (!lensingLayer.on("mousemove"))
                     lensingLayer.on("mousemove", function () {

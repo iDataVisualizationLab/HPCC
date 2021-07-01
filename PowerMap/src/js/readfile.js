@@ -1,5 +1,8 @@
 let _tempData={};
 function handleMetricCSV(){
+    var fileName = $(this).val();
+    //replace the "Choose a file" label
+    $(this).next('.custom-file-label').html(fileName);
     readFromInput(event,(_data)=>{
         d3.csv(_data).then(data=>{
             let results = newdatatoFormat_noSuggestion(data,"|");
@@ -14,6 +17,9 @@ function handleMetricCSV(){
 }
 
 function handlejobJson(){
+    var fileName = $(this).val();
+    //replace the "Choose a file" label
+    $(this).next('.custom-file-label').html(fileName);
     readFromInput(event,(_data)=>{
         d3.json(_data).then(data=>{
             let jobs = data;
