@@ -389,5 +389,22 @@
     "types": [
       "TimeArcs"
     ]
+  },"PowerMap": {
+    "title": "PowerMap",
+    "thumb": "PowerMap.PNG",
+    "url": "https://idatavisualizationlab.github.io/HPCC/PowerMap/index.html",
+    "tags": [
+      "slurm","time series"
+    ],
+    "pros": [
+      "Provide overview",
+      "Users, Jobs, and Computes relationship"
+    ],
+    "cons": [
+      "Complex view"
+    ],
+    "types": [
+      "Tree","Area chart","Network","Radar Chart"
+    ]
   }
 }
