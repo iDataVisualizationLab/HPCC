@@ -201,7 +201,12 @@ function sortData(data){
         const rankIndex = Layout.ranking.byMetric[vizservice[serviceSelected].text][Math.max(request.index-1,0)];
         dataviz.sort((a,b)=>rankIndex[a.key]-rankIndex[b.key])
     }else
-        dataviz.sort((a,b)=>-b.value+a.value);
+        if(vizservice[serviceSelected].text==='Radar') {
+            debugger
+            if(dataviz[0].value)
+                dataviz.sort((a, b) => -(+b.value.replace('group_','')) + +a.value.replace('group_',''));
+            // dataviz.sort((a, b) => -b.value + a.value);
+        }
     Layout.order.deltarank = [];
     // dataviz.forEach((d,i)=>(d.id=i,d.highlight=false,d.stackdelta=[],Layout.order.deltarank.push({data:d,value:Math.abs(Layout.order.object[d.key]-i)})));
     // let rankList = Layout.order.deltarank.sort((a,b)=>b.value-a.value).slice(0,5)
