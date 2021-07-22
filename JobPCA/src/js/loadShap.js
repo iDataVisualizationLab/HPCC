@@ -4,6 +4,7 @@ class LoadShap {
     #dim=2;
     onFinishQuery=[];
     onDataChange=[];
+    userDict={}; userReverseDict={};
     onStartQuery=()=>{};
     feature=[];
     constructor(url) {
@@ -105,7 +106,7 @@ class LoadShap {
                         temp.name = classKeyUndefined[i];
                         solution.push(temp)
                     });
-debugger
+
                     self.feature.map(function (key, i) {
                         let brand = d3.range(0,self.#dim).map(dim=>B[i][chosenPC[dim]]);
                         brand.name = key.text;

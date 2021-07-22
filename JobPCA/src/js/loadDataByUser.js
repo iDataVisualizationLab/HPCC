@@ -15,8 +15,23 @@ let job_node;
 let node_jobs;
 let sampleS;
 function handleDatabyUser(url,callBack){
+    const userDict={};
+    const userReverseDict={};
     d3.json(url).then(_data=>{
-        debugger
+        d3.keys(_data.jobs_info).forEach(jID=>{if (!userDict[_data.jobs_info[jID].user_name] && !userReverseDict[_data.jobs_info[jID].user_name]){
+            const encoded =  'user'+d3.keys(userDict).length;
+            userDict[_data.jobs_info[jID].user_name] = encoded;
+            userReverseDict[encoded] = _data.jobs_info[jID].user_name;
+            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+        }else if (!userReverseDict[_data.jobs_info[jID].user_name]){
+            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+        }if (!userDict[_data.jobs_info[jID].user_name])
+            userDict[_data.jobs_info[jID].user_name] = 'user'+d3.keys(userDict).length;
+            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+            _data.jobs_info[jID].node_list = _data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        });
+
+
         const dataurl = handleDataUrl(_data);
         tsnedata = dataurl.tsnedata;
         sampleS = dataurl.sampleS;
