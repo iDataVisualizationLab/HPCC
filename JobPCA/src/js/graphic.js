@@ -287,11 +287,15 @@ function draw(_result){
     let rangeDis = [Infinity,-Infinity];
     const arr = solution.map(function(d, i) {
         d.label = {};
-        d.label.scaleThreshold = Math.sqrt(graphicopt.displayThreshold / Math.abs(d3.polygonArea(cellsLabel.cellPolygon(i))));
+        if(cellsLabel.cellPolygon(i)){
+            d.label.scaleThreshold = Math.sqrt(graphicopt.displayThreshold / Math.abs(d3.polygonArea(cellsLabel.cellPolygon(i))));
         // d.label.scaleThreshold = cellsLabel.cellPolygon(i)?Math.sqrt(graphicopt.displayThreshold / Math.abs(d3.polygonArea(cellsLabel.cellPolygon(i)))):0.1;
         // d.label.opacityScale = d3.scaleLinear()
         //     .domain([d.label.scaleThreshold, d.label.scaleThreshold * 1.3])
         //     .range([0, 1]);
+        }else{
+            d.label.scaleThreshold = 0
+        }
         d.label.opacityScale = d3.scaleLinear()
             .domain([d.label.scaleThreshold, d.label.scaleThreshold * 1.3])
             .range([0, 1]);
