@@ -62,7 +62,7 @@ function initdraw(){
         handleDataComputeByUser.mode=val;
         d3.select('#ganttLayoutLabel').text(val==='core'?'#Cores':'#CPU Nodes')
         Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
-        subObject.data(Layout.userTimeline).draw();
+        subObject.graphicopt({maxLimit:val=='core'?32:1}).data(Layout.userTimeline).draw();
     })
 }
 function userTable(d,type){

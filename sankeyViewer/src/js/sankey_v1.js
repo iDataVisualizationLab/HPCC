@@ -31,8 +31,7 @@ let Sankey = function(){
         hi: 12,
         padding: 0,
         animationTime:1000,
-        color:{},
-        maxLimit: 32
+        color:{}
     };
 
     let maindiv='#ganttLayout';
@@ -166,43 +165,29 @@ let Sankey = function(){
             });
             console.timeEnd('create nodes');
             console.time('create links');
-            // nodes = _.shuffle(nodes);
-
-            const maxLimit = graphicopt.maxLimit;
-            const mapOfSankey = {};
+            // nodes = _.shuffle(nodes)
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
                 const b = keys[i];
                 const linkByKey = new Map();
                 for (const d of data){
-                    const aName = getUserName(d[a]);
-                    const bName = getUserName(d[b]);
                     const sourceName = JSON.stringify([a, getUserName(d[a])]);
                     const targetName = JSON.stringify([b, getUserName(d[b])]);
                     if (d[a] && d[b] && nodeByKey.has(sourceName) && nodeByKey.has(targetName)){
                         const names = [sourceName,targetName];
                         const key = JSON.stringify(names);
                         // const value = d.value || 1;
-                        const value = Math.min(d[a].total,maxLimit);
+                        const value = d[a].total;
                         const arr = [d.key];//just ad for testing
                         let link = linkByKey.get(key);
-                        const byComp = {};
-                        byComp[d.key] = value;
+
                         if (link) {
-                            let new_val = Math.min((link.byComp[d.key]??0) + value,maxLimit);
-                            let delta = new_val - (link.byComp[d.key]??0);
-                            link.byComp[d.key] = new_val;
-
-                            // if a compute over the limit
-                            link.value += delta;
-
-                            // d[a].forEach((n,i)=>{
-                            //     link._source[i].value+=n.value;
-                            //     link._source.total+=n.value;
-                            // });
+                            link.value += value;
+                            d[a].forEach((n,i)=>{
+                                link._source[i].value+=n.value;
+                                link._source.total+=n.value;
+                            });
                             d[b].forEach((n,i)=>{
-                                if(link._target[i]===undefined)
-                                    debugger
                                 link._target[i].value+=n.value;
                                 link._target.total+=n.value;
                             });
@@ -218,16 +203,12 @@ let Sankey = function(){
                             // }
                             continue;
                         }
-                        if(!mapOfSankey[sourceName])
-                            mapOfSankey[sourceName]= JSON.parse(JSON.stringify(d[a]));
-                        mapOfSankey[targetName] = JSON.parse(JSON.stringify(d[b]));
-                        const _source = mapOfSankey[sourceName];
-                        // _source.total=d[a].total;
-                        const _target = mapOfSankey[targetName];
-                        // _target.total=d[b].total;
+                        const _source = JSON.parse(JSON.stringify(d[a]));
+                        _source.total=d[a].total;
+                        const _target = JSON.parse(JSON.stringify(d[b]));
+                        _target.total=d[b].total;
 
                         link = {
-                            byComp,
                             source: indexByKey.get(JSON.stringify([a, getUserName(d[a])])),
                             _source,
                             target: indexByKey.get(JSON.stringify([b, getUserName(d[b])])),
@@ -255,7 +236,7 @@ let Sankey = function(){
                 let nodeObj = {};
                 nodes.forEach(d=>{nodeObj[d.id] = d;});
                 links = links.filter(l=>{
-                    if (((l._source.total>l.arr.length*graphicopt.maxLimit) || (l._target.total>l.arr.length*graphicopt.maxLimit))){
+                    if (((l._source.total>l.arr.length*36) || (l._target.total>l.arr.length*36))){
                         keepNodes[nodeObj[l.source].name]=true;
                         keepNodes[nodeObj[l.target].name]=true;
                         return true;
