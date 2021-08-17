@@ -241,6 +241,8 @@ let Sankey = function(){
                             if (graphicopt.hideStable){
                             nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
                             nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);}
+                            nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).shared = true;
+                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).shared = true;
                         }else{
                             link.isSameNode = true;
                         }
@@ -315,40 +317,62 @@ let Sankey = function(){
         });
         // renderSankey();
         // TIME ARC
+        const forceNode = nodes.filter(d=>d.shared)
         force = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-12))
+            .force("charge", d3.forceManyBody().strength(-50))
             .force("center", d3.forceCenter(graphicopt.widthG() / 2, graphicopt.heightG() / 2))
             .force('x', d3.forceX(0).strength(0.015))
             .force('y',  d3.forceY(0).strength(0.015))
-            .nodes( nodes)
+            .nodes( forceNode)
             .force('link',d3.forceLink(_links).id(d=>d.id).distance(0))
             .alpha(1)
             .on('tick',function () {
                 onLoadingFunc( {percentage:(1-this.alpha())*100,text:'TimeArc calculation'});
                 nodes.forEach(function (d,i) {
+                    if(d.x!==undefined && d.y!==undefined) {
+                        d.x += (graphicopt.widthG() / 2 - d.x) * 0.05;
+                        if (d.parentNode >= 0) {
+                            if (nodeObj[d.parentNode].y !== undefined)
+                                d.y += (nodeObj[d.parentNode].y - d.y) * 0.5;
 
-                    d.x += (graphicopt.widthG() / 2 - d.x||0) * 0.05;
-                    if (d.parentNode >= 0) {
-                        d.y += (nodeObj[d.parentNode].y - d.y||0) * 0.5;
-                    }
-                    else if (d.childNodes && d.childNodes.length) {
-                        var yy = 0;
-                        for (var i = 0; i < d.childNodes.length; i++) {
-                            var child = d.childNodes[i];
-                            yy += nodeObj[child].y;
+                                if (nodeObj[d.parentNode].childNodes && nodeObj[d.parentNode].childNodes.length) {
+                                    nodeObj[d.parentNode].y = d3.mean(nodeObj[d.parentNode].childNodes,e=>nodeObj[e].y);
+                                }
+                        } else if (d.childNodes && d.childNodes.length) {
+                            var yy = d3.mean(d.childNodes, e => nodeObj[e].y);
+                            if (yy !== undefined)
+                                d.y += (yy - d.y) * 0.2;
                         }
-                        yy = yy / d.childNodes.length; // average y coordinate
-                        d.y += (yy - d.y) * 0.2;
                     }
                 });
             })
             .on("end", function () {
                 onLoadingFunc();
-                graph.nodes.forEach(d=>d._forcey =  d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+                const miny= d3.min(forceNode,d=>d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+                let left = 1;
+                const nodep = {};
+                forceNode.forEach(d=>{
+                    if ((d.parentNode !==undefined) && nodeObj[d.parentNode].childNodes && nodeObj[d.parentNode].childNodes.length) {
+                        nodeObj[d.parentNode].y = d3.mean(nodeObj[d.parentNode].childNodes,e=>nodeObj[e].y);
+                    }
+                })
+                graph.nodes.forEach(d=>{
+                    d._forcey =  (d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
+                    if((d._forcey === undefined || _.isNaN(d._forcey)) ) {
+                        if(d.name==='User 2')
+                            debugger
+                        if (nodep[d.name] === undefined) {
+                            nodep[d.name] = miny - 10 * (left);
+                            d._forcey = nodep[d.name];
+                            left++;
+                        } else {
+                            d._forcey = nodep[d.name];
+                        }
+                    }
+                    d.y = d._forcey;
+                });
                 // graph.nodes.forEach(d=>d._forcey = d.y??nodeObj[d.parentNode].y);
-                console.log(graph.nodes.map(d=>({name: d.name,y:d.y})).sort((a,b)=>a.y-b.y).map(d=>d.name))
                 nodeSort = function(a,b){ return (a._forcey-b._forcey)};
-                // nodeSort = function(a,b){debugger; return a._forcey-b._forcey}
                 renderSankey();
             })
 
