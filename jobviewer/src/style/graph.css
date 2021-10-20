@@ -135,3 +135,7 @@ text {
     padding-right: 2px;
     padding-left: 2px;
 }
+
+.radar svg.radarPlot {
+    overflow: visible;
+}
