@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Job Net</title>
+    <title>Job Net v2</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 <!--    <script src="src/lib/jquery-3.2.1.min.js"></script>-->
     <script src="bower_components/jquery-3.5.1.min/index.js"></script>
@@ -85,7 +85,7 @@
             <main>
                 <nav class="navbar navbar-light bg-light ">
                     <a class="navbar-brand" href="#">
-                        Job Net
+                        Job Net v2
                     </a>
                     <form class="form-inline">
                         <ul class="nav" style="padding-right: 10px">
@@ -113,7 +113,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 116px);width: 100%; margin: 0px">
+                <div class="row" id="circularLayoutHolder" style="position: relative;height: calc(100vh - 116px);width: calc(100vw - 60px); margin: 0px">
             <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
                     <div class="dropHolder">
                         <svg id="circularLayout">
@@ -240,6 +240,10 @@
                                             <h5>Compute Size</h5>
                                             <svg id="legendComputeSize" style="width:100%;height:50px"><g class="content" style="transform:translate(50%,50%)"></g></svg>
                                         </div>
+                                        <div class="row justify-content-center ">
+                                            <h5>Link halo color:</h5>
+                                            <svg id="legendLinkBackground" style="width:100%;height:50px"><g class="content" style="transform:translate(50%,50%)"></g></svg>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="card-body row clusterView hide">
@@ -293,7 +297,7 @@
                                 </div>
                             </div>
                                 <div id="narrationHolder" class="tab-pane fade col-12" role="tabpanel">
-                                    <div class="row table-responsive">
+                                    <div class="row table-responsive" style="max-height: 400px">
                                         <div class="current">
                                             <h5 class="col-12"></h5>
                                             <table class="col-12 table table-sm" style="whiteSpace: 'normal';  wordWrap: 'break-word';">

@@ -48,6 +48,7 @@ let colorScaleList = {
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
 
 const UserIcon = {offset:-8,d:'M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',r:10,scale:1};
+let maxCore = 36;
 let scaleService;
 const timeMark = 5*60*1000;
 function handleDataUrl(dataRaw) {

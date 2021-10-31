@@ -193,8 +193,8 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         c.jobId = computers[c.name].job_id[0];
         c.cpu_cores = computers[c.name].cpu_cores[0];
         c.cpu_cores.total = d3.sum(c.cpu_cores);
-        c.cpu_cores.norm = d3.sum(c.cpu_cores)/36;
-        // c.cpu_cores.norm = Math.min(d3.sum(c.cpu_cores)/36,1);
+        // c.cpu_cores.norm = d3.sum(c.cpu_cores)/36;
+        c.cpu_cores.norm = Math.min(d3.sum(c.cpu_cores)/36,1);
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobL[_d]){
@@ -217,6 +217,8 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         const jobL = {};
         c.jobId = computers[c.name].job_id[0];
         c.cpu_cores = computers[c.name].cpu_cores[0];
+        c.cpu_cores.total = d3.sum(c.cpu_cores);
+        c.cpu_cores.norm = Math.min(d3.sum(c.cpu_cores)/36,1);
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobL[_d]){
@@ -239,7 +241,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         updateLink = updateLinkCU;
 // Layout.jobShow
     tree.forEach(r=>r.children.forEach(c=>{
-        let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name,tooltip:c.name.replace('10.101.','')};
+        let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name,shortname:c.name.replace('10.101.','')};
         data.drawData  = getDrawData(data);
         // dataIn.nodes.push({id:c.name,type:'compute',drawData:getDrawData(data),data:computers[c.name]});
 
@@ -251,6 +253,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
 
 
         updateLink( c);
+        data.tooltip = `${data.shortname} : ${c.cpu_cores.total} cores`
     }));
     Object.keys(users).forEach(u=>{
         users[u].duration = +Layout.currentTime -  d3.min(users[u].job,d=>jobs[d].start_time)

@@ -90,7 +90,7 @@ function initdraw(){
                     let posProp = $('.gu-mirror')[0].getBoundingClientRect()
                     d3.select(el).style('top', (posProp.y - svgProp.y) + 'px').style('left', (posProp.x - svgProp.x) + 'px');
                     const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
-                    drawObject.addForce({
+                    const comData ={
                         key: d3.select(el).datum().key,
                         drake,
                         posProp: {
@@ -104,19 +104,26 @@ function initdraw(){
                             _index: d3.select(el).datum()._index
                         },
                         mode
-                    })
+                    };
+                    if(key==='Work load'){
+                        comData.getRawData = (d)=>d.data.cpu_cores.norm;
+                    }
+                    drawObject.addForce(comData)
                 } else {
                     let isX = targetNode.attr('value') === 'x';
                     let isY = targetNode.attr('value') === 'y';
                     const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
+                    const _index = d3.select(el).datum()._index;
                     const comData = {
                         key,
                         drake,
-                        posProp: {_index: d3.select(el).datum()._index, isX: true, _el: el, el: $(el).clone()[0]},
+                        posProp: {_index, isX: true, _el: el, el: $(el).clone()[0],range:(serviceFullList[_index]??{range:[0,1]}).range},
                         mode
                     };
-                    if(key==='Work load')
+                    if(key==='Work load'){
                         comData.getRawData = (d)=>d.data.cpu_cores.norm;
+                        comData.posProp.range=[0,maxCore]
+                    }
                     if (isX) {
                         targetNode.classed('hasChild', true);
                         targetNode.select('h3').text(key);
@@ -184,7 +191,7 @@ function initDragItems(id,mode){
     drawObject.removeAllForce();
     if (mode==='metric'){
         const data = serviceFullList.map((d,i)=>({key:d.text,_index:i,range:d.range}));
-        data.push({key:'Work load',_index:-1,range:[0,36]})
+        data.push({key:'Work load',_index:-1,range:[0,maxCore]})
         d3.select(id)
             .selectAll('div')
             .data(data)
@@ -205,7 +212,12 @@ function initDragItems(id,mode){
 }
 function updateNarration({removedLinks,enterLinks}){
     // enterLinks.filter(d=>d.target)
-    d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
+    let historyData = d3.select('#narrationHolder .previous').datum()??[];
+    historyData = [d3.select('#narrationHolder .current').html(),...historyData];
+    if(historyData.length>5)
+        historyData.pop();
+    d3.select('#narrationHolder .previous').datum(historyData).html(historyData.join(' '));
+    // d3.select('#narrationHolder .previous').html(d3.select('#narrationHolder .current').html());
     d3.select('#narrationHolder .current h5').text(Layout.currentTime.toLocaleString())
     d3.select('#narrationHolder .current tbody')
         .selectAll('tr.enter').data(d3.nest().key(d=>d.target.id).entries(enterLinks))
@@ -232,8 +244,8 @@ function userTable(d,type){
     if (drawObject.isFreeze()) {
         d3.select('.informationHolder').classed('hide',false);
         const contain = d3.select('.informationHolder').datum(d);
-        contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.id));
-        contain.select('.card-body').html(`<table id="informationTable" class="display table-striped table-bordered" style="width:100%">
+        contain.select('.card-body').html(`
+            <table id="informationTable" class="display table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
                         <th>JobID</th>
@@ -255,24 +267,34 @@ function userTable(d,type){
         let jobData = [];
         let nodelist=[];
         let colorMap = {};
+        let info = "";
         if (type==='user'||type==='job'){
             debugger
+            let core=0;
+            const jobMain = {};
             jobData = d.data.job.map(j=>{
                 const jobID = j.split('.');
+                jobMain[jobID] = true;
                 const job=_.clone(Layout.jobs[j]);
                 job['id']=jobID[0];
                 job['_id']=j;
                 job['duration']=Layout.currentTime - job['start_time'];
                 job['task_id'] = jobID[1]||'n/a';
+                core+=job.cpu_cores;
                 return job});
             nodelist = _.isArray(d.data.node)?d.data.node:Object.keys(d.data.node);
-            if (d.relatedNodes[0].type==='job')
+            if (d.relatedNodes[0].type==='job'){
                 d.relatedNodes.forEach(f=>f.relatedNodes.forEach(e=>colorMap[e.key]=e.color));
-            else
-                d.relatedNodes.forEach(e=>colorMap[e.key]=e.color);
+                info = `(${d.data.node.length} compute${d.data.node.length>1?"s":""}, ${core} core)`;
+            }else {
+                d.relatedNodes.forEach(e => colorMap[e.key] = e.color);
+                info = `(${Object.keys(jobMain).length} job${Object.keys(jobMain).length>1?"s":""}, ${d.data.node.length} compute${d.data.node.length>1?"s":""}, ${core} core)`;
+            }
         }else{
+            const jobMain = {}
             jobData = d.data.jobId.map(j=>{
                 const jobID = j.split('.');
+                jobMain[jobID] = true;
                 const job=_.clone(Layout.jobs[j]);
                 if (job.node_list.indexOf(d.data.name)===-1)
                     return false;
@@ -282,8 +304,11 @@ function userTable(d,type){
                 job['task_id'] = jobID[1]||'n/a';
                 return job}).filter(d=>d);
             nodelist = [d.data.name];
-            colorMap[d.data.name] = d.color
+            colorMap[d.data.name] = d.color;
+            info = `(${Object.keys(jobMain).length} job${Object.keys(jobMain).length>1?"s":""}, ${d.data.cpu_cores.total} cores)`;
         }
+        contain.select('.card-header p').text(d => type.toUpperCase()+': ' + (type==='compute'?d.data.name:d.id)+" "+info+" "+Layout.currentTime.toLocaleString());
+
         var table = $('#informationTable').DataTable( {
             "data": jobData,
             "scrollX": true,
@@ -575,6 +600,17 @@ function getColorScale(){
 function closeToolTip(){
     d3.select('.informationHolder').classed('hide',true);
 }
+function makelegendLinkBackground(){
+    let g = d3.select('#legendLinkBackground g').select('.holder');
+    if(g.empty()){
+        g = d3.select('#legendLinkBackground g').append('g').attr('class','holder').attr('transform','translate(-50,-20)');
+        g.append('g').attr('transform','translate(0,10)');
+    }
+    g.select('image').remove();
+    const scale = drawObject.linkColorBackground();
+    makeColorLegend(scale, 10, g, 100, {margin:{left:0,top:0,right:0,bottom:0}},true,true);
+    g.select('g').call(d3.axisBottom(d3.scaleTime().range([0,100]).domain(scale.domain())).tickFormat(d=>millisecondsToStr_axproximate(d)).ticks(2))
+}
 function makeComputeLegend(){
     let scale = drawObject.scaleCompute().copy();
     const r=3;
@@ -603,7 +639,7 @@ function makeComputeLegend(){
     //     .join('line').attr('x1',-offset*1.5).attr('stroke','gray').attr('stroke-dasharray','2 1').attr('transform',d=>`translate(${offset*1.5},${-r*scale(d)*2+offset})`);
 }
 function makeUserLegend(){
-    let userScale = drawObject.scaleUser().copy().nice();
+    let userScale = drawObject.scaleUser().copy();
     let height = 100;
     const g = d3.select('#legendUserSize g');
     let gback = g.select('g.back');
@@ -611,7 +647,7 @@ function makeUserLegend(){
         gback = g.append('g').attr('class','back');
     }
     let offset = UserIcon.r*userScale.range()[1];
-    let ticks = userScale.ticks(3);
+    let ticks = userScale.domain();
     let small = ticks[0];
     ticks.reverse();
     gback.selectAll('circle').data(ticks)
@@ -627,9 +663,87 @@ function makeUserLegend(){
     g.selectAll('line').data([ticks[0],ticks[ticks.length-1]])
         .join('line').attr('x1',-offset*1.5).attr('stroke','gray').attr('stroke-dasharray','2 1').attr('transform',d=>`translate(${offset*1.5},${-UserIcon.r*userScale(d)*2+offset})`);
 }
+
+function makeColorLegend(color, height, legend, width, graphicopt,isH,disabletick) {
+    if (color.interpolate) {
+        const n = Math.min(color.domain().length, color.range().length);
+
+        let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
+
+        legend.append("image")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("preserveAspectRatio", "none")
+            .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL(),undefined,isH);
+    }// Sequential
+    else if (color.interpolator) {
+        let y = Object.assign(color.copy()
+                .interpolator(d3.interpolateRound(0, height)),
+            {
+                range() {
+                    return [0, height];
+                }
+            });
+
+        legend.append("image")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("preserveAspectRatio", "none")
+            .attr("xlink:href", ramp(color.interpolator(),undefined,isH).toDataURL());
+
+        // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+        if(!disabletick) {
+            if (!y.ticks) {
+                if (tickValues === undefined) {
+                    const n = Math.round(ticks + 1);
+                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                }
+                if (typeof tickFormat !== "function") {
+                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                }
+            } else {
+                graphicopt.legend = {scale: y};
+                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
+            }
+        }
+    }
+
+    function ramp(color, n = 256,isH) {
+        if(isH) {
+            const canvas = createContext(n, 1);
+            const context = canvas.getContext("2d");
+            for (let i = 0; i < n; ++i) {
+                context.fillStyle = color(i / (n - 1));
+                context.fillRect(i, 0, 1, 1);
+            }
+            return canvas;
+        }else{
+            const canvas = createContext(1, n);
+            const context = canvas.getContext("2d");
+            for (let i = 0; i < n; ++i) {
+                context.fillStyle = color(i / (n - 1));
+                context.fillRect(0, i, 1, 1);
+            }
+            return canvas;
+        }
+    }
+
+    function createContext(width, height) {
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+}
+
 function makelegend(){
     makeUserLegend();
     makeComputeLegend();
+    makelegendLinkBackground();
     let graphicopt = drawObject.graphicopt();
     if (vizservice[serviceSelected].text==='User'){
         d3.select('.legendView').classed('hide',true);
@@ -657,67 +771,7 @@ function makelegend(){
             .attr('transform', `translate(${marginLeft},${marginTop})`);
         // .attr('transform',`translate(${Math.min(graphicopt.diameter()+max_radius+40+graphicopt.margin.left,graphicopt.width-graphicopt.margin.right)},${graphicopt.margin.top+30})`);
 
-        if (color.interpolate) {
-            const n = Math.min(color.domain().length, color.range().length);
-
-            let y = color.copy().rangeRound(d3.quantize(d3.interpolate(0, height), n));
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
-        }// Sequential
-        else if (color.interpolator) {
-            let y = Object.assign(color.copy()
-                    .interpolator(d3.interpolateRound(0, height)),
-                {
-                    range() {
-                        return [0, height];
-                    }
-                });
-
-            legend.append("image")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
-
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!y.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
-                }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            } else {
-                graphicopt.legend = {scale: y};
-                legend.append('g').attr('class', 'legendTick').call(d3.axisLeft(y));
-            }
-        }
-
-        function ramp(color, n = 256) {
-            const canvas = createContext(1, n);
-            const context = canvas.getContext("2d");
-            for (let i = 0; i < n; ++i) {
-                context.fillStyle = color(i / (n - 1));
-                context.fillRect(0, i, 1, 1);
-            }
-            return canvas;
-        }
-
-        function createContext(width, height) {
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas;
-        }
+        makeColorLegend(color, height, legend, width, graphicopt);
 
         // make custom input button
         let legendRange = vizservice[serviceSelected].range;

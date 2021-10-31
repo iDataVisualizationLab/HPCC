@@ -38,7 +38,7 @@ svg {
     /*fill: #f1faee;*/
     /*stroke: #1d3557;*/
     /*stroke-width: 0.1;*/
-    pointer-events: all;
+    /*pointer-events: all;*/
 }
 .outer_node text.highlight2.hide{
     display: block;
@@ -52,20 +52,19 @@ svg {
 .onhighlight .outer_node.highlight .circleG .element,
 .onhighlight .outer_node.highlight.highlightSummary .circleG .element.highlight
 {
-    /*opacity: 1;*/
-    pointer-events: all
+    opacity: 1;
+    /*pointer-events: all*/
 }
 .onhighlight2 .outer_node .circleG .element, .onhighlight2.onhighlight .outer_node .circleG .element.highlight, .onhighlight .outer_node .circleG .element{
-    /*opacity: 0.1;*/
-    pointer-events: none
+    opacity: 0.1;
+    /*pointer-events: none*/
 }
 
 .onhighlight2 g.links .link,.onhighlight2.onhighlight g.links .link.highlight, .onhighlight g.links .link {
-    /*opacity: 0;*/
-
+    opacity: 0;
 }
 .onhighlight2 g.links .link.highlight2,.onhighlight2.onhighlight g.links .link.highlight.highlight2,.onhighlight g.links .link.highlight {
-    /*opacity: 1;*/
+    opacity: 1;
 }
 
 .onhighlight .highlight .circle_background{

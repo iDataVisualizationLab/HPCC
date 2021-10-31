@@ -1,7 +1,7 @@
 let DynamicNet = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
     let graphicopt = {
-        margin: {top: 20, right: 20, bottom: 20, left: 20},
+        margin: {top: 40, right: 100, bottom: 20, left: 20},
         width: 1400,
         height: 700,
         scalezoom: 1,
@@ -23,6 +23,11 @@ let DynamicNet = function(){
         },
         centerY: function () {
             return this.margin.top+this.heightG()/2;
+        },
+        posIsolate:{
+            r:50,
+              x: ()=>-graphicopt.widthG()/2 + graphicopt.posIsolate.r,
+              y: ()=>graphicopt.heightG()/2 - graphicopt.posIsolate.r,
         },
         animationTime:1000,
         color:{},
@@ -53,6 +58,7 @@ let DynamicNet = function(){
     let maxCore = 36;
     const scaleUser = d3.scaleSqrt().domain([1,5]).range([1,2]);
     const scaleCompute = d3.scaleLinear().domain([0,maxCore]).range([0.75,1.5]);
+    const linkColorBackground = d3.scaleSequential( d3.interpolateGreys).domain([0,24*3600000]);
     let getColorScale = function(){return color};
     let master={};
     let createRadar = _.partial(createRadar_func,_,_,_,_,'radar',graphicopt.radaropt,color);
@@ -158,6 +164,7 @@ let DynamicNet = function(){
                     d.scale = scaleCompute(totalCore);
                 }else{
                     d.scale = scaleCompute(maxCore);
+                    d.stroke = 'black';
                 }
             }
         });
@@ -231,7 +238,6 @@ let DynamicNet = function(){
 
         // let linkScale = d3.scaleSqrt().range([0.2,0.8]).domain([1,d3.max(links,d=>d.value||0)]);
         console.log('maxlink = ',d3.max(links,d=>d.value||0))
-        let linkColorBackground = d3.scaleSequential( d3.interpolateGreys).domain([0,24*3600000]);
         link_backgound = g.select('g.linkHolder_background').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
@@ -245,6 +251,9 @@ let DynamicNet = function(){
             },update=>update,exit=>{
                 exit.transition().attr('opacity',0).remove();
             });
+        link_backgound.each(function(d){
+            d.nodeBack = d3.select(this);
+        })
         link = g.select('g.linkHolder').selectAll(".link")
             .data(links, d => [d.source.id, d.target.id])
             .join(enter=>{
@@ -290,7 +299,7 @@ let DynamicNet = function(){
             .data(labels,d=>d.id);
         label.exit().transition().duration(graphicopt.animationTime).attr('opacity',0).remove();
         const label_n = label.enter()
-            .append('text').attr('class','labels').text(d=>d.tooltip??d.id).attr('opacity',1);
+            .append('text').attr('class','labels').text(d=>d.shortname??d.id).attr('opacity',1);
         label = label_n.merge(label);
 
         simulation.alphaTarget(0.02).restart();
@@ -308,7 +317,7 @@ let DynamicNet = function(){
                 return d.highlight;
             });
             els
-                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
+                .transition().duration(graphicopt.animationTime).attr("transform", function(d) { return `translate(${d.x??0},${d.y??0})`; });
 
             p.filter(d=>!d.highlight).attr("transform", function(d) { return `translate(${d.x},${d.y})`; });
             return p;
@@ -395,6 +404,7 @@ let DynamicNet = function(){
                                 // d.color = color(d.value,d);
                                 return d.color;
                         })
+                        .attr('stroke',d=>d.stroke??null)
                         // .style('stroke-width',d=>{
                         //     return circleStrokeScale(d.data.relatedNodes.length);
                         // });
@@ -467,21 +477,23 @@ let DynamicNet = function(){
     };
     let getDrawData = function(){return[];}
     function freezeHandle(){
+        debugger
         if (isFreeze){
             const func = isFreeze;
             isFreeze = false;
             func();
         }else{
-            isFreeze = true;
-            isFreeze = (function(){d3.select(this).dispatch('mouseout')}).bind(this);
+            isFreeze = (function () {
+                d3.select(this).dispatch('mouseleave')
+            }).bind(this);
             d3.event.stopPropagation();
         }
     }
     master.freezeHandle = freezeHandle;
     master.main_svg = function(){return main_svg};
     master.init=function(){
-        // graphicopt.width = d3.select(maindiv).node().getBoundingClientRect().width;
-        // graphicopt.height = d3.select(maindiv).node().getBoundingClientRect().height;
+        graphicopt.width = d3.select('#circularLayoutHolder').node().getBoundingClientRect().width;
+        graphicopt.height = d3.select('#circularLayoutHolder').node().getBoundingClientRect().height;
         r = d3.min([graphicopt.width, graphicopt.height]) / 2-20 ;
         main_svg = d3.select(maindiv)
             .attr("width", graphicopt.width)
@@ -491,10 +503,8 @@ let DynamicNet = function(){
             .select("g.content");
 
         if (g.empty()){
-            g = d3.select(maindiv)
-                .attr("width", graphicopt.width)
-                .attr("height", graphicopt.height)
-                .append("g")
+            main_svg.append('rect').attr('width','120%').attr('height','120%').attr('fill','none').on('click',()=>isFreeze?freezeHandle():'');
+            g = main_svg.append("g")
                 .attr('class','Outcontent')
                 .attr("transform", "translate(" + (graphicopt.centerX()) + "," + graphicopt.centerY() + ")")
                 .append("g")
@@ -504,7 +514,9 @@ let DynamicNet = function(){
                     isFreeze = false;
                     func();
                 }});
-            g.append('g').attr('class','forces');
+            const isolate = g.append('g').attr('class','forces').append('g').attr('class','forceIsolate').attr('transform',`translate(${graphicopt.posIsolate.x()},${graphicopt.posIsolate.y()})`);
+            isolate.append('circle').attr('r',graphicopt.posIsolate.r).attr('fill','none').attr('stroke','black').attr('stroke-dasharray',2);
+            isolate.append('text').text('Idle computes').attr('text-anchor','middle').attr('y',-graphicopt.posIsolate.r).attr('fill','#7e7e7e')
             const network = g.append('g').attr('class','network');
             network.append('g').attr('class','linkHolder_background links');
             network.append('g').attr('class','linkHolder links');
@@ -514,14 +526,14 @@ let DynamicNet = function(){
             simulation = d3.forceSimulation()
                 .force("charge", d3.forceManyBody().strength(-30))
                 .force("link", d3.forceLink().id(d => d.id))
-                .force("x", d3.forceX().x(d=>d.isolate?-graphicopt.widthG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
-                .force("y", d3.forceY().y(d=>d.isolate?-graphicopt.heightG()*3/8:0).strength(d=>d.isolate?0.5:0.1))
+                .force("x", d3.forceX().x(d=>d.isolate?graphicopt.posIsolate.x():0).strength(d=>d.isolate?0.9:0.1))
+                .force("y", d3.forceY().y(d=>d.isolate?graphicopt.posIsolate.y():0).strength(d=>d.isolate?0.9:0.1))
                 .on("tick", ticked);
             simulation.stop();
 
             g.call(tooltip);
-            d3.zoomIdentity.x = graphicopt.margin.left;
-            d3.zoomIdentity.y = graphicopt.margin.top;
+            // d3.zoomIdentity.x = graphicopt.margin.left;
+            // d3.zoomIdentity.y = graphicopt.margin.top;
             graphicopt.zoom.on("zoom", zoomed)
             main_svg.call(graphicopt.zoom.transform, d3.zoomIdentity);
             g.append('defs');
@@ -628,7 +640,9 @@ let DynamicNet = function(){
     }
     let getDataForce = {};
     let _drake = {};
-    master.addForce = function ({key,drake,posProp,mode}){
+    master.addForce = function ({key,drake,posProp,mode,getRawData}){
+        const {_index} = posProp;
+        getRawData = getRawData?? ((d,_index)=>(data.datamap[d.id]?data.datamap[d.id][0][_index]:undefined));
         let _pos = [posProp.x-graphicopt.centerX()-graphicopt.margin.left+posProp.width/2,
             posProp.y-graphicopt.centerY()-graphicopt.margin.top+posProp.height/2
         ];
@@ -661,9 +675,9 @@ let DynamicNet = function(){
                 }
             });
 
-            getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max)};
+            getDataForce[key] = {threshold:value2thresh(+d3.select(posProp.el).select('input').node().value,min,max),strength:0.8};
             const getData = function(d,_pos,index){
-                if (data.datamap[d.id]&&data.datamap[d.id][0][posProp._index]>getDataForce[key].threshold){
+                if ((d.type==='compute')&& (getRawData(d,_index)>=getDataForce[key].threshold)){
                     d['force'+key] = true;
                     return _pos[index]
                 }
@@ -672,7 +686,7 @@ let DynamicNet = function(){
             };
             getDataForce[key].getData=getData;
         }else{
-            getDataForce[key] = {};
+            getDataForce[key] = {strength:0.8};
             const getData = function(d,_pos,index){
                 if (Layout.compute_layout[d.id]===key){
                     d['force'+key] = true;
@@ -683,17 +697,18 @@ let DynamicNet = function(){
             };
             getDataForce[key].getData=getData;
         }
-        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
-        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
+        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
+        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
     }
     master.addForceAxis = function ({key,drake,posProp,mode,getRawData}){
-        const {isX,_index} = posProp;
+        const {isX,_index,range} = posProp;
         getRawData = getRawData?? ((d,_index)=>(data.datamap[d.id]?data.datamap[d.id][0][_index]:undefined));
         if (mode==='metric'){
-            getDataForce[key] = {scale:d3.scaleLinear().range(isX?[-graphicopt.widthG()/2, graphicopt.widthG()/2]:[graphicopt.heightG()/2, -graphicopt.heightG()/2])};
+            const bottom = graphicopt.posIsolate.y()-50;
+            const left = graphicopt.posIsolate.x()+50;
+            getDataForce[key] = {isX,scale:d3.scaleLinear().range(isX?[left, graphicopt.widthG()/2]:[bottom, -graphicopt.heightG()/2]),strength:0.2};
             const getData = function(d,_,index){
                 if(((isX && (index===0) )|| ((!isX) && (index===1)))&&(d.type==='compute')) {
-                    debugger
                     d['force' + key] = true;
                     const value = getDataForce[key].scale(getRawData(d,_index));
                     return value;
@@ -702,8 +717,22 @@ let DynamicNet = function(){
                 return 0;
             };
             getDataForce[key].getData=getData;
+
+            g.select('.forces').append('g')
+                .attr('class','forceSvg')
+                .datum({key})
+                .call(makeAxis);
+            function makeAxis(path){
+                if(getDataForce[key].isX) {
+                    path.attr('transform',`translate(${0},${bottom})`)
+                    path.call(d3.axisBottom(getDataForce[key].scale.copy().domain(range)))
+                }else{
+                    path.attr('transform',`translate(${left},${0})`)
+                    path.call(d3.axisLeft(getDataForce[key].scale.copy().domain(range)))
+                }
+            }
         }else{
-            // getDataForce[key] = {};
+            // getDataForce[key] = {strength:0.2};
             // const getData = function(d,index){
             //     if (Layout.compute_layout[d.id]===key){
             //         d['force'+key] = true;
@@ -714,9 +743,8 @@ let DynamicNet = function(){
             // };
             // getDataForce[key].getData=getData;
         }
-        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,undefined,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.2));
-        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,undefined,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.2));
-        simulation.alphaTarget(0.02).restart();
+        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,undefined,0)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
+        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,undefined,1)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
     }
     function value2thresh(value,min,max){
         return (value-min)/(max-min);
@@ -729,8 +757,8 @@ let DynamicNet = function(){
     // }
     function updateForce(key,_pos){
         const getData = getDataForce[key].getData;
-        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
-        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
+        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
+        simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:getDataForce[key].strength));
         simulation.alphaTarget(0.02).restart();
     }
     master.removeForce = function (key){
@@ -809,7 +837,7 @@ let DynamicNet = function(){
     master.g = function(){return g};
     master.isFreeze = function(){return isFreeze};
     function highlightItems(d,value){
-        if (d.relatedNodes && d.relatedNodes[0].type==='job'){
+        if (d.relatedNodes && d.relatedNodes[0] &&d.relatedNodes[0].type==='job'){
             d.relatedNodes.forEach(e=> {
                 e.node.classed('highlight', value);
                 // e.relatedLinks.forEach(e=>e.node.classed('highlight', value));
@@ -843,7 +871,10 @@ let DynamicNet = function(){
             }else{
                 linkHolder_font.selectAll("path").remove();
             }
-            // d.relatedLinks.forEach(e=>e.node.classed('highlight', value));
+            d.relatedLinks.forEach(e=>{
+                e.node.classed('highlight', value);
+                e.nodeBack.classed('highlight', value);
+            });
             d.relatedNodes.forEach(e=>{
                 e.node.classed('highlight', value)
             });
@@ -890,6 +921,7 @@ let DynamicNet = function(){
     master.PCAlayout = function(d){graphicopt.PCAlayout = d};
     master.scaleUser = function () {return scaleUser;};
     master.scaleCompute = function () {return scaleCompute;};
+    master.linkColorBackground = function () {return linkColorBackground;};
     function mouseout(d){
         if(!isFreeze)
         {
