@@ -169,3 +169,32 @@ text {
     position: absolute;
     display: none
 }
+.forceHolder h3{
+    pointer-events: none;
+}
+.forceHolder div.forceDrag{
+    display: unset;
+    opacity:0;
+}
+.forceHolder {
+    display: none
+}
+.forceHolder.hasChild,  .forceHolder.active{
+    display: block;
+}
+.forceHolder.ex-over {
+    background-color: #ddd;
+}
+#xForceHolder .arrow {
+    width:120px;
+    margin:50px auto;
+}
+
+#xForceHolder .line {
+    margin-top:14px;
+    width:90px;
+    background:blue;
+    height:10px;
+    float:left;
+}
+

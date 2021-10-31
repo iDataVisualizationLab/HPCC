@@ -77,17 +77,89 @@ function initdraw(){
     serviceControl();
     d3.select('#jobShow').on('change',function(){Layout.jobShow = this.checked;createdata();currentDraw();});
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
-    const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0]])
+    const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0], $( "#xForceHolder" )[0], $( "#yForceHolder" )[0]])
         .on('drop',function(el, target, source, sibling){
-            console.log('drop-------------->')
-            if (!d3.select(target).select('svg').empty()){
-                let svgProp = $('#circularLayout')[0].getBoundingClientRect()
-                let posProp = $('.gu-mirror')[0].getBoundingClientRect()
-                d3.select(el).style('top',(posProp.y-svgProp.y)+'px').style('left',(posProp.x-svgProp.x)+'px');
-                const mode = source.id==='ForceByMetrics'?'metric':'rack';
-                drawObject.addForce({key:d3.select(el).datum().key,drake,posProp:{width:posProp.width,height:posProp.height,x:(posProp.x-svgProp.x),y:(posProp.y-svgProp.y),source:source,_el:el,el:$(el).clone()[0],_index:d3.select(el).datum()._index},mode})
+            if(source!==target) {
+                console.log('drop-------------->')
+                debugger
+                const targetNode = d3.select(target);
+                const sourceNode = d3.select(source);
+                const key = d3.select(el).datum().key;
+                if (!targetNode.select('svg').empty()) {
+                    let svgProp = $('#circularLayout')[0].getBoundingClientRect()
+                    let posProp = $('.gu-mirror')[0].getBoundingClientRect()
+                    d3.select(el).style('top', (posProp.y - svgProp.y) + 'px').style('left', (posProp.x - svgProp.x) + 'px');
+                    const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
+                    drawObject.addForce({
+                        key: d3.select(el).datum().key,
+                        drake,
+                        posProp: {
+                            width: posProp.width,
+                            height: posProp.height,
+                            x: (posProp.x - svgProp.x),
+                            y: (posProp.y - svgProp.y),
+                            source: source,
+                            _el: el,
+                            el: $(el).clone()[0],
+                            _index: d3.select(el).datum()._index
+                        },
+                        mode
+                    })
+                } else {
+                    let isX = targetNode.attr('value') === 'x';
+                    let isY = targetNode.attr('value') === 'y';
+                    const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
+                    const comData = {
+                        key,
+                        drake,
+                        posProp: {_index: d3.select(el).datum()._index, isX: true, _el: el, el: $(el).clone()[0]},
+                        mode
+                    };
+                    if(key==='Work load')
+                        comData.getRawData = (d)=>d.data.cpu_cores.norm;
+                    if (isX) {
+                        targetNode.classed('hasChild', true);
+                        targetNode.select('h3').text(key);
+                        // targetNode.append('div')
+                        //     .attr('class','forceSvg')
+                        //     .datum(comData)
+                        //     .style('width','100%')
+                        //     .style('height','100%')
+                        //     .call(drawObject.drag4ForceDOM());
+                        drawObject.addForceAxis(comData)
+                    } else if (isY) {
+                        targetNode.classed('hasChild', true);
+                        targetNode.select('h3').text(key);
+                        comData.posProp.isX = false;
+                        // targetNode.append('div')
+                        //     .attr('class','forceSvg')
+                        //     .datum(comData)
+                        //     .style('width','100%')
+                        //     .style('height','100%')
+                        //     .call(drawObject.drag4ForceDOM());
+                        drawObject.addForceAxis(comData)
+                    }
+                }
+                if (sourceNode.attr('value')) {
+                    sourceNode.classed('hasChild', false);
+                    if (sourceNode.attr('value') === 'x') {
+                        sourceNode.select('h3').text('Force X')
+                    } else {
+                        sourceNode.select('h3').text('Force Y')
+                    }
+                }
+                if (d3.select(target).classed('holder')) {
+                    drawObject.removeForce(key);
+                }
+                d3.selectAll('.forceHolder').classed('active', false);
             }
+        }).on('over', function (el, container) {
+            container.className += ' ex-over';
+        }).on('out', function (el, container) {
+            container.className = container.className.replace('ex-over', '');
         }).on('drag',function(	el, source){
+            // d3.select(el).style('opacity',1)
+            d3.selectAll('.forceHolder').classed('active',true);
             if (d3.select(source).select('svg').empty())
                 drawObject.resetZoom();
             console.log('drag-------------->')
@@ -112,6 +184,7 @@ function initDragItems(id,mode){
     drawObject.removeAllForce();
     if (mode==='metric'){
         const data = serviceFullList.map((d,i)=>({key:d.text,_index:i,range:d.range}));
+        data.push({key:'Work load',_index:-1,range:[0,36]})
         d3.select(id)
             .selectAll('div')
             .data(data)
@@ -518,7 +591,6 @@ function makeComputeLegend(){
     const tickD = ticks.map(d=>{
         const s  = scale(d);
         const o = offset -t - s*r;
-        debugger
         t += s*r*2;
         return {o,s,d}
     });

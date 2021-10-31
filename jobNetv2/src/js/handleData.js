@@ -192,6 +192,9 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
         const jobL = {};
         c.jobId = computers[c.name].job_id[0];
         c.cpu_cores = computers[c.name].cpu_cores[0];
+        c.cpu_cores.total = d3.sum(c.cpu_cores);
+        c.cpu_cores.norm = d3.sum(c.cpu_cores)/36;
+        // c.cpu_cores.norm = Math.min(d3.sum(c.cpu_cores)/36,1);
         computers[c.name].job_id[0].forEach(d=>{
             const _d = d.split('.')[0];
             if (!jobL[_d]){

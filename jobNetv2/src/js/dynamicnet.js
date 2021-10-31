@@ -51,7 +51,7 @@ let DynamicNet = function(){
     var color = d3.scaleSequential()
         .interpolator(d3.interpolateSpectral);
     let maxCore = 36;
-    const scaleUser = d3.scaleLinear().domain([1,5]).range([1,2]);
+    const scaleUser = d3.scaleSqrt().domain([1,5]).range([1,2]);
     const scaleCompute = d3.scaleLinear().domain([0,maxCore]).range([0.75,1.5]);
     let getColorScale = function(){return color};
     let master={};
@@ -534,6 +534,52 @@ let DynamicNet = function(){
     master.resetZoom = function(){
         graphicopt.zoom.transform(main_svg, d3.zoomIdentity);
     };
+    function drag4ForceDOM(){
+        function dragstarted(d) {
+            d._x = d.x;
+            d._y = d.y;
+            d._mirror = $(d._el).clone(true)[0];
+            document.body.appendChild(d._mirror);
+            g.select('.network').style('pointer-events','none');
+            debugger
+            const pos = this.getBoundingClientRect();
+            d3.select(d._mirror).classed('gu-mirror',true).style('left',pos.left+'px').style('top',pos.top+'px');
+            _drake.start(d._mirror);
+            d3.select(this).attr('opacity',0)
+        }
+
+        function dragged(d) {
+            d._x = d3.event.x;
+            d._y = d3.event.y;
+            // d3.select(this).attr('transform',d=>`translate(${d._x-d.width/2},${d._y-d.height/2})`)
+            d3.select(this).attr('x',d=>d._x-d.width/2)
+                .attr('y',d=>d._y-d.height/2);
+            const pos = this.getBoundingClientRect();
+            const sourcepos = d.source.getBoundingClientRect();
+            d3.select(d._mirror).style('left',pos.left+'px').style('top',pos.top+'px');
+            d.remove = (pos.left>=sourcepos.left)&&((pos.left)<=(sourcepos.left+sourcepos.width))&&(pos.top>=sourcepos.top)&&((pos.top)<=(sourcepos.top+sourcepos.height));
+        }
+
+        function dragended(d) {
+            g.select('.network').style('pointer-events','all');
+            d3.select(d._mirror).remove();
+            if (d.remove){
+                d3.select(d._el).style('top',null).style('left',null)
+                d.source.appendChild(d._el);
+                master.removeForce(d.key);
+            }else{
+                d.x = d._x;
+                d.y = d._y;
+                updateForce(d.key,[d.x,d.y]);
+                _drake.end();
+                d3.select(this).attr('opacity',1);
+            }
+        }
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
     function drag4Force(){
         function dragstarted(d) {
             d._x = d.x;
@@ -640,6 +686,38 @@ let DynamicNet = function(){
         simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
     }
+    master.addForceAxis = function ({key,drake,posProp,mode,getRawData}){
+        const {isX,_index} = posProp;
+        getRawData = getRawData?? ((d,_index)=>(data.datamap[d.id]?data.datamap[d.id][0][_index]:undefined));
+        if (mode==='metric'){
+            getDataForce[key] = {scale:d3.scaleLinear().range(isX?[-graphicopt.widthG()/2, graphicopt.widthG()/2]:[graphicopt.heightG()/2, -graphicopt.heightG()/2])};
+            const getData = function(d,_,index){
+                if(((isX && (index===0) )|| ((!isX) && (index===1)))&&(d.type==='compute')) {
+                    debugger
+                    d['force' + key] = true;
+                    const value = getDataForce[key].scale(getRawData(d,_index));
+                    return value;
+                }
+                d['force' + key] = false;
+                return 0;
+            };
+            getDataForce[key].getData=getData;
+        }else{
+            // getDataForce[key] = {};
+            // const getData = function(d,index){
+            //     if (Layout.compute_layout[d.id]===key){
+            //         d['force'+key] = true;
+            //         return _pos[index]
+            //     }
+            //     d['force'+key] = false;
+            //     return 0;
+            // };
+            // getDataForce[key].getData=getData;
+        }
+        simulation.force(key+"X",d3.forceX().x(d=> getDataForce[key].getData(d,undefined,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.2));
+        simulation.force(key+"Y",d3.forceY().y(d=>getDataForce[key].getData(d,undefined,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.2));
+        simulation.alphaTarget(0.02).restart();
+    }
     function value2thresh(value,min,max){
         return (value-min)/(max-min);
     }
@@ -651,7 +729,7 @@ let DynamicNet = function(){
     // }
     function updateForce(key,_pos){
         const getData = getDataForce[key].getData;
-        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>{debugger; return (d.isolate|| !d['force'+key])?0:0.8}));
+        simulation.force(key+"X",d3.forceX().x(d=> getData(d,_pos,0)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.force(key+"Y",d3.forceY().y(d=>getData(d,_pos,1)).strength(d=>(d.isolate|| !d['force'+key])?0:0.8));
         simulation.alphaTarget(0.02).restart();
     }
@@ -703,6 +781,7 @@ let DynamicNet = function(){
         }
         return data;
     };
+    master.drag4ForceDOM = function() { return drag4ForceDOM}
     master.color = function(_data) {
         return arguments.length?(color=_data,master):color;
     };
@@ -839,7 +918,7 @@ let DynamicNet = function(){
         let A = pc[0];  // this is the U matrix from SVD
         // let B = pc[1];  // this is the dV matrix from SVD
         let chosenPC = pc[2];   // this is the most value of PCA
-        debugger
+
         let solution = dataIn.map((d, i) => d3.range(0, dim).map(dim => A[i][chosenPC[dim]]));
         return render(solution);
     }

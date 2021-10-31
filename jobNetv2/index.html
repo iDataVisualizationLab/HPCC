@@ -127,6 +127,17 @@
                                 </filter>
                             </defs>
                         </svg>
+                        <div id="xForceHolder" class="forceHolder" value="x" style="width:calc(100% - 50px);height: 50px; bottom:0px;left:50px; position:fixed">
+<!--                            <svg style="position:absolute;width:100%;top:0;left:50px"><line x1="100%" stroke="black"/></svg>-->
+                            <h3 class="text-center">Force X</h3>
+                        </div>
+                        <div id="yForceHolder" class="forceHolder" value="y" style="width: 50px;height: calc(100% - 100px); bottom:0px;left:50px; position:fixed">
+                            <div style="position:absolute;top:50%;left:0;width:100%">
+                            <h3 class="text-center" style="transform:rotate(-90deg);-webkit-transform:rotate(-90deg);white-space:nowrap; ">Force Y</h3>
+                            </div>
+                            <div style="position:absolute;top:50%;left:0;width:100%">
+                            </div>
+                        </div>
                     </div>
                     <svg id="pcaLayout">
                         <defs>
@@ -304,7 +315,7 @@
                                 <div id="forceLayoutHolder" class="tab-pane fade col-12" role="tabpanel">
                                     <div class="row">
                                         <ul class="nav nav-tabs" id="ForceByControl">
-                                            <li class="nav-item active"><a class="nav-link acti ve" data-toggle="tab" role="tab" href="#ForceByMetrics">by Metrics</a></li>
+                                            <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#ForceByMetrics" >by Metrics</a></li>
                                             <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#ForceByRacks">by Racks</a></li>
                                         </ul>
                                         <div class="card-body row">
