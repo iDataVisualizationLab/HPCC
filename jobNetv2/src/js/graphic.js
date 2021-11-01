@@ -79,9 +79,13 @@ function initdraw(){
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
     d3.selectAll('.forceDivHolder .close').on('click',function(){
         const source = d3.select('#'+d3.select(this).attr('data-target'));
-        const el = source.select('.forceDrag');
-        if(el.datum()) {
+        removeForceAxis(source)
+    });
+    function  removeForceAxis(source) {
+        const el = source.select('.forceDrag.old');
+        if((!el.empty()) && el.datum()) {
             let target={};
+            el.classed('old',false);
             if (el.datum()._index !== undefined) {
                 target = d3.select('#ForceByMetrics');
                 target.node().appendChild(el.node())
@@ -89,10 +93,10 @@ function initdraw(){
                 target = d3.select('#ForceByRacks');
                 target.node().appendChild(el.node())
             }
+            source.classed('hasChild', false);
             onChangeForce(source.node(), target.node(), el.node())
         }
-    })
-
+    }
     function onChangeForce(source, target, el) {
         if (source !== target) {
             console.log('drop-------------->')
@@ -145,10 +149,14 @@ function initdraw(){
                     comData.posProp.range = [0, maxCore]
                 }
                 if (isX) {
+                    removeForceAxis(targetNode);
+                    d3.select(el).classed('old',true);
                     targetNode.classed('hasChild', true);
                     d3.select('#xForceHolderLabel').text(key);
                     drawObject.addForceAxis(comData)
                 } else if (isY) {
+                    removeForceAxis(targetNode)
+                    d3.select(el).classed('old',true);
                     targetNode.classed('hasChild', true);
                     d3.select('#yForceHolderLabel').text(key);
                     comData.posProp.isX = false;
