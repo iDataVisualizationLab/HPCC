@@ -168,8 +168,8 @@ text {
     position: absolute;
     display: none
 }
-.forceHolder h3{
-    pointer-events: none;
+.forceDivHolder .menuForce{
+    display: none;
 }
 .forceHolder div.forceDrag{
     display: unset;
@@ -178,7 +178,13 @@ text {
 .forceHolder {
     display: none
 }
-.forceHolder.hasChild,  .forceHolder.active{
+.forceDivHolder .close{
+    padding:5px
+}
+.forceHolder.hasChild + .menuForce,  .forceHolder.active{
+    display: block;
+}
+.forceHolder.active + .menuForce {
     display: block;
 }
 .forceHolder.ex-over {

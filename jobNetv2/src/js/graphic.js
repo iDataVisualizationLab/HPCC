@@ -77,89 +77,102 @@ function initdraw(){
     serviceControl();
     d3.select('#jobShow').on('change',function(){Layout.jobShow = this.checked;createdata();currentDraw();});
     d3.select('#PCAlayout').on('change',function(){drawObject.PCAlayout(this.checked)});
+    d3.selectAll('.forceDivHolder .close').on('click',function(){
+        const source = d3.select('#'+d3.select(this).attr('data-target'));
+        const el = source.select('.forceDrag');
+        if(el.datum()) {
+            let target={};
+            if (el.datum()._index !== undefined) {
+                target = d3.select('#ForceByMetrics');
+                target.node().appendChild(el.node())
+            } else {
+                target = d3.select('#ForceByRacks');
+                target.node().appendChild(el.node())
+            }
+            onChangeForce(source.node(), target.node(), el.node())
+        }
+    })
+
+    function onChangeForce(source, target, el) {
+        if (source !== target) {
+            console.log('drop-------------->')
+            const targetNode = d3.select(target);
+            const sourceNode = d3.select(source);
+            const key = d3.select(el).datum().key;
+            if (!targetNode.select('svg').empty()) {
+                let svgProp = $('#circularLayout')[0].getBoundingClientRect()
+                let posProp = $('.gu-mirror')[0].getBoundingClientRect()
+                d3.select(el).style('top', (posProp.y - svgProp.y) + 'px').style('left', (posProp.x - svgProp.x) + 'px');
+                const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
+                const comData = {
+                    key: d3.select(el).datum().key,
+                    drake,
+                    posProp: {
+                        width: posProp.width,
+                        height: posProp.height,
+                        x: (posProp.x - svgProp.x),
+                        y: (posProp.y - svgProp.y),
+                        source: source,
+                        _el: el,
+                        el: $(el).clone()[0],
+                        _index: d3.select(el).datum()._index
+                    },
+                    mode
+                };
+                if (key === 'Work load') {
+                    comData.getRawData = (d) => d.data.cpu_cores.norm;
+                }
+                drawObject.addForce(comData)
+            } else {
+                let isX = targetNode.attr('value') === 'x';
+                let isY = targetNode.attr('value') === 'y';
+                const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
+                const _index = d3.select(el).datum()._index;
+                const comData = {
+                    key,
+                    drake,
+                    posProp: {
+                        _index,
+                        isX: true,
+                        _el: el,
+                        el: $(el).clone()[0],
+                        range: (serviceFullList[_index] ?? {range: [0, 1]}).range
+                    },
+                    mode
+                };
+                if (key === 'Work load') {
+                    comData.getRawData = (d) => d.data.cpu_cores.norm;
+                    comData.posProp.range = [0, maxCore]
+                }
+                if (isX) {
+                    targetNode.classed('hasChild', true);
+                    d3.select('#xForceHolderLabel').text(key);
+                    drawObject.addForceAxis(comData)
+                } else if (isY) {
+                    targetNode.classed('hasChild', true);
+                    d3.select('#yForceHolderLabel').text(key);
+                    comData.posProp.isX = false;
+                    drawObject.addForceAxis(comData)
+                }
+            }
+            if (sourceNode.attr('value')) {
+                sourceNode.classed('hasChild', false);
+                if (sourceNode.attr('value') === 'x') {
+                    d3.select('#xForceHolderLabel').text('Force X')
+                } else {
+                    d3.select('#yForceHolderLabel').text('Force Y')
+                }
+            }
+            if (d3.select(target).classed('holder')) {
+                drawObject.removeForce(key);
+            }
+        }
+        d3.selectAll('.forceHolder').classed('active', false);
+    }
+
     const drake = dragula([$( "#circularLayoutHolder .dropHolder" )[0], $( "#ForceByMetrics" )[0], $( "#ForceByRacks" )[0], $( "#xForceHolder" )[0], $( "#yForceHolder" )[0]])
         .on('drop',function(el, target, source, sibling){
-            if(source!==target) {
-                console.log('drop-------------->')
-                debugger
-                const targetNode = d3.select(target);
-                const sourceNode = d3.select(source);
-                const key = d3.select(el).datum().key;
-                if (!targetNode.select('svg').empty()) {
-                    let svgProp = $('#circularLayout')[0].getBoundingClientRect()
-                    let posProp = $('.gu-mirror')[0].getBoundingClientRect()
-                    d3.select(el).style('top', (posProp.y - svgProp.y) + 'px').style('left', (posProp.x - svgProp.x) + 'px');
-                    const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
-                    const comData ={
-                        key: d3.select(el).datum().key,
-                        drake,
-                        posProp: {
-                            width: posProp.width,
-                            height: posProp.height,
-                            x: (posProp.x - svgProp.x),
-                            y: (posProp.y - svgProp.y),
-                            source: source,
-                            _el: el,
-                            el: $(el).clone()[0],
-                            _index: d3.select(el).datum()._index
-                        },
-                        mode
-                    };
-                    if(key==='Work load'){
-                        comData.getRawData = (d)=>d.data.cpu_cores.norm;
-                    }
-                    drawObject.addForce(comData)
-                } else {
-                    let isX = targetNode.attr('value') === 'x';
-                    let isY = targetNode.attr('value') === 'y';
-                    const mode = source.id === 'ForceByMetrics' ? 'metric' : 'rack';
-                    const _index = d3.select(el).datum()._index;
-                    const comData = {
-                        key,
-                        drake,
-                        posProp: {_index, isX: true, _el: el, el: $(el).clone()[0],range:(serviceFullList[_index]??{range:[0,1]}).range},
-                        mode
-                    };
-                    if(key==='Work load'){
-                        comData.getRawData = (d)=>d.data.cpu_cores.norm;
-                        comData.posProp.range=[0,maxCore]
-                    }
-                    if (isX) {
-                        targetNode.classed('hasChild', true);
-                        targetNode.select('h3').text(key);
-                        // targetNode.append('div')
-                        //     .attr('class','forceSvg')
-                        //     .datum(comData)
-                        //     .style('width','100%')
-                        //     .style('height','100%')
-                        //     .call(drawObject.drag4ForceDOM());
-                        drawObject.addForceAxis(comData)
-                    } else if (isY) {
-                        targetNode.classed('hasChild', true);
-                        targetNode.select('h3').text(key);
-                        comData.posProp.isX = false;
-                        // targetNode.append('div')
-                        //     .attr('class','forceSvg')
-                        //     .datum(comData)
-                        //     .style('width','100%')
-                        //     .style('height','100%')
-                        //     .call(drawObject.drag4ForceDOM());
-                        drawObject.addForceAxis(comData)
-                    }
-                }
-                if (sourceNode.attr('value')) {
-                    sourceNode.classed('hasChild', false);
-                    if (sourceNode.attr('value') === 'x') {
-                        sourceNode.select('h3').text('Force X')
-                    } else {
-                        sourceNode.select('h3').text('Force Y')
-                    }
-                }
-                if (d3.select(target).classed('holder')) {
-                    drawObject.removeForce(key);
-                }
-                d3.selectAll('.forceHolder').classed('active', false);
-            }
+            onChangeForce(source, target, el);
         }).on('over', function (el, container) {
             container.className += ' ex-over';
         }).on('out', function (el, container) {
