@@ -145,7 +145,7 @@ let MapSetting = function () {
             height: graphicopt.height,
 
         });
-        let svdefs = svg.select('defsmain');
+        let svdefs = svg.select('#defsmain');
         if (svdefs.empty())
             svdefs = svg.append('defs').attr('id', 'defsmain');
         if (svdefs.select('#userpic').empty()) {
@@ -336,6 +336,7 @@ let MapSetting = function () {
     };
 
     function handleData() {
+        console.log(scheme.data)
         jobsObj = {};
         computersObj = {};
         usersObj = {};
@@ -415,6 +416,7 @@ let MapSetting = function () {
             tableData[d.key].id = d.key;
             d.order = i
         })
+        console.log(_computers,jobsObj,computersObj,usersObj,linkob,tableData,users,jobs,computers,linkdata)
     }
 
     function handleCollapseJobs(u) {
@@ -497,6 +499,7 @@ let MapSetting = function () {
 
                 });
             });
+            console.log('compute_tsnedata',compute_tsnedata)
             let summary = serviceFullList.map((s, si) => {
                 let min = Infinity;
                 let max = -Infinity;
@@ -595,6 +598,7 @@ let MapSetting = function () {
     }
 
     function drawJobNode() {
+        debugger
         if (jobs.length) {
             g.select('.job_title').classed('hide', false);
         } else {

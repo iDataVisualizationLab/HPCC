@@ -153,7 +153,8 @@ let DynamicNet = function(){
                     labels.push(d);
                     labelsM.set(d.id, d);}
             }
-            d.color = color(d.value,d);
+            if (d.type==='compute')
+                d.color = color(d.value,d);
             if(d.type==='user'){
                 nodes_user.push(d);
                if(maxJob<d.data.jobMain.length)
@@ -419,6 +420,30 @@ let DynamicNet = function(){
                 label.interrupt().transition().ease(d3.easeQuadIn).duration(graphicopt.animationTime).attr("transform", d => `translate(${d.x},${d.y})`);
                 node.selectAll('g').remove();
                 if (serviceName!=='Radar'){
+                    node.filter(d=>d.type==='compute').attr('transform',d=>d.scale?`scale(${d.scale})`:null)
+                    updateUser(node);
+                    const icon = node_n.filter(d=>d.isNew&&d.isNew.length).select('path.circle').attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
+                    icon.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
+                }else{
+                    const radarNode = node.filter(d=>d.type==='compute').attr('transform',null);
+                    radarNode.selectAll('path.circle').remove();
+                    radarNode
+                        .selectAll('g').data(d=>[d.drawData])
+                        .join('g').attr('class','radar  ')
+                        .style('fill',d=>d.color)
+                        .each(function(d){
+                            setTimeout(()=>{
+                                // debugger
+                                d[0].color = d.color;//color(_.isArray(d[0].name)?d[0].name[0]:d[0].name);
+                                createRadar(d3.select(this), d3.select(this), d[0], {size:d[0].r,colorfill: 0.5}).select('.radarStroke')
+                                    .style('stroke-opacity',1);
+                            },0);
+                        });
+                    updateUser(node_n.filter(d=>d.type!=='compute'));
+                    const icon = node_n.filter(d=>d.isNew&&d.isNew.length&&(!(d.type==='compute'))).select('path.circle').attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
+                    icon.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
+                }
+                function updateUser(node){
                     let path = node.selectAll('path').data(d=>d.drawData,d=>d.id)
                         .attr('d',getRenderFunc)
                         .classed('invalid',d=>d.invalid)
@@ -431,23 +456,6 @@ let DynamicNet = function(){
                         .style('filter',d=>d.invalid?'url("#glow")':null)
                         .attr('d',getRenderFunc).style('fill',d=>d.color)
                         .attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null);
-                    const icon = node_n.filter(d=>d.isNew&&d.isNew.length).select('path.circle').attr('transform',d=>{if (d.scale){return `translate(${d.offset*2},${d.offset*2}) scale(${d.scale*2})`;} return null})
-                    icon.transition().duration(5000).attr('transform',d=>d.scale?`translate(${d.offset},${d.offset}) scale(${d.scale})`:null)
-                }else{
-
-                    const radarNode = node.filter(d=>d.type==='compute');
-                    radarNode.selectAll('path.circle').remove();
-                    radarNode
-                        .selectAll('g').data(d=>[d.drawData])
-                        .join('g').attr('class','radar  ')
-                        .style('fill',d=>d.color)
-                        .each(function(d){
-                            setTimeout(()=>{
-                                d[0].color = color(_.isArray(d[0].name)?d[0].name[0]:d[0].name);
-                                createRadar(d3.select(this), d3.select(this), d[0], {size:d.r,colorfill: 0.5}).select('.radarStroke')
-                                    .style('stroke-opacity',1);
-                            },0);
-                        });
                 }
             }
         }

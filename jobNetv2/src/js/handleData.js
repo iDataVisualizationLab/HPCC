@@ -240,6 +240,7 @@ function _createdata({tree,computers,jobs,users,jobByNames,sampleS}){
     else
         updateLink = updateLinkCU;
 // Layout.jobShow
+    debugger
     tree.forEach(r=>r.children.forEach(c=>{
         let data = {id:c.name,type:'compute',data:c,value:getData(c),key:c.name,shortname:c.name.replace('10.101.','')};
         data.drawData  = getDrawData(data);

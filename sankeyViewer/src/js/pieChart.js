@@ -102,7 +102,7 @@ function UserPie(){
         var outerArc = d3.arc()
             .innerRadius(radius * 0.9)
             .outerRadius(radius * 0.9);
-
+        debugger
         /* ------- PIE SLICES -------*/
         var slice = g.select(".slices").selectAll("g.slice")
             .data(dataViz, d=>d.data.key)
@@ -142,7 +142,7 @@ function UserPie(){
             .data(dataViz, d=>d.data.key)
             .join("text")
             .classed('hide',d=>(d.data.key===emptyKey)||(d.endAngle-d.startAngle)<Math.PI/10)
-            .attr("dy", ".35em")
+                .attr("dy", ".35em")
             .text(function(d) {
                 return d.data.text;
             });

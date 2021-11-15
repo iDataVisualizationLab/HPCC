@@ -144,6 +144,7 @@ function onchangeCluster(isError) {
         cluster_info.forEach(d => (d.total = d.arr.length));
         cluster_map(cluster_info);
         handle_clusterinfo();
+        createdata();
         currentDraw(serviceSelected);
     }
 }

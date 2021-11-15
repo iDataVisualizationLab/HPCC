@@ -9,7 +9,7 @@ let vizservice=[];
 function serviceControl(){
     vizservice =serviceFullList.slice();
     drawObject.graphicopt({range:vizservice[serviceSelected].range});
-    vizservice.push({text:'User',range:[]});
+    // vizservice.push({text:'User',range:[]});
     vizservice.push({text:'Radar',range:[]});
     d3.selectAll('.serviceName').text(vizservice[serviceSelected].text)
     d3.select('#serviceSelection')
@@ -853,6 +853,7 @@ function getDrawData(e) {
     let serviceName = vizservice[serviceSelected].text;
     if (serviceName === 'Radar'){
         if (!e.children) {
+            debugger
             let radarvalue = [serviceFullList.map(d=>({axis:d.text,value:Math.max(d3.scaleLinear().domain(d.range)(e.data.metrics[d.text])??0,0)}))];
             radarvalue[0].name = e.data.metrics['Radar']
             radarvalue.isRadar = true;
