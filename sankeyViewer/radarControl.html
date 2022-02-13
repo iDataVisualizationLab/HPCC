@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../HiperView/css/customicon.css">
+    <style>
+        .toolTip.btn i {
+            font-size: 20px
+        }
+        #RadarController_Table .angle input{
+            max-width:40px
+        }
+
+        .dataTables_wrapper .dataTables_filter input{
+            width: calc(100% - 60px);
+            margin-left: 0.5em;
+            left: auto;
+            right: auto;
+            padding-left: 10px;
+        }
+        .dataTables_filter {
+            width: 50%;
+        }
+        .dataTables_length{
+            padding-top: 2px;
+        }
+        .dataTables_filter input{
+            height: 2rem;
+        }
+        .dataTables_paginate {
+            display: flex;
+        }
+        .dataTable input {
+            color: currentColor;
+        }
+        /*input[type=search]:not(.browser-default) {*/
+        /*font-size: unset;*/
+        /*border-radius: 10px;*/
+        /*border: 1px solid #666666;*/
+        /*}*/
+        .dataTables_wrapper .dataTables_filter{
+            padding: 0;
+            padding-bottom: 0.5rem;
+        }
+        .dataTable input[type=number]{
+            height: 1rem;
+            font-size: unset;
+            border-radius: 2px;
+            border: 1px solid #666666;
+            text-align: right;
+            margin: unset;
+        }
+        .dataTable input:focus{
+            border-bottom: unset;
+        }
+        .dataTable span {
+            padding: unset;
+        }
+        .dataTable a {
+            line-height: 1rem;
+            padding: 2px 0.25rem;
+        }
+        .dataTable a.disable-field {
+            color: #26a69a;
+        }
+        .dataTable .fieldDisable {
+            opacity: .4;
+            pointer-events: none;
+        }
+        .fieldDisable i {
+            color: #b7b7b7;
+        }
+        .fieldDisable .toggleDisable i {
+            pointer-events: all;
+        }
+        .fieldDisable :hover .toggleDisable i{
+            animation:2s linear bounce;
+            animation-iteration-count:infinite
+        }
+        .axis.disable {
+            display: none;
+        }
+        .btngroup {
+            width:5px
+        }
+    </style>
+    <link href="../HiperView/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <script src="../HiperView/js/simple-statistics.min.js"></script>
+</head>
+<body>
+<h4 id="vizController"><i class="icon-radarShape material-icons bi icon"></i><span>Radar Controller</span>  </h4>
+<div class="collapsible-body">
+    <div  class="row mx-auto">
+        <label for="viztype_holder" class="col-4">Circular layout</label>
+        <div id="viztype_holder" class="btn-group btn-group-toggle radio-toolbar col-8" role="group">
+            <label class="toolTip btn btn-primary" data-title="Star chart">
+                <input name="viztype" type="radio" value="star" autocomplete="off" ><i class="icon-starShape"></i>
+            </label>
+
+            <label class="toolTip btn btn-primary" data-title="Radar chart">
+                <input name="viztype" type="radio" value="radar" autocomplete="off" checked><i class="icon-radarShape"></i>
+            </label>
+
+            <label class="toolTip btn btn-primary" data-title="Nightingale Rose chart">
+                <input name="viztype" type="radio" value="rose" autocomplete="off" ><i class="icon-roseShape"></i>
+            </label>
+
+            <label class="toolTip btn btn-primary" data-title="Flower chart">
+                <input name="viztype" type="radio" value="flower" autocomplete="off" ><i class="icon-flowerShape"></i>
+            </label>
+
+        </div>
+    </div>
+    <div id="RadarController">
+
+    </div>
+    <div id="RadarController_Table" style = "position:relative">
+        <table class="display" width="100%"></table>
+    </div>
+<!--    <div id="RadarController_Table_toolbar">-->
+<!--        <button type="submit" class ="menuBtn btn-small" id="enableVariableCorrelation"> Variable Correlation </button>-->
+<!--        <button type="submit" class ="menuBtn btn-small" id="distributeLayout"> Evenly distributing angle </button>-->
+<!--        <button type="submit" value = false class ="menuBtn saveProfile modal-trigger btn-small" id="saveProfile" onclick="downloadProfile(this)" href="#savedialog_profile"><i class="fas fa-download"></i> Save</button>-->
+<!--        <input id="profile_input_file" class="none" type="file" style="display: none;"/>-->
+<!--        <button type="submit" value = false class ="menuBtn loadProfile btn-small" id="loadProfile" onclick="uploadProfile(this)"><i class="fas fa-upload"></i> Load </button>-->
+<!--    </div>-->
+    <div class="row clusterView">
+        <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping Method:</label>
+        <select id="clusterMethod" class="col-8 radarcontroller_layout">
+            <option value="leaderbin" selected="selected">Leader Bin</option>
+            <option value="kmean">K-means</option>
+            <option value="jobName" distanceFunc="none" cluster-function="calJobNameCluster" assign-function="getJobNameCluster">Job Name</option>
+            <option value="user" distanceFunc="none" cluster-function="calUserNameCluster" assign-function="getJobNameCluster">User</option>
+            <!--<option value="binarybin">Binary bin</option>-->
+        </select>
+        <label for="normMethod" class="col-4 radarcontroller_layout"> Distance Function:</label>
+        <select id="normMethod" class="col-8 radarcontroller_layout">
+            <option value="l1">L1 norm - Manhattan Distance</option>
+            <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+        </select>
+        <form action="#" class='clusterProfile row no-padding' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+            <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+            <!--                                <div  class="col-6 hide">-->
+            <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+            <!--                                </div>-->
+            <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
+            <input type="number" id="lowrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+            <span class="col-2 no_leftmagrin">to</span>
+            <input type="number" id="highrange" class="col-3 radarcontroller_layout browser-default no_leftmagrin" >
+
+            <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+
+        </form>
+        <form action="#" class='clusterProfile row hide no-padding' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+            <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+            <input type="number" id="knum" class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+            <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
+            <input type="number" id="kiteration" class="col-2 radarcontroller_layout browser-default no_leftmagrin" >
+
+            <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
+        </form>
+        <div class="col-12" style="height: 10px"></div>
+        <label class="col-4">Group information:</label>
+        <div class="col-8" style="padding-left: 0">
+            <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">
+                <i class="fas fa-download pauseicon" ></i> Save</button>
+            <button  type="submit" class ="menuBtn modal-trigger btn-small" id="loadClusterInfobtn">
+                <i class="fas fa-upload pauseicon" ></i> Load</button>
+            <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
+        </div>
+        <div class="d-flex justify-content-center white row" id="clusterDisplay">
+
+        </div>
+    </div>
+</div>
+<script src="../HiperView/myscripts/violinChart.js"></script>
+<script src="../HiperView/myscripts/histChart.js"></script>
+<script src="../HiperView/myscripts/radarController_v2.js"></script>
+<script>
+    let firstTime = true;
+    function onSchemaUpdate(schema){
+        serviceFullList.forEach(ser=>{
+            ser.angle = schema.axis[ser.text].angle();
+            ser.enable = schema.axis[ser.text].data.enable;
+        });
+        // radarChartOptions.schema = serviceFullList;
+        // Radarplot.schema(serviceFullList,firstTime);
+        if (cluster_info){
+            radarChartclusteropt.schema = serviceFullList;}
+        // if (!firstTime) {
+        //     // updateSummaryChartAll();
+            MetricController.drawSummary();
+            if (cluster_info) {
+                cluster_map(cluster_info);
+                // draw statement
+                drawGantt();
+            }
+        // }
+        // }
+        // if (db!=='csv')
+        //     SaveStore();
+    }
+    function onfilterdata (){
+
+    }
+
+    function onChangeMinMaxFunc(choice) {
+        // preloader(true);
+        // exit_warp();
+
+        // change the range of service here
+        if (choice) {
+            runopt.minMax = true;
+            calculateServiceRange();
+        }else{
+            runopt.minMax = false;
+            serviceFullList.forEach((s,si)=>s.range = s._range.slice());
+        }
+
+        MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
+        initTsnedata();
+        // initDataWorker();
+        recalculateCluster(group_opt,function(isError){
+            cluster_info.forEach(d => (d.total = 0));
+            Object.keys(tsnedata).forEach(k=>{
+                tsnedata[k].forEach((d,ti)=>{
+                    getCluster([k,ti]);
+                })
+            });
+            cluster_info.forEach(d => (d.total = d.arr.length));
+            cluster_map(cluster_info);
+            handle_clusterinfo();
+            const _l = [];
+            Object.values(tsnedata).forEach(e=>e.forEach(d=>_l.push(d)));
+            MetricController.data(_l).datasummary(getsummaryservice()).update();
+            MetricController.drawSummary(_l.length-1)
+            // currentDraw(serviceSelected);
+        });
+    }
+</script>
+</body>
+</html>

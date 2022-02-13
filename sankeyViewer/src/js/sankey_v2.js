@@ -1,7 +1,7 @@
 // data type {key, value, order(optional), data(extra data)}
 
 
-let Sankey = function(){
+let Sankey_v2 = function(){
     let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `${d}`})
     let graphicopt = {
         margin: {top: 20, right: 20, bottom: 20, left: 100},
@@ -106,7 +106,7 @@ let Sankey = function(){
         y.domain(data.map(d=>d.key));
         // let sizeScale = d3.scaleSqrt().domain(d3.extent(_.flatten(data.map(d=>d.value.map(d=>d.names.length))))).range([1,graphicopt.hi/2*1.2]);
         // let range= sizeScale.domain();
-
+        debugger
         data.forEach((d,i)=>{
             d.order = i;
             d.relatedNode = [];
@@ -170,6 +170,7 @@ let Sankey = function(){
 
             const maxLimit = graphicopt.maxLimit;
             const mapOfSankey = {};
+            const linkCheckBySource = {};
             for (let i = 1; i < keys.length; ++i) {
                 const a = keys[i - 1];
                 const b = keys[i];
@@ -237,12 +238,16 @@ let Sankey = function(){
                             value,
                             _id: 'link_'+key.replace(/\.|\[|\]| |"|\\|:|-|,/g,'')
                         };
-                        if (getUserName(d[a])!==getUserName(d[b])){
+                        if (aName!==bName){
                             if (graphicopt.hideStable){
-                            nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
-                            nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);}
+                                nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).relatedLinks.push(link);
+                                nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).relatedLinks.push(link);}
                             nodeByKey.get(JSON.stringify([a, getUserName(d[a])])).shared = true;
                             nodeByKey.get(JSON.stringify([b, getUserName(d[b])])).shared = true;
+
+                            if (!linkCheckBySource[bName])
+                                linkCheckBySource[bName] = {};
+                            linkCheckBySource[bName][nodeByKey.get(targetName).layer] = 1;
                         }else{
                             link.isSameNode = true;
                         }
@@ -296,8 +301,66 @@ let Sankey = function(){
                 // console.log(listUser)
                 links = links.filter(l=>!(removeNodes[l.source]||removeNodes[l.target]))
             }
+
+            const __links = []
+            d3.nest().key(d=>getUserName(d._source)).key(d=>getUserName(d._target)).entries(links)
+                .forEach(d=>{
+
+                    // compress links
+                    // let samenode = [];
+                    // d.values.forEach((e)=>{
+                    //     if (e.key!==d.key){
+                    //         e.values.forEach(l=>__links.push(l));
+                    //     }else{
+                    //         let startL = {...e.values[0]};
+                    //         __links.push(startL);
+                    //         for (let i = 1; i<e.values.length;i++){
+                    //             const l = e.values[i];
+                    //             if (nodes[startL.target].layer !== nodes[l.source].layer){
+                    //                 startL = {...l};
+                    //                 __links.push(startL);
+                    //             }else{
+                    //                 startL.target = l.target;
+                    //             }
+                    //         }
+                    //     }
+                    // })
+
+                    let samenode = [];
+                    let stoplayer = linkCheckBySource[d.key]??{};
+                    if (linkCheckBySource[d.key])
+                        debugger
+                    d.values.forEach((e)=>{
+                        if (e.key!==d.key){
+                            e.values.forEach(l=>{
+                                __links.push(l);
+                                stoplayer[nodes[l.source].layer] = 1;
+                            });
+                        }else{
+                            samenode=e.values;
+                        }
+                    });
+                    if (Object.keys(stoplayer).length){
+                        debugger
+                    }
+                    if (samenode.length) {
+                        let startL = {...samenode[0]};
+                        __links.push(startL);
+                        for (let i = 1; i < samenode.length; i++) {
+                            const l = samenode[i];
+                            if (stoplayer[nodes[l.source].layer] || (nodes[startL.target].layer !== nodes[l.source].layer)) {
+                                startL = {...l};
+                                __links.push(startL);
+                            } else {
+                                startL.target = l.target;
+                            }
+                        }
+                    }
+                })
+
+
             console.timeEnd('create links');
-            return {nodes, links};
+            return {nodes, links:__links};
         })();
 
         // TIME ARC
@@ -335,9 +398,9 @@ let Sankey = function(){
                             if (nodeObj[d.parentNode].y !== undefined)
                                 d.y += (nodeObj[d.parentNode].y - d.y) * 0.5;
 
-                                if (nodeObj[d.parentNode].childNodes && nodeObj[d.parentNode].childNodes.length) {
-                                    nodeObj[d.parentNode].y = d3.mean(nodeObj[d.parentNode].childNodes,e=>nodeObj[e].y);
-                                }
+                            if (nodeObj[d.parentNode].childNodes && nodeObj[d.parentNode].childNodes.length) {
+                                nodeObj[d.parentNode].y = d3.mean(nodeObj[d.parentNode].childNodes,e=>nodeObj[e].y);
+                            }
                         } else if (d.childNodes && d.childNodes.length) {
                             var yy = d3.mean(d.childNodes, e => nodeObj[e].y);
                             if (yy !== undefined)
@@ -359,6 +422,8 @@ let Sankey = function(){
                 graph.nodes.forEach(d=>{
                     d._forcey =  (d.parentNode!==undefined?nodeObj[d.parentNode].y:d.y);
                     if((d._forcey === undefined || _.isNaN(d._forcey)) ) {
+                        if(d.name==='User 2')
+                            debugger
                         if (nodep[d.name] === undefined) {
                             nodep[d.name] = miny - 10 * (left);
                             d._forcey = nodep[d.name];
@@ -381,7 +446,7 @@ let Sankey = function(){
                 .nodeSort(nodeSort)
                 // .linkSort(function(a,b){return ((a.source._forcey+a.target._forcey)-(b.source._forcey+b.target._forcey))})
                 .extent([[x.range()[0], 10], [x.range()[1], graphicopt.heightG()-10]]);
-
+            debugger
             const __nodes = graph.nodes.map(d => Object.assign({}, d))
             const __links = graph.links.map(d => Object.assign({}, d))
             const {nodes, links} = sankey({
@@ -465,8 +530,8 @@ let Sankey = function(){
                             .attr("d", linkPath);
                         if (isAnimate)
                             path.attr("opacity", 0)
-                            .transition().duration(graphicopt.animationTime)
-                            .attr("opacity", 1);
+                                .transition().duration(graphicopt.animationTime)
+                                .attr("opacity", 1);
                         path.each(function(d){d.dom=d3.select(this)});
                         e.append("title");
                         return e
@@ -489,8 +554,8 @@ let Sankey = function(){
                             .attr("stroke-width", 0.1);
                         if (isAnimate)
                             path
-                            .transition().duration(graphicopt.animationTime)
-                            .attr("d", linkPath);
+                                .transition().duration(graphicopt.animationTime)
+                                .attr("d", linkPath);
                         else
                             path.attr("d", linkPath);
                         return update
@@ -634,6 +699,7 @@ let Sankey = function(){
         return arguments.length?(graphicopt.padding=_data,master):graphicopt.padding;
     };
     master.data = function(_data) {
+        debugger
         return arguments.length?(data=_data,master):data;
     };
     master.times = function(_data) {

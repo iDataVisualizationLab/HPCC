@@ -64,6 +64,7 @@ function initdraw(){
         Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
         subObject.graphicopt({maxLimit:val=='core'?32:1}).data(Layout.userTimeline).draw();
     })
+    MetricController.axisSchema(serviceFullList, true).update()
 }
 function userTable(d,type){
     highlight2Stack = [];

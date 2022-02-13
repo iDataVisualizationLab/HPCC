@@ -389,6 +389,7 @@ function initDataWorker(){
                 if (graphicControl.sumType === "RadarSummary") {
                     Radarplot.data(data.result.arr).drawSummarypoint(data.result.index, data.result.hindex);
                 }
+                debugger
                 MetricController.data(data.result.arr).drawSummary(data.result.hindex);
             }
         }

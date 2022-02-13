@@ -271,7 +271,7 @@ function updateclusterDescription (name,text){
 function recalculateCluster (option,calback,customCluster) {
     // preloader(true,10,'Process grouping...','#clusterLoading');
 
-
+    debugger
     group_opt = option;
     distance = group_opt.normMethod==='l1'?distanceL1:distanceL2;
     if (clustercalWorker)
@@ -280,7 +280,7 @@ function recalculateCluster (option,calback,customCluster) {
     clustercalWorker.postMessage({
         binopt:group_opt,
         sampleS:tsnedata,
-        timeMax:1,
+        timeMax:sampleS.timespan.length-1,
         hosts:d3.keys(tsnedata).map(h=>({name:h})),
         serviceFullList: serviceFullList,
         serviceLists:serviceLists,
@@ -442,9 +442,10 @@ function handle_clusterinfo () {
     data_info.push(['#group calculated:',cluster_info.length]);
 }
 let getCluster = getMathCluster;
-function getMathCluster(e){
+function getMathCluster([name,ti]){
     // calculate cluster here
-    let axis_arr = tsnedata[e.name][0];
+    const e = tsnedata[name][ti];
+    let axis_arr = tsnedata[name][ti];
     let index = 0;
     let minval = Infinity;
     cluster_info.find((c, ci) => {
@@ -457,8 +458,8 @@ function getMathCluster(e){
         }
         return !val;
     });
-    cluster_info[index].arr.push(e.name);
-    e.metrics.Radar = cluster_info[index].name;
+    cluster_info[index].arr.push([name,ti]);
+    e.Radar = cluster_info[index].name;
     e.cluster = cluster_info[index];
 }
 function calJobNameCluster(){

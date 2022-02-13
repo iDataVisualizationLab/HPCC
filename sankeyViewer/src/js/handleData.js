@@ -114,12 +114,12 @@ function data2tree(data,sampleS,computers){
 }
 let currentDraw=()=>{};
 let tsnedata = {};
+let sampleS = [];
 function queryData(data) {
     const data_ = handleDataUrl(data);
-    let  sampleS = data_.sampleS;
     tsnedata = data_.tsnedata;
     let {computers,jobs,users,jobByNames} = handleData(data);
-    adjustTree(sampleS,computers);
+    // adjustTree(sampleS,computers);
     Layout.currentTime = data.currentTime;
     Layout.users = users;
     Layout.jobs = jobs;
@@ -144,11 +144,13 @@ function queryData(data) {
             .data(d=>d).join('td').html(d=>d);
 
     };
-    createdata();
+    // createdata();
     // _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
-    currentDraw();
+    // currentDraw();
     // currentDraw = _.partial(draw,{computers,jobs,users,jobByNames,sampleS},currentTime);
     // currentDraw(serviceSelected);
+    debugger
+    // MetricController.data(_.flatten(Object.values(tsnedata))).drawSummary(0)
 }
 function createdata(){
     if (!Layout.order){ // init order
@@ -236,7 +238,11 @@ function getUsers(_data){
 }
 function handleRankingData(data){
     console.time('handleRankingData');
-    debugger
+    let r = handleSmalldata(data);
+    sampleS = r.sampleh;
+    tsnedata = r.tsnedata;
+    Layout.minMaxDataComp = r.minMaxData;
+
     data.time_stamp = data.time_stamp.slice(0,50);
     const _nodes_info = data.nodes_info;
     data.nodes_info = {};
@@ -247,6 +253,14 @@ function handleRankingData(data){
 
     handleDataComputeByUser.data = data;
     userPie.data(Layout.usersStatic).draw();
-    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data);
+    Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data)
+    debugger
+    const _l = [];
+    Object.values(tsnedata).forEach(e=>e.forEach(d=>_l.push(d)));
+    MetricController.axisSchema(serviceFullList).update();
+    debugger
+    MetricController.data(_l).datasummary(getsummaryservice()).update();
+    MetricController.drawSummary(_l.length-1);
+    MetricController.datasummary(undefined)
     console.timeEnd('handleRankingData');
 }

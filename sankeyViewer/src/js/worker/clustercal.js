@@ -83,9 +83,15 @@ addEventListener('message',function ({data}) {
             })
         });
         // bin.data([]).minNumOfBins(8).maxNumOfBins(11);
+        debugger
         bin.data(dataSpider3.map((d, i) => {
-            var dd = d.slice();
-            dd.data = {name: d.name, id: d.id, indexSamp: d.indexSamp};
+            var dd = d.map(d => d ?? -1);
+            // @ts-ignore
+            dd.data = {name: d.name, id: i, timestep: d.timestep};
+            // @ts-ignore
+            dd.name = d.name;
+            // @ts-ignore
+            dd.timestep = d.timestep;
             return dd;
         }))
             .calculate();
@@ -99,6 +105,7 @@ addEventListener('message',function ({data}) {
         dataSpider3.length = 0;
         console.log("numBins: " + bin.bins.length);
         const binRadius = bin.binRadius;
+        console.log(bin.bins,binopt)
         dataSpider3 = bin.bins.map(d => {
             var temp;
             if (bin.normalizedFun)
