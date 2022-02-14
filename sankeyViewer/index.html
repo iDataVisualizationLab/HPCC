@@ -353,20 +353,6 @@
     <link rel="stylesheet" href="src/style/dashboard.css">
 
 
-    <script>
-        let MetricController;
-            $("#radarControlHolder").load("radarControl.html",()=>{
-                MetricController = radarController();
-                MetricController.graphicopt({width:300,height:300})
-                    .div(d3.select('#RadarController'))
-                    .tablediv(d3.select('#RadarController_Table'))
-                    .axisSchema(serviceFullList)
-                    .onChangeValue(onSchemaUpdate)
-                    .onChangeFilterFunc(onfilterdata)
-                    .onChangeMinMaxFunc(onChangeMinMaxFunc)
-                    .init();
-            });
-    </script>
 
 <!--    <script src="src/lib/nouislider.js"></script>-->
     <script src="src/lib/d3.v4.min.js"></script>
