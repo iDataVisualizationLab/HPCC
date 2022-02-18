@@ -254,13 +254,17 @@ function handleRankingData(data){
     handleDataComputeByUser.data = data;
     userPie.data(Layout.usersStatic).draw();
     Layout.userTimeline = handleDataComputeByUser(handleDataComputeByUser.data)
-    debugger
-    const _l = [];
-    Object.values(tsnedata).forEach(e=>e.forEach(d=>_l.push(d)));
+
     MetricController.axisSchema(serviceFullList).update();
     debugger
-    MetricController.data(_l).datasummary(getsummaryservice()).update();
-    MetricController.drawSummary(_l.length-1);
-    MetricController.datasummary(undefined)
+    outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
+    recalculateCluster(group_opt,function(isError){
+        cluster_map(cluster_info);
+        handle_clusterinfo();
+
+        const _l = _.flatten(Object.values(tsnedata),1);
+        MetricController.data(_l).datasummary(getsummaryservice());
+        MetricController.drawSummary(_l.length-1)
+    });
     console.timeEnd('handleRankingData');
 }

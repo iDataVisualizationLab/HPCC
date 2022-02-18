@@ -43,10 +43,10 @@ addEventListener('message',function ({data}) {
                 }
             }
         }
-        console.log(dataSpider3.length)
+        console.log('Raw data size :',dataSpider3.length)
         // remove outlying
         dataSpider3 = dataSpider3.filter(d => !d.outlier);
-        console.log(dataSpider3.length)
+        console.log('Input Cluster size :', dataSpider3.length)
         postMessage({
             action: 'returnData',
             result: {message: `Binning process`, process: 40}

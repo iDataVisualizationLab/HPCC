@@ -3,7 +3,6 @@ serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPo
 var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]}]},{"text":"Memory_usage","id":1,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]}]},{"text":"Fans_speed","id":2,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]}]},{"text":"Power_consum","id":3,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]}];
 serviceFullList = [];
 serviceLists.forEach(s=>s.sub.forEach(s=>serviceFullList.push(s)));
-debugger
 var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
 var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
 var alternative_scale = [1,1,1,0.5];
@@ -54,7 +53,6 @@ let colorScaleList = {
         {val: 'Viridis',type:'d3',label: 'Viridis'},
         {val: 'Greys',type:'d3',label: 'Greys'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]};
-let scaleService;
 
 function handleDataUrl(dataRaw) {
     hosts = d3.keys(dataRaw.nodes_info).map(ip=>{
@@ -81,7 +79,7 @@ function handleDataUrl(dataRaw) {
     let tsnedata = {};
     let data = dataRaw.nodes_info;
     sampleh.timespan = time_stamp.map(d=>d*1000);
-    scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
+    serviceFullList.forEach(d=>d.scale = d3.scaleLinear().domain(d.range));
     hosts.forEach(h => {
         sampleh[h.name] = {};
         tsnedata[h.name] = [];
@@ -105,7 +103,8 @@ function handleDataUrl(dataRaw) {
                     tsnedata[h.name][currentIndex].name = h.name;
                     tsnedata[h.name][currentIndex].timestep =currentIndex;
                 }
-                value.forEach(v=>tsnedata[h.name][currentIndex].push(v === null ? 0 : scaleService[si](v) || 0))
+                //TODO
+                value.forEach((v,i)=>tsnedata[h.name][currentIndex].push(v === null ? 0 : serviceLists[si].sub[i].scale(v) || 0))
             })
         })
     });
@@ -137,7 +136,7 @@ function initTsnedata() {
         tsnedata[h] = sampleS.timespan.map((t, i) => {
             let array_normalize = _.flatten(serviceLists.map(a => d3.range(0, a.sub.length).map(vi => {
                 let v = sampleS[h][serviceListattr[a.id]][i][vi];
-                return  v === null? undefined:d3.scaleLinear().domain(a.sub[0].range)(v);
+                return  v === null? undefined:a.sub[vi].scale(v);
             })));
             array_normalize.name = h;
             array_normalize.timestep = i;
@@ -152,7 +151,7 @@ function handleSmalldata(dataRaw){
             name: ip,
         }
     });
-    scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
+    serviceFullList.forEach(d=>d.scale = d3.scaleLinear().domain(d.range));
     let time_stamp = dataRaw.time_stamp.map(d=>d>9999999999999?(d/1000000):d)
     let sampleh = {};
 
@@ -187,8 +186,8 @@ function handleSmalldata(dataRaw){
                     minMaxData[h.name][ti].name = h.name;
                     minMaxData[h.name][ti].timestep =ti;
                 }
-                value.forEach(v=>{
-                    const val = v === null ? undefined : scaleService[si](v);
+                value.forEach((v,i)=>{
+                    const val = v === null ? undefined : serviceLists[si].sub[i].scale(v);
                     tsnedata[h.name][ti].push(val);
                     minMaxData[h.name][ti][0].push(val);
                     minMaxData[h.name][ti][1].push(val);
@@ -215,7 +214,7 @@ function handleAllData(dataRaw){
             if (dataRaw.jobs_info[jID].finish_time  && data.jobs_info[jID].finish_time>9999999999999)
                 dataRaw.jobs_info[jID].finish_time = dataRaw.jobs_info[jID].finish_time/1000000}
     });
-    scaleService = d3.nest().key(d=>d.idroot).rollup(d=>d3.scaleLinear().domain(d[0].range)).object(serviceFullList);
+    serviceFullList.forEach(d=>d.scale = d3.scaleLinear().domain(d.range));
     let time_stamp = dataRaw.time_stamp.map(d=>d/1000000);
     let sampleh = {};
     var ser = serviceListattr.slice();

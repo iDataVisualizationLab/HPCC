@@ -101,6 +101,7 @@ function initTimeElement(){
                 handleRankingData(data);
                 updateProcess({percentage:80,text:'Preprocess data'})
                 drawUserList();
+                debugger
                 initdrawGantt();
                 drawGantt();
                 // timelineControl.play.bind(timelineControl)();

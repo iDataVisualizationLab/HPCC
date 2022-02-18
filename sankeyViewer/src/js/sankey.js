@@ -537,6 +537,10 @@ let Sankey = function(){
             L ${target[0]} ${target[1]+thick} C ${target[0]-width} ${target[1]+thick}, ${source[0]+width} ${source[1]+thick}, ${source[0]} ${source[1]+thick} Z`;
         }
 
+        function getMetric (v){
+            return colorBy!=='name'?((colorBy!=='cluster')?`${dimensions[selectedService].text}: ${+d3.format('.2f')(dimensions[selectedService].scale.invert(v))}`:(clusterDescription?(clusterDescription[v]??'mixed'):'')):''
+        }
+
     };
     function str2class(str){
         return 'l'+str.replace(/ |,/g,'_');

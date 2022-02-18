@@ -87,6 +87,11 @@
     </style>
     <link href="../HiperView/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="../HiperView/js/simple-statistics.min.js"></script>
+    <script src="../HiperView/js/scagnosticsnd.min.js"></script>
+    <script src="../HiperView/js/binnerN.min.js"></script>
+    <script src="../HiperView/js/binarybin.min.js"></script>
+    <script src="../HiperView/js/binarybin.min.js"></script>
+    <script src="../HiperView/js/kmean.js"></script>
 </head>
 <body>
 <h4 id="vizController"><i class="icon-radarShape material-icons bi icon"></i><span>Radar Controller</span>  </h4>
@@ -185,22 +190,16 @@
             ser.angle = schema.axis[ser.text].angle();
             ser.enable = schema.axis[ser.text].data.enable;
         });
-        // radarChartOptions.schema = serviceFullList;
-        // Radarplot.schema(serviceFullList,firstTime);
         if (cluster_info){
             radarChartclusteropt.schema = serviceFullList;}
-        // if (!firstTime) {
-        //     // updateSummaryChartAll();
+
             MetricController.drawSummary();
             if (cluster_info) {
                 cluster_map(cluster_info);
                 // draw statement
                 drawGantt();
             }
-        // }
-        // }
-        // if (db!=='csv')
-        //     SaveStore();
+
     }
     function onfilterdata (){
 
@@ -221,24 +220,89 @@
 
         MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
         initTsnedata();
-        // initDataWorker();
+
+        outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
         recalculateCluster(group_opt,function(isError){
-            cluster_info.forEach(d => (d.total = 0));
-            Object.keys(tsnedata).forEach(k=>{
-                tsnedata[k].forEach((d,ti)=>{
-                    getCluster([k,ti]);
-                })
-            });
-            cluster_info.forEach(d => (d.total = d.arr.length));
             cluster_map(cluster_info);
             handle_clusterinfo();
-            const _l = [];
-            Object.values(tsnedata).forEach(e=>e.forEach(d=>_l.push(d)));
-            MetricController.data(_l).datasummary(getsummaryservice()).update();
+
+            MetricController.data(_.flatten(Object.values(tsnedata),1)).datasummary(getsummaryservice()).update();
             MetricController.drawSummary(_l.length-1)
             // currentDraw(serviceSelected);
         });
     }
+
+    function outlier(data,dimensions){
+        console.time('outline:');
+        let dataSpider3 = [];
+        const missingData = {}
+        data.forEach(d=>{
+            if (d.findIndex(e=>!_.isNumber(e))>-1){
+                d.outlier = 2; //missing
+                d.cluster = 'missing';
+                missingData[d.name+'_'+d.timestep] = (d);
+            }else{
+                dataSpider3.push(d);
+            }
+        });
+        let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
+        console.log('estimateSize:', estimateSize);
+        let scagOptions ={
+            startBinGridSize: estimateSize,
+            outlyingCoefficient: 1.5,
+        };
+
+
+        let outlyingBins = [];
+        outlyingBins.pointObject = {};
+        outlyingBins.missingData = missingData;
+
+        let scag = scagnosticsnd(dataSpider3.map((d, i) => {
+            var dd = d.filter((d,i)=>serviceFullList[i].enable);
+            dd.data = d;
+            return dd;
+        }), scagOptions);
+        console.timeEnd('outline:');
+        console.log('Total bin=' + scag.bins.length);
+        console.log('Outlying bin=' +scag.outlyingBins.length);
+
+
+
+        scag.outlyingBins.map((ob,i)=>{
+            let temp2 = {labels: -i-1,compObject:{}};
+
+            let arr = ob.map((o)=>{
+                let d = o.data;
+                d.outlier = 1;
+                d.cluster = 'outlier';
+                d.clusterIndex = -i-1;
+                let temp  = dimensions.map((s,si)=>({axis:s.text, value: d[si],angle: s.angle}));
+                temp.name = d.name+'_'+d.timestep;
+                temp.nodeName = d.name;
+                temp.timestep = d.timestep;
+                temp.cluster =  'outlier';
+                temp.clusterIndex =  -i-1;
+                outlyingBins.pointObject[temp.name] = temp;
+                if (!temp2.compObject[d.name]){
+                    temp2.compObject[d.name] = []
+                }
+                temp2.compObject[d.name].push(d);
+                return outlyingBins.pointObject[temp.name];
+            });
+
+            ob.site.forEach((s, i) => temp2[dimensions[i].text] = dimensions[i].scale.invert(s));
+            temp2.index = -i-1;
+
+            temp2.__metrics = dimensions.map((s,si)=>({axis:s.text, value: ob.site[si], angle: s.angle}));
+            temp2.__metrics.normalize = ob.site.slice();
+            temp2.arr = arr;
+            outlyingBins.push(temp2);
+        });
+        console.log('#Outlier: ',Object.values(outlyingBins.pointObject).length)
+        return outlyingBins;
+    }
+
+
 </script>
 </body>
 </html>
