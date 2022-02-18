@@ -28,7 +28,7 @@ function handleData(data){
         return {node,job,jobMain,totalCore}
     });
     const jobName_job = d3.nest()
-        .key(d=>d.value[JOBNAME].slice(0,3)) //user
+        .key(d=>d.value[JOBNAME])//.slice(0,3)) //user
         .key(d=>d.key.split('.')[0]) //job array
         .entries(d3.entries(jobs));
     return {computers,jobs,users}
@@ -243,10 +243,12 @@ function handleRankingData(data){
     tsnedata = r.tsnedata;
     Layout.minMaxDataComp = r.minMaxData;
 
-    data.time_stamp = data.time_stamp.slice(0,50);
+    data.time_stamp = data.time_stamp//.slice(0,50);
     const _nodes_info = data.nodes_info;
     data.nodes_info = {};
-    Object.keys(_nodes_info).slice(0,20).forEach(j=>data.nodes_info[j]=_nodes_info[j]);
+    Object.keys(_nodes_info)
+        // .slice(0,20)
+        .forEach(j=>data.nodes_info[j]=_nodes_info[j]);
 
     Layout.usersStatic = getUsers(data);
     Layout.timespan = data.time_stamp;
@@ -257,7 +259,7 @@ function handleRankingData(data){
 
     MetricController.axisSchema(serviceFullList).update();
     debugger
-    outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
+    outlyingBins = outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
     recalculateCluster(group_opt,function(isError){
         cluster_map(cluster_info);
         handle_clusterinfo();

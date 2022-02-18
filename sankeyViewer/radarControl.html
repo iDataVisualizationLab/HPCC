@@ -96,7 +96,7 @@
 <body>
 <h4 id="vizController"><i class="icon-radarShape material-icons bi icon"></i><span>Radar Controller</span>  </h4>
 <div class="collapsible-body">
-    <div  class="row mx-auto">
+    <div  class="row mx-auto hide">
         <label for="viztype_holder" class="col-4">Circular layout</label>
         <div id="viztype_holder" class="btn-group btn-group-toggle radio-toolbar col-8" role="group">
             <label class="toolTip btn btn-primary" data-title="Star chart">
@@ -117,7 +117,7 @@
 
         </div>
     </div>
-    <div id="RadarController">
+    <div id="RadarController" class="justify-content-center row">
 
     </div>
     <div id="RadarController_Table" style = "position:relative">
@@ -167,16 +167,37 @@
             <button type="submit" class="btn btn-success animatIcon col-8 offset-4 no-padding"><div>Submit</div></button>
         </form>
         <div class="col-12" style="height: 10px"></div>
-        <label class="col-4">Group information:</label>
-        <div class="col-8" style="padding-left: 0">
-            <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">
-                <i class="fas fa-download pauseicon" ></i> Save</button>
-            <button  type="submit" class ="menuBtn modal-trigger btn-small" id="loadClusterInfobtn">
-                <i class="fas fa-upload pauseicon" ></i> Load</button>
-            <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>
-        </div>
+<!--        <label class="col-4">Group information:</label>-->
+<!--        <div class="col-8" style="padding-left: 0">-->
+<!--            <button type="submit" class ="menuBtn modal-trigger btn-small" data-toggle="modal" data-target="#savedialog_clusterInfo">-->
+<!--                <i class="fas fa-download pauseicon" ></i> Save</button>-->
+<!--            <button  type="submit" class ="menuBtn modal-trigger btn-small" id="loadClusterInfobtn">-->
+<!--                <i class="fas fa-upload pauseicon" ></i> Load</button>-->
+<!--            <input id="clusterInfo_input_file" class="none" type="file" style="display: none;"/>-->
+<!--        </div>-->
+        <p id="clusterSummary">
+        </p>
         <div class="d-flex justify-content-center white row" id="clusterDisplay">
 
+        </div>
+        <div class="d-flex justify-content-center white row" style="background-color: rgba(255, 255, 255, 0.12); padding: 5px; border-radius: 10px; border: 1px dashed gray;">
+            <h5>Other color for cluster:</h5>
+            <div style="display: flex; align-items: center; padding: 3px;">
+                <div style="margin-right: 5px; width: 20px; height: 20px; border-radius: 10px; background-color: gray;"></div>
+                Outlier
+            </div>
+            <div style="display: flex; align-items: center; padding: 3px;">
+                <div style="margin-right: 5px; width: 20px; height: 20px; border-radius: 10px; background-color: black;"></div>
+                Missing dimension data
+            </div>
+            <div style="display: flex; align-items: center; padding: 3px;">
+                <div style="margin-right: 5px; width: 20px; height: 20px; border-radius: 10px; background-color: #e2e2e2;"></div>
+                Multiple Clusters
+            </div>
+        </div>
+        <div style="width:100%;border-top:gray 1px solid; margin-top:10px; margin-bottom:5px;"></div>
+        <div class="d-flex justify-content-center white row" id="outlierDisplay">
+            <h5 class="title" style="width:100%"></h5>
         </div>
     </div>
 </div>
@@ -184,6 +205,7 @@
 <script src="../HiperView/myscripts/histChart.js"></script>
 <script src="../HiperView/myscripts/radarController_v2.js"></script>
 <script>
+    let mixColor = '#e2e2e2';
     let firstTime = true;
     function onSchemaUpdate(schema){
         serviceFullList.forEach(ser=>{
@@ -221,12 +243,12 @@
         MetricController.axisSchema(serviceFullList).datasummary(undefined).update();
         initTsnedata();
 
-        outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
+        outlyingBins = outlier(_.flatten(Object.values(tsnedata),1),serviceFullList)
         recalculateCluster(group_opt,function(isError){
             cluster_map(cluster_info);
             handle_clusterinfo();
-
-            MetricController.data(_.flatten(Object.values(tsnedata),1)).datasummary(getsummaryservice()).update();
+            const _l = _.flatten(Object.values(tsnedata),1);
+            MetricController.data(_l).datasummary(getsummaryservice()).update();
             MetricController.drawSummary(_l.length-1)
             // currentDraw(serviceSelected);
         });

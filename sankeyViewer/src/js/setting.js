@@ -1,11 +1,22 @@
-// serviceFullList = [{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]},{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]},{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]},{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]
-serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPower_usage", "arrJob_scheduling"];
-var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]}]},{"text":"Memory_usage","id":1,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]}]},{"text":"Fans_speed","id":2,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]}]},{"text":"Power_consum","id":3,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]}];
+// // serviceFullList = [{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]},{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]},{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]},{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]
+// serviceListattr = ["arrTemperature", "arrMemory_usage", "arrFans_health", "arrPower_usage", "arrJob_scheduling"];
+// var serviceLists = [{"text":"Temperature","id":0,"enable":true,"sub":[{"text":"CPU1 Temp","id":0,"enable":true,"idroot":0,"angle":5.585053606381854,"range":[3,98]},{"text":"CPU2 Temp","id":1,"enable":true,"idroot":0,"angle":0,"range":[3,98]},{"text":"Inlet Temp","id":2,"enable":true,"idroot":0,"angle":0.6981317007977318,"range":[3,98]}]},{"text":"Memory_usage","id":1,"enable":true,"sub":[{"text":"Memory usage","id":0,"enable":true,"idroot":1,"angle":1.5707963267948966,"range":[0,99]}]},{"text":"Fans_speed","id":2,"enable":true,"sub":[{"text":"Fan1 speed","id":0,"enable":true,"idroot":2,"angle":2.4870941840919194,"range":[1050,17850]},{"text":"Fan2 speed","id":1,"enable":true,"idroot":2,"angle":2.923426497090502,"range":[1050,17850]},{"text":"Fan3 speed","id":2,"enable":true,"idroot":2,"angle":3.3597588100890845,"range":[1050,17850]},{"text":"Fan4 speed","id":3,"enable":true,"idroot":2,"angle":3.796091123087667,"range":[1050,17850]}]},{"text":"Power_consum","id":3,"enable":true,"sub":[{"text":"Power consumption","id":0,"enable":true,"idroot":3,"angle":4.71238898038469,"range":[0,200]}]}];
+// serviceFullList = [];
+// serviceLists.forEach(s=>s.sub.forEach(s=>serviceFullList.push(s)));
+// var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
+// var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
+// var alternative_scale = [1,1,1,0.5];
+
+
+serviceListattr = ['CPU1_Temp', 'CPU2_Temp', 'NIC_Temp', 'Fan 1', 'power_consumption'];
+var serviceLists = [{"text":"CPU1_Temp","id":0,"enable":true,"sub":[{"text":"CPU1_Temp","id":0,"enable":true,"idroot":0,"angle":0,"range":[3,98]}]},{"text":"CPU2_Temp","id":1,"enable":true,"sub":[{"text":"CPU2_Temp","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[3,98]}]},{"text":"NIC_Temp","id":2,"enable":true,"sub":[{"text":"NIC_Temp","id":0,"enable":true,"idroot":2,"angle":2.5132741228718345,"range":[3,98]}]},{"text":"Fan 1","id":3,"enable":true,"sub":[{"text":"Fan 1","id":0,"enable":true,"idroot":3,"angle":3.7699111843077517,"range":[1050,17850]}]},{"text":"power_consumption","id":4,"enable":true,"sub":[{"text":"power_consumption","id":0,"enable":true,"idroot":4,"angle":5.026548245743669,"range":[0,400]}]}];
 serviceFullList = [];
 serviceLists.forEach(s=>s.sub.forEach(s=>serviceFullList.push(s)));
-var serviceList_selected = [{"text":"Temperature","index":0},{"text":"Memory_usage","index":1},{"text":"Fans_speed","index":2},{"text":"Power_consum","index":3}];
-var alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
-var alternative_scale = [1,1,1,0.5];
+var serviceList_selected = serviceLists.map(d=>({"text":d.text,"index":d.id}));
+var alternative_service = serviceListattr;
+var alternative_scale = serviceListattr.map(d=>1);
+
+
 var runopt ={ // run opt global
     minMax: 0,
 };
@@ -291,4 +302,115 @@ function getsummaryservice(){
 
     });
     return ob;
+}
+
+// load data
+
+// Promise.all(['src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_12_48.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_19.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_36.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_40.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_44.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_48.csv',
+//     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 07_52_20.csv',
+// ].map(f=>d3.csv(f))).then(convertQuanahData)
+function convertQuanahData(files){
+    debugger
+    const jobs_info = {};
+    const nodes_info = {};
+    let job_core ;
+    const timeStamp = {};
+    let dimensions=[];
+    const dim = {};
+    const job_code_sum = {};
+    let jobf = [];
+        files.forEach(f=>{
+        const keys = Object.keys(f[0]);
+        if (keys.includes('job_id')){
+            jobf = f.filter(d=>d.nodes);
+        }else if(keys.includes('time') && keys.includes('cpus') && keys.includes('jobs')){
+            job_core = f;
+        }else if (keys.includes('time')){
+            f=f.filter(f=>f.time);
+            f.forEach(d=>{
+                d.time = (+new Date(d.time)*1000000);
+                timeStamp[ d.time] = 1;
+            });
+            keys.filter(d=>d!=='time').forEach(k=>{
+                const s = k.split('|').map(d=>d.trim());
+                dim[s[0]]=1;
+                if (!nodes_info[s[1]]){
+                    nodes_info[s[1]] = {job_id:[]};
+                }
+                if (!nodes_info[s[1]][s[0]])
+                    nodes_info[s[1]][s[0]] = [];
+            });
+            dimensions.push(f)
+        }
+    });
+    const time_stamp = Object.keys(timeStamp).sort((a,b)=>a - (b));
+    time_stamp.forEach((k,i)=>{
+        timeStamp[k] = i;
+    });
+    Object.keys(nodes_info).forEach(comp=>{
+        Object.keys(dim).forEach(d=>{
+            nodes_info[comp][d] = time_stamp.map(d=>null);
+        });
+        nodes_info[comp].job_id = time_stamp.map(d=>[]);
+    })
+    dimensions.forEach(f=>{
+        const keys = Object.keys(f[0]).filter(d=>d!=='time');
+        const keysOb = {};
+        keys.forEach(k=>{
+            const s = k.split('|').map(d=>d.trim());
+            keysOb[k] = {comp:s[1],dim:s[0]};
+        });
+        f.forEach(d=>{
+            keys.forEach(k=>{
+                const {comp,dim} = keysOb[k];
+                nodes_info[comp][dim][timeStamp[d.time]] = (d[k]!=='')?(+d[k]):null;
+            })
+        })
+    });
+    if (jobf) {
+        jobf.forEach(d=>{
+            const node_list = d.nodes.replace(/\{|\}/g,'').split(',').map(d=>d.trim()).filter(n=>nodes_info[n]);
+            if (node_list.length) {
+                jobs_info[d.job_id] = {
+                    "cpu_cores": 0,
+                    "finish_time": (+d.end_time) * 1000000000,
+                    "job_name": d.name,
+                    node_list,
+                    "start_time": (+d.start_time) * 1000000000,
+                    "submit_time": (+d.submit_time) * 1000000000,
+                    "total_nodes": node_list.length,
+                    "user_name": d.user_name
+                };
+                job_code_sum[d.job_id] = {};
+            }
+        })
+    }
+    if (job_core){
+        job_core.forEach(d=>{
+            if (d.jobs) {
+                const jobs = d.jobs.replace(/\{|\}/g, '').split(',').map(d => d.trim()).filter(j => job_code_sum[j]);
+                const cpus = d.cpus.replace(/\{|\}/g, '').split(',').map(d => +d);
+                const comp = d.name;
+                if (nodes_info[comp]) {
+                    const time = (+new Date(d.time)) * 1000000;
+                    if (timeStamp[time] !== undefined) {
+                        nodes_info[comp].job_id[timeStamp[time]] = jobs;
+                        jobs.forEach((j, i) => {
+                            if (!job_code_sum[j][comp]) {
+                                jobs_info[j].cpu_cores += cpus[i];
+                                job_code_sum[j][comp] = 1;
+                            }
+                        })
+                    }
+                }
+            }
+        })
+    }
+    debugger
+    return {jobs_info,nodes_info,time_stamp:time_stamp.map(d=>+d)}
 }

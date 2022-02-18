@@ -7,8 +7,8 @@ let group_opt = {
 };
 let radarChartclusteropt  = {
     margin: {top: 0, right: 0, bottom: 0, left: 0},
-    w: 130,
-    h: 130,
+    w: 110,
+    h: 110,
     radiuschange: false,
     levels:6,
     dotRadius:2,
@@ -43,7 +43,7 @@ let radarChartclusteropt  = {
         },
     },
     showText: false};
-let cluster_info,clusterDescription={},clusterGroup={};
+let cluster_info,clusterDescription={},clusterGroup={},clusterInfo={},outlyingBins;
 let clustercalWorker;
 let colorCluster  = d3.scaleOrdinal().range(d3.schemeCategory20);
 function initClusterUI(){
@@ -179,83 +179,161 @@ function cluster_map (dataRaw) {
     });
     data.forEach(d=>d[0].name = dataRaw.find(c=>d.id===c.name).text);
     //--end
+
+    let clusterSumDiv = d3.select("#clusterSummary");
+    clusterSumDiv.html(`Cluster inputdata: ${clusterInfo.input} (${d3.format(",.1%")(clusterInfo.input/clusterInfo.total)})<br/>
+            Cluster calculation time: ${Math.round(clusterInfo.clusterCalTime??0)} ms <br/>
+            Total MSE: ${d3.format('.2f')(clusterInfo.totalMSE??0)}`)
+
     let dir = d3.select('#clusterDisplay');
-    setTimeout(()=>{
-        let r_old = dir.selectAll('.radarCluster').data(data,d=>d.id).order();
+
+    function drawRadar(dir,data,renderRadar) {
+        let r_old = dir.selectAll('.radarCluster').data(data, d => d.id).order();
         r_old.exit().remove();
-        let r_new = r_old.enter().append('div').attr('class','radarCluster')
-            .on('mouseover',function(d){
+        let r_new = r_old.enter().append('div').attr('class', 'radarCluster')
+            .on('mouseover', function (d) {
                 // if (!jobMap.runopt().mouse.disable) {
                 //     mainviz.highlight(d.id);
                 // }
-                d3.select(this).classed('focus',true);
-            }).on('mouseleave',function(d){
+                d3.select(this).classed('focus', true);
+            }).on('mouseleave', function (d) {
                 // if (!jobMap.runopt().mouse.disable) {
                 //     mainviz.unhighlight(d.id);
                 // }
-                d3.select(this).classed('focus',false);
+                d3.select(this).classed('focus', false);
             })
             .append('div')
-            .attr('class','label')
-            .styles({'position':'absolute',
-                'color':'black',
-                'width': radarChartclusteropt.w+'px',
+            .attr('class', 'label')
+            .styles({
+                'position': 'absolute',
+                'color': 'black',
+                'width': radarChartclusteropt.w + 'px',
                 height: '1rem',
                 padding: '10px'
                 // overflow: 'hidden',
             });
         //
         if (isNameChangeable)
-            r_new.append('i').attr('class','editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click',function(){
+            r_new.append('i').attr('class', 'editbtn material-icons tiny col s1').style('cursor', 'Pointer').text('edit').on('click', function () {
                 let active = d3.select(this).classed('clicked');
                 active = !active;
-                d3.select(this).classed('clicked',active);
+                d3.select(this).classed('clicked', active);
                 const parent = d3.select(this.parentNode);
-                parent.select('span.clusterlabel').classed('hide',active);
-                parent.select('input.clusterlabel').classed('hide',!active);
+                parent.select('span.clusterlabel').classed('hide', active);
+                parent.select('input.clusterlabel').classed('hide', !active);
             });
-        r_new.append('span').attrs({'class':'clusterlabel truncate left-align col '+(isNameChangeable?'s11':'s12'),'type':'text'})
-            .style('padding',0)
-            .style('display','block');
-        if(isNameChangeable)
-        {
-            r_new.append('input').attrs({'class':'clusterlabel browser-default hide truncate center-align col s11','type':'text'})
-                .on('change',function(d){
+        r_new.append('span').attrs({
+            'class': 'clusterlabel truncate left-align col ' + (isNameChangeable ? 's11' : 's12'),
+            'type': 'text'
+        })
+            .style('padding', 0)
+            .style('display', 'block');
+        if (isNameChangeable) {
+            r_new.append('input').attrs({
+                'class': 'clusterlabel browser-default hide truncate center-align col s11',
+                'type': 'text'
+            })
+                .on('change', function (d) {
                     clusterDescription[d.id].text = $(this).val();
-                    d3.select(this).classed('hide',true);
+                    d3.select(this).classed('hide', true);
                     const parent = d3.select(this.parentNode);
-                    parent.select('.editbtn').classed('clicked',false);
-                    parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide',false);
-                    updateclusterDescription(d.id,clusterDescription[d.id].text);
+                    parent.select('.editbtn').classed('clicked', false);
+                    parent.select('span.clusterlabel').text(clusterDescription[d.id].text).classed('hide', false);
+                    updateclusterDescription(d.id, clusterDescription[d.id].text);
                 });
         }
-        r_new.append('span').attr('class','clusternum center-align col s12').style('display','block');;
-        // r_new.append('span').attr('class','clusterMSE center-align col s12');
-        dir.selectAll('.radarCluster')
-            .attr('class',(d,i)=>'flex_col valign-wrapper radarCluster radarh'+d.id)
-            .attr('data-toggle',"tooltip")
-            .attr('data-placement',"top")
-            .attr('title',d=>d[0].text)
-            .style('position','relative')
-            .each(function(d,i){
-                let datadraw = d.map(e=>{
-                    let temp = e.map(e=>({axis:e.axis,value:Math.max(e.value,0)}));
-                    temp.name = e.name;
-                    temp.text = e.text;
-                    return temp;
-                });
-                // datadraw[0].name = d[0].name;
-                // datadraw[0].text = d[0].text;
-                datadraw.id = d.id;
-                radarChartclusteropt.color = function(){return colorCluster(d.id)};
-                RadarChart(".radarh"+d.id, datadraw, radarChartclusteropt,"").select('.axisWrapper .gridCircle').classed('hide',true);
+        r_new.append('span').attr('class', 'clusternum center-align col s12').style('display', 'block');
+        ;
+
+        renderRadar = renderRadar ?? function renderRadar(d) {
+            let datadraw = d.map(e => {
+                let temp = e.map(e => ({axis: e.axis, value: Math.max(e.value, 0)}));
+                temp.name = e.name;
+                temp.text = e.text;
+                return temp;
             });
-        d3.selectAll('.radarCluster').classed('first',(d,i)=>!i);
-        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order',d=>d.order+1).text(d=>d[0].text);
-        d3.selectAll('.radarCluster').select('span.clusternum').text(d=>(d[0].total||d.total||0).toLocaleString());
-        if(isNameChangeable){
-            d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value',d=>d[0].text).each(function(d){$(this).val(d[0].text)});
-            d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide',!radarChartclusteropt.boxplot).text(d=>d3.format(".2")(d[0].mse||0));
+            // datadraw[0].name = d[0].name;
+            // datadraw[0].text = d[0].text;
+            datadraw.id = d.id;
+            radarChartclusteropt.color = function () {
+                return colorCluster(d.id)
+            };
+            RadarChart(".radarh" + d.id, datadraw, radarChartclusteropt, "").select('.axisWrapper .gridCircle').classed('hide', true);
+        }
+
+// r_new.append('span').attr('class','clusterMSE center-align col s12');
+        dir.selectAll('.radarCluster')
+            .attr('class', (d, i) => 'flex_col valign-wrapper radarCluster radarh' + d.id)
+            .attr('data-toggle', "tooltip")
+            .attr('data-placement', "top")
+            .attr('title', d => d[0].text)
+            .style('position', 'relative')
+            .each(function (d, i) {
+                renderRadar(d);
+            });
+        d3.selectAll('.radarCluster').classed('first', (d, i) => !i);
+        d3.selectAll('.radarCluster').select('span.clusterlabel').attr('data-order', d => d.order + 1).text(d => d[0].text);
+        d3.selectAll('.radarCluster').select('span.clusternum').text(d => (d[0].total || d.total || 0).toLocaleString());
+        if (isNameChangeable) {
+            d3.selectAll('.radarCluster').select('input.clusterlabel').attr('value', d => d[0].text).each(function (d) {
+                $(this).val(d[0].text)
+            });
+            d3.selectAll('.radarCluster').select('span.clusterMSE').classed('hide', !radarChartclusteropt.boxplot).text(d => d3.format(".2")(d[0].mse || 0));
+        }
+    }
+
+    setTimeout(()=>{
+        drawRadar(dir,data);
+
+        // draw outlier
+        let outlierDiv = d3.select('#outlierDisplay');
+        if (outlyingBins){
+            outlierDiv.style('display','unset');
+            outlierDiv.select('h5.title').html(`Outliers: ${outlyingBins?Object.keys(outlyingBins.pointObject).length:0} temporal instances`);
+            let outlieropt = {...radarChartclusteropt};
+            outlieropt.fillin=0;
+            outlieropt.events={
+                axis: {
+                    mouseover: function(){
+                        try {
+                            const d = d3.select(d3.event.detail || this).datum();
+                            d3.selectAll('#outlierDisplay .axis' + d.idroot + '_' + d.id).classed('highlight', true);
+                            d3.selectAll('#outlierDisplay .axisText').remove();
+                            if (d3.select(this.parentNode).select('.axisText').empty())
+                                d3.select(this.parentNode).append('text').attr('class','axisText').attr('transform','rotate(-90) translate(5,-5)');
+                            d3.select(this.parentNode).select('.axisText').text(d.text);
+                            $('.tablesvg').scrollTop($('table .axis' + d.idroot + '_' + d.id)[0].offsetTop);
+                        }catch(e){}
+                    },
+                    mouseleave: function(){
+                        const d = d3.select(d3.event.detail||this).datum();
+                        d3.selectAll('#outlierDisplay .axis'+d.idroot+'_'+d.id).classed('highlight',false);
+                        d3.selectAll('#outlierDisplay .axisText').remove();
+                    },
+                },
+            }
+            drawRadar(outlierDiv,outlyingBins.map((c,i)=>{
+                let temp = c.arr.slice();
+                temp.name = c.labels;
+                temp.text = c.text;
+                temp.total = c.total;
+                temp.mse = c.mse;
+                let temp_b = temp;
+                temp_b.id = 'Outlier'+(-c.index);
+                temp_b.total = c.arr.length;
+                temp_b.order = i;
+
+                return temp_b;
+            }),(d)=>{
+                let datadraw = d;
+                datadraw.id = d.id;
+                outlieropt.color = function () {
+                    return colorCluster('outlier')
+                };
+                RadarChart(".radarh" + d.id, datadraw, outlieropt, "").select('.axisWrapper .gridCircle').classed('hide', true);
+            });
+        }else{
+            outlierDiv.style('display','none');
         }
     }, 0);
     // outlier_map(outlyingList)
@@ -409,6 +487,7 @@ function recalculateCluster (option,calback) {
     cluster_info = result.cluster;
     clusterDescription = result.clusterDescription;
     colorCluster = result.colorCluster;
+    clusterInfo = result.clusterInfo;
     updateclusterDescription();
 
     if (!calback) {
