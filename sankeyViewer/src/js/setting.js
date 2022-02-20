@@ -8,8 +8,11 @@
 // var alternative_scale = [1,1,1,0.5];
 
 
-serviceListattr = ['CPU1_Temp', 'CPU2_Temp', 'NIC_Temp', 'Fan 1', 'power_consumption'];
-var serviceLists = [{"text":"CPU1_Temp","id":0,"enable":true,"sub":[{"text":"CPU1_Temp","id":0,"enable":true,"idroot":0,"angle":0,"range":[3,98]}]},{"text":"CPU2_Temp","id":1,"enable":true,"sub":[{"text":"CPU2_Temp","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[3,98]}]},{"text":"NIC_Temp","id":2,"enable":true,"sub":[{"text":"NIC_Temp","id":0,"enable":true,"idroot":2,"angle":2.5132741228718345,"range":[3,98]}]},{"text":"Fan 1","id":3,"enable":true,"sub":[{"text":"Fan 1","id":0,"enable":true,"idroot":3,"angle":3.7699111843077517,"range":[1050,17850]}]},{"text":"power_consumption","id":4,"enable":true,"sub":[{"text":"power_consumption","id":0,"enable":true,"idroot":4,"angle":5.026548245743669,"range":[0,400]}]}];
+// serviceListattr = ['CPU1_Temp', 'CPU2_Temp', 'NIC_Temp', 'Fan 1', 'power_consumption'];
+// var serviceLists = [{"text":"CPU1_Temp","id":0,"enable":true,"sub":[{"text":"CPU1_Temp","id":0,"enable":true,"idroot":0,"angle":0,"range":[3,98]}]},{"text":"CPU2_Temp","id":1,"enable":true,"sub":[{"text":"CPU2_Temp","id":0,"enable":true,"idroot":1,"angle":1.2566370614359172,"range":[3,98]}]},{"text":"NIC_Temp","id":2,"enable":true,"sub":[{"text":"NIC_Temp","id":0,"enable":true,"idroot":2,"angle":2.5132741228718345,"range":[3,98]}]},{"text":"Fan 1","id":3,"enable":true,"sub":[{"text":"Fan 1","id":0,"enable":true,"idroot":3,"angle":3.7699111843077517,"range":[1050,17850]}]},{"text":"power_consumption","id":4,"enable":true,"sub":[{"text":"power_consumption","id":0,"enable":true,"idroot":4,"angle":5.026548245743669,"range":[0,400]}]}];
+
+serviceListattr = ['memory_power', 'power_consumption', 'cpu_power', 'CPU_usage', 'CPU1_Temp', 'CPU2_Temp', 'NIC_Temp', 'Fan 1', 'Memory_usage'];
+var serviceLists = [{"text":"memory_power","id":0,"enable":true,"sub":[{"text":"memory_power","id":0,"enable":true,"idroot":0,"angle":0,"range":[0,400]}]},{"text":"power_consumption","id":1,"enable":true,"sub":[{"text":"power_consumption","id":0,"enable":true,"idroot":1,"angle":0.6981317007977318,"range":[0,800]}]},{"text":"cpu_power","id":2,"enable":true,"sub":[{"text":"cpu_power","id":0,"enable":true,"idroot":2,"angle":1.3962634015954636,"range":[0,800]}]},{"text":"CPU_usage","id":3,"enable":true,"sub":[{"text":"CPU_usage","id":0,"enable":true,"idroot":3,"angle":2.0943951023931953,"range":[0,100]}]},{"text":"CPU1_Temp","id":4,"enable":true,"sub":[{"text":"CPU1_Temp","id":0,"enable":true,"idroot":4,"angle":2.792526803190927,"range":[3.98]}]},{"text":"CPU2_Temp","id":5,"enable":true,"sub":[{"text":"CPU2_Temp","id":0,"enable":true,"idroot":5,"angle":3.490658503988659,"range":[3,98]}]},{"text":"NIC_Temp","id":6,"enable":true,"sub":[{"text":"NIC_Temp","id":0,"enable":true,"idroot":6,"angle":4.1887902047863905,"range":[3,98]}]},{"text":"Fan 1","id":7,"enable":true,"sub":[{"text":"Fan 1","id":0,"enable":true,"idroot":7,"angle":4.886921905584122,"range":[1050,17850]}]},{"text":"Memory_usage","id":8,"enable":true,"sub":[{"text":"Memory_usage","id":0,"enable":true,"idroot":8,"angle":5.585053606381854,"range":[0,100]}]}]
 serviceFullList = [];
 serviceLists.forEach(s=>s.sub.forEach(s=>serviceFullList.push(s)));
 var serviceList_selected = serviceLists.map(d=>({"text":d.text,"index":d.id}));
@@ -314,6 +317,21 @@ function getsummaryservice(){
 //     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 06_13_48.csv',
 //     'src/data/quanah-2-18-22/Query by User-data-2022-02-18 07_52_20.csv',
 // ].map(f=>d3.csv(f))).then(convertQuanahData)
+
+
+// Promise.all(['src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_06_50.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_06_54.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_06_58.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_02.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_05.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_10.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_14.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_17.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_25.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_30.csv',
+//     'src/data/nocona-8-11-21/Query by User-data-2022-02-19 19_07_37.csv',
+// ].map(f=>d3.csv(f))).then(convertQuanahData)
+
 function convertQuanahData(files){
     debugger
     const jobs_info = {};
@@ -411,6 +429,8 @@ function convertQuanahData(files){
             }
         })
     }
-    debugger
+    console.log(JSON.stringify({jobs_info,nodes_info,time_stamp:time_stamp.map(d=>+d)}));
+    console.log(JSON.stringify(Object.keys(dim).map((d,i)=>({text: d, id: i, enable: true, sub:[{text: d, id: 0, enable: true, idroot: i, angle: Math.PI*2*i/5,range:[]}]}))))
+    debugger;
     return {jobs_info,nodes_info,time_stamp:time_stamp.map(d=>+d)}
 }
