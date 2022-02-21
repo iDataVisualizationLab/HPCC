@@ -262,8 +262,8 @@
     ]
   },
   "SankeyViewer": {
-    "title": "Job Stream",
-    "thumb": "JobStream.png",
+    "title": "SankeyViewer",
+    "thumb": "SankeyViewer.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/sankeyViewer/index.html",
     "url_stable": ["https://idatavisualizationlab.github.io/SankeyViewer/index.html"],
     "tags": [
@@ -271,8 +271,7 @@
     ],
     "pros": [
       "Capture User status",
-      "Snapshot of user utilizing",
-      "User , job and compute relationship"
+      "Snapshot of user utilizing"
     ],
     "cons": [
       "Lack of physical information"
