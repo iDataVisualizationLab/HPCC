@@ -265,6 +265,7 @@
     "title": "Job Stream",
     "thumb": "JobStream.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/sankeyViewer/index.html",
+    "url_stable": ["https://idatavisualizationlab.github.io/SankeyViewer/index.html"],
     "tags": [
       "MONSTER API"
     ],
