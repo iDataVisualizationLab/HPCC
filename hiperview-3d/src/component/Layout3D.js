@@ -6,10 +6,10 @@ import LayoutMap from "./LayoutMap";
 import {useControls} from "leva";
 
 const Layout3D = function({data,layout}){
-    const config = useControls("3D",{timeGap:{value:0.1,min:0,max:1,step:0.01}});
-    return <Canvas mode="concurrent" flat>
+    const config = useControls("3D",{timeGap:{value:0.1,min:0,max:1,step:0.01},light:{value:0.1,min:0,max:1,step:0.01}});
+    return <Canvas mode="concurrent">
         <OrthographicCamera makeDefault zoom={30} position={[-10,10,100]} />
-        <ambientLight />
+        <ambientLight intensity={config.light}/>
         <Center>
             <LayoutMap data={layout}/>
             {data.map((d,i)=><group key={i} position={[...d.position]}>

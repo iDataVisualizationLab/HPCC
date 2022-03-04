@@ -15,7 +15,7 @@ export default function Layout3D({data}){
                                      anchorY="bottom"
                                      fontSize={0.3}>{d.text}</Text>
         <Plane position={[d.position[0] + d.size[0]/2,d.position[1]- d.size[1]/2,d.position[2]]} args={[d.size[0], d.size[1]]} >
-            <meshStandardMaterial attach="material" color={d.color} />
+            <meshBasicMaterial attach="material" color={d.color} />
         </Plane>
     </>)}
         {/*<Grid scale={10}/>*/}

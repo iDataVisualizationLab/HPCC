@@ -21,6 +21,6 @@ export default function NodeLayout({data=[],size=[0.6, 0.3, 0.01],timeGap=0,...o
         <boxGeometry args={size}>
             <instancedBufferAttribute attachObject={['attributes', 'color']} args={[colorArray, 3]} />
         </boxGeometry>
-        <meshPhongMaterial vertexColors={THREE.VertexColors} />
+        <meshStandardMaterial vertexColors={THREE.VertexColors} />
     </instancedMesh>
 }
