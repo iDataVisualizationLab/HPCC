@@ -36,7 +36,7 @@ function App() {
     const [mode, setMode] = React.useState('dark');
     const [selectedUser, setSelectedUser] = React.useState(null);
     const [selectedSer, setSelectedSer] = React.useState(0);
-    const config = useControls("Setting",{selectedSer:{options:dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {}),label:"User",value:0,
+    const config = useControls("Setting",{selectedSer:{options:dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {}),label:"Metric",value:0,
             onChange:val=>{
                 setSelectedSer(val)
                 updateColor(_draw3DData,scheme,val);
@@ -156,7 +156,7 @@ function App() {
 
         // 3D
         const reverseLayout = {};
-        let config={size:[0.6, 0.3, 0.1],padding:0.1, gap:0.5};
+        let config={size:[0.6, 0.15, 0.1],padding:0.25, gap:0.5};
         let wA = config.size[0]+config.padding;
         let hA = config.size[1]+config.padding;
         let sumupX = 0;

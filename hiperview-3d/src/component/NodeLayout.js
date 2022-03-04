@@ -3,7 +3,7 @@ import {useFrame} from "@react-three/fiber";
 import * as THREE from "three";
 const tempObject = new THREE.Object3D()
 const tempColor = new THREE.Color()
-export default function NodeLayout({data=[],size=[0.6, 0.3, 0.01],timeGap=0,...others}) {
+export default function NodeLayout({data=[],size=[0.6, 0.15, 0.01],timeGap=0,...others}) {
     const [hovered, set] = useState()
     const meshRef = useRef();
     const colorArray = useMemo(() => Float32Array.from(new Array(data.length).fill().flatMap((_, i) => tempColor.set(data[i].color??'black').toArray())), [data]);
