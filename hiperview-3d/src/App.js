@@ -31,6 +31,7 @@ function App() {
     const [timeSlice, setTimeSlice] = useState([0, 100]);
     const [_draw3DData, set_Draw3DData] = useState([]);
     const [draw3DData, setDraw3DData] = useState([]);
+    const [line3D, setLine3D] = useState([]);
     const [annotation, setAnnotation] = useState([]);
     const [isBusy, setIsBusy] = useState(true);
     const [mode, setMode] = React.useState('dark');
@@ -42,8 +43,9 @@ function App() {
                 updateColor(_draw3DData,scheme,val);
                 set_Draw3DData(_draw3DData);
                 draw3DData.forEach(d=>d.possArr=[...d.possArr]);
-                setDraw3DData([...draw3DData]);
-            }}},[dimensions]);
+                setDraw3DData(draw3DData);
+            }},suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}
+            },[dimensions,selectedUser,selectedSer,draw3DData]);
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -52,7 +54,6 @@ function App() {
         }),
         [],
     );
-
     const theme = React.useMemo(
         () =>
             createTheme({
@@ -70,7 +71,7 @@ function App() {
         setScheme(scheme);
         updateColor(draw3DData,scheme);
         set_Draw3DData(draw3DData);
-        getSelectedDraw3Data({selectedUser},draw3DData,scheme);
+        // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
         setLayout(layout)
         setIsBusy(false);
     }, []);
@@ -86,17 +87,23 @@ function App() {
             computers[d[0]]={
                 job_id: [],
                 key: d[0],
-                user: []
+                user: [],
+                drawData:[]
             };
             dimensionKeys.forEach((k,ki)=>{
-                computers[d[0]][k]=(d[1][k]??[])
-                computers[d[0]][k].forEach((d)=>{
+                const comp = d[0];
+                computers[comp][k]=(d[1][k]??[]);
+                computers[comp][k].sudden = [];
+                let current = +computers[comp][k][0];
+                computers[comp][k].forEach((d,ti)=>{
                     if (d!==null) {
                         if (d < dimensions[ki].range[0])
                             dimensions[ki].range[0] = d;
                         if (d > dimensions[ki].range[1])
                             dimensions[ki].range[1] = d;
                     }
+                    computers[comp][k].sudden[ti] = (+d) - current;
+                    current = +d;
                 })
             })
         });
@@ -111,9 +118,11 @@ function App() {
         });
         const tsnedata ={};
         compute.forEach(d=>{
+            // sudden
+            let current = dimensionKeys.map((k,ki)=>computers[d[0]][k][0]);
             tsnedata[d[0]] = _data.time_stamp.map((t,ti)=>{
                 return dimensionKeys.map((k,ki)=>{
-                    return dimensions[ki].scale((d[1][k]??[])[ti]??undefined)??null;
+                    return dimensions[ki].scale(computers[d[0]][k][ti]??undefined)??null;
                 })
             })
         });
@@ -178,10 +187,38 @@ function App() {
             })
         });
 
-        const draw3DData = compute.map(d=>{
-            const item =  { key:d[0], value:d[1], possArr:_data.time_stamp.map((t,i)=>[0,0,i]),
-                position: reverseLayout[d[0]].position}
-            return item;
+        // const draw3DData = compute.map(d=>{
+        //     const item =  { key:d[0], value:d[1], possArr:_data.time_stamp.map((t,i)=>{
+        //         const poss = [0,0,i];
+        //         debugger
+        //         poss.data = {full:d,timeStep:i,toolTip:<table>
+        //                 <tbody>
+        //                     <tr><td colSpan={2}>{t.toLocaleString()}</td></tr>
+        //                     <tr><td>Name</td><td>{d[0]}</td></tr>
+        //                     {dimensions.map(s=><tr key={s.text}><td>{s.text}</td><td>{d[1][s.text][i]}</td></tr>)}
+        //                 </tbody>
+        //             </table>};
+        //         return poss;
+        //     }),
+        //         position: reverseLayout[d[0]].position}
+        //     return item;
+        // });
+        const draw3DData = [{key:'all', possArr:[],position: [0,0,0]}];
+        compute.forEach(d=>{
+            computers[d[0]].position = reverseLayout[d[0]].position;
+            computers[d[0]].drawData = _data.time_stamp.map((t,i)=>{
+                    const poss = [computers[d[0]].position[0],computers[d[0]].position[1],computers[d[0]].position[2]+i];
+                    poss.data = {key:d[0],timeStep:i,toolTip:<table>
+                            <tbody>
+                            <tr><td colSpan={2}>{t.toLocaleString()}</td></tr>
+                            <tr><td>Name</td><td>{d[0]}</td></tr>
+                            {dimensions.map(s=><tr key={s.text}><td>{s.text}</td><td>{d[1][s.text][i]}</td></tr>)}
+                            </tbody>
+                        </table>,
+                    values:tsnedata[d[0]][i]};
+                    draw3DData[0].possArr.push(poss);
+                    return poss;
+                });
         });
         return {scheme: {data: _data,users,computers,jobs,tsnedata, timerange}, draw3DData,dimensions,layout}
     }, [layout]);
@@ -263,42 +300,83 @@ function App() {
         });
         return users;
     }
-    function onDimensionChange (val){
-        updateColor(_draw3DData,scheme,val);
-        set_Draw3DData(_draw3DData);
-        draw3DData.forEach(d=>d.possArr=[...d.possArr]);
-        setDraw3DData(draw3DData);
-    }
+    // function onDimensionChange (val){
+    //     updateColor(_draw3DData,scheme,val);
+    //     set_Draw3DData(_draw3DData);
+    //     draw3DData.forEach(d=>d.possArr=[...d.possArr]);
+    //     setDraw3DData(draw3DData);
+    // }
 
     const updateColor = useCallback((_draw3DData=draw3DData,_scheme=scheme,_selectedSer=config.selectedSer)=>{
+        // _draw3DData.forEach(d=>{
+        //     d.possArr.forEach((p,ti)=>{
+        //         p.color = (_scheme.tsnedata[d.key][ti][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[d.key][ti][_selectedSer]):undefined
+        //     })
+        // });
         _draw3DData.forEach(d=>{
             d.possArr.forEach((p,ti)=>{
-                p.color = (_scheme.tsnedata[d.key][ti][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[d.key][ti][_selectedSer]):undefined
+                p.color = (_scheme.tsnedata[p.data.key][p.data.timeStep][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[p.data.key][p.data.timeStep][_selectedSer]):undefined
             })
         });
-    },[selectedSer,dimensions,scheme])
+    },[selectedSer,dimensions,scheme]);
+    useEffect(()=>{
+        getSelectedDraw3Data({selectedUser})
+    },[_draw3DData,selectedUser,scheme,config.suddenThreshold])
     function getSelectedDraw3Data({selectedUser,selectedComputeMap},__draw3DData=_draw3DData,_scheme=scheme){
+        let isFilter = (!!selectedComputeMap || selectedUser || (!!config.suddenThreshold));
+        selectedComputeMap=selectedComputeMap??{};
+
+        if (config.suddenThreshold){
+            Object.keys(_scheme.computers).forEach(comp=>{
+                const arr = _scheme.computers[comp][dimensions[selectedSer].text];
+                const isEmpty = !selectedComputeMap[comp];
+                if (isEmpty)
+                    selectedComputeMap[comp] = {};
+                arr.sudden.forEach((d,ti)=>{
+                    if (Math.abs(d)>=config.suddenThreshold){
+                        selectedComputeMap[comp][ti] = true;
+                        selectedComputeMap[comp][ti-1] = true;
+                    }
+                });
+                if (isEmpty && (!Object.keys(selectedComputeMap[comp]).length))
+                    delete  selectedComputeMap[comp]
+            })
+        }
         if (selectedUser) {
             // _scheme.users[selectedUser].node_list
-            selectedComputeMap={};
             _scheme.users[selectedUser].node.forEach(com=>{
                 selectedComputeMap[com]={};
                 _scheme.computers[com].users.forEach((u,i)=>{if (u.find(d=>d===selectedUser)) selectedComputeMap[com][i]=true; });
             });
-            setDraw3DData(getData());
-        }else if (selectedComputeMap) {
+        }else if (!isFilter){
             setDraw3DData(__draw3DData);
-        }else{
-            setDraw3DData(__draw3DData);
+            setLine3D([])
+            return
+        }else if (!Object.keys(selectedComputeMap).length){
+            setDraw3DData([]);
+            setLine3D([])
+            return
         }
+        const newdata = getData();
+        setDraw3DData(newdata.draw3DData);
+        setLine3D(newdata.line3D)
         function getData(){
-            const data = [];
-            __draw3DData.forEach(d=>{
-                if (selectedComputeMap[d.key]){
-                    data.push({ key:d.key,position:d.position, possArr:d.possArr.filter((e,i)=>selectedComputeMap[d.key][i])})
+            const data = [{...__draw3DData[0],possArr:[]}];
+            const lines=[];
+            Object.keys(selectedComputeMap).forEach(comp=>{
+                if (_scheme.computers[comp]){
+                    let poss = [];
+                    _scheme.computers[comp].drawData.forEach(d=>{
+                        if (selectedComputeMap[comp][d.data.timeStep])
+                            data[0].possArr.push(d);
+
+                        // add line data
+                        poss.push(d)
+                    })
+                    lines.push(poss)
                 }
             })
-            return data;
+            return {draw3DData:data,line3D:lines};
         }
     }
 
@@ -328,7 +406,7 @@ function App() {
                             {/*    </FormControl>*/}
                             {/*</Grid>*/}
                             {dimensions[selectedSer]&&<Grid item xs={7} style={{textAlign:"center"}}>
-                                Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}
+                                {dimensions[selectedSer].text} Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}
                                 <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>
                             </Grid>}
                         </Grid>
@@ -340,7 +418,7 @@ function App() {
                                 options={Object.keys(scheme.users)}
                                 value={selectedUser}
                                 onChange={(event, newValue) => {
-                                    getSelectedDraw3Data({selectedUser:newValue});
+                                    // getSelectedDraw3Data({selectedUser:newValue});
                                     setSelectedUser(newValue);
                                 }}
                                 renderInput={(params) => <TextField {...params} label="Users" />}
@@ -353,7 +431,7 @@ function App() {
 
                         }</Grid>
                         <Grid item xs={12} style={{height: "80vh"}}>
-                            <Layout3D layout={layout} data={draw3DData}/>
+                            <Layout3D layout={layout} data={draw3DData} line3D={line3D} selectService={selectedSer}/>
                         </Grid>
                     </Grid>
                     <Backdrop
