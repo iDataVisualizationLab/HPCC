@@ -1,4 +1,4 @@
-// import binarybin from "./binarybin.min"
+/*eslint no-unused-expressions: "error"*/
 import binnerN from "./binnerN.min";
 import kmeanCluster from "./kmean";
 import * as d3 from "d3"

@@ -36,10 +36,12 @@
       "react-app/jest"
     ]
   },
+  "eslintIgnore": ["src/component/binnerN.min.js", "src/component/scagnosticsnd.min.js", "src/component/kmean.js"],
   "browserslist": {
     "production": [
       ">0.2%",
-      "not dead"
+      "not dead",
+      "not op_mini all"
     ],
     "development": [
       "last 1 chrome version",

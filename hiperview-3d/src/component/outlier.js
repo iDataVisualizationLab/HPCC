@@ -2,8 +2,6 @@ import * as d3 from "d3"
 import * as _ from "lodash"
 // eslint-disable-next-line no-restricted-globals
 import scagnosticsnd from "./scagnosticsnd.min"
-// import binnerN from "./binnerN.min"
-// import kmean from "./kmean"
 
 export function outlier({data=[],dimensions=[],outlyingCoefficient=1.5}){
     let dataSpider3 = [];
