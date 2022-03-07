@@ -15,7 +15,7 @@ const Layout3D = function({data,line3D,layout,selectService}){
             <LayoutMap data={layout}/>
             {/*{data.map((d,i)=><group key={i} position={[...d.position]}>*/}
             {data.map((d,i)=><group key={i} position={[0,0,0]}>
-                <NodeLayout data={d.possArr} timeGap={config.timeGap}/>
+                <NodeLayout data={d.possArr} timeGap={config.timeGap} selectService={selectService}/>
             </group>)}
             <LineLayout data={line3D} timeGap={config.timeGap} selectService={selectService}/>
             <arrowHelper length={100}/>

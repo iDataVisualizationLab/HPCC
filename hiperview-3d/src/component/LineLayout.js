@@ -24,7 +24,6 @@ export default function LineLayout({data=[],selectService=0,timeGap=0,graphHeigh
     const meshRef = useRef();
     const [vertexArray,setVertex] = useState([]);
     useLayoutEffect(()=>{
-        debugger
         const possFlat = [];
         data.forEach(d=>{
             const n = d.length;
@@ -44,7 +43,7 @@ export default function LineLayout({data=[],selectService=0,timeGap=0,graphHeigh
         setVertex(possFlat)
     },[data,selectService])
     const lineGeometry = useMemo(() => {
-        const points = vertexArray.map(d=>new THREE.Vector3(d[0],d[1]+graphHeight*d.data.values[selectService],d[2]*timeGap));
+        const points = vertexArray.map(d=>new THREE.Vector3(d[0],d[1]+graphHeight*d.data.values[selectService]-graphHeight/2,d[2]*timeGap));
         return new THREE.BufferGeometry().setFromPoints(points);
     }, [vertexArray])
     useFrame(()=>{
@@ -72,7 +71,8 @@ export default function LineLayout({data=[],selectService=0,timeGap=0,graphHeigh
     //     return [d[0], d[1], d[2]*timeGap]
     // },[timeGap])
     return <><lineSegments ref={meshRef} geometry={lineGeometry}>
-        <lineBasicMaterial attach="material" color={'#9c88ff'} linewidth={10} linecap={'round'} linejoin={'round'} />
+        <lineBasicMaterial attach="material" color={'#ffffff'} linewidth={3} linecap={'round'} linejoin={'round'}/>
     </lineSegments>
     </>
 }
+// add color vertex
