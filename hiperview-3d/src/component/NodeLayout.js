@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState, useLayoutEffect, useCallback} from "react";
+import React, {useMemo, useRef, useState, useEffect, useCallback} from "react";
 import {useFrame} from "@react-three/fiber";
 import {Html} from "@react-three/drei";
 import * as THREE from "three";
@@ -18,17 +18,20 @@ const useStyles = makeStyles({
 });
 export default function NodeLayout({data=[],selectService=0,size=[0.6, 0.15, 0.01],timeGap=0,...others}) {
     const classes = useStyles();
-    const [hovered, set] = useState()
+    const [hovered, set] = useState();
+    const prevRef = useRef();
+    // useEffect(() => void (prevRef.current = hovered), [hovered])
     const meshRef = useRef();
-    const colorArray = useMemo(() => Float32Array.from(new Array(data.length).fill().flatMap((_, i) => tempColor.set(data[i].color??'black').toArray())), [data]);
-    useFrame(() => {
+    const colorArray = useMemo(() => Float32Array.from(new Array(data.length).fill().flatMap((_, i) => [...tempColor.set(data[i].color??'black').toArray(),1])), [data]);
+    useFrame((state) => {
+        const hoverEmpty = hovered===undefined;
         data.forEach((d,i)=>{
             tempObject.position.set(d[0], d[1]+(d.data.values[selectService]??0)*size[1], d[2]*timeGap);
-            // tempColor.set(id === hovered ? 'white' : data[id].color).toArray(colorArray, id * 3)
-            // meshRef.current.geometry.attributes.color.needsUpdate = true
+            colorArray[i*4+3] = (hoverEmpty||(i===hovered))?1:0.01;
+            meshRef.current.geometry.attributes.color.needsUpdate = true
             tempObject.updateMatrix();
             meshRef.current.setMatrixAt(i, tempObject.matrix)
-        })
+        });
         meshRef.current.instanceMatrix.needsUpdate = true
     });
     const getDataPos = useCallback((d)=>{
@@ -36,11 +39,11 @@ export default function NodeLayout({data=[],selectService=0,size=[0.6, 0.15, 0.0
     },[timeGap])
     return <><instancedMesh ref={meshRef} args={[null, null, data.length]} onPointerMove={(e) => set(e.instanceId)} onPointerOut={(e) => set(undefined)}>
         <boxGeometry args={size}>
-            <instancedBufferAttribute attachObject={['attributes', 'color']} args={[colorArray, 3]} />
+            <instancedBufferAttribute attachObject={['attributes', 'color']} args={[colorArray, 4]} />
         </boxGeometry>
-        <meshStandardMaterial vertexColors />
+        <meshStandardMaterial vertexColors toneMapped={false} transparent={true} alphaTest={0} />
     </instancedMesh>
-    <Html scaleFactor={7}
+    <Html scaleFactor={1}
           position={hovered!==undefined?getDataPos(data[hovered]):undefined}
           className={classes.tooltip} style={{ pointerEvents: "none", display: (hovered!==undefined) ? "block" : "none" }}>
         <div>
