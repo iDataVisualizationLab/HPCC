@@ -378,9 +378,8 @@ function App() {
                 if (isEmpty)
                     sudenCompMap[comp] = {};
                 arr.forEach((d,ti)=>{
-                    if (Math.abs(d)>=config.metricFilter){
+                    if (d>=config.metricFilter){
                         sudenCompMap[comp][ti] =true;
-                        sudenCompMap[comp][ti-1] = true;
                     }
                 });
                 if (isEmpty && (!Object.keys(sudenCompMap[comp]).length))
