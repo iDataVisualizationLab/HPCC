@@ -24,9 +24,9 @@ export const colorScaleList = {
     customschemeCategory:  ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"],
     schemeCategory20: ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'],
     customFunc: function(name){
-        const n= num??this.n;
+        const n= this.n;
         // @ts-ignore
-        const arrColor = arr??this[name];
+        const arrColor = this[name];
         let colorLength = arrColor.length;
         const arrThresholds=d3.range(0,colorLength).map(e=>e/(colorLength-1));
         // @ts-ignore

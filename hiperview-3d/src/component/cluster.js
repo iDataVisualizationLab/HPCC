@@ -1,4 +1,4 @@
-import binarybin from "./binarybin.min"
+// import binarybin from "./binarybin.min"
 import binnerN from "./binnerN.min";
 import kmeanCluster from "./kmean";
 import * as d3 from "d3"
@@ -48,12 +48,10 @@ export function calculateCluster ({data=[],dimensions=[],binopt={},calbackMiddle
                     increase_offset: 0
                 }).data([]);
                 break;
-            case 'binarybin':
-                // @ts-ignore
-                bin = binarybin([], {isNormalized: true});
-                break;
+            // case 'binarybin':
+            //     bin = binarybin([], {isNormalized: true});
+            //     break;
             default:
-                // @ts-ignore
                 bin = window.kmeanCluster.k(binopt.k).distanceMethod(binopt.normMethod).iterations(binopt.iterations);
                 break;
         }

@@ -465,7 +465,10 @@ function App() {
         <ColorModeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
-                    <Grid container>
+                    <div style={{height: "100vh",width:'100wh',overflow:'hidden'}}>
+                        <Layout3D layout={layout} data={draw3DData} line3D={line3D} selectService={selectedSer}/>
+                    </div>
+                    <Grid container style={{position:'absolute',top:0,left:0}}>
                         <Container maxWidth="lg">
                             <Grid container>
                                 <Grid item xs={12}>
@@ -514,9 +517,6 @@ function App() {
                                 }</Grid>
                             </Grid>
                         </Container>
-                        <Grid item xs={12} style={{height: "80vh"}}>
-                            <Layout3D layout={layout} data={draw3DData} line3D={line3D} selectService={selectedSer}/>
-                        </Grid>
                     </Grid>
                     <Backdrop
                         sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
