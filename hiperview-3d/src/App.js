@@ -15,7 +15,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Slider from "@mui/material/Slider";
 import Container from "@mui/material/Container";
-import { useControls } from 'leva';
+import { useControls, folder } from 'leva';
+import {outlier} from './component/outlier'
+import {calculateCluster} from './component/cluster'
 
 const ColorModeContext = React.createContext({
     toggleColorMode: () => {
@@ -81,6 +83,8 @@ function App() {
         ,metricFilter:{render:(get)=>get("Setting.metricTrigger"),value:(dimensions[selectedSer]??{range:[0,1]}).range[0],min:(dimensions[selectedSer]??{range:[0,1]}).range[0],max:(dimensions[selectedSer]??{range:[0,1]}).range[1],step:0.1, label:""}
         ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme]);
+    const binopt = useControls("Cluster",{clusterMethod:{value:'leaderbin',options:['leaderbin','kmean']},
+        bin:folder({startBinGridSize:{value:10,render:false},range:{value:[8,9], min:1, max:20}})})
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -116,7 +120,7 @@ function App() {
         const timerange = d3.extent(_data.time_stamp);
         const compute = Object.entries(_data.nodes_info);
         const dimensionKeys = Object.keys(compute[0][1]).filter(s=>_.isNumber(compute[0][1][s][0]));
-        const dimensions = dimensionKeys.map((s,i)=>({text:s,index:i,range:[Infinity,-Infinity],scale:d3.scaleLinear()}));
+        const dimensions = dimensionKeys.map((s,i)=>({text:s,index:i,range:[Infinity,-Infinity],scale:d3.scaleLinear(),enable:true}));
         const computers ={};
         compute.forEach(d=>{
             computers[d[0]]={
@@ -155,9 +159,12 @@ function App() {
         const tsnedata ={};
         Object.keys(computers).forEach(d=>{
             tsnedata[d] = _data.time_stamp.map((t,ti)=>{
-                return dimensionKeys.map((k,ki)=>{
+                const item = dimensionKeys.map((k,ki)=>{
                     return dimensions[ki].scale(computers[d][k][ti]??undefined)??null;
-                })
+                });
+                item.key = d;
+                item.timestep = ti;
+                return item
             })
         });
         const jobs = {};
@@ -221,28 +228,12 @@ function App() {
             })
         });
 
-        // const draw3DData = compute.map(d=>{
-        //     const item =  { key:d[0], value:d[1], possArr:_data.time_stamp.map((t,i)=>{
-        //         const poss = [0,0,i];
-        //         debugger
-        //         poss.data = {full:d,timeStep:i,toolTip:<table>
-        //                 <tbody>
-        //                     <tr><td colSpan={2}>{t.toLocaleString()}</td></tr>
-        //                     <tr><td>Name</td><td>{d[0]}</td></tr>
-        //                     {dimensions.map(s=><tr key={s.text}><td>{s.text}</td><td>{d[1][s.text][i]}</td></tr>)}
-        //                 </tbody>
-        //             </table>};
-        //         return poss;
-        //     }),
-        //         position: reverseLayout[d[0]].position}
-        //     return item;
-        // });
         const draw3DData = [{key:'all', possArr:[],position: [0,0,0]}];
         compute.forEach(d=>{
             computers[d[0]].position = reverseLayout[d[0]].position;
             computers[d[0]].drawData = _data.time_stamp.map((t,i)=>{
                     const poss = [computers[d[0]].position[0],computers[d[0]].position[1],computers[d[0]].position[2]+i];
-                    poss.data = {key:d[0],timeStep:i,toolTip:<table>
+                    poss.data = {key:d[0],timestep:i,toolTip:<table>
                             <tbody>
                             <tr><td colSpan={2}>{t.toLocaleString()}</td></tr>
                             <tr><td>Name</td><td>{d[0]}</td></tr>
@@ -254,6 +245,10 @@ function App() {
                     return poss;
                 });
         });
+        const flat = _.flatten(Object.values(tsnedata),1);
+        let outlyingBins = outlier({data:flat,dimensions});
+        let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions,binopt})
+        console.log(outlyingBins)
         return {scheme: {data: _data,users,computers,jobs,tsnedata, timerange}, draw3DData,dimensions,layout}
     }, [layout]);
     function handleCUJ({computers,jobs},timestamp){
@@ -300,7 +295,7 @@ function App() {
         });
         return {users}
     }
-    function getUsers(jobs,computers,timeStep=1){
+    function getUsers(jobs,computers,timestep=1){
         const user_job = d3.groups(Object.entries(jobs),(d)=>(d[1])['user_name'],(d)=>(d[0]).split('.')[0].trim());
         const users = {};
         user_job.forEach((u,i)=>{
@@ -326,9 +321,9 @@ function App() {
                 }
                 return d[1].node_list;
             }))));
-            totalCore = totalCore/timeStep;
-            totalCore_notShare = totalCore_notShare/timeStep;
-            totalCore_share = totalCore_share/timeStep;
+            totalCore = totalCore/timestep;
+            totalCore_notShare = totalCore_notShare/timestep;
+            totalCore_share = totalCore_share/timestep;
             // const node = _.uniq(_.flattenDeep(_.values(u).map(d=>d.map(d=>(job.push(d.key),totalCore+=d3.sum(Object.values(d.value.node_list_obj)),d.value.node_list)))));
             users[k]={node,job,totalCore,totalCore_notShare,totalCore_share}
         });
@@ -352,7 +347,7 @@ function App() {
         // });
         __draw3DData.forEach(d=>{
             d.possArr.forEach((p,ti)=>{
-                p.color = (_scheme.tsnedata[p.data.key][p.data.timeStep][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[p.data.key][p.data.timeStep][_selectedSer]):undefined
+                p.color = (_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer]):undefined
             })
         });
     },[dimensions,scheme,_draw3DData,selectedSer]);
@@ -367,7 +362,7 @@ function App() {
         let flatmap =selectedComputeMap?ob2arr(selectedComputeMap):undefined;
         function ob2arr(selectedComputeMap){
             let flatmap =[];
-            Object.keys(selectedComputeMap).forEach(comp=>Object.keys(selectedComputeMap[comp]).forEach(timeStep=>flatmap.push({key:`${comp}|${timeStep}`,comp,timeStep})));
+            Object.keys(selectedComputeMap).forEach(comp=>Object.keys(selectedComputeMap[comp]).forEach(timestep=>flatmap.push({key:`${comp}|${timestep}`,comp,timestep})));
             return flatmap;
         }
         if (config.metricTrigger) {
@@ -434,10 +429,10 @@ function App() {
             return
         }
         selectedComputeMap={};
-        flatmap.forEach(({comp,timeStep})=>{
+        flatmap.forEach(({comp,timestep})=>{
             if (!selectedComputeMap[comp])
                 selectedComputeMap[comp] = {};
-            selectedComputeMap[comp][timeStep] = true;
+            selectedComputeMap[comp][timestep] = true;
         })
         const newdata = getData();
         setDraw3DData(newdata.draw3DData);
@@ -450,7 +445,7 @@ function App() {
                     let poss = [];
                     let count=0;
                     _scheme.computers[comp].drawData.forEach(d=>{
-                        if (selectedComputeMap[comp][d.data.timeStep]){
+                        if (selectedComputeMap[comp][d.data.timestep]){
                             data[0].possArr.push(d);
                             count++;
                         }
