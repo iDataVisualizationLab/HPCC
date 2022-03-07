@@ -15,7 +15,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Slider from "@mui/material/Slider";
 import Container from "@mui/material/Container";
-import { useControls, folder } from 'leva';
+import { useControls, folder, button } from 'leva';
 import {outlier} from './component/outlier'
 import {calculateCluster} from './component/cluster'
 
@@ -35,9 +35,10 @@ function App() {
     const [draw3DData, setDraw3DData] = useState([]);
     const [line3D, setLine3D] = useState([]);
     const [annotation, setAnnotation] = useState([]);
-    const [isBusy, setIsBusy] = useState(true);
+    const [isBusy, setIsBusy] = useState("Load data");
     const [mode, setMode] = React.useState('dark');
     const [selectedUser, setSelectedUser] = React.useState(null);
+    const [clusterInfo, setClusterInfo] = React.useState({cluster:[],outlyingBins:[],clusterDescription:[],colorCluster:d3.scaleOrdinal(),clusterInfo:{}});
     // const [selectedSer, setSelectedSer] = React.useState(0);
 
     const [{selectedSer},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {}),label:"Metric",value:0,
@@ -84,7 +85,9 @@ function App() {
         ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme]);
     const binopt = useControls("Cluster",{clusterMethod:{value:'leaderbin',options:['leaderbin','kmean']},
-        bin:folder({startBinGridSize:{value:10,render:false},range:{value:[8,9], min:1, max:20}})})
+        bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="leaderbin"}),
+        kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="kmean"}),
+        Apply:button((get)=>recalCluster())},[scheme.tsnedata,dimensions])
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -104,15 +107,19 @@ function App() {
     );
 
     useLayoutEffect(() => {
-        setIsBusy(true);
-        const {scheme, draw3DData,dimensions,layout} = handleData(_data);
-        setDimensions(dimensions);
-        setScheme(scheme);
-        updateColor(draw3DData,scheme);
-         set_draw3DData(draw3DData);
-        // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
-        setLayout(layout)
-        setIsBusy(false);
+        setIsBusy('Load data');
+        setTimeout(()=>{
+            const {scheme, draw3DData,dimensions,layout} = handleData(_data);
+            setDimensions(dimensions);
+            setScheme(scheme);
+            updateColor(draw3DData,scheme);
+            set_draw3DData(draw3DData);
+            // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
+            setLayout(layout);
+            setIsBusy(false);
+            debugger
+            recalCluster(scheme,dimensions)
+        },1);
     }, []);
     const handleData = useCallback((_data) => {
         if (_data.time_stamp[0] > 999999999999999999)
@@ -245,12 +252,19 @@ function App() {
                     return poss;
                 });
         });
-        const flat = _.flatten(Object.values(tsnedata),1);
-        let outlyingBins = outlier({data:flat,dimensions});
-        let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions,binopt})
-        console.log(outlyingBins)
         return {scheme: {data: _data,users,computers,jobs,tsnedata, timerange}, draw3DData,dimensions,layout}
     }, [layout]);
+    const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions)=>{
+        setIsBusy("Calculate cluster")
+        setTimeout(()=>{
+            const flat = _.flatten(Object.values(_scheme.tsnedata),1);
+            let outlyingBins = outlier({data:flat,dimensions:_dimensions});
+            let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
+            setClusterInfo({cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo})
+            setIsBusy(false)
+        },1);
+    },[scheme.tsnedata,dimensions,binopt]);
+
     function handleCUJ({computers,jobs},timestamp){
         const compute_user= {}
         Object.keys(computers).forEach((k)=>{
@@ -520,8 +534,9 @@ function App() {
                     </Grid>
                     <Backdrop
                         sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
-                        open={isBusy}
+                        open={!!isBusy}
                     >
+                        <h1>{isBusy}</h1>
                         <CircularProgress color="inherit"/>
                     </Backdrop>
             </ThemeProvider>
