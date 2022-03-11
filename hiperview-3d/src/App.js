@@ -189,7 +189,7 @@ function App() {
                 setDraw3DData([...draw3DData]);
             }
         })
-    })},[recalCluster,scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
+    })},[scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
 
     const showRadar = useControls("Cluster",{Clusters:viz({value:0,
             label:clusterInfo.clusterInfo&&<> Cluster inputdata: {clusterInfo.clusterInfo.input} ({d3.format(",.1%")(clusterInfo.clusterInfo.input/clusterInfo.clusterInfo.total)})<br/>
@@ -221,14 +221,14 @@ function App() {
                     {
                         clusterInfo.outlyingBins&&clusterInfo.outlyingBins.map((c,i)=><div key={c.labels} style={{display:'inline-block'}}>
                             <div style={{position:'relative'}}>
-                                <Radar width={120} height={120} data={c.arr.map(d=>clusterInfo.outlyingBins.pointObject[d.name])}
+                                <Radar width={100} height={100} data={c.arr.map(d=>clusterInfo.outlyingBins.pointObject[d.key])}
                                        fill={'none'} stroke={clusterInfo.colorCluster?clusterInfo.colorCluster('outlier'):'#fff'}
                                        // onMouseOver={(data:any)=>this.onComputeSelected(data,c.labels)}
                                        // onMouseLeave={this.onComputeSelected.bind(this)}
                                 />
-                                {/*<p style={{position:'absolute',top:10,left:0, width:'100%',textAlign:'center',color:'black', fontSize:12}}>{c.arr.length}<br/>*/}
-                                {/*    {shortArray(Object.keys(c.compObject))}*/}
-                                {/*</p>*/}
+                                <p style={{position:'absolute',top:10,left:0, width:'100%',textAlign:'center',color:'black', fontSize:12}}>{c.arr.length}<br/>
+                                    {shortArray(Object.keys(c.compObject))}
+                                </p>
                             </div> </div>)
                     }
                 </div>}),
