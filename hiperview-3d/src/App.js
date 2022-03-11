@@ -321,7 +321,7 @@ function App() {
             d.max = d.range[1];
             d.possibleUnit = recomend;
             // d.range = [recomend];
-            d.range = config.metricRangeMinMax?[d.min,d.max]:recomend.range.slice();
+            d.range = metricRangeMinMax?[d.min,d.max]:recomend.range.slice();
             d.scale.domain(d.range)
         });
         const tsnedata ={};
