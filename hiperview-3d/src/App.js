@@ -69,6 +69,7 @@ function App() {
                         setLayout(layout);
                         setIsBusy(false);
                         recalCluster(scheme, dimensions);
+                        debugger
                     }).catch(e=>{
                         setAlertMess({level:"error",message:"Can't load realtime data"})
                         setIsBusy(false);
@@ -85,7 +86,8 @@ function App() {
                         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
                         setLayout(layout);
                         setIsBusy(false);
-                        recalCluster(scheme, dimensions)
+                        recalCluster(scheme, dimensions);
+                        debugger
                     }, 1);
                 }
             }},
@@ -128,21 +130,24 @@ function App() {
                     })
                 });
                 // setScheme({...scheme});
-                recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
-                    if (selectedSer==='cluster') {
-                        setScheme(scheme);
-                        updateColor(_draw3DData, scheme,undefined,clusterInfo);
-                        set_draw3DData([..._draw3DData]);
-                        draw3DData.forEach(d=>d.possArr=[...d.possArr]);
-                        setDraw3DData([...draw3DData]);
-                    }
-                })
-                // updateColor(_draw3DData, scheme);
-                // set_draw3DData([..._draw3DData]);
-                // draw3DData.forEach(d => d.possArr = [...d.possArr]);
-                // setDraw3DData([...draw3DData]);
+                if (selectedSer==='cluster')
+                    recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
+                        if (selectedSer==='cluster') {
+                            setScheme(scheme);
+                            updateColor(_draw3DData, scheme,undefined,clusterInfo);
+                            set_draw3DData([..._draw3DData]);
+                            draw3DData.forEach(d=>d.possArr=[...d.possArr]);
+                            setDraw3DData([...draw3DData]);
+                        }
+                    })
+                else{
+                    updateColor(_draw3DData, scheme);
+                    set_draw3DData([..._draw3DData]);
+                    draw3DData.forEach(d => d.possArr = [...d.possArr]);
+                    setDraw3DData([...draw3DData]);
+                }
             }
-        },transient:false}},[dimensions,selectedUser,selectedSer,draw3DData,scheme])
+        }}},[dimensions,selectedUser,selectedSer,draw3DData,scheme])
     const metricSetting= useMemo(()=>{
         if (dimensions[selectedSer]){
             return {minMax:{label:'',transient:false,editable:false,value:dimensions[selectedSer]?`Min: ${dimensions[selectedSer].min} Max: ${dimensions[selectedSer].max}`:`Min:_ Max:_`},
