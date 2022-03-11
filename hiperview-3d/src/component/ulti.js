@@ -63,3 +63,14 @@ export const colorScaleList = {
         {val: 'Viridis',type:'d3',label: 'Viridis'},
         {val: 'Greys',type:'d3',label: 'Greys'}],
     Cluster: [{val: 'Category10',type:'d3',label: 'D3'},{val: 'Paired',type:'d3',label: 'Blue2Red'}]} ;
+
+export function getUrl({_start,_end,interval,value,compress}){
+    const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');
+    const start = timeFormat(_start);
+    const end = timeFormat(_end);
+    interval = interval||'5m';
+    value = value||'max';
+    compress = compress||false;
+    const url = `http://hugo.hpcc.ttu.edu:5000/metrics_builder?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
+    return url;
+}
