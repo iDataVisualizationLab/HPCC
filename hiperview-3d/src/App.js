@@ -128,10 +128,19 @@ function App() {
                     })
                 });
                 // setScheme({...scheme});
-                updateColor(_draw3DData, scheme);
-                set_draw3DData([..._draw3DData]);
-                draw3DData.forEach(d => d.possArr = [...d.possArr]);
-                setDraw3DData([...draw3DData]);
+                recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
+                    if (selectedSer==='cluster') {
+                        setScheme(scheme);
+                        updateColor(_draw3DData, scheme,undefined,clusterInfo);
+                        set_draw3DData([..._draw3DData]);
+                        draw3DData.forEach(d=>d.possArr=[...d.possArr]);
+                        setDraw3DData([...draw3DData]);
+                    }
+                })
+                // updateColor(_draw3DData, scheme);
+                // set_draw3DData([..._draw3DData]);
+                // draw3DData.forEach(d => d.possArr = [...d.possArr]);
+                // setDraw3DData([...draw3DData]);
             }
         },transient:false}},[dimensions,selectedUser,selectedSer,draw3DData,scheme])
     const metricSetting= useMemo(()=>{
@@ -149,15 +158,16 @@ function App() {
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
     const [config,setConfig] = useControls("Setting",()=>(metricSetting),[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
     const binopt = useControls("Cluster",{clusterMethod:{value:'leaderbin',options:['leaderbin','kmean']},
+        normMethod:{value:'l2',options:['l1','l2']},
         bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="leaderbin"}),
         kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="kmean"}),
         // Apply:button((get)=>{console.log(get("Cluster"));recalCluster(scheme, dimensions)}),
 
     },{
+        label:"Dataset Cluster",
         collapsed : true
     });
     const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions,callback=()=>{})=>{
-        console.log(binopt)
         setIsBusy("Calculate cluster")
         setTimeout(()=>{
             const flat = _.flatten(Object.values(_scheme.tsnedata),1);
@@ -180,7 +190,12 @@ function App() {
             }
         })
     })},[recalCluster,scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
-    const showRadar = useControls("Cluster",{Radar:viz({value:0,com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>{
+
+    const showRadar = useControls("Cluster",{Clusters:viz({value:0,
+            label:clusterInfo.clusterInfo&&<> Cluster inputdata: {clusterInfo.clusterInfo.input} ({d3.format(",.1%")(clusterInfo.clusterInfo.input/clusterInfo.clusterInfo.total)})<br/>
+                Cluster calculation time: {Math.round(clusterInfo.clusterInfo.clusterCalTime??0)} ms <br/>
+                Total MSE: {d3.format('.2f')(clusterInfo.clusterInfo.totalMSE??0)}</>,
+            com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>{
             clusterInfo&&clusterInfo.cluster.map((c,i)=><div key={c.labels} style={{display:'inline-block'}}>
                 <div style={{position:'relative'}}>
                     <Radar width={100} height={100} data={[c.__metrics]} area={true} mean={true} meanColor={"rgba(0,0,0,0.52)"}
@@ -191,7 +206,33 @@ function App() {
                     </div>
                     <p style={{position:'absolute',top:10,left:0, width:'100%',textAlign:'center',color:'black', fontSize:12}}>{c.arr.length}<br/>{i?'':' temporal instances'}</p>
                 </div> </div>)
-        }</div>})},[clusterInfo])
+        }
+        {
+            (clusterInfo&&clusterInfo.cluster)?<div style={{backgroundColor:'rgba(255,255,255,0.12)',padding:5, borderRadius:10, border:'1px dashed gray',width:'100%'}}>
+                <span>Other color for cluster:</span>
+                <div style={{display:'flex',alignItems:'center',padding:3}}><div style={{marginRight:5,width:20,height:20, borderRadius:10, backgroundColor:clusterInfo.colorCluster?clusterInfo.colorCluster('outlier'):'#fff'}}/> Outlier</div>
+                <div style={{display:'flex',alignItems:'center',padding:3}}><div style={{marginRight:5,width:20,height:20, borderRadius:10, backgroundColor:clusterInfo.colorCluster?clusterInfo.colorCluster('missing'):'#fff'}}/> Missing dimension data</div>
+                <div style={{display:'flex',alignItems:'center',padding:3}}><div style={{marginRight:5,width:20,height:20, borderRadius:10, backgroundColor:'white'}}/> Multiple Clusters</div>
+            </div>:''
+        }
+    </div>}),
+            "Outliers":viz({label:clusterInfo.outlyingBins&&<>Outliers: {(clusterInfo.outlyingBins.pointObject)?Object.keys(clusterInfo.outlyingBins.pointObject).length:0} temporal instances</>,value:0,
+                com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>
+                    {
+                        clusterInfo.outlyingBins&&clusterInfo.outlyingBins.map((c,i)=><div key={c.labels} style={{display:'inline-block'}}>
+                            <div style={{position:'relative'}}>
+                                <Radar width={120} height={120} data={c.arr.map(d=>clusterInfo.outlyingBins.pointObject[d.name])}
+                                       fill={'none'} stroke={clusterInfo.colorCluster?clusterInfo.colorCluster('outlier'):'#fff'}
+                                       // onMouseOver={(data:any)=>this.onComputeSelected(data,c.labels)}
+                                       // onMouseLeave={this.onComputeSelected.bind(this)}
+                                />
+                                {/*<p style={{position:'absolute',top:10,left:0, width:'100%',textAlign:'center',color:'black', fontSize:12}}>{c.arr.length}<br/>*/}
+                                {/*    {shortArray(Object.keys(c.compObject))}*/}
+                                {/*</p>*/}
+                            </div> </div>)
+                    }
+                </div>}),
+    },[clusterInfo])
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -688,3 +729,7 @@ function App() {
 }
 
 export default App;
+
+function shortArray(arr=[],limit=2){
+    return arr.length>limit?(arr.slice(0,limit).join(',')+`, +${arr.length-limit} more`): arr.join(',')
+}

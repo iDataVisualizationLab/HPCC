@@ -74,5 +74,6 @@ export function outlier({data=[],dimensions=[],outlyingCoefficient=1.5}){
         outlyingBins.push(temp2);
     });
     console.log('#Outlier: ',Object.values(outlyingBins.pointObject).length)
+    console.log(outlyingBins)
     return outlyingBins;
 }
