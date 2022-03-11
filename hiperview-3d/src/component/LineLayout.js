@@ -43,15 +43,17 @@ export default function LineLayout({data=[],selectService=0,timeGap=0,graphHeigh
         setVertex(possFlat)
     },[data,selectService])
     const lineGeometry = useMemo(() => {
-        const points = vertexArray.map(d=>new THREE.Vector3(d[0],d[1]+graphHeight*d.data.values[selectService]-graphHeight/2,d[2]*timeGap));
+        const notMetric = typeof selectService === 'string';
+        const points = vertexArray.map(d=>new THREE.Vector3(d[0],d[1]+graphHeight*(notMetric?0.5:(d.data.values[selectService]??0.5))-graphHeight/2,d[2]*timeGap));
         return new THREE.BufferGeometry().setFromPoints(points);
     }, [vertexArray])
     useFrame(()=>{
         // debugger
         // console.log(lineGeometry)
         // lineGeometry.attributes.position.
+        const notMetric = typeof selectService === 'string'
         vertexArray.forEach((d,id)=>{
-            tempV.set(d[0],d[1]+graphHeight*d.data.values[selectService],d[2]*timeGap).toArray(lineGeometry.attributes.position.array, id * 3)  ;
+            tempV.set(d[0],d[1]+graphHeight*(notMetric?0.5:(d.data.values[selectService]??0.5)),d[2]*timeGap).toArray(lineGeometry.attributes.position.array, id * 3)  ;
         });
         lineGeometry.computeBoundingSphere();
         lineGeometry.attributes.position.needsUpdate = true;

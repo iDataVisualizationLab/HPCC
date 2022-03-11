@@ -18,6 +18,11 @@ import Container from "@mui/material/Container";
 import { useControls, folder, button } from 'leva';
 import {outlier} from './component/outlier'
 import {calculateCluster} from './component/cluster'
+import {colorLegend} from "./component/leva/ColorLegend";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import {viz} from "./component/leva/Viz";
+import {Radar} from "./component/radar";
 
 const ColorModeContext = React.createContext({
     toggleColorMode: () => {
@@ -30,11 +35,10 @@ function App() {
     const [scheme, setScheme] = useState({data:{},users:{},time_stamp:[], timerange: [new Date(), new Date()]});
     const [dimensions, setDimensions] = useState([]);
     const [layout, setLayout] = useState(_layout);
-    const [timeSlice, setTimeSlice] = useState([0, 100]);
     const [_draw3DData, set_draw3DData] = useState([]);
     const [draw3DData, setDraw3DData] = useState([]);
     const [line3D, setLine3D] = useState([]);
-    const [annotation, setAnnotation] = useState([]);
+    const [alertMess, setAlertMess] = useState();
     const [isBusy, setIsBusy] = useState("Load data");
     const [mode, setMode] = React.useState('dark');
     const [selectedUser, setSelectedUser] = React.useState(null);
@@ -53,8 +57,9 @@ function App() {
                     const url = getUrl({_start,_end,interval,value,compress});
                     debugger
                     d3.text(url).then(s=>{
+                        setAlertMess({level:"success",message:"Successfully load"})
+                        setIsBusy('Process data');
                         const _data = JSON.parse(s.replaceAll("NaN",'null'));
-                        debugger
                         const {scheme, draw3DData, dimensions, layout} = handleData(_data);
                         setDimensions(dimensions);
                         setScheme(scheme);
@@ -63,23 +68,15 @@ function App() {
                         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
                         setLayout(layout);
                         setIsBusy(false);
-                        recalCluster(scheme, dimensions)
+                        recalCluster(scheme, dimensions);
+                    }).catch(e=>{
+                        setAlertMess({level:"error",message:"Can't load realtime data"})
+                        setIsBusy(false);
                     })
-                    // d3.json(url).then(function(_data){
-                    //     debugger
-                    //     const {scheme, draw3DData, dimensions, layout} = handleData(_data);
-                    //     setDimensions(dimensions);
-                    //     setScheme(scheme);
-                    //     updateColor(draw3DData, scheme);
-                    //     set_draw3DData(draw3DData);
-                    //     // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
-                    //     setLayout(layout);
-                    //     setIsBusy(false);
-                    //     recalCluster(scheme, dimensions)
-                    // });
                 }else {
                     setIsBusy('Load simulation data');
                     setTimeout(() => {
+                        setIsBusy('Process data');
                         const {scheme, draw3DData, dimensions, layout} = handleData(_data);
                         setDimensions(dimensions);
                         setScheme(scheme);
@@ -95,7 +92,12 @@ function App() {
         duration:{label:"Duration",value:3600000, options:[['1 hour', 3600000],['2 hours',7200000],['3 hours',9600000]].reduce((a,v)=>({...a,[v[0]]:v[1]}),{})},
         dataInfo:{label:"",value:"",rows:2,editable:false}
     }))
-    const [{selectedSer},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {}),label:"Metric",value:0,
+    const optionsColor = useMemo(()=>{
+        const option = dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {});
+        option["Dataset cluster"] = "cluster"
+        return option;
+    },[dimensions])
+    const [{selectedSer},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:optionsColor,label:"Color by",value:0,
             onChange:(val)=>{
                 updateColor(_draw3DData,scheme,val);
                 set_draw3DData([..._draw3DData]);
@@ -103,9 +105,7 @@ function App() {
                 setDraw3DData([...draw3DData]);
             },transient:false}
     }),[dimensions,_draw3DData,draw3DData,scheme]);
-
-    const config = useControls("Setting",{
-        metricRangeMinMax:{value:false, label:'Show min-max',onChange:(val)=>{
+    const metricRangeMinMax = useControls("Setting",{metricRangeMinMax:{value:false, label:'Show min-max',onChange:(val)=>{
             if (val){
                 dimensions.forEach(dim=>{
                     dim.range = [dim.min,dim.max];
@@ -122,8 +122,8 @@ function App() {
             if (scheme.computers) {
                 Object.keys(scheme.computers).forEach(d => {
                     scheme.time_stamp.forEach((t, ti) => {
-                         dimensions.forEach((dim, ki) => {
-                             scheme.tsnedata[d][ti][ki] = dimensions[ki].scale(scheme.computers[d][dim.text][ti] ?? undefined) ?? null;
+                        dimensions.forEach((dim, ki) => {
+                            scheme.tsnedata[d][ti][ki] = dimensions[ki].scale(scheme.computers[d][dim.text][ti] ?? undefined) ?? null;
                         })
                     })
                 });
@@ -133,15 +133,65 @@ function App() {
                 draw3DData.forEach(d => d.possArr = [...d.possArr]);
                 setDraw3DData([...draw3DData]);
             }
-        },transient:false},
-        metricTrigger:{value:false, label:'Filter'}
+        },transient:false}},[dimensions,selectedUser,selectedSer,draw3DData,scheme])
+    const metricSetting= useMemo(()=>{
+        if (dimensions[selectedSer]){
+            return {minMax:{label:'',transient:false,editable:false,value:dimensions[selectedSer]?`Min: ${dimensions[selectedSer].min} Max: ${dimensions[selectedSer].max}`:`Min:_ Max:_`},
+                legend:colorLegend({label:'Legend',
+                value:(dimensions[selectedSer]??{range:[0,1]}).range,range:(dimensions[selectedSer]??{range:[0,1]}).range,scale:colorByMetric}),
+
+            metricTrigger:{value:false, label:'Filter'}
         ,metricFilter:{render:(get)=>get("Setting.metricTrigger"),value:(dimensions[selectedSer]??{range:[0,1]}).range[0],min:(dimensions[selectedSer]??{range:[0,1]}).range[0],max:(dimensions[selectedSer]??{range:[0,1]}).range[1],step:0.1, label:""}
-        ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}
-    },[dimensions,selectedUser,selectedSer,draw3DData,scheme]);
+        ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}}
+        }else{
+            return {}
+        }
+    },[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
+    const [config,setConfig] = useControls("Setting",()=>(metricSetting),[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
     const binopt = useControls("Cluster",{clusterMethod:{value:'leaderbin',options:['leaderbin','kmean']},
         bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="leaderbin"}),
         kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="kmean"}),
-        Apply:button((get)=>recalCluster())},[scheme.tsnedata,dimensions])
+        // Apply:button((get)=>{console.log(get("Cluster"));recalCluster(scheme, dimensions)}),
+
+    },{
+        collapsed : true
+    });
+    const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions,callback=()=>{})=>{
+        console.log(binopt)
+        setIsBusy("Calculate cluster")
+        setTimeout(()=>{
+            const flat = _.flatten(Object.values(_scheme.tsnedata),1);
+            let outlyingBins = outlier({data:flat,dimensions:_dimensions});
+            let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
+            const _clusterInfo = {cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo};
+            setClusterInfo(_clusterInfo)
+            callback({clusterInfo:_clusterInfo,scheme:_scheme})
+            setIsBusy(false)
+        },1);
+    },[scheme.tsnedata,dimensions,binopt]);
+    const allplycluster = useControls("Cluster",{Apply:button((get)=>{
+        recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
+            if (selectedSer==='cluster') {
+                setScheme(scheme);
+                updateColor(_draw3DData, scheme,undefined,clusterInfo);
+                set_draw3DData([..._draw3DData]);
+                draw3DData.forEach(d=>d.possArr=[...d.possArr]);
+                setDraw3DData([...draw3DData]);
+            }
+        })
+    })},[recalCluster,scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
+    const showRadar = useControls("Cluster",{Radar:viz({value:0,com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>{
+            clusterInfo&&clusterInfo.cluster.map((c,i)=><div key={c.labels} style={{display:'inline-block'}}>
+                <div style={{position:'relative'}}>
+                    <Radar width={100} height={100} data={[c.__metrics]} area={true} mean={true} meanColor={"rgba(0,0,0,0.52)"}
+                           fill={clusterInfo.colorCluster?clusterInfo.colorCluster(c.name):'#fff'} stroke={'match'}/>
+                    <div style={{position:'absolute',top:0,left:0}}>
+                        <Radar width={100} height={100} data={[c.__metrics]} compact={true}
+                               fill={'none'} stroke={"black"} strokeWidth={2}/>
+                    </div>
+                    <p style={{position:'absolute',top:10,left:0, width:'100%',textAlign:'center',color:'black', fontSize:12}}>{c.arr.length}<br/>{i?'':' temporal instances'}</p>
+                </div> </div>)
+        }</div>})},[clusterInfo])
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -184,7 +234,11 @@ function App() {
         const timerange = d3.extent(_data.time_stamp);
         const compute = Object.entries(_data.nodes_info);
         const dimensionKeys = Object.keys(compute[0][1]).filter(s=>compute[0][1][s].find(d=>_.isNumber(d)));
-        const dimensions = dimensionKeys.map((s,i)=>({text:s,index:i,range:[Infinity,-Infinity],scale:d3.scaleLinear(),enable:true}));
+        const dimensions = dimensionKeys.map((s,i)=>({text:s,
+            index:i,range:[Infinity,-Infinity],scale:d3.scaleLinear(),
+            order:i,
+            angle:(i/dimensionKeys.length)*2*Math.PI,
+            enable:true}));
         const computers ={};
 
         let jobonnode = undefined;
@@ -333,16 +387,6 @@ function App() {
         setDataset({dataInfo:`from ${timerange[0].toLocaleString()}\nto ${timerange[1].toLocaleString()}`})
         return {scheme: {data: _data,users,computers,jobs,tsnedata,time_stamp:_data.time_stamp, timerange}, draw3DData,dimensions,layout}
     }, [layout]);
-    const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions)=>{
-        setIsBusy("Calculate cluster")
-        setTimeout(()=>{
-            const flat = _.flatten(Object.values(_scheme.tsnedata),1);
-            let outlyingBins = outlier({data:flat,dimensions:_dimensions});
-            let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
-            setClusterInfo({cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo})
-            setIsBusy(false)
-        },1);
-    },[scheme.tsnedata,dimensions,binopt]);
 
     function handleCUJ({computers,jobs},timestamp){
         const compute_user= {};
@@ -437,18 +481,25 @@ function App() {
     // }
 
 
-    const updateColor = useCallback((__draw3DData=_draw3DData,_scheme=scheme,_selectedSer=selectedSer)=>{
-        // _draw3DData.forEach(d=>{
-        //     d.possArr.forEach((p,ti)=>{
-        //         p.color = (_scheme.tsnedata[d.key][ti][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[d.key][ti][_selectedSer]):undefined
-        //     })
-        // });
-        __draw3DData.forEach(d=>{
-            d.possArr.forEach((p,ti)=>{
-                p.color = (_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer]!==null)?colorByMetric(_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer]):undefined
-            })
-        });
-    },[dimensions,scheme,_draw3DData,selectedSer]);
+    const updateColor = useCallback((__draw3DData=_draw3DData,_scheme=scheme,_selectedSer=selectedSer,_clusterInfo=clusterInfo)=>{
+        if (_selectedSer!=="cluster") {
+            __draw3DData.forEach(d => {
+                d.possArr.forEach((p, ti) => {
+                    p.color = (_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer] !== null) ? colorByMetric(_scheme.tsnedata[p.data.key][p.data.timestep][_selectedSer]) : undefined
+                })
+            });
+        }else{
+            __draw3DData.forEach(d => {
+                d.possArr.forEach((p, ti) => {
+                    const cluster = _scheme.tsnedata[p.data.key][p.data.timestep].cluster;
+                    p.color = _clusterInfo.colorCluster(cluster)
+                })
+            });
+        }
+        try {
+            setConfig({minMax: dimensions[selectedSer] ? `Min: ${dimensions[selectedSer].min} Max: ${dimensions[selectedSer].max}` : `Min:_ Max:_`})
+        }catch(e){}
+    },[dimensions,scheme,_draw3DData,selectedSer,clusterInfo]);
     useEffect(()=>{
         getSelectedDraw3Data({selectedUser},_draw3DData,scheme)
     },[_draw3DData,selectedUser,scheme,config.suddenThreshold,config.metricTrigger,config.metricFilter])
@@ -591,10 +642,10 @@ function App() {
                                     {/*        </Select>*/}
                                     {/*    </FormControl>*/}
                                     {/*</Grid>*/}
-                                    {dimensions[selectedSer]&&<Grid item xs={7} style={{textAlign:"center"}}>
-                                        {dimensions[selectedSer].text} Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}
-                                        <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>
-                                    </Grid>}
+                                    {/*{dimensions[selectedSer]&&<Grid item xs={7} style={{textAlign:"center"}}>*/}
+                                    {/*    {dimensions[selectedSer].text} Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}*/}
+                                    {/*    <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>*/}
+                                    {/*</Grid>}*/}
                                 </Grid>
                                 <Grid item xs={2}>
                                     <Autocomplete
@@ -626,6 +677,11 @@ function App() {
                         <h1>{isBusy}</h1>
                         <CircularProgress color="inherit"/>
                     </Backdrop>
+                <Snackbar anchorOrigin={{vertical:"top",horizontal:"right"}} open={!!alertMess} autoHideDuration={4000} onClose={()=>setAlertMess(undefined)}>
+                    <Alert severity={alertMess&&alertMess.level} sx={{ width: '100%' }}>
+                        {alertMess&&alertMess.message}
+                    </Alert>
+                </Snackbar>
             </ThemeProvider>
         </ColorModeContext.Provider>
     );

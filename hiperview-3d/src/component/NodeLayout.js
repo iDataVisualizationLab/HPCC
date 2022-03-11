@@ -27,11 +27,12 @@ export default function NodeLayout({data=[],selectService=0,size=[0.6, 0.15, 0.0
     const colorArray = useMemo(() => {
         setfreeze(false);
         set(undefined);
-        return Float32Array.from(new Array(data.length).fill().flatMap((_, i) => [...tempColor.set(data[i].color??'black').toArray(),1]))}, [data]);
+        return Float32Array.from(new Array(data.length).fill().flatMap((_, i) => [...tempColor.set(data[i].color??'black').toArray(),1]))}, [data,selectService]);
     useFrame((state) => {
         const hoverEmpty = hovered===undefined;
+        const notMetric = typeof selectService === 'string'
         data.forEach((d,i)=>{
-            tempObject.position.set(d[0], d[1]+(d.data.values[selectService]??0)*size[1], d[2]*timeGap);
+            tempObject.position.set(d[0], d[1]+(notMetric?0.5:(d.data.values[selectService]??0.5))*size[1], d[2]*timeGap);
             colorArray[i*4+3] = (hoverEmpty||(i===hovered))?1:0.01;
             meshRef.current.geometry.attributes.color.needsUpdate = true
             tempObject.updateMatrix();
