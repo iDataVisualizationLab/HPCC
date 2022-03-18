@@ -13,7 +13,7 @@ const Ticks = styled('text', {
 
 export default function ColorLegendGraph(){
     const { label,value, displayValue, settings, onUpdate, onChange, setSettings } = useInputContext();
-    debugger
+
     const { height=30,barHeight=10,style={},scale,range } = settings;
 
     const id = React.useMemo(()=>uniqueId(),[]);

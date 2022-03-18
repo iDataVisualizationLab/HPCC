@@ -62,11 +62,12 @@ function App() {
                         setAlertMess({level:"success",message:"Successfully load"})
                         setIsBusy('Process data');
                         const _data = JSON.parse(s.replaceAll("NaN",'null'));
-                        const {scheme, draw3DData, dimensions, layout} = handleData(_data);
+                        const {scheme, draw3DData, drawUserData, dimensions, layout} = handleData(_data);
                         setDimensions(dimensions);
                         setScheme(scheme);
                         updateColor(draw3DData, scheme);
                         set_draw3DData(draw3DData);
+                        setDrawUserData(drawUserData);
                         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
                         setLayout(layout);
                         setIsBusy(false);
@@ -79,11 +80,12 @@ function App() {
                     setIsBusy('Load simulation data');
                     setTimeout(() => {
                         setIsBusy('Process data');
-                        const {scheme, draw3DData, dimensions, layout} = handleData(_data);
+                        const {scheme, draw3DData,drawUserData, dimensions, layout} = handleData(_data);
                         setDimensions(dimensions);
                         setScheme(scheme);
                         updateColor(draw3DData, scheme);
                         set_draw3DData(draw3DData);
+                        setDrawUserData(drawUserData);
                         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
                         setLayout(layout);
                         setIsBusy(false);
@@ -478,11 +480,48 @@ function App() {
                 });
         });
         const drawUserData =[];
+        drawUserData.links=[];
         debugger
-        Object.keys(users).forEach()
+        Object.keys(users).forEach(selectedUser=>{
+            const user = [0,-2,0];
+            user.links = [];
+            console.log(users[selectedUser])
+            user.toolTip=<table>
+                <tbody>
+                <tr><td>Name</td><td>{selectedUser}</td></tr>
+                {users[selectedUser].job?<><tr><td>#Jobs</td><td>{users[selectedUser].job.length}</td></tr>
+                        <tr><td>Job Id</td><td>{users[selectedUser].job.join(',')}</td></tr>
+                        <tr><td>#Nodes</td><td>{users[selectedUser].node.length}</td></tr>
+                        <tr><td>Nodes</td><td>{users[selectedUser].node.join(',')}</td></tr></>:
+                    <tr><td colSpan={2}>No job</td></tr>}
+                </tbody>
+            </table>;
+            const comtract = {};
+            users[selectedUser].node.forEach(com=>{
+                if (computers[com]) {
+                    computers[com].users.forEach((u, i) => {
+                        if (u.find(d => d === selectedUser)){
+                            const compP = computers[com].position;
+                            user.links.push(compP);
+                            if(!comtract[com]) {
+                                drawUserData.links.push([user, compP]);
+                                comtract[com] = true;
+                            }
+                        }
+                    });
+                }
+            });
+            user[0] = d3.mean(user.links,d=>d[0]);
+            user.x = user[0];
+            user.y = user[1];
+            drawUserData.push(user);
+        });
+        console.log('#links ',drawUserData.links.length)
+        const userSize = d3.scaleSqrt().domain(d3.extent(drawUserData,d=>d.links.length)).range([0.5,1]);
+        drawUserData.forEach(d=>d.scale=userSize(d.links.length));
 
         setDataset({dataInfo:`from ${timerange[0].toLocaleString()}\nto ${timerange[1].toLocaleString()}`})
-        return {scheme: {data: _data,users,computers,jobs,tsnedata,time_stamp:_data.time_stamp, timerange}, draw3DData,dimensions,layout}
+        return {scheme: {data: _data,users,computers,jobs,tsnedata,time_stamp:_data.time_stamp, timerange}, draw3DData, drawUserData,dimensions,layout}
     }, [layout]);
 
     function handleCUJ({computers,jobs},timestamp){
@@ -715,7 +754,7 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
                     <div style={{height: "100vh",width:'100wh',overflow:'hidden'}}>
-                        <Layout3D layout={layout} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer}/>
+                        <Layout3D layout={layout} time_stamp={scheme.time_stamp} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer}/>
                     </div>
                     <Grid container style={{position:'absolute',top:0,left:0}}>
                         <Container maxWidth="lg">
