@@ -17,7 +17,7 @@ const useStyles = makeStyles({
         width: '300px'
     },
 });
-export default function NodeLayout({data=[],selectService=0,size=[0.6, 0.15, 0.01],timeGap=0,...others}) {
+export default function NodeLayout({data=[],selectService=0,size=[0.4, 0.1, 0.01],timeGap=0,...others}) {
     const classes = useStyles();
     const [hovered, set] = useState();
     const [freeze, setfreeze] = useState(false);

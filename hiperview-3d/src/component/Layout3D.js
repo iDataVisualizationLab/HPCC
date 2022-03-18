@@ -2,11 +2,12 @@ import {Canvas} from "@react-three/fiber";
 import {OrbitControls,GizmoHelper,GizmoViewcube,Center,OrthographicCamera} from "@react-three/drei";
 import React from "react";
 import NodeLayout from "./NodeLayout";
+import UserLayout from "./UserLayout";
 import LineLayout from "./LineLayout";
 import LayoutMap from "./LayoutMap";
 import {useControls} from "leva";
 
-const Layout3D = function({data,line3D,layout,selectService}){
+const Layout3D = function({data,line3D,layout,users,selectService}){
     const config = useControls("3D",{timeGap:{value:0.04,min:0,max:1,step:0.01},light:{value:0.5,min:0,max:1,step:0.01}});
     return <Canvas mode="concurrent">
         <OrthographicCamera makeDefault zoom={30} position={[-10,10,100]} />
@@ -18,6 +19,7 @@ const Layout3D = function({data,line3D,layout,selectService}){
                 <NodeLayout data={d.possArr} timeGap={config.timeGap} selectService={selectService}/>
             </group>)}
             <LineLayout data={line3D} timeGap={config.timeGap} selectService={selectService}/>
+            <UserLayout data={users}/>
             <arrowHelper length={100}/>
         </Center>
         <GizmoHelper alignment={"top-left"} margin={[80, 80]}>

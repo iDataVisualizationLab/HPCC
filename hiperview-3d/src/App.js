@@ -37,11 +37,13 @@ function App() {
     const [layout, setLayout] = useState(_layout);
     const [_draw3DData, set_draw3DData] = useState([]);
     const [draw3DData, setDraw3DData] = useState([]);
+    const [drawUserData, setDrawUserData] = useState([]);
     const [line3D, setLine3D] = useState([]);
     const [alertMess, setAlertMess] = useState();
     const [isBusy, setIsBusy] = useState("Load data");
     const [mode, setMode] = React.useState('dark');
     const [selectedUser, setSelectedUser] = React.useState(null);
+    const [selectedComputeMap, setSelectedComputeMap] = React.useState(undefined);
     const [clusterInfo, setClusterInfo] = React.useState({cluster:[],outlyingBins:[],clusterDescription:[],colorCluster:d3.scaleOrdinal(),clusterInfo:{}});
     // const [selectedSer, setSelectedSer] = React.useState(0);
 
@@ -69,7 +71,6 @@ function App() {
                         setLayout(layout);
                         setIsBusy(false);
                         recalCluster(scheme, dimensions);
-                        debugger
                     }).catch(e=>{
                         setAlertMess({level:"error",message:"Can't load realtime data"})
                         setIsBusy(false);
@@ -86,6 +87,7 @@ function App() {
                         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
                         setLayout(layout);
                         setIsBusy(false);
+                        console.log('Init data')
                         recalCluster(scheme, dimensions);
                         debugger
                     }, 1);
@@ -107,7 +109,8 @@ function App() {
                 setDraw3DData([...draw3DData]);
             },transient:false}
     }),[dimensions,_draw3DData,draw3DData,scheme]);
-    const metricRangeMinMax = useControls("Setting",{metricRangeMinMax:{value:false, label:'Show min-max',onChange:(val)=>{
+    const [{metricRangeMinMax},setMetricRangeMinMax] = useControls("Setting",()=>(
+        {metricRangeMinMax:{value:false, label:'Show min-max',onChange:(val)=>{
             if (val){
                 dimensions.forEach(dim=>{
                     dim.range = [dim.min,dim.max];
@@ -130,7 +133,8 @@ function App() {
                     })
                 });
                 // setScheme({...scheme});
-                if (selectedSer==='cluster')
+                if (selectedSer==='cluster'){
+                    console.log('selectedSer changed')
                     recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
                         if (selectedSer==='cluster') {
                             setScheme(scheme);
@@ -140,14 +144,56 @@ function App() {
                             setDraw3DData([...draw3DData]);
                         }
                     })
-                else{
+                }else{
                     updateColor(_draw3DData, scheme);
                     set_draw3DData([..._draw3DData]);
                     draw3DData.forEach(d => d.possArr = [...d.possArr]);
                     setDraw3DData([...draw3DData]);
                 }
             }
-        }}},[dimensions,selectedUser,selectedSer,draw3DData,scheme])
+        }}}));
+    useEffect(()=>{
+        if (metricRangeMinMax){
+            dimensions.forEach(dim=>{
+                dim.range = [dim.min,dim.max];
+                dim.scale.domain(dim.range)
+            })
+        }else{
+            dimensions.forEach(dim=>{
+                dim.range = dim.possibleUnit.range.slice();
+                dim.scale.domain(dim.range)
+            })
+        }
+
+        // setDimensions(dimensions);
+        if (scheme.computers) {
+            Object.keys(scheme.computers).forEach(d => {
+                scheme.time_stamp.forEach((t, ti) => {
+                    dimensions.forEach((dim, ki) => {
+                        scheme.tsnedata[d][ti][ki] = dimensions[ki].scale(scheme.computers[d][dim.text][ti] ?? undefined) ?? null;
+                    })
+                })
+            });
+            // setScheme({...scheme});
+            if (selectedSer==='cluster'){
+                console.log('selectedSer changed')
+                recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
+                    if (selectedSer==='cluster') {
+                        setScheme(scheme);
+                        updateColor(_draw3DData, scheme,undefined,clusterInfo);
+                        set_draw3DData([..._draw3DData]);
+                        draw3DData.forEach(d=>d.possArr=[...d.possArr]);
+                        setDraw3DData([...draw3DData]);
+                    }
+                })
+            }else{
+                updateColor(_draw3DData, scheme);
+                set_draw3DData([..._draw3DData]);
+                draw3DData.forEach(d => d.possArr = [...d.possArr]);
+                setDraw3DData([...draw3DData]);
+            }
+        }
+    },[metricRangeMinMax])
     const metricSetting= useMemo(()=>{
         if (dimensions[selectedSer]){
             return {minMax:{label:'',transient:false,editable:false,value:dimensions[selectedSer]?`Min: ${dimensions[selectedSer].min} Max: ${dimensions[selectedSer].max}`:`Min:_ Max:_`},
@@ -162,29 +208,19 @@ function App() {
         }
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
     const [config,setConfig] = useControls("Setting",()=>(metricSetting),[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
-    const binopt = useControls("Cluster",{clusterMethod:{value:'leaderbin',options:['leaderbin','kmean']},
+    const binopt = useControls("Cluster",{clusterMethod:{label:'Method',value:'leaderbin',options:['leaderbin','kmean']},
         normMethod:{value:'l2',options:['l1','l2']},
         bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="leaderbin"}),
         kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="kmean"}),
         // Apply:button((get)=>{console.log(get("Cluster"));recalCluster(scheme, dimensions)}),
-
+        "iqr":{min:1.5, max:4,step:0.1,value:1.5},
     },{
         label:"Dataset Cluster",
         collapsed : true
     });
-    const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions,callback=()=>{})=>{
-        setIsBusy("Calculate cluster")
-        setTimeout(()=>{
-            const flat = _.flatten(Object.values(_scheme.tsnedata),1);
-            let outlyingBins = outlier({data:flat,dimensions:_dimensions});
-            let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
-            const _clusterInfo = {cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo};
-            setClusterInfo(_clusterInfo)
-            callback({clusterInfo:_clusterInfo,scheme:_scheme})
-            setIsBusy(false)
-        },1);
-    },[scheme.tsnedata,dimensions,binopt]);
-    const allplycluster = useControls("Cluster",{Apply:button((get)=>{
+
+    const [allplycluster] = useControls("Cluster",()=>({Apply:button((get)=>{
+        console.log('clicked apply')
         recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
             if (selectedSer==='cluster') {
                 setScheme(scheme);
@@ -194,7 +230,7 @@ function App() {
                 setDraw3DData([...draw3DData]);
             }
         })
-    })},[scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
+    })}),[scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
 
     const showRadar = useControls("Cluster",{Clusters:viz({value:0,
             label:clusterInfo.clusterInfo&&<> Cluster inputdata: {clusterInfo.clusterInfo.input} ({d3.format(",.1%")(clusterInfo.clusterInfo.input/clusterInfo.clusterInfo.total)})<br/>
@@ -202,9 +238,20 @@ function App() {
                 Total MSE: {d3.format('.2f')(clusterInfo.clusterInfo.totalMSE??0)}</>,
             com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>{
             clusterInfo&&clusterInfo.cluster.map((c,i)=><div key={c.labels} style={{display:'inline-block'}}>
-                <div style={{position:'relative'}}>
+                <div style={{position:'relative'}}
+                     onMouseLeave={()=>setSelectedComputeMap(undefined)}
+                     onMouseEnter={()=>{
+                        const selectedComputeMap = {};
+                        c.arr.forEach(d=>{
+                            if (!selectedComputeMap[d.key])
+                                selectedComputeMap[d.key]={};
+                            selectedComputeMap[d.key][d.timestep] = true
+                        });
+                        setSelectedComputeMap(selectedComputeMap);
+                }}>
                     <Radar width={100} height={100} data={[c.__metrics]} area={true} mean={true} meanColor={"rgba(0,0,0,0.52)"}
-                           fill={clusterInfo.colorCluster?clusterInfo.colorCluster(c.name):'#fff'} stroke={'match'}/>
+                           fill={clusterInfo.colorCluster?clusterInfo.colorCluster(c.name):'#fff'} stroke={'match'}
+                    />
                     <div style={{position:'absolute',top:0,left:0}}>
                         <Radar width={100} height={100} data={[c.__metrics]} compact={true}
                                fill={'none'} stroke={"black"} strokeWidth={2}/>
@@ -237,7 +284,8 @@ function App() {
                             </div> </div>)
                     }
                 </div>}),
-    },[clusterInfo])
+    },[clusterInfo,scheme,_draw3DData]);
+
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
@@ -246,6 +294,20 @@ function App() {
         }),
         [],
     );
+    
+    const recalCluster = useCallback((_scheme=scheme,_dimensions=dimensions,callback=()=>{})=>{
+        setIsBusy("Calculate cluster")
+        setTimeout(()=>{
+            const flat = _.flatten(Object.values(_scheme.tsnedata),1);
+            console.log('iqr',binopt.iqr)
+            let outlyingBins = outlier({data:flat,dimensions:_dimensions,outlyingCoefficient:binopt.iqr});
+            let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
+            const _clusterInfo = {cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo};
+            setClusterInfo(_clusterInfo)
+            callback({clusterInfo:_clusterInfo,scheme:_scheme})
+            setIsBusy(false)
+        },1);
+    },[scheme.tsnedata,dimensions,binopt,showRadar.iqr]);
     const theme = React.useMemo(
         () =>
             createTheme({
@@ -255,22 +317,6 @@ function App() {
             }),
         [mode],
     );
-
-        // useLayoutEffect(() => {
-        //     setIsBusy('Load data');
-        //     setTimeout(()=>{
-        //         const {scheme, draw3DData,dimensions,layout} = handleData(_data);
-        //         setDimensions(dimensions);
-        //         setScheme(scheme);
-        //         updateColor(draw3DData,scheme);
-        //         set_draw3DData(draw3DData);
-        //         // getSelectedDraw3Data({selectedUser},draw3DData,scheme);
-        //         setLayout(layout);
-        //         setIsBusy(false);
-        //         debugger
-        //         recalCluster(scheme,dimensions)
-        //     },1);
-        // }, []);
     const handleData = useCallback((_data) => {
         if (_data.time_stamp[0] > 999999999999999999)
             _data.time_stamp = _data.time_stamp.map(d => new Date(d / 1000000));
@@ -409,6 +455,7 @@ function App() {
             })
         });
 
+
         const draw3DData = [{key:'all', possArr:[],position: [0,0,0]}];
         compute.forEach(d=>{
             computers[d[0]].position = reverseLayout[d[0]].position;
@@ -430,6 +477,10 @@ function App() {
                     return poss;
                 });
         });
+        const drawUserData =[];
+        debugger
+        Object.keys(users).forEach()
+
         setDataset({dataInfo:`from ${timerange[0].toLocaleString()}\nto ${timerange[1].toLocaleString()}`})
         return {scheme: {data: _data,users,computers,jobs,tsnedata,time_stamp:_data.time_stamp, timerange}, draw3DData,dimensions,layout}
     }, [layout]);
@@ -547,8 +598,8 @@ function App() {
         }catch(e){}
     },[dimensions,scheme,_draw3DData,selectedSer,clusterInfo]);
     useEffect(()=>{
-        getSelectedDraw3Data({selectedUser},_draw3DData,scheme)
-    },[_draw3DData,selectedUser,scheme,config.suddenThreshold,config.metricTrigger,config.metricFilter])
+        getSelectedDraw3Data({selectedUser,selectedComputeMap},_draw3DData,scheme)
+    },[_draw3DData,selectedComputeMap,selectedUser,scheme,config.suddenThreshold,config.metricTrigger,config.metricFilter])
     function getSelectedDraw3Data({selectedUser,selectedComputeMap},__draw3DData=_draw3DData,_scheme=scheme){
         let isFilter = (!!selectedComputeMap || selectedUser || (!!config.suddenThreshold) || config.metricTrigger);
         // selectedComputeMap=selectedComputeMap??{};
@@ -664,7 +715,7 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
                     <div style={{height: "100vh",width:'100wh',overflow:'hidden'}}>
-                        <Layout3D layout={layout} data={draw3DData} line3D={line3D} selectService={selectedSer}/>
+                        <Layout3D layout={layout} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer}/>
                     </div>
                     <Grid container style={{position:'absolute',top:0,left:0}}>
                         <Container maxWidth="lg">
