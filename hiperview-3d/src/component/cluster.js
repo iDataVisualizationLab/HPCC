@@ -148,7 +148,6 @@ export function calculateCluster ({data=[],dimensions=[],binopt={},calbackMiddle
         totalMSE+=c.mse;
     });
     // silhouetteScore
-    debugger
     totalMSE= totalMSE/cluster.length;//silhouetteScore(_data,adjust.map((d:any)=>d.cluster))//totalMSE/cluster.length;
     const endTime = performance.now();
     return {cluster,clusterDescription,colorCluster, clusterInfo:{clusterCalTime:endTime-startTime, totalMSE, input:_data.length, total: data.length}}
@@ -222,8 +221,6 @@ let getCluster = getMathCluster;
 function getMathCluster(oardinal,axis_arr,cluster_info,distance){
     // calculate cluster here
     if (!oardinal.outlier) {
-        if ((oardinal.name==='cpu-23-43') && (oardinal.timestep===50))
-            debugger
         axis_arr = axis_arr ? axis_arr : oardinal;
         let index = 0;
         let minval = Infinity;

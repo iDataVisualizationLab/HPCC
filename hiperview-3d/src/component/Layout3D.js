@@ -1,6 +1,6 @@
 import {Canvas} from "@react-three/fiber";
 import {OrbitControls, GizmoHelper, GizmoViewcube, Center, OrthographicCamera, BakeShadows} from "@react-three/drei";
-import React, {Suspense} from "react";
+import React, {Suspense, useCallback, useEffect, useRef, useState} from "react";
 import NodeLayout from "./NodeLayout";
 import UserLayout from "./UserLayout";
 import LineLayout from "./LineLayout";
@@ -10,11 +10,36 @@ import Effects from "./Effects";
 import {Vector3} from "three";
 import TimeAxis from "./TimeAxis";
 import TWEEN from '@tweenjs/tween.js';
-
-const Layout3D = function({data,time_stamp,line3D,layout,users,selectService}){
-    const config = useControls("3D",{timeGap:{value:0.04,min:0,max:1,step:0.01},
+import CustomCamera from "./CustomCamera";
+const SEQUNCE=[{x:0,y:0,z:100,zoom:30}]
+const Layout3D = function({data,time_stamp,line3D,layout,users,selectService,stackOption=false}){
+    const [currentSequnce,setCurrentSequnce] = useState(0);
+    const config = useControls("3D",{timeGap:{value:0.04,min:0,max:0.1,step:0.001},
         light:{value:0.5,min:0,max:1,step:0.01},
-        cameraAnimate:{value:true}});
+        cameraAnimate:{value:false}});
+    const cameraRef = useRef(null);
+    useEffect(()=>{
+        if (config.cameraAnimate)
+            if (cameraRef.current)
+                cameraRef.current.pointOfView(SEQUNCE[currentSequnce], 4000)
+    },[config.cameraAnimate])
+    useEffect(()=>{
+        if (cameraRef.current) {
+            if (currentSequnce < SEQUNCE.length) {
+                const interval = setTimeout(() => {
+                    cameraRef.current.pointOfView(SEQUNCE[currentSequnce], 4000)
+                    setCurrentSequnce(currentSequnce + 1);
+                }, 4000);
+                return () => {
+                    clearInterval(interval);
+                };
+            }
+        }
+    },[currentSequnce])
+    function stopPlay(){
+        setCurrentSequnce(SEQUNCE.length)
+    }
+
     return <Canvas mode="concurrent"
                    shadows gl={{ antialias: true }}
     >
@@ -39,11 +64,11 @@ const Layout3D = function({data,time_stamp,line3D,layout,users,selectService}){
                 <LayoutMap data={layout}/>
                 {/*{data.map((d,i)=><group key={i} position={[...d.position]}>*/}
                 {data.map((d,i)=><group key={i} position={[0,0,0]}>
-                    <NodeLayout data={d.possArr} cameraAnimate={config.cameraAnimate} timeGap={config.timeGap} selectService={selectService}/>
+                    <NodeLayout data={d.possArr} timeGap={config.timeGap} selectService={selectService}/>
                 </group>)}
-                <LineLayout data={line3D} timeGap={config.timeGap} selectService={selectService}/>
+                {(!stackOption)&&<><LineLayout data={line3D} timeGap={config.timeGap} selectService={selectService}/>
+                    <TimeAxis data={time_stamp} timeGap={config.timeGap}/></>}
                 <UserLayout data={users}/>
-                <TimeAxis data={time_stamp} timeGap={config.timeGap}/>
             </Center>
             <GizmoHelper alignment={"top-left"} margin={[80, 80]}>
                 <GizmoViewcube/>>
@@ -51,7 +76,7 @@ const Layout3D = function({data,time_stamp,line3D,layout,users,selectService}){
             <BakeShadows />
         {/*</Suspense>*/}
 
-        <OrbitControls/>
+        <CustomCamera ref={cameraRef} cameraAnimate={config.cameraAnimate}/>
         <Effects />
     </Canvas>
 }

@@ -57,7 +57,7 @@ function App() {
                     const value = 'max';
                     const compress = false;
                     const url = getUrl({_start,_end,interval,value,compress});
-                    debugger
+
                     d3.text(url).then(s=>{
                         setAlertMess({level:"success",message:"Successfully load"})
                         setIsBusy('Process data');
@@ -91,7 +91,7 @@ function App() {
                         setIsBusy(false);
                         console.log('Init data')
                         recalCluster(scheme, dimensions);
-                        debugger
+
                     }, 1);
                 }
             }},
@@ -204,16 +204,17 @@ function App() {
 
             metricTrigger:{value:false, label:'Filter'}
         ,metricFilter:{render:(get)=>get("Setting.metricTrigger"),value:(dimensions[selectedSer]??{range:[0,1]}).range[0],min:(dimensions[selectedSer]??{range:[0,1]}).range[0],max:(dimensions[selectedSer]??{range:[0,1]}).range[1],step:0.1, label:""}
+        ,stackOption:{render:(get)=>get("Setting.metricTrigger"),value:false,label:"Stack?"}
         ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}}
         }else{
             return {}
         }
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
     const [config,setConfig] = useControls("Setting",()=>(metricSetting),[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
-    const binopt = useControls("Cluster",{clusterMethod:{label:'Method',value:'leaderbin',options:['leaderbin','kmean']},
+    const binopt = useControls("DatasetCluster",{clusterMethod:{label:'Method',value:'leaderbin',options:['leaderbin','kmean']},
         normMethod:{value:'l2',options:['l1','l2']},
-        bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="leaderbin"}),
-        kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("Cluster.clusterMethod")==="kmean"}),
+        bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("DatasetCluster.clusterMethod")==="leaderbin"}),
+        kmean:folder({k:{value:8, step:1, min:2},iterations:{value:10,min:1, step:1}},{label:'parameter',render:(get)=>get("DatasetCluster.clusterMethod")==="kmean"}),
         // Apply:button((get)=>{console.log(get("Cluster"));recalCluster(scheme, dimensions)}),
         "iqr":{min:1.5, max:4,step:0.1,value:1.5},
     },{
@@ -221,7 +222,7 @@ function App() {
         collapsed : true
     });
 
-    const [allplycluster] = useControls("Cluster",()=>({Apply:button((get)=>{
+    const [allplycluster] = useControls("DatasetCluster",()=>({Apply:button((get)=>{
         console.log('clicked apply')
         recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
             if (selectedSer==='cluster') {
@@ -234,8 +235,8 @@ function App() {
         })
     })}),[scheme.tsnedata,dimensions,binopt,selectedSer,_draw3DData]);
 
-    const showRadar = useControls("Cluster",{Clusters:viz({value:0,
-            label:clusterInfo.clusterInfo&&<> Cluster inputdata: {clusterInfo.clusterInfo.input} ({d3.format(",.1%")(clusterInfo.clusterInfo.input/clusterInfo.clusterInfo.total)})<br/>
+    const showRadar = useControls("DatasetCluster",{Clusters:viz({value:0,
+            label:clusterInfo.clusterInfo&&<> DatasetCluster inputdata: {clusterInfo.clusterInfo.input} ({d3.format(",.1%")(clusterInfo.clusterInfo.input/clusterInfo.clusterInfo.total)})<br/>
                 Cluster calculation time: {Math.round(clusterInfo.clusterInfo.clusterCalTime??0)} ms <br/>
                 Total MSE: {d3.format('.2f')(clusterInfo.clusterInfo.totalMSE??0)}</>,
             com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}>{
@@ -303,8 +304,10 @@ function App() {
             const flat = _.flatten(Object.values(_scheme.tsnedata),1);
             console.log('iqr',binopt.iqr)
             let outlyingBins = outlier({data:flat,dimensions:_dimensions,outlyingCoefficient:binopt.iqr});
+            console.log(flat.filter(d => !d.outlier).length)
             let {cluster,clusterDescription,colorCluster,clusterInfo} = calculateCluster ({data:flat,dimensions:_dimensions,binopt})
             const _clusterInfo = {cluster,outlyingBins,clusterDescription,colorCluster,clusterInfo};
+            console.log(clusterInfo)
             setClusterInfo(_clusterInfo)
             callback({clusterInfo:_clusterInfo,scheme:_scheme})
             setIsBusy(false)
@@ -392,7 +395,6 @@ function App() {
         const jobs = {};
         const job_ref = undefined;
         // need update core info to job_ref
-        debugger
         Object.keys(_data.jobs_info).forEach(job_id=>{
 
             // remove job not belong to this cluster
@@ -463,6 +465,7 @@ function App() {
             computers[d[0]].position = reverseLayout[d[0]].position;
             computers[d[0]].drawData = _data.time_stamp.map((t,i)=>{
                     const poss = [computers[d[0]].position[0],computers[d[0]].position[1],computers[d[0]].position[2]+i];
+                    poss.offset = computers[d[0]].position;
                     poss.data = {key:d[0],timestep:i,toolTip:<table>
                             <tbody>
                             <tr><td colSpan={2}>{t.toLocaleString()}</td></tr>
@@ -481,7 +484,7 @@ function App() {
         });
         const drawUserData =[];
         drawUserData.links=[];
-        debugger
+
         Object.keys(users).forEach(selectedUser=>{
             const user = [0,-2,0];
             user.links = [];
@@ -637,12 +640,12 @@ function App() {
         }catch(e){}
     },[dimensions,scheme,_draw3DData,selectedSer,clusterInfo]);
     useEffect(()=>{
-        getSelectedDraw3Data({selectedUser,selectedComputeMap},_draw3DData,scheme)
-    },[_draw3DData,selectedComputeMap,selectedUser,scheme,config.suddenThreshold,config.metricTrigger,config.metricFilter])
-    function getSelectedDraw3Data({selectedUser,selectedComputeMap},__draw3DData=_draw3DData,_scheme=scheme){
+        getSelectedDraw3Data({selectedUser,selectedComputeMap},_draw3DData,scheme,config.stackOption)
+    },[_draw3DData,selectedComputeMap,selectedUser,scheme,config.suddenThreshold,config.metricTrigger,config.metricFilter,config.stackOption])
+    function getSelectedDraw3Data({selectedUser,selectedComputeMap},__draw3DData=_draw3DData,_scheme=scheme,isStack = config.stackOption){
         let isFilter = (!!selectedComputeMap || selectedUser || (!!config.suddenThreshold) || config.metricTrigger);
         // selectedComputeMap=selectedComputeMap??{};
-
+        console.log('isstack',isStack)
         let flatmap =selectedComputeMap?ob2arr(selectedComputeMap):undefined;
         function ob2arr(selectedComputeMap){
             let flatmap =[];
@@ -734,6 +737,10 @@ function App() {
                     let count=0;
                     _scheme.computers[comp].drawData.forEach(d=>{
                         if (selectedComputeMap[comp][d.data.timestep]){
+                            if (isStack)
+                                d[2] = d.offset[2]+count;
+                            else
+                                d[2] = d.offset[2]+d.data.timestep;
                             data[0].possArr.push(d);
                             count++;
                         }
@@ -754,7 +761,7 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
                     <div style={{height: "100vh",width:'100wh',overflow:'hidden'}}>
-                        <Layout3D layout={layout} time_stamp={scheme.time_stamp} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer}/>
+                        <Layout3D layout={layout} time_stamp={scheme.time_stamp} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer} stackOption={config.stackOption}/>
                     </div>
                     <Grid container style={{position:'absolute',top:0,left:0}}>
                         <Container maxWidth="lg">
