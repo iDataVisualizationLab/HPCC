@@ -282,12 +282,12 @@ function newdatatoFormat_noSuggestion (data,separate){
         keys[currentkey].vi.push(ki)
     });
     // check unionkeys
-    d3.keys(hostList.data.hostlist).forEach(hname=>{
-        Object.keys(keys).forEach((k,i)=>{
-            if (data.columns.find(c=>c===hname+separate+k)===undefined)
-                delete keys[k];
-        })
-    });
+    // d3.keys(hostList.data.hostlist).forEach(hname=>{
+    //     Object.keys(keys).forEach((k,i)=>{
+    //         if (data.columns.find(c=>c===hname+separate+k)===undefined)
+    //             delete keys[k];
+    //     })
+    // });
 
     serviceQuery["csv"]= serviceQuery["csv"]||{};
 
@@ -1112,6 +1112,8 @@ function recomendColor (clusterarr) {
         colorarray.push('gray');
         orderarray.push(c.name);
     });
+    colorarray.push('gray');
+    orderarray.push('outlier');
     colorCluster.range(colorarray).domain(orderarray)
 }
 

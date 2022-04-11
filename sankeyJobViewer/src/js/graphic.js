@@ -486,4 +486,4 @@ function drawGantt(){
 // setting
 let tooltip = d3.tip().attr('class', 'd3-tip').html(function (d){return `<span>${d}</span>`})
 // let subObject = new Gantt();
-let subObject = new Sankey();
+let subObject = new Sankey_v2();

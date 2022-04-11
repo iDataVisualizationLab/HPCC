@@ -809,7 +809,7 @@ d3.TimeSpace = function () {
                 lastMetricselection =_.bind(showMetrics_plotly,{},target.name,path[target.name].findIndex(d=>d.__timestep===target.__timestep));
                 onRequestplotly();
 
-                renderRadarSummary(target.__metrics,colorarr[target.cluster].value,false)
+                renderRadarSummary(target.__metrics,colorarr[target.cluster]?colorarr[target.cluster].value:'black',false)
             }
         } else if (INTERSECTED.length || ishighlightUpdate) {
             ishighlightUpdate = false;
@@ -1272,7 +1272,7 @@ d3.TimeSpace = function () {
                         for (var i = 0; i < lassoTool.collection.length; i++) {
                             let currentIndex = lassoTool.collection[i];
                             let currentData = datain[mapIndex[currentIndex]];
-                            let currentColor = d3.color(colorarr[currentData.cluster].value);
+                            let currentColor = d3.color((colorarr[currentData.cluster]??{value:'black'}).value);
                             points.geometry.attributes.customColor.array[currentIndex * 3] = currentColor.r / 255;
                             points.geometry.attributes.customColor.array[currentIndex * 3 + 1] = currentColor.g / 255;
                             points.geometry.attributes.customColor.array[currentIndex * 3 + 2] = currentColor.b / 255;
@@ -1655,7 +1655,7 @@ d3.TimeSpace = function () {
                 return {
                     x0: scaleTime.invert(v.timestep),
                     x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].timestep) : undefined,
-                    color: colorarr[v.cluster].value
+                    color: (colorarr[v.cluster]??{value:'black'}).value
                 }
             })
         };
@@ -1723,7 +1723,7 @@ d3.TimeSpace = function () {
                 y1: 1,
                 x0: scaleTime.invert(v.__timestep-0.5),
                 x1: path[name][i + 1] ? scaleTime.invert(path[name][i + 1].__timestep-0.5) : undefined,
-                fillcolor: colorarr[v.cluster].value,
+                fillcolor: (colorarr[v.cluster]??{value:'black'}).value,
                 opacity: 0.5,
                 line: {
                     width: 0
@@ -1903,7 +1903,7 @@ d3.TimeSpace = function () {
             pos[i*3+1]= 0;
             pos[i*3+2]= 0;
             // let color = new THREE.Color(d3.color(colorarr[target.cluster].value)+'');
-            let color = d3.color(colorarr[target.cluster].value);
+            let color = d3.color((colorarr[target.cluster]??{value:'black'}).value);
             colors[i*3+0]= color.r/255;
             colors[i*3+1]= color.g/255;
             colors[i*3+2]= color.b/255;
@@ -2173,14 +2173,14 @@ d3.TimeSpace = function () {
         let pointsGeometry = new THREE.Geometry();
         for (let i=0;i <path.length-1;i++){
             let vertex = new THREE.Vector3(0, 0, 0);
-            colorLineScale.range([colorarr[path[i].cluster].value,colorarr[path[i+1].cluster].value]);
+            colorLineScale.range([(colorarr[path[i].cluster]??{value:'black'}).value,(colorarr[path[i+1].cluster]??{value:'black'}).value]);
             pointsGeometry.vertices.push(vertex);
             pointsGeometry.colors.push(new THREE.Color(d3.color(colorLineScale(0))+''));
             pointsGeometry.vertices.push(vertex);
             pointsGeometry.colors.push(new THREE.Color(d3.color(colorLineScale(1))+''));
         }
         pointsGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-        pointsGeometry.colors.push( new THREE.Color(d3.color(colorarr[path[path.length-1].cluster].value)+''));
+        pointsGeometry.colors.push( new THREE.Color(d3.color(colorarr[path[path.length-1].cluster]?colorarr[path[path.length-1].cluster].value:'black')+''));
 
 
         var material = new THREE.LineBasicMaterial( {
@@ -2278,7 +2278,7 @@ d3.TimeSpace = function () {
                 if (path[currentstep*3+1] && path[currentstep*3+1].__timestep===i) {
                     currentstep = currentstep+1;
                 }
-                let color = d3.color(colorarr[path[currentstep].cluster].value);
+                let color = d3.color((colorarr[path[currentstep].cluster]??{value:'black'}).value);
                 colors[i * 3] = color.r / 255;
                 colors[i * 3 + 1] = color.g / 255;
                 colors[i * 3 + 2] = color.b / 255;
@@ -2840,6 +2840,7 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
             appendCondition = appendCondition && (lastcluster === undefined ) || (isStrickCluster(axis_arr[i])&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster_insterted));
+            appendCondition = appendCondition &&( axis_arr[i].outlier!==2);
             // appendCondition = appendCondition && (lastcluster === undefined ) || (axis_arr[i].strickCluster&&(runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster));
             // appendCondition = appendCondition && (lastcluster === undefined ) || (runopt.suddenGroup ? (calculateMSE_num(lastdataarr, currentData) > cluster_info[lastcluster].mse * runopt.suddenGroup):index !== lastcluster)&&axis_arr[i].strickCluster;
             lastcluster = index;
@@ -2898,7 +2899,8 @@ function handle_data_model(tsnedata,isKeepUndefined,notblock) {
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
-        lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
+        if (lastRadar)
+            lastRadar.__deltaTimestep = timeLength - lastRadar?lastRadar.__timestep:0;
     });
     timeSpacedata = dataIn;
     return dataIn;
@@ -2928,7 +2930,8 @@ function handle_data_model_full(tsnedata,isKeepUndefined,notblock) {
             currentData.clusterName = cluster_info[index].name;
             let appendCondition = !cluster_info[currentData.cluster].hide;
             // appendCondition = appendCondition && !(lastcluster !== undefined && index === lastcluster) || runopt.suddenGroup && calculateMSE_num(lastdataarr, currentData) > cluster_info[currentData.cluster].mse * runopt.suddenGroup;
-            appendCondition = true;
+            // appendCondition = true;
+            appendCondition = axis_arr[i].outlier!==2;
             lastcluster = index;
             lastdataarr = currentData.slice();
             if (appendCondition) {
@@ -2985,7 +2988,8 @@ function handle_data_model_full(tsnedata,isKeepUndefined,notblock) {
             return index;
             // return cluster_info.findIndex(c=>distance(c.__metrics.normalize,axis_arr)<=c.radius);
         })
-        lastRadar.__deltaTimestep = timeLength - lastRadar.__timestep;
+        if (lastRadar)
+            lastRadar.__deltaTimestep = timeLength - (lastRadar?lastRadar.__timestep:0);
     });
     timeSpacedata = dataIn;
     return dataIn;

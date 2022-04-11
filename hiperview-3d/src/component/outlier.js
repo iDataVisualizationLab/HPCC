@@ -15,6 +15,9 @@ export function outlier({data=[],dimensions=[],outlyingCoefficient=1.5}){
             d.indexMissing = indexMissing;
             missingData[d.key+'_'+d.timestep] = (d);
         }else{
+            delete d.outlier;
+            delete d.cluster;
+            delete d.indexMissing;
             dataSpider3.push(d);
         }
     });

@@ -14,16 +14,51 @@ const CustomCamera = React.forwardRef(({cameraAnimate=false,...props},ref)=> {
             var finalGeoCoords = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
             var transitionDuration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
             var curGeoCoords = {...camera.position,zoom:camera.zoom};//getGeoCoords(); // Getter
+
+            var finalLookAt = {
+                x: finalGeoCoords.lookAtX??0,
+                y: finalGeoCoords.lookAtY??0,
+                z: finalGeoCoords.lookAtZ??0
+            };
+
             new TWEEN.Tween(curGeoCoords).to(finalGeoCoords, transitionDuration).easing(TWEEN.Easing.Cubic.InOut)
-                .onUpdate(_ref5=>{console.log(_ref5); setCameraPos(_ref5)}).start();
+                .onUpdate(_ref5=>{setCameraPos(_ref5)}).start();
+
+            new TWEEN.Tween(getLookAt()).to(finalLookAt, transitionDuration).easing(TWEEN.Easing.Cubic.InOut)
+                .onUpdate(_ref5=>{setLookAt(_ref5)}).start();
             function setCameraPos(pos) {
                 var x = pos.x??camera.position.x,
                     y = pos.y??camera.position.y,
                     z = pos.z??camera.position.z;
-                p.set(pos.x,pos.y,pos.z)
-                camera.position.lerp(p,0.025);
-                camera.zoom=pos.zoom ;
-                camera.updateProjectionMatrix();
+                p.set(x,y,z)
+                if (divRef.current&&divRef.current.target){
+                    divRef.current.object.position.lerp(p,1);
+                    divRef.current.object.zoom=pos.zoom??divRef.current.object.zoom ;
+                    divRef.current.object.updateProjectionMatrix();
+                    divRef.current.update();
+                }else{
+                    camera.position.lerp(p,1);
+                    camera.zoom=pos.zoom??camera.zoom ;
+                    camera.updateProjectionMatrix();
+                }
+            }
+            function getLookAt() {
+                if (divRef.current&&divRef.current.target)
+                    return divRef.current.target;
+                return Object.assign(new THREE.Vector3(0, 0, 0).applyQuaternion(camera.quaternion).add(camera.position));
+            }
+            function setLookAt(pos) {
+                var x = pos.x,
+                    y = pos.y,
+                    z = pos.z;
+                p.set(x,y,z);
+                if (divRef.current&&divRef.current.target){
+                    divRef.current.target.lerp(p,1);
+                    divRef.current.update();
+                }else{
+                    camera.lookAt(p);
+                    camera.updateProjectionMatrix();
+                }
             }
         },
         current: divRef.current

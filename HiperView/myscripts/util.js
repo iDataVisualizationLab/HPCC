@@ -542,7 +542,7 @@ function UpdateGradient(svg) { // using global arrcolor
 
 }
 function fixName2Class(s) {
-    return 'h'+s.replace(/ |#|\./gi,''); //avoid . and number format
+    return 'h'+(s??"").replace(/ |#|\./gi,''); //avoid . and number format
 }
 function positiveAngle(angle){
     return angle>0? angle: (angle+Math.PI*2);

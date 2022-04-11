@@ -42,7 +42,7 @@ function App() {
     const [alertMess, setAlertMess] = useState();
     const [isBusy, setIsBusy] = useState("Load data");
     const [mode, setMode] = React.useState('dark');
-    const [selectedUser, setSelectedUser] = React.useState(null);
+    // const [selectedUser, setSelectedUser] = React.useState(null);
     const [selectedComputeMap, setSelectedComputeMap] = React.useState(undefined);
     const [clusterInfo, setClusterInfo] = React.useState({cluster:[],outlyingBins:[],clusterDescription:[],colorCluster:d3.scaleOrdinal(),clusterInfo:{}});
     // const [selectedSer, setSelectedSer] = React.useState(0);
@@ -103,6 +103,7 @@ function App() {
         option["Dataset cluster"] = "cluster"
         return option;
     },[dimensions])
+    const [{selectedUser},setSelectedUser] = useControls("Setting",()=>({"User":{value:undefined,options:Object.keys(scheme.users)}}),[scheme.users]);
     const [{selectedSer},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:optionsColor,label:"Color by",value:0,
             onChange:(val)=>{
                 updateColor(_draw3DData,scheme,val);
@@ -112,48 +113,7 @@ function App() {
             },transient:false}
     }),[dimensions,_draw3DData,draw3DData,scheme]);
     const [{metricRangeMinMax},setMetricRangeMinMax] = useControls("Setting",()=>(
-        {metricRangeMinMax:{value:false, label:'Show min-max',onChange:(val)=>{
-            if (val){
-                dimensions.forEach(dim=>{
-                    dim.range = [dim.min,dim.max];
-                    dim.scale.domain(dim.range)
-                })
-            }else{
-                dimensions.forEach(dim=>{
-                    dim.range = dim.possibleUnit.range.slice();
-                    dim.scale.domain(dim.range)
-                })
-            }
-
-            // setDimensions(dimensions);
-            if (scheme.computers) {
-                Object.keys(scheme.computers).forEach(d => {
-                    scheme.time_stamp.forEach((t, ti) => {
-                        dimensions.forEach((dim, ki) => {
-                            scheme.tsnedata[d][ti][ki] = dimensions[ki].scale(scheme.computers[d][dim.text][ti] ?? undefined) ?? null;
-                        })
-                    })
-                });
-                // setScheme({...scheme});
-                if (selectedSer==='cluster'){
-                    console.log('selectedSer changed')
-                    recalCluster(scheme, dimensions,({clusterInfo,scheme})=>{
-                        if (selectedSer==='cluster') {
-                            setScheme(scheme);
-                            updateColor(_draw3DData, scheme,undefined,clusterInfo);
-                            set_draw3DData([..._draw3DData]);
-                            draw3DData.forEach(d=>d.possArr=[...d.possArr]);
-                            setDraw3DData([...draw3DData]);
-                        }
-                    })
-                }else{
-                    updateColor(_draw3DData, scheme);
-                    set_draw3DData([..._draw3DData]);
-                    draw3DData.forEach(d => d.possArr = [...d.possArr]);
-                    setDraw3DData([...draw3DData]);
-                }
-            }
-        }}}));
+        {metricRangeMinMax:{value:false, label:'Min-Max scale'}}));
     useEffect(()=>{
         if (metricRangeMinMax){
             dimensions.forEach(dim=>{
@@ -195,7 +155,8 @@ function App() {
                 setDraw3DData([...draw3DData]);
             }
         }
-    },[metricRangeMinMax])
+    },[metricRangeMinMax]);
+
     const metricSetting= useMemo(()=>{
         if (dimensions[selectedSer]){
             return {minMax:{label:'',transient:false,editable:false,value:dimensions[selectedSer]?`Min: ${dimensions[selectedSer].min} Max: ${dimensions[selectedSer].max}`:`Min:_ Max:_`},
@@ -204,13 +165,15 @@ function App() {
 
             metricTrigger:{value:false, label:'Filter'}
         ,metricFilter:{render:(get)=>get("Setting.metricTrigger"),value:(dimensions[selectedSer]??{range:[0,1]}).range[0],min:(dimensions[selectedSer]??{range:[0,1]}).range[0],max:(dimensions[selectedSer]??{range:[0,1]}).range[1],step:0.1, label:""}
-        ,stackOption:{render:(get)=>get("Setting.metricTrigger"),value:false,label:"Stack?"}
+        ,stackOption:{render:(get)=>get("Setting.metricTrigger"),value:false,label:"Stack"}
         ,suddenThreshold:{value:0,min:0,max:(dimensions[selectedSer]??{max:1}).max,step:0.1, label:"Sudden Change"}}
         }else{
             return {}
         }
     },[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
+
     const [config,setConfig] = useControls("Setting",()=>(metricSetting),[dimensions,selectedUser,selectedSer,draw3DData,scheme,metricRangeMinMax]);
+
     const binopt = useControls("DatasetCluster",{clusterMethod:{label:'Method',value:'leaderbin',options:['leaderbin','kmean']},
         normMethod:{value:'l2',options:['l1','l2']},
         bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("DatasetCluster.clusterMethod")==="leaderbin"}),
@@ -287,6 +250,9 @@ function App() {
                             </div> </div>)
                     }
                 </div>}),
+        "Missing Dimension":viz({label:clusterInfo.outlyingBins&&<>Missing Dimension: {(clusterInfo.outlyingBins.missingData)?Object.keys(clusterInfo.outlyingBins.missingData).length:0} temporal instances</>,value:0,
+            com:<div style={{width:'100%',display:'flex',flexWrap: "wrap",justifyContent: "space-between"}}></div>
+                })
     },[clusterInfo,scheme,_draw3DData]);
 
     const colorMode = React.useMemo(
@@ -472,8 +438,8 @@ function App() {
                             <tr><td>Name</td><td>{d[0]}</td></tr>
                             {dimensions.map(s=><tr key={s.text}><td>{s.text}</td><td>{d[1][s.text][i]}</td></tr>)}
                             {computers[d[0]].job_id[i]?<><tr><td>#Jobs</td><td>{computers[d[0]].job_id[i].length}</td></tr>
-                            <tr><td>Job Id</td><td>{computers[d[0]].job_id[i].join(',')}</td></tr>
-                            <tr><td>Users</td><td>{computers[d[0]].users[i].join(',')}</td></tr></>:
+                            <tr><td>Job Id</td><td>{computers[d[0]].job_id[i].join(', ')}</td></tr>
+                            <tr><td>Users</td><td>{computers[d[0]].users[i].join(', ')}</td></tr></>:
                             <tr><td colSpan={2}>No job</td></tr>}
                             </tbody>
                         </table>,
@@ -488,7 +454,6 @@ function App() {
         Object.keys(users).forEach(selectedUser=>{
             const user = [0,-2,0];
             user.links = [];
-            console.log(users[selectedUser])
             user.toolTip=<table>
                 <tbody>
                 <tr><td>Name</td><td>{selectedUser}</td></tr>
@@ -761,7 +726,7 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
                     <div style={{height: "100vh",width:'100wh',overflow:'hidden'}}>
-                        <Layout3D layout={layout} time_stamp={scheme.time_stamp} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer} stackOption={config.stackOption}/>
+                        <Layout3D layout={layout} time_stamp={scheme.time_stamp} data={draw3DData} users={drawUserData} line3D={line3D} selectService={selectedSer} stackOption={config.stackOption} getKey={(d)=>d.data.key+' '+d.data.timestep}/>
                     </div>
                     <Grid container style={{position:'absolute',top:0,left:0}}>
                         <Container maxWidth="lg">
@@ -790,20 +755,20 @@ function App() {
                                     {/*    <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>*/}
                                     {/*</Grid>}*/}
                                 </Grid>
-                                <Grid item xs={2}>
-                                    <Autocomplete
-                                        fullWidth
-                                        size="small"
-                                        disablePortal
-                                        options={Object.keys(scheme.users)}
-                                        value={selectedUser}
-                                        onChange={(event, newValue) => {
-                                            // getSelectedDraw3Data({selectedUser:newValue});
-                                            setSelectedUser(newValue);
-                                        }}
-                                        renderInput={(params) => <TextField {...params} label="Users" />}
-                                    />
-                                </Grid>
+                                {/*<Grid item xs={2}>*/}
+                                {/*    <Autocomplete*/}
+                                {/*        fullWidth*/}
+                                {/*        size="small"*/}
+                                {/*        disablePortal*/}
+                                {/*        options={Object.keys(scheme.users)}*/}
+                                {/*        value={selectedUser}*/}
+                                {/*        onChange={(event, newValue) => {*/}
+                                {/*            // getSelectedDraw3Data({selectedUser:newValue});*/}
+                                {/*            setSelectedUser(newValue);*/}
+                                {/*        }}*/}
+                                {/*        renderInput={(params) => <TextField {...params} label="Users" />}*/}
+                                {/*    />*/}
+                                {/*</Grid>*/}
                                 <Grid item xs={2}>
                                 {
                                     selectedUser&&<>

@@ -7,7 +7,10 @@ function outlier(){
             var name = hosts[h].name;
             arrServices = tsnedata[name][i];
             arrServices.nameid = h;
-            dataSpider3.push(arrServices);
+            if (arrServices.__valwithNull.findIndex(d=>!_.isNumber(d)|| isNaN(d))===-1)
+                dataSpider3.push(arrServices);
+            else
+                arrServices.outlier=2;
         }
     }
     let estimateSize = Math.max(1, Math.pow(500, 1 / dataSpider3[0].length));
@@ -15,17 +18,18 @@ function outlier(){
     let scagOptions ={
         isNormalized: true,
         startBinGridSize: estimateSize,
-        minBins: 20,
-        maxBins: Math.sqrt(dataSpider3.length),
+        // minBins: 20,
+        // maxBins: Math.sqrt(dataSpider3.length),
         outlyingCoefficient: 1.5,
-        incrementA:2,
-        incrementB:0,
-        decrementA:1 / 3,
-        decrementB:0,
+        // incrementA:2,
+        // incrementB:0,
+        // decrementA:1 / 3,
+        // decrementB:0,
     };
     // scag = scagnosticsnd(handledata(index), scagOptions);
     let outlyingBins = [];
     outlyingBins.pointObject = {};
+    // outlyingBins.compObject = {};
     // remove outlying
     let scag = scagnosticsnd(dataSpider3.map((d, i) => {
         var dd = d.slice();
@@ -50,6 +54,10 @@ function outlier(){
             temp.timestep = d.timestep;
             temp.cluster =  -i-1;
             outlyingBins.pointObject[temp.name] = temp;
+            // if (!outlyingBins.compObject[d.name]){
+            //     outlyingBins.compObject[d.name] = []
+            // }
+            // outlyingBins.compObject[d.name].push(d);
             return outlyingBins.pointObject[temp.name];
         });
         let temp = {labels: -i-1};
@@ -58,6 +66,7 @@ function outlier(){
         temp.__metrics = serviceFullList.map((s,si)=>({axis:s.text, value: ob.site[si]}));
         temp.__metrics.normalize = ob.site.slice();
         temp.arr = arr;
+        temp.name='outlier'
         outlyingBins.push(temp);
     });
 

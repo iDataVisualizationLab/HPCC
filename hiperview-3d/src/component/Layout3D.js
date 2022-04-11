@@ -12,7 +12,7 @@ import TimeAxis from "./TimeAxis";
 import TWEEN from '@tweenjs/tween.js';
 import CustomCamera from "./CustomCamera";
 const SEQUNCE=[{x:0,y:0,z:100,zoom:30}]
-const Layout3D = function({data,time_stamp,line3D,layout,users,selectService,stackOption=false}){
+const Layout3D = function({data,time_stamp,line3D,layout,users,selectService,stackOption=false,getKey}){
     const [currentSequnce,setCurrentSequnce] = useState(0);
     const config = useControls("3D",{timeGap:{value:0.04,min:0,max:0.1,step:0.001},
         light:{value:0.5,min:0,max:1,step:0.01},
@@ -64,7 +64,7 @@ const Layout3D = function({data,time_stamp,line3D,layout,users,selectService,sta
                 <LayoutMap data={layout}/>
                 {/*{data.map((d,i)=><group key={i} position={[...d.position]}>*/}
                 {data.map((d,i)=><group key={i} position={[0,0,0]}>
-                    <NodeLayout data={d.possArr} timeGap={config.timeGap} selectService={selectService}/>
+                    <NodeLayout data={d.possArr} timeGap={config.timeGap} getKey={getKey} selectService={selectService}/>
                 </group>)}
                 {(!stackOption)&&<><LineLayout data={line3D} timeGap={config.timeGap} selectService={selectService}/>
                     <TimeAxis data={time_stamp} timeGap={config.timeGap}/></>}
