@@ -120,7 +120,7 @@ angular.module('hpccApp').constant('SampleData', [
     {
         id: "realtime",
         name: "Real time squeue",
-        url: "http://hugo.hpcc.ttu.edu:5000/queue_status",
+        url: "https://hugo.hpcc.ttu.edu:5002/queue",
         description: "",
         group: "sample",
         formatType: 'json',
