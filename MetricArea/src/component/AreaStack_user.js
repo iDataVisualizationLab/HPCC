@@ -44,6 +44,7 @@ const steps = d3.scaleQuantize()
 const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 Minute':{unit:'Minute',step:30}};
 const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
     const [data,setData] = useState([]);
+    const [hover,setHover] = useState();
     const [configStack] = useControls('Stack',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions}}));
 
     useEffect(()=>{
@@ -97,15 +98,22 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                 return item
             })
             debugger
-            console.log(d3.max(_data.find(d=>d.key==='npaulat').values,d=>d3.max(d.stack,e=>d3.max(e,f=>f[1]))))
-            console.log(d3.max(_data.find(d=>d.key==='xiaopson').values,d=>d3.max(d.stack,e=>d3.max(e,f=>f[1]))))
+            _data.sort((a,b)=>b.max-a.max)
             setData(_data);
         }else {
             setData([]);
         }
     },[objects,configStack.SeperatedBy,time_stamp,selectedSer,metricRangeMinMax]);
-    const onMouseOverlay = (event,d)=>{
-        debugger
+    const onMouseOverlay = (event,key,timeIndex,d)=>{
+        const mouse = d3.pointer(event,event.currentTarget);
+        const current = d.values[Math.round(x.invert(mouse[0]))];
+        if (current){
+            const position =[x(current.timeIndex),y(current.max)];
+
+            setHover({key,timeIndex,position,value:current.max})
+        }else{
+            setHover()
+        }
     }
     return <div style={{width:'100%',height:'100%',overflow:'auto'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%', pointerEvents:'all'}}>
@@ -119,13 +127,17 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                 {data.map(({key,values,max})=><Grid key={key} item xs={12}>
                     <Paper style={{padding:2}} elevation={3} >
                         <h5 >User: {key} , Max #compute: {max}</h5>
-                        {values.map(d=><svg width={width*d.scale + margin.left + margin.right} height={outerHeight} style={{'& .year':{fill: '#777',
+                        {values.map((d,ti)=><svg key={ti} width={width*d.scale + margin.left + margin.right} height={outerHeight} style={{'& .year':{fill: '#777',
                             fontSize: 11}}}>
                             <g transform={`translate(${margin.left},${margin.top})`}>
-                                <rect width={width} height={height} className={'overlay'}
-                                onMouseMove={event=>onMouseOverlay(event,d)}/>
                                 {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
+                                <rect width={width} height={height} className={'overlay'}
+                                      onMouseMove={event=>onMouseOverlay(event,key,ti,d)}/>
                                 <text y={height+4} dy=".71em" className={'year decade'}>{multiFormat(d.key)}</text>
+                                {(hover&&(hover.key===key)&&(hover.timeIndex===ti))&&<g transform={`translate(${hover.position[0]},0)`}>
+                                    <line y2={hover.position[1]} y1={y(0)} stroke={'black'} strokeDasharray={'2 1'}/>
+                                    <text y={hover.position[1]} textAnchor={'middle'} className={'tooltip'}>{hover.value}</text>
+                                </g>}
                             </g>
                         </svg>)}
                     </Paper>

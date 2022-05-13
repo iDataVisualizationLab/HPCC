@@ -962,24 +962,24 @@ function App() {
                                 <Grid item xs={12}>
                                     <h3>Nocona <Typography variant="subtitle1" style={{display:'inline-block'}}>from {scheme.timerange[0].toLocaleString()} to {scheme.timerange[1].toLocaleString()}</Typography></h3>
                                 </Grid>
-                                <Grid item xs={6} container spacing={1}>
-                                    <Grid item xs={12}>
-                                        <FormControl fullWidth>
-                                            <InputLabel >Filter Time</InputLabel>
-                                            <Slider
-                                                min={selectedTime.min}
-                                                max={selectedTime.max}
-                                                value={selectedTime.value}
-                                                size={"small"}
-                                                onChange={(e,v)=>setSelectedTime({...selectedTime,value:v,arr:scheme.time_stamp.filter(t=>((+t>=v[0]) && (+t<=v[1])))})}
-                                            />
-                                        </FormControl>
-                                    </Grid>
-                                    {/*{dimensions[selectedSer]&&<Grid item xs={7} style={{textAlign:"center"}}>*/}
-                                    {/*    {dimensions[selectedSer].text} Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}*/}
-                                    {/*    <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>*/}
-                                    {/*</Grid>}*/}
-                                </Grid>
+                                {/*<Grid item xs={6} container spacing={1}>*/}
+                                    {/*<Grid item xs={12}>*/}
+                                        {/*<FormControl fullWidth>*/}
+                                            {/*<InputLabel >Filter Time</InputLabel>*/}
+                                            {/*<Slider*/}
+                                                {/*min={selectedTime.min}*/}
+                                                {/*max={selectedTime.max}*/}
+                                                {/*value={selectedTime.value}*/}
+                                                {/*size={"small"}*/}
+                                                {/*onChange={(e,v)=>setSelectedTime({...selectedTime,value:v,arr:scheme.time_stamp.filter(t=>((+t>=v[0]) && (+t<=v[1])))})}*/}
+                                            {/*/>*/}
+                                        {/*</FormControl>*/}
+                                    {/*</Grid>*/}
+                                    {/*/!*{dimensions[selectedSer]&&<Grid item xs={7} style={{textAlign:"center"}}>*!/*/}
+                                    {/*/!*    {dimensions[selectedSer].text} Min: {dimensions[selectedSer].min} Max: {dimensions[selectedSer].max}*!/*/}
+                                    {/*/!*    <div style={{position:'relative'}}><ColorLegend colorScale={colorByMetric} range={dimensions[selectedSer].range}/></div>*!/*/}
+                                    {/*/!*</Grid>}*!/*/}
+                                {/*</Grid>*/}
                                 {/*<Grid item xs={2}>*/}
                                 {/*    <Autocomplete*/}
                                 {/*        fullWidth*/}

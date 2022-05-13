@@ -14,3 +14,7 @@
     display: none;
     pointer-events: none;
 }
+#g-chart .tooltip {
+    fill: #777;
+    font-size: 11px;
+}
