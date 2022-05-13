@@ -8,16 +8,22 @@ import "./AreaStack.css"
 import Paper from "@mui/material/Paper/Paper";
 
 
-var outerWidth = 95,
-    outerHeight = 85,
+var outerWidth = 60,
+    outerHeight = 110,
     margin = {
-        top: 12,
+        top: 0,
         right: 1,
-        bottom: 33,
+        bottom: 0,
         left: 0
     },
     width = outerWidth - margin.left - margin.right,
-    height = outerHeight - margin.top - margin.bottom;
+    height = outerHeight - margin.top - margin.bottom,
+    marginGroup = {
+        top: 0,
+        right: 10,
+        bottom: 0,
+        left: 10
+    };
 var x = d3.scaleLinear()
     .rangeRound([0, width]);
 
@@ -37,7 +43,6 @@ var area = d3.area()
     .y1(function(d) {
         return y(d[1]);
     });
-
 const steps = d3.scaleQuantize()
     .domain([0,0.2,0.4,0.6,0.8,1])
     .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]);
@@ -56,8 +61,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
             x.domain([0,maxLength-1]);
 
             // # compute
-            const total = Object.keys(metrics);
-            y.domain([0,total.length])
+
             // percentage
             // y.domain([0,1])
 
@@ -66,9 +70,10 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                 const v = objects[k];
                 const item = {key:k,max:0};
                 item.values = timeIndex.map((t)=>{
-                    const group = {key:t[0],scale:t[1].length/maxLength,max:0};
+                    const group = {key:t[0],max:0};
+                    const offset = maxLength - t[1].length
                     group.values = t[1].map(([t,ti],index)=>{
-                        const obj ={time:t,timeIndex:index,'black':0,max:0};
+                        const obj ={time:t,timeIndex:index+offset,'black':0,max:0};
                         steps.range().forEach(c=>{
                             obj[c]=0;
                         });
@@ -97,8 +102,10 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                 })
                 return item
             })
-            debugger
-            _data.sort((a,b)=>b.max-a.max)
+
+            _data.sort((a,b)=>b.max-a.max);
+            if (_data[0])
+            y.domain([0,_data[0].max])
             setData(_data);
         }else {
             setData([]);
@@ -109,40 +116,48 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
         const current = d.values[Math.round(x.invert(mouse[0]))];
         if (current){
             const position =[x(current.timeIndex),y(current.max)];
-
-            setHover({key,timeIndex,position,value:current.max})
+        console.log(current)
+            setHover({key,timeIndex,position,value:current.max,data:current})
         }else{
             setHover()
         }
     }
-    return <div style={{width:'100%',height:'100%',overflow:'auto'}}>
-        <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%', pointerEvents:'all'}}>
-            <Grid container style={{width:'100%',padding:10}} id="g-chart" spacing={2}>
-                {dimensions[selectedSer]&&<Grid item xs={12}>
+    return <div style={{width:'100vw',height:'100%',overflow:'hidden'}}>
+        <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
+            {data[0]&&<div style={{width:'100%',height:'100%'}} id="g-chart" spacing={2}>
+                {dimensions[selectedSer]&&<div style={{width:'100%'}}>
                     <span>Legend</span>
                     <div>
                         <span>{Math.round(dimensions[selectedSer].scale.invert(0))}</span>
                     </div>
-                </Grid>}
-                {data.map(({key,values,max})=><Grid key={key} item xs={12}>
-                    <Paper style={{padding:2}} elevation={3} >
-                        <h5 >User: {key} , Max #compute: {max}</h5>
-                        {values.map((d,ti)=><svg key={ti} width={width*d.scale + margin.left + margin.right} height={outerHeight} style={{'& .year':{fill: '#777',
-                            fontSize: 11}}}>
-                            <g transform={`translate(${margin.left},${margin.top})`}>
-                                {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
-                                <rect width={width} height={height} className={'overlay'}
-                                      onMouseMove={event=>onMouseOverlay(event,key,ti,d)}/>
-                                <text y={height+4} dy=".71em" className={'year decade'}>{multiFormat(d.key)}</text>
-                                {(hover&&(hover.key===key)&&(hover.timeIndex===ti))&&<g transform={`translate(${hover.position[0]},0)`}>
-                                    <line y2={hover.position[1]} y1={y(0)} stroke={'black'} strokeDasharray={'2 1'}/>
-                                    <text y={hover.position[1]} textAnchor={'middle'} className={'tooltip'}>{hover.value}</text>
-                                </g>}
-                            </g>
-                        </svg>)}
-                    </Paper>
-                </Grid>)}
-            </Grid>
+                </div>}
+                <div style={{width:'100%',height:'100%', overflow:'auto'}}>
+                    <svg width={(outerWidth+marginGroup.left+marginGroup.right)*data[0].values.length} height={(outerHeight+marginGroup.top+marginGroup.bottom)*data.length} style={{overflow:'visible'}}>
+                        <g transform={`translate(${marginGroup.left},${marginGroup.top})`}>
+                            {data.map(({key,values,max},i)=><g key={key} item xs={12}>
+                                <g transform={`translate(0,${i*(outerHeight+marginGroup.top+marginGroup.bottom)})`}>
+
+                                    {values.map((d,ti)=><g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >
+                                        <g transform={`translate(${margin.left},${margin.top})`}>
+                                            {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
+                                            <rect width={width} height={height} className={'overlay'}
+                                                  onMouseMove={event=>onMouseOverlay(event,key,ti,d)}/>
+                                            {(hover&&(hover.key===key))&&<line x2={width} y1={hover.position[1]} y2={hover.position[1]} stroke={'black'} strokeDasharray={'2 1'}/>}
+                                            {(hover&&(hover.key===key)&&(hover.timeIndex===ti))?<><g transform={`translate(${hover.position[0]},0)`}>
+                                                <line y2={hover.position[1]} y1={y(0)} stroke={'black'} strokeDasharray={'2 1'}/>
+                                                <text y={hover.position[1]} dy="-.1em" textAnchor={'middle'} className={'tooltip'}>#Computes: {hover.value}</text>
+                                            </g>
+                                                <text y={height+4} dy=".65em" className={'year decade'}>{multiFormat(hover.data.time)}</text>
+                                            </>: <text y={height+4} dy=".65em" className={'year decade'}>{multiFormat(d.key)}</text>}
+                                        </g>
+                                    </g>)}
+                                    <text className={'title'} dy={'4em'}>User: {key} , Max #computes: {max}</text>
+                                </g>
+                            </g>)}
+                        </g>
+                    </svg>
+                </div>
+            </div>}
         </div>
     </div>
 }

@@ -18,3 +18,10 @@
     fill: #777;
     font-size: 11px;
 }
+#g-chart svg {
+    overflow: visible;
+    display: inline-block;
+}
+#g-chart .title {
+    font-size: 13px;
+}

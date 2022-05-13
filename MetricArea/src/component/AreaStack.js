@@ -90,8 +90,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                     </div>
                 </Grid>}
                 <Grid item xs={12}>
-                    {data.map(d=><svg width={width*d.scale + margin.left + margin.right} height={outerHeight} style={{'& .year':{fill: '#777',
-                        fontSize: 11}}}>
+                    {data.map(d=><svg width={width*d.scale + margin.left + margin.right} height={outerHeight} style={{}}>
                         <g transform={`translate(${margin.left},${margin.top})`}>
                             {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
                             <text y={height+4} dy=".71em" className={'year decade'}>{multiFormat(d.key)}</text>

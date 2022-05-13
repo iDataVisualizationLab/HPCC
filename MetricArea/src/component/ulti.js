@@ -77,7 +77,7 @@ export function getUrl({_start,_end,interval,value,compress}){
 }
 
 const formatMillisecond = d3.timeFormat(".%L"),
-    formatSecond = d3.timeFormat(":%S"),
+    formatSecond = d3.timeFormat("%I:%M:%S"),
     formatMinute = d3.timeFormat("%I:%M"),
     formatHour = d3.timeFormat("%I %p"),
     formatDay = d3.timeFormat("%a %d"),

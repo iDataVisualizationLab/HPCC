@@ -1002,7 +1002,7 @@ function App() {
                                 }</Grid>
                             </Grid>
                         </Container>
-                        <div style={{height: "100%",width:'100wh',overflow:'hidden'}}>
+                        <div style={{height: "100vh",width:'100vw',overflow:'hidden'}}>
                             <AreaStack metricRangeMinMax={metricRangeMinMax}
                                        time_stamp={scheme.time_stamp}
                                        objects ={scheme._userarrdata}
