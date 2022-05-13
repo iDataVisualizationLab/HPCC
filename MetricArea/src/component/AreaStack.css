@@ -1,0 +1,16 @@
+#g-chart .year {
+    fill: #777;
+    font-size: 11px;
+}
+#g-chart .decade {
+    font-weight: bold;
+}
+#g-chart .overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+#g-focus {
+    display: none;
+    pointer-events: none;
+}
