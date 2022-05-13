@@ -1,4 +1,4 @@
-import React, {Suspense, useCallback, useEffect, useRef, useState} from "react";
+import React, {Suspense, useMemo, useEffect, useRef, useState} from "react";
 import {useControls, button} from "leva";
 import * as d3 from "d3";
 import * as _ from "lodash";
@@ -43,15 +43,16 @@ var area = d3.area()
     .y1(function(d) {
         return y(d[1]);
     });
-const steps = d3.scaleQuantize()
-    .domain([0,0.2,0.4,0.6,0.8,1])
-    .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]);
+const threshold = [0,0.2,0.4,0.6,0.8,1]
+
 const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 Minute':{unit:'Minute',step:30}};
 const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
     const [data,setData] = useState([]);
     const [hover,setHover] = useState();
     const [configStack] = useControls('Stack',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions}}));
-
+    const steps = useMemo(()=>d3.scaleQuantize()
+        .domain([0,1])
+        .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]),[]);
     useEffect(()=>{
         if (objects){
             const formatGroup = d3[`time${configStack.SeperatedBy.unit}`].every(configStack.SeperatedBy.step);
@@ -122,13 +123,23 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
             setHover()
         }
     }
+    console.log(steps.domain())
     return <div style={{width:'100vw',height:'100%',overflow:'hidden'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
             {data[0]&&<div style={{width:'100%',height:'100%'}} id="g-chart" spacing={2}>
                 {dimensions[selectedSer]&&<div style={{width:'100%'}}>
-                    <span>Legend</span>
-                    <div>
-                        <span>{Math.round(dimensions[selectedSer].scale.invert(0))}</span>
+                    <span style={{fontWeight:'bold'}}>Legend: </span>
+                    <div className={'legendCell'}>
+                        <div className={'legendCell'}>
+                            <div style={{width:80,height:5,backgroundColor:'black'}}></div>
+                            <span>Null</span>
+                        </div>
+                        {
+                            threshold.map(v=><div key={v} className={'legendCell'} style={{textAlign: 'right'}}>
+                                <div style={{width:80,height:5,backgroundColor:steps(v)}}></div>
+                                <span style={{visibility:v===1?'hidden':null, marginRight:-10}}>{Math.round(dimensions[selectedSer].scale.invert(v))}</span>
+                            </div>)
+                        }
                     </div>
                 </div>}
                 <div style={{width:'100%',height:'100%', overflow:'auto'}}>

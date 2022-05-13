@@ -25,3 +25,7 @@
 #g-chart .title {
     font-size: 13px;
 }
+#g-chart  .legendCell{
+    display: inline-block;
+    text-align: center;
+}
