@@ -7,6 +7,7 @@ export default function Dataset({onChange,onLoad,onError}) {
     const [datalist,setDatalist] = useState({
         'April 17-18 2022':'./data/nocona_24h.json',
         'Jieoyao use case':'./data/nocona-jieoyao.json',
+        '1 week':'./data/nocona_1week_update.json',
         'Real-time':'realtime',
     });
     const [past,setPast] = useState('');
@@ -34,13 +35,17 @@ export default function Dataset({onChange,onLoad,onError}) {
             }else{
                 if (past!==val) {
                     onLoad('Load history data');
+                    debugger
                     d3.json(val).then(_data => {
+                        debugger
                         onChange(_data);
                         setPast(val);
                     }).catch(e => {
-                        onError({level: "error", message: "Couldn't load data"})
-                        onLoad(false);
-                        setCurrentDataset({currentDataset:past})
+
+                            onError({level: "error", message: "Couldn't load data"})
+                            onLoad(false);
+                            setCurrentDataset({currentDataset:past})
+
                     })
                 }
             }

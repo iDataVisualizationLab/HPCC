@@ -8,15 +8,13 @@ import "./AreaStack.css"
 import Paper from "@mui/material/Paper/Paper";
 
 
-var outerWidth = 60,
-    outerHeight = 110,
+var outerHeight = 110,
     margin = {
         top: 0,
         right: 1,
         bottom: 0,
         left: 0
     },
-    width = outerWidth - margin.left - margin.right,
     height = outerHeight - margin.top - margin.bottom,
     marginGroup = {
         top: 0,
@@ -24,8 +22,7 @@ var outerWidth = 60,
         bottom: 0,
         left: 10
     };
-var x = d3.scaleLinear()
-    .rangeRound([0, width]);
+var x = d3.scaleLinear();
 
 var y = d3.scaleLinear()
     .rangeRound([height, 0]);
@@ -43,13 +40,27 @@ var area = d3.area()
     .y1(function(d) {
         return y(d[1]);
     });
-const threshold = [0,0.2,0.4,0.6,0.8,1]
 
+const nullColor = '#ccc'
 const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 Minute':{unit:'Minute',step:30}};
 const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
-    const [data,setData] = useState([]);
+    const [data,setData] = useState([])
+    const holderref = useRef();
     const [hover,setHover] = useState();
-    const [configStack] = useControls('Stack',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions}}));
+    var [{outerWidth,width},setGraphic] = useState({outerWidth:60,width:60-margin.left-margin.right});
+    const [configStack] = useControls('Graphic',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions,label:'Major tick'},
+    'fitScreen':button(()=>{
+        // setFit
+        if (holderref.current && data[0]) {
+            debugger
+            const currentw = holderref.current.getBoundingClientRect().width-20;
+            let _outerWidth = (currentw - marginGroup.left - marginGroup.right) / data[0].values.length;
+            let _width = _outerWidth-margin.left-margin.right
+            x.rangeRound([0, _width]);
+            setGraphic({outerWidth:_outerWidth,width:_width})
+            debugger
+        }
+    })}),[data]);
     const steps = useMemo(()=>d3.scaleQuantize()
         .domain([0,1])
         .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]),[]);
@@ -66,7 +77,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
             // percentage
             // y.domain([0,1])
 
-            stack.keys(['black',...steps.range()]);
+            stack.keys([nullColor,...steps.range()]);
             const _data = Object.keys(objects).map(k=>{
                 const v = objects[k];
                 const item = {key:k,max:0};
@@ -74,7 +85,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                     const group = {key:t[0],max:0};
                     const offset = maxLength - t[1].length
                     group.values = t[1].map(([t,ti],index)=>{
-                        const obj ={time:t,timeIndex:index+offset,'black':0,max:0};
+                        const obj ={time:t,timeIndex:index+offset,[nullColor]:0,max:0};
                         steps.range().forEach(c=>{
                             obj[c]=0;
                         });
@@ -87,7 +98,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                                 group.max = comp.length;
                             comp.forEach(d => {
                                 if (d[1][0][selectedSer] == null)
-                                    obj['black']++;
+                                    obj[nullColor]++;
                                 else
                                     obj[steps(d[1][0][selectedSer])]++
                             });
@@ -117,13 +128,12 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
         const current = d.values[Math.round(x.invert(mouse[0]))];
         if (current){
             const position =[x(current.timeIndex),y(current.max)];
-        console.log(current)
             setHover({key,timeIndex,position,value:current.max,data:current})
         }else{
             setHover()
         }
-    }
-    console.log(steps.domain())
+    };
+
     return <div style={{width:'100vw',height:'100%',overflow:'hidden'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
             {data[0]&&<div style={{width:'100%',height:'100%'}} id="g-chart" spacing={2}>
@@ -131,19 +141,19 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                     <span style={{fontWeight:'bold'}}>Legend: </span>
                     <div className={'legendCell'}>
                         <div className={'legendCell'}>
-                            <div style={{width:80,height:5,backgroundColor:'black'}}></div>
+                            <div style={{width:80,height:5,backgroundColor:nullColor}}></div>
                             <span>Null</span>
                         </div>
                         {
-                            threshold.map(v=><div key={v} className={'legendCell'} style={{textAlign: 'right'}}>
+                            d3.range(0,7).map(i=>(i)/7).map(v=><div key={v} className={'legendCell'} style={{textAlign: 'right'}}>
                                 <div style={{width:80,height:5,backgroundColor:steps(v)}}></div>
-                                <span style={{visibility:v===1?'hidden':null, marginRight:-10}}>{Math.round(dimensions[selectedSer].scale.invert(v))}</span>
+                                <span style={{visibility:v===1?'hidden':null, marginRight:-10}}>{Math.round(dimensions[selectedSer].scale.invert(v+1/7))}</span>
                             </div>)
                         }
                     </div>
                 </div>}
-                <div style={{width:'100%',height:'100%', overflow:'auto'}}>
-                    <svg width={(outerWidth+marginGroup.left+marginGroup.right)*data[0].values.length} height={(outerHeight+marginGroup.top+marginGroup.bottom)*data.length} style={{overflow:'visible'}}>
+                <div ref={holderref} style={{width:'100%',height:'88%', overflow:'auto'}}>
+                    <svg width={(outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right} height={(outerHeight+marginGroup.top+marginGroup.bottom)*data.length} style={{overflow:'visible'}}>
                         <g transform={`translate(${marginGroup.left},${marginGroup.top})`}>
                             {data.map(({key,values,max},i)=><g key={key} item xs={12}>
                                 <g transform={`translate(0,${i*(outerHeight+marginGroup.top+marginGroup.bottom)})`}>
@@ -151,6 +161,12 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
                                     {values.map((d,ti)=><g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >
                                         <g transform={`translate(${margin.left},${margin.top})`}>
                                             {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
+
+                                        </g>
+                                    </g>)}
+                                    {values.map((d,ti)=><g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >
+                                        <g transform={`translate(${margin.left},${margin.top})`}>
+
                                             <rect width={width} height={height} className={'overlay'}
                                                   onMouseMove={event=>onMouseOverlay(event,key,ti,d)}/>
                                             {(hover&&(hover.key===key))&&<line x2={width} y1={hover.position[1]} y2={hover.position[1]} stroke={'black'} strokeDasharray={'2 1'}/>}

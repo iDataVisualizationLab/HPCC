@@ -72,7 +72,7 @@ export function getUrl({_start,_end,interval,value,compress}){
     value = value||'max';
     compress = compress||false;
     // const url = `http://hugo.hpcc.ttu.edu:5002/metrics_builder?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
-    const url = `http://hugo.hpcc.ttu.edu:5002/metrics_builder`//?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
+    const url = `https://hugo.hpcc.ttu.edu:5002/metrics_builder`//?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
     return url;
 }
 
