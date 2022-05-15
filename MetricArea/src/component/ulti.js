@@ -4,7 +4,8 @@ export const metricRef ={
     'temp':d=>[3,98],
     'fan':d=>[0,d[1]],
     'power': d=>[0,Math.max(400,d[1])],
-    'percent': ()=>[0,100]
+    'percent': ()=>[0,100],
+    'memory':d=>d.slice()
 };
 export const getRefRange = (name,range)=>{
     if (name.match(/temp/i))
@@ -15,6 +16,8 @@ export const getRefRange = (name,range)=>{
         return {type:'percent',unit:'%',range:metricRef['percent'](range)};
     if (name.match(/fan/i))
         return {type:'fan',unit:'rpm',range:metricRef['fan'](range)};
+    if (name.match(/memory/i))
+        return {type:'memory',unit:'Gb',range:metricRef['memory'](range)};
     return {type:null,unit:null,range}
 }
 export const colorScaleList = {

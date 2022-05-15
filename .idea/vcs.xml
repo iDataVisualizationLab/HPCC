@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/MetricArea" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/buildLib/ng-copy-text" vcs="Git" />
   </component>
 </project>

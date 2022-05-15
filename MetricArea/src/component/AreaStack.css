@@ -15,7 +15,6 @@
     pointer-events: none;
 }
 #g-chart .tooltip {
-    fill: #777;
     font-size: 11px;
 }
 #g-chart svg {
@@ -24,8 +23,19 @@
 }
 #g-chart .title {
     font-size: 13px;
+    cursor: pointer;
 }
-#g-chart  .legendCell{
-    display: inline-block;
+#g-chart .title:hover {
+    font-weight: bold;
+}
+.legendCell{
+    align-items: center;
+    display: flex;
+}
+.legendCell span{
+    margin-left: 2px;
+    font-size: 14px;
+    line-height: 1;
     text-align: center;
+    display: inline-block;
 }

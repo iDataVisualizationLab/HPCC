@@ -87,8 +87,8 @@ function App() {
         const option = dimensions.reduce((a, v) => ({ ...a, [v.text]: v.index}), {'':undefined});
         return option;
     },[dimensions]);
-    const [{selectedUser},setSelectedUser] = useControls("Setting",()=>({"selectedUser":{label:'User',value:undefined,options:optionsUser}}),[optionsUser]);
-    const [{selectedSer,selectedSer2},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:optionsColor,label:"View 1",value:0,
+    const [selectedUser,setSelectedUser] = useState();//useControls("Setting",()=>({"selectedUser":{label:'User',value:undefined,options:optionsUser}}),[optionsUser]);
+    const [{selectedSer,selectedSer2},setSelectedSer] = useControls("Setting",()=>({selectedSer:{options:optionsColor,label:"Metric",value:0,
             onChange:(val)=>{
                 updateColor(_draw3DData,scheme,val);
                 set_draw3DData([..._draw3DData]);
@@ -98,7 +98,7 @@ function App() {
                 // if (dimensions[val])
                 //     setConfig({metricFilter: dimensions[val].range[0]})
             },transient:false},
-        selectedSer2:{options:optionsView,label:"View 2",value:undefined}
+        // selectedSer2:{options:optionsView,label:"View 2",value:undefined}
     }),[dimensions,_draw3DData,draw3DData,scheme]);
     // useControls("Setting",()=>{
     //     console.log(dimensions,selectedSer,dimensions[selectedSer])
@@ -530,9 +530,9 @@ function App() {
         scheme.jobArr=jobarrdata;
         scheme.userArr=userarrdata;
         scheme._userarrdata=_userarrdata;
-        const sankeyData = changeSankeyData('compute_num',{scheme});
-
-        return {scheme, draw3DData, drawUserData,dimensions,layout,sankeyData}
+        // const sankeyData = changeSankeyData('compute_num',{scheme});
+        debugger
+        return {scheme, draw3DData, drawUserData,dimensions,layout}
     }, [layout]);
     function handleWorkload(computers,dimensions,dimensionKeys,metricRangeMinMax) {
         const k = 'compute utilization';
@@ -600,10 +600,14 @@ function App() {
             minMaxDataCompJob[k] = [];
 
             if (!jobs[k].isJobarray){
-                users[_jobs[k].user_name] = _users[_jobs[k].user_name];
-                userarrdata[_jobs[k].user_name] = [];
-                _userarrdata[_jobs[k].user_name] = [];
-                minMaxDataUser[_jobs[k].user_name] = [];
+                if (!_userarrdata[_jobs[k].user_name]) {
+                    users[_jobs[k].user_name] = _users[_jobs[k].user_name];
+                    userarrdata[_jobs[k].user_name] = [];
+                    _userarrdata[_jobs[k].user_name] = [];
+                    _userarrdata[_jobs[k].user_name].jobs = {};
+                    minMaxDataUser[_jobs[k].user_name] = [];
+                }
+                _userarrdata[_jobs[k].user_name].jobs[k]=[];
             }else{
                 jobs[k].comp = {};
             }
@@ -633,8 +637,17 @@ function App() {
                             empty.cpus=0;
                             _userarrdata[d.user_name][i] =(empty);
                         }
-                        if(tsne_comp)
+                        if(tsne_comp) {
+                            if (!_userarrdata[d.user_name].jobs[d.job_id][i]){
+                                const empty = [];
+                                empty.name=d.job_id;
+                                empty.timestep=i;
+                                empty.cpus=0;
+                                _userarrdata[d.user_name].jobs[d.job_id][i] =(empty);
+                            }
                             _userarrdata[d.user_name][i].push(tsne_comp[i]);
+                            _userarrdata[d.user_name].jobs[d.job_id][i].push(tsne_comp[i]);
+                        }
 
                         if(d.job_array_id){
                             if (!_jobarrdata[d.job_array_id][i]){
@@ -1006,6 +1019,8 @@ function App() {
                             <AreaStack metricRangeMinMax={metricRangeMinMax}
                                        time_stamp={scheme.time_stamp}
                                        objects ={scheme._userarrdata}
+                                       onLoad={(m)=>setIsBusy(m)}
+
                                        users={drawUserData}
 
                                        selectedSer={selectedSer}

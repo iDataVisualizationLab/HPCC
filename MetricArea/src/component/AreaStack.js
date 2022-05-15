@@ -41,7 +41,7 @@ const steps = d3.scaleQuantize()
     .domain([0,0.2,0.4,0.6,0.8,1])
     .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]);
 const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 Minute':{unit:'Minute',step:30}};
-const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selectedTime, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, metrics, theme, line3D, layout, users, selectService, getKey}) {
+const AreaStack = function ({time_stamp,onLoad, metricRangeMinMax, color, config, selectedTime, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, metrics, theme, line3D, layout, users, selectService, getKey}) {
     const [data,setData] = useState([]);
     const [configStack] = useControls('Stack',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions}}));
 

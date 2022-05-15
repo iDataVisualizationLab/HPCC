@@ -35,9 +35,9 @@ export default function Dataset({onChange,onLoad,onError}) {
             }else{
                 if (past!==val) {
                     onLoad('Load history data');
-                    debugger
+
                     d3.json(val).then(_data => {
-                        debugger
+
                         onChange(_data);
                         setPast(val);
                     }).catch(e => {
