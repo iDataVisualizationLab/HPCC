@@ -1,4 +1,4 @@
-import React, {Suspense, useMemo, useEffect, useRef, useState} from "react";
+import React, {useTransition, useMemo, useEffect, useRef, useState} from "react";
 import {useControls, button} from "leva";
 import * as d3 from "d3";
 import * as _ from "lodash";
@@ -53,9 +53,9 @@ const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 M
 // const colorRange = ["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"];
 // const stackColor = [nullColor,...colorRange];
 // stack.keys(stackColor);
-const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
+const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
     const [_data,set_Data] = useState([]);
-
+    const [isPending,startTransition] = useTransition();
     const holderref = useRef();
     const [hover,setHover] = useState();
     const [focus,setfocus] = useState();
@@ -78,6 +78,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
         .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]),[]);
 
     useEffect(()=>{
+        onLoad('Prepare data...')
         if (objects){
             const formatGroup = d3[`time${configStack.SeperatedBy.unit}`].every(configStack.SeperatedBy.step);
             const mapTime = time_stamp.map((t,i)=>[t,i]);
@@ -163,30 +164,40 @@ const AreaStack = function ({time_stamp, metricRangeMinMax, color, config, selec
         }else {
             set_Data([]);
         }
+        onLoad(false);
     },[objects,configStack.SeperatedBy,time_stamp,selectedSer,metricRangeMinMax]);
-    const data = useMemo(()=>{
-        if (focus&&focus.sub){
-            focus.sub.sort((a,b)=>b.max-a.max);
-            const tail = (focus.index!==(_data.length-1))?_data.slice(focus.index+1,_data.length-1):[];
-            const data = [..._data.slice(0,focus.index+1),...focus.sub,...tail];
-            let offset=0;
-            data.forEach(d=>{
-                d.y = offset;
-                offset+=d.height;
-            });
-            data.height = offset;
-            // data.height =
-            return data;
-        }else {
-            let offset = 0;
-            _data.forEach(d=>{
-                d.y = offset;
-                offset+=d.height;
-            });
-            _data.height = offset;
-            return _data;
-        }
-    },[_data,focus]);
+    const [data,setdata] = useState([]);
+    useEffect(()=>{
+        updateData()
+    },[_data,focus])
+    function updateData(){
+        startTransition(()=>{
+            if (focus&&focus.sub){
+                focus.sub.sort((a,b)=>b.max-a.max);
+                const tail = (focus.index!==(_data.length-1))?_data.slice(focus.index+1,_data.length-1):[];
+                const data = [..._data.slice(0,focus.index+1),...focus.sub,...tail];
+                let offset=0;
+                data.forEach(d=>{
+                    d.y = offset;
+                    offset+=d.height;
+                });
+                data.height = offset;
+                // data.height =
+                setdata(data);
+                return;
+            }else {
+                let offset = 0;
+                _data.forEach(d=>{
+                    d.y = offset;
+                    offset+=d.height;
+                });
+                _data.height = offset;
+                setdata(_data);
+                return _data;
+            }
+        })
+
+    }
     const [legendColor] = useControls('Setting',()=>({legend:viz({value:0,
             label:dimensions[selectedSer]?`${dimensions[selectedSer].text} (${dimensions[selectedSer].possibleUnit?dimensions[selectedSer].possibleUnit.unit:''})`:'',
             com:<>{dimensions[selectedSer]&&<div style={{width:'100%'}}>
