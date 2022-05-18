@@ -34,8 +34,7 @@ var x = d3.scaleLinear()
 var y = d3.scaleLinear()
     .rangeRound([height, 0]);
 
-var stack = d3.stack()
-    .offset(d3.stackOffsetNone);
+
 
 var area = d3.area()
     .curve(d3.curveStepAfter)
@@ -57,6 +56,8 @@ const timeoptions = {'Day':{unit:'Day',step:1},'Hour':{unit:'Hour',step:1},'30 M
 // stack.keys(stackColor);
 const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config, selectedTime,metrics, selectedComputeMap, setSelectedComputeMap, selectedUser, dimensions, selectedSer,selectedSer2, scheme, colorByName, colorCluster, colorBy, getMetric, objects, theme, line3D, layout, users, selectService, getKey}) {
     const [_data,set_Data] = useState([]);
+    const [data,setdata] = useState([]);
+    const [timeIndex,setTimeIndex] = useState([]);
     const [isPending,startTransition] = useTransition();
     const [holderref,bounds] = useMeasure();
     const [hover,setHover] = useState();
@@ -89,103 +90,179 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     const steps = useMemo(()=>d3.scaleQuantize()
         .domain([0,1])
         .range(["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"]),[]);
+    const stack = useMemo(()=> d3.stack()
+        .offset(d3.stackOffsetNone),[]);
+    const singleTimeLineWithoutColor = (_timeIndex=timeIndex,v, k, type, scale = 1,maxLength) => {
 
-    useEffect(()=>{
-        onLoad('Prepare data...')
-        if (objects){
-            const formatGroup = d3[`time${configStack.SeperatedBy.unit}`].every(configStack.SeperatedBy.step);
-            const mapTime = time_stamp.map((t,i)=>[t,i]);
-            const timeIndex = d3.groups(mapTime,d=>formatGroup(d[0]));
-            const maxLength = d3.max(timeIndex,t=>t[1].length);
-            x.domain([0,maxLength-1]);
+        const item = {key: k, max: 0, type, data: v, height: height * scale + margin.top + margin.bottom};
+        item.values = _timeIndex.map((t, ti) => {
+            const offset = (!ti) ? (maxLength - t[1].length) : 0;
+            const group = {key: t[0], max: 0, offset};
+            group.values = t[1].map(([t, ti], index) => {
+                const obj = {time: t, timeIndex: index + offset, timestep: ti, max: 0};
+                // # compute
+                if (v[ti] && v[ti].computes) {
+                    const comp = Object.values(v[ti].computes)//d3.groups(v[ti],d=>d.key);
+                    if (obj.max < comp.length)
+                        obj.max = comp.length;
+                    if (group.max < comp.length)
+                        group.max = comp.length;
+                }
+                // percentage
 
+                return obj;
+            });
+            group.stack = [];
+            if (item.max < group.max)
+                item.max = group.max;
+            return group;
+        });
+        return item
+    }
+    const singleTimeLineUpdateColor = (_timeIndex=timeIndex,v, item) => {
 
-            // adjust color legend
-            const scaleNumber = dimensions[selectedSer].scale.copy().range([1,0]);
-            const colorticks = dimensions[selectedSer].scale.ticks(7);
-            const colorRange = colorticks.map(t=>d3.interpolateRdYlGn(scaleNumber(t)));//["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"];
-            const stackColor = [nullColor,...colorRange];
-            steps.domain([colorticks[0],colorticks[colorticks.length-1]+colorticks[1]-colorticks[0]].map(d=>dimensions[selectedSer].scale(d))).range(colorRange);
-
-            stack.keys(stackColor);
-
-            setColorScale({colorRange,stackColor,colorticks});
-            // # compute
-
-            // percentage
-            // y.domain([0,1])
-            const singleTimeLine = (v,k,type,scale=1)=>{
-                const item = {key:k,max:0,type,data:v,height:height*scale+margin.top+margin.bottom};
-                item.values = timeIndex.map((t,ti)=>{
-                    const offset = (!ti)?(maxLength - t[1].length):0;
-                    const group = {key:t[0],max:0,offset};
-                    group.values = t[1].map(([t,ti],index)=>{
-                        const obj ={time:t,timeIndex:index+offset,timestep:ti,[nullColor]:0,max:0};
-                        steps.range().forEach(c=>{
-                            obj[c]=0;
-                        });
-                        // # compute
-                        if (v[ti]&&v[ti].computes) {
-                            const comp = Object.values(v[ti].computes)//d3.groups(v[ti],d=>d.key);
-                            if (obj.max<comp.length)
-                                obj.max = comp.length;
-                            if (group.max<comp.length)
-                                group.max = comp.length;
-                            comp.forEach(d => {
-                                if (d[selectedSer] == null)
-                                    obj[nullColor]++;
-                                else
-                                    obj[steps(d[selectedSer])]++
-                            });
-                        }
-                        // percentage
-
-                        return obj;
-                    });
-                    group.stack = stack(group.values)
-                    if (item.max<group.max)
-                        item.max = group.max;
-                    return group;
+        item.values.forEach((group, ti) => {
+            group.values.forEach((obj, index) => {
+                const ti = obj.timestep;
+                obj[nullColor]= 0;
+                steps.range().forEach(c => {
+                    obj[c] = 0;
                 });
-                if (v.jobs){
-                    item.sub = Object.keys(v.jobs).map(j=>{
-                        return singleTimeLine(v.jobs[j],j,'Job',0.5)
-                    })
+                // # compute
+                if (v[ti] && v[ti].computes) {
+                    const comp = Object.values(v[ti].computes);
+                    comp.forEach(d => {
+                        if (d[selectedSer] == null)
+                            obj[nullColor]++;
+                        else
+                            obj[steps(d[selectedSer])]++
+                    });
                 }
-                return item
-            }
+                // percentage
 
-            const _data = Object.keys(objects).map(k=>{
-                return singleTimeLine(objects[k],k,'User')
-            })
-
-            _data.sort((a,b)=>b.max-a.max);
-            _data.forEach((d,i)=>{
-                d.index = i;
-            })
-            if (_data[0])
-            y.domain([0,_data[0].max])
-            set_Data(_data);
-            if (focus){
-                const _focus = _data.find(d=>d.key===focus.key);
-                if (_focus){
-                    setfocus(_focus)
-                }else{
-                    setfocus(undefined)
+                return obj;
+            });
+            group.stack = stack(group.values)
+        });
+    }
+    const singleTimeLine = (_timeIndex=timeIndex,v, k, type, scale = 1,maxLength) => {
+    debugger
+        const item = {key: k, max: 0, type, data: v, height: height * scale + margin.top + margin.bottom};
+        item.values = _timeIndex.map((t, ti) => {
+            const offset = (!ti) ? (maxLength - t[1].length) : 0;
+            const group = {key: t[0], max: 0, offset};
+            group.values = t[1].map(([t, ti], index) => {
+                const obj = {time: t, timeIndex: index + offset, timestep: ti, [nullColor]: 0, max: 0};
+                steps.range().forEach(c => {
+                    obj[c] = 0;
+                });
+                // # compute
+                if (v[ti]) {
+                    const comp = v[ti]//d3.groups(v[ti],d=>d.key);
+                    if (obj.max < comp.length)
+                        obj.max = comp.length;
+                    if (group.max < comp.length)
+                        group.max = comp.length;
+                    comp.forEach(d => {
+                        if (d[selectedSer] == null)
+                            obj[nullColor]++;
+                        else
+                            obj[steps(d[selectedSer])]++
+                    });
                 }
+                // percentage
+
+                return obj;
+            });
+            group.stack = stack(group.values)
+            if (item.max < group.max)
+                item.max = group.max;
+            return group;
+        });
+        return item
+    }
+    useEffect(()=>{
+        startTransition(()=> {
+            console.time('process data array')
+            if (objects) {
+                const formatGroup = d3[`time${configStack.SeperatedBy.unit}`].every(configStack.SeperatedBy.step);
+                const mapTime = time_stamp.map((t, i) => [t, i]);
+                const timeIndex = d3.groups(mapTime, d => formatGroup(d[0]));
+                setTimeIndex(timeIndex)
+                const maxLength = d3.max(timeIndex, t => t[1].length);
+                x.domain([0, maxLength - 1]);
+
+                // # compute
+
+                // percentage
+                // y.domain([0,1])
+
+                const _data = Object.keys(objects).map(k => {
+                    return singleTimeLineWithoutColor(timeIndex,objects[k], k, 'User',1,maxLength)
+                });
+
+                _data.sort((a, b) => b.max - a.max);
+                _data.forEach((d, i) => {
+                    d.index = i;
+                })
+                if (_data[0])
+                    y.domain([0, _data[0].max])
+                set_Data(_data);
+                if (focus) {
+                    const _focus = _data.find(d => d.key === focus.key);
+                    if (_focus) {
+                        setfocus(_focus)
+                    } else {
+                        setfocus(undefined)
+                    }
+                }
+            } else {
+                set_Data([]);
             }
-        }else {
-            set_Data([]);
-        }
-        onLoad(false);
-    },[objects,configStack.SeperatedBy,time_stamp,selectedSer,metricRangeMinMax]);
-    const [data,setdata] = useState([]);
+            console.timeEnd('process data array')
+        })
+    },[objects,configStack.SeperatedBy,time_stamp]);
+    useEffect(()=>{
+        startTransition(()=> {
+            console.time('update metric')
+            if (_data.length) {
+                const maxLength = d3.max(timeIndex, t => t[1].length);
+                // adjust color legend
+                const scaleNumber = dimensions[selectedSer].scale.copy().range([1, 0]);
+                const colorticks = dimensions[selectedSer].scale.ticks(7);
+                const colorRange = colorticks.map(t => d3.interpolateRdYlGn(scaleNumber(t)));//["#119955", "#7abb6d", "#c0dc8f", "#ffffbb", "#f1c76e", "#e98736", "#dd3322"];
+                const stackColor = [nullColor, ...colorRange];
+                steps.domain([colorticks[0], colorticks[colorticks.length - 1] + colorticks[1] - colorticks[0]].map(d => dimensions[selectedSer].scale(d))).range(colorRange);
+
+                stack.keys(stackColor);
+
+                setColorScale({colorRange, stackColor, colorticks});
+                // # compute
+
+                // percentage
+                // y.domain([0,1])
+
+                _data.forEach(item => {
+                    singleTimeLineUpdateColor(timeIndex,item.data, item)//(timeIndex,objects[k], k, 'User',1,maxLength)
+                });
+
+                set_Data(_data);
+            }
+            console.timeEnd('update metric')
+        })
+    },[_data,timeIndex,selectedSer,metricRangeMinMax]);
+
     useEffect(()=>{
         updateData()
-    },[_data,focus])
+    },[_data,focus,timeIndex]);
     function updateData(){
         startTransition(()=>{
-            if (focus&&focus.sub){
+            if (focus&&focus.data.jobs){
+                if (focus.data.jobs&&(!focus.sub)) {
+                    focus.sub = Object.keys(focus.data.jobs).map(j => {
+                        return singleTimeLine(timeIndex,focus.data.jobs[j], j, 'Job', 0.5, d3.max(timeIndex, t => t[1].length))
+                    })
+                }
                 focus.sub.sort((a,b)=>b.max-a.max);
                 const tail = (focus.index!==(_data.length-1))?_data.slice(focus.index+1,_data.length-1):[];
                 const data = [..._data.slice(0,focus.index+1),...focus.sub,...tail];
@@ -353,10 +430,10 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                                 {/*}*/}
                                             {/*</Transition>*/}
                                             {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key} style={{transition:"2s"}}/>)}
-                                            {/*<rect width={width} y={-main.height+outerHeight} height={main.height-margin.top-margin.bottom} className={'overlay'}*/}
-                                                  {/*onMouseMove={event=>onMouseOverlay(event,ti,d,main)}*/}
-                                                  {/*onMouseOut={event=>onMouseLeave(event)}*/}
-                                            {/*/>*/}
+                                            <rect width={width} y={-main.height+outerHeight} height={main.height-margin.top-margin.bottom} className={'overlay'}
+                                                  onMouseMove={event=>onMouseOverlay(event,ti,d,main)}
+                                                  onMouseOut={event=>onMouseLeave(event)}
+                                            />
                                         </g>
                                     </g>)}
                                     {/*{main.values.map((d,ti)=><g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >*/}
@@ -375,7 +452,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                 </g>
                                 <text className={'title'} dy={main.height/2} x={main.type==='User'?0:40}
                                       onClick={()=>(main.type==='User')?(focus===main?setfocus(undefined):setfocus(main)):null}
-                                >{main.type==='User'?(focus===main?'(-)':'(+)'):''} {main.type}: {main.key} , Max #computes: {main.max}{main.sub?`, #jobs: ${main.sub.length}`:''}</text>
+                                >{main.type==='User'?(focus===main?'(-)':'(+)'):''} {main.type}: {main.key} , Max #computes: {main.max}{main.data.jobs?`, #jobs: ${Object.keys(main.data.jobs).length}`:''}</text>
 
                             </g>)}
 
