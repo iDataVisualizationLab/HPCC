@@ -1,6 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 import AreaStack from "./component/AreaStack_user"
+import LineStack from "./component/LineStack_user"
 import React, {useState, useEffect, useCallback, useMemo, useLayoutEffect, useRef} from "react";
 import {Grid, Backdrop, CircularProgress, createTheme,FormControl,InputLabel,Select,MenuItem,Typography} from "@mui/material";
 import CssBaseline from '@mui/material/CssBaseline';
@@ -61,6 +62,7 @@ function App() {
     const onChangeData = useCallback((_data)=>{
         const {scheme, draw3DData, drawUserData, dimensions, layout,sankeyData} = handleData(_data);
         setDimensions(dimensions);
+
         setScheme(scheme);
         setSankeyData(sankeyData);
         updateColor(draw3DData, scheme);
@@ -218,7 +220,7 @@ function App() {
         {
             setConfig({metricFilter: dimensions[selectedSer].range[0]})
         }
-    },[selectedSer,metricRangeMinMax])
+    },[dimensions,selectedSer,metricRangeMinMax])
     const binopt = useControls("DatasetCluster",{clusterMethod:{label:'Method',value:'leaderbin',options:['leaderbin','kmean']},
         normMethod:{value:'l2',options:['l1','l2']},
         bin:folder({startBinGridSize:{value:10,render:()=>false},range:{value:[8,9], min:1,step:1, max:20}},{label:'parameter',render:(get)=>get("DatasetCluster.clusterMethod")==="leaderbin"}),
@@ -371,7 +373,11 @@ function App() {
             })
         });
         // const dimensionKeys = Object.keys(compute[0][1]).filter(s=>compute[0][1][s].find(d=>_.isNumber(d)));
-        const dimensionKeys = Object.keys(allDim).filter(k=>allDim[k]==='number');
+        let dimensionKeys = Object.keys(allDim).filter(k=>allDim[k]==='number');
+        const indexMem = dimensionKeys.findIndex(d=>d.match(/memory/i));
+        if (indexMem!==-1)
+            dimensionKeys = [dimensionKeys[indexMem],...dimensionKeys.slice(0,indexMem),...dimensionKeys.slice(indexMem+1)];
+
         const dimensions = dimensionKeys.map((s,i)=>({text:s,
             index:i,range:[Infinity,-Infinity],scale:d3.scaleLinear(),
             order:i,
@@ -425,8 +431,6 @@ function App() {
             d.range = metricRangeMinMax?[d.min,d.max]:recomend.range.slice();
             d.scale.domain(d.range)
         });
-
-
         const jobs = {};
         const job_ref = undefined;
         // need update core info to job_ref
@@ -635,8 +639,11 @@ function App() {
                             empty.name='';
                             empty.timestep=i;
                             empty.cpus=0;
+                            empty.jobs=[];
+                            empty.computes={};
                             _userarrdata[d.user_name][i] =(empty);
                         }
+                        _userarrdata[d.user_name][i].jobs.push(d.job_id);
                         if(tsne_comp) {
                             if (!_userarrdata[d.user_name].jobs[d.job_id][i]){
                                 const empty = [];
@@ -646,6 +653,7 @@ function App() {
                                 _userarrdata[d.user_name].jobs[d.job_id][i] =(empty);
                             }
                             _userarrdata[d.user_name][i].push(tsne_comp[i]);
+                            _userarrdata[d.user_name][i].computes[comp] = tsne_comp[i]
                             _userarrdata[d.user_name].jobs[d.job_id][i].push(tsne_comp[i]);
                         }
 
@@ -661,6 +669,7 @@ function App() {
                             if (!jobs[d.job_array_id].comp[i][comp]){
                                 jobs[d.job_array_id].comp[i][comp] = 1;
                                 _jobarrdata[d.job_array_id][i].push(tsnedata[comp][i]);
+                                _jobarrdata[d.job_array_id][i].computes[comp]=(tsnedata[comp][i]);
                             }
                         }
                         return true;
@@ -1049,6 +1058,40 @@ function App() {
 
                             />
                         </div>
+                        {/*<div style={{height: "100vh",width:'48vw',overflow:'hidden'}}>*/}
+                            {/*<LineStack metricRangeMinMax={metricRangeMinMax}*/}
+                                       {/*time_stamp={scheme.time_stamp}*/}
+                                       {/*objects ={scheme._userarrdata}*/}
+                                       {/*onLoad={(m)=>setIsBusy(m)}*/}
+
+                                       {/*users={drawUserData}*/}
+
+                                       {/*selectedSer={selectedSer}*/}
+                                       {/*selectedSer2={selectedSer2}*/}
+                                       {/*getKey={(d)=>d.data.key+' '+d.data.timestep}*/}
+
+
+                                       {/*color={color}*/}
+                                       {/*colorByName={colorByName}*/}
+                                       {/*colorCluster={clusterInfo.colorCluster}*/}
+                                {/*// colorBy={colorBy}*/}
+                                       {/*colorBy={'name'}*/}
+                                       {/*getMetric={getMetric}*/}
+                                       {/*metrics = {scheme.tsnedata}*/}
+                                       {/*theme={theme}*/}
+                                       {/*dimensions={dimensions}*/}
+                                       {/*selectedTime = {selectedTime.arr}*/}
+                                {/*// mouseOver = {this.onMouseOverSankey.bind(this)}*/}
+                                {/*// mouseLeave = {this.onMouseLeaveSankey.bind(this)}*/}
+                                {/*// sankeyComputeSelected = {sankeyComputeSelected}*/}
+                                       {/*config={config}*/}
+                                       {/*selectedComputeMap={selectedComputeMap}*/}
+                                       {/*setSelectedComputeMap={(d)=>setSelectedComputeMap(d)}*/}
+                                       {/*selectedUser={selectedUser}*/}
+                                       {/*scheme={scheme}*/}
+
+                            {/*/>*/}
+                        {/*</div>*/}
                     </Grid>
                     <Backdrop
                         sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
