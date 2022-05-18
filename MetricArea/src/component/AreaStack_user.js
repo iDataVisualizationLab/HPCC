@@ -336,27 +336,27 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                         <g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >
                                         <g transform={`translate(${margin.left},${margin.top})`}>
                                             {/*<Transition*/}
-                                                {/*items={d.stack.map(value=>({d:area(value),fill:value.key,data:value,key:value.key}))}*/}
+                                                {/*items={d.stack}*/}
                                                 {/*// initial={value=>({d:area(value),fill:value.key})}*/}
-                                                {/*from={d=>d}*/}
-                                                {/*enter={d=>d}*/}
-                                                {/*leave={d=>d}*/}
-                                                {/*update={d=>d}*/}
+                                                {/*from={{opacity:0}}*/}
+                                                {/*enter={{opacity:1}}*/}
+                                                {/*leave={{opacity:0}}*/}
                                                 {/*// leave={value=>({d:'',fill:value.key})}*/}
                                                 {/*delay={1000}*/}
                                                 {/*key={d=>d.key}*/}
                                             {/*>*/}
-                                                {/*{({key,d,fill}, value) => <animated.path*/}
-                                                    {/*d={d.to(value.d)}*/}
-                                                    {/*fill={fill.to(value.fill)}*/}
+                                                {/*{({opacity}, value) => <animated.path*/}
+                                                    {/*d={area(value)}*/}
+                                                    {/*fill={value.key}*/}
+                                                    {/*opacity={opacity.to(1)}*/}
                                                     {/*/>*/}
                                                 {/*}*/}
                                             {/*</Transition>*/}
-                                            {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key}/>)}
-                                            <rect width={width} y={-main.height+outerHeight} height={main.height-margin.top-margin.bottom} className={'overlay'}
-                                                  onMouseMove={event=>onMouseOverlay(event,ti,d,main)}
-                                                  onMouseOut={event=>onMouseLeave(event)}
-                                            />
+                                            {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key} style={{transition:"2s"}}/>)}
+                                            {/*<rect width={width} y={-main.height+outerHeight} height={main.height-margin.top-margin.bottom} className={'overlay'}*/}
+                                                  {/*onMouseMove={event=>onMouseOverlay(event,ti,d,main)}*/}
+                                                  {/*onMouseOut={event=>onMouseLeave(event)}*/}
+                                            {/*/>*/}
                                         </g>
                                     </g>)}
                                     {/*{main.values.map((d,ti)=><g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >*/}
