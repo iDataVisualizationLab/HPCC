@@ -146,7 +146,6 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
         });
     }
     const singleTimeLine = (_timeIndex=timeIndex,v, k, type, scale = 1,maxLength) => {
-    debugger
         const item = {key: k, max: 0, type, data: v, height: height * scale + margin.top + margin.bottom};
         item.values = _timeIndex.map((t, ti) => {
             const offset = (!ti) ? (maxLength - t[1].length) : 0;
