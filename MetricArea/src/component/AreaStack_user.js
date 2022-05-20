@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper/Paper";
 import {viz} from "./leva/Viz";
 import Popover from "@mui/material/Popover/Popover";
 import useMeasure from 'react-use-measure'
-import { motion  } from 'framer-motion'
+import { motion ,AnimatePresence } from 'framer-motion'
 
 var outerHeight = 110,
     margin = {
@@ -224,7 +224,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     useEffect(()=>{
         startTransition(()=> {
             console.time('update metric')
-            if (_data.length) {
+            if (_data.length &&  dimensions[selectedSer]) {
                 const maxLength = d3.max(timeIndex, t => t[1].length);
                 // adjust color legend
                 const scaleNumber = dimensions[selectedSer].scale.copy().range([1, 0]);
@@ -243,6 +243,11 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
 
                 _data.forEach(item => {
                     singleTimeLineUpdateColor(timeIndex,item.data, item)//(timeIndex,objects[k], k, 'User',1,maxLength)
+                    if (item.sub)
+                        item.sub.forEach((item=>{
+                            debugger
+                            singleTimeLineUpdateColor(timeIndex,item.data, item)
+                        }))
                 });
 
                 set_Data(_data);
@@ -391,7 +396,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
         //     offset+=d.height;
         // });
         // setdata(data)
-    },[data,scheme.computers]);
+    },[data,scheme.computers,colorScale]);
     // const testf = ({key,d,fill}, value) => {
     //     debugger
     //     return <animated.path
@@ -400,17 +405,18 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     //     />
     // }
     // const {outerWidth,width} = graphic;
-    const totalw = (outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right;
+    const totalw = data[0]?((outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right):200;
     return <div style={{width:'100%',height:'100%',overflow:'hidden'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
             {data[0]&&<div style={{width:'100%',height:'88%',position:'relative'}} id="g-chart" spacing={2}>
                 <div ref={holderref} style={{width:'100%',height:'100%', overflow:'auto'}}>
                     <svg width={totalw} height={data.height+marginGroup.top+marginGroup.bottom} style={{overflow:'visible',marginTop:10}}>
                         <g transform={`translate(${marginGroup.left},${marginGroup.top})`}>
+                            <AnimatePresence>
                             {data.map((main,i)=><motion.g key={main.key}
                                                           initial={{y: main.py??0}}
                                                           animate={{ y: main.y }}
-                                                          exit={{y: main.py??0,opacity: 0}}
+                                                          exit={{y: main.py??0}}
                                                           transition={{ type: "spring", stiffness: 30 }}
                                                           style={{ opacity: ((!hover) || hover.highlights[main.key])?1:0.1}}>
                                 <g transform={`translate(0,${main.height-outerHeight})`}>
@@ -444,7 +450,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                 >{main.type==='User'?(focus===main?'(-)':'(+)'):''} {main.type}: {main.key} , Max #computes: {main.max}{main.data.jobs?`, #jobs: ${Object.keys(main.data.jobs).length}`:''}</text>
 
                             </motion.g>)}
-
+                            </AnimatePresence>
                             {hover&&<><line x2={'100%'} y1={hover.position[1]+hover.parent.y} y2={hover.position[1]+hover.parent.y} stroke={'black'} strokeDasharray={'2 1'}/>}
                                 <g transform={`translate(${(outerWidth*hover.timeIndex + margin.left)},${margin.top})`} style={{pointerEvents:'none'}}>
                                     <line y2={'100%'} y1={0} stroke={'black'} strokeDasharray={'2 1'} x1={hover.position[0]} x2={hover.position[0]}/>
