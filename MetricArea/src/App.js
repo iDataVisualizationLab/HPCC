@@ -58,7 +58,8 @@ function App() {
     const [clusterInfo, setClusterInfo] = React.useState({cluster:[],outlyingBins:[],clusterDescription:[],colorCluster:d3.scaleOrdinal(),clusterInfo:{}});
 
     // const [selectedSer, setSelectedSer] = React.useState(0);
-
+    // holder
+    const dataholder = useControls("Dataset",{currentDataset:{}})
     const onChangeData = useCallback((_data)=>{
         const {scheme, draw3DData, drawUserData, dimensions, layout,sankeyData} = handleData(_data);
         setDimensions(dimensions);

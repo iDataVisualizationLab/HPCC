@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper/Paper";
 import {viz} from "./leva/Viz";
 import Popover from "@mui/material/Popover/Popover";
 import useMeasure from 'react-use-measure'
-import { animated,Transition  } from 'react-spring'
+import { motion  } from 'framer-motion'
 
 var outerHeight = 110,
     margin = {
@@ -271,6 +271,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                     d.y = offset;
                     offset+=d.height;
                 });
+                focus.sub.forEach(d=>d.py=focus.y)
                 data.height = offset;
                 // data.height =
                 setdata(data);
@@ -399,35 +400,24 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     //     />
     // }
     // const {outerWidth,width} = graphic;
+    const totalw = (outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right;
     return <div style={{width:'100%',height:'100%',overflow:'hidden'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
             {data[0]&&<div style={{width:'100%',height:'88%',position:'relative'}} id="g-chart" spacing={2}>
                 <div ref={holderref} style={{width:'100%',height:'100%', overflow:'auto'}}>
-                    <svg width={(outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right} height={data.height+marginGroup.top+marginGroup.bottom} style={{overflow:'visible',marginTop:10}}>
+                    <svg width={totalw} height={data.height+marginGroup.top+marginGroup.bottom} style={{overflow:'visible',marginTop:10}}>
                         <g transform={`translate(${marginGroup.left},${marginGroup.top})`}>
-                            {data.map((main,i)=><g key={main.key} transform={`translate(0,${main.y})`} style={{transition:'all 1s', opacity: ((!hover) || hover.highlights[main.key])?1:0.1}}>
+                            {data.map((main,i)=><motion.g key={main.key}
+                                                          initial={{y: main.py??0}}
+                                                          animate={{ y: main.y }}
+                                                          exit={{y: main.py??0,opacity: 0}}
+                                                          transition={{ type: "spring", stiffness: 30 }}
+                                                          style={{ opacity: ((!hover) || hover.highlights[main.key])?1:0.1}}>
                                 <g transform={`translate(0,${main.height-outerHeight})`}>
 
                                     {main.values.map((d,ti)=>
                                         <g key={ti} transform={`translate(${(outerWidth*ti)},0)`} >
                                         <g transform={`translate(${margin.left},${margin.top})`}>
-                                            {/*<Transition*/}
-                                                {/*items={d.stack}*/}
-                                                {/*// initial={value=>({d:area(value),fill:value.key})}*/}
-                                                {/*from={{opacity:0}}*/}
-                                                {/*enter={{opacity:1}}*/}
-                                                {/*leave={{opacity:0}}*/}
-                                                {/*// leave={value=>({d:'',fill:value.key})}*/}
-                                                {/*delay={1000}*/}
-                                                {/*key={d=>d.key}*/}
-                                            {/*>*/}
-                                                {/*{({opacity}, value) => <animated.path*/}
-                                                    {/*d={area(value)}*/}
-                                                    {/*fill={value.key}*/}
-                                                    {/*opacity={opacity.to(1)}*/}
-                                                    {/*/>*/}
-                                                {/*}*/}
-                                            {/*</Transition>*/}
                                             {d.stack.map(p=><path key={p.key} d={area(p)} fill={p.key} style={{transition:"2s"}}/>)}
                                             <rect width={width} y={-main.height+outerHeight} height={main.height-margin.top-margin.bottom} className={'overlay'}
                                                   onMouseMove={event=>onMouseOverlay(event,ti,d,main)}
@@ -453,7 +443,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                       onClick={()=>(main.type==='User')?(focus===main?setfocus(undefined):setfocus(main)):null}
                                 >{main.type==='User'?(focus===main?'(-)':'(+)'):''} {main.type}: {main.key} , Max #computes: {main.max}{main.data.jobs?`, #jobs: ${Object.keys(main.data.jobs).length}`:''}</text>
 
-                            </g>)}
+                            </motion.g>)}
 
                             {hover&&<><line x2={'100%'} y1={hover.position[1]+hover.parent.y} y2={hover.position[1]+hover.parent.y} stroke={'black'} strokeDasharray={'2 1'}/>}
                                 <g transform={`translate(${(outerWidth*hover.timeIndex + margin.left)},${margin.top})`} style={{pointerEvents:'none'}}>
@@ -518,5 +508,16 @@ function linkArc(d) {
     else
         return "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,1 " + d.source.x + "," + d.source.y;
 }
+
+// function GroupPosition(data){
+//     const transitions = useTransition(data, {
+//         from: { transform:  },
+//         enter: { opacity: 1 },
+//         leave: { opacity: 0 },
+//         delay: 200,
+//         config: config.molasses,
+//         onRest: () => setItems([]),
+//     })
+// }
 
 export default AreaStack;
