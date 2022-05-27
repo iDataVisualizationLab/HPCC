@@ -66,16 +66,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     var [width,setwidth] = useState(60-margin.left-margin.right);
     var [colorScale,setColorScale] = useState({colorRange:[],stackColor:[],colorticks:[]});
     const [configStack] = useControls('Graphic',()=>({'SeperatedBy':{value:timeoptions['Hour'],options:timeoptions,label:'Major tick'}}));
-    // const [graphicBtn] = useControls('Graphic',()=>({'Fit Screen':button(()=>{
-    //     // setFit
-    //     if (holderref.current && _data[0]) {
-    //         const currentw = holderref.current.getBoundingClientRect().width-20;
-    //         let _outerWidth = (currentw - marginGroup.left - marginGroup.right) / _data[0].values.length;
-    //         let _width = _outerWidth-margin.left-margin.right
-    //         x.rangeRound([0, _width]);
-    //         setGraphic({...graphic,outerWidth:_outerWidth,width:_width})
-    //     }
-    // })}),[_data,graphic]);
+
     useLayoutEffect(()=>{
         if (_data[0])
             startTransition(()=>{
@@ -223,7 +214,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
     },[objects,configStack.SeperatedBy,time_stamp]);
     useEffect(()=>{
         startTransition(()=> {
-            console.time('update metric')
+
             if (_data.length &&  dimensions[selectedSer]) {
                 const maxLength = d3.max(timeIndex, t => t[1].length);
                 // adjust color legend
@@ -243,32 +234,32 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
 
                 _data.forEach(item => {
                     singleTimeLineUpdateColor(timeIndex,item.data, item)//(timeIndex,objects[k], k, 'User',1,maxLength)
+                    // delete item.sub
                     if (item.sub)
                         item.sub.forEach((item=>{
-                            debugger
                             singleTimeLineUpdateColor(timeIndex,item.data, item)
                         }))
                 });
 
                 set_Data(_data);
             }
-            console.timeEnd('update metric')
+
         })
     },[_data,timeIndex,selectedSer,metricRangeMinMax]);
 
     useEffect(()=>{
         updateData()
-    },[_data,focus,timeIndex]);
+    },[_data,focus,timeIndex,selectedSer,metricRangeMinMax]);
     function updateData(){
         startTransition(()=>{
             if (focus&&focus.data.jobs){
-                if (focus.data.jobs&&(!focus.sub)) {
+                if (focus.data.jobs){//&&(!focus.sub)) {
                     focus.sub = Object.keys(focus.data.jobs).map(j => {
                         return singleTimeLine(timeIndex,focus.data.jobs[j], j, 'Job', 0.5, d3.max(timeIndex, t => t[1].length))
                     })
                 }
                 focus.sub.sort((a,b)=>b.max-a.max);
-                const tail = (focus.index!==(_data.length-1))?_data.slice(focus.index+1,_data.length-1):[];
+                const tail = _data.slice(focus.index+1);
                 const data = [..._data.slice(0,focus.index+1),...focus.sub,...tail];
                 let offset=0;
                 data.forEach(d=>{
@@ -290,7 +281,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                 });
                 _data.height = offset;
                 setdata(_data);
-                return _data;
+                return ;
             }
         })
 
@@ -330,36 +321,43 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
             const highlights = {};
             let links = [];
             if (main.data[current.timestep]) {
-                // data.forEach((d,i)=>{
-                //     d.order = i;
-                //     if (i<index)
-                //         d.y = -2;
-                // });
-                // current.y = -1;
-                main.x = position[0];
-                Object.values(main.data[current.timestep].computes).forEach((comp) => {
-                    const {key, timestep} = comp;
-                    scheme.computers[key].users[timestep].forEach(u => {
-                        highlights[u] = true;
-                        if (u!==main.key) {
-                            const target = data.find(d => d.key === u);
-                            // if (target.order>index)
-                            //     target.y = (-0.5);
-                            // else
-                            //     target.y = (-1.5);
-                            links.push({
-                                source: main,
-                                target,
-                                color: comp[selectedSer] === null ? nullColor : steps(comp[selectedSer])
-                            });
-                        }
-                    })
+                data.sort((a,b)=>a._y-b._y);
+                const Index = data.findIndex(d => d.key === key);
+                data.forEach((d,i)=>{
+                    d.order = i;
+                    if (i<Index)
+                        d.y = -2;
+                    else
+                        d.y=0
                 });
-                // data.sort((a,b)=>a.y-b.y);
-                links = d3.groups(links,d=>[d.source.key,d.target.key]).map(l=>{
-                    l[1][0].value=l[1].length;
-                    l[1][0].target.x = main.x;
-                return l[1][0]});
+                data[Index].y = -1;
+                main.x = position[0];
+                if (main.data[current.timestep].computes) {
+                    Object.values(main.data[current.timestep].computes).forEach((comp) => {
+                        const {key, timestep} = comp;
+                        scheme.computers[key].users[timestep].forEach(u => {
+                            highlights[u] = true;
+                            if (u !== main.key) {
+                                const target = data.find(d => d.key === u);
+                                if (target.order>Index)
+                                    target.y = (-0.5);
+                                else
+                                    target.y = (-1.5);
+                                links.push({
+                                    source: main,
+                                    target,
+                                    color: comp[selectedSer] === null ? nullColor : steps(comp[selectedSer])
+                                });
+                            }
+                        })
+                    });
+                    data.sort((a,b)=>a.y-b.y);
+                    links = d3.groups(links, d => [d.source.key, d.target.key]).map(l => {
+                        l[1][0].value = l[1].length;
+                        l[1][0].target.x = main.x;
+                        return l[1][0]
+                    });
+                }
             }else
                 highlights[main.key] = true;
             const list = colorScale.stackColor.map(k=>[k,current[k]]).reverse().filter(d=>d[1]);
@@ -379,7 +377,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                         {main.data[current.timestep]?<Grid container direction="column" rowSpacing={0}>
                             <Grid item xs={12}>{current.time.toLocaleString()}</Grid>
                             <Grid item xs={12}>#Computes:     {current.max}</Grid>
-                            <Grid item xs={12}>#Jobs:         {main.data[current.timestep].jobs.length}</Grid>
+                            {main.data[current.timestep].jobs&&<Grid item xs={12}>#Jobs:         {main.data[current.timestep].jobs.length}</Grid>}
                             {sharedu?<Grid item xs={12}>#Shared Users: {sharedu}</Grid>:''}
                         {list.map(d=><Grid key={d[0]} xs={12}><div className={'legendCell'} style={{marginLeft:10}}>
                             <div style={{width:20,height:10,backgroundColor:d[0]}}></div>
@@ -390,21 +388,13 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
         }else{
             setHover();
         }
-        // let offset=0;
-        // data.forEach(d=>{
-        //     d.y = offset;
-        //     offset+=d.height;
-        // });
-        // setdata(data)
+        let offset=0;
+        data.forEach(d=>{
+            d.y = offset;
+            offset+=d.height;
+        });
+        setdata(data)
     },[data,scheme.computers,colorScale]);
-    // const testf = ({key,d,fill}, value) => {
-    //     debugger
-    //     return <animated.path
-    //         d={d.to(value.d)}
-    //         fill={fill.to(value.fill)}
-    //     />
-    // }
-    // const {outerWidth,width} = graphic;
     const totalw = data[0]?((outerWidth)*data[0].values.length +marginGroup.left+marginGroup.right):200;
     return <div style={{width:'100%',height:'100%',overflow:'hidden'}}>
         <div style={{position:'relative',width:(selectedSer2!==undefined)?'50%':'100%',height:'100%', pointerEvents:'all'}}>
@@ -446,7 +436,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                                     {/*</g>)}*/}
                                 </g>
                                 <text className={'title'} dy={main.height/2} x={main.type==='User'?0:40}
-                                      onClick={()=>(main.type==='User')?(focus===main?setfocus(undefined):setfocus(main)):null}
+                                      onClick={()=>(main.type==='User')?(focus&&(focus.key===main.key)?setfocus(undefined):setfocus(main)):null}
                                 >{main.type==='User'?(focus===main?'(-)':'(+)'):''} {main.type}: {main.key} , Max #computes: {main.max}{main.data.jobs?`, #jobs: ${Object.keys(main.data.jobs).length}`:''}</text>
 
                             </motion.g>)}
