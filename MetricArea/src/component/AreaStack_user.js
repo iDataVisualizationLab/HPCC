@@ -321,16 +321,17 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
             const highlights = {};
             let links = [];
             if (main.data[current.timestep]) {
-                data.sort((a,b)=>a._y-b._y);
-                const Index = data.findIndex(d => d.key === key);
-                data.forEach((d,i)=>{
-                    d.order = i;
-                    if (i<Index)
-                        d.y = -2;
-                    else
-                        d.y=0
-                });
-                data[Index].y = -1;
+                // data.sort((a,b)=>a._y-b._y);
+                // const Index = data.findIndex(d => d.key === key);
+                // debugger
+                // data.forEach((d,i)=>{
+                //     d.order = i;
+                //     if (i<Index)
+                //         d.y = -2;
+                //     else
+                //         d.y=0
+                // });
+                // data[Index].y = -1;
                 main.x = position[0];
                 if (main.data[current.timestep].computes) {
                     Object.values(main.data[current.timestep].computes).forEach((comp) => {
@@ -339,10 +340,10 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                             highlights[u] = true;
                             if (u !== main.key) {
                                 const target = data.find(d => d.key === u);
-                                if (target.order>Index)
-                                    target.y = (-0.5);
-                                else
-                                    target.y = (-1.5);
+                                // if (target.order>Index)
+                                //     target.y = (-0.5);
+                                // else
+                                //     target.y = (-1.5);
                                 links.push({
                                     source: main,
                                     target,
@@ -351,7 +352,7 @@ const AreaStack = function ({time_stamp, metricRangeMinMax,onLoad, color, config
                             }
                         })
                     });
-                    data.sort((a,b)=>a.y-b.y);
+                    // data.sort((a,b)=>a.y-b.y);
                     links = d3.groups(links, d => [d.source.key, d.target.key]).map(l => {
                         l[1][0].value = l[1].length;
                         l[1][0].target.x = main.x;
