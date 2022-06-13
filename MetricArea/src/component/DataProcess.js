@@ -389,6 +389,7 @@ function DataProcss({onLoad, theme, _data}) {
     }
 
     const handleData = useCallback((_data) => {
+        debugger
         if (userEncoded) {
             let userCodecount = 1;
             const userEncode = {};
@@ -491,6 +492,7 @@ function DataProcss({onLoad, theme, _data}) {
             const start_time = adjustTime(_data.jobs_info[job_id].start_time);
             const end_time = adjustTime(_data.jobs_info[job_id].finish_time);
             const node_list = _data.jobs_info[job_id].node_list ?? _data.jobs_info[job_id].nodes;
+            // debugger
             const cpus_ = _data.jobs_info[job_id].cpus ?? (_data.jobs_info[job_id].cpu_cores);
             const cores = cpus_ / node_list.length;
             let node_list_obj = {};
@@ -519,6 +521,7 @@ function DataProcss({onLoad, theme, _data}) {
         const {users} = handleCUJ({computers, jobs}, _data.time_stamp);
         // add new DIm
         handleWorkload(computers, dimensions, dimensionKeys, metricRangeMinMax);
+        const coreUsageIndex = dimensions.length-1;
         const tsnedata = {};
         Object.keys(computers).forEach(d => {
             tsnedata[d] = _data.time_stamp.map((t, ti) => {
@@ -536,12 +539,16 @@ function DataProcss({onLoad, theme, _data}) {
         const jobCompTimeline = result.data;
         const noJobMap = result.noJobMap;
 
+        const powerIndex = dimensions.findIndex(d=>d.possibleUnit.type==='power' && d.text.match(/cpu/i));
+        debugger
         const {jobTimeline, jobarrdata, userarrdata, _userarrdata, minMaxDataCompJob, minMaxDataUser} = handleDataComputeByJob({
             tsnedata,
             computers,
             jobs,
             users,
-            timespan: _data.time_stamp
+            timespan: _data.time_stamp,
+            powerIndex,
+            coreUsageIndex
         });
 
 
@@ -586,13 +593,14 @@ function DataProcss({onLoad, theme, _data}) {
         scheme.jobArr = jobarrdata;
         scheme.userArr = userarrdata;
         scheme._userarrdata = _userarrdata;
+        scheme.powerIndex = powerIndex;
         // const sankeyData = changeSankeyData('compute_num',{scheme});
         debugger
         return {scheme, draw3DData, drawUserData, dimensions, layout}
     }, [layout]);
 
     function handleWorkload(computers, dimensions, dimensionKeys, metricRangeMinMax) {
-        const k = 'compute utilization';
+        const k = 'core usage';
         dimensionKeys.push(k)
         const i = dimensions.length;
         const dimT = {
@@ -651,15 +659,19 @@ function DataProcss({onLoad, theme, _data}) {
         const _jobarrdata = {};
         const userarrdata = {};
         const _userarrdata = {};
-        const minMaxDataCompJob = {};
-        const minMaxDataUser = {};
-        const timespan = input.timespan ?? [];
+        const {powerIndex,
+            coreUsageIndex} = input
+        // const minMaxDataCompJob = {};
+        // const minMaxDataUser = {};
+        const timespan = input.timespan ?? []
+
+        const delta = ((+timespan[1])- (+timespan[0]))/3600000;
         Object.keys(_jobs).forEach(k => {
             // if (_jobs[k].total_nodes>1){
             jobs[k] = _jobs[k];
             _jobarrdata[k] = [];
             jobarrdata[k] = [];
-            minMaxDataCompJob[k] = [];
+            // minMaxDataCompJob[k] = [];
 
             if (!jobs[k].isJobarray) {
                 if (!_userarrdata[_jobs[k].user_name]) {
@@ -667,9 +679,11 @@ function DataProcss({onLoad, theme, _data}) {
                     userarrdata[_jobs[k].user_name] = [];
                     _userarrdata[_jobs[k].user_name] = [];
                     _userarrdata[_jobs[k].user_name].jobs = {};
-                    minMaxDataUser[_jobs[k].user_name] = [];
+                    _userarrdata[_jobs[k].user_name].power = 0;
+                    // minMaxDataUser[_jobs[k].user_name] = [];
                 }
                 _userarrdata[_jobs[k].user_name].jobs[k] = [];
+                _userarrdata[_jobs[k].user_name].jobs[k].power = 0;
             } else {
                 jobs[k].comp = {};
             }
@@ -713,6 +727,10 @@ function DataProcss({onLoad, theme, _data}) {
                             _userarrdata[d.user_name][i].push(tsne_comp[i]);
                             _userarrdata[d.user_name][i].computes[comp] = tsne_comp[i]
                             _userarrdata[d.user_name].jobs[d.job_id][i].push(tsne_comp[i]);
+                            // power
+                            const power = ((tsne_comp[i][powerIndex]??0)*(jobs[d.job_id].node_list_obj[comp]/coreLimit) / tsne_comp[i][coreUsageIndex])*delta;
+                            _userarrdata[d.user_name].jobs[d.job_id].power += power;
+                            _userarrdata[d.user_name].power += power;
                         }
 
                         if (d.job_array_id) {
@@ -752,66 +770,82 @@ function DataProcss({onLoad, theme, _data}) {
             });
             data.push(item);
         }
-        Object.keys(_jobarrdata).forEach(k => {
-            _jobarrdata[k].forEach((d, i) => {
-                const timestep = _jobarrdata[k][i][0].timestep;
-                let valueMin = [];
-                let valueMax = [];
-                let value = _jobarrdata[k][i][0].map((d, si) => {
-                    const vals = _jobarrdata[k][i].map(d => d[si]);
-                    valueMin.push(d3.min(vals));
-                    valueMax.push(d3.max(vals));
-                    let sum = 0;
-                    let total = 0;
-                    _jobarrdata[k][i].forEach(d => {
-                        if (d[si] !== undefined) {
-                            const val = computers[d.name].cpus[i][k];
-                            sum += d[si] * val;
-                            total += val;
-                        }
-                    });
-                    // if(total&& _.isNaN(sum/total))
-                    //     debugger
-                    if (!total)
-                        return undefined;
-                    else
-                        return sum / total;
-                    // return  d3.mean(vals);
-                });
-                value.name = k;
-                valueMin.name = k;
-                valueMax.name = k;
-                value.timestep = timestep;
-                valueMin.timestep = timestep;
-                valueMax.timestep = timestep;
-                minMaxDataCompJob[k][i] = [valueMin, valueMax]
-                jobarrdata[k][i] = (value);
-            })
-        })
+        // Object.keys(_jobarrdata).forEach(k => {
+        //     _jobarrdata[k].forEach((d, i) => {
+        //         debugger
+        //         const timestep = _jobarrdata[k][i][0].timestep;
+        //         // let valueMin = [];
+        //         // let valueMax = [];
+        //         let value = _jobarrdata[k][i][0].map((d, si) => {
+        //             // const vals = _jobarrdata[k][i].map(d => d[si]);
+        //             // valueMin.push(d3.min(vals));
+        //             // valueMax.push(d3.max(vals));
+        //             let sum = 0;
+        //             let total = 0;
+        //             _jobarrdata[k][i].forEach(d => {
+        //                 debugger
+        //                 if (d[si] !== undefined) {
+        //                     const val = computers[d.name].cpus[i][k];
+        //                     sum += d[si] * val;
+        //                     total += val;
+        //                 }
+        //             });
+        //             // if(total&& _.isNaN(sum/total))
+        //             //     debugger
+        //             if (!total)
+        //                 return undefined;
+        //             else
+        //                 return sum / total;
+        //             // return  d3.mean(vals);
+        //         });
+        //         value.name = k;
+        //         // valueMin.name = k;
+        //         // valueMax.name = k;
+        //         value.timestep = timestep;
+        //         // valueMin.timestep = timestep;
+        //         // valueMax.timestep = timestep;
+        //         // minMaxDataCompJob[k][i] = [valueMin, valueMax]
+        //         jobarrdata[k][i] = (value);
+        //     })
+        // })
 
+        // Object.keys(_userarrdata).forEach(k => {
+        //     _userarrdata[k].forEach((d, i) => {
+        //         const timestep = _userarrdata[k][i][0].timestep;
+        //         // let valueMin = [];
+        //         // let valueMax = [];
+        //         let value = _userarrdata[k][i][0].map((d, si) => {
+        //             const vals = _userarrdata[k][i].map(d => d[si]);
+        //             // valueMin.push(d3.min(vals));
+        //             // valueMax.push(d3.max(vals));
+        //             return d3.mean(vals);
+        //         });
+        //         value.name = k;
+        //         // valueMin.name = k;
+        //         // valueMax.name = k;
+        //         value.timestep = timestep;
+        //         // valueMin.timestep = timestep;
+        //         // valueMax.timestep = timestep;
+        //         // minMaxDataUser[k][i] = [valueMin, valueMax]
+        //         userarrdata[k][i] = (value);
+        //     })
+        // })
         Object.keys(_userarrdata).forEach(k => {
             _userarrdata[k].forEach((d, i) => {
                 const timestep = _userarrdata[k][i][0].timestep;
-                let valueMin = [];
-                let valueMax = [];
+                debugger
                 let value = _userarrdata[k][i][0].map((d, si) => {
                     const vals = _userarrdata[k][i].map(d => d[si]);
-                    valueMin.push(d3.min(vals));
-                    valueMax.push(d3.max(vals));
                     return d3.mean(vals);
                 });
                 value.name = k;
-                valueMin.name = k;
-                valueMax.name = k;
                 value.timestep = timestep;
-                valueMin.timestep = timestep;
-                valueMax.timestep = timestep;
-                minMaxDataUser[k][i] = [valueMin, valueMax]
+                debugger
                 userarrdata[k][i] = (value);
             })
         })
         data.sort((a, b) => +a.range[0] - b.range[0])
-        return {jobTimeline: data, jobarrdata, userarrdata, _userarrdata, minMaxDataCompJob, minMaxDataUser};
+        return {jobTimeline: data, jobarrdata, userarrdata, _userarrdata};//, minMaxDataCompJob, minMaxDataUser};
     }
 
     function handleDataComputeByUser(computers, jobs, timeStamp) {
@@ -971,8 +1005,8 @@ function DataProcss({onLoad, theme, _data}) {
             let totalCore = 0;
             let totalCore_share = 0;
             let totalCore_notShare = 0;
-
-            const node = _.uniq(_.flattenDeep(u[1].map(e => e[1].map(d => {
+            const nodeObj = {};
+            u[1].map(e => e[1].map(d => {
                 job.push(d[0]);
                 const core = d[1].cpus * (d[1].finish_Index - d[1].start_Index + 1);
                 totalCore += core;
@@ -985,8 +1019,9 @@ function DataProcss({onLoad, theme, _data}) {
                         }
                     })
                 }
-                return d[1].node_list;
-            }))));
+                d[1].node_list.forEach(n=>nodeObj[n]=true);
+            }));
+            const node = Object.keys(nodeObj);
             totalCore = totalCore / timestep;
             totalCore_notShare = totalCore_notShare / timestep;
             totalCore_share = totalCore_share / timestep;

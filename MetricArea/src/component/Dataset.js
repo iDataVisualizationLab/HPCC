@@ -7,7 +7,10 @@ export default function Dataset({onChange,onLoad,onError}) {
     const [datalist,setDatalist] = useState({
         'April 17-18 2022':'./data/nocona_24h.json',
         'Jieoyao use case':'./data/nocona-jieoyao.json',
-        '1 week':'./data/nocona_1week_update.json',
+        'May 6-13 2022':'./data/nocona_1week_update.json',
+        'Jun 3-10 2022':'./data/nocona_1weeks_update.json',
+        '2 week':'./data/nocona_2weeks.json',//'https://www.myweb.ttu.edu/ngu00336/data/hpcc/nocona_2weeks.json',
+        '1 month':'./data/nocona_4weeks.json',
         'Real-time':'realtime',
     });
     const [past,setPast] = useState('');
@@ -36,17 +39,37 @@ export default function Dataset({onChange,onLoad,onError}) {
                 if (past!==val) {
                     onLoad('Load historical data');
 
-                    d3.json(val).then(_data => {
-
-                        onChange(_data);
-                        setPast(val);
+                    fetch(val, {
+                        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response=>{
+                        response.json().then(_data=>{
+                            onChange(_data);
+                            setPast(val);
+                        })
                     }).catch(e => {
 
-                            onError({level: "error", message: "Couldn't load data"})
-                            onLoad(false);
-                            setCurrentDataset({currentDataset:past})
+                        onError({level: "error", message: "Couldn't load data"})
+                        onLoad(false);
+                        setCurrentDataset({currentDataset:past})
 
-                    })
+                    });
+
+
+                    // d3.json(val).then(_data => {
+                    //
+                    //     onChange(_data);
+                    //     setPast(val);
+                    // }).catch(e => {
+                    //
+                    //         onError({level: "error", message: "Couldn't load data"})
+                    //         onLoad(false);
+                    //         setCurrentDataset({currentDataset:past})
+                    //
+                    // })
                 }
             }
         }, label:"Current"
