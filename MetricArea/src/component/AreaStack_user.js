@@ -13,7 +13,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import useMeasure from 'react-use-measure'
 import { motion ,AnimatePresence } from 'framer-motion'
 
-var outerHeight = 110,
+let outerHeight = 110,
     margin = {
         top: 0,
         right: 1,
@@ -30,15 +30,15 @@ var outerHeight = 110,
 let init_outerWidth = 60;
 let init_width = init_outerWidth-margin.left-margin.right
 
-var x = d3.scaleLinear()
+let x = d3.scaleLinear()
     .rangeRound([0, init_width]);
 
-var y = d3.scaleLinear()
+let y = d3.scaleLinear()
     .rangeRound([height, 0]);
 
 
 
-var area = d3.area()
+let area = d3.area()
     .curve(d3.curveStepAfter)
     .x(function(d) {
         return x(d.data.timeIndex);
