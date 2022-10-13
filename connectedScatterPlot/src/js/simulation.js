@@ -4,7 +4,7 @@ class Simulation {
     interval=1000;
     integrate=1.5*60*1000;
     index=0;
-    #currentTime;
+    currentTime;
     isRealTime; userDict={}; userReverseDict={};
     query;
     callbackStop = ()=>{};
@@ -16,26 +16,23 @@ class Simulation {
     constructor(url) {
         this.isRealTime = !url;
         if (!this.isRealTime) {
-            console.time('load data')
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
-                d3.keys(data.jobs_info).forEach(jID=>{
-                    // if (!this.userDict[data.jobs_info[jID].user_name])
-                    //     this.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(this.userDict).length;
-                    // data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
-                    data.jobs_info[jID].node_list_obj = {};
-                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>{
-                        let split = c.split('-');
-                        data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
-                        return split[0];
-                    });
+                d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name] && !this.userReverseDict[data.jobs_info[jID].user_name]){
+                    const encoded =  'user'+d3.keys(this.userDict).length;
+                    this.userDict[data.jobs_info[jID].user_name] = encoded;
+                    this.userReverseDict[encoded] = data.jobs_info[jID].user_name;
+                    data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                }else if (!this.userReverseDict[data.jobs_info[jID].user_name]){
+                    data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
+                }
+                    data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
                         if (data.jobs_info[jID].finish_time && data.jobs_info[jID].finish_time>9999999999999)
                             data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
                 });
-                console.timeEnd('load data')
                 this.data = data;
                 this.onTimeChange.forEach(function(listener) {
                     listener(d3.extent(data.time_stamp));
@@ -72,7 +69,7 @@ class Simulation {
                 updatePromise = updatePromise.then(listener);
             });
             this.onUpdateTime.forEach(function (listener) {
-                updatePromise = updatePromise.then(() => listener(self.#currentTime));
+                updatePromise = updatePromise.then(() => listener(self.currentTime));
             });
         }else{
             this.stop()
@@ -97,8 +94,8 @@ class Simulation {
     }
     requestFromData(index){
         const self = this;
-       return new Promise((resolve,refuse)=>{
-           let timer;
+        return new Promise((resolve,refuse)=>{
+            let timer;
             if (!this.data){
                 timer = d3.interval(update,100);
             }
@@ -122,20 +119,20 @@ class Simulation {
                         })
                     });
                     const time_stamp = [currentTime];
-                    self.#currentTime = currentTime;
+                    self.currentTime = currentTime;
                     self.index ++;
                     resolve({jobs_info, nodes_info, time_stamp,currentTime})
 
                 }
             }
-       });
+        });
     }
     getRunningJob(currentTime){
         return {}
     }
     requestFromURL(start,end){
         const self = this;
-       // todo need method to cancle
+        // todo need method to cancle
         console.time('request time: ')
         const _end = end??new Date(); //'2020-02-14T12:00:00-05:00'
         let _start = start??new Date(_end - self.interval); //'2020-02-14T18:00:00-05:
@@ -158,7 +155,7 @@ class Simulation {
                         data.jobs_info[jID].finish_time = data.jobs_info[jID].finish_time/1000000}
             })
             data.currentTime = _.last(data.time_stamp);
-            self.#currentTime = data.currentTime;
+            self.currentTime = data.currentTime;
             self.data = data;
             console.timeEnd('request time: ')
             return data;
