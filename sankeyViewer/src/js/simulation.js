@@ -18,6 +18,10 @@ class Simulation {
         if (!this.isRealTime) {
             console.time('load data')
             let updatePromise=(_.isString(url)?d3.json(url):url).then((data) => {
+                let handleCore = (c,n)=>c/n;
+                // FIX THIS LATER
+                if (data.cpu_cores)
+                    handleCore = 1;
                 data.time_stamp = data.time_stamp.map(d=>new Date(d/1000000));
                 d3.keys(data.jobs_info).forEach(jID=>{if (!this.userDict[data.jobs_info[jID].user_name] && !this.userReverseDict[data.jobs_info[jID].user_name]){
                          const encoded =  'user'+d3.keys(this.userDict).length;
@@ -29,9 +33,11 @@ class Simulation {
                }
                     data.jobs_info[jID].node_list_obj = {};
                     data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>{
-                        let split = c.split('-');
-                        data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
-                        return split[0];
+                        // let split = c.split('-');
+                        // data.jobs_info[jID].node_list_obj[split[0]] = +split[1];
+                        // return split[0];
+                        data.jobs_info[jID].node_list_obj[c] = Math.round(handleCore(data.jobs_info[jID].cpu_cores,data.jobs_info[jID].node_list.length));
+                        return c;
                     });
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000

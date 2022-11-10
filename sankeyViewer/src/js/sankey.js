@@ -390,6 +390,7 @@ let Sankey = function(){
             });
             graph_ = {nodes, links};
             console.log('#links: ',graph_.links.length);
+            debugger
             let isAnimate = true;
             if (links.length>400)
                 isAnimate = false;
