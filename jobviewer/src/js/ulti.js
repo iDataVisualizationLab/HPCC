@@ -256,7 +256,7 @@ function getUrl({_start,_end,interval,value,compress}){
     interval = interval||'5m';
     value = value||'max';
     compress = compress||false;
-    const url = `https://influx.ttu.edu:8080/v1/metrics?start=${start}&end=${end}&interval=${interval}&value=${value}&compress=${compress}`;
+    const url = `https://hugo.hpcc.ttu.edu:5000/v2/metricsbuilder/nocona?start=${start}&end=${end}&interval=${interval}&value=${value}&compression=${compress}`;
     return url;
 }
 
