@@ -1,7 +1,7 @@
 //parametter
 const COMPUTE = 'nodes_info';
 const JOB = 'jobs_info';
-const JOBNAME = 'job_name';
+let JOBNAME = 'job_name';
 const USER = 'user_name';
 
 const timeFormat = d3.timeFormat('%Y-%m-%dT%H:%M:%S-05:00');

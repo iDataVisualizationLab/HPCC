@@ -56,7 +56,7 @@ function handleDataUrl(dataRaw) {
         }
     });
     d3.keys(dataRaw.jobs_info).forEach(jID=>{
-        dataRaw.jobs_info[jID].node_list = dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+        dataRaw.jobs_info[jID].node_list = (dataRaw.jobs_info[jID].node_list??dataRaw.jobs_info[jID].nodes).map(c=>c);//dataRaw.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
         if(dataRaw.jobs_info[jID].start_time>9999999999999)
         {dataRaw.jobs_info[jID].start_time = dataRaw.jobs_info[jID].start_time/1000000
         dataRaw.jobs_info[jID].submit_time = dataRaw.jobs_info[jID].submit_time/1000000
@@ -84,6 +84,9 @@ function handleDataUrl(dataRaw) {
         ser.forEach(s => sampleh[h.name][s] = []);
         alternative_service.forEach((sa, si) => {
             var scale = alternative_scale[si];
+            if (!_.isArray(data[h.ip][sa])){
+                data[h.ip][sa] = [];
+            }
             sampleh.timespan.forEach((dt, ti) => {
                 let value = [];
                 if (!_.isArray(data[h.ip][sa][ti])){

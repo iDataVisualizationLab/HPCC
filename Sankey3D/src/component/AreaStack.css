@@ -1,0 +1,47 @@
+#g-chart .year {
+    fill: #777;
+    font-size: 11px;
+}
+#g-chart .decade {
+    font-weight: bold;
+}
+#g-chart .overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+#g-focus {
+    display: none;
+    pointer-events: none;
+}
+#g-chart .tooltip {
+    font-size: 11px;
+}
+#g-chart svg {
+    overflow: visible;
+    display: inline-block;
+}
+#g-chart .title {
+    font-size: 13px;
+    cursor: pointer;
+}
+#g-chart .title:hover {
+    font-weight: bold;
+}
+.legendCell{
+    align-items: center;
+    display: flex;
+}
+.legendCell span{
+    margin-left: 2px;
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+    display: inline-block;
+}
+.notransition {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+}

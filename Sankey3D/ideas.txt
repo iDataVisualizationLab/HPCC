@@ -1,0 +1,2 @@
+divide area chart to jobs (like sankey)?
+order area chart by value and reduce space?

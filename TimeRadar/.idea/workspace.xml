@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3dbfa8ac-6280-46ee-a20a-5f3758b5efc6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/setting.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../jobviewer/src/js/simulation.js" beforeDir="false" afterPath="$PROJECT_DIR$/../jobviewer/src/js/simulation.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -19,27 +21,24 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="JsFlowSettings">
-    <service-enabled>true</service-enabled>
-    <exe-path />
-    <other-services-enabled>true</other-services-enabled>
-    <auto-save>true</auto-save>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="1exuS5HcrSMLJXNUjrrBzcaCbLR" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="Settings.JavaScript" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/STORE/project/HPCC",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RunManager">
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:64320/jobList/index.html">
       <method v="2" />
@@ -62,6 +61,7 @@
       </list>
     </option>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -74,17 +74,12 @@
       <updated>1566679538816</updated>
       <workItem from="1566679540149" duration="45941000" />
       <workItem from="1595275563843" duration="8722000" />
+      <workItem from="1671191619755" duration="182000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="452" y="134" width="631" height="556" key="find.popup" timestamp="1595287737520">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state x="452" y="134" width="631" height="556" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1595287737520" />
+    <option name="version" value="3" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
