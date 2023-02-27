@@ -4,5 +4,7 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/MetricArea" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/buildLib/ng-copy-text" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/squeue" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/squeuev2" vcs="Git" />
   </component>
 </project>

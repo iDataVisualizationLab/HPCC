@@ -1,0 +1,1 @@
+{"version":3,"file":"static/js/123.ebc7b913.chunk.js","mappings":"uJAIA,UAJc,WACV,OAAO,yBAAK,kCAChB,C","sources":["views/about/index.js"],"sourcesContent":["const About = ()=>{\r\n    return <div>ABOUT US! Project introduction</div>\r\n}\r\n\r\nexport default About"],"names":[],"sourceRoot":""}
