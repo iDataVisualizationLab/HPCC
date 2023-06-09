@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --bg-primary: 7, 89, 133;
+        --bg-secondary: 245, 246, 247;
+        --bg-tertiary: 238, 238, 238;
+
+        --text-primary: 0, 0, 0;
+        --text-secondary: 56, 63, 74;
+        --text-tertiary: 255, 255, 255;
+    }
+}

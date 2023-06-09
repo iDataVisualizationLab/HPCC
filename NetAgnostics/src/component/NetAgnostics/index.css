@@ -1,0 +1,58 @@
+svg * {
+    transition: all 0.5s;
+}
+svg text {
+    font-size: 12px;
+}
+
+.lensing text.timeticks {
+    font-size: 8px;
+}
+
+.lensing .focus text.timeticks {
+    font-size: 12px;
+}
+
+path.layerTopAbove {
+    stroke: rgb(0, 0, 0);
+    stroke-width: 0;
+    stroke-opacity: 0.5;
+    fill-opacity: 0.2;
+    fill: rgb(0, 170, 0);
+}
+rect.boxplotRectAbove {
+    stroke: rgb(0, 0, 0);
+    stroke-width: 1;
+    stroke-opacity: 0.5;
+    fill: rgb(0, 170, 0);
+    fill-opacity: 1;
+}
+rect.boxplotRectBelow {
+    stroke: rgb(0, 0, 0);
+    stroke-width: 1;
+    stroke-opacity: 0.5;
+    fill: rgb(187, 0, 102);
+    fill-opacity: 1;
+}
+path.layerTopBelow {
+    stroke: rgb(0, 0, 0);
+    stroke-width: 0;
+    stroke-opacity: 0.5;
+    fill-opacity: 0.2;
+    fill: rgb(187, 0, 102);
+}
+
+.boxplotLine {
+    stroke: #000;
+    stroke-width:1;
+    stroke-opacity:0.75;
+}
+
+path.layerAreaProfile {
+    fill: red;
+    fill-opacity: 0.2;
+}
+
+path.layerLineProfile {
+    fill: none;
+}
