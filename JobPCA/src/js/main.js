@@ -23,6 +23,7 @@ $(document).ready(function(){
     // request = new LoadShap('src/data/shap_username.csv');
 
     handleDatabyUser('../HiperView/data/814_821_2020.json',(data)=>{
+    // handleDatabyUser('src/data/nocona_2023-05-01-2023-05-03.json',(data)=>{
         request = new LoadShap(new Promise((resolutionFunc)=>resolutionFunc(data)));
         initMenu();
         initClusterUI();
@@ -30,7 +31,6 @@ $(document).ready(function(){
         request.onFinishQuery.push(queryData);
         request.onDataChange.push(request.request.bind(request))
     })
-    debugger
 
     // initMenu();
     // initClusterUI();

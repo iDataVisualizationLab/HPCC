@@ -18,18 +18,41 @@ function handleDatabyUser(url,callBack){
     const userDict={};
     const userReverseDict={};
     d3.json(url).then(_data=>{
-        d3.keys(_data.jobs_info).forEach(jID=>{if (!userDict[_data.jobs_info[jID].user_name] && !userReverseDict[_data.jobs_info[jID].user_name]){
-            const encoded =  'user'+d3.keys(userDict).length;
-            userDict[_data.jobs_info[jID].user_name] = encoded;
-            userReverseDict[encoded] = _data.jobs_info[jID].user_name;
-            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
-        }else if (!userReverseDict[_data.jobs_info[jID].user_name]){
-            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
-        }if (!userDict[_data.jobs_info[jID].user_name])
-            userDict[_data.jobs_info[jID].user_name] = 'user'+d3.keys(userDict).length;
-            _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
-            _data.jobs_info[jID].node_list = _data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
-        });
+        if (_data.jobs_info && _data.jobs_info["base64(zip(o))"]){
+            Object.keys(_data).forEach(k=>{
+                if (_data[k]["base64(zip(o))"]){
+                    _data[k] = JSON.parse(pako.inflate(base64ToBuffer(_data[k]['base64(zip(o))']), { to: 'string' }));
+                }
+            })
+        }
+        else if (_data["base64(zip(o))"]){
+            _data = JSON.parse(pako.inflate(base64ToBuffer(_data['base64(zip(o))']), { to: 'string' }));
+        }
+        // fill in
+        Object.keys(_data[COMPUTE]).forEach(comp=>{
+            if (!_data[COMPUTE][comp].job_id)
+                _data[COMPUTE][comp].job_id = [];
+            else
+                _data[COMPUTE][comp].job_id = _data[COMPUTE][comp].job_id.map(j=>(j??[]).map(jid=>''+jid));
+        })
+
+        d3.keys(_data.jobs_info).forEach(jID=>{
+            _data.jobs_info[jID].finish_time = _data.jobs_info[jID].finish_time??_data.jobs_info[jID].end_time;
+            _data.jobs_info[jID].job_name = ''+(_data.jobs_info[jID].job_name??_data.jobs_info[jID].name);
+            if (!userDict[_data.jobs_info[jID].user_name] && !userReverseDict[_data.jobs_info[jID].user_name]){
+                const encoded =  'user'+d3.keys(userDict).length;
+                userDict[_data.jobs_info[jID].user_name] = encoded;
+                userReverseDict[encoded] = _data.jobs_info[jID].user_name;
+                _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+            }else if (!userReverseDict[_data.jobs_info[jID].user_name]){
+                _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+            }if (!userDict[_data.jobs_info[jID].user_name])
+                userDict[_data.jobs_info[jID].user_name] = 'user'+d3.keys(userDict).length;
+                _data.jobs_info[jID].user_name = userDict[_data.jobs_info[jID].user_name];
+                // _data.jobs_info[jID].node_list = (_data.jobs_info[jID].node_list??_data.jobs_info[jID].nodes??[]).map(c=>c.split('-')[0]); //slip old
+                _data.jobs_info[jID].node_list = (_data.jobs_info[jID].node_list??[]).slice();
+            }
+        );
 
 
         const dataurl = handleDataUrl(_data);
@@ -73,21 +96,25 @@ function summaryByUser(data) {
     const users = {};
     Object.keys(data[COMPUTE]).forEach(comp => {
         data.time_stamp.forEach((t, ti) => {
-            data[COMPUTE][comp].job_id[ti].forEach(jid => {
-                if (data[JOB][jid].finish_time && (data[JOB][jid].start_time>=(data.time_stamp[0]/1000000))){
-                    const user_name = data[JOB][jid].user_name;
-                    if (!users[user_name]) {
-                        users[user_name] = {id: user_name, comps: {}, time: {},value:{job:{}}, values: []}
+            (data[COMPUTE][comp].job_id[ti]??[]).forEach(jid => {
+                try {
+                    if (data[JOB][jid].finish_time && (data[JOB][jid].start_time >= (data.time_stamp[0] / 1000000))) {
+                        const user_name = data[JOB][jid].user_name;
+                        if (!users[user_name]) {
+                            users[user_name] = {id: user_name, comps: {}, time: {}, value: {job: {}}, values: []}
+                        }
+                        users[user_name].value.job[jid] = data[JOB][jid];
+                        if (!users[user_name].comps[comp]) {
+                            users[user_name].comps[comp] = [];
+                        }
+                        if (!users[user_name].comps[comp][ti]) {
+                            users[user_name].values.push(tsnedata[comp][ti])
+                            users[user_name].comps[comp][ti] = tsnedata[comp][ti];
+                            users[user_name].time[ti] = true;
+                        }
                     }
-                    users[user_name].value.job[jid]=data[JOB][jid];
-                    if (!users[user_name].comps[comp]) {
-                        users[user_name].comps[comp] = [];
-                    }
-                    if (!users[user_name].comps[comp][ti]) {
-                        users[user_name].values.push(tsnedata[comp][ti])
-                        users[user_name].comps[comp][ti] = tsnedata[comp][ti];
-                        users[user_name].time[ti] = true;
-                    }
+                }catch (e){
+                    // missing job info
                 }
             });
         });
@@ -112,39 +139,48 @@ function summaryByJob(data) {
     const nodes = {};
     const user = {};
     const node_jobs = {};
+    const missingJoblist = {};
     Object.keys(data[COMPUTE]).forEach(comp => {
         data.time_stamp.forEach((t, ti) => {
-            data[COMPUTE][comp].job_id[ti].forEach(jid => {
-                if (data[JOB][jid].finish_time && (data[JOB][jid].start_time>=(data.time_stamp[0]/1000000))) {
-                    // const jobID_Main = jid.split('.')[0];
-                    const jobID_Main = data[JOB][jid].job_name.split('batch')[0]+'||'+data[JOB][jid].user_name;
-                    if (!user[data[JOB][jid].user_name])
-                        user[data[JOB][jid].user_name] = {};
-                    if (!user[data[JOB][jid].user_name][jobID_Main])
-                        user[data[JOB][jid].user_name][jobID_Main] = {job:{}};
-                    user[data[JOB][jid].user_name][jobID_Main].job[jid] = data[JOB][jid];
-                    if (!jobs[jobID_Main]) {
-                        jobs[jobID_Main] = {id: jobID_Main, comps: {}, time: {}, values: []}
-                    }
-                    if (!jobs[jobID_Main].comps[comp]) {
-                        jobs[jobID_Main].comps[comp] = [];
-                        nodes[comp+'||'+jobID_Main] = {id: comp+'||'+jobID_Main, job:jobID_Main,time: {}, values: []};
-                        node_jobs[comp+'||'+jobID_Main]={};
-                    }
-                    node_jobs[comp+'||'+jobID_Main][jid.split('.')[0]] = 1;
-                    if (!jobs[jobID_Main].comps[comp][ti]) {
-                        jobs[jobID_Main].values.push(tsnedata[comp][ti]);
-                        jobs[jobID_Main].comps[comp][ti] = tsnedata[comp][ti];
-                        jobs[jobID_Main].time[ti] = true;
+            (data[COMPUTE][comp].job_id[ti]??[]).forEach(jid => {
+                try {
+                    if (data[JOB][jid].finish_time && (data[JOB][jid].start_time >= (data.time_stamp[0] / 1000000))) {
+                        // const jobID_Main = jid.split('.')[0];
+                        const jobID_Main = data[JOB][jid].job_name.split('batch')[0] + '||' + data[JOB][jid].user_name;
+                        if (!user[data[JOB][jid].user_name])
+                            user[data[JOB][jid].user_name] = {};
+                        if (!user[data[JOB][jid].user_name][jobID_Main])
+                            user[data[JOB][jid].user_name][jobID_Main] = {job: {}};
+                        user[data[JOB][jid].user_name][jobID_Main].job[jid] = data[JOB][jid];
+                        if (!jobs[jobID_Main]) {
+                            jobs[jobID_Main] = {id: jobID_Main, comps: {}, time: {}, values: []}
+                        }
+                        if (!jobs[jobID_Main].comps[comp]) {
+                            jobs[jobID_Main].comps[comp] = [];
+                            nodes[comp + '||' + jobID_Main] = {
+                                id: comp + '||' + jobID_Main,
+                                job: jobID_Main,
+                                time: {},
+                                values: []
+                            };
+                            node_jobs[comp + '||' + jobID_Main] = {};
+                        }
+                        node_jobs[comp + '||' + jobID_Main][jid.split('.')[0]] = 1;
+                        if (!jobs[jobID_Main].comps[comp][ti]) {
+                            jobs[jobID_Main].values.push(tsnedata[comp][ti]);
+                            jobs[jobID_Main].comps[comp][ti] = tsnedata[comp][ti];
+                            jobs[jobID_Main].time[ti] = true;
 
-                        nodes[comp+'||'+jobID_Main].values.push(tsnedata[comp][ti]);
-                        nodes[comp+'||'+jobID_Main].time[ti] = true;
+                            nodes[comp + '||' + jobID_Main].values.push(tsnedata[comp][ti]);
+                            nodes[comp + '||' + jobID_Main].time[ti] = true;
+                        }
                     }
+                }catch (e){
+                    missingJoblist[jid] = [comp,ti]
                 }
             });
         });
     });
-
     let blackList = {};
     let topUser = Object.keys(user).map(k=>({user:k,jobs:Object.keys(user[k]).length})).sort((a,b)=>b.jobs-a.jobs).slice(0,5);
     topUser

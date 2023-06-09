@@ -8,6 +8,7 @@ function TTUsetting(){
     alternative_service = ["cpu_inl_temp", "memory_usage", "fan_speed", "power_usage"];
     alternative_scale = [1,1,1,0.5];
 }
+
 let colorScaleList = {
     n: 7,
     rainbow: ["#000066", "#4400ff", "#00ddff", "#00ddaa", "#00dd00", "#aadd00", "#ffcc00", "#ff8800", "#ff0000", "#660000"],
@@ -85,6 +86,8 @@ function handleDataUrl(dataRaw) {
             var scale = alternative_scale[si];
             sampleh.timespan.forEach((dt, ti) => {
                 let value = [];
+                if (!data[h.ip][sa])
+                    data[h.ip][sa] = [];
                 if (!_.isArray(data[h.ip][sa][ti])){
                     data[h.ip][sa][ti] = [data[h.ip][sa][ti]]
                 }
