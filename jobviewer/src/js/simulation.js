@@ -31,8 +31,10 @@ class Simulation {
                }else if (!this.userReverseDict[data.jobs_info[jID].user_name]){
                          data.jobs_info[jID].user_name = this.userDict[data.jobs_info[jID].user_name];
                }
-                    data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c);
-                    // data.jobs_info[jID].node_list = data.jobs_info[jID].node_list.map(c=>c.split('-')[0]);
+                    if ((data.jobs_info[jID].node_list??data.jobs_info[jID].nodes)[0].split('-').length===2)
+                        data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c.split('-')[0]);
+                    else
+                        data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c);
                     if(data.jobs_info[jID].start_time>9999999999999)
                     {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                         data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
@@ -159,8 +161,10 @@ class Simulation {
                 if (!self.userDict[data.jobs_info[jID].user_name])
                     self.userDict[data.jobs_info[jID].user_name] = 'user'+d3.keys(self.userDict).length;
                 data.jobs_info[jID].user_name = self.userDict[data.jobs_info[jID].user_name];
-                // data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c.split('-')[0]);
-                data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c);
+                if ((data.jobs_info[jID].node_list??data.jobs_info[jID].nodes)[0].split('-').length===2)
+                    data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c.split('-')[0]);
+                else
+                    data.jobs_info[jID].node_list = (data.jobs_info[jID].node_list??data.jobs_info[jID].nodes).map(c=>c);
                 if(data.jobs_info[jID].start_time>9999999999999)
                 {data.jobs_info[jID].start_time = data.jobs_info[jID].start_time/1000000
                     data.jobs_info[jID].submit_time = data.jobs_info[jID].submit_time/1000000
