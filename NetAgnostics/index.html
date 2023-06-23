@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Net Agnostics</title>
+
+    <!--    <script src="src/lib/jquery-3.2.1.min.js"></script>-->
+    <link rel="icon" href="src/favicon.png" type="image/gif">
+    <script src="bower_components/jquery-3.5.1.min/index.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7z0Kn8nFbYfeHcvAu/tx6d6mrLe/90mkCxO+RcptyYpksUz35EO337F83bZwcmUyHiHamspkfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="src/lib/dragula.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+    <script src="src/lib/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="src/DataTables/datatables.min.js"></script>
+    <script src="//cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="cover" style="padding:12.5%">
+    <div class="progress" style="margin-top: 20%;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
+    <h3 class="text-center processText">Center aligned text on all viewport sizes.</h3>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidenav" class="bg-light sidebar">
+            <div class="sidebar-sticky pt-3">
+                <img src="../HiperView/images/TTUlogo.png" width="140" height="35" alt="" style="margin-left: 15px">
+                <ul class="nav flex-column accordion" id="menu" style="margin-top: 50px">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-book"
+                                 fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869zM1 2.82v9.908c.846-.343 1.944-.672 3.074-.788 1.143-.118 2.387-.023 3.426.56V2.718c-1.063-.929-2.631-.956-4.09-.664A11.958 11.958 0 0 0 1 2.82z"/>
+                                <path fill-rule="evenodd"
+                                      d="M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z"/>
+                            </svg>
+                            <span>How to use</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-server" viewBox="0 0 16 16">
+                                <path d="M1.333 2.667C1.333 1.194 4.318 0 8 0s6.667 1.194 6.667 2.667V4c0 1.473-2.985 2.667-6.667 2.667S1.333 5.473 1.333 4V2.667z"/>
+                                <path d="M1.333 6.334v3C1.333 10.805 4.318 12 8 12s6.667-1.194 6.667-2.667V6.334c-.43.32-.931.58-1.458.79C11.81 7.684 9.967 8 8 8c-1.967 0-3.81-.317-5.21-.876a6.508 6.508 0 0 1-1.457-.79z"/>
+                                <path d="M14.667 11.668c-.43.319-.931.578-1.458.789-1.4.56-3.242.876-5.209.876-1.967 0-3.81-.316-5.21-.876a6.51 6.51 0 0 1-1.457-.79v1.666C1.333 14.806 4.318 16 8 16s6.667-1.194 6.667-2.667v-1.665z"/>
+                            </svg>
+                            <span><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#datasetSelection" >
+                                Change dataset
+                            </button></span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleControlpanel()">
+                            <svg width="17" height="17" id="windownToggleIcon" viewBox="0 0 16 16"
+                                 class="bi bi-window feather" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M14 2H2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H2z"/>
+                                <path fill-rule="evenodd" d="M15 6H1V5h14v1z"/>
+                                <path d="M3 3.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1.5 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1.5 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                                <path class="slash" fill-rule="evenodd" d="M0 0H1L16 16H15z"/>
+                            </svg>
+                            <span>Toggle Control panel window</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="controlsHead" class="nav-link collapsed" href="#" data-toggle="collapse"
+                           data-target="#controls" data-action="#controlOnToolbar" aria-expanded="true"
+                           aria-controls="controls">
+                            <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-tools"
+                                 fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M0 1l1-1 3.081 2.2a1 1 0 0 1 .419.815v.07a1 1 0 0 0 .293.708L10.5 9.5l.914-.305a1 1 0 0 1 1.023.242l3.356 3.356a1 1 0 0 1 0 1.414l-1.586 1.586a1 1 0 0 1-1.414 0l-3.356-3.356a1 1 0 0 1-.242-1.023L9.5 10.5 3.793 4.793a1 1 0 0 0-.707-.293h-.071a1 1 0 0 1-.814-.419L0 1zm11.354 9.646a.5.5 0 0 0-.708.708l3 3a.5.5 0 0 0 .708-.708l-3-3z"/>
+                                <path fill-rule="evenodd"
+                                      d="M15.898 2.223a3.003 3.003 0 0 1-3.679 3.674L5.878 12.15a3 3 0 1 1-2.027-2.027l6.252-6.341A3 3 0 0 1 13.778.1l-2.142 2.142L12 4l1.757.364 2.141-2.141zm-13.37 9.019L3.001 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026z"/>
+                            </svg>
+                            <span>Controls <svg width="14" height="14" viewBox="0 0 16 16"
+                                                class="bi bi-chevron-right arrow" fill="currentColor"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg></span>
+                        </a>
+                        <div id="controls" class="collapse" aria-labelledby="controlsHead"
+                             data-action="#controlOnToolbar" data-parent="#menu">
+                            <div class="card-body row" id="controlHolderMenu">
+
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a id="analyticsHead" class="nav-link collapsed" href="#" data-toggle="collapse"
+                           data-target="#analytic" data-action="#analyticOnToolbar" aria-expanded="true"
+                           aria-controls="analytic">
+                            <svg width="17" height="17" viewBox="0 0 16 16" class="feather bi bi-bar-chart-fill"
+                                 fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="4" height="5" x="1" y="10" rx="1"/>
+                                <rect width="4" height="9" x="6" y="6" rx="1"/>
+                                <rect width="4" height="14" x="11" y="1" rx="1"/>
+                            </svg>
+                            <span>Analytics <svg width="14" height="14" viewBox="0 0 16 16"
+                                                 class="bi bi-chevron-right arrow" fill="currentColor"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg></span>
+                        </a>
+                        <div id="analytic" class="collapse" data-action="#analyticOnToolbar"
+                             aria-labelledby="controlsHead" data-parent="#menu">
+                            <div id="analyticHolderMenu">
+
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <main>
+            <nav class="navbar navbar-light bg-light ">
+                <a class="navbar-brand" href="#">
+                    Net Agnostics
+                </a>
+                <form class="form-inline">
+                    <ul class="nav" style="padding-right: 10px">
+                        <li class="theme shadow" value="slate" style="background-color: #272B30"
+                            onclick="loadTheme(event)"></li>
+                        <li class="theme shadow" value="solar" style="background-color: #002B36"
+                            onclick="loadTheme(event)"></li>
+                        <li class="theme shadow" value="" style="background-color: #ffffff"
+                            onclick="loadTheme(event)"></li>
+                        <li class="theme shadow" value="spacelab"
+                            style="background-image: linear-gradient(white, #eee 50%, #bebebe);"
+                            onclick="loadTheme(event)"></li>
+                        <li class="theme shadow" value="yeti" style="background-color: #008cba"
+                            onclick="loadTheme(event)"></li>
+                        <li class="theme shadow" value="united" style="background-color: #E95420"
+                            onclick="loadTheme(event)"></li>
+                    </ul>
+                    <ul class="nav nav-pills" id='navMode'>
+                        <li class="nav-item demo">
+                            <a class="nav-link active" href="index.html" target="_blank">Historical Data</a>
+                        </li>
+                        <li class="nav-item realtime">
+                            <a class="nav-link" href="index.html?mode=realTime" target="_blank">RealTime</a>
+                        </li>
+                    </ul>
+                </form>
+            </nav>
+            <div class="row" id="circularLayoutHolder"
+                 style="position: relative;height: calc(100vh - 50px);width: 100%; margin: 0px">
+                <!--        <div id="circularLayoutHolder" style="height: 100%;width: 100%">-->
+
+                <!--                    <h5 class="text-center" style="width:100%" >Sankey by <span id="ganttLayoutLabel">#CPU Cores</span></h5>-->
+                <div id="dynamicHolder" style="width:100%;height:100%; position: relative">
+                    <svg id="axisTime"></svg>
+                    <svg id="mainContent"></svg>
+                </div>
+
+                <div id="legendHolder" class="position-absolute card windown" style="top:0px;width: 320px; ;left: 70%">
+                    <div class="card-header all-scroll ">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle"
+                             fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                  d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                            <path fill-rule="evenodd" transform="translate(5,0)"
+                                  d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        </svg>
+                        Control panel
+                        <nav class="window-controls float-right auto">
+                            <div class="minimize" data-toggle="tooltip" data-placement="top" title="minimize"
+                                 onclick="minimizeToolbar()">
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-dash" fill="currentColor"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M3.5 8a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/>
+                                </svg>
+                            </div>
+                        </nav>
+                    </div>
+                    <div style="max-height: 80vh; overflow-y: auto">
+                        <div class="card-body row" id="controlOnToolbarHolder">
+                            <!--                                <div id="controlOnToolbar" class="row" data-maximize="controlOnToolbarHolder" data-minimize="controlHolderMenu">-->
+                            <!--    &lt;!&ndash;                                <label class="col-4" for="userSort">Sort <span class="innerName">users</span> by: </label>&ndash;&gt;-->
+                            <!--    &lt;!&ndash;                                <select class="col-8" id="userSort">&ndash;&gt;-->
+                            <!--    &lt;!&ndash;                                    <option value="job">#Job IDs</option>&ndash;&gt;-->
+                            <!--    &lt;!&ndash;                                    <option value="compute">#Compute</option>&ndash;&gt;-->
+                            <!--    &lt;!&ndash;                                    <option value="metric">Current metric</option>&ndash;&gt;-->
+                            <!--    &lt;!&ndash;                                </select>&ndash;&gt;-->
+                            <!--                                    <label class="col-4" for="serviceSelection">Trajectory style: </label>-->
+                            <!--                                    <select class="col-6" id="trajectoryStyle">-->
+                            <!--                                        <option value="none">None</option>-->
+                            <!--                                        <option value="contour">Heatmap</option>-->
+                            <!--                                    </select>-->
+                            <!--                                    <label class="col-4" for="serviceSelection">Visualizing: </label>-->
+                            <!--                                    <select class="col-6" id="serviceSelection">-->
+                            <!--                                    </select>-->
+                            <!--                                    <button id="sort_apply" type="button" class="btn btn-success btn-sm col-2">Sort</button>-->
+                            <!--                                </div>-->
+                        </div>
+                        <ul class="nav nav-tabs">
+                            <!--                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" role="tab" href="#analyticOnToolbarHolder">Analytic</a></li>-->
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" role="tab"
+                                                    href="#modelWorkerInformation">Control</a></li>
+<!--                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"-->
+<!--                                                    href="#analyticOnToolbarHolder">Filter</a></li>-->
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
+                                                    href="#clusterViewOnToolbarHolder">Group</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"
+                                                    href="#paralellOnToolbarHolder">Parallel Coordinates</a></li>
+<!--                            <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab"-->
+<!--                                                    href="#userOnToolbarHolder">User list</a></li>-->
+                        </ul>
+                        <div class="card-body row tab-content">
+<!--                            <div id="analyticOnToolbarHolder" class="tab-pane fade" role="tabpanel">-->
+<!--                                <div id="analyticOnToolbar" class="card-body row"-->
+<!--                                     data-maximize="analyticOnToolbarHolder" data-minimize="analyticHolderMenu">-->
+<!--                                    <div class="col-12" style="padding-left: 0;margin-bottom:5px;">-->
+<!--                                        <label>Filter Job Array:</label>-->
+<!--                                        <input id="disableJobArray" type="checkbox" class="filled-in">-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12" style="padding-left: 0;margin-bottom:5px;">-->
+<!--                                        <label>Nodes:</label>-->
+<!--                                        <div class="input-group">-->
+<!--                                            <select id="modelFilterToolInput" multiple="multiple"></select>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12 justify-content-md-center"-->
+<!--                                         style="padding-left: 0;margin-bottom:5px;">-->
+<!--                                        <label>Metrics:</label>-->
+<!--                                        <div class="input-group col-12" style="padding: 6px 0">-->
+<!--                                            <div class="input-group-prepend">-->
+<!--                                                <label class="input-group-text" for="lineChartOption">Show line charts</label>-->
+<!--                                            </div>-->
+<!--                                            <select class="custom-select" id="lineChartOption">-->
+<!--                                            </select>-->
+<!--                                        </div>-->
+<!--                                        <table class="col-12">-->
+<!--                                            <tbody id="serviceSelection"></tbody>-->
+<!--                                        </table>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12 justify-content-md-center"-->
+<!--                                         style="padding-left: 0;margin-bottom:5px;">-->
+<!--                                        <label>Groups:</label>-->
+<!--                                        <div class="d-flex justify-content-center white row" id="clusterFilterDisplay">-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12 justify-content-md-center">-->
+<!--                                        <button type="button" id="filter_apply"-->
+<!--                                                class="btn btn-sm btn-primary input-group-text">Filter-->
+<!--                                        </button>-->
+<!--                                        <span id="filter_results"></span>-->
+<!--                                    </div>-->
+<!--                                    <div class="MetricsLegend hide">-->
+<!--                                        <div class="row legendView hide">-->
+<!--                                            <label class="col-4"></label>-->
+<!--                                            <div class="col-8 justify-content-center "-->
+<!--                                                 style="padding-right: 0;padding-left: 0; margin-top: 10px">-->
+<!--                                                <div class="input-group flex-nowrap">-->
+<!--                                                    <div class="input-group-prepend">-->
+<!--                                                        <span class="input-group-text" id="addon-max">max</span>-->
+<!--                                                    </div>-->
+<!--                                                    <input type="number" id="range_max" class="form-control range"-->
+<!--                                                           aria-label="range_max" aria-describedby="addon-max">-->
+<!--                                                </div>-->
+<!--                                                <svg class="legend" style="transform: translateX(50px)"></svg>-->
+<!--                                                <div class="input-group flex-nowrap">-->
+<!--                                                    <div class="input-group-prepend">-->
+<!--                                                        <span class="input-group-text" id="addon-min">min</span>-->
+<!--                                                    </div>-->
+<!--                                                    <input type="number" id="range_min" class="form-control range"-->
+<!--                                                           aria-label="range_min" aria-describedby="addon-min">-->
+<!--                                                </div>-->
+<!--                                                <div class="btn-group hide" role="group">-->
+<!--                                                    <button id="range_apply" type="button" class="btn btn-success">-->
+<!--                                                        Apply-->
+<!--                                                    </button>-->
+<!--                                                    <button id="range_reset" type="button" class="btn btn-secondary">-->
+<!--                                                        reset-->
+<!--                                                    </button>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="RackLegend row-cols-6 hide">-->
+<!--                                        <svg width="290">-->
+<!--                                            <g class="content"></g>-->
+<!--                                        </svg>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div id="clusterViewOnToolbarHolder" class="tab-pane fade" role="tabpanel">
+                                <div class="card-body row clusterView">
+                                    <label for="clusterMethod" class="col-4 radarcontroller_layout"> Grouping
+                                        Method:</label>
+                                    <select id="clusterMethod" class="col-8 radarcontroller_layout">
+                                        <option value="leaderbin" selected="selected">Leader Bin</option>
+                                        <option value="kmean">K-means</option>
+                                        <!--<option value="binarybin">Binary bin</option>-->
+                                    </select>
+                                    <label for="normMethod" class="col-4 radarcontroller_layout"> Distance
+                                        Function:</label>
+                                    <select id="normMethod" class="col-8 radarcontroller_layout">
+                                        <option value="l1">L1 norm - Manhattan Distance</option>
+                                        <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+                                    </select>
+                                    <form action="#" class='clusterProfile row no-padding' id="leaderbinprofile"
+                                          onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+                                        <!--                                <label for="startBinGridSize" class="col-6 radarcontroller_layout hide">Initial diameter</label>-->
+                                        <!--                                <div  class="col-6 hide">-->
+                                        <!--                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">-->
+                                        <!--                                </div>-->
+                                        <label for="lowrange" class="col-4 radarcontroller_layout">#Groups from </label>
+                                        <input type="number" id="lowrange"
+                                               class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+                                        <span class="col-2 no_leftmagrin">to</span>
+                                        <input type="number" id="highrange"
+                                               class="col-3 radarcontroller_layout browser-default no_leftmagrin">
+
+                                        <button type="submit"
+                                                class="btn btn-success animatIcon col-8 offset-4 no-padding">
+                                            <div>Submit</div>
+                                        </button>
+
+                                    </form>
+                                    <form action="#" class='clusterProfile row hide no-padding' id="kmeanprofile"
+                                          onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                        <label for="knum" class="col-4 radarcontroller_layout">#Groups</label>
+
+                                        <input type="number" id="knum"
+                                               class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+                                        <label for="knum" class="col-4 radarcontroller_layout">#Iterations</label>
+                                        <input type="number" id="kiteration"
+                                               class="col-2 radarcontroller_layout browser-default no_leftmagrin">
+
+                                        <button type="submit"
+                                                class="btn btn-success animatIcon col-8 offset-4 no-padding">
+                                            <div>Submit</div>
+                                        </button>
+                                    </form>
+                                    <div class="col-12" style="height: 10px"></div>
+                                    <label class="col-4">Group information:</label>
+                                    <div class="col-8" style="padding-left: 0">
+                                        <button type="submit" class="menuBtn modal-trigger btn-small"
+                                                data-toggle="modal" data-target="#savedialog_clusterInfo">
+                                            <i class="fas fa-download pauseicon"></i> Save
+                                        </button>
+                                        <button type="submit" class="menuBtn modal-trigger btn-small"
+                                                id="loadClusterInfobtn">
+                                            <i class="fas fa-upload pauseicon"></i> Load
+                                        </button>
+                                        <input id="clusterInfo_input_file" class="none" type="file"
+                                               style="display: none;"/>
+                                    </div>
+                                    <div class="d-flex justify-content-center white row" id="clusterDisplay">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="modelWorkerInformation" class="tab-pane fade show active col-12" role="tabpanel">
+                                <div id="modelSelectionInformation">
+                                    <!--                                            <ul class="nav nav-tabs" style="margin-top: 10px">-->
+                                    <!--                                                <li class="nav-item active"><a class="nav-link active" data-toggle="tab" role="tab" href="#modelSetting">Setting</a></li>-->
+                                    <!--&lt;!&ndash;                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelSelectionTool">Selection</a></li>&ndash;&gt;-->
+                                    <!--                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" href="#modelFilterTool">Filter</a></li>-->
+                                    <!--                                            </ul>-->
+                                    <!--                                            <div class="card-body row tab-content">-->
+                                    <div class="row">
+                                        <label class="col-4" for="serviceSelectionSelection">Visualizing: </label>
+                                        <select class="col-6" id="serviceSelectionSelection">
+                                        </select>
+                                    </div>
+                                    <div id="modelSetting" class="tab-pane fade show active col-12" role="tabpanel">
+                                        <table class="table">
+                                        </table>
+                                        <div class="row empty search-wrapper focused no_magrin ">
+                                            <input type="text" id="search" class="search col s8"
+                                                   placeholder="Search e.g user13">
+                                            <!--                                                <i class="material-icons col s1" style="margin: auto;">search</i>-->
+                                        </div>
+                                        <div id="selectedItem">
+
+                                        </div>
+                                    </div>
+
+                                    <!--                                            <div id="modelSelectionTool" class="tabHolder tab-pane fade" role="tabpanel">-->
+                                    <!--                                            </div> -->
+                                    <!--                                            <div id="modelFilterTool" class="tab-pane fade col-12" role="tabpanel">-->
+                                    <!--                                                <div class="row">-->
+                                    <!--                                                    <input type="text" id="modelFilterToolInput" class="search col-8" placeholder="Search host e.g user13">-->
+                                    <!--                                                    <button type="button" id="modelFilterToolBtn" class="btn btn-primary col-4">Apply</button>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            </div>-->
+                                </div>
+                            </div>
+                            <div id="paralellOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="paraDimColtrol">Dimensions</label>
+                                    </div>
+                                    <select id="paraDimColtrol" multiple="multiple"></select>
+                                </div>
+                                <div class="row">
+                                    <label  for="minMaxScale" class="col-5">Min-max scale</label>
+                                    <input id="minMaxScale" class="col" type="checkbox">
+                                </div>
+                                <div class="row">
+                                    <label  for="minMaxScale" class="col-5">Outlying Coefficient</label>
+                                    <div id="outlyingCoefficient" class="col-7"></div>
+                                </div>
+                                <div id="paralell"></div>
+                                <div class="col-12 justify-content-md-center">
+                                    <button type="button" id="filter_apply_para" class="btn btn-sm btn-primary input-group-text">Filter
+                                    </button>
+                                    <span id="filter_result_para"></span>
+                                </div>
+                            </div>
+                            <div id="userOnToolbarHolder" class="tab-pane fade col-12" role="tabpanel">
+                                <div id="UserList" class="row table-responsive" data-maximize="RankingListHolder"
+                                     data-minimize="controlHolderMenu">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>User name</th>
+                                            <th>#Jobs</th>
+                                            <th>#Nodes</th>
+                                            <th>#Cores</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!--                                <div id="RankingListHolder" class="tab-pane fade col-12" role="tabpanel">-->
+                            <!--                                    <div id="RankingList" class="row table-responsive" data-maximize="RankingListHolder" data-minimize="controlHolderMenu">-->
+                            <!--                                        <table class="table">-->
+                            <!--                                            <thead><tr><th>Node</th><th class="serviceName">Node</th><th></th><th></th></tr></thead>-->
+                            <!--                                            <tbody></tbody>-->
+                            <!--                                        </table>-->
+                            <!--                                    </div>-->
+                            <!--                                </div>-->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="floatRight card bg-secondary mb-3 informationHolder hide">
+                <div class="card-header all-scroll">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical handle"
+                         fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        <path fill-rule="evenodd" transform="translate(5,0)"
+                              d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                    </svg>
+                    <p style="display: inline;">User Info</p>
+                    <nav class="window-controls float-right auto">
+                        <div class="minimize" data-toggle="tooltip" data-placement="top" title="close"
+                             onclick="closeToolTip()">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z"/>
+                                <path fill-rule="evenodd"
+                                      d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z"/>
+                            </svg>
+                        </div>
+                    </nav>
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="datasetSelection" tabindex="-1" aria-labelledby="datasetSelection" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Change data</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Metric file (csv)</label>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="metricCSV" aria-describedby="inputmetricCSV">
+                                    <label class="custom-file-label" for="metricCSV">Choose file</label>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Job file (json)</label>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="jobJson" aria-describedby="inputjobJson">
+                                    <label class="custom-file-label" for="jobJson">Choose file</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="changeDatasetBtn">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<link id="theme" rel="stylesheet" href="src/style/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="src/DataTables/DataTables-1.10.21/css/dataTables.bootstrap4.css"/>
+<link rel="stylesheet" type="text/css" href="src/style/dragula.css"/>
+<link rel="stylesheet" href="src/style/main.css">
+<link rel="stylesheet" href="src/style/graph.css">
+<link rel="stylesheet" href="src/style/sankey.css">
+<link rel="stylesheet" href="src/style/clusterMap.css">
+<link rel="stylesheet" href="src/style/timeline.css">
+<link rel="stylesheet" href="src/style/nouislider.css">
+<link rel="stylesheet" href="src/style/dashboard.css">
+
+<script type="text/javascript" src="src/lib/bootstrap-multiselect.js"></script>
+<link rel="stylesheet" href="src/style/bootstrap-multiselect.css" type="text/css"/>
+
+<script src="src/lib/d3.v7.min.js"></script>
+<script>
+    d3.schemeCategory20 = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"]
+</script>
+<script src="../HiperView/js/d3-delaunay.min.js"></script>
+<script src="src/lib/d3.tip.js"></script>
+<script src="src/lib/underscore-min.js"></script>
+
+
+
+<link rel="stylesheet" href="../HiperView/css/nouislider.css"/>
+<link rel="stylesheet" href="src/js/viz.css"/>
+<script src="../HiperView/js/nouislider.js"></script>
+<!--<script src="../HiperView/js/scagnosticsnd.min.js"></script>-->
+<script src="src/js/sidebar.js"></script>
+
+<script src="src/js/ulti.js"></script>
+<script src="src/js/simulation.js"></script>
+<script src="src/js/setting.js"></script>
+<script src="src/js/handleData.js"></script>
+<script src="src/js/AxisTime.js"></script>
+<script src="src/js/ScatterArray.js"></script>
+<script src="src/js/TextCloud.js"></script>
+<script src="src/js/BoxplotArray.js"></script>
+<script src="src/js/StreamArray.js"></script>
+<script src="src/js/NetAgnostics.js"></script>
+<script src="src/js/graphic.js"></script>
+<script src="src/js/menu.js"></script>
+<script src="src/js/main.js"></script>
+</body>
+</html>
