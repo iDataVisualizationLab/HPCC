@@ -72,10 +72,6 @@ let NetAgnostics = function () {
         graphicopt.width = $(graphicopt.maindiv).width();
 
 
-        // TODO highlight
-        // $('#search').on('input', searchHandler); // register for oninput
-        // $('#search').on('propertychange', searchHandler); // for IE8
-
         contentCollections.axistime_svg = d3.select('#axisTime')
             .attr("width", graphicopt.width)
             .attr("height", graphicopt.margin.top)
@@ -137,20 +133,6 @@ let NetAgnostics = function () {
         drawStreamArray.init(contentCollections.streamArray)
 
         return master;
-    }
-
-    function searchHandler(e) {
-        // if (e.target.value !== "") {
-        //     // let results = datain.filter(h => h.name.includes(e.target.value)).map(h => ({index: path[h.name][0].index}));
-        //     let target = data.root_nodes.find(d => d.id.includes(e.target.value));
-        //     if (target) {
-        //         let resultIndex = target.timeArr.findIndex(d => d);
-        //         if (resultIndex !== -1) {
-        //             return highlightNode([{index: target.timeArr[resultIndex]._index, netIndex: resultIndex}]);
-        //         }
-        //     }
-        // }
-        // return highlightNode([]);
     }
 
     master.draw = function() {

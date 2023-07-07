@@ -126,6 +126,7 @@ let currentDraw = (_serviceSelected) => {
             return initColorFunc
     })();
     drawObject.graphicopt({colorNet})
+        .data({serviceSelected:selectedSer})
         .draw()
 };
 let tsnedata = {};
@@ -442,7 +443,8 @@ function handleRankingData(data) {
     Object.keys(r).forEach(k=>{
         Layout[k] = r[k]
     })
-    Layout.nodeFilter = r.computers;
+    Layout.computers = r.computers;
+    Layout.nodeFilter = {...r.computers};
     Layout.usersStatic = r.users;
     summaryInTime.data = data;
     // userPie.data(Layout.usersStatic).draw();

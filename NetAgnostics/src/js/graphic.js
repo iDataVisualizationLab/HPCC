@@ -919,7 +919,51 @@ function drawGantt() {
         metrics:Layout.tsnedata,
         dimensions:serviceFullList,
         time:Layout.time_stamp
-    })
+    });
+
+    let _byUser=undefined;
+    $('#search').on('input', searchHandler); // register for oninput
+    $('#search').on('propertychange', searchHandler); // for IE8
+    function searchHandler(e) {
+        if (e.target.value !== "") {
+            const byUser = Layout.users[e.target.value]?e.target.value:undefined;
+            // let results = datain.filter(h => h.name.includes(e.target.value)).map(h => ({index: path[h.name][0].index}));
+            const dimensions = serviceFullList;
+            if(dimensions) {
+                if (!byUser) {
+                    if (_byUser!==byUser) {
+                        Layout.nodeFilter = {...Layout.computers};
+                        drawObject.data({node: Layout.nodeFilter}).draw();
+                    }
+                } else {
+                    const nodes = {};
+                    [byUser].forEach(u=>{
+                        debugger
+                        Layout.users[u].node.forEach(n=>{
+                            nodes[n] = {};
+                            dimensions.forEach(d=>{
+                                if (Layout.computers[n][d.text]){
+                                    nodes[n][d.text] = Layout.computers[n][d.text].map(()=>null);
+                                    nodes[n][d.text].sudden = Layout.computers[n][d.text].sudden;
+                                }
+                            })
+                            Layout.computers[n].users.forEach((t,i)=>{
+                                if (t.indexOf(u)){
+                                    dimensions.forEach(d=>{
+                                        if (Layout.computers[n][d.text]){
+                                            nodes[n][d.text][i] = Layout.computers[n][d.text][i];
+                                        }
+                                    })
+                                }
+                            })
+                        })
+                    })
+                    drawObject.data({node:nodes}).draw();
+                }
+            }
+            _byUser = byUser
+        }
+    }
 }
 
 // setting
